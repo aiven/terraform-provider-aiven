@@ -42,6 +42,12 @@ func resourceService() *schema.Resource {
 				Required:    true,
 				Description: "Service type code",
 			},
+			"host": &schema.Schema{
+				Type:        schema.TypeString,
+				Computed:    true,
+				Sensitive:   true,
+				Description: "Service type code",
+			},
 		},
 	}
 }
@@ -79,6 +85,8 @@ func resourceServiceRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.Set("name", service.Name)
+	d.Set("host", service.Uri)
+
 	return nil
 }
 
