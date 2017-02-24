@@ -38,3 +38,13 @@ resource "aiven_service" "my-service" {
     service_type = "pg"
 }
 ```
+
+## Resource Database
+
+```
+resource "aiven_database" "my-database" {
+    project = "<PROJECT_NAME>"
+    service_name = "<SERVICE_NAME>"
+    database = "<DATABASE_NAME>"
+}
+```

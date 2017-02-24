@@ -16,12 +16,21 @@ func Provider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"aiven_project": resourceProject(),
-			"aiven_service": resourceService(),
+			"aiven_project":  resourceProject(),
+			"aiven_service":  resourceService(),
+			"aiven_database": resourceDatabase(),
 		},
 
 		ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {
 			return aiven.NewTokenClient(d.Get("api_key").(string))
 		},
 	}
+}
+
+func optionalString(d *schema.ResourceData, key string) string {
+	str, ok := d.Get(key).(string)
+	if !ok {
+		return ""
+	}
+	return str
 }
