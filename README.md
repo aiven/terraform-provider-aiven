@@ -4,11 +4,10 @@ Terraform provider resources for Aiven.
 
 ## Provider
 
-Set up the provider with your own API Key. You can get this by using the [Aiven Client](https://github.com/aiven/aiven-client).
-
 ```
 provider "aiven" {
-        api_key = "<API_KEY>"
+    email = "<AIVEN_EMAIL>"
+    password = "<AIVEN_PASSWORD>"
 }
 ```
 
