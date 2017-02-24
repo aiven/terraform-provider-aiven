@@ -16,9 +16,10 @@ func Provider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"aiven_project":  resourceProject(),
-			"aiven_service":  resourceService(),
-			"aiven_database": resourceDatabase(),
+			"aiven_project":      resourceProject(),
+			"aiven_service":      resourceService(),
+			"aiven_database":     resourceDatabase(),
+			"aiven_service_user": resourceServiceUser(),
 		},
 
 		ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {

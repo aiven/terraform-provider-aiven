@@ -48,3 +48,13 @@ resource "aiven_database" "my-database" {
     database = "<DATABASE_NAME>"
 }
 ```
+
+## Resource ServiceUser
+
+```
+resource "aiven_service_user" "my-service-user" {
+    project = "<PROJECT_NAME>"
+    service_name = "<SERVICE_NAME>"
+    username = "<USERNAME>"
+}
+```
