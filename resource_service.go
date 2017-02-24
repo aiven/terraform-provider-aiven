@@ -42,11 +42,20 @@ func resourceService() *schema.Resource {
 				Required:    true,
 				Description: "Service type code",
 			},
-			"host": &schema.Schema{
+			"hostname": &schema.Schema{
 				Type:        schema.TypeString,
 				Computed:    true,
-				Sensitive:   true,
-				Description: "Service type code",
+				Description: "Service hostname",
+			},
+			"port": &schema.Schema{
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Service port",
+			},
+			"state": &schema.Schema{
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Service state",
 			},
 		},
 	}
@@ -55,7 +64,7 @@ func resourceService() *schema.Resource {
 func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-	project, err := client.Services.Create(
+	service, err := client.Services.Create(
 		d.Get("project").(string),
 		aiven.CreateServiceRequest{
 			d.Get("cloud").(string),
@@ -69,7 +78,23 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	d.SetId(project.Name + "!")
+	d.SetId(service.Name + "!")
+	d.Set("name", service.Name)
+	d.Set("state", service.State)
+	d.Set("plan", service.Plan)
+
+	hn, err := service.Hostname()
+	if err != nil {
+		return err
+	}
+	port, err := service.Port()
+	if err != nil {
+		return err
+	}
+
+	d.Set("hostname", hn)
+	d.Set("port", port)
+
 	return nil
 }
 
@@ -85,7 +110,20 @@ func resourceServiceRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.Set("name", service.Name)
-	d.Set("host", service.Uri)
+	d.Set("state", service.State)
+	d.Set("plan", service.Plan)
+
+	hn, err := service.Hostname()
+	if err != nil {
+		return err
+	}
+	port, err := service.Port()
+	if err != nil {
+		return err
+	}
+
+	d.Set("hostname", hn)
+	d.Set("port", port)
 
 	return nil
 }
