@@ -34,11 +34,12 @@ func resourceProject() *schema.Resource {
 
 func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
-
 	project, err := client.Projects.Create(
-		d.Get("card_id").(string),
-		d.Get("cloud").(string),
-		d.Get("project").(string),
+		aiven.CreateProjectRequest{
+			d.Get("card_id").(string),
+			d.Get("cloud").(string),
+			d.Get("project").(string),
+		},
 	)
 	if err != nil {
 		return err
@@ -51,9 +52,7 @@ func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
 func resourceProjectRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-	project, err := client.Projects.Get(
-		d.Get("project").(string),
-	)
+	project, err := client.Projects.Get(d.Get("project").(string))
 	if err != nil {
 		return err
 	}
@@ -66,9 +65,12 @@ func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	project, err := client.Projects.Update(
-		d.Get("card_id").(string),
-		d.Get("cloud").(string),
 		d.Get("project").(string),
+		aiven.UpdateProjectRequest{
+			d.Get("card_id").(string),
+			d.Get("cloud").(string),
+			d.Get("project").(string),
+		},
 	)
 	if err != nil {
 		return err
@@ -79,5 +81,7 @@ func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceProjectDelete(d *schema.ResourceData, m interface{}) error {
-	return nil
+	client := m.(*aiven.Client)
+
+	return client.Projects.Delete(d.Get("project").(string))
 }
