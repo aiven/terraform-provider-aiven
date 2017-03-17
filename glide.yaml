@@ -1,9 +1,10 @@
-package: github.com/jelmersnoeck/terraform-aiven
+package: github.com/jelmersnoeck/terraform-provider-aiven
 import:
 - package: github.com/hashicorp/terraform
-  version: v0.8.7
+  version: v0.9.0
   subpackages:
   - helper/schema
   - plugin
   - terraform
 - package: github.com/jelmersnoeck/aiven
+  version: v0.0.1
