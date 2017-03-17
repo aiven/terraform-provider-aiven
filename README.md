@@ -2,7 +2,17 @@
 
 [Terraform](https://www.terraform.io/) provider resources for [Aiven.io](https://aiven.io/).
 
-## Provider
+## Sample project
+
+There is a [sample project](sample.tf) which sets up a new project, adds a new service,
+creates a new database and sets up a new user for the service.
+
+Make sure you have a look at the [variables](terraform.tfvars.sample) and copy
+it over to `terraform.tfvars` with your own credentials.
+
+## Options
+
+### Provider
 
 ```
 provider "aiven" {
@@ -11,7 +21,7 @@ provider "aiven" {
 }
 ```
 
-## Resource Project
+### Resource Project
 
 **Note**: it is currently not possible to automatically set up a new card for a project. If you already have a card linked to your account, you can get the card id and use it to set up this project.
 
@@ -23,7 +33,7 @@ resource "aiven_service" "my-project" {
 }
 ```
 
-## Resource Service
+### Resource Service
 
 **Note**: to make a new service, you'll have to have set up a project with a valid billing plan.
 
@@ -38,7 +48,7 @@ resource "aiven_service" "my-service" {
 }
 ```
 
-## Resource Database
+### Resource Database
 
 ```
 resource "aiven_database" "my-database" {
@@ -48,7 +58,7 @@ resource "aiven_database" "my-database" {
 }
 ```
 
-## Resource ServiceUser
+### Resource ServiceUser
 
 ```
 resource "aiven_service_user" "my-service-user" {
