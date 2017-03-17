@@ -1,6 +1,6 @@
 # Terraform Aiven
 
-Terraform provider resources for Aiven.
+[Terraform](https://www.terraform.io/) provider resources for [Aiven.io](https://aiven.io/).
 
 ## Provider
 
