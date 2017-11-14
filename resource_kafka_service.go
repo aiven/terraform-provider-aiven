@@ -1,25 +1,31 @@
 package main
 
 import (
-	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jelmersnoeck/aiven"
 )
 
-func resourceService() *schema.Resource {
+func resourceKafkaService() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceServiceCreate,
-		Read:   resourceServiceRead,
-		Update: resourceServiceUpdate,
-		Delete: resourceServiceDelete,
+		Create: resourceKafkaServiceCreate,
+		Read:   resourceKafkaServiceRead,
+		Update: resourceKafkaServiceUpdate,
+		Delete: resourceKafkaServiceDelete,
 
-		// TODO: add user config
 		Schema: map[string]*schema.Schema{
 			"project": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Target cloud",
-			}, "cloud": &schema.Schema{
+				ForceNew:    true,
+			},
+			"service_name": &schema.Schema{
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Service name",
+				ForceNew:    true,
+			},
+			"cloud": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Target cloud",
@@ -34,14 +40,10 @@ func resourceService() *schema.Resource {
 				Optional:    true,
 				Description: "Subscription plan",
 			},
-			"service_name": &schema.Schema{Type: schema.TypeString,
-				Required:    true,
-				Description: "Service name",
-			},
-			"service_type": &schema.Schema{
+			"uri": &schema.Schema{
 				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Service type code",
+				Computed:    true,
+				Description: "Service URI",
 			},
 			"hostname": &schema.Schema{
 				Type:        schema.TypeString,
@@ -62,7 +64,7 @@ func resourceService() *schema.Resource {
 	}
 }
 
-func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaServiceCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	service, err := client.Services.Create(
@@ -72,7 +74,7 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 			d.Get("group_name").(string),
 			d.Get("plan").(string),
 			d.Get("service_name").(string),
-			d.Get("service_type").(string),
+			"kafka",
 		},
 	)
 
@@ -93,7 +95,7 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 	return resourceServiceRead(d, m)
 }
 
-func resourceServiceRead(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaServiceRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	service, err := client.Services.Get(
@@ -123,7 +125,7 @@ func resourceServiceRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceServiceUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaServiceUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	_, err := client.Services.Update(
@@ -149,26 +151,11 @@ func resourceServiceUpdate(d *schema.ResourceData, m interface{}) error {
 	return resourceServiceRead(d, m)
 }
 
-func resourceServiceDelete(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaServiceDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	return client.Services.Delete(
 		d.Get("project").(string),
 		d.Get("service_name").(string),
 	)
-}
-
-func resourceServiceWait(d *schema.ResourceData, m interface{}) error {
-	w := &ServiceChangeWaiter{
-		Client:      m.(*aiven.Client),
-		Project:     d.Get("project").(string),
-		ServiceName: d.Get("service_name").(string),
-	}
-
-	_, err := w.Conf().WaitForState()
-	if err != nil {
-		return fmt.Errorf("Error waiting for Aiven service to be RUNNING: %s", err)
-	}
-
-	return nil
 }
