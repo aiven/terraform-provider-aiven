@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jelmersnoeck/aiven"
 )
@@ -74,28 +75,22 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 			d.Get("service_type").(string),
 		},
 	)
+
 	if err != nil {
+		d.SetId("")
+		return err
+	}
+
+	err = resourceServiceWait(d, m)
+	
+	if err != nil {
+		d.SetId("")
 		return err
 	}
 
 	d.SetId(service.Name + "!")
-	d.Set("name", service.Name)
-	d.Set("state", service.State)
-	d.Set("plan", service.Plan)
 
-	hn, err := service.Hostname()
-	if err != nil {
-		return err
-	}
-	port, err := service.Port()
-	if err != nil {
-		return err
-	}
-
-	d.Set("hostname", hn)
-	d.Set("port", port)
-
-	return nil
+	return resourceServiceRead(d, m)
 }
 
 func resourceServiceRead(d *schema.ResourceData, m interface{}) error {
@@ -131,7 +126,7 @@ func resourceServiceRead(d *schema.ResourceData, m interface{}) error {
 func resourceServiceUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-	service, err := client.Services.Update(
+	_, err := client.Services.Update(
 		d.Get("project").(string),
 		d.Get("service_name").(string),
 		aiven.UpdateServiceRequest{
@@ -145,8 +140,13 @@ func resourceServiceUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	d.Set("name", service.Name)
-	return nil
+	err = resourceServiceWait(d, m)
+	
+	if err != nil {
+		return err
+	}
+
+	return resourceServiceRead(d, m)
 }
 
 func resourceServiceDelete(d *schema.ResourceData, m interface{}) error {
@@ -156,4 +156,19 @@ func resourceServiceDelete(d *schema.ResourceData, m interface{}) error {
 		d.Get("project").(string),
 		d.Get("service_name").(string),
 	)
+}
+
+func resourceServiceWait(d *schema.ResourceData, m interface{}) error {
+	w := &ServiceChangeWaiter{
+		Client:      m.(*aiven.Client),
+		Project:     d.Get("project").(string),
+		ServiceName: d.Get("service_name").(string),
+	}
+
+	_, err := w.Conf().WaitForState()
+	if err != nil {
+		return fmt.Errorf("Error waiting for Aiven service to be RUNNING: %s", err)
+	}
+
+	return nil
 }
