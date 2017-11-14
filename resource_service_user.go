@@ -18,23 +18,36 @@ func resourceServiceUser() *schema.Resource {
 			"project": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Project to link the service to",
+				Description: "Project to link the user to",
+				ForceNew:    true,
 			},
 			"service_name": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Service to link the service to",
+				Description: "Service to link the user to",
+				ForceNew:    true,
 			},
 			"username": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Service username",
+				ForceNew:    true,
 			},
 			"type": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"password": &schema.Schema{
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Computed:  true,
+			},
+			"access_cert": &schema.Schema{
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Computed:  true,
+			},
+			"access_key": &schema.Schema{
 				Type:      schema.TypeString,
 				Sensitive: true,
 				Computed:  true,
@@ -54,6 +67,7 @@ func resourceServiceUserCreate(d *schema.ResourceData, m interface{}) error {
 		},
 	)
 	if err != nil {
+		d.SetId("")
 		return err
 	}
 
@@ -62,6 +76,8 @@ func resourceServiceUserCreate(d *schema.ResourceData, m interface{}) error {
 	d.Set("username", user.Username)
 	d.Set("password", user.Password)
 	d.Set("type", user.Type)
+	d.Set("access_cert", user.AccessCert)
+	d.Set("access_key", user.AccessKey)
 
 	return nil
 }
@@ -83,6 +99,8 @@ func resourceServiceUserRead(d *schema.ResourceData, m interface{}) error {
 			d.Set("username", user.Username)
 			d.Set("password", user.Password)
 			d.Set("type", user.Type)
+			d.Set("access_cert", user.AccessCert)
+			d.Set("access_key", user.AccessKey)
 			return nil
 		}
 	}
