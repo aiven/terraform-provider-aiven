@@ -18,7 +18,9 @@ func resourceService() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Target cloud",
-			}, "cloud": &schema.Schema{
+				ForceNew:    true,
+			}, 
+			"cloud": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Target cloud",
@@ -33,14 +35,17 @@ func resourceService() *schema.Resource {
 				Optional:    true,
 				Description: "Subscription plan",
 			},
-			"service_name": &schema.Schema{Type: schema.TypeString,
+			"service_name": &schema.Schema{
+				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Service name",
+				ForceNew:    true,
 			},
 			"service_type": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Service type code",
+				ForceNew:    true,
 			},
 			"hostname": &schema.Schema{
 				Type:        schema.TypeString,
