@@ -14,6 +14,12 @@ func Provider() *schema.Provider {
 				Sensitive:   true,
 				Description: "Aiven email address",
 			},
+			"otp": &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				Description: "Aiven One-Time password",
+			},
 			"password": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
@@ -30,8 +36,9 @@ func Provider() *schema.Provider {
 		},
 
 		ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {
-			return aiven.NewUserClient(
+			return aiven.NewMFAUserClient(
 				d.Get("email").(string),
+				d.Get("otp").(string),
 				d.Get("password").(string),
 			)
 		},
