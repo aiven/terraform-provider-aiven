@@ -1,7 +1,9 @@
 package main
 
 import (
+  "fmt"
   "log"
+  "strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jelmersnoeck/aiven"
@@ -46,11 +48,13 @@ func resourceKafkaTopic() *schema.Resource {
       "retention_bytes": &schema.Schema{
 				Type:        schema.TypeInt,
 				Optional:    true,
+        Default:     -1,
 				Description: "TBD",
 			},
       "retention_hours": &schema.Schema{
 				Type:        schema.TypeInt,
 				Optional:    true,
+        Default:     72,
 				Description: "TBD",
 			},
       "minimum_in_sync_replicas": &schema.Schema{
@@ -72,13 +76,15 @@ func resourceKafkaTopic() *schema.Resource {
 func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
+  project := d.Get("project").(string)
+  service_name := d.Get("service_name").(string)
   topic := d.Get("topic").(string)
   partitions := d.Get("partitions").(int)
   replication := d.Get("replication").(int)
 
 	err := client.KafkaTopics.Create(
-		d.Get("project").(string),
-		d.Get("service_name").(string),
+		project,
+		service_name,
 		aiven.CreateKafkaTopicRequest{
       optionalStringPointer(d, "cleanup_policy"),
       optionalIntPointer(d, "minimum_in_sync_replicas"),
@@ -94,32 +100,46 @@ func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	d.SetId(topic)
+	err = resourceKafkaTopicWait(d, m)
 
-  // TODO: actually wait that the topic has been created
+	if err != nil {
+		d.SetId("")
+		return err
+	}
 
-	//return resourceKafkaTopicRead(d, m)
-  return nil
+	d.SetId(project + "/" + service_name + "/" + topic)
+
+	return resourceKafkaTopicRead(d, m)
 }
 
 func resourceKafkaTopicRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-  log.Printf("[DEBUG] reading information for kafka topic: %s", d.Get("topic").(string))
+  log.Printf("[DEBUG] reading information for kafka topic: %s", d.Id())
+
+  project, service_name, topic_name := parseTopicId(d.Id())
 
 	topic, err := client.KafkaTopics.Get(
-		d.Get("project").(string),
-		d.Get("service_name").(string),
-    d.Get("topic").(string),
+		project,
+		service_name,
+    topic_name,
 	)
 	if err != nil {
 		return err
 	}
 
-	d.Set("name", topic.TopicName)
+  log.Printf("[DEBUG] topic data: %#v", topic)
+
+  d.Set("project", project)
+  d.Set("service_name", service_name)
+	d.Set("topic", topic.TopicName)
 	d.Set("state", topic.State)
+  d.Set("partitions", len(topic.Partitions))
 	d.Set("replication", topic.Replication)
-  // TODO: add the other fields
+  d.Set("cleanup_policy", topic.CleanupPolicy)
+  d.Set("minimum_in_sync_replicas", topic.MinimumInSyncReplicas)
+  d.Set("retention_bytes", topic.RetentionBytes)
+  d.Set("retention_hours", topic.RetentionHours)
 
 	return nil
 }
@@ -136,4 +156,25 @@ func resourceKafkaTopicDelete(d *schema.ResourceData, m interface{}) error {
 		d.Get("service_name").(string),
 		d.Get("topic").(string),
 	)
+}
+
+func resourceKafkaTopicWait(d *schema.ResourceData, m interface{}) error {
+	w := &KafkaTopicChangeWaiter{
+		Client:      m.(*aiven.Client),
+		Project:     d.Get("project").(string),
+		ServiceName: d.Get("service_name").(string),
+    Topic:       d.Get("topic").(string),
+	}
+
+	_, err := w.Conf().WaitForState()
+	if err != nil {
+		return fmt.Errorf("Error waiting for Aiven Kafka topic to be ACTIVE: %s", err)
+	}
+
+	return nil
+}
+
+func parseTopicId(id string) (project, service_name, topic string) {
+  s := strings.Split(id, "/")
+  return s[0], s[1], s[2]
 }
