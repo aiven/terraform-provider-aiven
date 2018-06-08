@@ -1,9 +1,9 @@
 package main
 
 import (
-  "fmt"
-  "log"
-  "strings"
+	"fmt"
+	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jelmersnoeck/aiven"
@@ -15,7 +15,7 @@ func resourceKafkaTopic() *schema.Resource {
 		Read:   resourceKafkaTopicRead,
 		Update: resourceKafkaTopicUpdate,
 		Delete: resourceKafkaTopicDelete,
-    Importer: &schema.ResourceImporter{
+		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
 
@@ -45,28 +45,28 @@ func resourceKafkaTopic() *schema.Resource {
 				Required:    true,
 				Description: "Replication factor for the topic",
 			},
-      "retention_bytes": &schema.Schema{
+			"retention_bytes": &schema.Schema{
 				Type:        schema.TypeInt,
 				Optional:    true,
-        Default:     -1,
+				Default:     -1,
 				Description: "TBD",
 			},
-      "retention_hours": &schema.Schema{
+			"retention_hours": &schema.Schema{
 				Type:        schema.TypeInt,
 				Optional:    true,
-        Default:     72,
+				Default:     72,
 				Description: "TBD",
 			},
-      "minimum_in_sync_replicas": &schema.Schema{
+			"minimum_in_sync_replicas": &schema.Schema{
 				Type:        schema.TypeInt,
 				Optional:    true,
-        Default:     1,
+				Default:     1,
 				Description: "TBD",
 			},
-      "cleanup_policy": &schema.Schema{
+			"cleanup_policy": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
-        Default:     "delete",
+				Default:     "delete",
 				Description: "TBD",
 			},
 		},
@@ -76,27 +76,27 @@ func resourceKafkaTopic() *schema.Resource {
 func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-  project := d.Get("project").(string)
-  service_name := d.Get("service_name").(string)
-  topic := d.Get("topic").(string)
-  partitions := d.Get("partitions").(int)
-  replication := d.Get("replication").(int)
+	project := d.Get("project").(string)
+	service_name := d.Get("service_name").(string)
+	topic := d.Get("topic").(string)
+	partitions := d.Get("partitions").(int)
+	replication := d.Get("replication").(int)
 
 	err := client.KafkaTopics.Create(
 		project,
 		service_name,
 		aiven.CreateKafkaTopicRequest{
-      optionalStringPointer(d, "cleanup_policy"),
-      optionalIntPointer(d, "minimum_in_sync_replicas"),
-      &partitions,
-      &replication,
-      optionalIntPointer(d, "retention_bytes"),
-      optionalIntPointer(d, "retention_hours"),
+			optionalStringPointer(d, "cleanup_policy"),
+			optionalIntPointer(d, "minimum_in_sync_replicas"),
+			&partitions,
+			&replication,
+			optionalIntPointer(d, "retention_bytes"),
+			optionalIntPointer(d, "retention_hours"),
 			topic,
 		},
 	)
 	if err != nil {
-    d.SetId("")
+		d.SetId("")
 		return err
 	}
 
@@ -115,41 +115,41 @@ func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
 func resourceKafkaTopicRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-  log.Printf("[DEBUG] reading information for kafka topic: %s", d.Id())
+	log.Printf("[DEBUG] reading information for kafka topic: %s", d.Id())
 
-  project, service_name, topic_name := parseTopicId(d.Id())
+	project, service_name, topic_name := parseTopicId(d.Id())
 
 	topic, err := client.KafkaTopics.Get(
 		project,
 		service_name,
-    topic_name,
+		topic_name,
 	)
 	if err != nil {
 		return err
 	}
 
-  log.Printf("[DEBUG] topic data: %#v", topic)
+	log.Printf("[DEBUG] topic data: %#v", topic)
 
-  d.Set("project", project)
-  d.Set("service_name", service_name)
+	d.Set("project", project)
+	d.Set("service_name", service_name)
 	d.Set("topic", topic.TopicName)
 	d.Set("state", topic.State)
-  d.Set("partitions", len(topic.Partitions))
+	d.Set("partitions", len(topic.Partitions))
 	d.Set("replication", topic.Replication)
-  d.Set("cleanup_policy", topic.CleanupPolicy)
-  d.Set("minimum_in_sync_replicas", topic.MinimumInSyncReplicas)
-  d.Set("retention_bytes", topic.RetentionBytes)
-  d.Set("retention_hours", topic.RetentionHours)
+	d.Set("cleanup_policy", topic.CleanupPolicy)
+	d.Set("minimum_in_sync_replicas", topic.MinimumInSyncReplicas)
+	d.Set("retention_bytes", topic.RetentionBytes)
+	d.Set("retention_hours", topic.RetentionHours)
 
 	return nil
 }
 
 func resourceKafkaTopicUpdate(d *schema.ResourceData, m interface{}) error {
-  return nil
+	return nil
 }
 
 func resourceKafkaTopicDelete(d *schema.ResourceData, m interface{}) error {
-  client := m.(*aiven.Client)
+	client := m.(*aiven.Client)
 
 	return client.KafkaTopics.Delete(
 		d.Get("project").(string),
@@ -163,7 +163,7 @@ func resourceKafkaTopicWait(d *schema.ResourceData, m interface{}) error {
 		Client:      m.(*aiven.Client),
 		Project:     d.Get("project").(string),
 		ServiceName: d.Get("service_name").(string),
-    Topic:       d.Get("topic").(string),
+		Topic:       d.Get("topic").(string),
 	}
 
 	_, err := w.Conf().WaitForState()
@@ -175,6 +175,6 @@ func resourceKafkaTopicWait(d *schema.ResourceData, m interface{}) error {
 }
 
 func parseTopicId(id string) (project, service_name, topic string) {
-  s := strings.Split(id, "/")
-  return s[0], s[1], s[2]
+	s := strings.Split(id, "/")
+	return s[0], s[1], s[2]
 }

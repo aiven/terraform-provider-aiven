@@ -4,8 +4,8 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/jelmersnoeck/aiven"
 	"log"
-	"time"
 	"strings"
+	"time"
 )
 
 type KafkaTopicChangeWaiter struct {
@@ -26,7 +26,7 @@ func (w *KafkaTopicChangeWaiter) RefreshFunc() resource.StateRefreshFunc {
 		if err != nil {
 			// Handle this special case as it takes a while for topics to be created.
 			log.Printf("[DEBUG] Got %#v error while waiting for topic to be up.", err)
-			if strings.Compare(err.Error(), "Topic '" + w.Topic + "' does not exist") == 0 {
+			if strings.Compare(err.Error(), "Topic '"+w.Topic+"' does not exist") == 0 {
 				return nil, "CONFIGURING", nil
 			}
 			return nil, "", err
