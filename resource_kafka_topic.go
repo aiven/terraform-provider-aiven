@@ -94,7 +94,7 @@ func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	d.SetId(topic + "!")
+	d.SetId(topic)
 
   // TODO: actually wait that the topic has been created
 
