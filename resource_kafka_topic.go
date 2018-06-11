@@ -49,25 +49,25 @@ func resourceKafkaTopic() *schema.Resource {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Default:     -1,
-				Description: "TBD",
+				Description: "Retention bytes",
 			},
 			"retention_hours": &schema.Schema{
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Default:     72,
-				Description: "TBD",
+				Description: "Retention period (hours)",
 			},
 			"minimum_in_sync_replicas": &schema.Schema{
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Default:     1,
-				Description: "TBD",
+				Description: "Minimum required nodes In Sync Replicas (ISR) to produce to a partition",
 			},
 			"cleanup_policy": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "delete",
-				Description: "TBD",
+				Description: "Topic cleanup policy. Allowed values: delete, compact",
 			},
 		},
 	}
@@ -145,6 +145,34 @@ func resourceKafkaTopicRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceKafkaTopicUpdate(d *schema.ResourceData, m interface{}) error {
+	client := m.(*aiven.Client)
+
+	project := d.Get("project").(string)
+	service_name := d.Get("service_name").(string)
+	topic := d.Get("topic").(string)
+	partitions := d.Get("partitions").(int)
+
+	err := client.KafkaTopics.Update(
+		project,
+		service_name,
+		topic,
+		aiven.UpdateKafkaTopicRequest{
+			optionalIntPointer(d, "minimum_in_sync_replicas"),
+			&partitions,
+			optionalIntPointer(d, "retention_bytes"),
+			optionalIntPointer(d, "retention_hours"),
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	err = resourceKafkaTopicWait(d, m)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
