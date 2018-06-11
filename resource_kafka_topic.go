@@ -117,7 +117,7 @@ func resourceKafkaTopicRead(d *schema.ResourceData, m interface{}) error {
 
 	log.Printf("[DEBUG] reading information for kafka topic: %s", d.Id())
 
-	project, service_name, topic_name := parseTopicId(d.Id())
+	project, service_name, topic_name := resourceKafkaParseTopicId(d.Id())
 
 	topic, err := client.KafkaTopics.Get(
 		project,
@@ -202,7 +202,7 @@ func resourceKafkaTopicWait(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func parseTopicId(id string) (project, service_name, topic string) {
+func resourceKafkaParseTopicId(id string) (project, service_name, topic string) {
 	s := strings.Split(id, "/")
 	return s[0], s[1], s[2]
 }
