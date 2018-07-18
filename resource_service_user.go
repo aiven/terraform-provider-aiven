@@ -11,7 +11,6 @@ func resourceServiceUser() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceServiceUserCreate,
 		Read:   resourceServiceUserRead,
-		Update: resourceServiceUserUpdate,
 		Delete: resourceServiceUserDelete,
 
 		Schema: map[string]*schema.Schema{
@@ -106,10 +105,6 @@ func resourceServiceUserRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	return errors.New("User not found")
-}
-
-func resourceServiceUserUpdate(d *schema.ResourceData, m interface{}) error {
-	return nil
 }
 
 func resourceServiceUserDelete(d *schema.ResourceData, m interface{}) error {
