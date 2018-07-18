@@ -13,17 +13,17 @@ func resourceProject() *schema.Resource {
 		Delete: resourceProjectDelete,
 
 		Schema: map[string]*schema.Schema{
-			"card_id": &schema.Schema{
+			"card_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Credit card ID",
 			},
-			"cloud": &schema.Schema{
+			"cloud": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Target cloud",
 			},
-			"project": &schema.Schema{
+			"project": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Project name",
@@ -36,9 +36,9 @@ func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 	project, err := client.Projects.Create(
 		aiven.CreateProjectRequest{
-			d.Get("card_id").(string),
-			d.Get("cloud").(string),
-			d.Get("project").(string),
+			CardID:  d.Get("card_id").(string),
+			Cloud:   d.Get("cloud").(string),
+			Project: d.Get("project").(string),
 		},
 	)
 	if err != nil {
@@ -67,9 +67,8 @@ func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
 	project, err := client.Projects.Update(
 		d.Get("project").(string),
 		aiven.UpdateProjectRequest{
-			d.Get("card_id").(string),
-			d.Get("cloud").(string),
-			d.Get("project").(string),
+			CardID: d.Get("card_id").(string),
+			Cloud:  d.Get("cloud").(string),
 		},
 	)
 	if err != nil {
