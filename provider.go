@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jelmersnoeck/aiven"
 )
@@ -11,21 +13,31 @@ func Provider() *schema.Provider {
 		Schema: map[string]*schema.Schema{
 			"email": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
 				Description: "Aiven email address",
+				Default:     "",
 			},
 			"otp": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
 				Description: "Aiven One-Time password",
+				Default:     "",
 			},
 			"password": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
 				Description: "Aiven password",
+				Default:     "",
+			},
+			"api_token": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				Description: "Aiven Authentication Token",
+				Default:     "",
 			},
 		},
 
@@ -38,6 +50,14 @@ func Provider() *schema.Provider {
 		},
 
 		ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {
+			if d.Get("api_token") == "" && (d.Get("email") == "" || d.Get("password") == "") {
+				return nil, errors.New("Must provide an API Token or email and password")
+			}
+			if d.Get("api_token") != "" {
+				return aiven.NewTokenClient(
+					d.Get("api_token").(string),
+				)
+			}
 			return aiven.NewMFAUserClient(
 				d.Get("email").(string),
 				d.Get("otp").(string),
