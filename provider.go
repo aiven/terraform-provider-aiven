@@ -5,22 +5,23 @@ import (
 	"github.com/jelmersnoeck/aiven"
 )
 
+// Provider returns the Terraform Aiven Provider configuration object.
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"email": &schema.Schema{
+			"email": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
 				Description: "Aiven email address",
 			},
-			"otp": &schema.Schema{
+			"otp": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
 				Description: "Aiven One-Time password",
 			},
-			"password": &schema.Schema{
+			"password": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,

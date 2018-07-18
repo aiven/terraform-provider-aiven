@@ -14,27 +14,27 @@ func resourceDatabase() *schema.Resource {
 
 		// TODO: add user config
 		Schema: map[string]*schema.Schema{
-			"project": &schema.Schema{
+			"project": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Project to link the database to",
 			},
-			"service_name": &schema.Schema{
+			"service_name": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Service to link the database to",
 			},
-			"database": &schema.Schema{
+			"database": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Service database name",
 			},
-			"lc_collate": &schema.Schema{
+			"lc_collate": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Default string sort order (LC_COLLATE) of the database. Default value: en_US.UTF-8",
 			},
-			"lc_ctype": &schema.Schema{
+			"lc_ctype": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Default character classification (LC_CTYPE) of the database. Default value: en_US.UTF-8",
@@ -50,9 +50,9 @@ func resourceDatabaseCreate(d *schema.ResourceData, m interface{}) error {
 		d.Get("project").(string),
 		d.Get("service_name").(string),
 		aiven.CreateDatabaseRequest{
-			d.Get("database").(string),
-			optionalString(d, "lc_collate"),
-			optionalString(d, "lc_type"),
+			Database:  d.Get("database").(string),
+			LcCollate: optionalString(d, "lc_collate"),
+			LcType:    optionalString(d, "lc_type"),
 		},
 	)
 	if err != nil {
