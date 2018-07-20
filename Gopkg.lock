@@ -147,10 +147,10 @@
   revision = "d1caa6c97c9fc1cc9e83bbe34d0603f9ff0ce8bd"
 
 [[projects]]
-  branch = "master"
   name = "github.com/jelmersnoeck/aiven"
   packages = ["."]
-  revision = "2a0063b2df59ff374a309ecdaa9d926b79a83df8"
+  revision = "bb544f4dfbe14582fa498175771acd8409b9c2eb"
+  source = "github.com/jelmersnoeck/aiven"
 
 [[projects]]
   name = "github.com/jmespath/go-jmespath"
@@ -191,6 +191,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f87190b1b411f33d34e548c1128538e55ce781ecbb2ae9d6a0101a9362c1b7a4"
+  inputs-digest = "64509b845f14e462382d5638a9f26f2ecdd2f520f371a2bd728bbc7ac11d9883"
   solver-name = "gps-cdcl"
   solver-version = 1
