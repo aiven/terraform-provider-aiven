@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jelmersnoeck/aiven"
 )
@@ -15,50 +16,50 @@ func resourceService() *schema.Resource {
 
 		// TODO: add user config
 		Schema: map[string]*schema.Schema{
-			"project": &schema.Schema{
+			"project": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Target cloud",
 				ForceNew:    true,
-			}, 
-			"cloud": &schema.Schema{
+			},
+			"cloud": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Target cloud",
 			},
-			"group_name": &schema.Schema{
+			"group_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Service group name",
 			},
-			"plan": &schema.Schema{
+			"plan": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Subscription plan",
 			},
-			"service_name": &schema.Schema{
+			"service_name": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Service name",
 				ForceNew:    true,
 			},
-			"service_type": &schema.Schema{
+			"service_type": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Service type code",
 				ForceNew:    true,
 			},
-			"hostname": &schema.Schema{
+			"hostname": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "Service hostname",
 			},
-			"port": &schema.Schema{
+			"port": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "Service port",
 			},
-			"state": &schema.Schema{
+			"state": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "Service state",
@@ -73,11 +74,11 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 	service, err := client.Services.Create(
 		d.Get("project").(string),
 		aiven.CreateServiceRequest{
-			d.Get("cloud").(string),
-			d.Get("group_name").(string),
-			d.Get("plan").(string),
-			d.Get("service_name").(string),
-			d.Get("service_type").(string),
+			Cloud:       d.Get("cloud").(string),
+			GroupName:   d.Get("group_name").(string),
+			Plan:        d.Get("plan").(string),
+			ServiceName: d.Get("service_name").(string),
+			ServiceType: d.Get("service_type").(string),
 		},
 	)
 
@@ -87,7 +88,7 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	err = resourceServiceWait(d, m)
-	
+
 	if err != nil {
 		d.SetId("")
 		return err
@@ -135,10 +136,10 @@ func resourceServiceUpdate(d *schema.ResourceData, m interface{}) error {
 		d.Get("project").(string),
 		d.Get("service_name").(string),
 		aiven.UpdateServiceRequest{
-			d.Get("cloud").(string),
-			d.Get("group_name").(string),
-			d.Get("plan").(string),
-			true,
+			Cloud:     d.Get("cloud").(string),
+			GroupName: d.Get("group_name").(string),
+			Plan:      d.Get("plan").(string),
+			Powered:   true,
 		},
 	)
 	if err != nil {
@@ -146,7 +147,7 @@ func resourceServiceUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	err = resourceServiceWait(d, m)
-	
+
 	if err != nil {
 		return err
 	}

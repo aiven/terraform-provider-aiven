@@ -1,30 +1,43 @@
 package main
 
 import (
+	"errors"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jelmersnoeck/aiven"
 )
 
+// Provider returns the Terraform Aiven Provider configuration object.
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"email": &schema.Schema{
+			"email": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
 				Description: "Aiven email address",
+				Default:     "",
 			},
-			"otp": &schema.Schema{
+			"otp": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
 				Description: "Aiven One-Time password",
+				Default:     "",
 			},
-			"password": &schema.Schema{
+			"password": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
 				Description: "Aiven password",
+				Default:     "",
+			},
+			"api_token": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				Description: "Aiven Authentication Token",
+				Default:     "",
 			},
 		},
 
@@ -37,6 +50,14 @@ func Provider() *schema.Provider {
 		},
 
 		ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {
+			if d.Get("api_token") == "" && (d.Get("email") == "" || d.Get("password") == "") {
+				return nil, errors.New("Must provide an API Token or email and password")
+			}
+			if d.Get("api_token") != "" {
+				return aiven.NewTokenClient(
+					d.Get("api_token").(string),
+				)
+			}
 			return aiven.NewMFAUserClient(
 				d.Get("email").(string),
 				d.Get("otp").(string),

@@ -11,43 +11,42 @@ func resourceServiceUser() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceServiceUserCreate,
 		Read:   resourceServiceUserRead,
-		Update: resourceServiceUserUpdate,
 		Delete: resourceServiceUserDelete,
 
 		Schema: map[string]*schema.Schema{
-			"project": &schema.Schema{
+			"project": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Project to link the user to",
 				ForceNew:    true,
 			},
-			"service_name": &schema.Schema{
+			"service_name": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Service to link the user to",
 				ForceNew:    true,
 			},
-			"username": &schema.Schema{
+			"username": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Service username",
 				ForceNew:    true,
 			},
-			"type": &schema.Schema{
+			"type": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"password": &schema.Schema{
+			"password": {
 				Type:      schema.TypeString,
 				Sensitive: true,
 				Computed:  true,
 			},
-			"access_cert": &schema.Schema{
+			"access_cert": {
 				Type:      schema.TypeString,
 				Sensitive: true,
 				Computed:  true,
 			},
-			"access_key": &schema.Schema{
+			"access_key": {
 				Type:      schema.TypeString,
 				Sensitive: true,
 				Computed:  true,
@@ -63,7 +62,7 @@ func resourceServiceUserCreate(d *schema.ResourceData, m interface{}) error {
 		d.Get("project").(string),
 		d.Get("service_name").(string),
 		aiven.CreateServiceUserRequest{
-			d.Get("username").(string),
+			Username: d.Get("username").(string),
 		},
 	)
 	if err != nil {
@@ -106,10 +105,6 @@ func resourceServiceUserRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	return errors.New("User not found")
-}
-
-func resourceServiceUserUpdate(d *schema.ResourceData, m interface{}) error {
-	return nil
 }
 
 func resourceServiceUserDelete(d *schema.ResourceData, m interface{}) error {
