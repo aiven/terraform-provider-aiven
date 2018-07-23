@@ -46,6 +46,7 @@ func Provider() *schema.Provider {
 			"aiven_service":      resourceService(),
 			"aiven_database":     resourceDatabase(),
 			"aiven_service_user": resourceServiceUser(),
+			"aiven_kafka_topic":  resourceKafkaTopic(),
 		},
 
 		ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {
@@ -72,4 +73,20 @@ func optionalString(d *schema.ResourceData, key string) string {
 		return ""
 	}
 	return str
+}
+
+func optionalStringPointer(d *schema.ResourceData, key string) *string {
+	str, ok := d.Get(key).(string)
+	if !ok {
+		return nil
+	}
+	return &str
+}
+
+func optionalIntPointer(d *schema.ResourceData, key string) *int {
+	val, ok := d.Get(key).(int)
+	if !ok {
+		return nil
+	}
+	return &val
 }
