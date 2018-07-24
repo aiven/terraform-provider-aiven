@@ -67,3 +67,19 @@ resource "aiven_service_user" "my-service-user" {
     username = "<USERNAME>"
 }
 ```
+
+### Resource Kafka Topic
+
+```
+resource "aiven_kafka_topic" "rob-test" {
+    project = "<PROJECT_NAME>"
+    service_name = "<SERVICE_NAME>"
+    topic = "<TOPIC_NAME>"
+    partitions = 5
+    replication = 1
+    retention_bytes = -1
+    retention_hours = 72
+    minimum_in_sync_replicas = 1
+    cleanup_policy = "delete"
+}
+```
