@@ -69,6 +69,37 @@ func resourceService() *schema.Resource {
 				Optional:    true,
 				Description: "Service type-specific settings",
 			},
+			"kafka_hosts": {
+				Type:        schema.TypeList,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Computed:    true,
+				Description: "List of Kafka Hosts, if any",
+			},
+			"kafka_access_cert": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The Kafka Access Certificate, if any",
+			},
+			"kafka_access_key": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The Kafka Access Key, if any",
+			},
+			"kafka_connect_uri": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The Kafka Connect URI, if any",
+			},
+			"kafka_rest_uri": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The Kafka REST URI, if any",
+			},
+			"schema_registry_uri": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The Schema Registry URI, if any",
+			},
 		},
 	}
 }
@@ -130,6 +161,12 @@ func resourceServiceRead(d *schema.ResourceData, m interface{}) error {
 
 	d.Set("hostname", hn)
 	d.Set("port", port)
+	d.Set("kafka_hosts", service.ConnectionInfo.KafkaHosts)
+	d.Set("kafka_access_cert", service.ConnectionInfo.KafkaAccessCert)
+	d.Set("kafka_access_key", service.ConnectionInfo.KafkaAccessKey)
+	d.Set("kafka_connect_uri", service.ConnectionInfo.KafkaConnectURI)
+	d.Set("kafka_rest_uri", service.ConnectionInfo.KafkaRestURI)
+	d.Set("schema_registry_uri", service.ConnectionInfo.SchemaRegistryURI)
 
 	return nil
 }
