@@ -224,7 +224,7 @@ func resourceServiceWait(d *schema.ResourceData, m interface{}) error {
 
 // Aiven requires field types on received JSON to be correctly typed. If the service type is known
 // transform the Terraform type (one of string, list, or map) into the appropriate Go type and
-// return the modified user config. If the  service does not have a special handler the user config
+// return the modified user config. If the service does not have a special handler the user config
 // is returned as-is with the default Terraform types associated.
 func transformUserConfig(d *schema.ResourceData) map[string]interface{} {
 	serviceType := d.Get("service_type").(string)
