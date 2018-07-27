@@ -40,10 +40,8 @@ func (w *ServiceChangeWaiter) RefreshFunc() resource.StateRefreshFunc {
 		// If this is a Kafka service, wait for its component parts (i.e. Kafka Connect,
 		// Kafka REST, and Schema Registry) to be ready
 		state := service.State
-		if state == aivenTargetState && service.Type == "kafka" {
-			if !kafkaServicesReady(service) {
-				state = aivenKafkaServicesStartingState
-			}
+		if !kafkaServicesReady(service) {
+			state = aivenKafkaServicesStartingState
 		}
 
 		return service, state, nil
@@ -53,6 +51,14 @@ func (w *ServiceChangeWaiter) RefreshFunc() resource.StateRefreshFunc {
 // If any of Kafka Rest, Schema Registry, and Kafka Connect are enabled, refresh
 // their state to check if they're ready
 func kafkaServicesReady(service *aiven.Service) bool {
+	// Check if the service is a Kafka service and Kafka itself is ready
+	if service.Type != "kafka" {
+		return true
+	}
+	if service.State != aivenTargetState {
+		return false
+	}
+
 	kafkaRestEnabled, schemaRegistryEnabled, kafkaConnectEnabled := false, false, false
 	userConfig := service.UserConfig.(map[string]interface{})
 	if enabled, ok := userConfig["kafka_rest"]; ok {
@@ -69,18 +75,22 @@ func kafkaServicesReady(service *aiven.Service) bool {
 		return true
 	}
 
+	// Ping each Kafka add-on service's url to see if they are alive
 	if kafkaRestEnabled {
-		if _, err := http.Get(service.ConnectionInfo.KafkaRestURI); err != nil {
+		if resp, err := http.Get(service.ConnectionInfo.KafkaRestURI); err != nil {
+			resp.Body.Close()
 			return false
 		}
 	}
 	if schemaRegistryEnabled {
-		if _, err := http.Get(service.ConnectionInfo.SchemaRegistryURI); err != nil {
+		if resp, err := http.Get(service.ConnectionInfo.SchemaRegistryURI); err != nil {
+			resp.Body.Close()
 			return false
 		}
 	}
 	if kafkaConnectEnabled {
-		if _, err := http.Get(service.ConnectionInfo.KafkaConnectURI); err != nil {
+		if resp, err := http.Get(service.ConnectionInfo.KafkaConnectURI); err != nil {
+			resp.Body.Close()
 			return false
 		}
 	}
