@@ -49,6 +49,10 @@ func Provider() *schema.Provider {
 			"aiven_kafka_topic":  resourceKafkaTopic(),
 		},
 
+		DataSourcesMap: map[string]*schema.Resource{
+			"aiven_project": dataSourceProject(),
+		},
+
 		ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {
 			if d.Get("api_token") == "" && (d.Get("email") == "" || d.Get("password") == "") {
 				return nil, errors.New("Must provide an API Token or email and password")

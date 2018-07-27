@@ -28,6 +28,42 @@ func resourceProject() *schema.Resource {
 				Required:    true,
 				Description: "Project name",
 			},
+			"ca_crt": {
+				Type:        schema.TypeString,
+				Sensitive:   true,
+				Computed:    true,
+				Description: "Project CA Certificate",
+			},
+		},
+	}
+}
+
+func dataSourceProject() *schema.Resource {
+	return &schema.Resource{
+		Read: resourceProjectRead,
+
+		Schema: map[string]*schema.Schema{
+			"card_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Credit card ID",
+			},
+			"cloud": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Target cloud",
+			},
+			"project": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Project name",
+			},
+			"ca_crt": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Sensitive:   true,
+				Description: "Project CA Certificate",
+			},
 		},
 	}
 }
@@ -56,8 +92,13 @@ func resourceProjectRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
+	ca, err := client.CA.Get(d.Get("project").(string))
+	if err != nil {
+		return err
+	}
 
 	d.Set("project", project.Name)
+	d.Set("ca_crt", ca)
 	return nil
 }
 

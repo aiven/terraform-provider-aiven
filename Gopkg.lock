@@ -149,7 +149,7 @@
 [[projects]]
   name = "github.com/jelmersnoeck/aiven"
   packages = ["."]
-  revision = "bb544f4dfbe14582fa498175771acd8409b9c2eb"
+  revision = "79cce3d3655eea59d4a31f573e5ef5003a09c023"
   source = "github.com/jelmersnoeck/aiven"
 
 [[projects]]
@@ -191,6 +191,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "64509b845f14e462382d5638a9f26f2ecdd2f520f371a2bd728bbc7ac11d9883"
+  inputs-digest = "51dfca38d9d06185355ab1502aa8e38988b7c5cdbc4b26032dd6f6ce6922910d"
   solver-name = "gps-cdcl"
   solver-version = 1
