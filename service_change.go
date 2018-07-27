@@ -37,8 +37,6 @@ func (w *ServiceChangeWaiter) RefreshFunc() resource.StateRefreshFunc {
 			return nil, "", err
 		}
 
-		// If this is a Kafka service, wait for its component parts (i.e. Kafka Connect,
-		// Kafka REST, and Schema Registry) to be ready
 		state := service.State
 		if !kafkaServicesReady(service) {
 			state = aivenKafkaServicesStartingState
@@ -59,42 +57,28 @@ func kafkaServicesReady(service *aiven.Service) bool {
 		return false
 	}
 
-	kafkaRestEnabled, schemaRegistryEnabled, kafkaConnectEnabled := false, false, false
 	userConfig := service.UserConfig.(map[string]interface{})
-	if enabled, ok := userConfig["kafka_rest"]; ok {
-		kafkaRestEnabled = enabled.(bool)
+
+	ready := true
+	if enabled, ok := userConfig["kafka_rest"]; ok && enabled.(bool) {
+		ready = uriReachable(service.ConnectionInfo.KafkaRestURI)
 	}
-	if enabled, ok := userConfig["schema_registry"]; ok {
-		schemaRegistryEnabled = enabled.(bool)
+	if enabled, ok := userConfig["schema_registry"]; ok && enabled.(bool) {
+		ready = uriReachable(service.ConnectionInfo.SchemaRegistryURI)
 	}
-	if enabled, ok := userConfig["kafka_connect"]; ok {
-		kafkaConnectEnabled = enabled.(bool)
+	if enabled, ok := userConfig["kafka_connect"]; ok && enabled.(bool) {
+		ready = uriReachable(service.ConnectionInfo.KafkaConnectURI)
 	}
 
-	if !kafkaRestEnabled && !schemaRegistryEnabled && !kafkaConnectEnabled {
-		return true
-	}
+	return ready
+}
 
-	// Ping each Kafka add-on service's url to see if they are alive
-	if kafkaRestEnabled {
-		if resp, err := http.Get(service.ConnectionInfo.KafkaRestURI); err != nil {
-			resp.Body.Close()
-			return false
-		}
+func uriReachable(uri string) bool {
+	resp, err := http.Get(uri)
+	if err != nil {
+		return false
 	}
-	if schemaRegistryEnabled {
-		if resp, err := http.Get(service.ConnectionInfo.SchemaRegistryURI); err != nil {
-			resp.Body.Close()
-			return false
-		}
-	}
-	if kafkaConnectEnabled {
-		if resp, err := http.Get(service.ConnectionInfo.KafkaConnectURI); err != nil {
-			resp.Body.Close()
-			return false
-		}
-	}
-
+	resp.Body.Close()
 	return true
 }
 
