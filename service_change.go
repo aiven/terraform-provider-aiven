@@ -3,10 +3,11 @@ package main
 import (
 	"time"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/jelmersnoeck/aiven"
 	"log"
 	"net/http"
+
+	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/jelmersnoeck/aiven"
 )
 
 // ServiceChangeWaiter is used to refresh the Aiven Service endpoints when
@@ -57,7 +58,7 @@ func kafkaServicesReady(service *aiven.Service) bool {
 		return false
 	}
 
-	userConfig := service.UserConfig.(map[string]interface{})
+	userConfig := service.UserConfig
 
 	ready := true
 	if enabled, ok := userConfig["kafka_rest"]; ok && enabled.(bool) {

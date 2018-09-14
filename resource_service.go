@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -14,6 +15,9 @@ func resourceService() *schema.Resource {
 		Read:   resourceServiceRead,
 		Update: resourceServiceUpdate,
 		Delete: resourceServiceDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceServiceState,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"project": {
@@ -25,12 +29,7 @@ func resourceService() *schema.Resource {
 			"cloud": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Target cloud",
-			},
-			"group_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Service group name",
+				Description: "Cloud the service runs in",
 			},
 			"plan": {
 				Type:        schema.TypeString,
@@ -64,41 +63,128 @@ func resourceService() *schema.Resource {
 				Computed:    true,
 				Description: "Service state",
 			},
-			"user_config": {
-				Type:        schema.TypeMap,
-				Optional:    true,
-				Description: "Service type-specific settings",
-			},
-			"kafka_hosts": {
+			"kafka": {
 				Type:        schema.TypeList,
-				Elem:        &schema.Schema{Type: schema.TypeString},
+				MaxItems:    1,
 				Computed:    true,
-				Description: "List of Kafka Hosts, if any",
+				Description: "Kafka specific server provided values",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"access_cert": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The Kafka client certificate",
+							Optional:    true,
+							Sensitive:   true,
+						},
+						"access_key": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The Kafka client certificate key",
+							Optional:    true,
+							Sensitive:   true,
+						},
+						"connect_uri": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The Kafka Connect URI, if any",
+							Optional:    true,
+						},
+						"hosts": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "List of Kafka Hosts",
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Optional:    true,
+						},
+						"rest_uri": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The Kafka REST URI, if any",
+							Optional:    true,
+						},
+						"schema_registry_uri": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The Schema Registry URI, if any",
+							Optional:    true,
+						},
+					},
+				},
 			},
-			"kafka_access_cert": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The Kafka Access Certificate, if any",
+			"kafka_user_config": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Kafka specific user configurable settings",
+				Elem: &schema.Resource{
+					Schema: GenerateTerraformUserConfigSchema(userConfigSchemas["service"]["kafka"].(map[string]interface{})),
+				},
 			},
-			"kafka_access_key": {
-				Type:        schema.TypeString,
+			"pg": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
 				Computed:    true,
-				Description: "The Kafka Access Key, if any",
+				Description: "PostgreSQL specific server provided values",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"replica_uri": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "PostgreSQL replica URI for services with a replica",
+							Sensitive:   true,
+						},
+						"uri": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "PostgreSQL master connection URI",
+							Optional:    true,
+							Sensitive:   true,
+						},
+						"dbname": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Primary PostgreSQL database name",
+						},
+						"host": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "PostgreSQL master node host IP or name",
+						},
+						"password": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "PostgreSQL admin user password",
+							Sensitive:   true,
+						},
+						"port": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "PostgreSQL port",
+						},
+						"sslmode": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "PostgreSQL sslmode setting (currently always \"require\")",
+						},
+						"user": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "PostgreSQL admin user name",
+						},
+					},
+				},
 			},
-			"kafka_connect_uri": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The Kafka Connect URI, if any",
-			},
-			"kafka_rest_uri": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The Kafka REST URI, if any",
-			},
-			"schema_registry_uri": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The Schema Registry URI, if any",
+			"pg_user_config": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "PostgreSQL specific user configurable settings",
+				Elem: &schema.Resource{
+					Schema: GenerateTerraformUserConfigSchema(userConfigSchemas["service"]["pg"].(map[string]interface{})),
+				},
 			},
 		},
 	}
@@ -106,83 +192,59 @@ func resourceService() *schema.Resource {
 
 func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
+	serviceType := d.Get("service_type").(string)
+	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("service", serviceType, d)
 	service, err := client.Services.Create(
 		d.Get("project").(string),
 		aiven.CreateServiceRequest{
 			Cloud:       d.Get("cloud").(string),
-			GroupName:   d.Get("group_name").(string),
 			Plan:        d.Get("plan").(string),
 			ServiceName: d.Get("service_name").(string),
-			ServiceType: d.Get("service_type").(string),
-			UserConfig:  transformUserConfig(d),
+			ServiceType: serviceType,
+			UserConfig:  userConfig,
 		},
 	)
 
 	if err != nil {
-		d.SetId("")
 		return err
 	}
 
 	err = resourceServiceWait(d, m)
 
 	if err != nil {
-		d.SetId("")
 		return err
 	}
 
-	d.SetId(service.Name + "!")
+	d.SetId(buildResourceID(d.Get("project").(string), service.Name))
 
-	return resourceServiceRead(d, m)
+	return copyServicePropertiesFromAPIResponseToTerraform(d, service, d.Get("project").(string))
 }
 
 func resourceServiceRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-	service, err := client.Services.Get(
-		d.Get("project").(string),
-		d.Get("service_name").(string),
-	)
+	projectName, serviceName := splitResourceID2(d.Id())
+	service, err := client.Services.Get(projectName, serviceName)
 	if err != nil {
 		return err
 	}
 
-	d.Set("name", service.Name)
-	d.Set("state", service.State)
-	d.Set("plan", service.Plan)
-
-	hn, err := service.Hostname()
-	if err != nil {
-		return err
-	}
-	port, err := service.Port()
-	if err != nil {
-		return err
-	}
-
-	d.Set("hostname", hn)
-	d.Set("port", port)
-	d.Set("kafka_hosts", service.ConnectionInfo.KafkaHosts)
-	d.Set("kafka_access_cert", service.ConnectionInfo.KafkaAccessCert)
-	d.Set("kafka_access_key", service.ConnectionInfo.KafkaAccessKey)
-	d.Set("kafka_connect_uri", service.ConnectionInfo.KafkaConnectURI)
-	d.Set("kafka_rest_uri", service.ConnectionInfo.KafkaRestURI)
-	d.Set("schema_registry_uri", service.ConnectionInfo.SchemaRegistryURI)
-
-	return nil
+	return copyServicePropertiesFromAPIResponseToTerraform(d, service, projectName)
 }
 
 func resourceServiceUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-	_, err := client.Services.Update(
-		d.Get("project").(string),
-		d.Get("service_name").(string),
+	projectName, serviceName := splitResourceID2(d.Id())
+	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("service", d.Get("service_type").(string), d)
+	service, err := client.Services.Update(
+		projectName,
+		serviceName,
 		aiven.UpdateServiceRequest{
 			Cloud:      d.Get("cloud").(string),
-			GroupName:  d.Get("group_name").(string),
 			Plan:       d.Get("plan").(string),
 			Powered:    true,
-			UserConfig: transformUserConfig(d),
+			UserConfig: userConfig,
 		},
 	)
 	if err != nil {
@@ -195,16 +257,35 @@ func resourceServiceUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	return resourceServiceRead(d, m)
+	return copyServicePropertiesFromAPIResponseToTerraform(d, service, projectName)
 }
 
 func resourceServiceDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-	return client.Services.Delete(
-		d.Get("project").(string),
-		d.Get("service_name").(string),
-	)
+	projectName, serviceName := splitResourceID2(d.Id())
+	return client.Services.Delete(projectName, serviceName)
+}
+
+func resourceServiceState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	client := m.(*aiven.Client)
+
+	if len(strings.Split(d.Id(), "/")) != 2 {
+		return nil, fmt.Errorf("Invalid identifier %v, expected <project_name>/<service_name>", d.Id())
+	}
+
+	projectName, serviceName := splitResourceID2(d.Id())
+	service, err := client.Services.Get(projectName, serviceName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = copyServicePropertiesFromAPIResponseToTerraform(d, service, projectName)
+	if err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceServiceWait(d *schema.ResourceData, m interface{}) error {
@@ -222,45 +303,70 @@ func resourceServiceWait(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-// Aiven requires field types on received JSON to be correctly typed. If the service type is known
-// transform the Terraform type (one of string, list, or map) into the appropriate Go type and
-// return the modified user config. If the service does not have a special handler the user config
-// is returned as-is with the default Terraform types associated.
-func transformUserConfig(d *schema.ResourceData) map[string]interface{} {
-	serviceType := d.Get("service_type").(string)
-	userConfig := d.Get("user_config").(map[string]interface{})
+func copyServicePropertiesFromAPIResponseToTerraform(
+	d *schema.ResourceData,
+	service *aiven.Service,
+	project string,
+) error {
+	d.Set("cloud", service.CloudName)
+	d.Set("service_name", service.Name)
+	d.Set("state", service.State)
+	d.Set("plan", service.Plan)
+	d.Set("service_type", service.Type)
+	d.Set("project", project)
+	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat("service", service.Type, service.UserConfig)
+	d.Set(service.Type+"_user_config", userConfig)
 
-	if serviceType == "kafka" {
-		userConfig = transformKafkaUserConfig(userConfig)
+	hn, err := service.Hostname()
+	if err != nil {
+		return err
+	}
+	port, err := service.Port()
+	if err != nil {
+		return err
 	}
 
-	return userConfig
+	d.Set("hostname", hn)
+	d.Set("port", port)
+	copyConnectionInfoFromAPIResponseToTerraform(d, service.Type, service.ConnectionInfo)
+
+	return nil
 }
 
-// Transform the kafka service user config from Terraform's built-in types to the appropriate
-// golang types.
-func transformKafkaUserConfig(userConfig map[string]interface{}) map[string]interface{} {
-	newUserConfig := make(map[string]interface{})
-	kafkaConnectInterface, ok := userConfig["kafka_connect"]
-	if ok {
-		newUserConfig["kafka_connect"] = stringToBool(kafkaConnectInterface.(string))
-	}
-	kafkaRestInterface, ok := userConfig["kafka_rest"]
-	if ok {
-		newUserConfig["kafka_rest"] = stringToBool(kafkaRestInterface.(string))
-	}
-	schemaRegistryInterface, ok := userConfig["schema_registry"]
-	if ok {
-		newUserConfig["schema_registry"] = stringToBool(schemaRegistryInterface.(string))
-	}
-	kafkaVersionInterface, ok := userConfig["kafka_version"]
-	if ok {
-		newUserConfig["kafka_version"] = kafkaVersionInterface.(string)
-	}
+func copyConnectionInfoFromAPIResponseToTerraform(d *schema.ResourceData, serviceType string, connectionInfo aiven.ConnectionInfo) {
+	// Need to set empty value for all services or all Terraform keeps on showing there's
+	// a change in the computed values that don't match actual service type
+	d.Set("kafka", []map[string]interface{}{})
+	d.Set("pg", []map[string]interface{}{})
 
-	return newUserConfig
-}
-
-func stringToBool(maybeBool string) bool {
-	return maybeBool == "1" || strings.ToLower(maybeBool) == "true"
+	props := make(map[string]interface{})
+	switch serviceType {
+	case "kafka":
+		props["access_cert"] = connectionInfo.KafkaAccessCert
+		props["access_key"] = connectionInfo.KafkaAccessKey
+		props["connect_uri"] = connectionInfo.KafkaConnectURI
+		props["hosts"] = connectionInfo.KafkaHosts
+		props["rest_uri"] = connectionInfo.KafkaRestURI
+		props["schema_registry_uri"] = connectionInfo.SchemaRegistryURI
+	case "pg":
+		if connectionInfo.PostgresURIs != nil && len(connectionInfo.PostgresURIs) > 0 {
+			props["uri"] = connectionInfo.PostgresURIs[0]
+		}
+		if connectionInfo.PostgresParams != nil && len(connectionInfo.PostgresParams) > 0 {
+			params := connectionInfo.PostgresParams[0]
+			props["dbname"] = params.DatabaseName
+			props["host"] = params.Host
+			props["password"] = params.Password
+			port, err := strconv.ParseInt(params.Port, 10, 32)
+			if err == nil {
+				props["port"] = int(port)
+			}
+			props["sslmode"] = params.SSLMode
+			props["user"] = params.User
+		}
+		props["replica_uri"] = connectionInfo.PostgresReplicaURI
+	default:
+		panic(fmt.Sprintf("Unsupported service type %v", serviceType))
+	}
+	d.Set(serviceType, []map[string]interface{}{props})
 }

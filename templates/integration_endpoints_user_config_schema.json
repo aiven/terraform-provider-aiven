@@ -1,0 +1,30 @@
+{
+  "datadog": {
+    "additionalProperties": false,
+    "properties": {
+      "datadog_api_key": {
+        "example": "848f30907c15c55d601fe45487cce9b6",
+        "maxLength": 32,
+        "minLength": 32,
+        "title": "Datadog API key",
+        "type": "string"
+      },
+      "disable_consumer_stats": {
+        "example": true,
+        "title": "Disable consumer group metrics",
+        "type": "boolean"
+      },
+      "max_partition_contexts": {
+        "example": 32000,
+        "maximum": 200000,
+        "minimum": 200,
+        "title": "Maximum number of partition contexts to send",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "datadog_api_key"
+    ],
+    "type": "object"
+  }
+}

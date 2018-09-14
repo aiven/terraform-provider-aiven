@@ -2,6 +2,8 @@ package main
 
 import (
 	"errors"
+	"net/url"
+	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jelmersnoeck/aiven"
@@ -42,11 +44,12 @@ func Provider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"aiven_project":      resourceProject(),
-			"aiven_service":      resourceService(),
-			"aiven_database":     resourceDatabase(),
-			"aiven_service_user": resourceServiceUser(),
-			"aiven_kafka_topic":  resourceKafkaTopic(),
+			"aiven_project":                      resourceProject(),
+			"aiven_service":                      resourceService(),
+			"aiven_service_integration_endpoint": resourceServiceIntegrationEndpoint(),
+			"aiven_database":                     resourceDatabase(),
+			"aiven_service_user":                 resourceServiceUser(),
+			"aiven_kafka_topic":                  resourceKafkaTopic(),
 		},
 
 		ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {
@@ -89,4 +92,31 @@ func optionalIntPointer(d *schema.ResourceData, key string) *int {
 		return nil
 	}
 	return &val
+}
+
+func buildResourceID(parts ...string) string {
+	finalParts := make([]string, len(parts))
+	for idx, part := range parts {
+		finalParts[idx] = url.PathEscape(part)
+	}
+	return strings.Join(finalParts, "/")
+}
+
+func splitResourceID(resourceID string, n int) []string {
+	parts := strings.SplitN(resourceID, "/", n)
+	for idx, part := range parts {
+		part, _ := url.PathUnescape(part)
+		parts[idx] = part
+	}
+	return parts
+}
+
+func splitResourceID2(resourceID string) (string, string) {
+	parts := splitResourceID(resourceID, 2)
+	return parts[0], parts[1]
+}
+
+func splitResourceID3(resourceID string) (string, string, string) {
+	parts := splitResourceID(resourceID, 3)
+	return parts[0], parts[1], parts[2]
 }
