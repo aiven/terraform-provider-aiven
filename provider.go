@@ -46,6 +46,7 @@ func Provider() *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			"aiven_project":                      resourceProject(),
 			"aiven_service":                      resourceService(),
+			"aiven_service_integration":          resourceServiceIntegration(),
 			"aiven_service_integration_endpoint": resourceServiceIntegrationEndpoint(),
 			"aiven_database":                     resourceDatabase(),
 			"aiven_service_user":                 resourceServiceUser(),
@@ -79,7 +80,11 @@ func optionalString(d *schema.ResourceData, key string) string {
 }
 
 func optionalStringPointer(d *schema.ResourceData, key string) *string {
-	str, ok := d.Get(key).(string)
+	val, ok := d.GetOk(key)
+	if !ok {
+		return nil
+	}
+	str, ok := val.(string)
 	if !ok {
 		return nil
 	}
@@ -87,11 +92,15 @@ func optionalStringPointer(d *schema.ResourceData, key string) *string {
 }
 
 func optionalIntPointer(d *schema.ResourceData, key string) *int {
-	val, ok := d.Get(key).(int)
+	val, ok := d.GetOk(key)
 	if !ok {
 		return nil
 	}
-	return &val
+	intValue, ok := val.(int)
+	if !ok {
+		return nil
+	}
+	return &intValue
 }
 
 func buildResourceID(parts ...string) string {

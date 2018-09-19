@@ -342,13 +342,18 @@ func convertTerraformUserConfigValueToAPICompatibleFormat(
 			default:
 				panic(fmt.Sprintf("Invalid %v user config key type %T for %v, expected map", serviceType, value, key))
 			}
-			asMap := value.([]interface{})[0].(map[string]interface{})
-			if len(asMap) == 0 {
+			asList := value.([]interface{})
+			if len(asList) == 0 {
 				omit = true
 			} else {
-				convertedValue = convertTerraformUserConfigToAPICompatibleFormat(
-					serviceType, asMap, definition["properties"].(map[string]interface{}),
-				)
+				asMap := asList[0].(map[string]interface{})
+				if len(asMap) == 0 {
+					omit = true
+				} else {
+					convertedValue = convertTerraformUserConfigToAPICompatibleFormat(
+						serviceType, asMap, definition["properties"].(map[string]interface{}),
+					)
+				}
 			}
 		}
 	case "array":

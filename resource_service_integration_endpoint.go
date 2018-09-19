@@ -143,7 +143,9 @@ func copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(
 	endpointType := endpoint.EndpointType
 	d.Set("endpoint_type", endpointType)
 	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat("endpoint", endpointType, endpoint.UserConfig)
-	d.Set(endpointType+"_user_config", userConfig)
+	if userConfig != nil && len(userConfig) > 0 {
+		d.Set(endpointType+"_user_config", userConfig)
+	}
 
 	return nil
 }
