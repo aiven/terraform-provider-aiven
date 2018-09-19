@@ -129,3 +129,22 @@ func splitResourceID3(resourceID string) (string, string, string) {
 	parts := splitResourceID(resourceID, 3)
 	return parts[0], parts[1], parts[2]
 }
+
+func resourceExists(err error) (bool, error) {
+	if err == nil {
+		return true, nil
+	}
+
+	aivenError, ok := err.(aiven.Error)
+	if !ok {
+		return true, err
+	}
+
+	if aivenError.Status == 404 {
+		return false, nil
+	}
+	if aivenError.Status < 200 || aivenError.Status >= 300 {
+		return true, err
+	}
+	return true, nil
+}

@@ -14,6 +14,7 @@ func resourceServiceIntegration() *schema.Resource {
 		Read:   resourceServiceIntegrationRead,
 		Update: resourceServiceIntegrationUpdate,
 		Delete: resourceServiceIntegrationDelete,
+		Exists: resourceServiceIntegrationExists,
 		Importer: &schema.ResourceImporter{
 			State: resourceServiceIntegrationState,
 		},
@@ -149,6 +150,14 @@ func resourceServiceIntegrationDelete(d *schema.ResourceData, m interface{}) err
 
 	projectName, integrationID := splitResourceID2(d.Id())
 	return client.ServiceIntegrations.Delete(projectName, integrationID)
+}
+
+func resourceServiceIntegrationExists(d *schema.ResourceData, m interface{}) (bool, error) {
+	client := m.(*aiven.Client)
+
+	projectName, integrationID := splitResourceID2(d.Id())
+	_, err := client.ServiceIntegrations.Get(projectName, integrationID)
+	return resourceExists(err)
 }
 
 func resourceServiceIntegrationState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {

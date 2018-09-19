@@ -11,6 +11,7 @@ func resourceProject() *schema.Resource {
 		Read:   resourceProjectRead,
 		Update: resourceProjectUpdate,
 		Delete: resourceProjectDelete,
+		Exists: resourceProjectExists,
 		Importer: &schema.ResourceImporter{
 			State: resourceProjectState,
 		},
@@ -88,6 +89,13 @@ func resourceProjectDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	return client.Projects.Delete(d.Id())
+}
+
+func resourceProjectExists(d *schema.ResourceData, m interface{}) (bool, error) {
+	client := m.(*aiven.Client)
+
+	_, err := client.Projects.Get(d.Get("project").(string))
+	return resourceExists(err)
 }
 
 func resourceProjectState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
