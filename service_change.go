@@ -95,7 +95,7 @@ func (w *ServiceChangeWaiter) Conf() *resource.StateChangeConf {
 		Refresh: w.RefreshFunc(),
 	}
 	state.Delay = 10 * time.Second
-	state.Timeout = 10 * time.Minute
+	state.Timeout = 20 * time.Minute
 	state.MinTimeout = 2 * time.Second
 
 	return state

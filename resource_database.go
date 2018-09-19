@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jelmersnoeck/aiven"
 )
@@ -9,8 +12,11 @@ func resourceDatabase() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDatabaseCreate,
 		Read:   resourceDatabaseRead,
-		Update: resourceDatabaseUpdate,
 		Delete: resourceDatabaseDelete,
+		Exists: resourceDatabaseExists,
+		Importer: &schema.ResourceImporter{
+			State: resourceDatabaseState,
+		},
 
 		// TODO: add user config
 		Schema: map[string]*schema.Schema{
@@ -18,26 +24,33 @@ func resourceDatabase() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Project to link the database to",
+				ForceNew:    true,
 			},
 			"service_name": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Service to link the database to",
+				ForceNew:    true,
 			},
 			"database": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Service database name",
+				ForceNew:    true,
 			},
 			"lc_collate": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Default:     "en_US.UTF-8",
 				Description: "Default string sort order (LC_COLLATE) of the database. Default value: en_US.UTF-8",
+				ForceNew:    true,
 			},
 			"lc_ctype": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Default:     "en_US.UTF-8",
 				Description: "Default character classification (LC_CTYPE) of the database. Default value: en_US.UTF-8",
+				ForceNew:    true,
 			},
 		},
 	}
@@ -46,11 +59,14 @@ func resourceDatabase() *schema.Resource {
 func resourceDatabaseCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-	database, err := client.Databases.Create(
-		d.Get("project").(string),
-		d.Get("service_name").(string),
+	projectName := d.Get("project").(string)
+	serviceName := d.Get("service_name").(string)
+	databaseName := d.Get("database").(string)
+	_, err := client.Databases.Create(
+		projectName,
+		serviceName,
 		aiven.CreateDatabaseRequest{
-			Database:  d.Get("database").(string),
+			Database:  databaseName,
 			LcCollate: optionalString(d, "lc_collate"),
 			LcType:    optionalString(d, "lc_type"),
 		},
@@ -59,24 +75,49 @@ func resourceDatabaseCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	d.SetId(database.Database + "!")
-	return nil
+	d.SetId(buildResourceID(projectName, serviceName, databaseName))
+	return resourceDatabaseRead(d, m)
 }
 
 func resourceDatabaseRead(d *schema.ResourceData, m interface{}) error {
-	return nil
-}
+	client := m.(*aiven.Client)
 
-func resourceDatabaseUpdate(d *schema.ResourceData, m interface{}) error {
+	projectName, serviceName, databaseName := splitResourceID3(d.Id())
+	database, err := client.Databases.Get(projectName, serviceName, databaseName)
+	if err != nil {
+		return err
+	}
+
+	d.Set("database", database.DatabaseName)
+	d.Set("lc_collate", database.LcCollate)
+	d.Set("lc_ctype", database.LcType)
 	return nil
 }
 
 func resourceDatabaseDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-	return client.Databases.Delete(
-		d.Get("project").(string),
-		d.Get("service_name").(string),
-		d.Get("database").(string),
-	)
+	projectName, serviceName, databaseName := splitResourceID3(d.Id())
+	return client.Databases.Delete(projectName, serviceName, databaseName)
+}
+
+func resourceDatabaseExists(d *schema.ResourceData, m interface{}) (bool, error) {
+	client := m.(*aiven.Client)
+
+	projectName, serviceName, databaseName := splitResourceID3(d.Id())
+	_, err := client.Databases.Get(projectName, serviceName, databaseName)
+	return resourceExists(err)
+}
+
+func resourceDatabaseState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	if len(strings.Split(d.Id(), "/")) != 3 {
+		return nil, fmt.Errorf("Invalid identifier %v, expected <project_name>/<service_name>/<database_name>", d.Id())
+	}
+
+	err := resourceDatabaseRead(d, m)
+	if err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
 }
