@@ -14,6 +14,7 @@ import (
 // provisioning.
 type ServiceChangeWaiter struct {
 	Client      *aiven.Client
+	Operation   string
 	Project     string
 	ServiceName string
 }
@@ -39,7 +40,10 @@ func (w *ServiceChangeWaiter) RefreshFunc() resource.StateRefreshFunc {
 		}
 
 		state := service.State
-		if !kafkaServicesReady(service) {
+		if w.Operation == "update" {
+			state = aivenTargetState
+		}
+		if !kafkaServicesReady(service, state) {
 			state = aivenKafkaServicesStartingState
 		}
 
@@ -49,12 +53,12 @@ func (w *ServiceChangeWaiter) RefreshFunc() resource.StateRefreshFunc {
 
 // If any of Kafka Rest, Schema Registry, and Kafka Connect are enabled, refresh
 // their state to check if they're ready
-func kafkaServicesReady(service *aiven.Service) bool {
+func kafkaServicesReady(service *aiven.Service, state string) bool {
 	// Check if the service is a Kafka service and Kafka itself is ready
 	if service.Type != "kafka" {
 		return true
 	}
-	if service.State != aivenTargetState {
+	if state != aivenTargetState {
 		return false
 	}
 

@@ -209,7 +209,7 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	err = resourceServiceWait(d, m)
+	err = resourceServiceWait(d, m, "create")
 
 	if err != nil {
 		return err
@@ -251,7 +251,7 @@ func resourceServiceUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	err = resourceServiceWait(d, m)
+	err = resourceServiceWait(d, m, "update")
 
 	if err != nil {
 		return err
@@ -288,9 +288,10 @@ func resourceServiceState(d *schema.ResourceData, m interface{}) ([]*schema.Reso
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceServiceWait(d *schema.ResourceData, m interface{}) error {
+func resourceServiceWait(d *schema.ResourceData, m interface{}, operation string) error {
 	w := &ServiceChangeWaiter{
 		Client:      m.(*aiven.Client),
+		Operation:   operation,
 		Project:     d.Get("project").(string),
 		ServiceName: d.Get("service_name").(string),
 	}
