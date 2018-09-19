@@ -71,6 +71,7 @@ func resourceKafkaTopic() *schema.Resource {
 				Optional:    true,
 				Default:     "delete",
 				Description: "Topic cleanup policy. Allowed values: delete, compact",
+				ForceNew:    true,
 			},
 		},
 	}
@@ -117,12 +118,7 @@ func resourceKafkaTopicRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	project, serviceName, topicName := splitResourceID3(d.Id())
-
-	topic, err := client.KafkaTopics.Get(
-		project,
-		serviceName,
-		topicName,
-	)
+	topic, err := client.KafkaTopics.Get(project, serviceName, topicName)
 	if err != nil {
 		return err
 	}
@@ -153,6 +149,7 @@ func resourceKafkaTopicUpdate(d *schema.ResourceData, m interface{}) error {
 		aiven.UpdateKafkaTopicRequest{
 			MinimumInSyncReplicas: optionalIntPointer(d, "minimum_in_sync_replicas"),
 			Partitions:            &partitions,
+			Replication:           optionalIntPointer(d, "replication"),
 			RetentionBytes:        optionalIntPointer(d, "retention_bytes"),
 			RetentionHours:        optionalIntPointer(d, "retention_hours"),
 		},
@@ -162,8 +159,11 @@ func resourceKafkaTopicUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	err = resourceKafkaTopicWait(d, m)
+	if err != nil {
+		return err
+	}
 
-	return err
+	return resourceKafkaTopicRead(d, m)
 }
 
 func resourceKafkaTopicDelete(d *schema.ResourceData, m interface{}) error {
