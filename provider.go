@@ -44,13 +44,14 @@ func Provider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
+			"aiven_database":                     resourceDatabase(),
+			"aiven_kafka_topic":                  resourceKafkaTopic(),
 			"aiven_project":                      resourceProject(),
+			"aiven_project_user":                 resourceProjectUser(),
 			"aiven_service":                      resourceService(),
 			"aiven_service_integration":          resourceServiceIntegration(),
 			"aiven_service_integration_endpoint": resourceServiceIntegrationEndpoint(),
-			"aiven_database":                     resourceDatabase(),
 			"aiven_service_user":                 resourceServiceUser(),
-			"aiven_kafka_topic":                  resourceKafkaTopic(),
 		},
 
 		ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {
