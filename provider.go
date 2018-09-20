@@ -48,6 +48,7 @@ func Provider() *schema.Provider {
 			"aiven_kafka_topic":                  resourceKafkaTopic(),
 			"aiven_project":                      resourceProject(),
 			"aiven_project_user":                 resourceProjectUser(),
+			"aiven_project_vpc":                  resourceProjectVPC(),
 			"aiven_service":                      resourceService(),
 			"aiven_service_integration":          resourceServiceIntegration(),
 			"aiven_service_integration_endpoint": resourceServiceIntegrationEndpoint(),
