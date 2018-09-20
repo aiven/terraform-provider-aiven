@@ -39,17 +39,22 @@ func resourceProject() *schema.Resource {
 
 func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
+	cardID, err := getLongCardID(client, d.Get("card_id").(string))
+	if err != nil {
+		return err
+	}
+	projectName := d.Get("project").(string)
 	project, err := client.Projects.Create(
 		aiven.CreateProjectRequest{
-			CardID:  d.Get("card_id").(string),
-			Project: d.Get("project").(string),
+			CardID:  cardID,
+			Project: projectName,
 		},
 	)
 	if err != nil {
 		return err
 	}
 
-	d.SetId(project.Name)
+	d.SetId(projectName)
 	resourceProjectGetCACert(project.Name, client, d)
 	return nil
 }
@@ -63,7 +68,11 @@ func resourceProjectRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.Set("project", project.Name)
-	d.Set("card_id", project.Card.CardID)
+	// Don't set card id unconditionally to prevent converting short card id format to long
+	currentCardID, err := getLongCardID(client, d.Get("card_id").(string))
+	if err != nil || currentCardID != project.Card.CardID {
+		d.Set("card_id", project.Card.CardID)
+	}
 	resourceProjectGetCACert(project.Name, client, d)
 	return nil
 }
@@ -71,10 +80,14 @@ func resourceProjectRead(d *schema.ResourceData, m interface{}) error {
 func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
+	cardID, err := getLongCardID(client, d.Get("card_id").(string))
+	if err != nil {
+		return err
+	}
 	project, err := client.Projects.Update(
 		d.Get("project").(string),
 		aiven.UpdateProjectRequest{
-			CardID: d.Get("card_id").(string),
+			CardID: cardID,
 		},
 	)
 	if err != nil {
@@ -118,4 +131,15 @@ func resourceProjectGetCACert(project string, client *aiven.Client, d *schema.Re
 	if err == nil {
 		d.Set("ca_cert", ca)
 	}
+}
+
+func getLongCardID(client *aiven.Client, cardID string) (string, error) {
+	card, err := client.CardsHandler.Get(cardID)
+	if err != nil {
+		return "", err
+	}
+	if card != nil {
+		return card.CardID, nil
+	}
+	return cardID, nil
 }
