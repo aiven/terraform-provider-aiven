@@ -273,7 +273,8 @@ func convertTerraformUserConfigToAPICompatibleFormat(
 			continue
 		}
 		definition := definitionRaw.(map[string]interface{})
-		convertedValue, omit := convertTerraformUserConfigValueToAPICompatibleFormat(serviceType, key, value, definition)
+		convertedValue, omit := convertTerraformUserConfigValueToAPICompatibleFormat(
+			serviceType, key, value, definition)
 		if !omit {
 			apiConfig[key] = convertedValue
 		}

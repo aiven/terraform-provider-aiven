@@ -120,7 +120,8 @@ func resourceService() *schema.Resource {
 				Optional:    true,
 				Description: "Kafka specific user configurable settings",
 				Elem: &schema.Resource{
-					Schema: GenerateTerraformUserConfigSchema(userConfigSchemas["service"]["kafka"].(map[string]interface{})),
+					Schema: GenerateTerraformUserConfigSchema(
+						userConfigSchemas["service"]["kafka"].(map[string]interface{})),
 				},
 			},
 			"pg": {
@@ -184,7 +185,8 @@ func resourceService() *schema.Resource {
 				Optional:    true,
 				Description: "PostgreSQL specific user configurable settings",
 				Elem: &schema.Resource{
-					Schema: GenerateTerraformUserConfigSchema(userConfigSchemas["service"]["pg"].(map[string]interface{})),
+					Schema: GenerateTerraformUserConfigSchema(
+						userConfigSchemas["service"]["pg"].(map[string]interface{})),
 				},
 			},
 		},
@@ -343,7 +345,11 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	return nil
 }
 
-func copyConnectionInfoFromAPIResponseToTerraform(d *schema.ResourceData, serviceType string, connectionInfo aiven.ConnectionInfo) {
+func copyConnectionInfoFromAPIResponseToTerraform(
+	d *schema.ResourceData,
+	serviceType string,
+	connectionInfo aiven.ConnectionInfo,
+) {
 	// Need to set empty value for all services or all Terraform keeps on showing there's
 	// a change in the computed values that don't match actual service type
 	d.Set("kafka", []map[string]interface{}{})

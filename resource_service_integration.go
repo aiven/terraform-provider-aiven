@@ -199,7 +199,11 @@ func copyServiceIntegrationPropertiesFromAPIResponseToTerraform(
 	}
 	integrationType := integration.IntegrationType
 	d.Set("integration_type", integrationType)
-	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat("integration", integrationType, integration.UserConfig)
+	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat(
+		"integration",
+		integrationType,
+		integration.UserConfig,
+	)
 	if userConfig != nil && len(userConfig) > 0 {
 		d.Set(integrationType+"_user_config", userConfig)
 	}
