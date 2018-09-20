@@ -49,6 +49,7 @@ func Provider() *schema.Provider {
 			"aiven_project":                      resourceProject(),
 			"aiven_project_user":                 resourceProjectUser(),
 			"aiven_project_vpc":                  resourceProjectVPC(),
+			"aiven_vpc_peering_connection":       resourceVPCPeeringConnection(),
 			"aiven_service":                      resourceService(),
 			"aiven_service_integration":          resourceServiceIntegration(),
 			"aiven_service_integration_endpoint": resourceServiceIntegrationEndpoint(),
@@ -130,6 +131,11 @@ func splitResourceID2(resourceID string) (string, string) {
 func splitResourceID3(resourceID string) (string, string, string) {
 	parts := splitResourceID(resourceID, 3)
 	return parts[0], parts[1], parts[2]
+}
+
+func splitResourceID4(resourceID string) (string, string, string, string) {
+	parts := splitResourceID(resourceID, 4)
+	return parts[0], parts[1], parts[2], parts[3]
 }
 
 func resourceExists(err error) (bool, error) {
