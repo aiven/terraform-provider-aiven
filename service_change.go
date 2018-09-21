@@ -3,7 +3,6 @@ package main
 import (
 	"time"
 
-	"log"
 	"net/http"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -20,9 +19,10 @@ type ServiceChangeWaiter struct {
 }
 
 const (
-	aivenTargetState                = "RUNNING"
-	aivenPendingState               = "REBUILDING"
-	aivenKafkaServicesStartingState = "WAITING_FOR_KAFKA"
+	aivenTargetState           = "RUNNING"
+	aivenPendingState          = "REBUILDING"
+	aivenRebalancingState      = "REBALANCING"
+	aivenServicesStartingState = "WAITING_FOR_SERVICES"
 )
 
 // RefreshFunc will call the Aiven client and refresh its state.
@@ -33,18 +33,20 @@ func (w *ServiceChangeWaiter) RefreshFunc() resource.StateRefreshFunc {
 			w.ServiceName,
 		)
 
-		log.Printf("[DEBUG] Got %s state while waiting for service to be running.", service.State)
-
 		if err != nil {
 			return nil, "", err
 		}
 
 		state := service.State
 		if w.Operation == "update" {
+			// When updating service don't wait for it to enter RUNNING state because that can take
+			// very long time if for example service plan or cloud it runs in is changed and the
+			// service has a lot of data. If the service was already previously in RUNNING state we
+			// can manage the associated resources even if the service is rebuilding.
 			state = aivenTargetState
 		}
-		if !kafkaServicesReady(service, state) {
-			state = aivenKafkaServicesStartingState
+		if state == aivenTargetState && (!kafkaServicesReady(service) || !backupsReady(service)) {
+			state = aivenServicesStartingState
 		}
 
 		return service, state, nil
@@ -53,13 +55,10 @@ func (w *ServiceChangeWaiter) RefreshFunc() resource.StateRefreshFunc {
 
 // If any of Kafka Rest, Schema Registry, and Kafka Connect are enabled, refresh
 // their state to check if they're ready
-func kafkaServicesReady(service *aiven.Service, state string) bool {
+func kafkaServicesReady(service *aiven.Service) bool {
 	// Check if the service is a Kafka service and Kafka itself is ready
 	if service.Type != "kafka" {
 		return true
-	}
-	if state != aivenTargetState {
-		return false
 	}
 
 	userConfig := service.UserConfig
@@ -78,6 +77,14 @@ func kafkaServicesReady(service *aiven.Service, state string) bool {
 	return ready
 }
 
+func backupsReady(service *aiven.Service) bool {
+	if service.Type != "pg" {
+		return true
+	}
+
+	return len(service.Backups) > 0
+}
+
 func uriReachable(uri string) bool {
 	resp, err := http.Get(uri)
 	if err != nil {
@@ -90,7 +97,7 @@ func uriReachable(uri string) bool {
 // Conf sets up the configuration to refresh.
 func (w *ServiceChangeWaiter) Conf() *resource.StateChangeConf {
 	state := &resource.StateChangeConf{
-		Pending: []string{aivenPendingState, aivenKafkaServicesStartingState},
+		Pending: []string{aivenPendingState, aivenRebalancingState, aivenServicesStartingState},
 		Target:  []string{aivenTargetState},
 		Refresh: w.RefreshFunc(),
 	}
