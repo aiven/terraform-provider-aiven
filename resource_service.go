@@ -253,6 +253,11 @@ func transformKafkaUserConfig(userConfig map[string]interface{}) map[string]inte
 	if ok {
 		newUserConfig["schema_registry"] = stringToBool(schemaRegistryInterface.(string))
 	}
+	kafkaVersionInterface, ok := userConfig["kafka_version"]
+	if ok {
+		newUserConfig["kafka_version"] = kafkaVersionInterface.(string)
+	}
+
 	return newUserConfig
 }
 
