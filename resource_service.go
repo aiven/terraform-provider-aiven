@@ -49,20 +49,129 @@ func resourceService() *schema.Resource {
 				Description: "Service type code",
 				ForceNew:    true,
 			},
-			"hostname": {
+			"service_uri": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "URI for connecting to the service. Service specific info is under \"kafka\", \"pg\", etc.",
+			},
+			"service_host": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "Service hostname",
 			},
-			"port": {
+			"service_port": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "Service port",
+			},
+			"service_password": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Password used for connecting to the service, if applicable",
+				Sensitive:   true,
+			},
+			"service_username": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Username used for connecting to the service, if applicable",
 			},
 			"state": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "Service state",
+			},
+			"cassandra": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Computed:    true,
+				Description: "Cassandra specific server provided values",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{},
+				},
+			},
+			"cassandra_user_config": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Cassandra specific user configurable settings",
+				Elem: &schema.Resource{
+					Schema: GenerateTerraformUserConfigSchema(
+						userConfigSchemas["service"]["cassandra"].(map[string]interface{})),
+				},
+			},
+			"elasticsearch": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Computed:    true,
+				Description: "Elasticsearch specific server provided values",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"kibana_uri": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "URI for Kibana frontend",
+							Sensitive:   true,
+						},
+					},
+				},
+			},
+			"elasticsearch_user_config": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Elasticsearch specific user configurable settings",
+				Elem: &schema.Resource{
+					Schema: GenerateTerraformUserConfigSchema(
+						userConfigSchemas["service"]["elasticsearch"].(map[string]interface{})),
+				},
+			},
+			"grafana": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Computed:    true,
+				Description: "Grafana specific server provided values",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{},
+				},
+			},
+			"grafana_user_config": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Grafana specific user configurable settings",
+				Elem: &schema.Resource{
+					Schema: GenerateTerraformUserConfigSchema(
+						userConfigSchemas["service"]["grafana"].(map[string]interface{})),
+				},
+			},
+			"influxdb": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Computed:    true,
+				Description: "InfluxDB specific server provided values",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"database_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Name of the default InfluxDB database",
+						},
+					},
+				},
+			},
+			"influxdb_user_config": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "InfluxDB specific user configurable settings",
+				Elem: &schema.Resource{
+					Schema: GenerateTerraformUserConfigSchema(
+						userConfigSchemas["service"]["influxdb"].(map[string]interface{})),
+				},
 			},
 			"kafka": {
 				Type:        schema.TypeList,
@@ -90,13 +199,6 @@ func resourceService() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The Kafka Connect URI, if any",
-							Optional:    true,
-						},
-						"hosts": {
-							Type:        schema.TypeList,
-							Computed:    true,
-							Description: "List of Kafka Hosts",
-							Elem:        &schema.Schema{Type: schema.TypeString},
 							Optional:    true,
 						},
 						"rest_uri": {
@@ -187,6 +289,26 @@ func resourceService() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: GenerateTerraformUserConfigSchema(
 						userConfigSchemas["service"]["pg"].(map[string]interface{})),
+				},
+			},
+			"redis": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Computed:    true,
+				Description: "Redis specific server provided values",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{},
+				},
+			},
+			"redis_user_config": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Redis specific user configurable settings",
+				Elem: &schema.Resource{
+					Schema: GenerateTerraformUserConfigSchema(
+						userConfigSchemas["service"]["redis"].(map[string]interface{})),
 				},
 			},
 		},
@@ -325,21 +447,24 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	d.Set("state", service.State)
 	d.Set("plan", service.Plan)
 	d.Set("service_type", service.Type)
+	d.Set("service_uri", service.URI)
 	d.Set("project", project)
 	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat("service", service.Type, service.UserConfig)
 	d.Set(service.Type+"_user_config", userConfig)
 
-	hn, err := service.Hostname()
-	if err != nil {
-		return err
+	params := service.URIParams
+	d.Set("service_host", params["host"])
+	port, _ := strconv.ParseInt(params["port"], 10, 32)
+	d.Set("service_port", port)
+	password, passwordOK := params["password"]
+	username, usernameOK := params["username"]
+	if passwordOK {
+		d.Set("service_password", password)
 	}
-	port, err := service.Port()
-	if err != nil {
-		return err
+	if usernameOK {
+		d.Set("service_username", username)
 	}
 
-	d.Set("hostname", hn)
-	d.Set("port", port)
 	copyConnectionInfoFromAPIResponseToTerraform(d, service.Type, service.ConnectionInfo)
 
 	return nil
@@ -352,16 +477,26 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 ) {
 	// Need to set empty value for all services or all Terraform keeps on showing there's
 	// a change in the computed values that don't match actual service type
+	d.Set("cassandra", []map[string]interface{}{})
+	d.Set("elasticsearch", []map[string]interface{}{})
+	d.Set("grafana", []map[string]interface{}{})
+	d.Set("influxdb", []map[string]interface{}{})
 	d.Set("kafka", []map[string]interface{}{})
 	d.Set("pg", []map[string]interface{}{})
+	d.Set("redis", []map[string]interface{}{})
 
 	props := make(map[string]interface{})
 	switch serviceType {
+	case "cassandra":
+	case "elasticsearch":
+		props["kibana_uri"] = connectionInfo.KibanaURI
+	case "grafana":
+	case "influxdb":
+		props["database_name"] = connectionInfo.InfluxDBDatabaseName
 	case "kafka":
 		props["access_cert"] = connectionInfo.KafkaAccessCert
 		props["access_key"] = connectionInfo.KafkaAccessKey
 		props["connect_uri"] = connectionInfo.KafkaConnectURI
-		props["hosts"] = connectionInfo.KafkaHosts
 		props["rest_uri"] = connectionInfo.KafkaRestURI
 		props["schema_registry_uri"] = connectionInfo.SchemaRegistryURI
 	case "pg":
@@ -381,6 +516,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 			props["user"] = params.User
 		}
 		props["replica_uri"] = connectionInfo.PostgresReplicaURI
+	case "redis":
 	default:
 		panic(fmt.Sprintf("Unsupported service type %v", serviceType))
 	}

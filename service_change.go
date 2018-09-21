@@ -78,7 +78,8 @@ func kafkaServicesReady(service *aiven.Service) bool {
 }
 
 func backupsReady(service *aiven.Service) bool {
-	if service.Type != "pg" {
+	if service.Type != "pg" && service.Type != "elasticsearch" &&
+		service.Type != "redis" && service.Type != "influxdb" {
 		return true
 	}
 

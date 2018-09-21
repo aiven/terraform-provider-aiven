@@ -119,10 +119,15 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 		default:
 			panic(fmt.Sprintf("Unexpected user config schema array item type: %T / %v", typeString, typeString))
 		}
+		maxItemsVal, maxItemsFound := definition["maxItems"]
+		maxItems := 0
+		if maxItemsFound {
+			maxItems = int(maxItemsVal.(float64))
+		}
 		return &schema.Schema{
 			Description: title,
 			Elem:        &schema.Schema{Type: itemType},
-			MaxItems:    int(definition["maxItems"].(float64)),
+			MaxItems:    maxItems,
 			Optional:    true,
 			Sensitive:   sensitive,
 			Type:        schema.TypeList,
