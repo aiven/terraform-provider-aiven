@@ -27,7 +27,7 @@ func resourceService() *schema.Resource {
 				Description: "Target project",
 				ForceNew:    true,
 			},
-			"cloud": {
+			"cloud_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Cloud the service runs in",
@@ -200,7 +200,7 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 	service, err := client.Services.Create(
 		d.Get("project").(string),
 		aiven.CreateServiceRequest{
-			Cloud:       d.Get("cloud").(string),
+			Cloud:       d.Get("cloud_name").(string),
 			Plan:        d.Get("plan").(string),
 			ServiceName: d.Get("service_name").(string),
 			ServiceType: serviceType,
@@ -244,7 +244,7 @@ func resourceServiceUpdate(d *schema.ResourceData, m interface{}) error {
 		projectName,
 		serviceName,
 		aiven.UpdateServiceRequest{
-			Cloud:      d.Get("cloud").(string),
+			Cloud:      d.Get("cloud_name").(string),
 			Plan:       d.Get("plan").(string),
 			Powered:    true,
 			UserConfig: userConfig,
@@ -320,7 +320,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	service *aiven.Service,
 	project string,
 ) error {
-	d.Set("cloud", service.CloudName)
+	d.Set("cloud_name", service.CloudName)
 	d.Set("service_name", service.Name)
 	d.Set("state", service.State)
 	d.Set("plan", service.Plan)

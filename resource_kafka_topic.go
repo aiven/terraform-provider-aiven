@@ -32,7 +32,7 @@ func resourceKafkaTopic() *schema.Resource {
 				Description: "Service to link the kafka topic to",
 				ForceNew:    true,
 			},
-			"topic": {
+			"topic_name": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Topic name",
@@ -82,7 +82,7 @@ func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
 
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
-	topic := d.Get("topic").(string)
+	topicName := d.Get("topic_name").(string)
 	partitions := d.Get("partitions").(int)
 	replication := d.Get("replication").(int)
 
@@ -96,7 +96,7 @@ func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
 			Replication:           &replication,
 			RetentionBytes:        optionalIntPointer(d, "retention_bytes"),
 			RetentionHours:        optionalIntPointer(d, "retention_hours"),
-			TopicName:             topic,
+			TopicName:             topicName,
 		},
 	)
 	if err != nil {
@@ -109,7 +109,7 @@ func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	d.SetId(buildResourceID(project, serviceName, topic))
+	d.SetId(buildResourceID(project, serviceName, topicName))
 
 	return resourceKafkaTopicRead(d, m)
 }
@@ -125,7 +125,7 @@ func resourceKafkaTopicRead(d *schema.ResourceData, m interface{}) error {
 
 	d.Set("project", project)
 	d.Set("service_name", serviceName)
-	d.Set("topic", topic.TopicName)
+	d.Set("topic_name", topic.TopicName)
 	d.Set("state", topic.State)
 	d.Set("partitions", len(topic.Partitions))
 	d.Set("replication", topic.Replication)
@@ -199,7 +199,7 @@ func resourceKafkaTopicWait(d *schema.ResourceData, m interface{}) error {
 		Client:      m.(*aiven.Client),
 		Project:     d.Get("project").(string),
 		ServiceName: d.Get("service_name").(string),
-		Topic:       d.Get("topic").(string),
+		TopicName:   d.Get("topic_name").(string),
 	}
 
 	_, err := w.Conf().WaitForState()

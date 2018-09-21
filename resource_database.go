@@ -32,7 +32,7 @@ func resourceDatabase() *schema.Resource {
 				Description: "Service to link the database to",
 				ForceNew:    true,
 			},
-			"database": {
+			"database_name": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Service database name",
@@ -61,7 +61,7 @@ func resourceDatabaseCreate(d *schema.ResourceData, m interface{}) error {
 
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
-	databaseName := d.Get("database").(string)
+	databaseName := d.Get("database_name").(string)
 	_, err := client.Databases.Create(
 		projectName,
 		serviceName,
@@ -88,7 +88,7 @@ func resourceDatabaseRead(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	d.Set("database", database.DatabaseName)
+	d.Set("database_name", database.DatabaseName)
 	d.Set("lc_collate", database.LcCollate)
 	d.Set("lc_ctype", database.LcType)
 	return nil

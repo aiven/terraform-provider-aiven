@@ -14,7 +14,7 @@ type KafkaTopicChangeWaiter struct {
 	Client      *aiven.Client
 	Project     string
 	ServiceName string
-	Topic       string
+	TopicName   string
 }
 
 // RefreshFunc will call the Aiven client and refresh it's state.
@@ -23,7 +23,7 @@ func (w *KafkaTopicChangeWaiter) RefreshFunc() resource.StateRefreshFunc {
 		topic, err := w.Client.KafkaTopics.Get(
 			w.Project,
 			w.ServiceName,
-			w.Topic,
+			w.TopicName,
 		)
 
 		if err != nil {
