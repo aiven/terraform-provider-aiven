@@ -33,7 +33,7 @@ func resourceProjectUser() *schema.Resource {
 				Type:        schema.TypeString,
 			},
 			"member_type": {
-				Description: "Project membership type",
+				Description: "Project membership type. One of: admin, developer, operator",
 				Required:    true,
 				Type:        schema.TypeString,
 			},

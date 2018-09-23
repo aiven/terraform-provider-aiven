@@ -1,3 +1,3 @@
-aiven_email = ""
-aiven_password = ""
+aiven_api_token = ""
 aiven_card_id = ""
+aiven_project_name = ""
