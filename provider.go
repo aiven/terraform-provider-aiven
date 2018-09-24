@@ -24,6 +24,7 @@ func Provider() *schema.Provider {
 
 		ResourcesMap: map[string]*schema.Resource{
 			"aiven_database":                     resourceDatabase(),
+			"aiven_kafka_acl":                    resourceKafkaACL(),
 			"aiven_kafka_topic":                  resourceKafkaTopic(),
 			"aiven_project":                      resourceProject(),
 			"aiven_project_user":                 resourceProjectUser(),

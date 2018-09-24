@@ -57,6 +57,15 @@ resource "aiven_service_user" "kafka_a" {
 	username = "kafka_a"
 }
 
+# ACL for Kafka
+resource "aiven_kafka_acl" "sample_acl" {
+	project = "${aiven_project.sample.project}"
+        service_name = "${aiven_service.samplekafka.service_name}"
+	username = "kafka_*"
+	permission = "read"
+	topic = "*"
+}
+
 # InfluxDB service
 resource "aiven_service" "sampleinflux" {
 	project = "${aiven_project.sample.project}"
