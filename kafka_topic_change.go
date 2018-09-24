@@ -4,8 +4,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/jelmersnoeck/aiven"
 )
 
 // KafkaTopicChangeWaiter is used to refresh the Aiven Kafka Topic endpoints when

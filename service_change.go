@@ -5,8 +5,8 @@ import (
 
 	"net/http"
 
+	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/jelmersnoeck/aiven"
 )
 
 // ServiceChangeWaiter is used to refresh the Aiven Service endpoints when

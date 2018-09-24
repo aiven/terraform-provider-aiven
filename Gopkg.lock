@@ -147,10 +147,10 @@
   revision = "d1caa6c97c9fc1cc9e83bbe34d0603f9ff0ce8bd"
 
 [[projects]]
-  name = "github.com/jelmersnoeck/aiven"
+  name = "github.com/aiven/aiven-go-client"
   packages = ["."]
   revision = "99972dc23eb361d3d5227e1f5790a0bf80e90af0"
-  source = "github.com/jelmersnoeck/aiven"
+  source = "github.com/aiven/aiven-go-client"
 
 [[projects]]
   name = "github.com/jmespath/go-jmespath"
