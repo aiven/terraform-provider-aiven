@@ -127,6 +127,15 @@ resource "aiven_service_user" "sample_user" {
 	username = "sampleuser"
 }
 
+# PostgreSQL connection pool
+resource "aiven_connection_pool" "sample_pool" {
+	project = "${aiven_project.sample.project}"
+	service_name = "${aiven_service.samplepg.service_name}"
+	database_name = "${aiven_database.sample_db.database_name}"
+	pool_name = "samplepool"
+	username = "${aiven_service_user.sample_user.username}"
+}
+
 # Grafana service
 resource "aiven_service" "samplegrafana" {
 	project = "${aiven_project.sample.project}"
