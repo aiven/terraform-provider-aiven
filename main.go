@@ -1,3 +1,4 @@
+// Copyright (c) 2017 jelmersnoeck
 package main
 
 import (
