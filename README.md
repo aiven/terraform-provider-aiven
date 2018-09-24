@@ -155,6 +155,11 @@ significant amount of time to complete if the service has a lot of data.
 ``x_user_config`` defines service specific additional configuration options. These
 options can be found from the [JSON schema description](templates/service_user_config_schema.json).
 
+Note that some (very few) of the user configuration options have a dot (``.``) in their
+name. That is not supported by Terraform so the provider converts any literal dots to the
+text string ``__dot__``. So if you want to set ``foo.bar = "abc"`` you need to instead
+set ``foo__dot__bar = "abc"``.
+
 ``service_(uri|host|port|username|password)`` are computed properties that define the
 URI for connecting to the service and the same info split into various parts. These
 values cannot be set, only read.
