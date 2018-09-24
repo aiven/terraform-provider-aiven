@@ -31,7 +31,7 @@
 
 [[constraint]]
   name = "github.com/jelmersnoeck/aiven"
-  revision = "99972dc23eb361d3d5227e1f5790a0bf80e90af0"
+  revision = "79cce3d3655eea59d4a31f573e5ef5003a09c023"
   source = "github.com/jelmersnoeck/aiven"
 
 [prune]
