@@ -49,6 +49,11 @@ func resourceService() *schema.Resource {
 				Description: "Service type code",
 				ForceNew:    true,
 			},
+			"project_vpc_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Identifier of the VPC the service should be in, if any",
+			},
 			"service_uri": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -319,14 +324,21 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 	serviceType := d.Get("service_type").(string)
 	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("service", serviceType, d)
+	vpcID := d.Get("project_vpc_id").(string)
+	var vpcIDPointer *string
+	if len(vpcID) > 0 {
+		_, vpcID := splitResourceID2(vpcID)
+		vpcIDPointer = &vpcID
+	}
 	service, err := client.Services.Create(
 		d.Get("project").(string),
 		aiven.CreateServiceRequest{
-			Cloud:       d.Get("cloud_name").(string),
-			Plan:        d.Get("plan").(string),
-			ServiceName: d.Get("service_name").(string),
-			ServiceType: serviceType,
-			UserConfig:  userConfig,
+			Cloud:        d.Get("cloud_name").(string),
+			Plan:         d.Get("plan").(string),
+			ProjectVPCID: vpcIDPointer,
+			ServiceName:  d.Get("service_name").(string),
+			ServiceType:  serviceType,
+			UserConfig:   userConfig,
 		},
 	)
 
@@ -362,14 +374,21 @@ func resourceServiceUpdate(d *schema.ResourceData, m interface{}) error {
 
 	projectName, serviceName := splitResourceID2(d.Id())
 	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("service", d.Get("service_type").(string), d)
+	vpcID := d.Get("project_vpc_id").(string)
+	var vpcIDPointer *string
+	if len(vpcID) > 0 {
+		_, vpcID := splitResourceID2(vpcID)
+		vpcIDPointer = &vpcID
+	}
 	service, err := client.Services.Update(
 		projectName,
 		serviceName,
 		aiven.UpdateServiceRequest{
-			Cloud:      d.Get("cloud_name").(string),
-			Plan:       d.Get("plan").(string),
-			Powered:    true,
-			UserConfig: userConfig,
+			Cloud:        d.Get("cloud_name").(string),
+			Plan:         d.Get("plan").(string),
+			ProjectVPCID: vpcIDPointer,
+			Powered:      true,
+			UserConfig:   userConfig,
 		},
 	)
 	if err != nil {
@@ -449,6 +468,9 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	d.Set("service_type", service.Type)
 	d.Set("service_uri", service.URI)
 	d.Set("project", project)
+	if service.ProjectVPCID != nil {
+		d.Set("project_vpc_id", buildResourceID(project, *service.ProjectVPCID))
+	}
 	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat("service", service.Type, service.UserConfig)
 	d.Set(service.Type+"_user_config", userConfig)
 

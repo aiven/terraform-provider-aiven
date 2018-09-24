@@ -108,6 +108,7 @@ resource "aiven_service" "myservice" {
     plan = "business-8"
     service_name = "<SERVICE_NAME>"
     service_type = "pg"
+    project_vpc_id = "${aiven_project_vpc.vpc_gcp_europe_west1.id}"
     pg_user_config {
         ip_filter = ["0.0.0.0/0"]
         pg_version = "10"
@@ -143,6 +144,13 @@ intended service usage rather than current attributes.
 ``service_type`` is the actual service that is being provided. Currently available
 options are ``cassadra``, ``elasticsearch``, ``grafana``, ``influxdb``, ``kafka``,
  ``pg`` (PostreSQL) and ``redis``. This value cannot be changed after service creation.
+
+``project_vpc_id`` optionally specifies the VPC the service should run in. If the value
+is not set the service is not run inside a VPC. When set, the value should be given as a
+reference as shown above to set up dependencies correctly and the VPC must be in the same
+cloud and region as the service itself. Project can be freely moved to and from VPC after
+creation but doing so triggers migration to new servers so the operation can take
+significant amount of time to complete if the service has a lot of data.
 
 ``x_user_config`` defines service specific additional configuration options. These
 options can be found from the [JSON schema description](templates/service_user_config_schema.json).
