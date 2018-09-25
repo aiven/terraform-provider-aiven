@@ -29,7 +29,6 @@ resource "aiven_service" "samplekafka" {
 	service_name = "samplekafka"
 	service_type = "kafka"
 	kafka_user_config {
-		ip_filter = ["0.0.0.0/0"]
 		kafka_connect = true
 		kafka_rest = true
 		kafka_version = "2.0"
@@ -94,14 +93,10 @@ resource "aiven_service" "samplepg" {
 	service_name = "samplepg"
 	service_type = "pg"
 	pg_user_config {
-		ip_filter = ["0.0.0.0/0"]
 		pg {
 			idle_in_transaction_session_timeout = 900
 		}
 		pg_version = "10"
-		pglookout {
-			max_failover_replication_time_lag = 60
-		}
 	}
 }
 

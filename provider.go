@@ -132,3 +132,22 @@ func createOnlyDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool
 	}
 	return false
 }
+
+// When a map inside a list contains only default values without explicit values set by
+// the user Terraform inteprets the map as not being present and the array lenght being
+// zero, resulting in bogus update that does nothing. Allow ignoring those.
+func emptyObjectDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	return old == "1" && new == "0" && strings.HasSuffix(k, ".#")
+}
+
+// Terraform does not allow default values for arrays but the IP filter user config value
+// has default. We don't want to force users to always define explicit value just because
+// of the Terraform restriction so suppress the change from default to empty (which would
+// be nonsensical operation anyway)
+func ipFilterArrayDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	return old == "1" && new == "0" && strings.HasSuffix(k, ".ip_filter.#")
+}
+
+func ipFilterValueDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	return old == "0.0.0.0/0" && new == "" && strings.HasSuffix(k, ".ip_filter.0")
+}

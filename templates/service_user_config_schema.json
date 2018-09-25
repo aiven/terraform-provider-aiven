@@ -380,7 +380,7 @@
         "createOnly": true,
         "default": null,
         "example": "anotherservicename",
-        "title": "Name of another service to fork from",
+        "title": "Name of another service to fork from. This has effect only when a new service is being created.",
         "type": [
           "string",
           "null"
@@ -534,7 +534,7 @@
         "createOnly": true,
         "default": null,
         "example": "z66o9QXqKM",
-        "title": "Custom password for admin user. Defaults to random string.",
+        "title": "Custom password for admin user. Defaults to random string. This must be set only when a new service is being created.",
         "type": [
           "string",
           "null"
@@ -544,7 +544,7 @@
         "createOnly": true,
         "default": "avnadmin",
         "example": "avnadmin",
-        "title": "Custom username for admin user",
+        "title": "Custom username for admin user. This must be set only when a new service is being created.",
         "type": [
           "string",
           "null"
@@ -745,7 +745,7 @@
         "createOnly": true,
         "default": null,
         "example": "anotherservicename",
-        "title": "Name of the PG Service from which to fork (deprecated, use service_to_fork_from)",
+        "title": "Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created.",
         "type": [
           "string",
           "null"
@@ -786,7 +786,7 @@
         "default": null,
         "example": "2010-01-01 23:34:45",
         "format": "date-time",
-        "title": "PostgreSQL recovery_target_time",
+        "title": "PostgreSQL recovery_target_time. This has effect only when a new service is being created.",
         "type": [
           "string",
           "null"
@@ -796,7 +796,7 @@
         "createOnly": true,
         "default": null,
         "example": "anotherservicename",
-        "title": "Name of another service to fork from",
+        "title": "Name of another service to fork from. This has effect only when a new service is being created.",
         "type": [
           "string",
           "null"

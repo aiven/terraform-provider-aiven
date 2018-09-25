@@ -98,10 +98,11 @@ func resourceService() *schema.Resource {
 				},
 			},
 			"cassandra_user_config": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Optional:    true,
-				Description: "Cassandra specific user configurable settings",
+				Type:             schema.TypeList,
+				MaxItems:         1,
+				Optional:         true,
+				Description:      "Cassandra specific user configurable settings",
+				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 				Elem: &schema.Resource{
 					Schema: GenerateTerraformUserConfigSchema(
 						userConfigSchemas["service"]["cassandra"].(map[string]interface{})),
@@ -125,10 +126,11 @@ func resourceService() *schema.Resource {
 				},
 			},
 			"elasticsearch_user_config": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Optional:    true,
-				Description: "Elasticsearch specific user configurable settings",
+				Type:             schema.TypeList,
+				MaxItems:         1,
+				Optional:         true,
+				Description:      "Elasticsearch specific user configurable settings",
+				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 				Elem: &schema.Resource{
 					Schema: GenerateTerraformUserConfigSchema(
 						userConfigSchemas["service"]["elasticsearch"].(map[string]interface{})),
@@ -145,10 +147,11 @@ func resourceService() *schema.Resource {
 				},
 			},
 			"grafana_user_config": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Optional:    true,
-				Description: "Grafana specific user configurable settings",
+				Type:             schema.TypeList,
+				MaxItems:         1,
+				Optional:         true,
+				Description:      "Grafana specific user configurable settings",
+				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 				Elem: &schema.Resource{
 					Schema: GenerateTerraformUserConfigSchema(
 						userConfigSchemas["service"]["grafana"].(map[string]interface{})),
@@ -171,10 +174,11 @@ func resourceService() *schema.Resource {
 				},
 			},
 			"influxdb_user_config": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Optional:    true,
-				Description: "InfluxDB specific user configurable settings",
+				Type:             schema.TypeList,
+				MaxItems:         1,
+				Optional:         true,
+				Description:      "InfluxDB specific user configurable settings",
+				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 				Elem: &schema.Resource{
 					Schema: GenerateTerraformUserConfigSchema(
 						userConfigSchemas["service"]["influxdb"].(map[string]interface{})),
@@ -224,10 +228,11 @@ func resourceService() *schema.Resource {
 				},
 			},
 			"kafka_user_config": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Optional:    true,
-				Description: "Kafka specific user configurable settings",
+				Type:             schema.TypeList,
+				MaxItems:         1,
+				Optional:         true,
+				Description:      "Kafka specific user configurable settings",
+				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 				Elem: &schema.Resource{
 					Schema: GenerateTerraformUserConfigSchema(
 						userConfigSchemas["service"]["kafka"].(map[string]interface{})),
@@ -289,10 +294,11 @@ func resourceService() *schema.Resource {
 				},
 			},
 			"pg_user_config": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Optional:    true,
-				Description: "PostgreSQL specific user configurable settings",
+				Type:             schema.TypeList,
+				MaxItems:         1,
+				Optional:         true,
+				Description:      "PostgreSQL specific user configurable settings",
+				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 				Elem: &schema.Resource{
 					Schema: GenerateTerraformUserConfigSchema(
 						userConfigSchemas["service"]["pg"].(map[string]interface{})),
@@ -309,10 +315,11 @@ func resourceService() *schema.Resource {
 				},
 			},
 			"redis_user_config": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Optional:    true,
-				Description: "Redis specific user configurable settings",
+				Type:             schema.TypeList,
+				MaxItems:         1,
+				Optional:         true,
+				Description:      "Redis specific user configurable settings",
+				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 				Elem: &schema.Resource{
 					Schema: GenerateTerraformUserConfigSchema(
 						userConfigSchemas["service"]["redis"].(map[string]interface{})),

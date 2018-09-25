@@ -51,14 +51,13 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 	var diffFunction schema.SchemaDiffSuppressFunc
 	if createOnly, ok := definition["createOnly"]; ok && createOnly.(bool) {
 		diffFunction = createOnlyDiffSuppressFunc
+	} else if valueType == "object" {
+		diffFunction = emptyObjectDiffSuppressFunc
 	}
-	defaultValue, ok := definition["default"]
+	defaultValue := getAivenSchemaDefaultValue(definition)
 	title := definition["title"].(string)
 	switch valueType {
 	case "number":
-		if !ok {
-			defaultValue = -1.0
-		}
 		return &schema.Schema{
 			Default:          defaultValue,
 			Description:      title,
@@ -68,11 +67,12 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 			Type:             schema.TypeFloat,
 		}
 	case "integer":
-		if !ok {
-			defaultValue = -1.0
+		_, isFloat := defaultValue.(float64)
+		if isFloat {
+			defaultValue = int(defaultValue.(float64))
 		}
 		return &schema.Schema{
-			Default:          int(defaultValue.(float64)),
+			Default:          defaultValue,
 			Description:      title,
 			DiffSuppressFunc: diffFunction,
 			Optional:         true,
@@ -80,9 +80,6 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 			Type:             schema.TypeInt,
 		}
 	case "boolean":
-		if !ok || defaultValue == nil {
-			defaultValue = false
-		}
 		return &schema.Schema{
 			Default:          defaultValue,
 			Description:      title,
@@ -92,11 +89,6 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 			Type:             schema.TypeBool,
 		}
 	case "string":
-		if !ok || defaultValue == nil {
-			// Terraform has no way of indicating unset values.
-			// Convert "<<value not set>>" to unset when handling request
-			defaultValue = "<<value not set>>"
-		}
 		return &schema.Schema{
 			Default:          defaultValue,
 			Description:      title,
@@ -107,11 +99,12 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 		}
 	case "object":
 		return &schema.Schema{
-			Description: title,
-			Elem:        &schema.Resource{Schema: GenerateTerraformUserConfigSchema(definition)},
-			MaxItems:    1,
-			Optional:    true,
-			Type:        schema.TypeList,
+			Description:      title,
+			DiffSuppressFunc: diffFunction,
+			Elem:             &schema.Resource{Schema: GenerateTerraformUserConfigSchema(definition)},
+			MaxItems:         1,
+			Optional:         true,
+			Type:             schema.TypeList,
 		}
 	case "array":
 		var itemType schema.ValueType
@@ -133,14 +126,22 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 		if maxItemsFound {
 			maxItems = int(maxItemsVal.(float64))
 		}
+		var valueDiffFunction schema.SchemaDiffSuppressFunc
+		if key == "ip_filter" {
+			diffFunction = ipFilterArrayDiffSuppressFunc
+			valueDiffFunction = ipFilterValueDiffSuppressFunc
+		}
 		return &schema.Schema{
 			Description:      title,
 			DiffSuppressFunc: diffFunction,
-			Elem:             &schema.Schema{Type: itemType},
-			MaxItems:         maxItems,
-			Optional:         true,
-			Sensitive:        sensitive,
-			Type:             schema.TypeList,
+			Elem: &schema.Schema{
+				DiffSuppressFunc: valueDiffFunction,
+				Type:             itemType,
+			},
+			MaxItems:  maxItems,
+			Optional:  true,
+			Sensitive: sensitive,
+			Type:      schema.TypeList,
 		}
 	default:
 		panic(fmt.Sprintf("Unexpected user config schema type: %T / %v", valueType, valueType))
@@ -166,6 +167,27 @@ func getAivenSchemaType(value interface{}) (string, bool) {
 	default:
 		panic(fmt.Sprintf("Unexpected user config schema type: %T / %v", value, value))
 	}
+}
+
+func getAivenSchemaDefaultValue(definition map[string]interface{}) interface{} {
+	valueType, _ := getAivenSchemaType(definition["type"])
+	defaultValue, ok := definition["default"]
+	if !ok && valueType == "number" {
+		defaultValue = -1.0
+	} else if !ok && valueType == "integer" {
+		defaultValue = -1
+	} else if (!ok || defaultValue == nil) && valueType == "boolean" {
+		defaultValue = false
+	} else if (!ok || defaultValue == nil) && valueType == "string" {
+		// Terraform has no way of indicating unset values.
+		// Convert "<<value not set>>" to unset when handling request
+		defaultValue = "<<value not set>>"
+	} else if valueType == "array" {
+		defaultValue = []interface{}{}
+	} else if valueType == "object" {
+		defaultValue = map[string]interface{}{}
+	}
+	return defaultValue
 }
 
 // ConvertAPIUserConfigToTerraformCompatibleFormat converts API response to a format that is
@@ -198,20 +220,7 @@ func convertAPIUserConfigToTerraformCompatibleFormat(
 		if !ok || apiValue == nil {
 			// To avoid undesired "changes" for values that are not explicitly defined return
 			// default values for anything that is not returned in the API response
-			switch valueType {
-			case "object":
-				terraformConfig[key] = map[string]interface{}{}
-			case "array":
-				terraformConfig[key] = []interface{}{}
-			case "number":
-				terraformConfig[key] = -1.0
-			case "integer":
-				terraformConfig[key] = -1
-			case "boolean":
-				terraformConfig[key] = false
-			case "string":
-				terraformConfig[key] = "<<value not set>>"
-			}
+			terraformConfig[key] = getAivenSchemaDefaultValue(schemaDefinition)
 			continue
 		}
 		switch valueType {
