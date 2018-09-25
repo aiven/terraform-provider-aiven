@@ -93,7 +93,7 @@ func resourceServiceIntegrationCreate(d *schema.ResourceData, m interface{}) err
 	client := m.(*aiven.Client)
 	projectName := d.Get("project").(string)
 	integrationType := d.Get("integration_type").(string)
-	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("integration", integrationType, d)
+	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("integration", integrationType, true, d)
 	integration, err := client.ServiceIntegrations.Create(
 		projectName,
 		aiven.CreateServiceIntegrationRequest{
@@ -131,7 +131,7 @@ func resourceServiceIntegrationUpdate(d *schema.ResourceData, m interface{}) err
 
 	projectName, integrationID := splitResourceID2(d.Id())
 	integrationType := d.Get("integration_type").(string)
-	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("integration", integrationType, d)
+	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("integration", integrationType, false, d)
 	integration, err := client.ServiceIntegrations.Update(
 		projectName,
 		integrationID,

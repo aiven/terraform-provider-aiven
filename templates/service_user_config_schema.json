@@ -30,6 +30,14 @@
           "null"
         ]
       },
+      "disable_replication_factor_adjustment": {
+        "example": false,
+        "title": "Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: setting this to true increases a risk of data loss in case of virtual machine failure.",
+        "type": [
+          "boolean",
+          "null"
+        ]
+      },
       "elasticsearch_version": {
         "enum": [
           "2",
@@ -318,6 +326,27 @@
         ],
         "title": "SMTP server settings",
         "type": "object"
+      },
+      "user_auto_assign_org": {
+        "example": false,
+        "title": "Auto-assign new users on signup to main organization. Defaults to false",
+        "type": [
+          "boolean",
+          "null"
+        ]
+      },
+      "user_auto_assign_org_role": {
+        "enum": [
+          "Viewer",
+          "Admin",
+          "Editor"
+        ],
+        "example": "Viewer",
+        "title": "Set role for new signups. Defaults to Viewer",
+        "type": [
+          "string",
+          "null"
+        ]
       }
     },
     "type": "object"
@@ -348,6 +377,7 @@
         "type": "array"
       },
       "service_to_fork_from": {
+        "createOnly": true,
         "default": null,
         "example": "anotherservicename",
         "title": "Name of another service to fork from",
@@ -501,6 +531,7 @@
     "additionalProperties": false,
     "properties": {
       "admin_password": {
+        "createOnly": true,
         "default": null,
         "example": "z66o9QXqKM",
         "title": "Custom password for admin user. Defaults to random string.",
@@ -510,6 +541,7 @@
         ]
       },
       "admin_username": {
+        "createOnly": true,
         "default": "avnadmin",
         "example": "avnadmin",
         "title": "Custom username for admin user",
@@ -710,6 +742,7 @@
         ]
       },
       "pg_service_to_fork_from": {
+        "createOnly": true,
         "default": null,
         "example": "anotherservicename",
         "title": "Name of the PG Service from which to fork (deprecated, use service_to_fork_from)",
@@ -749,6 +782,7 @@
         "type": "object"
       },
       "recovery_target_time": {
+        "createOnly": true,
         "default": null,
         "example": "2010-01-01 23:34:45",
         "format": "date-time",
@@ -759,6 +793,7 @@
         ]
       },
       "service_to_fork_from": {
+        "createOnly": true,
         "default": null,
         "example": "anotherservicename",
         "title": "Name of another service to fork from",

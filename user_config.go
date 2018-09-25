@@ -48,6 +48,10 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 	if strings.Contains(key, "api_key") || strings.Contains(key, "password") {
 		sensitive = true
 	}
+	var diffFunction schema.SchemaDiffSuppressFunc
+	if createOnly, ok := definition["createOnly"]; ok && createOnly.(bool) {
+		diffFunction = createOnlyDiffSuppressFunc
+	}
 	defaultValue, ok := definition["default"]
 	title := definition["title"].(string)
 	switch valueType {
@@ -56,33 +60,36 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 			defaultValue = -1.0
 		}
 		return &schema.Schema{
-			Default:     defaultValue,
-			Description: title,
-			Optional:    true,
-			Sensitive:   sensitive,
-			Type:        schema.TypeFloat,
+			Default:          defaultValue,
+			Description:      title,
+			DiffSuppressFunc: diffFunction,
+			Optional:         true,
+			Sensitive:        sensitive,
+			Type:             schema.TypeFloat,
 		}
 	case "integer":
 		if !ok {
 			defaultValue = -1.0
 		}
 		return &schema.Schema{
-			Default:     int(defaultValue.(float64)),
-			Description: title,
-			Optional:    true,
-			Sensitive:   sensitive,
-			Type:        schema.TypeInt,
+			Default:          int(defaultValue.(float64)),
+			Description:      title,
+			DiffSuppressFunc: diffFunction,
+			Optional:         true,
+			Sensitive:        sensitive,
+			Type:             schema.TypeInt,
 		}
 	case "boolean":
 		if !ok || defaultValue == nil {
 			defaultValue = false
 		}
 		return &schema.Schema{
-			Default:     defaultValue,
-			Description: title,
-			Optional:    true,
-			Sensitive:   sensitive,
-			Type:        schema.TypeBool,
+			Default:          defaultValue,
+			Description:      title,
+			DiffSuppressFunc: diffFunction,
+			Optional:         true,
+			Sensitive:        sensitive,
+			Type:             schema.TypeBool,
 		}
 	case "string":
 		if !ok || defaultValue == nil {
@@ -91,11 +98,12 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 			defaultValue = "<<value not set>>"
 		}
 		return &schema.Schema{
-			Default:     defaultValue,
-			Description: title,
-			Optional:    true,
-			Sensitive:   sensitive,
-			Type:        schema.TypeString,
+			Default:          defaultValue,
+			Description:      title,
+			DiffSuppressFunc: diffFunction,
+			Optional:         true,
+			Sensitive:        sensitive,
+			Type:             schema.TypeString,
 		}
 	case "object":
 		return &schema.Schema{
@@ -126,12 +134,13 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 			maxItems = int(maxItemsVal.(float64))
 		}
 		return &schema.Schema{
-			Description: title,
-			Elem:        &schema.Schema{Type: itemType},
-			MaxItems:    maxItems,
-			Optional:    true,
-			Sensitive:   sensitive,
-			Type:        schema.TypeList,
+			Description:      title,
+			DiffSuppressFunc: diffFunction,
+			Elem:             &schema.Schema{Type: itemType},
+			MaxItems:         maxItems,
+			Optional:         true,
+			Sensitive:        sensitive,
+			Type:             schema.TypeList,
 		}
 	default:
 		panic(fmt.Sprintf("Unexpected user config schema type: %T / %v", valueType, valueType))
@@ -250,6 +259,7 @@ func convertAPIUserConfigToTerraformCompatibleFormat(
 func ConvertTerraformUserConfigToAPICompatibleFormat(
 	configType string,
 	entryType string,
+	newResource bool,
 	d *schema.ResourceData,
 ) map[string]interface{} {
 	mainKey := entryType + "_user_config"
@@ -260,11 +270,12 @@ func ConvertTerraformUserConfigToAPICompatibleFormat(
 	entrySchema := userConfigSchemas[configType][entryType].(map[string]interface{})
 	entrySchemaProps := entrySchema["properties"].(map[string]interface{})
 	return convertTerraformUserConfigToAPICompatibleFormat(
-		entryType, userConfigsRaw.([]interface{})[0].(map[string]interface{}), entrySchemaProps)
+		entryType, newResource, userConfigsRaw.([]interface{})[0].(map[string]interface{}), entrySchemaProps)
 }
 
 func convertTerraformUserConfigToAPICompatibleFormat(
 	serviceType string,
+	newResource bool,
 	userConfig map[string]interface{},
 	configSchema map[string]interface{},
 ) map[string]interface{} {
@@ -279,8 +290,12 @@ func convertTerraformUserConfigToAPICompatibleFormat(
 			continue
 		}
 		definition := definitionRaw.(map[string]interface{})
+		createOnly, ok := definition["createOnly"]
+		if ok && createOnly.(bool) && !newResource {
+			continue
+		}
 		convertedValue, omit := convertTerraformUserConfigValueToAPICompatibleFormat(
-			serviceType, key, value, definition)
+			serviceType, newResource, key, value, definition)
 		if !omit {
 			apiConfig[key] = convertedValue
 		}
@@ -290,6 +305,7 @@ func convertTerraformUserConfigToAPICompatibleFormat(
 
 func convertTerraformUserConfigValueToAPICompatibleFormat(
 	serviceType string,
+	newResource bool,
 	key string,
 	value interface{},
 	definition map[string]interface{},
@@ -358,7 +374,7 @@ func convertTerraformUserConfigValueToAPICompatibleFormat(
 					omit = true
 				} else {
 					convertedValue = convertTerraformUserConfigToAPICompatibleFormat(
-						serviceType, asMap, definition["properties"].(map[string]interface{}),
+						serviceType, newResource, asMap, definition["properties"].(map[string]interface{}),
 					)
 				}
 			}
@@ -380,7 +396,7 @@ func convertTerraformUserConfigValueToAPICompatibleFormat(
 				itemDefinition := definition["items"].(map[string]interface{})
 				for idx, arrValue := range asArray {
 					arrValueConverted, _ := convertTerraformUserConfigValueToAPICompatibleFormat(
-						serviceType, key, arrValue, itemDefinition)
+						serviceType, newResource, key, arrValue, itemDefinition)
 					values[idx] = arrValueConverted
 				}
 				convertedValue = values

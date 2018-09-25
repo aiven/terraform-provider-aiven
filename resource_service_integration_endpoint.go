@@ -57,7 +57,7 @@ func resourceServiceIntegrationEndpointCreate(d *schema.ResourceData, m interfac
 	client := m.(*aiven.Client)
 	projectName := d.Get("project").(string)
 	endpointType := d.Get("endpoint_type").(string)
-	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("endpoint", endpointType, d)
+	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("endpoint", endpointType, true, d)
 	endpoint, err := client.ServiceIntegrationEndpoints.Create(
 		projectName,
 		aiven.CreateServiceIntegrationEndpointRequest{
@@ -92,7 +92,7 @@ func resourceServiceIntegrationEndpointUpdate(d *schema.ResourceData, m interfac
 
 	projectName, endpointID := splitResourceID2(d.Id())
 	endpointType := d.Get("endpoint_type").(string)
-	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("endpoint", endpointType, d)
+	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("endpoint", endpointType, false, d)
 	endpoint, err := client.ServiceIntegrationEndpoints.Update(
 		projectName,
 		endpointID,

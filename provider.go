@@ -125,3 +125,10 @@ func resourceExists(err error) (bool, error) {
 	}
 	return true, nil
 }
+
+func createOnlyDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	if len(d.Id()) > 0 {
+		return true
+	}
+	return false
+}

@@ -325,7 +325,7 @@ func resourceService() *schema.Resource {
 func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 	serviceType := d.Get("service_type").(string)
-	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("service", serviceType, d)
+	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("service", serviceType, true, d)
 	vpcID := d.Get("project_vpc_id").(string)
 	var vpcIDPointer *string
 	if len(vpcID) > 0 {
@@ -375,7 +375,7 @@ func resourceServiceUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName := splitResourceID2(d.Id())
-	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("service", d.Get("service_type").(string), d)
+	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("service", d.Get("service_type").(string), false, d)
 	vpcID := d.Get("project_vpc_id").(string)
 	var vpcIDPointer *string
 	if len(vpcID) > 0 {
