@@ -91,7 +91,14 @@ project, including all sub-resources.
 
 ``card_id`` is either the full card UUID or the last 4 digits of the card. As the full
 UUID is not shown in the UI it is typically easier to use the last 4 digits to identify
-the card.
+the card. This can be omitted if ``copy_from_project`` is used to copy billing info from
+another project.
+
+``copy_from_project`` is the name of another project used to copy billing information and
+some other project attributes like technical contacts from. This is mostly relevant when
+an existing project has billing type set to invoice and that needs to be copied over to a
+new project. (Setting billing is otherwise not allowed over the API.) This only has
+effect when the project is created.
 
 ``ca_cert`` is a computed property that can be used to read the CA certificate of the
 project. This is required for configuring clients that connect to certain services like

@@ -30,6 +30,12 @@ func resourceProject() *schema.Resource {
 				Optional:    true,
 				Description: "Credit card ID",
 			},
+			"copy_from_project": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "Copy properties from another project. Only has effect when a new project is created.",
+				DiffSuppressFunc: createOnlyDiffSuppressFunc,
+			},
 			"project": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -48,8 +54,9 @@ func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
 	projectName := d.Get("project").(string)
 	project, err := client.Projects.Create(
 		aiven.CreateProjectRequest{
-			CardID:  cardID,
-			Project: projectName,
+			CardID:          cardID,
+			CopyFromProject: d.Get("copy_from_project").(string),
+			Project:         projectName,
 		},
 	)
 	if err != nil {
