@@ -162,8 +162,31 @@ significant amount of time to complete if the service has a lot of data.
 ``x_user_config`` defines service specific additional configuration options. These
 options can be found from the [JSON schema description](templates/service_user_config_schema.json).
 
-Note that some (very few) of the user configuration options have a dot (``.``) in their
-name. That is not supported by Terraform so the provider converts any literal dots to the
+For services that support different versions the version information must be specified in
+the user configuration. By the time of writing these services are Elasticsearch, Kafka
+and PostgreSQL. These services should have configuration like
+
+```
+elasticsearch_user_config {
+    elasticsearch_version = "6"
+}
+```
+
+```
+kafka_user_config {
+    kafka_version = "2.0"
+}
+```
+
+```
+pg_user_config {
+    pg_version = "10"
+}
+```
+
+
+Some (very few) of the user configuration options have a dot (``.``) in their name.
+That is not supported by Terraform so the provider converts any literal dots to the
 text string ``__dot__``. So if you want to set ``foo.bar = "abc"`` you need to instead
 set ``foo__dot__bar = "abc"``.
 
