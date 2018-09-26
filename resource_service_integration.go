@@ -205,7 +205,7 @@ func copyServiceIntegrationPropertiesFromAPIResponseToTerraform(
 		integrationType,
 		integration.UserConfig,
 	)
-	if userConfig != nil && len(userConfig) > 0 {
+	if len(userConfig) > 0 {
 		d.Set(integrationType+"_user_config", userConfig)
 	}
 

@@ -198,7 +198,7 @@ func ConvertAPIUserConfigToTerraformCompatibleFormat(
 	entryType string,
 	userConfig map[string]interface{},
 ) []map[string]interface{} {
-	if userConfig == nil || len(userConfig) == 0 {
+	if len(userConfig) == 0 {
 		return []map[string]interface{}{}
 	}
 

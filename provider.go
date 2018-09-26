@@ -127,14 +127,11 @@ func resourceExists(err error) (bool, error) {
 }
 
 func createOnlyDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
-	if len(d.Id()) > 0 {
-		return true
-	}
-	return false
+	return len(d.Id()) > 0
 }
 
 // When a map inside a list contains only default values without explicit values set by
-// the user Terraform inteprets the map as not being present and the array lenght being
+// the user Terraform inteprets the map as not being present and the array length being
 // zero, resulting in bogus update that does nothing. Allow ignoring those.
 func emptyObjectDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	return old == "1" && new == "0" && strings.HasSuffix(k, ".#")

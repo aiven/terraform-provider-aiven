@@ -207,14 +207,12 @@ func contactEmailListForAPI(d *schema.ResourceData, field string, newResource bo
 
 func contactEmailListForTerraform(d *schema.ResourceData, field string, contactEmails []*aiven.ContactEmail) {
 	_, existsBefore := d.GetOk(field)
-	if !existsBefore && (contactEmails == nil || len(contactEmails) == 0) {
+	if !existsBefore && len(contactEmails) == 0 {
 		return
 	}
 	results := []string{}
-	if contactEmails != nil {
-		for _, contactEmail := range contactEmails {
-			results = append(results, contactEmail.Email)
-		}
+	for _, contactEmail := range contactEmails {
+		results = append(results, contactEmail.Email)
 	}
 	d.Set(field, results)
 }
