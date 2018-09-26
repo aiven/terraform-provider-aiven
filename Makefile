@@ -6,7 +6,8 @@ ci: lint bins
 #################################################
 BOOTSTRAP=\
 	github.com/golang/dep/cmd/dep \
-	github.com/alecthomas/gometalinter
+	github.com/alecthomas/gometalinter \
+	github.com/gobuffalo/packr/...
 
 $(BOOTSTRAP):
 	go get -u $@
@@ -26,7 +27,7 @@ update-vendor:
 #################################################
 
 bins: vendor
-	go build -o terraform-provider-aiven .
+	packr build -o terraform-provider-aiven .
 
 #################################################
 # Testing and linting
