@@ -1,12 +1,13 @@
+// Copyright (c) 2017 jelmersnoeck
+// Copyright (c) 2018 Aiven, Helsinki, Finland. https://aiven.io/
 package main
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/jelmersnoeck/aiven"
 )
 
 func resourceKafkaTopic() *schema.Resource {
@@ -15,8 +16,9 @@ func resourceKafkaTopic() *schema.Resource {
 		Read:   resourceKafkaTopicRead,
 		Update: resourceKafkaTopicUpdate,
 		Delete: resourceKafkaTopicDelete,
+		Exists: resourceKafkaTopicExists,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: resourceKafkaTopicState,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -24,16 +26,19 @@ func resourceKafkaTopic() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Project to link the kafka topic to",
+				ForceNew:    true,
 			},
 			"service_name": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Service to link the kafka topic to",
+				ForceNew:    true,
 			},
-			"topic": {
+			"topic_name": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Topic name",
+				ForceNew:    true,
 			},
 			"partitions": {
 				Type:        schema.TypeInt,
@@ -61,13 +66,14 @@ func resourceKafkaTopic() *schema.Resource {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Default:     1,
-				Description: "Minimum required nodes In Sync Replicas (ISR) to produce to a partition",
+				Description: "Minimum required nodes in-sync replicas (ISR) to produce to a partition",
 			},
 			"cleanup_policy": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "delete",
 				Description: "Topic cleanup policy. Allowed values: delete, compact",
+				ForceNew:    true,
 			},
 		},
 	}
@@ -78,7 +84,7 @@ func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
 
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
-	topic := d.Get("topic").(string)
+	topicName := d.Get("topic_name").(string)
 	partitions := d.Get("partitions").(int)
 	replication := d.Get("replication").(int)
 
@@ -92,22 +98,20 @@ func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
 			Replication:           &replication,
 			RetentionBytes:        optionalIntPointer(d, "retention_bytes"),
 			RetentionHours:        optionalIntPointer(d, "retention_hours"),
-			TopicName:             topic,
+			TopicName:             topicName,
 		},
 	)
 	if err != nil {
-		d.SetId("")
 		return err
 	}
 
 	err = resourceKafkaTopicWait(d, m)
 
 	if err != nil {
-		d.SetId("")
 		return err
 	}
 
-	d.SetId(project + "/" + serviceName + "/" + topic)
+	d.SetId(buildResourceID(project, serviceName, topicName))
 
 	return resourceKafkaTopicRead(d, m)
 }
@@ -115,24 +119,15 @@ func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
 func resourceKafkaTopicRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-	log.Printf("[DEBUG] reading information for kafka topic: %s", d.Id())
-
-	project, serviceName, topicName := resourceKafkaParseTopicID(d.Id())
-
-	topic, err := client.KafkaTopics.Get(
-		project,
-		serviceName,
-		topicName,
-	)
+	project, serviceName, topicName := splitResourceID3(d.Id())
+	topic, err := client.KafkaTopics.Get(project, serviceName, topicName)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("[DEBUG] topic data: %#v", topic)
-
 	d.Set("project", project)
 	d.Set("service_name", serviceName)
-	d.Set("topic", topic.TopicName)
+	d.Set("topic_name", topic.TopicName)
 	d.Set("state", topic.State)
 	d.Set("partitions", len(topic.Partitions))
 	d.Set("replication", topic.Replication)
@@ -147,18 +142,16 @@ func resourceKafkaTopicRead(d *schema.ResourceData, m interface{}) error {
 func resourceKafkaTopicUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-	project := d.Get("project").(string)
-	serviceName := d.Get("service_name").(string)
-	topic := d.Get("topic").(string)
 	partitions := d.Get("partitions").(int)
-
+	projectName, serviceName, topicName := splitResourceID3(d.Id())
 	err := client.KafkaTopics.Update(
-		project,
+		projectName,
 		serviceName,
-		topic,
+		topicName,
 		aiven.UpdateKafkaTopicRequest{
 			MinimumInSyncReplicas: optionalIntPointer(d, "minimum_in_sync_replicas"),
 			Partitions:            &partitions,
+			Replication:           optionalIntPointer(d, "replication"),
 			RetentionBytes:        optionalIntPointer(d, "retention_bytes"),
 			RetentionHours:        optionalIntPointer(d, "retention_hours"),
 		},
@@ -168,18 +161,39 @@ func resourceKafkaTopicUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	err = resourceKafkaTopicWait(d, m)
+	if err != nil {
+		return err
+	}
 
-	return err
+	return resourceKafkaTopicRead(d, m)
 }
 
 func resourceKafkaTopicDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-	return client.KafkaTopics.Delete(
-		d.Get("project").(string),
-		d.Get("service_name").(string),
-		d.Get("topic").(string),
-	)
+	projectName, serviceName, topicName := splitResourceID3(d.Id())
+	return client.KafkaTopics.Delete(projectName, serviceName, topicName)
+}
+
+func resourceKafkaTopicExists(d *schema.ResourceData, m interface{}) (bool, error) {
+	client := m.(*aiven.Client)
+
+	projectName, serviceName, topicName := splitResourceID3(d.Id())
+	_, err := client.KafkaTopics.Get(projectName, serviceName, topicName)
+	return resourceExists(err)
+}
+
+func resourceKafkaTopicState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	if len(strings.Split(d.Id(), "/")) != 3 {
+		return nil, fmt.Errorf("Invalid identifier %v, expected <project_name>/<service_name>/<topic_name>", d.Id())
+	}
+
+	err := resourceKafkaTopicRead(d, m)
+	if err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceKafkaTopicWait(d *schema.ResourceData, m interface{}) error {
@@ -187,7 +201,7 @@ func resourceKafkaTopicWait(d *schema.ResourceData, m interface{}) error {
 		Client:      m.(*aiven.Client),
 		Project:     d.Get("project").(string),
 		ServiceName: d.Get("service_name").(string),
-		Topic:       d.Get("topic").(string),
+		TopicName:   d.Get("topic_name").(string),
 	}
 
 	_, err := w.Conf().WaitForState()
@@ -196,9 +210,4 @@ func resourceKafkaTopicWait(d *schema.ResourceData, m interface{}) error {
 	}
 
 	return nil
-}
-
-func resourceKafkaParseTopicID(id string) (project, serviceName, topic string) {
-	s := strings.Split(id, "/")
-	return s[0], s[1], s[2]
 }

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/jelmersnoeck/aiven"
 	"log"
-	"strings"
 	"time"
+
+	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform/helper/resource"
 )
 
 // KafkaTopicChangeWaiter is used to refresh the Aiven Kafka Topic endpoints when
@@ -14,7 +14,7 @@ type KafkaTopicChangeWaiter struct {
 	Client      *aiven.Client
 	Project     string
 	ServiceName string
-	Topic       string
+	TopicName   string
 }
 
 // RefreshFunc will call the Aiven client and refresh it's state.
@@ -23,13 +23,13 @@ func (w *KafkaTopicChangeWaiter) RefreshFunc() resource.StateRefreshFunc {
 		topic, err := w.Client.KafkaTopics.Get(
 			w.Project,
 			w.ServiceName,
-			w.Topic,
+			w.TopicName,
 		)
 
 		if err != nil {
 			// Handle this special case as it takes a while for topics to be created.
-			log.Printf("[DEBUG] Got %#v error while waiting for topic to be up.", err)
-			if strings.Compare(err.Error(), "Topic '"+w.Topic+"' does not exist") == 0 {
+			aivenError, ok := err.(aiven.Error)
+			if ok && aivenError.Status == 404 {
 				return nil, "CONFIGURING", nil
 			}
 			return nil, "", err
@@ -49,7 +49,7 @@ func (w *KafkaTopicChangeWaiter) Conf() *resource.StateChangeConf {
 		Refresh: w.RefreshFunc(),
 	}
 	state.Delay = 10 * time.Second
-	state.Timeout = 10 * time.Minute
+	state.Timeout = 4 * time.Minute
 	state.MinTimeout = 2 * time.Second
 	return state
 }

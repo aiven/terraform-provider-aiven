@@ -1,35 +1,152 @@
-variable "aiven_email" {}
-variable "aiven_password" {}
+variable "aiven_api_token" {}
 variable "aiven_card_id" {}
+variable "aiven_project_name" {}
 
+# Initialize provider. No other config options than api_token
 provider "aiven" {
-	email       = "${var.aiven_email}"
-	password    = "${var.aiven_password}"
+	api_token = "${var.aiven_api_token}"
 }
 
+# Project
 resource "aiven_project" "sample" {
-    project = "sample"
+    project = "${var.aiven_project_name}"
     card_id = "${var.aiven_card_id}"
-    cloud = "google-europe-west1"
 }
 
-resource "aiven_service" "postgresql" {
+# VPC for the project in AWS ap-south-1 region. Should also
+# define peering connection(s) to make this useful.
+resource "aiven_project_vpc" "vpc_aws_ap_south_1" {
 	project = "${aiven_project.sample.project}"
-	group_name = "test"
-    cloud = "google-europe-west1"
-	plan = "hobbyist"
-	service_name = "test-postgresql"
+	cloud_name = "aws-ap-south-1"
+	network_cidr = "192.168.0.0/24"
+}
+
+# Kafka service
+resource "aiven_service" "samplekafka" {
+	project = "${aiven_project.sample.project}"
+	cloud_name = "google-europe-west1"
+	plan = "business-4"
+	service_name = "samplekafka"
+	service_type = "kafka"
+	kafka_user_config {
+		kafka_connect = true
+		kafka_rest = true
+		kafka_version = "2.0"
+		kafka {
+			group_max_session_timeout_ms = 70000
+			log_retention_bytes = 1000000000
+		}
+	}
+}
+
+# Topic for Kafka
+resource "aiven_kafka_topic" "sample_topic" {
+	project = "${aiven_project.sample.project}"
+	service_name = "${aiven_service.samplekafka.service_name}"
+	topic_name = "sample_topic"
+	partitions = 3
+	replication = 2
+	retention_bytes = 1000000000
+}
+
+# User for Kafka
+resource "aiven_service_user" "kafka_a" {
+	project = "${aiven_project.sample.project}"
+	service_name = "${aiven_service.samplekafka.service_name}"
+	username = "kafka_a"
+}
+
+# ACL for Kafka
+resource "aiven_kafka_acl" "sample_acl" {
+	project = "${aiven_project.sample.project}"
+        service_name = "${aiven_service.samplekafka.service_name}"
+	username = "kafka_*"
+	permission = "read"
+	topic = "*"
+}
+
+# InfluxDB service
+resource "aiven_service" "sampleinflux" {
+	project = "${aiven_project.sample.project}"
+	cloud_name = "google-europe-west1"
+	plan = "startup-4"
+	service_name = "sampleinflux"
+	service_type = "influxdb"
+	influxdb_user_config {
+		ip_filter = ["0.0.0.0/0"]
+	}
+}
+
+# Send metrics from Kafka to InfluxDB
+resource "aiven_service_integration" "samplekafka_metrics" {
+	project = "${aiven_project.sample.project}"
+	integration_type = "metrics"
+	source_service_name = "${aiven_service.samplekafka.service_name}"
+	destination_service_name = "${aiven_service.sampleinflux.service_name}"
+}
+
+# PostreSQL service
+resource "aiven_service" "samplepg" {
+	project = "${aiven_project.sample.project}"
+	cloud_name = "google-europe-west1"
+	plan = "business-4"
+	service_name = "samplepg"
 	service_type = "pg"
+	pg_user_config {
+		pg {
+			idle_in_transaction_session_timeout = 900
+		}
+		pg_version = "10"
+	}
 }
 
-resource "aiven_database" "postgresql" {
-	project = "${aiven_service.postgresql.project}"
-	service_name = "${aiven_service.postgresql.service_name}"
-	database = "coda"
+# Send metrics from PostgreSQL to InfluxDB
+resource "aiven_service_integration" "samplepg_metrics" {
+	project = "${aiven_project.sample.project}"
+	integration_type = "metrics"
+	source_service_name = "${aiven_service.samplepg.service_name}"
+	destination_service_name = "${aiven_service.sampleinflux.service_name}"
 }
 
-resource "aiven_service_user" "postgresql" {
-	project = "${aiven_service.postgresql.project}"
-	service_name = "${aiven_database.postgresql.service_name}"
-	username = "codabox"
+# PostgreSQL database
+resource "aiven_database" "sample_db" {
+	project = "${aiven_project.sample.project}"
+	service_name = "${aiven_service.samplepg.service_name}"
+	database_name = "sample_db"
+}
+
+# PostgreSQL user
+resource "aiven_service_user" "sample_user" {
+	project = "${aiven_project.sample.project}"
+	service_name = "${aiven_service.samplepg.service_name}"
+	username = "sampleuser"
+}
+
+# PostgreSQL connection pool
+resource "aiven_connection_pool" "sample_pool" {
+	project = "${aiven_project.sample.project}"
+	service_name = "${aiven_service.samplepg.service_name}"
+	database_name = "${aiven_database.sample_db.database_name}"
+	pool_name = "samplepool"
+	username = "${aiven_service_user.sample_user.username}"
+}
+
+# Grafana service
+resource "aiven_service" "samplegrafana" {
+	project = "${aiven_project.sample.project}"
+	cloud_name = "google-europe-west1"
+	plan = "startup-4"
+	service_name = "samplegrafana"
+	service_type = "grafana"
+	grafana_user_config {
+		ip_filter = ["0.0.0.0/0"]
+	}
+}
+
+# Dashboards for Kafka and PostgreSQL services
+resource "aiven_service_integration" "samplegrafana_dashboards" {
+	project = "${aiven_project.sample.project}"
+	integration_type = "dashboard"
+	source_service_name = "${aiven_service.samplegrafana.service_name}"
+	destination_service_name = "${aiven_service.sampleinflux.service_name}"
 }

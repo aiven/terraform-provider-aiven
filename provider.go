@@ -1,68 +1,44 @@
+// Copyright (c) 2017 jelmersnoeck
+// Copyright (c) 2018 Aiven, Helsinki, Finland. https://aiven.io/
 package main
 
 import (
-	"errors"
+	"net/url"
+	"strings"
 
+	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/jelmersnoeck/aiven"
 )
 
 // Provider returns the Terraform Aiven Provider configuration object.
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"email": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Sensitive:   true,
-				Description: "Aiven email address",
-				Default:     "",
-			},
-			"otp": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Sensitive:   true,
-				Description: "Aiven One-Time password",
-				Default:     "",
-			},
-			"password": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Sensitive:   true,
-				Description: "Aiven password",
-				Default:     "",
-			},
 			"api_token": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				Sensitive:   true,
 				Description: "Aiven Authentication Token",
-				Default:     "",
 			},
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"aiven_project":      resourceProject(),
-			"aiven_service":      resourceService(),
-			"aiven_database":     resourceDatabase(),
-			"aiven_service_user": resourceServiceUser(),
-			"aiven_kafka_topic":  resourceKafkaTopic(),
+			"aiven_connection_pool":              resourceConnectionPool(),
+			"aiven_database":                     resourceDatabase(),
+			"aiven_kafka_acl":                    resourceKafkaACL(),
+			"aiven_kafka_topic":                  resourceKafkaTopic(),
+			"aiven_project":                      resourceProject(),
+			"aiven_project_user":                 resourceProjectUser(),
+			"aiven_project_vpc":                  resourceProjectVPC(),
+			"aiven_vpc_peering_connection":       resourceVPCPeeringConnection(),
+			"aiven_service":                      resourceService(),
+			"aiven_service_integration":          resourceServiceIntegration(),
+			"aiven_service_integration_endpoint": resourceServiceIntegrationEndpoint(),
+			"aiven_service_user":                 resourceServiceUser(),
 		},
 
 		ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {
-			if d.Get("api_token") == "" && (d.Get("email") == "" || d.Get("password") == "") {
-				return nil, errors.New("Must provide an API Token or email and password")
-			}
-			if d.Get("api_token") != "" {
-				return aiven.NewTokenClient(
-					d.Get("api_token").(string),
-				)
-			}
-			return aiven.NewMFAUserClient(
-				d.Get("email").(string),
-				d.Get("otp").(string),
-				d.Get("password").(string),
-			)
+			return aiven.NewTokenClient(d.Get("api_token").(string))
 		},
 	}
 }
@@ -76,7 +52,11 @@ func optionalString(d *schema.ResourceData, key string) string {
 }
 
 func optionalStringPointer(d *schema.ResourceData, key string) *string {
-	str, ok := d.Get(key).(string)
+	val, ok := d.GetOk(key)
+	if !ok {
+		return nil
+	}
+	str, ok := val.(string)
 	if !ok {
 		return nil
 	}
@@ -84,9 +64,87 @@ func optionalStringPointer(d *schema.ResourceData, key string) *string {
 }
 
 func optionalIntPointer(d *schema.ResourceData, key string) *int {
-	val, ok := d.Get(key).(int)
+	val, ok := d.GetOk(key)
 	if !ok {
 		return nil
 	}
-	return &val
+	intValue, ok := val.(int)
+	if !ok {
+		return nil
+	}
+	return &intValue
+}
+
+func buildResourceID(parts ...string) string {
+	finalParts := make([]string, len(parts))
+	for idx, part := range parts {
+		finalParts[idx] = url.PathEscape(part)
+	}
+	return strings.Join(finalParts, "/")
+}
+
+func splitResourceID(resourceID string, n int) []string {
+	parts := strings.SplitN(resourceID, "/", n)
+	for idx, part := range parts {
+		part, _ := url.PathUnescape(part)
+		parts[idx] = part
+	}
+	return parts
+}
+
+func splitResourceID2(resourceID string) (string, string) {
+	parts := splitResourceID(resourceID, 2)
+	return parts[0], parts[1]
+}
+
+func splitResourceID3(resourceID string) (string, string, string) {
+	parts := splitResourceID(resourceID, 3)
+	return parts[0], parts[1], parts[2]
+}
+
+func splitResourceID4(resourceID string) (string, string, string, string) {
+	parts := splitResourceID(resourceID, 4)
+	return parts[0], parts[1], parts[2], parts[3]
+}
+
+func resourceExists(err error) (bool, error) {
+	if err == nil {
+		return true, nil
+	}
+
+	aivenError, ok := err.(aiven.Error)
+	if !ok {
+		return true, err
+	}
+
+	if aivenError.Status == 404 {
+		return false, nil
+	}
+	if aivenError.Status < 200 || aivenError.Status >= 300 {
+		return true, err
+	}
+	return true, nil
+}
+
+func createOnlyDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	return len(d.Id()) > 0
+}
+
+// When a map inside a list contains only default values without explicit values set by
+// the user Terraform inteprets the map as not being present and the array length being
+// zero, resulting in bogus update that does nothing. Allow ignoring those.
+func emptyObjectDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	return old == "1" && new == "0" && strings.HasSuffix(k, ".#")
+}
+
+// Terraform does not allow default values for arrays but the IP filter user config value
+// has default. We don't want to force users to always define explicit value just because
+// of the Terraform restriction so suppress the change from default to empty (which would
+// be nonsensical operation anyway)
+func ipFilterArrayDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	return old == "1" && new == "0" && strings.HasSuffix(k, ".ip_filter.#")
+}
+
+func ipFilterValueDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	return old == "0.0.0.0/0" && new == "" && strings.HasSuffix(k, ".ip_filter.0")
 }

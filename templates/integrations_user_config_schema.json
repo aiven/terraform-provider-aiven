@@ -1,0 +1,53 @@
+{
+  "dashboard": {
+    "additionalProperties": true,
+    "title": "Integration user config",
+    "type": "object"
+  },
+  "datadog": {
+    "additionalProperties": true,
+    "title": "Integration user config",
+    "type": "object"
+  },
+  "logs": {
+    "additionalProperties": false,
+    "properties": {
+      "elasticsearch_index_days_max": {
+        "default": 3,
+        "example": 5,
+        "maximum": 100,
+        "minimum": 1,
+        "title": "Elasticsearch index retention limit",
+        "type": "integer"
+      },
+      "elasticsearch_index_prefix": {
+        "default": "logs",
+        "example": "logs",
+        "maxLength": 1000,
+        "minLength": 1,
+        "title": "Elasticsearch index prefix",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  },
+  "metrics": {
+    "additionalProperties": true,
+    "title": "Integration user config",
+    "type": "object"
+  },
+  "mirrormaker": {
+    "additionalProperties": false,
+    "properties": {
+      "mirrormaker_whitelist": {
+        "default": ".*",
+        "example": ".*",
+        "maxLength": 1000,
+        "minLength": 1,
+        "title": "Mirrormaker topic whitelist",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  }
+}

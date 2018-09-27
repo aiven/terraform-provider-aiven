@@ -2,37 +2,19 @@
 #
 # Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
 # for detailed Gopkg.toml documentation.
-#
-# required = ["github.com/user/thing/cmd/thing"]
-# ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
-#
-# [[constraint]]
-#   name = "github.com/user/project"
-#   version = "1.0.0"
-#
-# [[constraint]]
-#   name = "github.com/user/project2"
-#   branch = "dev"
-#   source = "github.com/myfork/project2"
-#
-# [[override]]
-#   name = "github.com/x/y"
-#   version = "2.4.0"
-#
-# [prune]
-#   non-go = false
-#   go-tests = true
-#   unused-packages = true
 
+[[constraint]]
+  name = "github.com/gobuffalo/packr"
+  version = "1.13.7"
 
 [[constraint]]
   name = "github.com/hashicorp/terraform"
   version = "0.9.0"
 
 [[constraint]]
-  name = "github.com/jelmersnoeck/aiven"
-  revision = "99972dc23eb361d3d5227e1f5790a0bf80e90af0"
-  source = "github.com/jelmersnoeck/aiven"
+  name = "github.com/aiven/aiven-go-client"
+  revision = "03b96f7bece55f0d98ad7e5a86461ea1da497236"
+  source = "github.com/aiven/aiven-go-client"
 
 [prune]
   go-tests = true
