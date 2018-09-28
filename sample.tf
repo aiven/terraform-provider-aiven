@@ -13,14 +13,6 @@ resource "aiven_project" "sample" {
     card_id = "${var.aiven_card_id}"
 }
 
-# VPC for the project in AWS ap-south-1 region. Should also
-# define peering connection(s) to make this useful.
-resource "aiven_project_vpc" "vpc_aws_ap_south_1" {
-	project = "${aiven_project.sample.project}"
-	cloud_name = "aws-ap-south-1"
-	network_cidr = "192.168.0.0/24"
-}
-
 # Kafka service
 resource "aiven_service" "samplekafka" {
 	project = "${aiven_project.sample.project}"
