@@ -19,6 +19,16 @@ These properties include such as the project a service is associated with, the n
 service, etc. Unless the system contains no relevant data, such changes must not be
 performed.
 
+To allow mitigating this problem, the service resource supports
+``termination_protection`` property. It is recommended to set this property to ``true``
+for all production services to avoid them being accidentally deleted. With this setting
+enabled service deletion, both intentional and unintentional, will fail until an explicit
+update is done to change the setting to ``false``. Note that while this does prevent the
+service itself from being deleted, any databases, topics or such that have been configured
+with Terraform can still be deleted and they will be deleted before the service itself is
+attempted to be deleted so even with this setting enabled you need to be very careful
+with the changes that are to be applied.
+
 ## Sample project
 
 There is a [sample project](sample.tf) which sets up a project, defines Kafka,
@@ -116,6 +126,7 @@ resource "aiven_service" "myservice" {
     service_name = "<SERVICE_NAME>"
     service_type = "pg"
     project_vpc_id = "${aiven_project_vpc.vpc_gcp_europe_west1.id}"
+    termination_protection = true
     pg_user_config {
         ip_filter = ["0.0.0.0/0"]
         pg_version = "10"
@@ -158,6 +169,12 @@ reference as shown above to set up dependencies correctly and the VPC must be in
 cloud and region as the service itself. Project can be freely moved to and from VPC after
 creation but doing so triggers migration to new servers so the operation can take
 significant amount of time to complete if the service has a lot of data.
+
+``termination_protection`` prevents the service from being deleted. It is recommended to
+set this to ``true`` for all production services to prevent unintentional service
+deletions. This does not shield against deleting databases or topics but for services
+with backups much of the content can at least be restored from backup in case accidental
+deletion is done.
 
 ``x_user_config`` defines service specific additional configuration options. These
 options can be found from the [JSON schema description](templates/service_user_config_schema.json).
