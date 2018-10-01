@@ -56,6 +56,11 @@ func resourceService() *schema.Resource {
 				Optional:    true,
 				Description: "Identifier of the VPC the service should be in, if any",
 			},
+			"termination_protection": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Prevent service from being deleted. It is recommended to have this enabled for all services.",
+			},
 			"service_uri": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -342,12 +347,13 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 	service, err := client.Services.Create(
 		d.Get("project").(string),
 		aiven.CreateServiceRequest{
-			Cloud:        d.Get("cloud_name").(string),
-			Plan:         d.Get("plan").(string),
-			ProjectVPCID: vpcIDPointer,
-			ServiceName:  d.Get("service_name").(string),
-			ServiceType:  serviceType,
-			UserConfig:   userConfig,
+			Cloud:                 d.Get("cloud_name").(string),
+			Plan:                  d.Get("plan").(string),
+			ProjectVPCID:          vpcIDPointer,
+			ServiceName:           d.Get("service_name").(string),
+			ServiceType:           serviceType,
+			TerminationProtection: d.Get("termination_protection").(bool),
+			UserConfig:            userConfig,
 		},
 	)
 
@@ -393,11 +399,12 @@ func resourceServiceUpdate(d *schema.ResourceData, m interface{}) error {
 		projectName,
 		serviceName,
 		aiven.UpdateServiceRequest{
-			Cloud:        d.Get("cloud_name").(string),
-			Plan:         d.Get("plan").(string),
-			ProjectVPCID: vpcIDPointer,
-			Powered:      true,
-			UserConfig:   userConfig,
+			Cloud:                 d.Get("cloud_name").(string),
+			Plan:                  d.Get("plan").(string),
+			ProjectVPCID:          vpcIDPointer,
+			Powered:               true,
+			TerminationProtection: d.Get("termination_protection").(bool),
+			UserConfig:            userConfig,
 		},
 	)
 	if err != nil {
@@ -475,6 +482,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	d.Set("state", service.State)
 	d.Set("plan", service.Plan)
 	d.Set("service_type", service.Type)
+	d.Set("termination_protection", service.TerminationProtection)
 	d.Set("service_uri", service.URI)
 	d.Set("project", project)
 	if service.ProjectVPCID != nil {

@@ -2,11 +2,11 @@
 
 
 [[projects]]
-  digest = "1:dedb0f251c9e52cff6f4a6b4e5ff4cbcbd9b6bc275648e0bc17b8b5c1a695744"
+  digest = "1:e7d639ec86898de9f66871353d23d3ffa7a10851c8f482e13e465ba189095863"
   name = "github.com/aiven/aiven-go-client"
   packages = ["."]
   pruneopts = "UT"
-  revision = "03b96f7bece55f0d98ad7e5a86461ea1da497236"
+  revision = "ec0871c583db5c4c154c68d814099fedacfc8ba5"
   source = "github.com/aiven/aiven-go-client"
 
 [[projects]]
