@@ -110,7 +110,7 @@ func resourceService() *schema.Resource {
 				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 				Elem: &schema.Resource{
 					Schema: GenerateTerraformUserConfigSchema(
-						userConfigSchemas["service"]["cassandra"].(map[string]interface{})),
+						GetUserConfigSchema("service")["cassandra"].(map[string]interface{})),
 				},
 			},
 			"elasticsearch": {
@@ -138,7 +138,7 @@ func resourceService() *schema.Resource {
 				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 				Elem: &schema.Resource{
 					Schema: GenerateTerraformUserConfigSchema(
-						userConfigSchemas["service"]["elasticsearch"].(map[string]interface{})),
+						GetUserConfigSchema("service")["elasticsearch"].(map[string]interface{})),
 				},
 			},
 			"grafana": {
@@ -159,7 +159,7 @@ func resourceService() *schema.Resource {
 				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 				Elem: &schema.Resource{
 					Schema: GenerateTerraformUserConfigSchema(
-						userConfigSchemas["service"]["grafana"].(map[string]interface{})),
+						GetUserConfigSchema("service")["grafana"].(map[string]interface{})),
 				},
 			},
 			"influxdb": {
@@ -186,7 +186,7 @@ func resourceService() *schema.Resource {
 				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 				Elem: &schema.Resource{
 					Schema: GenerateTerraformUserConfigSchema(
-						userConfigSchemas["service"]["influxdb"].(map[string]interface{})),
+						GetUserConfigSchema("service")["influxdb"].(map[string]interface{})),
 				},
 			},
 			"kafka": {
@@ -240,7 +240,7 @@ func resourceService() *schema.Resource {
 				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 				Elem: &schema.Resource{
 					Schema: GenerateTerraformUserConfigSchema(
-						userConfigSchemas["service"]["kafka"].(map[string]interface{})),
+						GetUserConfigSchema("service")["kafka"].(map[string]interface{})),
 				},
 			},
 			"pg": {
@@ -306,7 +306,7 @@ func resourceService() *schema.Resource {
 				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 				Elem: &schema.Resource{
 					Schema: GenerateTerraformUserConfigSchema(
-						userConfigSchemas["service"]["pg"].(map[string]interface{})),
+						GetUserConfigSchema("service")["pg"].(map[string]interface{})),
 				},
 			},
 			"redis": {
@@ -327,7 +327,7 @@ func resourceService() *schema.Resource {
 				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 				Elem: &schema.Resource{
 					Schema: GenerateTerraformUserConfigSchema(
-						userConfigSchemas["service"]["redis"].(map[string]interface{})),
+						GetUserConfigSchema("service")["redis"].(map[string]interface{})),
 				},
 			},
 		},

@@ -24,10 +24,26 @@ func readUserConfigJSONSchema(name string) map[string]interface{} {
 	return jsonObject.(map[string]interface{})
 }
 
-var userConfigSchemas = map[string]map[string]interface{}{
-	"endpoint":    readUserConfigJSONSchema("integration_endpoints_user_config_schema.json"),
-	"integration": readUserConfigJSONSchema("integrations_user_config_schema.json"),
-	"service":     readUserConfigJSONSchema("service_user_config_schema.json"),
+var userConfigSchemas = map[string]map[string]interface{}{}
+
+// GetUserConfigSchema returns user configuration definition for given resource type
+func GetUserConfigSchema(resourceType string) map[string]interface{} {
+	if data, ok := userConfigSchemas[resourceType]; ok {
+		return data
+	}
+	var result map[string]interface{}
+	switch resourceType {
+	case "endpoint":
+		result = readUserConfigJSONSchema("integration_endpoints_user_config_schema.json")
+	case "integration":
+		result = readUserConfigJSONSchema("integrations_user_config_schema.json")
+	case "service":
+		result = readUserConfigJSONSchema("service_user_config_schema.json")
+	default:
+		panic("Unknown resourceType " + resourceType)
+	}
+	userConfigSchemas[resourceType] = result
+	return result
 }
 
 // GenerateTerraformUserConfigSchema creates Terraform schema definition for user config based
@@ -202,7 +218,7 @@ func ConvertAPIUserConfigToTerraformCompatibleFormat(
 		return []map[string]interface{}{}
 	}
 
-	entrySchema := userConfigSchemas[configType][entryType].(map[string]interface{})
+	entrySchema := GetUserConfigSchema(configType)[entryType].(map[string]interface{})
 	entrySchemaProps := entrySchema["properties"].(map[string]interface{})
 	return []map[string]interface{}{convertAPIUserConfigToTerraformCompatibleFormat(userConfig, entrySchemaProps)}
 }
@@ -276,7 +292,7 @@ func ConvertTerraformUserConfigToAPICompatibleFormat(
 	if !ok || userConfigsRaw == nil {
 		return nil
 	}
-	entrySchema := userConfigSchemas[configType][entryType].(map[string]interface{})
+	entrySchema := GetUserConfigSchema(configType)[entryType].(map[string]interface{})
 	entrySchemaProps := entrySchema["properties"].(map[string]interface{})
 	return convertTerraformUserConfigToAPICompatibleFormat(
 		entryType, newResource, userConfigsRaw.([]interface{})[0].(map[string]interface{}), entrySchemaProps)
