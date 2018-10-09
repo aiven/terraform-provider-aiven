@@ -43,7 +43,7 @@ func resourceServiceIntegrationEndpoint() *schema.Resource {
 				Description: "Datadog specific user configurable settings",
 				Elem: &schema.Resource{
 					Schema: GenerateTerraformUserConfigSchema(
-						userConfigSchemas["endpoint"]["datadog"].(map[string]interface{})),
+						GetUserConfigSchema("endpoint")["datadog"].(map[string]interface{})),
 				},
 				MaxItems: 1,
 				Optional: true,

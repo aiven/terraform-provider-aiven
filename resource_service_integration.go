@@ -43,7 +43,7 @@ func resourceServiceIntegration() *schema.Resource {
 				Description: "Log integration specific user configurable settings",
 				Elem: &schema.Resource{
 					Schema: GenerateTerraformUserConfigSchema(
-						userConfigSchemas["integration"]["logs"].(map[string]interface{})),
+						GetUserConfigSchema("integration")["logs"].(map[string]interface{})),
 				},
 				MaxItems: 1,
 				Optional: true,
@@ -53,7 +53,7 @@ func resourceServiceIntegration() *schema.Resource {
 				Description: "Mirrormaker integration specific user configurable settings",
 				Elem: &schema.Resource{
 					Schema: GenerateTerraformUserConfigSchema(
-						userConfigSchemas["integration"]["mirrormaker"].(map[string]interface{})),
+						GetUserConfigSchema("integration")["mirrormaker"].(map[string]interface{})),
 				},
 				MaxItems: 1,
 				Optional: true,
