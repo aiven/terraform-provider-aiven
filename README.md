@@ -488,7 +488,7 @@ is not directly visible in the Aiven web console.
 
 ```
 resource "aiven_vpc_peering_connection" "mypeeringconnection" {
-    vpc_id = "${aiven_project.myproject.myvpc.id}"
+    vpc_id = "${aiven_project_vpc.myvpc.id}"
     peer_cloud_account = "<PEER_ACCOUNT_ID>"
     peer_vpc = "<PEER_VPC_ID/NAME>"
 }
