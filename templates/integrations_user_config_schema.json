@@ -49,5 +49,10 @@
       }
     },
     "type": "object"
+  },
+  "prometheus": {
+    "additionalProperties": true,
+    "title": "Integration user config",
+    "type": "object"
   }
 }
