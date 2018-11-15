@@ -39,11 +39,27 @@ func resourceServiceIntegrationEndpoint() *schema.Resource {
 				Required:    true,
 				Type:        schema.TypeString,
 			},
+			"endpoint_config": {
+				Description: "Integration endpoint specific backend configuration",
+				Computed:    true,
+				Type:        schema.TypeMap,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"datadog_user_config": {
 				Description: "Datadog specific user configurable settings",
 				Elem: &schema.Resource{
 					Schema: GenerateTerraformUserConfigSchema(
 						GetUserConfigSchema("endpoint")["datadog"].(map[string]interface{})),
+				},
+				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
+			"prometheus_user_config": {
+				Description: "Prometheus specific user configurable settings",
+				Elem: &schema.Resource{
+					Schema: GenerateTerraformUserConfigSchema(
+						GetUserConfigSchema("endpoint")["prometheus"].(map[string]interface{})),
 				},
 				MaxItems: 1,
 				Optional: true,
@@ -156,6 +172,14 @@ func copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(
 	if len(userConfig) > 0 {
 		d.Set(endpointType+"_user_config", userConfig)
 	}
+	// Must coerse all values into strings
+	endpointConfig := map[string]string{}
+	if len(endpoint.EndpointConfig) > 0 {
+		for key, value := range endpoint.EndpointConfig {
+			endpointConfig[key] = fmt.Sprintf("%v", value)
+		}
+	}
+	d.Set("endpoint_config", endpointConfig)
 
 	return nil
 }

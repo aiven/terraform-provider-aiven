@@ -507,6 +507,38 @@
         "title": "Enable Kafka-REST service",
         "type": "boolean"
       },
+      "kafka_rest_config": {
+        "additionalProperties": false,
+        "properties": {
+          "consumer_request_max_bytes": {
+            "default": 67108864,
+            "maximum": 671088640,
+            "minimum": 0,
+            "title": "Maximum number of bytes in unencoded message keys and values by a single request",
+            "type": "integer"
+          },
+          "producer_acks": {
+            "default": "1",
+            "enum": [
+              "all",
+              "-1",
+              "0",
+              "1"
+            ],
+            "title": "The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to 'all' or '-1', the leader will wait for the full set of in-sync replicas to acknowledge the record.",
+            "type": "string"
+          },
+          "producer_linger_ms": {
+            "default": 0,
+            "maximum": 5000,
+            "minimum": 0,
+            "title": "Wait for up to the given delay to allow batching records together",
+            "type": "integer"
+          }
+        },
+        "title": "Kafka REST configuration",
+        "type": "object"
+      },
       "kafka_version": {
         "enum": [
           "1.0",
@@ -756,7 +788,8 @@
           "9.3",
           "9.5",
           "9.6",
-          "10"
+          "10",
+          "11"
         ],
         "title": "PostgreSQL major version",
         "type": [
