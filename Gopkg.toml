@@ -5,7 +5,7 @@
 
 [[constraint]]
   name = "github.com/gobuffalo/packr"
-  version = "1.13.7"
+  version = "1.21.2"
 
 [[constraint]]
   name = "github.com/hashicorp/terraform"

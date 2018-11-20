@@ -75,12 +75,28 @@
   version = "v1.24.0"
 
 [[projects]]
-  digest = "1:c8ad4ba32ae8b71ef2bf5e1bad402aeb99ce77a1240f9b684db8b1ff5353e7ab"
+  digest = "1:ba4a13c1846fc9df263e43e61854e2ce530eadfdc10a7ea394cc3b76b42ddaed"
+  name = "github.com/gobuffalo/envy"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "b29bf6b8134f3398b9333ba1893c58620152edb0"
+  version = "v1.6.9"
+
+[[projects]]
+  branch = "master"
+  digest = "1:b73defe35e1810e7b7960c9515a99063c004751c11eb80432c987fb983cb7de4"
+  name = "github.com/gobuffalo/packd"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f25c5d2471d797647acdd6179365a5c4a88cf534"
+
+[[projects]]
+  digest = "1:ab653452d5b80ebaa5bf9fff29acf5b92ea2566a454e69589d54d0a608aac31a"
   name = "github.com/gobuffalo/packr"
   packages = ["."]
   pruneopts = "UT"
-  revision = "5a2cbb54c4e7d482e3f518c56f1f86f133d5204f"
-  version = "v1.13.7"
+  revision = "17c85984a2c7ebb445d4e51a4a155c9c458d2a72"
+  version = "v1.21.2"
 
 [[projects]]
   digest = "1:07671f8997086ed115824d1974507d2b147d1e0463675ea5dbf3be89b1c2c563"
@@ -200,6 +216,22 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d"
+
+[[projects]]
+  digest = "1:ecd9aa82687cf31d1585d4ac61d0ba180e42e8a6182b85bd785fcca8dfeefc1b"
+  name = "github.com/joho/godotenv"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "23d116af351c84513e1946b527c88823e476be13"
+  version = "v1.3.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:598aa4555d1ea05a7b949e31e7db0e7b2df21f8772c53cc42f6543dc6bf9a35a"
+  name = "github.com/markbates/oncer"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "05fccaae8fc423476d98fd4c3e4699ba0fbbde48"
 
 [[projects]]
   digest = "1:fa20c5befe61ffcce412048bbb2251d236cd847610e2d37162c234ff2fe00ff2"

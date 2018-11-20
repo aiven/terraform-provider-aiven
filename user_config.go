@@ -12,7 +12,7 @@ import (
 
 func readUserConfigJSONSchema(name string) map[string]interface{} {
 	box := packr.NewBox("./templates")
-	data, err := box.MustBytes(name)
+	data, err := box.Find(name)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to read %v: %v", name, err))
 	}
