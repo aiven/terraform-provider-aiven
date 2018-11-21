@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.0.2] - 2018-11-21
+Support for Prometheus integration and some new user config values.
+
 ## [1.0.1] - 2018-10-08
 Support termination_protection property for services.
 
