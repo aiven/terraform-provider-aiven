@@ -80,27 +80,28 @@ func resourceKafkaTopic() *schema.Resource {
 }
 
 func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*aiven.Client)
-
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	topicName := d.Get("topic_name").(string)
 	partitions := d.Get("partitions").(int)
 	replication := d.Get("replication").(int)
 
-	err := client.KafkaTopics.Create(
-		project,
-		serviceName,
-		aiven.CreateKafkaTopicRequest{
-			CleanupPolicy:         optionalStringPointer(d, "cleanup_policy"),
-			MinimumInSyncReplicas: optionalIntPointer(d, "minimum_in_sync_replicas"),
-			Partitions:            &partitions,
-			Replication:           &replication,
-			RetentionBytes:        optionalIntPointer(d, "retention_bytes"),
-			RetentionHours:        optionalIntPointer(d, "retention_hours"),
-			TopicName:             topicName,
-		},
-	)
+	createRequest := aiven.CreateKafkaTopicRequest{
+		CleanupPolicy:         optionalStringPointer(d, "cleanup_policy"),
+		MinimumInSyncReplicas: optionalIntPointer(d, "minimum_in_sync_replicas"),
+		Partitions:            &partitions,
+		Replication:           &replication,
+		RetentionBytes:        optionalIntPointer(d, "retention_bytes"),
+		RetentionHours:        optionalIntPointer(d, "retention_hours"),
+		TopicName:             topicName,
+	}
+	w := &KafkaTopicCreateWaiter{
+		Client:        m.(*aiven.Client),
+		Project:       project,
+		ServiceName:   serviceName,
+		CreateRequest: createRequest,
+	}
+	_, err := w.Conf().WaitForState()
 	if err != nil {
 		return err
 	}
