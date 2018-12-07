@@ -20,6 +20,8 @@ resource "aiven_service" "samplekafka" {
 	plan = "business-4"
 	service_name = "samplekafka"
 	service_type = "kafka"
+	maintenance_window_dow = "monday"
+	maintenance_window_time = "10:00:00"
 	kafka_user_config {
 		kafka_connect = true
 		kafka_rest = true
@@ -64,6 +66,8 @@ resource "aiven_service" "sampleinflux" {
 	plan = "startup-4"
 	service_name = "sampleinflux"
 	service_type = "influxdb"
+	maintenance_window_dow = "monday"
+	maintenance_window_time = "11:00:00"
 	influxdb_user_config {
 		ip_filter = ["0.0.0.0/0"]
 	}
@@ -84,6 +88,8 @@ resource "aiven_service" "samplepg" {
 	plan = "business-4"
 	service_name = "samplepg"
 	service_type = "pg"
+	maintenance_window_dow = "monday"
+	maintenance_window_time = "12:00:00"
 	pg_user_config {
 		pg {
 			idle_in_transaction_session_timeout = 900
