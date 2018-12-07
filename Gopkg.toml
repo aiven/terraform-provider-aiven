@@ -13,7 +13,7 @@
 
 [[constraint]]
   name = "github.com/aiven/aiven-go-client"
-  revision = "1229534dc578f64766c377491fd727d08fd95ac5"
+  revision = "fafcf428b65b2a6a1fabf28cc9fc91a6915f358d"
   source = "github.com/aiven/aiven-go-client"
 
 [prune]
