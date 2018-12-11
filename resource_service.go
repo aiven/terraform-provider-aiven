@@ -56,6 +56,16 @@ func resourceService() *schema.Resource {
 				Optional:    true,
 				Description: "Identifier of the VPC the service should be in, if any",
 			},
+			"maintenance_window_dow": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.",
+			},
+			"maintenance_window_time": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.",
+			},
 			"termination_protection": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -348,6 +358,7 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 		d.Get("project").(string),
 		aiven.CreateServiceRequest{
 			Cloud:                 d.Get("cloud_name").(string),
+			MaintenanceWindow:     getMaintenanceWindow(d),
 			Plan:                  d.Get("plan").(string),
 			ProjectVPCID:          vpcIDPointer,
 			ServiceName:           d.Get("service_name").(string),
@@ -400,6 +411,7 @@ func resourceServiceUpdate(d *schema.ResourceData, m interface{}) error {
 		serviceName,
 		aiven.UpdateServiceRequest{
 			Cloud:                 d.Get("cloud_name").(string),
+			MaintenanceWindow:     getMaintenanceWindow(d),
 			Plan:                  d.Get("plan").(string),
 			ProjectVPCID:          vpcIDPointer,
 			Powered:               true,
@@ -472,6 +484,15 @@ func resourceServiceWait(d *schema.ResourceData, m interface{}, operation string
 	return nil
 }
 
+func getMaintenanceWindow(d *schema.ResourceData) *aiven.MaintenanceWindow {
+	dow := d.Get("maintenance_window_dow").(string)
+	time := d.Get("maintenance_window_time").(string)
+	if len(dow) > 0 && len(time) > 0 {
+		return &aiven.MaintenanceWindow{DayOfWeek: dow, TimeOfDay: time}
+	}
+	return nil
+}
+
 func copyServicePropertiesFromAPIResponseToTerraform(
 	d *schema.ResourceData,
 	service *aiven.Service,
@@ -483,6 +504,8 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	d.Set("plan", service.Plan)
 	d.Set("service_type", service.Type)
 	d.Set("termination_protection", service.TerminationProtection)
+	d.Set("maintenance_window_dow", service.MaintenanceWindow.DayOfWeek)
+	d.Set("maintenance_window_time", service.MaintenanceWindow.TimeOfDay)
 	d.Set("service_uri", service.URI)
 	d.Set("project", project)
 	if service.ProjectVPCID != nil {
