@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.3] - 2018-12-11
+Ensure Kafka topic creation succeeds immediately after service creation.
+Support setting service maintenance window.
+Provide cloud provider's VPC peering connection ID (AWS only).
+
 ## [1.0.2] - 2018-11-21
 Support for Prometheus integration and some new user config values.
 
