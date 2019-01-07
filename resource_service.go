@@ -519,7 +519,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	port, _ := strconv.ParseInt(params["port"], 10, 32)
 	d.Set("service_port", port)
 	password, passwordOK := params["password"]
-	username, usernameOK := params["username"]
+	username, usernameOK := params["user"]
 	if passwordOK {
 		d.Set("service_password", password)
 	}
