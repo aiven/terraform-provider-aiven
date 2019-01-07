@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.0.4] - 2019-01-07
+Fix service_username property for services.
+
 ## [1.0.3] - 2018-12-11
 Ensure Kafka topic creation succeeds immediately after service creation.
 Support setting service maintenance window.
