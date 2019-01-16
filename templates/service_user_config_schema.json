@@ -87,7 +87,7 @@
           "allowed_organizations": {
             "items": {
               "example": "aiven",
-              "pattern": "^[a-z0-9-]+$",
+              "pattern": "^[A-Za-z0-9-]+$",
               "title": "Organization name",
               "type": "string"
             },
