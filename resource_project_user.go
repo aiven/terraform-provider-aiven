@@ -120,7 +120,7 @@ func resourceProjectUserExists(d *schema.ResourceData, m interface{}) (bool, err
 
 func resourceProjectUserState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	if len(strings.Split(d.Id(), "/")) != 2 {
-		return nil, fmt.Errorf("Invalid identifier %v, expected <project_name>/<email>", d.Id())
+		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<email>", d.Id())
 	}
 
 	err := resourceProjectUserRead(d, m)

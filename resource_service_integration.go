@@ -165,7 +165,7 @@ func resourceServiceIntegrationState(d *schema.ResourceData, m interface{}) ([]*
 	client := m.(*aiven.Client)
 
 	if len(strings.Split(d.Id(), "/")) != 2 {
-		return nil, fmt.Errorf("Invalid identifier %v, expected <project_name>/<integration_id>", d.Id())
+		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<integration_id>", d.Id())
 	}
 
 	projectName, integrationID := splitResourceID2(d.Id())

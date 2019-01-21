@@ -165,13 +165,13 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 }
 
 func getAivenSchemaType(value interface{}) (string, bool) {
-	switch value.(type) {
+	switch res := value.(type) {
 	case string:
-		return value.(string), false
+		return res, false
 	case []interface{}:
 		optional := false
 		typeString := ""
-		for _, typeOrNullRaw := range value.([]interface{}) {
+		for _, typeOrNullRaw := range res {
 			typeOrNull := typeOrNullRaw.(string)
 			if typeOrNull == "null" {
 				optional = true
@@ -246,28 +246,28 @@ func convertAPIUserConfigToTerraformCompatibleFormat(
 			)
 			terraformConfig[key] = []map[string]interface{}{res}
 		case "integer":
-			switch apiValue.(type) {
+			switch res := apiValue.(type) {
 			case float64:
-				terraformConfig[key] = int(apiValue.(float64))
+				terraformConfig[key] = int(res)
 			case float32:
-				terraformConfig[key] = int(apiValue.(float32))
+				terraformConfig[key] = int(res)
 			case int64:
-				terraformConfig[key] = int(apiValue.(int64))
+				terraformConfig[key] = int(res)
 			case int32:
-				terraformConfig[key] = int(apiValue.(int32))
+				terraformConfig[key] = int(res)
 			default:
 				panic(fmt.Sprintf("Unexpected value type for '%v': %v / %T", key, apiValue, apiValue))
 			}
 		case "number":
-			switch apiValue.(type) {
+			switch res := apiValue.(type) {
 			case float64:
-				terraformConfig[key] = apiValue.(float64)
+				terraformConfig[key] = res
 			case float32:
-				terraformConfig[key] = float64(apiValue.(float32))
+				terraformConfig[key] = float64(res)
 			case int64:
-				terraformConfig[key] = float64(apiValue.(int64))
+				terraformConfig[key] = float64(res)
 			case int32:
-				terraformConfig[key] = float64(apiValue.(int32))
+				terraformConfig[key] = float64(res)
 			default:
 				panic(fmt.Sprintf("Unexpected value type for '%v': %v / %T", key, apiValue, apiValue))
 			}
@@ -340,12 +340,12 @@ func convertTerraformUserConfigValueToAPICompatibleFormat(
 	valueType, _ := getAivenSchemaType(definition["type"])
 	switch valueType {
 	case "integer":
-		switch value.(type) {
+		switch res := value.(type) {
 		case int:
 		case int64:
-			convertedValue = int(value.(int64))
+			convertedValue = int(res)
 		case int32:
-			convertedValue = int(value.(int32))
+			convertedValue = int(res)
 		default:
 			panic(fmt.Sprintf("Invalid %v user config key type %T for %v, expected integer", serviceType, value, key))
 		}
@@ -354,16 +354,16 @@ func convertTerraformUserConfigValueToAPICompatibleFormat(
 			omit = true
 		}
 	case "number":
-		switch value.(type) {
+		switch res := value.(type) {
 		case float64:
 		case float32:
-			convertedValue = float64(value.(float32))
+			convertedValue = float64(res)
 		case int64:
-			convertedValue = float64(value.(int64))
+			convertedValue = float64(res)
 		case int32:
-			convertedValue = float64(value.(int32))
+			convertedValue = float64(res)
 		case int:
-			convertedValue = float64(value.(int))
+			convertedValue = float64(res)
 		default:
 			panic(fmt.Sprintf("Invalid %v user config key type %T for %v, expected float", serviceType, value, key))
 		}

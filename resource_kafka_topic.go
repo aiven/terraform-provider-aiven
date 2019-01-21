@@ -186,7 +186,7 @@ func resourceKafkaTopicExists(d *schema.ResourceData, m interface{}) (bool, erro
 
 func resourceKafkaTopicState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	if len(strings.Split(d.Id(), "/")) != 3 {
-		return nil, fmt.Errorf("Invalid identifier %v, expected <project_name>/<service_name>/<topic_name>", d.Id())
+		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<topic_name>", d.Id())
 	}
 
 	err := resourceKafkaTopicRead(d, m)
@@ -207,7 +207,7 @@ func resourceKafkaTopicWait(d *schema.ResourceData, m interface{}) error {
 
 	_, err := w.Conf().WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error waiting for Aiven Kafka topic to be ACTIVE: %s", err)
+		return fmt.Errorf("error waiting for Aiven Kafka topic to be ACTIVE: %s", err)
 	}
 
 	return nil

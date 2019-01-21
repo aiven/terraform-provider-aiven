@@ -134,7 +134,7 @@ func resourceServiceUserState(d *schema.ResourceData, m interface{}) ([]*schema.
 	client := m.(*aiven.Client)
 
 	if len(strings.Split(d.Id(), "/")) != 3 {
-		return nil, fmt.Errorf("Invalid identifier %v, expected <project_name>/<service_name>/<username>", d.Id())
+		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<username>", d.Id())
 	}
 
 	projectName, serviceName, username := splitResourceID3(d.Id())

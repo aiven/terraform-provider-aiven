@@ -113,7 +113,7 @@ func resourceDatabaseExists(d *schema.ResourceData, m interface{}) (bool, error)
 
 func resourceDatabaseState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	if len(strings.Split(d.Id(), "/")) != 3 {
-		return nil, fmt.Errorf("Invalid identifier %v, expected <project_name>/<service_name>/<database_name>", d.Id())
+		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<database_name>", d.Id())
 	}
 
 	err := resourceDatabaseRead(d, m)
