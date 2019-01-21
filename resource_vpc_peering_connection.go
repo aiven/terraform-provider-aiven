@@ -118,7 +118,7 @@ func resourceVPCPeeringConnectionExists(d *schema.ResourceData, m interface{}) (
 
 func resourceVPCPeeringConnectionState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	if len(strings.Split(d.Id(), "/")) != 4 {
-		return nil, fmt.Errorf("Invalid identifier %v, expected <project_name>/<vpc_id>", d.Id())
+		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<vpc_id>", d.Id())
 	}
 
 	err := resourceVPCPeeringConnectionRead(d, m)

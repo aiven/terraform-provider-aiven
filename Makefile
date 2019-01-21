@@ -36,7 +36,7 @@ bins: vendor
 LINTERS=\
 	gofmt \
 	golint \
-	gosimple \
+	staticcheck \
 	vet \
 	misspell \
 	ineffassign \

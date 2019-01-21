@@ -451,7 +451,7 @@ func resourceServiceState(d *schema.ResourceData, m interface{}) ([]*schema.Reso
 	client := m.(*aiven.Client)
 
 	if len(strings.Split(d.Id(), "/")) != 2 {
-		return nil, fmt.Errorf("Invalid identifier %v, expected <project_name>/<service_name>", d.Id())
+		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>", d.Id())
 	}
 
 	projectName, serviceName := splitResourceID2(d.Id())
@@ -478,7 +478,7 @@ func resourceServiceWait(d *schema.ResourceData, m interface{}, operation string
 
 	_, err := w.Conf().WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error waiting for Aiven service to be RUNNING: %s", err)
+		return fmt.Errorf("error waiting for Aiven service to be RUNNING: %s", err)
 	}
 
 	return nil
