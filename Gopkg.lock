@@ -2,22 +2,17 @@
 
 
 [[projects]]
-  digest = "1:a807e6824abe1e7bc2ff532d9340c0f402c33a88928659d6bc10917c9fb6f481"
   name = "github.com/aiven/aiven-go-client"
   packages = ["."]
-  pruneopts = "UT"
-  revision = "709131bc92d813e9551378827f2cce5a92be979c"
+  revision = "44678f01dd9aaed3497f4734488423ad84c578a2"
   source = "github.com/aiven/aiven-go-client"
 
 [[projects]]
-  digest = "1:672133929e2786ef49ada5ea7476fa154e251d04da8fa79ae0be0694562ef94e"
   name = "github.com/apparentlymart/go-cidr"
   packages = ["cidr"]
-  pruneopts = "UT"
   revision = "a3ebdb999b831ecb6ab8a226e31b07b2b9061c47"
 
 [[projects]]
-  digest = "1:f9ad6ffdf261fa78b099a66bb64bbc4ab1e4da1d61084fb30603c7b68343d6ec"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -44,107 +39,81 @@
     "private/protocol/xml/xmlutil",
     "private/waiter",
     "service/s3",
-    "service/sts",
+    "service/sts"
   ]
-  pruneopts = "UT"
   revision = "b2852089fcfd0794d25d57f193e15121ab8a6d9e"
   version = "v1.6.25"
 
 [[projects]]
   branch = "master"
-  digest = "1:37011b20a70e205b93ebea5287e1afa5618db54bf3998c36ff5a8e4b146a170a"
   name = "github.com/bgentry/go-netrc"
   packages = ["netrc"]
-  pruneopts = "UT"
   revision = "9fd32a8b3d3d3f9d43c341bfe098430e07609480"
 
 [[projects]]
-  digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
-  pruneopts = "UT"
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
   version = "v1.1.0"
 
 [[projects]]
-  digest = "1:b9a5ac645f8e4e8c735163872cb686592ce6d999dcd66e0a70d7eadce4fbd26b"
   name = "github.com/go-ini/ini"
   packages = ["."]
-  pruneopts = "UT"
   revision = "e3c2d47c61e5333f9aa2974695dd94396eb69c75"
   version = "v1.24.0"
 
 [[projects]]
-  digest = "1:ba4a13c1846fc9df263e43e61854e2ce530eadfdc10a7ea394cc3b76b42ddaed"
   name = "github.com/gobuffalo/envy"
   packages = ["."]
-  pruneopts = "UT"
   revision = "b29bf6b8134f3398b9333ba1893c58620152edb0"
   version = "v1.6.9"
 
 [[projects]]
   branch = "master"
-  digest = "1:b73defe35e1810e7b7960c9515a99063c004751c11eb80432c987fb983cb7de4"
   name = "github.com/gobuffalo/packd"
   packages = ["."]
-  pruneopts = "UT"
   revision = "f25c5d2471d797647acdd6179365a5c4a88cf534"
 
 [[projects]]
-  digest = "1:ab653452d5b80ebaa5bf9fff29acf5b92ea2566a454e69589d54d0a608aac31a"
   name = "github.com/gobuffalo/packr"
   packages = ["."]
-  pruneopts = "UT"
   revision = "17c85984a2c7ebb445d4e51a4a155c9c458d2a72"
   version = "v1.21.2"
 
 [[projects]]
-  digest = "1:07671f8997086ed115824d1974507d2b147d1e0463675ea5dbf3be89b1c2c563"
   name = "github.com/hashicorp/errwrap"
   packages = ["."]
-  pruneopts = "UT"
   revision = "7554cd9344cec97297fa6649b055a8c98c2a1e55"
 
 [[projects]]
-  digest = "1:a1648e42765e943bb08464a126ad141413ac423a00f827b4273b2fa6b29274a0"
   name = "github.com/hashicorp/go-getter"
   packages = [
     ".",
-    "helper/url",
+    "helper/url"
   ]
-  pruneopts = "UT"
   revision = "c3d66e76678dce180a7b452653472f949aedfbcd"
 
 [[projects]]
-  digest = "1:70058d557ddb53af1a35dd41b748ae8032901e407c7c60f6ff3638c8145be5fb"
   name = "github.com/hashicorp/go-multierror"
   packages = ["."]
-  pruneopts = "UT"
   revision = "ed905158d87462226a13fe39ddf685ea65f1c11f"
 
 [[projects]]
-  digest = "1:ad93e756332b116b1f63e523f233082c1316bc183bbb6d8f3c0bef8beb92416c"
   name = "github.com/hashicorp/go-plugin"
   packages = ["."]
-  pruneopts = "UT"
   revision = "f72692aebca2008343a9deb06ddb4b17f7051c15"
 
 [[projects]]
-  digest = "1:b8edba99399cf7b4140dd74c9b942ab65155f02f08cccf2cf8246eb692bc5d4b"
   name = "github.com/hashicorp/go-uuid"
   packages = ["."]
-  pruneopts = "UT"
   revision = "64130c7a86d732268a38cb04cfbaf0cc987fda98"
 
 [[projects]]
-  digest = "1:826df03282c5a336f1d23a07ce0ec0a26c7230e1a5d5a79a8ea4b68c0c8462b3"
   name = "github.com/hashicorp/go-version"
   packages = ["."]
-  pruneopts = "UT"
   revision = "03c5bf6be031b6dd45afec16b1cf94fc8938bc77"
 
 [[projects]]
-  digest = "1:2f7a294353f5e7ff51ae26df3a844cb699c7ed3585ff9208a29ab28de960efcd"
   name = "github.com/hashicorp/hcl"
   packages = [
     ".",
@@ -155,33 +124,27 @@
     "hcl/token",
     "json/parser",
     "json/scanner",
-    "json/token",
+    "json/token"
   ]
-  pruneopts = "UT"
   revision = "630949a3c5fa3c613328e1b8256052cbc2327c9b"
 
 [[projects]]
-  digest = "1:73ee4fb45f1d87037acaa1e62e362c8a52cb53a60d0a3f77df2a682790abea71"
   name = "github.com/hashicorp/hil"
   packages = [
     ".",
     "ast",
     "parser",
-    "scanner",
+    "scanner"
   ]
-  pruneopts = "UT"
   revision = "5b8d13c8c5c2753e109fab25392a1dbfa2db93d2"
 
 [[projects]]
   branch = "master"
-  digest = "1:ce3f7860fd68bd2dd4c3735e2aed8c9de7c7d05bd6ad7d97a6bedcf4fe7b84fb"
   name = "github.com/hashicorp/logutils"
   packages = ["."]
-  pruneopts = "UT"
   revision = "0dc08b1671f34c4250ce212759ebd880f743d883"
 
 [[projects]]
-  digest = "1:4666423a40098b6803b34c4d4607c57e76f6136f4524a134f9c1840db5964fcf"
   name = "github.com/hashicorp/terraform"
   packages = [
     "config",
@@ -197,114 +160,82 @@
     "helper/schema",
     "helper/shadow",
     "plugin",
-    "terraform",
+    "terraform"
   ]
-  pruneopts = "UT"
   revision = "efca455c35d0d218a9bfee835a8ec3ef8d4d1c8c"
   version = "v0.9.11"
 
 [[projects]]
-  digest = "1:f70324149a251e89d03333d2b627cb87bf360d1c576b218d8e8649c925316fe8"
   name = "github.com/hashicorp/yamux"
   packages = ["."]
-  pruneopts = "UT"
   revision = "d1caa6c97c9fc1cc9e83bbe34d0603f9ff0ce8bd"
 
 [[projects]]
-  digest = "1:777a19f55da89883fe86477b3ffcaaebece9a20efa6e9d161c08beb4b3bd83be"
   name = "github.com/jmespath/go-jmespath"
   packages = ["."]
-  pruneopts = "UT"
   revision = "bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d"
 
 [[projects]]
-  digest = "1:ecd9aa82687cf31d1585d4ac61d0ba180e42e8a6182b85bd785fcca8dfeefc1b"
   name = "github.com/joho/godotenv"
   packages = ["."]
-  pruneopts = "UT"
   revision = "23d116af351c84513e1946b527c88823e476be13"
   version = "v1.3.0"
 
 [[projects]]
   branch = "master"
-  digest = "1:598aa4555d1ea05a7b949e31e7db0e7b2df21f8772c53cc42f6543dc6bf9a35a"
   name = "github.com/markbates/oncer"
   packages = ["."]
-  pruneopts = "UT"
   revision = "05fccaae8fc423476d98fd4c3e4699ba0fbbde48"
 
 [[projects]]
-  digest = "1:fa20c5befe61ffcce412048bbb2251d236cd847610e2d37162c234ff2fe00ff2"
   name = "github.com/mitchellh/copystructure"
   packages = ["."]
-  pruneopts = "UT"
   revision = "f81071c9d77b7931f78c90b416a074ecdc50e959"
 
 [[projects]]
-  digest = "1:12ae6210bdbdad658a9a67fd95cd9c99f7fdbf12f6d36eaf0af704e69dacf4f5"
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
-  pruneopts = "UT"
   revision = "b8bc1bf767474819792c23f32d8286a45736f1c6"
 
 [[projects]]
-  digest = "1:3b6bb6060d008e84abb4d3d2dd2c50df391c4479056d66e2b4a22e5b0c83255c"
   name = "github.com/mitchellh/hashstructure"
   packages = ["."]
-  pruneopts = "UT"
   revision = "ab25296c0f51f1022f01cd99dfb45f1775de8799"
 
 [[projects]]
-  digest = "1:ce8a529f61eb119be5e84417a77e71fe380d09ddcd8b69b1372d9261a27f9539"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
-  pruneopts = "UT"
   revision = "db1efb556f84b25a0a13a04aad883943538ad2e0"
 
 [[projects]]
-  digest = "1:1df968c4c20f1e0fa1c88e9b7d86a4cea6ca45e5f133f11bfc3bb3f251ddf21e"
   name = "github.com/mitchellh/reflectwalk"
   packages = ["."]
-  pruneopts = "UT"
   revision = "417edcfd99a4d472c262e58f22b4bfe97580f03e"
 
 [[projects]]
-  digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
   name = "github.com/pkg/errors"
   packages = ["."]
-  pruneopts = "UT"
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
   version = "v0.8.0"
 
 [[projects]]
-  digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
   name = "github.com/satori/go.uuid"
   packages = ["."]
-  pruneopts = "UT"
   revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
   version = "v1.2.0"
 
 [[projects]]
   branch = "master"
-  digest = "1:1ecf2a49df33be51e757d0033d5d51d5f784f35f68e5a38f797b2d3f03357d71"
   name = "golang.org/x/crypto"
   packages = [
     "bcrypt",
-    "blowfish",
+    "blowfish"
   ]
-  pruneopts = "UT"
   revision = "0e37d006457bf46f9e6692014ba72ef82c33022c"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = [
-    "github.com/aiven/aiven-go-client",
-    "github.com/gobuffalo/packr",
-    "github.com/hashicorp/terraform/helper/resource",
-    "github.com/hashicorp/terraform/helper/schema",
-    "github.com/hashicorp/terraform/plugin",
-    "github.com/hashicorp/terraform/terraform",
-  ]
+  inputs-digest = "6258eee6d53182ef105dbb91e03f36ef517ff40003cba41f20945098b5940107"
   solver-name = "gps-cdcl"
   solver-version = 1
