@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.0.5] - 2019-02-05
+Improve retry logic in some error cases.
+
 ## [1.0.4] - 2019-01-07
 Fix service_username property for services.
 
