@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.6] - 2019-03-11
+Fix service_port type to make it properly available.
+Use latest service info on create/update to make service specific
+connection info available.
+
 ## [1.0.5] - 2019-02-05
 Improve retry logic in some error cases.
 
