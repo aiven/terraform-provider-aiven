@@ -82,7 +82,7 @@ func resourceService() *schema.Resource {
 				Description: "Service hostname",
 			},
 			"service_port": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeInt,
 				Computed:    true,
 				Description: "Service port",
 			},
@@ -354,7 +354,7 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 		_, vpcID := splitResourceID2(vpcID)
 		vpcIDPointer = &vpcID
 	}
-	service, err := client.Services.Create(
+	_, err := client.Services.Create(
 		d.Get("project").(string),
 		aiven.CreateServiceRequest{
 			Cloud:                 d.Get("cloud_name").(string),
@@ -372,7 +372,7 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	err = resourceServiceWait(d, m, "create")
+	service, err := resourceServiceWait(d, m, "create")
 
 	if err != nil {
 		return err
@@ -406,7 +406,7 @@ func resourceServiceUpdate(d *schema.ResourceData, m interface{}) error {
 		_, vpcID := splitResourceID2(vpcID)
 		vpcIDPointer = &vpcID
 	}
-	service, err := client.Services.Update(
+	_, err := client.Services.Update(
 		projectName,
 		serviceName,
 		aiven.UpdateServiceRequest{
@@ -423,7 +423,7 @@ func resourceServiceUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	err = resourceServiceWait(d, m, "update")
+	service, err := resourceServiceWait(d, m, "update")
 
 	if err != nil {
 		return err
@@ -468,7 +468,7 @@ func resourceServiceState(d *schema.ResourceData, m interface{}) ([]*schema.Reso
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceServiceWait(d *schema.ResourceData, m interface{}, operation string) error {
+func resourceServiceWait(d *schema.ResourceData, m interface{}, operation string) (*aiven.Service, error) {
 	w := &ServiceChangeWaiter{
 		Client:      m.(*aiven.Client),
 		Operation:   operation,
@@ -476,12 +476,12 @@ func resourceServiceWait(d *schema.ResourceData, m interface{}, operation string
 		ServiceName: d.Get("service_name").(string),
 	}
 
-	_, err := w.Conf().WaitForState()
+	service, err := w.Conf().WaitForState()
 	if err != nil {
-		return fmt.Errorf("error waiting for Aiven service to be RUNNING: %s", err)
+		return nil, fmt.Errorf("error waiting for Aiven service to be RUNNING: %s", err)
 	}
 
-	return nil
+	return service.(*aiven.Service), nil
 }
 
 func getMaintenanceWindow(d *schema.ResourceData) *aiven.MaintenanceWindow {
