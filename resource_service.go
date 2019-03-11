@@ -82,7 +82,7 @@ func resourceService() *schema.Resource {
 				Description: "Service hostname",
 			},
 			"service_port": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeInt,
 				Computed:    true,
 				Description: "Service port",
 			},
