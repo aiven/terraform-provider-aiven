@@ -81,6 +81,26 @@ func resourceService() *schema.Resource {
 				Computed:    true,
 				Description: "Service hostname",
 			},
+			"service_integrations": {
+				Type:             schema.TypeList,
+				Optional:         true,
+				Description:      "Service integrations to specify when creating a service. Not applied after initial service creation",
+				DiffSuppressFunc: createOnlyDiffSuppressFunc,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"source_service_name": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Name of the source service",
+						},
+						"integration_type": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Type of the service integration. The only supported value at the moment is 'read_replica'",
+						},
+					},
+				},
+			},
 			"service_port": {
 				Type:        schema.TypeInt,
 				Computed:    true,
@@ -370,6 +390,21 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 	serviceType := d.Get("service_type").(string)
 	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("service", serviceType, true, d)
 	vpcID := d.Get("project_vpc_id").(string)
+	var apiServiceIntegrations []aiven.NewServiceIntegration
+	tfServiceIntegrations := d.Get("service_integrations")
+	if tfServiceIntegrations != nil {
+		tfServiceIntegrationList := tfServiceIntegrations.([]interface{})
+		for _, definition := range tfServiceIntegrationList {
+			definitionMap := definition.(map[string]interface{})
+			sourceService := definitionMap["source_service_name"].(string)
+			apiIntegration := aiven.NewServiceIntegration{
+				IntegrationType: definitionMap["integration_type"].(string),
+				SourceService:   &sourceService,
+				UserConfig:      make(map[string]interface{}),
+			}
+			apiServiceIntegrations = append(apiServiceIntegrations, apiIntegration)
+		}
+	}
 	var vpcIDPointer *string
 	if len(vpcID) > 0 {
 		_, vpcID := splitResourceID2(vpcID)
@@ -382,6 +417,7 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 			MaintenanceWindow:     getMaintenanceWindow(d),
 			Plan:                  d.Get("plan").(string),
 			ProjectVPCID:          vpcIDPointer,
+			ServiceIntegrations:   apiServiceIntegrations,
 			ServiceName:           d.Get("service_name").(string),
 			ServiceType:           serviceType,
 			TerminationProtection: d.Get("termination_protection").(bool),
