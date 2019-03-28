@@ -253,6 +253,27 @@ func resourceService() *schema.Resource {
 						GetUserConfigSchema("service")["kafka"].(map[string]interface{})),
 				},
 			},
+			"mysql": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Computed:    true,
+				Description: "MySQL specific server provided values",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{},
+				},
+			},
+			"mysql_user_config": {
+				Type:             schema.TypeList,
+				MaxItems:         1,
+				Optional:         true,
+				Description:      "MySQL specific user configurable settings",
+				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+				Elem: &schema.Resource{
+					Schema: GenerateTerraformUserConfigSchema(
+						GetUserConfigSchema("service")["mysql"].(map[string]interface{})),
+				},
+			},
 			"pg": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
@@ -544,6 +565,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	d.Set("grafana", []map[string]interface{}{})
 	d.Set("influxdb", []map[string]interface{}{})
 	d.Set("kafka", []map[string]interface{}{})
+	d.Set("mysql", []map[string]interface{}{})
 	d.Set("pg", []map[string]interface{}{})
 	d.Set("redis", []map[string]interface{}{})
 
@@ -561,6 +583,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 		props["connect_uri"] = connectionInfo.KafkaConnectURI
 		props["rest_uri"] = connectionInfo.KafkaRestURI
 		props["schema_registry_uri"] = connectionInfo.SchemaRegistryURI
+	case "mysql":
 	case "pg":
 		if connectionInfo.PostgresURIs != nil && len(connectionInfo.PostgresURIs) > 0 {
 			props["uri"] = connectionInfo.PostgresURIs[0]
