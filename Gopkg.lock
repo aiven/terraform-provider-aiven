@@ -4,7 +4,7 @@
 [[projects]]
   name = "github.com/aiven/aiven-go-client"
   packages = ["."]
-  revision = "44678f01dd9aaed3497f4734488423ad84c578a2"
+  revision = "711316fd5965f7f3ca90794ecd353718c7703f79"
   source = "github.com/aiven/aiven-go-client"
 
 [[projects]]
@@ -236,6 +236,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6258eee6d53182ef105dbb91e03f36ef517ff40003cba41f20945098b5940107"
+  inputs-digest = "f5546a132abcd89f1f323ec694018020fcf791f9b7fe0e439c59cdb04b14b299"
   solver-name = "gps-cdcl"
   solver-version = 1
