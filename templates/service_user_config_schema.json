@@ -38,6 +38,23 @@
           "null"
         ]
       },
+      "elasticsearch": {
+        "additional_properties": false,
+        "properties": {
+          "reindex_remote_whitelist": {
+            "items": {
+              "example": "anotherservice.aivencloud.com:12398",
+              "pattern": "^[a-z0-9-_.]+:[0-9]+$",
+              "title": "Address (hostname:port or IP:port)",
+              "type": "string"
+            },
+            "title": "Whitelisted addresses for reindexing. Changing this value will cause all Elasticsearch instances to restart.",
+            "type": "array"
+          }
+        },
+        "title": "Elasticsearch settings",
+        "type": "object"
+      },
       "elasticsearch_version": {
         "enum": [
           "2",
@@ -49,6 +66,35 @@
           "string",
           "null"
         ]
+      },
+      "index_patterns": {
+        "items": {
+          "additionalProperties": false,
+          "description": "Allows you to create glob style patterns and set a max number of indexes matching thispattern you want to keep. Creating indexes exceeding this value will cause the oldest one to getdeleted. You could for example create a pattern looking like 'logs.?' and then create index logs.1,logs.2 etc, it will delete logs.1 once you create logs.6. Note: Setting max_index_count to 0 will donothing and the pattern gets ignored.",
+          "properties": {
+            "max_index_count": {
+              "example": 3,
+              "maximum": 9223372036854776000,
+              "minimum": 0,
+              "title": "Maximum number of indexes to keep",
+              "type": "integer"
+            },
+            "pattern": {
+              "example": "logs_*_foo_*",
+              "pattern": "^[A-z0-9-.*?]+$",
+              "title": "fnmatch pattern",
+              "type": "string"
+            }
+          },
+          "required": [
+            "pattern",
+            "max_index_count"
+          ],
+          "title": "Glob pattern and number of indexes matching that pattern to be kept",
+          "type": "object"
+        },
+        "title": "List of index patterns",
+        "type": "array"
       },
       "ip_filter": {
         "default": [
@@ -62,6 +108,25 @@
         "maxItems": 100,
         "title": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
         "type": "array"
+      },
+      "kibana": {
+        "additional_properties": false,
+        "properties": {
+          "enabled": {
+            "default": true,
+            "title": "Enable or disable Kibana",
+            "type": "boolean"
+          },
+          "max_old_space_size": {
+            "default": 128,
+            "maximum": 1024,
+            "minimum": 64,
+            "title": "Limits the maximum amount of memory (in MiB) the Kibana process can use. This sets the max_old_space_size option of the nodejs running the Kibana. Note: the memory reserved by Kibana is not available for Elasticsearch.",
+            "type": "integer"
+          }
+        },
+        "title": "Kibana settings",
+        "type": "object"
       },
       "max_index_count": {
         "default": 0,
@@ -268,6 +333,14 @@
         "title": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
         "type": "array"
       },
+      "metrics_enabled": {
+        "example": true,
+        "title": "Enable Grafana /metrics endpoint",
+        "type": [
+          "boolean",
+          "null"
+        ]
+      },
       "smtp_server": {
         "additionalproperties": false,
         "properties": {
@@ -427,6 +500,18 @@
             "title": "Enable auto creation of topics",
             "type": "boolean"
           },
+          "compression_type": {
+            "enum": [
+              "gzip",
+              "snappy",
+              "lz4",
+              "zstd",
+              "uncompressed",
+              "producer"
+            ],
+            "title": "Specify the final compression type for a given topic. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'uncompressed' which is equivalent to no compression; and 'producer' which means retain the original compression codec set by the producer.",
+            "type": "string"
+          },
           "default_replication_factor": {
             "maximum": 10,
             "minimum": 1,
@@ -473,6 +558,18 @@
             "title": "The number of hours to keep a log file before deleting it",
             "type": "integer"
           },
+          "log_segment_bytes": {
+            "maximum": 1073741824,
+            "minimum": 10485760,
+            "title": "The maximum size of a single log file",
+            "type": "integer"
+          },
+          "max_connections_per_ip": {
+            "maximum": 2147483647,
+            "minimum": 256,
+            "title": "The maximum number of connections allowed from each ip address (defaults to 2147483647).",
+            "type": "integer"
+          },
           "message_max_bytes": {
             "default": 1000012,
             "maximum": 100001200,
@@ -488,9 +585,33 @@
           },
           "offsets_retention_minutes": {
             "default": 1440,
-            "maximum": 14400,
+            "maximum": 129600,
             "minimum": 1,
             "title": "Log retention window in minutes for offsets topic",
+            "type": "integer"
+          },
+          "producer_purgatory_purge_interval_requests": {
+            "maximum": 10000,
+            "minimum": 10,
+            "title": "The purge interval (in number of requests) of the producer request purgatory(defaults to 1000).",
+            "type": "integer"
+          },
+          "replica_fetch_max_bytes": {
+            "maximum": 104857600,
+            "minimum": 1048576,
+            "title": "The number of bytes of messages to attempt to fetch for each partition (defaults to 1048576). This is not an absolute maximum, if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made.",
+            "type": "integer"
+          },
+          "replica_fetch_response_max_bytes": {
+            "maximum": 1048576000,
+            "minimum": 10485760,
+            "title": "Maximum bytes expected for the entire fetch response (defaults to 10485760). Records are fetched in batches, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made. As such, this is not an absolute maximum.",
+            "type": "integer"
+          },
+          "socket_request_max_bytes": {
+            "maximum": 209715200,
+            "minimum": 10485760,
+            "title": "The maximum number of bytes in a socket request (defaults to 104857600).",
             "type": "integer"
           }
         },
@@ -510,11 +631,28 @@
       "kafka_rest_config": {
         "additionalProperties": false,
         "properties": {
+          "consumer_enable_auto_commit": {
+            "default": true,
+            "title": "If true the consumer's offset will be periodically committed to Kafka in the background",
+            "type": "boolean"
+          },
           "consumer_request_max_bytes": {
             "default": 67108864,
             "maximum": 671088640,
             "minimum": 0,
             "title": "Maximum number of bytes in unencoded message keys and values by a single request",
+            "type": "integer"
+          },
+          "consumer_request_timeout_ms": {
+            "default": 1000,
+            "enum": [
+              1000,
+              15000,
+              30000
+            ],
+            "maximum": 30000,
+            "minimum": 1000,
+            "title": "The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached",
             "type": "integer"
           },
           "producer_acks": {
@@ -534,6 +672,13 @@
             "minimum": 0,
             "title": "Wait for up to the given delay to allow batching records together",
             "type": "integer"
+          },
+          "simpleconsumer_pool_size_max": {
+            "default": 25,
+            "maximum": 250,
+            "minimum": 10,
+            "title": "Maximum number of SimpleConsumers that can be instantiated per broker",
+            "type": "integer"
           }
         },
         "title": "Kafka REST configuration",
@@ -543,7 +688,8 @@
         "enum": [
           "1.0",
           "1.1",
-          "2.0"
+          "2.0",
+          "2.1"
         ],
         "title": "Kafka major version",
         "type": [
@@ -551,10 +697,120 @@
           "null"
         ]
       },
+      "public_access": {
+        "additionalProperties": false,
+        "properties": {
+          "kafka": {
+            "example": true,
+            "title": "Create a public address-only Kafka listener port. Allows access to it when in a project VPC",
+            "type": "boolean"
+          }
+        },
+        "title": "Allow access to selected service ports from the public Internet",
+        "type": "object"
+      },
       "schema_registry": {
         "default": false,
         "title": "Enable Schema-Registry service",
         "type": "boolean"
+      }
+    },
+    "type": "object"
+  },
+  "mysql": {
+    "additionalProperties": false,
+    "properties": {
+      "admin_password": {
+        "createOnly": true,
+        "default": null,
+        "example": "z66o9QXqKM",
+        "title": "Custom password for admin user. Defaults to random string. This must be set only when a new service is being created.",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "admin_username": {
+        "createOnly": true,
+        "default": "avnadmin",
+        "example": "avnadmin",
+        "title": "Custom username for admin user. This must be set only when a new service is being created.",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "backup_hour": {
+        "default": null,
+        "example": 3,
+        "maximum": 23,
+        "minimum": 0,
+        "title": "The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.",
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "backup_minute": {
+        "default": null,
+        "example": 30,
+        "maximum": 59,
+        "minimum": 0,
+        "title": "The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.",
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "ip_filter": {
+        "default": [
+          "0.0.0.0/0"
+        ],
+        "items": {
+          "example": "10.20.0.0/16",
+          "title": "CIDR address block",
+          "type": "string"
+        },
+        "maxItems": 100,
+        "title": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+        "type": "array"
+      },
+      "mysql": {
+        "additionalProperties": false,
+        "properties": {},
+        "title": "mysql.conf configuration values",
+        "type": "object"
+      },
+      "mysql_version": {
+        "enum": [
+          "8"
+        ],
+        "title": "MySQL major version",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "recovery_target_time": {
+        "createOnly": true,
+        "default": null,
+        "example": "2019-01-01 23:34:45",
+        "format": "date-time",
+        "title": "Recovery target time when forking a service. This has effect only when a new service is being created.",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "service_to_fork_from": {
+        "createOnly": true,
+        "default": null,
+        "example": "anotherservicename",
+        "title": "Name of another service to fork from. This has effect only when a new service is being created.",
+        "type": [
+          "string",
+          "null"
+        ]
       }
     },
     "type": "object"
@@ -703,6 +959,12 @@
             "title": "PostgreSQL maximum prepared transactions",
             "type": "integer"
           },
+          "max_stack_depth": {
+            "maximum": 6291456,
+            "minimum": 2097152,
+            "title": "Maximum depth of the stack in bytes",
+            "type": "integer"
+          },
           "max_standby_archive_delay": {
             "maximum": 43200000,
             "minimum": 1,
@@ -785,7 +1047,6 @@
       },
       "pg_version": {
         "enum": [
-          "9.3",
           "9.5",
           "9.6",
           "10",
@@ -817,9 +1078,9 @@
       "recovery_target_time": {
         "createOnly": true,
         "default": null,
-        "example": "2010-01-01 23:34:45",
+        "example": "2019-01-01 23:34:45",
         "format": "date-time",
-        "title": "PostgreSQL recovery_target_time. This has effect only when a new service is being created.",
+        "title": "Recovery target time when forking a service. This has effect only when a new service is being created.",
         "type": [
           "string",
           "null"
