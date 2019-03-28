@@ -391,7 +391,7 @@ func convertTerraformUserConfigValueToAPICompatibleFormat(
 				panic(fmt.Sprintf("Invalid %v user config key type %T for %v, expected map", serviceType, value, key))
 			}
 			asList := value.([]interface{})
-			if len(asList) == 0 {
+			if len(asList) == 0 || (len(asList) == 1 && asList[0] == nil) {
 				omit = true
 			} else {
 				asMap := asList[0].(map[string]interface{})
