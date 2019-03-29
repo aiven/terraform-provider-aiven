@@ -218,6 +218,24 @@ connection URI for the actual Elasticsearch service itself). Note the need for u
 `.0` when accessing the values due to Terraform's restrictions in defining nested
 schematized values. These values cannot be set, only read.
 
+``service_integrations`` can be used to define service integrations that must exist
+immediately upon service creation. By the time of writing the only such integration is
+defining that MySQL service is a read-replica of another service. To define a read-
+replica the following configuration needs to be added:
+
+```
+service_integrations {
+    integration_type = "read_replica"
+    source_service_name = "${aiven_service.mysourceservice.service_name}"
+}
+```
+
+Making changes to the service integrations as well as removing the service integration
+requires defining an explicit ``aiven_service_integration`` resource with the same
+attributes (plus ``project`` and ``destination_service_name`` attributes); the backend
+will handle creation of an existing read-replica integration as a no-op and will just
+return the identifier of the existing integration.
+
 Aiven ID format when importing existing resource: ``<project_name>/<service_name>``.
 
 ### Resource Database

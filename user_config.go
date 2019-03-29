@@ -124,7 +124,8 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 		}
 	case "array":
 		var itemType schema.ValueType
-		typeString := definition["items"].(map[string]interface{})["type"].(string)
+		itemDefinition := definition["items"].(map[string]interface{})
+		typeString := itemDefinition["type"].(string)
 		switch typeString {
 		case "number":
 			itemType = schema.TypeFloat
@@ -134,6 +135,8 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 			itemType = schema.TypeBool
 		case "string":
 			itemType = schema.TypeString
+		case "object":
+			itemType = schema.TypeList
 		default:
 			panic(fmt.Sprintf("Unexpected user config schema array item type: %T / %v", typeString, typeString))
 		}
@@ -147,17 +150,23 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 			diffFunction = ipFilterArrayDiffSuppressFunc
 			valueDiffFunction = ipFilterValueDiffSuppressFunc
 		}
+		var elem interface{}
+		if itemType == schema.TypeList {
+			elem = &schema.Resource{Schema: GenerateTerraformUserConfigSchema(itemDefinition)}
+		} else {
+			elem = &schema.Schema{
+				DiffSuppressFunc: valueDiffFunction,
+				Type:             itemType,
+			}
+		}
 		return &schema.Schema{
 			Description:      title,
 			DiffSuppressFunc: diffFunction,
-			Elem: &schema.Schema{
-				DiffSuppressFunc: valueDiffFunction,
-				Type:             itemType,
-			},
-			MaxItems:  maxItems,
-			Optional:  true,
-			Sensitive: sensitive,
-			Type:      schema.TypeList,
+			Elem:             elem,
+			MaxItems:         maxItems,
+			Optional:         true,
+			Sensitive:        sensitive,
+			Type:             schema.TypeList,
 		}
 	default:
 		panic(fmt.Sprintf("Unexpected user config schema type: %T / %v", valueType, valueType))
@@ -385,23 +394,25 @@ func convertTerraformUserConfigValueToAPICompatibleFormat(
 		if value == nil {
 			omit = true
 		} else {
-			switch value.(type) {
-			case []interface{}:
-			default:
-				panic(fmt.Sprintf("Invalid %v user config key type %T for %v, expected map", serviceType, value, key))
-			}
-			asList := value.([]interface{})
-			if len(asList) == 0 {
-				omit = true
-			} else {
-				asMap := asList[0].(map[string]interface{})
-				if len(asMap) == 0 {
+			if asList, isList := value.([]interface{}); isList {
+				if len(asList) == 0 || (len(asList) == 1 && asList[0] == nil) {
 					omit = true
 				} else {
-					convertedValue = convertTerraformUserConfigToAPICompatibleFormat(
-						serviceType, newResource, asMap, definition["properties"].(map[string]interface{}),
-					)
+					asMap := asList[0].(map[string]interface{})
+					if len(asMap) == 0 {
+						omit = true
+					} else {
+						convertedValue = convertTerraformUserConfigToAPICompatibleFormat(
+							serviceType, newResource, asMap, definition["properties"].(map[string]interface{}),
+						)
+					}
 				}
+			} else if asMap, isMap := value.(map[string]interface{}); isMap {
+				convertedValue = convertTerraformUserConfigToAPICompatibleFormat(
+					serviceType, newResource, asMap, definition["properties"].(map[string]interface{}),
+				)
+			} else {
+				panic(fmt.Sprintf("Invalid %v user config key type %T for %v, expected map", serviceType, value, key))
 			}
 		}
 	case "array":

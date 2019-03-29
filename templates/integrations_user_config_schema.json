@@ -9,13 +9,18 @@
     "title": "Integration user config",
     "type": "object"
   },
+  "jolokia": {
+    "additionalProperties": true,
+    "title": "Integration user config",
+    "type": "object"
+  },
   "logs": {
     "additionalProperties": false,
     "properties": {
       "elasticsearch_index_days_max": {
         "default": 3,
         "example": 5,
-        "maximum": 100,
+        "maximum": 10000,
         "minimum": 1,
         "title": "Elasticsearch index retention limit",
         "type": "integer"
@@ -33,6 +38,36 @@
   },
   "metrics": {
     "additionalProperties": true,
+    "properties": {
+      "database": {
+        "example": "metrics",
+        "pattern": "^[_A-Za-z0-9][-_A-Za-z0-9]{0,39}$",
+        "title": "Name of the database where to store metric datapoints. Only affects PostgreSQL destinations. Defaults to 'metrics'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.",
+        "type": "string",
+        "user_error": "Must consist of alpha-numeric characters, underscores or dashes, may not start with dash, max 40 characters"
+      },
+      "retention_days": {
+        "example": 30,
+        "maximum": 10000,
+        "minimum": 0,
+        "title": "Number of days to keep old metrics. Only affects PostgreSQL destinations. Set to 0 for no automatic cleanup. Defaults to 30 days.",
+        "type": "integer"
+      },
+      "ro_username": {
+        "example": "metrics_reader",
+        "pattern": "^[_A-Za-z0-9][-._A-Za-z0-9]{0,39}$",
+        "title": "Name of a user that can be used to read metrics. This will be used for Grafana integration (if enabled) to prevent Grafana users from making undesired changes. Only affects PostgreSQL destinations. Defaults to 'metrics_reader'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.",
+        "type": "string",
+        "user_error": "Must consist of alpha-numeric characters, dots, underscores or dashes, may not start with dash or dot, max 40 characters"
+      },
+      "username": {
+        "example": "metrics_writer",
+        "pattern": "^[_A-Za-z0-9][-._A-Za-z0-9]{0,39}$",
+        "title": "Name of the user used to write metrics. Only affects PostgreSQL destinations. Defaults to 'metrics_writer'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.",
+        "type": "string",
+        "user_error": "Must consist of alpha-numeric characters, dots, underscores or dashes, may not start with dash or dot, max 40 characters"
+      }
+    },
     "title": "Integration user config",
     "type": "object"
   },
@@ -51,6 +86,11 @@
     "type": "object"
   },
   "prometheus": {
+    "additionalProperties": true,
+    "title": "Integration user config",
+    "type": "object"
+  },
+  "read_replica": {
     "additionalProperties": true,
     "title": "Integration user config",
     "type": "object"
