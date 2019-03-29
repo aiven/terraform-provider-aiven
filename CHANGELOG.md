@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.7] - 2019-03-29
+Support managing MySQL services. Update all service and integration
+configuration attributes match latest definitions from server.
+
 ## [1.0.6] - 2019-03-11
 Fix service_port type to make it properly available.
 Use latest service info on create/update to make service specific
