@@ -3,9 +3,12 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"strings"
+	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -113,4 +116,41 @@ func copyVPCPropertiesFromAPIResponseToTerraform(d *schema.ResourceData, vpc *ai
 	d.Set("state", vpc.State)
 
 	return nil
+}
+
+// ProjectVPCActiveWaiter is used to wait for VPC to enter active state. This check needs to be
+// performed before creating a service that has a project VPC to ensure there has been sufficient
+// time for other actions that update the state to have been completed
+type ProjectVPCActiveWaiter struct {
+	Client  *aiven.Client
+	Project string
+	VPCID   string
+}
+
+// RefreshFunc will call the Aiven client and refresh it's state.
+func (w *ProjectVPCActiveWaiter) RefreshFunc() resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		vpc, err := w.Client.VPCs.Get(w.Project, w.VPCID)
+
+		if err != nil {
+			return nil, "", err
+		}
+
+		log.Printf("[DEBUG] Got %s state while waiting for VPC connection to be ACTIVE.", vpc.State)
+
+		return vpc, vpc.State, nil
+	}
+}
+
+// Conf sets up the configuration to refresh.
+func (w *ProjectVPCActiveWaiter) Conf() *resource.StateChangeConf {
+	state := &resource.StateChangeConf{
+		Pending: []string{"APPROVED"},
+		Target:  []string{"ACTIVE"},
+		Refresh: w.RefreshFunc(),
+	}
+	state.Delay = 10 * time.Second
+	state.Timeout = 2 * time.Minute
+	state.MinTimeout = 2 * time.Second
+	return state
 }

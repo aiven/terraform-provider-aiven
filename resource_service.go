@@ -405,13 +405,20 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 			apiServiceIntegrations = append(apiServiceIntegrations, apiIntegration)
 		}
 	}
+	project := d.Get("project").(string)
 	var vpcIDPointer *string
 	if len(vpcID) > 0 {
 		_, vpcID := splitResourceID2(vpcID)
 		vpcIDPointer = &vpcID
+		// Make sure the VPC is active before trying to create the service. Service creation will fail otherwise
+		waiter := ProjectVPCActiveWaiter{Client: client, Project: project, VPCID: vpcID}
+		_, vpcError := waiter.Conf().WaitForState()
+		if vpcError != nil {
+			return fmt.Errorf("error waiting for Aiven project VPC to be ACTIVE: %s", vpcError)
+		}
 	}
 	_, err := client.Services.Create(
-		d.Get("project").(string),
+		project,
 		aiven.CreateServiceRequest{
 			Cloud:                 d.Get("cloud_name").(string),
 			MaintenanceWindow:     getMaintenanceWindow(d),
