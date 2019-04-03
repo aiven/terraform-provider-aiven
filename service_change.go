@@ -65,6 +65,20 @@ func kafkaServicesReady(service *aiven.Service) bool {
 
 	userConfig := service.UserConfig
 
+	// If the service is in VPC or has IP filter then direct connections to Kafka aux services
+	// will fail unless Terraform plan is applied from a machine in the accepted network, which
+	// is often not the case. Just don't wait for the aux sevices if they might not be reachable
+	// due to network configuration.
+	ipFilter, ok := userConfig["ip_filter"]
+	var ipFilterArray []interface{}
+	if ok {
+		ipFilterArray, ok = ipFilter.([]interface{})
+	}
+	if (service.ProjectVPCID != nil && *service.ProjectVPCID != "") ||
+		(ok && (len(ipFilterArray) != 1 || ipFilterArray[0] != "0.0.0.0/0")) {
+		return true
+	}
+
 	ready := true
 	if enabled, ok := userConfig["kafka_rest"]; ok && enabled.(bool) {
 		ready = uriReachable(service.ConnectionInfo.KafkaRestURI)
