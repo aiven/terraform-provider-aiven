@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.8] - 2019-04-03
+Wait for VPC to reach active state before creating service.
+Don't wait for Kafka aux services if network restrictions may apply.
+
 ## [1.0.7] - 2019-03-29
 Support managing MySQL services. Update all service and integration
 configuration attributes match latest definitions from server.
