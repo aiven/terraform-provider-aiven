@@ -27,7 +27,7 @@ update-vendor:
 #################################################
 
 bins: vendor
-	GOOS=linux GOARCH=amd64 packr build -o terraform-provider-aiven-linux_amd64 .
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 packr build -o terraform-provider-aiven-linux_amd64 .
 	GOOS=darwin GOARCH=amd64 packr build -o terraform-provider-aiven-darwin_amd64 .
 
 #################################################
