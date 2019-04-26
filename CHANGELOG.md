@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.0.9] - 2019-04-26
+Build with CGO_ENABLED=0.
+
 ## [1.0.8] - 2019-04-03
 Wait for VPC to reach active state before creating service.
 Don't wait for Kafka aux services if network restrictions may apply.
