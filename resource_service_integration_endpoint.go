@@ -65,6 +65,16 @@ func resourceServiceIntegrationEndpoint() *schema.Resource {
 				Optional: true,
 				Type:     schema.TypeList,
 			},
+			"rsyslog_user_config": {
+				Description: "rsyslog specific user configurable settings",
+				Elem: &schema.Resource{
+					Schema: GenerateTerraformUserConfigSchema(
+						GetUserConfigSchema("endpoint")["rsyslog"].(map[string]interface{})),
+				},
+				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
 		},
 	}
 }

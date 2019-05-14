@@ -94,5 +94,10 @@
     "additionalProperties": true,
     "title": "Integration user config",
     "type": "object"
+  },
+  "rsyslog": {
+    "additionalProperties": true,
+    "title": "Integration user config",
+    "type": "object"
   }
 }
