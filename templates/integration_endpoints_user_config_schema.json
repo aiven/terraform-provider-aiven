@@ -75,5 +75,56 @@
       }
     },
     "type": "object"
+  },
+  "rsyslog": {
+    "additionalProperties": false,
+    "properties": {
+      "server": {
+        "example": "logs.example.com",
+        "title": "DNS or IPv4 address of the server",
+        "type": "string"
+      },
+      "port": {
+        "example": 514,
+        "minimum": 0,
+        "maximum": 65535,
+        "title": "Port to connect to",
+        "type": "integer"
+      },
+      "format": {
+        "example": "rfc5424",
+        "pattern": "^(rfc3164|rfc5424)$",
+        "title": "Log format, either rfc3164 or rfc5424",
+        "type": "string"
+      },
+      "tls": {
+        "example": true,
+        "title": "Use TLS",
+        "type": "boolean"
+      },
+      "sd": {
+        "title": "Content of the structured data block of rfc5424 message",
+        "type": "string"
+      },
+      "ca": {
+        "title": "PEM format certificate authority to use for verifying the server's certificate",
+        "type": "string"
+      },
+      "key": {
+        "title": "PEM format client key for client authentication",
+        "type": "string"
+      },
+      "cert": {
+        "title": "PEM format client cert for client authentication",
+        "type": "string"
+      }
+    },
+    "required": [
+      "server",
+      "port",
+      "format",
+      "tls"
+    ],
+    "type": "object"
   }
 }
