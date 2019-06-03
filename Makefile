@@ -31,12 +31,12 @@ bins: vendor
 test: vendor
 	CGO_ENABLED=0 go test -v ./...
 
-lint:
+lint: vendor
 	golangci-lint run -D errcheck
 
 clean:
 	go mod tidy
 	rm -rf vendor
-	rm -f terraform-provided-aiven-*_amd64
+	rm -f terraform-provider-aiven-*_amd64
 
 .PHONY: test lint vendor bootstrap

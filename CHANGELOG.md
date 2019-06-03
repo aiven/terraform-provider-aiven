@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.10] - 2019-06-10
+Switch to using go.mod
+Support cross-region VPC Peering.
+
 ## [1.0.9] - 2019-04-26
 Build with CGO_ENABLED=0.
 
