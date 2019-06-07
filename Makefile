@@ -6,7 +6,7 @@ ci: lint bins
 #################################################
 
 bootstrap:
-	curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $$(go env GOPATH)
+	curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $$(go env GOPATH)/bin
 	go get github.com/gobuffalo/packr/...
 
 vendor:
