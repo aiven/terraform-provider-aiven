@@ -4,52 +4,39 @@ ci: lint bins
 #################################################
 # Bootstrapping for base golang package deps
 #################################################
-BOOTSTRAP=\
-	github.com/golang/dep/cmd/dep \
-	github.com/alecthomas/gometalinter \
-	github.com/gobuffalo/packr/...
 
-$(BOOTSTRAP):
-	go get -u $@
+bootstrap:
+	curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $$(go env GOPATH)
+	go get github.com/gobuffalo/packr/...
 
-bootstrap: $(BOOTSTRAP)
-	gometalinter --install
-
-vendor: Gopkg.lock
-	dep ensure -v -vendor-only
+vendor:
+	go mod tidy
+	go mod vendor
 
 update-vendor:
 
-.PHONY: $(BOOTSTRAP)
 
 #################################################
 # Building
 #################################################
 
 bins: vendor
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 packr build -o terraform-provider-aiven-linux_amd64 .
-	GOOS=darwin GOARCH=amd64 packr build -o terraform-provider-aiven-darwin_amd64 .
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 packr build -mod=vendor -o terraform-provider-aiven-linux_amd64 .
+	GOOS=darwin GOARCH=amd64 packr build -mod=vendor -o terraform-provider-aiven-darwin_amd64 .
 
 #################################################
 # Testing and linting
 #################################################
-LINTERS=\
-	gofmt \
-	golint \
-	staticcheck \
-	vet \
-	misspell \
-	ineffassign \
-	deadcode
-METALINT=gometalinter --tests --disable-all --vendor --deadline=5m -e "zz_.*\.go" \
-	 ./... --enable
 
 test: vendor
 	CGO_ENABLED=0 go test -v ./...
 
-lint: $(LINTERS)
+lint:
+	golangci-lint run -D errcheck
 
-$(LINTERS): vendor
-	$(METALINT) $@
+clean:
+	go mod tidy
+	rm -rf vendor
+	rm -f terraform-provided-aiven-*_amd64
 
-.PHONY: $(LINTERS) test lint
+.PHONY: test lint vendor bootstrap
