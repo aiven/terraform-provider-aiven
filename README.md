@@ -509,6 +509,7 @@ resource "aiven_vpc_peering_connection" "mypeeringconnection" {
     vpc_id = "${aiven_project_vpc.myvpc.id}"
     peer_cloud_account = "<PEER_ACCOUNT_ID>"
     peer_vpc = "<PEER_VPC_ID/NAME>"
+    peer_region = "<PEER_REGION>"
 }
 ```
 
@@ -519,10 +520,13 @@ peered with.
 
 ``peer_vpc`` defines the identifier or name of the remote VPC.
 
+``peer_region`` defines the region of the remote VPC if it is not in the same region as Aiven VPC.
+
 Computed property ``state`` tells the current state of the VPC. This property cannot be
 set, only read.
 
 Aiven ID format when importing existing resource: ``<project_name>/<VPC_UUID>/<peer_cloud_account>/<peer_vpc>``.
+Aiven ID format when importing existing cross-region resource: ``<project_name>/<VPC_UUID>/<peer_cloud_account>/<peer_vpc>/peer_region``.
 The UUID is not directly visible in the Aiven web console.
 
 ## Credits

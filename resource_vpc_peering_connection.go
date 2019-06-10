@@ -41,6 +41,15 @@ func resourceVPCPeeringConnection() *schema.Resource {
 				Required:    true,
 				Type:        schema.TypeString,
 			},
+			"peer_region": {
+				Description: "AWS region of the peered VPC (if not in the same region as Aiven VPC)",
+				ForceNew:    true,
+				Optional:    true,
+				Type:        schema.TypeString,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return new == ""
+				},
+			},
 			"state": {
 				Computed:    true,
 				Description: "State of the peering connection",
@@ -56,14 +65,26 @@ func resourceVPCPeeringConnection() *schema.Resource {
 }
 
 func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) error {
+	var (
+		pc     *aiven.VPCPeeringConnection
+		err    error
+		region *string
+	)
+
 	client := m.(*aiven.Client)
 	projectName, vpcID := splitResourceID2(d.Get("vpc_id").(string))
-	pc, err := client.VPCPeeringConnections.Create(
+	peerRegion := d.Get("peer_region").(string)
+
+	if peerRegion != "" {
+		region = &peerRegion
+	}
+	pc, err = client.VPCPeeringConnections.Create(
 		projectName,
 		vpcID,
 		aiven.CreateVPCPeeringConnectionRequest{
 			PeerCloudAccount: d.Get("peer_cloud_account").(string),
 			PeerVPC:          d.Get("peer_vpc").(string),
+			PeerRegion:       region,
 		},
 	)
 
@@ -78,6 +99,7 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 		VPCID:            vpcID,
 		PeerCloudAccount: pc.PeerCloudAccount,
 		PeerVPC:          pc.PeerVPC,
+		PeerRegion:       pc.PeerRegion,
 	}
 	res, err := w.Conf().WaitForState()
 	if err != nil {
@@ -85,15 +107,34 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 	}
 
 	pc = res.(*aiven.VPCPeeringConnection)
-	d.SetId(buildResourceID(projectName, vpcID, pc.PeerCloudAccount, pc.PeerVPC))
+	if peerRegion != "" {
+		d.SetId(buildResourceID(projectName, vpcID, pc.PeerCloudAccount, pc.PeerVPC, *pc.PeerRegion))
+	} else {
+		d.SetId(buildResourceID(projectName, vpcID, pc.PeerCloudAccount, pc.PeerVPC))
+	}
 	return copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, projectName, vpcID)
+}
+
+func parsePeeringVPCId(resourceID string) (string, string, string, string, *string) {
+	var peerRegion *string
+
+	parts := strings.Split(resourceID, "/")
+	projectName := parts[0]
+	vpcID := parts[1]
+	peerCloudAccount := parts[2]
+	peerVPC := parts[3]
+	if len(parts) > 4 {
+		peerRegion = new(string)
+		*peerRegion = parts[4]
+	}
+	return projectName, vpcID, peerCloudAccount, peerVPC, peerRegion
 }
 
 func resourceVPCPeeringConnectionRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-	projectName, vpcID, peerCloudAccount, peerVPC := splitResourceID4(d.Id())
-	pc, err := client.VPCPeeringConnections.Get(projectName, vpcID, peerCloudAccount, peerVPC)
+	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
+	pc, err := client.VPCPeeringConnections.GetVPCPeering(projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
 	if err != nil {
 		return err
 	}
@@ -104,15 +145,15 @@ func resourceVPCPeeringConnectionRead(d *schema.ResourceData, m interface{}) err
 func resourceVPCPeeringConnectionDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-	projectName, vpcID, peerCloudAccount, peerVPC := splitResourceID4(d.Id())
-	return client.VPCPeeringConnections.Delete(projectName, vpcID, peerCloudAccount, peerVPC)
+	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
+	return client.VPCPeeringConnections.DeleteVPCPeering(projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
 }
 
 func resourceVPCPeeringConnectionExists(d *schema.ResourceData, m interface{}) (bool, error) {
 	client := m.(*aiven.Client)
 
-	projectName, vpcID, peerCloudAccount, peerVPC := splitResourceID4(d.Id())
-	_, err := client.VPCPeeringConnections.Get(projectName, vpcID, peerCloudAccount, peerVPC)
+	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
+	_, err := client.VPCPeeringConnections.GetVPCPeering(projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
 	return resourceExists(err)
 }
 
@@ -138,6 +179,9 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 	d.Set("vpc_id", buildResourceID(project, vpcID))
 	d.Set("peer_cloud_account", peeringConnection.PeerCloudAccount)
 	d.Set("peer_vpc", peeringConnection.PeerVPC)
+	if peeringConnection.PeerRegion != nil {
+		d.Set("peer_region", peeringConnection.PeerRegion)
+	}
 	d.Set("state", peeringConnection.State)
 	if peeringConnection.StateInfo != nil {
 		peeringID, ok := (*peeringConnection.StateInfo)["aws_vpc_peering_connection_id"]
@@ -157,12 +201,13 @@ type VPCPeeringBuildWaiter struct {
 	VPCID            string
 	PeerCloudAccount string
 	PeerVPC          string
+	PeerRegion       *string
 }
 
 // RefreshFunc will call the Aiven client and refresh it's state.
 func (w *VPCPeeringBuildWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		pc, err := w.Client.VPCPeeringConnections.Get(w.Project, w.VPCID, w.PeerCloudAccount, w.PeerVPC)
+		pc, err := w.Client.VPCPeeringConnections.GetVPCPeering(w.Project, w.VPCID, w.PeerCloudAccount, w.PeerVPC, w.PeerRegion)
 
 		if err != nil {
 			return nil, "", err

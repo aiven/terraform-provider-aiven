@@ -102,11 +102,6 @@ func splitResourceID3(resourceID string) (string, string, string) {
 	return parts[0], parts[1], parts[2]
 }
 
-func splitResourceID4(resourceID string) (string, string, string, string) {
-	parts := splitResourceID(resourceID, 4)
-	return parts[0], parts[1], parts[2], parts[3]
-}
-
 func resourceExists(err error) (bool, error) {
 	if err == nil {
 		return true, nil
