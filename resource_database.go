@@ -10,6 +10,16 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+const defaultLC = "en_US.UTF-8"
+
+// handleLcDefaults checks if the lc values have actually changed
+func handleLcDefaults(k, old, new string, d *schema.ResourceData) bool {
+	// NOTE! not all database resources return lc_* values even if
+	// they are set when the database is created; best we can do is
+	// to assume it was created using the default value.
+	return new == "" || (old == "" && new == defaultLC) || old == new
+}
+
 func resourceDatabase() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDatabaseCreate,
@@ -41,18 +51,20 @@ func resourceDatabase() *schema.Resource {
 				ForceNew:    true,
 			},
 			"lc_collate": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "en_US.UTF-8",
-				Description: "Default string sort order (LC_COLLATE) of the database. Default value: en_US.UTF-8",
-				ForceNew:    true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          defaultLC,
+				Description:      "Default string sort order (LC_COLLATE) of the database. Default value: en_US.UTF-8",
+				ForceNew:         true,
+				DiffSuppressFunc: handleLcDefaults,
 			},
 			"lc_ctype": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "en_US.UTF-8",
-				Description: "Default character classification (LC_CTYPE) of the database. Default value: en_US.UTF-8",
-				ForceNew:    true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          defaultLC,
+				Description:      "Default character classification (LC_CTYPE) of the database. Default value: en_US.UTF-8",
+				ForceNew:         true,
+				DiffSuppressFunc: handleLcDefaults,
 			},
 		},
 	}
@@ -93,6 +105,7 @@ func resourceDatabaseRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("database_name", database.DatabaseName)
 	d.Set("lc_collate", database.LcCollate)
 	d.Set("lc_ctype", database.LcType)
+
 	return nil
 }
 
