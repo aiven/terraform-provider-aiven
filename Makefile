@@ -1,16 +1,17 @@
-ci: lint bins
 .PHONY: ci
+ci: lint bins
 
 #################################################
 # Bootstrapping for base golang package deps
 #################################################
 
 bootstrap:
-	curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $$(go env GOPATH)/bin
+	if [ -z "$$(which golangci-lint 2>/dev/null)" ]; then \
+ 	  curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $$(go env GOPATH)/bin; \
+	fi
 	go get github.com/gobuffalo/packr/...
 
 vendor:
-	go mod tidy
 	go mod vendor
 
 update-vendor:
@@ -35,7 +36,6 @@ lint: vendor
 	golangci-lint run -D errcheck
 
 clean:
-	go mod tidy
 	rm -rf vendor
 	rm -f terraform-provider-aiven-*_amd64
 

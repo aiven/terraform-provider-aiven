@@ -1,5 +1,4 @@
 terraform-provider-aiven-*
 terraform.tfvars
 *.tfstate*
-go.sum
 vendor/*
