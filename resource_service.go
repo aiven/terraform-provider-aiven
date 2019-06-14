@@ -60,11 +60,17 @@ func resourceService() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return new == ""
+				},
 			},
 			"maintenance_window_time": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return new == ""
+				},
 			},
 			"termination_protection": {
 				Type:        schema.TypeBool,
