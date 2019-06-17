@@ -38,7 +38,7 @@ func Provider() *schema.Provider {
 		},
 
 		ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {
-			return aiven.NewTokenClient(d.Get("api_token").(string))
+			return aiven.NewTokenClient(d.Get("api_token").(string), "terraform-provider-aiven/"+version)
 		},
 	}
 }
