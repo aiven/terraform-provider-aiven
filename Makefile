@@ -1,3 +1,5 @@
+version = $(shell git describe --long --tags 2>/dev/null || echo unknown-g`git describe --always`)
+
 .PHONY: ci
 ci: lint bins
 
@@ -22,8 +24,8 @@ update-vendor:
 #################################################
 
 bins: vendor
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 packr build -mod=vendor -o terraform-provider-aiven-linux_amd64 .
-	GOOS=darwin GOARCH=amd64 packr build -mod=vendor -o terraform-provider-aiven-darwin_amd64 .
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 packr build -mod=vendor -ldflags "-X main.version=${version}" -o terraform-provider-aiven-linux_amd64 .
+	GOOS=darwin GOARCH=amd64 packr build -mod=vendor -ldflags "-X main.version=${version}" -o terraform-provider-aiven-darwin_amd64 .
 
 #################################################
 # Testing and linting
