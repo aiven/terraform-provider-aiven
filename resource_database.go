@@ -103,6 +103,8 @@ func resourceDatabaseRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.Set("database_name", database.DatabaseName)
+	d.Set("project", projectName)
+	d.Set("service_name", serviceName)
 	d.Set("lc_collate", database.LcCollate)
 	d.Set("lc_ctype", database.LcType)
 
