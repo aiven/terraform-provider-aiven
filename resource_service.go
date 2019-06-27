@@ -81,6 +81,7 @@ func resourceService() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "URI for connecting to the service. Service specific info is under \"kafka\", \"pg\", etc.",
+				Sensitive:   true,
 			},
 			"service_host": {
 				Type:        schema.TypeString,
