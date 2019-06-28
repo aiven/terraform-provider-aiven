@@ -9,6 +9,11 @@
     "title": "Integration user config",
     "type": "object"
   },
+  "external_elasticsearch_logs": {
+    "additionalProperties": true,
+    "title": "Integration user config",
+    "type": "object"
+  },
   "jolokia": {
     "additionalProperties": true,
     "title": "Integration user config",
