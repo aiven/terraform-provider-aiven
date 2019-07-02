@@ -9,6 +9,31 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+var aivenProjectUserSchema = map[string]*schema.Schema{
+	"project": {
+		Description: "The project the user belongs to",
+		ForceNew:    true,
+		Required:    true,
+		Type:        schema.TypeString,
+	},
+	"email": {
+		Description: "Email address of the user",
+		ForceNew:    true,
+		Required:    true,
+		Type:        schema.TypeString,
+	},
+	"member_type": {
+		Description: "Project membership type. One of: admin, developer, operator",
+		Required:    true,
+		Type:        schema.TypeString,
+	},
+	"accepted": {
+		Computed:    true,
+		Description: "Whether the user has accepted project membership or not",
+		Type:        schema.TypeBool,
+	},
+}
+
 func resourceProjectUser() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceProjectUserCreate,
@@ -20,30 +45,7 @@ func resourceProjectUser() *schema.Resource {
 			State: resourceProjectUserState,
 		},
 
-		Schema: map[string]*schema.Schema{
-			"project": {
-				Description: "The project the user belongs to",
-				ForceNew:    true,
-				Required:    true,
-				Type:        schema.TypeString,
-			},
-			"email": {
-				Description: "Email address of the user",
-				ForceNew:    true,
-				Required:    true,
-				Type:        schema.TypeString,
-			},
-			"member_type": {
-				Description: "Project membership type. One of: admin, developer, operator",
-				Required:    true,
-				Type:        schema.TypeString,
-			},
-			"accepted": {
-				Computed:    true,
-				Description: "Whether the user has accepted project membership or not",
-				Type:        schema.TypeBool,
-			},
-		},
+		Schema: aivenProjectUserSchema,
 	}
 }
 

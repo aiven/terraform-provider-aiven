@@ -9,6 +9,39 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+var aivenKafkaACLSchema = map[string]*schema.Schema{
+	"project": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Project to link the Kafka ACL to",
+		ForceNew:    true,
+	},
+	"service_name": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Service to link the Kafka ACL to",
+		ForceNew:    true,
+	},
+	"permission": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Kafka permission to grant (admin, read, readwrite, write)",
+		ForceNew:    true,
+	},
+	"topic": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Topic name pattern for the ACL entry",
+		ForceNew:    true,
+	},
+	"username": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Username pattern for the ACL entry",
+		ForceNew:    true,
+	},
+}
+
 func resourceKafkaACL() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceKafkaACLCreate,
@@ -19,38 +52,7 @@ func resourceKafkaACL() *schema.Resource {
 			State: resourceKafkaACLState,
 		},
 
-		Schema: map[string]*schema.Schema{
-			"project": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Project to link the Kafka ACL to",
-				ForceNew:    true,
-			},
-			"service_name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Service to link the Kafka ACL to",
-				ForceNew:    true,
-			},
-			"permission": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Kafka permission to grant (admin, read, readwrite, write)",
-				ForceNew:    true,
-			},
-			"topic": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Topic name pattern for the ACL entry",
-				ForceNew:    true,
-			},
-			"username": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Username pattern for the ACL entry",
-				ForceNew:    true,
-			},
-		},
+		Schema: aivenKafkaACLSchema,
 	}
 }
 

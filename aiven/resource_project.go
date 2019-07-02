@@ -7,6 +7,53 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+var aivenProjectSchema = map[string]*schema.Schema{
+	"billing_address": {
+		Type:        schema.TypeString,
+		Description: "Billing name and address of the project",
+		Optional:    true,
+	},
+	"billing_emails": {
+		Type:        schema.TypeSet,
+		Description: "Billing contact emails of the project",
+		Elem:        &schema.Schema{Type: schema.TypeString},
+		Optional:    true,
+	},
+	"ca_cert": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "Project root CA. This is used by some services like Kafka to sign service certificate",
+		Optional:    true,
+	},
+	"card_id": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Credit card ID",
+	},
+	"copy_from_project": {
+		Type:             schema.TypeString,
+		Optional:         true,
+		Description:      "Copy properties from another project. Only has effect when a new project is created.",
+		DiffSuppressFunc: createOnlyDiffSuppressFunc,
+	},
+	"country_code": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Billing country code of the project",
+	},
+	"project": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Project name",
+	},
+	"technical_emails": {
+		Type:        schema.TypeSet,
+		Description: "Technical contact emails of the project",
+		Elem:        &schema.Schema{Type: schema.TypeString},
+		Optional:    true,
+	},
+}
+
 func resourceProject() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceProjectCreate,
@@ -18,52 +65,7 @@ func resourceProject() *schema.Resource {
 			State: resourceProjectState,
 		},
 
-		Schema: map[string]*schema.Schema{
-			"billing_address": {
-				Type:        schema.TypeString,
-				Description: "Billing name and address of the project",
-				Optional:    true,
-			},
-			"billing_emails": {
-				Type:        schema.TypeSet,
-				Description: "Billing contact emails of the project",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Optional:    true,
-			},
-			"ca_cert": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Project root CA. This is used by some services like Kafka to sign service certificate",
-				Optional:    true,
-			},
-			"card_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Credit card ID",
-			},
-			"copy_from_project": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Description:      "Copy properties from another project. Only has effect when a new project is created.",
-				DiffSuppressFunc: createOnlyDiffSuppressFunc,
-			},
-			"country_code": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Billing country code of the project",
-			},
-			"project": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Project name",
-			},
-			"technical_emails": {
-				Type:        schema.TypeSet,
-				Description: "Technical contact emails of the project",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Optional:    true,
-			},
-		},
+		Schema: aivenProjectSchema,
 	}
 }
 

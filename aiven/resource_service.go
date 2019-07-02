@@ -11,6 +11,377 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+var aivenServiceSchema = map[string]*schema.Schema{
+	"project": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Target project",
+		ForceNew:    true,
+	},
+	"cloud_name": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Cloud the service runs in",
+	},
+	"plan": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Subscription plan",
+	},
+	"service_name": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Service name",
+		ForceNew:    true,
+	},
+	"service_type": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Service type code",
+		ForceNew:    true,
+	},
+	"project_vpc_id": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Identifier of the VPC the service should be in, if any",
+	},
+	"maintenance_window_dow": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.",
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			return new == ""
+		},
+	},
+	"maintenance_window_time": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.",
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			return new == ""
+		},
+	},
+	"termination_protection": {
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Description: "Prevent service from being deleted. It is recommended to have this enabled for all services.",
+	},
+	"service_uri": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "URI for connecting to the service. Service specific info is under \"kafka\", \"pg\", etc.",
+		Sensitive:   true,
+	},
+	"service_host": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "Service hostname",
+	},
+	"service_integrations": {
+		Type:             schema.TypeList,
+		Optional:         true,
+		Description:      "Service integrations to specify when creating a service. Not applied after initial service creation",
+		DiffSuppressFunc: createOnlyDiffSuppressFunc,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"source_service_name": {
+					Type:        schema.TypeString,
+					Required:    true,
+					Description: "Name of the source service",
+				},
+				"integration_type": {
+					Type:        schema.TypeString,
+					Required:    true,
+					Description: "Type of the service integration. The only supported value at the moment is 'read_replica'",
+				},
+			},
+		},
+	},
+	"service_port": {
+		Type:        schema.TypeInt,
+		Computed:    true,
+		Description: "Service port",
+	},
+	"service_password": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "Password used for connecting to the service, if applicable",
+		Sensitive:   true,
+	},
+	"service_username": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "Username used for connecting to the service, if applicable",
+	},
+	"state": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "Service state",
+	},
+	"cassandra": {
+		Type:        schema.TypeList,
+		MaxItems:    1,
+		Computed:    true,
+		Description: "Cassandra specific server provided values",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{},
+		},
+	},
+	"cassandra_user_config": {
+		Type:             schema.TypeList,
+		MaxItems:         1,
+		Optional:         true,
+		Description:      "Cassandra specific user configurable settings",
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				GetUserConfigSchema("service")["cassandra"].(map[string]interface{})),
+		},
+	},
+	"elasticsearch": {
+		Type:        schema.TypeList,
+		MaxItems:    1,
+		Computed:    true,
+		Description: "Elasticsearch specific server provided values",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"kibana_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "URI for Kibana frontend",
+					Sensitive:   true,
+				},
+			},
+		},
+	},
+	"elasticsearch_user_config": {
+		Type:             schema.TypeList,
+		MaxItems:         1,
+		Optional:         true,
+		Description:      "Elasticsearch specific user configurable settings",
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				GetUserConfigSchema("service")["elasticsearch"].(map[string]interface{})),
+		},
+	},
+	"grafana": {
+		Type:        schema.TypeList,
+		MaxItems:    1,
+		Computed:    true,
+		Description: "Grafana specific server provided values",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{},
+		},
+	},
+	"grafana_user_config": {
+		Type:             schema.TypeList,
+		MaxItems:         1,
+		Optional:         true,
+		Description:      "Grafana specific user configurable settings",
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				GetUserConfigSchema("service")["grafana"].(map[string]interface{})),
+		},
+	},
+	"influxdb": {
+		Type:        schema.TypeList,
+		MaxItems:    1,
+		Computed:    true,
+		Description: "InfluxDB specific server provided values",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"database_name": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "Name of the default InfluxDB database",
+				},
+			},
+		},
+	},
+	"influxdb_user_config": {
+		Type:             schema.TypeList,
+		MaxItems:         1,
+		Optional:         true,
+		Description:      "InfluxDB specific user configurable settings",
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				GetUserConfigSchema("service")["influxdb"].(map[string]interface{})),
+		},
+	},
+	"kafka": {
+		Type:        schema.TypeList,
+		MaxItems:    1,
+		Computed:    true,
+		Description: "Kafka specific server provided values",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"access_cert": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "The Kafka client certificate",
+					Optional:    true,
+					Sensitive:   true,
+				},
+				"access_key": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "The Kafka client certificate key",
+					Optional:    true,
+					Sensitive:   true,
+				},
+				"connect_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "The Kafka Connect URI, if any",
+					Optional:    true,
+					Sensitive:   true,
+				},
+				"rest_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "The Kafka REST URI, if any",
+					Optional:    true,
+					Sensitive:   true,
+				},
+				"schema_registry_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "The Schema Registry URI, if any",
+					Optional:    true,
+					Sensitive:   true,
+				},
+			},
+		},
+	},
+	"kafka_user_config": {
+		Type:             schema.TypeList,
+		MaxItems:         1,
+		Optional:         true,
+		Description:      "Kafka specific user configurable settings",
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				GetUserConfigSchema("service")["kafka"].(map[string]interface{})),
+		},
+	},
+	"mysql": {
+		Type:        schema.TypeList,
+		MaxItems:    1,
+		Computed:    true,
+		Description: "MySQL specific server provided values",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{},
+		},
+	},
+	"mysql_user_config": {
+		Type:             schema.TypeList,
+		MaxItems:         1,
+		Optional:         true,
+		Description:      "MySQL specific user configurable settings",
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				GetUserConfigSchema("service")["mysql"].(map[string]interface{})),
+		},
+	},
+	"pg": {
+		Type:        schema.TypeList,
+		MaxItems:    1,
+		Computed:    true,
+		Description: "PostgreSQL specific server provided values",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"replica_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "PostgreSQL replica URI for services with a replica",
+					Sensitive:   true,
+				},
+				"uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "PostgreSQL master connection URI",
+					Optional:    true,
+					Sensitive:   true,
+				},
+				"dbname": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "Primary PostgreSQL database name",
+				},
+				"host": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "PostgreSQL master node host IP or name",
+				},
+				"password": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "PostgreSQL admin user password",
+					Sensitive:   true,
+				},
+				"port": {
+					Type:        schema.TypeInt,
+					Computed:    true,
+					Description: "PostgreSQL port",
+				},
+				"sslmode": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "PostgreSQL sslmode setting (currently always \"require\")",
+				},
+				"user": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "PostgreSQL admin user name",
+				},
+			},
+		},
+	},
+	"pg_user_config": {
+		Type:             schema.TypeList,
+		MaxItems:         1,
+		Optional:         true,
+		Description:      "PostgreSQL specific user configurable settings",
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				GetUserConfigSchema("service")["pg"].(map[string]interface{})),
+		},
+	},
+	"redis": {
+		Type:        schema.TypeList,
+		MaxItems:    1,
+		Computed:    true,
+		Description: "Redis specific server provided values",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{},
+		},
+	},
+	"redis_user_config": {
+		Type:             schema.TypeList,
+		MaxItems:         1,
+		Optional:         true,
+		Description:      "Redis specific user configurable settings",
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				GetUserConfigSchema("service")["redis"].(map[string]interface{})),
+		},
+	},
+}
+
 func resourceService() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceServiceCreate,
@@ -22,376 +393,7 @@ func resourceService() *schema.Resource {
 			State: resourceServiceState,
 		},
 
-		Schema: map[string]*schema.Schema{
-			"project": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Target project",
-				ForceNew:    true,
-			},
-			"cloud_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Cloud the service runs in",
-			},
-			"plan": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Subscription plan",
-			},
-			"service_name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Service name",
-				ForceNew:    true,
-			},
-			"service_type": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Service type code",
-				ForceNew:    true,
-			},
-			"project_vpc_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Identifier of the VPC the service should be in, if any",
-			},
-			"maintenance_window_dow": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.",
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return new == ""
-				},
-			},
-			"maintenance_window_time": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.",
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return new == ""
-				},
-			},
-			"termination_protection": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Prevent service from being deleted. It is recommended to have this enabled for all services.",
-			},
-			"service_uri": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "URI for connecting to the service. Service specific info is under \"kafka\", \"pg\", etc.",
-				Sensitive:   true,
-			},
-			"service_host": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Service hostname",
-			},
-			"service_integrations": {
-				Type:             schema.TypeList,
-				Optional:         true,
-				Description:      "Service integrations to specify when creating a service. Not applied after initial service creation",
-				DiffSuppressFunc: createOnlyDiffSuppressFunc,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"source_service_name": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Name of the source service",
-						},
-						"integration_type": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Type of the service integration. The only supported value at the moment is 'read_replica'",
-						},
-					},
-				},
-			},
-			"service_port": {
-				Type:        schema.TypeInt,
-				Computed:    true,
-				Description: "Service port",
-			},
-			"service_password": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Password used for connecting to the service, if applicable",
-				Sensitive:   true,
-			},
-			"service_username": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Username used for connecting to the service, if applicable",
-			},
-			"state": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Service state",
-			},
-			"cassandra": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Computed:    true,
-				Description: "Cassandra specific server provided values",
-				Optional:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{},
-				},
-			},
-			"cassandra_user_config": {
-				Type:             schema.TypeList,
-				MaxItems:         1,
-				Optional:         true,
-				Description:      "Cassandra specific user configurable settings",
-				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-				Elem: &schema.Resource{
-					Schema: GenerateTerraformUserConfigSchema(
-						GetUserConfigSchema("service")["cassandra"].(map[string]interface{})),
-				},
-			},
-			"elasticsearch": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Computed:    true,
-				Description: "Elasticsearch specific server provided values",
-				Optional:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"kibana_uri": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "URI for Kibana frontend",
-							Sensitive:   true,
-						},
-					},
-				},
-			},
-			"elasticsearch_user_config": {
-				Type:             schema.TypeList,
-				MaxItems:         1,
-				Optional:         true,
-				Description:      "Elasticsearch specific user configurable settings",
-				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-				Elem: &schema.Resource{
-					Schema: GenerateTerraformUserConfigSchema(
-						GetUserConfigSchema("service")["elasticsearch"].(map[string]interface{})),
-				},
-			},
-			"grafana": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Computed:    true,
-				Description: "Grafana specific server provided values",
-				Optional:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{},
-				},
-			},
-			"grafana_user_config": {
-				Type:             schema.TypeList,
-				MaxItems:         1,
-				Optional:         true,
-				Description:      "Grafana specific user configurable settings",
-				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-				Elem: &schema.Resource{
-					Schema: GenerateTerraformUserConfigSchema(
-						GetUserConfigSchema("service")["grafana"].(map[string]interface{})),
-				},
-			},
-			"influxdb": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Computed:    true,
-				Description: "InfluxDB specific server provided values",
-				Optional:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"database_name": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "Name of the default InfluxDB database",
-						},
-					},
-				},
-			},
-			"influxdb_user_config": {
-				Type:             schema.TypeList,
-				MaxItems:         1,
-				Optional:         true,
-				Description:      "InfluxDB specific user configurable settings",
-				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-				Elem: &schema.Resource{
-					Schema: GenerateTerraformUserConfigSchema(
-						GetUserConfigSchema("service")["influxdb"].(map[string]interface{})),
-				},
-			},
-			"kafka": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Computed:    true,
-				Description: "Kafka specific server provided values",
-				Optional:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"access_cert": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The Kafka client certificate",
-							Optional:    true,
-							Sensitive:   true,
-						},
-						"access_key": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The Kafka client certificate key",
-							Optional:    true,
-							Sensitive:   true,
-						},
-						"connect_uri": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The Kafka Connect URI, if any",
-							Optional:    true,
-							Sensitive:   true,
-						},
-						"rest_uri": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The Kafka REST URI, if any",
-							Optional:    true,
-							Sensitive:   true,
-						},
-						"schema_registry_uri": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The Schema Registry URI, if any",
-							Optional:    true,
-							Sensitive:   true,
-						},
-					},
-				},
-			},
-			"kafka_user_config": {
-				Type:             schema.TypeList,
-				MaxItems:         1,
-				Optional:         true,
-				Description:      "Kafka specific user configurable settings",
-				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-				Elem: &schema.Resource{
-					Schema: GenerateTerraformUserConfigSchema(
-						GetUserConfigSchema("service")["kafka"].(map[string]interface{})),
-				},
-			},
-			"mysql": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Computed:    true,
-				Description: "MySQL specific server provided values",
-				Optional:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{},
-				},
-			},
-			"mysql_user_config": {
-				Type:             schema.TypeList,
-				MaxItems:         1,
-				Optional:         true,
-				Description:      "MySQL specific user configurable settings",
-				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-				Elem: &schema.Resource{
-					Schema: GenerateTerraformUserConfigSchema(
-						GetUserConfigSchema("service")["mysql"].(map[string]interface{})),
-				},
-			},
-			"pg": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Computed:    true,
-				Description: "PostgreSQL specific server provided values",
-				Optional:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"replica_uri": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "PostgreSQL replica URI for services with a replica",
-							Sensitive:   true,
-						},
-						"uri": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "PostgreSQL master connection URI",
-							Optional:    true,
-							Sensitive:   true,
-						},
-						"dbname": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "Primary PostgreSQL database name",
-						},
-						"host": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "PostgreSQL master node host IP or name",
-						},
-						"password": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "PostgreSQL admin user password",
-							Sensitive:   true,
-						},
-						"port": {
-							Type:        schema.TypeInt,
-							Computed:    true,
-							Description: "PostgreSQL port",
-						},
-						"sslmode": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "PostgreSQL sslmode setting (currently always \"require\")",
-						},
-						"user": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "PostgreSQL admin user name",
-						},
-					},
-				},
-			},
-			"pg_user_config": {
-				Type:             schema.TypeList,
-				MaxItems:         1,
-				Optional:         true,
-				Description:      "PostgreSQL specific user configurable settings",
-				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-				Elem: &schema.Resource{
-					Schema: GenerateTerraformUserConfigSchema(
-						GetUserConfigSchema("service")["pg"].(map[string]interface{})),
-				},
-			},
-			"redis": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Computed:    true,
-				Description: "Redis specific server provided values",
-				Optional:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{},
-				},
-			},
-			"redis_user_config": {
-				Type:             schema.TypeList,
-				MaxItems:         1,
-				Optional:         true,
-				Description:      "Redis specific user configurable settings",
-				DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-				Elem: &schema.Resource{
-					Schema: GenerateTerraformUserConfigSchema(
-						GetUserConfigSchema("service")["redis"].(map[string]interface{})),
-				},
-			},
-		},
+		Schema: aivenServiceSchema,
 	}
 }
 
