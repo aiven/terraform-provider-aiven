@@ -75,6 +75,16 @@ func resourceServiceIntegrationEndpoint() *schema.Resource {
 				Optional: true,
 				Type:     schema.TypeList,
 			},
+			"external_elasticsearch_logs_user_config": {
+				Description: "external elasticsearch specific user configurable settings",
+				Elem: &schema.Resource{
+					Schema: GenerateTerraformUserConfigSchema(
+						GetUserConfigSchema("endpoint")["external_elasticsearch_logs"].(map[string]interface{})),
+				},
+				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
 		},
 	}
 }

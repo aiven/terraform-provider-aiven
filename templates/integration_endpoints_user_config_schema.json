@@ -36,6 +36,56 @@
     ],
     "type": "object"
   },
+  "external_elasticsearch_logs": {
+    "additionalProperties": false,
+    "properties": {
+      "ca": {
+        "example": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n",
+        "title": "PEM encoded CA certificate",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "index_days_max": {
+        "default": 3,
+        "example": 3,
+        "maximum": 10000,
+        "minimum": 1,
+        "title": "Maximum number of days of logs to keep",
+        "type": "integer"
+      },
+      "index_prefix": {
+        "default": "logs",
+        "example": "logs",
+        "maxLength": 1000,
+        "minLength": 1,
+        "pattern": "^[a-z0-9][a-z0-9-_.]+$",
+        "title": "Elasticsearch index prefix",
+        "type": "string"
+      },
+      "timeout": {
+        "default": 10,
+        "example": 10,
+        "maximum": 120,
+        "minimum": 10,
+        "title": "Elasticsearch request timeout limit",
+        "type": "number"
+      },
+      "url": {
+        "example": "https://user:passwd@logs.example.com/",
+        "maxLength": 1000,
+        "minLength": 12,
+        "title": "Elasticsearch connection URL",
+        "type": "string"
+      }
+    },
+    "required": [
+      "url",
+      "index_prefix"
+    ],
+    "type": "object"
+  },
   "jolokia": {
     "additionalProperties": false,
     "properties": {
@@ -79,44 +129,76 @@
   "rsyslog": {
     "additionalProperties": false,
     "properties": {
-      "server": {
-        "example": "logs.example.com",
-        "title": "DNS or IPv4 address of the server",
-        "type": "string"
+      "ca": {
+        "example": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n",
+        "title": "PEM encoded CA certificate",
+        "type": [
+          "string",
+          "null"
+        ]
       },
-      "port": {
-        "example": 514,
-        "minimum": 0,
-        "maximum": 65535,
-        "title": "Port to connect to",
-        "type": "integer"
+      "cert": {
+        "example": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n",
+        "title": "PEM encoded client certificate",
+        "type": [
+          "string",
+          "null"
+        ]
       },
       "format": {
+        "default": "rfc5424",
+        "enum": [
+          "rfc5424",
+          "rfc3164",
+          "custom"
+        ],
         "example": "rfc5424",
-        "pattern": "^(rfc3164|rfc5424)$",
-        "title": "Log format, either rfc3164 or rfc5424",
-        "type": "string"
-      },
-      "tls": {
-        "example": true,
-        "title": "Use TLS",
-        "type": "boolean"
-      },
-      "sd": {
-        "title": "Content of the structured data block of rfc5424 message",
-        "type": "string"
-      },
-      "ca": {
-        "title": "PEM format certificate authority to use for verifying the server's certificate",
+        "title": "message format",
         "type": "string"
       },
       "key": {
-        "title": "PEM format client key for client authentication",
+        "example": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n",
+        "title": "PEM encoded client key",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "logline": {
+        "example": "<%pri%>%timestamp:::date-rfc3339% %HOSTNAME% %app-name% %msg%",
+        "maxLength": 512,
+        "minLength": 1,
+        "title": "custom syslog message format",
         "type": "string"
       },
-      "cert": {
-        "title": "PEM format client cert for client authentication",
+      "port": {
+        "default": 514,
+        "example": 514,
+        "maximum": 65535,
+        "minimum": 1,
+        "title": "rsyslog server port",
+        "type": "integer"
+      },
+      "sd": {
+        "example": "TOKEN tag=\"LiteralValue\"",
+        "title": "Structured data block for log message",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "server": {
+        "example": "logs.example.com",
+        "maxLength": 255,
+        "minLength": 4,
+        "title": "rsyslog server address or hostname",
         "type": "string"
+      },
+      "tls": {
+        "default": true,
+        "example": true,
+        "title": "Require TLS",
+        "type": "boolean"
       }
     },
     "required": [
