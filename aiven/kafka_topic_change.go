@@ -1,4 +1,4 @@
-package main
+package aiven
 
 import (
 	"log"

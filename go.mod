@@ -1,5 +1,7 @@
 module github.com/aiven/terraform-provider-aiven
 
+go 1.12
+
 require (
 	github.com/aiven/aiven-go-client v1.2.0
 	github.com/gobuffalo/packd v0.1.0 // indirect

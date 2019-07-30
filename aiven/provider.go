@@ -1,6 +1,6 @@
 // Copyright (c) 2017 jelmersnoeck
 // Copyright (c) 2018 Aiven, Helsinki, Finland. https://aiven.io/
-package main
+package aiven
 
 import (
 	"net/url"
@@ -8,10 +8,12 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/terraform"
+	
 )
 
-// Provider returns the Terraform Aiven Provider configuration object.
-func Provider() *schema.Provider {
+// Provider returns a terraform.ResourceProvider.
+func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"api_token": {

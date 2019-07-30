@@ -1,3 +1,3 @@
-package main
+package aiven
 
 var version string
