@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.11] - 2019-08-06
+Suppress invalid update when maintenance window is unset
+Handle lc_collate and lc_ctype database attributes better
+Report Terraform provider version to server
+Treat service_uri as sensitive to avoid showing password in plain text
+Fix importing existing aiven_database resource
+Support external Elasticsearch integration
+Update available advanced configuration options
+
 ## [1.0.10] - 2019-06-10
 Switch to using go.mod
 Support cross-region VPC Peering.
