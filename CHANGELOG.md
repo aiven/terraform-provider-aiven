@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.12] - 2019-08-08
+Always wait for VPC state to become active before treating it as created.
+Mark more URIs as sensitive.
+
 ## [1.0.11] - 2019-08-06
 Suppress invalid update when maintenance window is unset.
 Handle lc_collate and lc_ctype database attributes better.
