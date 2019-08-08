@@ -65,6 +65,14 @@ func resourceProjectVPCCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
+	// Make sure the VPC is active before returning it because service creation, moving
+	// service to VPC, and some other operations will fail unless the VPC is active
+	waiter := ProjectVPCActiveWaiter{Client: client, Project: projectName, VPCID: vpc.ProjectVPCID}
+	_, err = waiter.Conf().WaitForState()
+	if err != nil {
+		return fmt.Errorf("error waiting for Aiven project VPC to be ACTIVE: %s", err)
+	}
+
 	d.SetId(buildResourceID(projectName, vpc.ProjectVPCID))
 	return copyVPCPropertiesFromAPIResponseToTerraform(d, vpc, projectName)
 }
@@ -150,7 +158,7 @@ func (w *ProjectVPCActiveWaiter) Conf() *resource.StateChangeConf {
 		Refresh: w.RefreshFunc(),
 	}
 	state.Delay = 10 * time.Second
-	state.Timeout = 2 * time.Minute
+	state.Timeout = 4 * time.Minute
 	state.MinTimeout = 2 * time.Second
 	return state
 }
