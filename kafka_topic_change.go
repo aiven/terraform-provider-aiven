@@ -27,9 +27,15 @@ func (w *KafkaTopicChangeWaiter) RefreshFunc() resource.StateRefreshFunc {
 		)
 
 		if err != nil {
-			// Handle this special case as it takes a while for topics to be created.
 			aivenError, ok := err.(aiven.Error)
+			// Topic creation is asynchronous so it is possible for the creation call to
+			// have completed successfully yet fetcing topic info fails with 404.
 			if ok && aivenError.Status == 404 {
+				return nil, "CONFIGURING", nil
+			}
+			// Getting topic info can sometimes temporarily fail with 501. Don't treat
+			// that as fatal error but keep on retrying instead
+			if ok && aivenError.Status == 501 {
 				return nil, "CONFIGURING", nil
 			}
 			return nil, "", err
