@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.0.13] - 2019-08-12
+Handle API errors gracefully during Kafka topic creation.
+
 ## [1.0.12] - 2019-08-08
 Always wait for VPC state to become active before treating it as created.
 Mark more URIs as sensitive.
