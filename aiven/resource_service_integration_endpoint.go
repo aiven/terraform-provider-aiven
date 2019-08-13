@@ -1,5 +1,5 @@
 // Copyright (c) 2018 Aiven, Helsinki, Finland. https://aiven.io/
-package main
+package aiven
 
 import (
 	"fmt"

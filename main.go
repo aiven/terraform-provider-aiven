@@ -1,15 +1,11 @@
-// Copyright (c) 2017 jelmersnoeck
 package main
 
 import (
 	"github.com/hashicorp/terraform/plugin"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/aiven/terraform-provider-aiven/aiven"
 )
 
 func main() {
 	plugin.Serve(&plugin.ServeOpts{
-		ProviderFunc: func() terraform.ResourceProvider {
-			return Provider()
-		},
-	})
+		ProviderFunc: aiven.Provider})
 }
