@@ -9,6 +9,56 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+var aivenConnectionPoolSchema = map[string]*schema.Schema{
+	"project": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Project to link the connection pool to",
+		ForceNew:    true,
+	},
+	"service_name": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Service to link the connection pool to",
+		ForceNew:    true,
+	},
+	"database_name": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Name of the database the pool connects to",
+		ForceNew:    true,
+	},
+	"pool_mode": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Default:     "transaction",
+		Description: "Mode the pool operates in (session, transaction, statement)",
+	},
+	"pool_name": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Name of the pool",
+		ForceNew:    true,
+	},
+	"pool_size": {
+		Type:        schema.TypeInt,
+		Optional:    true,
+		Default:     10,
+		Description: "Number of connections the pool may create towards the backend server",
+	},
+	"username": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Name of the service user used to connect to the database",
+	},
+	"connection_uri": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "URI for connecting to the pool",
+		Sensitive:   true,
+	},
+}
+
 func resourceConnectionPool() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceConnectionPoolCreate,
@@ -20,55 +70,7 @@ func resourceConnectionPool() *schema.Resource {
 			State: resourceConnectionPoolState,
 		},
 
-		Schema: map[string]*schema.Schema{
-			"project": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Project to link the connection pool to",
-				ForceNew:    true,
-			},
-			"service_name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Service to link the connection pool to",
-				ForceNew:    true,
-			},
-			"database_name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Name of the database the pool connects to",
-				ForceNew:    true,
-			},
-			"pool_mode": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "transaction",
-				Description: "Mode the pool operates in (session, transaction, statement)",
-			},
-			"pool_name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Name of the pool",
-				ForceNew:    true,
-			},
-			"pool_size": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Default:     10,
-				Description: "Number of connections the pool may create towards the backend server",
-			},
-			"username": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Name of the service user used to connect to the database",
-			},
-			"connection_uri": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "URI for connecting to the pool",
-				Sensitive:   true,
-			},
-		},
+		Schema: aivenConnectionPoolSchema,
 	}
 }
 

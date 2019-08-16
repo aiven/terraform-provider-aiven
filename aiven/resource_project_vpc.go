@@ -12,6 +12,32 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+var aivenProjectVCPSchema = map[string]*schema.Schema{
+	"project": {
+		Description: "The project the VPC belongs to",
+		ForceNew:    true,
+		Required:    true,
+		Type:        schema.TypeString,
+	},
+	"cloud_name": {
+		Description: "Cloud the VPC is in",
+		ForceNew:    true,
+		Required:    true,
+		Type:        schema.TypeString,
+	},
+	"network_cidr": {
+		Description: "Network address range used by the VPC like 192.168.0.0/24",
+		ForceNew:    true,
+		Required:    true,
+		Type:        schema.TypeString,
+	},
+	"state": {
+		Computed:    true,
+		Description: "State of the VPC (APPROVED, ACTIVE, DELETING, DELETED)",
+		Type:        schema.TypeString,
+	},
+}
+
 func resourceProjectVPC() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceProjectVPCCreate,
@@ -22,31 +48,7 @@ func resourceProjectVPC() *schema.Resource {
 			State: resourceProjectVPCState,
 		},
 
-		Schema: map[string]*schema.Schema{
-			"project": {
-				Description: "The project the VPC belongs to",
-				ForceNew:    true,
-				Required:    true,
-				Type:        schema.TypeString,
-			},
-			"cloud_name": {
-				Description: "Cloud the VPC is in",
-				ForceNew:    true,
-				Required:    true,
-				Type:        schema.TypeString,
-			},
-			"network_cidr": {
-				Description: "Network address range used by the VPC like 192.168.0.0/24",
-				ForceNew:    true,
-				Required:    true,
-				Type:        schema.TypeString,
-			},
-			"state": {
-				Computed:    true,
-				Description: "State of the VPC (APPROVED, ACTIVE, DELETING, DELETED)",
-				Type:        schema.TypeString,
-			},
-		},
+		Schema: aivenProjectVCPSchema,
 	}
 }
 

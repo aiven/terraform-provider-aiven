@@ -12,6 +12,46 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+var aivenVPCPeeringConnectionSchema = map[string]*schema.Schema{
+	"vpc_id": {
+		Description: "The VPC the peering connection belongs to",
+		ForceNew:    true,
+		Required:    true,
+		Type:        schema.TypeString,
+	},
+	"peer_cloud_account": {
+		Description: "AWS account ID or GCP project ID of the peered VPC",
+		ForceNew:    true,
+		Required:    true,
+		Type:        schema.TypeString,
+	},
+	"peer_vpc": {
+		Description: "AWS VPC ID or GCP VPC network name of the peered VPC",
+		ForceNew:    true,
+		Required:    true,
+		Type:        schema.TypeString,
+	},
+	"peer_region": {
+		Description: "AWS region of the peered VPC (if not in the same region as Aiven VPC)",
+		ForceNew:    true,
+		Optional:    true,
+		Type:        schema.TypeString,
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			return new == ""
+		},
+	},
+	"state": {
+		Computed:    true,
+		Description: "State of the peering connection",
+		Type:        schema.TypeString,
+	},
+	"peering_connection_id": {
+		Computed:    true,
+		Description: "Cloud provider identifier for the peering connection if available",
+		Type:        schema.TypeString,
+	},
+}
+
 func resourceVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceVPCPeeringConnectionCreate,
@@ -22,45 +62,7 @@ func resourceVPCPeeringConnection() *schema.Resource {
 			State: resourceVPCPeeringConnectionState,
 		},
 
-		Schema: map[string]*schema.Schema{
-			"vpc_id": {
-				Description: "The VPC the peering connection belongs to",
-				ForceNew:    true,
-				Required:    true,
-				Type:        schema.TypeString,
-			},
-			"peer_cloud_account": {
-				Description: "AWS account ID or GCP project ID of the peered VPC",
-				ForceNew:    true,
-				Required:    true,
-				Type:        schema.TypeString,
-			},
-			"peer_vpc": {
-				Description: "AWS VPC ID or GCP VPC network name of the peered VPC",
-				ForceNew:    true,
-				Required:    true,
-				Type:        schema.TypeString,
-			},
-			"peer_region": {
-				Description: "AWS region of the peered VPC (if not in the same region as Aiven VPC)",
-				ForceNew:    true,
-				Optional:    true,
-				Type:        schema.TypeString,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return new == ""
-				},
-			},
-			"state": {
-				Computed:    true,
-				Description: "State of the peering connection",
-				Type:        schema.TypeString,
-			},
-			"peering_connection_id": {
-				Computed:    true,
-				Description: "Cloud provider identifier for the peering connection if available",
-				Type:        schema.TypeString,
-			},
-		},
+		Schema: aivenVPCPeeringConnectionSchema,
 	}
 }
 

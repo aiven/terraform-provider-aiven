@@ -9,6 +9,73 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
+	"project": {
+		Description: "Project the service integration endpoint belongs to",
+		ForceNew:    true,
+		Required:    true,
+		Type:        schema.TypeString,
+	},
+	"endpoint_name": {
+		ForceNew:    true,
+		Description: "Name of the service integration endpoint",
+		Required:    true,
+		Type:        schema.TypeString,
+	},
+	"endpoint_type": {
+		Description: "Type of the service integration endpoint",
+		ForceNew:    true,
+		Required:    true,
+		Type:        schema.TypeString,
+	},
+	"endpoint_config": {
+		Description: "Integration endpoint specific backend configuration",
+		Computed:    true,
+		Type:        schema.TypeMap,
+		Elem:        &schema.Schema{Type: schema.TypeString},
+	},
+	"datadog_user_config": {
+		Description: "Datadog specific user configurable settings",
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				GetUserConfigSchema("endpoint")["datadog"].(map[string]interface{})),
+		},
+		MaxItems: 1,
+		Optional: true,
+		Type:     schema.TypeList,
+	},
+	"prometheus_user_config": {
+		Description: "Prometheus specific user configurable settings",
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				GetUserConfigSchema("endpoint")["prometheus"].(map[string]interface{})),
+		},
+		MaxItems: 1,
+		Optional: true,
+		Type:     schema.TypeList,
+	},
+	"rsyslog_user_config": {
+		Description: "rsyslog specific user configurable settings",
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				GetUserConfigSchema("endpoint")["rsyslog"].(map[string]interface{})),
+		},
+		MaxItems: 1,
+		Optional: true,
+		Type:     schema.TypeList,
+	},
+	"external_elasticsearch_logs_user_config": {
+		Description: "external elasticsearch specific user configurable settings",
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				GetUserConfigSchema("endpoint")["external_elasticsearch_logs"].(map[string]interface{})),
+		},
+		MaxItems: 1,
+		Optional: true,
+		Type:     schema.TypeList,
+	},
+}
+
 func resourceServiceIntegrationEndpoint() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceServiceIntegrationEndpointCreate,
@@ -20,72 +87,7 @@ func resourceServiceIntegrationEndpoint() *schema.Resource {
 			State: resourceServiceIntegrationEndpointState,
 		},
 
-		Schema: map[string]*schema.Schema{
-			"project": {
-				Description: "Project the service integration endpoint belongs to",
-				ForceNew:    true,
-				Required:    true,
-				Type:        schema.TypeString,
-			},
-			"endpoint_name": {
-				ForceNew:    true,
-				Description: "Name of the service integration endpoint",
-				Required:    true,
-				Type:        schema.TypeString,
-			},
-			"endpoint_type": {
-				Description: "Type of the service integration endpoint",
-				ForceNew:    true,
-				Required:    true,
-				Type:        schema.TypeString,
-			},
-			"endpoint_config": {
-				Description: "Integration endpoint specific backend configuration",
-				Computed:    true,
-				Type:        schema.TypeMap,
-				Elem:        &schema.Schema{Type: schema.TypeString},
-			},
-			"datadog_user_config": {
-				Description: "Datadog specific user configurable settings",
-				Elem: &schema.Resource{
-					Schema: GenerateTerraformUserConfigSchema(
-						GetUserConfigSchema("endpoint")["datadog"].(map[string]interface{})),
-				},
-				MaxItems: 1,
-				Optional: true,
-				Type:     schema.TypeList,
-			},
-			"prometheus_user_config": {
-				Description: "Prometheus specific user configurable settings",
-				Elem: &schema.Resource{
-					Schema: GenerateTerraformUserConfigSchema(
-						GetUserConfigSchema("endpoint")["prometheus"].(map[string]interface{})),
-				},
-				MaxItems: 1,
-				Optional: true,
-				Type:     schema.TypeList,
-			},
-			"rsyslog_user_config": {
-				Description: "rsyslog specific user configurable settings",
-				Elem: &schema.Resource{
-					Schema: GenerateTerraformUserConfigSchema(
-						GetUserConfigSchema("endpoint")["rsyslog"].(map[string]interface{})),
-				},
-				MaxItems: 1,
-				Optional: true,
-				Type:     schema.TypeList,
-			},
-			"external_elasticsearch_logs_user_config": {
-				Description: "external elasticsearch specific user configurable settings",
-				Elem: &schema.Resource{
-					Schema: GenerateTerraformUserConfigSchema(
-						GetUserConfigSchema("endpoint")["external_elasticsearch_logs"].(map[string]interface{})),
-				},
-				MaxItems: 1,
-				Optional: true,
-				Type:     schema.TypeList,
-			},
-		},
+		Schema: aivenServiceIntegrationEndpointSchema,
 	}
 }
 

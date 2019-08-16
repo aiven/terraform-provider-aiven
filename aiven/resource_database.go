@@ -20,6 +20,43 @@ func handleLcDefaults(k, old, new string, d *schema.ResourceData) bool {
 	return new == "" || (old == "" && new == defaultLC) || old == new
 }
 
+var aivenDatabaseSchema = map[string]*schema.Schema{
+	"project": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Project to link the database to",
+		ForceNew:    true,
+	},
+	"service_name": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Service to link the database to",
+		ForceNew:    true,
+	},
+	"database_name": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Service database name",
+		ForceNew:    true,
+	},
+	"lc_collate": {
+		Type:             schema.TypeString,
+		Optional:         true,
+		Default:          defaultLC,
+		Description:      "Default string sort order (LC_COLLATE) of the database. Default value: en_US.UTF-8",
+		ForceNew:         true,
+		DiffSuppressFunc: handleLcDefaults,
+	},
+	"lc_ctype": {
+		Type:             schema.TypeString,
+		Optional:         true,
+		Default:          defaultLC,
+		Description:      "Default character classification (LC_CTYPE) of the database. Default value: en_US.UTF-8",
+		ForceNew:         true,
+		DiffSuppressFunc: handleLcDefaults,
+	},
+}
+
 func resourceDatabase() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDatabaseCreate,
@@ -31,42 +68,7 @@ func resourceDatabase() *schema.Resource {
 		},
 
 		// TODO: add user config
-		Schema: map[string]*schema.Schema{
-			"project": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Project to link the database to",
-				ForceNew:    true,
-			},
-			"service_name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Service to link the database to",
-				ForceNew:    true,
-			},
-			"database_name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Service database name",
-				ForceNew:    true,
-			},
-			"lc_collate": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Default:          defaultLC,
-				Description:      "Default string sort order (LC_COLLATE) of the database. Default value: en_US.UTF-8",
-				ForceNew:         true,
-				DiffSuppressFunc: handleLcDefaults,
-			},
-			"lc_ctype": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Default:          defaultLC,
-				Description:      "Default character classification (LC_CTYPE) of the database. Default value: en_US.UTF-8",
-				ForceNew:         true,
-				DiffSuppressFunc: handleLcDefaults,
-			},
-		},
+		Schema: aivenDatabaseSchema,
 	}
 }
 

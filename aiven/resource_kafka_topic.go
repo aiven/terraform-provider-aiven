@@ -10,6 +10,62 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+var aivenKafkaTopicSchema = map[string]*schema.Schema{
+	"project": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Project to link the kafka topic to",
+		ForceNew:    true,
+	},
+	"service_name": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Service to link the kafka topic to",
+		ForceNew:    true,
+	},
+	"topic_name": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Topic name",
+		ForceNew:    true,
+	},
+	"partitions": {
+		Type:        schema.TypeInt,
+		Required:    true,
+		Description: "Number of partitions to create in the topic",
+	},
+	"replication": {
+		Type:        schema.TypeInt,
+		Required:    true,
+		Description: "Replication factor for the topic",
+	},
+	"retention_bytes": {
+		Type:        schema.TypeInt,
+		Optional:    true,
+		Default:     -1,
+		Description: "Retention bytes",
+	},
+	"retention_hours": {
+		Type:        schema.TypeInt,
+		Optional:    true,
+		Default:     72,
+		Description: "Retention period (hours)",
+	},
+	"minimum_in_sync_replicas": {
+		Type:        schema.TypeInt,
+		Optional:    true,
+		Default:     1,
+		Description: "Minimum required nodes in-sync replicas (ISR) to produce to a partition",
+	},
+	"cleanup_policy": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Default:     "delete",
+		Description: "Topic cleanup policy. Allowed values: delete, compact",
+		ForceNew:    true,
+	},
+}
+
 func resourceKafkaTopic() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceKafkaTopicCreate,
@@ -21,61 +77,7 @@ func resourceKafkaTopic() *schema.Resource {
 			State: resourceKafkaTopicState,
 		},
 
-		Schema: map[string]*schema.Schema{
-			"project": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Project to link the kafka topic to",
-				ForceNew:    true,
-			},
-			"service_name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Service to link the kafka topic to",
-				ForceNew:    true,
-			},
-			"topic_name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Topic name",
-				ForceNew:    true,
-			},
-			"partitions": {
-				Type:        schema.TypeInt,
-				Required:    true,
-				Description: "Number of partitions to create in the topic",
-			},
-			"replication": {
-				Type:        schema.TypeInt,
-				Required:    true,
-				Description: "Replication factor for the topic",
-			},
-			"retention_bytes": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Default:     -1,
-				Description: "Retention bytes",
-			},
-			"retention_hours": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Default:     72,
-				Description: "Retention period (hours)",
-			},
-			"minimum_in_sync_replicas": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Default:     1,
-				Description: "Minimum required nodes in-sync replicas (ISR) to produce to a partition",
-			},
-			"cleanup_policy": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "delete",
-				Description: "Topic cleanup policy. Allowed values: delete, compact",
-				ForceNew:    true,
-			},
-		},
+		Schema: aivenKafkaTopicSchema,
 	}
 }
 

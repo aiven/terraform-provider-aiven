@@ -9,6 +9,65 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+var aivenServiceIntegrationSchema = map[string]*schema.Schema{
+	"destination_endpoint_id": {
+		Description: "Destination endpoint for the integration (if any)",
+		ForceNew:    true,
+		Optional:    true,
+		Type:        schema.TypeString,
+	},
+	"destination_service_name": {
+		Description: "Destination service for the integration (if any)",
+		ForceNew:    true,
+		Optional:    true,
+		Type:        schema.TypeString,
+	},
+	"integration_type": {
+		Description: "Type of the service integration",
+		ForceNew:    true,
+		Required:    true,
+		Type:        schema.TypeString,
+	},
+	"logs_user_config": {
+		Description: "Log integration specific user configurable settings",
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				GetUserConfigSchema("integration")["logs"].(map[string]interface{})),
+		},
+		MaxItems: 1,
+		Optional: true,
+		Type:     schema.TypeList,
+	},
+	"mirrormaker_user_config": {
+		Description: "Mirrormaker integration specific user configurable settings",
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				GetUserConfigSchema("integration")["mirrormaker"].(map[string]interface{})),
+		},
+		MaxItems: 1,
+		Optional: true,
+		Type:     schema.TypeList,
+	},
+	"project": {
+		Description: "Project the integration belongs to",
+		ForceNew:    true,
+		Required:    true,
+		Type:        schema.TypeString,
+	},
+	"source_endpoint_id": {
+		Description: "Source endpoint for the integration (if any)",
+		ForceNew:    true,
+		Optional:    true,
+		Type:        schema.TypeString,
+	},
+	"source_service_name": {
+		Description: "Source service for the integration (if any)",
+		ForceNew:    true,
+		Optional:    true,
+		Type:        schema.TypeString,
+	},
+}
+
 func resourceServiceIntegration() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceServiceIntegrationCreate,
@@ -20,64 +79,7 @@ func resourceServiceIntegration() *schema.Resource {
 			State: resourceServiceIntegrationState,
 		},
 
-		Schema: map[string]*schema.Schema{
-			"destination_endpoint_id": {
-				Description: "Destination endpoint for the integration (if any)",
-				ForceNew:    true,
-				Optional:    true,
-				Type:        schema.TypeString,
-			},
-			"destination_service_name": {
-				Description: "Destination service for the integration (if any)",
-				ForceNew:    true,
-				Optional:    true,
-				Type:        schema.TypeString,
-			},
-			"integration_type": {
-				Description: "Type of the service integration",
-				ForceNew:    true,
-				Required:    true,
-				Type:        schema.TypeString,
-			},
-			"logs_user_config": {
-				Description: "Log integration specific user configurable settings",
-				Elem: &schema.Resource{
-					Schema: GenerateTerraformUserConfigSchema(
-						GetUserConfigSchema("integration")["logs"].(map[string]interface{})),
-				},
-				MaxItems: 1,
-				Optional: true,
-				Type:     schema.TypeList,
-			},
-			"mirrormaker_user_config": {
-				Description: "Mirrormaker integration specific user configurable settings",
-				Elem: &schema.Resource{
-					Schema: GenerateTerraformUserConfigSchema(
-						GetUserConfigSchema("integration")["mirrormaker"].(map[string]interface{})),
-				},
-				MaxItems: 1,
-				Optional: true,
-				Type:     schema.TypeList,
-			},
-			"project": {
-				Description: "Project the integration belongs to",
-				ForceNew:    true,
-				Required:    true,
-				Type:        schema.TypeString,
-			},
-			"source_endpoint_id": {
-				Description: "Source endpoint for the integration (if any)",
-				ForceNew:    true,
-				Optional:    true,
-				Type:        schema.TypeString,
-			},
-			"source_service_name": {
-				Description: "Source service for the integration (if any)",
-				ForceNew:    true,
-				Optional:    true,
-				Type:        schema.TypeString,
-			},
-		},
+		Schema: aivenServiceIntegrationSchema,
 	}
 }
 

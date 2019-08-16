@@ -10,6 +10,50 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+var aivenServiceUserSchema = map[string]*schema.Schema{
+	"project": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Project to link the user to",
+		ForceNew:    true,
+	},
+	"service_name": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Service to link the user to",
+		ForceNew:    true,
+	},
+	"username": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Name of the user account",
+		ForceNew:    true,
+	},
+	"type": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "Type of the user account",
+	},
+	"password": {
+		Type:        schema.TypeString,
+		Sensitive:   true,
+		Computed:    true,
+		Description: "Password of the user",
+	},
+	"access_cert": {
+		Type:        schema.TypeString,
+		Sensitive:   true,
+		Computed:    true,
+		Description: "Access certificate for the user if applicable for the service in question",
+	},
+	"access_key": {
+		Type:        schema.TypeString,
+		Sensitive:   true,
+		Computed:    true,
+		Description: "Access certificate key for the user if applicable for the service in question",
+	},
+}
+
 func resourceServiceUser() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceServiceUserCreate,
@@ -20,49 +64,7 @@ func resourceServiceUser() *schema.Resource {
 			State: resourceServiceUserState,
 		},
 
-		Schema: map[string]*schema.Schema{
-			"project": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Project to link the user to",
-				ForceNew:    true,
-			},
-			"service_name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Service to link the user to",
-				ForceNew:    true,
-			},
-			"username": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Name of the user account",
-				ForceNew:    true,
-			},
-			"type": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Type of the user account",
-			},
-			"password": {
-				Type:        schema.TypeString,
-				Sensitive:   true,
-				Computed:    true,
-				Description: "Password of the user",
-			},
-			"access_cert": {
-				Type:        schema.TypeString,
-				Sensitive:   true,
-				Computed:    true,
-				Description: "Access certificate for the user if applicable for the service in question",
-			},
-			"access_key": {
-				Type:        schema.TypeString,
-				Sensitive:   true,
-				Computed:    true,
-				Description: "Access certificate key for the user if applicable for the service in question",
-			},
-		},
+		Schema: aivenServiceUserSchema,
 	}
 }
 

@@ -9,7 +9,6 @@ import (
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
-	
 )
 
 // Provider returns a terraform.ResourceProvider.
@@ -22,6 +21,20 @@ func Provider() terraform.ResourceProvider {
 				Sensitive:   true,
 				Description: "Aiven Authentication Token",
 			},
+		},
+
+		DataSourcesMap: map[string]*schema.Resource{
+			"aiven_connection_pool":              datasourceConnectionPool(),
+			"aiven_database":                     datasourceDatabase(),
+			"aiven_kafka_acl":                    datasourceKafkaACL(),
+			"aiven_kafka_topic":                  datasourceKafkaTopic(),
+			"aiven_project":                      datasourceProject(),
+			"aiven_project_user":                 datasourceProjectUser(),
+			"aiven_project_vpc":                  datasourceProjectVPC(),
+			"aiven_vpc_peering_connection":       datasourceVPCPeeringConnection(),
+			"aiven_service":                      datasourceService(),
+			"aiven_service_integration_endpoint": datasourceServiceIntegrationEndpoint(),
+			"aiven_service_user":                 datasourceServiceUser(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
