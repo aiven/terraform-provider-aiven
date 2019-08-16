@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.0.14] - 2019-08-16
+Datasource support
+
 ## [1.0.13] - 2019-08-12
 Handle API errors gracefully during Kafka topic creation.
 
