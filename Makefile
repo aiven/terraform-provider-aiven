@@ -38,6 +38,7 @@ lint: vendor
 	golangci-lint run -D errcheck
 
 clean:
+	packr2 clean
 	rm -rf vendor
 	rm -f terraform-provider-aiven-*_amd64
 
