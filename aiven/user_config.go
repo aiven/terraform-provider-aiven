@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gobuffalo/packr"
+	"github.com/gobuffalo/packr/v2"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func readUserConfigJSONSchema(name string) map[string]interface{} {
-	box := packr.NewBox("./templates")
+	box := packr.New("configBox", "./templates")
 	data, err := box.Find(name)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to read %v: %v", name, err))
