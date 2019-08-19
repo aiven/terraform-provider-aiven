@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.0.15] - 2019-08-19
+Switch to using packr v2
+
 ## [1.0.14] - 2019-08-16
 Datasource support
 
