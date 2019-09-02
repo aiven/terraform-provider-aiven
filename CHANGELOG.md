@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.16] - 2019-09-02
+Update all service configuration attributes to match latest
+definitions.
+
 ## [1.0.15] - 2019-08-19
 Switch to using packr v2
 
