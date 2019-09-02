@@ -71,9 +71,9 @@ This section describes all the different resources that can be managed with this
 The list of options in this document is not comprehensive. For most part the options map
 directly to [Aiven REST API](https://api.aiven.io/doc/) properties and that can be
 consulted for details. For various objects called x_user_config the exact configuration
-options are available in [Service User Config](templates/service_user_config_schema.json),
-[Integration User Config](templates/integrations_user_config_schema.json) and in
-[Integration Endpoint User Config](templates/integration_endpoints_user_config_schema.json).
+options are available in [Service User Config](aiven/templates/service_user_config_schema.json),
+[Integration User Config](aiven/templates/integrations_user_config_schema.json) and in
+[Integration Endpoint User Config](aiven/templates/integration_endpoints_user_config_schema.json).
 
 ### Provider
 
@@ -182,7 +182,7 @@ with backups much of the content can at least be restored from backup in case ac
 deletion is done.
 
 `x_user_config` defines service specific additional configuration options. These
-options can be found from the [JSON schema description](templates/service_user_config_schema.json).
+options can be found from the [JSON schema description](aiven/templates/service_user_config_schema.json).
 
 For services that support different versions the version information must be specified in
 the user configuration. By the time of writing these services are Elasticsearch, Kafka
@@ -413,7 +413,7 @@ By the time of writing the only available option is `datadog`.
 
 `x_user_config` defines endpoint type specific configuration. `x` is the type of the
 endpoint. The available configuration options are documented in
-[this JSON file](templates/integration_endpoints_user_config_schema.json)
+[this JSON file](aiven/templates/integration_endpoints_user_config_schema.json)
 
 Aiven ID format when importing existing resource: `<project_name>/<endpoint_id>`. The
 endpoint identifier (UUID) is not directly visible in the Aiven web console.
@@ -454,7 +454,7 @@ the dependency correctly.
 
 `x_user_config` defines integration specific configuration. `x` is the type of the
 integration. The available configuration options are documented in
-[this JSON file](templates/integrations_user_config_schema.json). Not all integration
+[this JSON file](aiven/templates/integrations_user_config_schema.json). Not all integration
 types have any configurable settings.
 
 Aiven ID format when importing existing resource: `<project_name>/<integration_id>`.
