@@ -35,7 +35,11 @@ test: vendor
 	CGO_ENABLED=0 go test -v ./...
 
 lint: vendor
-	golangci-lint run -D errcheck
+	if [ -z "$(SKIPDIRS)" ]; then \
+		golangci-lint run -D errcheck; \
+	else \
+		golangci-lint run -D errcheck --skip-dirs $(SKIPDIRS); \
+	fi
 
 clean:
 	packr2 clean
