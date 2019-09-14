@@ -5,8 +5,6 @@ package aiven
 import (
 	"time"
 
-	"net/http"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/resource"
 )
@@ -47,50 +45,12 @@ func (w *ServiceChangeWaiter) RefreshFunc() resource.StateRefreshFunc {
 			// can manage the associated resources even if the service is rebuilding.
 			state = aivenTargetState
 		}
-		if state == aivenTargetState && (!kafkaServicesReady(service) || !backupsReady(service)) {
+		if state == aivenTargetState && !backupsReady(service) {
 			state = aivenServicesStartingState
 		}
 
 		return service, state, nil
 	}
-}
-
-// If any of Kafka Rest, Schema Registry, and Kafka Connect are enabled, refresh
-// their state to check if they're ready
-func kafkaServicesReady(service *aiven.Service) bool {
-	// Check if the service is a Kafka service and Kafka itself is ready
-	if service.Type != "kafka" {
-		return true
-	}
-
-	userConfig := service.UserConfig
-
-	// If the service is in VPC or has IP filter then direct connections to Kafka aux services
-	// will fail unless Terraform plan is applied from a machine in the accepted network, which
-	// is often not the case. Just don't wait for the aux sevices if they might not be reachable
-	// due to network configuration.
-	ipFilter, ok := userConfig["ip_filter"]
-	var ipFilterArray []interface{}
-	if ok {
-		ipFilterArray, ok = ipFilter.([]interface{})
-	}
-	if (service.ProjectVPCID != nil && *service.ProjectVPCID != "") ||
-		(ok && (len(ipFilterArray) != 1 || ipFilterArray[0] != "0.0.0.0/0")) {
-		return true
-	}
-
-	ready := true
-	if enabled, ok := userConfig["kafka_rest"]; ok && enabled.(bool) {
-		ready = uriReachable(service.ConnectionInfo.KafkaRestURI)
-	}
-	if enabled, ok := userConfig["schema_registry"]; ok && enabled.(bool) {
-		ready = uriReachable(service.ConnectionInfo.SchemaRegistryURI)
-	}
-	if enabled, ok := userConfig["kafka_connect"]; ok && enabled.(bool) {
-		ready = uriReachable(service.ConnectionInfo.KafkaConnectURI)
-	}
-
-	return ready
 }
 
 func backupsReady(service *aiven.Service) bool {
@@ -100,15 +60,6 @@ func backupsReady(service *aiven.Service) bool {
 	}
 
 	return len(service.Backups) > 0
-}
-
-func uriReachable(uri string) bool {
-	resp, err := http.Get(uri)
-	if err != nil {
-		return false
-	}
-	resp.Body.Close()
-	return true
 }
 
 // Conf sets up the configuration to refresh.
