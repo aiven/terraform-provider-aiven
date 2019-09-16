@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.17] - 2019-09-16
+Do not explicitly wait for Kafka auxiliary services to start up in an
+attempt to fix issues with Kafka service create operation timing out.
+
 ## [1.0.16] - 2019-09-02
 Update all service configuration attributes to match latest
 definitions.
