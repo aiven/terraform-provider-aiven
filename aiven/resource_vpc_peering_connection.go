@@ -227,6 +227,7 @@ func (w *VPCPeeringBuildWaiter) Conf() *resource.StateChangeConf {
 		Pending: []string{"APPROVED"},
 		Target: []string{
 			"ACTIVE",
+			"APPROVED",
 			"REJECTED_BY_PEER",
 			"PENDING_PEER",
 			"INVALID_SPECIFICATION",
