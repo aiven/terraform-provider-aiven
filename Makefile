@@ -1,7 +1,8 @@
 version = $(shell git describe --long --tags 2>/dev/null || echo unknown-g`git describe --always`)
+short_version = $(shell echo $(version) | sed 's/-.*//')
 
 .PHONY: ci
-ci: lint bins
+ci: lint bins release
 
 #################################################
 # Bootstrapping for base golang package deps
@@ -23,9 +24,22 @@ update-vendor:
 # Building
 #################################################
 
-bins: vendor
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 packr2 build -mod=vendor -ldflags "-X main.version=${version}" -o terraform-provider-aiven-linux_amd64 .
-	GOOS=darwin GOARCH=amd64 packr2 build -mod=vendor -ldflags "-X main.version=${version}" -o terraform-provider-aiven-darwin_amd64 .
+.PHONY: plugins
+plugins:
+	mkdir -p plugins/linux_amd64 plugins/darwin_amd64
+
+.PHONY: bins
+bins: vendor plugins
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 packr2 build -mod=vendor -ldflags "-X main.version=${version}" -o plugins/linux_amd64/terraform-provider-aiven_$(short_version) .
+	GOOS=darwin GOARCH=amd64 packr2 build -mod=vendor -ldflags "-X main.version=${version}" -o plugins/darwin_amd64/terraform-provider-aiven_$(short_version) .
+
+#################################################
+# Artifacts for release
+#################################################
+
+.PHONY: release
+release: bins
+	tar cvzf terraform-provider-aiven.tar.gz -C plugins linux_amd64/terraform-provider-aiven_$(short_version) darwin_amd64/terraform-provider-aiven_$(short_version)
 
 #################################################
 # Testing and linting
@@ -35,11 +49,16 @@ test: vendor
 	CGO_ENABLED=0 go test -v ./...
 
 lint: vendor
-	golangci-lint run -D errcheck
+	if [ -z "$(SKIPDIRS)" ]; then \
+		golangci-lint run -D errcheck; \
+	else \
+		golangci-lint run -D errcheck --skip-dirs $(SKIPDIRS); \
+	fi
 
 clean:
 	packr2 clean
 	rm -rf vendor
-	rm -f terraform-provider-aiven-*_amd64
+	rm -rf plugins
+	rm -f terraform-provider-aiven.tar.gz
 
 .PHONY: test lint vendor bootstrap
