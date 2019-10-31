@@ -272,14 +272,15 @@ var aivenServiceSchema = map[string]*schema.Schema{
 				GetUserConfigSchema("service")["kafka"].(map[string]interface{})),
 		},
 	},
-	"kafka_connect": {
-		Type: schema.TypeList,
-		MaxItems: 1,
-		Computed: true,
-		Description: "Kafka Connect specific server provided values",
-		Optional: true,
+	"kafka_connect_user_config": {
+		Type:             schema.TypeList,
+		MaxItems:         1,
+		Description:      "Kafka Connect specific user configurable settings",
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{},
+			Schema: GenerateTerraformUserConfigSchema(
+				GetUserConfigSchema("service")["kafka_connect"].(map[string]interface{})),
 		},
 	},
 	"mysql": {

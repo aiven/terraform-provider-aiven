@@ -1478,5 +1478,29 @@
       }
     },
     "type": "object"
+  },
+  "kafka_connect": {
+    "additionalProperties": false,
+    "properties": {
+      "kafka_connect": {
+        "additionalProperties": false,
+        "default": {
+          "consumer_isolation_level": "read_uncommitted"
+        },
+        "properties": {
+          "consumer_isolation_level": {
+            "title": "Transaction read isolation level",
+            "type": "string",
+            "enum": [
+              "read_committed",
+              "read_uncommitted"
+            ]
+          }
+        },
+        "type": "object",
+        "title": "Kafka Connect configuration values"
+      }
+    },
+    "type": "object"
   }
 }
