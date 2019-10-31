@@ -272,6 +272,16 @@ var aivenServiceSchema = map[string]*schema.Schema{
 				GetUserConfigSchema("service")["kafka"].(map[string]interface{})),
 		},
 	},
+	"kafka_connect": {
+		Type: schema.TypeList,
+		MaxItems: 1,
+		Computed: true,
+		Description: "Kafka Connect specific server provided values",
+		Optional: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{},
+		},
+	},
 	"mysql": {
 		Type:        schema.TypeList,
 		MaxItems:    1,
@@ -617,6 +627,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	d.Set("mysql", []map[string]interface{}{})
 	d.Set("pg", []map[string]interface{}{})
 	d.Set("redis", []map[string]interface{}{})
+	d.Set("kafka_connect", []map[string]interface{}{})
 
 	props := make(map[string]interface{})
 	switch serviceType {
@@ -651,6 +662,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 		}
 		props["replica_uri"] = connectionInfo.PostgresReplicaURI
 	case "redis":
+	case "kafka_connect":
 	default:
 		panic(fmt.Sprintf("Unsupported service type %v", serviceType))
 	}
