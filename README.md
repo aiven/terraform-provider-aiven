@@ -397,7 +397,7 @@ resource "aiven_service_integration_endpoint" "myendpoint" {
     project = "${aiven_project.myproject.project}"
     endpoint_name = "<ENDPOINT_NAME>"
     endpoint_type = "datadog"
-    datadog_user_config = {
+    datadog_user_config {
         datadog_api_key = "<DATADOG_API_KEY>"
     }
 }

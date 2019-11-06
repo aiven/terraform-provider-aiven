@@ -1,6 +1,8 @@
-terraform-provider-aiven-*
+terraform-provider-aiven
+terraform-provider-aiven.tar.gz
 terraform.tfvars
 *.tfstate*
 vendor/*
 aiven/aiven-packr.go
 packrd/*
+plugins/
