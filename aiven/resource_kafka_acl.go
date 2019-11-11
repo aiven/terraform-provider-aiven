@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aiven/terraform-provider-aiven/pkg/cache"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -83,12 +85,12 @@ func resourceKafkaACLRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	project, serviceName, aclID := splitResourceID3(d.Id())
-	acl, err := client.KafkaACLs.Get(project, serviceName, aclID)
+	acl, err := cache.ACLCache{}.Read(project, serviceName, aclID, client)
 	if err != nil {
 		return err
 	}
 
-	return copyKafkaACLPropertiesFromAPIResponseToTerraform(d, acl, project, serviceName)
+	return copyKafkaACLPropertiesFromAPIResponseToTerraform(d, &acl, project, serviceName)
 }
 
 func resourceKafkaACLDelete(d *schema.ResourceData, m interface{}) error {
@@ -102,7 +104,7 @@ func resourceKafkaACLExists(d *schema.ResourceData, m interface{}) (bool, error)
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, aclID := splitResourceID3(d.Id())
-	_, err := client.KafkaACLs.Get(projectName, serviceName, aclID)
+	_, err := cache.ACLCache{}.Read(projectName, serviceName, aclID, client)
 	return resourceExists(err)
 }
 

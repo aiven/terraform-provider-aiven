@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/pkg/cache"
+
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
@@ -20,11 +22,11 @@ type KafkaTopicChangeWaiter struct {
 // RefreshFunc will call the Aiven client and refresh it's state.
 func (w *KafkaTopicChangeWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		topic, err := w.Client.KafkaTopics.Get(
-			w.Project,
-			w.ServiceName,
-			w.TopicName,
-		)
+		var topic aiven.KafkaTopic
+		var err error
+		topicCache := cache.TopicCache{}
+		topicCache.Refresh(w.Project, w.ServiceName, w.Client)
+		topic, err = topicCache.Read(w.Project, w.ServiceName, w.TopicName, w.Client)
 
 		if err != nil {
 			aivenError, ok := err.(aiven.Error)
