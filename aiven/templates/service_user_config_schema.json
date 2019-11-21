@@ -1292,6 +1292,11 @@
         "title": "PostgreSQL major version",
         "type": ["string", "null"]
       },
+      "variant": {
+        "enum": ["aiven", "timescale"],
+        "title": "Service variant",
+        "type": ["string", "null"]
+      },
       "pgbouncer": {
         "properties": {
           "server_reset_query_always": {
