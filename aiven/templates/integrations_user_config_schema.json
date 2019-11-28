@@ -5,8 +5,18 @@
     "type": "object"
   },
   "datadog": {
-    "additionalProperties": true,
-    "title": "Integration user config",
+    "additionalProperties": false,
+    "properties": {
+      "kafka_custom_metrics": {
+        "items": {
+          "example": "kafka.log.log_size",
+          "title": "Metric name",
+          "type": "string"
+        },
+        "title": "List of custom metrics",
+        "type": "array"
+      }
+    },
     "type": "object"
   },
   "external_elasticsearch_logs": {
@@ -16,6 +26,40 @@
   },
   "jolokia": {
     "additionalProperties": true,
+    "title": "Integration user config",
+    "type": "object"
+  },
+  "kafka_connect": {
+    "additionalProperties": true,
+    "properties": {
+      "kafka_connect": {
+        "additionalProperties": false,
+        "properties": {
+          "config_storage_topic": {
+            "example": "__connect_configs",
+            "title": "The name of the topic where connector and task configuration data are stored.This must be the same for all workers with the same group_id.",
+            "type": "string"
+          },
+          "group_id": {
+            "example": "connect",
+            "title": "A unique string that identifies the Connect cluster group this worker belongs to.",
+            "type": "string"
+          },
+          "offset_storage_topic": {
+            "example": "__connect_offsets",
+            "title": "The name of the topic where connector and task configuration offsets are stored.This must be the same for all workers with the same group_id.",
+            "type": "string"
+          },
+          "status_storage_topic": {
+            "example": "__connect_status",
+            "title": "The name of the topic where connector and task configuration status updates are stored.This must be the same for all workers with the same group_id.",
+            "type": "string"
+          }
+        },
+        "title": "Kafka Connect service configuration values",
+        "type": "object"
+      }
+    },
     "title": "Integration user config",
     "type": "object"
   },
@@ -101,6 +145,11 @@
     "type": "object"
   },
   "rsyslog": {
+    "additionalProperties": true,
+    "title": "Integration user config",
+    "type": "object"
+  },
+  "signalfx": {
     "additionalProperties": true,
     "title": "Integration user config",
     "type": "object"
