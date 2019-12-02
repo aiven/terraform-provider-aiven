@@ -2,12 +2,14 @@ package cache
 
 import (
 	"fmt"
+	"sync"
 
 	aiven "github.com/aiven/aiven-go-client"
 )
 
 var (
-	topics = make(map[string]map[string]aiven.KafkaTopic)
+	topics         = make(map[string]map[string]aiven.KafkaTopic)
+	topicCacheLock sync.Mutex
 )
 
 //TopicCache type
@@ -39,12 +41,17 @@ func (t TopicCache) write(project, service string, topic *aiven.KafkaListTopic) 
 
 //Refresh refreshes the Topic cache
 func (t TopicCache) Refresh(project, service string, client *aiven.Client) error {
+	topicCacheLock.Lock()
+	defer topicCacheLock.Unlock()
 	return t.populateTopicCache(project, service, client)
 }
 
 //Read populates the cache if it doesn't exist, and reads the required topic. An aiven.Error with status
 //404 is returned upon cache miss
 func (t TopicCache) Read(project, service, topicName string, client *aiven.Client) (topic aiven.KafkaTopic, err error) {
+	topicCacheLock.Lock()
+	defer topicCacheLock.Unlock()
+
 	if _, ok := topics[project+service]; !ok {
 		if err = t.populateTopicCache(project, service, client); err != nil {
 			return
