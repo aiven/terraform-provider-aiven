@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/pkg/cache"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -123,7 +124,7 @@ func resourceKafkaTopicRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	project, serviceName, topicName := splitResourceID3(d.Id())
-	topic, err := client.KafkaTopics.Get(project, serviceName, topicName)
+	topic, err := cache.TopicCache{}.Read(project, serviceName, topicName, client)
 	if err != nil {
 		return err
 	}
@@ -182,7 +183,7 @@ func resourceKafkaTopicExists(d *schema.ResourceData, m interface{}) (bool, erro
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, topicName := splitResourceID3(d.Id())
-	_, err := client.KafkaTopics.Get(projectName, serviceName, topicName)
+	_, err := cache.TopicCache{}.Read(projectName, serviceName, topicName, client)
 	return resourceExists(err)
 }
 
