@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.0.18] - 2019-12-09
+Enable Kafka topics caching and add support of the Aiven terraform plugin on Windows
+
 ## [1.0.17] - 2019-09-16
 Do not explicitly wait for Kafka auxiliary services to start up in an
 attempt to fix issues with Kafka service create operation timing out.
