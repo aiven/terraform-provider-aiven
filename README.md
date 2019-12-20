@@ -29,6 +29,10 @@ with Terraform can still be deleted and they will be deleted before the service 
 attempted to be deleted so even with this setting enabled you need to be very careful
 with the changes that are to be applied.
 
+## Requirements
+- [Terraform](https://www.terraform.io/downloads.html) v0.10.1 or greater
+- [Go](https://golang.org/doc/install) 1.12.X or greater
+
 ## Sample project
 
 There is a [sample project](sample.tf) which sets up a project, defines Kafka,
