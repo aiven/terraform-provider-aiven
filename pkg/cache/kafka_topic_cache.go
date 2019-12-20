@@ -60,9 +60,9 @@ func (t TopicCache) Read(project, service, topicName string, client *aiven.Clien
 	if cachedService, ok := topics[project+service]; ok {
 		if topic, ok = cachedService[topicName]; !ok {
 			// cache miss, return a 404 so it can be cleaned up later
-			err = aiven.Error{
-				Status:  404,
-				Message: fmt.Sprintf("Cache miss on project/service/topic: %s/%s/%s", project, service, topicName),
+			var liveTopic *aiven.KafkaTopic
+			if liveTopic, err = client.KafkaTopics.Get(project, service, topicName); err == nil {
+				topic = *liveTopic
 			}
 		}
 	} else {
