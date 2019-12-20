@@ -32,8 +32,9 @@ func (a ACLCache) Read(project, service, aclID string, client *aiven.Client) (ac
 			// cache miss, try to get the ACL from the Aiven API instead
 			log.Printf("Cache miss on ACL: %s, going live to Aiven API", aclID)
 			var liveACL *aiven.KafkaACL
-			liveACL, err = client.KafkaACLs.Get(project, service, aclID)
-			acl = *liveACL
+			if liveACL, err = client.KafkaACLs.Get(project, service, aclID); err == nil {
+				acl = *liveACL
+			}
 		}
 	} else {
 		//TODO: returning a 404 here provides no extra value, as the ACL is then treated as if it
