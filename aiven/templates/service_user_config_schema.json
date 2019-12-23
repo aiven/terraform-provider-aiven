@@ -79,6 +79,12 @@
       "elasticsearch": {
         "additional_properties": false,
         "properties": {
+          "action_auto_create_index_enabled": {
+            "description": "Explicitly allow or block automatic creation of indices. Defaults to true",
+            "example": false,
+            "title": "action.auto_create_index",
+            "type": "boolean"
+          },
           "action_destructive_requires_name": {
             "example": true,
             "title": "Require explicit index names when deleting",
@@ -461,6 +467,16 @@
             "title": "Require users to belong to one of given groups",
             "type": "array"
           },
+          "api_url": {
+            "example": "https://gitlab.com/api/v4",
+            "title": "API URL. This only needs to be set when using self hosted GitLab",
+            "type": "string"
+          },
+          "auth_url": {
+            "example": "https://gitlab.com/oauth/authorize",
+            "title": "Authorization URL. This only needs to be set when using self hosted GitLab",
+            "type": "string"
+          },
           "client_id": {
             "example": "b1ba0bf54a4c2c0a1c29",
             "pattern": "^[a-zA-Z0-9-/=\\.]+$",
@@ -471,6 +487,11 @@
             "example": "bfa6gea4f129076761dcba8ce5e1e406bd83af7b",
             "pattern": "^[a-zA-Z0-9-/=]+$",
             "title": "Client secret from provider",
+            "type": "string"
+          },
+          "token_url": {
+            "example": "https://gitlab.com/oauth/token",
+            "title": "Token URL. This only needs to be set when using self hosted GitLab",
             "type": "string"
           }
         },
@@ -842,6 +863,13 @@
             ],
             "type": "string"
           },
+          "connections_max_idle_ms": {
+            "title": "Idle connections timeout: the server socket processor threads close the connections that idle for longer than this.",
+            "example": 540000,
+            "maximum": 3600000,
+            "minimum": 1000,
+            "type": "integer"
+          },
           "default_replication_factor": {
             "title": "Replication factor for autocreated topics",
             "maximum": 10,
@@ -1006,6 +1034,13 @@
             "maximum": 10000,
             "minimum": 1,
             "type": "integer"
+          },
+          "offset_flush_interval_ms": {
+            "title": "The interval at which to try committing offsets for tasks (defaults to 60000).",
+            "example": 60000,
+            "maximum": 100000000,
+            "minimum": 1,
+            "type": "integer"
           }
         },
         "title": "Kafka Connect configuration values",
@@ -1108,9 +1143,24 @@
             "title": "Allow clients to connect to kafka from the public internet for service nodes that are in a project VPC or another type of private network",
             "type": "boolean"
           },
+          "kafka_connect": {
+            "example": true,
+            "title": "Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network",
+            "type": "boolean"
+          },
+          "kafka_rest": {
+            "example": true,
+            "title": "Allow clients to connect to kafka_rest from the public internet for service nodes that are in a project VPC or another type of private network",
+            "type": "boolean"
+          },
           "prometheus": {
             "example": true,
             "title": "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
+            "type": "boolean"
+          },
+          "schema_registry": {
+            "example": true,
+            "title": "Allow clients to connect to schema_registry from the public internet for service nodes that are in a project VPC or another type of private network",
             "type": "boolean"
           }
         },
@@ -1155,6 +1205,13 @@
             "title": "The maximum number of records returned in a single call to poll() (defaults to 500).",
             "example": 500,
             "maximum": 10000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "offset_flush_interval_ms": {
+            "title": "The interval at which to try committing offsets for tasks (defaults to 60000).",
+            "example": 60000,
+            "maximum": 100000000,
             "minimum": 1,
             "type": "integer"
           }
@@ -1278,6 +1335,15 @@
             "maximum": 16,
             "minimum": 0,
             "type": "integer"
+          },
+          "innodb_ft_server_stopword_table": {
+            "title": "This option is used to specify your own InnoDB FULLTEXT index stopword list for all InnoDB tables.",
+            "example": "db_name/table_name",
+            "pattern": "^.+/.+$",
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "sql_mode": {
             "title": "Global SQL mode. Set to empty to use MySQL server defaults. When creating a new service and not setting this field Aiven default SQL mode (strict, SQL standard compliant) will be assigned.",
@@ -1720,6 +1786,20 @@
           "null"
         ]
       },
+      "timescaledb": {
+        "additionalProperties": false,
+        "properties": {
+          "max_background_workers": {
+            "title": "The number of background workers for timescaledb operations. You should configure this setting to the sum of your number of databases and the total number of concurrent background workers you want running at any given point in time.",
+            "example": 8,
+            "maximum": 4096,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "title": "TimescaleDB extension configuration values",
+        "type": "object"
+      },
       "variant": {
 	"createOnly": true,
 	"default": "aiven",
@@ -1751,6 +1831,48 @@
           "type": "string"
         },
         "type": "array"
+      },
+      "migration": {
+        "additionalProperties": false,
+        "default": null,
+        "properties": {
+          "host": {
+            "example": "my.server.com",
+            "title": "Hostname or IP address of the server where to migrate data from",
+            "type": "string"
+          },
+          "password": {
+            "example": "jjKk45Nnd",
+            "title": "Password for authentication with the server where to migrate data from",
+            "type": "string"
+          },
+          "port": {
+            "example": 1234,
+            "maximum": 65535,
+            "minimum": 1,
+            "title": "Port number of the server where to migrate data from",
+            "type": "integer"
+          },
+          "ssl": {
+            "default": true,
+            "title": "The server where to migrate data from is secured with SSL",
+            "type": "boolean"
+          },
+          "username": {
+            "example": "myname",
+            "title": "User name for authentication with the server where to migrate data from",
+            "type": "string"
+          }
+        },
+        "required": [
+          "host",
+          "port"
+        ],
+        "title": "Migrate data from existing server",
+        "type": [
+          "object",
+          "null"
+        ]
       },
       "private_access": {
         "additionalProperties": false,
