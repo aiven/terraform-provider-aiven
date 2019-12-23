@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.0.19] - 2019-12-23
+Update all service configuration attributes to match latest definitions.
+
 ## [1.0.18] - 2019-12-09
 Enable Kafka topics caching and add support of the Aiven terraform plugin on Windows
 
