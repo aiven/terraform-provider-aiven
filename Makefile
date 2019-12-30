@@ -54,12 +54,11 @@ release: bins
 test: vendor
 	CGO_ENABLED=0 go test -v ./...
 
+fmt: vendor
+	! go fmt ./... 2>&1 | read
+
 lint: vendor
-	if [ -z "$(SKIPDIRS)" ]; then \
-		golangci-lint run -D errcheck; \
-	else \
-		golangci-lint run -D errcheck --skip-dirs $(SKIPDIRS); \
-	fi
+	golangci-lint run --no-config --issues-exit-code=0 ./...
 
 clean:
 	packr2 clean

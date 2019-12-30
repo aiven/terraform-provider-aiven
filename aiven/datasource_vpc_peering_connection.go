@@ -26,7 +26,7 @@ func datasourceVPCPeeringConnectionRead(d *schema.ResourceData, m interface{}) e
 	if err != nil {
 		return err
 	}
-	for _, peer := range(vpc.PeeringConnections) {
+	for _, peer := range vpc.PeeringConnections {
 		if peer.PeerCloudAccount == peerCloudAccount && peer.PeerVPC == peerVPC {
 			if peer.PeerRegion != nil && *peer.PeerRegion != "" {
 				d.SetId(buildResourceID(projectName, vpcID, peer.PeerCloudAccount, peer.PeerVPC, *peer.PeerRegion))

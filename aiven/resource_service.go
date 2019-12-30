@@ -654,7 +654,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 		props["connect_uri"] = connectionInfo.KafkaConnectURI
 		props["rest_uri"] = connectionInfo.KafkaRestURI
 		props["schema_registry_uri"] = connectionInfo.SchemaRegistryURI
-        case "kafka_connect":
+	case "kafka_connect":
 	case "mysql":
 	case "pg":
 		if connectionInfo.PostgresURIs != nil && len(connectionInfo.PostgresURIs) > 0 {
