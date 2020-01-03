@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.0.20] - 2020-01-03
+Terraform support for Elasticsearch ACLs
+
 ## [1.0.19] - 2019-12-23
 Update all service configuration attributes to match latest definitions.
 
