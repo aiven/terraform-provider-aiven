@@ -58,7 +58,7 @@ fmt: vendor
 	! go fmt ./... 2>&1 | read
 
 lint: vendor
-	golangci-lint run --no-config --issues-exit-code=0 ./...
+	golangci-lint run  -D errcheck --no-config --issues-exit-code=0 ./...
 
 clean:
 	packr2 clean
