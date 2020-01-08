@@ -2,7 +2,7 @@ version = $(shell git describe --long --tags 2>/dev/null || echo unknown-g`git d
 short_version = $(shell echo $(version) | sed 's/-.*//')
 
 .PHONY: ci
-ci: lint bins release
+ci: bins release
 
 #################################################
 # Bootstrapping for base golang package deps
@@ -66,4 +66,4 @@ clean:
 	rm -rf plugins
 	rm -f terraform-provider-aiven.tar.gz
 
-.PHONY: test lint vendor bootstrap
+.PHONY: test vendor bootstrap
