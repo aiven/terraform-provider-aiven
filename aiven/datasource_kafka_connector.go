@@ -30,5 +30,5 @@ func datasourceKafkaConnectorRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	return fmt.Errorf("kafka connector %s/%s not found", connectorName)
+	return fmt.Errorf("kafka connector %s not found", connectorName)
 }
