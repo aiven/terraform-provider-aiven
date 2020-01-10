@@ -98,10 +98,10 @@ func kafkaSchemaSubjectGetLastVersion(m interface{}, project, serviceName, subje
 	return latestVersion, nil
 }
 
-// Aiven Kafka schema creates a new Kafka Schema subject with a new version, and if
-// Kafka Schema subject with a given name already exists API will validate new Kafka
-// Schema configuration against latest previous version for compatibility and it
-// compatible will create a new version for the same Kafka Schema name
+// Aiven Kafka schema creates a new Kafka Schema Subject with a new version, and if Kafka
+// Schema subject with a given name already exists API will validate new Kafka Schema
+// configuration against the previous version for compatibility and if compatible will
+// create a new version for the same Kafka Schema Subject
 func resourceKafkaSchemaCreate(d *schema.ResourceData, m interface{}) error {
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
@@ -109,8 +109,6 @@ func resourceKafkaSchemaCreate(d *schema.ResourceData, m interface{}) error {
 
 	client := m.(*aiven.Client)
 
-	// Add method retrieves back subject ID that we cannot use in Terraform composite
-	// ID since it is not used anywhere else, we need to know a newly created version
 	_, err := client.KafkaSubjectSchemas.Add(
 		project,
 		serviceName,
