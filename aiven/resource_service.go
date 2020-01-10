@@ -97,6 +97,53 @@ var aivenServiceSchema = map[string]*schema.Schema{
 			},
 		},
 	},
+	"components": {
+		Type:        schema.TypeList,
+		Computed:    true,
+		Description: "Service component information objects",
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"component": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "Service component name",
+				},
+				"host": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "DNS name for connecting to the service component",
+				},
+				"kafka_authentication_method": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Optional:    true,
+					Description: "Kafka authentication method. This is a value specific to the 'kafka' service component",
+				},
+				"port": {
+					Type:        schema.TypeInt,
+					Computed:    true,
+					Description: "Port number for connecting to the service component",
+				},
+				"route": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "Network access route",
+				},
+				"ssl": {
+					Type:     schema.TypeBool,
+					Computed: true,
+					Description: "Whether the endpoint is encrypted or accepts plaintext. By default endpoints are " +
+						"always encrypted and this property is only included for service components they may " +
+						"disable encryption",
+				},
+				"usage": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "DNS usage name",
+				},
+			},
+		},
+	},
 	"service_port": {
 		Type:        schema.TypeInt,
 		Computed:    true,
@@ -618,9 +665,30 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		d.Set("service_username", username)
 	}
 
+	if err := d.Set("components", flattenServiceComponents(service)); err != nil {
+		return fmt.Errorf("cannot set `components` : %s", err)
+	}
+
 	copyConnectionInfoFromAPIResponseToTerraform(d, service.Type, service.ConnectionInfo)
 
 	return nil
+}
+
+func flattenServiceComponents(r *aiven.Service) []map[string]interface{} {
+	var components []map[string]interface{}
+
+	for _, c := range r.Components {
+		component := map[string]interface{}{
+			"component": c.Component,
+			"host":      c.Host,
+			"port":      c.Port,
+			"route":     c.Route,
+			"usage":     c.Usage,
+		}
+		components = append(components, component)
+	}
+
+	return components
 }
 
 func copyConnectionInfoFromAPIResponseToTerraform(
