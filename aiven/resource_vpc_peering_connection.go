@@ -45,6 +45,11 @@ var aivenVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		Description: "State of the peering connection",
 		Type:        schema.TypeString,
 	},
+	"state_info": {
+		Computed:    true,
+		Description: "State-specific help or error information",
+		Type:        schema.TypeMap,
+	},
 	"peering_connection_id": {
 		Computed:    true,
 		Description: "Cloud provider identifier for the peering connection if available",
@@ -178,18 +183,35 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 	project string,
 	vpcID string,
 ) error {
-	d.Set("vpc_id", buildResourceID(project, vpcID))
-	d.Set("peer_cloud_account", peeringConnection.PeerCloudAccount)
-	d.Set("peer_vpc", peeringConnection.PeerVPC)
-	if peeringConnection.PeerRegion != nil {
-		d.Set("peer_region", peeringConnection.PeerRegion)
+	if err := d.Set("vpc_id", buildResourceID(project, vpcID)); err != nil {
+		return err
 	}
-	d.Set("state", peeringConnection.State)
+	if err := d.Set("peer_cloud_account", peeringConnection.PeerCloudAccount); err != nil {
+		return err
+	}
+	if err := d.Set("peer_vpc", peeringConnection.PeerVPC); err != nil {
+		return err
+	}
+	if peeringConnection.PeerRegion != nil {
+		if err := d.Set("peer_region", peeringConnection.PeerRegion); err != nil {
+			return err
+		}
+	}
+	if err := d.Set("state", peeringConnection.State); err != nil {
+		return err
+	}
+
 	if peeringConnection.StateInfo != nil {
 		peeringID, ok := (*peeringConnection.StateInfo)["aws_vpc_peering_connection_id"]
 		if ok {
-			d.Set("peering_connection_id", peeringID)
+			if err := d.Set("peering_connection_id", peeringID); err != nil {
+				return err
+			}
 		}
+	}
+
+	if err := d.Set("state_info", peeringConnection.StateInfo); err != nil {
+		return err
 	}
 
 	return nil
