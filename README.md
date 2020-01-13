@@ -391,6 +391,50 @@ topics (admin, read, readwrite, write).
 Aiven ID format when importing existing resource: `<project_name>/<service_name>/<acl_id>`.
 The ACL ID is not directly visible in the Aiven web console.
 
+### Resource Kafka Schemas
+```
+# Kafka Schema global configuration
+ resource "aiven_kafka_schema_configuration" "config" {
+   project = aiven_project.kafka-schemas-project1.project
+   service_name = aiven_service.kafka-service1.service_name
+   compatibility_level = "BACKWARD"
+ }
+ 
+ # Kafka Schema
+ resource "aiven_kafka_schema" "kafka-schema1" {
+   project = aiven_project.kafka-schemas-project1.project
+   service_name = aiven_service.kafka-service1.service_name
+   subject_name = "kafka-schema1"
+ 
+   schema = <<EOT
+    	  {
+           "doc": "example",
+           "fields": [{
+               "default": 5,
+               "doc": "my test number",
+               "name": "test",
+               "namespace": "test",
+               "type": "int"
+           }],
+           "name": "example",
+           "namespace": "example",
+           "type": "record"
+       }
+     EOT
+ }
+```
+
+`project` and `service_name` define the project and service the Kafka Schemas belongs to. 
+They should be defined using reference as shown above to set up dependencies correctly.
+
+`compatibility_level` is Kafka Schema Global configuration compatibility level. 
+Allowed values: "BACKWARD", "BACKWARD_TRANSITIVE", "FORWARD", "FORWARD_TRANSITIVE", 
+"FULL", "FULL_TRANSITIVE", "NONE"
+
+`subject_name` is Kafka Schema subject name
+
+`schema` is Kafka Schema configuration should be a valid Avro Schema JSON format 
+
 ### Resource Elasticsearch ACL
 
 ```
