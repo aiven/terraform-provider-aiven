@@ -1,5 +1,9 @@
 # Changelog
 
+
+## [1.1.0] - 2020-01-13
+Terraform support for Kafka Schema's, Kafka Connectors and Service Components
+
 ## [1.0.20] - 2020-01-03
 Terraform support for Elasticsearch ACLs
 
