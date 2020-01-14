@@ -1,6 +1,9 @@
 # Changelog
 
 
+## [1.1.1] - 2020-01-14
+Add VPC Peering Connections `state_info` property
+
 ## [1.1.0] - 2020-01-13
 Terraform support for Kafka Schema's, Kafka Connectors and Service Components
 
