@@ -87,7 +87,7 @@ provider "aiven" {
 }
 ```
 
-The Aiven provider currently only supports a single configuration option, `api_token`.
+The Aiven provider currently only supports a single configuration option, `api_token`. This can also be specified with the AIVEN_TOKEN shell environment variable. 
 The Aiven web console can be used to create named, never expiring API tokens that should
 be used for this kind of purposes. If Terraform is used for managing existing project(s),
 the API token must belong to a user with admin privileges for those project(s). For new

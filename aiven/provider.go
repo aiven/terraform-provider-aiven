@@ -19,6 +19,7 @@ func Provider() terraform.ResourceProvider {
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
+				DefaultFunc: schema.EnvDefaultFunc("AIVEN_TOKEN", nil),
 				Description: "Aiven Authentication Token",
 			},
 		},
