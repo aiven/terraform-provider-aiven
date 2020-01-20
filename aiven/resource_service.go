@@ -636,33 +636,67 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	service *aiven.Service,
 	project string,
 ) error {
-	d.Set("cloud_name", service.CloudName)
-	d.Set("service_name", service.Name)
-	d.Set("state", service.State)
-	d.Set("plan", service.Plan)
-	d.Set("service_type", service.Type)
-	d.Set("termination_protection", service.TerminationProtection)
-	d.Set("maintenance_window_dow", service.MaintenanceWindow.DayOfWeek)
-	d.Set("maintenance_window_time", service.MaintenanceWindow.TimeOfDay)
-	d.Set("service_uri", service.URI)
-	d.Set("project", project)
-	if service.ProjectVPCID != nil {
-		d.Set("project_vpc_id", buildResourceID(project, *service.ProjectVPCID))
+	if err := d.Set("cloud_name", service.CloudName); err != nil {
+		return err
 	}
+	if err := d.Set("service_name", service.Name); err != nil {
+		return err
+	}
+	if err := d.Set("state", service.State); err != nil {
+		return err
+	}
+	if err := d.Set("plan", service.Plan); err != nil {
+		return err
+	}
+	if err := d.Set("service_type", service.Type); err != nil {
+		return err
+	}
+	if err := d.Set("termination_protection", service.TerminationProtection); err != nil {
+		return err
+	}
+	if err := d.Set("maintenance_window_dow", service.MaintenanceWindow.DayOfWeek); err != nil {
+		return err
+	}
+	if err := d.Set("maintenance_window_time", service.MaintenanceWindow.TimeOfDay); err != nil {
+		return err
+	}
+	if err := d.Set("service_uri", service.URI); err != nil {
+		return err
+	}
+	if err := d.Set("project", project); err != nil {
+		return err
+	}
+
+	if service.ProjectVPCID != nil {
+		if err := d.Set("project_vpc_id", buildResourceID(project, *service.ProjectVPCID)); err != nil {
+			return err
+		}
+	}
+
 	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat("service", service.Type, service.UserConfig)
 	d.Set(service.Type+"_user_config", userConfig)
 
 	params := service.URIParams
-	d.Set("service_host", params["host"])
+	if err := d.Set("service_host", params["host"]); err != nil {
+		return err
+	}
+
 	port, _ := strconv.ParseInt(params["port"], 10, 32)
-	d.Set("service_port", port)
+	if err := d.Set("service_port", port); err != nil {
+		return err
+	}
+
 	password, passwordOK := params["password"]
 	username, usernameOK := params["user"]
 	if passwordOK {
-		d.Set("service_password", password)
+		if err := d.Set("service_password", password); err != nil {
+			return err
+		}
 	}
 	if usernameOK {
-		d.Set("service_username", username)
+		if err := d.Set("service_username", username); err != nil {
+			return err
+		}
 	}
 
 	if err := d.Set("components", flattenServiceComponents(service)); err != nil {
