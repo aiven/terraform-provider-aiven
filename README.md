@@ -31,7 +31,7 @@ with the changes that are to be applied.
 
 ## Requirements
 - [Terraform](https://www.terraform.io/downloads.html) v0.10.1 or greater
-- [Go](https://golang.org/doc/install) 1.12.X or greater
+- [Go](https://golang.org/doc/install) 1.13.X or greater
 
 ## Sample project
 
