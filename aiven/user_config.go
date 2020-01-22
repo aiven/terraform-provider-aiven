@@ -4,6 +4,7 @@ package aiven
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/gobuffalo/packr/v2"
@@ -51,10 +52,19 @@ func GetUserConfigSchema(resourceType string) map[string]interface{} {
 func GenerateTerraformUserConfigSchema(data map[string]interface{}) map[string]*schema.Schema {
 	properties := data["properties"].(map[string]interface{})
 	terraformSchema := make(map[string]*schema.Schema)
+
 	for name, definitionRaw := range properties {
 		definition := definitionRaw.(map[string]interface{})
+
+		t, op := getAivenSchemaType(definition["type"])
+		if d, ok := definition["default"]; (!ok || op || d == nil) && t == "boolean" {
+			definition["type"] = "string"
+			definition["api_type"] = "boolean"
+		}
+
 		terraformSchema[encodeKeyName(name)] = generateTerraformUserConfigSchema(name, definition)
 	}
+
 	return terraformSchema
 }
 
@@ -346,7 +356,14 @@ func convertTerraformUserConfigValueToAPICompatibleFormat(
 ) (interface{}, bool) {
 	convertedValue := value
 	omit := false
-	valueType, _ := getAivenSchemaType(definition["type"])
+
+	var valueType string
+	if t, ok := definition["api_type"]; ok {
+		valueType = t.(string)
+	} else {
+		valueType, _ = getAivenSchemaType(definition["type"])
+	}
+
 	switch valueType {
 	case "integer":
 		switch res := value.(type) {
@@ -381,6 +398,25 @@ func convertTerraformUserConfigValueToAPICompatibleFormat(
 			omit = true
 		}
 	case "boolean":
+		switch value.(type) {
+		case string:
+			if value == "<<value not set>>" {
+				omit = true
+			} else {
+				b, err := strconv.ParseBool(value.(string))
+				if err != nil {
+					panic(fmt.Sprintf("Invalid %v user config key type %T for %v, a string is expected "+
+						"that can be parsed as boolean, error : %s", serviceType, value, key, err.Error()))
+				}
+				convertedValue = b
+			}
+		case bool:
+			convertedValue = value
+		default:
+			panic(fmt.Sprintf("Invalid %v user config key type %T for %v, expected string or boolean",
+				serviceType, value, key))
+		}
+
 	case "string":
 		switch value.(type) {
 		case string:
