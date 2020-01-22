@@ -1,6 +1,11 @@
 # Changelog
 
 
+## [1.1.2] - 2020-01-22
+- Fix for <service>_user_config Boolean fields without default value.
+- Upgrade golang version to 1.3.
+- Allow the API token to be read from an env var.
+
 ## [1.1.1] - 2020-01-14
 Add VPC Peering Connections `state_info` property
 
