@@ -54,11 +54,8 @@ release: bins
 test: vendor
 	CGO_ENABLED=0 go test -v ./...
 
-fmt: vendor
-	! go fmt ./... 2>&1 | read
-
 lint: vendor
-	golangci-lint run  -D errcheck --no-config --issues-exit-code=0 ./...
+	golangci-lint run  -D errcheck -E gofmt --no-config --issues-exit-code=0 --timeout=30m ./...
 
 clean:
 	packr2 clean
