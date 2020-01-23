@@ -13,6 +13,7 @@ branches:
 
 script:
   - make fmt
+  - make lint
   - make test
 env:
   global:
