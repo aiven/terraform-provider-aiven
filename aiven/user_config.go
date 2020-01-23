@@ -398,12 +398,12 @@ func convertTerraformUserConfigValueToAPICompatibleFormat(
 			omit = true
 		}
 	case "boolean":
-		switch value.(type) {
+		switch value := value.(type) {
 		case string:
 			if value == "<<value not set>>" {
 				omit = true
 			} else {
-				b, err := strconv.ParseBool(value.(string))
+				b, err := strconv.ParseBool(value)
 				if err != nil {
 					panic(fmt.Sprintf("Invalid %v user config key type %T for %v, a string is expected "+
 						"that can be parsed as boolean, error : %s", serviceType, value, key, err.Error()))
