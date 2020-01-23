@@ -1801,8 +1801,7 @@
         "type": "object"
       },
       "variant": {
-	"createOnly": true,
-	"default": "aiven",
+        "createOnly": true,
         "enum": [
           "aiven",
           "timescale"
