@@ -62,7 +62,7 @@ sweep:
 	go test -v ./... -sweep=global -timeout 60m
 
 lint: vendor
-	golangci-lint run  -D errcheck -E gofmt --no-config --issues-exit-code=0 --timeout=30m ./...
+	golangci-lint run  -D errcheck -D unused -E gofmt --no-config --issues-exit-code=0 --timeout=30m ./...
 
 clean:
 	packr2 clean
