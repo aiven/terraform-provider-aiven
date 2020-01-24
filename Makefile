@@ -54,6 +54,13 @@ release: bins
 test: vendor
 	CGO_ENABLED=0 go test -v ./...
 
+testacc: vendor
+	TF_ACC=1 CGO_ENABLED=0 go test -v --cover ./... -timeout 120m
+
+sweep:
+	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."
+	go test -v ./... -sweep=global -timeout 60m
+
 lint: vendor
 	golangci-lint run  -D errcheck -E gofmt --no-config --issues-exit-code=0 --timeout=30m ./...
 
