@@ -6,19 +6,12 @@ import (
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
+	"log"
 	"strings"
 	"testing"
 )
 
-func init() {
-	resource.AddTestSweepers("aiven_project", &resource.Sweeper{
-		Name: "aiven_project",
-		F:    sweepProjects,
-	})
-}
-
 func sweepProjects(region string) error {
-
 	client, err := sharedClient(region)
 	if err != nil {
 		return fmt.Errorf("error getting client: %s", err)
@@ -43,6 +36,8 @@ func sweepProjects(region string) error {
 }
 
 func TestAccAivenProject_basic(t *testing.T) {
+	t.Parallel()
+
 	resourceName := "aiven_project.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
@@ -55,7 +50,7 @@ func TestAccAivenProject_basic(t *testing.T) {
 				Config: testAccProjectResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenProjectAttributes("data.aiven_project.project"),
-					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
 				),
 			},
 		},
@@ -79,6 +74,8 @@ func testAccCheckAivenProjectAttributes(n string) resource.TestCheckFunc {
 		r := s.RootModule().Resources[n]
 		a := r.Primary.Attributes
 
+		log.Printf("[DEBUG] project attributes %v", a)
+
 		if a["project"] == "" {
 			return fmt.Errorf("expected to get a project name from Aiven")
 		}
@@ -96,7 +93,7 @@ func testAccCheckAivenProjectResourceDestroy(s *terraform.State) error {
 
 	// loop through the resources in state, verifying each project is destroyed
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "project" {
+		if rs.Type != "aiven_project" {
 			continue
 		}
 
