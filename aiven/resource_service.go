@@ -674,7 +674,9 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	}
 
 	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat("service", service.Type, service.UserConfig)
-	d.Set(service.Type+"_user_config", userConfig)
+	if err := d.Set(service.Type+"_user_config", userConfig); err != nil {
+		return fmt.Errorf("cannot set `%s_user_config` : %s", service.Type, err)
+	}
 
 	params := service.URIParams
 	if err := d.Set("service_host", params["host"]); err != nil {
@@ -703,9 +705,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		return fmt.Errorf("cannot set `components` : %s", err)
 	}
 
-	copyConnectionInfoFromAPIResponseToTerraform(d, service.Type, service.ConnectionInfo)
-
-	return nil
+	return copyConnectionInfoFromAPIResponseToTerraform(d, service.Type, service.ConnectionInfo)
 }
 
 func flattenServiceComponents(r *aiven.Service) []map[string]interface{} {
@@ -729,18 +729,36 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	d *schema.ResourceData,
 	serviceType string,
 	connectionInfo aiven.ConnectionInfo,
-) {
+) error {
 	// Need to set empty value for all services or all Terraform keeps on showing there's
 	// a change in the computed values that don't match actual service type
-	d.Set("cassandra", []map[string]interface{}{})
-	d.Set("elasticsearch", []map[string]interface{}{})
-	d.Set("grafana", []map[string]interface{}{})
-	d.Set("influxdb", []map[string]interface{}{})
-	d.Set("kafka", []map[string]interface{}{})
-	d.Set("kafka_connect", []map[string]interface{}{})
-	d.Set("mysql", []map[string]interface{}{})
-	d.Set("pg", []map[string]interface{}{})
-	d.Set("redis", []map[string]interface{}{})
+	if err := d.Set("cassandra", []map[string]interface{}{}); err != nil {
+		return err
+	}
+	if err := d.Set("elasticsearch", []map[string]interface{}{}); err != nil {
+		return err
+	}
+	if err := d.Set("grafana", []map[string]interface{}{}); err != nil {
+		return err
+	}
+	if err := d.Set("influxdb", []map[string]interface{}{}); err != nil {
+		return err
+	}
+	if err := d.Set("kafka", []map[string]interface{}{}); err != nil {
+		return err
+	}
+	if err := d.Set("kafka_connect", []map[string]interface{}{}); err != nil {
+		return err
+	}
+	if err := d.Set("mysql", []map[string]interface{}{}); err != nil {
+		return err
+	}
+	if err := d.Set("pg", []map[string]interface{}{}); err != nil {
+		return err
+	}
+	if err := d.Set("redis", []map[string]interface{}{}); err != nil {
+		return err
+	}
 
 	props := make(map[string]interface{})
 	switch serviceType {
@@ -779,5 +797,10 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	default:
 		panic(fmt.Sprintf("Unsupported service type %v", serviceType))
 	}
-	d.Set(serviceType, []map[string]interface{}{props})
+
+	if err := d.Set(serviceType, []map[string]interface{}{props}); err != nil {
+		return err
+	}
+
+	return nil
 }
