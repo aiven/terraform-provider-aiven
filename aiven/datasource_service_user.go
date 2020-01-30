@@ -2,6 +2,7 @@
 package aiven
 
 import (
+	"fmt"
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -20,11 +21,17 @@ func datasourceServiceUserRead(d *schema.ResourceData, m interface{}) error {
 	serviceName := d.Get("service_name").(string)
 	userName := d.Get("username").(string)
 
-	user, err := client.ServiceUsers.Get(projectName, serviceName, userName)
+	list, err := client.ServiceUsers.List(projectName, serviceName)
 	if err != nil {
 		return err
 	}
 
-	d.SetId(buildResourceID(projectName, serviceName, userName))
-	return copyServiceUserPropertiesFromAPIResponseToTerraform(d, user, projectName, serviceName)
+	for _, u := range list {
+		if u.Username == userName {
+			d.SetId(buildResourceID(projectName, serviceName, userName))
+			return resourceServiceUserRead(d, m)
+		}
+	}
+
+	return fmt.Errorf("service user %s/%s/%s not found", projectName, serviceName, userName)
 }
