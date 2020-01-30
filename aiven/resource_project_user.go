@@ -66,7 +66,9 @@ func resourceProjectUserCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.SetId(buildResourceID(projectName, email))
-	d.Set("accepted", false)
+	if err := d.Set("accepted", false); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -79,14 +81,26 @@ func resourceProjectUserRead(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	d.Set("project", projectName)
-	d.Set("email", email)
+	if err := d.Set("project", projectName); err != nil {
+		return err
+	}
+	if err := d.Set("email", email); err != nil {
+		return err
+	}
 	if user != nil {
-		d.Set("member_type", user.MemberType)
-		d.Set("accepted", true)
+		if err := d.Set("member_type", user.MemberType); err != nil {
+			return err
+		}
+		if err := d.Set("accepted", true); err != nil {
+			return err
+		}
 	} else {
-		d.Set("member_type", invitation.MemberType)
-		d.Set("accepted", false)
+		if err := d.Set("member_type", invitation.MemberType); err != nil {
+			return err
+		}
+		if err := d.Set("accepted", false); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -109,7 +123,35 @@ func resourceProjectUserDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	projectName, email := splitResourceID2(d.Id())
-	return client.ProjectUsers.DeleteUserOrInvitation(projectName, email)
+	user, invitation, err := client.ProjectUsers.Get(projectName, email)
+	if err != nil {
+		return err
+	}
+
+	// delete user if exists
+	if user != nil {
+		err := client.ProjectUsers.DeleteUser(projectName, email)
+		if err != nil {
+			if err.(aiven.Error).Status != 404 ||
+				!strings.Contains(err.(aiven.Error).Message, "User does not exist") ||
+				!strings.Contains(err.(aiven.Error).Message, "User not found") {
+
+				return err
+			}
+		}
+	}
+
+	// delete invitation if exists
+	if invitation != nil {
+		err := client.ProjectUsers.DeleteInvitation(projectName, email)
+		if err != nil {
+			if err.(aiven.Error).Status != 404 {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func resourceProjectUserExists(d *schema.ResourceData, m interface{}) (bool, error) {
