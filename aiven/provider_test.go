@@ -34,4 +34,8 @@ func testAccPreCheck(t *testing.T) {
 		t.Log(v)
 		t.Fatal("AIVEN_TOKEN must be set for acceptance tests")
 	}
+
+	if v := os.Getenv("AIVEN_CARD_ID"); v == "" {
+		t.Fatal("AIVEN_CARD_ID must be set for acceptance tests")
+	}
 }
