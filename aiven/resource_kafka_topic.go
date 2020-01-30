@@ -129,16 +129,33 @@ func resourceKafkaTopicRead(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	d.Set("project", project)
-	d.Set("service_name", serviceName)
-	d.Set("topic_name", topic.TopicName)
-	d.Set("state", topic.State)
-	d.Set("partitions", len(topic.Partitions))
-	d.Set("replication", topic.Replication)
-	d.Set("cleanup_policy", topic.CleanupPolicy)
-	d.Set("minimum_in_sync_replicas", topic.MinimumInSyncReplicas)
-	d.Set("retention_bytes", topic.RetentionBytes)
-	d.Set("retention_hours", topic.RetentionHours)
+	if err := d.Set("project", project); err != nil {
+		return err
+	}
+	if err := d.Set("service_name", serviceName); err != nil {
+		return err
+	}
+	if err := d.Set("topic_name", topic.TopicName); err != nil {
+		return err
+	}
+	if err := d.Set("partitions", len(topic.Partitions)); err != nil {
+		return err
+	}
+	if err := d.Set("replication", topic.Replication); err != nil {
+		return err
+	}
+	if err := d.Set("cleanup_policy", topic.CleanupPolicy); err != nil {
+		return err
+	}
+	if err := d.Set("minimum_in_sync_replicas", topic.MinimumInSyncReplicas); err != nil {
+		return err
+	}
+	if err := d.Set("retention_bytes", topic.RetentionBytes); err != nil {
+		return err
+	}
+	if err := d.Set("retention_hours", topic.RetentionHours); err != nil {
+		return err
+	}
 
 	return nil
 }

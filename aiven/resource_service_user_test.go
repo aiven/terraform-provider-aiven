@@ -63,30 +63,34 @@ func testAccCheckAivenServiceUserResourceDestroy(s *terraform.State) error {
 func testAccServiceUserResource(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_project" "foo" {
-		  project = "test-acc-pr-%s"
-		  card_id = "%s"
+			project = "test-acc-pr-%s"
+			card_id = "%s"
 		}
-
+		
 		resource "aiven_service" "bar" {
-		  project = aiven_project.foo.project
-		  cloud_name = "google-europe-west1"
-		  plan = "startup-4"
-		  service_name = "test-acc-sr-%s"
-		  service_type = "pg"
-		  maintenance_window_dow = "monday"
-		  maintenance_window_time = "10:00:00"
+			project = aiven_project.foo.project
+			cloud_name = "google-europe-west1"
+			plan = "startup-4"
+			service_name = "test-acc-sr-%s"
+			service_type = "pg"
+			maintenance_window_dow = "monday"
+			maintenance_window_time = "10:00:00"
+			
+			pg_user_config {
+				pg_version = 11
+			}
 		}
-
+		
 		resource "aiven_service_user" "foo" {
-		  service_name = aiven_service.bar.service_name
-		  project = aiven_project.foo.project
-		  username = "user-%s"
+			service_name = aiven_service.bar.service_name
+			project = aiven_project.foo.project
+			username = "user-%s"
 		}
-
+		
 		data "aiven_service_user" "user" {
-		  service_name = aiven_service.bar.service_name
-		  project = aiven_project.foo.project
-		  username = aiven_service_user.foo.username
+			service_name = aiven_service.bar.service_name
+			project = aiven_project.foo.project
+			username = aiven_service_user.foo.username
 		}
 		`, name, os.Getenv("AIVEN_CARD_ID"), name, name)
 }
