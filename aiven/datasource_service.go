@@ -2,6 +2,7 @@
 package aiven
 
 import (
+	"fmt"
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -20,10 +21,16 @@ func datasourceServiceRead(d *schema.ResourceData, m interface{}) error {
 	serviceName := d.Get("service_name").(string)
 	d.SetId(buildResourceID(projectName, serviceName))
 
-	service, err := client.Services.Get(projectName, serviceName)
+	services, err := client.Services.List(projectName)
+	for _, service := range services {
+		if service.Name == serviceName {
+			return resourceServiceRead(d, m)
+		}
+	}
+
 	if err != nil {
 		return err
 	}
 
-	return copyServicePropertiesFromAPIResponseToTerraform(d, service, projectName)
+	return fmt.Errorf("service %s/%s not found", projectName, serviceName)
 }

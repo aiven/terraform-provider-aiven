@@ -220,7 +220,7 @@ func getAivenSchemaDefaultValue(definition map[string]interface{}) interface{} {
 	} else if valueType == "array" {
 		defaultValue = []interface{}{}
 	} else if valueType == "object" {
-		defaultValue = map[string]interface{}{}
+		defaultValue = []map[string]interface{}{}
 	}
 	return defaultValue
 }
