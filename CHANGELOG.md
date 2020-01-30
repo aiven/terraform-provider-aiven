@@ -6,7 +6,7 @@ Service pg_user_config variant configuration option remove default value.
 
 ## [1.1.2] - 2020-01-22
 - Fix for <service>_user_config Boolean fields without default value.
-- Upgrade golang version to 1.3.
+- Upgrade golang version to 1.13.
 - Allow the API token to be read from an env var.
 
 ## [1.1.1] - 2020-01-14
