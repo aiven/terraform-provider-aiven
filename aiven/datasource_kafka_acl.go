@@ -31,7 +31,7 @@ func datasourceKafkaACLRead(d *schema.ResourceData, m interface{}) error {
 	for _, acl := range acls {
 		if acl.Topic == topic && acl.Username == userName {
 			d.SetId(buildResourceID(projectName, serviceName, acl.ID))
-			return copyKafkaACLPropertiesFromAPIResponseToTerraform(d, acl, projectName, serviceName)
+			return resourceKafkaACLRead(d, m)
 		}
 	}
 
