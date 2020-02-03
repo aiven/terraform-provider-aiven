@@ -1,6 +1,10 @@
 # Changelog
 
 
+## [1.1.4] - 2020-02-03
+- Acceptance tests
+- Fix <service>_user_config population problem during import
+ 
 ## [1.1.3] - 2020-01-24
 Service pg_user_config variant configuration option remove default value.
 
