@@ -3,9 +3,8 @@ package aiven
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/aiven/terraform-provider-aiven/pkg/cache"
+	"strings"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -127,11 +126,21 @@ func copyKafkaACLPropertiesFromAPIResponseToTerraform(
 	project string,
 	serviceName string,
 ) error {
-	d.Set("project", project)
-	d.Set("service_name", serviceName)
-	d.Set("topic", acl.Topic)
-	d.Set("permission", acl.Permission)
-	d.Set("username", acl.Username)
+	if err := d.Set("project", project); err != nil {
+		return err
+	}
+	if err := d.Set("service_name", serviceName); err != nil {
+		return err
+	}
+	if err := d.Set("topic", acl.Topic); err != nil {
+		return err
+	}
+	if err := d.Set("permission", acl.Permission); err != nil {
+		return err
+	}
+	if err := d.Set("username", acl.Username); err != nil {
+		return err
+	}
 
 	return nil
 }
