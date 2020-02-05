@@ -90,13 +90,13 @@ func testAccCheckAivenAccountResourceDestroy(s *terraform.State) error {
 			if err.(aiven.Error).Status != 404 {
 				return err
 			}
+
+			return nil
 		}
 
-		if r != nil {
-			for _, acc := range r.Accounts {
-				if acc.Id == rs.Primary.ID {
-					return fmt.Errorf("account (%s) still exists", rs.Primary.ID)
-				}
+		for _, acc := range r.Accounts {
+			if acc.Id == rs.Primary.ID {
+				return fmt.Errorf("account (%s) still exists", rs.Primary.ID)
 			}
 		}
 	}
