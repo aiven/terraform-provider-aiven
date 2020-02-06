@@ -85,6 +85,7 @@ func testAccCheckAivenAccountResourceDestroy(s *terraform.State) error {
 		if rs.Type != "aiven_account" {
 			continue
 		}
+
 		r, err := c.Accounts.List()
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {
