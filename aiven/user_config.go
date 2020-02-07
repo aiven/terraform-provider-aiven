@@ -249,7 +249,14 @@ func convertAPIUserConfigToTerraformCompatibleFormat(
 	terraformConfig := make(map[string]interface{})
 	for key, schemaDefinitionRaw := range jsonSchema {
 		schemaDefinition := schemaDefinitionRaw.(map[string]interface{})
-		valueType, _ := getAivenSchemaType(schemaDefinition["type"])
+
+		var valueType string
+		if t, ok := schemaDefinition["api_type"]; ok {
+			valueType = t.(string)
+		} else {
+			valueType, _ = getAivenSchemaType(schemaDefinition["type"])
+		}
+
 		apiValue, ok := apiUserConfig[key]
 		key = encodeKeyName(key)
 		if !ok || apiValue == nil {
@@ -289,6 +296,16 @@ func convertAPIUserConfigToTerraformCompatibleFormat(
 				terraformConfig[key] = float64(res)
 			default:
 				panic(fmt.Sprintf("Unexpected value type for '%v': %v / %T", key, apiValue, apiValue))
+			}
+		case "boolean":
+			switch value := apiValue.(type) {
+			case string:
+				terraformConfig[key] = apiValue
+			case bool:
+				terraformConfig[key] = strconv.FormatBool(apiValue.(bool))
+			default:
+				panic(fmt.Sprintf("Invalid user config key type %T for %v, expected string or boolean",
+					value, key))
 			}
 		default:
 			terraformConfig[key] = apiValue
