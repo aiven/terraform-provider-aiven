@@ -302,7 +302,12 @@ func convertAPIUserConfigToTerraformCompatibleFormat(
 			case string:
 				terraformConfig[key] = apiValue
 			case bool:
-				terraformConfig[key] = strconv.FormatBool(apiValue.(bool))
+				_, ok := schemaDefinition["api_type"]
+				if ok {
+					terraformConfig[key] = strconv.FormatBool(apiValue.(bool))
+				} else {
+					terraformConfig[key] = apiValue
+				}
 			default:
 				panic(fmt.Sprintf("Invalid user config key type %T for %v, expected string or boolean",
 					value, key))
