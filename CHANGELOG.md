@@ -1,5 +1,7 @@
 # Changelog
 
+## [1.1.6] - 2020-02-07
+Fix for a problem that appears for normal boolean user configuration settings
 
 ## [1.1.5] - 2020-02-07
 Fix for a problem that appears for optional bool user configuration settings
