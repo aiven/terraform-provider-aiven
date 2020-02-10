@@ -17,9 +17,9 @@ func datasourceAccountTeamRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	name := d.Get("name").(string)
-	account_id := d.Get("account_id").(string)
+	accountId := d.Get("account_id").(string)
 
-	r, err := client.AccountTeams.List(account_id)
+	r, err := client.AccountTeams.List(accountId)
 	if err != nil {
 		return err
 	}

@@ -28,12 +28,6 @@ var aivenAccountSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Computed:    true,
 	},
-	"billing_enabled": {
-		Type:        schema.TypeBool,
-		Description: "Billing enabled",
-		Optional:    true,
-		Computed:    true,
-	},
 	"create_time": {
 		Type:        schema.TypeString,
 		Description: "Time of creation",
@@ -99,9 +93,6 @@ func resourceAccountRead(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	if err := d.Set("tenant_id", r.Account.TenantId); err != nil {
-		return err
-	}
-	if err := d.Set("billing_enabled", r.Account.BillingEnabled); err != nil {
 		return err
 	}
 	if err := d.Set("create_time", r.Account.CreateTime.String()); err != nil {

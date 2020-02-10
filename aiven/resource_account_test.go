@@ -13,8 +13,9 @@ import (
 
 func init() {
 	resource.AddTestSweepers("aiven_account", &resource.Sweeper{
-		Name: "aiven_account",
-		F:    sweepAccounts,
+		Name:         "aiven_account",
+		F:            sweepAccounts,
+		Dependencies: []string{"aiven_project", "aiven_account_team", "aiven_account_team_project"},
 	})
 }
 
@@ -34,7 +35,9 @@ func sweepAccounts(region string) error {
 	for _, a := range r.Accounts {
 		if strings.Contains(a.Name, "test-acc-ac-") {
 			if err := conn.Projects.Delete(a.Name); err != nil {
-				return fmt.Errorf("error destroying account %s during sweep: %s", a.Name, err)
+				if err.(aiven.Error).Status != 404 {
+					return fmt.Errorf("error destroying account %s during sweep: %s", a.Name, err)
+				}
 			}
 		}
 	}

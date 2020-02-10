@@ -11,6 +11,14 @@ import (
 	"testing"
 )
 
+func init() {
+	resource.AddTestSweepers("aiven_project", &resource.Sweeper{
+		Name:         "aiven_project",
+		F:            sweepProjects,
+		Dependencies: []string{"aiven_service"},
+	})
+}
+
 func sweepProjects(region string) error {
 	client, err := sharedClient(region)
 	if err != nil {
@@ -27,6 +35,19 @@ func sweepProjects(region string) error {
 	for _, project := range projects {
 		if strings.Contains(project.Name, "test-acc-pr") {
 			if err := conn.Projects.Delete(project.Name); err != nil {
+				e := err.(aiven.Error)
+
+				// project not found
+				if e.Status == 404 {
+					continue
+				}
+
+				// project with open balance cannot be destroyed
+				if strings.Contains(e.Message, "open balance") && e.Status == 403 {
+					log.Printf("[DEBUG] project %s with open balance cannot be destroyed", project.Name)
+					continue
+				}
+
 				return fmt.Errorf("error destroying project %s during sweep: %s", project.Name, err)
 			}
 		}
@@ -57,6 +78,45 @@ func TestAccAivenProject_basic(t *testing.T) {
 	})
 }
 
+func TestAccAivenProject_accounts(t *testing.T) {
+	t.Parallel()
+
+	resourceName := "aiven_project.foo"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAivenProjectResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccProjectResourceAccounts(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenProjectAttributes("data.aiven_project.project", "account_id"),
+					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+				),
+			},
+		},
+	})
+}
+
+func testAccProjectResourceAccounts(name string) string {
+	return fmt.Sprintf(`
+		resource "aiven_account" "foo" {
+			name = "test-acc-ac-%s"
+		} 
+
+		resource "aiven_project" "foo" {
+			project = "test-acc-pr-%s"
+			account_id = aiven_account.foo.account_id
+		}
+
+		data "aiven_project" "project" {
+			project = aiven_project.foo.project
+		}
+		`, name, name)
+}
+
 func testAccProjectResource(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_project" "foo" {
@@ -69,7 +129,7 @@ func testAccProjectResource(name string) string {
 		`, name)
 }
 
-func testAccCheckAivenProjectAttributes(n string) resource.TestCheckFunc {
+func testAccCheckAivenProjectAttributes(n string, attributes ...string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		r := s.RootModule().Resources[n]
 		a := r.Primary.Attributes
@@ -82,6 +142,12 @@ func testAccCheckAivenProjectAttributes(n string) resource.TestCheckFunc {
 
 		if a["ca_cert"] == "" {
 			return fmt.Errorf("expected to get an ca_cert from Aiven")
+		}
+
+		for _, attr := range attributes {
+			if a[attr] == "" {
+				return fmt.Errorf("expected to get an %s from Aiven", attr)
+			}
 		}
 
 		return nil

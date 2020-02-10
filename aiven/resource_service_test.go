@@ -39,15 +39,12 @@ func sweepServices(region string) error {
 
 			for _, service := range services {
 				if err := conn.Services.Delete(project.Name, service.Name); err != nil {
-					return fmt.Errorf("error destroying service %s during sweep: %s", service.Name, err)
+					if err.(aiven.Error).Status != 404 {
+						return fmt.Errorf("error destroying service %s during sweep: %s", service.Name, err)
+					}
 				}
 			}
 		}
-	}
-
-	// sweep projects
-	if err := sweepProjects(region); err != nil {
-		return err
 	}
 
 	return nil

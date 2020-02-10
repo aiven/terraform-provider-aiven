@@ -2,6 +2,7 @@
 package aiven
 
 import (
+	"fmt"
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -17,17 +18,18 @@ func datasourceProjectRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
-	project, err := client.Projects.Get(projectName)
+
+	projects, err := client.Projects.List()
 	if err != nil {
 		return err
 	}
 
-	d.SetId(projectName)
-
-	currentCardID, err := getLongCardID(client, d.Get("card_id").(string))
-	if err != nil || currentCardID != project.Card.CardID {
-		d.Set("card_id", project.Card.CardID)
+	for _, project := range projects {
+		if project.Name == projectName {
+			d.SetId(projectName)
+			return resourceProjectRead(d, m)
+		}
 	}
-	setProjectTerraformProperties(d, client, project)
-	return nil
+
+	return fmt.Errorf("project %s not found", projectName)
 }

@@ -101,6 +101,7 @@ the services.
 resource "aiven_project" "myproject" {
     project = "<PROJECT_NAME>"
     card_id = "<FULL_CARD_ID/LAST4_DIGITS>"
+    account_id = aiven_account_team.<ACCOUNT_RESOURCE>.account_id
 }
 ```
 
@@ -113,6 +114,9 @@ UUID is not shown in the UI it is typically easier to use the last 4 digits to i
 the card. This can be omitted if `copy_from_project` is used to copy billing info from
 another project.
 
+`account_id` is an optional property to link a project to already an existing account by 
+using account ID
+
 `copy_from_project` is the name of another project used to copy billing information and
 some other project attributes like technical contacts from. This is mostly relevant when
 an existing project has billing type set to invoice and that needs to be copied over to a
@@ -124,6 +128,88 @@ project. This is required for configuring clients that connect to certain servic
 Kafka. This value cannot be set, only read.
 
 Aiven ID format when importing existing resource: name of the project as is.
+
+### Resource Account
+```
+resource "aiven_account" "account1" {
+    name = "<ACCOUNT_NAME>"
+}
+
+```
+
+`name` defines an account name.
+
+`account_id` is an auto-generated unique account id.
+
+### Resource Account Team
+```
+resource "aiven_account_team" "account_team1" {
+    account_id = aiven_account.<ACCOUNT_RESOURCE>.account_id
+    name = "account_team1"
+}
+```
+
+`name` defines an account team name.
+
+`account_id` is an unique account id.
+
+`team_id` is an auto-generated unique account team id.
+
+### Resource Account Team Project
+The account team project is intended to link and existing project to the existing account team. 
+It is important to note that the project should have an `account_id` property set and equal to
+account team you are trying to link this project. 
+
+```
+resource "aiven_project" "<PROJECT>" {
+  project = "project-1"
+  account_id = aiven_account_team.<ACCOUNT_RESOURCE>.account_id
+}
+
+resource "aiven_account_team_project" "account_team_project1" {
+    account_id = aiven_account.<ACCOUNT_RESOURCE>.account_id
+    team_id = aiven_account_team.<TEAM_RESOURCE>.team_id
+    project_name = aiven_project.<PROJECT>.project
+    team_type = "admin"
+}
+```
+
+`account_id` is an unique account id.
+
+`team_id` is an account team id.
+
+`project_name` is a project name of already existing project.
+
+`team_type` is an account team project type, can one of the following values: `admin`, 
+`developer`, `operator` and `read_only`.
+
+### Resource Account Team Member
+During the creation of `aiven_account_team_member` resource, an email invitation will be sent  
+to a user using `user_email` address. If the user accepts an invitation, he or she will become 
+a member of the account team. The deletion of `aiven_account_team_member` will not only 
+delete invitation if one was sent but not yet accepted by the user, and it will also 
+eliminate an account team member if one has accepted an invitation previously.
+ 
+
+```
+resource "aiven_account_team_member" "foo" {
+  account_id = aiven_account.<ACCOUNT_RESOURCE>.account_id
+  team_id = aiven_account_team.<TEAM_RESOURCE>.team_id
+  user_email = "user+1@example.com"
+}
+
+```
+
+`account_id` is an unique account id.
+
+`team_id` is an account team id.
+
+`user_email` is a user email address that first will be invited, and after accepting an invitation,
+he or she becomes a member of a team.
+
+`accepted` is a boolean flag that determines whether an invitation was accepted or not by the user. 
+`false` value means that the invitation was sent to the user but not yet accepted. 
+`true` means that the user accepted the invitation and now a member of an account team 
 
 ### Resource Service
 
