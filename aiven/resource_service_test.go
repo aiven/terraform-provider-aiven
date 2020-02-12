@@ -82,8 +82,15 @@ func testAccCheckAivenServiceCommonAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a service.maintenance_window_dow from Aiven")
 		}
 
-		if a["service_password"] == "" {
-			return fmt.Errorf("expected to get a service_password from Aiven")
+		// Kafka service has no username and password
+		if a["service_type"] != "kafka" {
+			if a["service_password"] == "" {
+				return fmt.Errorf("expected to get a service_password from Aiven")
+			}
+
+			if a["service_username"] == "" {
+				return fmt.Errorf("expected to get a service_username from Aiven")
+			}
 		}
 
 		if a["service_port"] == "" {
@@ -104,10 +111,6 @@ func testAccCheckAivenServiceCommonAttributes(n string) resource.TestCheckFunc {
 
 		if a["state"] != "RUNNING" {
 			return fmt.Errorf("expected to get a correct state from Aiven")
-		}
-
-		if a["service_username"] == "" {
-			return fmt.Errorf("expected to get a service_username from Aiven")
 		}
 
 		if a["maintenance_window_time"] != "10:00:00" {
