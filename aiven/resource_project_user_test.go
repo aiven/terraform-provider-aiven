@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"log"
 	"testing"
 )
 
@@ -26,7 +25,7 @@ func TestAccAivenProjectUser_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenProjectUserAttributes("data.aiven_project_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "email", fmt.Sprintf("user%s@aiven.fi", rName)),
+					resource.TestCheckResourceAttr(resourceName, "email", fmt.Sprintf("savciuci+%s@aiven.fi", rName)),
 					resource.TestCheckResourceAttr(resourceName, "member_type", "admin"),
 				),
 			},
@@ -71,7 +70,7 @@ func testAccProjectUserResource(name string) string {
 
 		resource "aiven_project_user" "bar" {
 			project = aiven_project.foo.project
-			email = "user%s@aiven.fi"
+			email = "savciuci+%s@aiven.fi"
 			member_type = "admin"
 		}
 
@@ -86,8 +85,6 @@ func testAccCheckAivenProjectUserAttributes(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		r := s.RootModule().Resources[n]
 		a := r.Primary.Attributes
-
-		log.Printf("[DEBUG] project user attributes %v", a)
 
 		if a["project"] == "" {
 			return fmt.Errorf("expected to get a project name from Aiven")
