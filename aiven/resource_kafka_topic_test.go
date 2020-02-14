@@ -99,8 +99,40 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "true"),
 				),
 			},
+			{
+				Config: testAccKafka101TopicResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenKafkaTopicAttributes("data.aiven_kafka_topic.topic"),
+					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
+					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
+				),
+			},
 		},
 	})
+}
+
+func testAccKafka101TopicResource(name string) string {
+	s := testAccKafkaTopicResource(name)
+
+	// add extra 100 Kafka topics to test caching layer and creation waiter functionality
+	for i := 1; i < 100; i++ {
+		s += fmt.Sprintf(`
+			resource "aiven_kafka_topic" "foo%s" {
+				project = aiven_project.foo.project
+				service_name = aiven_service.bar.service_name
+				topic_name = "test-acc-topic-%s"
+				partitions = 3
+				replication = 2
+			}
+		`,
+			acctest.RandStringFromCharSet(5, acctest.CharSetAlphaNum),
+			acctest.RandStringFromCharSet(5, acctest.CharSetAlphaNum))
+	}
+
+	return s
 }
 
 func testAccKafkaTopicResource(name string) string {
@@ -225,7 +257,16 @@ func testAccCheckAivenKafkaTopicResourceDestroy(s *terraform.State) error {
 		if rs.Type != "aiven_kafka_topic" {
 			continue
 		}
+
 		project, serviceName, topicName := splitResourceID3(rs.Primary.ID)
+
+		_, err := c.Services.Get(project, serviceName)
+		if err != nil {
+			if err.(aiven.Error).Status != 404 {
+				return err
+			}
+		}
+
 		t, err := c.KafkaTopics.Get(project, serviceName, topicName)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {

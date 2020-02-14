@@ -1,95 +1,103 @@
 package cache
 
 import (
-	"fmt"
+	"log"
 	"sync"
 
 	aiven "github.com/aiven/aiven-go-client"
 )
 
 var (
-	topics         = make(map[string]map[string]aiven.KafkaTopic)
-	topicCacheLock sync.Mutex
+	once       sync.Once
+	topicCache *TopicCache
 )
 
-//TopicCache type
+// TopicCache represents Kafka Topics cache based on Service and Project identifiers
 type TopicCache struct {
+	sync.RWMutex
+	internal map[string]map[string]aiven.KafkaTopic
 }
 
-//write writes the specified topic to the cache
-func (t TopicCache) write(project, service string, topic *aiven.KafkaListTopic) (err error) {
-	var cachedService map[string]aiven.KafkaTopic
-	var ok bool
-	if cachedService, ok = topics[project+service]; !ok {
-		cachedService = make(map[string]aiven.KafkaTopic)
-	}
+// NewTopicCache creates new global instance of Kafka Topic Cache
+func NewTopicCache() *TopicCache {
+	log.Print("[DEBUG] Creating an instance of TopicCache ...")
 
-	topicForCache := aiven.KafkaTopic{
-		MinimumInSyncReplicas: topic.MinimumInSyncReplicas,
-		Partitions:            partitions(topic.Partitions),
-		Replication:           topic.Replication,
-		RetentionBytes:        topic.RetentionBytes,
-		RetentionHours:        topic.RetentionHours,
-		State:                 topic.State,
-		TopicName:             topic.TopicName,
-		CleanupPolicy:         topic.CleanupPolicy}
+	once.Do(func() {
+		topicCache = &TopicCache{
+			internal: make(map[string]map[string]aiven.KafkaTopic),
+		}
+	})
 
-	cachedService[topic.TopicName] = topicForCache
-	topics[project+service] = cachedService
-	return
+	return topicCache
 }
 
-//Refresh refreshes the Topic cache
-func (t TopicCache) Refresh(project, service string, client *aiven.Client) error {
-	topicCacheLock.Lock()
-	defer topicCacheLock.Unlock()
-	return t.populateTopicCache(project, service, client)
+// GetTopicCache gets a global Kafka Topics Cache
+func GetTopicCache() *TopicCache {
+	return topicCache
 }
 
-//Read populates the cache if it doesn't exist, and reads the required topic. An aiven.Error with status
-//404 is returned upon cache miss
-func (t TopicCache) Read(project, service, topicName string, client *aiven.Client) (topic aiven.KafkaTopic, err error) {
-	topicCacheLock.Lock()
-	defer topicCacheLock.Unlock()
+// LoadByProjectAndServiceName returns a list of Kafka Topics stored in the cache for a given Project
+// and Service names, or nil if no value is present.
+// The ok result indicates whether value was found in the map.
+func (t *TopicCache) LoadByProjectAndServiceName(projectName, serviceName string) (map[string]aiven.KafkaTopic, bool) {
+	t.RLock()
+	result, ok := t.internal[projectName+serviceName]
+	t.RUnlock()
 
-	if _, ok := topics[project+service]; !ok {
-		if err = t.populateTopicCache(project, service, client); err != nil {
-			return
-		}
-	}
-	if cachedService, ok := topics[project+service]; ok {
-		if topic, ok = cachedService[topicName]; !ok {
-			// cache miss, return a 404 so it can be cleaned up later
-			var liveTopic *aiven.KafkaTopic
-			if liveTopic, err = client.KafkaTopics.Get(project, service, topicName); err == nil {
-				topic = *liveTopic
-			}
-		}
-	} else {
-		err = aiven.Error{
-			Status:  404,
-			Message: fmt.Sprintf("Cache miss on project/service: %s/%s", project, service),
-		}
+	return result, ok
+}
+
+// LoadByTopicName returns a list of Kafka Topics stored in the cache for a given Project
+// and Service names, or nil if no value is present.
+// The ok result indicates whether value was found in the map.
+func (t *TopicCache) LoadByTopicName(projectName, serviceName, topicName string) (aiven.KafkaTopic, bool) {
+	t.RLock()
+	defer t.RUnlock()
+
+	topics, ok := t.internal[projectName+serviceName]
+	if !ok {
+		return aiven.KafkaTopic{}, false
 	}
 
-	return
+	result, ok := topics[topicName]
+
+	return result, ok
+}
+
+// DeleteByProjectAndServiceName deletes the cache value for a key which is a combination of Project
+// and Service names.
+func (t *TopicCache) DeleteByProjectAndServiceName(projectName, serviceName string) {
+	t.Lock()
+	delete(t.internal, projectName+serviceName)
+	t.Unlock()
+}
+
+// StoreByProjectAndServiceName sets the values for a Project name and Service name key.
+func (t *TopicCache) StoreByProjectAndServiceName(projectName, serviceName string, list []*aiven.KafkaListTopic) {
+	for _, lTopic := range list {
+		topic := aiven.KafkaTopic{
+			MinimumInSyncReplicas: lTopic.MinimumInSyncReplicas,
+			Partitions:            partitions(lTopic.Partitions),
+			Replication:           lTopic.Replication,
+			RetentionBytes:        lTopic.RetentionBytes,
+			RetentionHours:        lTopic.RetentionHours,
+			State:                 lTopic.State,
+			TopicName:             lTopic.TopicName,
+			CleanupPolicy:         lTopic.CleanupPolicy}
+
+		t.Lock()
+		if _, ok := t.internal[projectName+serviceName]; !ok {
+			t.internal[projectName+serviceName] = make(map[string]aiven.KafkaTopic)
+		}
+		t.internal[projectName+serviceName][topic.TopicName] = topic
+		t.Unlock()
+	}
 }
 
 //partitions returns a slice, of empty aiven.Partition, of specified size
 func partitions(numPartitions int) (partitions []*aiven.Partition) {
 	for i := 0; i < numPartitions; i++ {
 		partitions = append(partitions, &aiven.Partition{})
-	}
-	return
-}
-
-//populateTopicCache makes a call to Aiven to list kafka topics, and upserts into the cache
-func (t TopicCache) populateTopicCache(project, service string, client *aiven.Client) (err error) {
-	var topics []*aiven.KafkaListTopic
-	if topics, err = client.KafkaTopics.List(project, service); err == nil {
-		for _, topic := range topics {
-			t.write(project, service, topic)
-		}
 	}
 	return
 }

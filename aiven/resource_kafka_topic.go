@@ -4,11 +4,9 @@ package aiven
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/pkg/cache"
 	"github.com/hashicorp/terraform/helper/schema"
+	"strings"
 )
 
 var aivenKafkaTopicSchema = map[string]*schema.Schema{
@@ -106,6 +104,7 @@ func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
 		RetentionHours:        optionalIntPointer(d, "retention_hours"),
 		TopicName:             topicName,
 	}
+
 	w := &KafkaTopicCreateWaiter{
 		Client:        m.(*aiven.Client),
 		Project:       project,
@@ -117,22 +116,14 @@ func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	err = resourceKafkaTopicWait(d, m)
-
-	if err != nil {
-		return err
-	}
-
 	d.SetId(buildResourceID(project, serviceName, topicName))
 
 	return resourceKafkaTopicRead(d, m)
 }
 
 func resourceKafkaTopicRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*aiven.Client)
-
-	project, serviceName, topicName := splitResourceID3(d.Id())
-	topic, err := cache.TopicCache{}.Read(project, serviceName, topicName, client)
+	project, serviceName, _ := splitResourceID3(d.Id())
+	topic, err := getTopic(d, m)
 	if err != nil {
 		return err
 	}
@@ -171,6 +162,22 @@ func resourceKafkaTopicRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
+func getTopic(d *schema.ResourceData, m interface{}) (aiven.KafkaTopic, error) {
+	w := &KafkaTopicAvailabilityWaiter{
+		Client:      m.(*aiven.Client),
+		Project:     d.Get("project").(string),
+		ServiceName: d.Get("service_name").(string),
+		TopicName:   d.Get("topic_name").(string),
+	}
+
+	topic, err := w.Conf().WaitForState()
+	if err != nil {
+		return aiven.KafkaTopic{}, fmt.Errorf("error waiting for Aiven Kafka topic to be ACTIVE: %s", err)
+	}
+
+	return topic.(aiven.KafkaTopic), nil
+}
+
 func resourceKafkaTopicUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
@@ -192,11 +199,6 @@ func resourceKafkaTopicUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	err = resourceKafkaTopicWait(d, m)
-	if err != nil {
-		return err
-	}
-
 	return resourceKafkaTopicRead(d, m)
 }
 
@@ -204,6 +206,7 @@ func resourceKafkaTopicDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, topicName := splitResourceID3(d.Id())
+
 
 	if d.Get("termination_protection").(bool) == true {
 		return fmt.Errorf("cannot delete kafka topic when termination_protection is enabled")
@@ -213,10 +216,8 @@ func resourceKafkaTopicDelete(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceKafkaTopicExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	client := m.(*aiven.Client)
+	_, err := getTopic(d, m)
 
-	projectName, serviceName, topicName := splitResourceID3(d.Id())
-	_, err := cache.TopicCache{}.Read(projectName, serviceName, topicName, client)
 	return resourceExists(err)
 }
 
@@ -231,20 +232,4 @@ func resourceKafkaTopicState(d *schema.ResourceData, m interface{}) ([]*schema.R
 	}
 
 	return []*schema.ResourceData{d}, nil
-}
-
-func resourceKafkaTopicWait(d *schema.ResourceData, m interface{}) error {
-	w := &KafkaTopicChangeWaiter{
-		Client:      m.(*aiven.Client),
-		Project:     d.Get("project").(string),
-		ServiceName: d.Get("service_name").(string),
-		TopicName:   d.Get("topic_name").(string),
-	}
-
-	_, err := w.Conf().WaitForState()
-	if err != nil {
-		return fmt.Errorf("error waiting for Aiven Kafka topic to be ACTIVE: %s", err)
-	}
-
-	return nil
 }
