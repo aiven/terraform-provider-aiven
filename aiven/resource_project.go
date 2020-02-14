@@ -30,6 +30,11 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Description: "Credit card ID",
 	},
+	"account_id": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Account ID",
+	},
 	"copy_from_project": {
 		Type:             schema.TypeString,
 		Optional:         true,
@@ -85,6 +90,7 @@ func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
 			CountryCode:     optionalStringPointer(d, "country_code"),
 			Project:         projectName,
 			TechnicalEmails: contactEmailListForAPI(d, "technical_emails", true),
+			AccountId:       d.Get("account_id").(string),
 		},
 	)
 	if err != nil {
@@ -92,8 +98,8 @@ func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.SetId(projectName)
-	resourceProjectGetCACert(project.Name, client, d)
-	return nil
+
+	return resourceProjectGetCACert(project.Name, client, d)
 }
 
 func resourceProjectRead(d *schema.ResourceData, m interface{}) error {
@@ -107,10 +113,12 @@ func resourceProjectRead(d *schema.ResourceData, m interface{}) error {
 	// Don't set card id unconditionally to prevent converting short card id format to long
 	currentCardID, err := getLongCardID(client, d.Get("card_id").(string))
 	if err != nil || currentCardID != project.Card.CardID {
-		d.Set("card_id", project.Card.CardID)
+		if err := d.Set("card_id", project.Card.CardID); err != nil {
+			return err
+		}
 	}
-	setProjectTerraformProperties(d, client, project)
-	return nil
+
+	return setProjectTerraformProperties(d, client, project)
 }
 
 func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
@@ -130,6 +138,7 @@ func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
 			CardID:          cardID,
 			CountryCode:     &countryCode,
 			TechnicalEmails: contactEmailListForAPI(d, "technical_emails", false),
+			AccountId:       d.Get("account_id").(string),
 		},
 	)
 	if err != nil {
@@ -161,17 +170,26 @@ func resourceProjectState(d *schema.ResourceData, m interface{}) ([]*schema.Reso
 		return nil, err
 	}
 
-	d.Set("card_id", project.Card.CardID)
-	setProjectTerraformProperties(d, client, project)
+	if err := d.Set("card_id", project.Card.CardID); err != nil {
+		return nil, err
+	}
+
+	if err := setProjectTerraformProperties(d, client, project); err != nil {
+		return nil, err
+	}
 
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceProjectGetCACert(project string, client *aiven.Client, d *schema.ResourceData) {
+func resourceProjectGetCACert(project string, client *aiven.Client, d *schema.ResourceData) error {
 	ca, err := client.CA.Get(project)
 	if err == nil {
-		d.Set("ca_cert", ca)
+		if err := d.Set("ca_cert", ca); err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
 func getLongCardID(client *aiven.Client, cardID string) (string, error) {
@@ -207,23 +225,46 @@ func contactEmailListForAPI(d *schema.ResourceData, field string, newResource bo
 	return &results
 }
 
-func contactEmailListForTerraform(d *schema.ResourceData, field string, contactEmails []*aiven.ContactEmail) {
+func contactEmailListForTerraform(d *schema.ResourceData, field string, contactEmails []*aiven.ContactEmail) error {
 	_, existsBefore := d.GetOk(field)
 	if !existsBefore && len(contactEmails) == 0 {
-		return
+		return nil
 	}
+
 	results := []string{}
 	for _, contactEmail := range contactEmails {
 		results = append(results, contactEmail.Email)
 	}
-	d.Set(field, results)
+
+	if err := d.Set(field, results); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client, project *aiven.Project) {
-	d.Set("billing_address", project.BillingAddress)
-	contactEmailListForTerraform(d, "billing_emails", project.BillingEmails)
-	d.Set("country_code", project.CountryCode)
-	d.Set("project", project.Name)
-	contactEmailListForTerraform(d, "technical_emails", project.TechnicalEmails)
-	resourceProjectGetCACert(project.Name, client, d)
+func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client, project *aiven.Project) error {
+	if err := d.Set("billing_address", project.BillingAddress); err != nil {
+		return err
+	}
+	if err := contactEmailListForTerraform(d, "billing_emails", project.BillingEmails); err != nil {
+		return err
+	}
+	if err := d.Set("country_code", project.CountryCode); err != nil {
+		return err
+	}
+	if err := d.Set("project", project.Name); err != nil {
+		return err
+	}
+	if err := d.Set("account_id", project.AccountId); err != nil {
+		return err
+	}
+	if err := contactEmailListForTerraform(d, "technical_emails", project.TechnicalEmails); err != nil {
+		return err
+	}
+	if err := resourceProjectGetCACert(project.Name, client, d); err != nil {
+		return err
+	}
+
+	return nil
 }
