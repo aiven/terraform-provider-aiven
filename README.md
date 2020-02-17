@@ -172,6 +172,33 @@ resource "aiven_account" "account1" {
 
 `account_id` is an auto-generated unique account id.
 
+### Resource Account Authentication
+```
+resource "aiven_account_authentication" "foo" {
+    account_id = aiven_account.<ACCOUNT_RESOURCE>.account_id
+    name = "auth-1"
+    type = "saml"
+    enabled = true
+    saml_certificate = "---CERTIFICATE---"
+    saml_entity_id = "https://example.com/00000"
+    saml_idp_url = "https://example.com/sso/saml"
+}
+```
+
+`account_id` is an unique account id.
+
+`name` is an account authentication name.
+
+`type` is an account authentication type, can be one of `internal` and `saml`.
+
+`enabled` defines an authentication method enabled or not. 
+
+`saml_certificate` is a SAML Certificate.
+
+`saml_entity_id` is a SAML Entity Id.
+
+`saml_idp_url` is a SAML Idp URL.
+
 ### Resource Account Team
 ```
 resource "aiven_account_team" "account_team1" {

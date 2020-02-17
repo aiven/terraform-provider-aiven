@@ -29,8 +29,10 @@ data "aiven_account_team" "team" {
   account_id = aiven_account_team.foo.account_id
 }
 
-data "aiven_account_team_member" "member" {
-  team_id = aiven_account_team_member.foo.team_id
-  account_id = aiven_account_team_member.foo.account_id
-  user_email = aiven_account_team_member.foo.user_email
+# Account authentication
+resource "aiven_account_authentication" "foo" {
+  account_id = aiven_account.foo.account_id
+  name = "auth-1"
+  type = "saml"
+  enabled = false
 }
