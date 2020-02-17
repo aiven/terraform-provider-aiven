@@ -14,8 +14,6 @@ import (
 
 // Provider returns a terraform.ResourceProvider.
 func Provider() terraform.ResourceProvider {
-	_ = cache.NewTopicCache()
-
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"api_token": {
@@ -73,6 +71,8 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {
+			_ = cache.NewTopicCache()
+
 			return aiven.NewTokenClient(d.Get("api_token").(string), "terraform-provider-aiven/")
 		},
 	}

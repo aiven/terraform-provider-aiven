@@ -99,6 +99,21 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "true"),
 				),
 			},
+		},
+	})
+}
+
+func TestAccAivenKafkaTopic_100topics(t *testing.T) {
+	t.Parallel()
+
+	resourceName := "aiven_kafka_topic.foo"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAivenKafkaTopicResourceDestroy,
+		Steps: []resource.TestStep{
 			{
 				Config: testAccKafka101TopicResource(rName),
 				Check: resource.ComposeTestCheckFunc(
