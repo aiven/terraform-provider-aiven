@@ -59,19 +59,24 @@ func backupsReady(service *aiven.Service) bool {
 		return true
 	}
 
+	// no backups for read replicas type of service
+	for _, i := range service.Integrations {
+		if i.IntegrationType == "read_replica" && *i.DestinationService == service.Name {
+			return true
+		}
+	}
+
 	return len(service.Backups) > 0
 }
 
 // Conf sets up the configuration to refresh.
 func (w *ServiceChangeWaiter) Conf() *resource.StateChangeConf {
-	state := &resource.StateChangeConf{
-		Pending: []string{aivenPendingState, aivenRebalancingState, aivenServicesStartingState},
-		Target:  []string{aivenTargetState},
-		Refresh: w.RefreshFunc(),
+	return &resource.StateChangeConf{
+		Pending:    []string{aivenPendingState, aivenRebalancingState, aivenServicesStartingState},
+		Target:     []string{aivenTargetState},
+		Refresh:    w.RefreshFunc(),
+		Delay:      10 * time.Second,
+		Timeout:    20 * time.Minute,
+		MinTimeout: 2 * time.Second,
 	}
-	state.Delay = 10 * time.Second
-	state.Timeout = 20 * time.Minute
-	state.MinTimeout = 2 * time.Second
-
-	return state
 }
