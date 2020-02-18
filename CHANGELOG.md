@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.2.0] - 2020-02-18
+- Following new types of resources have been added:
+     - account
+     - account_team
+     - account_team_member
+     - account_team_project
+ 
+- New configuration options 
+- Fix for a read-only replica service types
+- Service specific acceptance tests 
+
 ## [1.1.6] - 2020-02-07
 Fix for a problem that appears for normal boolean user configuration settings
 
