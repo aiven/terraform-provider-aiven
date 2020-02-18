@@ -6,17 +6,21 @@
         "default": [
           "0.0.0.0/0"
         ],
-        "title": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+        "description": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
         "items": {
           "example": "10.20.0.0/16",
+          "maxLength": 18,
           "title": "CIDR address block",
           "type": "string"
         },
+        "maxItems": 256,
+        "title": "IP filter",
         "type": "array"
       },
       "migrate_sstableloader": {
-        "title": "Sets the service into migration mode enabling the sstableloader utility to be used to upload Cassandra data files. Available only on service create.",
+        "description": "Sets the service into migration mode enabling the sstableloader utility to be used to upload Cassandra data files. Available only on service create.",
         "example": true,
+        "title": "Migration mode for the sstableloader utility",
         "type": "boolean"
       },
       "private_access": {
@@ -47,6 +51,7 @@
         "createOnly": true,
         "default": null,
         "example": "anotherservicename",
+        "maxLength": 63,
         "title": "Name of another service to fork from. This has effect only when a new service is being created.",
         "type": [
           "string",
@@ -61,16 +66,19 @@
     "properties": {
       "custom_domain": {
         "default": null,
-        "title": "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
+        "description": "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
         "example": "grafana.example.org",
+        "maxLength": 255,
+        "title": "Custom domain",
         "type": [
           "string",
           "null"
         ]
       },
       "disable_replication_factor_adjustment": {
-        "title": "Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: setting this to true increases a risk of data loss in case of virtual machine failure.",
+        "description": "Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: setting this to true increases a risk of data loss in case of virtual machine failure.",
         "example": false,
+        "title": "Disable replication factor adjustment",
         "type": [
           "boolean",
           "null"
@@ -94,125 +102,145 @@
             ]
           },
           "http_max_content_length": {
-            "title": "Maximum content length for HTTP requests to the Elasticsearch HTTP API, in bytes.",
+            "description": "Maximum content length for HTTP requests to the Elasticsearch HTTP API, in bytes.",
             "maximum": 2147483647,
             "minimum": 1,
+            "title": "http.max_content_length",
             "type": "integer"
           },
           "indices_fielddata_cache_size": {
             "default": null,
-            "title": "Relative amount. Maximum amount of heap memory used for field data cache. This is an expert setting; decreasing the value too much will increase overhead of loading field data; too much memory used for field data cache will decrease amount of heap available for other operations.",
+            "description": "Relative amount. Maximum amount of heap memory used for field data cache. This is an expert setting; decreasing the value too much will increase overhead of loading field data; too much memory used for field data cache will decrease amount of heap available for other operations.",
             "maximum": 100,
             "minimum": 3,
+            "title": "indices.fielddata.cache.size",
             "type": [
               "integer",
               "null"
             ]
           },
           "indices_memory_index_buffer_size": {
-            "title": "Percentage value. Default is 10%. Total amount of heap used for indexing buffer, before writing segments to disk. This is an expert setting. Too low value will slow down indexing; too high value will increase indexing performance but causes performance issues for query performance.",
+            "description": "Percentage value. Default is 10%. Total amount of heap used for indexing buffer, before writing segments to disk. This is an expert setting. Too low value will slow down indexing; too high value will increase indexing performance but causes performance issues for query performance.",
             "maximum": 40,
             "minimum": 3,
+            "title": "indices.memory.index_buffer_size",
             "type": "integer"
           },
           "indices_queries_cache_size": {
-            "title": "Percentage value. Default is 10%. Maximum amount of heap used for query cache. This is an expert setting. Too low value will decrease query performance and increase performance for other operations; too high value will cause issues with other Elasticsearch functionality.",
+            "description": "Percentage value. Default is 10%. Maximum amount of heap used for query cache. This is an expert setting. Too low value will decrease query performance and increase performance for other operations; too high value will cause issues with other Elasticsearch functionality.",
             "maximum": 40,
             "minimum": 3,
+            "title": "indices.queries.cache.size",
             "type": "integer"
           },
           "indices_query_bool_max_clause_count": {
-            "title": "Maximum number of clauses Lucene BooleanQuery can have. The default value (1024) is relatively high, and increasing it may cause performance issues. Investigate other approaches first before increasing this value.",
+            "description": "Maximum number of clauses Lucene BooleanQuery can have. The default value (1024) is relatively high, and increasing it may cause performance issues. Investigate other approaches first before increasing this value.",
             "maximum": 4096,
             "minimum": 64,
+            "title": "indices.query.bool.max_clause_count",
             "type": "integer"
           },
           "reindex_remote_whitelist": {
-            "title": "Whitelisted addresses for reindexing. Changing this value will cause all Elasticsearch instances to restart.",
+            "description": "Whitelisted addresses for reindexing. Changing this value will cause all Elasticsearch instances to restart.",
             "items": {
               "example": "anotherservice.aivencloud.com:12398",
-              "pattern": "^[a-z0-9-_.]+:[0-9]+$",
+              "maxLength": 261,
               "title": "Address (hostname:port or IP:port)",
               "type": "string"
             },
+            "maxItems": 32,
+            "title": "reindex_remote_whitelist",
             "type": "array"
           },
           "thread_pool_analyze_queue_size": {
-            "title": "Size for the thread pool queue. See documentation for exact details.",
+            "description": "Size for the thread pool queue. See documentation for exact details.",
             "maximum": 2000,
             "minimum": 10,
+            "title": "analyze thread pool queue size",
             "type": "integer"
           },
           "thread_pool_analyze_size": {
-            "title": "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
+            "description": "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
             "maximum": 128,
             "minimum": 1,
+            "title": "analyze thread pool size",
             "type": "integer"
           },
           "thread_pool_force_merge_size": {
-            "title": "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
+            "description": "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
             "maximum": 128,
             "minimum": 1,
+            "title": "force_merge thread pool size",
             "type": "integer"
           },
           "thread_pool_get_queue_size": {
-            "title": "Size for the thread pool queue. See documentation for exact details.",
+            "description": "Size for the thread pool queue. See documentation for exact details.",
             "maximum": 2000,
             "minimum": 10,
+            "title": "get thread pool queue size",
             "type": "integer"
           },
           "thread_pool_get_size": {
-            "title": "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
+            "description": "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
             "maximum": 128,
             "minimum": 1,
+            "title": "get thread pool size",
             "type": "integer"
           },
           "thread_pool_index_queue_size": {
-            "title": "Size for the thread pool queue. See documentation for exact details.",
+            "description": "Size for the thread pool queue. See documentation for exact details.",
             "maximum": 2000,
             "minimum": 10,
+            "title": "index thread pool queue size",
             "type": "integer"
           },
           "thread_pool_index_size": {
-            "title": "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
+            "description": "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
             "maximum": 128,
             "minimum": 1,
+            "title": "index thread pool size",
             "type": "integer"
           },
           "thread_pool_search_queue_size": {
-            "title": "Size for the thread pool queue. See documentation for exact details.",
+            "description": "Size for the thread pool queue. See documentation for exact details.",
             "maximum": 2000,
             "minimum": 10,
+            "title": "search thread pool queue size",
             "type": "integer"
           },
           "thread_pool_search_size": {
-            "title": "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
+            "description": "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
             "maximum": 128,
             "minimum": 1,
+            "title": "search thread pool size",
             "type": "integer"
           },
           "thread_pool_search_throttled_queue_size": {
-            "title": "Size for the thread pool queue. See documentation for exact details.",
+            "description": "Size for the thread pool queue. See documentation for exact details.",
             "maximum": 2000,
             "minimum": 10,
+            "title": "search_throttled thread pool queue size",
             "type": "integer"
           },
           "thread_pool_search_throttled_size": {
-            "title": "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
+            "description": "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
             "maximum": 128,
             "minimum": 1,
+            "title": "search_throttled thread pool size",
             "type": "integer"
           },
           "thread_pool_write_queue_size": {
-            "title": "Size for the thread pool queue. See documentation for exact details.",
+            "description": "Size for the thread pool queue. See documentation for exact details.",
             "maximum": 2000,
             "minimum": 10,
+            "title": "write thread pool queue size",
             "type": "integer"
           },
           "thread_pool_write_size": {
-            "title": "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
+            "description": "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
             "maximum": 128,
             "minimum": 1,
+            "title": "write thread pool size",
             "type": "integer"
           }
         },
@@ -235,7 +263,7 @@
       "index_patterns": {
         "items": {
           "additionalProperties": false,
-          "title": "Allows you to create glob style patterns and set a max number of indexes matching this pattern you want to keep. Creating indexes exceeding this value will cause the oldest one to get deleted. You could for example create a pattern looking like 'logs.?' and then create index logs.1, logs.2 etc, it will delete logs.1 once you create logs.6. Do note 'logs.?' does not apply to logs.10. Note: Setting max_index_count to 0 will do nothing and the pattern gets ignored.",
+          "description": "Allows you to create glob style patterns and set a max number of indexes matching this pattern you want to keep. Creating indexes exceeding this value will cause the oldest one to get deleted. You could for example create a pattern looking like 'logs.?' and then create index logs.1, logs.2 etc, it will delete logs.1 once you create logs.6. Do note 'logs.?' does not apply to logs.10. Note: Setting max_index_count to 0 will do nothing and the pattern gets ignored.",
           "properties": {
             "max_index_count": {
               "example": 3,
@@ -246,17 +274,21 @@
             },
             "pattern": {
               "example": "logs_*_foo_*",
-              "pattern": "^[A-z0-9-.*?]+$",
+              "maxLength": 1024,
+              "pattern": "^[A-Za-z0-9-_.*?]+$",
               "title": "fnmatch pattern",
-              "type": "string"
+              "type": "string",
+              "user_error": "Must consist of alpha-numeric characters, dashes, underscores, dots and glob characters (* and ?)"
             }
           },
           "required": [
             "pattern",
             "max_index_count"
           ],
+          "title": "Glob pattern and number of indexes matching that pattern to be kept",
           "type": "object"
         },
+        "maxItems": 512,
         "title": "Index patterns",
         "type": "array"
       },
@@ -264,12 +296,15 @@
         "default": [
           "0.0.0.0/0"
         ],
-        "title": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+        "description": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
         "items": {
           "example": "10.20.0.0/16",
+          "maxLength": 18,
           "title": "CIDR address block",
           "type": "string"
         },
+        "maxItems": 256,
+        "title": "IP filter",
         "type": "array"
       },
       "kibana": {
@@ -289,9 +324,10 @@
           },
           "max_old_space_size": {
             "default": 128,
-            "title": "Limits the maximum amount of memory (in MiB) the Kibana process can use. This sets the max_old_space_size option of the nodejs running the Kibana. Note: the memory reserved by Kibana is not available for Elasticsearch.",
+            "description": "Limits the maximum amount of memory (in MiB) the Kibana process can use. This sets the max_old_space_size option of the nodejs running the Kibana. Note: the memory reserved by Kibana is not available for Elasticsearch.",
             "maximum": 1024,
             "minimum": 64,
+            "title": "max_old_space_size",
             "type": "integer"
           }
         },
@@ -300,9 +336,10 @@
       },
       "max_index_count": {
         "default": 0,
-        "title": "Maximum number of indexes to keep before deleting the oldest one",
+        "description": "Maximum number of indexes to keep before deleting the oldest one",
         "maximum": 9223372036854776000,
         "minimum": 0,
+        "title": "Maximum index count",
         "type": "integer"
       },
       "private_access": {
@@ -351,6 +388,7 @@
       },
       "recovery_basebackup_name": {
         "example": "elasticsearch-20191112t091354293891z",
+        "maxLength": 128,
         "title": "Name of the basebackup to restore in forked service",
         "type": "string"
       },
@@ -358,6 +396,7 @@
         "createOnly": true,
         "default": null,
         "example": "anotherservicename",
+        "maxLength": 63,
         "title": "Name of another service to fork from. This has effect only when a new service is being created.",
         "type": [
           "string",
@@ -400,6 +439,104 @@
         "title": "Allow embedding Grafana dashboards with iframe/frame/object/embed tags. Disabled by default to limit impact of clickjacking",
         "type": "boolean"
       },
+      "auth_generic_oauth": {
+        "additionalProperties": false,
+        "properties": {
+          "allow_sign_up": {
+            "example": false,
+            "title": "Automatically sign-up users on successful sign-in",
+            "type": "boolean"
+          },
+          "allowed_domains": {
+            "items": {
+              "example": "mycompany.com",
+              "maxLength": 255,
+              "title": "Allowed domain",
+              "type": "string"
+            },
+            "maxItems": 50,
+            "title": "Allowed domains",
+            "type": "array"
+          },
+          "allowed_organizations": {
+            "items": {
+              "example": "myorg",
+              "maxLength": 256,
+              "pattern": "^[^ ]+$",
+              "title": "Allowed organization",
+              "type": "string",
+              "user_error": "Organization must be non-empty string without whitespace"
+            },
+            "maxItems": 50,
+            "title": "Require user to be member of one of the listed organizations",
+            "type": "array"
+          },
+          "api_url": {
+            "example": "https://yourprovider.com/api",
+            "maxLength": 2048,
+            "title": "API URL",
+            "type": "string"
+          },
+          "auth_url": {
+            "example": "https://yourprovider.com/oauth/authorize",
+            "maxLength": 2048,
+            "title": "Authorization URL",
+            "type": "string"
+          },
+          "client_id": {
+            "example": "b1ba0bf54a4c2c0a1c29",
+            "maxLength": 1024,
+            "pattern": "^[\\040-\\176]+$",
+            "title": "Client ID from provider",
+            "type": "string",
+            "user_error": "Must be a valid client ID string"
+          },
+          "client_secret": {
+            "example": "bfa6gea4f129076761dcba8ce5e1e406bd83af7b",
+            "maxLength": 1024,
+            "pattern": "^[\\040-\\176]+$",
+            "title": "Client secret from provider",
+            "type": "string",
+            "user_error": "Must be a valid client secret string"
+          },
+          "name": {
+            "example": "My authentication",
+            "maxLength": 128,
+            "pattern": "^[a-zA-Z0-9_\\- ]+$",
+            "title": "Name of the OAuth integration",
+            "type": "string",
+            "user_error": "Integration name must consist of alphanumeric ASCII characters, _, - and whitespace"
+          },
+          "scopes": {
+            "items": {
+              "example": "email",
+              "maxLength": 256,
+              "pattern": "^[^ ]+$",
+              "title": "OAuth scope",
+              "type": "string",
+              "user_error": "Scope must be non-empty string without whitespace"
+            },
+            "maxItems": 50,
+            "title": "OAuth scopes",
+            "type": "array"
+          },
+          "token_url": {
+            "example": "https://yourprovider.com/oauth/token",
+            "maxLength": 2048,
+            "title": "Token URL",
+            "type": "string"
+          }
+        },
+        "required": [
+          "api_url",
+          "auth_url",
+          "client_id",
+          "client_secret",
+          "token_url"
+        ],
+        "title": "Generic OAuth integration",
+        "type": "object"
+      },
       "auth_github": {
         "additionalProperties": false,
         "properties": {
@@ -411,24 +548,31 @@
           "allowed_organizations": {
             "items": {
               "example": "aiven",
+              "maxLength": 256,
               "pattern": "^[A-Za-z0-9-]+$",
               "title": "Organization name",
-              "type": "string"
+              "type": "string",
+              "user_error": "Must consist of alpha-numeric characters and dashes"
             },
+            "maxItems": 50,
             "title": "Require users to belong to one of given organizations",
             "type": "array"
           },
           "client_id": {
             "example": "b1ba0bf54a4c2c0a1c29",
-            "pattern": "^[a-zA-Z0-9-/=\\.]+$",
+            "maxLength": 1024,
+            "pattern": "^[\\040-\\176]+$",
             "title": "Client ID from provider",
-            "type": "string"
+            "type": "string",
+            "user_error": "Must be a valid client ID string"
           },
           "client_secret": {
             "example": "bfa6gea4f129076761dcba8ce5e1e406bd83af7b",
-            "pattern": "^[a-zA-Z0-9-/=]+$",
+            "maxLength": 1024,
+            "pattern": "^[\\040-\\176]+$",
             "title": "Client secret from provider",
-            "type": "string"
+            "type": "string",
+            "user_error": "Must be a valid client secret string"
           },
           "team_ids": {
             "items": {
@@ -438,6 +582,7 @@
               "title": "Team ID",
               "type": "integer"
             },
+            "maxItems": 50,
             "title": "Require users to belong to one of given team IDs",
             "type": "array"
           }
@@ -460,37 +605,47 @@
           "allowed_groups": {
             "items": {
               "example": "aiven/developers",
+              "maxLength": 256,
               "pattern": "^[a-z0-9-_/]+$",
               "title": "Group or subgroup name",
-              "type": "string"
+              "type": "string",
+              "user_error": "Must consist of alpha-numeric characters, dashes, underscores and slashes"
             },
+            "maxItems": 50,
             "title": "Require users to belong to one of given groups",
             "type": "array"
           },
           "api_url": {
             "example": "https://gitlab.com/api/v4",
+            "maxLength": 2048,
             "title": "API URL. This only needs to be set when using self hosted GitLab",
             "type": "string"
           },
           "auth_url": {
             "example": "https://gitlab.com/oauth/authorize",
+            "maxLength": 2048,
             "title": "Authorization URL. This only needs to be set when using self hosted GitLab",
             "type": "string"
           },
           "client_id": {
             "example": "b1ba0bf54a4c2c0a1c29",
-            "pattern": "^[a-zA-Z0-9-/=\\.]+$",
+            "maxLength": 1024,
+            "pattern": "^[\\040-\\176]+$",
             "title": "Client ID from provider",
-            "type": "string"
+            "type": "string",
+            "user_error": "Must be a valid client ID string"
           },
           "client_secret": {
             "example": "bfa6gea4f129076761dcba8ce5e1e406bd83af7b",
-            "pattern": "^[a-zA-Z0-9-/=]+$",
+            "maxLength": 1024,
+            "pattern": "^[\\040-\\176]+$",
             "title": "Client secret from provider",
-            "type": "string"
+            "type": "string",
+            "user_error": "Must be a valid client secret string"
           },
           "token_url": {
             "example": "https://gitlab.com/oauth/token",
+            "maxLength": 2048,
             "title": "Token URL. This only needs to be set when using self hosted GitLab",
             "type": "string"
           }
@@ -513,25 +668,30 @@
           },
           "allowed_domains": {
             "items": {
-              "example": "aiven.io",
-              "pattern": "^(\\w+(-\\w+)*\\.)+([a-zA-Z]{2,}|xn--[a-zA-Z0-9]+)$",
+              "example": "example.com",
+              "maxLength": 255,
               "title": "Domain",
               "type": "string"
             },
+            "maxItems": 64,
             "title": "Domains allowed to sign-in to this Grafana",
             "type": "array"
           },
           "client_id": {
             "example": "b1ba0bf54a4c2c0a1c29",
-            "pattern": "^[a-zA-Z0-9-/=\\.]+$",
+            "maxLength": 1024,
+            "pattern": "^[\\040-\\176]+$",
             "title": "Client ID from provider",
-            "type": "string"
+            "type": "string",
+            "user_error": "Must be a valid client ID string"
           },
           "client_secret": {
             "example": "bfa6gea4f129076761dcba8ce5e1e406bd83af7b",
-            "pattern": "^[a-zA-Z0-9-/=]+$",
+            "maxLength": 1024,
+            "pattern": "^[\\040-\\176]+$",
             "title": "Client secret from provider",
-            "type": "string"
+            "type": "string",
+            "user_error": "Must be a valid client secret string"
           }
         },
         "required": [
@@ -554,8 +714,10 @@
       },
       "custom_domain": {
         "default": null,
-        "title": "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
+        "description": "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
         "example": "grafana.example.org",
+        "maxLength": 255,
+        "title": "Custom domain",
         "type": [
           "string",
           "null"
@@ -595,11 +757,13 @@
         "properties": {
           "access_key": {
             "example": "AAAAAAAAAAAAAAAAAAAA",
+            "maxLength": 4096,
             "title": "S3 access key. Requires permissions to the S3 bucket for the s3:PutObject and s3:PutObjectAcl actions",
             "type": "string"
           },
           "bucket_url": {
             "example": "https://grafana.s3-ap-southeast-2.amazonaws.com/",
+            "maxLength": 2048,
             "title": "Bucket URL for S3",
             "type": "string"
           },
@@ -612,6 +776,7 @@
           },
           "secret_key": {
             "example": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+            "maxLength": 4096,
             "title": "S3 secret key",
             "type": "string"
           }
@@ -627,6 +792,7 @@
       },
       "google_analytics_ua_id": {
         "example": "UA-123456-4",
+        "maxLength": 256,
         "title": "Google Analytics Universal Analytics ID for tracking Grafana usage",
         "type": "string"
       },
@@ -634,12 +800,15 @@
         "default": [
           "0.0.0.0/0"
         ],
-        "title": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+        "description": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
         "items": {
           "example": "10.20.0.0/16",
+          "maxLength": 18,
           "title": "CIDR address block",
           "type": "string"
         },
+        "maxItems": 256,
+        "title": "IP filter",
         "type": "array"
       },
       "metrics_enabled": {
@@ -676,12 +845,15 @@
         "properties": {
           "from_address": {
             "example": "yourgrafanauser@yourdomain.example.com",
-            "pattern": "^[^@\\s,]+@(\\w+(-\\w+)*\\.)+([a-zA-Z]{2,}|xn--[a-zA-Z0-9]+)$",
+            "maxLength": 319,
+            "pattern": "^[A-Za-z0-9_\\-\\.+\\'&]+@([a-zA-Z0-9_]+([a-zA-Z0-9_\\-]+)*\\.)+([a-zA-Z]{2,}|xn--[a-zA-Z0-9]+)$",
             "title": "Address used for sending emails",
-            "type": "string"
+            "type": "string",
+            "user_error": "Must be a valid email address"
           },
           "from_name": {
             "example": "Company Grafana",
+            "maxLength": 128,
             "title": "Name used in outgoing emails, defaults to Grafana",
             "type": [
               "string",
@@ -690,11 +862,13 @@
           },
           "host": {
             "example": "smtp.example.com",
+            "maxLength": 255,
             "title": "Server hostname or IP",
             "type": "string"
           },
           "password": {
             "example": "ein0eemeev5eeth3Ahfu",
+            "maxLength": 255,
             "title": "Password for SMTP authentication",
             "type": [
               "string",
@@ -715,6 +889,7 @@
           },
           "username": {
             "example": "smtpuser",
+            "maxLength": 255,
             "title": "Username for SMTP authentication",
             "type": [
               "string",
@@ -758,8 +933,10 @@
     "properties": {
       "custom_domain": {
         "default": null,
-        "title": "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
+        "description": "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
         "example": "grafana.example.org",
+        "maxLength": 255,
+        "title": "Custom domain",
         "type": [
           "string",
           "null"
@@ -769,12 +946,15 @@
         "default": [
           "0.0.0.0/0"
         ],
-        "title": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+        "description": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
         "items": {
           "example": "10.20.0.0/16",
+          "maxLength": 18,
           "title": "CIDR address block",
           "type": "string"
         },
+        "maxItems": 256,
+        "title": "IP filter",
         "type": "array"
       },
       "private_access": {
@@ -805,6 +985,7 @@
         "createOnly": true,
         "default": null,
         "example": "anotherservicename",
+        "maxLength": 63,
         "title": "Name of another service to fork from. This has effect only when a new service is being created.",
         "type": [
           "string",
@@ -819,8 +1000,10 @@
     "properties": {
       "custom_domain": {
         "default": null,
-        "title": "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
+        "description": "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
         "example": "grafana.example.org",
+        "maxLength": 255,
+        "title": "Custom domain",
         "type": [
           "string",
           "null"
@@ -830,12 +1013,15 @@
         "default": [
           "0.0.0.0/0"
         ],
-        "title": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+        "description": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
         "items": {
           "example": "10.20.0.0/16",
+          "maxLength": 18,
           "title": "CIDR address block",
           "type": "string"
         },
+        "maxItems": 256,
+        "title": "IP filter",
         "type": "array"
       },
       "kafka": {
@@ -847,12 +1033,13 @@
         },
         "properties": {
           "auto_create_topics_enable": {
-            "title": "Enable auto creation of topics",
+            "description": "Enable auto creation of topics",
             "example": true,
+            "title": "auto.create.topics.enable",
             "type": "boolean"
           },
           "compression_type": {
-            "title": "Specify the final compression type for a given topic. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'uncompressed' which is equivalent to no compression; and 'producer' which means retain the original compression codec set by the producer.",
+            "description": "Specify the final compression type for a given topic. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'uncompressed' which is equivalent to no compression; and 'producer' which means retain the original compression codec set by the producer.",
             "enum": [
               "gzip",
               "snappy",
@@ -861,134 +1048,165 @@
               "uncompressed",
               "producer"
             ],
+            "title": "compression.type",
             "type": "string"
           },
           "connections_max_idle_ms": {
-            "title": "Idle connections timeout: the server socket processor threads close the connections that idle for longer than this.",
+            "description": "Idle connections timeout: the server socket processor threads close the connections that idle for longer than this.",
             "example": 540000,
             "maximum": 3600000,
             "minimum": 1000,
+            "title": "connections.max.idle.ms",
             "type": "integer"
           },
           "default_replication_factor": {
-            "title": "Replication factor for autocreated topics",
+            "description": "Replication factor for autocreated topics",
             "maximum": 10,
             "minimum": 1,
+            "title": "default.replication.factor",
             "type": "integer"
           },
           "group_max_session_timeout_ms": {
             "default": 300000,
-            "title": "The maximum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures.",
+            "description": "The maximum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures.",
             "maximum": 1800000,
             "minimum": 0,
+            "title": "group.max.session.timeout.ms",
             "type": "integer"
           },
           "group_min_session_timeout_ms": {
             "default": 6000,
-            "title": "The minimum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures.",
+            "description": "The minimum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures.",
             "maximum": 60000,
             "minimum": 0,
+            "title": "group.min.session.timeout.ms",
             "type": "integer"
           },
           "log_cleaner_max_compaction_lag_ms": {
-            "title": "The maximum amount of time message will remain uncompacted. Only applicable for logs that are being compacted",
+            "description": "The maximum amount of time message will remain uncompacted. Only applicable for logs that are being compacted",
             "maximum": 9223372036854776000,
             "minimum": 30000,
+            "title": "log.cleaner.max.compaction.lag.ms",
             "type": "integer"
           },
           "log_cleaner_min_cleanable_ratio": {
             "default": 0.5,
-            "title": "Controls log compactor frequency. Larger value means more frequent compactions but also more space wasted for logs. Consider setting log.cleaner.max.compaction.lag.ms to enforce compactions sooner, instead of setting a very high value for this option.",
+            "description": "Controls log compactor frequency. Larger value means more frequent compactions but also more space wasted for logs. Consider setting log.cleaner.max.compaction.lag.ms to enforce compactions sooner, instead of setting a very high value for this option.",
             "maximum": 0.9,
             "minimum": 0.2,
+            "title": "log.cleaner.min.cleanable.ratio",
             "type": "number"
           },
           "log_cleaner_min_compaction_lag_ms": {
-            "title": "The minimum time a message will remain uncompacted in the log. Only applicable for logs that are being compacted.",
+            "description": "The minimum time a message will remain uncompacted in the log. Only applicable for logs that are being compacted.",
             "maximum": 9223372036854776000,
             "minimum": 0,
+            "title": "log.cleaner.min.compaction.lag.ms",
             "type": "integer"
           },
+          "log_cleanup_policy": {
+            "default": "delete",
+            "description": "The default cleanup policy for segments beyond the retention window",
+            "enum": [
+              "compact",
+              "delete"
+            ],
+            "title": "log.cleanup.policy",
+            "type": "string"
+          },
           "log_message_timestamp_difference_max_ms": {
-            "title": "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message",
+            "description": "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message",
             "maximum": 9223372036854776000,
             "minimum": 0,
+            "title": "log.message.timestamp.difference.max.ms",
             "type": "integer"
           },
           "log_message_timestamp_type": {
-            "title": "Define whether the timestamp in the message is message create time or log append time.",
+            "description": "Define whether the timestamp in the message is message create time or log append time.",
             "enum": [
               "CreateTime",
               "LogAppendTime"
             ],
+            "title": "log.message.timestamp.type",
             "type": "string"
           },
           "log_retention_bytes": {
-            "title": "The maximum size of the log before deleting messages",
+            "description": "The maximum size of the log before deleting messages",
             "maximum": 9223372036854776000,
             "minimum": -1,
+            "title": "log.retention.bytes",
             "type": "integer"
           },
           "log_retention_hours": {
-            "title": "The number of hours to keep a log file before deleting it",
+            "description": "The number of hours to keep a log file before deleting it",
             "maximum": 2147483647,
             "minimum": -1,
+            "title": "log.retention.hours",
             "type": "integer"
           },
           "log_segment_bytes": {
-            "title": "The maximum size of a single log file",
+            "description": "The maximum size of a single log file",
             "maximum": 1073741824,
             "minimum": 10485760,
+            "title": "log.segment.bytes",
             "type": "integer"
           },
           "max_connections_per_ip": {
-            "title": "The maximum number of connections allowed from each ip address (defaults to 2147483647).",
+            "description": "The maximum number of connections allowed from each ip address (defaults to 2147483647).",
             "maximum": 2147483647,
             "minimum": 256,
+            "title": "max.connections.per.ip",
             "type": "integer"
           },
           "message_max_bytes": {
             "default": 1000012,
-            "title": "The maximum size of message that the server can receive.",
+            "description": "The maximum size of message that the server can receive.",
             "maximum": 100001200,
             "minimum": 0,
+            "title": "message.max.bytes",
             "type": "integer"
           },
           "num_partitions": {
-            "title": "Number of partitions for autocreated topics",
+            "description": "Number of partitions for autocreated topics",
             "maximum": 1000,
             "minimum": 1,
+            "title": "num.partitions",
             "type": "integer"
           },
           "offsets_retention_minutes": {
             "default": 1440,
-            "title": "Log retention window in minutes for offsets topic",
+            "description": "Log retention window in minutes for offsets topic",
             "maximum": 2147483647,
             "minimum": 1,
+            "title": "offsets.retention.minutes",
             "type": "integer"
           },
           "producer_purgatory_purge_interval_requests": {
-            "title": "The purge interval (in number of requests) of the producer request purgatory(defaults to 1000).",
+            "description": "The purge interval (in number of requests) of the producer request purgatory(defaults to 1000).",
             "maximum": 10000,
             "minimum": 10,
+            "title": "producer.purgatory.purge.interval.requests",
             "type": "integer"
           },
           "replica_fetch_max_bytes": {
-            "title": "The number of bytes of messages to attempt to fetch for each partition (defaults to 1048576). This is not an absolute maximum, if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made.",
+            "description": "The number of bytes of messages to attempt to fetch for each partition (defaults to 1048576). This is not an absolute maximum, if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made.",
             "maximum": 104857600,
             "minimum": 1048576,
+            "title": "replica.fetch.max.bytes",
             "type": "integer"
           },
           "replica_fetch_response_max_bytes": {
-            "title": "Maximum bytes expected for the entire fetch response (defaults to 10485760). Records are fetched in batches, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made. As such, this is not an absolute maximum.",
+            "description": "Maximum bytes expected for the entire fetch response (defaults to 10485760). Records are fetched in batches, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made. As such, this is not an absolute maximum.",
             "maximum": 1048576000,
             "minimum": 10485760,
+            "title": "replica.fetch.response.max.bytes",
             "type": "integer"
           },
           "socket_request_max_bytes": {
-            "title": "The maximum number of bytes in a socket request (defaults to 104857600).",
+            "description": "The maximum number of bytes in a socket request (defaults to 104857600).",
             "maximum": 209715200,
             "minimum": 10485760,
+            "title": "socket.request.max.bytes",
             "type": "integer"
           }
         },
@@ -1021,25 +1239,28 @@
         "additionalProperties": false,
         "properties": {
           "consumer_isolation_level": {
-            "title": "Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
+            "description": "Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
             "enum": [
               "read_uncommitted",
               "read_committed"
             ],
+            "title": "Consumer isolation level",
             "type": "string"
           },
           "consumer_max_poll_records": {
-            "title": "The maximum number of records returned in a single call to poll() (defaults to 500).",
+            "description": "The maximum number of records returned in a single call to poll() (defaults to 500).",
             "example": 500,
             "maximum": 10000,
             "minimum": 1,
+            "title": "The maximum number of records returned by a single poll",
             "type": "integer"
           },
           "offset_flush_interval_ms": {
-            "title": "The interval at which to try committing offsets for tasks (defaults to 60000).",
+            "description": "The interval at which to try committing offsets for tasks (defaults to 60000).",
             "example": 60000,
             "maximum": 100000000,
             "minimum": 1,
+            "title": "The interval at which to try committing offsets for tasks",
             "type": "integer"
           }
         },
@@ -1056,19 +1277,21 @@
         "properties": {
           "consumer_enable_auto_commit": {
             "default": true,
-            "title": "If true the consumer's offset will be periodically committed to Kafka in the background",
+            "description": "If true the consumer's offset will be periodically committed to Kafka in the background",
+            "title": "consumer.enable.auto.commit",
             "type": "boolean"
           },
           "consumer_request_max_bytes": {
             "default": 67108864,
-            "title": "Maximum number of bytes in unencoded message keys and values by a single request",
+            "description": "Maximum number of bytes in unencoded message keys and values by a single request",
             "maximum": 671088640,
             "minimum": 0,
+            "title": "consumer.request.max.bytes",
             "type": "integer"
           },
           "consumer_request_timeout_ms": {
             "default": 1000,
-            "title": "The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached",
+            "description": "The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached",
             "enum": [
               1000,
               15000,
@@ -1076,31 +1299,35 @@
             ],
             "maximum": 30000,
             "minimum": 1000,
+            "title": "consumer.request.timeout.ms",
             "type": "integer"
           },
           "producer_acks": {
             "default": "1",
-            "title": "The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to 'all' or '-1', the leader will wait for the full set of in-sync replicas to acknowledge the record.",
+            "description": "The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to 'all' or '-1', the leader will wait for the full set of in-sync replicas to acknowledge the record.",
             "enum": [
               "all",
               "-1",
               "0",
               "1"
             ],
+            "title": "producer.acks",
             "type": "string"
           },
           "producer_linger_ms": {
             "default": 0,
-            "title": "Wait for up to the given delay to allow batching records together",
+            "description": "Wait for up to the given delay to allow batching records together",
             "maximum": 5000,
             "minimum": 0,
+            "title": "producer.linger.ms",
             "type": "integer"
           },
           "simpleconsumer_pool_size_max": {
             "default": 25,
-            "title": "Maximum number of SimpleConsumers that can be instantiated per broker",
+            "description": "Maximum number of SimpleConsumers that can be instantiated per broker",
             "maximum": 250,
             "minimum": 10,
+            "title": "simpleconsumer.pool.size.max",
             "type": "integer"
           }
         },
@@ -1182,37 +1409,43 @@
         "default": [
           "0.0.0.0/0"
         ],
-        "title": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+        "description": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
         "items": {
           "example": "10.20.0.0/16",
+          "maxLength": 18,
           "title": "CIDR address block",
           "type": "string"
         },
+        "maxItems": 256,
+        "title": "IP filter",
         "type": "array"
       },
       "kafka_connect": {
         "additionalProperties": false,
         "properties": {
           "consumer_isolation_level": {
-            "title": "Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
+            "description": "Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
             "enum": [
               "read_uncommitted",
               "read_committed"
             ],
+            "title": "Consumer isolation level",
             "type": "string"
           },
           "consumer_max_poll_records": {
-            "title": "The maximum number of records returned in a single call to poll() (defaults to 500).",
+            "description": "The maximum number of records returned in a single call to poll() (defaults to 500).",
             "example": 500,
             "maximum": 10000,
             "minimum": 1,
+            "title": "The maximum number of records returned by a single poll",
             "type": "integer"
           },
           "offset_flush_interval_ms": {
-            "title": "The interval at which to try committing offsets for tasks (defaults to 60000).",
+            "description": "The interval at which to try committing offsets for tasks (defaults to 60000).",
             "example": 60000,
             "maximum": 100000000,
             "minimum": 1,
+            "title": "The interval at which to try committing offsets for tasks",
             "type": "integer"
           }
         },
@@ -1263,21 +1496,28 @@
         "createOnly": true,
         "default": null,
         "example": "z66o9QXqKM",
+        "maxLength": 256,
+        "minLength": 8,
+        "pattern": "^[a-zA-Z0-9-_]+$",
         "title": "Custom password for admin user. Defaults to random string. This must be set only when a new service is being created.",
         "type": [
           "string",
           "null"
-        ]
+        ],
+        "user_error": "Must consist of alpha-numeric characters, underscores or dashes"
       },
       "admin_username": {
         "createOnly": true,
         "default": null,
         "example": "avnadmin",
+        "maxLength": 64,
+        "pattern": "^[_A-Za-z0-9][-._A-Za-z0-9]{0,63}$",
         "title": "Custom username for admin user. This must be set only when a new service is being created.",
         "type": [
           "string",
           "null"
-        ]
+        ],
+        "user_error": "Must consist of alpha-numeric characters, dots, underscores or dashes, may not start with dash or dot, max 64 characters"
       },
       "backup_hour": {
         "default": null,
@@ -1305,51 +1545,140 @@
         "default": [
           "0.0.0.0/0"
         ],
-        "title": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+        "description": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
         "items": {
           "example": "10.20.0.0/16",
+          "maxLength": 18,
           "title": "CIDR address block",
           "type": "string"
         },
+        "maxItems": 256,
+        "title": "IP filter",
         "type": "array"
       },
       "mysql": {
         "additionalProperties": false,
         "properties": {
+          "connect_timeout": {
+            "description": "The number of seconds that the mysqld server waits for a connect packet before responding with Bad handshake",
+            "example": 10,
+            "maximum": 3600,
+            "minimum": 2,
+            "title": "connect_timeout",
+            "type": "integer"
+          },
           "default_time_zone": {
-            "title": "Default server time zone as an offset from UTC, from -12:00 to +12:00. You can also set this to 'SYSTEM' to use the MySQL server default.",
+            "description": "Default server time zone as an offset from UTC, from -12:00 to +12:00. You can also set this to 'SYSTEM' to use the MySQL server default.",
             "example": "+03:00",
+            "maxLength": 6,
             "pattern": "^(SYSTEM|[+-](0?[0-9]|1[0-2]):[0-9][0-9])$",
-            "type": "string"
+            "title": "default_time_zone",
+            "type": "string",
+            "user_error": "Must be SYSTEM or numeric timezone information"
           },
           "group_concat_max_len": {
-            "title": "The maximum permitted result length in bytes for the GROUP_CONCAT() function.",
+            "description": "The maximum permitted result length in bytes for the GROUP_CONCAT() function.",
             "example": 1024,
             "maximum": 18446744073709552000,
             "minimum": 4,
+            "title": "group_concat_max_len",
+            "type": "integer"
+          },
+          "information_schema_stats_expiry": {
+            "description": "The time, in seconds, before cached statistics expire",
+            "example": 86400,
+            "maximum": 31536000,
+            "minimum": 900,
+            "title": "information_schema_stats_expiry",
             "type": "integer"
           },
           "innodb_ft_min_token_size": {
-            "title": "Minimum length of words that are stored in an InnoDB FULLTEXT index.",
+            "description": "Minimum length of words that are stored in an InnoDB FULLTEXT index.",
             "example": 3,
             "maximum": 16,
             "minimum": 0,
+            "title": "innodb_ft_min_token_size",
             "type": "integer"
           },
           "innodb_ft_server_stopword_table": {
-            "title": "This option is used to specify your own InnoDB FULLTEXT index stopword list for all InnoDB tables.",
+            "description": "This option is used to specify your own InnoDB FULLTEXT index stopword list for all InnoDB tables.",
             "example": "db_name/table_name",
+            "maxLength": 1024,
             "pattern": "^.+/.+$",
+            "title": "innodb_ft_server_stopword_table",
             "type": [
               "null",
               "string"
             ]
           },
+          "innodb_lock_wait_timeout": {
+            "description": "The length of time in seconds an InnoDB transaction waits for a row lock before giving up.",
+            "example": 50,
+            "maximum": 3600,
+            "minimum": 1,
+            "title": "innodb_lock_wait_timeout",
+            "type": "integer"
+          },
+          "innodb_online_alter_log_max_size": {
+            "description": "The upper limit in bytes on the size of the temporary log files used during online DDL operations for InnoDB tables.",
+            "example": 134217728,
+            "maximum": 1099511627776,
+            "minimum": 65536,
+            "title": "innodb_online_alter_log_max_size",
+            "type": "integer"
+          },
+          "innodb_rollback_on_timeout": {
+            "description": "When enabled a transaction timeout causes InnoDB to abort and roll back the entire transaction.",
+            "example": true,
+            "title": "innodb_rollback_on_timeout",
+            "type": "boolean"
+          },
+          "max_allowed_packet": {
+            "description": "Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M)",
+            "example": 67108864,
+            "maximum": 1073741824,
+            "minimum": 102400,
+            "title": "max_allowed_packet",
+            "type": "integer"
+          },
+          "net_read_timeout": {
+            "description": "The number of seconds to wait for more data from a connection before aborting the read.",
+            "example": 30,
+            "maximum": 3600,
+            "minimum": 1,
+            "title": "net_read_timeout",
+            "type": "integer"
+          },
+          "net_write_timeout": {
+            "description": "The number of seconds to wait for a block to be written to a connection before aborting the write.",
+            "example": 30,
+            "maximum": 3600,
+            "minimum": 1,
+            "title": "net_write_timeout",
+            "type": "integer"
+          },
           "sql_mode": {
-            "title": "Global SQL mode. Set to empty to use MySQL server defaults. When creating a new service and not setting this field Aiven default SQL mode (strict, SQL standard compliant) will be assigned.",
+            "description": "Global SQL mode. Set to empty to use MySQL server defaults. When creating a new service and not setting this field Aiven default SQL mode (strict, SQL standard compliant) will be assigned.",
             "example": "ANSI,TRADITIONAL",
+            "maxLength": 1024,
             "pattern": "^[A-Z_]*(,[A-Z_]+)*$",
-            "type": "string"
+            "title": "sql_mode",
+            "type": "string",
+            "user_error": "Must be uppercase alphabetic characters, underscores and commas"
+          },
+          "sql_require_primary_key": {
+            "description": "Require primary key to be defined for new tables or old tables modified with ALTER TABLE and fail if missing. It is recommended to always have primary keys because various functionality may break if any large table is missing them.",
+            "example": true,
+            "title": "sql_require_primary_key",
+            "type": "boolean"
+          },
+          "wait_timeout": {
+            "description": "The number of seconds the server waits for activity on a noninteractive connection before closing it.",
+            "example": 28800,
+            "maximum": 2147483,
+            "minimum": 1,
+            "title": "wait_timeout",
+            "type": "integer"
           }
         },
         "title": "mysql.conf configuration values",
@@ -1404,6 +1733,7 @@
         "default": null,
         "example": "2019-01-01 23:34:45",
         "format": "date-time",
+        "maxLength": 32,
         "title": "Recovery target time when forking a service. This has effect only when a new service is being created.",
         "type": [
           "string",
@@ -1414,6 +1744,7 @@
         "createOnly": true,
         "default": null,
         "example": "anotherservicename",
+        "maxLength": 63,
         "title": "Name of another service to fork from. This has effect only when a new service is being created.",
         "type": [
           "string",
@@ -1430,21 +1761,28 @@
         "createOnly": true,
         "default": null,
         "example": "z66o9QXqKM",
+        "maxLength": 256,
+        "minLength": 8,
+        "pattern": "^[a-zA-Z0-9-_]+$",
         "title": "Custom password for admin user. Defaults to random string. This must be set only when a new service is being created.",
         "type": [
           "string",
           "null"
-        ]
+        ],
+        "user_error": "Must consist of alpha-numeric characters, underscores or dashes"
       },
       "admin_username": {
         "createOnly": true,
         "default": null,
         "example": "avnadmin",
+        "maxLength": 64,
+        "pattern": "^[_A-Za-z0-9][-._A-Za-z0-9]{0,63}$",
         "title": "Custom username for admin user. This must be set only when a new service is being created.",
         "type": [
           "string",
           "null"
-        ]
+        ],
+        "user_error": "Must consist of alpha-numeric characters, dots, underscores or dashes, may not start with dash or dot, max 64 characters"
       },
       "backup_hour": {
         "default": null,
@@ -1472,189 +1810,236 @@
         "default": [
           "0.0.0.0/0"
         ],
-        "title": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+        "description": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
         "items": {
           "example": "10.20.0.0/16",
+          "maxLength": 18,
           "title": "CIDR address block",
           "type": "string"
         },
+        "maxItems": 256,
+        "title": "IP filter",
         "type": "array"
       },
       "pg": {
         "additionalProperties": false,
         "properties": {
           "autovacuum_analyze_scale_factor": {
-            "title": "Specifies a fraction of the table size to add to autovacuum_analyze_threshold when deciding whether to trigger an ANALYZE. The default is 0.2 (20% of table size)",
+            "description": "Specifies a fraction of the table size to add to autovacuum_analyze_threshold when deciding whether to trigger an ANALYZE. The default is 0.2 (20% of table size)",
             "maximum": 1,
             "minimum": 0,
+            "title": "autovacuum_analyze_scale_factor",
             "type": "number"
           },
           "autovacuum_analyze_threshold": {
-            "title": "Specifies the minimum number of inserted, updated or deleted tuples needed to trigger an  ANALYZE in any one table. The default is 50 tuples.",
+            "description": "Specifies the minimum number of inserted, updated or deleted tuples needed to trigger an  ANALYZE in any one table. The default is 50 tuples.",
             "maximum": 2147483647,
             "minimum": 0,
+            "title": "autovacuum_analyze_threshold",
             "type": "integer"
           },
           "autovacuum_max_workers": {
-            "title": "Specifies the maximum number of autovacuum processes (other than the autovacuum launcher) that may be running at any one time. The default is three. This parameter can only be set at server start.",
+            "description": "Specifies the maximum number of autovacuum processes (other than the autovacuum launcher) that may be running at any one time. The default is three. This parameter can only be set at server start.",
             "maximum": 20,
             "minimum": 1,
+            "title": "autovacuum_max_workers",
             "type": "integer"
           },
           "autovacuum_naptime": {
-            "title": "Specifies the minimum delay between autovacuum runs on any given database. The delay is measured in seconds, and the default is one minute",
+            "description": "Specifies the minimum delay between autovacuum runs on any given database. The delay is measured in seconds, and the default is one minute",
             "maximum": 86400,
             "minimum": 0,
+            "title": "autovacuum_naptime",
             "type": "integer"
           },
           "autovacuum_vacuum_cost_delay": {
-            "title": "Specifies the cost delay value that will be used in automatic VACUUM operations. If -1 is specified, the regular vacuum_cost_delay value will be used. The default value is 20 milliseconds",
+            "description": "Specifies the cost delay value that will be used in automatic VACUUM operations. If -1 is specified, the regular vacuum_cost_delay value will be used. The default value is 20 milliseconds",
             "maximum": 2147483647,
             "minimum": -1,
+            "title": "autovacuum_vacuum_cost_delay",
             "type": "integer"
           },
           "autovacuum_vacuum_cost_limit": {
-            "title": "Specifies the cost limit value that will be used in automatic VACUUM operations. If -1 is specified (which is the default), the regular vacuum_cost_limit value will be used.",
+            "description": "Specifies the cost limit value that will be used in automatic VACUUM operations. If -1 is specified (which is the default), the regular vacuum_cost_limit value will be used.",
             "maximum": 2147483647,
             "minimum": -1,
+            "title": "autovacuum_vacuum_cost_limit",
             "type": "integer"
           },
           "autovacuum_vacuum_scale_factor": {
-            "title": "Specifies a fraction of the table size to add to autovacuum_vacuum_threshold when deciding whether to trigger a VACUUM. The default is 0.2 (20% of table size)",
+            "description": "Specifies a fraction of the table size to add to autovacuum_vacuum_threshold when deciding whether to trigger a VACUUM. The default is 0.2 (20% of table size)",
             "maximum": 1,
             "minimum": 0,
+            "title": "autovacuum_vacuum_scale_factor",
             "type": "number"
           },
           "autovacuum_vacuum_threshold": {
-            "title": "Specifies the minimum number of updated or deleted tuples needed to trigger a VACUUM in any one table. The default is 50 tuples",
+            "description": "Specifies the minimum number of updated or deleted tuples needed to trigger a VACUUM in any one table. The default is 50 tuples",
             "maximum": 2147483647,
             "minimum": 0,
+            "title": "autovacuum_vacuum_threshold",
+            "type": "integer"
+          },
+          "deadlock_timeout": {
+            "description": "This is the amount of time, in milliseconds, to wait on a lock before checking to see if there is a deadlock condition.",
+            "example": 1000,
+            "maximum": 1800000,
+            "minimum": 500,
+            "title": "deadlock_timeout",
             "type": "integer"
           },
           "idle_in_transaction_session_timeout": {
-            "title": "Time out sessions with open transactions after this number of milliseconds",
+            "description": "Time out sessions with open transactions after this number of milliseconds",
             "maximum": 86400000,
             "minimum": 0,
+            "title": "idle_in_transaction_session_timeout",
             "type": "integer"
           },
           "jit": {
-            "title": "Controls system-wide use of Just-in-Time Compilation (JIT).",
+            "description": "Controls system-wide use of Just-in-Time Compilation (JIT).",
             "example": true,
+            "title": "jit",
             "type": "boolean"
           },
           "log_autovacuum_min_duration": {
-            "title": "Causes each action executed by autovacuum to be logged if it ran for at least the specified number of milliseconds. Setting this to zero logs all autovacuum actions. Minus-one (the default) disables logging autovacuum actions.",
+            "description": "Causes each action executed by autovacuum to be logged if it ran for at least the specified number of milliseconds. Setting this to zero logs all autovacuum actions. Minus-one (the default) disables logging autovacuum actions.",
             "maximum": 2147483647,
             "minimum": -1,
+            "title": "log_autovacuum_min_duration",
             "type": "integer"
           },
           "log_error_verbosity": {
-            "title": "Controls the amount of detail written in the server log for each message that is logged.",
+            "description": "Controls the amount of detail written in the server log for each message that is logged.",
             "enum": [
               "TERSE",
               "DEFAULT",
               "VERBOSE"
             ],
+            "title": "log_error_verbosity",
             "type": "string"
           },
           "log_min_duration_statement": {
-            "title": "Log statements that take more than this number of milliseconds to run, -1 disables",
+            "description": "Log statements that take more than this number of milliseconds to run, -1 disables",
             "maximum": 86400000,
             "minimum": -1,
+            "title": "log_min_duration_statement",
             "type": "integer"
           },
           "max_locks_per_transaction": {
-            "title": "PostgreSQL maximum locks per transaction",
+            "description": "PostgreSQL maximum locks per transaction",
             "maximum": 640,
             "minimum": 64,
+            "title": "max_locks_per_transaction",
             "type": "integer"
           },
           "max_parallel_workers": {
-            "title": "Sets the maximum number of workers that the system can support for parallel queries",
+            "description": "Sets the maximum number of workers that the system can support for parallel queries",
             "maximum": 96,
             "minimum": 0,
+            "title": "max_parallel_workers",
             "type": "integer"
           },
           "max_parallel_workers_per_gather": {
-            "title": "Sets the maximum number of workers that can be started by a single Gather or Gather Merge node",
+            "description": "Sets the maximum number of workers that can be started by a single Gather or Gather Merge node",
             "maximum": 96,
             "minimum": 0,
+            "title": "max_parallel_workers_per_gather",
             "type": "integer"
           },
           "max_pred_locks_per_transaction": {
-            "title": "PostgreSQL maximum predicate locks per transaction",
+            "description": "PostgreSQL maximum predicate locks per transaction",
             "maximum": 640,
             "minimum": 64,
+            "title": "max_pred_locks_per_transaction",
             "type": "integer"
           },
           "max_prepared_transactions": {
-            "title": "PostgreSQL maximum prepared transactions",
+            "description": "PostgreSQL maximum prepared transactions",
             "maximum": 10000,
             "minimum": 0,
+            "title": "max_prepared_transactions",
             "type": "integer"
           },
           "max_stack_depth": {
-            "title": "Maximum depth of the stack in bytes",
+            "description": "Maximum depth of the stack in bytes",
             "maximum": 6291456,
             "minimum": 2097152,
+            "title": "max_stack_depth",
             "type": "integer"
           },
           "max_standby_archive_delay": {
-            "title": "Max standby archive delay in milliseconds",
+            "description": "Max standby archive delay in milliseconds",
             "maximum": 43200000,
             "minimum": 1,
+            "title": "max_standby_archive_delay",
             "type": "integer"
           },
           "max_standby_streaming_delay": {
-            "title": "Max standby streaming delay in milliseconds",
+            "description": "Max standby streaming delay in milliseconds",
             "maximum": 43200000,
             "minimum": 1,
+            "title": "max_standby_streaming_delay",
             "type": "integer"
           },
           "max_worker_processes": {
-            "title": "Sets the maximum number of background processes that the system can support",
+            "description": "Sets the maximum number of background processes that the system can support",
             "maximum": 96,
             "minimum": 8,
+            "title": "max_worker_processes",
             "type": "integer"
           },
           "pg_stat_statements.track": {
-            "title": "Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default value is top.",
+            "description": "Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default value is top.",
             "enum": [
               "all",
               "top",
               "none"
             ],
+            "title": "pg_stat_statements.track",
             "type": [
               "string"
             ]
           },
           "temp_file_limit": {
-            "title": "PostgreSQL temporary file limit in KiB, -1 for unlimited",
+            "description": "PostgreSQL temporary file limit in KiB, -1 for unlimited",
             "example": 5000000,
             "maximum": 2147483647,
             "minimum": -1,
+            "title": "temp_file_limit",
             "type": "integer"
           },
           "timezone": {
-            "title": "PostgreSQL service timezone",
+            "description": "PostgreSQL service timezone",
             "example": "Europe/Helsinki",
+            "maxLength": 64,
+            "title": "timezone",
             "type": "string"
           },
           "track_activity_query_size": {
-            "title": "Specifies the number of bytes reserved to track the currently executing command for each active session.",
+            "description": "Specifies the number of bytes reserved to track the currently executing command for each active session.",
             "example": 1024,
             "maximum": 10240,
             "minimum": 1024,
+            "title": "track_activity_query_size",
             "type": "integer"
           },
           "track_functions": {
-            "title": "Enables tracking of function call counts and time used.",
+            "description": "Enables tracking of function call counts and time used.",
             "enum": [
               "all",
               "pl",
               "none"
             ],
+            "title": "track_functions",
             "type": "string"
+          },
+          "wal_writer_delay": {
+            "description": "WAL flush interval in milliseconds. Note that setting this value to lower than the default 200ms may negatively impact performance",
+            "example": 50,
+            "maximum": 200,
+            "minimum": 10,
+            "title": "wal_writer_delay",
+            "type": "integer"
           }
         },
         "title": "postgresql.conf configuration values",
@@ -1662,8 +2047,9 @@
       },
       "pg_read_replica": {
         "default": null,
-        "title": "This setting is deprecated. Use read-replica service integration instead.",
+        "description": "This setting is deprecated. Use read-replica service integration instead.",
         "example": true,
+        "title": "Should the service which is being forked be a read replica",
         "type": [
           "boolean",
           "null"
@@ -1673,6 +2059,7 @@
         "createOnly": true,
         "default": null,
         "example": "anotherservicename",
+        "maxLength": 63,
         "title": "Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created.",
         "type": [
           "string",
@@ -1694,6 +2081,7 @@
         ]
       },
       "pgbouncer": {
+        "additionalProperties": false,
         "properties": {
           "server_reset_query_always": {
             "default": false,
@@ -1712,9 +2100,10 @@
         "properties": {
           "max_failover_replication_time_lag": {
             "default": 60,
-            "title": "Number of seconds of master unavailability before triggering database failover to standby",
+            "description": "Number of seconds of master unavailability before triggering database failover to standby",
             "maximum": 9223372036854776000,
             "minimum": 10,
+            "title": "max_failover_replication_time_lag",
             "type": "integer"
           }
         },
@@ -1770,6 +2159,7 @@
         "default": null,
         "example": "2019-01-01 23:34:45",
         "format": "date-time",
+        "maxLength": 32,
         "title": "Recovery target time when forking a service. This has effect only when a new service is being created.",
         "type": [
           "string",
@@ -1780,6 +2170,7 @@
         "createOnly": true,
         "default": null,
         "example": "anotherservicename",
+        "maxLength": 63,
         "title": "Name of another service to fork from. This has effect only when a new service is being created.",
         "type": [
           "string",
@@ -1790,10 +2181,11 @@
         "additionalProperties": false,
         "properties": {
           "max_background_workers": {
-            "title": "The number of background workers for timescaledb operations. You should configure this setting to the sum of your number of databases and the total number of concurrent background workers you want running at any given point in time.",
+            "description": "The number of background workers for timescaledb operations. You should configure this setting to the sum of your number of databases and the total number of concurrent background workers you want running at any given point in time.",
             "example": 8,
             "maximum": 4096,
             "minimum": 1,
+            "title": "timescaledb.max_background_workers",
             "type": "integer"
           }
         },
@@ -1801,7 +2193,6 @@
         "type": "object"
       },
       "variant": {
-        "createOnly": true,
         "enum": [
           "aiven",
           "timescale"
@@ -1823,12 +2214,15 @@
         "default": [
           "0.0.0.0/0"
         ],
-        "title": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+        "description": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
         "items": {
           "example": "10.20.0.0/16",
+          "maxLength": 18,
           "title": "CIDR address block",
           "type": "string"
         },
+        "maxItems": 256,
+        "title": "IP filter",
         "type": "array"
       },
       "migration": {
@@ -1837,11 +2231,13 @@
         "properties": {
           "host": {
             "example": "my.server.com",
+            "maxLength": 255,
             "title": "Hostname or IP address of the server where to migrate data from",
             "type": "string"
           },
           "password": {
             "example": "jjKk45Nnd",
+            "maxLength": 256,
             "title": "Password for authentication with the server where to migrate data from",
             "type": "string"
           },
@@ -1859,6 +2255,7 @@
           },
           "username": {
             "example": "myname",
+            "maxLength": 256,
             "title": "User name for authentication with the server where to migrate data from",
             "type": "string"
           }
@@ -1941,6 +2338,7 @@
       },
       "redis_notify_keyspace_events": {
         "default": "",
+        "maxLength": 32,
         "pattern": "^[KEg\\$lshzxeA]*$",
         "title": "Set notify-keyspace-events option",
         "type": "string"

@@ -1,6 +1,6 @@
 {
   "dashboard": {
-    "additionalProperties": true,
+    "additionalProperties": false,
     "title": "Integration user config",
     "type": "object"
   },
@@ -10,9 +10,11 @@
       "kafka_custom_metrics": {
         "items": {
           "example": "kafka.log.log_size",
+          "maxLength": 1024,
           "title": "Metric name",
           "type": "string"
         },
+        "maxItems": 1024,
         "title": "List of custom metrics",
         "type": "array"
       }
@@ -20,38 +22,42 @@
     "type": "object"
   },
   "external_elasticsearch_logs": {
-    "additionalProperties": true,
+    "additionalProperties": false,
     "title": "Integration user config",
     "type": "object"
   },
   "jolokia": {
-    "additionalProperties": true,
+    "additionalProperties": false,
     "title": "Integration user config",
     "type": "object"
   },
   "kafka_connect": {
-    "additionalProperties": true,
+    "additionalProperties": false,
     "properties": {
       "kafka_connect": {
         "additionalProperties": false,
         "properties": {
           "config_storage_topic": {
             "example": "__connect_configs",
+            "maxLength": 249,
             "title": "The name of the topic where connector and task configuration data are stored.This must be the same for all workers with the same group_id.",
             "type": "string"
           },
           "group_id": {
             "example": "connect",
+            "maxLength": 249,
             "title": "A unique string that identifies the Connect cluster group this worker belongs to.",
             "type": "string"
           },
           "offset_storage_topic": {
             "example": "__connect_offsets",
+            "maxLength": 249,
             "title": "The name of the topic where connector and task configuration offsets are stored.This must be the same for all workers with the same group_id.",
             "type": "string"
           },
           "status_storage_topic": {
             "example": "__connect_status",
+            "maxLength": 249,
             "title": "The name of the topic where connector and task configuration status updates are stored.This must be the same for all workers with the same group_id.",
             "type": "string"
           }
@@ -77,7 +83,7 @@
       "elasticsearch_index_prefix": {
         "default": "logs",
         "example": "logs",
-        "maxLength": 1000,
+        "maxLength": 1024,
         "minLength": 1,
         "title": "Elasticsearch index prefix",
         "type": "string"
@@ -86,10 +92,11 @@
     "type": "object"
   },
   "metrics": {
-    "additionalProperties": true,
+    "additionalProperties": false,
     "properties": {
       "database": {
         "example": "metrics",
+        "maxLength": 40,
         "pattern": "^[_A-Za-z0-9][-_A-Za-z0-9]{0,39}$",
         "title": "Name of the database where to store metric datapoints. Only affects PostgreSQL destinations. Defaults to 'metrics'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.",
         "type": "string",
@@ -104,13 +111,105 @@
       },
       "ro_username": {
         "example": "metrics_reader",
+        "maxLength": 40,
         "pattern": "^[_A-Za-z0-9][-._A-Za-z0-9]{0,39}$",
         "title": "Name of a user that can be used to read metrics. This will be used for Grafana integration (if enabled) to prevent Grafana users from making undesired changes. Only affects PostgreSQL destinations. Defaults to 'metrics_reader'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.",
         "type": "string",
         "user_error": "Must consist of alpha-numeric characters, dots, underscores or dashes, may not start with dash or dot, max 40 characters"
       },
+      "source_mysql": {
+        "additionalProperties": false,
+        "properties": {
+          "telegraf": {
+            "additionalProperties": false,
+            "properties": {
+              "gather_event_waits": {
+                "example": false,
+                "title": "Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS",
+                "type": "boolean"
+              },
+              "gather_file_events_stats": {
+                "example": false,
+                "title": "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME",
+                "type": "boolean"
+              },
+              "gather_index_io_waits": {
+                "example": false,
+                "title": "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE",
+                "type": "boolean"
+              },
+              "gather_info_schema_auto_inc": {
+                "example": false,
+                "title": "Gather auto_increment columns and max values from information schema",
+                "type": "boolean"
+              },
+              "gather_innodb_metrics": {
+                "example": true,
+                "title": "Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS",
+                "type": "boolean"
+              },
+              "gather_perf_events_statements": {
+                "example": false,
+                "title": "Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST",
+                "type": "boolean"
+              },
+              "gather_process_list": {
+                "example": true,
+                "title": "Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST",
+                "type": "boolean"
+              },
+              "gather_slave_status": {
+                "example": true,
+                "title": "Gather metrics from SHOW SLAVE STATUS command output",
+                "type": "boolean"
+              },
+              "gather_table_io_waits": {
+                "example": false,
+                "title": "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE",
+                "type": "boolean"
+              },
+              "gather_table_lock_waits": {
+                "example": false,
+                "title": "Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS",
+                "type": "boolean"
+              },
+              "gather_table_schema": {
+                "example": true,
+                "title": "Gather metrics from INFORMATION_SCHEMA.TABLES",
+                "type": "boolean"
+              },
+              "perf_events_statements_digest_text_limit": {
+                "example": 120,
+                "maximum": 2048,
+                "minimum": 1,
+                "title": "Truncates digest text from perf_events_statements into this many characters",
+                "type": "integer"
+              },
+              "perf_events_statements_limit": {
+                "example": 250,
+                "maximum": 4000,
+                "minimum": 1,
+                "title": "Limits metrics from perf_events_statements",
+                "type": "integer"
+              },
+              "perf_events_statements_time_limit": {
+                "example": 86400,
+                "maximum": 2592000,
+                "minimum": 1,
+                "title": "Only include perf_events_statements whose last seen is less than this many seconds",
+                "type": "integer"
+              }
+            },
+            "title": "Configuration options for Telegraf MySQL input plugin",
+            "type": "object"
+          }
+        },
+        "title": "Configuration options for metrics where source service is MySQL",
+        "type": "object"
+      },
       "username": {
         "example": "metrics_writer",
+        "maxLength": 40,
         "pattern": "^[_A-Za-z0-9][-._A-Za-z0-9]{0,39}$",
         "title": "Name of the user used to write metrics. Only affects PostgreSQL destinations. Defaults to 'metrics_writer'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.",
         "type": "string",
@@ -135,22 +234,114 @@
     "type": "object"
   },
   "prometheus": {
-    "additionalProperties": true,
+    "additionalProperties": false,
+    "properties": {
+      "source_mysql": {
+        "additionalProperties": false,
+        "properties": {
+          "telegraf": {
+            "additionalProperties": false,
+            "properties": {
+              "gather_event_waits": {
+                "example": false,
+                "title": "Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS",
+                "type": "boolean"
+              },
+              "gather_file_events_stats": {
+                "example": false,
+                "title": "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME",
+                "type": "boolean"
+              },
+              "gather_index_io_waits": {
+                "example": false,
+                "title": "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE",
+                "type": "boolean"
+              },
+              "gather_info_schema_auto_inc": {
+                "example": false,
+                "title": "Gather auto_increment columns and max values from information schema",
+                "type": "boolean"
+              },
+              "gather_innodb_metrics": {
+                "example": true,
+                "title": "Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS",
+                "type": "boolean"
+              },
+              "gather_perf_events_statements": {
+                "example": false,
+                "title": "Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST",
+                "type": "boolean"
+              },
+              "gather_process_list": {
+                "example": true,
+                "title": "Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST",
+                "type": "boolean"
+              },
+              "gather_slave_status": {
+                "example": true,
+                "title": "Gather metrics from SHOW SLAVE STATUS command output",
+                "type": "boolean"
+              },
+              "gather_table_io_waits": {
+                "example": false,
+                "title": "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE",
+                "type": "boolean"
+              },
+              "gather_table_lock_waits": {
+                "example": false,
+                "title": "Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS",
+                "type": "boolean"
+              },
+              "gather_table_schema": {
+                "example": true,
+                "title": "Gather metrics from INFORMATION_SCHEMA.TABLES",
+                "type": "boolean"
+              },
+              "perf_events_statements_digest_text_limit": {
+                "example": 120,
+                "maximum": 2048,
+                "minimum": 1,
+                "title": "Truncates digest text from perf_events_statements into this many characters",
+                "type": "integer"
+              },
+              "perf_events_statements_limit": {
+                "example": 250,
+                "maximum": 4000,
+                "minimum": 1,
+                "title": "Limits metrics from perf_events_statements",
+                "type": "integer"
+              },
+              "perf_events_statements_time_limit": {
+                "example": 86400,
+                "maximum": 2592000,
+                "minimum": 1,
+                "title": "Only include perf_events_statements whose last seen is less than this many seconds",
+                "type": "integer"
+              }
+            },
+            "title": "Configuration options for Telegraf MySQL input plugin",
+            "type": "object"
+          }
+        },
+        "title": "Configuration options for metrics where source service is MySQL",
+        "type": "object"
+      }
+    },
     "title": "Integration user config",
     "type": "object"
   },
   "read_replica": {
-    "additionalProperties": true,
+    "additionalProperties": false,
     "title": "Integration user config",
     "type": "object"
   },
   "rsyslog": {
-    "additionalProperties": true,
+    "additionalProperties": false,
     "title": "Integration user config",
     "type": "object"
   },
   "signalfx": {
-    "additionalProperties": true,
+    "additionalProperties": false,
     "title": "Integration user config",
     "type": "object"
   }

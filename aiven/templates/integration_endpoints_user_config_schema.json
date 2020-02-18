@@ -6,8 +6,10 @@
         "example": "848f30907c15c55d601fe45487cce9b6",
         "maxLength": 32,
         "minLength": 32,
+        "pattern": "^[A-Za-z0-9]{32}$",
         "title": "Datadog API key",
-        "type": "string"
+        "type": "string",
+        "user_error": "Must consist of alpha-numeric characters and contain 32 characters"
       },
       "disable_consumer_stats": {
         "example": true,
@@ -41,6 +43,7 @@
     "properties": {
       "ca": {
         "example": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n",
+        "maxLength": 16384,
         "title": "PEM encoded CA certificate",
         "type": [
           "string",
@@ -62,7 +65,8 @@
         "minLength": 1,
         "pattern": "^[a-z0-9][a-z0-9-_.]+$",
         "title": "Elasticsearch index prefix",
-        "type": "string"
+        "type": "string",
+        "user_error": "Must start with alpha-numeric character, and only contain alpha-numeric characters, dashes, underscores and dots"
       },
       "timeout": {
         "default": 10,
@@ -74,7 +78,7 @@
       },
       "url": {
         "example": "https://user:passwd@logs.example.com/",
-        "maxLength": 1000,
+        "maxLength": 2048,
         "minLength": 12,
         "title": "Elasticsearch connection URL",
         "type": "string"
@@ -100,8 +104,10 @@
         "example": "jol48k51",
         "maxLength": 32,
         "minLength": 5,
+        "pattern": "^[a-z0-9\\-@_]{5,32}$",
         "title": "Jolokia basic authentication username",
-        "type": "string"
+        "type": "string",
+        "user_error": "Must only contain a-z and 0-9"
       }
     },
     "type": "object"
@@ -120,8 +126,10 @@
         "example": "prom4851",
         "maxLength": 32,
         "minLength": 5,
+        "pattern": "^[a-z0-9\\-@_]{5,32}$",
         "title": "Prometheus basic authentication username",
-        "type": "string"
+        "type": "string",
+        "user_error": "Must only contain a-z and 0-9"
       }
     },
     "type": "object"
@@ -131,6 +139,7 @@
     "properties": {
       "ca": {
         "example": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n",
+        "maxLength": 16384,
         "title": "PEM encoded CA certificate",
         "type": [
           "string",
@@ -139,6 +148,7 @@
       },
       "cert": {
         "example": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n",
+        "maxLength": 16384,
         "title": "PEM encoded client certificate",
         "type": [
           "string",
@@ -158,6 +168,7 @@
       },
       "key": {
         "example": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n",
+        "maxLength": 16384,
         "title": "PEM encoded client key",
         "type": [
           "string",
@@ -181,6 +192,7 @@
       },
       "sd": {
         "example": "TOKEN tag=\"LiteralValue\"",
+        "maxLength": 1024,
         "title": "Structured data block for log message",
         "type": [
           "string",
@@ -191,7 +203,7 @@
         "example": "logs.example.com",
         "maxLength": 255,
         "minLength": 4,
-        "title": "rsyslog server address or hostname",
+        "title": "rsyslog server IP address or hostname",
         "type": "string"
       },
       "tls": {
@@ -221,9 +233,11 @@
           "vmpage.*"
         ],
         "items": {
+          "maxLength": 1024,
           "title": "metric to send (glob pattern)",
           "type": "string"
         },
+        "maxItems": 256,
         "title": "list of metrics to send",
         "type": "array"
       },
