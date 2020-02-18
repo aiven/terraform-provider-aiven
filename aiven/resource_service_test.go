@@ -148,11 +148,6 @@ func testAccCheckAivenServiceResourceDestroy(s *terraform.State) error {
 		}
 	}
 
-	// check if all projects were destroyed as well
-	if err := testAccCheckAivenProjectResourceDestroy(s); err != nil {
-		return err
-	}
-
 	return nil
 }
 

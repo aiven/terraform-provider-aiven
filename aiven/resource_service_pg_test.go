@@ -37,6 +37,24 @@ func TestAccAivenService_pg(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
 				),
 			},
+			{
+				Config:                    testAccPGReadReplicaServiceResource(rName),
+				PreventPostDestroyRefresh: true,
+				ExpectNonEmptyPlan:        true,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenServiceCommonAttributes("data.aiven_service.service-pg"),
+					testAccCheckAivenServicePGAttributes("data.aiven_service.service-pg"),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-pg-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
+					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
+					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
+					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
+					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+				),
+			},
 		},
 	})
 }
@@ -76,6 +94,73 @@ func testAccPGServiceResource(name string) string {
 			project = aiven_project.foo-pg.project
 		}
 		`, name, os.Getenv("AIVEN_CARD_ID"), name)
+}
+
+func testAccPGReadReplicaServiceResource(name string) string {
+	return fmt.Sprintf(`
+		resource "aiven_project" "foo-pg" {
+			project = "test-acc-pr-pg-%s"
+			card_id="%s"	
+		}
+		
+		resource "aiven_service" "bar-pg" {
+			project = aiven_project.foo-pg.project
+			cloud_name = "google-europe-west1"
+			plan = "startup-4"
+			service_name = "test-acc-sr-%s"
+			service_type = "pg"
+			maintenance_window_dow = "monday"
+			maintenance_window_time = "10:00:00"
+			
+			pg_user_config {
+				pg_version = 11
+
+				public_access {
+					pg = true
+					prometheus = false
+				}
+
+				pg {
+					idle_in_transaction_session_timeout = 900
+				}
+			}
+		}
+
+		resource "aiven_service" "bar-replica" {
+			project = aiven_project.foo-pg.project
+			cloud_name = "google-europe-west1"
+			plan = "startup-4"
+			service_name = "test-acc-sr-repica-%s"
+			service_type = "pg"
+			maintenance_window_dow = "monday"
+			maintenance_window_time = "10:00:00"
+			
+			pg_user_config {
+				pg_version = 11
+
+				public_access {
+					pg = true
+					prometheus = false
+				}
+
+				pg {
+					idle_in_transaction_session_timeout = 900
+				}
+			}
+
+			service_integrations {
+				integration_type = "read_replica"
+				source_service_name = aiven_service.bar-pg.service_name
+			}
+
+			 depends_on = [aiven_service.bar-pg]
+		}
+		
+		data "aiven_service" "service-pg" {
+			service_name = aiven_service.bar-pg.service_name
+			project = aiven_project.foo-pg.project
+		}
+		`, name, os.Getenv("AIVEN_CARD_ID"), name, name)
 }
 
 func testAccCheckAivenServicePGAttributes(n string) resource.TestCheckFunc {
