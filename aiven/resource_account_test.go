@@ -119,10 +119,6 @@ func testAccCheckAivenAccountAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get an account id from Aiven")
 		}
 
-		if a["billing_enabled"] == "" {
-			return fmt.Errorf("expected to get a billing_enabled from Aiven")
-		}
-
 		if a["owner_team_id"] == "" {
 			return fmt.Errorf("expected to get a owner_team_id from Aiven")
 		}
