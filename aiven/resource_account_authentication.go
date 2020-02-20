@@ -46,7 +46,7 @@ var aivenAccountAuthenticationSchema = map[string]*schema.Schema{
 	},
 	"saml_acs_url": {
 		Type:        schema.TypeString,
-		Description: "SAML Acs URL",
+		Description: "SAML Assertion Consumer Service URL",
 		Optional:    true,
 		Computed:    true,
 	},

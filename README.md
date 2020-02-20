@@ -199,6 +199,10 @@ resource "aiven_account_authentication" "foo" {
 
 `saml_idp_url` is a SAML Idp URL.
 
+`saml_acs_url` is a SAML Assertion Consumer Service URL.
+
+`saml_metadata_url` is a SAML Metadata URL
+
 ### Resource Account Team
 ```
 resource "aiven_account_team" "account_team1" {
