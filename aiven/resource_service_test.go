@@ -38,6 +38,24 @@ func sweepServices(region string) error {
 			}
 
 			for _, service := range services {
+				// if service termination_protection is on service cannot be deleted
+				// update service and turn termination_protection off
+				if service.TerminationProtection == true {
+					_, err := conn.Services.Update(project.Name, service.Name, aiven.UpdateServiceRequest{
+						Cloud:                 service.CloudName,
+						MaintenanceWindow:     &service.MaintenanceWindow,
+						Plan:                  service.Plan,
+						ProjectVPCID:          service.ProjectVPCID,
+						Powered:               true,
+						TerminationProtection: false,
+						UserConfig:            service.UserConfig,
+					})
+
+					if err != nil {
+						return fmt.Errorf("error destroying service %s during sweep, disabling `termination_protection`: %s", service.Name, err)
+					}
+				}
+
 				if err := conn.Services.Delete(project.Name, service.Name); err != nil {
 					if err.(aiven.Error).Status != 404 {
 						return fmt.Errorf("error destroying service %s during sweep: %s", service.Name, err)
@@ -118,8 +136,8 @@ func testAccCheckAivenServiceCommonAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a none empty list of components from Aiven")
 		}
 
-		if a["termination_protection"] != "false" {
-			return fmt.Errorf("expected to get a correct termination_protection from Aiven")
+		if a["termination_protection"] == "" {
+			return fmt.Errorf("expected to get a termination_protection from Aiven")
 		}
 
 		return nil

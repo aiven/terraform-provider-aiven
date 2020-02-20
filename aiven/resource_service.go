@@ -574,6 +574,7 @@ func resourceServiceDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName := splitResourceID2(d.Id())
+
 	return client.Services.Delete(projectName, serviceName)
 }
 
