@@ -61,6 +61,7 @@ func testAccMysqlServiceResource(name string) string {
 							
 				mysql {
 					sql_mode = "ANSI,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE"
+					sql_require_primary_key = true
 				}
 
 				public_access {
