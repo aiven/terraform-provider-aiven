@@ -65,6 +65,14 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 		Description: "Topic cleanup policy. Allowed values: delete, compact",
 		ForceNew:    true,
 	},
+	"termination_protection": {
+		Type:     schema.TypeBool,
+		Optional: true,
+		Default:  false,
+		Description: `It is a Terraform client-side deletion protection, which prevents a Kafka 
+			topic from being deleted. It is recommended to enable this for any production Kafka 
+			topic containing critical data.`,
+	},
 }
 
 func resourceKafkaTopic() *schema.Resource {
@@ -156,6 +164,9 @@ func resourceKafkaTopicRead(d *schema.ResourceData, m interface{}) error {
 	if err := d.Set("retention_hours", topic.RetentionHours); err != nil {
 		return err
 	}
+	if err := d.Set("termination_protection", d.Get("termination_protection")); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -193,6 +204,11 @@ func resourceKafkaTopicDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, topicName := splitResourceID3(d.Id())
+
+	if d.Get("termination_protection").(bool) == true {
+		return fmt.Errorf("cannot delete kafka topic when termination_protection is enabled")
+	}
+
 	return client.KafkaTopics.Delete(projectName, serviceName, topicName)
 }
 

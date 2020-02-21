@@ -56,10 +56,12 @@ var aivenDatabaseSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: handleLcDefaults,
 	},
 	"termination_protection": {
-		Type:        schema.TypeBool,
-		Optional:    true,
-		Default:     false,
-		Description: "Prevent database from being deleted. It is recommended to have this enabled for all services.",
+		Type:     schema.TypeBool,
+		Optional: true,
+		Default:  false,
+		Description: `It is a Terraform client-side deletion protections, which prevents the database
+			from being deleted by Terraform. It is recommended to enable this for any production
+			databases containing critical data.`,
 	},
 }
 

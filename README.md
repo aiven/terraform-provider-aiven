@@ -433,6 +433,7 @@ resource "aiven_kafka_topic" "mytesttopic" {
     retention_hours = 72
     minimum_in_sync_replicas = 2
     cleanup_policy = "delete"
+    termination_protection = true
 }
 ```
 
@@ -444,6 +445,10 @@ the topic being deleted and new one created instead.
 `topic_name` is the actual name of the topic account. This propery cannot be changed
 once the service is created. Doing so will result in the topic being deleted and new one
 created instead.
+
+`termination_protection` is a Terraform client-side deletion protection, which prevents a Kafka  
+topic from being deleted. It is recommended to enable this for any production Kafka topic 
+containing critical data.
 
 Other properties should be self-explanatory. They can be changed after the topic has been
 created.
@@ -787,12 +792,17 @@ data "aiven_database" "mydatabase" {
     project = data.aiven_service.myservice.project
     service_name = data.aiven_service.myservice.service_name
     database_name = "<DATABASE_NAME>"
+    termination_protection = true
 }
 ```
 
 `project` and `service_name` define the project and service the database belongs to.
 
 `database_name` is the actual name of the database.
+
+`termination_protection` is a Terraform client-side deletion protections, which prevents 
+the database from being deleted by Terraform. It is recommended to enable this for any 
+production databases containing critical data.
 
 ### Datasource Service User
 

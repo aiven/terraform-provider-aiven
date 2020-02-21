@@ -14,6 +14,10 @@ func init() {
 	resource.AddTestSweepers("aiven_service", &resource.Sweeper{
 		Name: "aiven_service",
 		F:    sweepServices,
+		Dependencies: []string{
+			"aiven_database",
+			"aiven_kafka_topic",
+		},
 	})
 }
 
