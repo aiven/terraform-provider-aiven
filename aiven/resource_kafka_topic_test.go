@@ -8,8 +8,59 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 	"log"
 	"os"
+	"strings"
 	"testing"
 )
+
+func init() {
+	resource.AddTestSweepers("aiven_kafka_topic", &resource.Sweeper{
+		Name: "aiven_kafka_topic",
+		F:    sweepKafkaTopics,
+	})
+}
+
+func sweepKafkaTopics(region string) error {
+	client, err := sharedClient(region)
+	if err != nil {
+		return fmt.Errorf("error getting client: %s", err)
+	}
+
+	conn := client.(*aiven.Client)
+
+	projects, err := conn.Projects.List()
+	if err != nil {
+		return fmt.Errorf("error retrieving a list of projects : %s", err)
+	}
+
+	for _, project := range projects {
+		if strings.Contains(project.Name, "test-acc-") {
+			services, err := conn.Services.List(project.Name)
+			if err != nil {
+				return fmt.Errorf("error retrieving a list of services for a project `%s`: %s", project.Name, err)
+			}
+
+			for _, service := range services {
+				if service.Type != "kafka" {
+					continue
+				}
+
+				topics, err := conn.KafkaTopics.List(project.Name, service.Name)
+				if err != nil {
+					return fmt.Errorf("error retrieving a list of kafka topics for a service `%s`: %s", service.Name, err)
+				}
+
+				for _, topic := range topics {
+					err = conn.KafkaTopics.Delete(project.Name, service.Name, topic.TopicName)
+					if err != nil {
+						return fmt.Errorf("error destroying kafka topic %s during sweep: %s", topic.TopicName, err)
+					}
+				}
+			}
+		}
+	}
+
+	return nil
+}
 
 func TestAccAivenKafkaTopic_basic(t *testing.T) {
 	t.Parallel()
@@ -31,6 +82,21 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
 					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
+					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+				),
+			},
+			{
+				Config:                    testAccKafkaTopicTerminationProtectionResource(rName),
+				PreventPostDestroyRefresh: true,
+				ExpectNonEmptyPlan:        true,
+				PlanOnly:                  true,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
+					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
+					resource.TestCheckResourceAttr(resourceName, "termination_protection", "true"),
 				),
 			},
 		},
@@ -68,6 +134,48 @@ func testAccKafkaTopicResource(name string) string {
 			topic_name = "test-acc-topic-%s"
 			partitions = 3
 			replication = 2
+		}
+
+		data "aiven_kafka_topic" "topic" {
+			project = aiven_project.foo.project
+			service_name = aiven_service.bar.service_name
+			topic_name = aiven_kafka_topic.foo.topic_name
+		}
+		`, name, os.Getenv("AIVEN_CARD_ID"), name, name)
+}
+
+func testAccKafkaTopicTerminationProtectionResource(name string) string {
+	return fmt.Sprintf(`
+		resource "aiven_project" "foo" {
+			project = "test-acc-pr-%s"
+			card_id="%s"	
+		}
+
+		resource "aiven_service" "bar" {
+			project = aiven_project.foo.project
+			cloud_name = "google-europe-west1"
+			plan = "business-4"
+			service_name = "test-acc-sr-%s"
+			service_type = "kafka"
+			maintenance_window_dow = "monday"
+			maintenance_window_time = "10:00:00"
+			
+			kafka_user_config {
+				kafka_version = "2.4"
+				kafka {
+				  group_max_session_timeout_ms = 70000
+				  log_retention_bytes = 1000000000
+				}
+			}
+		}
+		
+		resource "aiven_kafka_topic" "foo" {
+			project = aiven_project.foo.project
+			service_name = aiven_service.bar.service_name
+			topic_name = "test-acc-topic-%s"
+			partitions = 3
+			replication = 2
+			termination_protection = true
 		}
 
 		data "aiven_kafka_topic" "topic" {

@@ -55,6 +55,14 @@ var aivenDatabaseSchema = map[string]*schema.Schema{
 		ForceNew:         true,
 		DiffSuppressFunc: handleLcDefaults,
 	},
+	"termination_protection": {
+		Type:     schema.TypeBool,
+		Optional: true,
+		Default:  false,
+		Description: `It is a Terraform client-side deletion protections, which prevents the database
+			from being deleted by Terraform. It is recommended to enable this for any production
+			databases containing critical data.`,
+	},
 }
 
 func resourceDatabase() *schema.Resource {
@@ -62,6 +70,7 @@ func resourceDatabase() *schema.Resource {
 		Create: resourceDatabaseCreate,
 		Read:   resourceDatabaseRead,
 		Delete: resourceDatabaseDelete,
+		Update: resourceDatabaseUpdate,
 		Exists: resourceDatabaseExists,
 		Importer: &schema.ResourceImporter{
 			State: resourceDatabaseState,
@@ -95,6 +104,10 @@ func resourceDatabaseCreate(d *schema.ResourceData, m interface{}) error {
 	return resourceDatabaseRead(d, m)
 }
 
+func resourceDatabaseUpdate(d *schema.ResourceData, m interface{}) error {
+	return resourceDatabaseRead(d, m)
+}
+
 func resourceDatabaseRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
@@ -104,11 +117,24 @@ func resourceDatabaseRead(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	d.Set("database_name", database.DatabaseName)
-	d.Set("project", projectName)
-	d.Set("service_name", serviceName)
-	d.Set("lc_collate", database.LcCollate)
-	d.Set("lc_ctype", database.LcType)
+	if err := d.Set("database_name", database.DatabaseName); err != nil {
+		return err
+	}
+	if err := d.Set("project", projectName); err != nil {
+		return err
+	}
+	if err := d.Set("service_name", serviceName); err != nil {
+		return err
+	}
+	if err := d.Set("lc_collate", database.LcCollate); err != nil {
+		return err
+	}
+	if err := d.Set("lc_ctype", database.LcType); err != nil {
+		return err
+	}
+	if err := d.Set("termination_protection", d.Get("termination_protection")); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -117,6 +143,11 @@ func resourceDatabaseDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, databaseName := splitResourceID3(d.Id())
+
+	if d.Get("termination_protection").(bool) == true {
+		return fmt.Errorf("cannot delete a database termination_protection is enabled")
+	}
+
 	return client.Databases.Delete(projectName, serviceName, databaseName)
 }
 
