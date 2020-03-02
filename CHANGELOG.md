@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.2.1] - 2020-03-02
+Terraform client-side termination protection for resources: 
+- aiven_kafka_topic
+- aiven_database
+
 ## [1.2.0] - 2020-02-18
 - Following new types of resources have been added:
      - account
