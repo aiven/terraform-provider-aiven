@@ -3,6 +3,7 @@
 package aiven
 
 import (
+	"github.com/aiven/terraform-provider-aiven/pkg/cache"
 	"net/url"
 	"strings"
 
@@ -70,6 +71,8 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {
+			_ = cache.NewTopicCache()
+
 			return aiven.NewTokenClient(d.Get("api_token").(string), "terraform-provider-aiven/")
 		},
 	}
