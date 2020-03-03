@@ -17,6 +17,7 @@ func init() {
 		Dependencies: []string{
 			"aiven_database",
 			"aiven_kafka_topic",
+			"aiven_kafka_schema",
 		},
 	})
 }

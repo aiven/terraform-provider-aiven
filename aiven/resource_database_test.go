@@ -41,6 +41,10 @@ func sweepDatabases(region string) error {
 			for _, service := range services {
 				dbs, err := conn.Databases.List(project.Name, service.Name)
 				if err != nil {
+					if err.(aiven.Error).Status == 403 {
+						continue
+					}
+
 					return fmt.Errorf("error retrieving a list of databases for a service `%s`: %s", service.Name, err)
 				}
 

@@ -59,7 +59,7 @@ testacc: vendor
 
 sweep:
 	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."
-	go test -v ./... -sweep=global -timeout 60m
+	go test -v ./aiven -sweep=global -timeout 60m
 
 lint: vendor
 	golangci-lint run  -D errcheck -D unused -E gofmt --no-config --issues-exit-code=0 --timeout=30m ./...
