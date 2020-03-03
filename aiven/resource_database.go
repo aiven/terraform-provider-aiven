@@ -144,7 +144,7 @@ func resourceDatabaseDelete(d *schema.ResourceData, m interface{}) error {
 
 	projectName, serviceName, databaseName := splitResourceID3(d.Id())
 
-	if d.Get("termination_protection").(bool) == true {
+	if d.Get("termination_protection").(bool) {
 		return fmt.Errorf("cannot delete a database termination_protection is enabled")
 	}
 

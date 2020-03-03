@@ -3,6 +3,7 @@ package aiven
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform/helper/validation"
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
@@ -29,10 +30,11 @@ var aivenConnectionPoolSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 	},
 	"pool_mode": {
-		Type:        schema.TypeString,
-		Optional:    true,
-		Default:     "transaction",
-		Description: "Mode the pool operates in (session, transaction, statement)",
+		Type:         schema.TypeString,
+		Optional:     true,
+		Default:      "transaction",
+		Description:  "Mode the pool operates in (session, transaction, statement)",
+		ValidateFunc: validation.StringInSlice([]string{"session", "transaction", "statement"}, false),
 	},
 	"pool_name": {
 		Type:        schema.TypeString,
@@ -167,14 +169,30 @@ func copyConnectionPoolPropertiesFromAPIResponseToTerraform(
 	project string,
 	serviceName string,
 ) error {
-	d.Set("project", project)
-	d.Set("service_name", serviceName)
-	d.Set("connection_uri", pool.ConnectionURI)
-	d.Set("database_name", pool.Database)
-	d.Set("pool_mode", pool.PoolMode)
-	d.Set("pool_name", pool.PoolName)
-	d.Set("pool_size", pool.PoolSize)
-	d.Set("username", pool.Username)
+	if err := d.Set("project", project); err != nil {
+		return err
+	}
+	if err := d.Set("service_name", serviceName); err != nil {
+		return err
+	}
+	if err := d.Set("connection_uri", pool.ConnectionURI); err != nil {
+		return err
+	}
+	if err := d.Set("database_name", pool.Database); err != nil {
+		return err
+	}
+	if err := d.Set("pool_mode", pool.PoolMode); err != nil {
+		return err
+	}
+	if err := d.Set("pool_name", pool.PoolName); err != nil {
+		return err
+	}
+	if err := d.Set("pool_size", pool.PoolSize); err != nil {
+		return err
+	}
+	if err := d.Set("username", pool.Username); err != nil {
+		return err
+	}
 
 	return nil
 }

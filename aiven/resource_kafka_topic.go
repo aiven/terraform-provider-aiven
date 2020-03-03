@@ -207,8 +207,7 @@ func resourceKafkaTopicDelete(d *schema.ResourceData, m interface{}) error {
 
 	projectName, serviceName, topicName := splitResourceID3(d.Id())
 
-
-	if d.Get("termination_protection").(bool) == true {
+	if d.Get("termination_protection").(bool) {
 		return fmt.Errorf("cannot delete kafka topic when termination_protection is enabled")
 	}
 
