@@ -39,13 +39,17 @@ func sweepKafkaSchemas(region string) error {
 			}
 
 			for _, service := range services {
+				if service.Type != "kafka" {
+					continue
+				}
+
 				schemaList, err := conn.KafkaSubjectSchemas.List(project.Name, service.Name)
 				if err != nil {
 					if err.(aiven.Error).Status == 403 {
 						continue
 					}
 
-					return fmt.Errorf("error retrieving a list of databases for a service `%s`: %s", service.Name, err)
+					return fmt.Errorf("error retrieving a list of kafka schemas for a service `%s`: %s", service.Name, err)
 				}
 
 				for _, s := range schemaList.Subjects {

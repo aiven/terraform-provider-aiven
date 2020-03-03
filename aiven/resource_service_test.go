@@ -18,6 +18,8 @@ func init() {
 			"aiven_database",
 			"aiven_kafka_topic",
 			"aiven_kafka_schema",
+			"aiven_kafka_connector",
+			"aiven_connection_pool",
 		},
 	})
 }
