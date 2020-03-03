@@ -15,6 +15,9 @@ func init() {
 	resource.AddTestSweepers("aiven_database", &resource.Sweeper{
 		Name: "aiven_database",
 		F:    sweepDatabases,
+		Dependencies: []string{
+			"aiven_connection_pool",
+		},
 	})
 }
 
