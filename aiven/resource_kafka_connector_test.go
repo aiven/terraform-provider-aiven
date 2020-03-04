@@ -45,7 +45,7 @@ func sweepKafkaConnectos(region string) error {
 
 				connectorsList, err := conn.KafkaConnectors.List(project.Name, service.Name)
 				if err != nil {
-					if err.(aiven.Error).Status == 403 {
+					if err.(aiven.Error).Status == 403 || err.(aiven.Error).Status == 501 {
 						continue
 					}
 
