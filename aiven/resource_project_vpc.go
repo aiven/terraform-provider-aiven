@@ -3,13 +3,12 @@ package aiven
 
 import (
 	"fmt"
-	"log"
-	"strings"
-	"time"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"log"
+	"strings"
+	"time"
 )
 
 var aivenProjectVCPSchema = map[string]*schema.Schema{
@@ -69,14 +68,20 @@ func resourceProjectVPCCreate(d *schema.ResourceData, m interface{}) error {
 
 	// Make sure the VPC is active before returning it because service creation, moving
 	// service to VPC, and some other operations will fail unless the VPC is active
-	waiter := ProjectVPCActiveWaiter{Client: client, Project: projectName, VPCID: vpc.ProjectVPCID}
+	waiter := ProjectVPCActiveWaiter{
+		Client:  client,
+		Project: projectName,
+		VPCID:   vpc.ProjectVPCID,
+	}
+
 	_, err = waiter.Conf().WaitForState()
 	if err != nil {
 		return fmt.Errorf("error waiting for Aiven project VPC to be ACTIVE: %s", err)
 	}
 
 	d.SetId(buildResourceID(projectName, vpc.ProjectVPCID))
-	return copyVPCPropertiesFromAPIResponseToTerraform(d, vpc, projectName)
+
+	return resourceProjectVPCRead(d, m)
 }
 
 func resourceProjectVPCRead(d *schema.ResourceData, m interface{}) error {
@@ -95,7 +100,19 @@ func resourceProjectVPCDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	projectName, vpcID := splitResourceID2(d.Id())
-	return client.VPCs.Delete(projectName, vpcID)
+
+	waiter := ProjectVPCDeleteWaiter{
+		Client:  client,
+		Project: projectName,
+		VPCID:   vpcID,
+	}
+
+	_, err := waiter.Conf().WaitForState()
+	if err != nil {
+		return fmt.Errorf("error waiting for Aiven project VPC to be DELETED: %s", err)
+	}
+
+	return nil
 }
 
 func resourceProjectVPCExists(d *schema.ResourceData, m interface{}) (bool, error) {
@@ -120,10 +137,18 @@ func resourceProjectVPCState(d *schema.ResourceData, m interface{}) ([]*schema.R
 }
 
 func copyVPCPropertiesFromAPIResponseToTerraform(d *schema.ResourceData, vpc *aiven.VPC, project string) error {
-	d.Set("project", project)
-	d.Set("cloud_name", vpc.CloudName)
-	d.Set("network_cidr", vpc.NetworkCIDR)
-	d.Set("state", vpc.State)
+	if err := d.Set("project", project); err != nil {
+		return err
+	}
+	if err := d.Set("cloud_name", vpc.CloudName); err != nil {
+		return err
+	}
+	if err := d.Set("network_cidr", vpc.NetworkCIDR); err != nil {
+		return err
+	}
+	if err := d.Set("state", vpc.State); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -141,7 +166,6 @@ type ProjectVPCActiveWaiter struct {
 func (w *ProjectVPCActiveWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		vpc, err := w.Client.VPCs.Get(w.Project, w.VPCID)
-
 		if err != nil {
 			return nil, "", err
 		}
@@ -154,13 +178,61 @@ func (w *ProjectVPCActiveWaiter) RefreshFunc() resource.StateRefreshFunc {
 
 // Conf sets up the configuration to refresh.
 func (w *ProjectVPCActiveWaiter) Conf() *resource.StateChangeConf {
-	state := &resource.StateChangeConf{
-		Pending: []string{"APPROVED"},
-		Target:  []string{"ACTIVE"},
-		Refresh: w.RefreshFunc(),
+	return &resource.StateChangeConf{
+		Pending:    []string{"APPROVED", "DELETING", "DELETED"},
+		Target:     []string{"ACTIVE"},
+		Refresh:    w.RefreshFunc(),
+		Delay:      10 * time.Second,
+		Timeout:    4 * time.Minute,
+		MinTimeout: 2 * time.Second,
 	}
-	state.Delay = 10 * time.Second
-	state.Timeout = 4 * time.Minute
-	state.MinTimeout = 2 * time.Second
-	return state
+}
+
+// ProjectVPCDeleteWaiter is used to wait for VPC been deleted.
+type ProjectVPCDeleteWaiter struct {
+	Client  *aiven.Client
+	Project string
+	VPCID   string
+}
+
+// RefreshFunc will call the Aiven client and refresh it's state.
+func (w *ProjectVPCDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		vpc, err := w.Client.VPCs.Get(w.Project, w.VPCID)
+		if err != nil {
+			// might be already gone after deletion
+			if err.(aiven.Error).Status == 404 {
+				return &aiven.VPC{}, "DELETED", nil
+			}
+
+			return nil, "", err
+		}
+
+		if vpc.State != "DELETING" && vpc.State != "DELETED" {
+			err := w.Client.VPCs.Delete(w.Project, w.VPCID)
+			if err != nil {
+				// VPC cannot be deleted while there are services migrating from it
+				// and coses 409 error API response
+				if err.(aiven.Error).Status != 409 {
+					return nil, "", err
+				}
+			}
+		}
+
+		log.Printf("[DEBUG] Got %s state while waiting for VPC connection to be DELETED.", vpc.State)
+
+		return vpc, vpc.State, nil
+	}
+}
+
+// Conf sets up the configuration to refresh.
+func (w *ProjectVPCDeleteWaiter) Conf() *resource.StateChangeConf {
+	return &resource.StateChangeConf{
+		Pending:    []string{"APPROVED", "DELETING", "ACTIVE"},
+		Target:     []string{"DELETED"},
+		Refresh:    w.RefreshFunc(),
+		Delay:      10 * time.Second,
+		Timeout:    4 * time.Minute,
+		MinTimeout: 2 * time.Second,
+	}
 }
