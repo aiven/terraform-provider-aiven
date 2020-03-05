@@ -3,6 +3,9 @@
 package aiven
 
 import (
+	"log"
+	"net"
+	"strconv"
 	"time"
 
 	"github.com/aiven/aiven-go-client"
@@ -45,12 +48,47 @@ func (w *ServiceChangeWaiter) RefreshFunc() resource.StateRefreshFunc {
 			// can manage the associated resources even if the service is rebuilding.
 			state = aivenTargetState
 		}
+
 		if state == aivenTargetState && !backupsReady(service) {
+			state = aivenServicesStartingState
+		}
+
+		if state == aivenTargetState && !grafanaReady(service) {
 			state = aivenServicesStartingState
 		}
 
 		return service, state, nil
 	}
+}
+
+func grafanaReady(service *aiven.Service) bool {
+	if service.Type != "grafana" {
+		return true
+	}
+
+	var publicGrafana string
+
+	// constructing grafana public address if available
+	for _, component := range service.Components {
+		if component.Route == "public" && component.Usage == "primary" {
+			publicGrafana = component.Host + ":" + strconv.Itoa(component.Port)
+			continue
+		}
+	}
+
+	// checking if public grafana is reachable
+	if publicGrafana != "" {
+		_, err := net.DialTimeout("tcp", publicGrafana, 1*time.Second)
+		if err != nil {
+			log.Printf("[DEBUG] public grafana is not yet reachable")
+			return false
+		}
+
+		log.Printf("[DEBUG] public grafana is reachable")
+		return true
+	}
+
+	return true
 }
 
 func backupsReady(service *aiven.Service) bool {
@@ -72,11 +110,12 @@ func backupsReady(service *aiven.Service) bool {
 // Conf sets up the configuration to refresh.
 func (w *ServiceChangeWaiter) Conf() *resource.StateChangeConf {
 	return &resource.StateChangeConf{
-		Pending:    []string{aivenPendingState, aivenRebalancingState, aivenServicesStartingState},
-		Target:     []string{aivenTargetState},
-		Refresh:    w.RefreshFunc(),
-		Delay:      10 * time.Second,
-		Timeout:    20 * time.Minute,
-		MinTimeout: 2 * time.Second,
+		Pending:                   []string{aivenPendingState, aivenRebalancingState, aivenServicesStartingState},
+		Target:                    []string{aivenTargetState},
+		Refresh:                   w.RefreshFunc(),
+		Delay:                     10 * time.Second,
+		Timeout:                   20 * time.Minute,
+		MinTimeout:                2 * time.Second,
+		ContinuousTargetOccurence: 3,
 	}
 }
