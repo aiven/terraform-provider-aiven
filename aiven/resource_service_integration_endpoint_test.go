@@ -11,11 +11,10 @@ import (
 )
 
 func TestAccAivenServiceIntegrationEndpoint_basic(t *testing.T) {
-	t.Parallel()
 	resourceName := "aiven_service_integration_endpoint.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAivenServiceIntegraitonEndpointResourceDestroy,
@@ -26,7 +25,7 @@ func TestAccAivenServiceIntegrationEndpoint_basic(t *testing.T) {
 					testAccCheckAivenServiceEndpointIntegrationAttributes("data.aiven_service_integration_endpoint.endpoint"),
 					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "endpoint_name", fmt.Sprintf("test-acc-ie-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "endpoint_type", "datadog"),
+					resource.TestCheckResourceAttr(resourceName, "endpoint_type", "external_elasticsearch_logs"),
 				),
 			},
 		},
@@ -66,15 +65,19 @@ func testAccServiceIntegrationEndpointResource(name string) string {
 		resource "aiven_service_integration_endpoint" "bar" {
 			project = aiven_project.foo.project
 			endpoint_name = "test-acc-ie-%s"
-			endpoint_type = "datadog"
-			datadog_user_config {
-				datadog_api_key = "Jwx4dl20zOfyYsJGvuv2fiV2VZzCgsuK"
+			endpoint_type = "external_elasticsearch_logs"
+
+			external_elasticsearch_logs_user_config {
+				url = "https://user:passwd@logs.example.com/"
+				index_prefix = "test-acc-prefix-%s"
+				index_days_max = 3
+				timeout = 10
 			}
 		}
 
 		resource "aiven_service_integration" "bar" {
 			project = aiven_project.foo.project
-			integration_type = "datadog"
+			integration_type = "external_elasticsearch_logs"
 			source_service_name = aiven_service.bar-pg.service_name
 			destination_endpoint_id = aiven_service_integration_endpoint.bar.id
 		}
@@ -83,7 +86,7 @@ func testAccServiceIntegrationEndpointResource(name string) string {
 			project = aiven_service_integration_endpoint.bar.project
 			endpoint_name = aiven_service_integration_endpoint.bar.endpoint_name
 		}
-		`, name, os.Getenv("AIVEN_CARD_ID"), name, name)
+		`, name, os.Getenv("AIVEN_CARD_ID"), name, name, name)
 }
 
 func testAccCheckAivenServiceIntegraitonEndpointResourceDestroy(s *terraform.State) error {
@@ -124,8 +127,8 @@ func testAccCheckAivenServiceEndpointIntegrationAttributes(n string) resource.Te
 			return fmt.Errorf("expected to get a endpoint_name from Aiven")
 		}
 
-		if a["endpoint_type"] != "datadog" {
-			return fmt.Errorf("expected to get a correct endpoint_type from Aiven")
+		if a["endpoint_type"] == "" {
+			return fmt.Errorf("expected to get an endpoint_type from Aiven")
 		}
 
 		return nil
