@@ -104,6 +104,9 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 }
 
 func TestAccAivenKafkaTopic_100topics(t *testing.T) {
+	if os.Getenv("AIVEN_ACC_LONG") == "" {
+		t.Skip(fmt.Sprintf("Acceptance tests skipped unless env AIVEN_ACC_LONG set"))
+	}
 	t.Parallel()
 
 	resourceName := "aiven_kafka_topic.foo"

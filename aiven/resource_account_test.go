@@ -34,10 +34,12 @@ func sweepAccounts(region string) error {
 
 	for _, a := range r.Accounts {
 		if strings.Contains(a.Name, "test-acc-ac-") {
-			if err := conn.Projects.Delete(a.Name); err != nil {
-				if err.(aiven.Error).Status != 404 {
-					return fmt.Errorf("error destroying account %s during sweep: %s", a.Name, err)
+			if err := conn.Accounts.Delete(a.Id); err != nil {
+				if err.(aiven.Error).Status == 404 {
+					continue
 				}
+
+				return fmt.Errorf("error destroying account %s during sweep: %s", a.Name, err)
 			}
 		}
 	}

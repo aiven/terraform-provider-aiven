@@ -5,23 +5,43 @@ import (
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 	"log"
 	"os"
+	"regexp"
 	"testing"
 )
 
 func TestAccAivenKafkaACL_basic(t *testing.T) {
-	t.Parallel()
-
 	resourceName := "aiven_kafka_acl.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAivenKafkaACLResourceDestroy,
 		Steps: []resource.TestStep{
+			{
+				Config:      testAccKafkaACLWrongProjectResource(rName),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("invalid value for project"),
+			},
+			{
+				Config:      testAccKafkaACLWrongServiceNameResource(rName),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("invalid value for service_name"),
+			},
+			{
+				Config:      testAccKafkaACLWrongPermisionResource(rName),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("expected permission to be one of"),
+			},
+			{
+				Config:      testAccKafkaACLWrongUsernameResource(rName),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("invalid value for username"),
+			},
 			{
 				Config: testAccKafkaACLResource(rName),
 				Check: resource.ComposeTestCheckFunc(
@@ -66,6 +86,53 @@ func testAccCheckAivenKafkaACLAttributes(n string) resource.TestCheckFunc {
 
 		return nil
 	}
+}
+
+func testAccKafkaACLWrongProjectResource(_ string) string {
+	return fmt.Sprintf(`
+		resource "aiven_kafka_acl" "foo" {
+			project = "!./,£$^&*()_"
+			service_name = "test-acc-sr-1"
+			topic = "test-acc-topic-1"
+			username = "user-1"
+			permission = "admin"
+		}
+		`)
+}
+
+func testAccKafkaACLWrongServiceNameResource(_ string) string {
+	return fmt.Sprintf(`
+		resource "aiven_kafka_acl" "foo" {
+			project = "test-acc-pr-1"
+			service_name = "!./,£$^&*()_"
+			topic = "test-acc-topic-1"
+			username = "user-1"
+			permission = "admin"
+		}
+		`)
+}
+
+func testAccKafkaACLWrongPermisionResource(_ string) string {
+	return fmt.Sprintf(`
+		resource "aiven_kafka_acl" "foo" {
+			project = "test-acc-pr-1"
+			service_name = "test-acc-sr-1"
+			topic = "test-acc-topic-1"
+			username = "user-1"
+			permission = "wrong-permission"
+		}
+		`)
+}
+func testAccKafkaACLWrongUsernameResource(_ string) string {
+	return fmt.Sprintf(`
+		resource "aiven_kafka_acl" "foo" {
+			project = "test-acc-pr-1"
+			service_name = "test-acc-sr-1"
+			topic = "test-acc-topic-1"
+			username = "!./,£$^&*()_"
+			permission = "admin"
+		}
+		`)
 }
 
 func testAccKafkaACLResource(name string) string {
@@ -141,4 +208,138 @@ func testAccCheckAivenKafkaACLResourceDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+func Test_copyKafkaACLPropertiesFromAPIResponseToTerraform(t *testing.T) {
+	type args struct {
+		d           *schema.ResourceData
+		acl         *aiven.KafkaACL
+		project     string
+		serviceName string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			"basic",
+			args{
+				d: resourceKafkaACL().Data(&terraform.InstanceState{
+					ID:         "",
+					Attributes: nil,
+					Ephemeral:  terraform.EphemeralState{},
+					Meta:       nil,
+					Tainted:    false,
+				}),
+				acl: &aiven.KafkaACL{
+					ID:         "1",
+					Permission: "admin",
+					Topic:      "test-topic1",
+					Username:   "test-user1",
+				},
+				project:     "test-pr1",
+				serviceName: "test-sr1",
+			},
+			false,
+		},
+		{
+			"missing-project",
+			args{
+				d: testKafkaAclResourceMissingField("project"),
+				acl: &aiven.KafkaACL{
+					ID:         "1",
+					Permission: "admin",
+					Topic:      "test-topic1",
+					Username:   "test-user1",
+				},
+				project:     "test-pr1",
+				serviceName: "test-sr1",
+			},
+			true,
+		},
+		{
+			"missing-service_name",
+			args{
+				d: testKafkaAclResourceMissingField("service_name"),
+				acl: &aiven.KafkaACL{
+					ID:         "1",
+					Permission: "admin",
+					Topic:      "test-topic1",
+					Username:   "test-user1",
+				},
+				project:     "test-pr1",
+				serviceName: "test-sr1",
+			},
+			true,
+		},
+		{
+			"missing-topic",
+			args{
+				d: testKafkaAclResourceMissingField("topic"),
+				acl: &aiven.KafkaACL{
+					ID:         "1",
+					Permission: "admin",
+					Topic:      "test-topic1",
+					Username:   "test-user1",
+				},
+				project:     "test-pr1",
+				serviceName: "test-sr1",
+			},
+			true,
+		},
+		{
+			"missing-permission",
+			args{
+				d: testKafkaAclResourceMissingField("permission"),
+				acl: &aiven.KafkaACL{
+					ID:         "1",
+					Permission: "admin",
+					Topic:      "test-topic1",
+					Username:   "test-user1",
+				},
+				project:     "test-pr1",
+				serviceName: "test-sr1",
+			},
+			true,
+		},
+		{
+			"missing-username",
+			args{
+				d: testKafkaAclResourceMissingField("username"),
+				acl: &aiven.KafkaACL{
+					ID:         "1",
+					Permission: "admin",
+					Topic:      "test-topic1",
+					Username:   "test-user1",
+				},
+				project:     "test-pr1",
+				serviceName: "test-sr1",
+			},
+			true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := copyKafkaACLPropertiesFromAPIResponseToTerraform(tt.args.d, tt.args.acl, tt.args.project, tt.args.serviceName); (err != nil) != tt.wantErr {
+				t.Errorf("copyKafkaACLPropertiesFromAPIResponseToTerraform() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func testKafkaAclResourceMissingField(missing string) *schema.ResourceData {
+	res := schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"project":      aivenKafkaACLSchema["project"],
+			"service_name": aivenKafkaACLSchema["service_name"],
+			"permission":   aivenKafkaACLSchema["permission"],
+			"topic":        aivenKafkaACLSchema["topic"],
+			"username":     aivenKafkaACLSchema["username"],
+		},
+	}
+
+	delete(res.Schema, missing)
+
+	return res.Data(&terraform.InstanceState{})
 }

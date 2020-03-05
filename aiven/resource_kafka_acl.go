@@ -4,6 +4,8 @@ package aiven
 import (
 	"fmt"
 	"github.com/aiven/terraform-provider-aiven/pkg/cache"
+	"github.com/hashicorp/terraform/helper/validation"
+	"regexp"
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
@@ -16,18 +18,23 @@ var aivenKafkaACLSchema = map[string]*schema.Schema{
 		Required:    true,
 		Description: "Project to link the Kafka ACL to",
 		ForceNew:    true,
+		ValidateFunc: validation.StringMatch(regexp.MustCompile("^[a-zA-Z0-9_-]*$"),
+			"project name should be alphanumeric"),
 	},
 	"service_name": {
 		Type:        schema.TypeString,
 		Required:    true,
 		Description: "Service to link the Kafka ACL to",
 		ForceNew:    true,
+		ValidateFunc: validation.StringMatch(regexp.MustCompile("^[a-zA-Z0-9_-]*$"),
+			"service name should be alphanumeric"),
 	},
 	"permission": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Kafka permission to grant (admin, read, readwrite, write)",
-		ForceNew:    true,
+		Type:         schema.TypeString,
+		Required:     true,
+		Description:  "Kafka permission to grant (admin, read, readwrite, write)",
+		ForceNew:     true,
+		ValidateFunc: validation.StringInSlice([]string{"admin", "read", "readwrite", "write"}, false),
 	},
 	"topic": {
 		Type:        schema.TypeString,
@@ -40,6 +47,8 @@ var aivenKafkaACLSchema = map[string]*schema.Schema{
 		Required:    true,
 		Description: "Username pattern for the ACL entry",
 		ForceNew:    true,
+		ValidateFunc: validation.StringMatch(regexp.MustCompile("^[a-zA-Z0-9_-]*$"),
+			"username should be alphanumeric"),
 	},
 }
 
