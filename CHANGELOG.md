@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.2.2] - 2020-03-10
+- Grafana service waits until Grafana is reachable publicly (only works in case `public_access.grafana`
+ configuration options is set to `true` and IP filter is set to default `0.0.0.0/0`) during resource creation or update.
+- Project VPC resource graceful deletion.
+
 ## [1.2.1] - 2020-03-02
 Terraform client-side termination protection for resources: 
 - aiven_kafka_topic
