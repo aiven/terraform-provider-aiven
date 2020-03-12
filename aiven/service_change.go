@@ -66,6 +66,16 @@ func grafanaReady(service *aiven.Service) bool {
 		return true
 	}
 
+	// if IP filter is anything but 0.0.0.0/0 skip Grafana service availability checks
+	ipFilters, ok := service.UserConfig["ip_filter"]
+	if ok {
+		if len(ipFilters.([]interface{})) > 1 || ipFilters.([]interface{})[0] != "0.0.0.0/0" {
+			log.Printf("[DEBUG] grafana serivce has `%+v` ip filters, and avaiability checks will be skiped", ipFilters)
+
+			return true
+		}
+	}
+
 	var publicGrafana string
 
 	// constructing grafana public address if available
