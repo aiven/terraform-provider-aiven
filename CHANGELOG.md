@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.2.3] - 2020-03-30
+Add backwards compatibility for old TF state files created before Kafka `topic` field was renamed to `topic_name`.
+
 ## [1.2.2] - 2020-03-10
 - Grafana service waits until Grafana is reachable publicly (only works in case `public_access.grafana`
  configuration options is set to `true` and IP filter is set to default `0.0.0.0/0`) during resource creation or update.
