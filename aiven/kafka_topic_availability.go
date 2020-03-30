@@ -22,11 +22,27 @@ type KafkaTopicAvailabilityWaiter struct {
 // RefreshFunc will call the Aiven client and refresh it's state.
 func (w *KafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
+		if w.Project == "" {
+			return nil, "WRONG_INPUT", fmt.Errorf("project name of the kafka topic resource cannot be empty `%s`", w.Project)
+		}
+
+		if w.ServiceName == "" {
+			return nil, "WRONG_INPUT", fmt.Errorf("service name of the kafka topic resource cannot be empty `%s`", w.ServiceName)
+		}
+
+		if w.TopicName == "" {
+			return nil, "WRONG_INPUT", fmt.Errorf("topic name of the kafka topic resource cannot be empty `%s`", w.TopicName)
+		}
+
 		topicCache := cache.GetTopicCache()
 		topic, ok := topicCache.LoadByTopicName(w.Project, w.ServiceName, w.TopicName)
 
 		if !ok {
 			list, err := w.Client.KafkaTopics.List(w.Project, w.ServiceName)
+
+			for _, item := range list {
+				log.Printf("[TRACE] got a topic `%s` from aiven API with the status `%s`", item.TopicName, item.State)
+			}
 
 			if err != nil {
 				aivenError, ok := err.(aiven.Error)
@@ -47,14 +63,14 @@ func (w *KafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 
 			topic, ok = topicCache.LoadByTopicName(w.Project, w.ServiceName, w.TopicName)
 			if !ok {
-				return nil, "CONFIGURING", fmt.Errorf("topic %s for project %s and service %s not found",
+				return nil, "CONFIGURING", fmt.Errorf("topic `%s` for project `%s` and service `%s` not found",
 					w.TopicName,
 					w.Project,
 					w.ServiceName)
 			}
 		}
 
-		log.Printf("[DEBUG] Got %s state while waiting for topic to be up.", topic.State)
+		log.Printf("[DEBUG] Got `%s` state while waiting for topic `%s` to be up.", topic.State, w.TopicName)
 
 		return topic, topic.State, nil
 	}

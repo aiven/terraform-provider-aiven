@@ -61,6 +61,8 @@ func (t *TopicCache) LoadByTopicName(projectName, serviceName, topicName string)
 
 	result, ok := topics[topicName]
 
+	log.Printf("[TRACE] retrienve from a topic cache `%+#v` for a topic name `%s`", result, topicName)
+
 	return result, ok
 }
 
