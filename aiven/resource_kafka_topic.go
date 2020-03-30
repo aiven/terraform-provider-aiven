@@ -122,7 +122,7 @@ func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceKafkaTopicRead(d *schema.ResourceData, m interface{}) error {
-	project, serviceName, _ := splitResourceID3(d.Id())
+	project, serviceName, topicName := splitResourceID3(d.Id())
 	topic, err := getTopic(d, m)
 	if err != nil {
 		return err
@@ -134,7 +134,7 @@ func resourceKafkaTopicRead(d *schema.ResourceData, m interface{}) error {
 	if err := d.Set("service_name", serviceName); err != nil {
 		return err
 	}
-	if err := d.Set("topic_name", topic.TopicName); err != nil {
+	if err := d.Set("topic_name", topicName); err != nil {
 		return err
 	}
 	if err := d.Set("partitions", len(topic.Partitions)); err != nil {
@@ -163,11 +163,13 @@ func resourceKafkaTopicRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func getTopic(d *schema.ResourceData, m interface{}) (aiven.KafkaTopic, error) {
+	project, serviceName, topicName := splitResourceID3(d.Id())
+
 	w := &KafkaTopicAvailabilityWaiter{
 		Client:      m.(*aiven.Client),
-		Project:     d.Get("project").(string),
-		ServiceName: d.Get("service_name").(string),
-		TopicName:   d.Get("topic_name").(string),
+		Project:     project,
+		ServiceName: serviceName,
+		TopicName:   topicName,
 	}
 
 	topic, err := w.Conf().WaitForState()
