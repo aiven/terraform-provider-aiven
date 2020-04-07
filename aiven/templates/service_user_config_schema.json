@@ -998,17 +998,6 @@
   "kafka": {
     "additionalProperties": false,
     "properties": {
-      "custom_domain": {
-        "default": null,
-        "description": "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
-        "example": "grafana.example.org",
-        "maxLength": 255,
-        "title": "Custom domain",
-        "type": [
-          "string",
-          "null"
-        ]
-      },
       "ip_filter": {
         "default": [
           "0.0.0.0/0"

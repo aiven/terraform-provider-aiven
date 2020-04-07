@@ -259,7 +259,6 @@ func TestConvertAPIUserConfigToTerraformCompatibleFormat(t *testing.T) {
 				configType: "service",
 				entryType:  "kafka",
 				userConfig: map[string]interface{}{
-					"custom_domain": nil,
 					"ip_filter": []interface{}{
 						"0.0.0.0/0",
 					},
@@ -280,7 +279,6 @@ func TestConvertAPIUserConfigToTerraformCompatibleFormat(t *testing.T) {
 			},
 			[]map[string]interface{}{
 				{
-					"custom_domain": "<<value not set>>",
 					"ip_filter": []interface{}{
 						"0.0.0.0/0",
 					},
@@ -359,7 +357,6 @@ func Test_convertTerraformUserConfigToAPICompatibleFormat1(t *testing.T) {
 				serviceType: "kafka",
 				newResource: false,
 				userConfig: map[string]interface{}{
-					"custom_domain": "<<value not set>>",
 					"ip_filter": []interface{}{
 						"0.0.0.0/0",
 					},
