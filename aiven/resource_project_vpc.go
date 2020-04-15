@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-var aivenProjectVCPSchema = map[string]*schema.Schema{
+var aivenProjectVPCSchema = map[string]*schema.Schema{
 	"project": {
 		Description: "The project the VPC belongs to",
 		ForceNew:    true,
@@ -47,7 +47,7 @@ func resourceProjectVPC() *schema.Resource {
 			State: resourceProjectVPCState,
 		},
 
-		Schema: aivenProjectVCPSchema,
+		Schema: aivenProjectVPCSchema,
 	}
 }
 

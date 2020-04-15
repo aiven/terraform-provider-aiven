@@ -11,7 +11,7 @@ import (
 func datasourceProjectVPC() *schema.Resource {
 	return &schema.Resource{
 		Read:   datasourceProjectVPCRead,
-		Schema: resourceSchemaAsDatasourceSchema(aivenProjectVCPSchema, "project", "cloud_name"),
+		Schema: resourceSchemaAsDatasourceSchema(aivenProjectVPCSchema, "project", "cloud_name"),
 	}
 }
 

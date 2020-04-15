@@ -199,10 +199,10 @@ func Test_copyVPCPropertiesFromAPIResponseToTerraform(t *testing.T) {
 func testProjectVPCResourceMissingField(missing string) *schema.ResourceData {
 	res := schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"project":      aivenProjectVCPSchema["project"],
-			"cloud_name":   aivenProjectVCPSchema["cloud_name"],
-			"network_cidr": aivenProjectVCPSchema["network_cidr"],
-			"state":        aivenProjectVCPSchema["state"],
+			"project":      aivenProjectVPCSchema["project"],
+			"cloud_name":   aivenProjectVPCSchema["cloud_name"],
+			"network_cidr": aivenProjectVPCSchema["network_cidr"],
+			"state":        aivenProjectVPCSchema["state"],
 		},
 	}
 
