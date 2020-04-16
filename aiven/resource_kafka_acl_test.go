@@ -89,7 +89,7 @@ func testAccCheckAivenKafkaACLAttributes(n string) resource.TestCheckFunc {
 }
 
 func testAccKafkaACLWrongProjectResource(_ string) string {
-	return fmt.Sprintf(`
+	return `
 		resource "aiven_kafka_acl" "foo" {
 			project = "!./,£$^&*()_"
 			service_name = "test-acc-sr-1"
@@ -97,11 +97,11 @@ func testAccKafkaACLWrongProjectResource(_ string) string {
 			username = "user-1"
 			permission = "admin"
 		}
-		`)
+		`
 }
 
 func testAccKafkaACLWrongServiceNameResource(_ string) string {
-	return fmt.Sprintf(`
+	return `
 		resource "aiven_kafka_acl" "foo" {
 			project = "test-acc-pr-1"
 			service_name = "!./,£$^&*()_"
@@ -109,11 +109,11 @@ func testAccKafkaACLWrongServiceNameResource(_ string) string {
 			username = "user-1"
 			permission = "admin"
 		}
-		`)
+		`
 }
 
 func testAccKafkaACLWrongPermisionResource(_ string) string {
-	return fmt.Sprintf(`
+	return `
 		resource "aiven_kafka_acl" "foo" {
 			project = "test-acc-pr-1"
 			service_name = "test-acc-sr-1"
@@ -121,10 +121,10 @@ func testAccKafkaACLWrongPermisionResource(_ string) string {
 			username = "user-1"
 			permission = "wrong-permission"
 		}
-		`)
+		`
 }
 func testAccKafkaACLWrongUsernameResource(_ string) string {
-	return fmt.Sprintf(`
+	return `
 		resource "aiven_kafka_acl" "foo" {
 			project = "test-acc-pr-1"
 			service_name = "test-acc-sr-1"
@@ -132,7 +132,7 @@ func testAccKafkaACLWrongUsernameResource(_ string) string {
 			username = "!./,£$^&*()_"
 			permission = "admin"
 		}
-		`)
+		`
 }
 
 func testAccKafkaACLResource(name string) string {
