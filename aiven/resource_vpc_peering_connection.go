@@ -3,6 +3,7 @@ package aiven
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform/helper/validation"
 	"log"
 	"strings"
 	"time"
@@ -54,6 +55,14 @@ var aivenVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		Computed:    true,
 		Description: "Cloud provider identifier for the peering connection if available",
 		Type:        schema.TypeString,
+	},
+	"client_create_wait_timeout": {
+		Optional:     true,
+		Description:  "Custom TF client timeout for a waiter in seconds",
+		Type:         schema.TypeInt,
+		ForceNew:     true,
+		ValidateFunc: validation.IntAtLeast(2),
+		Default:      2 * 60, // two minutes in seconds
 	},
 }
 
@@ -108,7 +117,9 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 		PeerVPC:          pc.PeerVPC,
 		PeerRegion:       pc.PeerRegion,
 	}
-	res, err := w.Conf().WaitForState()
+
+	clientTimeout := d.Get("client_create_wait_timeout").(int)
+	res, err := w.Conf(clientTimeout).WaitForState()
 	if err != nil {
 		return err
 	}
@@ -244,8 +255,8 @@ func (w *VPCPeeringBuildWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 // Conf sets up the configuration to refresh.
-func (w *VPCPeeringBuildWaiter) Conf() *resource.StateChangeConf {
-	state := &resource.StateChangeConf{
+func (w *VPCPeeringBuildWaiter) Conf(timeout int) *resource.StateChangeConf {
+	return &resource.StateChangeConf{
 		Pending: []string{"APPROVED"},
 		Target: []string{
 			"ACTIVE",
@@ -256,10 +267,9 @@ func (w *VPCPeeringBuildWaiter) Conf() *resource.StateChangeConf {
 			"DELETED",
 			"DELETED_BY_PEER",
 		},
-		Refresh: w.RefreshFunc(),
+		Refresh:    w.RefreshFunc(),
+		Delay:      10 * time.Second,
+		Timeout:    time.Duration(timeout) * time.Second,
+		MinTimeout: 2 * time.Second,
 	}
-	state.Delay = 10 * time.Second
-	state.Timeout = 2 * time.Minute
-	state.MinTimeout = 2 * time.Second
-	return state
 }

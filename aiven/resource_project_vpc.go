@@ -6,6 +6,7 @@ import (
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	"log"
 	"strings"
 	"time"
@@ -34,6 +35,14 @@ var aivenProjectVPCSchema = map[string]*schema.Schema{
 		Computed:    true,
 		Description: "State of the VPC (APPROVED, ACTIVE, DELETING, DELETED)",
 		Type:        schema.TypeString,
+	},
+	"client_create_wait_timeout": {
+		Optional:     true,
+		Description:  "Custom TF Client timeout for a waiter in seconds",
+		Type:         schema.TypeInt,
+		ValidateFunc: validation.IntAtLeast(2),
+		ForceNew:     true,
+		Default:      4 * 60, // 4 minutes in seconds
 	},
 }
 
@@ -74,7 +83,8 @@ func resourceProjectVPCCreate(d *schema.ResourceData, m interface{}) error {
 		VPCID:   vpc.ProjectVPCID,
 	}
 
-	_, err = waiter.Conf().WaitForState()
+	clientTimeout := d.Get("client_create_wait_timeout").(int)
+	_, err = waiter.Conf(clientTimeout).WaitForState()
 	if err != nil {
 		return fmt.Errorf("error waiting for Aiven project VPC to be ACTIVE: %s", err)
 	}
@@ -177,13 +187,13 @@ func (w *ProjectVPCActiveWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 // Conf sets up the configuration to refresh.
-func (w *ProjectVPCActiveWaiter) Conf() *resource.StateChangeConf {
+func (w *ProjectVPCActiveWaiter) Conf(timeout int) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{"APPROVED", "DELETING", "DELETED"},
 		Target:     []string{"ACTIVE"},
 		Refresh:    w.RefreshFunc(),
 		Delay:      10 * time.Second,
-		Timeout:    4 * time.Minute,
+		Timeout:    time.Duration(timeout) * time.Second,
 		MinTimeout: 2 * time.Second,
 	}
 }
