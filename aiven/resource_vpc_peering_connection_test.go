@@ -11,11 +11,9 @@ import (
 )
 
 func TestAccAivenVPCPeeringConnection_basic(t *testing.T) {
-	t.Parallel()
-
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -23,6 +21,12 @@ func TestAccAivenVPCPeeringConnection_basic(t *testing.T) {
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
 				Config:             testAccVPCPeeringConnectionResource(rName),
+				Check:              resource.ComposeTestCheckFunc(),
+			},
+			{
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				Config:             testAccVPCPeeringConnectionCustomTimeoutResource(rName),
 				Check:              resource.ComposeTestCheckFunc(),
 			},
 		},
@@ -46,6 +50,28 @@ func testAccVPCPeeringConnectionResource(name string) string {
 			peer_cloud_account = "<PEER_ACCOUNT_ID>"
 			peer_vpc = "google-project1"
 			peer_region = "google-europe-west1"
+		}
+		`, name)
+}
+
+func testAccVPCPeeringConnectionCustomTimeoutResource(name string) string {
+	return fmt.Sprintf(`
+		resource "aiven_project" "foo" {
+			project = "test-acc-pr-%s"
+		}
+
+		resource "aiven_project_vpc" "bar" {
+			project = aiven_project.foo.project
+			cloud_name = "google-europe-west1"
+			network_cidr = "192.168.0.0/24"
+		}
+
+		resource "aiven_vpc_peering_connection" "foo" {
+			vpc_id = aiven_project_vpc.bar.id
+			peer_cloud_account = "<PEER_ACCOUNT_ID>"
+			peer_vpc = "google-project1"
+			peer_region = "google-europe-west1"
+			client_create_wait_timeout = 60
 		}
 		`, name)
 }

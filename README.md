@@ -721,6 +721,8 @@ in. See the Service resource for additional information.
 
 `network_cidr` defines the network CIDR of the VPC.
 
+`client_create_wait_timeout` a custom wait timeout defined in seconds.
+
 Computed property `state` tells the current state of the VPC. This property cannot be
 set, only read.
 
@@ -746,6 +748,8 @@ peered with.
 `peer_vpc` defines the identifier or name of the remote VPC.
 
 `peer_region` defines the region of the remote VPC if it is not in the same region as Aiven VPC.
+
+`client_create_wait_timeout` a custom wait timeout defined in seconds.
 
 `state` is the state of the peering connection. This property is computed by Aiven 
 therefore cannot be set, only read. Where state can be one of: `APPROVED`, 
