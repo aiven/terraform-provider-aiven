@@ -71,7 +71,10 @@ func testAccVPCPeeringConnectionCustomTimeoutResource(name string) string {
 			peer_cloud_account = "<PEER_ACCOUNT_ID>"
 			peer_vpc = "google-project1"
 			peer_region = "google-europe-west1"
-			client_create_wait_timeout = 60
+			
+			client_timeout {
+				create = "5m"
+			}
 		}
 		`, name)
 }

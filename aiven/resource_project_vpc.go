@@ -6,7 +6,6 @@ import (
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/helper/validation"
 	"log"
 	"strings"
 	"time"
@@ -36,13 +35,30 @@ var aivenProjectVPCSchema = map[string]*schema.Schema{
 		Description: "State of the VPC (APPROVED, ACTIVE, DELETING, DELETED)",
 		Type:        schema.TypeString,
 	},
-	"client_create_wait_timeout": {
-		Optional:     true,
-		Description:  "Custom TF Client timeout for a waiter in seconds",
-		Type:         schema.TypeInt,
-		ValidateFunc: validation.IntAtLeast(2),
-		ForceNew:     true,
-		Default:      4 * 60, // 4 minutes in seconds
+	"client_timeout": {
+		Type:        schema.TypeSet,
+		MaxItems:    1,
+		Description: "Custom Terraform Client timeouts",
+		Optional:    true,
+		ForceNew:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"create": {
+					Type:         schema.TypeString,
+					Description:  "Creation timeout",
+					Optional:     true,
+					Default:      "4m",
+					ValidateFunc: validateDurationString,
+				},
+				"delete": {
+					Type:         schema.TypeString,
+					Description:  "Deletion timeout",
+					Optional:     true,
+					Default:      "4m",
+					ValidateFunc: validateDurationString,
+				},
+			},
+		},
 	},
 }
 
@@ -75,6 +91,18 @@ func resourceProjectVPCCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
+	// Get creation timeout
+	var timeout = 4 * time.Minute
+	for _, timeouts := range d.Get("client_timeout").(*schema.Set).List() {
+		log.Printf("[DEBUG] client_timeout %+v", timeouts)
+
+		t := timeouts.(map[string]interface{})
+		timeout, err = time.ParseDuration(t["create"].(string))
+		if err != nil {
+			return err
+		}
+	}
+
 	// Make sure the VPC is active before returning it because service creation, moving
 	// service to VPC, and some other operations will fail unless the VPC is active
 	waiter := ProjectVPCActiveWaiter{
@@ -83,8 +111,7 @@ func resourceProjectVPCCreate(d *schema.ResourceData, m interface{}) error {
 		VPCID:   vpc.ProjectVPCID,
 	}
 
-	clientTimeout := d.Get("client_create_wait_timeout").(int)
-	_, err = waiter.Conf(clientTimeout).WaitForState()
+	_, err = waiter.Conf(timeout).WaitForState()
 	if err != nil {
 		return fmt.Errorf("error waiting for Aiven project VPC to be ACTIVE: %s", err)
 	}
@@ -111,13 +138,27 @@ func resourceProjectVPCDelete(d *schema.ResourceData, m interface{}) error {
 
 	projectName, vpcID := splitResourceID2(d.Id())
 
+	// Get deletion timeout
+	var timeout = 4 * time.Minute
+	for _, timeouts := range d.Get("client_timeout").(*schema.Set).List() {
+		var err error
+		log.Printf("[DEBUG] client_timeout %+v", timeouts)
+
+		t := timeouts.(map[string]interface{})
+		timeout, err = time.ParseDuration(t["delete"].(string))
+
+		if err != nil {
+			return err
+		}
+	}
+
 	waiter := ProjectVPCDeleteWaiter{
 		Client:  client,
 		Project: projectName,
 		VPCID:   vpcID,
 	}
 
-	_, err := waiter.Conf().WaitForState()
+	_, err := waiter.Conf(timeout).WaitForState()
 	if err != nil {
 		return fmt.Errorf("error waiting for Aiven project VPC to be DELETED: %s", err)
 	}
@@ -187,13 +228,15 @@ func (w *ProjectVPCActiveWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 // Conf sets up the configuration to refresh.
-func (w *ProjectVPCActiveWaiter) Conf(timeout int) *resource.StateChangeConf {
+func (w *ProjectVPCActiveWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
+	log.Printf("[DEBUG] Active waiter timeout %.0f minutes", timeout.Minutes())
+
 	return &resource.StateChangeConf{
 		Pending:    []string{"APPROVED", "DELETING", "DELETED"},
 		Target:     []string{"ACTIVE"},
 		Refresh:    w.RefreshFunc(),
 		Delay:      10 * time.Second,
-		Timeout:    time.Duration(timeout) * time.Second,
+		Timeout:    timeout,
 		MinTimeout: 2 * time.Second,
 	}
 }
@@ -236,13 +279,15 @@ func (w *ProjectVPCDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 // Conf sets up the configuration to refresh.
-func (w *ProjectVPCDeleteWaiter) Conf() *resource.StateChangeConf {
+func (w *ProjectVPCDeleteWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
+	log.Printf("[DEBUG] Delete waiter timeout %.0f minutes", timeout.Minutes())
+
 	return &resource.StateChangeConf{
 		Pending:    []string{"APPROVED", "DELETING", "ACTIVE"},
 		Target:     []string{"DELETED"},
 		Refresh:    w.RefreshFunc(),
 		Delay:      10 * time.Second,
-		Timeout:    4 * time.Minute,
+		Timeout:    timeout,
 		MinTimeout: 2 * time.Second,
 	}
 }
