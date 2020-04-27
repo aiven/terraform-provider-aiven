@@ -3,9 +3,12 @@
 package aiven
 
 import (
+	"fmt"
 	"github.com/aiven/terraform-provider-aiven/pkg/cache"
+	"log"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -177,4 +180,15 @@ func ipFilterArrayDiffSuppressFunc(k, old, new string, d *schema.ResourceData) b
 
 func ipFilterValueDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	return old == "0.0.0.0/0" && new == "" && strings.HasSuffix(k, ".ip_filter.0")
+}
+
+// validateDurationString is a ValidateFunc that ensures a string parses
+// as time.Duration format
+func validateDurationString(v interface{}, k string) (ws []string, errors []error) {
+	if _, err := time.ParseDuration(v.(string)); err != nil {
+		log.Printf("[DEBUG] invalid duration: %s", err)
+		errors = append(errors, fmt.Errorf("%q: invalid duration", k))
+	}
+
+	return
 }

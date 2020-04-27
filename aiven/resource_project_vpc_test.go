@@ -72,12 +72,16 @@ func testAccProjectVPCCustomTimeoutResource(name string) string {
 			project = aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			network_cidr = "192.168.0.0/24"
+
+			client_timeout {
+				create = "10m"
+				delete = "5m"
+			}
 		}
 
 		data "aiven_project_vpc" "vpc" {
 			project = aiven_project_vpc.bar.project
 			cloud_name = aiven_project_vpc.bar.cloud_name
-			client_create_wait_timeout = 80
 		}
 		`, name)
 }
