@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/schema"
-	"log"
 	"strings"
 	"time"
 )
@@ -73,31 +72,10 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 			topic from being deleted. It is recommended to enable this for any production Kafka 
 			topic containing critical data.`,
 	},
-	"client_timeout": {
-		Type:        schema.TypeSet,
-		MaxItems:    1,
-		Description: "Custom Terraform Client timeouts",
-		Optional:    true,
-		ForceNew:    true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"create": {
-					Type:         schema.TypeString,
-					Description:  "Creation timeout",
-					Optional:     true,
-					Default:      "1m",
-					ValidateFunc: validateDurationString,
-				},
-				"read": {
-					Type:         schema.TypeString,
-					Description:  "Availability timeout",
-					Optional:     true,
-					Default:      "4m",
-					ValidateFunc: validateDurationString,
-				},
-			},
-		},
-	},
+	"client_timeout": generateClientTimeoutsSchema(map[string]time.Duration{
+		"create": 1 * time.Minute,
+		"read":   4 * time.Minute,
+	}),
 }
 
 func resourceKafkaTopic() *schema.Resource {
@@ -140,16 +118,9 @@ func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	// Get creation timeout
-	var timeout = 1 * time.Minute
-	var err error
-	for _, timeouts := range d.Get("client_timeout").(*schema.Set).List() {
-		log.Printf("[DEBUG] Kafka Topic client_timeout %+v", timeouts)
-
-		t := timeouts.(map[string]interface{})
-		timeout, err = time.ParseDuration(t["create"].(string))
-		if err != nil {
-			return err
-		}
+	timeout, err := getTimeoutHelper(d, "create", 1*time.Minute)
+	if err != nil {
+		return err
 	}
 
 	_, err = w.Conf(timeout).WaitForState()
@@ -214,16 +185,9 @@ func getTopic(d *schema.ResourceData, m interface{}) (aiven.KafkaTopic, error) {
 	}
 
 	// Get availability timeout
-	var timeout = 4 * time.Minute
-	var err error
-	for _, timeouts := range d.Get("client_timeout").(*schema.Set).List() {
-		log.Printf("[DEBUG] Kafka Topic client_timeout %+v", timeouts)
-
-		t := timeouts.(map[string]interface{})
-		timeout, err = time.ParseDuration(t["read"].(string))
-		if err != nil {
-			return aiven.KafkaTopic{}, err
-		}
+	timeout, err := getTimeoutHelper(d, "read", 4*time.Minute)
+	if err != nil {
+		return aiven.KafkaTopic{}, err
 	}
 
 	topic, err := w.Conf(timeout).WaitForState()
