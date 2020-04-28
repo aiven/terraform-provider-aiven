@@ -45,13 +45,15 @@ func (w *KafkaTopicCreateWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 // Conf sets up the configuration to refresh.
-func (w *KafkaTopicCreateWaiter) Conf() *resource.StateChangeConf {
+func (w *KafkaTopicCreateWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
+	log.Printf("[DEBUG] Create waiter timeout %.0f minutes", timeout.Minutes())
+
 	return &resource.StateChangeConf{
 		Pending:    []string{"CREATING"},
 		Target:     []string{"CREATED"},
 		Refresh:    w.RefreshFunc(),
 		Delay:      10 * time.Second,
-		Timeout:    1 * time.Minute,
+		Timeout:    timeout,
 		MinTimeout: 2 * time.Second,
 	}
 }
