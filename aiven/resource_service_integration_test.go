@@ -11,11 +11,10 @@ import (
 )
 
 func TestAccAivenServiceIntegration_basic(t *testing.T) {
-	t.Parallel()
 	resourceName := "aiven_service_integration.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAivenServiceIntegraitonResourceDestroy,
@@ -28,6 +27,11 @@ func TestAccAivenServiceIntegration_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-pg-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-influxdb-%s", rName)),
 				),
+			},
+			{
+				Config:             testAccServiceIntegrationMirrorMakerResource(rName),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -86,6 +90,107 @@ func testAccServiceIntegrationResource(name string) string {
 			destination_service_name = aiven_service.bar-influxdb.service_name
 		}
 		`, name, os.Getenv("AIVEN_CARD_ID"), name, name)
+}
+
+func testAccServiceIntegrationMirrorMakerResource(name string) string {
+	return fmt.Sprintf(`
+		resource "aiven_project" "foo" {
+			project = "test-acc-pr-%s"
+			card_id="%s"	
+		}
+		
+		resource "aiven_service" "source" {
+			project = aiven_project.foo.project
+			cloud_name = "google-europe-west1"
+			plan = "business-4"
+			service_name = "test-acc-sr-source-%s"
+			service_type = "kafka"
+			maintenance_window_dow = "monday"
+			maintenance_window_time = "10:00:00"
+			
+			kafka_user_config {
+				kafka_version = "2.4"
+				kafka {
+				  group_max_session_timeout_ms = 70000
+				  log_retention_bytes = 1000000000
+				}
+			}
+		}
+		
+		resource "aiven_kafka_topic" "source" {
+			project = aiven_project.foo.project
+			service_name = aiven_service.source.service_name
+			topic_name = "test-acc-topic-a-%s"
+			partitions = 3
+			replication = 2
+		}
+
+		resource "aiven_service" "target" {
+			project = aiven_project.foo.project
+			cloud_name = "google-europe-west1"
+			plan = "business-4"
+			service_name = "test-acc-sr-target-%s"
+			service_type = "kafka"
+			maintenance_window_dow = "monday"
+			maintenance_window_time = "10:00:00"
+			
+			kafka_user_config {
+				kafka_version = "2.4"
+				kafka {
+				  group_max_session_timeout_ms = 70000
+				  log_retention_bytes = 1000000000
+				}
+			}
+		}
+		
+		resource "aiven_kafka_topic" "target" {
+			project = aiven_project.foo.project
+			service_name = aiven_service.target.service_name
+			topic_name = "test-acc-topic-b-%s"
+			partitions = 3
+			replication = 2
+		}
+
+		resource "aiven_service" "mm" {
+			project = aiven_project.foo.project
+			cloud_name = "google-europe-west1"
+			plan = "startup-4"
+			service_name = "test-acc-sr-mm-%s"
+			service_type = "kafka_mirrormaker"
+			
+			kafka_mirrormaker_user_config {
+				ip_filter = ["0.0.0.0/0"]
+
+				kafka_mirrormaker {
+					refresh_groups_interval_seconds = 600
+					refresh_topics_enabled = true
+					refresh_topics_interval_seconds = 600
+				}
+			}
+		}
+
+		resource "aiven_service_integration" "bar" {
+			project = aiven_project.foo.project
+			integration_type = "kafka_mirrormaker"
+			source_service_name = aiven_service.source.service_name
+			destination_service_name = aiven_service.mm.service_name
+	
+			kafka_mirrormaker_user_config {
+				cluster_alias = "source"
+			}
+		}
+
+		resource "aiven_service_integration" "i2" {
+			project = aiven_project.foo.project
+			integration_type = "kafka_mirrormaker"
+			source_service_name = aiven_service.target.service_name
+			destination_service_name = aiven_service.mm.service_name
+	
+			kafka_mirrormaker_user_config {
+				cluster_alias = "target"
+			}
+		}
+		`, name, os.Getenv("AIVEN_CARD_ID"), name, name, name, name, name)
 }
 
 func testAccCheckAivenServiceIntegraitonResourceDestroy(s *terraform.State) error {
