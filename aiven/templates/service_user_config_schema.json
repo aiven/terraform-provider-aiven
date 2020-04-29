@@ -13,7 +13,7 @@
           "title": "CIDR address block",
           "type": "string"
         },
-        "maxItems": 256,
+        "maxItems": 1024,
         "title": "IP filter",
         "type": "array"
       },
@@ -106,6 +106,22 @@
             "maximum": 2147483647,
             "minimum": 1,
             "title": "http.max_content_length",
+            "type": "integer"
+          },
+          "http_max_header_size": {
+            "description": "The max size of allowed headers, in bytes",
+            "example": 8192,
+            "maximum": 262144,
+            "minimum": 1024,
+            "title": "http.max_header_size",
+            "type": "integer"
+          },
+          "http_max_initial_line_length": {
+            "description": "The max length of an HTTP URL, in bytes",
+            "example": 4096,
+            "maximum": 65536,
+            "minimum": 1024,
+            "title": "http.max_initial_line_length",
             "type": "integer"
           },
           "indices_fielddata_cache_size": {
@@ -303,7 +319,7 @@
           "title": "CIDR address block",
           "type": "string"
         },
-        "maxItems": 256,
+        "maxItems": 1024,
         "title": "IP filter",
         "type": "array"
       },
@@ -437,6 +453,11 @@
       "allow_embedding": {
         "example": false,
         "title": "Allow embedding Grafana dashboards with iframe/frame/object/embed tags. Disabled by default to limit impact of clickjacking",
+        "type": "boolean"
+      },
+      "auth_basic_enabled": {
+        "example": true,
+        "title": "Enable or disable basic authentication form, used by Grafana built-in login",
         "type": "boolean"
       },
       "auth_generic_oauth": {
@@ -807,7 +828,7 @@
           "title": "CIDR address block",
           "type": "string"
         },
-        "maxItems": 256,
+        "maxItems": 1024,
         "title": "IP filter",
         "type": "array"
       },
@@ -953,7 +974,7 @@
           "title": "CIDR address block",
           "type": "string"
         },
-        "maxItems": 256,
+        "maxItems": 1024,
         "title": "IP filter",
         "type": "array"
       },
@@ -1020,7 +1041,7 @@
           "title": "CIDR address block",
           "type": "string"
         },
-        "maxItems": 256,
+        "maxItems": 1024,
         "title": "IP filter",
         "type": "array"
       },
@@ -1416,7 +1437,7 @@
           "title": "CIDR address block",
           "type": "string"
         },
-        "maxItems": 256,
+        "maxItems": 1024,
         "title": "IP filter",
         "type": "array"
       },
@@ -1489,6 +1510,62 @@
     },
     "type": "object"
   },
+  "kafka_mirrormaker": {
+    "additionalProperties": false,
+    "properties": {
+      "ip_filter": {
+        "default": [
+          "0.0.0.0/0"
+        ],
+        "description": "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+        "items": {
+          "example": "10.20.0.0/16",
+          "maxLength": 18,
+          "title": "CIDR address block",
+          "type": "string"
+        },
+        "maxItems": 1024,
+        "title": "IP filter",
+        "type": "array"
+      },
+      "kafka_mirrormaker": {
+        "additionalProperties": false,
+        "properties": {
+          "refresh_groups_enabled": {
+            "description": "Whether to periodically check for new consumer groups. Defaults to 'true'.",
+            "example": "true",
+            "title": "Refresh consumer groups",
+            "type": "boolean"
+          },
+          "refresh_groups_interval_seconds": {
+            "description": "Frequency of consumer group refresh in seconds. Defaults to 600 seconds (10 minutes).",
+            "example": 600,
+            "maximum": 9223372036854776000,
+            "minimum": 1,
+            "title": "Frequency of group refresh",
+            "type": "integer"
+          },
+          "refresh_topics_enabled": {
+            "description": "Whether to periodically check for new topics and partitions. Defaults to 'true'.",
+            "example": "true",
+            "title": "Refresh topics and partitions",
+            "type": "boolean"
+          },
+          "refresh_topics_interval_seconds": {
+            "description": "Frequency of topic and partitions refresh in seconds. Defaults to 600 seconds (10 minutes).",
+            "example": 600,
+            "maximum": 9223372036854776000,
+            "minimum": 1,
+            "title": "Frequency of topic and partitions refresh",
+            "type": "integer"
+          }
+        },
+        "title": "Kafka MirrorMaker configuration values",
+        "type": "object"
+      }
+    },
+    "type": "object"
+  },
   "mysql": {
     "additionalProperties": false,
     "properties": {
@@ -1552,7 +1629,7 @@
           "title": "CIDR address block",
           "type": "string"
         },
-        "maxItems": 256,
+        "maxItems": 1024,
         "title": "IP filter",
         "type": "array"
       },
@@ -1568,13 +1645,12 @@
             "type": "integer"
           },
           "default_time_zone": {
-            "description": "Default server time zone as an offset from UTC, from -12:00 to +12:00. You can also set this to 'SYSTEM' to use the MySQL server default.",
+            "description": "Default server time zone as an offset from UTC (from -12:00 to +12:00), a time zone name, or 'SYSTEM' to use the MySQL server default.",
             "example": "+03:00",
-            "maxLength": 6,
-            "pattern": "^(SYSTEM|[+-](0?[0-9]|1[0-2]):[0-9][0-9])$",
+            "maxLength": 100,
+            "minLength": 2,
             "title": "default_time_zone",
-            "type": "string",
-            "user_error": "Must be SYSTEM or numeric timezone information"
+            "type": "string"
           },
           "group_concat_max_len": {
             "description": "The maximum permitted result length in bytes for the GROUP_CONCAT() function.",
@@ -1619,6 +1695,14 @@
             "title": "innodb_lock_wait_timeout",
             "type": "integer"
           },
+          "innodb_log_buffer_size": {
+            "description": "The size in bytes of the buffer that InnoDB uses to write to the log files on disk.",
+            "example": 16777216,
+            "maximum": 4294967295,
+            "minimum": 1048576,
+            "title": "innodb_log_buffer_size",
+            "type": "integer"
+          },
           "innodb_online_alter_log_max_size": {
             "description": "The upper limit in bytes on the size of the temporary log files used during online DDL operations for InnoDB tables.",
             "example": 134217728,
@@ -1633,12 +1717,28 @@
             "title": "innodb_rollback_on_timeout",
             "type": "boolean"
           },
+          "interactive_timeout": {
+            "description": "The number of seconds the server waits for activity on an interactive connection before closing it.",
+            "example": 3600,
+            "maximum": 604800,
+            "minimum": 30,
+            "title": "interactive_timeout",
+            "type": "integer"
+          },
           "max_allowed_packet": {
             "description": "Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M)",
             "example": 67108864,
             "maximum": 1073741824,
             "minimum": 102400,
             "title": "max_allowed_packet",
+            "type": "integer"
+          },
+          "max_heap_table_size": {
+            "description": "Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M)",
+            "example": 16777216,
+            "maximum": 1073741824,
+            "minimum": 1048576,
+            "title": "max_heap_table_size",
             "type": "integer"
           },
           "net_read_timeout": {
@@ -1657,6 +1757,14 @@
             "title": "net_write_timeout",
             "type": "integer"
           },
+          "sort_buffer_size": {
+            "description": "Sort buffer size in bytes for ORDER BY optimization. Default is 262144 (256K)",
+            "example": 262144,
+            "maximum": 1073741824,
+            "minimum": 32768,
+            "title": "sort_buffer_size",
+            "type": "integer"
+          },
           "sql_mode": {
             "description": "Global SQL mode. Set to empty to use MySQL server defaults. When creating a new service and not setting this field Aiven default SQL mode (strict, SQL standard compliant) will be assigned.",
             "example": "ANSI,TRADITIONAL",
@@ -1671,6 +1779,14 @@
             "example": true,
             "title": "sql_require_primary_key",
             "type": "boolean"
+          },
+          "tmp_table_size": {
+            "description": "Limits the size of internal in-memory tables. Also set max_heap_table_size. Default is 16777216 (16M)",
+            "example": 16777216,
+            "maximum": 1073741824,
+            "minimum": 1048576,
+            "title": "tmp_table_size",
+            "type": "integer"
           },
           "wait_timeout": {
             "description": "The number of seconds the server waits for activity on a noninteractive connection before closing it.",
@@ -1817,7 +1933,7 @@
           "title": "CIDR address block",
           "type": "string"
         },
-        "maxItems": 256,
+        "maxItems": 1024,
         "title": "IP filter",
         "type": "array"
       },
@@ -1836,6 +1952,14 @@
             "maximum": 2147483647,
             "minimum": 0,
             "title": "autovacuum_analyze_threshold",
+            "type": "integer"
+          },
+          "autovacuum_freeze_max_age": {
+            "description": "Specifies the maximum age (in transactions) that a table's pg_class.relfrozenxid field can attain before a VACUUM operation is forced to prevent transaction ID wraparound within the table. Note that the system will launch autovacuum processes to prevent wraparound even when autovacuum is otherwise disabled. This parameter will cause the server to be restarted.",
+            "example": 200000000,
+            "maximum": 1500000000,
+            "minimum": 200000000,
+            "title": "autovacuum_freeze_max_age",
             "type": "integer"
           },
           "autovacuum_max_workers": {
@@ -1890,7 +2014,7 @@
           },
           "idle_in_transaction_session_timeout": {
             "description": "Time out sessions with open transactions after this number of milliseconds",
-            "maximum": 86400000,
+            "maximum": 604800000,
             "minimum": 0,
             "title": "idle_in_transaction_session_timeout",
             "type": "integer"
@@ -2023,6 +2147,16 @@
             "title": "track_activity_query_size",
             "type": "integer"
           },
+          "track_commit_timestamp": {
+            "description": "Record commit time of transactions.",
+            "enum": [
+              "off",
+              "on"
+            ],
+            "example": "off",
+            "title": "track_commit_timestamp",
+            "type": "string"
+          },
           "track_functions": {
             "description": "Enables tracking of function call counts and time used.",
             "enum": [
@@ -2032,6 +2166,14 @@
             ],
             "title": "track_functions",
             "type": "string"
+          },
+          "wal_sender_timeout": {
+            "description": "Terminate replication connections that are inactive for longer than this amount of time, in milliseconds.",
+            "example": 60000,
+            "maximum": 600000,
+            "minimum": 5000,
+            "title": "wal_sender_timeout",
+            "type": "integer"
           },
           "wal_writer_delay": {
             "description": "WAL flush interval in milliseconds. Note that setting this value to lower than the default 200ms may negatively impact performance",
@@ -2083,6 +2225,23 @@
       "pgbouncer": {
         "additionalProperties": false,
         "properties": {
+          "ignore_startup_parameters": {
+            "example": [
+              "extra_float_digits",
+              "search_path"
+            ],
+            "items": {
+              "enum": [
+                "extra_float_digits",
+                "search_path"
+              ],
+              "title": "Enum of parameters to ignore when given in startup packet",
+              "type": "string"
+            },
+            "maxItems": 32,
+            "title": "List of parameters to ignore when given in startup packet",
+            "type": "array"
+          },
           "server_reset_query_always": {
             "default": false,
             "title": "Run server_reset_query (DISCARD ALL) in all pooling modes",
@@ -2177,6 +2336,15 @@
           "null"
         ]
       },
+      "synchronous_replication": {
+        "enum": [
+          "quorum",
+          "off"
+        ],
+        "example": "off",
+        "title": "Synchronous replication type. Note that the service plan also needs to support synchronous replication.",
+        "type": "string"
+      },
       "timescaledb": {
         "additionalProperties": false,
         "properties": {
@@ -2221,7 +2389,7 @@
           "title": "CIDR address block",
           "type": "string"
         },
-        "maxItems": 256,
+        "maxItems": 1024,
         "title": "IP filter",
         "type": "array"
       },

@@ -69,6 +69,22 @@
     "title": "Integration user config",
     "type": "object"
   },
+  "kafka_mirrormaker": {
+    "additionalProperties": false,
+    "properties": {
+      "cluster_alias": {
+        "description": "The alias under which the Kafka cluster is known to MirrorMaker. Can contain the following symbols: ASCII alphanumerics, '.', '_', and '-'.",
+        "example": "kafka-abc",
+        "maxLength": 128,
+        "pattern": "^[a-zA-Z0-9_.-]+$",
+        "title": "Kafka cluster alias",
+        "type": "string",
+        "user_error": "Must consist of alpha-numeric ASCII characters, dashes, underscores, and dots."
+      }
+    },
+    "title": "Integration user config",
+    "type": "object"
+  },
   "logs": {
     "additionalProperties": false,
     "properties": {
