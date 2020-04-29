@@ -4,13 +4,24 @@ package aiven
 
 import (
 	"fmt"
+	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform/helper/schema"
 )
+
+var availableServiceTypes = []string{
+	"pg",
+	"kafka",
+	"cassandra",
+	"elasticsearch",
+	"grafana",
+	"influxdb",
+	"redis",
+	"kafka_connect",
+	"kafka_mirrormaker"}
 
 var aivenServiceSchema = map[string]*schema.Schema{
 	"project": {
@@ -36,10 +47,11 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 	},
 	"service_type": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Service type code",
-		ForceNew:    true,
+		Type:         schema.TypeString,
+		Required:     true,
+		Description:  "Service type code",
+		ForceNew:     true,
+		ValidateFunc: validation.StringInSlice(availableServiceTypes, false),
 	},
 	"project_vpc_id": {
 		Type:        schema.TypeString,
@@ -360,6 +372,27 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
 				GetUserConfigSchema("service")["mysql"].(map[string]interface{})),
+		},
+	},
+	"kafka_mirrormaker": &schema.Schema{
+		Type:        schema.TypeList,
+		MaxItems:    1,
+		Computed:    true,
+		Description: "Kafka MirrorMaker 2 specific server provided values",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{},
+		},
+	},
+	"kafka_mirrormaker_user_config": {
+		Type:             schema.TypeList,
+		MaxItems:         1,
+		Optional:         true,
+		Description:      "Kafka MirrorMaker 2 specific user configurable settings",
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				GetUserConfigSchema("service")["kafka_mirrormaker"].(map[string]interface{})),
 		},
 	},
 	"pg": {
@@ -762,6 +795,9 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	if err := d.Set("kafka_connect", []map[string]interface{}{}); err != nil {
 		return err
 	}
+	if err := d.Set("kafka_mirrormaker", []map[string]interface{}{}); err != nil {
+		return err
+	}
 	if err := d.Set("mysql", []map[string]interface{}{}); err != nil {
 		return err
 	}
@@ -806,6 +842,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 		}
 		props["replica_uri"] = connectionInfo.PostgresReplicaURI
 	case "redis":
+	case "kafka_mirrormaker":
 	default:
 		panic(fmt.Sprintf("Unsupported service type %v", serviceType))
 	}
