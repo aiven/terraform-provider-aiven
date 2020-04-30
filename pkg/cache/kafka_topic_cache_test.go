@@ -174,7 +174,9 @@ func TestTopicCache_LoadByTopicName(t1 *testing.T) {
 				serviceName: "test-sr1",
 				topicName:   "topic-1",
 			},
-			aiven.KafkaTopic{},
+			aiven.KafkaTopic{
+				State: "CONFIGURING",
+			},
 			false,
 		},
 		{

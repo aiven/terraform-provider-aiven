@@ -3,6 +3,7 @@ package aiven
 import (
 	"fmt"
 	"github.com/aiven/terraform-provider-aiven/pkg/cache"
+	"golang.org/x/sync/semaphore"
 	"log"
 	"time"
 
@@ -18,6 +19,8 @@ type KafkaTopicAvailabilityWaiter struct {
 	ServiceName string
 	TopicName   string
 }
+
+var kafkaTopicAvailabilitySem = semaphore.NewWeighted(1)
 
 // RefreshFunc will call the Aiven client and refresh it's state.
 func (w *KafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
@@ -38,11 +41,7 @@ func (w *KafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 		topic, ok := topicCache.LoadByTopicName(w.Project, w.ServiceName, w.TopicName)
 
 		if !ok {
-			list, err := w.Client.KafkaTopics.List(w.Project, w.ServiceName)
-
-			for _, item := range list {
-				log.Printf("[TRACE] got a topic `%s` from aiven API with the status `%s`", item.TopicName, item.State)
-			}
+			err := w.refresh()
 
 			if err != nil {
 				aivenError, ok := err.(aiven.Error)
@@ -56,17 +55,12 @@ func (w *KafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 				if (ok && aivenError.Status == 501) || (ok && aivenError.Status == 502) {
 					return nil, "CONFIGURING", nil
 				}
-				return nil, "", err
+				return nil, "CONFIGURING", err
 			}
-
-			topicCache.StoreByProjectAndServiceName(w.Project, w.ServiceName, list)
 
 			topic, ok = topicCache.LoadByTopicName(w.Project, w.ServiceName, w.TopicName)
 			if !ok {
-				return nil, "CONFIGURING", fmt.Errorf("topic `%s` for project `%s` and service `%s` not found",
-					w.TopicName,
-					w.Project,
-					w.ServiceName)
+				return nil, "CONFIGURING", nil
 			}
 		}
 
@@ -74,6 +68,28 @@ func (w *KafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 
 		return topic, topic.State, nil
 	}
+}
+
+func (w *KafkaTopicAvailabilityWaiter) refresh() error {
+	if !kafkaTopicAvailabilitySem.TryAcquire(1) {
+		log.Printf("[TRACE] Kafka Topic Availability cache refresh already in progress ...")
+		return nil
+	}
+	defer kafkaTopicAvailabilitySem.Release(1)
+
+	topicCache := cache.GetTopicCache()
+
+	list, err := w.Client.KafkaTopics.List(w.Project, w.ServiceName)
+	if err != nil {
+		return err
+	}
+
+	for _, item := range list {
+		log.Printf("[TRACE] got a topic `%s` from aiven API with the status `%s`", item.TopicName, item.State)
+	}
+
+	topicCache.StoreByProjectAndServiceName(w.Project, w.ServiceName, list)
+	return nil
 }
 
 // Conf sets up the configuration to refresh.
@@ -84,7 +100,6 @@ func (w *KafkaTopicAvailabilityWaiter) Conf(timeout time.Duration) *resource.Sta
 		Pending:    []string{"CONFIGURING"},
 		Target:     []string{"ACTIVE"},
 		Refresh:    w.RefreshFunc(),
-		Delay:      10 * time.Second,
 		Timeout:    timeout,
 		MinTimeout: 1 * time.Second,
 	}
