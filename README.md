@@ -226,6 +226,11 @@ resource "aiven_service" "myservice" {
         ip_filter = ["0.0.0.0/0"]
         pg_version = "10"
     }
+    
+    client_timeout {
+        create = "20m"
+        update = "15m"
+    }
 }
 ```
 
@@ -277,6 +282,8 @@ options can be found from the [JSON schema description](aiven/templates/service_
 For services that support different versions the version information must be specified in
 the user configuration. By the time of writing these services are Elasticsearch, Kafka
 and PostgreSQL. These services should have configuration like
+
+`client_timeout` a custom client timeouts.
 
 ```
 elasticsearch_user_config {
@@ -434,6 +441,11 @@ resource "aiven_kafka_topic" "mytesttopic" {
     minimum_in_sync_replicas = 2
     cleanup_policy = "delete"
     termination_protection = true
+
+    client_timeout {
+        create = "1m"
+        read = "5m"
+    }
 }
 ```
 
@@ -454,6 +466,8 @@ Other properties should be self-explanatory. They can be changed after the topic
 created.
 
 Aiven ID format when importing existing resource: `<project_name>/<service_name>/<topic_name>`
+
+`client_timeout` a custom client timeouts.
 
 ### Resource Kafka ACL
 
@@ -711,6 +725,10 @@ resource "aiven_project_vpc" "myvpc" {
     project = "${aiven_project.myproject.project}"
     cloud_name = "google-europe-west1"
     network_cidr = "192.168.0.1/24"
+
+    client_timeout {
+        create = "5m"
+    }
 }
 ```
 
@@ -721,7 +739,7 @@ in. See the Service resource for additional information.
 
 `network_cidr` defines the network CIDR of the VPC.
 
-`client_create_wait_timeout` a custom wait timeout defined in seconds.
+`client_timeout` a custom client timeouts.
 
 Computed property `state` tells the current state of the VPC. This property cannot be
 set, only read.
@@ -737,6 +755,10 @@ resource "aiven_vpc_peering_connection" "mypeeringconnection" {
     peer_cloud_account = "<PEER_ACCOUNT_ID>"
     peer_vpc = "<PEER_VPC_ID/NAME>"
     peer_region = "<PEER_REGION>"
+
+    client_timeout {
+        create = "10m"
+    }
 }
 ```
 
@@ -749,7 +771,7 @@ peered with.
 
 `peer_region` defines the region of the remote VPC if it is not in the same region as Aiven VPC.
 
-`client_create_wait_timeout` a custom wait timeout defined in seconds.
+`client_timeout` a custom client timeouts.
 
 `state` is the state of the peering connection. This property is computed by Aiven 
 therefore cannot be set, only read. Where state can be one of: `APPROVED`, 

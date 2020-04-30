@@ -192,3 +192,46 @@ func validateDurationString(v interface{}, k string) (ws []string, errors []erro
 
 	return
 }
+
+// generateClientTimeoutsSchema generates client_timeout Terraform schema
+// based on name of the timeout and default duration
+func generateClientTimeoutsSchema(timeouts map[string]time.Duration) *schema.Schema {
+	schemaTimeouts := map[string]*schema.Schema{}
+	for name, duration := range timeouts {
+		schemaTimeouts[name] = &schema.Schema{
+			Type:         schema.TypeString,
+			Description:  name + " timeout",
+			Optional:     true,
+			Default:      duration.String(),
+			ValidateFunc: validateDurationString,
+		}
+	}
+
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		MaxItems:    1,
+		Description: "Custom Terraform Client timeouts",
+		Optional:    true,
+		ForceNew:    true,
+		Elem: &schema.Resource{
+			Schema: schemaTimeouts,
+		},
+	}
+}
+
+// getTimeoutHelper is a helper which extract from a resource data client timeout
+func getTimeoutHelper(d *schema.ResourceData, name string, defaultDuration time.Duration) (time.Duration, error) {
+	for _, timeouts := range d.Get("client_timeout").(*schema.Set).List() {
+		t := timeouts.(map[string]interface{})
+		if _, ok := t[name]; ok {
+			timeout, err := time.ParseDuration(t[name].(string))
+			if err != nil {
+				return time.Duration(0), err
+			}
+
+			return timeout, nil
+		}
+	}
+
+	return defaultDuration, nil
+}

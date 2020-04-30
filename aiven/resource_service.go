@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -448,6 +449,10 @@ var aivenServiceSchema = map[string]*schema.Schema{
 				GetUserConfigSchema("service")["redis"].(map[string]interface{})),
 		},
 	},
+	"client_timeout": generateClientTimeoutsSchema(map[string]time.Duration{
+		"create": 20 * time.Minute,
+		"update": 20 * time.Minute,
+	}),
 }
 
 func resourceService() *schema.Resource {
@@ -615,7 +620,13 @@ func resourceServiceWait(d *schema.ResourceData, m interface{}, operation string
 		ServiceName: d.Get("service_name").(string),
 	}
 
-	service, err := w.Conf().WaitForState()
+	// Get timeout
+	timeout, err := getTimeoutHelper(d, operation, 20*time.Minute)
+	if err != nil {
+		return nil, err
+	}
+
+	service, err := w.Conf(timeout).WaitForState()
 	if err != nil {
 		return nil, fmt.Errorf("error waiting for Aiven service to be RUNNING: %s", err)
 	}

@@ -55,24 +55,9 @@ var aivenVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		Description: "Cloud provider identifier for the peering connection if available",
 		Type:        schema.TypeString,
 	},
-	"client_timeout": {
-		Type:        schema.TypeSet,
-		MaxItems:    1,
-		Description: "Custom Terraform Client timeouts",
-		Optional:    true,
-		ForceNew:    true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"create": {
-					Type:         schema.TypeString,
-					Description:  "Creation timeout",
-					Optional:     true,
-					Default:      "2m",
-					ValidateFunc: validateDurationString,
-				},
-			},
-		},
-	},
+	"client_timeout": generateClientTimeoutsSchema(map[string]time.Duration{
+		"create": 2 * time.Minute,
+	}),
 }
 
 func resourceVPCPeeringConnection() *schema.Resource {
@@ -112,22 +97,14 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 			PeerRegion:       region,
 		},
 	)
-
 	if err != nil {
 		return err
 	}
 
 	// Get creation timeout
-	var timeout = 2 * time.Minute
-	for _, timeouts := range d.Get("client_timeout").(*schema.Set).List() {
-		log.Printf("[DEBUG] client_timeout %+v", timeouts)
-
-		t := timeouts.(map[string]interface{})
-		timeout, err = time.ParseDuration(t["create"].(string))
-
-		if err != nil {
-			return err
-		}
+	timeout, err := getTimeoutHelper(d, "create", 2*time.Minute)
+	if err != nil {
+		return err
 	}
 
 	// Wait until the peering connection has actually been built

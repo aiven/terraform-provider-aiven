@@ -77,13 +77,15 @@ func (w *KafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 // Conf sets up the configuration to refresh.
-func (w *KafkaTopicAvailabilityWaiter) Conf() *resource.StateChangeConf {
+func (w *KafkaTopicAvailabilityWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
+	log.Printf("[DEBUG] Kafka Topic availability waiter timeout %.0f minutes", timeout.Minutes())
+
 	return &resource.StateChangeConf{
 		Pending:    []string{"CONFIGURING"},
 		Target:     []string{"ACTIVE"},
 		Refresh:    w.RefreshFunc(),
 		Delay:      10 * time.Second,
-		Timeout:    4 * time.Minute,
+		Timeout:    timeout,
 		MinTimeout: 1 * time.Second,
 	}
 }

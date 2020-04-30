@@ -7,6 +7,7 @@ import (
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/schema"
 	"strings"
+	"time"
 )
 
 var aivenKafkaTopicSchema = map[string]*schema.Schema{
@@ -71,6 +72,10 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 			topic from being deleted. It is recommended to enable this for any production Kafka 
 			topic containing critical data.`,
 	},
+	"client_timeout": generateClientTimeoutsSchema(map[string]time.Duration{
+		"create": 1 * time.Minute,
+		"read":   4 * time.Minute,
+	}),
 }
 
 func resourceKafkaTopic() *schema.Resource {
@@ -111,7 +116,14 @@ func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
 		ServiceName:   serviceName,
 		CreateRequest: createRequest,
 	}
-	_, err := w.Conf().WaitForState()
+
+	// Get creation timeout
+	timeout, err := getTimeoutHelper(d, "create", 1*time.Minute)
+	if err != nil {
+		return err
+	}
+
+	_, err = w.Conf(timeout).WaitForState()
 	if err != nil {
 		return err
 	}
@@ -172,7 +184,13 @@ func getTopic(d *schema.ResourceData, m interface{}) (aiven.KafkaTopic, error) {
 		TopicName:   topicName,
 	}
 
-	topic, err := w.Conf().WaitForState()
+	// Get availability timeout
+	timeout, err := getTimeoutHelper(d, "read", 4*time.Minute)
+	if err != nil {
+		return aiven.KafkaTopic{}, err
+	}
+
+	topic, err := w.Conf(timeout).WaitForState()
 	if err != nil {
 		return aiven.KafkaTopic{}, fmt.Errorf("error waiting for Aiven Kafka topic to be ACTIVE: %s", err)
 	}

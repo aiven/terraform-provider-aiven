@@ -118,13 +118,15 @@ func backupsReady(service *aiven.Service) bool {
 }
 
 // Conf sets up the configuration to refresh.
-func (w *ServiceChangeWaiter) Conf() *resource.StateChangeConf {
+func (w *ServiceChangeWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
+	log.Printf("[DEBUG] Service waiter timeout %.0f minutes", timeout.Minutes())
+
 	return &resource.StateChangeConf{
 		Pending:                   []string{aivenPendingState, aivenRebalancingState, aivenServicesStartingState},
 		Target:                    []string{aivenTargetState},
 		Refresh:                   w.RefreshFunc(),
 		Delay:                     10 * time.Second,
-		Timeout:                   20 * time.Minute,
+		Timeout:                   timeout,
 		MinTimeout:                2 * time.Second,
 		ContinuousTargetOccurence: 3,
 	}

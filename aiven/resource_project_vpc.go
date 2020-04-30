@@ -35,31 +35,10 @@ var aivenProjectVPCSchema = map[string]*schema.Schema{
 		Description: "State of the VPC (APPROVED, ACTIVE, DELETING, DELETED)",
 		Type:        schema.TypeString,
 	},
-	"client_timeout": {
-		Type:        schema.TypeSet,
-		MaxItems:    1,
-		Description: "Custom Terraform Client timeouts",
-		Optional:    true,
-		ForceNew:    true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"create": {
-					Type:         schema.TypeString,
-					Description:  "Creation timeout",
-					Optional:     true,
-					Default:      "4m",
-					ValidateFunc: validateDurationString,
-				},
-				"delete": {
-					Type:         schema.TypeString,
-					Description:  "Deletion timeout",
-					Optional:     true,
-					Default:      "4m",
-					ValidateFunc: validateDurationString,
-				},
-			},
-		},
-	},
+	"client_timeout": generateClientTimeoutsSchema(map[string]time.Duration{
+		"create": 4 * time.Minute,
+		"delete": 4 * time.Minute,
+	}),
 }
 
 func resourceProjectVPC() *schema.Resource {
@@ -92,15 +71,9 @@ func resourceProjectVPCCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	// Get creation timeout
-	var timeout = 4 * time.Minute
-	for _, timeouts := range d.Get("client_timeout").(*schema.Set).List() {
-		log.Printf("[DEBUG] client_timeout %+v", timeouts)
-
-		t := timeouts.(map[string]interface{})
-		timeout, err = time.ParseDuration(t["create"].(string))
-		if err != nil {
-			return err
-		}
+	timeout, err := getTimeoutHelper(d, "create", 4*time.Minute)
+	if err != nil {
+		return err
 	}
 
 	// Make sure the VPC is active before returning it because service creation, moving
@@ -139,17 +112,9 @@ func resourceProjectVPCDelete(d *schema.ResourceData, m interface{}) error {
 	projectName, vpcID := splitResourceID2(d.Id())
 
 	// Get deletion timeout
-	var timeout = 4 * time.Minute
-	for _, timeouts := range d.Get("client_timeout").(*schema.Set).List() {
-		var err error
-		log.Printf("[DEBUG] client_timeout %+v", timeouts)
-
-		t := timeouts.(map[string]interface{})
-		timeout, err = time.ParseDuration(t["delete"].(string))
-
-		if err != nil {
-			return err
-		}
+	timeout, err := getTimeoutHelper(d, "delete", 4*time.Minute)
+	if err != nil {
+		return err
 	}
 
 	waiter := ProjectVPCDeleteWaiter{
@@ -158,7 +123,7 @@ func resourceProjectVPCDelete(d *schema.ResourceData, m interface{}) error {
 		VPCID:   vpcID,
 	}
 
-	_, err := waiter.Conf(timeout).WaitForState()
+	_, err = waiter.Conf(timeout).WaitForState()
 	if err != nil {
 		return fmt.Errorf("error waiting for Aiven project VPC to be DELETED: %s", err)
 	}

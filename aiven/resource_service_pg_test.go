@@ -13,11 +13,10 @@ import (
 
 // PG service tests
 func TestAccAivenService_pg(t *testing.T) {
-	t.Parallel()
 	resourceName := "aiven_service.bar-pg"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAivenServiceResourceDestroy,
@@ -25,6 +24,23 @@ func TestAccAivenService_pg(t *testing.T) {
 			// basic checks
 			{
 				Config: testAccPGServiceResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenServiceCommonAttributes("data.aiven_service.service-pg"),
+					testAccCheckAivenServicePGAttributes("data.aiven_service.service-pg"),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-pg-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
+					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
+					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
+					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
+					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+				),
+			},
+			// custom timeouts tests
+			{
+				Config: testAccPGServiceCustomTimeoutsResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceCommonAttributes("data.aiven_service.service-pg"),
 					testAccCheckAivenServicePGAttributes("data.aiven_service.service-pg"),
@@ -96,6 +112,48 @@ func testAccPGServiceResource(name string) string {
 			service_type = "pg"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
+			
+			pg_user_config {
+				pg_version = 11
+
+				public_access {
+					pg = true
+					prometheus = false
+				}
+
+				pg {
+					idle_in_transaction_session_timeout = 900
+				}
+			}
+		}
+		
+		data "aiven_service" "service-pg" {
+			service_name = aiven_service.bar-pg.service_name
+			project = aiven_project.foo-pg.project
+		}
+		`, name, os.Getenv("AIVEN_CARD_ID"), name)
+}
+
+func testAccPGServiceCustomTimeoutsResource(name string) string {
+	return fmt.Sprintf(`
+		resource "aiven_project" "foo-pg" {
+			project = "test-acc-pr-pg-%s"
+			card_id="%s"	
+		}
+		
+		resource "aiven_service" "bar-pg" {
+			project = aiven_project.foo-pg.project
+			cloud_name = "google-europe-west1"
+			plan = "startup-4"
+			service_name = "test-acc-sr-%s"
+			service_type = "pg"
+			maintenance_window_dow = "monday"
+			maintenance_window_time = "10:00:00"
+			
+			client_timeout {
+				create = "25m"
+				update = "30m"
+			}
 			
 			pg_user_config {
 				pg_version = 11
