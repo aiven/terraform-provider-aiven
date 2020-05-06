@@ -56,10 +56,13 @@ func (t *TopicCache) LoadByTopicName(projectName, serviceName, topicName string)
 
 	topics, ok := t.internal[projectName+serviceName]
 	if !ok {
-		return aiven.KafkaTopic{}, false
+		return aiven.KafkaTopic{State: "CONFIGURING"}, false
 	}
 
 	result, ok := topics[topicName]
+	if !ok {
+		result.State = "CONFIGURING"
+	}
 
 	log.Printf("[TRACE] retrienve from a topic cache `%+#v` for a topic name `%s`", result, topicName)
 
