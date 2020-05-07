@@ -33,6 +33,16 @@ with the changes that are to be applied.
 - [Terraform](https://www.terraform.io/downloads.html) v0.10.1 or greater
 - [Go](https://golang.org/doc/install) 1.13.X or greater
 
+## Installation
+
+Work is underway to host the Aiven Terraform Provider under the official Terraform registry. Until then, the easiest method is:
+
+```
+go get -u github.com/aiven/terraform-provider-aiven
+mkdir -p ~/.terraform.d/plugins
+cp $GOPATH/bin/terraform-provider-aiven ~/.terraform.d/plugins/
+```
+
 ## Sample project
 
 There is a [sample project](sample.tf) which sets up a project, defines Kafka,
@@ -41,6 +51,15 @@ user, and metrics and dashboard integration for the Kafka and PG databases.
 
 Make sure you have a look at the [variables](terraform.tfvars.sample) and copy it over to
 `terraform.tfvars` with your own settings.
+
+Other examples can be found in the [examples](examples/) folder that provides examples to:
+* [Team Accounts and member management](examples/account)
+* [Elasticsearch deployment and configuration](examples/elasticsearch)
+* [Standalone Kafka connect deployment with custom config](examples/kafka_connect)
+* [Deploying Kafka and Elasticsearch with a Kafka Connect Elasticsearch Sink connector](examples/kafka_connectors)
+* [Deploying Kafka with Schema Registry enabled and providing a schema](examples/kafka_schemas)
+* [Deploying Cassandra and forking (cloning the service, config and data) into a new service with a higher plan](examples/cassandra_fork)
+* [Deploying a Grafana service](examples/service)
 
 ## Importing existing infrastructure
 
