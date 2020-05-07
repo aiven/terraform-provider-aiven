@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.4] - 2020-05-07
+- Speed up kafka topic availability waiter
+- Kafka Connect examples
+- TF client timings added for the following resources:
+    - aiven_vpc_peering_connection
+    - aiven_project_vpc
+    - aiven_service
+    - aiven_kafka_topic
+
 ## [1.2.3] - 2020-03-30
 Add backwards compatibility for old TF state files created before Kafka `topic` field was renamed to `topic_name`.
 
