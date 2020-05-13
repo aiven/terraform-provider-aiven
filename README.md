@@ -39,8 +39,12 @@ Work is underway to host the Aiven Terraform Provider under the official Terrafo
 
 ```
 go get -u github.com/aiven/terraform-provider-aiven
+# Global Install
 mkdir -p ~/.terraform.d/plugins
-cp $GOPATH/bin/terraform-provider-aiven ~/.terraform.d/plugins/
+cp $GOPATH/bin/terraform-provider-aiven ~/.terraform.d/plugins/ #Use a version here as a suffix if you specify a version in your plan
+# Local Install
+mkdir -p $PWD/terraform.d/plugins/linux_amd64 #darwin_amd64 if on OSX but linux will be needed for TF Cloud
+cp $GOPATH/bin/terraform-provider-aiven $PWD/terraform.d/plugins/linux_amd64/terraform-provider-aiven_v1.2.4 # Change to release ver
 ```
 
 ## Sample project
@@ -53,6 +57,7 @@ Make sure you have a look at the [variables](terraform.tfvars.sample) and copy i
 `terraform.tfvars` with your own settings.
 
 Other examples can be found in the [examples](examples/) folder that provides examples to:
+* [Getting Started](examples/getting-started.tf)
 * [Team Accounts and member management](examples/account)
 * [Elasticsearch deployment and configuration](examples/elasticsearch)
 * [Standalone Kafka connect deployment with custom config](examples/kafka_connect)
