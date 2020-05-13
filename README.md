@@ -56,7 +56,7 @@ user, and metrics and dashboard integration for the Kafka and PG databases.
 Make sure you have a look at the [variables](terraform.tfvars.sample) and copy it over to
 `terraform.tfvars` with your own settings.
 
-Other examples can be found in the [examples](examples/) folder that provides examples to:
+Other examples can be found in the [examples](examples) folder that provides examples to:
 * [Getting Started](examples/getting-started.tf)
 * [Team Accounts and member management](examples/account)
 * [Elasticsearch deployment and configuration](examples/elasticsearch)
@@ -65,6 +65,7 @@ Other examples can be found in the [examples](examples/) folder that provides ex
 * [Deploying Kafka with Schema Registry enabled and providing a schema](examples/kafka_schemas)
 * [Deploying Cassandra and forking (cloning the service, config and data) into a new service with a higher plan](examples/cassandra_fork)
 * [Deploying a Grafana service](examples/service)
+* [Deploying a MirrorMaker service](examples/kafka_mirrormaker)
 
 ## Importing existing infrastructure
 
@@ -588,6 +589,40 @@ They should be defined using reference as shown above to set up dependencies cor
 
 `config` is the Kafka Connector configuration parameters, where `topics`, `connector.class` and `name` 
 are required parameters but the rest of them are connector type specific. 
+
+### Resource MirrorMaker 2 Replication Flow
+```
+resource "aiven_mirrormaker_replication_flow" "f1" {
+  project = aiven_project.kafka-mm-project1.project
+  service_name = aiven_service.mm.service_name
+  source_cluster = aiven_service.source.service_name
+  target_cluster = aiven_service.target.service_name
+  enable = true
+
+  topics = [
+    ".*",
+  ]
+
+  topics_blacklist = [
+    ".*[\\-\\.]internal",
+    ".*\\.replica",
+    "__.*"
+  ]
+}
+```
+
+`project` and `service_name` define the project and service the Kafka MirrorMaker Replication 
+Flow belongs to. They should be defined using reference as shown above to set up dependencies correctly.
+
+`source_cluster` is a source cluster alias.
+
+`target_cluster` is a target cluster alias.
+
+`enable` enable of disable replication flows for a mirror maker service 
+
+`topics` is a list of topics and/or regular expressions to replicate.
+
+`topics_blacklist` is a list of topics and/or regular expressions to not replicate.
 
 ### Resource Elasticsearch ACL
 

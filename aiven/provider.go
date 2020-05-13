@@ -48,6 +48,7 @@ func Provider() terraform.ResourceProvider {
 			"aiven_account_team":                 datasourceAccountTeam(),
 			"aiven_account_team_project":         datasourceAccountTeamProject(),
 			"aiven_account_team_member":          datasourceAccountTeamMember(),
+			"aiven_mirrormaker_replication_flow": datasourceMirrorMakerReplicationFlowTopic(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -71,6 +72,7 @@ func Provider() terraform.ResourceProvider {
 			"aiven_account_team":                 resourceAccountTeam(),
 			"aiven_account_team_project":         resourceAccountTeamProject(),
 			"aiven_account_team_member":          resourceAccountTeamMember(),
+			"aiven_mirrormaker_replication_flow": resourceMirrorMakerReplicationFlow(),
 		},
 
 		ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {
@@ -138,6 +140,11 @@ func splitResourceID2(resourceID string) (string, string) {
 func splitResourceID3(resourceID string) (string, string, string) {
 	parts := splitResourceID(resourceID, 3)
 	return parts[0], parts[1], parts[2]
+}
+
+func splitResourceID4(resourceID string) (string, string, string, string) {
+	parts := splitResourceID(resourceID, 4)
+	return parts[0], parts[1], parts[2], parts[3]
 }
 
 func resourceExists(err error) (bool, error) {
@@ -234,4 +241,13 @@ func getTimeoutHelper(d *schema.ResourceData, name string, defaultDuration time.
 	}
 
 	return defaultDuration, nil
+}
+
+func flattenToString(a []interface{}) []string {
+	r := make([]string, len(a))
+	for i, v := range a {
+		r[i] = fmt.Sprint(v)
+	}
+
+	return r
 }
