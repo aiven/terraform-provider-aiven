@@ -374,7 +374,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 				GetUserConfigSchema("service")["mysql"].(map[string]interface{})),
 		},
 	},
-	"kafka_mirrormaker": &schema.Schema{
+	"kafka_mirrormaker": {
 		Type:        schema.TypeList,
 		MaxItems:    1,
 		Computed:    true,

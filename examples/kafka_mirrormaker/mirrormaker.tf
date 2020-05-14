@@ -6,7 +6,9 @@ resource "aiven_service" "mm" {
   service_type = "kafka_mirrormaker"
 
   kafka_mirrormaker_user_config {
-    ip_filter = ["0.0.0.0/0"]
+    ip_filter = [
+      "0.0.0.0/0"
+    ]
 
     kafka_mirrormaker {
       refresh_groups_interval_seconds = 600
@@ -36,4 +38,22 @@ resource "aiven_service_integration" "i2" {
   kafka_mirrormaker_user_config {
     cluster_alias = "target"
   }
+}
+
+resource "aiven_mirrormaker_replication_flow" "f1" {
+  project = aiven_project.kafka-mm-project1.project
+  service_name = aiven_service.mm.service_name
+  source_cluster = aiven_service.source.service_name
+  target_cluster = aiven_service.target.service_name
+  enable = true
+
+  topics = [
+    ".*",
+  ]
+
+  topics_blacklist = [
+    ".*[\\-\\.]internal",
+    ".*\\.replica",
+    "__.*"
+  ]
 }
