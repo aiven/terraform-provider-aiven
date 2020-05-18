@@ -301,14 +301,14 @@ deletions. This does not shield against deleting databases or topics but for ser
 with backups much of the content can at least be restored from backup in case accidental
 deletion is done.
 
+`client_timeout` a custom client timeouts.
+
 `x_user_config` defines service specific additional configuration options. These
 options can be found from the [JSON schema description](aiven/templates/service_user_config_schema.json).
 
 For services that support different versions the version information must be specified in
 the user configuration. By the time of writing these services are Elasticsearch, Kafka
 and PostgreSQL. These services should have configuration like
-
-`client_timeout` a custom client timeouts.
 
 ```
 elasticsearch_user_config {
