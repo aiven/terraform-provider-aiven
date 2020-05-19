@@ -181,6 +181,7 @@ func testAccKafkaACLResource(name string) string {
 			service_name = aiven_kafka_acl.foo.service_name
 			topic = aiven_kafka_acl.foo.topic
 			username = aiven_kafka_acl.foo.username
+			permission = aiven_kafka_acl.foo.permission
 		}
 		`, name, os.Getenv("AIVEN_CARD_ID"), name, name, name)
 }
