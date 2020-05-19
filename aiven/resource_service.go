@@ -21,7 +21,8 @@ var availableServiceTypes = []string{
 	"influxdb",
 	"redis",
 	"kafka_connect",
-	"kafka_mirrormaker"}
+	"kafka_mirrormaker",
+	"mysql"}
 
 var aivenServiceSchema = map[string]*schema.Schema{
 	"project": {
