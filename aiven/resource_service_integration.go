@@ -3,10 +3,9 @@ package aiven
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/schema"
+	"strings"
 )
 
 var aivenServiceIntegrationSchema = map[string]*schema.Schema{
@@ -199,19 +198,33 @@ func copyServiceIntegrationPropertiesFromAPIResponseToTerraform(
 	integration *aiven.ServiceIntegration,
 	project string,
 ) error {
-	d.Set("project", project)
+	if err := d.Set("project", project); err != nil {
+		return err
+	}
+
 	if integration.DestinationEndpointID != nil {
-		d.Set("destination_endpoint_id", buildResourceID(project, *integration.DestinationEndpointID))
+		if err := d.Set("destination_endpoint_id", buildResourceID(project, *integration.DestinationEndpointID)); err != nil {
+			return err
+		}
 	} else if integration.DestinationService != nil {
-		d.Set("destination_service_name", *integration.DestinationService)
+		if err := d.Set("destination_service_name", *integration.DestinationService); err != nil {
+			return err
+		}
 	}
 	if integration.SourceEndpointID != nil {
-		d.Set("source_endpoint_id", buildResourceID(project, *integration.SourceEndpointID))
+		if err := d.Set("source_endpoint_id", buildResourceID(project, *integration.SourceEndpointID)); err != nil {
+			return err
+		}
 	} else if integration.SourceService != nil {
-		d.Set("source_service_name", *integration.SourceService)
+		if err := d.Set("source_service_name", *integration.SourceService); err != nil {
+			return err
+		}
 	}
 	integrationType := integration.IntegrationType
-	d.Set("integration_type", integrationType)
+	if err := d.Set("integration_type", integrationType); err != nil {
+		return err
+	}
+
 	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat(
 		"integration",
 		integrationType,
