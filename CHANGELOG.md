@@ -1,4 +1,8 @@
-# Changelog
+---
+title: Changelog
+parent: README
+nav_order: 1
+---# Changelog
 
 ## [1.2.4] - 2020-05-07
 - Speed up kafka topic availability waiter

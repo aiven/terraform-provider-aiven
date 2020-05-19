@@ -71,3 +71,15 @@ clean:
 	rm -f terraform-provider-aiven.tar.gz
 
 .PHONY: test lint vendor bootstrap
+
+#################################################
+# Documentation
+#################################################
+# TODO Run schema json output command on build
+doc:
+	cat scripts/template_all.md > docs/index.md
+	cat scripts/template_ds.md > docs/data-sources/index.md
+	cat scripts/template_re.md > docs/resources/index.md
+	python scripts/docgen.py scripts/schema.json ALL >> docs/index.md
+	python scripts/docgen.py scripts/schema.json DATASOURCES >> docs/data-sources/index.md
+	python scripts/docgen.py scripts/schema.json RESOURCES >> docs/resources/index.md

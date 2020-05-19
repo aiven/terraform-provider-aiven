@@ -34,3 +34,8 @@ packrd/
 
 # Artefacts directories
 plugins/
+
+# Github Pages
+_site/
+Gemfile
+Gemfile.lock

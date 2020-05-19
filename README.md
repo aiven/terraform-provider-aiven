@@ -1,3 +1,9 @@
+---
+title: README
+nav_order: 1
+has_children: true
+---
+
 # Terraform Aiven
 
 [Terraform](https://www.terraform.io/) provider for [Aiven.io](https://aiven.io/). This
