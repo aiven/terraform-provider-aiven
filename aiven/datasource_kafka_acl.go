@@ -10,8 +10,9 @@ import (
 
 func datasourceKafkaACL() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceKafkaACLRead,
-		Schema: resourceSchemaAsDatasourceSchema(aivenKafkaACLSchema, "project", "service_name", "topic", "username"),
+		Read: datasourceKafkaACLRead,
+		Schema: resourceSchemaAsDatasourceSchema(aivenKafkaACLSchema,
+			"project", "service_name", "topic", "username", "permission"),
 	}
 }
 
@@ -22,6 +23,7 @@ func datasourceKafkaACLRead(d *schema.ResourceData, m interface{}) error {
 	serviceName := d.Get("service_name").(string)
 	topic := d.Get("topic").(string)
 	userName := d.Get("username").(string)
+	permission := d.Get("permission").(string)
 
 	acls, err := client.KafkaACLs.List(projectName, serviceName)
 	if err != nil {
@@ -29,7 +31,7 @@ func datasourceKafkaACLRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	for _, acl := range acls {
-		if acl.Topic == topic && acl.Username == userName {
+		if acl.Topic == topic && acl.Username == userName && acl.Permission == permission {
 			d.SetId(buildResourceID(projectName, serviceName, acl.ID))
 			return resourceKafkaACLRead(d, m)
 		}
