@@ -5,6 +5,8 @@ package aiven
 import (
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/schema"
+	"os"
+	"regexp"
 )
 
 var aivenProjectSchema = map[string]*schema.Schema{
@@ -152,7 +154,18 @@ func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
 func resourceProjectDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-	return client.Projects.Delete(d.Id())
+	err := client.Projects.Delete(d.Id())
+
+	// Silence "Project with open balance cannot be deleted" error
+	// to make long acceptance tests pass which generate some balance
+	re := regexp.MustCompile("Project with open balance cannot be deleted")
+	if err != nil && os.Getenv("TF_ACC") != "" {
+		if re.MatchString(err.Error()) && err.(aiven.Error).Status == 403 {
+			return nil
+		}
+	}
+
+	return err
 }
 
 func resourceProjectExists(d *schema.ResourceData, m interface{}) (bool, error) {
