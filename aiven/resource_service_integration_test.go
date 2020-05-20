@@ -22,6 +22,7 @@ func TestAccAivenServiceIntegration_basic(t *testing.T) {
 			{
 				Config: testAccServiceIntegrationResource(rName),
 				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenServiceIntegrationAttributes("data.aiven_service_integration.int"),
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "metrics"),
 					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-pg-%s", rName)),
@@ -88,6 +89,13 @@ func testAccServiceIntegrationResource(name string) string {
 			integration_type = "metrics"
 			source_service_name = aiven_service.bar-pg.service_name
 			destination_service_name = aiven_service.bar-influxdb.service_name
+		}
+
+		data "aiven_service_integration" "int" {
+			project = aiven_service_integration.bar.project
+			integration_type = aiven_service_integration.bar.integration_type
+			source_service_name = aiven_service_integration.bar.source_service_name
+			destination_service_name = aiven_service_integration.bar.destination_service_name
 		}
 		`, name, os.Getenv("AIVEN_CARD_ID"), name, name)
 }
@@ -216,4 +224,29 @@ func testAccCheckAivenServiceIntegraitonResourceDestroy(s *terraform.State) erro
 	}
 
 	return nil
+}
+
+func testAccCheckAivenServiceIntegrationAttributes(n string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		r := s.RootModule().Resources[n]
+		a := r.Primary.Attributes
+
+		if a["project"] == "" {
+			return fmt.Errorf("expected to get a project from Aiven")
+		}
+
+		if a["integration_type"] == "" {
+			return fmt.Errorf("expected to get an integration_type from Aiven")
+		}
+
+		if a["source_service_name"] == "" {
+			return fmt.Errorf("expected to get a source_service_name from Aiven")
+		}
+
+		if a["destination_service_name"] == "" {
+			return fmt.Errorf("expected to get a source_service_name from Aiven")
+		}
+
+		return nil
+	}
 }

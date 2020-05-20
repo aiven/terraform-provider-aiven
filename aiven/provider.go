@@ -42,6 +42,7 @@ func Provider() terraform.ResourceProvider {
 			"aiven_project_vpc":                  datasourceProjectVPC(),
 			"aiven_vpc_peering_connection":       datasourceVPCPeeringConnection(),
 			"aiven_service":                      datasourceService(),
+			"aiven_service_integration":          datasourceServiceIntegration(),
 			"aiven_service_integration_endpoint": datasourceServiceIntegrationEndpoint(),
 			"aiven_service_user":                 datasourceServiceUser(),
 			"aiven_account":                      datasourceAccount(),
