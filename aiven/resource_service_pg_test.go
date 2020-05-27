@@ -59,7 +59,6 @@ func TestAccAivenService_pg(t *testing.T) {
 			{
 				Config:                    testAccPGReadReplicaServiceResource(rName),
 				PreventPostDestroyRefresh: true,
-				ExpectNonEmptyPlan:        true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceCommonAttributes("data.aiven_service.service-pg"),
 					testAccCheckAivenServicePGAttributes("data.aiven_service.service-pg"),
@@ -254,6 +253,8 @@ func testAccPGReadReplicaServiceResource(name string) string {
 			maintenance_window_time = "10:00:00"
 			
 			pg_user_config {
+				backup_hour = 19
+				backup_minute = 30
 				pg_version = 11
 
 				public_access {
@@ -354,7 +355,7 @@ func testAccCheckAivenServicePGAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a correct PG public_access from Aiven")
 		}
 
-		if a["pg_user_config.0.public_access.0.pgbouncer"] != "<<value not set>>" {
+		if a["pg_user_config.0.public_access.0.pgbouncer"] != "" {
 			return fmt.Errorf("expected to get a correct PG public_access from Aiven")
 		}
 
@@ -382,7 +383,7 @@ func testAccCheckAivenServicePGAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a PG URI from Aiven")
 		}
 
-		if a["pg_user_config.0.service_to_fork_from"] != "<<value not set>>" {
+		if a["pg_user_config.0.service_to_fork_from"] != "" {
 			return fmt.Errorf("expected to get a PG service_to_fork_from not set to any value")
 		}
 

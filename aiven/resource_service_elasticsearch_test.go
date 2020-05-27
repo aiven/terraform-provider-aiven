@@ -121,7 +121,7 @@ func testAccCheckAivenServiceESAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get elasticsearch.public_access enabled for Kibana from Aiven")
 		}
 
-		if a["elasticsearch_user_config.0.public_access.0.prometheus"] != "<<value not set>>" {
+		if a["elasticsearch_user_config.0.public_access.0.prometheus"] != "" {
 			return fmt.Errorf("expected to get a correct public_access prometheus from Aiven")
 		}
 

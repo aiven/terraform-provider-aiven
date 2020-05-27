@@ -46,7 +46,8 @@ func sweepKafkaTopics(region string) error {
 
 				topics, err := conn.KafkaTopics.List(project.Name, service.Name)
 				if err != nil {
-					return fmt.Errorf("error retrieving a list of kafka topics for a service `%s`: %s", service.Name, err)
+					log.Printf("[ERROR] error retrieving a list of kafka topics for a service `%s`: %s", service.Name, err)
+					continue
 				}
 
 				for _, topic := range topics {
@@ -200,8 +201,8 @@ func testAccKafkaTopicResource(name string) string {
 		}
 
 		data "aiven_kafka_topic" "topic" {
-			project = aiven_project.foo.project
-			service_name = aiven_service.bar.service_name
+			project = aiven_kafka_topic.foo.project
+			service_name = aiven_kafka_topic.foo.service_name
 			topic_name = aiven_kafka_topic.foo.topic_name
 		}
 		`, name, os.Getenv("AIVEN_CARD_ID"), name, name)
@@ -247,8 +248,8 @@ func testAccKafkaTopicCustomTimeoutsResource(name string) string {
 		}
 
 		data "aiven_kafka_topic" "topic" {
-			project = aiven_project.foo.project
-			service_name = aiven_service.bar.service_name
+			project = aiven_kafka_topic.foo.project
+			service_name = aiven_kafka_topic.foo.service_name
 			topic_name = aiven_kafka_topic.foo.topic_name
 		}
 		`, name, os.Getenv("AIVEN_CARD_ID"), name, name)
@@ -289,8 +290,8 @@ func testAccKafkaTopicTerminationProtectionResource(name string) string {
 		}
 
 		data "aiven_kafka_topic" "topic" {
-			project = aiven_project.foo.project
-			service_name = aiven_service.bar.service_name
+			project = aiven_kafka_topic.foo.project
+			service_name = aiven_kafka_topic.foo.service_name
 			topic_name = aiven_kafka_topic.foo.topic_name
 		}
 		`, name, os.Getenv("AIVEN_CARD_ID"), name, name)

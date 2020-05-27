@@ -171,11 +171,28 @@ func createOnlyDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool
 	return len(d.Id()) > 0
 }
 
-// When a map inside a list contains only default values without explicit values set by
-// the user Terraform inteprets the map as not being present and the array length being
-// zero, resulting in bogus update that does nothing. Allow ignoring those.
+// emptyObjectDiffSuppressFunc suppresses a diff for service user configuration options when
+// fields are not set by the user but have default or previously defined values.
 func emptyObjectDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
-	return old == "1" && new == "0" && strings.HasSuffix(k, ".#")
+	// When a map inside a list contains only default values without explicit values set by
+	// the user Terraform inteprets the map as not being present and the array length being
+	// zero, resulting in bogus update that does nothing. Allow ignoring those.
+	if old == "1" && new == "0" && strings.HasSuffix(k, ".#") {
+		return true
+	}
+
+	// When a field is not set to any value and consequently is null (empty string) but had
+	// a non-empty parameter before. Allow ignoring those.
+	if new == "" && old != "" {
+		return true
+	}
+
+	// There is a bug in Terraform 0.11 which interprets "true" as "0" and "false" as "1"
+	if (new == "0" && old == "false") || (new == "1" && old == "true") {
+		return true
+	}
+
+	return false
 }
 
 // Terraform does not allow default values for arrays but the IP filter user config value
