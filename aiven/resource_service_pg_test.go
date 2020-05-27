@@ -150,7 +150,7 @@ func testAccPGServiceCustomTimeoutsResource(name string) string {
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
-			client_timeout {
+			timeouts {
 				create = "25m"
 				update = "30m"
 			}

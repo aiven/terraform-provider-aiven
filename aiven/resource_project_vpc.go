@@ -50,6 +50,10 @@ func resourceProjectVPC() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceProjectVPCState,
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(4 * time.Minute),
+			Delete: schema.DefaultTimeout(4 * time.Minute),
+		},
 
 		Schema: aivenProjectVPCSchema,
 	}
@@ -71,9 +75,12 @@ func resourceProjectVPCCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	// Get creation timeout
-	timeout, err := getTimeoutHelper(d, "create", 4*time.Minute)
+	timeout, err := getTimeoutHelper(d, "create")
 	if err != nil {
 		return err
+	}
+	if timeout == 0 {
+		timeout = d.Timeout(schema.TimeoutCreate)
 	}
 
 	// Make sure the VPC is active before returning it because service creation, moving
@@ -112,9 +119,12 @@ func resourceProjectVPCDelete(d *schema.ResourceData, m interface{}) error {
 	projectName, vpcID := splitResourceID2(d.Id())
 
 	// Get deletion timeout
-	timeout, err := getTimeoutHelper(d, "delete", 4*time.Minute)
+	timeout, err := getTimeoutHelper(d, "delete")
 	if err != nil {
 		return err
+	}
+	if timeout == 0 {
+		timeout = d.Timeout(schema.TimeoutDelete)
 	}
 
 	waiter := ProjectVPCDeleteWaiter{

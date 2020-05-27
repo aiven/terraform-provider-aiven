@@ -88,6 +88,10 @@ func resourceKafkaTopic() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceKafkaTopicState,
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(1 * time.Minute),
+			Read:   schema.DefaultTimeout(4 * time.Minute),
+		},
 
 		Schema: aivenKafkaTopicSchema,
 	}
@@ -118,9 +122,12 @@ func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	// Get creation timeout
-	timeout, err := getTimeoutHelper(d, "create", 1*time.Minute)
+	timeout, err := getTimeoutHelper(d, "create")
 	if err != nil {
 		return err
+	}
+	if timeout == 0 {
+		timeout = d.Timeout(schema.TimeoutCreate)
 	}
 
 	_, err = w.Conf(timeout).WaitForState()
@@ -185,9 +192,12 @@ func getTopic(d *schema.ResourceData, m interface{}) (aiven.KafkaTopic, error) {
 	}
 
 	// Get availability timeout
-	timeout, err := getTimeoutHelper(d, "read", 4*time.Minute)
+	timeout, err := getTimeoutHelper(d, "read")
 	if err != nil {
 		return aiven.KafkaTopic{}, err
+	}
+	if timeout == 0 {
+		timeout = d.Timeout(schema.TimeoutRead)
 	}
 
 	topic, err := w.Conf(timeout).WaitForState()
