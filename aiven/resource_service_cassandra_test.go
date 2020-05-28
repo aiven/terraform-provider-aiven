@@ -85,7 +85,7 @@ func testAccCheckAivenServiceCassandraAttributes(n string) resource.TestCheckFun
 			return fmt.Errorf("expected to get a correct public_access.prometheus from Aiven")
 		}
 
-		if a["cassandra_user_config.0.service_to_fork_from"] != "<<value not set>>" {
+		if a["cassandra_user_config.0.service_to_fork_from"] != "" {
 			return fmt.Errorf("expected to get a correct public_access.service_to_fork_from from Aiven")
 		}
 
