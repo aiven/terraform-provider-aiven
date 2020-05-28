@@ -258,7 +258,7 @@ resource "aiven_service" "myservice" {
         pg_version = "10"
     }
     
-    client_timeout {
+    timeouts {
         create = "20m"
         update = "15m"
     }
@@ -307,7 +307,9 @@ deletions. This does not shield against deleting databases or topics but for ser
 with backups much of the content can at least be restored from backup in case accidental
 deletion is done.
 
-`client_timeout` a custom client timeouts.
+`client_timeout` a deprecated custom client timeouts please use `timeouts` instead.
+
+`timeouts` a custom client timeouts.
 
 `x_user_config` defines service specific additional configuration options. These
 options can be found from the [JSON schema description](aiven/templates/service_user_config_schema.json).
@@ -473,7 +475,7 @@ resource "aiven_kafka_topic" "mytesttopic" {
     cleanup_policy = "delete"
     termination_protection = true
 
-    client_timeout {
+    timeouts {
         create = "1m"
         read = "5m"
     }
@@ -498,7 +500,9 @@ created.
 
 Aiven ID format when importing existing resource: `<project_name>/<service_name>/<topic_name>`
 
-`client_timeout` a custom client timeouts.
+`client_timeout` a deprecated custom client timeouts please use `timeouts` instead.
+
+`timeouts` a custom client timeouts.
 
 ### Resource Kafka ACL
 
@@ -791,7 +795,7 @@ resource "aiven_project_vpc" "myvpc" {
     cloud_name = "google-europe-west1"
     network_cidr = "192.168.0.1/24"
 
-    client_timeout {
+    timeouts {
         create = "5m"
     }
 }
@@ -821,7 +825,7 @@ resource "aiven_vpc_peering_connection" "mypeeringconnection" {
     peer_vpc = "<PEER_VPC_ID/NAME>"
     peer_region = "<PEER_REGION>"
 
-    client_timeout {
+    timeouts {
         create = "10m"
     }
 }
@@ -836,7 +840,9 @@ peered with.
 
 `peer_region` defines the region of the remote VPC if it is not in the same region as Aiven VPC.
 
-`client_timeout` a custom client timeouts.
+`client_timeout` a deprecated custom client timeouts please use `timeouts` instead.
+
+`timeouts` a custom client timeouts.
 
 `state` is the state of the peering connection. This property is computed by Aiven 
 therefore cannot be set, only read. Where state can be one of: `APPROVED`, 

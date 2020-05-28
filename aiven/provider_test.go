@@ -110,7 +110,6 @@ func Test_generateClientTimeoutsSchema(t *testing.T) {
 							Type:         schema.TypeString,
 							Description:  "create timeout",
 							Optional:     true,
-							Default:      "1m0s",
 							ValidateFunc: validateDurationString,
 						},
 					},
@@ -125,7 +124,6 @@ func Test_generateClientTimeoutsSchema(t *testing.T) {
 			assert.Equal(t, tt.want.MaxItems, got.MaxItems)
 			assert.Equal(t, tt.want.Description, got.Description)
 			assert.Equal(t, tt.want.Optional, got.Optional)
-			assert.Equal(t, tt.want.ForceNew, got.ForceNew)
 
 			for name, s := range got.Elem.(*schema.Resource).Schema {
 				want := tt.want.Elem.(*schema.Resource).Schema[name]
@@ -133,7 +131,6 @@ func Test_generateClientTimeoutsSchema(t *testing.T) {
 				assert.Equal(t, want.Type, s.Type)
 				assert.Equal(t, want.Description, s.Description)
 				assert.Equal(t, want.Optional, s.Optional)
-				assert.Equal(t, want.Default, s.Default)
 			}
 		})
 	}
@@ -164,12 +161,12 @@ func Test_getTimeoutHelper(t *testing.T) {
 				name:            "create",
 				defaultDuration: 1 * time.Minute,
 			},
-			want: 1 * time.Minute,
+			want: 0,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := getTimeoutHelper(tt.args.d, tt.args.name, tt.args.defaultDuration)
+			got, err := getTimeoutHelper(tt.args.d, tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("getTimeoutHelper() error = %v, wantErr %v", err, tt.wantErr)
 				return

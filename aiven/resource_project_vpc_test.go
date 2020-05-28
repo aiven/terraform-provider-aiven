@@ -73,7 +73,7 @@ func testAccProjectVPCCustomTimeoutResource(name string) string {
 			cloud_name = "google-europe-west1"
 			network_cidr = "192.168.0.0/24"
 
-			client_timeout {
+			timeouts {
 				create = "10m"
 				delete = "5m"
 			}

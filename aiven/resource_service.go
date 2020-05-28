@@ -499,6 +499,10 @@ func resourceService() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceServiceState,
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
+		},
 
 		Schema: aivenServiceSchema,
 	}
@@ -647,17 +651,24 @@ func resourceServiceState(d *schema.ResourceData, m interface{}) ([]*schema.Reso
 }
 
 func resourceServiceWait(d *schema.ResourceData, m interface{}, operation string) (*aiven.Service, error) {
+	// First get deprecated `client_timeout` timeout
+	timeout, err := getTimeoutHelper(d, operation)
+	if err != nil {
+		return nil, err
+	}
+	if timeout == 0 {
+		if operation == "create" {
+			timeout = d.Timeout(schema.TimeoutCreate)
+		} else {
+			timeout = d.Timeout(schema.TimeoutUpdate)
+		}
+	}
+
 	w := &ServiceChangeWaiter{
 		Client:      m.(*aiven.Client),
 		Operation:   operation,
 		Project:     d.Get("project").(string),
 		ServiceName: d.Get("service_name").(string),
-	}
-
-	// Get timeout
-	timeout, err := getTimeoutHelper(d, operation, 20*time.Minute)
-	if err != nil {
-		return nil, err
 	}
 
 	service, err := w.Conf(timeout).WaitForState()

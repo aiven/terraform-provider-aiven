@@ -69,6 +69,9 @@ func resourceVPCPeeringConnection() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceVPCPeeringConnectionState,
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(2 * time.Minute),
+		},
 
 		Schema: aivenVPCPeeringConnectionSchema,
 	}
@@ -102,9 +105,12 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 	}
 
 	// Get creation timeout
-	timeout, err := getTimeoutHelper(d, "create", 2*time.Minute)
+	timeout, err := getTimeoutHelper(d, "create")
 	if err != nil {
 		return err
+	}
+	if timeout == 0 {
+		timeout = d.Timeout(schema.TimeoutCreate)
 	}
 
 	// Wait until the peering connection has actually been built

@@ -203,14 +203,15 @@ func validateDurationString(v interface{}, k string) (ws []string, errors []erro
 
 // generateClientTimeoutsSchema generates client_timeout Terraform schema
 // based on name of the timeout and default duration
+// Deprecated: generateClientTimeoutsSchema exists for historical compatibility
+// and should not be used. To set timeouts use native TF timeouts functionality.
 func generateClientTimeoutsSchema(timeouts map[string]time.Duration) *schema.Schema {
 	schemaTimeouts := map[string]*schema.Schema{}
-	for name, duration := range timeouts {
+	for name := range timeouts {
 		schemaTimeouts[name] = &schema.Schema{
 			Type:         schema.TypeString,
 			Description:  name + " timeout",
 			Optional:     true,
-			Default:      duration.String(),
 			ValidateFunc: validateDurationString,
 		}
 	}
@@ -219,8 +220,9 @@ func generateClientTimeoutsSchema(timeouts map[string]time.Duration) *schema.Sch
 		Type:        schema.TypeSet,
 		MaxItems:    1,
 		Description: "Custom Terraform Client timeouts",
-		Optional:    true,
 		ForceNew:    true,
+		Optional:    true,
+		Deprecated:  "use timeouts instead",
 		Elem: &schema.Resource{
 			Schema: schemaTimeouts,
 		},
@@ -228,20 +230,27 @@ func generateClientTimeoutsSchema(timeouts map[string]time.Duration) *schema.Sch
 }
 
 // getTimeoutHelper is a helper which extract from a resource data client timeout
-func getTimeoutHelper(d *schema.ResourceData, name string, defaultDuration time.Duration) (time.Duration, error) {
-	for _, timeouts := range d.Get("client_timeout").(*schema.Set).List() {
+// Deprecated: getTimeoutHelper exists for historical compatibility
+// and should not be used. To set timeouts use native TF timeouts functionality.
+func getTimeoutHelper(d *schema.ResourceData, name string) (time.Duration, error) {
+	clientTimeouts, ok := d.GetOk("client_timeout")
+	if !ok || clientTimeouts.(*schema.Set).Len() == 0 {
+		return 0, nil
+	}
+
+	for _, timeouts := range clientTimeouts.(*schema.Set).List() {
 		t := timeouts.(map[string]interface{})
 		if _, ok := t[name]; ok {
 			timeout, err := time.ParseDuration(t[name].(string))
 			if err != nil {
-				return time.Duration(0), err
+				return 0, err
 			}
 
 			return timeout, nil
 		}
 	}
 
-	return defaultDuration, nil
+	return 0, nil
 }
 
 func flattenToString(a []interface{}) []string {
