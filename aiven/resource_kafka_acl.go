@@ -47,7 +47,7 @@ var aivenKafkaACLSchema = map[string]*schema.Schema{
 		Required:    true,
 		Description: "Username pattern for the ACL entry",
 		ForceNew:    true,
-		ValidateFunc: validation.StringMatch(regexp.MustCompile("^[a-zA-Z0-9_-]*$"),
+		ValidateFunc: validation.StringMatch(regexp.MustCompile("^([*]{1}$|[a-zA-Z0-9_-]*)$"),
 			"username should be alphanumeric"),
 	},
 }
