@@ -30,9 +30,23 @@ func TestAccAivenServiceIntegration_basic(t *testing.T) {
 				),
 			},
 			{
-				Config:             testAccServiceIntegrationMirrorMakerResource(rName),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: true,
+				Config: testAccServiceIntegrationKafkaConnectResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenServiceIntegrationAttributes("data.aiven_service_integration.int"),
+					resource.TestCheckResourceAttr(resourceName, "integration_type", "kafka_connect"),
+					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-kafka-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-kafka-con-%s", rName)),
+				),
+			},
+			{
+				Config: testAccServiceIntegrationMirrorMakerResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "integration_type", "kafka_mirrormaker"),
+					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-source-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-mm-%s", rName)),
+				),
 			},
 		},
 	})
@@ -89,6 +103,71 @@ func testAccServiceIntegrationResource(name string) string {
 			integration_type = "metrics"
 			source_service_name = aiven_service.bar-pg.service_name
 			destination_service_name = aiven_service.bar-influxdb.service_name
+		}
+
+		data "aiven_service_integration" "int" {
+			project = aiven_service_integration.bar.project
+			integration_type = aiven_service_integration.bar.integration_type
+			source_service_name = aiven_service_integration.bar.source_service_name
+			destination_service_name = aiven_service_integration.bar.destination_service_name
+		}
+		`, name, os.Getenv("AIVEN_CARD_ID"), name, name)
+}
+
+func testAccServiceIntegrationKafkaConnectResource(name string) string {
+	return fmt.Sprintf(`
+		resource "aiven_project" "foo" {
+			project = "test-acc-pr-%s"
+			card_id="%s"	
+		}
+		
+		resource "aiven_service" "kafka1" {
+			project = aiven_project.foo.project
+			cloud_name = "google-europe-west1"
+			plan = "business-4"
+			service_name =  "test-acc-sr-kafka-%s"
+			service_type = "kafka"
+			maintenance_window_dow = "monday"
+			maintenance_window_time = "10:00:00"
+			
+			kafka_user_config {
+				kafka_version = "2.4"
+			}
+		}
+		
+		resource "aiven_service" "kafka_connect1" {
+			project = aiven_project.foo.project
+			cloud_name = "google-europe-west1"
+			plan = "startup-4"
+			service_name = "test-acc-sr-kafka-con-%s"
+			service_type = "kafka_connect"
+			maintenance_window_dow = "monday"
+			maintenance_window_time = "10:00:00"
+			
+			kafka_connect_user_config {
+				kafka_connect {
+					consumer_isolation_level = "read_committed"
+				}
+				
+				public_access {
+					kafka_connect = true
+				}
+			}
+		}
+
+		resource "aiven_service_integration" "bar" {
+			project = aiven_project.foo.project
+			integration_type = "kafka_connect"
+			source_service_name = aiven_service.kafka1.service_name
+			destination_service_name = aiven_service.kafka_connect1.service_name
+			
+			kafka_connect_user_config {
+				kafka_connect {
+					group_id = "connect"
+					status_storage_topic = "__connect_status"
+					offset_storage_topic = "__connect_offsets"
+				}
+			}
 		}
 
 		data "aiven_service_integration" "int" {
