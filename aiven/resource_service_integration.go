@@ -57,6 +57,16 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		Optional: true,
 		Type:     schema.TypeList,
 	},
+	"kafka_connect_user_config": {
+		Description: "Kafka Connect specific user configurable settings",
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				GetUserConfigSchema("integration")["kafka_connect"].(map[string]interface{})),
+		},
+		MaxItems: 1,
+		Optional: true,
+		Type:     schema.TypeList,
+	},
 	"project": {
 		Description: "Project the integration belongs to",
 		ForceNew:    true,
