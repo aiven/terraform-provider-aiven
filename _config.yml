@@ -10,5 +10,4 @@ Description: The Aiven Terraform Provider is a way to access all of your Aiven s
 search_enabled: true
 exclude:
   - scripts/
-
 theme: jekyll-theme-minimal

@@ -2,15 +2,16 @@ package aiven
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"regexp"
+	"testing"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
-	"log"
-	"os"
-	"regexp"
-	"testing"
 )
 
 func TestAccAivenKafkaACL_basic(t *testing.T) {
@@ -41,6 +42,11 @@ func TestAccAivenKafkaACL_basic(t *testing.T) {
 				Config:      testAccKafkaACLWrongUsernameResource(rName),
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile("invalid value for username"),
+			},
+			{
+				Config:             testAccKafkaACLWildcardResource(rName),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
 			},
 			{
 				Config: testAccKafkaACLResource(rName),
@@ -123,6 +129,19 @@ func testAccKafkaACLWrongPermisionResource(_ string) string {
 		}
 		`
 }
+
+func testAccKafkaACLWildcardResource(_ string) string {
+	return `
+		resource "aiven_kafka_acl" "foo" {
+			project = "test-acc-pr-1"
+			service_name = "test-acc-sr-1"
+			topic = "test-acc-topic-1"
+			username = "*"
+			permission = "admin"
+		}
+		`
+}
+
 func testAccKafkaACLWrongUsernameResource(_ string) string {
 	return `
 		resource "aiven_kafka_acl" "foo" {
