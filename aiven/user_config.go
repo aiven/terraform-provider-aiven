@@ -32,7 +32,9 @@ func GetUserConfigSchema(resourceType string) map[string]interface{} {
 	if data, ok := userConfigSchemas[resourceType]; ok {
 		return data
 	}
+
 	var result map[string]interface{}
+
 	switch resourceType {
 	case "endpoint":
 		result = readUserConfigJSONSchema("integration_endpoints_user_config_schema.json")
@@ -43,6 +45,7 @@ func GetUserConfigSchema(resourceType string) map[string]interface{} {
 	default:
 		panic("Unknown resourceType " + resourceType)
 	}
+
 	userConfigSchemas[resourceType] = result
 	return result
 }
@@ -55,16 +58,6 @@ func GenerateTerraformUserConfigSchema(data map[string]interface{}) map[string]*
 
 	for name, definitionRaw := range properties {
 		definition := definitionRaw.(map[string]interface{})
-
-		t, _ := getAivenSchemaType(definition["type"])
-		// Types for all configuration option fields except object and array convert to Terraform
-		// string type, and original type is preserved in an api_type fields for backwards
-		// compatibility with Aiven API.
-		if t != "object" && t != "array" {
-			definition["type"] = "string"
-			definition["api_type"] = t
-		}
-
 		terraformSchema[encodeKeyName(name)] = generateTerraformUserConfigSchema(name, definition)
 	}
 
@@ -90,7 +83,7 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 	title := definition["title"].(string)
 
 	switch valueType {
-	case "string":
+	case "string", "integer", "boolean", "number":
 		return &schema.Schema{
 			Default:          defaultValue,
 			Description:      title,
@@ -222,6 +215,7 @@ func convertAPIUserConfigToTerraformCompatibleFormat(
 	jsonSchema map[string]interface{},
 ) map[string]interface{} {
 	terraformConfig := make(map[string]interface{})
+
 	for key, schemaDefinitionRaw := range jsonSchema {
 		schemaDefinition := schemaDefinitionRaw.(map[string]interface{})
 
@@ -239,7 +233,12 @@ func convertAPIUserConfigToTerraformCompatibleFormat(
 		}
 
 		switch valueType {
-		case "string":
+		case "object":
+			res := convertAPIUserConfigToTerraformCompatibleFormat(
+				apiValue.(map[string]interface{}), schemaDefinition["properties"].(map[string]interface{}),
+			)
+			terraformConfig[key] = []map[string]interface{}{res}
+		default:
 			switch value := apiValue.(type) {
 			case string:
 				terraformConfig[key] = apiValue
@@ -251,18 +250,14 @@ func convertAPIUserConfigToTerraformCompatibleFormat(
 				terraformConfig[key] = strconv.FormatFloat(apiValue.(float64), 'f', -1, 32)
 			case int:
 				terraformConfig[key] = strconv.Itoa(apiValue.(int))
+			case []interface{}:
+				terraformConfig[key] = apiValue
 			default:
 				panic(fmt.Sprintf("Invalid user config key type %T for %v", value, key))
 			}
-		case "object":
-			res := convertAPIUserConfigToTerraformCompatibleFormat(
-				apiValue.(map[string]interface{}), schemaDefinition["properties"].(map[string]interface{}),
-			)
-			terraformConfig[key] = []map[string]interface{}{res}
-		default:
-			terraformConfig[key] = apiValue
 		}
 	}
+
 	return terraformConfig
 }
 
@@ -335,12 +330,7 @@ func convertTerraformUserConfigValueToAPICompatibleFormat(
 	}
 
 	// get Aiven API value type
-	var valueType string
-	if t, ok := definition["api_type"]; ok {
-		valueType = t.(string)
-	} else {
-		valueType, _ = getAivenSchemaType(definition["type"])
-	}
+	valueType, _ := getAivenSchemaType(definition["type"])
 
 	switch valueType {
 	case "integer":
