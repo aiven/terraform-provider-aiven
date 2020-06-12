@@ -4,10 +4,10 @@ relative_links:
   enabled: true
   collections: true
 remote_theme: pmarsceill/just-the-docs
+#theme: "just-the-docs"
 email: support@aiven.io 
 title: Aiven Terraform Provider
 Description: The Aiven Terraform Provider is a way to access all of your Aiven services within Terraform. Use this provider to set up and teardown services and test out configurations. Any issues, please email support@aiven.io
 search_enabled: true
 exclude:
   - scripts/
-theme: jekyll-theme-minimal
