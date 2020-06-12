@@ -9,8 +9,7 @@ ci: lint bins release
 #################################################
 
 bootstrap:
-	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.20.0; \
-	go get -u github.com/gobuffalo/packr/v2/...
+	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.20.0;
 
 #################################################
 # Building
@@ -22,7 +21,7 @@ plugins:
 
 .PHONY: bins
 bins: plugins
-	packr2
+	go generate
 	GOOS=linux GOARCH=amd64 go build -ldflags "-X main.version=${version}" -o plugins/linux_amd64/terraform-provider-aiven_$(short_version) .
 	GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.version=${version}" -o plugins/darwin_amd64/terraform-provider-aiven_$(short_version) .
 	GOOS=windows GOARCH=amd64 go build -ldflags "-X main.version=${version}" -o plugins/windows_amd64/terraform-provider-aiven_$(short_version).exe .
@@ -62,7 +61,6 @@ lint:
 	fi
 
 clean:
-	packr2 clean
 	rm -rf vendor
 	rm -rf plugins
 	rm -f terraform-provider-aiven.tar.gz

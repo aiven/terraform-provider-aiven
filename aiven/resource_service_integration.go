@@ -4,6 +4,7 @@ package aiven
 import (
 	"fmt"
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/templates"
 	"github.com/hashicorp/terraform/helper/schema"
 	"strings"
 )
@@ -31,7 +32,7 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		Description: "Log integration specific user configurable settings",
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("integration")["logs"].(map[string]interface{})),
+				templates.GetUserConfigSchema("integration")["logs"].(map[string]interface{})),
 		},
 		MaxItems: 1,
 		Optional: true,
@@ -41,7 +42,7 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		Description: "Mirrormaker 1 integration specific user configurable settings",
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("integration")["mirrormaker"].(map[string]interface{})),
+				templates.GetUserConfigSchema("integration")["mirrormaker"].(map[string]interface{})),
 		},
 		MaxItems: 1,
 		Optional: true,
@@ -51,7 +52,7 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		Description: "Mirrormaker 2 integration specific user configurable settings",
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("integration")["kafka_mirrormaker"].(map[string]interface{})),
+				templates.GetUserConfigSchema("integration")["kafka_mirrormaker"].(map[string]interface{})),
 		},
 		MaxItems: 1,
 		Optional: true,
@@ -61,7 +62,7 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		Description: "Kafka Connect specific user configurable settings",
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("integration")["kafka_connect"].(map[string]interface{})),
+				templates.GetUserConfigSchema("integration")["kafka_connect"].(map[string]interface{})),
 		},
 		MaxItems: 1,
 		Optional: true,
