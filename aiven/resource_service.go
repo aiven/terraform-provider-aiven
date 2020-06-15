@@ -13,17 +13,33 @@ import (
 	"time"
 )
 
-var availableServiceTypes = []string{
-	"pg",
-	"kafka",
-	"cassandra",
-	"elasticsearch",
-	"grafana",
-	"influxdb",
-	"redis",
-	"kafka_connect",
-	"kafka_mirrormaker",
-	"mysql"}
+const (
+	ServiceTypePG               = "pg"
+	ServiceTypeCassandra        = "cassandra"
+	ServiceTypeElasticsearch    = "elasticsearch"
+	ServiceTypeGrafana          = "grafana"
+	ServiceTypeInfluxDB         = "influxdb"
+	ServiceTypeRedis            = "redis"
+	ServiceTypeMySQL            = "mysql"
+	ServiceTypeKafka            = "kafka"
+	ServiceTypeKafkaConnect     = "kafka_connect"
+	ServiceTypeKafkaMirrormaker = "kafka_mirrormaker"
+)
+
+func availableServiceTypes() []string {
+	return []string{
+		ServiceTypePG,
+		ServiceTypeCassandra,
+		ServiceTypeElasticsearch,
+		ServiceTypeGrafana,
+		ServiceTypeInfluxDB,
+		ServiceTypeRedis,
+		ServiceTypeMySQL,
+		ServiceTypeKafka,
+		ServiceTypeKafkaConnect,
+		ServiceTypeKafkaMirrormaker,
+	}
+}
 
 var aivenServiceSchema = map[string]*schema.Schema{
 	"project": {
@@ -53,7 +69,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		Required:     true,
 		Description:  "Service type code",
 		ForceNew:     true,
-		ValidateFunc: validation.StringInSlice(availableServiceTypes, false),
+		ValidateFunc: validation.StringInSlice(availableServiceTypes(), false),
 	},
 	"project_vpc_id": {
 		Type:        schema.TypeString,
@@ -488,7 +504,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 
 func resourceService() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceServiceCreate,
+		Create: resourceServiceCreateWrapper,
 		Read:   resourceServiceRead,
 		Update: resourceServiceUpdate,
 		Delete: resourceServiceDelete,
@@ -503,6 +519,43 @@ func resourceService() *schema.Resource {
 
 		Schema: aivenServiceSchema,
 	}
+}
+
+func resourceServiceCreateWrapper(d *schema.ResourceData, m interface{}) error {
+	// Need to set empty value for all services or all Terraform keeps on showing there's
+	// a change in the computed values that don't match actual service type
+	if err := d.Set(ServiceTypeCassandra, []map[string]interface{}{}); err != nil {
+		return err
+	}
+	if err := d.Set(ServiceTypeCassandra, []map[string]interface{}{}); err != nil {
+		return err
+	}
+	if err := d.Set(ServiceTypeGrafana, []map[string]interface{}{}); err != nil {
+		return err
+	}
+	if err := d.Set(ServiceTypeInfluxDB, []map[string]interface{}{}); err != nil {
+		return err
+	}
+	if err := d.Set(ServiceTypeKafka, []map[string]interface{}{}); err != nil {
+		return err
+	}
+	if err := d.Set(ServiceTypeKafkaConnect, []map[string]interface{}{}); err != nil {
+		return err
+	}
+	if err := d.Set(ServiceTypeKafkaMirrormaker, []map[string]interface{}{}); err != nil {
+		return err
+	}
+	if err := d.Set(ServiceTypeMySQL, []map[string]interface{}{}); err != nil {
+		return err
+	}
+	if err := d.Set(ServiceTypePG, []map[string]interface{}{}); err != nil {
+		return err
+	}
+	if err := d.Set(ServiceTypeRedis, []map[string]interface{}{}); err != nil {
+		return err
+	}
+
+	return resourceServiceCreate(d, m)
 }
 
 func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
@@ -779,39 +832,6 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	serviceType string,
 	connectionInfo aiven.ConnectionInfo,
 ) error {
-	// Need to set empty value for all services or all Terraform keeps on showing there's
-	// a change in the computed values that don't match actual service type
-	if err := d.Set("cassandra", []map[string]interface{}{}); err != nil {
-		return err
-	}
-	if err := d.Set("elasticsearch", []map[string]interface{}{}); err != nil {
-		return err
-	}
-	if err := d.Set("grafana", []map[string]interface{}{}); err != nil {
-		return err
-	}
-	if err := d.Set("influxdb", []map[string]interface{}{}); err != nil {
-		return err
-	}
-	if err := d.Set("kafka", []map[string]interface{}{}); err != nil {
-		return err
-	}
-	if err := d.Set("kafka_connect", []map[string]interface{}{}); err != nil {
-		return err
-	}
-	if err := d.Set("kafka_mirrormaker", []map[string]interface{}{}); err != nil {
-		return err
-	}
-	if err := d.Set("mysql", []map[string]interface{}{}); err != nil {
-		return err
-	}
-	if err := d.Set("pg", []map[string]interface{}{}); err != nil {
-		return err
-	}
-	if err := d.Set("redis", []map[string]interface{}{}); err != nil {
-		return err
-	}
-
 	props := make(map[string]interface{})
 
 	switch serviceType {
