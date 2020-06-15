@@ -51,6 +51,10 @@ func Provider() terraform.ResourceProvider {
 			"aiven_account_team_member":          datasourceAccountTeamMember(),
 			"aiven_mirrormaker_replication_flow": datasourceMirrorMakerReplicationFlowTopic(),
 			"aiven_account_authentication":       datasourceAccountAuthentication(),
+			"aiven_kafka":                        datasourceKafka(),
+			"aiven_kafka_connect":                datasourceKafkaConnect(),
+			"aiven_kafka_mirrormaker":            datasourceKafkaMirrormaker(),
+			"aiven_kafka_pg":                     datasourcePG(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -76,6 +80,10 @@ func Provider() terraform.ResourceProvider {
 			"aiven_account_team_member":          resourceAccountTeamMember(),
 			"aiven_mirrormaker_replication_flow": resourceMirrorMakerReplicationFlow(),
 			"aiven_account_authentication":       resourceAccountAuthentication(),
+			"aiven_kafka":                        resourceKafka(),
+			"aiven_kafka_connect":                resourceKafkaConnect(),
+			"aiven_kafka_mirrormaker":            resourceKafkaMirrormaker(),
+			"aiven_kafka_pg":                     resourcePG(),
 		},
 
 		ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {

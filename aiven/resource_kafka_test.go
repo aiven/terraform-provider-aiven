@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
 	"os"
 	"testing"
 )
@@ -22,7 +21,7 @@ func TestAccAiven_kafka(t *testing.T) {
 				Config: testAccKafkaResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceCommonAttributes("data.aiven_kafka.service"),
-					testAccCheckAivenKafkaAttributes("data.aiven_kafka.service"),
+					testAccCheckAivenServiceKafkaAttributes("data.aiven_kafka.service"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
@@ -76,65 +75,4 @@ func testAccKafkaResource(name string) string {
 			project = aiven_kafka.bar.project
 		}
 		`, name, os.Getenv("AIVEN_CARD_ID"), name)
-}
-
-func testAccCheckAivenKafkaAttributes(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		r := s.RootModule().Resources[n]
-		a := r.Primary.Attributes
-
-		if a["service_type"] != "kafka" {
-			return fmt.Errorf("expected to get a correct service type from Aiven, got :%s", a["service_type"])
-		}
-
-		if a["kafka_user_config.0.kafka_connect"] != "true" {
-			return fmt.Errorf("expected to get a correct kafka_connect from Aiven")
-		}
-
-		if a["kafka_user_config.0.kafka_rest"] != "true" {
-			return fmt.Errorf("expected to get a correct kafka_rest from Aiven")
-		}
-
-		if a["kafka_user_config.0.kafka_version"] != "2.4" {
-			return fmt.Errorf("expected to get a correct kafka_version from Aiven")
-		}
-
-		if a["kafka_user_config.0.public_access.0.kafka_connect"] != "true" {
-			return fmt.Errorf("expected to get a correct public_access.kafka_connect from Aiven")
-		}
-
-		if a["kafka_user_config.0.public_access.0.kafka_rest"] != "true" {
-			return fmt.Errorf("expected to get a correct public_access.kafka_rest from Aiven")
-		}
-
-		if a["kafka_user_config.0.public_access.0.kafka"] != "" {
-			return fmt.Errorf("expected to get a correct public_access.kafka from Aiven")
-		}
-
-		if a["kafka_user_config.0.public_access.0.prometheus"] != "" {
-			return fmt.Errorf("expected to get a correct public_access.prometheus from Aiven")
-		}
-
-		if a["kafka.0.connect_uri"] == "" {
-			return fmt.Errorf("expected to get a connect_uri from Aiven")
-		}
-
-		if a["kafka.0.rest_uri"] == "" {
-			return fmt.Errorf("expected to get a rest_uri from Aiven")
-		}
-
-		if a["kafka.0.schema_registry_uri"] == "" {
-			return fmt.Errorf("expected to get a schema_registry_uri from Aiven")
-		}
-
-		if a["kafka.0.access_key"] == "" {
-			return fmt.Errorf("expected to get an access_key from Aiven")
-		}
-
-		if a["kafka.0.access_cert"] == "" {
-			return fmt.Errorf("expected to get an access_cert from Aiven")
-		}
-
-		return nil
-	}
 }
