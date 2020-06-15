@@ -5,36 +5,36 @@ import (
 	"time"
 )
 
-func aivenKafkaConnectSchema() map[string]*schema.Schema {
-	kafkaConnectSchema := serviceCommonSchema()
-	kafkaConnectSchema[ServiceTypeKafkaConnect] = &schema.Schema{
+func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
+	kafkaMMSchema := serviceCommonSchema()
+	kafkaMMSchema[ServiceTypeKafkaMirrormaker] = &schema.Schema{
 		Type:        schema.TypeList,
 		MaxItems:    1,
 		Computed:    true,
-		Description: "Kafka Connect server provided values",
+		Description: "Kafka MirrorMaker 2 server provided values",
 		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	kafkaConnectSchema[ServiceTypeKafkaConnect+"_user_config"] = &schema.Schema{
+	kafkaMMSchema[ServiceTypeKafkaMirrormaker+"_user_config"] = &schema.Schema{
 		Type:             schema.TypeList,
 		MaxItems:         1,
 		Optional:         true,
-		Description:      "Kafka Connect user configurable settings",
+		Description:      "Kafka MirrorMaker 2 specific user configurable settings",
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("service")[ServiceTypeKafkaConnect].(map[string]interface{})),
+				GetUserConfigSchema("service")[ServiceTypeKafkaMirrormaker].(map[string]interface{})),
 		},
 	}
 
-	return kafkaConnectSchema
+	return kafkaMMSchema
 }
+func resourceKafkaMirrormaker() *schema.Resource {
 
-func resourceKafkaConnect() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceServiceCreateWrapper(ServiceTypeKafkaConnect),
+		Create: resourceServiceCreateWrapper(ServiceTypeKafkaMirrormaker),
 		Read:   resourceServiceRead,
 		Update: resourceServiceUpdate,
 		Delete: resourceServiceDelete,
@@ -47,6 +47,6 @@ func resourceKafkaConnect() *schema.Resource {
 			Update: schema.DefaultTimeout(20 * time.Minute),
 		},
 
-		Schema: aivenKafkaConnectSchema(),
+		Schema: aivenKafkaMirrormakerSchema(),
 	}
 }

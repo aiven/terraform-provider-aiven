@@ -1,9 +1,8 @@
-resource "aiven_service" "mm" {
+resource "aiven_mirror_maker" "mm" {
   project = aiven_project.kafka-mm-project1.project
   cloud_name = "google-europe-west1"
   plan = "startup-4"
   service_name = "mm"
-  service_type = "kafka_mirrormaker"
 
   kafka_mirrormaker_user_config {
     ip_filter = [
@@ -21,8 +20,8 @@ resource "aiven_service" "mm" {
 resource "aiven_service_integration" "i1" {
   project = aiven_project.kafka-mm-project1.project
   integration_type = "kafka_mirrormaker"
-  source_service_name = aiven_service.source.service_name
-  destination_service_name = aiven_service.mm.service_name
+  source_service_name = aiven_kafka.source.service_name
+  destination_service_name = aiven_mirror_maker.mm.service_name
 
   kafka_mirrormaker_user_config {
     cluster_alias = "source"
@@ -32,8 +31,8 @@ resource "aiven_service_integration" "i1" {
 resource "aiven_service_integration" "i2" {
   project = aiven_project.kafka-mm-project1.project
   integration_type = "kafka_mirrormaker"
-  source_service_name = aiven_service.target.service_name
-  destination_service_name = aiven_service.mm.service_name
+  source_service_name = aiven_kafka.target.service_name
+  destination_service_name = aiven_mirror_maker.mm.service_name
 
   kafka_mirrormaker_user_config {
     cluster_alias = "target"
@@ -42,9 +41,9 @@ resource "aiven_service_integration" "i2" {
 
 resource "aiven_mirrormaker_replication_flow" "f1" {
   project = aiven_project.kafka-mm-project1.project
-  service_name = aiven_service.mm.service_name
-  source_cluster = aiven_service.source.service_name
-  target_cluster = aiven_service.target.service_name
+  service_name = aiven_mirror_maker.mm.service_name
+  source_cluster = aiven_kafka.source.service_name
+  target_cluster = aiven_kafka.target.service_name
   enable = true
 
   topics = [

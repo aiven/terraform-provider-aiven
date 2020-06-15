@@ -104,12 +104,11 @@ func testAccMirrorMakerReplicationFlowResource(name string) string {
 			replication = 2
 		}
 
-		resource "aiven_service" "target" {
+		resource "aiven_kafka" "target" {
 			project = aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "business-4"
 			service_name = "test-acc-sr-target-%s"
-			service_type = "kafka"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
@@ -124,7 +123,7 @@ func testAccMirrorMakerReplicationFlowResource(name string) string {
 		
 		resource "aiven_kafka_topic" "target" {
 			project = aiven_project.foo.project
-			service_name = aiven_service.target.service_name
+			service_name = aiven_kafka.target.service_name
 			topic_name = "test-acc-topic-b-%s"
 			partitions = 3
 			replication = 2
@@ -162,7 +161,7 @@ func testAccMirrorMakerReplicationFlowResource(name string) string {
 		resource "aiven_service_integration" "i2" {
 			project = aiven_project.foo.project
 			integration_type = "kafka_mirrormaker"
-			source_service_name = aiven_service.target.service_name
+			source_service_name = aiven_kafka.target.service_name
 			destination_service_name = aiven_service.mm.service_name
 	
 			kafka_mirrormaker_user_config {
