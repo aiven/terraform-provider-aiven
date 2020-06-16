@@ -54,7 +54,7 @@ func Provider() terraform.ResourceProvider {
 			"aiven_kafka":                        datasourceKafka(),
 			"aiven_kafka_connect":                datasourceKafkaConnect(),
 			"aiven_kafka_mirrormaker":            datasourceKafkaMirrormaker(),
-			"aiven_kafka_pg":                     datasourcePG(),
+			"aiven_pg":                           datasourcePG(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -83,7 +83,7 @@ func Provider() terraform.ResourceProvider {
 			"aiven_kafka":                        resourceKafka(),
 			"aiven_kafka_connect":                resourceKafkaConnect(),
 			"aiven_kafka_mirrormaker":            resourceKafkaMirrormaker(),
-			"aiven_kafka_pg":                     resourcePG(),
+			"aiven_pg":                           resourcePG(),
 		},
 
 		ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {
