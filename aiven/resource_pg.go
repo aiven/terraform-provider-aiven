@@ -1,6 +1,7 @@
 package aiven
 
 import (
+	"github.com/aiven/terraform-provider-aiven/aiven/templates"
 	"github.com/hashicorp/terraform/helper/schema"
 	"time"
 )
@@ -70,7 +71,7 @@ func aivenPGSchema() map[string]*schema.Schema {
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("service")[ServiceTypePG].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypePG].(map[string]interface{})),
 		},
 	}
 

@@ -6,36 +6,35 @@ import (
 	"time"
 )
 
-func aivenKafkaConnectSchema() map[string]*schema.Schema {
-	kafkaConnectSchema := serviceCommonSchema()
-	kafkaConnectSchema[ServiceTypeKafkaConnect] = &schema.Schema{
+func aivenMySQLSchema() map[string]*schema.Schema {
+	schemaMySQL := serviceCommonSchema()
+	schemaMySQL[ServiceTypeMySQL] = &schema.Schema{
 		Type:        schema.TypeList,
 		MaxItems:    1,
 		Computed:    true,
-		Description: "Kafka Connect server provided values",
+		Description: "MySQL specific server provided values",
 		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	kafkaConnectSchema[ServiceTypeKafkaConnect+"_user_config"] = &schema.Schema{
+	schemaMySQL[ServiceTypeMySQL+"_user_config"] = &schema.Schema{
 		Type:             schema.TypeList,
 		MaxItems:         1,
 		Optional:         true,
-		Description:      "Kafka Connect user configurable settings",
+		Description:      "MySQL specific user configurable settings",
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")[ServiceTypeKafkaConnect].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeMySQL].(map[string]interface{})),
 		},
 	}
 
-	return kafkaConnectSchema
+	return schemaMySQL
 }
-
-func resourceKafkaConnect() *schema.Resource {
+func resourceMySQL() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceServiceCreateWrapper(ServiceTypeKafkaConnect),
+		Create: resourceServiceCreateWrapper(ServiceTypeMySQL),
 		Read:   resourceServiceRead,
 		Update: resourceServiceUpdate,
 		Delete: resourceServiceDelete,
@@ -48,6 +47,6 @@ func resourceKafkaConnect() *schema.Resource {
 			Update: schema.DefaultTimeout(20 * time.Minute),
 		},
 
-		Schema: aivenKafkaConnectSchema(),
+		Schema: aivenMySQLSchema(),
 	}
 }
