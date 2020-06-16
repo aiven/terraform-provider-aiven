@@ -1,6 +1,7 @@
 package aiven
 
 import (
+	"github.com/aiven/terraform-provider-aiven/aiven/templates"
 	"github.com/hashicorp/terraform/helper/schema"
 	"time"
 )
@@ -61,7 +62,7 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("service")[ServiceTypeKafka].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeKafka].(map[string]interface{})),
 		},
 	}
 
