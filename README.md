@@ -323,7 +323,7 @@ intended service usage rather than current attributes.
 
 `service_type` is the actual service that is being provided. Currently available
 options are `cassadra`, `elasticsearch`, `grafana`, `influxdb`, `kafka`,
-`pg` (PostreSQL) and `redis`. This value cannot be changed after service creation.
+`pg` (PostgreSQL) and `redis`. This value cannot be changed after service creation.
 
 `project_vpc_id` optionally specifies the VPC the service should run in. If the value
 is not set the service is not run inside a VPC. When set, the value should be given as a
