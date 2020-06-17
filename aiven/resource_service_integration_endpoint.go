@@ -3,6 +3,7 @@ package aiven
 
 import (
 	"fmt"
+	"github.com/aiven/terraform-provider-aiven/aiven/templates"
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
@@ -38,7 +39,7 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 		Description: "Datadog specific user configurable settings",
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("endpoint")["datadog"].(map[string]interface{})),
+				templates.GetUserConfigSchema("endpoint")["datadog"].(map[string]interface{})),
 		},
 		MaxItems: 1,
 		Optional: true,
@@ -48,7 +49,7 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 		Description: "Prometheus specific user configurable settings",
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("endpoint")["prometheus"].(map[string]interface{})),
+				templates.GetUserConfigSchema("endpoint")["prometheus"].(map[string]interface{})),
 		},
 		MaxItems: 1,
 		Optional: true,
@@ -58,7 +59,7 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 		Description: "rsyslog specific user configurable settings",
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("endpoint")["rsyslog"].(map[string]interface{})),
+				templates.GetUserConfigSchema("endpoint")["rsyslog"].(map[string]interface{})),
 		},
 		MaxItems: 1,
 		Optional: true,
@@ -68,7 +69,7 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 		Description: "external elasticsearch specific user configurable settings",
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("endpoint")["external_elasticsearch_logs"].(map[string]interface{})),
+				templates.GetUserConfigSchema("endpoint")["external_elasticsearch_logs"].(map[string]interface{})),
 		},
 		MaxItems: 1,
 		Optional: true,

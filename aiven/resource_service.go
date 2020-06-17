@@ -5,6 +5,7 @@ package aiven
 import (
 	"fmt"
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/templates"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 	"strconv"
@@ -197,7 +198,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("service")["cassandra"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")["cassandra"].(map[string]interface{})),
 		},
 	},
 	"elasticsearch": {
@@ -225,7 +226,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("service")["elasticsearch"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")["elasticsearch"].(map[string]interface{})),
 		},
 	},
 	"grafana": {
@@ -246,7 +247,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("service")["grafana"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")["grafana"].(map[string]interface{})),
 		},
 	},
 	"influxdb": {
@@ -273,7 +274,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("service")["influxdb"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")["influxdb"].(map[string]interface{})),
 		},
 	},
 	"kafka": {
@@ -330,7 +331,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("service")["kafka"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")["kafka"].(map[string]interface{})),
 		},
 	},
 	"kafka_connect": {
@@ -351,7 +352,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("service")["kafka_connect"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")["kafka_connect"].(map[string]interface{})),
 		},
 	},
 	"mysql": {
@@ -372,7 +373,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("service")["mysql"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")["mysql"].(map[string]interface{})),
 		},
 	},
 	"kafka_mirrormaker": {
@@ -393,7 +394,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("service")["kafka_mirrormaker"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")["kafka_mirrormaker"].(map[string]interface{})),
 		},
 	},
 	"pg": {
@@ -459,7 +460,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("service")["pg"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")["pg"].(map[string]interface{})),
 		},
 	},
 	"redis": {
@@ -480,7 +481,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				GetUserConfigSchema("service")["redis"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")["redis"].(map[string]interface{})),
 		},
 	},
 	"client_timeout": generateClientTimeoutsSchema(map[string]time.Duration{
@@ -534,6 +535,7 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 		_, vpcID := splitResourceID2(vpcID)
 		vpcIDPointer = &vpcID
 	}
+
 	_, err := client.Services.Create(
 		project,
 		aiven.CreateServiceRequest{
@@ -821,6 +823,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	}
 
 	props := make(map[string]interface{})
+
 	switch serviceType {
 	case "cassandra":
 	case "elasticsearch":
