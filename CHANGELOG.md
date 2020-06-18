@@ -4,6 +4,17 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [1.3.0] - 2020-06-18
+- Add support for Kafka Mirrormaker 2 
+- User go-client 1.5.5
+- User service configuration options refactoring
+- Fix Kafka ACL data source
+- Add GitHub Pages support
+- Add support for Terraform native timeouts
+- Add support for Accounts Authentication
+- Kafka ACL allow wildcard for username
+- Replace Packr2 with go generate 
+
 ## [1.2.4] - 2020-05-07
 - Speed up kafka topic availability waiter
 - Kafka Connect examples
