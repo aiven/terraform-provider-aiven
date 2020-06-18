@@ -4,9 +4,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
-func datasourceMySQL() *schema.Resource {
+func datasourceRedis() *schema.Resource {
 	return &schema.Resource{
 		Read:   datasourceServiceRead,
-		Schema: resourceSchemaAsDatasourceSchema(aivenMySQLSchema(), "project", "service_name"),
+		Schema: resourceSchemaAsDatasourceSchema(redisSchema(), "project", "service_name"),
 	}
 }

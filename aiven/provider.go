@@ -60,6 +60,7 @@ func Provider() terraform.ResourceProvider {
 			"aiven_elasticsearch":                datasourceElasticsearch(),
 			"aiven_grafana":                      datasourceGrafana(),
 			"aiven_influxdb":                     datasourceInfluxDB(),
+			"aiven_redis":                        datasourceRedis(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -94,6 +95,7 @@ func Provider() terraform.ResourceProvider {
 			"aiven_elasticsearch":                resourceElasticsearch(),
 			"aiven_grafana":                      resourceGrafana(),
 			"aiven_influxdb":                     resourceInfluxDB(),
+			"aiven_redis":                        resourceRedis(),
 		},
 
 		ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {
