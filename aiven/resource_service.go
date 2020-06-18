@@ -371,7 +371,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")["cassandra"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeCassandra].(map[string]interface{})),
 		},
 	},
 	"elasticsearch": {
@@ -399,7 +399,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")["elasticsearch"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeElasticsearch].(map[string]interface{})),
 		},
 	},
 	"grafana": {
@@ -420,7 +420,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")["grafana"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeGrafana].(map[string]interface{})),
 		},
 	},
 	"influxdb": {
@@ -447,7 +447,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")["influxdb"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeInfluxDB].(map[string]interface{})),
 		},
 	},
 	"kafka": {
@@ -504,7 +504,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")["kafka"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeKafka].(map[string]interface{})),
 		},
 	},
 	"kafka_connect": {
@@ -525,7 +525,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")["kafka_connect"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeKafkaConnect].(map[string]interface{})),
 		},
 	},
 	"mysql": {
@@ -546,7 +546,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")["mysql"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeMySQL].(map[string]interface{})),
 		},
 	},
 	"kafka_mirrormaker": {
@@ -567,7 +567,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")["kafka_mirrormaker"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeKafkaMirrormaker].(map[string]interface{})),
 		},
 	},
 	"pg": {
@@ -633,7 +633,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")["pg"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypePG].(map[string]interface{})),
 		},
 	},
 	"redis": {
@@ -654,7 +654,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")["redis"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeRedis].(map[string]interface{})),
 		},
 	},
 	"client_timeout": generateClientTimeoutsSchema(map[string]time.Duration{

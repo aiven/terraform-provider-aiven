@@ -6,36 +6,36 @@ import (
 	"time"
 )
 
-func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
-	kafkaMMSchema := serviceCommonSchema()
-	kafkaMMSchema[ServiceTypeKafkaMirrormaker] = &schema.Schema{
+func redisSchema() map[string]*schema.Schema {
+	s := serviceCommonSchema()
+	s[ServiceTypeRedis] = &schema.Schema{
 		Type:        schema.TypeList,
 		MaxItems:    1,
 		Computed:    true,
-		Description: "Kafka MirrorMaker 2 server provided values",
+		Description: "Redis server provided values",
 		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	kafkaMMSchema[ServiceTypeKafkaMirrormaker+"_user_config"] = &schema.Schema{
+	s[ServiceTypeRedis+"_user_config"] = &schema.Schema{
 		Type:             schema.TypeList,
 		MaxItems:         1,
 		Optional:         true,
-		Description:      "Kafka MirrorMaker 2 specific user configurable settings",
+		Description:      "Redis user configurable settings",
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")[ServiceTypeKafkaMirrormaker].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeRedis].(map[string]interface{})),
 		},
 	}
 
-	return kafkaMMSchema
+	return s
 }
-func resourceKafkaMirrormaker() *schema.Resource {
 
+func resourceRedis() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceServiceCreateWrapper(ServiceTypeKafkaMirrormaker),
+		Create: resourceServiceCreateWrapper(ServiceTypeRedis),
 		Read:   resourceServiceRead,
 		Update: resourceServiceUpdate,
 		Delete: resourceServiceDelete,
@@ -48,6 +48,6 @@ func resourceKafkaMirrormaker() *schema.Resource {
 			Update: schema.DefaultTimeout(20 * time.Minute),
 		},
 
-		Schema: aivenKafkaMirrormakerSchema(),
+		Schema: redisSchema(),
 	}
 }

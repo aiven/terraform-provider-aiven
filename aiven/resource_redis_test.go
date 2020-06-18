@@ -8,8 +8,8 @@ import (
 	"testing"
 )
 
-func TestAccAiven_mysql(t *testing.T) {
-	resourceName := "aiven_mysql.bar"
+func TestAccAiven_redis(t *testing.T) {
+	resourceName := "aiven_redis.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -18,14 +18,14 @@ func TestAccAiven_mysql(t *testing.T) {
 		CheckDestroy: testAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMysqlResource(rName),
+				Config: testAccRedisResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenServiceCommonAttributes("data.aiven_mysql.service"),
-					testAccCheckAivenServiceMysqlAttributes("data.aiven_mysql.service"),
+					testAccCheckAivenServiceCommonAttributes("data.aiven_redis.service"),
+					testAccCheckAivenServiceRedisAttributes("data.aiven_redis.service"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "service_type", "mysql"),
+					resource.TestCheckResourceAttr(resourceName, "service_type", "redis"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
@@ -37,14 +37,14 @@ func TestAccAiven_mysql(t *testing.T) {
 	})
 }
 
-func testAccMysqlResource(name string) string {
+func testAccRedisResource(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_project" "foo" {
 			project = "test-acc-pr-%s"
 			card_id="%s"	
 		}
 		
-		resource "aiven_mysql" "bar" {
+		resource "aiven_redis" "bar" {
 			project = aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "business-4"
@@ -52,23 +52,18 @@ func testAccMysqlResource(name string) string {
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
-			mysql_user_config {
-				mysql_version = 8
-							
-				mysql {
-					sql_mode = "ANSI,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE"
-					sql_require_primary_key = true
-				}
-
+			redis_user_config {
+				redis_maxmemory_policy = "allkeys-random"		
+	
 				public_access {
-					mysql = true
+					redis = true
 				}
 			}
 		}
 		
-		data "aiven_mysql" "service" {
-			service_name = aiven_mysql.bar.service_name
-			project = aiven_mysql.bar.project
+		data "aiven_redis" "service" {
+			service_name = aiven_redis.bar.service_name
+			project = aiven_project.foo.project
 		}
 		`, name, os.Getenv("AIVEN_CARD_ID"), name)
 }
