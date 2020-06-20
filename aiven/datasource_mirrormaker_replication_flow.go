@@ -1,6 +1,6 @@
 package aiven
 
-import "github.com/hashicorp/terraform/helper/schema"
+import "github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
 func datasourceMirrorMakerReplicationFlowTopic() *schema.Resource {
 	return &schema.Resource{

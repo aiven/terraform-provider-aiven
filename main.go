@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/aiven/terraform-provider-aiven/aiven"
-	"github.com/hashicorp/terraform/plugin"
+	"github.com/hashicorp/terraform-plugin-sdk/plugin"
 )
 
 //go:generate ./aiven/templates/gen.sh service service_user_config_schema.json

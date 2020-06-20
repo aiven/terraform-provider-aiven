@@ -3,11 +3,11 @@ package aiven
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 var aivenConnectionPoolSchema = map[string]*schema.Schema{

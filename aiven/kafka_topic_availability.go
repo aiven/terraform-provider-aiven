@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 // KafkaTopicAvailabilityWaiter is used to refresh the Aiven Kafka Topic endpoints when
