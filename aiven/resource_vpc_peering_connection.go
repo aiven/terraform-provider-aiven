@@ -2,6 +2,7 @@
 package aiven
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -86,6 +87,10 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 
 	client := m.(*aiven.Client)
 	projectName, vpcID := splitResourceID2(d.Get("vpc_id").(string))
+	if projectName == "" || vpcID == "" {
+		return errors.New("incorrect VPC ID, expected structure <PROJECT_NAME>/<VPC_ID>")
+	}
+
 	peerRegion := d.Get("peer_region").(string)
 
 	if peerRegion != "" {
