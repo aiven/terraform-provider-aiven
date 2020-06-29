@@ -21,7 +21,7 @@ In this example, we already have a project (`my-proj`) and a service (`kafka-ser
 Then, we define the `aiven_service_integration_endpoint`.
 
 The important things here are:
-* endpoint_type - The type of integration (e.g. `rsyslog`, `prometheus`, `rsyslog`)
+* endpoint_type - The type of integration (e.g. `rsyslog`, `prometheus`, `Datadog`)
 * {type}_user_config - The user config contains the connection info for your endpoint, such as: URL, port, Certificates (as strings) and login info. {type} here is the endpoint_type you specified above
     * The documentation for these configs is [here](https://github.com/aiven/terraform-provider-aiven/blob/8c66aab13a6bf1c4c48a1cf1e105927dab1fb93d/aiven/templates/integration_endpoints_user_config_schema.json) but generated documentation for this is coming soon.
 
