@@ -22,10 +22,10 @@ plugins:
 .PHONY: bins
 bins: plugins
 	go generate
-	GOOS=linux GOARCH=amd64 go build -ldflags "-X main.version=${version}" -o plugins/linux_amd64/terraform-provider-aiven_$(short_version) .
-	GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.version=${version}" -o plugins/darwin_amd64/terraform-provider-aiven_$(short_version) .
-	GOOS=windows GOARCH=amd64 go build -ldflags "-X main.version=${version}" -o plugins/windows_amd64/terraform-provider-aiven_$(short_version).exe .
-	GOOS=windows GOARCH=386 go build -ldflags "-X main.version=${version}" -o plugins/windows_386/terraform-provider-aiven_$(short_version).exe .
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-X main.version=${version}" -o plugins/linux_amd64/terraform-provider-aiven_$(short_version) .
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.version=${version}" -o plugins/darwin_amd64/terraform-provider-aiven_$(short_version) .
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags "-X main.version=${version}" -o plugins/windows_amd64/terraform-provider-aiven_$(short_version).exe .
+	CGO_ENABLED=0 GOOS=windows GOARCH=386 go build -ldflags "-X main.version=${version}" -o plugins/windows_386/terraform-provider-aiven_$(short_version).exe .
 
 #################################################
 # Artifacts for release
