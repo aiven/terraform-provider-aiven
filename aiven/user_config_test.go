@@ -2,7 +2,7 @@ package aiven
 
 import (
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"

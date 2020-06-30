@@ -2,8 +2,8 @@ package aiven
 
 import (
 	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 var aivenAccountAuthenticationSchema = map[string]*schema.Schema{

@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/helper/structure"
-	"github.com/hashicorp/terraform/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/structure"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"reflect"
 )
 
@@ -33,7 +33,7 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Description:      "Kafka Schema configuration should be a valid Avro Schema JSON format",
 		Required:         true,
-		ValidateFunc:     validation.ValidateJsonString,
+		ValidateFunc:     validation.StringIsJSON,
 		StateFunc:        normalizeJsonString,
 		DiffSuppressFunc: diffSuppressJsonObject,
 	},

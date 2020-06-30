@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 var aivenServiceUserSchema = map[string]*schema.Schema{
