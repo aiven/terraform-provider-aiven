@@ -4,6 +4,9 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [1.3.1] - 2020-06-30
+Improve vpc_id error handling for vpc peering connection
+
 ## [1.3.0] - 2020-06-18
 - Add support for Kafka Mirrormaker 2 
 - User go-client 1.5.5
