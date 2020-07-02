@@ -70,11 +70,22 @@ clean:
 #################################################
 # Documentation
 #################################################
-# TODO Run schema json output command on build
+gen_schema:
+	pip3 install json-schema-generator2
+	mkdir temp
+	./scripts/gen-schema.sh
+
 doc:
+	go get -u github.com/grafana/json-schema-docs
 	cat scripts/template_all.md > docs/index.md
 	cat scripts/template_ds.md > docs/data-sources/index.md
 	cat scripts/template_re.md > docs/resources/index.md
-	python scripts/docgen.py scripts/schema.json ALL >> docs/index.md
-	python scripts/docgen.py scripts/schema.json DATASOURCES >> docs/data-sources/index.md
-	python scripts/docgen.py scripts/schema.json RESOURCES >> docs/resources/index.md
+	python3 scripts/docgen.py scripts/schema.json ALL >> docs/index.md
+	python3 scripts/docgen.py scripts/schema.json DATASOURCES >> docs/data-sources/index.md
+	python3 scripts/docgen.py scripts/schema.json RESOURCES >> docs/resources/index.md
+	json-schema-docs -schema temp/integrations_user_config.schema.json -template scripts/integrations.md.tpl > docs/resources/integrations-user-config.md
+	json-schema-docs -schema temp/integration_endpoints_user_config.schema.json -template scripts/integration_endpoints.md.tpl > docs/resources/integration-endpoints-user-config.md
+	json-schema-docs -schema temp/service_user_config.schema.json -template scripts/services.md.tpl > docs/resources/services-config.md
+	rm -rf temp
+
+docs: gen_schema doc

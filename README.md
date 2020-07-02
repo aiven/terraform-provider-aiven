@@ -1,7 +1,6 @@
 ---
-title: README
-nav_order: 1
-has_children: true
+title: Home
+nav_exclude: true
 ---
 
 # Terraform Aiven
@@ -9,7 +8,7 @@ has_children: true
 [Terraform](https://www.terraform.io/) provider for [Aiven.io](https://aiven.io/). This
 provider allows you to conveniently manage all resources for Aiven.
 
-**A word of caution**: While Terraform is an extremely powerful tool that can make
+**A word of cautions**: While Terraform is an extremely powerful tool that can make
 managing your infrastructure a breeze, great care must be taken when comparing the
 changes that are about to applied to your infrastructure. When it comes to stateful
 services, you cannot just re-create a resource and have it in the original state;
