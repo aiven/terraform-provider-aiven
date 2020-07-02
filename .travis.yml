@@ -38,7 +38,6 @@ jobs:
       provider: pages
       cleanup: false
       edge: true
-      target_branch: master
       strategy: git
       keep_history: true
       on:
