@@ -70,6 +70,16 @@ func testAccElasticsearchServiceResource(name string) string {
 					elasticsearch = true
 					kibana = true
 				}
+
+				index_patterns {
+					pattern = "logs_*_foo_*"
+					max_index_count = 3
+				}
+
+				index_patterns {
+					pattern = "logs_*_bar_*"
+					max_index_count = 15
+				}
 			}
 		}
 		
