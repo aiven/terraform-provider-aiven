@@ -35,10 +35,6 @@ var aivenProjectVPCSchema = map[string]*schema.Schema{
 		Description: "State of the VPC (APPROVED, ACTIVE, DELETING, DELETED)",
 		Type:        schema.TypeString,
 	},
-	"client_timeout": generateClientTimeoutsSchema(map[string]time.Duration{
-		"create": 4 * time.Minute,
-		"delete": 4 * time.Minute,
-	}),
 }
 
 func resourceProjectVPC() *schema.Resource {
@@ -69,18 +65,8 @@ func resourceProjectVPCCreate(d *schema.ResourceData, m interface{}) error {
 			NetworkCIDR: d.Get("network_cidr").(string),
 		},
 	)
-
 	if err != nil {
 		return err
-	}
-
-	// Get creation timeout
-	timeout, err := getTimeoutHelper(d, "create")
-	if err != nil {
-		return err
-	}
-	if timeout == 0 {
-		timeout = d.Timeout(schema.TimeoutCreate)
 	}
 
 	// Make sure the VPC is active before returning it because service creation, moving
@@ -91,7 +77,7 @@ func resourceProjectVPCCreate(d *schema.ResourceData, m interface{}) error {
 		VPCID:   vpc.ProjectVPCID,
 	}
 
-	_, err = waiter.Conf(timeout).WaitForState()
+	_, err = waiter.Conf(d.Timeout(schema.TimeoutCreate)).WaitForState()
 	if err != nil {
 		return fmt.Errorf("error waiting for Aiven project VPC to be ACTIVE: %s", err)
 	}
@@ -118,22 +104,14 @@ func resourceProjectVPCDelete(d *schema.ResourceData, m interface{}) error {
 
 	projectName, vpcID := splitResourceID2(d.Id())
 
-	// Get deletion timeout
-	timeout, err := getTimeoutHelper(d, "delete")
-	if err != nil {
-		return err
-	}
-	if timeout == 0 {
-		timeout = d.Timeout(schema.TimeoutDelete)
-	}
-
 	waiter := ProjectVPCDeleteWaiter{
 		Client:  client,
 		Project: projectName,
 		VPCID:   vpcID,
 	}
 
-	_, err = waiter.Conf(timeout).WaitForState()
+	timeout := d.Timeout(schema.TimeoutDelete)
+	_, err := waiter.Conf(timeout).WaitForState()
 	if err != nil {
 		return fmt.Errorf("error waiting for Aiven project VPC to be DELETED: %s", err)
 	}
