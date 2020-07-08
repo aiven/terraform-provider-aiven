@@ -220,58 +220,6 @@ func validateDurationString(v interface{}, k string) (ws []string, errors []erro
 	return
 }
 
-// generateClientTimeoutsSchema generates client_timeout Terraform schema
-// based on name of the timeout and default duration
-// Deprecated: generateClientTimeoutsSchema exists for historical compatibility
-// and should not be used. To set timeouts use native TF timeouts functionality.
-func generateClientTimeoutsSchema(timeouts map[string]time.Duration) *schema.Schema {
-	schemaTimeouts := map[string]*schema.Schema{}
-	for name := range timeouts {
-		schemaTimeouts[name] = &schema.Schema{
-			Type:         schema.TypeString,
-			Description:  name + " timeout",
-			Optional:     true,
-			ValidateFunc: validateDurationString,
-		}
-	}
-
-	return &schema.Schema{
-		Type:        schema.TypeSet,
-		MaxItems:    1,
-		Description: "Custom Terraform Client timeouts",
-		ForceNew:    true,
-		Optional:    true,
-		Deprecated:  "use timeouts instead",
-		Elem: &schema.Resource{
-			Schema: schemaTimeouts,
-		},
-	}
-}
-
-// getTimeoutHelper is a helper which extract from a resource data client timeout
-// Deprecated: getTimeoutHelper exists for historical compatibility
-// and should not be used. To set timeouts use native TF timeouts functionality.
-func getTimeoutHelper(d *schema.ResourceData, name string) (time.Duration, error) {
-	clientTimeouts, ok := d.GetOk("client_timeout")
-	if !ok || clientTimeouts.(*schema.Set).Len() == 0 {
-		return 0, nil
-	}
-
-	for _, timeouts := range clientTimeouts.(*schema.Set).List() {
-		t := timeouts.(map[string]interface{})
-		if _, ok := t[name]; ok {
-			timeout, err := time.ParseDuration(t[name].(string))
-			if err != nil {
-				return 0, err
-			}
-
-			return timeout, nil
-		}
-	}
-
-	return 0, nil
-}
-
 func flattenToString(a []interface{}) []string {
 	r := make([]string, len(a))
 	for i, v := range a {

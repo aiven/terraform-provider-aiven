@@ -337,8 +337,6 @@ deletions. This does not shield against deleting databases or topics but for ser
 with backups much of the content can at least be restored from backup in case accidental
 deletion is done.
 
-`client_timeout` a deprecated custom client timeouts please use `timeouts` instead.
-
 `timeouts` a custom client timeouts.
 
 `x_user_config` defines service specific additional configuration options. These
@@ -529,8 +527,6 @@ Other properties should be self-explanatory. They can be changed after the topic
 created.
 
 Aiven ID format when importing existing resource: `<project_name>/<service_name>/<topic_name>`
-
-`client_timeout` a deprecated custom client timeouts please use `timeouts` instead.
 
 `timeouts` a custom client timeouts.
 
@@ -838,7 +834,7 @@ in. See the Service resource for additional information.
 
 `network_cidr` defines the network CIDR of the VPC.
 
-`client_timeout` a custom client timeouts.
+`timeouts` a custom client timeouts.
 
 Computed property `state` tells the current state of the VPC. This property cannot be
 set, only read.
@@ -869,8 +865,6 @@ peered with.
 `peer_vpc` defines the identifier or name of the remote VPC.
 
 `peer_region` defines the region of the remote VPC if it is not in the same region as Aiven VPC.
-
-`client_timeout` a deprecated custom client timeouts please use `timeouts` instead.
 
 `timeouts` a custom client timeouts.
 

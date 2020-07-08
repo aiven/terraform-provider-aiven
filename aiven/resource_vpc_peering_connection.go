@@ -56,9 +56,6 @@ var aivenVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		Description: "Cloud provider identifier for the peering connection if available",
 		Type:        schema.TypeString,
 	},
-	"client_timeout": generateClientTimeoutsSchema(map[string]time.Duration{
-		"create": 2 * time.Minute,
-	}),
 }
 
 func resourceVPCPeeringConnection() *schema.Resource {
@@ -109,15 +106,6 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 		return err
 	}
 
-	// Get creation timeout
-	timeout, err := getTimeoutHelper(d, "create")
-	if err != nil {
-		return err
-	}
-	if timeout == 0 {
-		timeout = d.Timeout(schema.TimeoutCreate)
-	}
-
 	// Wait until the peering connection has actually been built
 	w := &VPCPeeringBuildWaiter{
 		Client:           m.(*aiven.Client),
@@ -128,6 +116,7 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 		PeerRegion:       pc.PeerRegion,
 	}
 
+	timeout := d.Timeout(schema.TimeoutCreate)
 	res, err := w.Conf(timeout).WaitForState()
 	if err != nil {
 		return err

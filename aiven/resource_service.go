@@ -484,10 +484,6 @@ var aivenServiceSchema = map[string]*schema.Schema{
 				templates.GetUserConfigSchema("service")["redis"].(map[string]interface{})),
 		},
 	},
-	"client_timeout": generateClientTimeoutsSchema(map[string]time.Duration{
-		"create": 20 * time.Minute,
-		"update": 20 * time.Minute,
-	}),
 }
 
 func resourceService() *schema.Resource {
@@ -653,17 +649,11 @@ func resourceServiceState(d *schema.ResourceData, m interface{}) ([]*schema.Reso
 }
 
 func resourceServiceWait(d *schema.ResourceData, m interface{}, operation string) (*aiven.Service, error) {
-	// First get deprecated `client_timeout` timeout
-	timeout, err := getTimeoutHelper(d, operation)
-	if err != nil {
-		return nil, err
-	}
-	if timeout == 0 {
-		if operation == "create" {
-			timeout = d.Timeout(schema.TimeoutCreate)
-		} else {
-			timeout = d.Timeout(schema.TimeoutUpdate)
-		}
+	var timeout time.Duration
+	if operation == "create" {
+		timeout = d.Timeout(schema.TimeoutCreate)
+	} else {
+		timeout = d.Timeout(schema.TimeoutUpdate)
 	}
 
 	w := &ServiceChangeWaiter{
