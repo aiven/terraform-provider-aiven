@@ -205,11 +205,12 @@ func convertAPIUserConfigToTerraformCompatibleFormat(
 			case int:
 				terraformConfig[key] = strconv.Itoa(apiValue.(int))
 			case []interface{}:
-				if hasNestedUserConfigurationOptionItems(apiValue, schemaDefinition) {
+				if properties, ok := hasNestedUserConfigurationOptionItems(apiValue, schemaDefinition); ok {
 					var list []interface{}
 					for _, v := range apiValue.([]interface{}) {
+
 						res := convertAPIUserConfigToTerraformCompatibleFormat(
-							v.(map[string]interface{}), schemaDefinition["items"].(map[string]interface{})["properties"].(map[string]interface{}),
+							v.(map[string]interface{}), properties,
 						)
 						list = append(list, res)
 					}
@@ -233,24 +234,31 @@ func convertAPIUserConfigToTerraformCompatibleFormat(
 
 // hasNestedUserConfigurationOptionItems determines if the user configuration option has nested
 // items by definition and base on API value.
-func hasNestedUserConfigurationOptionItems(apiValue interface{}, schemaDefinition map[string]interface{}) bool {
-	var result bool
-
-	// check if API
-	//value has nested an items type of map[string]interface{}
+func hasNestedUserConfigurationOptionItems(
+	apiValue interface{}, schemaDefinition map[string]interface{},
+) (map[string]interface{}, bool) {
+	// check if API value has nested an items type of map[string]interface{}
 	for _, v := range apiValue.([]interface{}) {
 		if b, ok := v.(map[string]interface{}); ok && b != nil {
 			// check if schemaDefinition has [items] key
-			if _, ok := schemaDefinition["items"]; ok {
+			if items, ok := schemaDefinition["items"]; ok {
+				if _, ok := items.(map[string]interface{}); !ok {
+					return nil, false
+				}
+
 				// check if schemaDefinition has [items][properties] key
-				if _, ok := schemaDefinition["items"].(map[string]interface{})["properties"]; ok {
-					result = true
+				if properties, ok := schemaDefinition["items"].(map[string]interface{})["properties"]; ok {
+					if _, ok := properties.(map[string]interface{}); !ok {
+						return nil, false
+					}
+
+					return properties.(map[string]interface{}), true
 				}
 			}
 		}
 	}
 
-	return result
+	return nil, false
 }
 
 // ConvertTerraformUserConfigToAPICompatibleFormat converts Terraform user configuration to API compatible
