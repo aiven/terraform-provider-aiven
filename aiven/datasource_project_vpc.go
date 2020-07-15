@@ -10,8 +10,9 @@ import (
 
 func datasourceProjectVPC() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceProjectVPCRead,
-		Schema: resourceSchemaAsDatasourceSchema(aivenProjectVPCSchema, "project", "cloud_name"),
+		Read: datasourceProjectVPCRead,
+		Schema: resourceSchemaAsDatasourceSchema(aivenProjectVPCSchema,
+			"project", "cloud_name"),
 	}
 }
 
@@ -33,5 +34,6 @@ func datasourceProjectVPCRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	return fmt.Errorf("Project %s has no VPC defined for %s", projectName, cloudName)
+	return fmt.Errorf("pßroject %s has no VPC defined for %s",
+		projectName, cloudName)
 }

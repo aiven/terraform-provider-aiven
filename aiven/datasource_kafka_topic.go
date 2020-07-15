@@ -7,8 +7,9 @@ import (
 
 func datasourceKafkaTopic() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceKafkaTopicRead,
-		Schema: resourceSchemaAsDatasourceSchema(aivenKafkaTopicSchema, "project", "service_name", "topic_name"),
+		Read: datasourceKafkaTopicRead,
+		Schema: resourceSchemaAsDatasourceSchema(aivenKafkaTopicSchema,
+			"project", "service_name", "topic_name"),
 	}
 }
 
