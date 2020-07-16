@@ -402,12 +402,12 @@ func convertTerraformUserConfigValueToAPICompatibleFormatObject(
 func convertTerraformUserConfigValueToAPICompatibleFormatInteger(value interface{}) (int, error) {
 	var convertedValue int
 
-	switch value.(type) {
+	switch value := value.(type) {
 	case int:
-		convertedValue = value.(int)
+		convertedValue = value
 	case string:
 		var err error
-		convertedValue, err = strconv.Atoi(value.(string))
+		convertedValue, err = strconv.Atoi(value)
 		if err != nil {
 			return 0, fmt.Errorf("impossible to convert int to a string: %s", err)
 		}
@@ -459,9 +459,9 @@ func convertTerraformUserConfigValueToAPICompatibleFormatBoolean(value interface
 func convertTerraformUserConfigValueToAPICompatibleFormatString(value interface{}) (string, error) {
 	var convertedValue string
 
-	switch value.(type) {
+	switch value := value.(type) {
 	case string:
-		convertedValue = value.(string)
+		convertedValue = value
 	default:
 		return "", fmt.Errorf("expected string but got %s", value)
 	}
