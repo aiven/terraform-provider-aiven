@@ -1,0 +1,74 @@
+package aiven
+
+import (
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"os"
+	"testing"
+)
+
+func TestAccAiven_pg(t *testing.T) {
+	resourceName := "aiven_pg.bar"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAivenServiceResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPGResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
+					testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-pg-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
+					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
+					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
+					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
+					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+				),
+			},
+		},
+	})
+}
+
+func testAccPGResource(name string) string {
+	return fmt.Sprintf(`
+		resource "aiven_project" "foo" {
+			project = "test-acc-pr-pg-%s"
+			card_id="%s"	
+		}
+		
+		resource "aiven_pg" "bar" {
+			project = aiven_project.foo.project
+			cloud_name = "google-europe-west1"
+			plan = "startup-4"
+			service_name = "test-acc-sr-%s"
+			maintenance_window_dow = "monday"
+			maintenance_window_time = "10:00:00"
+			
+			pg_user_config {
+				pg_version = 11
+
+				public_access {
+					pg = true
+					prometheus = false
+				}
+
+				pg {
+					idle_in_transaction_session_timeout = 900
+				}
+			}
+		}
+		
+		data "aiven_pg" "service" {
+			service_name = aiven_pg.bar.service_name
+			project = aiven_pg.bar.project
+		}
+		`, name, os.Getenv("AIVEN_CARD_ID"), name)
+}

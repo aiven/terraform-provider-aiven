@@ -51,6 +51,16 @@ func Provider() terraform.ResourceProvider {
 			"aiven_account_team_member":          datasourceAccountTeamMember(),
 			"aiven_mirrormaker_replication_flow": datasourceMirrorMakerReplicationFlowTopic(),
 			"aiven_account_authentication":       datasourceAccountAuthentication(),
+			"aiven_kafka":                        datasourceKafka(),
+			"aiven_kafka_connect":                datasourceKafkaConnect(),
+			"aiven_kafka_mirrormaker":            datasourceKafkaMirrormaker(),
+			"aiven_pg":                           datasourcePG(),
+			"aiven_mysql":                        datasourceMySQL(),
+			"aiven_cassandra":                    datasourceCassandra(),
+			"aiven_elasticsearch":                datasourceElasticsearch(),
+			"aiven_grafana":                      datasourceGrafana(),
+			"aiven_influxdb":                     datasourceInfluxDB(),
+			"aiven_redis":                        datasourceRedis(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -76,6 +86,16 @@ func Provider() terraform.ResourceProvider {
 			"aiven_account_team_member":          resourceAccountTeamMember(),
 			"aiven_mirrormaker_replication_flow": resourceMirrorMakerReplicationFlow(),
 			"aiven_account_authentication":       resourceAccountAuthentication(),
+			"aiven_kafka":                        resourceKafka(),
+			"aiven_kafka_connect":                resourceKafkaConnect(),
+			"aiven_kafka_mirrormaker":            resourceKafkaMirrormaker(),
+			"aiven_pg":                           resourcePG(),
+			"aiven_mysql":                        resourceMySQL(),
+			"aiven_cassandra":                    resourceCassandra(),
+			"aiven_elasticsearch":                resourceElasticsearch(),
+			"aiven_grafana":                      resourceGrafana(),
+			"aiven_influxdb":                     resourceInfluxDB(),
+			"aiven_redis":                        resourceRedis(),
 		},
 
 		ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {
