@@ -1,6 +1,8 @@
 package aiven
 
 import (
+	"fmt"
+	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"time"
@@ -8,6 +10,12 @@ import (
 
 func aivenKafkaSchema() map[string]*schema.Schema {
 	aivenKafkaSchema := serviceCommonSchema()
+	aivenKafkaSchema["default_acl"] = &schema.Schema{
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Default:     true,
+		Description: "Create default wildcard Kafka ACL",
+	}
 	aivenKafkaSchema[ServiceTypeKafka] = &schema.Schema{
 		Type:        schema.TypeList,
 		MaxItems:    1,
@@ -71,7 +79,7 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 
 func resourceKafka() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceServiceCreateWrapper(ServiceTypeKafka),
+		Create: resourceKafkaCreate,
 		Read:   resourceServiceRead,
 		Update: resourceServiceUpdate,
 		Delete: resourceServiceDelete,
@@ -86,4 +94,35 @@ func resourceKafka() *schema.Resource {
 
 		Schema: aivenKafkaSchema(),
 	}
+}
+
+func resourceKafkaCreate(d *schema.ResourceData, m interface{}) error {
+	if err := resourceServiceCreateWrapper(ServiceTypeKafka)(d, m); err != nil {
+		return err
+	}
+
+	// if default_acl=false delete default wildcard Kafka ACL that is automatically created
+	if d.Get("default_acl").(bool) == false {
+		client := m.(*aiven.Client)
+		project := d.Get("project").(string)
+		serviceName := d.Get("service_name").(string)
+
+		list, err := client.KafkaACLs.List(project, serviceName)
+		if err != nil {
+			if err.(aiven.Error).Status != 404 {
+				return fmt.Errorf("cannot get a list of kafka acl's: %w", err)
+			}
+		}
+
+		for _, acl := range list {
+			if acl.Username == "*" && acl.Topic == "*" && acl.Permission == "admin" {
+				err := client.KafkaACLs.Delete(project, serviceName, acl.ID)
+				if err != nil {
+					return fmt.Errorf("cannot delete default wildcard kafka acl: %w", err)
+				}
+			}
+		}
+	}
+
+	return nil
 }
