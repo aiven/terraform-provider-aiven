@@ -64,7 +64,7 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 	case "array":
 		var itemType schema.ValueType
 		itemDefinition := definition["items"].(map[string]interface{})
-		typeString := itemDefinition["type"].(string)
+		typeString, _ := getAivenSchemaType(itemDefinition["type"])
 		switch typeString {
 		case "string", "integer", "boolean", "number":
 			itemType = schema.TypeString
