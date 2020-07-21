@@ -66,13 +66,7 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 		itemDefinition := definition["items"].(map[string]interface{})
 		typeString := itemDefinition["type"].(string)
 		switch typeString {
-		case "number":
-			itemType = schema.TypeFloat
-		case "integer":
-			itemType = schema.TypeInt
-		case "boolean":
-			itemType = schema.TypeBool
-		case "string":
+		case "string", "integer", "boolean", "number":
 			itemType = schema.TypeString
 		case "object":
 			itemType = schema.TypeList
@@ -211,7 +205,24 @@ func convertAPIUserConfigToTerraformCompatibleFormat(
 			case int:
 				terraformConfig[key] = strconv.Itoa(apiValue.(int))
 			case []interface{}:
-				terraformConfig[key] = apiValue
+				if properties, ok := hasNestedUserConfigurationOptionItems(apiValue, schemaDefinition); ok {
+					var list []interface{}
+					for _, v := range apiValue.([]interface{}) {
+
+						res := convertAPIUserConfigToTerraformCompatibleFormat(
+							v.(map[string]interface{}), properties,
+						)
+						list = append(list, res)
+					}
+					terraformConfig[key] = list
+				} else {
+					var list []interface{}
+					for _, v := range apiValue.([]interface{}) {
+						list = append(list, fmt.Sprintf("%v", v))
+					}
+					terraformConfig[key] = list
+				}
+
 			default:
 				panic(fmt.Sprintf("Invalid user config key type %T for %v", value, key))
 			}
@@ -219,6 +230,35 @@ func convertAPIUserConfigToTerraformCompatibleFormat(
 	}
 
 	return terraformConfig
+}
+
+// hasNestedUserConfigurationOptionItems determines if the user configuration option has nested
+// items by definition and base on API value.
+func hasNestedUserConfigurationOptionItems(
+	apiValue interface{}, schemaDefinition map[string]interface{},
+) (map[string]interface{}, bool) {
+	// check if API value has nested an items type of map[string]interface{}
+	for _, v := range apiValue.([]interface{}) {
+		if b, ok := v.(map[string]interface{}); ok && b != nil {
+			// check if schemaDefinition has [items] key
+			if items, ok := schemaDefinition["items"]; ok {
+				if _, ok := items.(map[string]interface{}); !ok {
+					return nil, false
+				}
+
+				// check if schemaDefinition has [items][properties] key
+				if properties, ok := schemaDefinition["items"].(map[string]interface{})["properties"]; ok {
+					if _, ok := properties.(map[string]interface{}); !ok {
+						return nil, false
+					}
+
+					return properties.(map[string]interface{}), true
+				}
+			}
+		}
+	}
+
+	return nil, false
 }
 
 // ConvertTerraformUserConfigToAPICompatibleFormat converts Terraform user configuration to API compatible
