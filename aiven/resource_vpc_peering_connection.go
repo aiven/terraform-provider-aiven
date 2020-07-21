@@ -59,6 +59,21 @@ var aivenVPCPeeringConnectionSchema = map[string]*schema.Schema{
 	"client_timeout": generateClientTimeoutsSchema(map[string]time.Duration{
 		"create": 2 * time.Minute,
 	}),
+	"peer_azure_app_id": {
+		Computed:    true,
+		Description: "Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet",
+		Type:        schema.TypeString,
+	},
+	"peer_azure_tenant_id": {
+		Computed:    true,
+		Description: "Azure tenant id in UUID4 form",
+		Type:        schema.TypeString,
+	},
+	"peer_resource_group": {
+		Computed:    true,
+		Description: "Azure resource group name of the peered VPC",
+		Type:        schema.TypeString,
+	},
 }
 
 func resourceVPCPeeringConnection() *schema.Resource {
@@ -140,7 +155,7 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 		d.SetId(buildResourceID(projectName, vpcID, pc.PeerCloudAccount, pc.PeerVPC))
 	}
 
-	return copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, projectName, vpcID)
+	return resourceVPCPeeringConnectionRead(d, m)
 }
 
 func parsePeeringVPCId(resourceID string) (string, string, string, string, *string) {
@@ -235,6 +250,15 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 	}
 
 	if err := d.Set("state_info", peeringConnection.StateInfo); err != nil {
+		return err
+	}
+	if err := d.Set("peer_azure_app_id", peeringConnection.PeerAzureAppId); err != nil {
+		return err
+	}
+	if err := d.Set("peer_azure_tenant_id", peeringConnection.PeerAzureTenantId); err != nil {
+		return err
+	}
+	if err := d.Set("peer_resource_group", peeringConnection.PeerResourceGroup); err != nil {
 		return err
 	}
 
