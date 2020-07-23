@@ -51,16 +51,6 @@ func Provider() terraform.ResourceProvider {
 			"aiven_account_team_member":            datasourceAccountTeamMember(),
 			"aiven_mirrormaker_replication_flow":   datasourceMirrorMakerReplicationFlowTopic(),
 			"aiven_account_authentication":         datasourceAccountAuthentication(),
-			"aiven_kafka":                          datasourceKafka(),
-			"aiven_kafka_connect":                  datasourceKafkaConnect(),
-			"aiven_kafka_mirrormaker":              datasourceKafkaMirrormaker(),
-			"aiven_pg":                             datasourcePG(),
-			"aiven_mysql":                          datasourceMySQL(),
-			"aiven_cassandra":                      datasourceCassandra(),
-			"aiven_elasticsearch":                  datasourceElasticsearch(),
-			"aiven_grafana":                        datasourceGrafana(),
-			"aiven_influxdb":                       datasourceInfluxDB(),
-			"aiven_redis":                          datasourceRedis(),
 			"aiven_transit_gateway_vpc_attachment": datasourceTransitGatewayVPCAttachment(),
 		},
 
@@ -87,16 +77,6 @@ func Provider() terraform.ResourceProvider {
 			"aiven_account_team_member":            resourceAccountTeamMember(),
 			"aiven_mirrormaker_replication_flow":   resourceMirrorMakerReplicationFlow(),
 			"aiven_account_authentication":         resourceAccountAuthentication(),
-			"aiven_kafka":                          resourceKafka(),
-			"aiven_kafka_connect":                  resourceKafkaConnect(),
-			"aiven_kafka_mirrormaker":              resourceKafkaMirrormaker(),
-			"aiven_pg":                             resourcePG(),
-			"aiven_mysql":                          resourceMySQL(),
-			"aiven_cassandra":                      resourceCassandra(),
-			"aiven_elasticsearch":                  resourceElasticsearch(),
-			"aiven_grafana":                        resourceGrafana(),
-			"aiven_influxdb":                       resourceInfluxDB(),
-			"aiven_redis":                          resourceRedis(),
 			"aiven_transit_gateway_vpc_attachment": resourceTransitGatewayVPCAttachment(),
 		},
 
@@ -240,6 +220,58 @@ func validateDurationString(v interface{}, k string) (ws []string, errors []erro
 	}
 
 	return
+}
+
+// generateClientTimeoutsSchema generates client_timeout Terraform schema
+// based on name of the timeout and default duration
+// Deprecated: generateClientTimeoutsSchema exists for historical compatibility
+// and should not be used. To set timeouts use native TF timeouts functionality.
+func generateClientTimeoutsSchema(timeouts map[string]time.Duration) *schema.Schema {
+	schemaTimeouts := map[string]*schema.Schema{}
+	for name := range timeouts {
+		schemaTimeouts[name] = &schema.Schema{
+			Type:         schema.TypeString,
+			Description:  name + " timeout",
+			Optional:     true,
+			ValidateFunc: validateDurationString,
+		}
+	}
+
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		MaxItems:    1,
+		Description: "Custom Terraform Client timeouts",
+		ForceNew:    true,
+		Optional:    true,
+		Deprecated:  "use timeouts instead",
+		Elem: &schema.Resource{
+			Schema: schemaTimeouts,
+		},
+	}
+}
+
+// getTimeoutHelper is a helper which extract from a resource data client timeout
+// Deprecated: getTimeoutHelper exists for historical compatibility
+// and should not be used. To set timeouts use native TF timeouts functionality.
+func getTimeoutHelper(d *schema.ResourceData, name string) (time.Duration, error) {
+	clientTimeouts, ok := d.GetOk("client_timeout")
+	if !ok || clientTimeouts.(*schema.Set).Len() == 0 {
+		return 0, nil
+	}
+
+	for _, timeouts := range clientTimeouts.(*schema.Set).List() {
+		t := timeouts.(map[string]interface{})
+		if _, ok := t[name]; ok {
+			timeout, err := time.ParseDuration(t[name].(string))
+			if err != nil {
+				return 0, err
+			}
+
+			return timeout, nil
+		}
+	}
+
+	return 0, nil
 }
 
 func flattenToString(a []interface{}) []string {
