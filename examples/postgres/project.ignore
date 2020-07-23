@@ -1,5 +1,0 @@
-# Project
-resource "aiven_project" "avn-project" {
-  project = var.avn_project_id
-  card_id = var.avn_card_id
-}
