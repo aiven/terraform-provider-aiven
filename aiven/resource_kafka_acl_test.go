@@ -142,6 +142,18 @@ func testAccKafkaACLWildcardResource(_ string) string {
 		`
 }
 
+func testAccKafkaACLPrefixWildcardResource(_ string) string {
+	return `
+		resource "aiven_kafka_acl" "foo" {
+			project = "test-acc-pr-1"
+			service_name = "test-acc-sr-1"
+			topic = "test-acc-topic-1"
+			username = "group-user-*"
+			permission = "admin"
+		}
+		`
+}
+
 func testAccKafkaACLWrongUsernameResource(_ string) string {
 	return `
 		resource "aiven_kafka_acl" "foo" {
