@@ -4,6 +4,9 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [1.3.3] - 2020-08-06
+Fix account team projects resource project reference bug
+
 ## [1.3.2] - 2020-07-21
 - Force static compilation
 - Fix user configuration options array of objects format bug
