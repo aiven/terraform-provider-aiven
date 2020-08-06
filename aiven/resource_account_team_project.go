@@ -80,14 +80,14 @@ func resourceAccountTeamProjectRead(d *schema.ResourceData, m interface{}) error
 		return err
 	}
 
-	var project *aiven.AccountTeamProject
+	var project aiven.AccountTeamProject
 	for _, p := range r.Projects {
 		if p.ProjectName == projectName {
-			project = &p
+			project = p
 		}
 	}
 
-	if project == nil {
+	if project.ProjectName == "" {
 		return fmt.Errorf("account team project %s not found", d.Id())
 	}
 
