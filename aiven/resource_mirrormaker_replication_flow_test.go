@@ -23,7 +23,7 @@ func TestAccAivenMirrorMakerReplicationFlow_basic(t *testing.T) {
 				Config: testAccMirrorMakerReplicationFlowResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenMirrorMakerReplicationFlowAttributes("data.aiven_mirrormaker_replication_flow.flow"),
-					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-mm-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "source_cluster", "source"),
 					resource.TestCheckResourceAttr(resourceName, "target_cluster", "target"),
@@ -73,13 +73,12 @@ func testAccCheckAivenMirrorMakerReplicationFlowResourceDestroy(s *terraform.Sta
 
 func testAccMirrorMakerReplicationFlowResource(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
-			card_id="%s"	
+		data "aiven_project" "foo" {
+			project = "%s"
 		}
 		
 		resource "aiven_service" "source" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "business-4"
 			service_name = "test-acc-sr-source-%s"
@@ -97,7 +96,7 @@ func testAccMirrorMakerReplicationFlowResource(name string) string {
 		}
 		
 		resource "aiven_kafka_topic" "source" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			service_name = aiven_service.source.service_name
 			topic_name = "test-acc-topic-a-%s"
 			partitions = 3
@@ -105,7 +104,7 @@ func testAccMirrorMakerReplicationFlowResource(name string) string {
 		}
 
 		resource "aiven_service" "target" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "business-4"
 			service_name = "test-acc-sr-target-%s"
@@ -123,7 +122,7 @@ func testAccMirrorMakerReplicationFlowResource(name string) string {
 		}
 		
 		resource "aiven_kafka_topic" "target" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			service_name = aiven_service.target.service_name
 			topic_name = "test-acc-topic-b-%s"
 			partitions = 3
@@ -131,7 +130,7 @@ func testAccMirrorMakerReplicationFlowResource(name string) string {
 		}
 
 		resource "aiven_service" "mm" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-mm-%s"
@@ -149,7 +148,7 @@ func testAccMirrorMakerReplicationFlowResource(name string) string {
 		}
 
 		resource "aiven_service_integration" "bar" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			integration_type = "kafka_mirrormaker"
 			source_service_name = aiven_service.source.service_name
 			destination_service_name = aiven_service.mm.service_name
@@ -160,7 +159,7 @@ func testAccMirrorMakerReplicationFlowResource(name string) string {
 		}
 
 		resource "aiven_service_integration" "i2" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			integration_type = "kafka_mirrormaker"
 			source_service_name = aiven_service.target.service_name
 			destination_service_name = aiven_service.mm.service_name
@@ -171,7 +170,7 @@ func testAccMirrorMakerReplicationFlowResource(name string) string {
 		}
 
 		resource "aiven_mirrormaker_replication_flow" "foo" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			service_name = aiven_service.mm.service_name
 			source_cluster = "source"
 			target_cluster = "target"
@@ -189,12 +188,12 @@ func testAccMirrorMakerReplicationFlowResource(name string) string {
 		}
 
 		data "aiven_mirrormaker_replication_flow" "flow" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			service_name = aiven_service.mm.service_name
 			source_cluster = aiven_mirrormaker_replication_flow.foo.source_cluster
 			target_cluster = aiven_mirrormaker_replication_flow.foo.target_cluster
 		}
-		`, name, os.Getenv("AIVEN_CARD_ID"), name, name, name, name, name)
+		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
 }
 
 func testAccCheckAivenMirrorMakerReplicationFlowAttributes(n string) resource.TestCheckFunc {

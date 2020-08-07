@@ -79,12 +79,10 @@ func TestAccAivenProject_basic(t *testing.T) {
 }
 
 func TestAccAivenProject_accounts(t *testing.T) {
-	t.Parallel()
-
 	resourceName := "aiven_project.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAivenProjectResourceDestroy,
