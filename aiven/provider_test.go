@@ -3,6 +3,7 @@ package aiven
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"log"
 	"os"
 	"reflect"
 	"testing"
@@ -36,8 +37,10 @@ func testAccPreCheck(t *testing.T) {
 		t.Fatal("AIVEN_TOKEN must be set for acceptance tests")
 	}
 
-	if v := os.Getenv("AIVEN_CARD_ID"); v == "" {
-		t.Fatal("AIVEN_CARD_ID must be set for acceptance tests")
+	// Provider a project name with enough credits to run acceptance
+	// tests or project name with the assigned payment card.
+	if v := os.Getenv("AIVEN_PROJECT_NAME"); v == "" {
+		log.Print("[WARNING] AIVEN_PROJECT_NAME must be set for some acceptance tests")
 	}
 }
 
