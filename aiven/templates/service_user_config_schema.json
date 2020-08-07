@@ -1284,6 +1284,24 @@
       "kafka_connect_config": {
         "additionalProperties": false,
         "properties": {
+          "connector_client_config_override_policy": {
+            "description": "Defines what client configurations can be overridden by the connector. Default is None",
+            "enum": [
+              "None",
+              "All"
+            ],
+            "title": "Client config override policy",
+            "type": "string"
+          },
+          "consumer_auto_offset_reset": {
+            "description": "What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest",
+            "enum": [
+              "earliest",
+              "latest"
+            ],
+            "title": "Consumer auto offset reset",
+            "type": "string"
+          },
           "consumer_isolation_level": {
             "description": "Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
             "enum": [
@@ -1292,6 +1310,14 @@
             ],
             "title": "Consumer isolation level",
             "type": "string"
+          },
+          "consumer_max_poll_interval_ms": {
+            "description": "The maximum delay in milliseconds between invocations of poll() when using consumer group management (defaults to 300000).",
+            "example": 300000,
+            "maximum": 2147483647,
+            "minimum": 1,
+            "title": "The maximum delay between polls when using consumer group management",
+            "type": "integer"
           },
           "consumer_max_poll_records": {
             "description": "The maximum number of records returned in a single call to poll() (defaults to 500).",
@@ -1307,6 +1333,22 @@
             "maximum": 100000000,
             "minimum": 1,
             "title": "The interval at which to try committing offsets for tasks",
+            "type": "integer"
+          },
+          "offset_flush_timeout_ms": {
+            "description": "Maximum number of milliseconds to wait for records to flush and partition offset data to be committed to offset storage before cancelling the process and restoring the offset data to be committed in a future attempt (defaults to 5000).",
+            "example": 5000,
+            "maximum": 2147483647,
+            "minimum": 1,
+            "title": "Offset flush timeout",
+            "type": "integer"
+          },
+          "session_timeout_ms": {
+            "description": "The timeout in milliseconds used to detect failures when using Kafka’s group management facilities (defaults to 10000).",
+            "example": 10000,
+            "maximum": 2147483647,
+            "minimum": 1,
+            "title": "The timeout used to detect failures when using Kafka’s group management facilities",
             "type": "integer"
           }
         },
@@ -1470,6 +1512,24 @@
       "kafka_connect": {
         "additionalProperties": false,
         "properties": {
+          "connector_client_config_override_policy": {
+            "description": "Defines what client configurations can be overridden by the connector. Default is None",
+            "enum": [
+              "None",
+              "All"
+            ],
+            "title": "Client config override policy",
+            "type": "string"
+          },
+          "consumer_auto_offset_reset": {
+            "description": "What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest",
+            "enum": [
+              "earliest",
+              "latest"
+            ],
+            "title": "Consumer auto offset reset",
+            "type": "string"
+          },
           "consumer_isolation_level": {
             "description": "Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
             "enum": [
@@ -1478,6 +1538,14 @@
             ],
             "title": "Consumer isolation level",
             "type": "string"
+          },
+          "consumer_max_poll_interval_ms": {
+            "description": "The maximum delay in milliseconds between invocations of poll() when using consumer group management (defaults to 300000).",
+            "example": 300000,
+            "maximum": 2147483647,
+            "minimum": 1,
+            "title": "The maximum delay between polls when using consumer group management",
+            "type": "integer"
           },
           "consumer_max_poll_records": {
             "description": "The maximum number of records returned in a single call to poll() (defaults to 500).",
@@ -1493,6 +1561,22 @@
             "maximum": 100000000,
             "minimum": 1,
             "title": "The interval at which to try committing offsets for tasks",
+            "type": "integer"
+          },
+          "offset_flush_timeout_ms": {
+            "description": "Maximum number of milliseconds to wait for records to flush and partition offset data to be committed to offset storage before cancelling the process and restoring the offset data to be committed in a future attempt (defaults to 5000).",
+            "example": 5000,
+            "maximum": 2147483647,
+            "minimum": 1,
+            "title": "Offset flush timeout",
+            "type": "integer"
+          },
+          "session_timeout_ms": {
+            "description": "The timeout in milliseconds used to detect failures when using Kafka’s group management facilities (defaults to 10000).",
+            "example": 10000,
+            "maximum": 2147483647,
+            "minimum": 1,
+            "title": "The timeout used to detect failures when using Kafka’s group management facilities",
             "type": "integer"
           }
         },
@@ -1736,6 +1820,12 @@
             "minimum": 65536,
             "title": "innodb_online_alter_log_max_size",
             "type": "integer"
+          },
+          "innodb_print_all_deadlocks": {
+            "description": "When enabled, information about all deadlocks in InnoDB user transactions is recorded in the error log. Disabled by default.",
+            "example": true,
+            "title": "innodb_print_all_deadlocks",
+            "type": "boolean"
           },
           "innodb_rollback_on_timeout": {
             "description": "When enabled a transaction timeout causes InnoDB to abort and roll back the entire transaction.",
@@ -2362,6 +2452,14 @@
           "null"
         ]
       },
+      "shared_buffers_percentage": {
+        "description": "Percentage of total RAM that the database server uses for shared memory buffers. Valid range is 20-60 (float), which corresponds to 20% - 60%. This setting adjusts the shared_buffers configuration value. The absolute maximum is 12 GB.",
+        "example": 41.5,
+        "maximum": 60,
+        "minimum": 20,
+        "title": "shared_buffers_percentage",
+        "type": "number"
+      },
       "synchronous_replication": {
         "enum": [
           "quorum",
@@ -2397,6 +2495,14 @@
           "string",
           "null"
         ]
+      },
+      "work_mem": {
+        "description": "Sets the maximum amount of memory to be used by a query operation (such as a sort or hash table) before writing to temporary disk files, in MB. Default is 1MB + 0.075% of total RAM (up to 32MB).",
+        "example": 4,
+        "maximum": 1024,
+        "minimum": 1,
+        "title": "work_mem",
+        "type": "integer"
       }
     },
     "type": "object"
