@@ -128,7 +128,7 @@ func resourceTransitGatewayVPCAttachmentUpdate(d *schema.ResourceData, m interfa
 	}
 
 	_, err = client.TransitGatewayVPCAttachment.Update(projectName, vpcID, aiven.TransitGatewayVPCAttachmentRequest{
-		Add:    nil,
+		Add:    add,
 		Delete: deleteCIDRs,
 	})
 	if err != nil {
