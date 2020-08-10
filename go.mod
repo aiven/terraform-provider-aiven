@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	cloud.google.com/go/storage v1.0.0 // indirect
-	github.com/aiven/aiven-go-client v1.5.5
+	github.com/aiven/aiven-go-client v1.5.7-0.20200723071816-76bc47f624b3
 	github.com/aws/aws-sdk-go v1.30.12 // indirect
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
@@ -16,8 +16,6 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk v1.14.0
 	github.com/mattn/go-colorable v0.1.7 // indirect
 	github.com/mitchellh/mapstructure v1.3.2 // indirect
-	github.com/onsi/ginkgo v1.12.0 // indirect
-	github.com/onsi/gomega v1.9.0 // indirect
 	github.com/spf13/afero v1.3.1 // indirect
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37 // indirect
