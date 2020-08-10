@@ -884,7 +884,7 @@ set, only read.
 Aiven ID format when importing existing resource: `<project_name>/<VPC_UUID>`. The UUID
 is not directly visible in the Aiven web console.
 
-### Resource VPC Peering Connection
+## Resource VPC Peering Connection
 
 ```
 resource "aiven_vpc_peering_connection" "mypeeringconnection" {
@@ -950,6 +950,36 @@ there. `state_info` field contains more details about the particular issue.
 Aiven ID format when importing existing resource: `<project_name>/<VPC_UUID>/<peer_cloud_account>/<peer_vpc>`.
 Aiven ID format when importing existing cross-region resource: `<project_name>/<VPC_UUID>/<peer_cloud_account>/<peer_vpc>/peer_region`.
 The UUID is not directly visible in the Aiven web console.
+
+## Resource Transit Gateway VPC Attachment
+
+```
+resource "aiven_transit_gateway_vpc_attachment" "attachment" {
+    vpc_id = aiven_project_vpc.bar.id
+    peer_cloud_account = "<PEER_ACCOUNT_ID>"
+    peer_vpc = "google-project1"
+    peer_region = "google-europe-west1"
+    user_peer_network_cidrs = [ "10.0.0.0/24" ]
+}
+```
+
+`vpc_id` is the Aiven VPC the peering connection is associated with.
+
+`peer_cloud_account` AWS account ID of the peered VPC.
+
+`peer_vpc` Transit gateway ID
+
+`peer_region` AWS region of the peered VPC (if not in the same region as Aiven VPC).
+
+`user_peer_network_cidrs` List of private IPv4 ranges to route through the peering connection.
+
+`timeouts` a custom client timeouts.
+
+`state` is the state of the peering connection.
+
+`state_info` state-specific help or error information.
+
+`peering_connection_id` Cloud provider identifier for the peering connection if available.
 
 ## Datasource options
 

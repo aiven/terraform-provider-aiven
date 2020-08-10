@@ -259,8 +259,10 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 		return err
 	}
 
-	if len(peeringConnection.UserPeerNetworkCIDRs) > 0 {
-		if err := d.Set("user_peer_network_cidrs", peeringConnection.UserPeerNetworkCIDRs); err != nil {
+	if err := d.Set("user_peer_network_cidrs", peeringConnection.UserPeerNetworkCIDRs); err != nil {
+		// this filed is only available for transit gateway vpc attachment, and regular vpc
+		// resource triggers `Invalid address to set` error
+		if !strings.Contains(err.Error(), "Invalid address to set") {
 			return err
 		}
 	}
