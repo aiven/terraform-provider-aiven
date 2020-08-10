@@ -10,8 +10,9 @@ import (
 
 func datasourceVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceVPCPeeringConnectionRead,
-		Schema: resourceSchemaAsDatasourceSchema(aivenVPCPeeringConnectionSchema, "vpc_id", "peer_cloud_account", "peer_vpc"),
+		Read: datasourceVPCPeeringConnectionRead,
+		Schema: resourceSchemaAsDatasourceSchema(aivenVPCPeeringConnectionSchema,
+			"vpc_id", "peer_cloud_account", "peer_vpc"),
 	}
 }
 
@@ -33,9 +34,10 @@ func datasourceVPCPeeringConnectionRead(d *schema.ResourceData, m interface{}) e
 			} else {
 				d.SetId(buildResourceID(projectName, vpcID, peer.PeerCloudAccount, peer.PeerVPC))
 			}
-			return copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, peer, projectName, vpcID)
+			return resourceVPCPeeringConnectionRead(d, m)
 		}
 	}
 
-	return fmt.Errorf("Peering connection from %s/%s to %s/%s not found", projectName, vpc.CloudName, peerCloudAccount, peerVPC)
+	return fmt.Errorf("peering connection from %s/%s to %s/%s not found",
+		projectName, vpc.CloudName, peerCloudAccount, peerVPC)
 }

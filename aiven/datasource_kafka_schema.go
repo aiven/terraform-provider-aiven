@@ -8,8 +8,9 @@ import (
 
 func datasourceKafkaSchema() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceKafkaSchemaRead,
-		Schema: resourceSchemaAsDatasourceSchema(aivenKafkaSchemaSchema, "project", "service_name", "subject_name"),
+		Read: datasourceKafkaSchemaRead,
+		Schema: resourceSchemaAsDatasourceSchema(aivenKafkaSchemaSchema,
+			"project", "service_name", "subject_name"),
 	}
 }
 
@@ -30,5 +31,6 @@ func datasourceKafkaSchemaRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	return fmt.Errorf("kafka schema subject %s/%s/%s not found", projectName, serviceName, subjectName)
+	return fmt.Errorf("kafka schema subject %s/%s/%s not found",
+		projectName, serviceName, subjectName)
 }

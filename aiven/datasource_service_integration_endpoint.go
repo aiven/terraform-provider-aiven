@@ -10,8 +10,9 @@ import (
 
 func datasourceServiceIntegrationEndpoint() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceServiceIntegrationEndpointRead,
-		Schema: resourceSchemaAsDatasourceSchema(aivenServiceIntegrationEndpointSchema, "project", "endpoint_name"),
+		Read: datasourceServiceIntegrationEndpointRead,
+		Schema: resourceSchemaAsDatasourceSchema(aivenServiceIntegrationEndpointSchema,
+			"project", "endpoint_name"),
 	}
 }
 
@@ -29,9 +30,9 @@ func datasourceServiceIntegrationEndpointRead(d *schema.ResourceData, m interfac
 	for _, endpoint := range endpoints {
 		if endpoint.EndpointName == endpointName {
 			d.SetId(buildResourceID(projectName, endpoint.EndpointID))
-			return copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(d, endpoint, projectName)
+			return resourceServiceIntegrationEndpointRead(d, m)
 		}
 	}
 
-	return fmt.Errorf("Endpoint \"%s\" not found", endpointName)
+	return fmt.Errorf("endpoint \"%s\" not found", endpointName)
 }
