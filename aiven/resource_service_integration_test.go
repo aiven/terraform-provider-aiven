@@ -17,7 +17,7 @@ func TestAccAivenServiceIntegration_basic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAivenServiceIntegraitonResourceDestroy,
+		CheckDestroy: testAccCheckAivenServiceIntegrationResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccServiceIntegrationResource(rName),
@@ -277,7 +277,7 @@ func testAccServiceIntegrationMirrorMakerResource(name string) string {
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
 }
 
-func testAccCheckAivenServiceIntegraitonResourceDestroy(s *terraform.State) error {
+func testAccCheckAivenServiceIntegrationResourceDestroy(s *terraform.State) error {
 	c := testAccProvider.Meta().(*aiven.Client)
 
 	// loop through the resources in state, verifying each aiven_service_integration is destroyed
