@@ -12,12 +12,10 @@ import (
 )
 
 func TestAccAivenServiceUser_basic(t *testing.T) {
-	t.Parallel()
-
 	resourceName := "aiven_service_user.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAivenServiceUserResourceDestroy,
@@ -27,7 +25,7 @@ func TestAccAivenServiceUser_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceUserAttributes("data.aiven_service_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 				),
 			},
@@ -62,13 +60,12 @@ func testAccCheckAivenServiceUserResourceDestroy(s *terraform.State) error {
 
 func testAccServiceUserResource(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
-			card_id = "%s"
+		data "aiven_project" "foo" {
+			project = "%s"
 		}
 		
 		resource "aiven_service" "bar" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-%s"
@@ -83,16 +80,16 @@ func testAccServiceUserResource(name string) string {
 		
 		resource "aiven_service_user" "foo" {
 			service_name = aiven_service.bar.service_name
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			username = "user-%s"
 		}
 		
 		data "aiven_service_user" "user" {
 			service_name = aiven_service.bar.service_name
-			project = aiven_project.foo.project
+			project = aiven_service.bar.project
 			username = aiven_service_user.foo.username
 		}
-		`, name, os.Getenv("AIVEN_CARD_ID"), name, name)
+		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccCheckAivenServiceUserAttributes(n string) resource.TestCheckFunc {

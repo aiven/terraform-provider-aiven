@@ -12,12 +12,10 @@ import (
 )
 
 func TestAccAivenElasticsearchAcl_basic(t *testing.T) {
-	t.Parallel()
-
 	resourceName := "aiven_elasticsearch_acl.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAivenAleasticsearchAclResourceDestroy,
@@ -26,7 +24,7 @@ func TestAccAivenElasticsearchAcl_basic(t *testing.T) {
 				Config: testAccElasticsearchAclResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenElasticsearchAclAttributes("data.aiven_elasticsearch_acl.acl"),
-					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "extended_acl", "false"),
@@ -38,13 +36,12 @@ func TestAccAivenElasticsearchAcl_basic(t *testing.T) {
 
 func testAccElasticsearchAclResource(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
-			card_id="%s"	
+		data "aiven_project" "foo" {
+			project = "%s"
 		}
 
 		resource "aiven_service" "bar" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-%s"
@@ -59,12 +56,12 @@ func testAccElasticsearchAclResource(name string) string {
 
 		resource "aiven_service_user" "foo" {
 			service_name = aiven_service.bar.service_name
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			username = "user-%s"
 		}
 		
 		resource "aiven_elasticsearch_acl" "foo" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			service_name = aiven_service.bar.service_name
 			enabled = true
 			extended_acl = false
@@ -88,7 +85,7 @@ func testAccElasticsearchAclResource(name string) string {
 			project = aiven_elasticsearch_acl.foo.project
 			service_name = aiven_elasticsearch_acl.foo.service_name
 		}
-		`, name, os.Getenv("AIVEN_CARD_ID"), name, name)
+		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccCheckAivenElasticsearchAclAttributes(n string) resource.TestCheckFunc {
