@@ -4,6 +4,10 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [1.3.4] - 2020-08-10
+- Expose new azure config parameters in aiven_vpc_peering_connection resource
+- Add support for new user configuration options
+
 ## [1.3.3] - 2020-08-06
 Fix account team projects resource project reference bug
 
