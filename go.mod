@@ -4,11 +4,11 @@ go 1.13
 
 require (
 	cloud.google.com/go/storage v1.0.0 // indirect
-	github.com/aiven/aiven-go-client v1.5.6
+	github.com/aiven/aiven-go-client v1.5.7-0.20200723071816-76bc47f624b3
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/hashicorp/go-hclog v0.9.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/hashicorp/terraform v0.12.28
+	github.com/hashicorp/terraform v0.12.29
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d // indirect
 	github.com/mattn/go-colorable v0.1.7 // indirect
 	github.com/mitchellh/mapstructure v1.3.2 // indirect

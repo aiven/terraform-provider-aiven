@@ -98,6 +98,7 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 		pc     *aiven.VPCPeeringConnection
 		err    error
 		region *string
+		cidrs  []string
 	)
 
 	client := m.(*aiven.Client)
@@ -111,13 +112,19 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 	if peerRegion != "" {
 		region = &peerRegion
 	}
+
+	if userPeerNetworkCidrs, ok := d.GetOk("user_peer_network_cidrs"); ok {
+		cidrs = userPeerNetworkCidrs.([]string)
+	}
+
 	pc, err = client.VPCPeeringConnections.Create(
 		projectName,
 		vpcID,
 		aiven.CreateVPCPeeringConnectionRequest{
-			PeerCloudAccount: d.Get("peer_cloud_account").(string),
-			PeerVPC:          d.Get("peer_vpc").(string),
-			PeerRegion:       region,
+			PeerCloudAccount:     d.Get("peer_cloud_account").(string),
+			PeerVPC:              d.Get("peer_vpc").(string),
+			PeerRegion:           region,
+			UserPeerNetworkCIDRs: cidrs,
 		},
 	)
 	if err != nil {
@@ -260,6 +267,14 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 	}
 	if err := d.Set("peer_resource_group", peeringConnection.PeerResourceGroup); err != nil {
 		return err
+	}
+
+	if err := d.Set("user_peer_network_cidrs", peeringConnection.UserPeerNetworkCIDRs); err != nil {
+		// this filed is only available for transit gateway vpc attachment, and regular vpc
+		// resource triggers `Invalid address to set` error
+		if !strings.Contains(err.Error(), "Invalid address to set") {
+			return err
+		}
 	}
 
 	return nil
