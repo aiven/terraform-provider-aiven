@@ -56,6 +56,22 @@ var aivenVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		Description: "Cloud provider identifier for the peering connection if available",
 		Type:        schema.TypeString,
 	},
+
+	"peer_azure_app_id": {
+		Computed:    true,
+		Description: "Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet",
+		Type:        schema.TypeString,
+	},
+	"peer_azure_tenant_id": {
+		Computed:    true,
+		Description: "Azure tenant id in UUID4 form",
+		Type:        schema.TypeString,
+	},
+	"peer_resource_group": {
+		Computed:    true,
+		Description: "Azure resource group name of the peered VPC",
+		Type:        schema.TypeString,
+	},
 }
 
 func resourceVPCPeeringConnection() *schema.Resource {
@@ -80,6 +96,7 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 		pc     *aiven.VPCPeeringConnection
 		err    error
 		region *string
+		cidrs  []string
 	)
 
 	client := m.(*aiven.Client)
@@ -93,13 +110,19 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 	if peerRegion != "" {
 		region = &peerRegion
 	}
+
+	if userPeerNetworkCidrs, ok := d.GetOk("user_peer_network_cidrs"); ok {
+		cidrs = userPeerNetworkCidrs.([]string)
+	}
+
 	pc, err = client.VPCPeeringConnections.Create(
 		projectName,
 		vpcID,
 		aiven.CreateVPCPeeringConnectionRequest{
-			PeerCloudAccount: d.Get("peer_cloud_account").(string),
-			PeerVPC:          d.Get("peer_vpc").(string),
-			PeerRegion:       region,
+			PeerCloudAccount:     d.Get("peer_cloud_account").(string),
+			PeerVPC:              d.Get("peer_vpc").(string),
+			PeerRegion:           region,
+			UserPeerNetworkCIDRs: cidrs,
 		},
 	)
 	if err != nil {
@@ -129,7 +152,7 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 		d.SetId(buildResourceID(projectName, vpcID, pc.PeerCloudAccount, pc.PeerVPC))
 	}
 
-	return copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, projectName, vpcID)
+	return resourceVPCPeeringConnectionRead(d, m)
 }
 
 func parsePeeringVPCId(resourceID string) (string, string, string, string, *string) {
@@ -225,6 +248,21 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 
 	if err := d.Set("state_info", peeringConnection.StateInfo); err != nil {
 		return err
+	}
+	if err := d.Set("peer_azure_app_id", peeringConnection.PeerAzureAppId); err != nil {
+		return err
+	}
+	if err := d.Set("peer_azure_tenant_id", peeringConnection.PeerAzureTenantId); err != nil {
+		return err
+	}
+	if err := d.Set("peer_resource_group", peeringConnection.PeerResourceGroup); err != nil {
+		return err
+	}
+
+	if len(peeringConnection.UserPeerNetworkCIDRs) > 0 {
+		if err := d.Set("user_peer_network_cidrs", peeringConnection.UserPeerNetworkCIDRs); err != nil {
+			return err
+		}
 	}
 
 	return nil

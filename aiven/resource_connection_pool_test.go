@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"os"
-	"strings"
 	"testing"
 )
 
@@ -32,7 +31,7 @@ func sweepConnectionPools(region string) error {
 	}
 
 	for _, project := range projects {
-		if strings.Contains(project.Name, "test-acc-") {
+		if project.Name == os.Getenv("AIVEN_PROJECT_NAME") {
 			services, err := conn.Services.List(project.Name)
 			if err != nil {
 				return fmt.Errorf("error retrieving a list of services for a project `%s`: %s", project.Name, err)
@@ -62,12 +61,10 @@ func sweepConnectionPools(region string) error {
 }
 
 func TestAccAivenConnectionPool_basic(t *testing.T) {
-	t.Parallel()
-
 	resourceName := "aiven_connection_pool.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAivenConnectionPoolResourceDestroy,
@@ -76,7 +73,7 @@ func TestAccAivenConnectionPool_basic(t *testing.T) {
 				Config: testAccConnectionPoolResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenConnectionPoolAttributes("data.aiven_connection_pool.pool"),
-					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "database_name", fmt.Sprintf("test-acc-db-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
@@ -91,13 +88,12 @@ func TestAccAivenConnectionPool_basic(t *testing.T) {
 
 func testAccConnectionPoolResource(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
-			card_id="%s"	
+		data "aiven_project" "foo" {
+			project = "%s"
 		}
 
 		resource "aiven_service" "bar" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-%s"
@@ -112,7 +108,7 @@ func testAccConnectionPoolResource(name string) string {
 		
 		resource "aiven_service_user" "foo" {
 			service_name = aiven_service.bar.service_name
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			username = "user-%s"
 		}
 
@@ -124,7 +120,7 @@ func testAccConnectionPoolResource(name string) string {
 
 		resource "aiven_connection_pool" "foo" {
 			service_name = aiven_service.bar.service_name
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			database_name = aiven_database.foo.database_name
 			username = aiven_service_user.foo.username
 			pool_name = "test-acc-pool-%s"
@@ -137,7 +133,7 @@ func testAccConnectionPoolResource(name string) string {
 			service_name = aiven_connection_pool.foo.service_name
 			pool_name = aiven_connection_pool.foo.pool_name
 		}
-		`, name, os.Getenv("AIVEN_CARD_ID"), name, name, name, name)
+		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name)
 }
 
 func testAccCheckAivenConnectionPoolAttributes(n string) resource.TestCheckFunc {

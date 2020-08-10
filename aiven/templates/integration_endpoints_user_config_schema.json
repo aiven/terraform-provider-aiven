@@ -38,6 +38,43 @@
     ],
     "type": "object"
   },
+  "external_aws_cloudwatch_logs": {
+    "additionalProperties": false,
+    "properties": {
+      "access_key": {
+        "example": "AAAAAAAAAAAAAAAAAAAA",
+        "maxLength": 4096,
+        "title": "AWS access key. Required permissions are logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents and logs:DescribeLogStreams",
+        "type": "string"
+      },
+      "log_group_name": {
+        "example": "my-log-group",
+        "maxLength": 512,
+        "minLength": 1,
+        "pattern": "^[\\.\\-_/#A-Za-z0-9]+$",
+        "title": "AWS CloudWatch log group name",
+        "type": "string"
+      },
+      "region": {
+        "example": "us-east-1",
+        "maxLength": 32,
+        "title": "AWS region",
+        "type": "string"
+      },
+      "secret_key": {
+        "example": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "maxLength": 4096,
+        "title": "AWS secret key",
+        "type": "string"
+      }
+    },
+    "required": [
+      "access_key",
+      "secret_key",
+      "region"
+    ],
+    "type": "object"
+  },
   "external_elasticsearch_logs": {
     "additionalProperties": false,
     "properties": {
@@ -88,6 +125,37 @@
       "url",
       "index_prefix"
     ],
+    "type": "object"
+  },
+  "external_google_cloud_logging": {
+    "additionalProperties": false,
+    "properties": {
+      "log_id": {
+        "example": "syslog",
+        "maxLength": 512,
+        "title": "Google Cloud Logging log id",
+        "type": "string"
+      },
+      "project_id": {
+        "example": "snappy-photon-12345",
+        "maxLength": 30,
+        "minLength": 6,
+        "title": "GCP project id.",
+        "type": "string"
+      },
+      "service_account_credentials": {
+        "example": "{\"type\": \"service_account\", ...",
+        "maxLength": 4096,
+        "title": "Google Service Account Credentials",
+        "type": "string"
+      }
+    },
+    "required": [
+      "project_id",
+      "log_id",
+      "service_account_credentials"
+    ],
+    "title": "User configuration for Google Cloud Logging integration",
     "type": "object"
   },
   "jolokia": {

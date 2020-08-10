@@ -17,14 +17,14 @@ func TestAccAivenServiceIntegration_basic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAivenServiceIntegraitonResourceDestroy,
+		CheckDestroy: testAccCheckAivenServiceIntegrationResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccServiceIntegrationResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceIntegrationAttributes("data.aiven_service_integration.int"),
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "metrics"),
-					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-pg-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-influxdb-%s", rName)),
 				),
@@ -34,7 +34,7 @@ func TestAccAivenServiceIntegration_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceIntegrationAttributes("data.aiven_service_integration.int"),
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "kafka_connect"),
-					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-kafka-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-kafka-con-%s", rName)),
 				),
@@ -43,7 +43,7 @@ func TestAccAivenServiceIntegration_basic(t *testing.T) {
 				Config: testAccServiceIntegrationMirrorMakerResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "kafka_mirrormaker"),
-					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-source-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-mm-%s", rName)),
 				),
@@ -54,13 +54,12 @@ func TestAccAivenServiceIntegration_basic(t *testing.T) {
 
 func testAccServiceIntegrationResource(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
-			card_id="%s"	
+		data "aiven_project" "foo" {
+			project = "%s"
 		}
 		
 		resource "aiven_service" "bar-pg" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-pg-%s"
@@ -83,7 +82,7 @@ func testAccServiceIntegrationResource(name string) string {
 		}
 
 		resource "aiven_service" "bar-influxdb" {
-				project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-influxdb-%s"
@@ -99,7 +98,7 @@ func testAccServiceIntegrationResource(name string) string {
 		}
 
 		resource "aiven_service_integration" "bar" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			integration_type = "metrics"
 			source_service_name = aiven_service.bar-pg.service_name
 			destination_service_name = aiven_service.bar-influxdb.service_name
@@ -111,18 +110,17 @@ func testAccServiceIntegrationResource(name string) string {
 			source_service_name = aiven_service_integration.bar.source_service_name
 			destination_service_name = aiven_service_integration.bar.destination_service_name
 		}
-		`, name, os.Getenv("AIVEN_CARD_ID"), name, name)
+		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccServiceIntegrationKafkaConnectResource(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
-			card_id="%s"	
+		data "aiven_project" "foo" {
+			project = "%s"
 		}
 		
 		resource "aiven_service" "kafka1" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "business-4"
 			service_name =  "test-acc-sr-kafka-%s"
@@ -136,7 +134,7 @@ func testAccServiceIntegrationKafkaConnectResource(name string) string {
 		}
 		
 		resource "aiven_service" "kafka_connect1" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-kafka-con-%s"
@@ -156,7 +154,7 @@ func testAccServiceIntegrationKafkaConnectResource(name string) string {
 		}
 
 		resource "aiven_service_integration" "bar" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			integration_type = "kafka_connect"
 			source_service_name = aiven_service.kafka1.service_name
 			destination_service_name = aiven_service.kafka_connect1.service_name
@@ -176,18 +174,17 @@ func testAccServiceIntegrationKafkaConnectResource(name string) string {
 			source_service_name = aiven_service_integration.bar.source_service_name
 			destination_service_name = aiven_service_integration.bar.destination_service_name
 		}
-		`, name, os.Getenv("AIVEN_CARD_ID"), name, name)
+		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccServiceIntegrationMirrorMakerResource(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
-			card_id="%s"	
+		data "aiven_project" "foo" {
+			project = "%s"
 		}
 		
 		resource "aiven_service" "source" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "business-4"
 			service_name = "test-acc-sr-source-%s"
@@ -205,7 +202,7 @@ func testAccServiceIntegrationMirrorMakerResource(name string) string {
 		}
 		
 		resource "aiven_kafka_topic" "source" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			service_name = aiven_service.source.service_name
 			topic_name = "test-acc-topic-a-%s"
 			partitions = 3
@@ -213,7 +210,7 @@ func testAccServiceIntegrationMirrorMakerResource(name string) string {
 		}
 
 		resource "aiven_service" "target" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "business-4"
 			service_name = "test-acc-sr-target-%s"
@@ -231,7 +228,7 @@ func testAccServiceIntegrationMirrorMakerResource(name string) string {
 		}
 		
 		resource "aiven_kafka_topic" "target" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			service_name = aiven_service.target.service_name
 			topic_name = "test-acc-topic-b-%s"
 			partitions = 3
@@ -239,7 +236,7 @@ func testAccServiceIntegrationMirrorMakerResource(name string) string {
 		}
 
 		resource "aiven_service" "mm" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-mm-%s"
@@ -257,7 +254,7 @@ func testAccServiceIntegrationMirrorMakerResource(name string) string {
 		}
 
 		resource "aiven_service_integration" "bar" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			integration_type = "kafka_mirrormaker"
 			source_service_name = aiven_service.source.service_name
 			destination_service_name = aiven_service.mm.service_name
@@ -268,7 +265,7 @@ func testAccServiceIntegrationMirrorMakerResource(name string) string {
 		}
 
 		resource "aiven_service_integration" "i2" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			integration_type = "kafka_mirrormaker"
 			source_service_name = aiven_service.target.service_name
 			destination_service_name = aiven_service.mm.service_name
@@ -277,10 +274,10 @@ func testAccServiceIntegrationMirrorMakerResource(name string) string {
 				cluster_alias = "target"
 			}
 		}
-		`, name, os.Getenv("AIVEN_CARD_ID"), name, name, name, name, name)
+		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
 }
 
-func testAccCheckAivenServiceIntegraitonResourceDestroy(s *terraform.State) error {
+func testAccCheckAivenServiceIntegrationResourceDestroy(s *terraform.State) error {
 	c := testAccProvider.Meta().(*aiven.Client)
 
 	// loop through the resources in state, verifying each aiven_service_integration is destroyed
