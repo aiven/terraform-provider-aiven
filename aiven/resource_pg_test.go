@@ -24,7 +24,7 @@ func TestAccAiven_pg(t *testing.T) {
 					testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-pg-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -39,13 +39,12 @@ func TestAccAiven_pg(t *testing.T) {
 
 func testAccPGResource(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_project" "foo" {
-			project = "test-acc-pr-pg-%s"
-			card_id="%s"	
+		data "aiven_project" "foo" {
+			project = "%s"
 		}
 		
 		resource "aiven_pg" "bar" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-%s"
@@ -70,5 +69,5 @@ func testAccPGResource(name string) string {
 			service_name = aiven_pg.bar.service_name
 			project = aiven_pg.bar.project
 		}
-		`, name, os.Getenv("AIVEN_CARD_ID"), name)
+		`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }

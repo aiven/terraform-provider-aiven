@@ -24,7 +24,7 @@ func TestAccAiven_redis(t *testing.T) {
 					testAccCheckAivenServiceRedisAttributes("data.aiven_redis.service"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "redis"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -39,13 +39,12 @@ func TestAccAiven_redis(t *testing.T) {
 
 func testAccRedisResource(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
-			card_id="%s"	
+		data "aiven_project" "foo" {
+			project = "%s"
 		}
 		
 		resource "aiven_redis" "bar" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "business-4"
 			service_name = "test-acc-sr-%s"
@@ -63,7 +62,7 @@ func testAccRedisResource(name string) string {
 		
 		data "aiven_redis" "service" {
 			service_name = aiven_redis.bar.service_name
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 		}
-		`, name, os.Getenv("AIVEN_CARD_ID"), name)
+		`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
