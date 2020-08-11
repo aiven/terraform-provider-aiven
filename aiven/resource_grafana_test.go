@@ -24,7 +24,7 @@ func TestAccAiven_grafana(t *testing.T) {
 					testAccCheckAivenServiceGrafanaAttributes("data.aiven_grafana.service"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "grafana"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
@@ -39,13 +39,12 @@ func TestAccAiven_grafana(t *testing.T) {
 
 func testAccGrafanaResource(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
-			card_id="%s"	
+		data "aiven_project" "foo" {
+			project = "%s"
 		}
 		
 		resource "aiven_grafana" "bar" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-1"
 			service_name = "test-acc-sr-%s"
@@ -63,7 +62,7 @@ func testAccGrafanaResource(name string) string {
 		
 		data "aiven_grafana" "service" {
 			service_name = aiven_grafana.bar.service_name
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 		}
-		`, name, os.Getenv("AIVEN_CARD_ID"), name)
+		`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
