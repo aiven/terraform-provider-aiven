@@ -4,6 +4,9 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [1.3.5] - 2020-08-11
+Add support for transit gateway vpc attachment
+
 ## [1.3.4] - 2020-08-10
 - Expose new azure config parameters in aiven_vpc_peering_connection resource
 - Add support for new user configuration options
