@@ -3,10 +3,11 @@ package aiven
 
 import (
 	"fmt"
-	"github.com/aiven/terraform-provider-aiven/pkg/cache"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"regexp"
 	"strings"
+
+	"github.com/aiven/terraform-provider-aiven/pkg/cache"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -47,7 +48,7 @@ var aivenKafkaACLSchema = map[string]*schema.Schema{
 		Required:    true,
 		Description: "Username pattern for the ACL entry",
 		ForceNew:    true,
-		ValidateFunc: validation.StringMatch(regexp.MustCompile("^([*]{1}$|[a-zA-Z0-9-_*?]*)$"),
+		ValidateFunc: validation.StringMatch(regexp.MustCompile(`^(\*$|[a-zA-Z0-9-_?][a-zA-Z0-9-_?*]+)$`),
 			"username should be alphanumeric"),
 	},
 }

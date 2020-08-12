@@ -44,7 +44,12 @@ func TestAccAivenKafkaACL_basic(t *testing.T) {
 				ExpectError: regexp.MustCompile("invalid value for username"),
 			},
 			{
-				Config:             testAccKafkaACLWildcardResource(rName),
+				Config:      testAccKafkaACLInvalidCharsResource(rName),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("invalid value for username"),
+			},
+			{
+				Config:             testAccKafkaACLPrefixWildcardResource(rName),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
 			},
@@ -155,6 +160,18 @@ func testAccKafkaACLPrefixWildcardResource(_ string) string {
 }
 
 func testAccKafkaACLWrongUsernameResource(_ string) string {
+	return `
+		resource "aiven_kafka_acl" "foo" {
+			project = "test-acc-pr-1"
+			service_name = "test-acc-sr-1"
+			topic = "test-acc-topic-1"
+			username = "*-user"
+			permission = "admin"
+		}
+		`
+}
+
+func testAccKafkaACLInvalidCharsResource(_ string) string {
 	return `
 		resource "aiven_kafka_acl" "foo" {
 			project = "test-acc-pr-1"
