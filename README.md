@@ -401,6 +401,47 @@ return the identifier of the existing integration.
 
 Aiven ID format when importing existing resource: `<project_name>/<service_name>`.
 
+### Separate Service Resources
+
+Starting from the version 2 Aiven Provider supports separate Terraform resources for each 
+service type available in Aiven Cloud. 
+
+List of available resources:
+- `aiven_pg` PostgreSQL service 
+- `aiven_cassandra` Cassandra service
+- `aiven_elasticsearch` Elasticsearch service
+- `aiven_grafana` Grafana service
+- `aiven_influxdb` Influxdb service
+- `aiven_redis` Redis service
+- `aiven_mysql` MySQL service
+- `aiven_kafka` Kafka service
+- `aiven_kafka_connect` Kafka Connect service
+- `aiven_kafka_mirrormaker` Kafka Mirrormaker 2 service
+ 
+Instructions on how to use them are similar to `aiven_service` with the exception that 
+for example `aiven_kafka` contains only all the necessary configuration options related 
+to this service type.
+
+Each resource for certain service type has the following structure:
+```
+resource "aiven_<TYPE>" "my-service" {
+    project = aiven_project.my-project.project
+    cloud_name = "google-europe-west1"
+    plan = "business-4"
+    service_name = "my-service1"
+    maintenance_window_dow = "monday"
+    maintenance_window_time = "10:00:00"
+    
+    <TYPE>_user_config {
+        ...
+    
+        <TYPE> {
+            ...
+        }
+    }
+}
+```
+
 ### Resource Database
 
 ```
