@@ -4,6 +4,26 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.0.0] - 2020-08-18
+- Migration to Terraform Plugin SDK 0.12
+- Add transit gateway vpc attachment documentation
+- Add mongo sink connector examples and tests
+- Kafka ACL regex modification
+- New resources:
+    - `aiven_pg` PostgreSQL service 
+    - `aiven_cassandra` Cassandra service
+    - `aiven_elasticsearch` Elasticsearch service
+    - `aiven_grafana` Grafana service
+    - `aiven_influxdb` Influxdb service
+    - `aiven_redis` Redis service
+    - `aiven_mysql` MySQL service
+    - `aiven_kafka` Kafka service
+    - `aiven_kafka_connect` Kafka Connect service
+    - `aiven_kafka_mirrormaker` Kafka Mirrormaker 2 service
+
+## [1.3.5] - 2020-08-11
+Add support for transit gateway vpc attachment
+
 ## [1.3.4] - 2020-08-10
 - Expose new azure config parameters in aiven_vpc_peering_connection resource
 - Add support for new user configuration options
