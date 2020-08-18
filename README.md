@@ -35,7 +35,7 @@ attempted to be deleted so even with this setting enabled you need to be very ca
 with the changes that are to be applied.
 
 ## Requirements
-- [Terraform](https://www.terraform.io/downloads.html) v0.10.1 or greater
+- [Terraform](https://www.terraform.io/downloads.html) v0.12.X or greater
 - [Go](https://golang.org/doc/install) 1.14.X or greater
 
 ## Installation
