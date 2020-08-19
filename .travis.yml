@@ -3,7 +3,7 @@ branches:
   - master
   - "/^v([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:\\-(rc\\.[0-9]+)*)?$/"
 language: go
-go: 1.13.x
+go: 1.14.x
 os:
 - osx
 - linux
@@ -28,7 +28,7 @@ jobs:
     - source env/bin/activate
     language: go
     os: linux
-    go: 1.13.x
+    go: 1.14.x
     script:
     - make gen_schema
     - make doc
@@ -42,4 +42,3 @@ jobs:
       keep_history: true
       on:
         branch: master
-  

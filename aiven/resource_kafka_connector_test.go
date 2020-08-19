@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"os"
-	"strings"
 	"testing"
 )
 
@@ -32,7 +31,7 @@ func sweepKafkaConnectos(region string) error {
 	}
 
 	for _, project := range projects {
-		if strings.Contains(project.Name, "test-acc-") {
+		if project.Name == os.Getenv("AIVEN_PROJECT_NAME") {
 			services, err := conn.Services.List(project.Name)
 			if err != nil {
 				return fmt.Errorf("error retrieving a list of services for a project `%s`: %s", project.Name, err)
@@ -66,12 +65,10 @@ func sweepKafkaConnectos(region string) error {
 }
 
 func TestAccAivenKafkaConnector_basic(t *testing.T) {
-	t.Parallel()
-
 	resourceName := "aiven_kafka_connector.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAivenKafkaConnectorResourceDestroy,
@@ -80,9 +77,34 @@ func TestAccAivenKafkaConnector_basic(t *testing.T) {
 				Config: testAccKafkaConnectorResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenKafkaConnectorAttributes("data.aiven_kafka_connector.connector"),
-					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "connector_name", fmt.Sprintf("test-acc-con-%s", rName)),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAivenKafkaConnector_mogosink(t *testing.T) {
+	if os.Getenv("MONGO_URI") == "" {
+		t.Skip("MONGO_URI environment variable is required to run this test")
+	}
+
+	resourceName := "aiven_kafka_connector.foo"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAivenKafkaConnectorResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKafkaConnectorMonoSinkResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "connector_name", fmt.Sprintf("test-acc-con-mongo-sink-%s", rName)),
 				),
 			},
 		},
@@ -139,13 +161,12 @@ func testAccCheckAivenKafkaConnectorResourceDestroy(s *terraform.State) error {
 
 func testAccKafkaConnectorResource(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
-			card_id="%s"	
+		data "aiven_project" "foo" {
+			project = "%s"
 		}
 
 		resource "aiven_service" "bar" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "business-4"
 			service_name = "test-acc-sr-%s"
@@ -165,7 +186,7 @@ func testAccKafkaConnectorResource(name string) string {
 		}
 		
 		resource "aiven_kafka_topic" "foo" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			service_name = aiven_service.bar.service_name
 			topic_name = "test-acc-topic-%s"
 			partitions = 3
@@ -173,7 +194,7 @@ func testAccKafkaConnectorResource(name string) string {
 		}
 		
 		resource "aiven_service" "dest" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr2-%s"
@@ -187,7 +208,7 @@ func testAccKafkaConnectorResource(name string) string {
 		}
 
 		resource "aiven_kafka_connector" "foo" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			service_name = aiven_service.bar.service_name
 			connector_name = "test-acc-con-%s"
 			
@@ -205,7 +226,68 @@ func testAccKafkaConnectorResource(name string) string {
 			service_name = aiven_kafka_connector.foo.service_name
 			connector_name = aiven_kafka_connector.foo.connector_name
 		}
-		`, name, os.Getenv("AIVEN_CARD_ID"), name, name, name, name, name)
+		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
+}
+
+func testAccKafkaConnectorMonoSinkResource(name string) string {
+	return fmt.Sprintf(`
+		data "aiven_project" "foo" {
+			project = "%s"
+		}
+
+		resource "aiven_kafka" "bar" {
+			project = data.aiven_project.foo.project
+			cloud_name = "google-europe-west1"
+			plan = "business-4"
+			service_name = "test-acc-sr-%s"
+			maintenance_window_dow = "monday"
+			maintenance_window_time = "10:00:00"
+			
+			kafka_user_config {
+				kafka_version = "2.4"
+				kafka_connect = true
+				schema_registry = true
+
+				kafka {
+				  group_max_session_timeout_ms = 70000
+				  log_retention_bytes = 1000000000
+				}
+			}
+		}
+		
+		resource "aiven_kafka_topic" "foo" {
+			project = data.aiven_project.foo.project
+			service_name = aiven_kafka.bar.service_name
+			topic_name = "test-acc-topic-%s"
+			partitions = 3
+			replication = 2
+		}
+
+		resource "aiven_kafka_connector" "foo" {
+			project = data.aiven_project.foo.project
+			service_name = aiven_kafka.bar.service_name
+			connector_name = "test-acc-con-mongo-sink-%s"
+			
+			config = {
+				"name" = "test-acc-con-mongo-sink-%s"
+				"connector.class" : "com.mongodb.kafka.connect.MongoSinkConnector"
+				"topics" = aiven_kafka_topic.foo.topic_name
+				"tasks.max" = 1
+
+				# mongo connect settings
+				"connection.uri" = "%s"
+				"database" = "acc-test-mongo"
+				"collection" = "mongo_collection_name"
+				"max.batch.size" = 1
+			}
+		}
+
+		data "aiven_kafka_connector" "connector" {
+			project = aiven_kafka_connector.foo.project
+			service_name = aiven_kafka_connector.foo.service_name
+			connector_name = aiven_kafka_connector.foo.connector_name
+		}
+		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, os.Getenv("MONGO_URI"))
 }
 
 func testAccCheckAivenKafkaConnectorAttributes(n string) resource.TestCheckFunc {

@@ -5,8 +5,8 @@ import (
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"os"
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -38,7 +38,7 @@ func sweepServices(region string) error {
 	}
 
 	for _, project := range projects {
-		if strings.Contains(project.Name, "test-acc-") {
+		if project.Name == os.Getenv("AIVEN_PROJECT_NAME") {
 			services, err := conn.Services.List(project.Name)
 			if err != nil {
 				return fmt.Errorf("error retrieving a list of services for a project `%s`: %s", project.Name, err)

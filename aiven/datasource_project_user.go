@@ -2,14 +2,16 @@
 package aiven
 
 import (
+	"fmt"
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func datasourceProjectUser() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceProjectUserRead,
-		Schema: resourceSchemaAsDatasourceSchema(aivenProjectUserSchema, "project", "email"),
+		Read: datasourceProjectUserRead,
+		Schema: resourceSchemaAsDatasourceSchema(aivenProjectUserSchema,
+			"project", "email"),
 	}
 }
 
@@ -19,20 +21,23 @@ func datasourceProjectUserRead(d *schema.ResourceData, m interface{}) error {
 	projectName := d.Get("project").(string)
 	email := d.Get("email").(string)
 
-	user, invitation, err := client.ProjectUsers.Get(projectName, email)
+	users, invitations, err := client.ProjectUsers.List(projectName)
 	if err != nil {
 		return err
 	}
-
-	d.SetId(buildResourceID(projectName, email))
-	d.Set("project", projectName)
-	d.Set("email", email)
-	if user != nil {
-		d.Set("member_type", user.MemberType)
-		d.Set("accepted", true)
-	} else {
-		d.Set("member_type", invitation.MemberType)
-		d.Set("accepted", false)
+	for _, user := range users {
+		if user.Email == email {
+			d.SetId(buildResourceID(projectName, email))
+			return resourceProjectUserRead(d, m)
+		}
 	}
-	return nil
+
+	for _, invitation := range invitations {
+		if invitation.UserEmail == email {
+			d.SetId(buildResourceID(projectName, email))
+			return resourceProjectUserRead(d, m)
+		}
+	}
+
+	return fmt.Errorf("project user %s/%s not found", projectName, email)
 }

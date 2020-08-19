@@ -8,8 +8,9 @@ import (
 
 func datasourceAccountTeam() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceAccountTeamRead,
-		Schema: resourceSchemaAsDatasourceSchema(aivenAccountTeamSchema, "account_id", "name"),
+		Read: datasourceAccountTeamRead,
+		Schema: resourceSchemaAsDatasourceSchema(aivenAccountTeamSchema,
+			"account_id", "name"),
 	}
 }
 

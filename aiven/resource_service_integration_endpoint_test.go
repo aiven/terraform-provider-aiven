@@ -23,7 +23,7 @@ func TestAccAivenServiceIntegrationEndpoint_basic(t *testing.T) {
 				Config: testAccServiceIntegrationEndpointResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceEndpointIntegrationAttributes("data.aiven_service_integration_endpoint.endpoint"),
-					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "endpoint_name", fmt.Sprintf("test-acc-ie-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "endpoint_type", "external_elasticsearch_logs"),
 				),
@@ -34,13 +34,12 @@ func TestAccAivenServiceIntegrationEndpoint_basic(t *testing.T) {
 
 func testAccServiceIntegrationEndpointResource(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
-			card_id="%s"	
+		data "aiven_project" "foo" {
+			project = "%s"
 		}
 		
 		resource "aiven_service" "bar-pg" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-pg-%s"
@@ -63,7 +62,7 @@ func testAccServiceIntegrationEndpointResource(name string) string {
 		}
 		
 		resource "aiven_service_integration_endpoint" "bar" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			endpoint_name = "test-acc-ie-%s"
 			endpoint_type = "external_elasticsearch_logs"
 
@@ -76,7 +75,7 @@ func testAccServiceIntegrationEndpointResource(name string) string {
 		}
 
 		resource "aiven_service_integration" "bar" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			integration_type = "external_elasticsearch_logs"
 			source_service_name = aiven_service.bar-pg.service_name
 			destination_endpoint_id = aiven_service_integration_endpoint.bar.id
@@ -86,7 +85,7 @@ func testAccServiceIntegrationEndpointResource(name string) string {
 			project = aiven_service_integration_endpoint.bar.project
 			endpoint_name = aiven_service_integration_endpoint.bar.endpoint_name
 		}
-		`, name, os.Getenv("AIVEN_CARD_ID"), name, name, name)
+		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name)
 }
 
 func testAccCheckAivenServiceIntegraitonEndpointResourceDestroy(s *terraform.State) error {

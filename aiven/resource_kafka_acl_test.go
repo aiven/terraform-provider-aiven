@@ -44,7 +44,12 @@ func TestAccAivenKafkaACL_basic(t *testing.T) {
 				ExpectError: regexp.MustCompile("invalid value for username"),
 			},
 			{
-				Config:             testAccKafkaACLWildcardResource(rName),
+				Config:      testAccKafkaACLInvalidCharsResource(rName),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("invalid value for username"),
+			},
+			{
+				Config:             testAccKafkaACLPrefixWildcardResource(rName),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
 			},
@@ -52,7 +57,7 @@ func TestAccAivenKafkaACL_basic(t *testing.T) {
 				Config: testAccKafkaACLResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenKafkaACLAttributes("data.aiven_kafka_acl.acl"),
-					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "topic", fmt.Sprintf("test-acc-topic-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
@@ -142,7 +147,31 @@ func testAccKafkaACLWildcardResource(_ string) string {
 		`
 }
 
+func testAccKafkaACLPrefixWildcardResource(_ string) string {
+	return `
+		resource "aiven_kafka_acl" "foo" {
+			project = "test-acc-pr-1"
+			service_name = "test-acc-sr-1"
+			topic = "test-acc-topic-1"
+			username = "group-user-*"
+			permission = "admin"
+		}
+		`
+}
+
 func testAccKafkaACLWrongUsernameResource(_ string) string {
+	return `
+		resource "aiven_kafka_acl" "foo" {
+			project = "test-acc-pr-1"
+			service_name = "test-acc-sr-1"
+			topic = "test-acc-topic-1"
+			username = "*-user"
+			permission = "admin"
+		}
+		`
+}
+
+func testAccKafkaACLInvalidCharsResource(_ string) string {
 	return `
 		resource "aiven_kafka_acl" "foo" {
 			project = "test-acc-pr-1"
@@ -156,13 +185,12 @@ func testAccKafkaACLWrongUsernameResource(_ string) string {
 
 func testAccKafkaACLResource(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
-			card_id="%s"	
+		data "aiven_project" "foo" {
+			project = "%s"
 		}
 
 		resource "aiven_service" "bar" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "business-4"
 			service_name = "test-acc-sr-%s"
@@ -180,7 +208,7 @@ func testAccKafkaACLResource(name string) string {
 		}
 		
 		resource "aiven_kafka_topic" "foo" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			service_name = aiven_service.bar.service_name
 			topic_name = "test-acc-topic-%s"
 			partitions = 3
@@ -188,7 +216,7 @@ func testAccKafkaACLResource(name string) string {
 		}
 
 		resource "aiven_kafka_acl" "foo" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			service_name = aiven_service.bar.service_name
 			topic = aiven_kafka_topic.foo.topic_name
 			username = "user-%s"
@@ -202,7 +230,7 @@ func testAccKafkaACLResource(name string) string {
 			username = aiven_kafka_acl.foo.username
 			permission = aiven_kafka_acl.foo.permission
 		}
-		`, name, os.Getenv("AIVEN_CARD_ID"), name, name, name)
+		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name)
 }
 
 func testAccCheckAivenKafkaACLResourceDestroy(s *terraform.State) error {

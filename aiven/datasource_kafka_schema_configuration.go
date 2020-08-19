@@ -7,8 +7,9 @@ import (
 
 func datasourceKafkaSchemaConfiguration() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceKafkaSchemasConfigurationRead,
-		Schema: resourceSchemaAsDatasourceSchema(aivenKafkaSchemaSchema, "project", "service_name"),
+		Read: datasourceKafkaSchemasConfigurationRead,
+		Schema: resourceSchemaAsDatasourceSchema(aivenKafkaSchemaSchema,
+			"project", "service_name"),
 	}
 }
 

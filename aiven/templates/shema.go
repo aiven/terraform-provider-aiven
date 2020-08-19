@@ -14,16 +14,6 @@ const (
 	ServiceFileName     = "service_user_config_schema.json"
 )
 
-// getUserConfigurationOptionsTypes gets a list of available user configuration
-// options resource types
-func getUserConfigurationOptionsTypes() []string {
-	return []string{
-		UserConfigSchemaEndpoint,
-		UserConfigSchemaIntegration,
-		UserConfigSchemaService,
-	}
-}
-
 // getUserConfigurationOptionsSchemaFilenames gets a list of user configuration
 // options filenames based on resource type
 func getUserConfigurationOptionsSchemaFilenames() map[string]string {
