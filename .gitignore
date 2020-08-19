@@ -45,6 +45,7 @@ Gemfile.lock
 # Temp files from build steps
 tmp/
 temp/
+dist/
 
 # Mac meta files
 .DS_Store
