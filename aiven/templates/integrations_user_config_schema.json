@@ -21,7 +21,17 @@
     },
     "type": "object"
   },
+  "external_aws_cloudwatch_logs": {
+    "additionalProperties": false,
+    "title": "Integration user config",
+    "type": "object"
+  },
   "external_elasticsearch_logs": {
+    "additionalProperties": false,
+    "title": "Integration user config",
+    "type": "object"
+  },
+  "external_google_cloud_logging": {
     "additionalProperties": false,
     "title": "Integration user config",
     "type": "object"
@@ -105,6 +115,16 @@
         "type": "string"
       }
     },
+    "type": "object"
+  },
+  "m3aggregator": {
+    "additionalProperties": false,
+    "title": "Integration user config",
+    "type": "object"
+  },
+  "m3coordinator": {
+    "additionalProperties": false,
+    "title": "Integration user config",
     "type": "object"
   },
   "metrics": {

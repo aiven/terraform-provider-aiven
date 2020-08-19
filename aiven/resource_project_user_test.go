@@ -10,12 +10,10 @@ import (
 )
 
 func TestAccAivenProjectUser_basic(t *testing.T) {
-	t.Parallel()
-
 	resourceName := "aiven_project_user.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAivenProjectUserResourceDestroy,

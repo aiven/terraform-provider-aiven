@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"os"
-	"strings"
 	"testing"
 )
 
@@ -32,7 +31,7 @@ func sweepKafkaSchemas(region string) error {
 	}
 
 	for _, project := range projects {
-		if strings.Contains(project.Name, "test-acc-") {
+		if project.Name == os.Getenv("AIVEN_PROJECT_NAME") {
 			services, err := conn.Services.List(project.Name)
 			if err != nil {
 				return fmt.Errorf("error retrieving a list of services for a project `%s`: %s", project.Name, err)
@@ -66,12 +65,10 @@ func sweepKafkaSchemas(region string) error {
 }
 
 func TestAccAivenKafkaSchema_basic(t *testing.T) {
-	t.Parallel()
-
 	resourceName := "aiven_kafka_schema.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAivenKafkaSchemaResourceDestroy,
@@ -80,7 +77,7 @@ func TestAccAivenKafkaSchema_basic(t *testing.T) {
 				Config: testAccKafkaSchemaResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenKafkaSchemaAttributes("data.aiven_kafka_schema.schema"),
-					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "subject_name", fmt.Sprintf("kafka-schema-%s", rName)),
 				),
@@ -139,13 +136,12 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 
 func testAccKafkaSchemaResource(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
-			card_id="%s"	
+		data "aiven_project" "foo" {
+			project = "%s"
 		}
 
 		resource "aiven_service" "bar" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "business-4"
 			service_name = "test-acc-sr-%s"
@@ -165,13 +161,13 @@ func testAccKafkaSchemaResource(name string) string {
 		}
 		
 		resource "aiven_kafka_schema_configuration" "foo" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			service_name = aiven_service.bar.service_name
 			compatibility_level = "BACKWARD"
 		}
 
 		resource "aiven_kafka_schema" "foo" {
-			project = aiven_project.foo.project
+			project = data.aiven_project.foo.project
 			service_name = aiven_service.bar.service_name
 			subject_name = "kafka-schema-%s"
 			
@@ -197,7 +193,7 @@ func testAccKafkaSchemaResource(name string) string {
 			service_name = aiven_kafka_schema.foo.service_name
 			subject_name = aiven_kafka_schema.foo.subject_name
 		}
-		`, name, os.Getenv("AIVEN_CARD_ID"), name, name)
+		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccCheckAivenKafkaSchemaAttributes(n string) resource.TestCheckFunc {

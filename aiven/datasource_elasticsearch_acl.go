@@ -9,8 +9,9 @@ import (
 
 func datasourceElasticsearchACL() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceElasticsearchACLRead,
-		Schema: resourceSchemaAsDatasourceSchema(aivenElasticsearchACLSchema, "project", "service_name"),
+		Read: datasourceElasticsearchACLRead,
+		Schema: resourceSchemaAsDatasourceSchema(aivenElasticsearchACLSchema,
+			"project", "service_name"),
 	}
 }
 
@@ -31,5 +32,6 @@ func datasourceElasticsearchACLRead(d *schema.ResourceData, m interface{}) error
 		return resourceElasticsearchACLRead(d, m)
 	}
 
-	return fmt.Errorf("elasticsearch acl %s/%s not found", projectName, serviceName)
+	return fmt.Errorf("elasticsearch acl %s/%s not found",
+		projectName, serviceName)
 }

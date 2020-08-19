@@ -1,10 +1,9 @@
 # Kafka service
-resource "aiven_service" "kafka-service1" {
+resource "aiven_kafka" "kafka-service" {
   project = aiven_project.kafka-con-project1.project
   cloud_name = "google-europe-west1"
   plan = "business-4"
   service_name = "kafka-service1"
-  service_type = "kafka"
   maintenance_window_dow = "monday"
   maintenance_window_time = "10:00:00"
 
@@ -14,12 +13,11 @@ resource "aiven_service" "kafka-service1" {
 }
 
 # Kafka connect service
-resource "aiven_service" "kafka_connect1" {
+resource "aiven_kafka_connect" "kafka_connect" {
   project = aiven_project.kafka-con-project1.project
   cloud_name = "google-europe-west1"
   plan = "startup-4"
   service_name = "kafka-connect1"
-  service_type = "kafka_connect"
   maintenance_window_dow = "monday"
   maintenance_window_time = "10:00:00"
 
@@ -38,8 +36,8 @@ resource "aiven_service" "kafka_connect1" {
 resource "aiven_service_integration" "i1" {
   project = aiven_project.kafka-con-project1.project
   integration_type = "kafka_connect"
-  source_service_name = aiven_service.kafka-service1.service_name
-  destination_service_name = aiven_service.kafka_connect1.service_name
+  source_service_name = aiven_kafka.kafka-service.service_name
+  destination_service_name = aiven_kafka_connect.kafka_connect.service_name
 
   kafka_connect_user_config {
     kafka_connect {

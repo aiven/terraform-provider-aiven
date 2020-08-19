@@ -13,17 +13,190 @@ import (
 	"time"
 )
 
-var availableServiceTypes = []string{
-	"pg",
-	"kafka",
-	"cassandra",
-	"elasticsearch",
-	"grafana",
-	"influxdb",
-	"redis",
-	"kafka_connect",
-	"kafka_mirrormaker",
-	"mysql"}
+const (
+	ServiceTypePG               = "pg"
+	ServiceTypeCassandra        = "cassandra"
+	ServiceTypeElasticsearch    = "elasticsearch"
+	ServiceTypeGrafana          = "grafana"
+	ServiceTypeInfluxDB         = "influxdb"
+	ServiceTypeRedis            = "redis"
+	ServiceTypeMySQL            = "mysql"
+	ServiceTypeKafka            = "kafka"
+	ServiceTypeKafkaConnect     = "kafka_connect"
+	ServiceTypeKafkaMirrormaker = "kafka_mirrormaker"
+)
+
+func availableServiceTypes() []string {
+	return []string{
+		ServiceTypePG,
+		ServiceTypeCassandra,
+		ServiceTypeElasticsearch,
+		ServiceTypeGrafana,
+		ServiceTypeInfluxDB,
+		ServiceTypeRedis,
+		ServiceTypeMySQL,
+		ServiceTypeKafka,
+		ServiceTypeKafkaConnect,
+		ServiceTypeKafkaMirrormaker,
+	}
+}
+
+func serviceCommonSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"project": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "Target project",
+			ForceNew:    true,
+		},
+		"cloud_name": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Cloud the service runs in",
+		},
+		"plan": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Subscription plan",
+		},
+		"service_name": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "Service name",
+			ForceNew:    true,
+		},
+		"service_type": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "Aiven internal service type code",
+		},
+		"project_vpc_id": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Identifier of the VPC the service should be in, if any",
+		},
+		"maintenance_window_dow": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.",
+			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+				return new == ""
+			},
+		},
+		"maintenance_window_time": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.",
+			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+				return new == ""
+			},
+		},
+		"termination_protection": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: "Prevent service from being deleted. It is recommended to have this enabled for all services.",
+		},
+		"service_uri": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "URI for connecting to the service. Service specific info is under \"kafka\", \"pg\", etc.",
+			Sensitive:   true,
+		},
+		"service_host": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "Service hostname",
+		},
+		"service_port": {
+			Type:        schema.TypeInt,
+			Computed:    true,
+			Description: "Service port",
+		},
+		"service_password": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "Password used for connecting to the service, if applicable",
+			Sensitive:   true,
+		},
+		"service_username": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "Username used for connecting to the service, if applicable",
+		},
+		"state": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "Service state",
+		},
+		"service_integrations": {
+			Type:             schema.TypeList,
+			Optional:         true,
+			Description:      "Service integrations to specify when creating a service. Not applied after initial service creation",
+			DiffSuppressFunc: createOnlyDiffSuppressFunc,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"source_service_name": {
+						Type:        schema.TypeString,
+						Required:    true,
+						Description: "Name of the source service",
+					},
+					"integration_type": {
+						Type:        schema.TypeString,
+						Required:    true,
+						Description: "Type of the service integration. The only supported value at the moment is 'read_replica'",
+					},
+				},
+			},
+		},
+		"components": {
+			Type:        schema.TypeList,
+			Computed:    true,
+			Description: "Service component information objects",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"component": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: "Service component name",
+					},
+					"host": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: "DNS name for connecting to the service component",
+					},
+					"kafka_authentication_method": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Optional:    true,
+						Description: "Kafka authentication method. This is a value specific to the 'kafka' service component",
+					},
+					"port": {
+						Type:        schema.TypeInt,
+						Computed:    true,
+						Description: "Port number for connecting to the service component",
+					},
+					"route": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: "Network access route",
+					},
+					"ssl": {
+						Type:     schema.TypeBool,
+						Computed: true,
+						Description: "Whether the endpoint is encrypted or accepts plaintext. By default endpoints are " +
+							"always encrypted and this property is only included for service components they may " +
+							"disable encryption",
+					},
+					"usage": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: "DNS usage name",
+					},
+				},
+			},
+		},
+	}
+}
 
 var aivenServiceSchema = map[string]*schema.Schema{
 	"project": {
@@ -53,7 +226,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		Required:     true,
 		Description:  "Service type code",
 		ForceNew:     true,
-		ValidateFunc: validation.StringInSlice(availableServiceTypes, false),
+		ValidateFunc: validation.StringInSlice(availableServiceTypes(), false),
 	},
 	"project_vpc_id": {
 		Type:        schema.TypeString,
@@ -198,7 +371,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")["cassandra"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeCassandra].(map[string]interface{})),
 		},
 	},
 	"elasticsearch": {
@@ -226,7 +399,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")["elasticsearch"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeElasticsearch].(map[string]interface{})),
 		},
 	},
 	"grafana": {
@@ -247,7 +420,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")["grafana"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeGrafana].(map[string]interface{})),
 		},
 	},
 	"influxdb": {
@@ -274,7 +447,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")["influxdb"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeInfluxDB].(map[string]interface{})),
 		},
 	},
 	"kafka": {
@@ -331,7 +504,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")["kafka"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeKafka].(map[string]interface{})),
 		},
 	},
 	"kafka_connect": {
@@ -352,7 +525,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")["kafka_connect"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeKafkaConnect].(map[string]interface{})),
 		},
 	},
 	"mysql": {
@@ -373,7 +546,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")["mysql"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeMySQL].(map[string]interface{})),
 		},
 	},
 	"kafka_mirrormaker": {
@@ -394,7 +567,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")["kafka_mirrormaker"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeKafkaMirrormaker].(map[string]interface{})),
 		},
 	},
 	"pg": {
@@ -460,7 +633,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")["pg"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypePG].(map[string]interface{})),
 		},
 	},
 	"redis": {
@@ -481,14 +654,14 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")["redis"].(map[string]interface{})),
+				templates.GetUserConfigSchema("service")[ServiceTypeRedis].(map[string]interface{})),
 		},
 	},
 }
 
 func resourceService() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceServiceCreate,
+		Create: resourceServiceCreateWrapper("service"),
 		Read:   resourceServiceRead,
 		Update: resourceServiceUpdate,
 		Delete: resourceServiceDelete,
@@ -504,6 +677,64 @@ func resourceService() *schema.Resource {
 		Schema: aivenServiceSchema,
 	}
 }
+
+func resourceServiceCreateWrapper(serviceType string) schema.CreateFunc {
+	if serviceType == "service" {
+		return func(d *schema.ResourceData, m interface{}) error {
+			// Need to set empty value for all services or all Terraform keeps on showing there's
+			// a change in the computed values that don't match actual service type
+			if err := d.Set(ServiceTypeCassandra, []map[string]interface{}{}); err != nil {
+				return err
+			}
+			if err := d.Set(ServiceTypeElasticsearch, []map[string]interface{}{}); err != nil {
+				return err
+			}
+			if err := d.Set(ServiceTypeGrafana, []map[string]interface{}{}); err != nil {
+				return err
+			}
+			if err := d.Set(ServiceTypeInfluxDB, []map[string]interface{}{}); err != nil {
+				return err
+			}
+			if err := d.Set(ServiceTypeKafka, []map[string]interface{}{}); err != nil {
+				return err
+			}
+			if err := d.Set(ServiceTypeKafkaConnect, []map[string]interface{}{}); err != nil {
+				return err
+			}
+			if err := d.Set(ServiceTypeKafkaMirrormaker, []map[string]interface{}{}); err != nil {
+				return err
+			}
+			if err := d.Set(ServiceTypeMySQL, []map[string]interface{}{}); err != nil {
+				return err
+			}
+			if err := d.Set(ServiceTypePG, []map[string]interface{}{}); err != nil {
+				return err
+			}
+			if err := d.Set(ServiceTypeRedis, []map[string]interface{}{}); err != nil {
+				return err
+			}
+
+			return resourceServiceCreate(d, m)
+		}
+	}
+
+	return func(d *schema.ResourceData, m interface{}) error {
+		if err := d.Set("service_type", serviceType); err != nil {
+			return err
+		}
+		if err := d.Set(serviceType, []map[string]interface{}{}); err != nil {
+			return err
+		}
+
+		return resourceServiceCreate(d, m)
+	}
+
+}
+
+//func resourceServiceCreateWrapper(d *schema.ResourceData, m interface{}) error {
+//
+//	return resourceServiceCreate(d, m)
+//}
 
 func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
@@ -779,39 +1010,6 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	serviceType string,
 	connectionInfo aiven.ConnectionInfo,
 ) error {
-	// Need to set empty value for all services or all Terraform keeps on showing there's
-	// a change in the computed values that don't match actual service type
-	if err := d.Set("cassandra", []map[string]interface{}{}); err != nil {
-		return err
-	}
-	if err := d.Set("elasticsearch", []map[string]interface{}{}); err != nil {
-		return err
-	}
-	if err := d.Set("grafana", []map[string]interface{}{}); err != nil {
-		return err
-	}
-	if err := d.Set("influxdb", []map[string]interface{}{}); err != nil {
-		return err
-	}
-	if err := d.Set("kafka", []map[string]interface{}{}); err != nil {
-		return err
-	}
-	if err := d.Set("kafka_connect", []map[string]interface{}{}); err != nil {
-		return err
-	}
-	if err := d.Set("kafka_mirrormaker", []map[string]interface{}{}); err != nil {
-		return err
-	}
-	if err := d.Set("mysql", []map[string]interface{}{}); err != nil {
-		return err
-	}
-	if err := d.Set("pg", []map[string]interface{}{}); err != nil {
-		return err
-	}
-	if err := d.Set("redis", []map[string]interface{}{}); err != nil {
-		return err
-	}
-
 	props := make(map[string]interface{})
 
 	switch serviceType {

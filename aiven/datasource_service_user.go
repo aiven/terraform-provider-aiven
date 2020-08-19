@@ -9,8 +9,9 @@ import (
 
 func datasourceServiceUser() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceServiceUserRead,
-		Schema: resourceSchemaAsDatasourceSchema(aivenServiceUserSchema, "project", "service_name", "username"),
+		Read: datasourceServiceUserRead,
+		Schema: resourceSchemaAsDatasourceSchema(aivenServiceUserSchema,
+			"project", "service_name", "username"),
 	}
 }
 
@@ -33,5 +34,6 @@ func datasourceServiceUserRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	return fmt.Errorf("service user %s/%s/%s not found", projectName, serviceName, userName)
+	return fmt.Errorf("service user %s/%s/%s not found",
+		projectName, serviceName, userName)
 }
