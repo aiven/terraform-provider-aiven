@@ -44,3 +44,4 @@ Gemfile.lock
 # Temp files from build steps
 tmp/
 temp/
+dist/
