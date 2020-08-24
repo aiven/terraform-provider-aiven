@@ -121,6 +121,7 @@ func testAccServiceComponentDataSource(name string) string {
 			service_name = aiven_kafka.bar.service_name
 			component = "kafka"
 			route = "dynamic"
+			kafka_authentication_method = "certificate"
 		}
 		
 		data "aiven_service_component" "kafka_connect" {

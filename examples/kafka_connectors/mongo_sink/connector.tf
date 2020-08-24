@@ -1,9 +1,16 @@
-locals {
-  components_flat = {for component in aiven_kafka.kafka-service1.components :
-  "${component.component}" =>  "${component.host}:${component.port}" if component.usage == "primary"
-  }
+data "aiven_service_component" "schema_registry" {
+  project = aiven_kafka.kafka-service1.project
+  service_name = aiven_kafka.kafka-service1.service_name
+  component = "schema_registry"
+  route = "dynamic"
 
-  schema_registry_uri = "https://${data.aiven_service_user.kafka_admin.username}:${data.aiven_service_user.kafka_admin.password}@${local.components_flat["schema_registry"]}"
+  depends_on = [
+    aiven_kafka.kafka-service1
+  ]
+}
+
+locals {
+  schema_registry_uri = "https://${data.aiven_service_user.kafka_admin.username}:${data.aiven_service_user.kafka_admin.password}@${data.aiven_service_component.schema_registry.host}:${data.aiven_service_component.schema_registry.port}"
 }
 
 # Kafka Mongo Sink connector

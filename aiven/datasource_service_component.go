@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"log"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"strconv"
 )
 
 func datasourceServiceComponent() *schema.Resource {
@@ -26,11 +27,60 @@ func datasourceServiceComponent() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Service component name",
+				ValidateFunc: validation.StringInSlice([]string{
+					"cassandra",
+					"elasticsearch",
+					"grafana",
+					"influxdb",
+					"kafka",
+					"kafka_connect",
+					"mysql",
+					"pg",
+					"redis",
+					"kibana",
+					"kafka_connect",
+					"kafka_rest",
+					"schema_registry",
+					"pgbouncer",
+					"prometheus",
+				}, false),
 			},
 			"route": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "Network access route",
+				ValidateFunc: validation.StringInSlice([]string{
+					"dynamic",
+					"public",
+					"private",
+				}, false),
+			},
+			"kafka_authentication_method": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Kafka authentication method. This is a value specific to the 'kafka' service component",
+				ValidateFunc: validation.StringInSlice([]string{
+					"certificate",
+					"sasl",
+				}, false),
+			},
+			"ssl": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Description: "Whether the endpoint is encrypted or accepts plaintext. By default endpoints are " +
+					"always encrypted and this property is only included for service components that may " +
+					"disable encryption",
+			},
+			"usage": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "DNS usage name",
+				Default:     "primary",
+				ValidateFunc: validation.StringInSlice([]string{
+					"primary",
+					"replica",
+					"syncing",
+				}, false),
 			},
 			"host": {
 				Type:        schema.TypeString,
@@ -41,23 +91,6 @@ func datasourceServiceComponent() *schema.Resource {
 				Type:        schema.TypeInt,
 				Computed:    true,
 				Description: "Port number for connecting to the service component",
-			},
-			"kafka_authentication_method": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Kafka authentication method. This is a value specific to the 'kafka' service component",
-			},
-			"ssl": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Description: "Whether the endpoint is encrypted or accepts plaintext. By default endpoints are " +
-					"always encrypted and this property is only included for service components they may " +
-					"disable encryption",
-			},
-			"usage": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "DNS usage name",
 			},
 		},
 	}
@@ -70,6 +103,7 @@ func datasourceServiceComponentRead(d *schema.ResourceData, m interface{}) error
 	serviceName := d.Get("service_name").(string)
 	componentName := d.Get("component").(string)
 	route := d.Get("route").(string)
+	usage := d.Get("usage").(string)
 
 	service, err := client.Services.Get(projectName, serviceName)
 	if err != nil {
@@ -77,9 +111,33 @@ func datasourceServiceComponentRead(d *schema.ResourceData, m interface{}) error
 	}
 
 	for _, c := range service.Components {
-		if c.Component == componentName && c.Route == route && c.Usage == "primary" {
-			log.Printf("[DEBUG] component %+#v", c)
-			d.SetId(buildResourceID(projectName, serviceName, componentName, route))
+		if c.Component == componentName && c.Route == route && c.Usage == usage {
+			// check optional ssl search criteria, if not set by a user match entries
+			// without ssl or ssl=true
+			if ssl, ok := d.GetOk("ssl"); ok {
+				if c.Ssl != strconv.FormatBool(ssl.(bool)) {
+					continue
+				}
+			} else {
+				if !(c.Ssl == "" || c.Ssl == "true") {
+					continue
+				}
+			}
+
+			// check optional kafka_authentication_method search criteria, if not set by a
+			// user match entries without kafka_authentication_method
+			if method, ok := d.GetOk("kafka_authentication_method"); ok {
+				if c.KafkaAuthenticationMethod != method {
+					continue
+				}
+			} else {
+				if c.KafkaAuthenticationMethod != "" {
+					continue
+				}
+			}
+
+			d.SetId(buildResourceID(c.Host, strconv.Itoa(c.Port)))
+
 			if err := d.Set("project", projectName); err != nil {
 				return err
 			}
@@ -104,9 +162,18 @@ func datasourceServiceComponentRead(d *schema.ResourceData, m interface{}) error
 			if err := d.Set("kafka_authentication_method", c.KafkaAuthenticationMethod); err != nil {
 				return err
 			}
-			if err := d.Set("ssl", c.Ssl); err != nil {
-				return err
+
+			if c.Ssl != "" {
+				b, err := strconv.ParseBool(c.Ssl)
+				if err != nil {
+					return err
+				}
+
+				if err := d.Set("ssl", b); err != nil {
+					return err
+				}
 			}
+
 			return nil
 		}
 	}
