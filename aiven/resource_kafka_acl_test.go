@@ -54,6 +54,11 @@ func TestAccAivenKafkaACL_basic(t *testing.T) {
 				ExpectNonEmptyPlan: true,
 			},
 			{
+				Config:             testAccKafkaACLWildcardResource(rName),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+			},
+			{
 				Config: testAccKafkaACLResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenKafkaACLAttributes("data.aiven_kafka_acl.acl"),
