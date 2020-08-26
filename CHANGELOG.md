@@ -4,6 +4,13 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.0.1] - 2020-08-26
+- Add support for service component `aiven_service_component` data source
+- Add accounts examples and update documentation
+- Add PG example and documentation
+- Fix vpc `user_peer_network_cidrs` type conversion problem
+- Add support for goreleaser
+
 ## [2.0.0] - 2020-08-18
 - Migration to Terraform Plugin SDK 0.12
 - Add transit gateway vpc attachment documentation
