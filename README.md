@@ -112,7 +112,7 @@ Make sure you have a look at the [variables](terraform.tfvars.sample) and copy i
 
 Other examples can be found in the [examples](examples) folder that provides examples to:
 * [Getting Started](examples/getting-started.tf)
-* [Team Accounts and member management](examples/account)
+* [Account, projects, teams, and member management](examples/account)
 * [Elasticsearch deployment and configuration](examples/elasticsearch)
 * [Standalone Kafka connect deployment with custom config](examples/kafka_connect)
 * [Deploying Kafka and Elasticsearch with a Kafka Connect Elasticsearch Sink connector](examples/kafka_connectors/es_sink)

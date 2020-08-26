@@ -46,3 +46,6 @@ Gemfile.lock
 tmp/
 temp/
 dist/
+
+# Mac meta files
+.DS_Store
