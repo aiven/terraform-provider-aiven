@@ -121,6 +121,7 @@ Other examples can be found in the [examples](examples) folder that provides exa
 * [Deploying Cassandra and forking (cloning the service, config and data) into a new service with a higher plan](examples/cassandra_fork)
 * [Deploying a Grafana service](examples/service)
 * [Deploying a MirrorMaker service](examples/kafka_mirrormaker)
+* [Deploying PostgreSQL services to multiple clouds and regions](examples/postgres)
 
 ## Importing existing infrastructure
 
