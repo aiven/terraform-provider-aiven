@@ -9,7 +9,7 @@ import (
 
 func datasourceConnectionPool() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceConnectionPoolRead,
+		Read: datasourceConnectionPoolRead,
 		Schema: resourceSchemaAsDatasourceSchema(aivenConnectionPoolSchema,
 			"project", "service_name", "pool_name"),
 	}

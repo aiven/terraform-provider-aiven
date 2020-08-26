@@ -8,7 +8,7 @@ import (
 
 func datasourceKafkaConnector() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceKafkaConnectorRead,
+		Read: datasourceKafkaConnectorRead,
 		Schema: resourceSchemaAsDatasourceSchema(aivenKafkaConnectorSchema,
 			"project", "service_name", "connector_name"),
 	}
