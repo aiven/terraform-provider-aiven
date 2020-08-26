@@ -81,7 +81,7 @@ func resourceTransitGatewayVPCAttachment() *schema.Resource {
 func resourceTransitGatewayVPCAttachmentUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-	cidrs := d.Get("user_peer_network_cidrs").([]string)
+	cidrs := flattenToString(d.Get("user_peer_network_cidrs").([]interface{}))
 	projectName, vpcID, peerCloudAccount, peerVPC, _ := parsePeeringVPCId(d.Id())
 
 	peeringConnection, err := client.VPCPeeringConnections.Get(projectName, vpcID, peerCloudAccount, peerVPC)

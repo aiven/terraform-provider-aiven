@@ -112,7 +112,7 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 	}
 
 	if userPeerNetworkCidrs, ok := d.GetOk("user_peer_network_cidrs"); ok {
-		cidrs = userPeerNetworkCidrs.([]string)
+		cidrs = flattenToString(userPeerNetworkCidrs.([]interface{}))
 	}
 
 	pc, err = client.VPCPeeringConnections.Create(
@@ -259,7 +259,12 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 		return err
 	}
 
-	if err := d.Set("user_peer_network_cidrs", peeringConnection.UserPeerNetworkCIDRs); err != nil {
+	// convert cidrs from []string to []interface {}
+	cidrs := make([]interface{}, len(peeringConnection.UserPeerNetworkCIDRs))
+	for i, cidr := range peeringConnection.UserPeerNetworkCIDRs {
+		cidrs[i] = cidr
+	}
+	if err := d.Set("user_peer_network_cidrs", cidrs); err != nil {
 		// this filed is only available for transit gateway vpc attachment, and regular vpc
 		// resource triggers `Invalid address to set` error
 		if !strings.Contains(err.Error(), "Invalid address to set") {
