@@ -11,13 +11,17 @@ resource "aiven_grafana" "grafana-service1" {
   }
 }
 
-locals {
-  # A list of components is sorted on API side in a way that the client should pick first entry based on the query
-  components_flat = {for component in aiven_grafana.grafana-service1.components :
-  "${component.component}_${component.route}" =>  "${component.host}:${component.port}" if component.usage == "primary"
-  }
+data "aiven_service_component" "grafana_public" {
+  project = aiven_grafana.grafana-service1.project
+  service_name = aiven_grafana.grafana-service1.service_name
+  component = "grafana"
+  route = "public"
+
+  depends_on = [
+    aiven_grafana.grafana-service1
+  ]
 }
 
 output "grafana_public" {
-  value = local.components_flat["grafana_public"]
+  value = "${data.aiven_service_component.grafana_public.host}:${data.aiven_service_component.grafana_public.port}"
 }

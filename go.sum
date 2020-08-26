@@ -22,8 +22,8 @@ github.com/agext/levenshtein v1.2.1/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki
 github.com/agext/levenshtein v1.2.2 h1:0S/Yg6LYmFJ5stwQeRp6EeOcCbj7xiqQSdNelsXvaqE=
 github.com/agext/levenshtein v1.2.2/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/agl/ed25519 v0.0.0-20170116200512-5312a6153412/go.mod h1:WPjqKcmVOxf0XSf3YxCJs6N6AOSrOx3obionmG7T0y0=
-github.com/aiven/aiven-go-client v1.5.7-0.20200723071816-76bc47f624b3 h1:mfWkdNIh8bHoF0otQjHZARX8iRSyUlvVjIq1fw8EdGk=
-github.com/aiven/aiven-go-client v1.5.7-0.20200723071816-76bc47f624b3/go.mod h1:tcoqGxvGReymGMsP62X5YkhOgpWgIRgM8mxTmVRNC3g=
+github.com/aiven/aiven-go-client v1.5.7 h1:8NlYyMZeMLjK/XHlsG2jlppOk54Ptn5fHhNUMeB4ZoM=
+github.com/aiven/aiven-go-client v1.5.7/go.mod h1:tcoqGxvGReymGMsP62X5YkhOgpWgIRgM8mxTmVRNC3g=
 github.com/apparentlymart/go-cidr v1.0.1 h1:NmIwLZ/KdsjIUlhf+/Np40atNXm/+lZ5txfTJ/SpF+U=
 github.com/apparentlymart/go-cidr v1.0.1/go.mod h1:EBcsNrHc3zQeuaeCeCtQruQm+n9/YjEn/vI25Lg7Gwc=
 github.com/apparentlymart/go-dump v0.0.0-20180507223929-23540a00eaa3/go.mod h1:oL81AME2rN47vu18xqj1S1jPIPuN7afo62yKTNn3XMM=

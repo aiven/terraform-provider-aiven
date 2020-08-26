@@ -62,6 +62,7 @@ func Provider() terraform.ResourceProvider {
 			"aiven_influxdb":                       datasourceInfluxDB(),
 			"aiven_redis":                          datasourceRedis(),
 			"aiven_transit_gateway_vpc_attachment": datasourceTransitGatewayVPCAttachment(),
+			"aiven_service_component":              datasourceServiceComponent(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
