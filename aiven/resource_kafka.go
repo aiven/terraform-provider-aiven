@@ -102,7 +102,7 @@ func resourceKafkaCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	// if default_acl=false delete default wildcard Kafka ACL that is automatically created
-	if d.Get("default_acl").(bool) == false {
+	if !d.Get("default_acl").(bool) {
 		client := m.(*aiven.Client)
 		project := d.Get("project").(string)
 		serviceName := d.Get("service_name").(string)

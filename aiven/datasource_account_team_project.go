@@ -6,7 +6,7 @@ import (
 
 func datasourceAccountTeamProject() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceAccountTeamProjectRead,
+		Read: datasourceAccountTeamProjectRead,
 		Schema: resourceSchemaAsDatasourceSchema(aivenAccountTeamProjectSchema,
 			"account_id", "team_id", "project_name"),
 	}
