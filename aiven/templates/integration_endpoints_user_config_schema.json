@@ -158,6 +158,59 @@
     "title": "User configuration for Google Cloud Logging integration",
     "type": "object"
   },
+  "external_kafka": {
+    "additionalProperties": false,
+    "properties": {
+      "bootstrap_servers": {
+        "example": "10.0.0.1:9092",
+        "maxLength": 256,
+        "minLength": 3,
+        "title": "Bootstrap servers",
+        "type": "string"
+      },
+      "security_protocol": {
+        "enum": [
+          "PLAINTEXT",
+          "SSL"
+        ],
+        "example": "PLAINTEXT",
+        "title": "Security protocol",
+        "type": "string"
+      },
+      "ssl_ca_cert": {
+        "example": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n",
+        "maxLength": 16384,
+        "title": "PEM-encoded CA certificate",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "ssl_client_cert": {
+        "example": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n",
+        "maxLength": 16384,
+        "title": "PEM-encoded client certificate",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "ssl_client_key": {
+        "example": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n",
+        "maxLength": 16384,
+        "title": "PEM-encoded client key",
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    },
+    "required": [
+      "bootstrap_servers",
+      "security_protocol"
+    ],
+    "type": "object"
+  },
   "jolokia": {
     "additionalProperties": false,
     "properties": {
