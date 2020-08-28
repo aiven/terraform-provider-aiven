@@ -174,6 +174,7 @@ func resourceKafkaSchemaUpdate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
+	// if compatibility_level has changed and the new value is other then global schema configuration
 	if d.HasChange("compatibility_level") {
 		_, err := client.KafkaSubjectSchemas.UpdateConfiguration(
 			project,
@@ -220,11 +221,13 @@ func resourceKafkaSchemaRead(d *schema.ResourceData, m interface{}) error {
 
 	c, err := client.KafkaSubjectSchemas.GetConfiguration(project, serviceName, subjectName)
 	if err != nil {
-		return err
-	}
-
-	if err := d.Set("compatibility_level", c.CompatibilityLevel); err != nil {
-		return err
+		if !aiven.IsNotFound(err) {
+			return err
+		}
+	} else {
+		if err := d.Set("compatibility_level", c.CompatibilityLevel); err != nil {
+			return err
+		}
 	}
 
 	return nil

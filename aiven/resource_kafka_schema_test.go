@@ -170,7 +170,6 @@ func testAccKafkaSchemaResource(name string) string {
 			project = data.aiven_project.foo.project
 			service_name = aiven_service.bar.service_name
 			subject_name = "kafka-schema-%s"
-			compatibility_level = "FORWARD"
 			
 			schema = <<EOT
 				{
@@ -218,7 +217,7 @@ func testAccCheckAivenKafkaSchemaAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a schema from Aiven)")
 		}
 
-		if a["compatibility_level"] != "FORWARD" {
+		if a["compatibility_level"] != "" {
 			return fmt.Errorf("expected to get a corect compatibility_level from Aiven)")
 		}
 
