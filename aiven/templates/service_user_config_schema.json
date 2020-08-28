@@ -1431,7 +1431,8 @@
           "2.2",
           "2.3",
           "2.4",
-          "2.5"
+          "2.5",
+          "2.6"
         ],
         "title": "Kafka major version",
         "type": [
@@ -2053,6 +2054,57 @@
         "title": "IP filter",
         "type": "array"
       },
+      "migration": {
+        "additionalProperties": false,
+        "default": null,
+        "properties": {
+          "dbname": {
+            "example": "defaultdb",
+            "maxLength": 63,
+            "title": "Database name for bootstrapping the initial connection",
+            "type": "string"
+          },
+          "host": {
+            "example": "my.server.com",
+            "maxLength": 255,
+            "title": "Hostname or IP address of the server where to migrate data from",
+            "type": "string"
+          },
+          "password": {
+            "example": "jjKk45Nnd",
+            "maxLength": 256,
+            "title": "Password for authentication with the server where to migrate data from",
+            "type": "string"
+          },
+          "port": {
+            "example": 1234,
+            "maximum": 65535,
+            "minimum": 1,
+            "title": "Port number of the server where to migrate data from",
+            "type": "integer"
+          },
+          "ssl": {
+            "default": true,
+            "title": "The server where to migrate data from is secured with SSL",
+            "type": "boolean"
+          },
+          "username": {
+            "example": "myname",
+            "maxLength": 256,
+            "title": "User name for authentication with the server where to migrate data from",
+            "type": "string"
+          }
+        },
+        "required": [
+          "host",
+          "port"
+        ],
+        "title": "Migrate data from existing server",
+        "type": [
+          "object",
+          "null"
+        ]
+      },
       "pg": {
         "additionalProperties": false,
         "properties": {
@@ -2094,14 +2146,14 @@
           },
           "autovacuum_vacuum_cost_delay": {
             "description": "Specifies the cost delay value that will be used in automatic VACUUM operations. If -1 is specified, the regular vacuum_cost_delay value will be used. The default value is 20 milliseconds",
-            "maximum": 2147483647,
+            "maximum": 100,
             "minimum": -1,
             "title": "autovacuum_vacuum_cost_delay",
             "type": "integer"
           },
           "autovacuum_vacuum_cost_limit": {
             "description": "Specifies the cost limit value that will be used in automatic VACUUM operations. If -1 is specified (which is the default), the regular vacuum_cost_limit value will be used.",
-            "maximum": 2147483647,
+            "maximum": 10000,
             "minimum": -1,
             "title": "autovacuum_vacuum_cost_limit",
             "type": "integer"
@@ -2227,6 +2279,21 @@
             "minimum": 8,
             "title": "max_worker_processes",
             "type": "integer"
+          },
+          "pg_partman_bgw.interval": {
+            "description": "Sets the time interval to run pg_partman's scheduled tasks",
+            "example": 3600,
+            "maximum": 604800,
+            "minimum": 3600,
+            "title": "pg_partman_bgw.interval",
+            "type": "integer"
+          },
+          "pg_partman_bgw.role": {
+            "description": "Controls which role to use for pg_partman's scheduled background tasks.",
+            "example": "myrolename",
+            "maxLength": 256,
+            "title": "pg_partman_bgw.role",
+            "type": "string"
           },
           "pg_stat_statements.track": {
             "description": "Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default value is top.",
@@ -2529,6 +2596,12 @@
         "additionalProperties": false,
         "default": null,
         "properties": {
+          "dbname": {
+            "example": "defaultdb",
+            "maxLength": 63,
+            "title": "Database name for bootstrapping the initial connection",
+            "type": "string"
+          },
           "host": {
             "example": "my.server.com",
             "maxLength": 255,
@@ -2654,6 +2727,17 @@
         "minimum": 0,
         "title": "Redis idle connection timeout",
         "type": "integer"
+      },
+      "service_to_fork_from": {
+        "createOnly": true,
+        "default": null,
+        "example": "anotherservicename",
+        "maxLength": 63,
+        "title": "Name of another service to fork from. This has effect only when a new service is being created.",
+        "type": [
+          "string",
+          "null"
+        ]
       }
     },
     "type": "object"
