@@ -4,6 +4,7 @@ package aiven
 import (
 	"fmt"
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
+	"math"
 	"strconv"
 	"strings"
 
@@ -316,8 +317,7 @@ func convertTerraformUserConfigValueToAPICompatibleFormat(
 	var omit bool
 	var convertedValue = value
 
-	// for backwards compatibility reasons omit -1 and <<value not set>>
-	if value == "" || value == "<<value not set>>" || value == "-1" {
+	if canOmit(value, definition) {
 		return nil, true
 	}
 
@@ -349,6 +349,33 @@ func convertTerraformUserConfigValueToAPICompatibleFormat(
 	}
 
 	return convertedValue, omit
+}
+
+// canOmit checks if values can be omitted
+func canOmit(value interface{}, definition map[string]interface{}) bool {
+	// all empty string values indicate that user configuration option is not by the user
+	if value == "" {
+		return true
+	}
+
+	// for backwards compatibility with the old versions omit when <<value not set>>
+	if value == "<<value not set>>" {
+		return true
+	}
+
+	// if minimum values can be lower then zero do not omit -1
+	if minimum, ok := definition["minimum"]; ok {
+		if math.Signbit(minimum.(float64)) && value == "-1" {
+			return false
+		}
+	}
+
+	// for backwards compatibility with the old versions omit when -1
+	if value == "-1" {
+		return true
+	}
+
+	return false
 }
 
 func convertTerraformUserConfigValueToAPICompatibleFormatArray(value interface{},

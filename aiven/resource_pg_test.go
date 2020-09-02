@@ -61,6 +61,7 @@ func testAccPGResource(name string) string {
 
 				pg {
 					idle_in_transaction_session_timeout = 900
+					log_min_duration_statement = -1
 				}
 			}
 		}
