@@ -115,11 +115,15 @@ func datasourceServiceComponentRead(d *schema.ResourceData, m interface{}) error
 			// check optional ssl search criteria, if not set by a user match entries
 			// without ssl or ssl=true
 			if ssl, ok := d.GetOk("ssl"); ok {
-				if c.Ssl != strconv.FormatBool(ssl.(bool)) {
+				if c.Ssl == nil {
+					continue
+				}
+
+				if *c.Ssl != ssl.(bool) {
 					continue
 				}
 			} else {
-				if !(c.Ssl == "" || c.Ssl == "true") {
+				if !(c.Ssl == nil || *c.Ssl == true) {
 					continue
 				}
 			}
@@ -163,13 +167,8 @@ func datasourceServiceComponentRead(d *schema.ResourceData, m interface{}) error
 				return err
 			}
 
-			if c.Ssl != "" {
-				b, err := strconv.ParseBool(c.Ssl)
-				if err != nil {
-					return err
-				}
-
-				if err := d.Set("ssl", b); err != nil {
+			if c.Ssl != nil {
+				if err := d.Set("ssl", *c.Ssl); err != nil {
 					return err
 				}
 			}
