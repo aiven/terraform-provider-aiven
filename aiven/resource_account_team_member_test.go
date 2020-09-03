@@ -89,7 +89,7 @@ func TestAccAivenAccountTeamMember_basic(t *testing.T) {
 				Config: testAccAccountTeamMemberResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenAccountTeamMemberAttributes("data.aiven_account_team_member.member"),
-					resource.TestCheckResourceAttr(resourceName, "user_email", fmt.Sprintf("savciuci+%s@aiven.fi", rName)),
+					resource.TestCheckResourceAttr(resourceName, "user_email", fmt.Sprintf("ivan-savciuc+%s@aiven.fi", rName)),
 					resource.TestCheckResourceAttr(resourceName, "accepted", "false"),
 				),
 			},
@@ -111,7 +111,7 @@ func testAccAccountTeamMemberResource(name string) string {
 		resource "aiven_account_team_member" "foo" {
 			team_id = aiven_account_team.foo.team_id
   			account_id = aiven_account_team.foo.account_id
-			user_email = "savciuci+%s@aiven.fi"
+			user_email = "ivan.savciuc+%s@aiven.fi"
 		}
 
 		data "aiven_account_team_member" "member" {

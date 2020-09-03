@@ -23,7 +23,7 @@ func TestAccAivenProjectUser_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenProjectUserAttributes("data.aiven_project_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "email", fmt.Sprintf("savciuci+%s@aiven.fi", rName)),
+					resource.TestCheckResourceAttr(resourceName, "email", fmt.Sprintf("ivan.savciuc+%s@aiven.fi", rName)),
 					resource.TestCheckResourceAttr(resourceName, "member_type", "admin"),
 				),
 			},
@@ -68,7 +68,7 @@ func testAccProjectUserResource(name string) string {
 
 		resource "aiven_project_user" "bar" {
 			project = aiven_project.foo.project
-			email = "savciuci+%s@aiven.fi"
+			email = "ivan.savciuc+%s@aiven.fi"
 			member_type = "admin"
 		}
 
