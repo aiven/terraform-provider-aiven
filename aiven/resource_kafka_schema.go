@@ -42,10 +42,16 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 		Description: "Kafka Schema configuration version",
 		Computed:    true,
 	},
+	"compatibility_level": {
+		Type:         schema.TypeString,
+		Description:  "Kafka Schemas compatibility level",
+		Optional:     true,
+		ValidateFunc: validation.StringInSlice(compatibilityLevels, false),
+	},
 }
 
 // diffSuppressJsonObject checks logical equivalences in JSON Kafka Schema values
-func diffSuppressJsonObject(k, old, new string, d *schema.ResourceData) bool {
+func diffSuppressJsonObject(_, old, new string, _ *schema.ResourceData) bool {
 	var objOld, objNew interface{}
 
 	if err := json.Unmarshal([]byte(old), &objOld); err != nil {
@@ -109,6 +115,7 @@ func resourceKafkaSchemaCreate(d *schema.ResourceData, m interface{}) error {
 
 	client := m.(*aiven.Client)
 
+	// create Kafka Schema Subject
 	_, err := client.KafkaSubjectSchemas.Add(
 		project,
 		serviceName,
@@ -119,6 +126,19 @@ func resourceKafkaSchemaCreate(d *schema.ResourceData, m interface{}) error {
 	)
 	if err != nil {
 		return err
+	}
+
+	// set compatibility level if defined for a newly created Kafka Schema Subject
+	if compatibility, ok := d.GetOk("compatibility_level"); ok {
+		_, err := client.KafkaSubjectSchemas.UpdateConfiguration(
+			project,
+			serviceName,
+			subjectName,
+			compatibility.(string),
+		)
+		if err != nil {
+			return err
+		}
 	}
 
 	version, err := kafkaSchemaSubjectGetLastVersion(m, project, serviceName, subjectName)
@@ -138,17 +158,32 @@ func resourceKafkaSchemaCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourceKafkaSchemaUpdate(d *schema.ResourceData, m interface{}) error {
 	var project, serviceName, subjectName = splitResourceID3(d.Id())
+	client := m.(*aiven.Client)
 
-	_, err := m.(*aiven.Client).KafkaSubjectSchemas.Add(
-		project,
-		serviceName,
-		subjectName,
-		aiven.KafkaSchemaSubject{
-			Schema: d.Get("schema").(string),
-		},
-	)
-	if err != nil {
-		return err
+	if d.HasChange("schema") {
+		_, err := client.KafkaSubjectSchemas.Add(
+			project,
+			serviceName,
+			subjectName,
+			aiven.KafkaSchemaSubject{
+				Schema: d.Get("schema").(string),
+			},
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	// if compatibility_level has changed and the new value is other then global schema configuration
+	if d.HasChange("compatibility_level") {
+		_, err := client.KafkaSubjectSchemas.UpdateConfiguration(
+			project,
+			serviceName,
+			subjectName,
+			d.Get("compatibility_level").(string))
+		if err != nil {
+			return err
+		}
 	}
 
 	return resourceKafkaSchemaRead(d, m)
@@ -156,13 +191,14 @@ func resourceKafkaSchemaUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourceKafkaSchemaRead(d *schema.ResourceData, m interface{}) error {
 	var project, serviceName, subjectName = splitResourceID3(d.Id())
+	client := m.(*aiven.Client)
 
 	version, err := kafkaSchemaSubjectGetLastVersion(m, project, serviceName, subjectName)
 	if err != nil {
 		return err
 	}
 
-	r, err := m.(*aiven.Client).KafkaSubjectSchemas.Get(project, serviceName, subjectName, version)
+	r, err := client.KafkaSubjectSchemas.Get(project, serviceName, subjectName, version)
 	if err != nil {
 		return err
 	}
@@ -181,6 +217,17 @@ func resourceKafkaSchemaRead(d *schema.ResourceData, m interface{}) error {
 	}
 	if err := d.Set("schema", r.Version.Schema); err != nil {
 		return err
+	}
+
+	c, err := client.KafkaSubjectSchemas.GetConfiguration(project, serviceName, subjectName)
+	if err != nil {
+		if !aiven.IsNotFound(err) {
+			return err
+		}
+	} else {
+		if err := d.Set("compatibility_level", c.CompatibilityLevel); err != nil {
+			return err
+		}
 	}
 
 	return nil

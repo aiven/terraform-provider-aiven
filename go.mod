@@ -4,10 +4,9 @@ go 1.14
 
 require (
 	cloud.google.com/go/storage v1.0.0 // indirect
-	github.com/aiven/aiven-go-client v1.5.7
+	github.com/aiven/aiven-go-client v1.5.8
 	github.com/aws/aws-sdk-go v1.30.12 // indirect
 	github.com/fatih/color v1.9.0 // indirect
-	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/hashicorp/go-getter v1.4.2-0.20200106182914-9813cbd4eb02 // indirect
 	github.com/hashicorp/go-plugin v1.3.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -28,7 +27,6 @@ require (
 	golang.org/x/tools v0.0.0-20200701041122-1837592efa10 // indirect
 	google.golang.org/api v0.13.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
-	gopkg.in/yaml.v2 v2.3.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
 	honnef.co/go/tools v0.0.1-2020.1.4 // indirect
 )

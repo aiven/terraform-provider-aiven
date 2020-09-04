@@ -217,6 +217,10 @@ func testAccCheckAivenKafkaSchemaAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a schema from Aiven)")
 		}
 
+		if a["compatibility_level"] != "" {
+			return fmt.Errorf("expected to get a corect compatibility_level from Aiven)")
+		}
+
 		return nil
 	}
 }
