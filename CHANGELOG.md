@@ -4,6 +4,13 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.0.2] - 2020-09-04
+- Add kafka schema subject compatibility level configuration
+- Use go-client v1.5.8
+- Add support for -1 user configuration options when min value can be below zero
+- Update user configuration options
+- Small improvements: fixed tests, formatting and documentation
+
 ## [2.0.1] - 2020-08-26
 - Add support for service component `aiven_service_component` data source
 - Add accounts examples and update documentation
