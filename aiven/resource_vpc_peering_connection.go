@@ -56,19 +56,21 @@ var aivenVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		Description: "Cloud provider identifier for the peering connection if available",
 		Type:        schema.TypeString,
 	},
-
 	"peer_azure_app_id": {
-		Computed:    true,
+		Optional:    true,
+		ForceNew:    true,
 		Description: "Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet",
 		Type:        schema.TypeString,
 	},
 	"peer_azure_tenant_id": {
-		Computed:    true,
+		Optional:    true,
+		ForceNew:    true,
 		Description: "Azure tenant id in UUID4 form",
 		Type:        schema.TypeString,
 	},
 	"peer_resource_group": {
-		Computed:    true,
+		Optional:    true,
+		ForceNew:    true,
 		Description: "Azure resource group name of the peered VPC",
 		Type:        schema.TypeString,
 	},
@@ -123,6 +125,9 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 			PeerVPC:              d.Get("peer_vpc").(string),
 			PeerRegion:           region,
 			UserPeerNetworkCIDRs: cidrs,
+			PeerAzureAppId:       d.Get("peer_azure_app_id").(string),
+			PeerAzureTenantId:    d.Get("peer_azure_tenant_id").(string),
+			PeerResourceGroup:    d.Get("peer_resource_group").(string),
 		},
 	)
 	if err != nil {
