@@ -4,6 +4,9 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.0.3] - 2020-09-08
+- Extend VPC peering connection creation with new azure related optional fields
+
 ## [2.0.2] - 2020-09-04
 - Add kafka schema subject compatibility level configuration
 - Use go-client v1.5.8
