@@ -2,46 +2,108 @@ package aiven
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"os"
 	"testing"
 )
 
 func TestAccAivenTransitGatewayVPCAttachment_basic(t *testing.T) {
-	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	if os.Getenv("AWS_REGION") == "" ||
+		os.Getenv("AWS_TRANSIT_GATEWAY_ID") == "" ||
+		os.Getenv("AWS_ACCOUNT_ID") == "" {
+		t.Skip("env variables AWS_REGION, AWS_TRANSIT_GATEWAY_ID and AWS_ACCOUNT_ID required to run this test")
+	}
+
+	resourceName := "aiven_transit_gateway_vpc_attachment.foo"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: true,
-				Config:             testAccTransitGatewayVPCAttachmentResource(rName),
-				Check:              resource.ComposeTestCheckFunc(),
+				Config: testAccTransitGatewayVPCAttachmentResource(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTransitGatewayVPCAttachmentAttributes("data.aiven_transit_gateway_vpc_attachment.att"),
+					resource.TestCheckResourceAttr(resourceName, "peer_cloud_account", os.Getenv("AWS_ACCOUNT_ID")),
+					resource.TestCheckResourceAttr(resourceName, "peer_vpc", os.Getenv("AWS_TRANSIT_GATEWAY_ID")),
+					resource.TestCheckResourceAttr(resourceName, "peer_region", os.Getenv("AWS_REGION")),
+					resource.TestCheckResourceAttrSet(resourceName, "state"),
+				),
 			},
 		},
 	})
 }
 
-func testAccTransitGatewayVPCAttachmentResource(name string) string {
+func testAccTransitGatewayVPCAttachmentResource() string {
 	return fmt.Sprintf(`
-		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
+		data "aiven_project" "foo" {
+			project = "%s"
 		}
 
 		resource "aiven_project_vpc" "bar" {
-			project = aiven_project.foo.project
-			cloud_name = "google-europe-west1"
-			network_cidr = "192.168.0.0/24"
+			project = data.aiven_project.foo.project
+			cloud_name = "aws-%s"
+			network_cidr = "10.0.0.0/24"
+
+			timeouts {
+				create = "5m"
+			}
 		}
 
 		resource "aiven_transit_gateway_vpc_attachment" "foo" {
 			vpc_id = aiven_project_vpc.bar.id
-			peer_cloud_account = "<PEER_ACCOUNT_ID>"
-			peer_vpc = "google-project1"
-			peer_region = "google-europe-west1"
-			user_peer_network_cidrs = [ "10.0.0.0/24" ]
+			peer_cloud_account = "%s"
+			peer_vpc = "%s"
+			peer_region = "%s"
+			user_peer_network_cidrs = [ "172.31.0.0/16" ]
+
+			timeouts {
+				create = "10m"
+			}
 		}
-		`, name)
+
+		data "aiven_transit_gateway_vpc_attachment" "att" {
+			vpc_id = aiven_transit_gateway_vpc_attachment.foo.vpc_id
+			peer_cloud_account = aiven_transit_gateway_vpc_attachment.foo.peer_cloud_account
+			peer_vpc = aiven_transit_gateway_vpc_attachment.foo.peer_vpc
+		}
+		`, os.Getenv("AIVEN_PROJECT_NAME"),
+		os.Getenv("AWS_REGION"),
+		os.Getenv("AWS_ACCOUNT_ID"),
+		os.Getenv("AWS_TRANSIT_GATEWAY_ID"),
+		os.Getenv("AWS_REGION"))
+}
+
+func testAccCheckTransitGatewayVPCAttachmentAttributes(n string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		r := s.RootModule().Resources[n]
+		a := r.Primary.Attributes
+
+		if a["vpc_id"] == "" {
+			return fmt.Errorf("expected to get a vpc_id name from Aiven")
+		}
+
+		if a["peer_cloud_account"] == "" {
+			return fmt.Errorf("expected to get a peer_cloud_account from Aiven")
+		}
+
+		if a["peer_vpc"] == "" {
+			return fmt.Errorf("expected to get a peer_vpc from Aiven")
+		}
+
+		if a["peer_region"] == "" {
+			return fmt.Errorf("expected to get a peer_region from Aiven")
+		}
+
+		if a["user_peer_network_cidrs.0"] == "" {
+			return fmt.Errorf("expected to get a user_peer_network_cidrs from Aiven")
+		}
+
+		if a["state"] == "" {
+			return fmt.Errorf("expected to get a state from Aiven")
+		}
+
+		return nil
+	}
 }

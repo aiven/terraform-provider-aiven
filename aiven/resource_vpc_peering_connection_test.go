@@ -3,80 +3,70 @@ package aiven
 import (
 	"fmt"
 	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"os"
 	"testing"
 )
 
 func TestAccAivenVPCPeeringConnection_basic(t *testing.T) {
-	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	if os.Getenv("AWS_REGION") == "" ||
+		os.Getenv("AWS_VPC_ID") == "" ||
+		os.Getenv("AWS_ACCOUNT_ID") == "" {
+		t.Skip("env variables AWS_REGION, AWS_VPC_ID and AWS_ACCOUNT_ID required to run this test")
+	}
+
+	resourceName := "aiven_vpc_peering_connection.foo"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: true,
-				Config:             testAccVPCPeeringConnectionResource(rName),
-				Check:              resource.ComposeTestCheckFunc(),
-			},
-			{
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: true,
-				Config:             testAccVPCPeeringConnectionCustomTimeoutResource(rName),
-				Check:              resource.ComposeTestCheckFunc(),
+				Config: testAccVPCPeeringConnectionAWSResource(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "peer_cloud_account", os.Getenv("AWS_ACCOUNT_ID")),
+					resource.TestCheckResourceAttr(resourceName, "peer_vpc", os.Getenv("AWS_VPC_ID")),
+					resource.TestCheckResourceAttr(resourceName, "peer_region", os.Getenv("AWS_REGION")),
+					resource.TestCheckResourceAttrSet(resourceName, "state"),
+				),
 			},
 		},
 	})
 }
 
-func testAccVPCPeeringConnectionResource(name string) string {
+func testAccVPCPeeringConnectionAWSResource() string {
 	return fmt.Sprintf(`
-		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
+		data "aiven_project" "foo" {
+			project = "%s"
 		}
 
 		resource "aiven_project_vpc" "bar" {
-			project = aiven_project.foo.project
-			cloud_name = "google-europe-west1"
-			network_cidr = "192.168.0.0/24"
-		}
+			project = data.aiven_project.foo.project
+			cloud_name = "aws-%s"
+			network_cidr = "10.0.0.0/24"
 
-		resource "aiven_vpc_peering_connection" "foo" {
-			vpc_id = aiven_project_vpc.bar.id
-			peer_cloud_account = "<PEER_ACCOUNT_ID>"
-			peer_vpc = "google-project1"
-			peer_region = "google-europe-west1"
-		}
-		`, name)
-}
-
-func testAccVPCPeeringConnectionCustomTimeoutResource(name string) string {
-	return fmt.Sprintf(`
-		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
-		}
-
-		resource "aiven_project_vpc" "bar" {
-			project = aiven_project.foo.project
-			cloud_name = "google-europe-west1"
-			network_cidr = "192.168.0.0/24"
-		}
-
-		resource "aiven_vpc_peering_connection" "foo" {
-			vpc_id = aiven_project_vpc.bar.id
-			peer_cloud_account = "<PEER_ACCOUNT_ID>"
-			peer_vpc = "google-project1"
-			peer_region = "google-europe-west1"
-			
 			timeouts {
 				create = "5m"
 			}
 		}
-		`, name)
+
+		resource "aiven_vpc_peering_connection" "foo" {
+			vpc_id = aiven_project_vpc.bar.id
+			peer_cloud_account = "%s"
+			peer_vpc = "%s"
+			peer_region = "%s"
+
+			timeouts {
+				create = "10m"
+			}
+		}
+		`, os.Getenv("AIVEN_PROJECT_NAME"),
+		os.Getenv("AWS_REGION"),
+		os.Getenv("AWS_ACCOUNT_ID"),
+		os.Getenv("AWS_VPC_ID"),
+		os.Getenv("AWS_REGION"))
 }
 
 func Test_copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(t *testing.T) {

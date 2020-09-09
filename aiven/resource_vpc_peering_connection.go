@@ -117,6 +117,20 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 		cidrs = flattenToString(userPeerNetworkCidrs.([]interface{}))
 	}
 
+	// Azure related fields are only available for VPC Peering Connection resource but
+	// not for Transit Gateway VPC Attachment therefore ResourceData.Get retrieves nil
+	// for fields that are not present in the schema.
+	var peerAzureAppId, peerAzureTenantId, peerResourceGroup string
+	if v, ok := d.GetOk("peer_azure_app_id"); ok {
+		peerAzureAppId = v.(string)
+	}
+	if v, ok := d.GetOk("peer_azure_tenant_id"); ok {
+		peerAzureTenantId = v.(string)
+	}
+	if v, ok := d.GetOk("peer_resource_group"); ok {
+		peerResourceGroup = v.(string)
+	}
+
 	pc, err = client.VPCPeeringConnections.Create(
 		projectName,
 		vpcID,
@@ -125,9 +139,9 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 			PeerVPC:              d.Get("peer_vpc").(string),
 			PeerRegion:           region,
 			UserPeerNetworkCIDRs: cidrs,
-			PeerAzureAppId:       d.Get("peer_azure_app_id").(string),
-			PeerAzureTenantId:    d.Get("peer_azure_tenant_id").(string),
-			PeerResourceGroup:    d.Get("peer_resource_group").(string),
+			PeerAzureAppId:       peerAzureAppId,
+			PeerAzureTenantId:    peerAzureTenantId,
+			PeerResourceGroup:    peerResourceGroup,
 		},
 	)
 	if err != nil {
@@ -254,14 +268,23 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 	if err := d.Set("state_info", peeringConnection.StateInfo); err != nil {
 		return err
 	}
+
+	// Azure related fields are only available for VPC peering connection resource, and transit
+	// gateway vpc attachment triggers `Invalid address to set` error
 	if err := d.Set("peer_azure_app_id", peeringConnection.PeerAzureAppId); err != nil {
-		return err
+		if !strings.Contains(err.Error(), "Invalid address to set") {
+			return err
+		}
 	}
 	if err := d.Set("peer_azure_tenant_id", peeringConnection.PeerAzureTenantId); err != nil {
-		return err
+		if !strings.Contains(err.Error(), "Invalid address to set") {
+			return err
+		}
 	}
 	if err := d.Set("peer_resource_group", peeringConnection.PeerResourceGroup); err != nil {
-		return err
+		if !strings.Contains(err.Error(), "Invalid address to set") {
+			return err
+		}
 	}
 
 	// convert cidrs from []string to []interface {}
