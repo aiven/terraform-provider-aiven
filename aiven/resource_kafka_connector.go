@@ -3,7 +3,10 @@ package aiven
 import (
 	"fmt"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"log"
+	"time"
 )
 
 var aivenKafkaConnectorSchema = map[string]*schema.Schema{
@@ -94,6 +97,9 @@ func resourceKafkaConnector() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceKafkaConnectorState,
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Read: schema.DefaultTimeout(2 * time.Minute),
+		},
 
 		Schema: aivenKafkaConnectorSchema,
 	}
@@ -117,13 +123,20 @@ func flattenKafkaConnectorTasks(r *aiven.KafkaConnector) []map[string]interface{
 func resourceKafkaConnectorRead(d *schema.ResourceData, m interface{}) error {
 	project, serviceName, connectorName := splitResourceID3(d.Id())
 
-	res, err := m.(*aiven.Client).KafkaConnectors.List(project, serviceName)
+	w := &KafkaConnectorWaiter{
+		Client:      m.(*aiven.Client),
+		Project:     project,
+		ServiceName: serviceName,
+	}
+
+	timeout := d.Timeout(schema.TimeoutRead)
+	res, err := w.Conf(timeout).WaitForState()
 	if err != nil {
 		return fmt.Errorf("cannot read Kafka Connector List resource %s: %s", d.Id(), err)
 	}
 
 	var found bool
-	for _, r := range res.Connectors {
+	for _, r := range res.(*aiven.KafkaConnectorsResponse).Connectors {
 		if r.Name == connectorName {
 			found = true
 			if err := d.Set("project", project); err != nil {
@@ -240,4 +253,47 @@ func resourceKafkaConnectorState(d *schema.ResourceData, m interface{}) ([]*sche
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+// KafkaConnectorWaiter is used to wait for Aiven Kafka Connector list to be available
+type KafkaConnectorWaiter struct {
+	Client      *aiven.Client
+	Project     string
+	ServiceName string
+}
+
+// RefreshFunc will call the Aiven client and refresh it's state.
+func (w *KafkaConnectorWaiter) RefreshFunc() resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		list, err := w.Client.KafkaConnectors.List(w.Project, w.ServiceName)
+		if err != nil {
+			log.Printf("[DEBUG] Kafka Connectors list waiter err %s", err.Error())
+
+			if aiven.IsNotFound(err) {
+				return nil, "", err
+			}
+
+			return nil, "IN_PROGRESS", nil
+		}
+
+		return list, "OK", nil
+	}
+}
+
+// Conf sets up the configuration to refresh.
+func (w *KafkaConnectorWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
+	log.Printf("[DEBUG] Kafka Connector waiter timeout %.0f minutes", timeout.Minutes())
+
+	return &resource.StateChangeConf{
+		Pending: []string{
+			"IN_PROGRESS",
+		},
+		Target: []string{
+			"OK",
+		},
+		Refresh:    w.RefreshFunc(),
+		Delay:      10 * time.Second,
+		Timeout:    timeout,
+		MinTimeout: 2 * time.Second,
+	}
 }
