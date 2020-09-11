@@ -4,6 +4,10 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.0.4] - 2020-09-11
+- Add kafka connector read waiter
+- Fix Transit Gateway VPC Attachment Azure fields issue
+
 ## [2.0.3] - 2020-09-08
 - Extend VPC peering connection creation with new azure related optional fields
 
