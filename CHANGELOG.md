@@ -1,8 +1,18 @@
----
+ ---
 title: Changelog
 parent: README
 nav_order: 1
 ---# Changelog
+
+## [2.0.5] - 2020-09-17
+- Extend service integration endpoint, add user configuration options
+    - `external_aws_cloudwatch_logs`
+    - `external_google_cloud_logging`
+    - `external_kafka`
+    - `jolokia`
+    - `signalfx`
+- Add support for new user configuration options 
+- Add Azure specific behaviour for VPC peering connection resource
 
 ## [2.0.4] - 2020-09-11
 - Add kafka connector read waiter
