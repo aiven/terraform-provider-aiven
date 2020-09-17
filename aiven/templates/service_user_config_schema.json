@@ -420,7 +420,7 @@
         "type": "object"
       },
       "recovery_basebackup_name": {
-        "example": "elasticsearch-20191112t091354293891z",
+        "example": "backup-20191112t091354293891z",
         "maxLength": 128,
         "title": "Name of the basebackup to restore in forked service",
         "type": "string"
@@ -878,6 +878,23 @@
         "title": "Allow access to selected service ports from the public Internet",
         "type": "object"
       },
+      "recovery_basebackup_name": {
+        "example": "backup-20191112t091354293891z",
+        "maxLength": 128,
+        "title": "Name of the basebackup to restore in forked service",
+        "type": "string"
+      },
+      "service_to_fork_from": {
+        "createOnly": true,
+        "default": null,
+        "example": "anotherservicename",
+        "maxLength": 63,
+        "title": "Name of another service to fork from. This has effect only when a new service is being created.",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
       "smtp_server": {
         "additionalproperties": false,
         "properties": {
@@ -1018,6 +1035,12 @@
         },
         "title": "Allow access to selected service ports from the public Internet",
         "type": "object"
+      },
+      "recovery_basebackup_name": {
+        "example": "backup-20191112t091354293891z",
+        "maxLength": 128,
+        "title": "Name of the basebackup to restore in forked service",
+        "type": "string"
       },
       "service_to_fork_from": {
         "createOnly": true,
@@ -2676,6 +2699,12 @@
         },
         "title": "Allow access to selected service ports from the public Internet",
         "type": "object"
+      },
+      "recovery_basebackup_name": {
+        "example": "backup-20191112t091354293891z",
+        "maxLength": 128,
+        "title": "Name of the basebackup to restore in forked service",
+        "type": "string"
       },
       "redis_lfu_decay_time": {
         "default": 1,
