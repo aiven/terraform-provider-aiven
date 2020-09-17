@@ -940,7 +940,7 @@ is not directly visible in the Aiven web console.
 
 ## Resource VPC Peering Connection
 
-```
+```hcl-terraform
 resource "aiven_vpc_peering_connection" "mypeeringconnection" {
     vpc_id = "${aiven_project_vpc.myvpc.id}"
     peer_cloud_account = "<PEER_ACCOUNT_ID>"
@@ -963,6 +963,14 @@ peered with.
 `peer_region` defines the region of the remote VPC if it is not in the same region as Aiven VPC.
 
 `timeouts` a custom client timeouts.
+
+`peering_connection_id` a cloud provider identifier for the peering connection if available.
+
+`peer_azure_app_id` an Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet. 
+
+`peer_azure_tenant_id` an Azure tenant id in UUID4 form.
+
+`peer_resource_group` an Azure resource group name of the peered VPC.
 
 `state` is the state of the peering connection. This property is computed by Aiven 
 therefore cannot be set, only read. Where state can be one of: `APPROVED`, 
