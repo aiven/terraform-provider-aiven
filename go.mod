@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	cloud.google.com/go/storage v1.0.0 // indirect
-	github.com/aiven/aiven-go-client v1.5.8
+	github.com/aiven/aiven-go-client v1.5.9-0.20200916150818-025ace534a8b
 	github.com/aws/aws-sdk-go v1.30.12 // indirect
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/hashicorp/go-getter v1.4.2-0.20200106182914-9813cbd4eb02 // indirect
