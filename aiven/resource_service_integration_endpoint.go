@@ -75,6 +75,56 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 		Optional: true,
 		Type:     schema.TypeList,
 	},
+	"external_aws_cloudwatch_logs_user_config": {
+		Description: "external AWS CloudWatch Logs specific user configurable settings",
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				templates.GetUserConfigSchema("endpoint")["external_aws_cloudwatch_logs"].(map[string]interface{})),
+		},
+		MaxItems: 1,
+		Optional: true,
+		Type:     schema.TypeList,
+	},
+	"external_google_cloud_logging_user_config": {
+		Description: "external Google Cloud Logginig specific user configurable settings",
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				templates.GetUserConfigSchema("endpoint")["external_google_cloud_logging"].(map[string]interface{})),
+		},
+		MaxItems: 1,
+		Optional: true,
+		Type:     schema.TypeList,
+	},
+	"external_kafka_user_config": {
+		Description: "external Kafka specific user configurable settings",
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				templates.GetUserConfigSchema("endpoint")["external_kafka"].(map[string]interface{})),
+		},
+		MaxItems: 1,
+		Optional: true,
+		Type:     schema.TypeList,
+	},
+	"jolokia_user_config": {
+		Description: "Jolokia specific user configurable settings",
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				templates.GetUserConfigSchema("endpoint")["jolokia"].(map[string]interface{})),
+		},
+		MaxItems: 1,
+		Optional: true,
+		Type:     schema.TypeList,
+	},
+	"signalfx_user_config": {
+		Description: "Signalfx specific user configurable settings",
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				templates.GetUserConfigSchema("endpoint")["signalfx"].(map[string]interface{})),
+		},
+		MaxItems: 1,
+		Optional: true,
+		Type:     schema.TypeList,
+	},
 }
 
 func resourceServiceIntegrationEndpoint() *schema.Resource {
