@@ -191,10 +191,31 @@ func parsePeeringVPCId(resourceID string) (string, string, string, string, *stri
 }
 
 func resourceVPCPeeringConnectionRead(d *schema.ResourceData, m interface{}) error {
+	var pc *aiven.VPCPeeringConnection
 	client := m.(*aiven.Client)
 
 	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
-	pc, err := client.VPCPeeringConnections.GetVPCPeering(projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
+	isAzure, err := isAzureVPCPeeringConnection(d, client)
+	if err != nil {
+		return err
+	}
+
+	if isAzure {
+		if peerResourceGroup, ok := d.GetOk("peer_resource_group"); ok {
+			pc, err = client.VPCPeeringConnections.GetVPCPeeringWithResourceGroup(
+				projectName, vpcID, peerCloudAccount, peerVPC, peerRegion, peerResourceGroup.(string))
+			if err != nil {
+				return err
+			}
+		} else {
+			return errors.New("cannot get an Azure VPC peering connection without `peer_resource_group`")
+		}
+
+		return copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, projectName, vpcID)
+	}
+
+	pc, err = client.VPCPeeringConnections.GetVPCPeering(
+		projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
 	if err != nil {
 		return err
 	}
@@ -206,6 +227,19 @@ func resourceVPCPeeringConnectionDelete(d *schema.ResourceData, m interface{}) e
 	client := m.(*aiven.Client)
 
 	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
+	isAzure, err := isAzureVPCPeeringConnection(d, client)
+	if err != nil {
+		return err
+	}
+
+	if isAzure {
+		if peerResourceGroup, ok := d.GetOk("peer_resource_group"); ok {
+			return client.VPCPeeringConnections.DeleteVPCPeeringWithResourceGroup(
+				projectName, vpcID, peerCloudAccount, peerVPC, peerResourceGroup.(string), peerRegion)
+		} else {
+			return errors.New("cannot delete an Azure VPC peering connection without `peer_resource_group`")
+		}
+	}
 
 	return client.VPCPeeringConnections.DeleteVPCPeering(projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
 }
@@ -349,4 +383,31 @@ func (w *VPCPeeringBuildWaiter) Conf(timeout time.Duration) *resource.StateChang
 		Timeout:    timeout,
 		MinTimeout: 2 * time.Second,
 	}
+}
+
+// isAzureVPCPeeringConnection checking if peered VPC is in the Azure cloud
+func isAzureVPCPeeringConnection(d *schema.ResourceData, c *aiven.Client) (bool, error) {
+	projectName, vpcID, _, _, peerRegion := parsePeeringVPCId(d.Id())
+
+	// If peerRegion is nil the peered VPC is assumed to be in the same region and
+	// cloud as the project VPC
+	if peerRegion == nil {
+		vpc, err := c.VPCs.Get(projectName, vpcID)
+		if err != nil {
+			return false, err
+		}
+
+		// Project VPC CloudName has [cloud]-[region] structure
+		if strings.Contains(vpc.CloudName, "azure") {
+			return true, nil
+		}
+
+		return false, nil
+	}
+
+	if strings.Contains(*peerRegion, "azure") {
+		return true, nil
+	}
+
+	return false, nil
 }
