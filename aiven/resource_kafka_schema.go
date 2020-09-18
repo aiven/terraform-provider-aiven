@@ -47,6 +47,15 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 		Description:  "Kafka Schemas compatibility level",
 		Optional:     true,
 		ValidateFunc: validation.StringInSlice(compatibilityLevels, false),
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			// When a compatibility level is not set to any value and consequently is null (empty string).
+			// Allow ignoring those.
+			if new == "" {
+				return true
+			}
+
+			return false
+		},
 	},
 }
 
@@ -174,8 +183,9 @@ func resourceKafkaSchemaUpdate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	// if compatibility_level has changed and the new value is other then global schema configuration
-	if d.HasChange("compatibility_level") {
+	// if compatibility_level has changed and the new value is not empty
+	_, ok := d.GetOk("compatibility_level")
+	if d.HasChange("compatibility_level") && ok {
 		_, err := client.KafkaSubjectSchemas.UpdateConfiguration(
 			project,
 			serviceName,
@@ -225,8 +235,11 @@ func resourceKafkaSchemaRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	} else {
-		if err := d.Set("compatibility_level", c.CompatibilityLevel); err != nil {
-			return err
+		// only update if was set to not empty values by the user
+		if _, ok := d.GetOk("compatibility_level"); ok {
+			if err := d.Set("compatibility_level", c.CompatibilityLevel); err != nil {
+				return err
+			}
 		}
 	}
 
