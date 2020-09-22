@@ -115,7 +115,7 @@ Other examples can be found in the [examples](examples) folder that provides exa
 * [Account, projects, teams, and member management](examples/account)
 * [Elasticsearch deployment and configuration](examples/elasticsearch)
 * [Standalone Kafka connect deployment with custom config](examples/kafka_connect)
-* [Deploying Kafka with a Prometheus Service Integration](examples/kaka_prometheus)
+* [Deploying Kafka with a Prometheus Service Integration](examples/kafka_prometheus)
 * [Deploying Kafka and Elasticsearch with a Kafka Connect Elasticsearch Sink connector](examples/kafka_connectors/es_sink)
 * [Deploying Kafka and Elasticsearch with a Kafka Connect Mongo Sink connector](examples/kafka_connectors/mongo_sink)
 * [Deploying Kafka with Schema Registry enabled and providing a schema](examples/kafka_schemas)
