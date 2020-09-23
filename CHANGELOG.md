@@ -4,6 +4,12 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.0.6] - 2020-09-23
+- Fix README typo in the link to the prometheus/kafka example
+- Fix links for kafka schemas example
+- Do not change Kafka Schema compatibility level if it is empty or omitted
+- Update VPC peering connection documentation
+
 ## [2.0.5] - 2020-09-17
 - Extend service integration endpoint, add user configuration options
     - `external_aws_cloudwatch_logs`
