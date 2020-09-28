@@ -1,6 +1,6 @@
 module github.com/aiven/terraform-provider-aiven
 
-go 1.14
+go 1.15
 
 require (
 	cloud.google.com/go/storage v1.0.0 // indirect
