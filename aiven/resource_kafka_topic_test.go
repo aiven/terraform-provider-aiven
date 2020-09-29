@@ -82,6 +82,7 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
 					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+					resource.TestCheckNoResourceAttr(resourceName, "retention_hours"),
 				),
 			},
 			// custom TF client timeouts test

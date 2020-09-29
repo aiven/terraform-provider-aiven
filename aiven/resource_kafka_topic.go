@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"strings"
 	"time"
 )
@@ -46,10 +47,25 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 		Description: "Retention bytes",
 	},
 	"retention_hours": {
-		Type:        schema.TypeInt,
-		Optional:    true,
-		Default:     72,
-		Description: "Retention period (hours)",
+		Type:         schema.TypeInt,
+		Optional:     true,
+		Description:  "Retention period (hours)",
+		ValidateFunc: validation.IntBetween(0, 2562047788015),
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			// When a retention hours field is not set to any value and consequently is null (empty string).
+			// Allow ignoring those.
+			if new == "" {
+				return true
+			}
+
+			// When a retention hours field is set to -1 it means that it not defined.
+			// Allow ignoring those for gracefully transition to the new logic.
+			if old == "-1" {
+				return true
+			}
+
+			return false
+		},
 	},
 	"minimum_in_sync_replicas": {
 		Type:        schema.TypeInt,
@@ -159,9 +175,16 @@ func resourceKafkaTopicRead(d *schema.ResourceData, m interface{}) error {
 	if err := d.Set("retention_bytes", topic.RetentionBytes); err != nil {
 		return err
 	}
-	if err := d.Set("retention_hours", topic.RetentionHours); err != nil {
-		return err
+
+	if topic.RetentionHours != nil {
+		// it could be -1, which means that this field is not defined.
+		if *topic.RetentionHours >= 0 {
+			if err := d.Set("retention_hours", *topic.RetentionHours); err != nil {
+				return err
+			}
+		}
 	}
+
 	if err := d.Set("termination_protection", d.Get("termination_protection")); err != nil {
 		return err
 	}
