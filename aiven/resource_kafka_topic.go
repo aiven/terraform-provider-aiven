@@ -50,17 +50,11 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 		Type:         schema.TypeInt,
 		Optional:     true,
 		Description:  "Retention period (hours)",
-		ValidateFunc: validation.IntBetween(0, 2562047788015),
+		ValidateFunc: validation.IntBetween(-1, 2562047788015),
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			// When a retention hours field is not set to any value and consequently is null (empty string).
 			// Allow ignoring those.
 			if new == "" {
-				return true
-			}
-
-			// When a retention hours field is set to -1 it means that it not defined.
-			// Allow ignoring those for gracefully transition to the new logic.
-			if old == "-1" {
 				return true
 			}
 
@@ -177,8 +171,8 @@ func resourceKafkaTopicRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if topic.RetentionHours != nil {
-		// it could be -1, which means that this field is not defined.
-		if *topic.RetentionHours >= 0 {
+		// it could be -1, which means infinite retention
+		if *topic.RetentionHours >= -1 {
 			if err := d.Set("retention_hours", *topic.RetentionHours); err != nil {
 				return err
 			}
