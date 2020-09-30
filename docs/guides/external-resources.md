@@ -1,6 +1,6 @@
 ---
 parent: Guides
-title: "External Resources"
+page_title: "External Resources"
 ---
 
 ## Aiven Help Articles

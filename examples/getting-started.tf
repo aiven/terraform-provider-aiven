@@ -1,8 +1,9 @@
 terraform {
-  # go get u github.com/aiven/terraform-provider-aiven
-  # cp $GOPATH/bin/terraform-provider-aiven $PWD/terraform.d/plugins/linux_amd64/terraform-provider-aiven_v1.2.4
   required_providers {
-    aiven = "1.2.4"
+    aiven = {
+      source = "aiven/aiven"
+      version = "2.X.X"
+    }
   }
 }
 
