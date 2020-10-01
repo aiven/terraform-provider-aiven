@@ -3,6 +3,15 @@ variable "prod_project_name" {}
 variable "qa_project_name" {}
 variable "dev_project_name" {}
 
+terraform {
+  required_providers {
+    aiven = {
+      source = "aiven/aiven"
+      version = "2.X.X"
+    }
+  }
+}
+
 ################################################
 ################################################
 #################### AIVEN #####################

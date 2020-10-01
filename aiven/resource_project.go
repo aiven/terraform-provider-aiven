@@ -26,6 +26,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Computed:    true,
 		Description: "Project root CA. This is used by some services like Kafka to sign service certificate",
 		Optional:    true,
+		Sensitive:   true,
 	},
 	"card_id": {
 		Type:        schema.TypeString,

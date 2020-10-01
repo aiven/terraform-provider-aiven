@@ -40,47 +40,6 @@ with the changes that are to be applied.
 
 ## Installation
 
-Work is underway to host the Aiven Terraform Provider under the official Terraform registry.
-Until then, the easiest methods are:
-
-**Terraform client version 0.12 and below**
-```shell script
-go get -u github.com/aiven/terraform-provider-aiven
-
-# Global Install
-mkdir -p ~/.terraform.d/plugins
-cp $GOPATH/bin/terraform-provider-aiven ~/.terraform.d/plugins/ #Use a version here as a suffix if you specify a version in your plan
-
-# Local Install
-mkdir -p $PWD/terraform.d/plugins/linux_amd64 #darwin_amd64 if on OSX but linux will be needed for TF Cloud
-cp $GOPATH/bin/terraform-provider-aiven $PWD/terraform.d/plugins/linux_amd64/terraform-provider-aiven_v1.2.4 # Change to release ver
-```
-
-**Terraform client version 0.13 and below**
-
-Download the Aiven provider for Linux AMD64. 
-```shell script
-curl -Lo terraform-provider-aiven https://github.com/aiven/terraform-provider-aiven/releases/download/v2.X.X/terraform-provider-aiven-linux-amd64_v2.X.X
-
-chmod +x terraform-provider-aiven
-```
-*Please specify version that you like to use and if you are not using Linux AMD64, 
-download the correct binary for your system from the [release page](https://github.com/aiven/terraform-provider-aiven/releases).*
-
-Third-party provider plugins — locally installed providers, not on the registry — need to be 
-assigned an (arbitrary) source and placed in the appropriate subdirectory for Terraform to find and use them.
-Create the appropriate subdirectory within the user plugins directory for the Aiven provider.
-```shell script
-mkdir -p ~/.terraform.d/plugins/aiven.io/provider/aiven/2.X/linux_amd64
-```
-*If you are not using Linux AMD64 replace `linux_amd64` with your `$OS_$ARCH`, and the same for the provider version.*
-
-Finally, move the Aiven provider binary into the newly created directory.
-```shell script
-mv terraform-provider-aiven ~/.terraform.d/plugins/aiven.io/provider/aiven/2.X/linux_amd64
-```
-
-Now Aiven provider is in your user plugins directory, you can use the provider in your Terraform configuration.
 ```hcl-terraform
 terraform {
   required_providers {
@@ -97,85 +56,7 @@ provider "aiven" {
   api_token = var.aiven_api_token
 }
 ```
-Then, initialize your Terraform workspace by running `terraform init`. If your Aiven provider  
-is located in the correct directory, it should successfully initialize. Otherwise, move your 
-Aiven provider to the correct directory: `~/.terraform.d/plugins/aiven.io/provider/aiven/$VERSION/$OS_$ARCH/`.
-
-## Sample project
-
-There is a [sample project](sample.tf) which sets up a project, defines Kafka,
-PostgreSQL, InfluxDB and Grafana services, one PG database and user, one Kafka topic and
-user, and metrics and dashboard integration for the Kafka and PG databases.
-
-Make sure you have a look at the [variables](terraform.tfvars.sample) and copy it over to
-`terraform.tfvars` with your own settings.
-
-Other examples can be found in the [examples](examples) folder that provides examples to:
-* [Getting Started](examples/getting-started.tf)
-* [Account, projects, teams, and member management](examples/account)
-* [Elasticsearch deployment and configuration](examples/elasticsearch)
-* [Standalone Kafka connect deployment with custom config](examples/kafka_connect)
-* [Deploying Kafka with a Prometheus Service Integration](examples/kafka_prometheus)
-* [Deploying Kafka and Elasticsearch with a Kafka Connect Elasticsearch Sink connector](examples/kafka_connectors/es_sink)
-* [Deploying Kafka and Elasticsearch with a Kafka Connect Mongo Sink connector](examples/kafka_connectors/mongo_sink)
-* [Deploying Kafka with Schema Registry enabled and providing a schema](examples/kafka_schemas)
-* [Deploying Cassandra and forking (cloning the service, config and data) into a new service with a higher plan](examples/cassandra_fork)
-* [Deploying a Grafana service](examples/service)
-* [Deploying a MirrorMaker service](examples/kafka_mirrormaker)
-* [Deploying PostgreSQL services to multiple clouds and regions](examples/postgres)
-
-## Importing existing infrastructure
-
-All resources support importing so if you have already manually created an Aiven
-environment using the web console or otherwise, it is possible to import all resources
-and start managing them using Terraform. The documentation below mentions the ID format
-for each resource but typically it is `<project_name>/<resource_name>` for resources
-that are directly under project level and `<project_name>/<service_name>/<resource_name>`
-for resources that belong to specific service. E.g. to import a database called `mydb`
-belonging to service `myservice` in project `myproject` you'd do something like
-
-```
-terraform import aiven_database.mydb myproject/myservice/mydb
-```
-
-In some cases the internal identifiers are not shown in the Aiven web console. In such
-cases the easiest way to obtain identifiers is typically to check network requests and
-responses with your browser's debugging tools, as the raw responses do contain the IDs.
-
-Note that as Terraform does not support creating configuration automatically you will
-still need to manually create the Terraform configuration files. The import will just
-match the existing resources with the ones defined in the configuration.
-
-## Using datasources
-
-Alternatively you can define already existing, or externally created and managed, resources
-as datasources. Most of the resources are also available as datasources.
-
-## Resource options
-
-This section describes all the different resources that can be managed with this provider.
-The list of options in this document is not comprehensive. For most part the options map
-directly to [Aiven REST API](https://api.aiven.io/doc/) properties and that can be
-consulted for details. For various objects called x_user_config the exact configuration
-options are available in [Service User Config](aiven/templates/service_user_config_schema.json),
-[Integration User Config](aiven/templates/integrations_user_config_schema.json) and in
-[Integration Endpoint User Config](aiven/templates/integration_endpoints_user_config_schema.json).
-
-### Provider
-
-```
-provider "aiven" {
-    api_token = "<AIVEN_API_TOKEN>"
-}
-```
-
-The Aiven provider currently only supports a single configuration option, `api_token`. This can also be specified with the AIVEN_TOKEN shell environment variable. 
-The Aiven web console can be used to create named, never expiring API tokens that should
-be used for this kind of purposes. If Terraform is used for managing existing project(s),
-the API token must belong to a user with admin privileges for those project(s). For new
-projects the user will be automatically granted admin role. For projects with credit card
-billing this account must be the one in possession with the credit card used to pay for
-the services.
+Then, initialize your Terraform workspace by running `terraform init`.
 
 ### Resource Project
 

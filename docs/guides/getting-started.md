@@ -1,6 +1,6 @@
 ---
 parent: Guides
-title: "Getting Started"
+page_title: "Getting Started"
 sidebar_current: "docs-aiven-getting-started"
 description: |-
   The Aiven Terraform Provider is a way to access all of your Aiven services within Terraform. Use this provider to set up and teardown services and test out configurations. Any issues, please email support@aiven.io

@@ -1,7 +1,7 @@
 ---
 layout: default
 parent: Guides
-title: Creating a Syslog Service Integration
+page_title: Creating a Syslog Service Integration
 nav_order: 5
 ---
 
