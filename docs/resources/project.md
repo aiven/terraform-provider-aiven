@@ -1,6 +1,6 @@
 # Project Resource
 
-Aiven Project
+The Project resource allows the creation and management of an Aiven Projects.
 
 ## Example Usage
 
@@ -34,16 +34,10 @@ effect when the project is created.
 
 ## Attribute Reference
 
+In addition to all arguments above, the following attributes are exported:
+
 * `ca_cert` - is a computed property that can be used to read the CA certificate of the
 project. This is required for configuring clients that connect to certain services like
 Kafka. This value cannot be set, only read.
 
 Aiven ID format when importing existing resource: name of the project as is.
-
-
-
-
-
-
-
-
