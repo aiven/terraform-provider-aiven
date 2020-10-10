@@ -4,6 +4,13 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.0.7] - 2020-10-08
+- Documentation re-formatting and enhancement
+- Temporarily disable docs auto-generation
+- Change Kafka Topic resource `retention_hours` behaviour according to API specification
+- Use latest go-client version v1.5.9
+- Use golang 1.15
+
 ## [2.0.6] - 2020-09-23
 - Fix README typo in the link to the prometheus/kafka example
 - Fix links for kafka schemas example
