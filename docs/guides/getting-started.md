@@ -8,19 +8,15 @@ description: |-
 
 ## Installing the Aiven Provider
 
-`go get -u github.com/aiven/terraform-provider-aiven`
-
-### Locally
-
-```
-$ mkdir -p $PWD/terraform.d/plugins/<OS_ARCH> # i.e. ~/.terraform.d/plugins/linux_amd64
-$ cp $GOPATH/bin/terraform-provider-aiven $PWD/terraform.d/plugins/linux_amd64/terraform-provider-aiven_v1.2.4 # Change to release ver
-```
-### Globally
-
-```
-$ mkdir -p ~/.terraform.d/plugins/<OS_ARCH> # i.e. ~/.terraform.d/plugins/linux_amd64
-$ cp $GOPATH/bin/terraform-provider-aiven ~/.terraform.d/plugins/<OS_ARCH>/terraform-provider-aiven-v1.2.4
+```hcl
+terraform {
+  required_providers {
+    aiven = {
+      source = "aiven/aiven"
+      version = "2.X.X"
+    }
+  }
+}
 ```
 
 #### TIP: Using with Terraform Cloud
@@ -42,7 +38,7 @@ You should now see terraform and terraform-provider-aiven with the version numbe
 
 It is difficult to make an Open Source Database Management Service say Hello World, so maybe we will just setup a project and deploy Postgres.
 
-```
+```hcl
 terraform {
   required_providers {
     aiven = "1.2.4"
