@@ -27,7 +27,7 @@ The important things here are:
 
 A sample script is below:
 
-```
+```hcl
 terraform {
   required_providers {
     aiven = ">1.2.4"

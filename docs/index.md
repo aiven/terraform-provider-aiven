@@ -49,26 +49,26 @@ Then, initialize your Terraform workspace by running `terraform init`.
 
 ## Sample project
 
-There is a [sample project](../sample.tf) which sets up a project, defines Kafka,
+There is a [sample project](https://github.com/aiven/terraform-provider-aiven/tree/master/sample.tf) which sets up a project, defines Kafka,
 PostgreSQL, InfluxDB and Grafana services, one PG database and user, one Kafka topic and
 user, and metrics and dashboard integration for the Kafka and PG databases.
 
-Make sure you have a look at the [variables](../terraform.tfvars.sample) and copy it over to
+Make sure you have a look at the [variables](https://github.com/aiven/terraform-provider-aiven/tree/master/terraform.tfvars.sample) and copy it over to
 `terraform.tfvars` with your own settings.
 
-Other examples can be found in the [examples](../examples) folder that provides examples to:
-* [Getting Started](../examples/getting-started.tf)
-* [Account, projects, teams, and member management](../examples/account)
-* [Elasticsearch deployment and configuration](../examples/elasticsearch)
-* [Standalone Kafka connect deployment with custom config](../examples/kafka_connect)
-* [Deploying Kafka with a Prometheus Service Integration](../examples/kafka_prometheus)
-* [Deploying Kafka and Elasticsearch with a Kafka Connect Elasticsearch Sink connector](../examples/kafka_connectors/es_sink)
-* [Deploying Kafka and Elasticsearch with a Kafka Connect Mongo Sink connector](../examples/kafka_connectors/mongo_sink)
-* [Deploying Kafka with Schema Registry enabled and providing a schema](../examples/kafka_schemas)
-* [Deploying Cassandra and forking (cloning the service, config and data) into a new service with a higher plan](../examples/cassandra_fork)
-* [Deploying a Grafana service](../examples/service)
-* [Deploying a MirrorMaker service](../examples/kafka_mirrormaker)
-* [Deploying PostgreSQL services to multiple clouds and regions](../examples/postgres)
+Other examples can be found in the [examples](https://github.com/aiven/terraform-provider-aiven/tree/master/examples) folder that provides examples to:
+* [Getting Started](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/getting-started.tf)
+* [Account, projects, teams, and member management](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/account)
+* [Elasticsearch deployment and configuration](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/elasticsearch)
+* [Standalone Kafka connect deployment with custom config](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_connect)
+* [Deploying Kafka with a Prometheus Service Integration](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_prometheus)
+* [Deploying Kafka and Elasticsearch with a Kafka Connect Elasticsearch Sink connector](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_connectors/es_sink)
+* [Deploying Kafka and Elasticsearch with a Kafka Connect Mongo Sink connector](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_connectors/mongo_sink)
+* [Deploying Kafka with Schema Registry enabled and providing a schema](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_schemas)
+* [Deploying Cassandra and forking (cloning the service, config and data) into a new service with a higher plan](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/cassandra_fork)
+* [Deploying a Grafana service](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/service)
+* [Deploying a MirrorMaker service](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_mirrormaker)
+* [Deploying PostgreSQL services to multiple clouds and regions](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/postgres)
 
 ## Importing existing infrastructure
 
@@ -103,13 +103,13 @@ This section describes all the different resources that can be managed with this
 The list of options in this document is not comprehensive. For most part the options map
 directly to [Aiven REST API](https://api.aiven.io/doc/) properties and that can be
 consulted for details. For various objects called x_user_config the exact configuration
-options are available in [Service User Config](../aiven/templates/service_user_config_schema.json),
-[Integration User Config](../aiven/templates/integrations_user_config_schema.json) and in
-[Integration Endpoint User Config](../aiven/templates/integration_endpoints_user_config_schema.json).
+options are available in [Service User Config](https://github.com/aiven/terraform-provider-aiven/tree/master/aiven/templates/service_user_config_schema.json),
+[Integration User Config](https://github.com/aiven/terraform-provider-aiven/tree/master/aiven/templates/integrations_user_config_schema.json) and in
+[Integration Endpoint User Config](https://github.com/aiven/terraform-provider-aiven/tree/master/aiven/templates/integration_endpoints_user_config_schema.json).
 
 ### Provider
 
-```
+```hcl
 provider "aiven" {
     api_token = "<AIVEN_API_TOKEN>"
 }
