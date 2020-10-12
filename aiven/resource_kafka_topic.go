@@ -50,7 +50,7 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 		Type:         schema.TypeInt,
 		Optional:     true,
 		Description:  "Retention period (hours)",
-		ValidateFunc: validation.IntBetween(-1, 2562047788015),
+		ValidateFunc: validation.IntAtLeast(-1),
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			// When a retention hours field is not set to any value and consequently is null (empty string).
 			// Allow ignoring those.
