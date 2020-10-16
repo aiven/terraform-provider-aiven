@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"log"
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -197,6 +198,12 @@ func testAccKafkaTopicResource(name string) string {
 			partitions = 3
 			replication = 2
 			retention_hours = -1
+
+			config {
+				flush_ms = 10
+				unclean_leader_election_enable = true
+				cleanup_policy = "compact"
+			}
 		}
 
 		data "aiven_kafka_topic" "topic" {
@@ -357,4 +364,32 @@ func testAccCheckAivenKafkaTopicResourceDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+func Test_partitions(t *testing.T) {
+	type args struct {
+		numPartitions int
+	}
+	tests := []struct {
+		name           string
+		args           args
+		wantPartitions []*aiven.Partition
+	}{
+		{
+			"basic",
+			args{numPartitions: 3},
+			[]*aiven.Partition{
+				{},
+				{},
+				{},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotPartitions := partitions(tt.args.numPartitions); !reflect.DeepEqual(gotPartitions, tt.wantPartitions) {
+				t.Errorf("partitions() = %v, want %v", gotPartitions, tt.wantPartitions)
+			}
+		})
+	}
 }

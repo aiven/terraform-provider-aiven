@@ -54,34 +54,6 @@ func TestGetTopicCache(t *testing.T) {
 	}
 }
 
-func Test_partitions(t *testing.T) {
-	type args struct {
-		numPartitions int
-	}
-	tests := []struct {
-		name           string
-		args           args
-		wantPartitions []*aiven.Partition
-	}{
-		{
-			"basic",
-			args{numPartitions: 3},
-			[]*aiven.Partition{
-				{},
-				{},
-				{},
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if gotPartitions := partitions(tt.args.numPartitions); !reflect.DeepEqual(gotPartitions, tt.wantPartitions) {
-				t.Errorf("partitions() = %v, want %v", gotPartitions, tt.wantPartitions)
-			}
-		})
-	}
-}
-
 func TestTopicCache_LoadByProjectAndServiceName(t1 *testing.T) {
 	tearDown := setupTopicCacheTestCase(t1)
 	defer tearDown(t1)
@@ -117,13 +89,11 @@ func TestTopicCache_LoadByProjectAndServiceName(t1 *testing.T) {
 			},
 			map[string]aiven.KafkaTopic{
 				"topic-1": {
-					Partitions:  partitions(3),
 					Replication: 3,
 					State:       "AVAILABLE",
 					TopicName:   "topic-1",
 				},
 				"topic-2": {
-					Partitions:  partitions(1),
 					Replication: 1,
 					State:       "AVAILABLE",
 					TopicName:   "topic-2",
@@ -188,7 +158,6 @@ func TestTopicCache_LoadByTopicName(t1 *testing.T) {
 				topicName:   "topic-1",
 			},
 			aiven.KafkaTopic{
-				Partitions:  partitions(3),
 				Replication: 3,
 				State:       "AVAILABLE",
 				TopicName:   "topic-1",
@@ -265,15 +234,13 @@ func testAddTwoTopicsToCache() {
 	cache.StoreByProjectAndServiceName(
 		"test-pr1",
 		"test-sr1",
-		[]*aiven.KafkaListTopic{
+		[]*aiven.KafkaTopic{
 			{
-				Partitions:  3,
 				Replication: 3,
 				State:       "AVAILABLE",
 				TopicName:   "topic-1",
 			},
 			{
-				Partitions:  1,
 				Replication: 1,
 				State:       "AVAILABLE",
 				TopicName:   "topic-2",

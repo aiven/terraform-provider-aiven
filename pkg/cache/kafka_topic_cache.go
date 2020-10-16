@@ -78,33 +78,15 @@ func (t *TopicCache) DeleteByProjectAndServiceName(projectName, serviceName stri
 }
 
 // StoreByProjectAndServiceName sets the values for a Project name and Service name key.
-func (t *TopicCache) StoreByProjectAndServiceName(projectName, serviceName string, list []*aiven.KafkaListTopic) {
+func (t *TopicCache) StoreByProjectAndServiceName(projectName, serviceName string, list []*aiven.KafkaTopic) {
 	log.Printf("[DEBUG] Updating Kafka Topic cache for project %s and service %s ...", projectName, serviceName)
 
-	for _, lTopic := range list {
-		topic := aiven.KafkaTopic{
-			MinimumInSyncReplicas: lTopic.MinimumInSyncReplicas,
-			Partitions:            partitions(lTopic.Partitions),
-			Replication:           lTopic.Replication,
-			RetentionBytes:        lTopic.RetentionBytes,
-			RetentionHours:        lTopic.RetentionHours,
-			State:                 lTopic.State,
-			TopicName:             lTopic.TopicName,
-			CleanupPolicy:         lTopic.CleanupPolicy}
-
+	for _, topic := range list {
 		t.Lock()
 		if _, ok := t.internal[projectName+serviceName]; !ok {
 			t.internal[projectName+serviceName] = make(map[string]aiven.KafkaTopic)
 		}
-		t.internal[projectName+serviceName][topic.TopicName] = topic
+		t.internal[projectName+serviceName][topic.TopicName] = *topic
 		t.Unlock()
 	}
-}
-
-//partitions returns a slice, of empty aiven.Partition, of specified size
-func partitions(numPartitions int) (partitions []*aiven.Partition) {
-	for i := 0; i < numPartitions; i++ {
-		partitions = append(partitions, &aiven.Partition{})
-	}
-	return
 }

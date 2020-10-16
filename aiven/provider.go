@@ -7,6 +7,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/pkg/cache"
 	"log"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -139,6 +140,65 @@ func optionalIntPointer(d *schema.ResourceData, key string) *int {
 		return nil
 	}
 	return &intValue
+}
+
+func toOptionalString(val interface{}) string {
+	switch v := val.(type) {
+	case int:
+		return strconv.Itoa(v)
+	case int64:
+		return strconv.FormatInt(v, 10)
+	case float64:
+		return strconv.FormatFloat(v, 'E', -1, 64)
+	case bool:
+		return strconv.FormatBool(v)
+	case string:
+		return v
+	default:
+		return ""
+	}
+}
+
+func parseOptionalStringToInt64(val interface{}) *int64 {
+	v, ok := val.(string)
+	if !ok {
+		return nil
+	}
+
+	res, err := strconv.ParseInt(v, 10, 64)
+	if err != nil {
+		return nil
+	}
+
+	return &res
+}
+
+func parseOptionalStringToFloat64(val interface{}) *float64 {
+	v, ok := val.(string)
+	if !ok {
+		return nil
+	}
+
+	res, err := strconv.ParseFloat(v, 64)
+	if err != nil {
+		return nil
+	}
+
+	return &res
+}
+
+func parseOptionalStringToBool(val interface{}) *bool {
+	v, ok := val.(string)
+	if !ok {
+		return nil
+	}
+
+	res, err := strconv.ParseBool(v)
+	if err != nil {
+		return nil
+	}
+
+	return &res
 }
 
 func buildResourceID(parts ...string) string {
