@@ -137,16 +137,21 @@ configuration options available:
         each message that is logged. Possible values: `TERSE`, `DEFAULT` and `VERBOSE`.
         * `log_min_duration_statement` - (Optional) Log statements that take more than this number of 
         milliseconds to run, -1 disables
+        * `max_files_per_process` - (Optional) PostgreSQL maximum number of files that can be open per process
         * `max_locks_per_transaction` - (Optional) PostgreSQL maximum locks per transaction
+        * `max_logical_replication_workers` - (Optional) PostgreSQL maximum logical replication workers 
+        (taken from the pool of max_parallel_workers)
         * `max_parallel_workers` - (Optional) Sets the maximum number of workers that the system can 
         support for parallel queries.
         * `max_parallel_workers_per_gather` - (Optional) Sets the maximum number of workers that can be 
         started by a single Gather or Gather Merge node.
         * `max_pred_locks_per_transaction` - (Optional) PostgreSQL maximum predicate locks per transaction
         * `max_prepared_transactions` - (Optional) PostgreSQL maximum prepared transactions
+        * `max_replication_slots` - (Optional) PostgreSQL maximum replication slots
         * `max_stack_depth` - (Optional) Maximum depth of the stack in bytes
         * `max_standby_archive_delay` - (Optional) Max standby archive delay in milliseconds
         * `max_standby_streaming_delay` - (Optional) Max standby streaming delay in milliseconds
+        * `max_wal_senders` - (Optional) PostgreSQL maximum WAL senders
         * `max_worker_processes` - (Optional) Sets the maximum number of background processes that the system
          can support
         * `pg_partman_bgw.interval` - (Optional) Sets the time interval to run pg_partman's scheduled tasks

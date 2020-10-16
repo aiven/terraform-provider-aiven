@@ -84,6 +84,19 @@ configuration options available:
     * `service_to_fork_from` - (Optional) Name of another service to fork from. This has effect 
     only when a new service is being created.
     
+    * `influxdb` - (Optional) influxdb.conf configuration values
+        * `log_queries_after` - (Optional) The maximum duration in seconds before a query is 
+        logged as a slow query. Setting this to 0 (the default) will never log slow queries.
+        * `max_row_limit` - (Optional) The maximum number of rows returned in a non-chunked query. 
+        Setting this to 0 (the default) allows an unlimited number to be returned.
+        * `max_select_buckets` - (Optional) The maximum number of `GROUP BY time()` buckets that 
+        can be processed in a query. Setting this to 0 (the default) allows an unlimited number to 
+        be processed.
+        * `max_select_point` - (Optional) The maximum number of points that can be processed in a 
+        SELECT statement. Setting this to 0 (the default) allows an unlimited number to be processed.
+        * `query_timeout` - (Optional) The maximum duration in seconds before a query is killed. 
+        Setting this to 0 (the default) will never kill slow queries.
+
 * `timeouts` - (Optional) a custom client timeouts.
 
 ## Attribute Reference
