@@ -18,7 +18,7 @@ data "aiven_account_team_project" "account_team_project1" {
 
 * `team_id` - (Required) is an account team id.
 
-* `project_name` - (Optional) is a project name of already existing project.
+* `project_name` - (Required) is a project name of already existing project.
 
 ## Attribute Reference
 

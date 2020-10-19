@@ -7,6 +7,50 @@
   "datadog": {
     "additionalProperties": false,
     "properties": {
+      "exclude_consumer_groups": {
+        "items": {
+          "example": "[ group_a, group_b ]",
+          "maxLength": 1024,
+          "title": "Consumer groups to exclude",
+          "type": "string"
+        },
+        "maxItems": 1024,
+        "title": "List of custom metrics",
+        "type": "array"
+      },
+      "exclude_topics": {
+        "items": {
+          "example": "[ topic_x, topic_y ]",
+          "maxLength": 1024,
+          "title": "Topics to exclude",
+          "type": "string"
+        },
+        "maxItems": 1024,
+        "title": "List of topics to exclude",
+        "type": "array"
+      },
+      "include_consumer_groups": {
+        "items": {
+          "example": "[ group_a, group_b ]",
+          "maxLength": 1024,
+          "title": "Consumer groups to include",
+          "type": "string"
+        },
+        "maxItems": 1024,
+        "title": "List of custom metrics",
+        "type": "array"
+      },
+      "include_topics": {
+        "items": {
+          "example": "[ topic_x, topic_y ]",
+          "maxLength": 1024,
+          "title": "Topics to include",
+          "type": "string"
+        },
+        "maxItems": 1024,
+        "title": "List of topics to include",
+        "type": "array"
+      },
       "kafka_custom_metrics": {
         "items": {
           "example": "kafka.log.log_size",

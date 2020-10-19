@@ -13,11 +13,11 @@ data "aiven_grafana" "gr1" {
 
 ## Argument Reference
 
-* `project` - (Required) identifies the project the service belongs to. To set up proper dependency
+* `project` - identifies the project the service belongs to. To set up proper dependency
 between the project and the service, refer to the project as shown in the above example.
 Project cannot be changed later without destroying and re-creating the service.
 
-* `service_name` - (Required) specifies the actual name of the service. The name cannot be changed
+* `service_name` - specifies the actual name of the service. The name cannot be changed
 later without destroying and re-creating the service so name should be picked based on
 intended service usage rather than current attributes.
 
@@ -76,35 +76,35 @@ configuration options available:
         * `allow_sign_up` - Automatically sign-up users on successful sign-in
         * `allowed_domains` - Allowed domain
         * `allowed_organizations` - Allowed organization
-        * `api_url` - (Required) API URL
-        * `auth_url` - (Required) Authorization URL
-        * `client_id` - (Required) Client ID from provider
-        * `client_secret` - (Required) Client secret from provider
+        * `api_url` - API URL
+        * `auth_url` - Authorization URL
+        * `client_id` - Client ID from provider
+        * `client_secret` - Client secret from provider
         * `name` - Name of the OAuth integration
         * `scopes` - Scope must be non-empty string without whitespace
-        * `token_url` - (Required) Token URL
+        * `token_url` - Token URL
     
     * `auth_github` - Github Auth integration.
         * `auth_github` - Automatically sign-up users on successful sign-in
         * `allowed_organizations` - Must consist of alpha-numeric characters and dashes"
-        * `client_id` - (Required) Client ID from provider
-        * `client_secret` - (Required) Client secret from provider
+        * `client_id` - Client ID from provider
+        * `client_secret` - Client secret from provider
         * `team_ids` - Require users to belong to one of given team IDs
     
     * `auth_gitlab` - GitLab Auth integration.
         * `allow_sign_up` - Automatically sign-up users on successful sign-in
-        * `allowed_groups` - (Required) Require users to belong to one of given groups
+        * `allowed_groups` - Require users to belong to one of given groups
         * `api_url` - API URL. This only needs to be set when using self hosted GitLab
         * `auth_url` - Authorization URL. This only needs to be set when using self hosted GitLab
-        * `client_id` - (Required) Client ID from provider
-        * `client_secret` - (Required) Client secret from provider
+        * `client_id` - Client ID from provider
+        * `client_secret` - Client secret from provider
         * `token_url` - Token URL. This only needs to be set when using self hosted GitLab
     
     * `auth_google` - Google Auth integration
         * `allow_sign_up` - Automatically sign-up users on successful sign-in
-        * `allowed_domain` - (Required) Domains allowed to sign-in to this Grafana
-        * `client_id` - (Required) Client ID from provider
-        * `client_secret` - (Required) Client secret from provider
+        * `allowed_domain` - Domains allowed to sign-in to this Grafana
+        * `client_id` - Client ID from provider
+        * `client_secret` - Client secret from provider
     
     * `cookie_samesite` - Cookie SameSite attribute: 'strict' prevents sending cookie for 
     cross-site requests, effectively disabling direct linking from other sites to Grafana. 'lax' is the default value.
@@ -117,11 +117,11 @@ configuration options available:
     * `editors_can_admin` - Editors can manage folders, teams and dashboards created by them.
     
     * `external_image_storage` - External image store settings
-        * `access_key` - (Required) S3 access key. Requires permissions to the S3 bucket for the 
+        * `access_key` - S3 access key. Requires permissions to the S3 bucket for the 
         s3:PutObject and s3:PutObjectAcl actions
-        * `bucket_url` - (Required) Bucket URL for S3
-        * `provider` - (Required) Provider type
-        * `secret_key` - (Required) S3 secret key
+        * `bucket_url` - Bucket URL for S3
+        * `provider` - Provider type
+        * `secret_key` - S3 secret key
     
     * `google_analytics_ua_id` - Google Analytics Universal Analytics ID for tracking Grafana usage
     * `ip_filter` - Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
@@ -140,13 +140,15 @@ configuration options available:
     when a new service is being created.
     
     * `smtp_server` - SMTP server settings.
-        * `from_address` - (Required) Address used for sending emails
+        * `from_address` - Address used for sending emails
         * `from_name` - Name used in outgoing emails, defaults to Grafana
-        * `host` - (Required) Server hostname or IP
+        * `host` - Server hostname or IP
         * `password` - Password for SMTP authentication
-        * `port` - (Required) SMTP server port
+        * `port` - SMTP server port
         * `skip_verify` - Skip verifying server certificate. Defaults to false
         * `username` - Username for SMTP authentication
+        * `starttls_policy` - Either OpportunisticStartTLS, MandatoryStartTLS or NoStartTLS. 
+        Default is OpportunisticStartTLS.
         
     * `user_auto_assign_org` - Auto-assign new users on signup to main organization. 
     Defaults to false.

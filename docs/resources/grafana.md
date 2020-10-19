@@ -155,6 +155,8 @@ configuration options available:
         * `port` - (Required) SMTP server port
         * `skip_verify` - (Optional) Skip verifying server certificate. Defaults to false
         * `username` - (Optional) Username for SMTP authentication
+        * `starttls_policy` - (Optional) Either OpportunisticStartTLS, MandatoryStartTLS or NoStartTLS. 
+        Default is OpportunisticStartTLS.
         
     * `user_auto_assign_org` - (Optional) Auto-assign new users on signup to main organization. 
     Defaults to false.
