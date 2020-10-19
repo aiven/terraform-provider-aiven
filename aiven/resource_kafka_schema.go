@@ -50,11 +50,7 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			// When a compatibility level is not set to any value and consequently is null (empty string).
 			// Allow ignoring those.
-			if new == "" {
-				return true
-			}
-
-			return false
+			return new == ""
 		},
 	},
 }

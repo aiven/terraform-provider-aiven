@@ -123,7 +123,7 @@ func datasourceServiceComponentRead(d *schema.ResourceData, m interface{}) error
 					continue
 				}
 			} else {
-				if !(c.Ssl == nil || *c.Ssl == true) {
+				if !(c.Ssl == nil || *c.Ssl) {
 					continue
 				}
 			}
