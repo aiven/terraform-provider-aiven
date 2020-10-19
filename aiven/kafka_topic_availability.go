@@ -84,11 +84,31 @@ func (w *KafkaTopicAvailabilityWaiter) refresh() error {
 		return err
 	}
 
+	var topics []*aiven.KafkaTopic
 	for _, item := range list {
 		log.Printf("[TRACE] got a topic `%s` from aiven API with the status `%s`", item.TopicName, item.State)
+		topic := &aiven.KafkaTopic{
+			MinimumInSyncReplicas: item.MinimumInSyncReplicas,
+			Partitions:            partitions(item.Partitions),
+			Replication:           item.Replication,
+			RetentionBytes:        item.RetentionBytes,
+			RetentionHours:        item.RetentionHours,
+			State:                 item.State,
+			TopicName:             item.TopicName,
+			CleanupPolicy:         item.CleanupPolicy}
+
+		// when topic from a topics list is ACTIVE but has an empty config
+		if topic.State == "ACTIVE" && topic.Config.CleanupPolicy.Value == "" {
+			topic, err = w.Client.KafkaTopics.Get(w.Project, w.ServiceName, w.TopicName)
+			if err != nil {
+				return err
+			}
+		}
+
+		topics = append(topics, topic)
 	}
 
-	topicCache.StoreByProjectAndServiceName(w.Project, w.ServiceName, list)
+	topicCache.StoreByProjectAndServiceName(w.Project, w.ServiceName, topics)
 	return nil
 }
 
@@ -103,4 +123,12 @@ func (w *KafkaTopicAvailabilityWaiter) Conf(timeout time.Duration) *resource.Sta
 		Timeout:    timeout,
 		MinTimeout: 1 * time.Second,
 	}
+}
+
+//partitions returns a slice, of empty aiven.Partition, of specified size
+func partitions(numPartitions int) (partitions []*aiven.Partition) {
+	for i := 0; i < numPartitions; i++ {
+		partitions = append(partitions, &aiven.Partition{})
+	}
+	return
 }
