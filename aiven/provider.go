@@ -64,6 +64,8 @@ func Provider() terraform.ResourceProvider {
 			"aiven_redis":                          datasourceRedis(),
 			"aiven_transit_gateway_vpc_attachment": datasourceTransitGatewayVPCAttachment(),
 			"aiven_service_component":              datasourceServiceComponent(),
+			"aiven_m3db":                           datasourceM3DB(),
+			"aiven_m3aggregator":                   datasourceM3Aggregator(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -100,6 +102,8 @@ func Provider() terraform.ResourceProvider {
 			"aiven_influxdb":                       resourceInfluxDB(),
 			"aiven_redis":                          resourceRedis(),
 			"aiven_transit_gateway_vpc_attachment": resourceTransitGatewayVPCAttachment(),
+			"aiven_m3db":                           resourceM3DB(),
+			"aiven_m3aggregator":                   resourceM3Aggregator(),
 		},
 
 		ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {
