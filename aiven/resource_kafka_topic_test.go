@@ -3,9 +3,9 @@ package aiven
 import (
 	"fmt"
 	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"log"
 	"os"
 	"testing"
@@ -69,9 +69,9 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 	rName3 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAivenKafkaTopicResourceDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
 		Steps: []resource.TestStep{
 			// basic Kafka Topic test
 			{
@@ -122,13 +122,14 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 }
 
 func TestAccAivenKafkaTopic_100topics(t *testing.T) {
+
 	resourceName := "aiven_kafka_topic.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAivenKafkaTopicResourceDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKafka101TopicResource(rName),

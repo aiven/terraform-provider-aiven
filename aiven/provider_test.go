@@ -1,8 +1,10 @@
 package aiven
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"log"
 	"os"
 	"reflect"
@@ -10,25 +12,33 @@ import (
 )
 
 var (
-	testAccProviders map[string]terraform.ResourceProvider
-	testAccProvider  *schema.Provider
+	testAccProviders         map[string]schema.Provider
+	testAccProvider          *schema.Provider
+	testAccProviderFactories map[string]func() (*schema.Provider, error)
+	testAccProviderFunc      func() *schema.Provider
 )
 
 func init() {
-	testAccProvider = Provider().(*schema.Provider)
-	testAccProviders = map[string]terraform.ResourceProvider{
-		"aiven": testAccProvider,
+	testAccProvider = Provider()
+	testAccProviders = map[string]schema.Provider{
+		"aiven": *testAccProvider,
 	}
+	testAccProviderFactories = map[string]func() (*schema.Provider, error){
+		"aiven": func() (*schema.Provider, error) {
+			return testAccProvider, nil
+		},
+	}
+	testAccProviderFunc = func() *schema.Provider { return testAccProvider }
 }
 
 func TestProvider(t *testing.T) {
-	if err := Provider().(*schema.Provider).InternalValidate(); err != nil {
+	if err := Provider().InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }
 
 func TestProviderImpl(t *testing.T) {
-	var _ terraform.ResourceProvider = Provider()
+	var _ *schema.Provider = Provider()
 }
 
 func testAccPreCheck(t *testing.T) {
@@ -41,6 +51,11 @@ func testAccPreCheck(t *testing.T) {
 	// tests or project name with the assigned payment card.
 	if v := os.Getenv("AIVEN_PROJECT_NAME"); v == "" {
 		log.Print("[WARNING] AIVEN_PROJECT_NAME must be set for some acceptance tests")
+	}
+
+	err := testAccProvider.Configure(context.Background(), terraform.NewResourceConfigRaw(nil))
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 
@@ -84,5 +99,22 @@ func Test_validateDurationString(t *testing.T) {
 				t.Errorf("validateDurationString() gotErrors = %v", gotErrors)
 			}
 		})
+	}
+}
+
+func testAccCheckWithProviders(f func(*terraform.State, *schema.Provider) error, providers *[]*schema.Provider) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		numberOfProviders := len(*providers)
+		for i, provider := range *providers {
+			if provider.Meta() == nil {
+				log.Printf("[DEBUG] Skipping empty provider %d (total: %d)", i, numberOfProviders)
+				continue
+			}
+			log.Printf("[DEBUG] Calling check with provider %d (total: %d)", i, numberOfProviders)
+			if err := f(s, provider); err != nil {
+				return err
+			}
+		}
+		return nil
 	}
 }
