@@ -4,6 +4,14 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.0.8] - 2020-10-20
+- Add support for new kafka topic features
+- Use go-client v1.5.10
+- Improve documentation 
+- Add support for new user configuration options
+- Simplify certain part of the code 
+- Fix Kafka Topic validation since value that is coming from API overflows int
+
 ## [2.0.7] - 2020-10-08
 - Documentation re-formatting and enhancement
 - Temporarily disable docs auto-generation
