@@ -21,7 +21,7 @@ func TestAccAiven_m3aggregator(t *testing.T) {
 				Config: testAccM3AggregatorResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceCommonAttributes("data.aiven_m3aggregator.service"),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-m3a-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "m3aggregator"),
