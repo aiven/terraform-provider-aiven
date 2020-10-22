@@ -40,9 +40,12 @@ It is difficult to make an Open Source Database Management Service say Hello Wor
 
 ```hcl
 terraform {
-  required_providers {
-    aiven = "1.2.4"
-  }
+    required_providers {
+        aiven = {
+            source = "aiven/aiven"
+            version = "2.X.X"
+        }
+    }
 }
 
 variable "aiven_api_token" {
@@ -58,19 +61,19 @@ resource "aiven_project" "hello" {
 }
 
 resource "aiven_service" "world" {
-	project = "${aiven_project.hello.project}"
-	cloud_name = "google-europe-west1"
-	plan = "business-4"
-	service_name = "world-pg"
-	service_type = "pg"
-	maintenance_window_dow = "monday"
-	maintenance_window_time = "12:00:00"
-	pg_user_config {
-		pg {
-			idle_in_transaction_session_timeout = 900
-		}
-		pg_version = "10"
-	}
+    project = "${aiven_project.hello.project}"
+    cloud_name = "google-europe-west1"
+    plan = "business-4"
+    service_name = "world-pg"
+    service_type = "pg"
+    maintenance_window_dow = "monday"
+    maintenance_window_time = "12:00:00"
+    pg_user_config {
+    pg {
+        idle_in_transaction_session_timeout = 900
+    }
+    pg_version = "10"
+}
 }
 
 ```
