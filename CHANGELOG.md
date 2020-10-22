@@ -4,6 +4,10 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.0.9] - 2020-10-22
+- Add support for M3 DB and M3 Aggregator, these services are currently in beta and available 
+only for selected customers; currently, components for both of these services are under development.
+
 ## [2.0.8] - 2020-10-20
 - Add support for new kafka topic features
 - Use go-client v1.5.10
