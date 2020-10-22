@@ -30,7 +30,10 @@ A sample script is below:
 ```hcl
 terraform {
   required_providers {
-    aiven = ">1.2.4"
+    aiven = {
+      source = "aiven/aiven"
+      version = "2.X.X"
+    }
   }
 }
 
