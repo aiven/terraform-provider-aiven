@@ -139,8 +139,11 @@ func testAccCheckAivenServiceCommonAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a service.maintenance_window_time from Aiven")
 		}
 
-		if a["components.#"] == "0" {
-			return fmt.Errorf("expected to get a none empty list of components from Aiven")
+		// M3 Aggregator has no components
+		if a["service_type"] != "m3aggregator" {
+			if a["components.#"] == "0" {
+				return fmt.Errorf("expected to get a none empty list of components from Aiven")
+			}
 		}
 
 		if a["termination_protection"] == "" {

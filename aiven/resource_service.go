@@ -24,6 +24,8 @@ const (
 	ServiceTypeKafka            = "kafka"
 	ServiceTypeKafkaConnect     = "kafka_connect"
 	ServiceTypeKafkaMirrormaker = "kafka_mirrormaker"
+	ServiceTypeM3               = "m3db"
+	ServiceTypeM3Aggregator     = "m3aggregator"
 )
 
 func availableServiceTypes() []string {
@@ -38,6 +40,8 @@ func availableServiceTypes() []string {
 		ServiceTypeKafka,
 		ServiceTypeKafkaConnect,
 		ServiceTypeKafkaMirrormaker,
+		ServiceTypeM3,
+		ServiceTypeM3Aggregator,
 	}
 }
 
@@ -731,11 +735,6 @@ func resourceServiceCreateWrapper(serviceType string) schema.CreateFunc {
 
 }
 
-//func resourceServiceCreateWrapper(d *schema.ResourceData, m interface{}) error {
-//
-//	return resourceServiceCreate(d, m)
-//}
-
 func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 	serviceType := d.Get("service_type").(string)
@@ -1046,6 +1045,8 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 		props["replica_uri"] = connectionInfo.PostgresReplicaURI
 	case "redis":
 	case "kafka_mirrormaker":
+	case "m3db":
+	case "m3aggregator":
 	default:
 		panic(fmt.Sprintf("Unsupported service type %v", serviceType))
 	}
