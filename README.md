@@ -38,25 +38,39 @@ with the changes that are to be applied.
 - [Terraform](https://www.terraform.io/downloads.html) v0.12.X or greater
 - [Go](https://golang.org/doc/install) 1.14.X or greater
 
-## Installation
+## Using the provider
+See the [Aiven Provider documentation](https://registry.terraform.io/providers/aiven/aiven/latest/docs) to get started using the Aiven provider.
 
-```hcl-terraform
-terraform {
-  required_providers {
-    aiven = {
-      versions = [
-        "2.X"
-      ]
-      source = "aiven.io/provider/aiven"
-    }
-  }
-}
+## Developing the Provider
+If you wish to work on the provider, you'll first need Go installed on your machine (version 1.14+ is required).
 
-provider "aiven" {
-  api_token = var.aiven_api_token
-}
+To compile the provider, run `make release`. This will build the provider and put the provider binary in the `plugins/$OS_$ARCH` directory.
+
+In order to test the provider, you can simply run make test.
+
+```shell script
+$ make test
 ```
-Then, initialize your Terraform workspace by running `terraform init`.
+In order to run the full suite of acceptance tests, run `make testacc`.
+
+**Required environment variables for acceptance tests:**
+- `AIVEN_TOKEN` - Aiven Token.
+- `AIVEN_PROJECT_NAME` - project with enough credits where all tests will be executed.
+
+*Note: Acceptance tests create real resources, and often cost money to run.*
+
+```shell script
+$ make testacc
+```
+
+In order to run a specific acceptance test, use the TESTARGS environment variable. For example, 
+the following command will run `TestAccAiven_kafka` acceptance test only:
+
+```shell script
+$ make testacc TESTARGS='-run=TestAccAiven_kafka'
+```
+
+For information about writing acceptance tests, see the main [Terraform contributing guide](https://github.com/hashicorp/terraform/blob/master/.github/CONTRIBUTING.md#writing-acceptance-tests).
 
 ## Credits
 
