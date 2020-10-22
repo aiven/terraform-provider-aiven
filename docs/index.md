@@ -28,7 +28,56 @@ with Terraform can still be deleted and they will be deleted before the service 
 attempted to be deleted so even with this setting enabled you need to be very careful
 with the changes that are to be applied.
 
+## Installation instructions for Terraform client 0.12
+*If you can please upgrade your Terraform client to version 0.13 or above, in this case, 
+there is no need to install provide manually.*
+
+Download the Aiven provider for Linux AMD64. 
+```shell script
+curl -Lo terraform-provider-aiven https://github.com/aiven/terraform-provider-aiven/releases/download/v2.X.X/terraform-provider-aiven-linux-amd64_v2.X.X
+
+chmod +x terraform-provider-aiven
+```
+*Please specify version that you like to use and if you are not using Linux AMD64, 
+download the correct binary for your system from the [release page](https://github.com/aiven/terraform-provider-aiven/releases).*
+
+Third-party provider plugins — locally installed providers, not on the registry — need to be 
+assigned an (arbitrary) source and placed in the appropriate subdirectory for Terraform to find and use them.
+Create the appropriate subdirectory within the user plugins directory for the Aiven provider.
+```shell script
+mkdir -p ~/.terraform.d/plugins/aiven.io/provider/aiven/2.X/linux_amd64
+```
+*If you are not using Linux AMD64 replace `linux_amd64` with your `$OS_$ARCH`, and the same for the provider version.*
+
+Finally, move the Aiven provider binary into the newly created directory.
+```shell script
+mv terraform-provider-aiven ~/.terraform.d/plugins/aiven.io/provider/aiven/2.X/linux_amd64
+```
+
+Now Aiven provider is in your user plugins directory, you can use the provider in your Terraform configuration.
+```hcl-terraform
+terraform {
+  required_providers {
+    aiven = {
+      versions = [
+        "2.X"
+      ]
+      source = "aiven.io/provider/aiven"
+    }
+  }
+}
+
+provider "aiven" {
+  api_token = var.aiven_api_token
+}
+```
+Then, initialize your Terraform workspace by running `terraform init`. If your Aiven provider  
+is located in the correct directory, it should successfully initialize. Otherwise, move your 
+Aiven provider to the correct directory: `~/.terraform.d/plugins/aiven.io/provider/aiven/$VERSION/$OS_$ARCH/`.
+
 ## Example Usage
+
+*This is only available for Terraform client 0.13 and above*
 
 ```hcl
 terraform {
