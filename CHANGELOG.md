@@ -4,6 +4,10 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.0.10] - 2020-10-23
+- Fix a bug related to Kafka Topic cache layer
+- Small documentation improvements
+
 ## [2.0.9] - 2020-10-22
 - Add support for M3 DB and M3 Aggregator, these services are currently in beta and available 
 only for selected customers; currently, components for both of these services are under development.
