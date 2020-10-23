@@ -99,12 +99,13 @@ func (w *KafkaTopicAvailabilityWaiter) refresh() error {
 
 		// when topic from a topics list is ACTIVE but has an empty config
 		if topic.State == "ACTIVE" && topic.Config.CleanupPolicy.Value == "" {
-			topic, err = w.Client.KafkaTopics.Get(w.Project, w.ServiceName, w.TopicName)
+			topic, err = w.Client.KafkaTopics.Get(w.Project, w.ServiceName, item.TopicName)
 			if err != nil {
 				return err
 			}
 		}
 
+		log.Printf("[TRACE] got a topic `%s` from aiven API with the status `%s`", topic.TopicName, topic.State)
 		topics = append(topics, topic)
 	}
 
