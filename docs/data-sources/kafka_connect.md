@@ -69,16 +69,25 @@ The following configuration options available:
     overridden by the connector. Default is None.
     * `consumer_auto_offset_reset` - What to do when there is no initial offset in Kafka or 
     if the current offset does not exist any more on the server. Default is earliest.
+    * `consumer_fetch_max_bytes` - Records are fetched in batches by the consumer, and if 
+    the first record batch in the first non-empty partition of the fetch is larger than this value, 
+    the record batch will still be returned to ensure that the consumer can make progress. As such, 
+    this is not a absolute maximum.
     * `consumer_isolation_level` - Transaction read isolation level. read_uncommitted is 
-    the default, but read_committed can be used if consume-exactly-once behavior is desired.                                                        
-    * `consumer_max_poll_interval_ms`- The maximum delay in milliseconds between invocations 
+    the default, but read_committed can be used if consume-exactly-once behavior is desired.     
+    * `consumer_max_partition_fetch_bytes` - Records are fetched in batches by the consumer.If 
+    the first record batch in the first non-empty partition of the fetch is larger than this limit, 
+    the batch will still be returned to ensure that the consumer can make progress.                                                   
+    * `consumer_max_poll_interval_ms` - The maximum delay in milliseconds between invocations 
     of poll() when using consumer group management (defaults to 300000).
     * `consumer_max_poll_records` The maximum number of records returned by a single poll.
-    * `offset_flush_interval_ms`- The interval at which to try committing offsets for tasks 
+    * `offset_flush_interval_ms` - The interval at which to try committing offsets for tasks 
     (defaults to 60000).
-    * `offset_flush_timeout_ms`- Maximum number of milliseconds to wait for records to flush 
+    * `offset_flush_timeout_ms` - Maximum number of milliseconds to wait for records to flush 
     and partition offset data to be committed to offset storage before cancelling the process and restoring 
     the offset data to be committed in a future attempt (defaults to 5000).
+    * `producer_max_request_size` - This setting will limit the number of record batches the 
+    producer will send in a single request to avoid sending huge requests. 
     * `session_timeout_ms` - The timeout in milliseconds used to detect failures when using Kafka’s 
     group management facilities (defaults to 10000).
     
