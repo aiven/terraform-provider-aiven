@@ -70,6 +70,8 @@ The following configuration options available:
     adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at 
     least to two nodes. Note: setting this to true increases a risk of data loss in case of 
     virtual machine failure.
+    * `cluster_max_shards_per_node` - Controls the number of shards allowed in the 
+    cluster per data node
     
     * `elasticsearch` - Elasticsearch settings.
         * `action_auto_create_index_enabled` - Explicitly allow or block automatic 

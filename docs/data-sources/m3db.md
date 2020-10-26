@@ -66,6 +66,12 @@ configuration options available:
     * `m3_version` - M3 major version
     * `custom_domain` - Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
     * `ip_filter` - Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+    * `private_access` - Allow access to selected service ports from private networks.
+        * `m3coordinator` - Allow clients to connect to m3coordinator with a DNS name that 
+        always resolves to the service's private IP addresses. Only available in certain network locations.
+    * `public_access` - Allow access to selected service ports from the public Internet.
+        * `m3coordinator` - Allow clients to connect to m3coordinator from the public internet 
+        for service nodes that are in a project VPC or another type of private network.
     * `limits` - M3 limits
         * `global_datapoints` - The maximum number of data points fetched during request
         * `query_datapoints` - The maximum number of data points fetched in single query
