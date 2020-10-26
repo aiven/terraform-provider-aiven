@@ -101,6 +101,14 @@
               "null"
             ]
           },
+          "cluster_max_shards_per_node": {
+            "description": "Controls the number of shards allowed in the cluster per data node",
+            "example": 1000,
+            "maximum": 10000,
+            "minimum": 100,
+            "title": "cluster.max_shards_per_node",
+            "type": "integer"
+          },
           "http_max_content_length": {
             "description": "Maximum content length for HTTP requests to the Elasticsearch HTTP API, in bytes.",
             "maximum": 2147483647,
@@ -1190,6 +1198,14 @@
             "title": "group.min.session.timeout.ms",
             "type": "integer"
           },
+          "log_cleaner_delete_retention_ms": {
+            "description": "How long are delete records retained?",
+            "example": 86400000,
+            "maximum": 315569260000,
+            "minimum": 0,
+            "title": "log.cleaner.delete.retention.ms",
+            "type": "integer"
+          },
           "log_cleaner_max_compaction_lag_ms": {
             "description": "The maximum amount of time message will remain uncompacted. Only applicable for logs that are being compacted",
             "maximum": 9223372036854776000,
@@ -1222,6 +1238,43 @@
             "title": "log.cleanup.policy",
             "type": "string"
           },
+          "log_flush_interval_messages": {
+            "description": "The number of messages accumulated on a log partition before messages are flushed to disk",
+            "example": 9223372036854776000,
+            "maximum": 9223372036854776000,
+            "minimum": 1,
+            "title": "log.flush.interval.messages",
+            "type": "integer"
+          },
+          "log_flush_interval_ms": {
+            "description": "The maximum time in ms that a message in any topic is kept in memory before flushed to disk. If not set, the value in log.flush.scheduler.interval.ms is used",
+            "maximum": 9223372036854776000,
+            "minimum": 0,
+            "title": "log.flush.interval.ms",
+            "type": "integer"
+          },
+          "log_index_interval_bytes": {
+            "description": "The interval with which Kafka adds an entry to the offset index",
+            "example": 4096,
+            "maximum": 104857600,
+            "minimum": 0,
+            "title": "log.index.interval.bytes",
+            "type": "integer"
+          },
+          "log_index_size_max_bytes": {
+            "description": "The maximum size in bytes of the offset index",
+            "example": 10485760,
+            "maximum": 104857600,
+            "minimum": 1048576,
+            "title": "log.index.size.max.bytes",
+            "type": "integer"
+          },
+          "log_message_downconversion_enable": {
+            "description": "This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. ",
+            "example": true,
+            "title": "log.message.downconversion.enable",
+            "type": "boolean"
+          },
           "log_message_timestamp_difference_max_ms": {
             "description": "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message",
             "maximum": 9223372036854776000,
@@ -1238,6 +1291,12 @@
             "title": "log.message.timestamp.type",
             "type": "string"
           },
+          "log_preallocate": {
+            "description": "Should pre allocate file when create new segment?",
+            "example": false,
+            "title": "log.preallocate",
+            "type": "boolean"
+          },
           "log_retention_bytes": {
             "description": "The maximum size of the log before deleting messages",
             "maximum": 9223372036854776000,
@@ -1252,11 +1311,40 @@
             "title": "log.retention.hours",
             "type": "integer"
           },
+          "log_retention_ms": {
+            "description": "The number of milliseconds to keep a log file before deleting it (in milliseconds), If not set, the value in log.retention.minutes is used. If set to -1, no time limit is applied.",
+            "maximum": 9223372036854776000,
+            "minimum": -1,
+            "title": "log.retention.ms",
+            "type": "integer"
+          },
+          "log_roll_jitter_ms": {
+            "description": "The maximum jitter to subtract from logRollTimeMillis (in milliseconds). If not set, the value in log.roll.jitter.hours is used",
+            "maximum": 9223372036854776000,
+            "minimum": 0,
+            "title": "log.roll.jitter.ms",
+            "type": "integer"
+          },
+          "log_roll_ms": {
+            "description": "The maximum time before a new log segment is rolled out (in milliseconds).",
+            "maximum": 9223372036854776000,
+            "minimum": 1,
+            "title": "log.roll.ms",
+            "type": "integer"
+          },
           "log_segment_bytes": {
             "description": "The maximum size of a single log file",
             "maximum": 1073741824,
             "minimum": 10485760,
             "title": "log.segment.bytes",
+            "type": "integer"
+          },
+          "log_segment_delete_delay_ms": {
+            "description": "The amount of time to wait before deleting a file from the filesystem",
+            "example": 60000,
+            "maximum": 3600000,
+            "minimum": 0,
+            "title": "log.segment.delete.delay.ms",
             "type": "integer"
           },
           "max_connections_per_ip": {
@@ -1280,6 +1368,14 @@
             "maximum": 100001200,
             "minimum": 0,
             "title": "message.max.bytes",
+            "type": "integer"
+          },
+          "min_insync_replicas": {
+            "description": "When a producer sets acks to 'all' (or '-1'), min.insync.replicas specifies the minimum number of replicas that must acknowledge a write for the write to be considered successful.",
+            "example": 1,
+            "maximum": 7,
+            "minimum": 1,
+            "title": "min.insync.replicas",
             "type": "integer"
           },
           "num_partitions": {
@@ -1372,6 +1468,14 @@
             "title": "Consumer auto offset reset",
             "type": "string"
           },
+          "consumer_fetch_max_bytes": {
+            "description": "Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum.",
+            "example": 52428800,
+            "maximum": 104857600,
+            "minimum": 1048576,
+            "title": "The maximum amount of data the server should return for a fetch request",
+            "type": "integer"
+          },
           "consumer_isolation_level": {
             "description": "Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
             "enum": [
@@ -1380,6 +1484,14 @@
             ],
             "title": "Consumer isolation level",
             "type": "string"
+          },
+          "consumer_max_partition_fetch_bytes": {
+            "description": "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. ",
+            "example": 1048576,
+            "maximum": 104857600,
+            "minimum": 1048576,
+            "title": "The maximum amount of data per-partition the server will return.",
+            "type": "integer"
           },
           "consumer_max_poll_interval_ms": {
             "description": "The maximum delay in milliseconds between invocations of poll() when using consumer group management (defaults to 300000).",
@@ -1411,6 +1523,14 @@
             "maximum": 2147483647,
             "minimum": 1,
             "title": "Offset flush timeout",
+            "type": "integer"
+          },
+          "producer_max_request_size": {
+            "description": "This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests.",
+            "example": 1048576,
+            "maximum": 10485760,
+            "minimum": 131072,
+            "title": "The maximum size of a request in bytes",
             "type": "integer"
           },
           "session_timeout_ms": {
@@ -1494,11 +1614,6 @@
       },
       "kafka_version": {
         "enum": [
-          "1.0",
-          "1.1",
-          "2.0",
-          "2.1",
-          "2.2",
           "2.3",
           "2.4",
           "2.5",
@@ -1558,6 +1673,29 @@
         "default": false,
         "title": "Enable Schema-Registry service",
         "type": "boolean"
+      },
+      "schema_registry_config": {
+        "additionalProperties": false,
+        "properties": {
+          "leader_eligibility": {
+            "description": "If true, Karapace / Schema Registry on the service nodes can participate in leader election. It might be needed to disable this when the schemas topic is replicated to a secondary cluster and Karapace / Schema Registry there must not participate in leader election. Defaults to 'true'.",
+            "example": true,
+            "title": "leader_eligibility",
+            "type": "boolean"
+          },
+          "topic_name": {
+            "description": "The durable single partition topic that acts as the durable log for the data. This topic must be compacted to avoid losing data due to retention policy. Please note that changing this configuration in an existing Schema Registry / Karapace setup leads to previous schemas being inaccessible, data encoded with them potentially unreadable and schema ID sequence put out of order. It's only possible to do the switch while Schema Registry / Karapace is disabled. Defaults to '_schemas'.",
+            "example": "_schemas",
+            "maxLength": 249,
+            "minLength": 1,
+            "pattern": "^(?!\\.$|\\.\\.$)[-_.A-Za-z0-9]+$",
+            "title": "topic_name",
+            "type": "string",
+            "user_error": "Must consist of alpha-numeric characters, underscores, dashes or dots, max 249 characters"
+          }
+        },
+        "title": "Schema Registry configuration",
+        "type": "object"
       }
     },
     "type": "object"
@@ -1601,6 +1739,14 @@
             "title": "Consumer auto offset reset",
             "type": "string"
           },
+          "consumer_fetch_max_bytes": {
+            "description": "Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum.",
+            "example": 52428800,
+            "maximum": 104857600,
+            "minimum": 1048576,
+            "title": "The maximum amount of data the server should return for a fetch request",
+            "type": "integer"
+          },
           "consumer_isolation_level": {
             "description": "Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
             "enum": [
@@ -1609,6 +1755,14 @@
             ],
             "title": "Consumer isolation level",
             "type": "string"
+          },
+          "consumer_max_partition_fetch_bytes": {
+            "description": "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. ",
+            "example": 1048576,
+            "maximum": 104857600,
+            "minimum": 1048576,
+            "title": "The maximum amount of data per-partition the server will return.",
+            "type": "integer"
           },
           "consumer_max_poll_interval_ms": {
             "description": "The maximum delay in milliseconds between invocations of poll() when using consumer group management (defaults to 300000).",
@@ -1640,6 +1794,14 @@
             "maximum": 2147483647,
             "minimum": 1,
             "title": "Offset flush timeout",
+            "type": "integer"
+          },
+          "producer_max_request_size": {
+            "description": "This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests.",
+            "example": 1048576,
+            "maximum": 10485760,
+            "minimum": 131072,
+            "title": "The maximum size of a request in bytes",
             "type": "integer"
           },
           "session_timeout_ms": {
@@ -1964,6 +2126,30 @@
         "maxItems": 2147483647,
         "title": "List of M3 namespaces",
         "type": "array"
+      },
+      "private_access": {
+        "additionalProperties": false,
+        "properties": {
+          "m3coordinator": {
+            "example": true,
+            "title": "Allow clients to connect to m3coordinator with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+            "type": "boolean"
+          }
+        },
+        "title": "Allow access to selected service ports from private networks",
+        "type": "object"
+      },
+      "public_access": {
+        "additionalProperties": false,
+        "properties": {
+          "m3coordinator": {
+            "example": true,
+            "title": "Allow clients to connect to m3coordinator from the public internet for service nodes that are in a project VPC or another type of private network",
+            "type": "boolean"
+          }
+        },
+        "title": "Allow access to selected service ports from the public Internet",
+        "type": "object"
       }
     },
     "type": "object"
