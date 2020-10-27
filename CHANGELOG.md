@@ -4,6 +4,9 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.0.11] - 2020-10-27
+- Add support for new user configuration options related to Kafka, Kafka Schema Registry, Kafka Connect, Elasticsearch and M3 services.
+
 ## [2.0.10] - 2020-10-23
 - Fix a bug related to Kafka Topic cache layer
 - Small documentation improvements
