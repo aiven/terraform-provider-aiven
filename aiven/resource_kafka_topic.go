@@ -285,7 +285,7 @@ func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
 
 	d.SetId(buildResourceID(project, serviceName, topicName))
 
-	return resourceKafkaTopicRead(d, m)
+	return nil
 }
 
 func getKafkaTopicConfig(d *schema.ResourceData) aiven.KafkaTopicConfig {
@@ -425,7 +425,7 @@ func resourceKafkaTopicUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	return resourceKafkaTopicRead(d, m)
+	return nil
 }
 
 func resourceKafkaTopicDelete(d *schema.ResourceData, m interface{}) error {
@@ -437,7 +437,15 @@ func resourceKafkaTopicDelete(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("cannot delete kafka topic when termination_protection is enabled")
 	}
 
-	return client.KafkaTopics.Delete(projectName, serviceName, topicName)
+	err := client.KafkaTopics.Delete(projectName, serviceName, topicName)
+	if err != nil {
+		if aiven.IsNotFound(err) {
+			return nil
+		}
+		return err
+	}
+
+	return nil
 }
 
 func resourceKafkaTopicExists(d *schema.ResourceData, m interface{}) (bool, error) {

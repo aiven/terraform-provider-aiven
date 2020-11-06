@@ -37,6 +37,16 @@ func (w *KafkaTopicCreateWaiter) RefreshFunc() resource.StateRefreshFunc {
 				log.Printf("[DEBUG] Got error %v while waiting for topic to be created.", aivenError)
 				return nil, "CREATING", nil
 			}
+
+			if ok && aivenError.Status == 409 && strings.Contains(aivenError.Message, "already exists") {
+				return w.CreateRequest.TopicName, "CREATED", nil
+			}
+
+			if ok && aivenError.Status == 501 &&
+				strings.Contains(aivenError.Message, "An error occurred. Please try again later") {
+				return nil, "CREATING", nil
+			}
+
 			return nil, "", err
 		}
 
@@ -54,6 +64,6 @@ func (w *KafkaTopicCreateWaiter) Conf(timeout time.Duration) *resource.StateChan
 		Refresh:    w.RefreshFunc(),
 		Delay:      10 * time.Second,
 		Timeout:    timeout,
-		MinTimeout: 2 * time.Second,
+		MinTimeout: 10 * time.Second,
 	}
 }
