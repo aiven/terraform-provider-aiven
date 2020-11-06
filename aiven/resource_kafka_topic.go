@@ -293,6 +293,10 @@ func getKafkaTopicConfig(d *schema.ResourceData) aiven.KafkaTopicConfig {
 		return aiven.KafkaTopicConfig{}
 	}
 
+	if d.Get("config").([]interface{})[0] == nil {
+		return aiven.KafkaTopicConfig{}
+	}
+
 	configRaw := d.Get("config").([]interface{})[0].(map[string]interface{})
 
 	return aiven.KafkaTopicConfig{
