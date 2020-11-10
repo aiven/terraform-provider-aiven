@@ -1,6 +1,6 @@
 # Connection Pool Resource
 
-The Connection Pool resource allows the creation and management of an Aiven Connection Pool`s.
+The Connection Pool resource allows the creation and management of Aiven Connection Pools.
 
 ## Example Usage
 

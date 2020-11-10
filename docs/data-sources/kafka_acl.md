@@ -1,4 +1,4 @@
-# Data Source Kafka ACL Data Source
+# Kafka ACL Data Source
 
 The Data Source Kafka ACL data source provides information about the existing Aiven Kafka ACL 
 for a Kafka service.

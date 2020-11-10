@@ -21,7 +21,7 @@ They should be defined using reference as shown above to set up dependencies cor
 
 In addition to all arguments above, the following attributes are exported:
 
-* `enabled` - enables of disables Elasticsearch ACL's.
+* `enabled` - enables or disables Elasticsearch ACLs.
 
 * `extended_acl` - Index rules can be applied in a limited fashion to the _mget, _msearch and _bulk APIs 
 (and only those) by enabling the ExtendedAcl option for the service. When it is enabled, users can use 
