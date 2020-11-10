@@ -3,9 +3,9 @@ package aiven
 import (
 	"fmt"
 	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"os"
 	"testing"
 )
@@ -15,9 +15,9 @@ func TestAccAivenMirrorMakerReplicationFlow_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAivenMirrorMakerReplicationFlowResourceDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenMirrorMakerReplicationFlowResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMirrorMakerReplicationFlowResource(rName),
@@ -191,6 +191,8 @@ func testAccMirrorMakerReplicationFlowResource(name string) string {
 			service_name = aiven_service.mm.service_name
 			source_cluster = aiven_mirrormaker_replication_flow.foo.source_cluster
 			target_cluster = aiven_mirrormaker_replication_flow.foo.target_cluster
+
+			depends_on = [aiven_mirrormaker_replication_flow.foo]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
 }

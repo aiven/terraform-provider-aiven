@@ -8,10 +8,9 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccAivenKafkaACL_basic(t *testing.T) {
@@ -19,9 +18,9 @@ func TestAccAivenKafkaACL_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAivenKafkaACLResourceDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenKafkaACLResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccKafkaACLWrongProjectResource(rName),
@@ -234,6 +233,8 @@ func testAccKafkaACLResource(name string) string {
 			topic = aiven_kafka_acl.foo.topic
 			username = aiven_kafka_acl.foo.username
 			permission = aiven_kafka_acl.foo.permission
+
+			depends_on = [aiven_kafka_acl.foo]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name)
 }
@@ -261,138 +262,4 @@ func testAccCheckAivenKafkaACLResourceDestroy(s *terraform.State) error {
 	}
 
 	return nil
-}
-
-func Test_copyKafkaACLPropertiesFromAPIResponseToTerraform(t *testing.T) {
-	type args struct {
-		d           *schema.ResourceData
-		acl         *aiven.KafkaACL
-		project     string
-		serviceName string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{
-			"basic",
-			args{
-				d: resourceKafkaACL().Data(&terraform.InstanceState{
-					ID:         "",
-					Attributes: nil,
-					Ephemeral:  terraform.EphemeralState{},
-					Meta:       nil,
-					Tainted:    false,
-				}),
-				acl: &aiven.KafkaACL{
-					ID:         "1",
-					Permission: "admin",
-					Topic:      "test-topic1",
-					Username:   "test-user1",
-				},
-				project:     "test-pr1",
-				serviceName: "test-sr1",
-			},
-			false,
-		},
-		{
-			"missing-project",
-			args{
-				d: testKafkaAclResourceMissingField("project"),
-				acl: &aiven.KafkaACL{
-					ID:         "1",
-					Permission: "admin",
-					Topic:      "test-topic1",
-					Username:   "test-user1",
-				},
-				project:     "test-pr1",
-				serviceName: "test-sr1",
-			},
-			true,
-		},
-		{
-			"missing-service_name",
-			args{
-				d: testKafkaAclResourceMissingField("service_name"),
-				acl: &aiven.KafkaACL{
-					ID:         "1",
-					Permission: "admin",
-					Topic:      "test-topic1",
-					Username:   "test-user1",
-				},
-				project:     "test-pr1",
-				serviceName: "test-sr1",
-			},
-			true,
-		},
-		{
-			"missing-topic",
-			args{
-				d: testKafkaAclResourceMissingField("topic"),
-				acl: &aiven.KafkaACL{
-					ID:         "1",
-					Permission: "admin",
-					Topic:      "test-topic1",
-					Username:   "test-user1",
-				},
-				project:     "test-pr1",
-				serviceName: "test-sr1",
-			},
-			true,
-		},
-		{
-			"missing-permission",
-			args{
-				d: testKafkaAclResourceMissingField("permission"),
-				acl: &aiven.KafkaACL{
-					ID:         "1",
-					Permission: "admin",
-					Topic:      "test-topic1",
-					Username:   "test-user1",
-				},
-				project:     "test-pr1",
-				serviceName: "test-sr1",
-			},
-			true,
-		},
-		{
-			"missing-username",
-			args{
-				d: testKafkaAclResourceMissingField("username"),
-				acl: &aiven.KafkaACL{
-					ID:         "1",
-					Permission: "admin",
-					Topic:      "test-topic1",
-					Username:   "test-user1",
-				},
-				project:     "test-pr1",
-				serviceName: "test-sr1",
-			},
-			true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := copyKafkaACLPropertiesFromAPIResponseToTerraform(tt.args.d, tt.args.acl, tt.args.project, tt.args.serviceName); (err != nil) != tt.wantErr {
-				t.Errorf("copyKafkaACLPropertiesFromAPIResponseToTerraform() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func testKafkaAclResourceMissingField(missing string) *schema.ResourceData {
-	res := schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"project":      aivenKafkaACLSchema["project"],
-			"service_name": aivenKafkaACLSchema["service_name"],
-			"permission":   aivenKafkaACLSchema["permission"],
-			"topic":        aivenKafkaACLSchema["topic"],
-			"username":     aivenKafkaACLSchema["username"],
-		},
-	}
-
-	delete(res.Schema, missing)
-
-	return res.Data(&terraform.InstanceState{})
 }

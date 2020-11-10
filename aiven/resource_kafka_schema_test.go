@@ -3,9 +3,9 @@ package aiven
 import (
 	"fmt"
 	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"os"
 	"testing"
 )
@@ -69,9 +69,9 @@ func TestAccAivenKafkaSchema_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAivenKafkaSchemaResourceDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenKafkaSchemaResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKafkaSchemaResource(rName),
@@ -192,6 +192,8 @@ func testAccKafkaSchemaResource(name string) string {
 			project = aiven_kafka_schema.foo.project
 			service_name = aiven_kafka_schema.foo.service_name
 			subject_name = aiven_kafka_schema.foo.subject_name
+
+			depends_on = [aiven_kafka_schema.foo]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }

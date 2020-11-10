@@ -2,8 +2,8 @@ package aiven
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"os"
 	"testing"
 )
@@ -13,9 +13,9 @@ func TestAccAiven_influxdb(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAivenServiceResourceDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccInfluxDBResource(rName),
@@ -61,6 +61,8 @@ func testAccInfluxDBResource(name string) string {
 		data "aiven_influxdb" "service" {
 			service_name = aiven_influxdb.bar.service_name
 			project = aiven_influxdb.bar.project
+
+			depends_on = [aiven_influxdb.bar]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }

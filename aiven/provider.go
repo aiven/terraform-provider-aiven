@@ -12,12 +12,11 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Provider returns a terraform.ResourceProvider.
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"api_token": {
@@ -256,15 +255,15 @@ func resourceExists(err error) (bool, error) {
 	return true, nil
 }
 
-func createOnlyDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+func createOnlyDiffSuppressFunc(_, _, _ string, d *schema.ResourceData) bool {
 	return len(d.Id()) > 0
 }
 
 // emptyObjectDiffSuppressFunc suppresses a diff for service user configuration options when
 // fields are not set by the user but have default or previously defined values.
-func emptyObjectDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+func emptyObjectDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) bool {
 	// When a map inside a list contains only default values without explicit values set by
-	// the user Terraform inteprets the map as not being present and the array length being
+	// the user Terraform interprets the map as not being present and the array length being
 	// zero, resulting in bogus update that does nothing. Allow ignoring those.
 	if old == "1" && new == "0" && strings.HasSuffix(k, ".#") {
 		return true
@@ -288,11 +287,11 @@ func emptyObjectDiffSuppressFunc(k, old, new string, d *schema.ResourceData) boo
 // has default. We don't want to force users to always define explicit value just because
 // of the Terraform restriction so suppress the change from default to empty (which would
 // be nonsensical operation anyway)
-func ipFilterArrayDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+func ipFilterArrayDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) bool {
 	return old == "1" && new == "0" && strings.HasSuffix(k, ".ip_filter.#")
 }
 
-func ipFilterValueDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+func ipFilterValueDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) bool {
 	return old == "0.0.0.0/0" && new == "" && strings.HasSuffix(k, ".ip_filter.0")
 }
 

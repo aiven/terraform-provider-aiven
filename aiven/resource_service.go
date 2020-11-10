@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"strconv"
 	"strings"
 	"time"
@@ -903,9 +903,9 @@ func resourceServiceWait(d *schema.ResourceData, m interface{}, operation string
 
 func getMaintenanceWindow(d *schema.ResourceData) *aiven.MaintenanceWindow {
 	dow := d.Get("maintenance_window_dow").(string)
-	time := d.Get("maintenance_window_time").(string)
-	if len(dow) > 0 && len(time) > 0 {
-		return &aiven.MaintenanceWindow{DayOfWeek: dow, TimeOfDay: time}
+	t := d.Get("maintenance_window_time").(string)
+	if len(dow) > 0 && len(t) > 0 {
+		return &aiven.MaintenanceWindow{DayOfWeek: dow, TimeOfDay: t}
 	}
 	return nil
 }

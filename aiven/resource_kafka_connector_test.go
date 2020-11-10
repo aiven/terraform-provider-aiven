@@ -3,9 +3,9 @@ package aiven
 import (
 	"fmt"
 	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"os"
 	"testing"
 )
@@ -69,9 +69,9 @@ func TestAccAivenKafkaConnector_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAivenKafkaConnectorResourceDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenKafkaConnectorResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKafkaConnectorResource(rName),
@@ -95,9 +95,9 @@ func TestAccAivenKafkaConnector_mogosink(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAivenKafkaConnectorResourceDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenKafkaConnectorResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKafkaConnectorMonoSinkResource(rName),
@@ -225,6 +225,8 @@ func testAccKafkaConnectorResource(name string) string {
 			project = aiven_kafka_connector.foo.project
 			service_name = aiven_kafka_connector.foo.service_name
 			connector_name = aiven_kafka_connector.foo.connector_name
+
+			depends_on = [aiven_kafka_connector.foo]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
 }
@@ -286,6 +288,8 @@ func testAccKafkaConnectorMonoSinkResource(name string) string {
 			project = aiven_kafka_connector.foo.project
 			service_name = aiven_kafka_connector.foo.service_name
 			connector_name = aiven_kafka_connector.foo.connector_name
+
+			depends_on = [aiven_kafka_connector.foo]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, os.Getenv("MONGO_URI"))
 }

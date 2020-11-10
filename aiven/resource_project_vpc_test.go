@@ -3,10 +3,9 @@ package aiven
 import (
 	"fmt"
 	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"testing"
 )
 
@@ -15,9 +14,9 @@ func TestAccAivenProjectVPC_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAivenProjectVPCResourceDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenProjectVPCResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectVPCResource(rName),
@@ -58,6 +57,8 @@ func testAccProjectVPCResource(name string) string {
 		data "aiven_project_vpc" "vpc" {
 			project = aiven_project_vpc.bar.project
 			cloud_name = aiven_project_vpc.bar.cloud_name
+
+			depends_on = [aiven_project_vpc.bar]
 		}
 		`, name)
 }
@@ -82,6 +83,8 @@ func testAccProjectVPCCustomTimeoutResource(name string) string {
 		data "aiven_project_vpc" "vpc" {
 			project = aiven_project_vpc.bar.project
 			cloud_name = aiven_project_vpc.bar.cloud_name
+
+			depends_on = [aiven_project_vpc.bar]
 		}
 		`, name)
 }
@@ -134,111 +137,4 @@ func testAccCheckAivenProjectVPCResourceDestroy(s *terraform.State) error {
 	}
 
 	return nil
-}
-
-func Test_copyVPCPropertiesFromAPIResponseToTerraform(t *testing.T) {
-	type args struct {
-		d       *schema.ResourceData
-		vpc     *aiven.VPC
-		project string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{
-			"basic",
-			args{
-				d: resourceProjectVPC().Data(&terraform.InstanceState{
-					ID:         "",
-					Attributes: nil,
-					Ephemeral:  terraform.EphemeralState{},
-					Meta:       nil,
-					Tainted:    false,
-				}),
-				vpc: &aiven.VPC{
-					CloudName:    "google-europe-west1",
-					ProjectVPCID: "123",
-					State:        "APPROVE",
-				},
-				project: "test-pr1",
-			},
-			false,
-		},
-		{
-			"missing-project",
-			args{
-				d: testProjectVPCResourceMissingField("project"),
-				vpc: &aiven.VPC{
-					CloudName:    "google-europe-west1",
-					ProjectVPCID: "123",
-					State:        "APPROVE",
-				},
-				project: "test-pr1",
-			},
-			true,
-		},
-		{
-			"missing-cloud_name",
-			args{
-				d: testProjectVPCResourceMissingField("cloud_name"),
-				vpc: &aiven.VPC{
-					CloudName:    "google-europe-west1",
-					ProjectVPCID: "123",
-					State:        "APPROVE",
-				},
-				project: "test-pr1",
-			},
-			true,
-		},
-		{
-			"missing-state",
-			args{
-				d: testProjectVPCResourceMissingField("state"),
-				vpc: &aiven.VPC{
-					CloudName:    "google-europe-west1",
-					ProjectVPCID: "123",
-					State:        "APPROVE",
-				},
-				project: "test-pr1",
-			},
-			true,
-		},
-		{
-			"missing-network_cidr",
-			args{
-				d: testProjectVPCResourceMissingField("network_cidr"),
-				vpc: &aiven.VPC{
-					CloudName:    "google-europe-west1",
-					ProjectVPCID: "123",
-					State:        "APPROVE",
-				},
-				project: "test-pr1",
-			},
-			true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := copyVPCPropertiesFromAPIResponseToTerraform(tt.args.d, tt.args.vpc, tt.args.project); (err != nil) != tt.wantErr {
-				t.Errorf("copyVPCPropertiesFromAPIResponseToTerraform() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func testProjectVPCResourceMissingField(missing string) *schema.ResourceData {
-	res := schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"project":      aivenProjectVPCSchema["project"],
-			"cloud_name":   aivenProjectVPCSchema["cloud_name"],
-			"network_cidr": aivenProjectVPCSchema["network_cidr"],
-			"state":        aivenProjectVPCSchema["state"],
-		},
-	}
-
-	delete(res.Schema, missing)
-
-	return res.Data(&terraform.InstanceState{})
 }
