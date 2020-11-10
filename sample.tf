@@ -34,7 +34,7 @@ resource "aiven_service" "samplekafka" {
   kafka_user_config {
     kafka_connect = true
     kafka_rest    = true
-    kafka_version = "2.0"
+    kafka_version = "2.6"
     kafka {
       group_max_session_timeout_ms = 70000
       log_retention_bytes          = 1000000000
