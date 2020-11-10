@@ -1,6 +1,6 @@
-# Kafka Mirror Maker Resource
+# Kafka MirrorMaker Resource
 
-The Kafka Mirror Maker resource allows the creation and management of an Aiven Kafka Mirror Maker 2 services.
+The Kafka MirrorMaker resource allows the creation and management of Aiven Kafka MirrorMaker 2 services.
 
 ## Example Usage
 
@@ -35,7 +35,7 @@ intended service usage rather than current attributes.
 
 * `cloud_name` - (Optional) defines where the cloud provider and region where the service is hosted
 in. This can be changed freely after service is created. Changing the value will trigger
-a potentially lenghty migration process for the service. Format is cloud provider name
+a potentially lengthy migration process for the service. Format is cloud provider name
 (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider
 specific region name. These are documented on each Cloud provider's own support articles,
 like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and
@@ -59,17 +59,17 @@ significant amount of time to complete if the service has a lot of data.
 
 * `termination_protection` - (Optional) prevents the service from being deleted. It is recommended to
 set this to `true` for all production services to prevent unintentional service
-deletions. This does not shield against deleting databases or topics but for services
+deletion. This does not shield against deleting databases or topics but for services
 with backups much of the content can at least be restored from backup in case accidental
 deletion is done.
 
 * `maintenance_window_dow` - (Optional) day of week when maintenance operations should be performed. 
-One monday, tuesday, wednesday, etc.
+On monday, tuesday, wednesday, etc.
 
 * `maintenance_window_time` - (Optional) time of day when maintenance operations should be performed. 
 UTC time in HH:mm:ss format.
 
-* `kafka_mirrormaker_user_config` - (Optional) defines Kafka Mirror Maker 2 specific additional configuration options. 
+* `kafka_mirrormaker_user_config` - (Optional) defines Kafka MirrorMaker 2 specific additional configuration options. 
 The following configuration options available:
     * `ip_filter` - (Optional) allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`
     
@@ -89,16 +89,16 @@ The following configuration options available:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `service_uri` - URI for connecting to the Kafka Mirror Maker 2 service.
+* `service_uri` - URI for connecting to the Kafka MirrorMaker 2 service.
 
-* `service_host` - Kafka Mirror Maker 2 hostname.
+* `service_host` - Kafka MirrorMaker 2 hostname.
 
-* `service_port` - Kafka Mirror Maker 2 port.
+* `service_port` - Kafka MirrorMaker 2 port.
 
-* `service_password` - Password used for connecting to the Kafka Mirror Maker 2 service, if applicable.
+* `service_password` - Password used for connecting to the Kafka MirrorMaker 2 service, if applicable.
 
-* `service_username` - Username used for connecting to the Kafka Mirror Maker 2 service, if applicable.
+* `service_username` - Username used for connecting to the Kafka MirrorMaker 2 service, if applicable.
 
 * `state` - Service state.
 
-* `kafka_mirrormaker` - Kafka Mirror Maker 2 specific server provided values.
+* `kafka_mirrormaker` - Kafka MirrorMaker 2 specific server provided values.

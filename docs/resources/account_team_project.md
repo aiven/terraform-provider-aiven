@@ -1,10 +1,10 @@
 # Account Team Project Resource
 
-The Account Team Project resource allows the creation and management of an Account Team Projects.
+The Account Team Project resource allows the creation and management of an Account Team Project.
 
-It is intended to link and existing project to the existing account team. 
-It is important to note that the project should have an `account_id` property set and equal to
-account team you are trying to link this project. 
+It is intended to link an existing project to the existing account team. 
+It is important to note that the project should have an `account_id` property set equal to the
+account team you are trying to link to this project. 
 
 ## Example Usage
 

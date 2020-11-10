@@ -27,7 +27,7 @@ Flow belongs to. They should be defined using reference as shown above to set up
 
 In addition to all arguments above, the following attributes are exported:
 
-* `enable` - enable of disable replication flows for a mirror maker service 
+* `enable` - enable of disable replication flows for a MirrorMaker service 
 
 * `topics` - is a list of topics and/or regular expressions to replicate.
 

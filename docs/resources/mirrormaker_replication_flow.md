@@ -1,7 +1,7 @@
 # MirrorMaker 2 Replication Flow Resource
 
 The MirrorMaker 2 Replication Flow resource allows the creation and management of MirrorMaker 2 
-Replication Flow on Aiven Cloud.
+Replication Flows on Aiven Cloud.
 
 ## Example Usage
 
@@ -34,7 +34,7 @@ Flow belongs to. They should be defined using reference as shown above to set up
 
 * `target_cluster` - (Required) is a target cluster alias.
 
-* `enable` - (Required) enable of disable replication flows for a mirror maker service 
+* `enable` - (Required) enable of disable replication flows for a MirrorMaker service 
 
 * `topics` - (Optional) is a list of topics and/or regular expressions to replicate.
 

@@ -1,6 +1,6 @@
 # Kafka Topic Resource
 
-The Kafka Topic resource allows the creation and management of an Aiven Kafka Topic`s.
+The Kafka Topic resource allows the creation and management of Aiven Kafka Topics.
 
 ## Example Usage
 

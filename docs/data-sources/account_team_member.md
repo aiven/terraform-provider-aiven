@@ -1,6 +1,6 @@
 # Account Team Member Data Source
 
-The Account Team Member  data source provides information about the existing Aiven Account Team Member.
+The Account Team Member data source provides information about the existing Aiven Account Team Member.
 
 ## Example Usage
 
@@ -29,6 +29,6 @@ In addition to all arguments above, the following attributes are exported:
 
 * `accepted` - is a boolean flag that determines whether an invitation was accepted or not by the user. 
 `false` value means that the invitation was sent to the user but not yet accepted. 
-`true` means that the user accepted the invitation and now a member of an account team.
+`true` means that the user accepted the invitation and is now a member of an account team.
  
 * `create_time` - time of creation.

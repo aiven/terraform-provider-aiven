@@ -1,6 +1,6 @@
 # Project User Resource
 
-The Project User resource allows the creation and management of an Aiven Project Users.
+The Project User resource allows the creation and management of Aiven Project Users.
 
 ## Example Usage
 
