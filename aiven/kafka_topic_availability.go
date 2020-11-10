@@ -122,7 +122,7 @@ func (w *KafkaTopicAvailabilityWaiter) Conf(timeout time.Duration) *resource.Sta
 		Target:     []string{"ACTIVE"},
 		Refresh:    w.RefreshFunc(),
 		Timeout:    timeout,
-		MinTimeout: 1 * time.Second,
+		MinTimeout: 10 * time.Second,
 	}
 }
 
