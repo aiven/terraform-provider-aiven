@@ -3,9 +3,9 @@ package aiven
 import (
 	"fmt"
 	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"log"
 	"strings"
 	"testing"
@@ -55,15 +55,13 @@ func sweepAccountTeams(region string) error {
 }
 
 func TestAccAivenAccountTeam_basic(t *testing.T) {
-	t.Parallel()
-
 	resourceName := "aiven_account_team.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAivenAccountTeamResourceDestroy,
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenAccountTeamResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAccountTeamResource(rName),
@@ -90,6 +88,8 @@ func testAccAccountTeamResource(name string) string {
 		data "aiven_account_team" "team" {
   			name = aiven_account_team.foo.name
   			account_id = aiven_account_team.foo.account_id
+
+			depends_on = [aiven_account_team.foo]
 		}
 		`, name, name)
 }

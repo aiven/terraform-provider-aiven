@@ -3,9 +3,9 @@ package aiven
 import (
 	"fmt"
 	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"log"
 	"os"
 	"reflect"
@@ -70,9 +70,9 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 	rName3 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAivenKafkaTopicResourceDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
 		Steps: []resource.TestStep{
 			// basic Kafka Topic test
 			{
@@ -127,9 +127,9 @@ func TestAccAivenKafkaTopic_100topics(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAivenKafkaTopicResourceDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKafka101TopicResource(rName),
@@ -210,6 +210,8 @@ func testAccKafkaTopicResource(name string) string {
 			project = aiven_kafka_topic.foo.project
 			service_name = aiven_kafka_topic.foo.service_name
 			topic_name = aiven_kafka_topic.foo.topic_name
+
+			depends_on = [aiven_kafka_topic.foo]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
@@ -257,6 +259,8 @@ func testAccKafkaTopicCustomTimeoutsResource(name string) string {
 			project = aiven_kafka_topic.foo.project
 			service_name = aiven_kafka_topic.foo.service_name
 			topic_name = aiven_kafka_topic.foo.topic_name
+
+			depends_on = [aiven_kafka_topic.foo]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
@@ -298,6 +302,8 @@ func testAccKafkaTopicTerminationProtectionResource(name string) string {
 			project = aiven_kafka_topic.foo.project
 			service_name = aiven_kafka_topic.foo.service_name
 			topic_name = aiven_kafka_topic.foo.topic_name
+
+			depends_on = [aiven_kafka_topic.foo]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }

@@ -3,9 +3,9 @@ package aiven
 import (
 	"fmt"
 	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"log"
 	"strings"
 	"testing"
@@ -48,15 +48,13 @@ func sweepAccounts(region string) error {
 }
 
 func TestAccAivenAccount_basic(t *testing.T) {
-	t.Parallel()
-
 	resourceName := "aiven_account.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAivenAccountResourceDestroy,
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenAccountResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAccountResource(rName),
@@ -78,6 +76,8 @@ func testAccAccountResource(name string) string {
 
 		data "aiven_account" "account" {
   			name = aiven_account.foo.name
+
+			depends_on = [aiven_account.foo]
 		}
 		`, name)
 }

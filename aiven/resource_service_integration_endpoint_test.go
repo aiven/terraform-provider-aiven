@@ -3,9 +3,9 @@ package aiven
 import (
 	"fmt"
 	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"os"
 	"testing"
 )
@@ -15,9 +15,9 @@ func TestAccAivenServiceIntegrationEndpoint_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAivenServiceIntegraitonEndpointResourceDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenServiceIntegraitonEndpointResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccServiceIntegrationEndpointResource(rName),
@@ -84,6 +84,8 @@ func testAccServiceIntegrationEndpointResource(name string) string {
 		data "aiven_service_integration_endpoint" "endpoint" {
 			project = aiven_service_integration_endpoint.bar.project
 			endpoint_name = aiven_service_integration_endpoint.bar.endpoint_name
+
+			depends_on = [aiven_service_integration_endpoint.bar]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name)
 }

@@ -3,9 +3,9 @@ package aiven
 import (
 	"fmt"
 	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"os"
 	"testing"
 )
@@ -15,9 +15,9 @@ func TestAccAivenServiceIntegration_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAivenServiceIntegrationResourceDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenServiceIntegrationResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccServiceIntegrationResource(rName),
@@ -109,6 +109,8 @@ func testAccServiceIntegrationResource(name string) string {
 			integration_type = aiven_service_integration.bar.integration_type
 			source_service_name = aiven_service_integration.bar.source_service_name
 			destination_service_name = aiven_service_integration.bar.destination_service_name
+
+			depends_on = [aiven_service_integration.bar]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
@@ -173,6 +175,8 @@ func testAccServiceIntegrationKafkaConnectResource(name string) string {
 			integration_type = aiven_service_integration.bar.integration_type
 			source_service_name = aiven_service_integration.bar.source_service_name
 			destination_service_name = aiven_service_integration.bar.destination_service_name
+
+			depends_on = [aiven_service_integration.bar]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }

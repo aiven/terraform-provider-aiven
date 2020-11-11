@@ -2,8 +2,8 @@ package aiven
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"os"
 	"testing"
 )
@@ -18,8 +18,8 @@ func TestAccAivenTransitGatewayVPCAttachment_basic(t *testing.T) {
 	resourceName := "aiven_transit_gateway_vpc_attachment.foo"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccTransitGatewayVPCAttachmentResource(),
@@ -67,6 +67,8 @@ func testAccTransitGatewayVPCAttachmentResource() string {
 			vpc_id = aiven_transit_gateway_vpc_attachment.foo.vpc_id
 			peer_cloud_account = aiven_transit_gateway_vpc_attachment.foo.peer_cloud_account
 			peer_vpc = aiven_transit_gateway_vpc_attachment.foo.peer_vpc
+
+			depends_on = [aiven_transit_gateway_vpc_attachment.foo]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"),
 		os.Getenv("AWS_REGION"),
