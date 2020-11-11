@@ -197,7 +197,7 @@ func resourceAccountAuthenticationDelete(d *schema.ResourceData, m interface{}) 
 	accountId, teamId := splitResourceID2(d.Id())
 
 	err := client.AccountAuthentications.Delete(accountId, teamId)
-	if err != nil {
+	if err != nil && !aiven.IsNotFound(err) {
 		return err
 	}
 

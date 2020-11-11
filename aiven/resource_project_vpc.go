@@ -217,6 +217,10 @@ func (w *ProjectVPCDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 		if vpc.State != "DELETING" && vpc.State != "DELETED" {
 			err := w.Client.VPCs.Delete(w.Project, w.VPCID)
 			if err != nil {
+				if aiven.IsNotFound(err) {
+					return vpc, "DELETED", nil
+				}
+
 				// VPC cannot be deleted while there are services migrating from
 				// it or service deletion is still in progress
 				if err.(aiven.Error).Status != 409 {

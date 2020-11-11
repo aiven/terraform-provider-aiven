@@ -200,7 +200,12 @@ func resourceServiceIntegrationEndpointDelete(d *schema.ResourceData, m interfac
 	client := m.(*aiven.Client)
 
 	projectName, endpointID := splitResourceID2(d.Id())
-	return client.ServiceIntegrationEndpoints.Delete(projectName, endpointID)
+	err := client.ServiceIntegrationEndpoints.Delete(projectName, endpointID)
+	if err != nil && !aiven.IsNotFound(err) {
+		return err
+	}
+
+	return nil
 }
 
 func resourceServiceIntegrationEndpointExists(d *schema.ResourceData, m interface{}) (bool, error) {

@@ -245,7 +245,12 @@ func resourceKafkaSchemaRead(d *schema.ResourceData, m interface{}) error {
 func resourceKafkaSchemaDelete(d *schema.ResourceData, m interface{}) error {
 	var project, serviceName, schemaName = splitResourceID3(d.Id())
 
-	return m.(*aiven.Client).KafkaSubjectSchemas.Delete(project, serviceName, schemaName)
+	err := m.(*aiven.Client).KafkaSubjectSchemas.Delete(project, serviceName, schemaName)
+	if err != nil && !aiven.IsNotFound(err) {
+		return err
+	}
+
+	return nil
 }
 
 func resourceKafkaSchemaExists(d *schema.ResourceData, m interface{}) (bool, error) {

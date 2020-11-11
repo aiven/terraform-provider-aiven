@@ -164,6 +164,10 @@ func resourceProjectDelete(d *schema.ResourceData, m interface{}) error {
 		if re.MatchString(err.Error()) && err.(aiven.Error).Status == 403 {
 			return nil
 		}
+
+		if aiven.IsNotFound(err) {
+			return nil
+		}
 	}
 
 	return err

@@ -241,7 +241,12 @@ func resourceVPCPeeringConnectionDelete(d *schema.ResourceData, m interface{}) e
 		}
 	}
 
-	return client.VPCPeeringConnections.DeleteVPCPeering(projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
+	err = client.VPCPeeringConnections.DeleteVPCPeering(projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
+	if err != nil && !aiven.IsNotFound(err) {
+		return err
+	}
+
+	return nil
 }
 
 func resourceVPCPeeringConnectionExists(d *schema.ResourceData, m interface{}) (bool, error) {

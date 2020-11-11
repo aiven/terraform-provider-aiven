@@ -148,7 +148,12 @@ func resourceDatabaseDelete(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("cannot delete a database termination_protection is enabled")
 	}
 
-	return client.Databases.Delete(projectName, serviceName, databaseName)
+	err := client.Databases.Delete(projectName, serviceName, databaseName)
+	if err != nil && !aiven.IsNotFound(err) {
+		return err
+	}
+
+	return nil
 }
 
 func resourceDatabaseExists(d *schema.ResourceData, m interface{}) (bool, error) {

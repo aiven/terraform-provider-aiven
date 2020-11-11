@@ -438,10 +438,7 @@ func resourceKafkaTopicDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	err := client.KafkaTopics.Delete(projectName, serviceName, topicName)
-	if err != nil {
-		if aiven.IsNotFound(err) {
-			return nil
-		}
+	if err != nil && !aiven.IsNotFound(err) {
 		return err
 	}
 

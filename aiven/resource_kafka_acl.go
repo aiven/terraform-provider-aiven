@@ -106,7 +106,12 @@ func resourceKafkaACLDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, aclID := splitResourceID3(d.Id())
-	return client.KafkaACLs.Delete(projectName, serviceName, aclID)
+	err := client.KafkaACLs.Delete(projectName, serviceName, aclID)
+	if err != nil && !aiven.IsNotFound(err) {
+		return err
+	}
+
+	return nil
 }
 
 func resourceKafkaACLExists(d *schema.ResourceData, m interface{}) (bool, error) {

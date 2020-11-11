@@ -846,7 +846,12 @@ func resourceServiceDelete(d *schema.ResourceData, m interface{}) error {
 
 	projectName, serviceName := splitResourceID2(d.Id())
 
-	return client.Services.Delete(projectName, serviceName)
+	err := client.Services.Delete(projectName, serviceName)
+	if err != nil && !aiven.IsNotFound(err) {
+		return err
+	}
+
+	return nil
 }
 
 func resourceServiceExists(d *schema.ResourceData, m interface{}) (bool, error) {

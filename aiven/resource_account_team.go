@@ -120,7 +120,7 @@ func resourceAccountTeamDelete(d *schema.ResourceData, m interface{}) error {
 	accountId, teamId := splitResourceID2(d.Id())
 
 	err := client.AccountTeams.Delete(accountId, teamId)
-	if err != nil {
+	if err != nil && !aiven.IsNotFound(err) {
 		return err
 	}
 

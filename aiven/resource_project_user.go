@@ -144,10 +144,8 @@ func resourceProjectUserDelete(d *schema.ResourceData, m interface{}) error {
 	// delete invitation if exists
 	if invitation != nil {
 		err := client.ProjectUsers.DeleteInvitation(projectName, email)
-		if err != nil {
-			if err.(aiven.Error).Status != 404 {
-				return err
-			}
+		if err != nil && !aiven.IsNotFound(err) {
+			return err
 		}
 	}
 
