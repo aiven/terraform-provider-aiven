@@ -60,8 +60,7 @@ func resourceProjectUserCreate(d *schema.ResourceData, m interface{}) error {
 			MemberType: d.Get("member_type").(string),
 		},
 	)
-
-	if err != nil {
+	if err != nil && !aiven.IsAlreadyExists(err) {
 		return err
 	}
 
@@ -69,6 +68,7 @@ func resourceProjectUserCreate(d *schema.ResourceData, m interface{}) error {
 	if err := d.Set("accepted", false); err != nil {
 		return err
 	}
+
 	return nil
 }
 

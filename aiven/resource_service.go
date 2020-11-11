@@ -777,7 +777,7 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 		},
 	)
 
-	if err != nil {
+	if err != nil && !aiven.IsAlreadyExists(err) {
 		return err
 	}
 

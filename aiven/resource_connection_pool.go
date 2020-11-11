@@ -93,7 +93,7 @@ func resourceConnectionPoolCreate(d *schema.ResourceData, m interface{}) error {
 			Username: d.Get("username").(string),
 		},
 	)
-	if err != nil {
+	if err != nil && !aiven.IsAlreadyExists(err) {
 		return err
 	}
 

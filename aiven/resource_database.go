@@ -13,7 +13,7 @@ import (
 const defaultLC = "en_US.UTF-8"
 
 // handleLcDefaults checks if the lc values have actually changed
-func handleLcDefaults(k, old, new string, d *schema.ResourceData) bool {
+func handleLcDefaults(_, old, new string, _ *schema.ResourceData) bool {
 	// NOTE! not all database resources return lc_* values even if
 	// they are set when the database is created; best we can do is
 	// to assume it was created using the default value.
@@ -96,7 +96,7 @@ func resourceDatabaseCreate(d *schema.ResourceData, m interface{}) error {
 			LcType:    optionalString(d, "lc_type"),
 		},
 	)
-	if err != nil {
+	if err != nil && !aiven.IsAlreadyExists(err) {
 		return err
 	}
 

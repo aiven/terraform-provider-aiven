@@ -81,7 +81,7 @@ func resourceServiceUserCreate(d *schema.ResourceData, m interface{}) error {
 			Username: username,
 		},
 	)
-	if err != nil {
+	if err != nil && !aiven.IsAlreadyExists(err) {
 		return err
 	}
 
@@ -95,13 +95,28 @@ func copyServiceUserPropertiesFromAPIResponseToTerraform(
 	projectName string,
 	serviceName string,
 ) error {
-	d.Set("project", projectName)
-	d.Set("service_name", serviceName)
-	d.Set("username", user.Username)
-	d.Set("password", user.Password)
-	d.Set("type", user.Type)
-	d.Set("access_cert", user.AccessCert)
-	d.Set("access_key", user.AccessKey)
+	if err := d.Set("project", projectName); err != nil {
+		return err
+	}
+	if err := d.Set("service_name", serviceName); err != nil {
+		return err
+	}
+	if err := d.Set("username", user.Username); err != nil {
+		return err
+	}
+	if err := d.Set("password", user.Password); err != nil {
+		return err
+	}
+	if err := d.Set("type", user.Type); err != nil {
+		return err
+	}
+	if err := d.Set("access_cert", user.AccessCert); err != nil {
+		return err
+	}
+	if err := d.Set("access_key", user.AccessKey); err != nil {
+		return err
+	}
+
 	return nil
 }
 

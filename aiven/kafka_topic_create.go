@@ -33,12 +33,12 @@ func (w *KafkaTopicCreateWaiter) RefreshFunc() resource.StateRefreshFunc {
 			// If some brokers are offline while the request is being executed
 			// the operation may fail.
 			aivenError, ok := err.(aiven.Error)
-			if ok && aivenError.Status == 409 && !strings.Contains(aivenError.Message, "already exists") {
+			if ok && aivenError.Status == 409 && !aiven.IsAlreadyExists(aivenError) {
 				log.Printf("[DEBUG] Got error %v while waiting for topic to be created.", aivenError)
 				return nil, "CREATING", nil
 			}
 
-			if ok && aivenError.Status == 409 && strings.Contains(aivenError.Message, "already exists") {
+			if ok && !aiven.IsAlreadyExists(aivenError) {
 				return w.CreateRequest.TopicName, "CREATED", nil
 			}
 

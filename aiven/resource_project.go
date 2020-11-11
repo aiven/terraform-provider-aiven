@@ -96,7 +96,7 @@ func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
 			AccountId:       d.Get("account_id").(string),
 		},
 	)
-	if err != nil {
+	if err != nil && !aiven.IsAlreadyExists(err) {
 		return err
 	}
 

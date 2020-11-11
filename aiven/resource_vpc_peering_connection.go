@@ -160,7 +160,7 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 
 	timeout := d.Timeout(schema.TimeoutCreate)
 	res, err := w.Conf(timeout).WaitForState()
-	if err != nil {
+	if err != nil && !aiven.IsAlreadyExists(err) {
 		return err
 	}
 
