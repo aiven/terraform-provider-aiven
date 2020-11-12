@@ -195,7 +195,7 @@ func resourceKafkaConnectorCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	err := m.(*aiven.Client).KafkaConnectors.Create(project, serviceName, config)
-	if err != nil {
+	if err != nil && !aiven.IsAlreadyExists(err) {
 		return err
 	}
 
@@ -205,8 +205,12 @@ func resourceKafkaConnectorCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceKafkaConnectorDelete(d *schema.ResourceData, m interface{}) error {
-	return m.(*aiven.Client).KafkaConnectors.Delete(
-		splitResourceID3(d.Id()))
+	err := m.(*aiven.Client).KafkaConnectors.Delete(splitResourceID3(d.Id()))
+	if err != nil && !aiven.IsNotFound(err) {
+		return err
+	}
+
+	return nil
 }
 
 func resourceKafkaTConnectorUpdate(d *schema.ResourceData, m interface{}) error {

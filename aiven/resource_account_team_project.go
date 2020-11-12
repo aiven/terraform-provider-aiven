@@ -130,8 +130,12 @@ func resourceAccountTeamProjectUpdate(d *schema.ResourceData, m interface{}) err
 func resourceAccountTeamProjectDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-	return client.AccountTeamProjects.Delete(
-		splitResourceID3(d.Id()))
+	err := client.AccountTeamProjects.Delete(splitResourceID3(d.Id()))
+	if err != nil && !aiven.IsNotFound(err) {
+		return err
+	}
+
+	return nil
 }
 
 func resourceAccountTeamProjectExists(d *schema.ResourceData, m interface{}) (bool, error) {

@@ -60,8 +60,7 @@ func resourceProjectUserCreate(d *schema.ResourceData, m interface{}) error {
 			MemberType: d.Get("member_type").(string),
 		},
 	)
-
-	if err != nil {
+	if err != nil && !aiven.IsAlreadyExists(err) {
 		return err
 	}
 
@@ -69,6 +68,7 @@ func resourceProjectUserCreate(d *schema.ResourceData, m interface{}) error {
 	if err := d.Set("accepted", false); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -144,10 +144,8 @@ func resourceProjectUserDelete(d *schema.ResourceData, m interface{}) error {
 	// delete invitation if exists
 	if invitation != nil {
 		err := client.ProjectUsers.DeleteInvitation(projectName, email)
-		if err != nil {
-			if err.(aiven.Error).Status != 404 {
-				return err
-			}
+		if err != nil && !aiven.IsNotFound(err) {
+			return err
 		}
 	}
 

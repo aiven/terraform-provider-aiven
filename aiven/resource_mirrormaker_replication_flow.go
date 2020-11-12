@@ -97,7 +97,7 @@ func resourceMirrorMakerReplicationFlowCreate(d *schema.ResourceData, m interfac
 			TopicsBlacklist: topicsBlacklist,
 		},
 	})
-	if err != nil {
+	if err != nil && !aiven.IsAlreadyExists(err) {
 		return err
 	}
 

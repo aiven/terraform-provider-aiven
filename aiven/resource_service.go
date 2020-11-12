@@ -777,7 +777,7 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 		},
 	)
 
-	if err != nil {
+	if err != nil && !aiven.IsAlreadyExists(err) {
 		return err
 	}
 
@@ -846,7 +846,12 @@ func resourceServiceDelete(d *schema.ResourceData, m interface{}) error {
 
 	projectName, serviceName := splitResourceID2(d.Id())
 
-	return client.Services.Delete(projectName, serviceName)
+	err := client.Services.Delete(projectName, serviceName)
+	if err != nil && !aiven.IsNotFound(err) {
+		return err
+	}
+
+	return nil
 }
 
 func resourceServiceExists(d *schema.ResourceData, m interface{}) (bool, error) {

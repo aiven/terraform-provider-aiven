@@ -93,7 +93,7 @@ func resourceConnectionPoolCreate(d *schema.ResourceData, m interface{}) error {
 			Username: d.Get("username").(string),
 		},
 	)
-	if err != nil {
+	if err != nil && !aiven.IsAlreadyExists(err) {
 		return err
 	}
 
@@ -139,7 +139,12 @@ func resourceConnectionPoolDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, poolName := splitResourceID3(d.Id())
-	return client.ConnectionPools.Delete(projectName, serviceName, poolName)
+	err := client.ConnectionPools.Delete(projectName, serviceName, poolName)
+	if err != nil && !aiven.IsNotFound(err) {
+		return err
+	}
+
+	return nil
 }
 
 func resourceConnectionPoolExists(d *schema.ResourceData, m interface{}) (bool, error) {
