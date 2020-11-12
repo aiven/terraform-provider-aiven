@@ -48,7 +48,7 @@ In addition to all arguments above, the following attributes are exported:
 * `cleanup_policy` - Topic cleanup policy. Allowed values: delete, compact.
 
 * `config` - Kafka topic configuration
-    * `cleanup_policy` - cleanup.policy value
+    * `cleanup_policy` - cleanup.policy value, can be `create`, `delete` or `compact,delete`
     * `compression_type` - compression.type value
     * `delete_retention_ms` - delete.retention.ms value
     * `file_delete_delay_ms` - file.delete.delay.ms value

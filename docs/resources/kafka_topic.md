@@ -11,11 +11,14 @@ resource "aiven_kafka_topic" "mytesttopic" {
     topic_name = "<TOPIC_NAME>"
     partitions = 5
     replication = 3
-    retention_bytes = -1
-    retention_hours = 72
-    minimum_in_sync_replicas = 2
-    cleanup_policy = "delete"
     termination_protection = true
+    
+    config {
+        flush_ms = 10
+        unclean_leader_election_enable = true
+        cleanup_policy = "compact,delete"
+    }
+
 
     timeouts {
         create = "1m"
@@ -58,7 +61,7 @@ created.
 * `cleanup_policy` - (Optional/Deprecated)  Topic cleanup policy. Allowed values: delete, compact.
 
 * `config` - (Optional) Kafka topic configuration
-    * `cleanup_policy` - (Optional) cleanup.policy value
+    * `cleanup_policy` - (Optional) cleanup.policy value, can be `create`, `delete` or `compact,delete`
     * `compression_type` - (Optional) compression.type value
     * `delete_retention_ms` - (Optional) delete.retention.ms value
     * `file_delete_delay_ms` - (Optional) file.delete.delay.ms value
