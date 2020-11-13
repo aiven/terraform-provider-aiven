@@ -165,14 +165,70 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 		return diag.Errorf("Error waiting for VPC peering connection creation: %s", err)
 	}
 
+	diags := diag.Diagnostics{}
+
 	pc = res.(*aiven.VPCPeeringConnection)
+	if pc.State != "ACTIVE" {
+		switch pc.State {
+		case "PENDING_PEER":
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary: fmt.Sprintf("Aiven platform has created a connection to the specified "+
+					"peer successfully in the cloud, but the connection is not active until the user "+
+					"completes the setup in their cloud account. The steps needed in the user cloud "+
+					"account depend on the used cloud provider. Find more in the state info: %s",
+					stateInfoToString(pc.StateInfo)),
+			})
+		case "DELETED":
+			diags = append(diags, diag.Errorf("A user has deleted the peering connection through the Aiven "+
+				"Terraform provider, or Aiven Web Console or directly via Aiven API. There are no "+
+				"transitions from this state")...)
+		case "DELETED_BY_PEER":
+			diags = append(diags, diag.Errorf("A user deleted the peering cloud resource in their account. "+
+				"There are no transitions from this state")...)
+		case "REJECTED_BY_PEER":
+			diags = append(diags, diag.Errorf("AWS VPC peering connection request was rejected, state info: %s",
+				stateInfoToString(pc.StateInfo))...)
+		case "INVALID_SPECIFICATION":
+			diags = append(diags, diag.Errorf("VPC peering connection cannot be created, more in the state info: %s",
+				stateInfoToString(pc.StateInfo))...)
+		default:
+			return diag.Errorf("Unknown VPC peering connection cannot state: %s", pc.State)
+		}
+	}
+
 	if peerRegion != "" {
 		d.SetId(buildResourceID(projectName, vpcID, pc.PeerCloudAccount, pc.PeerVPC, *pc.PeerRegion))
 	} else {
 		d.SetId(buildResourceID(projectName, vpcID, pc.PeerCloudAccount, pc.PeerVPC))
 	}
 
-	return resourceVPCPeeringConnectionRead(ctx, d, m)
+	// in case of an error delete VPC peering connection
+	if diags.HasError() {
+		return append(diags, resourceVPCPeeringConnectionDelete(ctx, d, m)...)
+	}
+
+	return append(diags, resourceVPCPeeringConnectionRead(ctx, d, m)...)
+}
+
+// stateInfoToString converts VPC peering connection state_info to a string
+func stateInfoToString(s *map[string]interface{}) string {
+	if len(*s) == 0 {
+		return ""
+	}
+
+	var str string
+	// Print message first
+	if m, ok := (*s)["message"]; ok {
+		str = fmt.Sprintf("%s", m)
+		delete(*s, "message")
+	}
+
+	for k, v := range *s {
+		str += fmt.Sprintf("\n`%s`:`%s`", k, v)
+	}
+
+	return str
 }
 
 func parsePeeringVPCId(resourceID string) (string, string, string, string, *string) {
@@ -421,6 +477,7 @@ func (w *VPCPeeringBuildWaiter) Conf(timeout time.Duration) *resource.StateChang
 			"ACTIVE",
 			"REJECTED_BY_PEER",
 			"PENDING_PEER",
+			"INVALID_SPECIFICATION",
 			"DELETING",
 			"DELETED",
 			"DELETED_BY_PEER",
