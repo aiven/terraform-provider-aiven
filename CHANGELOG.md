@@ -4,6 +4,17 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.0] - 2020-11-16
+- Terraform plugin sdk v2 upgrade
+- Update documentation: variety of minor updates which includes fix typos / grammar
+- Add `is not found` error handling for delete action for all resources
+- Add `already exists` error handling for create action for all resources
+- Update examples
+- Optimise Kafka Topic resource performance
+- Fix Kafka Topic empty config issue
+- Add example initial configuration for Timescale Cloud
+- Add guide for documenting issues encountered during upgrades
+
 ## [2.0.11] - 2020-10-27
 - Add support for new user configuration options related to Kafka, Kafka Schema Registry, Kafka Connect, Elasticsearch and M3 services.
 
