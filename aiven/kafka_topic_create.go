@@ -38,7 +38,7 @@ func (w *KafkaTopicCreateWaiter) RefreshFunc() resource.StateRefreshFunc {
 				return nil, "CREATING", nil
 			}
 
-			if ok && !aiven.IsAlreadyExists(aivenError) {
+			if ok && aiven.IsAlreadyExists(aivenError) {
 				return w.CreateRequest.TopicName, "CREATED", nil
 			}
 
