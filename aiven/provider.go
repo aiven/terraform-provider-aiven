@@ -152,7 +152,7 @@ func toOptionalString(val interface{}) string {
 	case int64:
 		return strconv.FormatInt(v, 10)
 	case float64:
-		return strconv.FormatFloat(v, 'E', -1, 64)
+		return strconv.FormatFloat(v, 'f', -1, 64)
 	case bool:
 		return strconv.FormatBool(v)
 	case string:
