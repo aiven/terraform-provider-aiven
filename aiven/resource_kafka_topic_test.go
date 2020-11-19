@@ -10,6 +10,7 @@ import (
 	"os"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func init() {
@@ -85,7 +86,70 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
 					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
-					resource.TestCheckResourceAttr(resourceName, "retention_hours", "-1"),
+				),
+			},
+			// basic Kafka Topic test validating is already exists error handling
+			{
+				// Before running Config Kafka service and topic will be created via API
+				PreConfig: func() {
+					client, _ := aiven.NewTokenClient(os.Getenv("AIVEN_TOKEN"), "terraform-provider-aiven/")
+					s, err := client.Services.Create(os.Getenv("AIVEN_PROJECT_NAME"), aiven.CreateServiceRequest{
+						Cloud:       "google-europe-west1",
+						Plan:        "business-4",
+						ServiceName: fmt.Sprintf("test-acc-sr-%s", rName),
+						ServiceType: "kafka",
+						MaintenanceWindow: &aiven.MaintenanceWindow{
+							DayOfWeek: "monday",
+							TimeOfDay: "10:00:00",
+						},
+					})
+					if err != nil {
+						t.Fatalf("Cannot create Kafka service in PreConfig %s:", err.Error())
+					}
+
+					// wait until Kafka service is RUNNING
+					for {
+						s, err = client.Services.Get(os.Getenv("AIVEN_PROJECT_NAME"), s.Name)
+						if err != nil {
+							t.Fatalf("Cannot get Kafka service in PreConfig while waiting to be ACTIVE %s:", err.Error())
+						}
+
+						if s.State == "RUNNING" {
+							t.Logf("Service %s us ", s.Name)
+							time.Sleep(10 * time.Second)
+							break
+						}
+
+						t.Logf("Waiting for service %s to be RUNNING, current state: %s", s.Name, s.State)
+						time.Sleep(10 * time.Second)
+					}
+
+					var partitions = 3
+					var replication = 2
+					err = client.KafkaTopics.Create(os.Getenv("AIVEN_PROJECT_NAME"), s.Name, aiven.CreateKafkaTopicRequest{
+						Partitions:  &partitions,
+						Replication: &replication,
+						TopicName:   fmt.Sprintf("test-acc-topic-%s", rName),
+						Config: aiven.KafkaTopicConfig{
+							FlushMs:                     parseOptionalStringToInt64("10"),
+							UncleanLeaderElectionEnable: parseOptionalStringToBool("true"),
+							CleanupPolicy:               "compact",
+							MinCleanableDirtyRatio:      parseOptionalStringToFloat64("0.01"),
+						},
+					})
+					if err != nil {
+						t.Fatalf("Cannot create Kafka Topic in PreConfig %s:", err.Error())
+					}
+				},
+				Config: testAccKafkaTopicResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenKafkaTopicAttributes("data.aiven_kafka_topic.topic"),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
+					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
+					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
 				),
 			},
 			// custom TF client timeouts test
@@ -102,7 +166,7 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "retention_hours", "100"),
 				),
 			},
-			//termination protection test
+			// termination protection test
 			{
 				Config:                    testAccKafkaTopicTerminationProtectionResource(rName3),
 				PreventPostDestroyRefresh: true,
@@ -181,14 +245,6 @@ func testAccKafkaTopicResource(name string) string {
 			service_type = "kafka"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
-			
-			kafka_user_config {
-				kafka_version = "2.4"
-				kafka {
-				  group_max_session_timeout_ms = 70000
-				  log_retention_bytes = 1000000000
-				}
-			}
 		}
 		
 		resource "aiven_kafka_topic" "foo" {
@@ -197,7 +253,6 @@ func testAccKafkaTopicResource(name string) string {
 			topic_name = "test-acc-topic-%s"
 			partitions = 3
 			replication = 2
-			retention_hours = -1
 
 			config {
 				flush_ms = 10

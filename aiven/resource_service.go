@@ -777,12 +777,11 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 		},
 	)
 
-	if err != nil && !aiven.IsAlreadyExists(err) {
+	if err != nil && !isServiceAlreadyExists(err) {
 		return err
 	}
 
 	service, err := resourceServiceWait(d, m, "create")
-
 	if err != nil {
 		return err
 	}
@@ -1061,4 +1060,13 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	}
 
 	return nil
+}
+
+func isServiceAlreadyExists(err error) bool {
+	if e, ok := err.(aiven.Error); ok {
+		if e.Status == 409 && strings.Contains(err.Error(), "Service name is already in use in this project") {
+			return true
+		}
+	}
+	return false
 }
