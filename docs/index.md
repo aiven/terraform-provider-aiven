@@ -29,32 +29,39 @@ attempted to be deleted so even with this setting enabled you need to be very ca
 with the changes that are to be applied.
 
 ## Installation instructions for Terraform client 0.12
-*If you can please upgrade your Terraform client to version 0.13 or above, in this case, 
-there is no need to install provide manually.*
 
-Download the Aiven provider for Linux AMD64. 
+_If you can please upgrade your Terraform client to version 0.13 or above, in this case,
+there is no need to install provide manually._
+
+Download the Aiven provider for Linux AMD64.
+
 ```shell script
 curl -Lo terraform-provider-aiven https://github.com/aiven/terraform-provider-aiven/releases/download/v2.X.X/terraform-provider-aiven-linux-amd64_v2.X.X
 
 chmod +x terraform-provider-aiven
 ```
-*Please specify version that you like to use and if you are not using Linux AMD64, 
-download the correct binary for your system from the [release page](https://github.com/aiven/terraform-provider-aiven/releases).*
 
-Third-party provider plugins — locally installed providers, not on the registry — need to be 
+_Please specify version that you like to use and if you are not using Linux AMD64,
+download the correct binary for your system from the [release page](https://github.com/aiven/terraform-provider-aiven/releases)._
+
+Third-party provider plugins — locally installed providers, not on the registry — need to be
 assigned an (arbitrary) source and placed in the appropriate subdirectory for Terraform to find and use them.
 Create the appropriate subdirectory within the user plugins directory for the Aiven provider.
+
 ```shell script
 mkdir -p ~/.terraform.d/plugins/aiven.io/provider/aiven/2.X/linux_amd64
 ```
-*If you are not using Linux AMD64 replace `linux_amd64` with your `$OS_$ARCH`, and the same for the provider version.*
+
+_If you are not using Linux AMD64 replace `linux_amd64` with your `\$OS_\$ARCH`, and the same for the provider version.\_
 
 Finally, move the Aiven provider binary into the newly created directory.
+
 ```shell script
 mv terraform-provider-aiven ~/.terraform.d/plugins/aiven.io/provider/aiven/2.X/linux_amd64
 ```
 
 Now Aiven provider is in your user plugins directory, you can use the provider in your Terraform configuration.
+
 ```hcl-terraform
 terraform {
   required_providers {
@@ -71,13 +78,14 @@ provider "aiven" {
   api_token = var.aiven_api_token
 }
 ```
+
 Then, initialize your Terraform workspace by running `terraform init`. If your Aiven provider  
-is located in the correct directory, it should successfully initialize. Otherwise, move your 
+is located in the correct directory, it should successfully initialize. Otherwise, move your
 Aiven provider to the correct directory: `~/.terraform.d/plugins/aiven.io/provider/aiven/$VERSION/$OS_$ARCH/`.
 
 ## Example Usage
 
-*This is only available for Terraform client 0.13 and above*
+_This is only available for Terraform client 0.13 and above_
 
 ```hcl
 terraform {
@@ -106,20 +114,23 @@ Make sure you have a look at the [variables](https://github.com/aiven/terraform-
 `terraform.tfvars` with your own settings.
 
 Other examples can be found in the [examples](https://github.com/aiven/terraform-provider-aiven/tree/master/examples) folder that provides examples to:
-* [Getting Started](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/getting-started.tf)
-* [Account, projects, teams, and member management](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/account)
-* [Elasticsearch deployment and configuration](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/elasticsearch)
-* [Standalone Kafka connect deployment with custom config](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_connect)
-* [Deploying Kafka with a Prometheus Service Integration](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_prometheus)
-* [Deploying Kafka and Elasticsearch with a Kafka Connect Elasticsearch Sink connector](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_connectors/es_sink)
-* [Deploying Kafka and Elasticsearch with a Kafka Connect Mongo Sink connector](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_connectors/mongo_sink)
-* [Deploying Kafka with Schema Registry enabled and providing a schema](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_schemas)
-* [Deploying Cassandra and forking (cloning the service, config and data) into a new service with a higher plan](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/cassandra_fork)
-* [Deploying a Grafana service](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/service)
-* [Deploying a MirrorMaker service](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_mirrormaker)
-* [Deploying PostgreSQL services to multiple clouds and regions](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/postgres)
-* [Deploying M3 and M3 Aggregator services](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/m3)
-* [Deploying on Timescale Cloud](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/timescale)
+
+- [Getting Started](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/getting-started.tf)
+- [Account, projects, teams, and member management](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/account)
+- [Elasticsearch deployment and configuration](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/elasticsearch)
+- [Standalone Kafka connect deployment with custom config](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_connect)
+- [Deploying Kafka with a Prometheus Service Integration](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_prometheus)
+- [Deploying Kafka and Elasticsearch with a Kafka Connect Elasticsearch Sink connector](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_connectors/es_sink)
+- [Deploying Kafka and Elasticsearch with a Kafka Connect Mongo Sink connector](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_connectors/mongo_sink)
+- [Deploying Kafka with Schema Registry enabled and providing a schema](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_schemas)
+- [Deploying Cassandra and forking (cloning the service, config and data) into a new service with a higher plan](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/cassandra_fork)
+- [Deploying a Grafana service](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/service)
+- [Deploying a MirrorMaker service](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_mirrormaker)
+- [Deploying a MirrorMaker service with multiple global regions](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_mirrormaker_global)
+- [Deploying a MirrorMaker service in an Active<=>Active confguration](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_mirrormaker_bidirectional)
+- [Deploying PostgreSQL services to multiple clouds and regions](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/postgres)
+- [Deploying M3 and M3 Aggregator services](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/m3)
+- [Deploying on Timescale Cloud](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/timescale)
 
 ## Importing existing infrastructure
 
@@ -166,8 +177,8 @@ provider "aiven" {
 }
 ```
 
-The Aiven provider currently only supports a single configuration option, `api_token`. 
-This can also be specified with the AIVEN_TOKEN shell environment variable. 
+The Aiven provider currently only supports a single configuration option, `api_token`.
+This can also be specified with the AIVEN_TOKEN shell environment variable.
 The Aiven web console can be used to create named, never expiring API tokens that should
 be used for this kind of purposes. If Terraform is used for managing existing project(s),
 the API token must belong to a user with admin privileges for those project(s). For new
