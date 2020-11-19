@@ -1,4 +1,4 @@
-# Aiven Kafka MirrorMaker Bidirectional Example
+# Aiven Kafka MirrorMaker Global Example
 
 ## Overview
 

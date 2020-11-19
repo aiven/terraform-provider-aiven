@@ -31,7 +31,7 @@ with the changes that are to be applied.
 ## Installation instructions for Terraform client 0.12
 
 _If you can please upgrade your Terraform client to version 0.13 or above, in this case,
-there is no need to install provide manually._
+there is no need to install provider manually._
 
 Download the Aiven provider for Linux AMD64.
 
@@ -153,7 +153,7 @@ responses with your browser's debugging tools, as the raw responses do contain t
 Note that as Terraform does not support creating configuration automatically you will
 still need to manually create the Terraform configuration files. The import will just
 match the existing resources with the ones defined in the configuration.
-
+	
 ## Using datasources
 
 Alternatively you can define already existing, or externally created and managed, resources
