@@ -17,6 +17,18 @@
         "title": "IP filter",
         "type": "array"
       },
+      "variant": {
+        "enum": [
+          "aiven",
+          "gcp"
+        ],
+        "example": "aiven",
+        "title": "Variant of the PostgreSQL service, may affect the features that are exposed by default",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
       "migrate_sstableloader": {
         "description": "Sets the service into migration mode enabling the sstableloader utility to be used to upload Cassandra data files. Available only on service create.",
         "example": true,
@@ -70,6 +82,18 @@
         "example": "grafana.example.org",
         "maxLength": 255,
         "title": "Custom domain",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "variant": {
+        "enum": [
+          "aiven",
+          "gcp"
+        ],
+        "example": "aiven",
+        "title": "Variant of the PostgreSQL service, may affect the features that are exposed by default",
         "type": [
           "string",
           "null"
@@ -1125,6 +1149,18 @@
           "null"
         ]
       },
+      "variant": {
+        "enum": [
+          "aiven",
+          "gcp"
+        ],
+        "example": "aiven",
+        "title": "Variant of the PostgreSQL service, may affect the features that are exposed by default",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
       "ip_filter": {
         "default": [
           "0.0.0.0/0"
@@ -1740,6 +1776,18 @@
         "title": "IP filter",
         "type": "array"
       },
+      "variant": {
+        "enum": [
+          "aiven",
+          "gcp"
+        ],
+        "example": "aiven",
+        "title": "Variant of the PostgreSQL service, may affect the features that are exposed by default",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
       "kafka_connect": {
         "additionalProperties": false,
         "properties": {
@@ -1893,6 +1941,18 @@
         "title": "IP filter",
         "type": "array"
       },
+      "variant": {
+        "enum": [
+          "aiven",
+          "gcp"
+        ],
+        "example": "aiven",
+        "title": "Variant of the PostgreSQL service, may affect the features that are exposed by default",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
       "kafka_mirrormaker": {
         "additionalProperties": false,
         "properties": {
@@ -1945,6 +2005,18 @@
           "null"
         ]
       },
+      "variant": {
+        "enum": [
+          "aiven",
+          "gcp"
+        ],
+        "example": "aiven",
+        "title": "Variant of the PostgreSQL service, may affect the features that are exposed by default",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
       "ip_filter": {
         "default": [
           "0.0.0.0/0"
@@ -1982,6 +2054,18 @@
         "example": "grafana.example.org",
         "maxLength": 255,
         "title": "Custom domain",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "variant": {
+        "enum": [
+          "aiven",
+          "gcp"
+        ],
+        "example": "aiven",
+        "title": "Variant of the PostgreSQL service, may affect the features that are exposed by default",
         "type": [
           "string",
           "null"
@@ -2179,6 +2263,18 @@
   "mysql": {
     "additionalProperties": false,
     "properties": {
+      "variant": {
+        "enum": [
+          "aiven",
+          "gcp"
+        ],
+        "example": "aiven",
+        "title": "Variant of the PostgreSQL service, may affect the features that are exposed by default",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
       "admin_password": {
         "createOnly": true,
         "default": null,
@@ -3135,7 +3231,8 @@
       "variant": {
         "enum": [
           "aiven",
-          "timescale"
+          "timescale",
+          "gcp"
         ],
         "example": "aiven",
         "title": "Variant of the PostgreSQL service, may affect the features that are exposed by default",
@@ -3172,6 +3269,18 @@
         "maxItems": 1024,
         "title": "IP filter",
         "type": "array"
+      },
+      "variant": {
+        "enum": [
+          "aiven",
+          "gcp"
+        ],
+        "example": "aiven",
+        "title": "Variant of the PostgreSQL service, may affect the features that are exposed by default",
+        "type": [
+          "string",
+          "null"
+        ]
       },
       "migration": {
         "additionalProperties": false,
