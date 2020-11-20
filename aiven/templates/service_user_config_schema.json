@@ -1233,7 +1233,8 @@
             "description": "The default cleanup policy for segments beyond the retention window",
             "enum": [
               "compact",
-              "delete"
+              "delete",
+              "compact,delete"
             ],
             "title": "log.cleanup.policy",
             "type": "string"
@@ -1386,8 +1387,8 @@
             "type": "integer"
           },
           "offsets_retention_minutes": {
-            "default": 1440,
             "description": "Log retention window in minutes for offsets topic",
+            "example": 10080,
             "maximum": 2147483647,
             "minimum": 1,
             "title": "offsets.retention.minutes",
@@ -1419,6 +1420,22 @@
             "maximum": 209715200,
             "minimum": 10485760,
             "title": "socket.request.max.bytes",
+            "type": "integer"
+          },
+          "transaction_remove_expired_transaction_cleanup_interval_ms": {
+            "description": "The interval at which to remove transactions that have expired due to transactional.id.expiration.ms passing (defaults to 3600000 (1 hour)).",
+            "example": 3600000,
+            "maximum": 3600000,
+            "minimum": 600000,
+            "title": "transaction.remove.expired.transaction.cleanup.interval.ms",
+            "type": "integer"
+          },
+          "transaction_state_log_segment_bytes": {
+            "description": "The transaction topic segment bytes should be kept relatively small in order to facilitate faster log compaction and cache loads (defaults to 104857600 (100 mebibytes)).",
+            "example": 104857600,
+            "maximum": 2147483647,
+            "minimum": 1048576,
+            "title": "transaction.state.log.segment.bytes",
             "type": "integer"
           }
         },
@@ -2920,6 +2937,37 @@
       "pgbouncer": {
         "additionalProperties": false,
         "properties": {
+          "autodb_idle_timeout": {
+            "example": 3600,
+            "maximum": 86400,
+            "minimum": 0,
+            "title": "If the automatically created database pools have been unused this many seconds, they are freed. If 0 then timeout is disabled. [seconds]",
+            "type": "integer"
+          },
+          "autodb_max_db_connections": {
+            "example": 0,
+            "maximum": 2147483647,
+            "minimum": 0,
+            "title": "Do not allow more than this many server connections per database (regardless of user). Setting it to 0 means unlimited.",
+            "type": "integer"
+          },
+          "autodb_pool_mode": {
+            "enum": [
+              "session",
+              "transaction",
+              "statement"
+            ],
+            "example": "session",
+            "title": "PGBouncer pool mode",
+            "type": "string"
+          },
+          "autodb_pool_size": {
+            "example": 0,
+            "maximum": 1000,
+            "minimum": 0,
+            "title": "If non-zero then create automatically a pool of that size per user when a pool doesn't exist.",
+            "type": "integer"
+          },
           "ignore_startup_parameters": {
             "example": [
               "extra_float_digits",
@@ -2937,8 +2985,29 @@
             "title": "List of parameters to ignore when given in startup packet",
             "type": "array"
           },
+          "min_pool_size": {
+            "example": 0,
+            "maximum": 1000,
+            "minimum": 0,
+            "title": "Add more server connections to pool if below this number. Improves behavior when usual load comes suddenly back after period of total inactivity. The value is effectively capped at the pool size.",
+            "type": "integer"
+          },
+          "server_idle_timeout": {
+            "example": 600,
+            "maximum": 86400,
+            "minimum": 0,
+            "title": "If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. [seconds]",
+            "type": "integer"
+          },
+          "server_lifetime": {
+            "example": 3600,
+            "maximum": 86400,
+            "minimum": 60,
+            "title": "The pooler will close an unused server connection that has been connected longer than this. [seconds]",
+            "type": "integer"
+          },
           "server_reset_query_always": {
-            "default": false,
+            "example": false,
             "title": "Run server_reset_query (DISCARD ALL) in all pooling modes",
             "type": "boolean"
           }
@@ -3032,7 +3101,7 @@
         ]
       },
       "shared_buffers_percentage": {
-        "description": "Percentage of total RAM that the database server uses for shared memory buffers. Valid range is 20-60 (float), which corresponds to 20% - 60%. This setting adjusts the shared_buffers configuration value. The absolute maximum is 12 GB.",
+        "description": "Percentage of total RAM that the database server uses for shared memory buffers. Valid range is 20-60 (float), which corresponds to 20% - 60%. This setting adjusts the shared_buffers configuration value.",
         "example": 41.5,
         "maximum": 60,
         "minimum": 20,
@@ -3194,6 +3263,13 @@
         "maxLength": 128,
         "title": "Name of the basebackup to restore in forked service",
         "type": "string"
+      },
+      "redis_io_threads": {
+        "example": 1,
+        "maximum": 32,
+        "minimum": 1,
+        "title": "Redis IO thread count",
+        "type": "integer"
       },
       "redis_lfu_decay_time": {
         "default": 1,
