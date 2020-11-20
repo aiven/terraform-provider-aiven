@@ -180,6 +180,20 @@ configuration options available:
     * `pgbouncer` - (Optional) PGBouncer connection pooling settings.
         * `ignore_startup_parameters` - (Optional) Enum of parameters to ignore when given in startup packet.
         * `server_reset_query_always` - (Optional) Run server_reset_query (DISCARD ALL) in all pooling modes.
+        * `autodb_idle_timeout` - (Optional) If the automatically created database pools have been unused this 
+        many seconds, they are freed. If 0 then timeout is disabled.
+        * `autodb_max_db_connections` - (Optional) Do not allow more than this many server connections per database 
+        (regardless of user). Setting it to 0 means unlimited.
+        * `autodb_pool_mode` - (Optional) PGBouncer pool mode
+        * `autodb_pool_size` - (Optional) If non-zero then create automatically a pool of that size per user 
+        when a pool doesn't exist.
+        * `min_pool_size` - (Optional) Add more server connections to pool if below this number. Improves 
+        behavior when usual load comes suddenly back after period of total inactivity. The value is 
+        effectively capped at the pool size.
+        * `server_idle_timeout` - (Optional) If a server connection has been idle more than this many seconds 
+        it will be dropped. If 0 then timeout is disabled. 
+        * `server_lifetime` - (Optional) The pooler will close an unused server connection that has been connected 
+        longer than this.
         
     * `pglookout` - (Optional) PGLookout settings.
         * `max_failover_replication_time_lag` - (Optional) Number of seconds of master unavailability before 

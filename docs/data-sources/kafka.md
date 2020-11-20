@@ -169,6 +169,12 @@ configuration options available:
         the producer will send in a single request to avoid sending huge requests.
         * `session_timeout_ms` - The timeout in milliseconds used to detect failures when 
         using Kafka’s group management facilities (defaults to 10000). 
+        * `transaction_remove_expired_transaction_cleanup_interval_ms` - The interval at which 
+        to remove transactions that have expired due to transactional.id.expiration.ms passing (defaults 
+        to 3600000 (1 hour)).
+        * `transaction_state_log_segment_bytes` - The transaction topic segment bytes should 
+        be kept relatively small in order to facilitate faster log compaction and cache loads (defaults 
+        to 104857600 (100 mebibytes)).
     
     * `kafka_rest` - Enable Kafka-REST service
     * `kafka_rest_config` - Kafka-REST configuration

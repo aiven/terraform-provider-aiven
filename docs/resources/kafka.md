@@ -153,7 +153,13 @@ configuration options available:
         still be returned to ensure that progress can be made. As such, this is not an absolute maximum.
         * `socket_request_max_bytes` - (Optional) The maximum number of bytes in a socket request 
         (defaults to 104857600).
-         
+        * `transaction_remove_expired_transaction_cleanup_interval_ms` - (Optional) The interval at which 
+        to remove transactions that have expired due to transactional.id.expiration.ms passing (defaults 
+        to 3600000 (1 hour)).
+        * `transaction_state_log_segment_bytes` - (Optional) The transaction topic segment bytes should 
+        be kept relatively small in order to facilitate faster log compaction and cache loads (defaults 
+        to 104857600 (100 mebibytes)).
+        
     * `kafka_authentication_methods` - (Optional) Kafka authentication methods
         * `certificate` - (Optional) Enable certificate/SSL authentication
         * `sasl` - (Optional) Enable SASL authentication
