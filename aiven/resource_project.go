@@ -67,10 +67,10 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Elem:        &schema.Schema{Type: schema.TypeString},
 		Optional:    true,
 	},
-	"cloud": {
+	"default_cloud": {
 		Type:        schema.TypeString,
 		Optional:    true,
-		Description: "Target cloud",
+		Description: "Default cloud for new services",
 	},
 	"billing_currency": {
 		Type:        schema.TypeString,
@@ -100,7 +100,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 	},
 	"vat_id": {
 		Type:        schema.TypeString,
-		Computed:    true,
+		Optional:    true,
 		Description: "EU VAT Identification Number",
 	},
 }
@@ -133,13 +133,14 @@ func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
 			BillingEmails:    contactEmailListForAPI(d, "billing_emails", true),
 			BillingExtraText: optionalStringPointer(d, "billing_extra_text"),
 			CardID:           cardID,
-			Cloud:            d.Get("cloud").(string),
+			Cloud:            d.Get("default_cloud").(string),
 			CopyFromProject:  d.Get("copy_from_project").(string),
 			CountryCode:      optionalStringPointer(d, "country_code"),
 			Project:          projectName,
 			TechnicalEmails:  contactEmailListForAPI(d, "technical_emails", true),
 			AccountId:        d.Get("account_id").(string),
 			BillingCurrency:  d.Get("billing_currency").(string),
+			VatID:            d.Get("vat_id").(string),
 		},
 	)
 	if err != nil && !aiven.IsAlreadyExists(err) {
@@ -186,11 +187,12 @@ func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
 			BillingEmails:    contactEmailListForAPI(d, "billing_emails", false),
 			BillingExtraText: optionalStringPointer(d, "billing_extra_text"),
 			CardID:           cardID,
-			Cloud:            d.Get("cloud").(string),
+			Cloud:            d.Get("default_cloud").(string),
 			CountryCode:      &countryCode,
 			TechnicalEmails:  contactEmailListForAPI(d, "technical_emails", false),
 			AccountId:        d.Get("account_id").(string),
 			BillingCurrency:  d.Get("billing_currency").(string),
+			VatID:            d.Get("vat_id").(string),
 		},
 	)
 	if err != nil {
@@ -335,7 +337,7 @@ func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client,
 	if err := d.Set("billing_extra_text", project.BillingExtraText); err != nil {
 		return err
 	}
-	if err := d.Set("cloud", project.DefaultCloud); err != nil {
+	if err := d.Set("default_cloud", project.DefaultCloud); err != nil {
 		return err
 	}
 	if err := d.Set("billing_currency", project.BillingCurrency); err != nil {
