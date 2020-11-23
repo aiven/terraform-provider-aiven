@@ -5,6 +5,7 @@ package aiven
 import (
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"os"
 	"regexp"
 )
@@ -20,6 +21,12 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Description: "Billing contact emails of the project",
 		Elem:        &schema.Schema{Type: schema.TypeString},
 		Optional:    true,
+	},
+	"billing_extra_text": {
+		Type:         schema.TypeString,
+		Description:  "Extra text to be included in all project invoices, e.g. purchase order or cost center number",
+		ValidateFunc: validation.StringLenBetween(0, 1000),
+		Optional:     true,
 	},
 	"ca_cert": {
 		Type:        schema.TypeString,
@@ -60,6 +67,42 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Elem:        &schema.Schema{Type: schema.TypeString},
 		Optional:    true,
 	},
+	"cloud": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Target cloud",
+	},
+	"billing_currency": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Billing currency",
+	},
+	"available_credits": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "Available credits",
+		Optional:    true,
+	},
+	"country": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "Billing country",
+	},
+	"estimated_balance": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "Estimated balance",
+	},
+	"payment_method": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "Payment method",
+	},
+	"vat_id": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "EU VAT Identification Number",
+	},
 }
 
 func resourceProject() *schema.Resource {
@@ -86,14 +129,17 @@ func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
 	projectName := d.Get("project").(string)
 	project, err := client.Projects.Create(
 		aiven.CreateProjectRequest{
-			BillingAddress:  optionalStringPointer(d, "billing_address"),
-			BillingEmails:   contactEmailListForAPI(d, "billing_emails", true),
-			CardID:          cardID,
-			CopyFromProject: d.Get("copy_from_project").(string),
-			CountryCode:     optionalStringPointer(d, "country_code"),
-			Project:         projectName,
-			TechnicalEmails: contactEmailListForAPI(d, "technical_emails", true),
-			AccountId:       d.Get("account_id").(string),
+			BillingAddress:   optionalStringPointer(d, "billing_address"),
+			BillingEmails:    contactEmailListForAPI(d, "billing_emails", true),
+			BillingExtraText: optionalStringPointer(d, "billing_extra_text"),
+			CardID:           cardID,
+			Cloud:            d.Get("cloud").(string),
+			CopyFromProject:  d.Get("copy_from_project").(string),
+			CountryCode:      optionalStringPointer(d, "country_code"),
+			Project:          projectName,
+			TechnicalEmails:  contactEmailListForAPI(d, "technical_emails", true),
+			AccountId:        d.Get("account_id").(string),
+			BillingCurrency:  d.Get("billing_currency").(string),
 		},
 	)
 	if err != nil && !aiven.IsAlreadyExists(err) {
@@ -136,12 +182,15 @@ func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
 	project, err := client.Projects.Update(
 		d.Get("project").(string),
 		aiven.UpdateProjectRequest{
-			BillingAddress:  &billingAddress,
-			BillingEmails:   contactEmailListForAPI(d, "billing_emails", false),
-			CardID:          cardID,
-			CountryCode:     &countryCode,
-			TechnicalEmails: contactEmailListForAPI(d, "technical_emails", false),
-			AccountId:       d.Get("account_id").(string),
+			BillingAddress:   &billingAddress,
+			BillingEmails:    contactEmailListForAPI(d, "billing_emails", false),
+			BillingExtraText: optionalStringPointer(d, "billing_extra_text"),
+			CardID:           cardID,
+			Cloud:            d.Get("cloud").(string),
+			CountryCode:      &countryCode,
+			TechnicalEmails:  contactEmailListForAPI(d, "technical_emails", false),
+			AccountId:        d.Get("account_id").(string),
+			BillingCurrency:  d.Get("billing_currency").(string),
 		},
 	)
 	if err != nil {
@@ -281,6 +330,30 @@ func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client,
 		return err
 	}
 	if err := resourceProjectGetCACert(project.Name, client, d); err != nil {
+		return err
+	}
+	if err := d.Set("billing_extra_text", project.BillingExtraText); err != nil {
+		return err
+	}
+	if err := d.Set("cloud", project.DefaultCloud); err != nil {
+		return err
+	}
+	if err := d.Set("billing_currency", project.BillingCurrency); err != nil {
+		return err
+	}
+	if err := d.Set("available_credits", project.AvailableCredits); err != nil {
+		return err
+	}
+	if err := d.Set("country_code", project.CountryCode); err != nil {
+		return err
+	}
+	if err := d.Set("estimated_balance", project.EstimatedBalance); err != nil {
+		return err
+	}
+	if err := d.Set("payment_method", project.PaymentMethod); err != nil {
+		return err
+	}
+	if err := d.Set("vat_id", project.VatID); err != nil {
 		return err
 	}
 
