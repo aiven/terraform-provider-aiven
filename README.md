@@ -36,7 +36,7 @@ with the changes that are to be applied.
 
 ## Requirements
 - [Terraform](https://www.terraform.io/downloads.html) v0.12.X or greater
-- [Go](https://golang.org/doc/install) 1.14.X or greater
+- [Go](https://golang.org/doc/install) 1.15.X or greater
 
 ## Using the provider
 See the [Aiven Provider documentation](https://registry.terraform.io/providers/aiven/aiven/latest/docs) to get started using the Aiven provider.
