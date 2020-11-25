@@ -94,6 +94,7 @@ configuration options available:
         nodes that are in a project VPC or another type of private network
         
     * `recovery_basebackup_name` - (Optional) Name of the basebackup to restore in forked service
+    * `redis_io_threads` - (Optional) Redis IO thread count
     * `redis_lfu_decay_time"` - (Optional) LFU maxmemory-policy counter decay time in minutes
     * `redis_lfu_log_factor` - (Optional) Counter logarithm factor for volatile-lfu and allkeys-lfu 
     maxmemory-policies

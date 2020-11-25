@@ -13,11 +13,11 @@ Elasticsearch, etc.
 ```hcl
 resource "aiven_service_integration" "myintegration" {
     project = "${aiven_project.myproject.project}"
-    destination_endpoint_id = "${aiven_service_integration_endpoint.myendpoint.id}"
-    destination_service_name = ""
+    // use destination_endpoint_id or destination_service_name = "aiven_service.YYY.service_name"
+    destination_endpoint_id = aiven_service_integration_endpoint.XX.id 
     integration_type = "datadog"
-    source_endpoint_id = ""
-    source_service_name = "${aiven_service.testkafka.service_name}"
+    // use source_service_name or source_endpoint_id = aiven_service_integration_endpoint.XXX.id
+    source_service_name = "${aiven_kafka.XXX.service_name}" 
 }
 ```
 
@@ -26,17 +26,17 @@ resource "aiven_service_integration" "myintegration" {
 * `project` - (Required) defines the project the integration belongs to.
 
 * `destination_endpoint_id` or `destination_service_name` - (Required) identifies the target side of
-the integration. Only either endpoint identifier or service name must be specified. In
-either case the target needs to be defined using the reference syntax described above to
-set up the dependency correctly.
+the integration. Only either endpoint identifier (e.g. `aiven_service_integration_endpoint.XXX.id`) or 
+service name (e.g. `aiven_kafka.XXX.service_name`) must be specified. In either case the target needs 
+to be defined using the reference syntax described above to set up the dependency correctly.
 
 * `integration_type` - (Optional) identifies the type of integration that is set up. Possible values
 include `dashboard`, `datadog`, `logs`, `metrics` and `mirrormaker`.
 
 * `source_endpoint_id` or `source_service_name` - (Optional) identifies the source side of the
-integration. Only either endpoint identifier or service name must be specified. In either
-case the source needs to be defined using the reference syntax described above to set up
-the dependency correctly.
+integration. Only either endpoint identifier (e.g. `aiven_service_integration_endpoint.XXX.id`) or 
+service name (e.g. `aiven_kafka.XXX.service_name`) must be specified. In either case the source 
+needs to be defined using the reference syntax described above to set up the dependency correctly.
 
 * `x_user_config` - (Optional) defines integration specific configuration. `x` is the type of the
 integration. The available configuration options are documented in

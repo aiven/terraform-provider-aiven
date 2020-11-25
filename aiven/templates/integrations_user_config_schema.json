@@ -65,6 +65,11 @@
     },
     "type": "object"
   },
+  "datasource": {
+    "additionalProperties": false,
+    "title": "Integration user config",
+    "type": "object"
+  },
   "external_aws_cloudwatch_logs": {
     "additionalProperties": false,
     "title": "Integration user config",
@@ -76,6 +81,11 @@
     "type": "object"
   },
   "external_google_cloud_logging": {
+    "additionalProperties": false,
+    "title": "Integration user config",
+    "type": "object"
+  },
+  "internal_connectivity": {
     "additionalProperties": false,
     "title": "Integration user config",
     "type": "object"

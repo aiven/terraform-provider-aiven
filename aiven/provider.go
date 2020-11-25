@@ -17,7 +17,7 @@ import (
 
 // Provider returns a terraform.ResourceProvider.
 func Provider() *schema.Provider {
-	return &schema.Provider{
+	p := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"api_token": {
 				Type:        schema.TypeString,
@@ -104,13 +104,23 @@ func Provider() *schema.Provider {
 			"aiven_m3db":                           resourceM3DB(),
 			"aiven_m3aggregator":                   resourceM3Aggregator(),
 		},
-
-		ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {
-			_ = cache.NewTopicCache()
-
-			return aiven.NewTokenClient(d.Get("api_token").(string), "terraform-provider-aiven/")
-		},
 	}
+
+	p.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
+		_ = cache.NewTopicCache()
+		terraformVersion := p.TerraformVersion
+		if terraformVersion == "" {
+			// Terraform 0.12 introduced this field to the protocol
+			// We can therefore assume that if it's missing it's 0.10 or 0.11
+			terraformVersion = "0.11+compatible"
+		}
+
+		return aiven.NewTokenClient(
+			d.Get("api_token").(string),
+			fmt.Sprintf("terraform-provider-aiven/%s", terraformVersion))
+	}
+
+	return p
 }
 
 func optionalString(d *schema.ResourceData, key string) string {
