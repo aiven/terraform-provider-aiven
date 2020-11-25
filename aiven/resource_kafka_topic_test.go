@@ -116,7 +116,7 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 						}
 
 						if s.State == "RUNNING" {
-							t.Logf("Service %s us ", s.Name)
+							t.Logf("Service %s is RUNNING!", s.Name)
 							time.Sleep(10 * time.Second)
 							break
 						}

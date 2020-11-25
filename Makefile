@@ -47,7 +47,7 @@ test:
 	CGO_ENABLED=0 go test -v --cover ./...
 
 testacc:
-	TF_ACC=1 CGO_ENABLED=0 go test -v -count 1 -parallel 20 --cover ./... $(TESTARGS) -timeout 120m
+	TF_ACC=1 CGO_ENABLED=0 go test -v -count 1 -parallel 10 --cover ./... $(TESTARGS) -timeout 120m
 
 sweep:
 	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."
