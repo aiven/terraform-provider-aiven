@@ -121,7 +121,7 @@ func TestGenerateTerraformUserConfigSchema(t *testing.T) {
 				},
 			},
 			nil,
-			true,
+			false,
 		},
 	}
 	for _, tt := range tests {

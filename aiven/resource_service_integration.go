@@ -68,6 +68,36 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		Optional: true,
 		Type:     schema.TypeList,
 	},
+	"external_google_cloud_logging_user_config": {
+		Description: "External Google Cloud Logging specific user configurable settings",
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				templates.GetUserConfigSchema("integration")["external_google_cloud_logging"].(map[string]interface{})),
+		},
+		MaxItems: 1,
+		Optional: true,
+		Type:     schema.TypeList,
+	},
+	"external_elasticsearch_logs_user_config": {
+		Description: "External Elasticsearch logs specific user configurable settings",
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				templates.GetUserConfigSchema("integration")["external_elasticsearch_logs"].(map[string]interface{})),
+		},
+		MaxItems: 1,
+		Optional: true,
+		Type:     schema.TypeList,
+	},
+	"external_aws_cloudwatch_logs_user_config": {
+		Description: "External AWS Cloudwatch logs specific user configurable settings",
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				templates.GetUserConfigSchema("integration")["external_aws_cloudwatch_logs"].(map[string]interface{})),
+		},
+		MaxItems: 1,
+		Optional: true,
+		Type:     schema.TypeList,
+	},
 	"project": {
 		Description: "Project the integration belongs to",
 		ForceNew:    true,
