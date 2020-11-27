@@ -4,6 +4,18 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.1] - 2020-11-26
+- Add new `aiven_project` resource attributes
+- Add MirrorMaker examples
+- Add new acceptance tests and change settings
+- Add support for new user configuration options and service integrations
+- Add Terraform version to user agent
+- Update Golang requirements
+- Add support for GitHub Actions
+- Improve service already exists error handling
+- Fix kafka topic creation typo
+- Fix float to string conversion
+
 ## [2.1.0] - 2020-11-16
 - Terraform plugin sdk v2 upgrade
 - Update documentation: variety of minor updates which includes fix typos / grammar
