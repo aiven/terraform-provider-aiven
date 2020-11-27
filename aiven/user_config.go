@@ -14,6 +14,10 @@ import (
 // GenerateTerraformUserConfigSchema creates Terraform schema definition for user config based
 // on user config JSON schema definition.
 func GenerateTerraformUserConfigSchema(data map[string]interface{}) map[string]*schema.Schema {
+	if _, ok := data["properties"]; !ok {
+		return nil
+	}
+
 	properties := data["properties"].(map[string]interface{})
 	terraformSchema := make(map[string]*schema.Schema)
 
