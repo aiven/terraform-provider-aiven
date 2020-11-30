@@ -29,6 +29,36 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 		Description: "Name of the user account",
 		ForceNew:    true,
 	},
+	"redis_acl_categories": {
+		Type:         schema.TypeList,
+		Optional:     true,
+		Description:  "Command category rules",
+		ForceNew:     true,
+		RequiredWith: []string{"redis_acl_commands", "redis_acl_keys"},
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
+	},
+	"redis_acl_commands": {
+		Type:         schema.TypeList,
+		Optional:     true,
+		Description:  "Rules for individual commands",
+		ForceNew:     true,
+		RequiredWith: []string{"redis_acl_categories", "redis_acl_keys"},
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
+	},
+	"redis_acl_keys": {
+		Type:         schema.TypeList,
+		Optional:     true,
+		Description:  "Key access rules",
+		ForceNew:     true,
+		RequiredWith: []string{"redis_acl_categories", "redis_acl_commands"},
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
+	},
 	"type": {
 		Type:        schema.TypeString,
 		Computed:    true,
@@ -74,11 +104,16 @@ func resourceServiceUserCreate(d *schema.ResourceData, m interface{}) error {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	username := d.Get("username").(string)
-	user, err := client.ServiceUsers.Create(
+	_, err := client.ServiceUsers.Create(
 		projectName,
 		serviceName,
 		aiven.CreateServiceUserRequest{
 			Username: username,
+			AccessControl: aiven.AccessControl{
+				RedisACLCategories: flattenToString(d.Get("redis_acl_categories").([]interface{})),
+				RedisACLCommands:   flattenToString(d.Get("redis_acl_commands").([]interface{})),
+				RedisACLKeys:       flattenToString(d.Get("redis_acl_keys").([]interface{})),
+			},
 		},
 	)
 	if err != nil && !aiven.IsAlreadyExists(err) {
@@ -86,7 +121,8 @@ func resourceServiceUserCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.SetId(buildResourceID(projectName, serviceName, username))
-	return copyServiceUserPropertiesFromAPIResponseToTerraform(d, user, projectName, serviceName)
+
+	return resourceServiceUserRead(d, m)
 }
 
 func copyServiceUserPropertiesFromAPIResponseToTerraform(
@@ -114,6 +150,15 @@ func copyServiceUserPropertiesFromAPIResponseToTerraform(
 		return err
 	}
 	if err := d.Set("access_key", user.AccessKey); err != nil {
+		return err
+	}
+	if err := d.Set("redis_acl_keys", user.AccessControl.RedisACLKeys); err != nil {
+		return err
+	}
+	if err := d.Set("redis_acl_categories", user.AccessControl.RedisACLCategories); err != nil {
+		return err
+	}
+	if err := d.Set("redis_acl_commands", user.AccessControl.RedisACLCommands); err != nil {
 		return err
 	}
 

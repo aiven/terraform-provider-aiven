@@ -29,6 +29,15 @@ func TestAccAivenServiceUser_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 				),
 			},
+			{
+				Config: testAccServiceUserRedisACLResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenServiceUserAttributes("data.aiven_service_user.user"),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
+				),
+			},
 		},
 	})
 }
@@ -87,6 +96,39 @@ func testAccServiceUserResource(name string) string {
 		data "aiven_service_user" "user" {
 			service_name = aiven_service.bar.service_name
 			project = aiven_service.bar.project
+			username = aiven_service_user.foo.username
+
+			depends_on = [aiven_service_user.foo]
+		}
+		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}
+
+func testAccServiceUserRedisACLResource(name string) string {
+	return fmt.Sprintf(`
+		data "aiven_project" "foo" {
+			project = "%s"
+		}
+		
+		resource "aiven_redis" "bar" {
+			project = data.aiven_project.foo.project
+			cloud_name = "google-europe-west1"
+			plan = "startup-4"
+			service_name = "test-acc-sr-%s"
+		}
+		
+		resource "aiven_service_user" "foo" {
+			service_name = aiven_redis.bar.service_name
+			project = aiven_redis.bar.project
+			username = "user-%s"
+
+			redis_acl_commands = ["+set"]
+			redis_acl_keys = ["prefix*", "another_key"]
+			redis_acl_categories = ["-@all", "+@admin"]
+		}
+		
+		data "aiven_service_user" "user" {
+			service_name = aiven_service_user.foo.service_name
+			project = aiven_service_user.foo.project
 			username = aiven_service_user.foo.username
 
 			depends_on = [aiven_service_user.foo]
