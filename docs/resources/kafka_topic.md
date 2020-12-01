@@ -38,7 +38,11 @@ the topic being deleted and new one created instead.
 once the service is created. Doing so will result in the topic being deleted and new one
 created instead.
 
-* `termination_protection` - (Optional) is a Terraform client-side deletion protection, which prevents a Kafka  
+* `partitions` - (Required) Number of partitions to create in the topic.
+
+* `replication` - (Required) Replication factor for the topic.
+
+* `termination_protection` - (Optional, default `false`) is a Terraform client-side deletion protection, which prevents a Kafka  
 topic from being deleted. It is recommended to enable this for any production Kafka topic 
 containing critical data.
 
@@ -46,10 +50,6 @@ containing critical data.
 
 Other properties should be self-explanatory. They can be changed after the topic has been
 created.
-
-* `partitions` - (Optional) Number of partitions to create in the topic.
-
-* `replication` - (Optional) Replication factor for the topic.
 
 * `retention_bytes` - (Optional/Deprecated)  Retention bytes.
 
