@@ -4,6 +4,7 @@ package aiven
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
@@ -59,16 +60,25 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 			Type: schema.TypeString,
 		},
 	},
+	"password": {
+		Type:             schema.TypeString,
+		Sensitive:        true,
+		Computed:         true,
+		Optional:         true,
+		Description:      "Password of the user",
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+	},
+	"authentication": {
+		Type:             schema.TypeString,
+		Optional:         true,
+		Description:      "Authentication details",
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		ValidateFunc:     validation.StringInSlice([]string{"caching_sha2_password", "mysql_native_password"}, false),
+	},
 	"type": {
 		Type:        schema.TypeString,
 		Computed:    true,
 		Description: "Type of the user account",
-	},
-	"password": {
-		Type:        schema.TypeString,
-		Sensitive:   true,
-		Computed:    true,
-		Description: "Password of the user",
 	},
 	"access_cert": {
 		Type:        schema.TypeString,
@@ -87,6 +97,7 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 func resourceServiceUser() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceServiceUserCreate,
+		Update: resourceServiceUserUpdate,
 		Read:   resourceServiceUserRead,
 		Delete: resourceServiceUserDelete,
 		Exists: resourceServiceUserExists,
@@ -120,7 +131,35 @@ func resourceServiceUserCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
+	if newPassword, ok := d.GetOk("password"); ok {
+		_, err := client.ServiceUsers.Update(projectName, serviceName, username,
+			aiven.ModifyServiceUserRequest{
+				Authentication: optionalStringPointer(d, "authentication"),
+				NewPassword:    newPassword.(string),
+			})
+		if err != nil {
+			return err
+		}
+	}
+
 	d.SetId(buildResourceID(projectName, serviceName, username))
+
+	return resourceServiceUserRead(d, m)
+}
+
+func resourceServiceUserUpdate(d *schema.ResourceData, m interface{}) error {
+	client := m.(*aiven.Client)
+
+	projectName, serviceName, username := splitResourceID3(d.Id())
+
+	_, err := client.ServiceUsers.Update(projectName, serviceName, username,
+		aiven.ModifyServiceUserRequest{
+			Authentication: optionalStringPointer(d, "authentication"),
+			NewPassword:    d.Get("password").(string),
+		})
+	if err != nil {
+		return err
+	}
 
 	return resourceServiceUserRead(d, m)
 }
