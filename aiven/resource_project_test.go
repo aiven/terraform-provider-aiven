@@ -112,6 +112,12 @@ func testAccProjectResourceAccounts(name string) string {
 		resource "aiven_project" "foo" {
 			project = "test-acc-pr-%s"
 			account_id = aiven_account.foo.account_id
+			billing_address = "MXQ4+M5 New York, United States"
+			billing_extra_text = "some extra text ..."
+			country_code = "DE"
+			default_cloud = "aws-eu-west-2"
+			billing_currency = "EUR"
+			vat_id = "123"
 		}
 
 		data "aiven_project" "project" {
