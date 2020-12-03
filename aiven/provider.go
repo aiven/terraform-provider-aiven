@@ -131,12 +131,24 @@ func optionalString(d *schema.ResourceData, key string) string {
 	return str
 }
 
+// optionalStringPointer retrieves a string pointer to a field, empty string
+// will be converted to nil
 func optionalStringPointer(d *schema.ResourceData, key string) *string {
 	val, ok := d.GetOk(key)
 	if !ok {
 		return nil
 	}
 	str, ok := val.(string)
+	if !ok {
+		return nil
+	}
+	return &str
+}
+
+// optionalStringPointerForUndefined retrieves a string pointer to a field, empty
+// string remains a pointer to an empty string
+func optionalStringPointerForUndefined(d *schema.ResourceData, key string) *string {
+	str, ok := d.Get(key).(string)
 	if !ok {
 		return nil
 	}
@@ -287,6 +299,20 @@ func emptyObjectDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) boo
 
 	// There is a bug in Terraform 0.11 which interprets "true" as "0" and "false" as "1"
 	if (new == "0" && old == "false") || (new == "1" && old == "true") {
+		return true
+	}
+
+	return false
+}
+
+// emptyObjectNoChangeDiffSuppressFunc it suppresses a diff if a field is empty but have not
+// been set before to any value
+func emptyObjectNoChangeDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	if d.HasChange(k) {
+		return false
+	}
+
+	if new == "" {
 		return true
 	}
 

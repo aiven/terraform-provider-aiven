@@ -3,7 +3,10 @@
 package aiven
 
 import (
+	"context"
+	"fmt"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"os"
@@ -12,21 +15,24 @@ import (
 
 var aivenProjectSchema = map[string]*schema.Schema{
 	"billing_address": {
-		Type:        schema.TypeString,
-		Description: "Billing name and address of the project",
-		Optional:    true,
+		Type:             schema.TypeString,
+		Description:      "Billing name and address of the project",
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
 	},
 	"billing_emails": {
-		Type:        schema.TypeSet,
-		Description: "Billing contact emails of the project",
-		Elem:        &schema.Schema{Type: schema.TypeString},
-		Optional:    true,
+		Type:             schema.TypeSet,
+		Description:      "Billing contact emails of the project",
+		Elem:             &schema.Schema{Type: schema.TypeString},
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
 	},
 	"billing_extra_text": {
-		Type:         schema.TypeString,
-		Description:  "Extra text to be included in all project invoices, e.g. purchase order or cost center number",
-		ValidateFunc: validation.StringLenBetween(0, 1000),
-		Optional:     true,
+		Type:             schema.TypeString,
+		Description:      "Extra text to be included in all project invoices, e.g. purchase order or cost center number",
+		ValidateFunc:     validation.StringLenBetween(0, 1000),
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
 	},
 	"ca_cert": {
 		Type:        schema.TypeString,
@@ -36,14 +42,16 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Sensitive:   true,
 	},
 	"card_id": {
-		Type:        schema.TypeString,
-		Optional:    true,
-		Description: "Credit card ID",
+		Type:             schema.TypeString,
+		Optional:         true,
+		Description:      "Credit card ID",
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 	},
 	"account_id": {
-		Type:        schema.TypeString,
-		Optional:    true,
-		Description: "Account ID",
+		Type:             schema.TypeString,
+		Optional:         true,
+		Description:      "Account ID",
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 	},
 	"copy_from_project": {
 		Type:             schema.TypeString,
@@ -52,9 +60,10 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: createOnlyDiffSuppressFunc,
 	},
 	"country_code": {
-		Type:        schema.TypeString,
-		Optional:    true,
-		Description: "Billing country code of the project",
+		Type:             schema.TypeString,
+		Optional:         true,
+		Description:      "Billing country code of the project",
+		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
 	},
 	"project": {
 		Type:        schema.TypeString,
@@ -62,20 +71,23 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Description: "Project name",
 	},
 	"technical_emails": {
-		Type:        schema.TypeSet,
-		Description: "Technical contact emails of the project",
-		Elem:        &schema.Schema{Type: schema.TypeString},
-		Optional:    true,
+		Type:             schema.TypeSet,
+		Description:      "Technical contact emails of the project",
+		Elem:             &schema.Schema{Type: schema.TypeString},
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
 	},
 	"default_cloud": {
-		Type:        schema.TypeString,
-		Optional:    true,
-		Description: "Default cloud for new services",
+		Type:             schema.TypeString,
+		Optional:         true,
+		Description:      "Default cloud for new services",
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 	},
 	"billing_currency": {
-		Type:        schema.TypeString,
-		Optional:    true,
-		Description: "Billing currency",
+		Type:             schema.TypeString,
+		Optional:         true,
+		Description:      "Billing currency",
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 	},
 	"available_credits": {
 		Type:        schema.TypeString,
@@ -99,111 +111,140 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Description: "Payment method",
 	},
 	"vat_id": {
-		Type:        schema.TypeString,
-		Optional:    true,
-		Description: "EU VAT Identification Number",
+		Type:             schema.TypeString,
+		Optional:         true,
+		Description:      "EU VAT Identification Number",
+		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
 	},
 }
 
 func resourceProject() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceProjectCreate,
-		Read:   resourceProjectRead,
-		Update: resourceProjectUpdate,
-		Delete: resourceProjectDelete,
-		Exists: resourceProjectExists,
+		CreateContext: resourceProjectCreate,
+		ReadContext:   resourceProjectRead,
+		UpdateContext: resourceProjectUpdate,
+		DeleteContext: resourceProjectDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceProjectState,
+			StateContext: resourceProjectState,
 		},
 
 		Schema: aivenProjectSchema,
 	}
 }
 
-func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
+func resourceProjectCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	cardID, err := getLongCardID(client, d.Get("card_id").(string))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
+
 	projectName := d.Get("project").(string)
-	project, err := client.Projects.Create(
+	_, err = client.Projects.Create(
 		aiven.CreateProjectRequest{
-			BillingAddress:   optionalStringPointer(d, "billing_address"),
+			BillingAddress:   optionalStringPointerForUndefined(d, "billing_address"),
 			BillingEmails:    contactEmailListForAPI(d, "billing_emails", true),
-			BillingExtraText: optionalStringPointer(d, "billing_extra_text"),
+			BillingExtraText: optionalStringPointerForUndefined(d, "billing_extra_text"),
 			CardID:           cardID,
-			Cloud:            d.Get("default_cloud").(string),
+			Cloud:            optionalStringPointer(d, "default_cloud"),
 			CopyFromProject:  d.Get("copy_from_project").(string),
-			CountryCode:      optionalStringPointer(d, "country_code"),
+			CountryCode:      optionalStringPointerForUndefined(d, "country_code"),
 			Project:          projectName,
 			TechnicalEmails:  contactEmailListForAPI(d, "technical_emails", true),
-			AccountId:        d.Get("account_id").(string),
+			AccountId:        optionalStringPointer(d, "account_id"),
 			BillingCurrency:  d.Get("billing_currency").(string),
-			VatID:            d.Get("vat_id").(string),
+			VatID:            optionalStringPointerForUndefined(d, "vat_id"),
 		},
 	)
 	if err != nil && !aiven.IsAlreadyExists(err) {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(projectName)
 
-	return resourceProjectGetCACert(project.Name, client, d)
+	return resourceProjectGetCACert(projectName, client, d)
 }
 
-func resourceProjectRead(d *schema.ResourceData, m interface{}) error {
+func resourceProjectRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, err := client.Projects.Get(d.Id())
 	if err != nil {
-		return err
+		return diag.Errorf("Error getting project: %s", err)
 	}
 
-	// Don't set card id unconditionally to prevent converting short card id format to long
-	currentCardID, err := getLongCardID(client, d.Get("card_id").(string))
-	if err != nil || currentCardID != project.Card.CardID {
+	currentCardId := d.Get("card_id").(string)
+	currentLongCardID, err := getLongCardID(client, currentCardId)
+	if err != nil {
+		return diag.Errorf("Error getting long card id: %s", err)
+	}
+
+	var diags diag.Diagnostics
+
+	if currentCardId != "" {
+		// for non empty card_id long card id should exist
+		if currentLongCardID == nil {
+			return diag.Errorf("For card_id %s long card id is not found.", currentCardId)
+		}
+
+		// long card ids should be equal
+		if *currentLongCardID != project.Card.CardID {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary: fmt.Sprintf("Long card id has changed : current `%s` - new `%s`",
+					*currentLongCardID, project.Card.CardID),
+			})
+
+			if err := d.Set("card_id", project.Card.CardID); err != nil {
+				diags = append(diags, diag.Diagnostic{
+					Severity: diag.Error,
+					Summary:  fmt.Sprintf("Unable to set card_id: %s", err),
+				})
+				return diags
+			}
+		}
+	} else {
 		if err := d.Set("card_id", project.Card.CardID); err != nil {
-			return err
+			return diag.Errorf("Unable to set card_id: %s", err)
 		}
 	}
 
-	return setProjectTerraformProperties(d, client, project)
+	return append(diags, setProjectTerraformProperties(d, client, project)...)
 }
 
-func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	cardID, err := getLongCardID(client, d.Get("card_id").(string))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
-	billingAddress := d.Get("billing_address").(string)
-	countryCode := d.Get("country_code").(string)
+
 	project, err := client.Projects.Update(
 		d.Get("project").(string),
 		aiven.UpdateProjectRequest{
-			BillingAddress:   &billingAddress,
+			BillingAddress:   optionalStringPointerForUndefined(d, "billing_address"),
 			BillingEmails:    contactEmailListForAPI(d, "billing_emails", false),
-			BillingExtraText: optionalStringPointer(d, "billing_extra_text"),
+			BillingExtraText: optionalStringPointerForUndefined(d, "billing_extra_text"),
 			CardID:           cardID,
-			Cloud:            d.Get("default_cloud").(string),
-			CountryCode:      &countryCode,
+			Cloud:            optionalStringPointer(d, "default_cloud"),
+			CountryCode:      optionalStringPointerForUndefined(d, "country_code"),
 			TechnicalEmails:  contactEmailListForAPI(d, "technical_emails", false),
-			AccountId:        d.Get("account_id").(string),
+			AccountId:        optionalStringPointer(d, "account_id"),
 			BillingCurrency:  d.Get("billing_currency").(string),
-			VatID:            d.Get("vat_id").(string),
+			VatID:            optionalStringPointerForUndefined(d, "vat_id"),
 		},
 	)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(project.Name)
+
 	return nil
 }
 
-func resourceProjectDelete(d *schema.ResourceData, m interface{}) error {
+func resourceProjectDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	err := client.Projects.Delete(d.Id())
@@ -215,23 +256,20 @@ func resourceProjectDelete(d *schema.ResourceData, m interface{}) error {
 		if re.MatchString(err.Error()) && err.(aiven.Error).Status == 403 {
 			return nil
 		}
+	}
 
+	if err != nil {
 		if aiven.IsNotFound(err) {
 			return nil
 		}
+
+		return diag.FromErr(err)
 	}
 
-	return err
+	return nil
 }
 
-func resourceProjectExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	client := m.(*aiven.Client)
-
-	_, err := client.Projects.Get(d.Get("project").(string))
-	return resourceExists(err)
-}
-
-func resourceProjectState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceProjectState(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	client := m.(*aiven.Client)
 
 	project, err := client.Projects.Get(d.Id())
@@ -243,33 +281,37 @@ func resourceProjectState(d *schema.ResourceData, m interface{}) ([]*schema.Reso
 		return nil, err
 	}
 
-	if err := setProjectTerraformProperties(d, client, project); err != nil {
-		return nil, err
+	if d := setProjectTerraformProperties(d, client, project); d.HasError() {
+		return nil, fmt.Errorf("cannot set project properties")
 	}
 
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceProjectGetCACert(project string, client *aiven.Client, d *schema.ResourceData) error {
+func resourceProjectGetCACert(project string, client *aiven.Client, d *schema.ResourceData) diag.Diagnostics {
 	ca, err := client.CA.Get(project)
 	if err == nil {
 		if err := d.Set("ca_cert", ca); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	return nil
 }
 
-func getLongCardID(client *aiven.Client, cardID string) (string, error) {
+func getLongCardID(client *aiven.Client, cardID string) (*string, error) {
+	if cardID == "" {
+		return nil, nil
+	}
+
 	card, err := client.CardsHandler.Get(cardID)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if card != nil {
-		return card.CardID, nil
+		return &card.CardID, nil
 	}
-	return cardID, nil
+	return &cardID, nil
 }
 
 func contactEmailListForAPI(d *schema.ResourceData, field string, newResource bool) *[]*aiven.ContactEmail {
@@ -312,51 +354,51 @@ func contactEmailListForTerraform(d *schema.ResourceData, field string, contactE
 	return nil
 }
 
-func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client, project *aiven.Project) error {
+func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client, project *aiven.Project) diag.Diagnostics {
 	if err := d.Set("billing_address", project.BillingAddress); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := contactEmailListForTerraform(d, "billing_emails", project.BillingEmails); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("country_code", project.CountryCode); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("project", project.Name); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("account_id", project.AccountId); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := contactEmailListForTerraform(d, "technical_emails", project.TechnicalEmails); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
-	if err := resourceProjectGetCACert(project.Name, client, d); err != nil {
-		return err
+	if d := resourceProjectGetCACert(project.Name, client, d); d != nil {
+		return d
 	}
 	if err := d.Set("billing_extra_text", project.BillingExtraText); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("default_cloud", project.DefaultCloud); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("billing_currency", project.BillingCurrency); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("available_credits", project.AvailableCredits); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("country_code", project.CountryCode); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("estimated_balance", project.EstimatedBalance); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("payment_method", project.PaymentMethod); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("vat_id", project.VatID); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

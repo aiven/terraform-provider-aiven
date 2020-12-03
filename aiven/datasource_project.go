@@ -2,34 +2,35 @@
 package aiven
 
 import (
-	"fmt"
+	"context"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func datasourceProject() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceProjectRead,
-		Schema: resourceSchemaAsDatasourceSchema(aivenProjectSchema, "project"),
+		ReadContext: datasourceProjectRead,
+		Schema:      resourceSchemaAsDatasourceSchema(aivenProjectSchema, "project"),
 	}
 }
 
-func datasourceProjectRead(d *schema.ResourceData, m interface{}) error {
+func datasourceProjectRead(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
 
 	projects, err := client.Projects.List()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	for _, project := range projects {
 		if project.Name == projectName {
 			d.SetId(projectName)
-			return resourceProjectRead(d, m)
+			return resourceProjectRead(c, d, m)
 		}
 	}
 
-	return fmt.Errorf("project %s not found", projectName)
+	return diag.Errorf("project %s not found", projectName)
 }
