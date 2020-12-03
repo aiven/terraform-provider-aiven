@@ -138,6 +138,7 @@ func testAccProjectResource(name string) string {
 			default_cloud = "aws-eu-west-2"
 			billing_currency = "EUR"
 			vat_id = "123"
+			card_id = ""
 		}
 
 		data "aiven_project" "project" {
