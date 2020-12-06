@@ -20,7 +20,6 @@ func TestAccAivenProjectDataSource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(datasourceName, "project", resourceName, "project"),
 					resource.TestCheckResourceAttrPair(datasourceName, "ca_cert", resourceName, "ca_cert"),
-					resource.TestCheckResourceAttrPair(datasourceName, "card_id", resourceName, "card_id"),
 				),
 			},
 		},
