@@ -19,14 +19,15 @@ They should be defined using reference as shown above to set up dependencies cor
 
 * `username` - (Required) is the actual name of the user account.
 
+* `password` - is the password of the service user (not applicable for all services), the 
+Terraform user can set that.
+
 None of the service user properties can currently be changed after creation. Doing so
 will result in the old database getting dropped and a new database created.
 
 ## Attribute Reference
 
 Service users have several computed properties that cannot be set, only read:
-
-* `password` - is the password of the user (not applicable for all services).
 
 * `access_cert` - is the access certificate of the user (not applicable for all services).
 
