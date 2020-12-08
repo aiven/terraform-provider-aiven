@@ -1,20 +1,21 @@
 package aiven
 
 import (
-	"fmt"
+	"context"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func datasourceAccountTeam() *schema.Resource {
 	return &schema.Resource{
-		Read: datasourceAccountTeamRead,
+		ReadContext: datasourceAccountTeamRead,
 		Schema: resourceSchemaAsDatasourceSchema(aivenAccountTeamSchema,
 			"account_id", "name"),
 	}
 }
 
-func datasourceAccountTeamRead(d *schema.ResourceData, m interface{}) error {
+func datasourceAccountTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	name := d.Get("name").(string)
@@ -22,15 +23,15 @@ func datasourceAccountTeamRead(d *schema.ResourceData, m interface{}) error {
 
 	r, err := client.AccountTeams.List(accountId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	for _, t := range r.Teams {
 		if t.Name == name {
 			d.SetId(buildResourceID(t.AccountId, t.Id))
-			return resourceAccountTeamRead(d, m)
+			return resourceAccountTeamRead(ctx, d, m)
 		}
 	}
 
-	return fmt.Errorf("account team %s not found", name)
+	return diag.Errorf("account team %s not found", name)
 }

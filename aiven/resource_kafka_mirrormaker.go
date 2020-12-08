@@ -35,13 +35,12 @@ func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
 func resourceKafkaMirrormaker() *schema.Resource {
 
 	return &schema.Resource{
-		Create: resourceServiceCreateWrapper(ServiceTypeKafkaMirrormaker),
-		Read:   resourceServiceRead,
-		Update: resourceServiceUpdate,
-		Delete: resourceServiceDelete,
-		Exists: resourceServiceExists,
+		CreateContext: resourceServiceCreateWrapper(ServiceTypeKafkaMirrormaker),
+		ReadContext:   resourceServiceRead,
+		UpdateContext: resourceServiceUpdate,
+		DeleteContext: resourceServiceDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceServiceState,
+			StateContext: resourceServiceState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),

@@ -2,7 +2,9 @@
 package aiven
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
@@ -36,20 +38,19 @@ var aivenProjectUserSchema = map[string]*schema.Schema{
 
 func resourceProjectUser() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceProjectUserCreate,
-		Read:   resourceProjectUserRead,
-		Update: resourceProjectUserUpdate,
-		Delete: resourceProjectUserDelete,
-		Exists: resourceProjectUserExists,
+		CreateContext: resourceProjectUserCreate,
+		ReadContext:   resourceProjectUserRead,
+		UpdateContext: resourceProjectUserUpdate,
+		DeleteContext: resourceProjectUserDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceProjectUserState,
+			StateContext: resourceProjectUserState,
 		},
 
 		Schema: aivenProjectUserSchema,
 	}
 }
 
-func resourceProjectUserCreate(d *schema.ResourceData, m interface{}) error {
+func resourceProjectUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	projectName := d.Get("project").(string)
 	email := d.Get("email").(string)
@@ -61,71 +62,76 @@ func resourceProjectUserCreate(d *schema.ResourceData, m interface{}) error {
 		},
 	)
 	if err != nil && !aiven.IsAlreadyExists(err) {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(buildResourceID(projectName, email))
 	if err := d.Set("accepted", false); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return nil
+	return resourceProjectUserRead(ctx, d, m)
 }
 
-func resourceProjectUserRead(d *schema.ResourceData, m interface{}) error {
+func resourceProjectUserRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, email := splitResourceID2(d.Id())
 	user, invitation, err := client.ProjectUsers.Get(projectName, email)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("project", projectName); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("email", email); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if user != nil {
 		if err := d.Set("member_type", user.MemberType); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		if err := d.Set("accepted", true); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	} else {
 		if err := d.Set("member_type", invitation.MemberType); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		if err := d.Set("accepted", false); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	return nil
 }
 
-func resourceProjectUserUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceProjectUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, email := splitResourceID2(d.Id())
 	memberType := d.Get("member_type").(string)
-	return client.ProjectUsers.UpdateUserOrInvitation(
+	err := client.ProjectUsers.UpdateUserOrInvitation(
 		projectName,
 		email,
 		aiven.UpdateProjectUserOrInvitationRequest{
 			MemberType: memberType,
 		},
 	)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return resourceProjectUserRead(ctx, d, m)
 }
 
-func resourceProjectUserDelete(d *schema.ResourceData, m interface{}) error {
+func resourceProjectUserDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, email := splitResourceID2(d.Id())
 	user, invitation, err := client.ProjectUsers.Get(projectName, email)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// delete user if exists
@@ -136,7 +142,7 @@ func resourceProjectUserDelete(d *schema.ResourceData, m interface{}) error {
 				!strings.Contains(err.(aiven.Error).Message, "User does not exist") ||
 				!strings.Contains(err.(aiven.Error).Message, "User not found") {
 
-				return err
+				return diag.FromErr(err)
 			}
 		}
 	}
@@ -145,29 +151,21 @@ func resourceProjectUserDelete(d *schema.ResourceData, m interface{}) error {
 	if invitation != nil {
 		err := client.ProjectUsers.DeleteInvitation(projectName, email)
 		if err != nil && !aiven.IsNotFound(err) {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	return nil
 }
 
-func resourceProjectUserExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	client := m.(*aiven.Client)
-
-	projectName, email := splitResourceID2(d.Id())
-	_, _, err := client.ProjectUsers.Get(projectName, email)
-	return resourceExists(err)
-}
-
-func resourceProjectUserState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceProjectUserState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	if len(strings.Split(d.Id(), "/")) != 2 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<email>", d.Id())
 	}
 
-	err := resourceProjectUserRead(d, m)
-	if err != nil {
-		return nil, err
+	di := resourceProjectUserRead(ctx, d, m)
+	if di.HasError() {
+		return nil, fmt.Errorf("cannot get project user %v", di)
 	}
 
 	return []*schema.ResourceData{d}, nil

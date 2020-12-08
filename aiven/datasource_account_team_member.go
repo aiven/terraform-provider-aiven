@@ -1,23 +1,25 @@
 package aiven
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func datasourceAccountTeamMember() *schema.Resource {
 	return &schema.Resource{
-		Read: datasourceAccountTeamMemberRead,
+		ReadContext: datasourceAccountTeamMemberRead,
 		Schema: resourceSchemaAsDatasourceSchema(aivenAccountTeamMemberSchema,
 			"account_id", "team_id", "user_email"),
 	}
 }
 
-func datasourceAccountTeamMemberRead(d *schema.ResourceData, m interface{}) error {
+func datasourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	accountId := d.Get("account_id").(string)
 	teamId := d.Get("team_id").(string)
 	userEmail := d.Get("user_email").(string)
 
 	d.SetId(buildResourceID(accountId, teamId, userEmail))
 
-	return resourceAccountTeamMemberRead(d, m)
+	return resourceAccountTeamMemberRead(ctx, d, m)
 }

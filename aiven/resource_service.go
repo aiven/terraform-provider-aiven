@@ -3,9 +3,11 @@
 package aiven
 
 import (
+	"context"
 	"fmt"
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"strconv"
@@ -665,13 +667,12 @@ var aivenServiceSchema = map[string]*schema.Schema{
 
 func resourceService() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceServiceCreateWrapper("service"),
-		Read:   resourceServiceRead,
-		Update: resourceServiceUpdate,
-		Delete: resourceServiceDelete,
-		Exists: resourceServiceExists,
+		CreateContext: resourceServiceCreateWrapper("service"),
+		ReadContext:   resourceServiceRead,
+		UpdateContext: resourceServiceUpdate,
+		DeleteContext: resourceServiceDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceServiceState,
+			StateContext: resourceServiceState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
@@ -682,60 +683,60 @@ func resourceService() *schema.Resource {
 	}
 }
 
-func resourceServiceCreateWrapper(serviceType string) schema.CreateFunc {
+func resourceServiceCreateWrapper(serviceType string) schema.CreateContextFunc {
 	if serviceType == "service" {
-		return func(d *schema.ResourceData, m interface{}) error {
+		return func(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 			// Need to set empty value for all services or all Terraform keeps on showing there's
 			// a change in the computed values that don't match actual service type
 			if err := d.Set(ServiceTypeCassandra, []map[string]interface{}{}); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 			if err := d.Set(ServiceTypeElasticsearch, []map[string]interface{}{}); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 			if err := d.Set(ServiceTypeGrafana, []map[string]interface{}{}); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 			if err := d.Set(ServiceTypeInfluxDB, []map[string]interface{}{}); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 			if err := d.Set(ServiceTypeKafka, []map[string]interface{}{}); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 			if err := d.Set(ServiceTypeKafkaConnect, []map[string]interface{}{}); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 			if err := d.Set(ServiceTypeKafkaMirrormaker, []map[string]interface{}{}); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 			if err := d.Set(ServiceTypeMySQL, []map[string]interface{}{}); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 			if err := d.Set(ServiceTypePG, []map[string]interface{}{}); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 			if err := d.Set(ServiceTypeRedis, []map[string]interface{}{}); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 
-			return resourceServiceCreate(d, m)
+			return resourceServiceCreate(ctx, d, m)
 		}
 	}
 
-	return func(d *schema.ResourceData, m interface{}) error {
+	return func(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 		if err := d.Set("service_type", serviceType); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		if err := d.Set(serviceType, []map[string]interface{}{}); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
-		return resourceServiceCreate(d, m)
+		return resourceServiceCreate(ctx, d, m)
 	}
 
 }
 
-func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
+func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	serviceType := d.Get("service_type").(string)
 	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("service", serviceType, true, d)
@@ -778,32 +779,42 @@ func resourceServiceCreate(d *schema.ResourceData, m interface{}) error {
 	)
 
 	if err != nil && !isServiceAlreadyExists(err) {
-		return err
+		return diag.FromErr(err)
 	}
 
-	service, err := resourceServiceWait(d, m, "create")
+	service, err := resourceServiceWait(ctx, d, m, "create")
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(buildResourceID(d.Get("project").(string), service.Name))
 
-	return copyServicePropertiesFromAPIResponseToTerraform(d, service, d.Get("project").(string))
+	err = copyServicePropertiesFromAPIResponseToTerraform(d, service, d.Get("project").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }
 
-func resourceServiceRead(d *schema.ResourceData, m interface{}) error {
+func resourceServiceRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName := splitResourceID2(d.Id())
 	service, err := client.Services.Get(projectName, serviceName)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return copyServicePropertiesFromAPIResponseToTerraform(d, service, projectName)
+	err = copyServicePropertiesFromAPIResponseToTerraform(d, service, projectName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }
 
-func resourceServiceUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName := splitResourceID2(d.Id())
@@ -828,26 +839,30 @@ func resourceServiceUpdate(d *schema.ResourceData, m interface{}) error {
 		},
 	)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	service, err := resourceServiceWait(d, m, "update")
-
+	service, err := resourceServiceWait(ctx, d, m, "update")
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return copyServicePropertiesFromAPIResponseToTerraform(d, service, projectName)
+	err = copyServicePropertiesFromAPIResponseToTerraform(d, service, projectName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }
 
-func resourceServiceDelete(d *schema.ResourceData, m interface{}) error {
+func resourceServiceDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName := splitResourceID2(d.Id())
 
 	err := client.Services.Delete(projectName, serviceName)
 	if err != nil && !aiven.IsNotFound(err) {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -861,7 +876,7 @@ func resourceServiceExists(d *schema.ResourceData, m interface{}) (bool, error) 
 	return resourceExists(err)
 }
 
-func resourceServiceState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceServiceState(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	client := m.(*aiven.Client)
 
 	if len(strings.Split(d.Id(), "/")) != 2 {
@@ -882,7 +897,7 @@ func resourceServiceState(d *schema.ResourceData, m interface{}) ([]*schema.Reso
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceServiceWait(d *schema.ResourceData, m interface{}, operation string) (*aiven.Service, error) {
+func resourceServiceWait(ctx context.Context, d *schema.ResourceData, m interface{}, operation string) (*aiven.Service, error) {
 	var timeout time.Duration
 	if operation == "create" {
 		timeout = d.Timeout(schema.TimeoutCreate)
@@ -897,7 +912,7 @@ func resourceServiceWait(d *schema.ResourceData, m interface{}, operation string
 		ServiceName: d.Get("service_name").(string),
 	}
 
-	service, err := w.Conf(timeout).WaitForState()
+	service, err := w.Conf(timeout).WaitForStateContext(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("error waiting for Aiven service to be RUNNING: %s", err)
 	}
