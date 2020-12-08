@@ -1,7 +1,10 @@
 package aiven
 
 import (
+	"context"
+	"fmt"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -38,20 +41,19 @@ var aivenKafkaSchemaConfigurationSchema = map[string]*schema.Schema{
 
 func resourceKafkaSchemaConfiguration() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKafkaSchemaConfigurationCreate,
-		Update: resourceKafkaSchemaConfigurationUpdate,
-		Read:   resourceKafkaSchemaConfigurationRead,
-		Delete: resourceKafkaSchemaConfigurationDelete,
-		Exists: resourceKafkaSchemaConfigurationExists,
+		CreateContext: resourceKafkaSchemaConfigurationCreate,
+		UpdateContext: resourceKafkaSchemaConfigurationUpdate,
+		ReadContext:   resourceKafkaSchemaConfigurationRead,
+		DeleteContext: resourceKafkaSchemaConfigurationDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceKafkaSchemaConfigurationState,
+			StateContext: resourceKafkaSchemaConfigurationState,
 		},
 
 		Schema: aivenKafkaSchemaConfigurationSchema,
 	}
 }
 
-func resourceKafkaSchemaConfigurationUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaSchemaConfigurationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project, serviceName := splitResourceID2(d.Id())
 
 	_, err := m.(*aiven.Client).KafkaGlobalSchemaConfig.Update(
@@ -61,14 +63,14 @@ func resourceKafkaSchemaConfigurationUpdate(d *schema.ResourceData, m interface{
 			CompatibilityLevel: d.Get("compatibility_level").(string),
 		})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceKafkaSchemaConfigurationRead(d, m)
+	return resourceKafkaSchemaConfigurationRead(ctx, d, m)
 }
 
 // resourceKafkaSchemaConfigurationCreate Kafka Schemas global configuration cannot be created but only updated
-func resourceKafkaSchemaConfigurationCreate(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaSchemaConfigurationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 
@@ -79,30 +81,30 @@ func resourceKafkaSchemaConfigurationCreate(d *schema.ResourceData, m interface{
 			CompatibilityLevel: d.Get("compatibility_level").(string),
 		})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(buildResourceID(project, serviceName))
 
-	return resourceKafkaSchemaConfigurationRead(d, m)
+	return resourceKafkaSchemaConfigurationRead(ctx, d, m)
 }
 
-func resourceKafkaSchemaConfigurationRead(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaSchemaConfigurationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project, serviceName := splitResourceID2(d.Id())
 
 	r, err := m.(*aiven.Client).KafkaGlobalSchemaConfig.Get(project, serviceName)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("project", project); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("service_name", serviceName); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("compatibility_level", r.CompatibilityLevel); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -110,7 +112,7 @@ func resourceKafkaSchemaConfigurationRead(d *schema.ResourceData, m interface{})
 
 // resourceKafkaSchemaConfigurationDelete Kafka Schemas configuration cannot be deleted, therefore
 // on delete event configuration will be set to the default setting
-func resourceKafkaSchemaConfigurationDelete(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaSchemaConfigurationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project, serviceName := splitResourceID2(d.Id())
 
 	_, err := m.(*aiven.Client).KafkaGlobalSchemaConfig.Update(
@@ -119,18 +121,17 @@ func resourceKafkaSchemaConfigurationDelete(d *schema.ResourceData, m interface{
 		aiven.KafkaSchemaConfig{
 			CompatibilityLevel: "BACKWARD",
 		})
-
-	return err
-}
-
-func resourceKafkaSchemaConfigurationExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	return resourceExists(resourceKafkaSchemaConfigurationRead(d, m))
-}
-
-func resourceKafkaSchemaConfigurationState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	err := resourceKafkaSchemaConfigurationRead(d, m)
 	if err != nil {
-		return nil, err
+		return diag.FromErr(err)
+	}
+
+	return nil
+}
+
+func resourceKafkaSchemaConfigurationState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	di := resourceKafkaSchemaConfigurationRead(ctx, d, m)
+	if di.HasError() {
+		return nil, fmt.Errorf("cannot get kafka schema configuration: %v", di)
 	}
 
 	return []*schema.ResourceData{d}, nil

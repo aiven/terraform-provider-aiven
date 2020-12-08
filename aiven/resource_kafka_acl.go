@@ -2,7 +2,9 @@
 package aiven
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"regexp"
 	"strings"
 
@@ -55,19 +57,18 @@ var aivenKafkaACLSchema = map[string]*schema.Schema{
 
 func resourceKafkaACL() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKafkaACLCreate,
-		Read:   resourceKafkaACLRead,
-		Delete: resourceKafkaACLDelete,
-		Exists: resourceKafkaACLExists,
+		CreateContext: resourceKafkaACLCreate,
+		ReadContext:   resourceKafkaACLRead,
+		DeleteContext: resourceKafkaACLDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceKafkaACLState,
+			StateContext: resourceKafkaACLState,
 		},
 
 		Schema: aivenKafkaACLSchema,
 	}
 }
 
-func resourceKafkaACLCreate(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaACLCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -83,53 +84,51 @@ func resourceKafkaACLCreate(d *schema.ResourceData, m interface{}) error {
 		},
 	)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(buildResourceID(project, serviceName, acl.ID))
-	return copyKafkaACLPropertiesFromAPIResponseToTerraform(d, acl, project, serviceName)
+
+	return resourceKafkaACLRead(ctx, d, m)
 }
 
-func resourceKafkaACLRead(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaACLRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, aclID := splitResourceID3(d.Id())
 	acl, err := cache.ACLCache{}.Read(project, serviceName, aclID, client)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return copyKafkaACLPropertiesFromAPIResponseToTerraform(d, &acl, project, serviceName)
-}
-
-func resourceKafkaACLDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*aiven.Client)
-
-	projectName, serviceName, aclID := splitResourceID3(d.Id())
-	err := client.KafkaACLs.Delete(projectName, serviceName, aclID)
-	if err != nil && !aiven.IsNotFound(err) {
-		return err
+	err = copyKafkaACLPropertiesFromAPIResponseToTerraform(d, &acl, project, serviceName)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKafkaACLExists(d *schema.ResourceData, m interface{}) (bool, error) {
+func resourceKafkaACLDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, aclID := splitResourceID3(d.Id())
-	_, err := cache.ACLCache{}.Read(projectName, serviceName, aclID, client)
-	return resourceExists(err)
+	err := client.KafkaACLs.Delete(projectName, serviceName, aclID)
+	if err != nil && !aiven.IsNotFound(err) {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }
 
-func resourceKafkaACLState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceKafkaACLState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	if len(strings.Split(d.Id(), "/")) != 3 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<acl_id>", d.Id())
 	}
 
-	err := resourceKafkaACLRead(d, m)
-	if err != nil {
-		return nil, err
+	di := resourceKafkaACLRead(ctx, d, m)
+	if di.HasError() {
+		return nil, fmt.Errorf("cannot get kafka acl: %v", di)
 	}
 
 	return []*schema.ResourceData{d}, nil

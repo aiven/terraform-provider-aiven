@@ -3,7 +3,9 @@
 package aiven
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"strings"
 
@@ -96,20 +98,19 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 
 func resourceServiceUser() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceServiceUserCreate,
-		Update: resourceServiceUserUpdate,
-		Read:   resourceServiceUserRead,
-		Delete: resourceServiceUserDelete,
-		Exists: resourceServiceUserExists,
+		CreateContext: resourceServiceUserCreate,
+		UpdateContext: resourceServiceUserUpdate,
+		ReadContext:   resourceServiceUserRead,
+		DeleteContext: resourceServiceUserDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceServiceUserState,
+			StateContext: resourceServiceUserState,
 		},
 
 		Schema: aivenServiceUserSchema,
 	}
 }
 
-func resourceServiceUserCreate(d *schema.ResourceData, m interface{}) error {
+func resourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -128,7 +129,7 @@ func resourceServiceUserCreate(d *schema.ResourceData, m interface{}) error {
 		},
 	)
 	if err != nil && !aiven.IsAlreadyExists(err) {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if newPassword, ok := d.GetOk("password"); ok {
@@ -138,16 +139,16 @@ func resourceServiceUserCreate(d *schema.ResourceData, m interface{}) error {
 				NewPassword:    newPassword.(string),
 			})
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	d.SetId(buildResourceID(projectName, serviceName, username))
 
-	return resourceServiceUserRead(d, m)
+	return resourceServiceUserRead(ctx, d, m)
 }
 
-func resourceServiceUserUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceServiceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, username := splitResourceID3(d.Id())
@@ -158,10 +159,10 @@ func resourceServiceUserUpdate(d *schema.ResourceData, m interface{}) error {
 			NewPassword:    d.Get("password").(string),
 		})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceServiceUserRead(d, m)
+	return resourceServiceUserRead(ctx, d, m)
 }
 
 func copyServiceUserPropertiesFromAPIResponseToTerraform(
@@ -204,39 +205,36 @@ func copyServiceUserPropertiesFromAPIResponseToTerraform(
 	return nil
 }
 
-func resourceServiceUserRead(d *schema.ResourceData, m interface{}) error {
+func resourceServiceUserRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, username := splitResourceID3(d.Id())
 	user, err := client.ServiceUsers.Get(projectName, serviceName, username)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return copyServiceUserPropertiesFromAPIResponseToTerraform(d, user, projectName, serviceName)
-}
-
-func resourceServiceUserDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*aiven.Client)
-
-	projectName, serviceName, username := splitResourceID3(d.Id())
-	err := client.ServiceUsers.Delete(projectName, serviceName, username)
-	if err != nil && !aiven.IsNotFound(err) {
-		return err
+	err = copyServiceUserPropertiesFromAPIResponseToTerraform(d, user, projectName, serviceName)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceServiceUserExists(d *schema.ResourceData, m interface{}) (bool, error) {
+func resourceServiceUserDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, username := splitResourceID3(d.Id())
-	_, err := client.ServiceUsers.Get(projectName, serviceName, username)
-	return resourceExists(err)
+	err := client.ServiceUsers.Delete(projectName, serviceName, username)
+	if err != nil && !aiven.IsNotFound(err) {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }
 
-func resourceServiceUserState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceServiceUserState(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	client := m.(*aiven.Client)
 
 	if len(strings.Split(d.Id(), "/")) != 3 {

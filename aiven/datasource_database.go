@@ -2,20 +2,21 @@
 package aiven
 
 import (
-	"fmt"
+	"context"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func datasourceDatabase() *schema.Resource {
 	return &schema.Resource{
-		Read: datasourceDatabaseRead,
+		ReadContext: datasourceDatabaseRead,
 		Schema: resourceSchemaAsDatasourceSchema(aivenDatabaseSchema,
 			"project", "service_name", "database_name"),
 	}
 }
 
-func datasourceDatabaseRead(d *schema.ResourceData, m interface{}) error {
+func datasourceDatabaseRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -24,16 +25,16 @@ func datasourceDatabaseRead(d *schema.ResourceData, m interface{}) error {
 
 	databases, err := client.Databases.List(projectName, serviceName)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	for _, db := range databases {
 		if db.DatabaseName == databaseName {
 			d.SetId(buildResourceID(projectName, serviceName, databaseName))
-			return resourceDatabaseRead(d, m)
+			return resourceDatabaseRead(ctx, d, m)
 		}
 	}
 
-	return fmt.Errorf("database %s/%s/%s not found",
+	return diag.Errorf("database %s/%s/%s not found",
 		projectName, serviceName, databaseName)
 }

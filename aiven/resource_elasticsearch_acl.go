@@ -1,8 +1,10 @@
 package aiven
 
 import (
+	"context"
 	"fmt"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -73,13 +75,12 @@ var aivenElasticsearchACLSchema = map[string]*schema.Schema{
 
 func resourceElasticsearchACL() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceElasticsearchACLUpdate,
-		Read:   resourceElasticsearchACLRead,
-		Update: resourceElasticsearchACLUpdate,
-		Delete: resourceElasticsearchACLDelete,
-		Exists: resourceElasticsearchACLExists,
+		CreateContext: resourceElasticsearchACLUpdate,
+		ReadContext:   resourceElasticsearchACLRead,
+		UpdateContext: resourceElasticsearchACLUpdate,
+		DeleteContext: resourceElasticsearchACLDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceElasticsearchACLState,
+			StateContext: resourceElasticsearchACLState,
 		},
 
 		Schema: aivenElasticsearchACLSchema,
@@ -111,59 +112,47 @@ func flattenElasticsearchACL(r *aiven.ElasticSearchACLResponse) []map[string]int
 	return acls
 }
 
-func resourceElasticsearchACLRead(d *schema.ResourceData, m interface{}) error {
+func resourceElasticsearchACLRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName := splitResourceID2(d.Id())
 	r, err := client.ElasticsearchACLs.Get(project, serviceName)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("error setting Elasticsearch ACLs `project` for resource %s: %s", d.Id(), err)
+		return diag.Errorf("error setting Elasticsearch ACLs `project` for resource %s: %s", d.Id(), err)
 	}
 	if err := d.Set("service_name", serviceName); err != nil {
-		return fmt.Errorf("error setting Elasticsearch ACLs `service_name` for resource %s: %s", d.Id(), err)
+		return diag.Errorf("error setting Elasticsearch ACLs `service_name` for resource %s: %s", d.Id(), err)
 	}
 	if err := d.Set("extended_acl", r.ElasticSearchACLConfig.ExtendedAcl); err != nil {
-		return fmt.Errorf("error setting Elasticsearch ACLs `extended_acl` for resource %s: %s", d.Id(), err)
+		return diag.Errorf("error setting Elasticsearch ACLs `extended_acl` for resource %s: %s", d.Id(), err)
 	}
 	if err := d.Set("enabled", r.ElasticSearchACLConfig.Enabled); err != nil {
-		return fmt.Errorf("error setting Elasticsearch ACLs `enable` for resource %s: %s", d.Id(), err)
+		return diag.Errorf("error setting Elasticsearch ACLs `enable` for resource %s: %s", d.Id(), err)
 	}
 
 	acls := flattenElasticsearchACL(r)
 
 	if err := d.Set("acl", acls); err != nil {
-		return fmt.Errorf("error setting Elasticsearch ACLs `acls` array for resource %s: %s", d.Id(), err)
+		return diag.Errorf("error setting Elasticsearch ACLs `acls` array for resource %s: %s", d.Id(), err)
 	}
 
 	return nil
 }
 
-func resourceElasticsearchACLExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	client := m.(*aiven.Client)
-
-	project, serviceName := splitResourceID2(d.Id())
-	_, err := client.ElasticsearchACLs.Get(project, serviceName)
-	if err != nil {
-		return false, err
-	}
-
-	return resourceExists(err)
-}
-
-func resourceElasticsearchACLState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	err := resourceElasticsearchACLRead(d, m)
-	if err != nil {
-		return nil, err
+func resourceElasticsearchACLState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	di := resourceElasticsearchACLRead(ctx, d, m)
+	if di.HasError() {
+		return nil, fmt.Errorf("cannot get elasticsearch acl: %v", di)
 	}
 
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceElasticsearchACLUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceElasticsearchACLUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -191,14 +180,15 @@ func resourceElasticsearchACLUpdate(d *schema.ResourceData, m interface{}) error
 		serviceName,
 		aiven.ElasticsearchACLRequest{ElasticSearchACLConfig: config})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(buildResourceID(project, serviceName))
-	return resourceElasticsearchACLRead(d, m)
+
+	return resourceElasticsearchACLRead(ctx, d, m)
 }
 
-func resourceElasticsearchACLDelete(d *schema.ResourceData, m interface{}) error {
+func resourceElasticsearchACLDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -213,7 +203,7 @@ func resourceElasticsearchACLDelete(d *schema.ResourceData, m interface{}) error
 				Enabled:     false,
 				ExtendedAcl: false}})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

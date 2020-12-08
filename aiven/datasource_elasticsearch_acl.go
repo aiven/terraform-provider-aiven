@@ -2,20 +2,21 @@
 package aiven
 
 import (
-	"fmt"
+	"context"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func datasourceElasticsearchACL() *schema.Resource {
 	return &schema.Resource{
-		Read: datasourceElasticsearchACLRead,
+		ReadContext: datasourceElasticsearchACLRead,
 		Schema: resourceSchemaAsDatasourceSchema(aivenElasticsearchACLSchema,
 			"project", "service_name"),
 	}
 }
 
-func datasourceElasticsearchACLRead(d *schema.ResourceData, m interface{}) error {
+func datasourceElasticsearchACLRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -23,15 +24,15 @@ func datasourceElasticsearchACLRead(d *schema.ResourceData, m interface{}) error
 
 	acl, err := client.ElasticsearchACLs.Get(projectName, serviceName)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if acl != nil {
 		d.SetId(buildResourceID(projectName, serviceName))
 
-		return resourceElasticsearchACLRead(d, m)
+		return resourceElasticsearchACLRead(ctx, d, m)
 	}
 
-	return fmt.Errorf("elasticsearch acl %s/%s not found",
+	return diag.Errorf("elasticsearch acl %s/%s not found",
 		projectName, serviceName)
 }
