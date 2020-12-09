@@ -308,7 +308,7 @@
           "properties": {
             "max_index_count": {
               "example": 3,
-              "maximum": 9223372036854776000,
+              "maximum": 9223372036854775807,
               "minimum": 0,
               "title": "Maximum number of indexes to keep",
               "type": "integer"
@@ -378,7 +378,7 @@
       "max_index_count": {
         "default": 0,
         "description": "Maximum number of indexes to keep before deleting the oldest one",
-        "maximum": 9223372036854776000,
+        "maximum": 9223372036854775807,
         "minimum": 0,
         "title": "Maximum index count",
         "type": "integer"
@@ -623,7 +623,7 @@
           "team_ids": {
             "items": {
               "example": 150,
-              "maximum": 9223372036854776000,
+              "maximum": 9223372036854775807,
               "minimum": 1,
               "title": "Team ID",
               "type": "integer"
@@ -1208,7 +1208,7 @@
           },
           "log_cleaner_max_compaction_lag_ms": {
             "description": "The maximum amount of time message will remain uncompacted. Only applicable for logs that are being compacted",
-            "maximum": 9223372036854776000,
+            "maximum": 9223372036854775807,
             "minimum": 30000,
             "title": "log.cleaner.max.compaction.lag.ms",
             "type": "integer"
@@ -1223,7 +1223,7 @@
           },
           "log_cleaner_min_compaction_lag_ms": {
             "description": "The minimum time a message will remain uncompacted in the log. Only applicable for logs that are being compacted.",
-            "maximum": 9223372036854776000,
+            "maximum": 9223372036854775807,
             "minimum": 0,
             "title": "log.cleaner.min.compaction.lag.ms",
             "type": "integer"
@@ -1241,15 +1241,15 @@
           },
           "log_flush_interval_messages": {
             "description": "The number of messages accumulated on a log partition before messages are flushed to disk",
-            "example": 9223372036854776000,
-            "maximum": 9223372036854776000,
+            "example": 9223372036854775807,
+            "maximum": 9223372036854775807,
             "minimum": 1,
             "title": "log.flush.interval.messages",
             "type": "integer"
           },
           "log_flush_interval_ms": {
             "description": "The maximum time in ms that a message in any topic is kept in memory before flushed to disk. If not set, the value in log.flush.scheduler.interval.ms is used",
-            "maximum": 9223372036854776000,
+            "maximum": 9223372036854775807,
             "minimum": 0,
             "title": "log.flush.interval.ms",
             "type": "integer"
@@ -1278,7 +1278,7 @@
           },
           "log_message_timestamp_difference_max_ms": {
             "description": "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message",
-            "maximum": 9223372036854776000,
+            "maximum": 9223372036854775807,
             "minimum": 0,
             "title": "log.message.timestamp.difference.max.ms",
             "type": "integer"
@@ -1300,7 +1300,7 @@
           },
           "log_retention_bytes": {
             "description": "The maximum size of the log before deleting messages",
-            "maximum": 9223372036854776000,
+            "maximum": 9223372036854775807,
             "minimum": -1,
             "title": "log.retention.bytes",
             "type": "integer"
@@ -1314,21 +1314,21 @@
           },
           "log_retention_ms": {
             "description": "The number of milliseconds to keep a log file before deleting it (in milliseconds), If not set, the value in log.retention.minutes is used. If set to -1, no time limit is applied.",
-            "maximum": 9223372036854776000,
+            "maximum": 9223372036854775807,
             "minimum": -1,
             "title": "log.retention.ms",
             "type": "integer"
           },
           "log_roll_jitter_ms": {
             "description": "The maximum jitter to subtract from logRollTimeMillis (in milliseconds). If not set, the value in log.roll.jitter.hours is used",
-            "maximum": 9223372036854776000,
+            "maximum": 9223372036854775807,
             "minimum": 0,
             "title": "log.roll.jitter.ms",
             "type": "integer"
           },
           "log_roll_ms": {
             "description": "The maximum time before a new log segment is rolled out (in milliseconds).",
-            "maximum": 9223372036854776000,
+            "maximum": 9223372036854775807,
             "minimum": 1,
             "title": "log.roll.ms",
             "type": "integer"
@@ -1905,7 +1905,7 @@
           "refresh_groups_interval_seconds": {
             "description": "Frequency of consumer group refresh in seconds. Defaults to 600 seconds (10 minutes).",
             "example": 600,
-            "maximum": 9223372036854776000,
+            "maximum": 9223372036854775807,
             "minimum": 1,
             "title": "Frequency of group refresh",
             "type": "integer"
@@ -1919,7 +1919,7 @@
           "refresh_topics_interval_seconds": {
             "description": "Frequency of topic and partitions refresh in seconds. Defaults to 600 seconds (10 minutes).",
             "example": 600,
-            "maximum": 9223372036854776000,
+            "maximum": 9223372036854775807,
             "minimum": 1,
             "title": "Frequency of topic and partitions refresh",
             "type": "integer"
@@ -2007,14 +2007,14 @@
         "properties": {
           "global_datapoints": {
             "example": 1000000,
-            "maximum": 9223372036854776000,
+            "maximum": 9223372036854775807,
             "minimum": 100000,
             "title": "The maximum number of data points fetched during request",
             "type": "integer"
           },
           "query_datapoints": {
             "example": 1000000,
-            "maximum": 9223372036854776000,
+            "maximum": 9223372036854775807,
             "minimum": 100000,
             "title": "The maximum number of data points fetched in single query",
             "type": "integer"
@@ -2027,7 +2027,7 @@
           },
           "query_series": {
             "example": 100000,
-            "maximum": 9223372036854776000,
+            "maximum": 9223372036854775807,
             "minimum": 10000,
             "title": "The maximum number of series fetched in single query",
             "type": "integer"
@@ -3024,7 +3024,7 @@
           "max_failover_replication_time_lag": {
             "default": 60,
             "description": "Number of seconds of master unavailability before triggering database failover to standby",
-            "maximum": 9223372036854776000,
+            "maximum": 9223372036854775807,
             "minimum": 10,
             "title": "max_failover_replication_time_lag",
             "type": "integer"
