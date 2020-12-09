@@ -2,8 +2,10 @@
 package aiven
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"log"
 	"strings"
 	"time"
@@ -78,12 +80,11 @@ var aivenVPCPeeringConnectionSchema = map[string]*schema.Schema{
 
 func resourceVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceVPCPeeringConnectionCreate,
-		Read:   resourceVPCPeeringConnectionRead,
-		Delete: resourceVPCPeeringConnectionDelete,
-		Exists: resourceVPCPeeringConnectionExists,
+		CreateContext: resourceVPCPeeringConnectionCreate,
+		ReadContext:   resourceVPCPeeringConnectionRead,
+		DeleteContext: resourceVPCPeeringConnectionDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceVPCPeeringConnectionState,
+			StateContext: resourceVPCPeeringConnectionImport,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(2 * time.Minute),
@@ -93,7 +94,7 @@ func resourceVPCPeeringConnection() *schema.Resource {
 	}
 }
 
-func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) error {
+func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var (
 		pc     *aiven.VPCPeeringConnection
 		err    error
@@ -104,7 +105,7 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 	client := m.(*aiven.Client)
 	projectName, vpcID := splitResourceID2(d.Get("vpc_id").(string))
 	if projectName == "" || vpcID == "" {
-		return errors.New("incorrect VPC ID, expected structure <PROJECT_NAME>/<VPC_ID>")
+		return diag.Errorf("incorrect VPC ID, expected structure <PROJECT_NAME>/<VPC_ID>")
 	}
 
 	peerRegion := d.Get("peer_region").(string)
@@ -145,7 +146,7 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 		},
 	)
 	if err != nil {
-		return err
+		return diag.Errorf("Error creating VPC peering connection: %s", err)
 	}
 
 	// Wait until the peering connection has actually been built
@@ -159,19 +160,75 @@ func resourceVPCPeeringConnectionCreate(d *schema.ResourceData, m interface{}) e
 	}
 
 	timeout := d.Timeout(schema.TimeoutCreate)
-	res, err := w.Conf(timeout).WaitForState()
+	res, err := w.Conf(timeout).WaitForStateContext(ctx)
 	if err != nil && !aiven.IsAlreadyExists(err) {
-		return err
+		return diag.Errorf("Error waiting for VPC peering connection creation: %s", err)
 	}
 
+	diags := diag.Diagnostics{}
+
 	pc = res.(*aiven.VPCPeeringConnection)
+	if pc.State != "ACTIVE" {
+		switch pc.State {
+		case "PENDING_PEER":
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary: fmt.Sprintf("Aiven platform has created a connection to the specified "+
+					"peer successfully in the cloud, but the connection is not active until the user "+
+					"completes the setup in their cloud account. The steps needed in the user cloud "+
+					"account depend on the used cloud provider. Find more in the state info: %s",
+					stateInfoToString(pc.StateInfo)),
+			})
+		case "DELETED":
+			diags = append(diags, diag.Errorf("A user has deleted the peering connection through the Aiven "+
+				"Terraform provider, or Aiven Web Console or directly via Aiven API. There are no "+
+				"transitions from this state")...)
+		case "DELETED_BY_PEER":
+			diags = append(diags, diag.Errorf("A user deleted the peering cloud resource in their account. "+
+				"There are no transitions from this state")...)
+		case "REJECTED_BY_PEER":
+			diags = append(diags, diag.Errorf("AWS VPC peering connection request was rejected, state info: %s",
+				stateInfoToString(pc.StateInfo))...)
+		case "INVALID_SPECIFICATION":
+			diags = append(diags, diag.Errorf("VPC peering connection cannot be created, more in the state info: %s",
+				stateInfoToString(pc.StateInfo))...)
+		default:
+			return diag.Errorf("Unknown VPC peering connection cannot state: %s", pc.State)
+		}
+	}
+
 	if peerRegion != "" {
 		d.SetId(buildResourceID(projectName, vpcID, pc.PeerCloudAccount, pc.PeerVPC, *pc.PeerRegion))
 	} else {
 		d.SetId(buildResourceID(projectName, vpcID, pc.PeerCloudAccount, pc.PeerVPC))
 	}
 
-	return resourceVPCPeeringConnectionRead(d, m)
+	// in case of an error delete VPC peering connection
+	if diags.HasError() {
+		return append(diags, resourceVPCPeeringConnectionDelete(ctx, d, m)...)
+	}
+
+	return append(diags, resourceVPCPeeringConnectionRead(ctx, d, m)...)
+}
+
+// stateInfoToString converts VPC peering connection state_info to a string
+func stateInfoToString(s *map[string]interface{}) string {
+	if len(*s) == 0 {
+		return ""
+	}
+
+	var str string
+	// Print message first
+	if m, ok := (*s)["message"]; ok {
+		str = fmt.Sprintf("%s", m)
+		delete(*s, "message")
+	}
+
+	for k, v := range *s {
+		str += fmt.Sprintf("\n`%s`:`%s`", k, v)
+	}
+
+	return str
 }
 
 func parsePeeringVPCId(resourceID string) (string, string, string, string, *string) {
@@ -190,14 +247,14 @@ func parsePeeringVPCId(resourceID string) (string, string, string, string, *stri
 	return projectName, vpcID, peerCloudAccount, peerVPC, peerRegion
 }
 
-func resourceVPCPeeringConnectionRead(d *schema.ResourceData, m interface{}) error {
+func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var pc *aiven.VPCPeeringConnection
 	client := m.(*aiven.Client)
 
 	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
 	isAzure, err := isAzureVPCPeeringConnection(d, client)
 	if err != nil {
-		return err
+		return diag.Errorf("Error checking if it Azure VPC peering connection: %s", err)
 	}
 
 	if isAzure {
@@ -205,10 +262,10 @@ func resourceVPCPeeringConnectionRead(d *schema.ResourceData, m interface{}) err
 			pc, err = client.VPCPeeringConnections.GetVPCPeeringWithResourceGroup(
 				projectName, vpcID, peerCloudAccount, peerVPC, peerRegion, peerResourceGroup.(string))
 			if err != nil {
-				return err
+				return diag.Errorf("Error getting VPC peering connection resource group: %s", err)
 			}
 		} else {
-			return errors.New("cannot get an Azure VPC peering connection without `peer_resource_group`")
+			return diag.Errorf("cannot get an Azure VPC peering connection without `peer_resource_group`")
 		}
 
 		return copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, projectName, vpcID)
@@ -217,55 +274,50 @@ func resourceVPCPeeringConnectionRead(d *schema.ResourceData, m interface{}) err
 	pc, err = client.VPCPeeringConnections.GetVPCPeering(
 		projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
 	if err != nil {
-		return err
+		return diag.Errorf("Error getting VPC peering connection: %s", err)
 	}
 
 	return copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, projectName, vpcID)
 }
 
-func resourceVPCPeeringConnectionDelete(d *schema.ResourceData, m interface{}) error {
+func resourceVPCPeeringConnectionDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
 	isAzure, err := isAzureVPCPeeringConnection(d, client)
 	if err != nil {
-		return err
+		return diag.Errorf("Error checking if it Azure VPC peering connection: %s", err)
 	}
 
 	if isAzure {
 		if peerResourceGroup, ok := d.GetOk("peer_resource_group"); ok {
-			return client.VPCPeeringConnections.DeleteVPCPeeringWithResourceGroup(
+			err := client.VPCPeeringConnections.DeleteVPCPeeringWithResourceGroup(
 				projectName, vpcID, peerCloudAccount, peerVPC, peerResourceGroup.(string), peerRegion)
+			if err != nil {
+				return diag.Errorf("Error deleting VPC peering connection with resource group: %s", err)
+			}
+			return nil
 		} else {
-			return errors.New("cannot delete an Azure VPC peering connection without `peer_resource_group`")
+			return diag.Errorf("cannot delete an Azure VPC peering connection without `peer_resource_group`")
 		}
 	}
 
 	err = client.VPCPeeringConnections.DeleteVPCPeering(projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
 	if err != nil && !aiven.IsNotFound(err) {
-		return err
+		return diag.Errorf("Error deleting VPC peering connection: %s", err)
 	}
 
 	return nil
 }
 
-func resourceVPCPeeringConnectionExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	client := m.(*aiven.Client)
-
-	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
-	_, err := client.VPCPeeringConnections.GetVPCPeering(projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
-
-	return resourceExists(err)
-}
-
-func resourceVPCPeeringConnectionState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceVPCPeeringConnectionImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	if len(strings.Split(d.Id(), "/")) != 4 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<vpc_id>", d.Id())
 	}
 
-	err := resourceVPCPeeringConnectionRead(d, m)
-	if err != nil {
-		return nil, err
+	dig := resourceVPCPeeringConnectionRead(ctx, d, m)
+	if dig.HasError() {
+		return nil, errors.New("cannot get VPC peering connection")
 	}
 
 	return []*schema.ResourceData{d}, nil
@@ -276,53 +328,96 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 	peeringConnection *aiven.VPCPeeringConnection,
 	project string,
 	vpcID string,
-) error {
+) diag.Diagnostics {
+	// Warning or errors can be collected in a slice type
+	var diags diag.Diagnostics
+
 	if err := d.Set("vpc_id", buildResourceID(project, vpcID)); err != nil {
-		return err
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  fmt.Sprintf("Unable to set vpc_id field: %s", err),
+			Detail:   fmt.Sprintf("Unable to set vpc_id field for VPC peering connection: %s", err),
+		})
 	}
 	if err := d.Set("peer_cloud_account", peeringConnection.PeerCloudAccount); err != nil {
-		return err
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  fmt.Sprintf("Unable to set peer_cloud_account field: %s", err),
+			Detail:   fmt.Sprintf("Unable to set peer_cloud_account field for VPC peering connection: %s", err),
+		})
 	}
 	if err := d.Set("peer_vpc", peeringConnection.PeerVPC); err != nil {
-		return err
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  fmt.Sprintf("Unable to set peer_vpc field: %s", err),
+			Detail:   fmt.Sprintf("Unable to set peer_vpc field for VPC peering connection: %s", err),
+		})
 	}
 	if peeringConnection.PeerRegion != nil {
 		if err := d.Set("peer_region", peeringConnection.PeerRegion); err != nil {
-			return err
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  fmt.Sprintf("Unable to set peer_region field: %s", err),
+				Detail:   fmt.Sprintf("Unable to set peer_region field for VPC peering connection: %s", err),
+			})
 		}
 	}
 	if err := d.Set("state", peeringConnection.State); err != nil {
-		return err
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  fmt.Sprintf("Unable to set state field: %s", err),
+			Detail:   fmt.Sprintf("Unable to set state field for VPC peering connection: %s", err),
+		})
 	}
 
 	if peeringConnection.StateInfo != nil {
 		peeringID, ok := (*peeringConnection.StateInfo)["aws_vpc_peering_connection_id"]
 		if ok {
 			if err := d.Set("peering_connection_id", peeringID); err != nil {
-				return err
+				diags = append(diags, diag.Diagnostic{
+					Severity: diag.Error,
+					Summary:  fmt.Sprintf("Unable to set peering_connection_id field: %s", err),
+					Detail:   fmt.Sprintf("Unable to set peering_connection_id field for VPC peering connection: %s", err),
+				})
 			}
 		}
 	}
 
 	if err := d.Set("state_info", peeringConnection.StateInfo); err != nil {
-		return err
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  fmt.Sprintf("Unable to set state_info field: %s", err),
+			Detail:   fmt.Sprintf("Unable to set state_info field for VPC peering connection: %s", err),
+		})
 	}
 
 	// Azure related fields are only available for VPC peering connection resource, and transit
 	// gateway vpc attachment triggers `Invalid address to set` error
 	if err := d.Set("peer_azure_app_id", peeringConnection.PeerAzureAppId); err != nil {
 		if !strings.Contains(err.Error(), "Invalid address to set") {
-			return err
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  fmt.Sprintf("Unable to set peer_azure_app_id field: %s", err),
+				Detail:   fmt.Sprintf("Unable to set peer_azure_app_id field for VPC peering connection: %s", err),
+			})
 		}
 	}
 	if err := d.Set("peer_azure_tenant_id", peeringConnection.PeerAzureTenantId); err != nil {
 		if !strings.Contains(err.Error(), "Invalid address to set") {
-			return err
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  fmt.Sprintf("Unable to set peer_azure_tenant_id field: %s", err),
+				Detail:   fmt.Sprintf("Unable to set peer_azure_tenant_id field for VPC peering connection: %s", err),
+			})
 		}
 	}
 	if err := d.Set("peer_resource_group", peeringConnection.PeerResourceGroup); err != nil {
 		if !strings.Contains(err.Error(), "Invalid address to set") {
-			return err
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  fmt.Sprintf("Unable to set peer_resource_group field: %s", err),
+				Detail:   fmt.Sprintf("Unable to set peer_resource_group field for VPC peering connection: %s", err),
+			})
 		}
 	}
 
@@ -335,11 +430,15 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 		// this filed is only available for transit gateway vpc attachment, and regular vpc
 		// resource triggers `Invalid address to set` error
 		if !strings.Contains(err.Error(), "Invalid address to set") {
-			return err
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  fmt.Sprintf("Unable to set user_peer_network_cidrs field: %s", err),
+				Detail:   fmt.Sprintf("Unable to set user_peer_network_cidrs field for VPC peering connection: %s", err),
+			})
 		}
 	}
 
-	return nil
+	return diags
 }
 
 // VPCPeeringBuildWaiter is used to wait for Aiven to build a new VPC peering connection
