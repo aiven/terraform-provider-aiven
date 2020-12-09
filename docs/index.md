@@ -104,6 +104,9 @@ provider "aiven" {
 
 Then, initialize your Terraform workspace by running `terraform init`.
 
+~> **Note** If you would like to build a Terraform module using Aiven provider please note 
+that each such module must [declare its own Aiven provider requirements](https://www.terraform.io/docs/configuration/provider-requirements.html).
+
 ## Sample project
 
 There is a [sample project](https://github.com/aiven/terraform-provider-aiven/tree/master/sample.tf) which sets up a project, defines Kafka,
