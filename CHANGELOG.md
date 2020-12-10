@@ -4,6 +4,18 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.2] - 2020-12-09
+- Change VPC peering connection state handling
+- Add terraform modules related docs
+- Add context support for vpc peering connection
+- Add service user new password support
+- Extend and improve acceptance tests
+- Add project resource diff suppress logic for optional fields
+- Add Kafka User Configuration options max values
+- Add Redis ACL support to a `service_user` resource
+- Fixed docs for mandatory kafka topic params which were marked optional
+- Add service integration external user configuration settings
+
 ## [2.1.1] - 2020-11-26
 - Add new `aiven_project` resource attributes
 - Add MirrorMaker examples

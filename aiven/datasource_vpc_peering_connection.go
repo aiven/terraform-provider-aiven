@@ -2,7 +2,8 @@
 package aiven
 
 import (
-	"fmt"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -10,13 +11,13 @@ import (
 
 func datasourceVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
-		Read: datasourceVPCPeeringConnectionRead,
+		ReadContext: datasourceVPCPeeringConnectionRead,
 		Schema: resourceSchemaAsDatasourceSchema(aivenVPCPeeringConnectionSchema,
 			"vpc_id", "peer_cloud_account", "peer_vpc"),
 	}
 }
 
-func datasourceVPCPeeringConnectionRead(d *schema.ResourceData, m interface{}) error {
+func datasourceVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, vpcID := splitResourceID2(d.Get("vpc_id").(string))
@@ -25,8 +26,9 @@ func datasourceVPCPeeringConnectionRead(d *schema.ResourceData, m interface{}) e
 
 	vpc, err := client.VPCs.Get(projectName, vpcID)
 	if err != nil {
-		return err
+		return diag.Errorf("Error deleting VPC peering connection: %s", err)
 	}
+
 	for _, peer := range vpc.PeeringConnections {
 		if peer.PeerCloudAccount == peerCloudAccount && peer.PeerVPC == peerVPC {
 			if peer.PeerRegion != nil && *peer.PeerRegion != "" {
@@ -34,10 +36,10 @@ func datasourceVPCPeeringConnectionRead(d *schema.ResourceData, m interface{}) e
 			} else {
 				d.SetId(buildResourceID(projectName, vpcID, peer.PeerCloudAccount, peer.PeerVPC))
 			}
-			return resourceVPCPeeringConnectionRead(d, m)
+			return resourceVPCPeeringConnectionRead(ctx, d, m)
 		}
 	}
 
-	return fmt.Errorf("peering connection from %s/%s to %s/%s not found",
+	return diag.Errorf("peering connection from %s/%s to %s/%s not found",
 		projectName, vpc.CloudName, peerCloudAccount, peerVPC)
 }

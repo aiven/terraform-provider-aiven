@@ -2,8 +2,9 @@
 package aiven
 
 import (
-	"fmt"
+	"context"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -62,13 +63,12 @@ var aivenTransitGatewayVPCAttachmentSchema = map[string]*schema.Schema{
 
 func resourceTransitGatewayVPCAttachment() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceVPCPeeringConnectionCreate,
-		Read:   resourceVPCPeeringConnectionRead,
-		Update: resourceTransitGatewayVPCAttachmentUpdate,
-		Delete: resourceVPCPeeringConnectionDelete,
-		Exists: resourceVPCPeeringConnectionExists,
+		CreateContext: resourceVPCPeeringConnectionCreate,
+		ReadContext:   resourceVPCPeeringConnectionRead,
+		UpdateContext: resourceTransitGatewayVPCAttachmentUpdate,
+		DeleteContext: resourceVPCPeeringConnectionDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceVPCPeeringConnectionState,
+			StateContext: resourceVPCPeeringConnectionImport,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(2 * time.Minute),
@@ -78,7 +78,7 @@ func resourceTransitGatewayVPCAttachment() *schema.Resource {
 	}
 }
 
-func resourceTransitGatewayVPCAttachmentUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	cidrs := flattenToString(d.Get("user_peer_network_cidrs").([]interface{}))
@@ -86,7 +86,7 @@ func resourceTransitGatewayVPCAttachmentUpdate(d *schema.ResourceData, m interfa
 
 	peeringConnection, err := client.VPCPeeringConnections.Get(projectName, vpcID, peerCloudAccount, peerVPC)
 	if err != nil {
-		return fmt.Errorf("cannot get transit gateway vpc attachment by id %s: %w", d.Id(), err)
+		return diag.Errorf("cannot get transit gateway vpc attachment by id %s: %s", d.Id(), err)
 	}
 
 	// prepare a list of new transit gateway vpc attachment that needs to be added
@@ -132,8 +132,8 @@ func resourceTransitGatewayVPCAttachmentUpdate(d *schema.ResourceData, m interfa
 		Delete: deleteCIDRs,
 	})
 	if err != nil {
-		return fmt.Errorf("cannot update transit gateway vpc attachment %w", err)
+		return diag.Errorf("cannot update transit gateway vpc attachment %s", err)
 	}
 
-	return resourceVPCPeeringConnectionRead(d, m)
+	return resourceVPCPeeringConnectionRead(ctx, d, m)
 }
