@@ -2,8 +2,10 @@
 package aiven
 
 import (
+	"context"
 	"fmt"
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
@@ -129,20 +131,19 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 
 func resourceServiceIntegrationEndpoint() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceServiceIntegrationEndpointCreate,
-		Read:   resourceServiceIntegrationEndpointRead,
-		Update: resourceServiceIntegrationEndpointUpdate,
-		Delete: resourceServiceIntegrationEndpointDelete,
-		Exists: resourceServiceIntegrationEndpointExists,
+		CreateContext: resourceServiceIntegrationEndpointCreate,
+		ReadContext:   resourceServiceIntegrationEndpointRead,
+		UpdateContext: resourceServiceIntegrationEndpointUpdate,
+		DeleteContext: resourceServiceIntegrationEndpointDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceServiceIntegrationEndpointState,
+			StateContext: resourceServiceIntegrationEndpointState,
 		},
 
 		Schema: aivenServiceIntegrationEndpointSchema,
 	}
 }
 
-func resourceServiceIntegrationEndpointCreate(d *schema.ResourceData, m interface{}) error {
+func resourceServiceIntegrationEndpointCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	projectName := d.Get("project").(string)
 	endpointType := d.Get("endpoint_type").(string)
@@ -157,32 +158,38 @@ func resourceServiceIntegrationEndpointCreate(d *schema.ResourceData, m interfac
 	)
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(buildResourceID(projectName, endpoint.EndpointID))
-	return copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(d, endpoint, projectName)
+
+	return resourceServiceIntegrationEndpointRead(ctx, d, m)
 }
 
-func resourceServiceIntegrationEndpointRead(d *schema.ResourceData, m interface{}) error {
+func resourceServiceIntegrationEndpointRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, endpointID := splitResourceID2(d.Id())
 	endpoint, err := client.ServiceIntegrationEndpoints.Get(projectName, endpointID)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(d, endpoint, projectName)
+	err = copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(d, endpoint, projectName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }
 
-func resourceServiceIntegrationEndpointUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceServiceIntegrationEndpointUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, endpointID := splitResourceID2(d.Id())
 	endpointType := d.Get("endpoint_type").(string)
 	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("endpoint", endpointType, false, d)
-	endpoint, err := client.ServiceIntegrationEndpoints.Update(
+	_, err := client.ServiceIntegrationEndpoints.Update(
 		projectName,
 		endpointID,
 		aiven.UpdateServiceIntegrationEndpointRequest{
@@ -190,33 +197,25 @@ func resourceServiceIntegrationEndpointUpdate(d *schema.ResourceData, m interfac
 		},
 	)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(d, endpoint, projectName)
+	return resourceServiceIntegrationEndpointRead(ctx, d, m)
 }
 
-func resourceServiceIntegrationEndpointDelete(d *schema.ResourceData, m interface{}) error {
+func resourceServiceIntegrationEndpointDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, endpointID := splitResourceID2(d.Id())
 	err := client.ServiceIntegrationEndpoints.Delete(projectName, endpointID)
 	if err != nil && !aiven.IsNotFound(err) {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceServiceIntegrationEndpointExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	client := m.(*aiven.Client)
-
-	projectName, endpointID := splitResourceID2(d.Id())
-	_, err := client.ServiceIntegrationEndpoints.Get(projectName, endpointID)
-	return resourceExists(err)
-}
-
-func resourceServiceIntegrationEndpointState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceServiceIntegrationEndpointState(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	client := m.(*aiven.Client)
 
 	if len(strings.Split(d.Id(), "/")) != 2 {

@@ -6,7 +6,7 @@ import (
 
 func datasourcePG() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceServiceRead,
-		Schema: resourceSchemaAsDatasourceSchema(aivenPGSchema(), "project", "service_name"),
+		ReadContext: datasourceServiceRead,
+		Schema:      resourceSchemaAsDatasourceSchema(aivenPGSchema(), "project", "service_name"),
 	}
 }

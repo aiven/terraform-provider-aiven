@@ -1,9 +1,11 @@
 package aiven
 
 import (
+	"context"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -78,13 +80,12 @@ func normalizeJsonString(v interface{}) string {
 
 func resourceKafkaSchema() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKafkaSchemaCreate,
-		Update: resourceKafkaSchemaUpdate,
-		Read:   resourceKafkaSchemaRead,
-		Delete: resourceKafkaSchemaDelete,
-		Exists: resourceKafkaSchemaExists,
+		CreateContext: resourceKafkaSchemaCreate,
+		UpdateContext: resourceKafkaSchemaUpdate,
+		ReadContext:   resourceKafkaSchemaRead,
+		DeleteContext: resourceKafkaSchemaDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceKafkaSchemaState,
+			StateContext: resourceKafkaSchemaState,
 		},
 
 		Schema: aivenKafkaSchemaSchema,
@@ -113,7 +114,7 @@ func kafkaSchemaSubjectGetLastVersion(m interface{}, project, serviceName, subje
 // Schema subject with a given name already exists API will validate new Kafka Schema
 // configuration against the previous version for compatibility and if compatible will
 // create a new version for the same Kafka Schema Subject
-func resourceKafkaSchemaCreate(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaSchemaCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	subjectName := d.Get("subject_name").(string)
@@ -130,7 +131,7 @@ func resourceKafkaSchemaCreate(d *schema.ResourceData, m interface{}) error {
 		},
 	)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// set compatibility level if defined for a newly created Kafka Schema Subject
@@ -142,26 +143,26 @@ func resourceKafkaSchemaCreate(d *schema.ResourceData, m interface{}) error {
 			compatibility.(string),
 		)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	version, err := kafkaSchemaSubjectGetLastVersion(m, project, serviceName, subjectName)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// newly created versions start from 1
 	if version == 0 {
-		return errors.New("kafka schema subject after creation has an empty list of versions")
+		return diag.Errorf("kafka schema subject after creation has an empty list of versions")
 	}
 
 	d.SetId(buildResourceID(project, serviceName, subjectName))
 
-	return resourceKafkaSchemaRead(d, m)
+	return resourceKafkaSchemaRead(ctx, d, m)
 }
 
-func resourceKafkaSchemaUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaSchemaUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var project, serviceName, subjectName = splitResourceID3(d.Id())
 	client := m.(*aiven.Client)
 
@@ -175,7 +176,7 @@ func resourceKafkaSchemaUpdate(d *schema.ResourceData, m interface{}) error {
 			},
 		)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
@@ -188,53 +189,53 @@ func resourceKafkaSchemaUpdate(d *schema.ResourceData, m interface{}) error {
 			subjectName,
 			d.Get("compatibility_level").(string))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
-	return resourceKafkaSchemaRead(d, m)
+	return resourceKafkaSchemaRead(ctx, d, m)
 }
 
-func resourceKafkaSchemaRead(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaSchemaRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var project, serviceName, subjectName = splitResourceID3(d.Id())
 	client := m.(*aiven.Client)
 
 	version, err := kafkaSchemaSubjectGetLastVersion(m, project, serviceName, subjectName)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	r, err := client.KafkaSubjectSchemas.Get(project, serviceName, subjectName, version)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("project", project); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("service_name", serviceName); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("subject_name", subjectName); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("version", version); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("schema", r.Version.Schema); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	c, err := client.KafkaSubjectSchemas.GetConfiguration(project, serviceName, subjectName)
 	if err != nil {
 		if !aiven.IsNotFound(err) {
-			return err
+			return diag.FromErr(err)
 		}
 	} else {
 		// only update if was set to not empty values by the user
 		if _, ok := d.GetOk("compatibility_level"); ok {
 			if err := d.Set("compatibility_level", c.CompatibilityLevel); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 	}
@@ -242,25 +243,21 @@ func resourceKafkaSchemaRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceKafkaSchemaDelete(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaSchemaDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var project, serviceName, schemaName = splitResourceID3(d.Id())
 
 	err := m.(*aiven.Client).KafkaSubjectSchemas.Delete(project, serviceName, schemaName)
 	if err != nil && !aiven.IsNotFound(err) {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKafkaSchemaExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	return resourceExists(resourceKafkaSchemaRead(d, m))
-}
-
-func resourceKafkaSchemaState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	err := resourceKafkaSchemaRead(d, m)
-	if err != nil {
-		return nil, err
+func resourceKafkaSchemaState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	di := resourceKafkaSchemaRead(ctx, d, m)
+	if di.HasError() {
+		return nil, fmt.Errorf("cannot get kafka schema: %v", di)
 	}
 
 	return []*schema.ResourceData{d}, nil

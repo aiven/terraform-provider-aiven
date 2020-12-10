@@ -6,7 +6,7 @@ import (
 
 func datasourceInfluxDB() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceServiceRead,
-		Schema: resourceSchemaAsDatasourceSchema(influxDBSchema(), "project", "service_name"),
+		ReadContext: datasourceServiceRead,
+		Schema:      resourceSchemaAsDatasourceSchema(influxDBSchema(), "project", "service_name"),
 	}
 }

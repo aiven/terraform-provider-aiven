@@ -42,13 +42,12 @@ func elasticsearchSchema() map[string]*schema.Schema {
 
 func resourceElasticsearch() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceServiceCreateWrapper(ServiceTypeElasticsearch),
-		Read:   resourceServiceRead,
-		Update: resourceServiceUpdate,
-		Delete: resourceServiceDelete,
-		Exists: resourceServiceExists,
+		CreateContext: resourceServiceCreateWrapper(ServiceTypeElasticsearch),
+		ReadContext:   resourceServiceRead,
+		UpdateContext: resourceServiceUpdate,
+		DeleteContext: resourceServiceDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceServiceState,
+			StateContext: resourceServiceState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),

@@ -3,7 +3,9 @@
 package aiven
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
@@ -67,13 +69,12 @@ var aivenDatabaseSchema = map[string]*schema.Schema{
 
 func resourceDatabase() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDatabaseCreate,
-		Read:   resourceDatabaseRead,
-		Delete: resourceDatabaseDelete,
-		Update: resourceDatabaseUpdate,
-		Exists: resourceDatabaseExists,
+		CreateContext: resourceDatabaseCreate,
+		ReadContext:   resourceDatabaseRead,
+		DeleteContext: resourceDatabaseDelete,
+		UpdateContext: resourceDatabaseUpdate,
 		Importer: &schema.ResourceImporter{
-			State: resourceDatabaseState,
+			StateContext: resourceDatabaseState,
 		},
 
 		// TODO: add user config
@@ -81,7 +82,7 @@ func resourceDatabase() *schema.Resource {
 	}
 }
 
-func resourceDatabaseCreate(d *schema.ResourceData, m interface{}) error {
+func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -97,81 +98,74 @@ func resourceDatabaseCreate(d *schema.ResourceData, m interface{}) error {
 		},
 	)
 	if err != nil && !aiven.IsAlreadyExists(err) {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(buildResourceID(projectName, serviceName, databaseName))
-	return resourceDatabaseRead(d, m)
+
+	return resourceDatabaseRead(ctx, d, m)
 }
 
-func resourceDatabaseUpdate(d *schema.ResourceData, m interface{}) error {
-	return resourceDatabaseRead(d, m)
+func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	return resourceDatabaseRead(ctx, d, m)
 }
 
-func resourceDatabaseRead(d *schema.ResourceData, m interface{}) error {
+func resourceDatabaseRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, databaseName := splitResourceID3(d.Id())
 	database, err := client.Databases.Get(projectName, serviceName, databaseName)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("database_name", database.DatabaseName); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("project", projectName); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("service_name", serviceName); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("lc_collate", database.LcCollate); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("lc_ctype", database.LcType); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("termination_protection", d.Get("termination_protection")); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceDatabaseDelete(d *schema.ResourceData, m interface{}) error {
+func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, databaseName := splitResourceID3(d.Id())
 
 	if d.Get("termination_protection").(bool) {
-		return fmt.Errorf("cannot delete a database termination_protection is enabled")
+		return diag.Errorf("cannot delete a database termination_protection is enabled")
 	}
 
 	err := client.Databases.Delete(projectName, serviceName, databaseName)
 	if err != nil && !aiven.IsNotFound(err) {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceDatabaseExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	client := m.(*aiven.Client)
-
-	projectName, serviceName, databaseName := splitResourceID3(d.Id())
-	_, err := client.Databases.Get(projectName, serviceName, databaseName)
-	return resourceExists(err)
-}
-
-func resourceDatabaseState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceDatabaseState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	if len(strings.Split(d.Id(), "/")) != 3 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<database_name>", d.Id())
 	}
 
-	err := resourceDatabaseRead(d, m)
-	if err != nil {
-		return nil, err
+	di := resourceDatabaseRead(ctx, d, m)
+	if di.HasError() {
+		return nil, fmt.Errorf("cannot get database: %v", di)
 	}
 
 	return []*schema.ResourceData{d}, nil

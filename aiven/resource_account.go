@@ -1,7 +1,10 @@
 package aiven
 
 import (
+	"context"
+	"fmt"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -44,20 +47,19 @@ var aivenAccountSchema = map[string]*schema.Schema{
 
 func resourceAccount() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAccountCreate,
-		Read:   resourceAccountRead,
-		Update: resourceAccountUpdate,
-		Delete: resourceAccountDelete,
-		Exists: resourceAccountExists,
+		CreateContext: resourceAccountCreate,
+		ReadContext:   resourceAccountRead,
+		UpdateContext: resourceAccountUpdate,
+		DeleteContext: resourceAccountDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceAccountState,
+			StateContext: resourceAccountState,
 		},
 
 		Schema: aivenAccountSchema,
 	}
 }
 
-func resourceAccountCreate(d *schema.ResourceData, m interface{}) error {
+func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	name := d.Get("name").(string)
 
@@ -67,85 +69,74 @@ func resourceAccountCreate(d *schema.ResourceData, m interface{}) error {
 		},
 	)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(r.Account.Id)
 
-	return resourceAccountRead(d, m)
+	return resourceAccountRead(ctx, d, m)
 }
 
-func resourceAccountRead(d *schema.ResourceData, m interface{}) error {
+func resourceAccountRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	r, err := client.Accounts.Get(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("account_id", r.Account.Id); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("name", r.Account.Name); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("owner_team_id", r.Account.OwnerTeamId); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("tenant_id", r.Account.TenantId); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("create_time", r.Account.CreateTime.String()); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("update_time", r.Account.UpdateTime.String()); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceAccountUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	r, err := client.Accounts.Update(d.Id(), aiven.Account{
 		Name: d.Get("name").(string),
 	})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(r.Account.Id)
 
-	return resourceAccountRead(d, m)
+	return resourceAccountRead(ctx, d, m)
 }
 
-func resourceAccountDelete(d *schema.ResourceData, m interface{}) error {
+func resourceAccountDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	err := client.Accounts.Delete(d.Id())
 	if err != nil && !aiven.IsNotFound(err) {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceAccountExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	client := m.(*aiven.Client)
-
-	_, err := client.Accounts.Get(d.Id())
-	if err != nil {
-		return false, err
-	}
-
-	return resourceExists(err)
-}
-
-func resourceAccountState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	err := resourceAccountRead(d, m)
-	if err != nil {
-		return nil, err
+func resourceAccountState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	di := resourceAccountRead(ctx, d, m)
+	if di.HasError() {
+		return nil, fmt.Errorf("cannot get account %v", di)
 	}
 
 	return []*schema.ResourceData{d}, nil

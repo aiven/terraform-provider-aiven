@@ -6,7 +6,7 @@ import (
 
 func datasourceKafkaConnect() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceServiceRead,
-		Schema: resourceSchemaAsDatasourceSchema(aivenKafkaConnectSchema(), "project", "service_name"),
+		ReadContext: datasourceServiceRead,
+		Schema:      resourceSchemaAsDatasourceSchema(aivenKafkaConnectSchema(), "project", "service_name"),
 	}
 }

@@ -6,7 +6,7 @@ import (
 
 func datasourceM3DB() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceServiceRead,
-		Schema: resourceSchemaAsDatasourceSchema(aivenM3DBSchema(), "project", "service_name"),
+		ReadContext: datasourceServiceRead,
+		Schema:      resourceSchemaAsDatasourceSchema(aivenM3DBSchema(), "project", "service_name"),
 	}
 }

@@ -2,19 +2,20 @@
 package aiven
 
 import (
-	"fmt"
+	"context"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func datasourceService() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceServiceRead,
-		Schema: resourceSchemaAsDatasourceSchema(aivenServiceSchema, "project", "service_name"),
+		ReadContext: datasourceServiceRead,
+		Schema:      resourceSchemaAsDatasourceSchema(aivenServiceSchema, "project", "service_name"),
 	}
 }
 
-func datasourceServiceRead(d *schema.ResourceData, m interface{}) error {
+func datasourceServiceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -24,13 +25,13 @@ func datasourceServiceRead(d *schema.ResourceData, m interface{}) error {
 	services, err := client.Services.List(projectName)
 	for _, service := range services {
 		if service.Name == serviceName {
-			return resourceServiceRead(d, m)
+			return resourceServiceRead(ctx, d, m)
 		}
 	}
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return fmt.Errorf("service %s/%s not found", projectName, serviceName)
+	return diag.Errorf("service %s/%s not found", projectName, serviceName)
 }

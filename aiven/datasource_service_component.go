@@ -2,8 +2,9 @@
 package aiven
 
 import (
-	"fmt"
+	"context"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"strconv"
@@ -11,7 +12,7 @@ import (
 
 func datasourceServiceComponent() *schema.Resource {
 	return &schema.Resource{
-		Read: datasourceServiceComponentRead,
+		ReadContext: datasourceServiceComponentRead,
 		Schema: map[string]*schema.Schema{
 			"project": {
 				Type:        schema.TypeString,
@@ -96,7 +97,7 @@ func datasourceServiceComponent() *schema.Resource {
 	}
 }
 
-func datasourceServiceComponentRead(d *schema.ResourceData, m interface{}) error {
+func datasourceServiceComponentRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -107,7 +108,7 @@ func datasourceServiceComponentRead(d *schema.ResourceData, m interface{}) error
 
 	service, err := client.Services.Get(projectName, serviceName)
 	if err != nil {
-		return fmt.Errorf("service %s/%s not found: %w", projectName, serviceName, err)
+		return diag.Errorf("service %s/%s not found: %s", projectName, serviceName, err)
 	}
 
 	for _, c := range service.Components {
@@ -143,33 +144,33 @@ func datasourceServiceComponentRead(d *schema.ResourceData, m interface{}) error
 			d.SetId(buildResourceID(c.Host, strconv.Itoa(c.Port)))
 
 			if err := d.Set("project", projectName); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 			if err := d.Set("service_name", serviceName); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 			if err := d.Set("component", componentName); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 			if err := d.Set("route", route); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 			if err := d.Set("host", c.Host); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 			if err := d.Set("port", c.Port); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 			if err := d.Set("usage", c.Usage); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 			if err := d.Set("kafka_authentication_method", c.KafkaAuthenticationMethod); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 
 			if c.Ssl != nil {
 				if err := d.Set("ssl", *c.Ssl); err != nil {
-					return err
+					return diag.FromErr(err)
 				}
 			}
 
@@ -177,6 +178,6 @@ func datasourceServiceComponentRead(d *schema.ResourceData, m interface{}) error
 		}
 	}
 
-	return fmt.Errorf("cannot find component %s/%s for service %s",
+	return diag.Errorf("cannot find component %s/%s for service %s",
 		componentName, route, serviceName)
 }

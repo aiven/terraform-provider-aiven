@@ -1,7 +1,10 @@
 package aiven
 
 import (
+	"context"
+	"fmt"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -78,20 +81,19 @@ var aivenAccountAuthenticationSchema = map[string]*schema.Schema{
 
 func resourceAccountAuthentication() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAccountAuthenticationCreate,
-		Read:   resourceAccountAuthenticationRead,
-		Update: resourceAccountAuthenticationUpdate,
-		Delete: resourceAccountAuthenticationDelete,
-		Exists: resourceAccountAuthenticationExists,
+		CreateContext: resourceAccountAuthenticationCreate,
+		ReadContext:   resourceAccountAuthenticationRead,
+		UpdateContext: resourceAccountAuthenticationUpdate,
+		DeleteContext: resourceAccountAuthenticationDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceAccountAuthenticationState,
+			StateContext: resourceAccountAuthenticationState,
 		},
 
 		Schema: aivenAccountAuthenticationSchema,
 	}
 }
 
-func resourceAccountAuthenticationCreate(d *schema.ResourceData, m interface{}) error {
+func resourceAccountAuthenticationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	accountId := d.Get("account_id").(string)
@@ -108,66 +110,66 @@ func resourceAccountAuthenticationCreate(d *schema.ResourceData, m interface{}) 
 		},
 	)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(buildResourceID(
 		r.AuthenticationMethod.AccountId,
 		r.AuthenticationMethod.Id))
 
-	return resourceAccountAuthenticationRead(d, m)
+	return resourceAccountAuthenticationRead(ctx, d, m)
 }
 
-func resourceAccountAuthenticationRead(d *schema.ResourceData, m interface{}) error {
+func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	accountId, authId := splitResourceID2(d.Id())
 	r, err := client.AccountAuthentications.Get(accountId, authId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("account_id", r.AuthenticationMethod.AccountId); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("name", r.AuthenticationMethod.Name); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("type", r.AuthenticationMethod.Type); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("enabled", r.AuthenticationMethod.Enabled); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("saml_certificate", r.AuthenticationMethod.SAMLCertificate); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("saml_idp_url", r.AuthenticationMethod.SAMLCertificate); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("saml_entity_id", r.AuthenticationMethod.SAMLCertificate); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("authentication_id", r.AuthenticationMethod.Id); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("saml_acs_url", r.AuthenticationMethod.SAMLAcsUrl); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("saml_metadata_url", r.AuthenticationMethod.SAMLMetadataUrl); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("create_time", r.AuthenticationMethod.CreateTime.String()); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("update_time", r.AuthenticationMethod.UpdateTime.String()); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceAccountAuthenticationUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceAccountAuthenticationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	accountId, authId := splitResourceID2(d.Id())
 
@@ -181,44 +183,33 @@ func resourceAccountAuthenticationUpdate(d *schema.ResourceData, m interface{}) 
 		SAMLEntity:      d.Get("saml_entity_id").(string),
 	})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(buildResourceID(
 		r.AuthenticationMethod.AccountId,
 		r.AuthenticationMethod.Id))
 
-	return resourceAccountAuthenticationRead(d, m)
+	return resourceAccountAuthenticationRead(ctx, d, m)
 }
 
-func resourceAccountAuthenticationDelete(d *schema.ResourceData, m interface{}) error {
+func resourceAccountAuthenticationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	accountId, teamId := splitResourceID2(d.Id())
 
 	err := client.AccountAuthentications.Delete(accountId, teamId)
 	if err != nil && !aiven.IsNotFound(err) {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceAccountAuthenticationExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	client := m.(*aiven.Client)
-
-	_, err := client.AccountAuthentications.Get(splitResourceID2(d.Id()))
-	if err != nil {
-		return false, err
-	}
-
-	return resourceExists(err)
-}
-
-func resourceAccountAuthenticationState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	err := resourceAccountAuthenticationRead(d, m)
-	if err != nil {
-		return nil, err
+func resourceAccountAuthenticationState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	di := resourceAccountAuthenticationRead(ctx, d, m)
+	if di.HasError() {
+		return nil, fmt.Errorf("cannot get account authentication %v", di)
 	}
 
 	return []*schema.ResourceData{d}, nil

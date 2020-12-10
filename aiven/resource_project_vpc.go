@@ -2,8 +2,10 @@
 package aiven
 
 import (
+	"context"
 	"fmt"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
@@ -39,12 +41,11 @@ var aivenProjectVPCSchema = map[string]*schema.Schema{
 
 func resourceProjectVPC() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceProjectVPCCreate,
-		Read:   resourceProjectVPCRead,
-		Delete: resourceProjectVPCDelete,
-		Exists: resourceProjectVPCExists,
+		CreateContext: resourceProjectVPCCreate,
+		ReadContext:   resourceProjectVPCRead,
+		DeleteContext: resourceProjectVPCDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceProjectVPCState,
+			StateContext: resourceProjectVPCState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(4 * time.Minute),
@@ -55,7 +56,7 @@ func resourceProjectVPC() *schema.Resource {
 	}
 }
 
-func resourceProjectVPCCreate(d *schema.ResourceData, m interface{}) error {
+func resourceProjectVPCCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	projectName := d.Get("project").(string)
 	vpc, err := client.VPCs.Create(
@@ -66,7 +67,7 @@ func resourceProjectVPCCreate(d *schema.ResourceData, m interface{}) error {
 		},
 	)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Make sure the VPC is active before returning it because service creation, moving
@@ -77,29 +78,34 @@ func resourceProjectVPCCreate(d *schema.ResourceData, m interface{}) error {
 		VPCID:   vpc.ProjectVPCID,
 	}
 
-	_, err = waiter.Conf(d.Timeout(schema.TimeoutCreate)).WaitForState()
+	_, err = waiter.Conf(d.Timeout(schema.TimeoutCreate)).WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("error waiting for Aiven project VPC to be ACTIVE: %s", err)
+		return diag.Errorf("error waiting for Aiven project VPC to be ACTIVE: %s", err)
 	}
 
 	d.SetId(buildResourceID(projectName, vpc.ProjectVPCID))
 
-	return resourceProjectVPCRead(d, m)
+	return resourceProjectVPCRead(ctx, d, m)
 }
 
-func resourceProjectVPCRead(d *schema.ResourceData, m interface{}) error {
+func resourceProjectVPCRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, vpcID := splitResourceID2(d.Id())
 	vpc, err := client.VPCs.Get(projectName, vpcID)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return copyVPCPropertiesFromAPIResponseToTerraform(d, vpc, projectName)
+	err = copyVPCPropertiesFromAPIResponseToTerraform(d, vpc, projectName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }
 
-func resourceProjectVPCDelete(d *schema.ResourceData, m interface{}) error {
+func resourceProjectVPCDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, vpcID := splitResourceID2(d.Id())
@@ -111,30 +117,22 @@ func resourceProjectVPCDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	timeout := d.Timeout(schema.TimeoutDelete)
-	_, err := waiter.Conf(timeout).WaitForState()
+	_, err := waiter.Conf(timeout).WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("error waiting for Aiven project VPC to be DELETED: %s", err)
+		return diag.Errorf("error waiting for Aiven project VPC to be DELETED: %s", err)
 	}
 
 	return nil
 }
 
-func resourceProjectVPCExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	client := m.(*aiven.Client)
-
-	projectName, vpcID := splitResourceID2(d.Id())
-	_, err := client.VPCs.Get(projectName, vpcID)
-	return resourceExists(err)
-}
-
-func resourceProjectVPCState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceProjectVPCState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	if len(strings.Split(d.Id(), "/")) != 2 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<vpc_id>", d.Id())
 	}
 
-	err := resourceProjectVPCRead(d, m)
-	if err != nil {
-		return nil, err
+	di := resourceProjectVPCRead(ctx, d, m)
+	if di.HasError() {
+		return nil, fmt.Errorf("cannot get project vpc: %v", di)
 	}
 
 	return []*schema.ResourceData{d}, nil

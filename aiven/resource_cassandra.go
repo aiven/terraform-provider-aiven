@@ -35,13 +35,12 @@ func cassandraSchema() map[string]*schema.Schema {
 
 func resourceCassandra() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceServiceCreateWrapper(ServiceTypeCassandra),
-		Read:   resourceServiceRead,
-		Update: resourceServiceUpdate,
-		Delete: resourceServiceDelete,
-		Exists: resourceServiceExists,
+		CreateContext: resourceServiceCreateWrapper(ServiceTypeCassandra),
+		ReadContext:   resourceServiceRead,
+		UpdateContext: resourceServiceUpdate,
+		DeleteContext: resourceServiceDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceServiceState,
+			StateContext: resourceServiceState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),

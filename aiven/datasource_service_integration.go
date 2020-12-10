@@ -2,20 +2,21 @@
 package aiven
 
 import (
-	"fmt"
+	"context"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func datasourceServiceIntegration() *schema.Resource {
 	return &schema.Resource{
-		Read: datasourceServiceIntegrationRead,
+		ReadContext: datasourceServiceIntegrationRead,
 		Schema: resourceSchemaAsDatasourceSchema(aivenServiceIntegrationSchema,
 			"project", "integration_type", "source_service_name", "destination_service_name"),
 	}
 }
 
-func datasourceServiceIntegrationRead(d *schema.ResourceData, m interface{}) error {
+func datasourceServiceIntegrationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -25,7 +26,7 @@ func datasourceServiceIntegrationRead(d *schema.ResourceData, m interface{}) err
 
 	integrations, err := client.ServiceIntegrations.List(projectName, sourceServiceName)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	for _, i := range integrations {
@@ -38,10 +39,10 @@ func datasourceServiceIntegrationRead(d *schema.ResourceData, m interface{}) err
 			*i.DestinationService == destinationServiceName {
 
 			d.SetId(buildResourceID(projectName, i.ServiceIntegrationID))
-			return resourceServiceIntegrationRead(d, m)
+			return resourceServiceIntegrationRead(ctx, d, m)
 		}
 	}
 
-	return fmt.Errorf("service integration %s/%s/%s/%s not found",
+	return diag.Errorf("service integration %s/%s/%s/%s not found",
 		projectName, integrationType, sourceServiceName, destinationServiceName)
 }

@@ -6,7 +6,7 @@ import (
 
 func datasourceRedis() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceServiceRead,
-		Schema: resourceSchemaAsDatasourceSchema(redisSchema(), "project", "service_name"),
+		ReadContext: datasourceServiceRead,
+		Schema:      resourceSchemaAsDatasourceSchema(redisSchema(), "project", "service_name"),
 	}
 }

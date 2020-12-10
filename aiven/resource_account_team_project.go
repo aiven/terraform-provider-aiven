@@ -1,8 +1,10 @@
 package aiven
 
 import (
+	"context"
 	"fmt"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -33,20 +35,19 @@ var aivenAccountTeamProjectSchema = map[string]*schema.Schema{
 
 func resourceAccountTeamProject() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAccountTeamProjectCreate,
-		Read:   resourceAccountTeamProjectRead,
-		Update: resourceAccountTeamProjectUpdate,
-		Delete: resourceAccountTeamProjectDelete,
-		Exists: resourceAccountTeamProjectExists,
+		CreateContext: resourceAccountTeamProjectCreate,
+		ReadContext:   resourceAccountTeamProjectRead,
+		UpdateContext: resourceAccountTeamProjectUpdate,
+		DeleteContext: resourceAccountTeamProjectDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceAccountTeamProjectState,
+			StateContext: resourceAccountTeamProjectState,
 		},
 
 		Schema: aivenAccountTeamProjectSchema,
 	}
 }
 
-func resourceAccountTeamProjectCreate(d *schema.ResourceData, m interface{}) error {
+func resourceAccountTeamProjectCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	accountId := d.Get("account_id").(string)
@@ -63,21 +64,21 @@ func resourceAccountTeamProjectCreate(d *schema.ResourceData, m interface{}) err
 		},
 	)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(buildResourceID(accountId, teamId, projectName))
 
-	return resourceAccountTeamProjectRead(d, m)
+	return resourceAccountTeamProjectRead(ctx, d, m)
 }
 
-func resourceAccountTeamProjectRead(d *schema.ResourceData, m interface{}) error {
+func resourceAccountTeamProjectRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	accountId, teamId, projectName := splitResourceID3(d.Id())
 	r, err := client.AccountTeamProjects.List(accountId, teamId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var project aiven.AccountTeamProject
@@ -88,26 +89,26 @@ func resourceAccountTeamProjectRead(d *schema.ResourceData, m interface{}) error
 	}
 
 	if project.ProjectName == "" {
-		return fmt.Errorf("account team project %s not found", d.Id())
+		return diag.Errorf("account team project %s not found", d.Id())
 	}
 
 	if err := d.Set("account_id", accountId); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("team_id", teamId); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("project_name", project.ProjectName); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("team_type", project.TeamType); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceAccountTeamProjectUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceAccountTeamProjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	accountId, teamId, _ := splitResourceID3(d.Id())
@@ -119,47 +120,29 @@ func resourceAccountTeamProjectUpdate(d *schema.ResourceData, m interface{}) err
 		ProjectName: newProjectName,
 	})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(buildResourceID(accountId, teamId, newProjectName))
 
-	return resourceAccountTeamRead(d, m)
+	return resourceAccountTeamRead(ctx, d, m)
 }
 
-func resourceAccountTeamProjectDelete(d *schema.ResourceData, m interface{}) error {
+func resourceAccountTeamProjectDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	err := client.AccountTeamProjects.Delete(splitResourceID3(d.Id()))
 	if err != nil && !aiven.IsNotFound(err) {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceAccountTeamProjectExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	client := m.(*aiven.Client)
-
-	accountId, teamId, projectName := splitResourceID3(d.Id())
-	r, err := client.AccountTeamProjects.List(accountId, teamId)
-	if err != nil {
-		return resourceExists(err)
-	}
-
-	for _, p := range r.Projects {
-		if p.ProjectName == projectName {
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
-
-func resourceAccountTeamProjectState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	err := resourceAccountTeamProjectRead(d, m)
-	if err != nil {
-		return nil, err
+func resourceAccountTeamProjectState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	di := resourceAccountTeamProjectRead(ctx, d, m)
+	if di.HasError() {
+		return nil, fmt.Errorf("cannot get account team project: %v", di)
 	}
 
 	return []*schema.ResourceData{d}, nil

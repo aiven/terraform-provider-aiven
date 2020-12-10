@@ -6,7 +6,7 @@ import (
 
 func datasourceElasticsearch() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceServiceRead,
-		Schema: resourceSchemaAsDatasourceSchema(elasticsearchSchema(), "project", "service_name"),
+		ReadContext: datasourceServiceRead,
+		Schema:      resourceSchemaAsDatasourceSchema(elasticsearchSchema(), "project", "service_name"),
 	}
 }

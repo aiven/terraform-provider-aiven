@@ -41,13 +41,12 @@ func influxDBSchema() map[string]*schema.Schema {
 
 func resourceInfluxDB() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceServiceCreateWrapper(ServiceTypeInfluxDB),
-		Read:   resourceServiceRead,
-		Update: resourceServiceUpdate,
-		Delete: resourceServiceDelete,
-		Exists: resourceServiceExists,
+		CreateContext: resourceServiceCreateWrapper(ServiceTypeInfluxDB),
+		ReadContext:   resourceServiceRead,
+		UpdateContext: resourceServiceUpdate,
+		DeleteContext: resourceServiceDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceServiceState,
+			StateContext: resourceServiceState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),

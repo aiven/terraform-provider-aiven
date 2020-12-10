@@ -1,9 +1,10 @@
 package aiven
 
 import (
-	"fmt"
+	"context"
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"time"
 )
@@ -79,13 +80,12 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 
 func resourceKafka() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKafkaCreate,
-		Read:   resourceServiceRead,
-		Update: resourceServiceUpdate,
-		Delete: resourceServiceDelete,
-		Exists: resourceServiceExists,
+		CreateContext: resourceKafkaCreate,
+		ReadContext:   resourceServiceRead,
+		UpdateContext: resourceServiceUpdate,
+		DeleteContext: resourceServiceDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceServiceState,
+			StateContext: resourceServiceState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
@@ -96,9 +96,9 @@ func resourceKafka() *schema.Resource {
 	}
 }
 
-func resourceKafkaCreate(d *schema.ResourceData, m interface{}) error {
-	if err := resourceServiceCreateWrapper(ServiceTypeKafka)(d, m); err != nil {
-		return err
+func resourceKafkaCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	if di := resourceServiceCreateWrapper(ServiceTypeKafka)(ctx, d, m); di.HasError() {
+		return di
 	}
 
 	// if default_acl=false delete default wildcard Kafka ACL that is automatically created
@@ -110,7 +110,7 @@ func resourceKafkaCreate(d *schema.ResourceData, m interface{}) error {
 		list, err := client.KafkaACLs.List(project, serviceName)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {
-				return fmt.Errorf("cannot get a list of kafka acl's: %w", err)
+				return diag.Errorf("cannot get a list of kafka acl's: %s", err)
 			}
 		}
 
@@ -118,7 +118,7 @@ func resourceKafkaCreate(d *schema.ResourceData, m interface{}) error {
 			if acl.Username == "*" && acl.Topic == "*" && acl.Permission == "admin" {
 				err := client.KafkaACLs.Delete(project, serviceName, acl.ID)
 				if err != nil {
-					return fmt.Errorf("cannot delete default wildcard kafka acl: %w", err)
+					return diag.Errorf("cannot delete default wildcard kafka acl: %s", err)
 				}
 			}
 		}

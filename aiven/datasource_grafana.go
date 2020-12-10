@@ -6,7 +6,7 @@ import (
 
 func datasourceGrafana() *schema.Resource {
 	return &schema.Resource{
-		Read:   datasourceServiceRead,
-		Schema: resourceSchemaAsDatasourceSchema(grafanaSchema(), "project", "service_name"),
+		ReadContext: datasourceServiceRead,
+		Schema:      resourceSchemaAsDatasourceSchema(grafanaSchema(), "project", "service_name"),
 	}
 }

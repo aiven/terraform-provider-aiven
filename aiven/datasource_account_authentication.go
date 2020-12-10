@@ -1,20 +1,21 @@
 package aiven
 
 import (
-	"fmt"
+	"context"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func datasourceAccountAuthentication() *schema.Resource {
 	return &schema.Resource{
-		Read: datasourceAccountAuthenticationRead,
+		ReadContext: datasourceAccountAuthenticationRead,
 		Schema: resourceSchemaAsDatasourceSchema(aivenAccountAuthenticationSchema,
 			"account_id", "name"),
 	}
 }
 
-func datasourceAccountAuthenticationRead(d *schema.ResourceData, m interface{}) error {
+func datasourceAccountAuthenticationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	name := d.Get("name").(string)
@@ -22,15 +23,15 @@ func datasourceAccountAuthenticationRead(d *schema.ResourceData, m interface{}) 
 
 	r, err := client.AccountAuthentications.List(accountId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	for _, a := range r.AuthenticationMethods {
 		if a.Name == name {
 			d.SetId(buildResourceID(a.AccountId, a.Id))
-			return resourceAccountAuthenticationRead(d, m)
+			return resourceAccountAuthenticationRead(ctx, d, m)
 		}
 	}
 
-	return fmt.Errorf("account authentication %s not found", name)
+	return diag.Errorf("account authentication %s not found", name)
 }

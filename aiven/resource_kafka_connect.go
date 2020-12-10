@@ -35,13 +35,12 @@ func aivenKafkaConnectSchema() map[string]*schema.Schema {
 
 func resourceKafkaConnect() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceServiceCreateWrapper(ServiceTypeKafkaConnect),
-		Read:   resourceServiceRead,
-		Update: resourceServiceUpdate,
-		Delete: resourceServiceDelete,
-		Exists: resourceServiceExists,
+		CreateContext: resourceServiceCreateWrapper(ServiceTypeKafkaConnect),
+		ReadContext:   resourceServiceRead,
+		UpdateContext: resourceServiceUpdate,
+		DeleteContext: resourceServiceDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceServiceState,
+			StateContext: resourceServiceState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
