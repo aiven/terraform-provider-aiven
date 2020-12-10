@@ -2,7 +2,9 @@
 package aiven
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"strings"
 
@@ -63,26 +65,25 @@ var aivenConnectionPoolSchema = map[string]*schema.Schema{
 
 func resourceConnectionPool() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceConnectionPoolCreate,
-		Read:   resourceConnectionPoolRead,
-		Update: resourceConnectionPoolUpdate,
-		Delete: resourceConnectionPoolDelete,
-		Exists: resourceConnectionPoolExists,
+		CreateContext: resourceConnectionPoolCreate,
+		ReadContext:   resourceConnectionPoolRead,
+		UpdateContext: resourceConnectionPoolUpdate,
+		DeleteContext: resourceConnectionPoolDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceConnectionPoolState,
+			StateContext: resourceConnectionPoolState,
 		},
 
 		Schema: aivenConnectionPoolSchema,
 	}
 }
 
-func resourceConnectionPoolCreate(d *schema.ResourceData, m interface{}) error {
+func resourceConnectionPoolCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	poolName := d.Get("pool_name").(string)
-	pool, err := client.ConnectionPools.Create(
+	_, err := client.ConnectionPools.Create(
 		project,
 		serviceName,
 		aiven.CreateConnectionPoolRequest{
@@ -94,30 +95,36 @@ func resourceConnectionPoolCreate(d *schema.ResourceData, m interface{}) error {
 		},
 	)
 	if err != nil && !aiven.IsAlreadyExists(err) {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(buildResourceID(project, serviceName, poolName))
-	return copyConnectionPoolPropertiesFromAPIResponseToTerraform(d, pool, project, serviceName)
+
+	return resourceConnectionPoolRead(ctx, d, m)
 }
 
-func resourceConnectionPoolRead(d *schema.ResourceData, m interface{}) error {
+func resourceConnectionPoolRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, poolName := splitResourceID3(d.Id())
 	pool, err := client.ConnectionPools.Get(project, serviceName, poolName)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return copyConnectionPoolPropertiesFromAPIResponseToTerraform(d, pool, project, serviceName)
+	err = copyConnectionPoolPropertiesFromAPIResponseToTerraform(d, pool, project, serviceName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }
 
-func resourceConnectionPoolUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceConnectionPoolUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, poolName := splitResourceID3(d.Id())
-	pool, err := client.ConnectionPools.Update(
+	_, err := client.ConnectionPools.Update(
 		project,
 		serviceName,
 		poolName,
@@ -129,40 +136,32 @@ func resourceConnectionPoolUpdate(d *schema.ResourceData, m interface{}) error {
 		},
 	)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return copyConnectionPoolPropertiesFromAPIResponseToTerraform(d, pool, project, serviceName)
+	return resourceConnectionPoolRead(ctx, d, m)
 }
 
-func resourceConnectionPoolDelete(d *schema.ResourceData, m interface{}) error {
+func resourceConnectionPoolDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, poolName := splitResourceID3(d.Id())
 	err := client.ConnectionPools.Delete(projectName, serviceName, poolName)
 	if err != nil && !aiven.IsNotFound(err) {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceConnectionPoolExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	client := m.(*aiven.Client)
-
-	projectName, serviceName, poolName := splitResourceID3(d.Id())
-	_, err := client.ConnectionPools.Get(projectName, serviceName, poolName)
-	return resourceExists(err)
-}
-
-func resourceConnectionPoolState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceConnectionPoolState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	if len(strings.Split(d.Id(), "/")) != 3 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<pool_name>", d.Id())
 	}
 
-	err := resourceConnectionPoolRead(d, m)
-	if err != nil {
-		return nil, err
+	di := resourceConnectionPoolRead(ctx, d, m)
+	if di.HasError() {
+		return nil, fmt.Errorf("cannot read connection pool: %v", di)
 	}
 
 	return []*schema.ResourceData{d}, nil

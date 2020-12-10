@@ -3,8 +3,10 @@
 package aiven
 
 import (
+	"context"
 	"fmt"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"strings"
@@ -236,13 +238,12 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 
 func resourceKafkaTopic() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKafkaTopicCreate,
-		Read:   resourceKafkaTopicRead,
-		Update: resourceKafkaTopicUpdate,
-		Delete: resourceKafkaTopicDelete,
-		Exists: resourceKafkaTopicExists,
+		CreateContext: resourceKafkaTopicCreate,
+		ReadContext:   resourceKafkaTopicRead,
+		UpdateContext: resourceKafkaTopicUpdate,
+		DeleteContext: resourceKafkaTopicDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceKafkaTopicState,
+			StateContext: resourceKafkaTopicState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(1 * time.Minute),
@@ -252,7 +253,7 @@ func resourceKafkaTopic() *schema.Resource {
 	}
 }
 
-func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	topicName := d.Get("topic_name").(string)
@@ -278,9 +279,9 @@ func resourceKafkaTopicCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	timeout := d.Timeout(schema.TimeoutCreate)
-	_, err := w.Conf(timeout).WaitForState()
+	_, err := w.Conf(timeout).WaitForStateContext(ctx)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(buildResourceID(project, serviceName, topicName))
@@ -327,64 +328,64 @@ func getKafkaTopicConfig(d *schema.ResourceData) aiven.KafkaTopicConfig {
 	}
 }
 
-func resourceKafkaTopicRead(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project, serviceName, topicName := splitResourceID3(d.Id())
-	topic, err := getTopic(d, m)
+	topic, err := getTopic(ctx, d, m)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("project", project); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("service_name", serviceName); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("topic_name", topicName); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("partitions", len(topic.Partitions)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("replication", topic.Replication); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if _, ok := d.GetOk("cleanup_policy"); ok {
 		if err := d.Set("cleanup_policy", topic.CleanupPolicy); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	if _, ok := d.GetOk("minimum_in_sync_replicas"); ok {
 		if err := d.Set("minimum_in_sync_replicas", topic.MinimumInSyncReplicas); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	if _, ok := d.GetOk("retention_bytes"); ok {
 		if err := d.Set("retention_bytes", topic.RetentionBytes); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	if err := d.Set("config", flattenKafkaTopicConfig(topic)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if _, ok := d.GetOk("retention_hours"); topic.RetentionHours != nil && ok {
 		// it could be -1, which means infinite retention
 		if *topic.RetentionHours >= -1 {
 			if err := d.Set("retention_hours", *topic.RetentionHours); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 	}
 
 	if err := d.Set("termination_protection", d.Get("termination_protection")); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func getTopic(d *schema.ResourceData, m interface{}) (aiven.KafkaTopic, error) {
+func getTopic(ctx context.Context, d *schema.ResourceData, m interface{}) (aiven.KafkaTopic, error) {
 	project, serviceName, topicName := splitResourceID3(d.Id())
 
 	w := &KafkaTopicAvailabilityWaiter{
@@ -395,7 +396,7 @@ func getTopic(d *schema.ResourceData, m interface{}) (aiven.KafkaTopic, error) {
 	}
 
 	timeout := d.Timeout(schema.TimeoutRead)
-	topic, err := w.Conf(timeout).WaitForState()
+	topic, err := w.Conf(timeout).WaitForStateContext(ctx)
 	if err != nil {
 		return aiven.KafkaTopic{}, fmt.Errorf("error waiting for Aiven Kafka topic to be ACTIVE: %s", err)
 	}
@@ -403,7 +404,7 @@ func getTopic(d *schema.ResourceData, m interface{}) (aiven.KafkaTopic, error) {
 	return topic.(aiven.KafkaTopic), nil
 }
 
-func resourceKafkaTopicUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaTopicUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	partitions := d.Get("partitions").(int)
@@ -422,43 +423,37 @@ func resourceKafkaTopicUpdate(d *schema.ResourceData, m interface{}) error {
 		},
 	)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKafkaTopicDelete(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaTopicDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, topicName := splitResourceID3(d.Id())
 
 	if d.Get("termination_protection").(bool) {
-		return fmt.Errorf("cannot delete kafka topic when termination_protection is enabled")
+		return diag.Errorf("cannot delete kafka topic when termination_protection is enabled")
 	}
 
 	err := client.KafkaTopics.Delete(projectName, serviceName, topicName)
 	if err != nil && !aiven.IsNotFound(err) {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKafkaTopicExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	_, err := getTopic(d, m)
-
-	return resourceExists(err)
-}
-
-func resourceKafkaTopicState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceKafkaTopicState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	if len(strings.Split(d.Id(), "/")) != 3 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<topic_name>", d.Id())
 	}
 
-	err := resourceKafkaTopicRead(d, m)
-	if err != nil {
-		return nil, err
+	di := resourceKafkaTopicRead(ctx, d, m)
+	if di.HasError() {
+		return nil, fmt.Errorf("cannot get kafka topic: %v", di)
 	}
 
 	return []*schema.ResourceData{d}, nil

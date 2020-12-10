@@ -3,8 +3,10 @@
 package aiven
 
 import (
+	"context"
 	"fmt"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"strings"
@@ -64,20 +66,19 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 
 func resourceMirrorMakerReplicationFlow() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceMirrorMakerReplicationFlowCreate,
-		Read:   resourceMirrorMakerReplicationFlowRead,
-		Update: resourceMirrorMakerReplicationFlowUpdate,
-		Delete: resourceMirrorMakerReplicationFlowDelete,
-		Exists: resourceMirrorMakerReplicationFlowExists,
+		CreateContext: resourceMirrorMakerReplicationFlowCreate,
+		ReadContext:   resourceMirrorMakerReplicationFlowRead,
+		UpdateContext: resourceMirrorMakerReplicationFlowUpdate,
+		DeleteContext: resourceMirrorMakerReplicationFlowDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceMirrorMakerReplicationFlowState,
+			StateContext: resourceMirrorMakerReplicationFlowState,
 		},
 
 		Schema: aivenMirrorMakerReplicationFlowSchema,
 	}
 }
 
-func resourceMirrorMakerReplicationFlowCreate(d *schema.ResourceData, m interface{}) error {
+func resourceMirrorMakerReplicationFlowCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -98,49 +99,49 @@ func resourceMirrorMakerReplicationFlowCreate(d *schema.ResourceData, m interfac
 		},
 	})
 	if err != nil && !aiven.IsAlreadyExists(err) {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(buildResourceID(project, serviceName, sourceCluster, targetCluster))
 
-	return resourceMirrorMakerReplicationFlowRead(d, m)
+	return resourceMirrorMakerReplicationFlowRead(ctx, d, m)
 }
 
-func resourceMirrorMakerReplicationFlowRead(d *schema.ResourceData, m interface{}) error {
+func resourceMirrorMakerReplicationFlowRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, sourceCluster, targetCluster := splitResourceID4(d.Id())
 	replicationFlow, err := client.KafkaMirrorMakerReplicationFlow.Get(project, serviceName, sourceCluster, targetCluster)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("project", project); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("service_name", serviceName); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("enable", replicationFlow.ReplicationFlow.Enabled); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("source_cluster", sourceCluster); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("target_cluster", targetCluster); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("topics", replicationFlow.ReplicationFlow.Topics); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("topics_blacklist", replicationFlow.ReplicationFlow.TopicsBlacklist); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceMirrorMakerReplicationFlowUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	enable := d.Get("enable").(bool)
@@ -162,37 +163,33 @@ func resourceMirrorMakerReplicationFlowUpdate(d *schema.ResourceData, m interfac
 		},
 	)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceMirrorMakerReplicationFlowRead(d, m)
+	return resourceMirrorMakerReplicationFlowRead(ctx, d, m)
 }
 
-func resourceMirrorMakerReplicationFlowDelete(d *schema.ResourceData, m interface{}) error {
+func resourceMirrorMakerReplicationFlowDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, sourceCluster, targetCluster := splitResourceID4(d.Id())
 
-	return client.KafkaMirrorMakerReplicationFlow.Delete(project, serviceName, sourceCluster, targetCluster)
+	err := client.KafkaMirrorMakerReplicationFlow.Delete(project, serviceName, sourceCluster, targetCluster)
+	if err != nil {
+		diag.FromErr(err)
+	}
+
+	return nil
 }
 
-func resourceMirrorMakerReplicationFlowExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	client := m.(*aiven.Client)
-
-	project, serviceName, sourceCluster, targetCluster := splitResourceID4(d.Id())
-	_, err := client.KafkaMirrorMakerReplicationFlow.Get(project, serviceName, sourceCluster, targetCluster)
-
-	return resourceExists(err)
-}
-
-func resourceMirrorMakerReplicationFlowState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceMirrorMakerReplicationFlowState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	if len(strings.Split(d.Id(), "/")) != 4 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<source_cluster>/<target_cluster>", d.Id())
 	}
 
-	err := resourceMirrorMakerReplicationFlowRead(d, m)
-	if err != nil {
-		return nil, err
+	di := resourceMirrorMakerReplicationFlowRead(ctx, d, m)
+	if di.HasError() {
+		return nil, fmt.Errorf("cannot get mirror maker 2 replication flow: %v", di)
 	}
 
 	return []*schema.ResourceData{d}, nil

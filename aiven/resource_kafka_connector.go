@@ -1,8 +1,10 @@
 package aiven
 
 import (
+	"context"
 	"fmt"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
@@ -89,13 +91,12 @@ var aivenKafkaConnectorSchema = map[string]*schema.Schema{
 
 func resourceKafkaConnector() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKafkaConnectorCreate,
-		Read:   resourceKafkaConnectorRead,
-		Update: resourceKafkaTConnectorUpdate,
-		Delete: resourceKafkaConnectorDelete,
-		Exists: resourceKafkaConnectorExists,
+		CreateContext: resourceKafkaConnectorCreate,
+		ReadContext:   resourceKafkaConnectorRead,
+		UpdateContext: resourceKafkaTConnectorUpdate,
+		DeleteContext: resourceKafkaConnectorDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceKafkaConnectorState,
+			StateContext: resourceKafkaConnectorState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Read: schema.DefaultTimeout(2 * time.Minute),
@@ -120,7 +121,7 @@ func flattenKafkaConnectorTasks(r *aiven.KafkaConnector) []map[string]interface{
 	return tasks
 }
 
-func resourceKafkaConnectorRead(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaConnectorRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project, serviceName, connectorName := splitResourceID3(d.Id())
 
 	w := &KafkaConnectorWaiter{
@@ -130,9 +131,9 @@ func resourceKafkaConnectorRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	timeout := d.Timeout(schema.TimeoutRead)
-	res, err := w.Conf(timeout).WaitForState()
+	res, err := w.Conf(timeout).WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("cannot read Kafka Connector List resource %s: %s", d.Id(), err)
+		return diag.Errorf("cannot read Kafka Connector List resource %s: %s", d.Id(), err)
 	}
 
 	var found bool
@@ -140,51 +141,51 @@ func resourceKafkaConnectorRead(d *schema.ResourceData, m interface{}) error {
 		if r.Name == connectorName {
 			found = true
 			if err := d.Set("project", project); err != nil {
-				return fmt.Errorf("error setting Kafka Connector `project` for resource %s: %s", d.Id(), err)
+				return diag.Errorf("error setting Kafka Connector `project` for resource %s: %s", d.Id(), err)
 			}
 			if err := d.Set("service_name", serviceName); err != nil {
-				return fmt.Errorf("error setting Kafka Connector `service_name` for resource %s: %s", d.Id(), err)
+				return diag.Errorf("error setting Kafka Connector `service_name` for resource %s: %s", d.Id(), err)
 			}
 			if err := d.Set("connector_name", connectorName); err != nil {
-				return fmt.Errorf("error setting Kafka Connector `connector_name` for resource %s: %s", d.Id(), err)
+				return diag.Errorf("error setting Kafka Connector `connector_name` for resource %s: %s", d.Id(), err)
 			}
 			if err := d.Set("config", r.Config); err != nil {
-				return fmt.Errorf("error setting Kafka Connector `config` for resource %s: %s", d.Id(), err)
+				return diag.Errorf("error setting Kafka Connector `config` for resource %s: %s", d.Id(), err)
 			}
 			if err := d.Set("plugin_author", r.Plugin.Author); err != nil {
-				return fmt.Errorf("error setting Kafka Connector `plugin_author` for resource %s: %s", d.Id(), err)
+				return diag.Errorf("error setting Kafka Connector `plugin_author` for resource %s: %s", d.Id(), err)
 			}
 			if err := d.Set("plugin_class", r.Plugin.Class); err != nil {
-				return fmt.Errorf("error setting Kafka Connector `plugin_class` for resource %s: %s", d.Id(), err)
+				return diag.Errorf("error setting Kafka Connector `plugin_class` for resource %s: %s", d.Id(), err)
 			}
 			if err := d.Set("plugin_doc_url", r.Plugin.DocumentationURL); err != nil {
-				return fmt.Errorf("error setting Kafka Connector `plugin_doc_url` for resource %s: %s", d.Id(), err)
+				return diag.Errorf("error setting Kafka Connector `plugin_doc_url` for resource %s: %s", d.Id(), err)
 			}
 			if err := d.Set("plugin_title", r.Plugin.Title); err != nil {
-				return fmt.Errorf("error setting Kafka Connector `plugin_title` for resource %s: %s", d.Id(), err)
+				return diag.Errorf("error setting Kafka Connector `plugin_title` for resource %s: %s", d.Id(), err)
 			}
 			if err := d.Set("plugin_type", r.Plugin.Type); err != nil {
-				return fmt.Errorf("error setting Kafka Connector `plugin_type` for resource %s: %s", d.Id(), err)
+				return diag.Errorf("error setting Kafka Connector `plugin_type` for resource %s: %s", d.Id(), err)
 			}
 			if err := d.Set("plugin_version", r.Plugin.Version); err != nil {
-				return fmt.Errorf("error setting Kafka Connector `plugin_version` for resource %s: %s", d.Id(), err)
+				return diag.Errorf("error setting Kafka Connector `plugin_version` for resource %s: %s", d.Id(), err)
 			}
 
 			tasks := flattenKafkaConnectorTasks(&r)
 			if err := d.Set("task", tasks); err != nil {
-				return fmt.Errorf("error setting Kafka Connector `task` array for resource %s: %s", d.Id(), err)
+				return diag.Errorf("error setting Kafka Connector `task` array for resource %s: %s", d.Id(), err)
 			}
 		}
 	}
 
 	if !found {
-		return fmt.Errorf("cannot read Kafka Connector resource with Id: %s not found in a Kafka Connectors list", d.Id())
+		return diag.Errorf("cannot read Kafka Connector resource with Id: %s not found in a Kafka Connectors list", d.Id())
 	}
 
 	return nil
 }
 
-func resourceKafkaConnectorCreate(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaConnectorCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	connectorName := d.Get("connector_name").(string)
@@ -196,24 +197,24 @@ func resourceKafkaConnectorCreate(d *schema.ResourceData, m interface{}) error {
 
 	err := m.(*aiven.Client).KafkaConnectors.Create(project, serviceName, config)
 	if err != nil && !aiven.IsAlreadyExists(err) {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(buildResourceID(project, serviceName, connectorName))
 
-	return resourceKafkaConnectorRead(d, m)
+	return resourceKafkaConnectorRead(ctx, d, m)
 }
 
-func resourceKafkaConnectorDelete(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaConnectorDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	err := m.(*aiven.Client).KafkaConnectors.Delete(splitResourceID3(d.Id()))
 	if err != nil && !aiven.IsNotFound(err) {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceKafkaTConnectorUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceKafkaTConnectorUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project, serviceName, connectorName := splitResourceID3(d.Id())
 
 	config := make(aiven.KafkaConnectorConfig)
@@ -223,37 +224,16 @@ func resourceKafkaTConnectorUpdate(d *schema.ResourceData, m interface{}) error 
 
 	_, err := m.(*aiven.Client).KafkaConnectors.Update(project, serviceName, connectorName, config)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceKafkaConnectorRead(d, m)
+	return resourceKafkaConnectorRead(ctx, d, m)
 }
 
-func resourceKafkaConnectorExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	project, serviceName, connectorName := splitResourceID3(d.Id())
-
-	r, err := m.(*aiven.Client).KafkaConnectors.List(project, serviceName)
-	if err != nil {
-		return false, err
-	}
-
-	if ok, err := resourceExists(err); err != nil {
-		return ok, err
-	}
-
-	for _, c := range r.Connectors {
-		if c.Name == connectorName {
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
-
-func resourceKafkaConnectorState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	err := resourceKafkaConnectorRead(d, m)
-	if err != nil {
-		return nil, err
+func resourceKafkaConnectorState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	di := resourceKafkaConnectorRead(ctx, d, m)
+	if di.HasError() {
+		return nil, fmt.Errorf("cannot get kafka connector: %v", di)
 	}
 
 	return []*schema.ResourceData{d}, nil

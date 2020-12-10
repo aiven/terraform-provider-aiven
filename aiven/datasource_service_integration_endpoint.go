@@ -2,7 +2,8 @@
 package aiven
 
 import (
-	"fmt"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -10,13 +11,13 @@ import (
 
 func datasourceServiceIntegrationEndpoint() *schema.Resource {
 	return &schema.Resource{
-		Read: datasourceServiceIntegrationEndpointRead,
+		ReadContext: datasourceServiceIntegrationEndpointRead,
 		Schema: resourceSchemaAsDatasourceSchema(aivenServiceIntegrationEndpointSchema,
 			"project", "endpoint_name"),
 	}
 }
 
-func datasourceServiceIntegrationEndpointRead(d *schema.ResourceData, m interface{}) error {
+func datasourceServiceIntegrationEndpointRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -24,15 +25,15 @@ func datasourceServiceIntegrationEndpointRead(d *schema.ResourceData, m interfac
 
 	endpoints, err := client.ServiceIntegrationEndpoints.List(projectName)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	for _, endpoint := range endpoints {
 		if endpoint.EndpointName == endpointName {
 			d.SetId(buildResourceID(projectName, endpoint.EndpointID))
-			return resourceServiceIntegrationEndpointRead(d, m)
+			return resourceServiceIntegrationEndpointRead(ctx, d, m)
 		}
 	}
 
-	return fmt.Errorf("endpoint \"%s\" not found", endpointName)
+	return diag.Errorf("endpoint \"%s\" not found", endpointName)
 }

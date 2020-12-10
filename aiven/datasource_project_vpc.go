@@ -2,21 +2,21 @@
 package aiven
 
 import (
-	"fmt"
-
+	"context"
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func datasourceProjectVPC() *schema.Resource {
 	return &schema.Resource{
-		Read: datasourceProjectVPCRead,
+		ReadContext: datasourceProjectVPCRead,
 		Schema: resourceSchemaAsDatasourceSchema(aivenProjectVPCSchema,
 			"project", "cloud_name"),
 	}
 }
 
-func datasourceProjectVPCRead(d *schema.ResourceData, m interface{}) error {
+func datasourceProjectVPCRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -24,16 +24,16 @@ func datasourceProjectVPCRead(d *schema.ResourceData, m interface{}) error {
 
 	vpcs, err := client.VPCs.List(projectName)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	for _, vpc := range vpcs {
 		if vpc.CloudName == cloudName {
 			d.SetId(buildResourceID(projectName, vpc.ProjectVPCID))
-			return copyVPCPropertiesFromAPIResponseToTerraform(d, vpc, projectName)
+			return diag.FromErr(copyVPCPropertiesFromAPIResponseToTerraform(d, vpc, projectName))
 		}
 	}
 
-	return fmt.Errorf("pßroject %s has no VPC defined for %s",
+	return diag.Errorf("pßroject %s has no VPC defined for %s",
 		projectName, cloudName)
 }
