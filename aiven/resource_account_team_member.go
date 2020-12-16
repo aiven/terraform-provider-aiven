@@ -164,7 +164,7 @@ func resourceAccountTeamMemberDelete(_ context.Context, d *schema.ResourceData, 
 
 	// delete account team user invitation
 	err := client.AccountTeamInvites.Delete(accountId, teamId, userEmail)
-	if !aiven.IsNotFound(err) {
+	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
 
