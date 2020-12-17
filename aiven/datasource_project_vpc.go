@@ -21,7 +21,6 @@ func datasourceProjectVPCRead(ctx context.Context, d *schema.ResourceData, m int
 
 	projectName := d.Get("project").(string)
 	cloudName := d.Get("cloud_name").(string)
-	foundVPC := false
 
 	vpcs, err := client.VPCs.List(projectName)
 	if err != nil {
@@ -30,19 +29,16 @@ func datasourceProjectVPCRead(ctx context.Context, d *schema.ResourceData, m int
 
 	for _, vpc := range vpcs {
 		if vpc.CloudName == cloudName {
-			foundVPC = true
 			d.SetId(buildResourceID(projectName, vpc.ProjectVPCID))
 			err = copyVPCPropertiesFromAPIResponseToTerraform(d, vpc, projectName)
 			if err != nil {
 				return diag.FromErr(err)
 			}
+
+			return nil
 		}
 	}
 
-	if !foundVPC {
-		return diag.Errorf("project %s has no VPC defined for %s",
-			projectName, cloudName)
-	}
-
-	return nil
+	return diag.Errorf("project %s has no VPC defined for %s",
+		projectName, cloudName)
 }
