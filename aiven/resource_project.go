@@ -116,6 +116,11 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Description:      "EU VAT Identification Number",
 		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
 	},
+	"billing_group": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Billing group Id",
+	},
 }
 
 func resourceProject() *schema.Resource {
@@ -160,9 +165,43 @@ func resourceProjectCreate(_ context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(err)
 	}
 
+	if billingGroupId, ok := d.GetOk("billing_group"); ok {
+		d := resourceProjectAssignToBillingGroup(projectName, billingGroupId.(string), client)
+		if d.HasError() {
+			return d
+		}
+	}
+
 	d.SetId(projectName)
 
 	return resourceProjectGetCACert(projectName, client, d)
+}
+
+func resourceProjectAssignToBillingGroup(projectName, billingGroupId string, client *aiven.Client) diag.Diagnostics {
+	_, err := client.BillingGroup.Get(billingGroupId)
+	if err != nil {
+		diag.Errorf("cannot get a billing group by id: %s", err)
+	}
+
+	var isAlreadyAssigned bool
+	assignedProjects, err := client.BillingGroup.GetProjects(billingGroupId)
+	if err != nil {
+		diag.Errorf("cannot get a billing group assigned projects list: %s", err)
+	}
+	for _, p := range assignedProjects {
+		if p == projectName {
+			isAlreadyAssigned = true
+		}
+	}
+
+	if !isAlreadyAssigned {
+		err = client.BillingGroup.AssignProjects(billingGroupId, []string{projectName})
+		if err != nil {
+			diag.Errorf("cannot assign project to a billing group: %s", err)
+		}
+	}
+
+	return nil
 }
 
 func resourceProjectRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -237,6 +276,13 @@ func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interfac
 	)
 	if err != nil {
 		return diag.FromErr(err)
+	}
+
+	if billingGroupId, ok := d.GetOk("billing_group"); ok {
+		d := resourceProjectAssignToBillingGroup(d.Get("project").(string), billingGroupId.(string), client)
+		if d.HasError() {
+			return d
+		}
 	}
 
 	d.SetId(project.Name)
@@ -321,7 +367,7 @@ func contactEmailListForAPI(d *schema.ResourceData, field string, newResource bo
 	// should be sent if user has explicitly defined that even when copy_from_project
 	// is set but Terraform does not support checking that; d.GetOkExists returns false
 	// even if the value is set (to empty).
-	if len(d.Get("copy_from_project").(string)) == 0 || !newResource {
+	if _, ok := d.GetOk("copy_from_project"); ok || !newResource {
 		results = []*aiven.ContactEmail{}
 	}
 	valuesInterface, ok := d.GetOk(field)
