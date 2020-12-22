@@ -3,8 +3,10 @@
 package aiven
 
 import (
+	"context"
 	"fmt"
 	"github.com/aiven/terraform-provider-aiven/pkg/cache"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"log"
 	"net/url"
 	"strconv"
@@ -106,7 +108,7 @@ func Provider() *schema.Provider {
 		},
 	}
 
-	p.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
+	p.ConfigureContextFunc = func(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		_ = cache.NewTopicCache()
 		terraformVersion := p.TerraformVersion
 		if terraformVersion == "" {
@@ -115,9 +117,14 @@ func Provider() *schema.Provider {
 			terraformVersion = "0.11+compatible"
 		}
 
-		return aiven.NewTokenClient(
+		client, err := aiven.NewTokenClient(
 			d.Get("api_token").(string),
 			fmt.Sprintf("terraform-provider-aiven/%s", terraformVersion))
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
+		return client, nil
 	}
 
 	return p
@@ -258,25 +265,6 @@ func splitResourceID4(resourceID string) (string, string, string, string) {
 	return parts[0], parts[1], parts[2], parts[3]
 }
 
-func resourceExists(err error) (bool, error) {
-	if err == nil {
-		return true, nil
-	}
-
-	aivenError, ok := err.(aiven.Error)
-	if !ok {
-		return true, err
-	}
-
-	if aivenError.Status == 404 {
-		return false, nil
-	}
-	if aivenError.Status < 200 || aivenError.Status >= 300 {
-		return true, err
-	}
-	return true, nil
-}
-
 func createOnlyDiffSuppressFunc(_, _, _ string, d *schema.ResourceData) bool {
 	return len(d.Id()) > 0
 }
@@ -307,7 +295,7 @@ func emptyObjectDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) boo
 
 // emptyObjectNoChangeDiffSuppressFunc it suppresses a diff if a field is empty but have not
 // been set before to any value
-func emptyObjectNoChangeDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+func emptyObjectNoChangeDiffSuppressFunc(k, _, new string, d *schema.ResourceData) bool {
 	if d.HasChange(k) {
 		return false
 	}
