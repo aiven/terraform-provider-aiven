@@ -868,14 +868,6 @@ func resourceServiceDelete(_ context.Context, d *schema.ResourceData, m interfac
 	return nil
 }
 
-func resourceServiceExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	client := m.(*aiven.Client)
-
-	projectName, serviceName := splitResourceID2(d.Id())
-	_, err := client.Services.Get(projectName, serviceName)
-	return resourceExists(err)
-}
-
 func resourceServiceState(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	client := m.(*aiven.Client)
 
