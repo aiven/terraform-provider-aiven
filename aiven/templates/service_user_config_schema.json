@@ -35,6 +35,17 @@
         "title": "Allow access to selected service ports from private networks",
         "type": "object"
       },
+      "project_to_fork_from": {
+        "createOnly": true,
+        "default": null,
+        "example": "anotherprojectname",
+        "maxLength": 63,
+        "title": "Name of another project to fork a service from. This has effect only when a new service is being created.",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
       "public_access": {
         "additionalProperties": false,
         "properties": {
@@ -404,6 +415,17 @@
         },
         "title": "Allow access to selected service ports from private networks",
         "type": "object"
+      },
+      "project_to_fork_from": {
+        "createOnly": true,
+        "default": null,
+        "example": "anotherprojectname",
+        "maxLength": 63,
+        "title": "Name of another project to fork a service from. This has effect only when a new service is being created.",
+        "type": [
+          "string",
+          "null"
+        ]
       },
       "public_access": {
         "additionalProperties": false,
@@ -838,8 +860,9 @@
       },
       "google_analytics_ua_id": {
         "example": "UA-123456-4",
-        "maxLength": 256,
-        "title": "Google Analytics Universal Analytics ID for tracking Grafana usage",
+        "maxLength": 64,
+        "pattern": "^(G|UA|YT|MO)-[a-zA-Z0-9-]+$",
+        "title": "Google Analytics ID",
         "type": "string"
       },
       "ip_filter": {
@@ -873,6 +896,17 @@
         },
         "title": "Allow access to selected service ports from private networks",
         "type": "object"
+      },
+      "project_to_fork_from": {
+        "createOnly": true,
+        "default": null,
+        "example": "anotherprojectname",
+        "maxLength": 63,
+        "title": "Name of another project to fork a service from. This has effect only when a new service is being created.",
+        "type": [
+          "string",
+          "null"
+        ]
       },
       "public_access": {
         "additionalProperties": false,
@@ -1078,6 +1112,17 @@
         },
         "title": "Allow access to selected service ports from private networks",
         "type": "object"
+      },
+      "project_to_fork_from": {
+        "createOnly": true,
+        "default": null,
+        "example": "anotherprojectname",
+        "maxLength": 63,
+        "title": "Name of another project to fork a service from. This has effect only when a new service is being created.",
+        "type": [
+          "string",
+          "null"
+        ]
       },
       "public_access": {
         "additionalProperties": false,
@@ -1962,7 +2007,8 @@
       },
       "m3_version": {
         "enum": [
-          "0.15"
+          "0.15",
+          "1.0"
         ],
         "title": "M3 major version",
         "type": [
@@ -2038,13 +2084,20 @@
       },
       "m3_version": {
         "enum": [
-          "0.15"
+          "0.15",
+          "1.0"
         ],
         "title": "M3 major version",
         "type": [
           "string",
           "null"
         ]
+      },
+      "m3coordinator_enable_graphite_carbon_ingest": {
+        "description": "Enables access to Graphite Carbon plaintext metrics ingestion. It can be enabled only for services inside VPCs. The metrics are written to aggregated namespaces only.",
+        "example": true,
+        "title": "Enable Graphite ingestion using Carbon plaintext protocol",
+        "type": "boolean"
       },
       "namespaces": {
         "default": [
@@ -2161,6 +2214,17 @@
         "title": "Allow access to selected service ports from private networks",
         "type": "object"
       },
+      "project_to_fork_from": {
+        "createOnly": true,
+        "default": null,
+        "example": "anotherprojectname",
+        "maxLength": 63,
+        "title": "Name of another project to fork a service from. This has effect only when a new service is being created.",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
       "public_access": {
         "additionalProperties": false,
         "properties": {
@@ -2172,6 +2236,17 @@
         },
         "title": "Allow access to selected service ports from the public Internet",
         "type": "object"
+      },
+      "service_to_fork_from": {
+        "createOnly": true,
+        "default": null,
+        "example": "anotherservicename",
+        "maxLength": 63,
+        "title": "Name of another service to fork from. This has effect only when a new service is being created.",
+        "type": [
+          "string",
+          "null"
+        ]
       }
     },
     "type": "object"
@@ -2442,6 +2517,17 @@
         },
         "title": "Allow access to selected service ports from private networks",
         "type": "object"
+      },
+      "project_to_fork_from": {
+        "createOnly": true,
+        "default": null,
+        "example": "anotherprojectname",
+        "maxLength": 63,
+        "title": "Name of another project to fork a service from. This has effect only when a new service is being created.",
+        "type": [
+          "string",
+          "null"
+        ]
       },
       "public_access": {
         "additionalProperties": false,
@@ -3055,6 +3141,17 @@
         "title": "Allow access to selected service ports from private networks",
         "type": "object"
       },
+      "project_to_fork_from": {
+        "createOnly": true,
+        "default": null,
+        "example": "anotherprojectname",
+        "maxLength": 63,
+        "title": "Name of another project to fork a service from. This has effect only when a new service is being created.",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
       "public_access": {
         "additionalProperties": false,
         "properties": {
@@ -3240,6 +3337,17 @@
         },
         "title": "Allow access to selected service ports from private networks",
         "type": "object"
+      },
+      "project_to_fork_from": {
+        "createOnly": true,
+        "default": null,
+        "example": "anotherprojectname",
+        "maxLength": 63,
+        "title": "Name of another project to fork a service from. This has effect only when a new service is being created.",
+        "type": [
+          "string",
+          "null"
+        ]
       },
       "public_access": {
         "additionalProperties": false,

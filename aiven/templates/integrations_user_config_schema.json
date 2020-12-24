@@ -133,6 +133,21 @@
     "title": "Integration user config",
     "type": "object"
   },
+  "kafka_logs": {
+    "additionalProperties": false,
+    "properties": {
+      "kafka_topic": {
+        "example": "mytopic",
+        "maxLength": 249,
+        "minLength": 1,
+        "pattern": "^(?!\\.$|\\.\\.$)[-_.A-Za-z0-9]+$",
+        "title": "Topic name",
+        "type": "string",
+        "user_error": "Must consist of alpha-numeric characters, underscores, dashes or dots, max 249 characters"
+      }
+    },
+    "type": "object"
+  },
   "kafka_mirrormaker": {
     "additionalProperties": false,
     "properties": {
