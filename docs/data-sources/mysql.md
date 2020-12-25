@@ -138,6 +138,8 @@ configuration options available:
     only when a new service is being created.
     * `service_to_fork_from` - Name of another service to fork from. This has effect only when 
     a new service is being created.
+    * `project_to_fork_from` - Name of another project to fork a service from. This has
+    effect only when a new service is being created.
     
 * `service_integrations` can be used to define service integrations that must exist
     immediately upon service creation. By the time of writing the only such integration is

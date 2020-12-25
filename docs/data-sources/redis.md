@@ -96,6 +96,8 @@ configuration options available:
     * `redis_timeout` - Redis idle connection timeout
     * `service_to_fork_from"` - Name of another service to fork from. This has effect only 
     when a new service is being created. 
+    * `project_to_fork_from` - Name of another project to fork a service from. This has
+    effect only when a new service is being created.
 
 * `service_uri` - URI for connecting to the Redis service.
 

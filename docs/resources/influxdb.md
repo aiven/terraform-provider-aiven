@@ -83,6 +83,8 @@ configuration options available:
     * `recovery_basebackup_name` - (Optional) Name of the basebackup to restore in forked service
     * `service_to_fork_from` - (Optional) Name of another service to fork from. This has effect 
     only when a new service is being created.
+    * `project_to_fork_from` - (Optional) Name of another project to fork a service from. This has 
+    effect only when a new service is being created.
     
     * `influxdb` - (Optional) influxdb.conf configuration values
         * `log_queries_after` - (Optional) The maximum duration in seconds before a query is 

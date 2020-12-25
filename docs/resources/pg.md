@@ -175,6 +175,8 @@ configuration options available:
     * `pg_read_replica` - (Optional) This setting is deprecated. Use read-replica service integration instead.
     * `pg_service_to_fork_from` - (Optional) Name of the PG Service from which to fork (deprecated, use service_to_fork_from). 
     This has effect only when a new service is being created.
+    * `project_to_fork_from` - (Optional) Name of another project to fork a service from. This has
+    effect only when a new service is being created.
     * `pg_version` - (Optional) PostgreSQL major version.
     
     * `pgbouncer` - (Optional) PGBouncer connection pooling settings.

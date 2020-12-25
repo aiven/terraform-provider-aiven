@@ -66,6 +66,13 @@ configuration options available:
     * `m3_version` - M3 major version
     * `custom_domain` - Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
     * `ip_filter` - Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+    * `project_to_fork_from` - Name of another project to fork a service from. This has
+    effect only when a new service is being created.
+    * `service_to_fork_from` - Name of another service to fork from. This has effect only 
+    when a new service is being created.
+    * `m3coordinator_enable_graphite_carbon_ingest` - Enables access to Graphite Carbon 
+    plaintext metrics ingestion. It can be enabled only for services inside VPCs. The 
+    metrics are written to aggregated namespaces only. 
     * `private_access` - Allow access to selected service ports from private networks.
         * `m3coordinator` - Allow clients to connect to m3coordinator with a DNS name that 
         always resolves to the service's private IP addresses. Only available in certain network locations.
