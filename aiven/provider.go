@@ -105,6 +105,7 @@ func Provider() *schema.Provider {
 			"aiven_transit_gateway_vpc_attachment": resourceTransitGatewayVPCAttachment(),
 			"aiven_m3db":                           resourceM3DB(),
 			"aiven_m3aggregator":                   resourceM3Aggregator(),
+			"aiven_billing_group":                  resourceBillingGroup(),
 		},
 	}
 
