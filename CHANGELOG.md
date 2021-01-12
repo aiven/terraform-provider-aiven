@@ -4,6 +4,19 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.3] - 2021-01-11
+- Add support for PG upgrade check task
+- Use latest go-client version
+- Add support for billing groups resource
+- Add support for new service user configuration options
+- Add support for new service integrations user configuration options
+- Use Terraform SDK v2 function instead of deprecated 
+- Improve formatting of the code and remove unused functions
+- Fix project vpc error handling
+- Update service user and service integration documentation
+- Fix account team member error handling
+- Remove travis ci config
+
 ## [2.1.2] - 2020-12-09
 - Change VPC peering connection state handling
 - Add terraform modules related docs
