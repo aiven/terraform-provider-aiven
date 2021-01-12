@@ -2,13 +2,13 @@ package aiven
 
 import (
 	"fmt"
-	"github.com/aiven/terraform-provider-aiven/pkg/cache"
-	"golang.org/x/sync/semaphore"
 	"log"
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/pkg/cache"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"golang.org/x/sync/semaphore"
 )
 
 // KafkaTopicAvailabilityWaiter is used to refresh the Aiven Kafka Topic endpoints when
@@ -77,39 +77,13 @@ func (w *KafkaTopicAvailabilityWaiter) refresh() error {
 	}
 	defer kafkaTopicAvailabilitySem.Release(1)
 
-	topicCache := cache.GetTopicCache()
-
-	list, err := w.Client.KafkaTopics.List(w.Project, w.ServiceName)
+	topic, err := w.Client.KafkaTopics.Get(w.Project, w.ServiceName, w.TopicName)
 	if err != nil {
 		return err
 	}
 
-	var topics []*aiven.KafkaTopic
-	for _, item := range list {
-		log.Printf("[TRACE] got a topic `%s` from aiven API with the status `%s`", item.TopicName, item.State)
-		topic := &aiven.KafkaTopic{
-			MinimumInSyncReplicas: item.MinimumInSyncReplicas,
-			Partitions:            partitions(item.Partitions),
-			Replication:           item.Replication,
-			RetentionBytes:        item.RetentionBytes,
-			RetentionHours:        item.RetentionHours,
-			State:                 item.State,
-			TopicName:             item.TopicName,
-			CleanupPolicy:         item.CleanupPolicy}
-
-		// when topic from a topics list is ACTIVE but has an empty config
-		if topic.State == "ACTIVE" && topic.Config.CleanupPolicy.Value == "" {
-			topic, err = w.Client.KafkaTopics.Get(w.Project, w.ServiceName, item.TopicName)
-			if err != nil {
-				return err
-			}
-		}
-
-		log.Printf("[TRACE] got a topic `%s` from aiven API with the status `%s`", topic.TopicName, topic.State)
-		topics = append(topics, topic)
-	}
-
-	topicCache.StoreByProjectAndServiceName(w.Project, w.ServiceName, topics)
+	log.Printf("[TRACE] got a topic `%s` from aiven API with the status `%s`", topic.TopicName, topic.State)
+	cache.GetTopicCache().StoreByProjectAndServiceName(w.Project, w.ServiceName, []*aiven.KafkaTopic{topic})
 	return nil
 }
 
