@@ -15,29 +15,34 @@ var aivenBillingGroupSchema = map[string]*schema.Schema{
 		Required:    true,
 	},
 	"card_id": {
-		Type:        schema.TypeString,
-		Description: "Credit card id",
-		Optional:    true,
+		Type:             schema.TypeString,
+		Description:      "Credit card id",
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
 	},
 	"vat_id": {
-		Type:        schema.TypeString,
-		Description: "VAT id",
-		Optional:    true,
+		Type:             schema.TypeString,
+		Description:      "VAT id",
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
 	},
 	"account_id": {
-		Type:        schema.TypeString,
-		Description: "Account id",
-		Optional:    true,
+		Type:             schema.TypeString,
+		Description:      "Account id",
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
 	},
 	"billing_currency": {
-		Type:        schema.TypeString,
-		Description: "Billing currency",
-		Optional:    true,
+		Type:             schema.TypeString,
+		Description:      "Billing currency",
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
 	},
 	"billing_extra_text": {
-		Type:        schema.TypeString,
-		Description: "Billing extra text",
-		Optional:    true,
+		Type:             schema.TypeString,
+		Description:      "Billing extra text",
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
 	},
 	"billing_emails": {
 		Type:             schema.TypeSet,
@@ -47,9 +52,10 @@ var aivenBillingGroupSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
 	},
 	"company": {
-		Type:        schema.TypeString,
-		Description: "Company name",
-		Optional:    true,
+		Type:             schema.TypeString,
+		Description:      "Company name",
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
 	},
 	"address_lines": {
 		Type:             schema.TypeSet,
@@ -59,24 +65,28 @@ var aivenBillingGroupSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
 	},
 	"country_code": {
-		Type:        schema.TypeString,
-		Description: "Country code",
-		Optional:    true,
+		Type:             schema.TypeString,
+		Description:      "Country code",
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
 	},
 	"city": {
-		Type:        schema.TypeString,
-		Description: "City",
-		Optional:    true,
+		Type:             schema.TypeString,
+		Description:      "City",
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
 	},
 	"zip_code": {
-		Type:        schema.TypeString,
-		Description: "Zip Code",
-		Optional:    true,
+		Type:             schema.TypeString,
+		Description:      "Zip Code",
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
 	},
 	"state": {
-		Type:        schema.TypeString,
-		Optional:    true,
-		Description: "State",
+		Type:             schema.TypeString,
+		Optional:         true,
+		Description:      "State",
+		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
 	},
 }
 
@@ -182,6 +192,11 @@ func resourceBillingGroupRead(_ context.Context, d *schema.ResourceData, m inter
 func resourceBillingGroupUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
+	var billingEmails []*aiven.ContactEmail
+	if emails := contactEmailListForAPI(d, "billing_emails", true); emails != nil {
+		billingEmails = *emails
+	}
+
 	bg, err := client.BillingGroup.Update(
 		d.Id(),
 		aiven.BillingGroupRequest{
@@ -191,9 +206,9 @@ func resourceBillingGroupUpdate(ctx context.Context, d *schema.ResourceData, m i
 			VatId:            optionalStringPointer(d, "vat_id"),
 			BillingCurrency:  optionalStringPointer(d, "billing_currency"),
 			BillingExtraText: optionalStringPointer(d, "billing_extra_text"),
-			BillingEmails:    *contactEmailListForAPI(d, "billing_emails", true),
+			BillingEmails:    billingEmails,
 			Company:          optionalStringPointer(d, "company"),
-			AddressLines:     flattenToString(d.Get("address_lines").([]interface{})),
+			AddressLines:     flattenToString(d.Get("address_lines").(*schema.Set).List()),
 			CountryCode:      optionalStringPointer(d, "country_code"),
 			City:             optionalStringPointer(d, "city"),
 			ZipCode:          optionalStringPointer(d, "zip_code"),

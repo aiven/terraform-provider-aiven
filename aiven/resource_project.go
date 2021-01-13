@@ -19,6 +19,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Description:      "Billing name and address of the project",
 		Optional:         true,
 		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
+		Deprecated:       "Please aiven_billing_group resource to set this value.",
 	},
 	"billing_emails": {
 		Type:             schema.TypeSet,
@@ -26,6 +27,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Elem:             &schema.Schema{Type: schema.TypeString},
 		Optional:         true,
 		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
+		Deprecated:       "Please aiven_billing_group resource to set this value.",
 	},
 	"billing_extra_text": {
 		Type:             schema.TypeString,
@@ -33,6 +35,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		ValidateFunc:     validation.StringLenBetween(0, 1000),
 		Optional:         true,
 		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
+		Deprecated:       "Please aiven_billing_group resource to set this value.",
 	},
 	"ca_cert": {
 		Type:        schema.TypeString,
@@ -88,6 +91,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Optional:         true,
 		Description:      "Billing currency",
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Deprecated:       "Please aiven_billing_group resource to set this value.",
 	},
 	"available_credits": {
 		Type:        schema.TypeString,
@@ -99,6 +103,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Computed:    true,
 		Description: "Billing country",
+		Deprecated:  "Please aiven_billing_group resource to set this value.",
 	},
 	"estimated_balance": {
 		Type:        schema.TypeString,
@@ -114,7 +119,8 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Optional:         true,
 		Description:      "EU VAT Identification Number",
-		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Deprecated:       "Please aiven_billing_group resource to set this value.",
 	},
 	"billing_group": {
 		Type:        schema.TypeString,
@@ -144,37 +150,61 @@ func resourceProjectCreate(_ context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(err)
 	}
 
+	var billingAddress, billingExtraText, countryCode, vatID *string
+	billingCurrency := d.Get("billing_currency").(string)
+	var diags diag.Diagnostics
+	if _, ok := d.GetOk("billing_group"); ok {
+		billingAddress = optionalStringPointer(d, "billing_address")
+		billingExtraText = optionalStringPointer(d, "billing_extra_text")
+		countryCode = optionalStringPointer(d, "country_code")
+		vatID = optionalStringPointer(d, "vat_id")
+
+		if billingAddress != nil || billingExtraText != nil || countryCode != nil || vatID != nil || billingCurrency != "" {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary: "Billing group is already associated to this project, setting one these fields " +
+					"(billing_group, billing_extra_text, country_code, billing_currency and vat_id) will " +
+					"result in overwriting of the billing group properties!",
+			})
+		}
+	} else {
+		billingAddress = optionalStringPointerForUndefined(d, "billing_address")
+		billingExtraText = optionalStringPointerForUndefined(d, "billing_extra_text")
+		countryCode = optionalStringPointerForUndefined(d, "country_code")
+		vatID = optionalStringPointerForUndefined(d, "vat_id")
+	}
+
 	projectName := d.Get("project").(string)
 	_, err = client.Projects.Create(
 		aiven.CreateProjectRequest{
-			BillingAddress:   optionalStringPointerForUndefined(d, "billing_address"),
+			BillingAddress:   billingAddress,
 			BillingEmails:    contactEmailListForAPI(d, "billing_emails", true),
-			BillingExtraText: optionalStringPointerForUndefined(d, "billing_extra_text"),
+			BillingExtraText: billingExtraText,
 			CardID:           cardID,
 			Cloud:            optionalStringPointer(d, "default_cloud"),
 			CopyFromProject:  d.Get("copy_from_project").(string),
-			CountryCode:      optionalStringPointerForUndefined(d, "country_code"),
+			CountryCode:      countryCode,
 			Project:          projectName,
 			TechnicalEmails:  contactEmailListForAPI(d, "technical_emails", true),
 			AccountId:        optionalStringPointer(d, "account_id"),
-			BillingCurrency:  d.Get("billing_currency").(string),
-			VatID:            optionalStringPointerForUndefined(d, "vat_id"),
+			BillingCurrency:  billingCurrency,
+			VatID:            vatID,
 		},
 	)
 	if err != nil && !aiven.IsAlreadyExists(err) {
-		return diag.FromErr(err)
+		return append(diags, diag.FromErr(err)...)
 	}
 
 	if billingGroupId, ok := d.GetOk("billing_group"); ok {
 		d := resourceProjectAssignToBillingGroup(projectName, billingGroupId.(string), client)
 		if d.HasError() {
-			return d
+			return append(diags, d...)
 		}
 	}
 
 	d.SetId(projectName)
 
-	return resourceProjectGetCACert(projectName, client, d)
+	return append(diags, resourceProjectGetCACert(projectName, client, d)...)
 }
 
 func resourceProjectAssignToBillingGroup(projectName, billingGroupId string, client *aiven.Client) diag.Diagnostics {
@@ -259,29 +289,50 @@ func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(err)
 	}
 
-	project, err := client.Projects.Update(
-		d.Get("project").(string),
-		aiven.UpdateProjectRequest{
-			BillingAddress:   optionalStringPointerForUndefined(d, "billing_address"),
-			BillingEmails:    contactEmailListForAPI(d, "billing_emails", false),
-			BillingExtraText: optionalStringPointerForUndefined(d, "billing_extra_text"),
-			CardID:           cardID,
-			Cloud:            optionalStringPointer(d, "default_cloud"),
-			CountryCode:      optionalStringPointerForUndefined(d, "country_code"),
-			TechnicalEmails:  contactEmailListForAPI(d, "technical_emails", false),
-			AccountId:        optionalStringPointer(d, "account_id"),
-			BillingCurrency:  d.Get("billing_currency").(string),
-			VatID:            optionalStringPointerForUndefined(d, "vat_id"),
-		},
-	)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
+	var project *aiven.Project
+	projectName := d.Get("project").(string)
 	if billingGroupId, ok := d.GetOk("billing_group"); ok {
+		project, err = client.Projects.Update(
+			projectName,
+			aiven.UpdateProjectRequest{
+				BillingAddress:   optionalStringPointerForUndefined(d, "billing_address"),
+				BillingEmails:    contactEmailListForAPI(d, "billing_emails", false),
+				BillingExtraText: optionalStringPointerForUndefined(d, "billing_extra_text"),
+				CardID:           cardID,
+				Cloud:            optionalStringPointer(d, "default_cloud"),
+				CountryCode:      optionalStringPointerForUndefined(d, "country_code"),
+				TechnicalEmails:  contactEmailListForAPI(d, "technical_emails", false),
+				AccountId:        optionalStringPointer(d, "account_id"),
+				BillingCurrency:  d.Get("billing_currency").(string),
+				VatID:            optionalStringPointerForUndefined(d, "vat_id"),
+			},
+		)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
 		d := resourceProjectAssignToBillingGroup(d.Get("project").(string), billingGroupId.(string), client)
 		if d.HasError() {
 			return d
+		}
+	} else {
+		project, err = client.Projects.Update(
+			projectName,
+			aiven.UpdateProjectRequest{
+				BillingAddress:   optionalStringPointer(d, "billing_address"),
+				BillingEmails:    contactEmailListForAPI(d, "billing_emails", false),
+				BillingExtraText: optionalStringPointer(d, "billing_extra_text"),
+				CardID:           cardID,
+				Cloud:            optionalStringPointer(d, "default_cloud"),
+				CountryCode:      optionalStringPointer(d, "country_code"),
+				TechnicalEmails:  contactEmailListForAPI(d, "technical_emails", false),
+				AccountId:        optionalStringPointer(d, "account_id"),
+				BillingCurrency:  d.Get("billing_currency").(string),
+				VatID:            optionalStringPointer(d, "vat_id"),
+			},
+		)
+		if err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
