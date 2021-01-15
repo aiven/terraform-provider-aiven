@@ -4,6 +4,9 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.4] - 2021-01-15
+- Improve Kafka Topic caching
+
 ## [2.1.3] - 2021-01-11
 - Add support for PG upgrade check task
 - Use latest go-client version
