@@ -87,7 +87,7 @@
         ]
       },
       "disable_replication_factor_adjustment": {
-        "description": "Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: setting this to true increases a risk of data loss in case of virtual machine failure.",
+        "description": "DEPRECATED: Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can no longer be activated.",
         "example": false,
         "title": "Disable replication factor adjustment",
         "type": [
@@ -344,6 +344,46 @@
         "title": "Index patterns",
         "type": "array"
       },
+      "index_template": {
+        "additional_properties": false,
+        "properties": {
+          "mapping_nested_objects_limit": {
+            "description": "The maximum number of nested JSON objects that a single document can contain across all nested types. This limit helps to prevent out of memory errors when a document contains too many nested objects. Default is 10000.",
+            "example": 10000,
+            "maximum": 100000,
+            "minimum": 0,
+            "title": "index.mapping.nested_objects.limit",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "number_of_replicas": {
+            "description": "The number of replicas each primary shard has.",
+            "example": 1,
+            "maximum": 29,
+            "minimum": 0,
+            "title": "index.number_of_replicas",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "number_of_shards": {
+            "description": "The number of primary shards that an index should have.",
+            "example": 1,
+            "maximum": 1024,
+            "minimum": 1,
+            "title": "index.number_of_shards",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "title": "Template settings for all new indexes",
+        "type": "object"
+      },
       "ip_filter": {
         "default": [
           "0.0.0.0/0"
@@ -452,6 +492,7 @@
       "recovery_basebackup_name": {
         "example": "backup-20191112t091354293891z",
         "maxLength": 128,
+        "pattern": "^[a-zA-Z0-9-_:.]+$",
         "title": "Name of the basebackup to restore in forked service",
         "type": "string"
       },
@@ -923,6 +964,7 @@
       "recovery_basebackup_name": {
         "example": "backup-20191112t091354293891z",
         "maxLength": 128,
+        "pattern": "^[a-zA-Z0-9-_:.]+$",
         "title": "Name of the basebackup to restore in forked service",
         "type": "string"
       },
@@ -1139,6 +1181,7 @@
       "recovery_basebackup_name": {
         "example": "backup-20191112t091354293891z",
         "maxLength": 128,
+        "pattern": "^[a-zA-Z0-9-_:.]+$",
         "title": "Name of the basebackup to restore in forked service",
         "type": "string"
       },
@@ -1187,11 +1230,7 @@
       },
       "kafka": {
         "additionalProperties": false,
-        "default": {
-          "group_max_session_timeout_ms": 300000,
-          "group_min_session_timeout_ms": 6000,
-          "message_max_bytes": 1000012
-        },
+        "default": {},
         "properties": {
           "auto_create_topics_enable": {
             "description": "Enable auto creation of topics",
@@ -1228,16 +1267,16 @@
             "type": "integer"
           },
           "group_max_session_timeout_ms": {
-            "default": 300000,
             "description": "The maximum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures.",
+            "example": 1800000,
             "maximum": 1800000,
             "minimum": 0,
             "title": "group.max.session.timeout.ms",
             "type": "integer"
           },
           "group_min_session_timeout_ms": {
-            "default": 6000,
             "description": "The minimum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures.",
+            "example": 6000,
             "maximum": 60000,
             "minimum": 0,
             "title": "group.min.session.timeout.ms",
@@ -1259,8 +1298,8 @@
             "type": "integer"
           },
           "log_cleaner_min_cleanable_ratio": {
-            "default": 0.5,
             "description": "Controls log compactor frequency. Larger value means more frequent compactions but also more space wasted for logs. Consider setting log.cleaner.max.compaction.lag.ms to enforce compactions sooner, instead of setting a very high value for this option.",
+            "example": 0.5,
             "maximum": 0.9,
             "minimum": 0.2,
             "title": "log.cleaner.min.cleanable.ratio",
@@ -1274,13 +1313,13 @@
             "type": "integer"
           },
           "log_cleanup_policy": {
-            "default": "delete",
             "description": "The default cleanup policy for segments beyond the retention window",
             "enum": [
               "compact",
               "delete",
               "compact,delete"
             ],
+            "example": "delete",
             "title": "log.cleanup.policy",
             "type": "string"
           },
@@ -1401,16 +1440,16 @@
             "type": "integer"
           },
           "max_incremental_fetch_session_cache_slots": {
-            "default": 1000,
             "description": "The maximum number of incremental fetch sessions that the broker will maintain.",
+            "example": 1000,
             "maximum": 10000,
             "minimum": 1000,
             "title": "max.incremental.fetch.session.cache.slots",
             "type": "integer"
           },
           "message_max_bytes": {
-            "default": 1000012,
             "description": "The maximum size of message that the server can receive.",
+            "example": 1048588,
             "maximum": 100001200,
             "minimum": 0,
             "title": "message.max.bytes",
@@ -1702,6 +1741,34 @@
           }
         },
         "title": "Allow access to selected service ports from private networks",
+        "type": "object"
+      },
+      "privatelink_access": {
+        "additionalProperties": false,
+        "hidden": true,
+        "properties": {
+          "kafka": {
+            "example": true,
+            "title": "Enable kafka",
+            "type": "boolean"
+          },
+          "kafka_connect": {
+            "example": true,
+            "title": "Enable kafka_connect",
+            "type": "boolean"
+          },
+          "kafka_rest": {
+            "example": true,
+            "title": "Enable kafka_rest",
+            "type": "boolean"
+          },
+          "schema_registry": {
+            "example": true,
+            "title": "Enable schema_registry",
+            "type": "boolean"
+          }
+        },
+        "title": "Allow access to selected service components through Privatelink",
         "type": "object"
       },
       "public_access": {
@@ -2010,6 +2077,17 @@
           "0.15",
           "1.0"
         ],
+        "title": "M3 major version (deprecated, use m3aggregator_version)",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "m3aggregator_version": {
+        "enum": [
+          "0.15",
+          "1.0"
+        ],
         "title": "M3 major version",
         "type": [
           "string",
@@ -2087,7 +2165,7 @@
           "0.15",
           "1.0"
         ],
-        "title": "M3 major version",
+        "title": "M3 major version (deprecated, use m3db_version)",
         "type": [
           "string",
           "null"
@@ -2098,6 +2176,17 @@
         "example": true,
         "title": "Enable Graphite ingestion using Carbon plaintext protocol",
         "type": "boolean"
+      },
+      "m3db_version": {
+        "enum": [
+          "0.15",
+          "1.0"
+        ],
+        "title": "M3 major version",
+        "type": [
+          "string",
+          "null"
+        ]
       },
       "namespaces": {
         "default": [
@@ -3141,6 +3230,24 @@
         "title": "Allow access to selected service ports from private networks",
         "type": "object"
       },
+      "privatelink_access": {
+        "additionalProperties": false,
+        "hidden": true,
+        "properties": {
+          "pg": {
+            "example": true,
+            "title": "Enable pg",
+            "type": "boolean"
+          },
+          "pgbouncer": {
+            "example": true,
+            "title": "Enable pgbouncer",
+            "type": "boolean"
+          }
+        },
+        "title": "Allow access to selected service components through Privatelink",
+        "type": "object"
+      },
       "project_to_fork_from": {
         "createOnly": true,
         "default": null,
@@ -3369,6 +3476,7 @@
       "recovery_basebackup_name": {
         "example": "backup-20191112t091354293891z",
         "maxLength": 128,
+        "pattern": "^[a-zA-Z0-9-_:.]+$",
         "title": "Name of the basebackup to restore in forked service",
         "type": "string"
       },
