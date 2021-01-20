@@ -295,6 +295,7 @@ func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interfac
 		project, err = client.Projects.Update(
 			projectName,
 			aiven.UpdateProjectRequest{
+				Name:             projectName,
 				BillingAddress:   optionalStringPointerForUndefined(d, "billing_address"),
 				BillingEmails:    contactEmailListForAPI(d, "billing_emails", false),
 				BillingExtraText: optionalStringPointerForUndefined(d, "billing_extra_text"),
@@ -319,6 +320,7 @@ func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interfac
 		project, err = client.Projects.Update(
 			projectName,
 			aiven.UpdateProjectRequest{
+				Name:             projectName,
 				BillingAddress:   optionalStringPointer(d, "billing_address"),
 				BillingEmails:    contactEmailListForAPI(d, "billing_emails", false),
 				BillingExtraText: optionalStringPointer(d, "billing_extra_text"),
