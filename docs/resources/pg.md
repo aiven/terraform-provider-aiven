@@ -231,7 +231,11 @@ configuration options available:
         * `max_background_workers` - (Optional) The number of background workers for timescaledb 
         operations. You should configure this setting to the sum of your number of databases and the 
         total number of concurrent background workers you want running at any given point in time.
-        
+
+    * `privatelink_access` - (Optional) Allow access to selected service components through Privatelink.
+        * `pg` - (Optional) Enable pg.
+        * `pgbouncer` - (Optional) Enable pgbouncer.
+
     * `variant` - (Optional) Variant of the PostgreSQL service, may affect the features that are 
     exposed by default. Options: `aiven` or `timescale`.
     * `work_mem` - (Optional) Sets the maximum amount of memory to be used by a query operation (such 

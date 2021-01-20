@@ -14,7 +14,7 @@ resource "aiven_m3aggregator" "m3a" {
     maintenance_window_time = "10:00:00"
     
     m3aggregator_user_config {
-      m3_version = 0.15
+      m3aggregator_version = 0.15
     }
 }
 ```
@@ -67,7 +67,7 @@ UTC time in HH:mm:ss format.
 
 * `m3aggregator_user_config` - (Optional) defines M3 Aggregator specific additional configuration options. 
 The following configuration options available:
-    * `m3_version` - (Optional) M3 major version
+    * `m3aggregator_version` - (Optional) M3 major version
     * `custom_domain` - (Optional) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
     * `ip_filter` - (Optional) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
 

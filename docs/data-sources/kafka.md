@@ -223,6 +223,12 @@ configuration options available:
         
     * `schema_registry` - Enable Schema-Registry service
     
+    * `privatelink_access` - Allow access to selected service components through Privatelink
+        * `kafka` - Enable kafka
+        * `kafka_connect` - Enable kafka_connect
+        * `kafka_rest` - Enable kafka_rest
+        * `schema_registry` - Enable schema_registry
+    
 * `service_uri` - URI for connecting to the Kafka service.
 
 * `service_host` - Kafka hostname.
