@@ -4,8 +4,16 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.5] - 2021-01-21
+- Add support for renaming projects (only allowed for projects with no powered on services)
+- Use latest go-client which fixes Kafka Topic consumer group parsing issue
+- Add support for new user configuration options
+- Update documentation with the newly available user configuration options
+- Kafka topic availability improvements
+
 ## [2.1.4] - 2021-01-15
 - Improve Kafka Topic caching
+- Billing group: change project fields behaviour
 
 ## [2.1.3] - 2021-01-11
 - Add support for PG upgrade check task
