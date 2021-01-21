@@ -187,7 +187,7 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 	})
 }
 
-func TestAccAivenKafkaTopic_100topics(t *testing.T) {
+func TestAccAivenKafkaTopic_450topics(t *testing.T) {
 	resourceName := "aiven_kafka_topic.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
@@ -197,7 +197,7 @@ func TestAccAivenKafkaTopic_100topics(t *testing.T) {
 		CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKafka101TopicResource(rName),
+				Config: testAccKafka451TopicResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenKafkaTopicAttributes("data.aiven_kafka_topic.topic"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
@@ -211,11 +211,11 @@ func TestAccAivenKafkaTopic_100topics(t *testing.T) {
 	})
 }
 
-func testAccKafka101TopicResource(name string) string {
+func testAccKafka451TopicResource(name string) string {
 	s := testAccKafkaTopicResource(name)
 
 	// add extra 100 Kafka topics to test caching layer and creation waiter functionality
-	for i := 1; i < 100; i++ {
+	for i := 1; i < 450; i++ {
 		s += fmt.Sprintf(`
 			resource "aiven_kafka_topic" "foo%s" {
 				project = data.aiven_project.foo.project

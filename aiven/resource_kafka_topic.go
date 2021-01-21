@@ -247,7 +247,7 @@ func resourceKafkaTopic() *schema.Resource {
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(1 * time.Minute),
-			Read:   schema.DefaultTimeout(4 * time.Minute),
+			Read:   schema.DefaultTimeout(10 * time.Minute),
 		},
 		Schema: aivenKafkaTopicSchema,
 	}

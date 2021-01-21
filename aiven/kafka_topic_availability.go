@@ -71,7 +71,7 @@ func (w *KafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 func (w *KafkaTopicAvailabilityWaiter) refresh() error {
-	if !kafkaTopicAvailabilitySem.TryAcquire(1) {
+	if !kafkaTopicAvailabilitySem.TryAcquire(5) {
 		log.Printf("[TRACE] Kafka Topic Availability cache refresh already in progress ...")
 		return nil
 	}
@@ -92,11 +92,12 @@ func (w *KafkaTopicAvailabilityWaiter) Conf(timeout time.Duration) *resource.Sta
 	log.Printf("[DEBUG] Kafka Topic availability waiter timeout %.0f minutes", timeout.Minutes())
 
 	return &resource.StateChangeConf{
-		Pending:    []string{"CONFIGURING"},
-		Target:     []string{"ACTIVE"},
-		Refresh:    w.RefreshFunc(),
-		Timeout:    timeout,
-		MinTimeout: 10 * time.Second,
+		Pending:        []string{"CONFIGURING"},
+		Target:         []string{"ACTIVE"},
+		Refresh:        w.RefreshFunc(),
+		Timeout:        timeout,
+		MinTimeout:     20 * time.Second,
+		NotFoundChecks: 50,
 	}
 }
 
