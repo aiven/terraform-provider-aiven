@@ -51,7 +51,7 @@ func testAccM3DBResource(name string) string {
 			maintenance_window_time = "10:00:00"
 			
 			m3db_user_config {
-				m3_version = 0.15
+				m3db_version = 0.15
 							
 				namespaces {
 					name = "test-acc-%s"

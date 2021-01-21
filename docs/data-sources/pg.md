@@ -156,7 +156,7 @@ configuration options available:
     * `pg_read_replica` - This setting is deprecated. Use read-replica service integration instead.
     * `pg_service_to_fork_from` - Name of the PG Service from which to fork (deprecated, use service_to_fork_from). 
     This has effect only when a new service is being created.
-    * `project_to_fork_from` - (Optional) Name of another project to fork a service from. This has
+    * `project_to_fork_from` - Name of another project to fork a service from. This has
     effect only when a new service is being created.
     * `pg_version` - PostgreSQL major version.
     
@@ -212,6 +212,10 @@ configuration options available:
         * `max_background_workers` - The number of background workers for timescaledb 
         operations. You should configure this setting to the sum of your number of databases and the 
         total number of concurrent background workers you want running at any given point in time.
+
+    * `privatelink_access` - Allow access to selected service components through Privatelink.
+        * `pg` - Enable pg.
+        * `pgbouncer` - Enable pgbouncer.
         
     * `variant` - Variant of the PostgreSQL service, may affect the features that are 
     exposed by default. Options: `aiven` or `timescale`.

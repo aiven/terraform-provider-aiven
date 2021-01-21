@@ -167,7 +167,14 @@ The following configuration options available:
         service nodes that are in a project VPC or another type of private network.
         * `prometheus` - Allow clients to connect to prometheus from the public 
         internet for service nodes that are in a project VPC or another type of private network.
-    
+
+    * `index_template` - Template settings for all new indexe.
+        * `mapping_nested_objects_limit` - The maximum number of nested JSON objects that
+        a single document can contain across all nested types. This limit helps to prevent out of
+        memory errors when a document contains too many nested objects. Default is 10000.
+        * `number_of_replicas` - The number of replicas each primary shard has.
+        * `number_of_shards` - The number of primary shards that an index should have.    
+
     * `recovery_basebackup_name` - Name of the basebackup to restore in forked service.
     * `service_to_fork_from` - Name of another service to fork from. This has effect 
     only when a new service is being created.

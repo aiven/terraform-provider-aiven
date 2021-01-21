@@ -237,7 +237,13 @@ configuration options available:
         service nodes that are in a project VPC or another type of private network
         * `schema_registry` - (Optional) Allow clients to connect to schema_registry from the public 
         internet for service nodes that are in a project VPC or another type of private network
-        
+
+    * `privatelink_access` - (Optional) Allow access to selected service components through Privatelink
+        * `kafka` - (Optional) Enable kafka
+        * `kafka_connect` - (Optional) Enable kafka_connect
+        * `kafka_rest` - (Optional) Enable kafka_rest
+        * `schema_registry` - (Optional) Enable schema_registry
+      
     * `schema_registry` - (Optional) Enable Schema-Registry service
     
 * `timeouts` - (Optional) a custom client timeouts.

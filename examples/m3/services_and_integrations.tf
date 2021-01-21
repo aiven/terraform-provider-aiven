@@ -5,7 +5,7 @@ resource "aiven_m3db" "m3db" {
   service_name = "m3db"
 
   m3db_user_config {
-    m3_version = 0.15
+    m3db_version = 1.0
 
     namespaces {
       name = "test-acc-%s"
@@ -65,7 +65,7 @@ resource "aiven_m3aggregator" "m3a" {
   service_name = "m3a"
 
   m3aggregator_user_config {
-    m3_version = 0.15
+    m3aggregator_version = 1.0
   }
 }
 

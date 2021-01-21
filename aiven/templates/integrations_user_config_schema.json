@@ -445,6 +445,12 @@
     "title": "Integration user config",
     "type": "object"
   },
+  "schema_registry_proxy": {
+    "additionalProperties": false,
+    "properties": {},
+    "title": "Integration user config",
+    "type": "object"
+  },
   "signalfx": {
     "additionalProperties": false,
     "title": "Integration user config",

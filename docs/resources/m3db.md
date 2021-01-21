@@ -14,7 +14,7 @@ resource "aiven_m3db" "m3" {
     maintenance_window_time = "10:00:00"
     
     m3db_user_config {
-        m3_version = 0.15
+      m3db_version = 0.15
                     
         namespaces {
             name = "my-ns1"
@@ -72,7 +72,7 @@ UTC time in HH:mm:ss format.
 
 * `m3db_user_config` - (Optional) defines M3 specific additional configuration options. The following 
 configuration options available:
-    * `m3_version` - (Optional) M3 major version
+    * `m3db_version` - (Optional) M3 major version
     * `custom_domain` - (Optional) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
     * `ip_filter` - (Optional) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
     * `project_to_fork_from` - (Optional) Name of another project to fork a service from. This has

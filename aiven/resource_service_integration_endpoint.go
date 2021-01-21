@@ -127,6 +127,16 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 		Optional: true,
 		Type:     schema.TypeList,
 	},
+	"external_schema_registry_user_config": {
+		Description: "External schema registry specific user configurable settings",
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				templates.GetUserConfigSchema("endpoint")["external_schema_registry"].(map[string]interface{})),
+		},
+		MaxItems: 1,
+		Optional: true,
+		Type:     schema.TypeList,
+	},
 }
 
 func resourceServiceIntegrationEndpoint() *schema.Resource {

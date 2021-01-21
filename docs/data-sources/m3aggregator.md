@@ -63,7 +63,7 @@ UTC time in HH:mm:ss format.
 
 * `m3aggregator_user_config` - defines M3 Aggregator specific additional configuration options. 
 The following configuration options available:
-    * `m3_version` - M3 major version
+    * `m3aggregator_version` - M3 major version
     * `custom_domain` - Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
     * `ip_filter` - Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
 
