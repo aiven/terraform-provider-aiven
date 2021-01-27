@@ -3,6 +3,7 @@ package aiven
 import (
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/aiven/aiven-go-client"
@@ -21,6 +22,7 @@ type KafkaTopicAvailabilityWaiter struct {
 }
 
 var kafkaTopicAvailabilitySem = semaphore.NewWeighted(1)
+var warmingUpCacheOne sync.Once
 
 // RefreshFunc will call the Aiven client and refresh it's state.
 func (w *KafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
@@ -71,19 +73,57 @@ func (w *KafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 func (w *KafkaTopicAvailabilityWaiter) refresh() error {
-	if !kafkaTopicAvailabilitySem.TryAcquire(5) {
+	if !kafkaTopicAvailabilitySem.TryAcquire(1) {
 		log.Printf("[TRACE] Kafka Topic Availability cache refresh already in progress ...")
 		return nil
 	}
 	defer kafkaTopicAvailabilitySem.Release(1)
 
-	topic, err := w.Client.KafkaTopics.Get(w.Project, w.ServiceName, w.TopicName)
-	if err != nil {
-		return err
+	c := cache.GetTopicCache()
+
+	// warming up cache if queue is empty
+	warmingUpCacheOne.Do(func() {
+		log.Printf("[DEBUG] Kafka Topic queue is empty, warming up cache!")
+		topics, err := w.Client.KafkaTopics.List(w.Project, w.ServiceName)
+		if err == nil {
+			for _, t := range topics {
+				c.AddToQueue(w.Project, w.ServiceName, t.TopicName)
+			}
+		}
+	})
+
+	if _, ok := c.LoadByTopicName(w.Project, w.ServiceName, w.TopicName); ok {
+		return nil
 	}
 
-	log.Printf("[TRACE] got a topic `%s` from aiven API with the status `%s`", topic.TopicName, topic.State)
-	cache.GetTopicCache().StoreByProjectAndServiceName(w.Project, w.ServiceName, []*aiven.KafkaTopic{topic})
+	for {
+		queue := c.GetQueue(w.Project, w.ServiceName)
+
+		if len(queue) == 0 {
+			break
+		}
+
+		log.Printf("[DEBUG] Kafka Topic queue: %+v", queue)
+		v2Topics, err := w.Client.KafkaTopics.V2List(w.Project, w.ServiceName, queue)
+		if err != nil {
+			if err.(aiven.Error).Status == 409 {
+				log.Printf("[DEBUG] Kafka Topic V2 endpoit is not available, using v1!")
+				for _, n := range queue {
+					topic, err := w.Client.KafkaTopics.Get(w.Project, w.ServiceName, n)
+					if err != nil {
+						return err
+					}
+
+					cache.GetTopicCache().StoreByProjectAndServiceName(w.Project, w.ServiceName, []*aiven.KafkaTopic{topic})
+				}
+			} else {
+				return err
+			}
+		}
+
+		cache.GetTopicCache().StoreByProjectAndServiceName(w.Project, w.ServiceName, v2Topics)
+	}
+
 	return nil
 }
 

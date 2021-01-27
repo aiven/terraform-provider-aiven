@@ -62,7 +62,7 @@ func (w *KafkaTopicCreateWaiter) Conf(timeout time.Duration) *resource.StateChan
 		Pending:    []string{"CREATING"},
 		Target:     []string{"CREATED"},
 		Refresh:    w.RefreshFunc(),
-		Delay:      10 * time.Second,
+		Delay:      5 * time.Second,
 		Timeout:    timeout,
 		MinTimeout: 10 * time.Second,
 	}
