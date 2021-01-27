@@ -269,3 +269,43 @@ In addition to all arguments above, the following attributes are exported:
     * `port` - PostgreSQL port
     * `sslmode` - PostgreSQL sslmode setting (currently always `require`)
     * `user` - PostgreSQL admin user name
+
+## To create PG USER, SCHEMA, etc use community PostgresSQL provider 
+
+For more information regarding PostgreSQL provider features please check [official documentation.](https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/)
+
+```hcl
+resource "aiven_pg" "pg" {
+    project = data.aiven_project.pr1.project
+    cloud_name = "google-europe-west1"
+    plan = "startup-4"
+    service_name = "my-pg1"
+}
+
+provider "postgresql" {
+  host = aiven_pg.pg.service_host
+  port = aiven_pg.pg.service_port
+  database = "defaultdb"
+  username = aiven_pg.pg.service_username
+  password = aiven_pg.pg.service_password
+  sslmode = "require"
+  connect_timeout = 15
+}
+
+resource postgresql_database "test_db" {
+  name = "test_db"
+}
+
+resource "postgresql_role" "test_r" {
+  name = "test_r"
+}
+
+resource "postgresql_schema" "my_schema" {
+  name  = "my_schema"
+
+  policy {
+    usage = true
+    role  = postgresql_role.test_r.name
+  }
+}
+```
