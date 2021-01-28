@@ -40,6 +40,7 @@ func TestGetTopicCache(t *testing.T) {
 			},
 			&TopicCache{
 				internal: make(map[string]map[string]aiven.KafkaTopic),
+				inQueue:  make(map[string][]string),
 			},
 		},
 	}

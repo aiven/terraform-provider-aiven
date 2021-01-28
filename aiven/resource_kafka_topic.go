@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"log"
 	"strings"
 	"time"
 )
@@ -248,6 +250,7 @@ func resourceKafkaTopic() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(1 * time.Minute),
 			Read:   schema.DefaultTimeout(10 * time.Minute),
+			Delete: schema.DefaultTimeout(2 * time.Minute),
 		},
 		Schema: aivenKafkaTopicSchema,
 	}
@@ -429,7 +432,7 @@ func resourceKafkaTopicUpdate(_ context.Context, d *schema.ResourceData, m inter
 	return nil
 }
 
-func resourceKafkaTopicDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, topicName := splitResourceID3(d.Id())
@@ -438,9 +441,17 @@ func resourceKafkaTopicDelete(_ context.Context, d *schema.ResourceData, m inter
 		return diag.Errorf("cannot delete kafka topic when termination_protection is enabled")
 	}
 
-	err := client.KafkaTopics.Delete(projectName, serviceName, topicName)
-	if err != nil && !aiven.IsNotFound(err) {
-		return diag.FromErr(err)
+	waiter := KafkaTopicDeleteWaiter{
+		Client:      client,
+		ProjectName: projectName,
+		ServiceName: serviceName,
+		TopicName:   topicName,
+	}
+
+	timeout := d.Timeout(schema.TimeoutDelete)
+	_, err := waiter.Conf(timeout).WaitForStateContext(ctx)
+	if err != nil {
+		return diag.Errorf("error waiting for Aiven Kafka Topic to be DELETED: %s", err)
 	}
 
 	return nil
@@ -486,5 +497,41 @@ func flattenKafkaTopicConfig(t aiven.KafkaTopic) []map[string]interface{} {
 			"segment_ms":                          toOptionalString(t.Config.SegmentMs.Value),
 			"unclean_leader_election_enable":      toOptionalString(t.Config.UncleanLeaderElectionEnable.Value),
 		},
+	}
+}
+
+// KafkaTopicDeleteWaiter is used to wait for Kafka Topic to be deleted.
+type KafkaTopicDeleteWaiter struct {
+	Client      *aiven.Client
+	ProjectName string
+	ServiceName string
+	TopicName   string
+}
+
+// RefreshFunc will call the Aiven client and refresh it's state.
+func (w *KafkaTopicDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		err := w.Client.KafkaTopics.Delete(w.ProjectName, w.ServiceName, w.TopicName)
+		if err != nil {
+			if !aiven.IsNotFound(err) {
+				return nil, "REMOVING", nil
+			}
+		}
+
+		return aiven.KafkaTopic{}, "DELETED", nil
+	}
+}
+
+// Conf sets up the configuration to refresh.
+func (w *KafkaTopicDeleteWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
+	log.Printf("[DEBUG] Delete waiter timeout %.0f minutes", timeout.Minutes())
+
+	return &resource.StateChangeConf{
+		Pending:    []string{"REMOVING"},
+		Target:     []string{"DELETED"},
+		Refresh:    w.RefreshFunc(),
+		Delay:      1 * time.Second,
+		Timeout:    timeout,
+		MinTimeout: 1 * time.Second,
 	}
 }

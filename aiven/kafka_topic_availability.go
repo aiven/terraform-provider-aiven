@@ -81,7 +81,7 @@ func (w *KafkaTopicAvailabilityWaiter) refresh() error {
 
 	c := cache.GetTopicCache()
 
-	// warming up cache if queue is empty
+	// warming up cache
 	warmingUpCacheOne.Do(func() {
 		log.Printf("[DEBUG] Kafka Topic queue is empty, warming up cache!")
 		topics, err := w.Client.KafkaTopics.List(w.Project, w.ServiceName)
@@ -92,9 +92,12 @@ func (w *KafkaTopicAvailabilityWaiter) refresh() error {
 		}
 	})
 
+	// check if topic is already in cache
 	if _, ok := c.LoadByTopicName(w.Project, w.ServiceName, w.TopicName); ok {
 		return nil
 	}
+
+	c.AddToQueue(w.Project, w.ServiceName, w.TopicName)
 
 	for {
 		queue := c.GetQueue(w.Project, w.ServiceName)
@@ -106,10 +109,12 @@ func (w *KafkaTopicAvailabilityWaiter) refresh() error {
 		log.Printf("[DEBUG] Kafka Topic queue: %+v", queue)
 		v2Topics, err := w.Client.KafkaTopics.V2List(w.Project, w.ServiceName, queue)
 		if err != nil {
+			// if v2 endpoint retrieves 409 response code, it means that Kafka service has old nodes and
+			// v2 endpoint is not available, therefore using v1.
 			if err.(aiven.Error).Status == 409 {
 				log.Printf("[DEBUG] Kafka Topic V2 endpoit is not available, using v1!")
-				for _, n := range queue {
-					topic, err := w.Client.KafkaTopics.Get(w.Project, w.ServiceName, n)
+				for _, t := range queue {
+					topic, err := w.Client.KafkaTopics.Get(w.Project, w.ServiceName, t)
 					if err != nil {
 						return err
 					}
