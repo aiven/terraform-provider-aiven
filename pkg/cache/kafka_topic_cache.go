@@ -16,6 +16,7 @@ var (
 type TopicCache struct {
 	sync.RWMutex
 	internal map[string]map[string]aiven.KafkaTopic
+	inQueue  map[string][]string
 }
 
 // NewTopicCache creates new global instance of Kafka Topic Cache
@@ -25,6 +26,7 @@ func NewTopicCache() *TopicCache {
 	once.Do(func() {
 		topicCache = &TopicCache{
 			internal: make(map[string]map[string]aiven.KafkaTopic),
+			inQueue:  make(map[string][]string),
 		}
 	})
 
@@ -81,12 +83,66 @@ func (t *TopicCache) DeleteByProjectAndServiceName(projectName, serviceName stri
 func (t *TopicCache) StoreByProjectAndServiceName(projectName, serviceName string, list []*aiven.KafkaTopic) {
 	log.Printf("[DEBUG] Updating Kafka Topic cache for project %s and service %s ...", projectName, serviceName)
 
+	if len(list) == 0 {
+		return
+	}
+
 	for _, topic := range list {
 		t.Lock()
 		if _, ok := t.internal[projectName+serviceName]; !ok {
 			t.internal[projectName+serviceName] = make(map[string]aiven.KafkaTopic)
 		}
 		t.internal[projectName+serviceName][topic.TopicName] = *topic
+
+		// when topic is added to cache, it need to be deleted from the queue
+		for i, name := range t.inQueue[projectName+serviceName] {
+			if name == topic.TopicName {
+				t.inQueue[projectName+serviceName] = append(t.inQueue[projectName+serviceName][:i], t.inQueue[projectName+serviceName][i+1:]...)
+			}
+		}
+
 		t.Unlock()
 	}
+}
+
+// IsEmpty checks if cache is empty for particular service
+func (t *TopicCache) IsQueueEmpty(projectName, serviceName string) bool {
+	t.RLock()
+	defer t.RUnlock()
+
+	_, ok := t.inQueue[projectName+serviceName]
+
+	return !ok
+}
+
+// AddToQueue adds a topic name to a queue of topics to be found
+func (t *TopicCache) AddToQueue(projectName, serviceName, topicName string) {
+	var isFound bool
+
+	t.Lock()
+	// check if topic is already in the queue
+	for _, name := range t.inQueue[projectName+serviceName] {
+		if name == topicName {
+			isFound = true
+		}
+	}
+
+	_, inCache := t.internal[projectName+serviceName][topicName]
+	// the only topic that is not in the queue nor inside cache can be added to the queue
+	if !isFound && !inCache {
+		t.inQueue[projectName+serviceName] = append(t.inQueue[projectName+serviceName], topicName)
+	}
+	t.Unlock()
+}
+
+// GetQueue retrieves a topics queue, retrieves up to 100 first elements
+func (t *TopicCache) GetQueue(projectName, serviceName string) []string {
+	t.RLock()
+	defer t.RUnlock()
+
+	if len(t.inQueue[projectName+serviceName]) >= 100 {
+		return t.inQueue[projectName+serviceName][:99]
+	}
+
+	return t.inQueue[projectName+serviceName]
 }
