@@ -4,6 +4,14 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.6] - 2021-02-02
+- Add Kafka Topic graceful deletion logic
+- New Kafka Topic waiter and caching logic, uses v2 endpoint when available.
+- Add security policy
+- Improve project refresh handling when card id is incorrect
+- Uses latest Terraform SDK v2.4.2
+- Minor documentation improvements
+
 ## [2.1.5] - 2021-01-21
 - Add support for renaming projects (only allowed for projects with no powered on services)
 - Use latest go-client which fixes Kafka Topic consumer group parsing issue
