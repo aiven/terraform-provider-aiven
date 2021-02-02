@@ -19,7 +19,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Description:      "Billing name and address of the project",
 		Optional:         true,
 		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
-		Deprecated:       "Please aiven_billing_group resource to set this value.",
+		Deprecated:       "Please use aiven_billing_group resource to set this value.",
 	},
 	"billing_emails": {
 		Type:             schema.TypeSet,
@@ -27,7 +27,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Elem:             &schema.Schema{Type: schema.TypeString},
 		Optional:         true,
 		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
-		Deprecated:       "Please aiven_billing_group resource to set this value.",
+		Deprecated:       "Please use aiven_billing_group resource to set this value.",
 	},
 	"billing_extra_text": {
 		Type:             schema.TypeString,
@@ -35,7 +35,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		ValidateFunc:     validation.StringLenBetween(0, 1000),
 		Optional:         true,
 		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
-		Deprecated:       "Please aiven_billing_group resource to set this value.",
+		Deprecated:       "Please use aiven_billing_group resource to set this value.",
 	},
 	"ca_cert": {
 		Type:        schema.TypeString,
@@ -49,6 +49,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Optional:         true,
 		Description:      "Credit card ID",
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Deprecated:       "Please use aiven_billing_group resource to set this value.",
 	},
 	"account_id": {
 		Type:             schema.TypeString,
@@ -67,6 +68,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Optional:         true,
 		Description:      "Billing country code of the project",
 		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
+		Deprecated:       "Please use aiven_billing_group resource to set this value.",
 	},
 	"project": {
 		Type:        schema.TypeString,
@@ -91,7 +93,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Optional:         true,
 		Description:      "Billing currency",
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Deprecated:       "Please aiven_billing_group resource to set this value.",
+		Deprecated:       "Please use aiven_billing_group resource to set this value.",
 	},
 	"available_credits": {
 		Type:        schema.TypeString,
@@ -103,7 +105,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Computed:    true,
 		Description: "Billing country",
-		Deprecated:  "Please aiven_billing_group resource to set this value.",
+		Deprecated:  "Please use aiven_billing_group resource to set this value.",
 	},
 	"estimated_balance": {
 		Type:        schema.TypeString,
@@ -120,7 +122,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Optional:         true,
 		Description:      "EU VAT Identification Number",
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Deprecated:       "Please aiven_billing_group resource to set this value.",
+		Deprecated:       "Please use aiven_billing_group resource to set this value.",
 	},
 	"billing_group": {
 		Type:        schema.TypeString,
@@ -147,7 +149,7 @@ func resourceProjectCreate(_ context.Context, d *schema.ResourceData, m interfac
 	client := m.(*aiven.Client)
 	cardID, err := getLongCardID(client, d.Get("card_id").(string))
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("Error getting long card id: %s", err)
 	}
 
 	var billingAddress, billingExtraText, countryCode, vatID *string
@@ -242,13 +244,18 @@ func resourceProjectRead(_ context.Context, d *schema.ResourceData, m interface{
 		return diag.Errorf("Error getting project: %s", err)
 	}
 
+	var diags diag.Diagnostics
+
 	currentCardId := d.Get("card_id").(string)
 	currentLongCardID, err := getLongCardID(client, currentCardId)
-	if err != nil {
-		return diag.Errorf("Error getting long card id: %s", err)
+	if err != nil { // do not error when `card_id` is broken
+		currentCardId = ""
+		diags = append(diags,
+			diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  fmt.Sprintf("Error getting long card id: %s", err),
+			})
 	}
-
-	var diags diag.Diagnostics
 
 	if currentCardId != "" {
 		// for non empty card_id long card id should exist
@@ -286,7 +293,7 @@ func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interfac
 
 	cardID, err := getLongCardID(client, d.Get("card_id").(string))
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("Error getting long card id: %s", err)
 	}
 
 	var project *aiven.Project
