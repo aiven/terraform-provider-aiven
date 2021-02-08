@@ -215,3 +215,6 @@ In addition to all arguments above, the following attributes are exported:
 
 * `elasticsearch` - Elasticsearch specific server provided values.
     * `kibana_uri` - URI for Kibana frontend.
+
+Aiven ID format when importing existing resource: `<project_name>/<service_name>`, where `project_name`
+is the name of the project, and `service_name` is the name of the Elasticsearch service.

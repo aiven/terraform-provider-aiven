@@ -270,3 +270,6 @@ In addition to all arguments above, the following attributes are exported:
     * `connect_uri` - The Kafka Connect URI, if any
     * `rest_uri` - The Kafka REST URI, if any
     * `schema_registry_uri` - The Schema Registry URI, if any
+
+Aiven ID format when importing existing resource: `<project_name>/<service_name>`, where `project_name`
+is the name of the project, and `service_name` is the name of the Kafka service.
