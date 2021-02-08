@@ -31,8 +31,10 @@ resource "aiven_service_integration" "myintegration" {
   e.g. `aiven_kafka.XXX.service_name`) must be specified. In either case the target needs to be defined using the
   reference syntax described above to set up the dependency correctly.
 
-* `integration_type` - (Optional) identifies the type of integration that is set up. Possible values include `dashboard`
-  , `datadog`, `logs`, `metrics` and `mirrormaker`.
+* `integration_type` - (Required) identifies the type of integration that is set up. Possible values include `dashboard`
+  , `datadog`, `logs`, `metrics`, `kafka_connect`, `external_google_cloud_logging`, `external_elasticsearch_logs`
+  `external_aws_cloudwatch_logs`, `read_replica`, `rsyslog`, `signalfx`, `kafka_logs`, `m3aggregator`, 
+  `m3coordinator`, `prometheus`, `schema_registry_proxy` and `kafka_mirrormaker`.
 
 * `source_endpoint_id` or `source_service_name` - (Optional) identifies the source side of the integration. Only either
   endpoint identifier (e.g. `aiven_service_integration_endpoint.XXX.id`) or service name (

@@ -309,3 +309,6 @@ resource "postgresql_schema" "my_schema" {
   }
 }
 ```
+
+Aiven ID format when importing existing resource: `<project_name>/<service_name>`, where `project_name`
+is the name of the project, and `service_name` is the name of the PG service.

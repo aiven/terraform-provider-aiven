@@ -126,3 +126,6 @@ In addition to all arguments above, the following attributes are exported:
 * `state` - Service state.
 
 * `redis` - Redis specific server provided values.
+
+Aiven ID format when importing existing resource: `<project_name>/<service_name>`, where `project_name`
+is the name of the project, and `service_name` is the name of the Redis service.
