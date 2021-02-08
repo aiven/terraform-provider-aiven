@@ -94,7 +94,7 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, m inter
 		aiven.CreateDatabaseRequest{
 			Database:  databaseName,
 			LcCollate: optionalString(d, "lc_collate"),
-			LcType:    optionalString(d, "lc_type"),
+			LcType:    optionalString(d, "lc_ctype"),
 		},
 	)
 	if err != nil && !aiven.IsAlreadyExists(err) {
