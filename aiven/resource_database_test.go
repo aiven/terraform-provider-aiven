@@ -160,6 +160,8 @@ func testAccDatabaseResource(name string) string {
 			project = aiven_service.bar.project
 			service_name = aiven_service.bar.service_name
 			database_name = "test-acc-db-%s"
+			lc_ctype = "en_US.UTF-8"
+			lc_collate = "en_US.UTF-8"
 		}
 
 		data "aiven_database" "database" {
