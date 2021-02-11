@@ -4,6 +4,10 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.7] - 2021-02-11
+- Fix `lc_ctype` PostgreSQL database parameter
+- Minor documentation improvements
+
 ## [2.1.6] - 2021-02-02
 - Add Kafka Topic graceful deletion logic
 - New Kafka Topic waiter and caching logic, uses v2 endpoint when available.
