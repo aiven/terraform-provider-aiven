@@ -198,6 +198,10 @@ func parseOptionalStringToInt64(val interface{}) *int64 {
 		return nil
 	}
 
+	if v == "" {
+		return nil
+	}
+
 	res, err := strconv.ParseInt(v, 10, 64)
 	if err != nil {
 		return nil
@@ -212,6 +216,10 @@ func parseOptionalStringToFloat64(val interface{}) *float64 {
 		return nil
 	}
 
+	if v == "" {
+		return nil
+	}
+
 	res, err := strconv.ParseFloat(v, 64)
 	if err != nil {
 		return nil
@@ -223,6 +231,10 @@ func parseOptionalStringToFloat64(val interface{}) *float64 {
 func parseOptionalStringToBool(val interface{}) *bool {
 	v, ok := val.(string)
 	if !ok {
+		return nil
+	}
+
+	if v == "" {
 		return nil
 	}
 
