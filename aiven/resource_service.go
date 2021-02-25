@@ -965,7 +965,8 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 
 	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat("service", service.Type, service.UserConfig)
 	if err := d.Set(service.Type+"_user_config", userConfig); err != nil {
-		return fmt.Errorf("cannot set `%s_user_config` : %s", service.Type, err)
+		return fmt.Errorf("cannot set `%s_user_config` : %s;"+
+			"Please make sure that all Aiven services have unique service names", service.Type, err)
 	}
 
 	params := service.URIParams
