@@ -121,12 +121,12 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 	// Azure related fields are only available for VPC Peering Connection resource but
 	// not for Transit Gateway VPC Attachment therefore ResourceData.Get retrieves nil
 	// for fields that are not present in the schema.
-	var peerAzureAppId, peerAzureTenantId, peerResourceGroup string
+	var peerAzureAppID, peerAzureTenantID, peerResourceGroup string
 	if v, ok := d.GetOk("peer_azure_app_id"); ok {
-		peerAzureAppId = v.(string)
+		peerAzureAppID = v.(string)
 	}
 	if v, ok := d.GetOk("peer_azure_tenant_id"); ok {
-		peerAzureTenantId = v.(string)
+		peerAzureTenantID = v.(string)
 	}
 	if v, ok := d.GetOk("peer_resource_group"); ok {
 		peerResourceGroup = v.(string)
@@ -140,8 +140,8 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 			PeerVPC:              d.Get("peer_vpc").(string),
 			PeerRegion:           region,
 			UserPeerNetworkCIDRs: cidrs,
-			PeerAzureAppId:       peerAzureAppId,
-			PeerAzureTenantId:    peerAzureTenantId,
+			PeerAzureAppId:       peerAzureAppID,
+			PeerAzureTenantId:    peerAzureTenantID,
 			PeerResourceGroup:    peerResourceGroup,
 		},
 	)
@@ -268,7 +268,9 @@ func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData,
 			return diag.Errorf("cannot get an Azure VPC peering connection without `peer_resource_group`")
 		}
 
-		return copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, projectName, vpcID)
+		return append(
+			copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, projectName, vpcID),
+			copyAzureVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc)...)
 	}
 
 	pc, err = client.VPCPeeringConnections.GetVPCPeering(
@@ -321,6 +323,37 @@ func resourceVPCPeeringConnectionImport(ctx context.Context, d *schema.ResourceD
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func copyAzureVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
+	d *schema.ResourceData,
+	peeringConnection *aiven.VPCPeeringConnection,
+) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	if err := d.Set("peer_azure_app_id", peeringConnection.PeerAzureAppId); err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  fmt.Sprintf("Unable to set peer_azure_app_id field: %s", err),
+			Detail:   fmt.Sprintf("Unable to set peer_azure_app_id field for VPC peering connection: %s", err),
+		})
+	}
+	if err := d.Set("peer_azure_tenant_id", peeringConnection.PeerAzureTenantId); err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  fmt.Sprintf("Unable to set peer_azure_tenant_id field: %s", err),
+			Detail:   fmt.Sprintf("Unable to set peer_azure_tenant_id field for VPC peering connection: %s", err),
+		})
+	}
+	if err := d.Set("peer_resource_group", peeringConnection.PeerResourceGroup); err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  fmt.Sprintf("Unable to set peer_resource_group field: %s", err),
+			Detail:   fmt.Sprintf("Unable to set peer_resource_group field for VPC peering connection: %s", err),
+		})
+	}
+
+	return diags
 }
 
 func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
@@ -391,45 +424,15 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 		})
 	}
 
-	// Azure related fields are only available for VPC peering connection resource, and transit
-	// gateway vpc attachment triggers `Invalid address to set` error
-	if err := d.Set("peer_azure_app_id", peeringConnection.PeerAzureAppId); err != nil {
-		if !strings.Contains(err.Error(), "Invalid address to set") {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  fmt.Sprintf("Unable to set peer_azure_app_id field: %s", err),
-				Detail:   fmt.Sprintf("Unable to set peer_azure_app_id field for VPC peering connection: %s", err),
-			})
+	// user_peer_network_cidrs filed is only available for transit gateway vpc attachment
+	if len(peeringConnection.UserPeerNetworkCIDRs) > 0 {
+		// convert cidrs from []string to []interface {}
+		cidrs := make([]interface{}, len(peeringConnection.UserPeerNetworkCIDRs))
+		for i, cidr := range peeringConnection.UserPeerNetworkCIDRs {
+			cidrs[i] = cidr
 		}
-	}
-	if err := d.Set("peer_azure_tenant_id", peeringConnection.PeerAzureTenantId); err != nil {
-		if !strings.Contains(err.Error(), "Invalid address to set") {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  fmt.Sprintf("Unable to set peer_azure_tenant_id field: %s", err),
-				Detail:   fmt.Sprintf("Unable to set peer_azure_tenant_id field for VPC peering connection: %s", err),
-			})
-		}
-	}
-	if err := d.Set("peer_resource_group", peeringConnection.PeerResourceGroup); err != nil {
-		if !strings.Contains(err.Error(), "Invalid address to set") {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  fmt.Sprintf("Unable to set peer_resource_group field: %s", err),
-				Detail:   fmt.Sprintf("Unable to set peer_resource_group field for VPC peering connection: %s", err),
-			})
-		}
-	}
 
-	// convert cidrs from []string to []interface {}
-	cidrs := make([]interface{}, len(peeringConnection.UserPeerNetworkCIDRs))
-	for i, cidr := range peeringConnection.UserPeerNetworkCIDRs {
-		cidrs[i] = cidr
-	}
-	if err := d.Set("user_peer_network_cidrs", cidrs); err != nil {
-		// this filed is only available for transit gateway vpc attachment, and regular vpc
-		// resource triggers `Invalid address to set` error
-		if !strings.Contains(err.Error(), "Invalid address to set") {
+		if err := d.Set("user_peer_network_cidrs", cidrs); err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
 				Summary:  fmt.Sprintf("Unable to set user_peer_network_cidrs field: %s", err),
