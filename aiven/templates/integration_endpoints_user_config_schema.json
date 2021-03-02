@@ -75,6 +75,44 @@
     ],
     "type": "object"
   },
+  "external_aws_cloudwatch_metrics": {
+    "additionalProperties": false,
+    "properties": {
+      "access_key": {
+        "example": "AAAAAAAAAAAAAAAAAAAA",
+        "maxLength": 4096,
+        "title": "AWS access key. Required permissions are cloudwatch:PutMetricData",
+        "type": "string"
+      },
+      "namespace": {
+        "example": "my-metrics-namespace",
+        "maxLength": 255,
+        "minLength": 1,
+        "pattern": "^(?!(AWS/|:))[:\\.\\-_/#A-Za-z0-9]+$",
+        "title": "AWS CloudWatch Metrics Namespace",
+        "type": "string"
+      },
+      "region": {
+        "example": "us-east-1",
+        "maxLength": 32,
+        "title": "AWS region",
+        "type": "string"
+      },
+      "secret_key": {
+        "example": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "maxLength": 4096,
+        "title": "AWS secret key",
+        "type": "string"
+      }
+    },
+    "required": [
+      "access_key",
+      "secret_key",
+      "region",
+      "namespace"
+    ],
+    "type": "object"
+  },
   "external_elasticsearch_logs": {
     "additionalProperties": false,
     "properties": {

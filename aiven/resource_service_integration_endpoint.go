@@ -137,6 +137,16 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 		Optional: true,
 		Type:     schema.TypeList,
 	},
+	"external_aws_cloudwatch_metrics_user_config": {
+		Description: "External AWS cloudwatch mertrics specific user configurable settings",
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				templates.GetUserConfigSchema("endpoint")["external_aws_cloudwatch_metrics"].(map[string]interface{})),
+		},
+		MaxItems: 1,
+		Optional: true,
+		Type:     schema.TypeList,
+	},
 }
 
 func resourceServiceIntegrationEndpoint() *schema.Resource {
