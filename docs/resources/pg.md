@@ -163,6 +163,8 @@ configuration options available:
         collection. The default value is top.
         * `temp_file_limit` - (Optional) PostgreSQL temporary file limit in KiB, -1 for unlimited
         * `timezone` - (Optional) PostgreSQL service timezone
+        * `ignore_dbs` - (Optional) Comma-separated list of databases, which should be ignored during 
+        migration (supported by MySQL only at the moment)
         * `track_activity_query_size` - (Optional) Specifies the number of bytes reserved to track the currently 
         executing command for each active session.
         * `track_commit_timestamp` - (Optional) Record commit time of transactions

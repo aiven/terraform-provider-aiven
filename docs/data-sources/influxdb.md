@@ -65,7 +65,10 @@ UTC time in HH:mm:ss format.
 configuration options available:
     * `ip_filter` - allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`
     * `custom_domain` - Serve the web frontend using a custom CNAME pointing to the Aiven DNS name
-    
+
+    * `privatelink_access` - Allow access to selected service components through Privatelink
+        * `influxdb` - Enable influxdb
+
     * `private_access` - Allow access to selected service ports from private networks
         * `influxdb` - Allow clients to connect to influxdb with a DNS name that always resolves 
         to the service's private IP addresses. Only available in certain network locations

@@ -72,6 +72,9 @@ configuration options available:
     * `ip_filter` - (Optional) allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`
     * `custom_domain` - (Optional) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name
     
+    * `privatelink_access` - (Optional) Allow access to selected service components through Privatelink
+        * `influxdb` - (Optional) Enable influxdb
+    
     * `private_access` - (Optional) Allow access to selected service ports from private networks
         * `influxdb` - (Optional) Allow clients to connect to influxdb with a DNS name that always resolves 
         to the service's private IP addresses. Only available in certain network locations

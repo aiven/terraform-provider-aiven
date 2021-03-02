@@ -80,6 +80,8 @@ configuration options available:
         * `port` - (Required) Port number of the server where to migrate data from
         * `ssl` - (Optional) The server where to migrate data from is secured with SSL
         * `username` - (Optional) User name for authentication with the server where to migrate data from
+        * `ignore_dbs` - (Optional) Comma-separated list of databases, which should be ignored during 
+        migration (supported by MySQL only at the moment)
     
     * `private_access` - (Optional) Allow access to selected service ports from private networks
         * `prometheus` - (Optional) Allow clients to connect to prometheus with a DNS name that always 
@@ -87,6 +89,9 @@ configuration options available:
         * `prometheus` - (Optional) Allow clients to connect to redis with a DNS name that always 
         resolves to the service's private IP addresses. Only available in certain network locations
         
+    * `privatelink_access` - (Optional) Allow access to selected service components through Privatelink
+        * `redis` - (Optional) Enable redis
+      
     * `public_access` - (Optional) Allow access to selected service ports from the public Internet
         * `prometheus` - (Optional) Allow clients to connect to prometheus from the public internet 
         for service nodes that are in a project VPC or another type of private network

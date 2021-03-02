@@ -90,17 +90,20 @@ The following configuration options available:
     producer will send in a single request to avoid sending huge requests. 
     * `session_timeout_ms` - The timeout in milliseconds used to detect failures when using Kafka’s 
     group management facilities (defaults to 10000).
-    
-    * `private_access`- Allow access to selected service ports from private networks.
-        * `kafka_connect`-  Allow clients to connect to kafka_connect with a DNS name that 
+
+    * `privatelink_access` - Allow access to selected service components through Privatelink
+        * `kafka_connect` - Enable kafka_connect
+
+    * `private_access` - Allow access to selected service ports from private networks.
+        * `kafka_connect` -  Allow clients to connect to kafka_connect with a DNS name that 
          always resolves to the service's private IP addresses. Only available in certain network locations.
-        * `prometheus`-Allow clients to connect to prometheus with a DNS name that always resolves to 
+        * `prometheus` - Allow clients to connect to prometheus with a DNS name that always resolves to 
          the service's private IP addresses. Only available in certain network locations.
       
-    * `public_access`-Allow access to selected service ports from the public Internet.
+    * `public_access`- Allow access to selected service ports from the public Internet.
         * `kafka_connect` - Allow clients to connect to kafka_connect from the public internet for 
         service nodes that are in a project VPC or another type of private network.
-        * `prometheus`-Allow clients to connect to prometheus from the public internet for service 
+        * `prometheus`- Allow clients to connect to prometheus from the public internet for service 
         nodes that are in a project VPC or another type of private network.
 
 * `service_uri` - URI for connecting to the Kafka Connect service.

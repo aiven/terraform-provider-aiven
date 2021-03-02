@@ -132,8 +132,25 @@ configuration options available:
         max_heap_table_size. Default is 16777216 (16M)
         * `wait_timeout` - (Optional) The number of seconds the server waits for activity on 
         a noninteractive connection before closing it.
+        * `long_query_time` - (Optional) The slow_query_logs work as SQL statements that take 
+        more than long_query_time seconds to execute. Default is 10s
+        * `slow_query_log` - (Optional) Slow query log enables capturing of slow queries. 
+        Setting slow_query_log to false also truncates the mysql.slow_log table. Default is off
     
     * `mysql_version` - (Optional) MySQL major version
+    
+    * `privatelink_access` - (Optional) Allow access to selected service components through Privatelink
+        * `mysql` - (Optional) Enable mysql
+    
+    * `migration` - (Optional) Migrate data from existing server
+        * `dbname` - (Optional) Database name for bootstrapping the initial connection
+        * `host` - (Optional) Hostname or IP address of the server where to migrate data from
+        * `ignore_dbs` - (Optional) Comma-separated list of databases, which should be ignored 
+        during migration (supported by MySQL only at the moment)
+        * `password` - (Optional) Password for authentication with the server where to migrate data from
+        * `port` - (Optional) Port number of the server where to migrate data from
+        * `ssl` - (Optional) The server where to migrate data from is secured with SSL
+        * `username` - (Optional) User name for authentication with the server where to migrate data from
     
     * `private_access` - (Optional) Allow access to selected service ports from private networks
         * `mysql` - (Optional) Allow clients to connect to mysql with a DNS name that always 

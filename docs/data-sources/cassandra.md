@@ -63,6 +63,12 @@ UTC time in HH:mm:ss format.
 
 * `cassandra_user_config` - defines Cassandra specific additional configuration options. 
 The following configuration options available:
+    * `cassandra` - Cassandra configuration values
+        * `batch_size_fail_threshold_in_kb` - Fail any multiple-partition batch exceeding this value.
+        50kb (10x warn threshold) by default.
+        * `batch_size_warn_threshold_in_kb` - Log a warning message on any multiple-partition
+        batch size exceeding this value.5kb per batch by default.Caution should be taken on increasing
+        the size of this thresholdas it can lead to node instability.
     * `ip_filter` - allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`
     * `migrate_sstableloader` - sets the service into migration mode enabling the sstableloader 
     utility to be used to upload Cassandra data files. Available only on service create.

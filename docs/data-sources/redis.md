@@ -72,6 +72,8 @@ configuration options available:
         * `port` - (Required) Port number of the server where to migrate data from
         * `ssl` - The server where to migrate data from is secured with SSL
         * `username` - User name for authentication with the server where to migrate data from
+        * `ignore_dbs` - Comma-separated list of databases, which should be ignored during
+        migration (supported by MySQL only at the moment)
     
     * `private_access` - Allow access to selected service ports from private networks
         * `prometheus` - Allow clients to connect to prometheus with a DNS name that always 
@@ -84,7 +86,10 @@ configuration options available:
         for service nodes that are in a project VPC or another type of private network
         * `redis` - Allow clients to connect to redis from the public internet for service 
         nodes that are in a project VPC or another type of private network
-        
+
+    * `privatelink_access` - Allow access to selected service components through Privatelink
+        * `redis` - Enable redis
+
     * `recovery_basebackup_name` - Name of the basebackup to restore in forked service
     * `redis_io_threads` - Redis IO thread count
     * `redis_lfu_decay_time"` - LFU maxmemory-policy counter decay time in minutes
