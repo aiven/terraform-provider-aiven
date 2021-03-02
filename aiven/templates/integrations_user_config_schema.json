@@ -75,6 +75,11 @@
     "title": "Integration user config",
     "type": "object"
   },
+  "external_aws_cloudwatch_metrics": {
+    "additionalProperties": false,
+    "title": "Integration user config",
+    "type": "object"
+  },
   "external_elasticsearch_logs": {
     "additionalProperties": false,
     "title": "Integration user config",
