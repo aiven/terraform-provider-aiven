@@ -71,6 +71,11 @@ configuration options available:
     tags. Disabled by default to limit impact of clickjacking
     * `auth_basic_enabled` - Enable or disable basic authentication form, used by Grafana 
     built-in login.
+    * `dashboards_min_refresh_interval` - Signed sequence of decimal numbers, followed
+    by a unit suffix (ms, s, m, h, d), e.g. 30s, 1h.
+
+    * `privatelink_access` - Allow access to selected service components through Privatelink
+        * `grafana` - Enable grafana
      
     * `auth_generic_oauth` - Generic OAuth integration.
         * `allow_sign_up` - Automatically sign-up users on successful sign-in

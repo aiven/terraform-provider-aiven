@@ -72,7 +72,11 @@ The following configuration options available:
     virtual machine failure.
     * `cluster_max_shards_per_node` - Controls the number of shards allowed in the 
     cluster per data node
-    
+
+    * `privatelink_access` - Allow access to selected service components through Privatelink
+        * `elasticsearch` - Enable elasticsearch   
+        * `kibana` - Enable kibana
+
     * `elasticsearch` - Elasticsearch settings.
         * `action_auto_create_index_enabled` - Explicitly allow or block automatic 
         creation of indices. Defaults to true
@@ -140,6 +144,7 @@ The following configuration options available:
         * `max_index_count` - Maximum number of indexes to keep
         * `pattern` - Must consist of alpha-numeric characters, dashes, underscores, 
         dots and glob characters (* and ?)
+        * `sorting_algorithm` - Deletion sorting algorithm 
     
     * `kibana` - Kibana settings
         * `elasticsearch_request_timeout` - Timeout in milliseconds for requests 
