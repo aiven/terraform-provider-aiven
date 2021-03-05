@@ -4,6 +4,13 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.8] - 2021-03-04
+- Add support for new user configuration options
+- Azure fields settings for VPC peering connection refactoring
+- Add example initial configuration for GCP Marketplace
+- Improve documentation and error messages
+- Add empty string validation for OptionalStringToX conversion
+
 ## [2.1.7] - 2021-02-11
 - Fix `lc_ctype` PostgreSQL database parameter
 - Minor documentation improvements
