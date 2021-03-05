@@ -67,6 +67,7 @@ func Provider() *schema.Provider {
 			"aiven_service_component":              datasourceServiceComponent(),
 			"aiven_m3db":                           datasourceM3DB(),
 			"aiven_m3aggregator":                   datasourceM3Aggregator(),
+			"aiven_aws_privatelink":                datasourceAWSPrivatelink(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -106,6 +107,7 @@ func Provider() *schema.Provider {
 			"aiven_m3db":                           resourceM3DB(),
 			"aiven_m3aggregator":                   resourceM3Aggregator(),
 			"aiven_billing_group":                  resourceBillingGroup(),
+			"aiven_aws_privatelink":                resourceAWSPrivatelink(),
 		},
 	}
 
