@@ -86,7 +86,7 @@ configuration options available:
     * `private_access` - (Optional) Allow access to selected service ports from private networks
         * `prometheus` - (Optional) Allow clients to connect to prometheus with a DNS name that always 
         resolves to the service's private IP addresses. Only available in certain network locations
-        * `prometheus` - (Optional) Allow clients to connect to redis with a DNS name that always 
+        * `redis` - (Optional) Allow clients to connect to redis with a DNS name that always 
         resolves to the service's private IP addresses. Only available in certain network locations
         
     * `privatelink_access` - (Optional) Allow access to selected service components through Privatelink
