@@ -6,7 +6,7 @@ resource "aiven_kafka" "kafka-service" {
   service_name = "privatelink-kafka1"
   maintenance_window_dow = "monday"
   maintenance_window_time = "10:00:00"
-    project_vpc_id = "YOUR-AWS-PROJECT-VPC-ID"
+  project_vpc_id = "YOUR-AWS-PROJECT-VPC-ID"
 }
 
 # AWS Privatelink service
@@ -15,6 +15,11 @@ resource "aiven_aws_privatelink" "aws_pl" {
   service_name = aiven_kafka.kafka-service.service_name
   principals = [
     "arn:aws:iam::012345678901:role/my-privatelink-role"]
+  kafka_user_config {
+    privatelink_access {
+      kafka = true
+    }
+  }
 }
 
 data "aiven_aws_privatelink" "pl" {
