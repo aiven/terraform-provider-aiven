@@ -54,6 +54,7 @@ func datasourceServiceComponent() *schema.Resource {
 					"dynamic",
 					"public",
 					"private",
+					"privatelink",
 				}, false),
 			},
 			"kafka_authentication_method": {
@@ -97,7 +98,7 @@ func datasourceServiceComponent() *schema.Resource {
 	}
 }
 
-func datasourceServiceComponentRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func datasourceServiceComponentRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
