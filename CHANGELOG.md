@@ -4,6 +4,9 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.9] - 2021-03-11
+- Add support for AWS Privatelink
+
 ## [2.1.8] - 2021-03-04
 - Add support for new user configuration options
 - Azure fields settings for VPC peering connection refactoring
