@@ -75,6 +75,7 @@ func (w *KafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 func (w *KafkaTopicAvailabilityWaiter) refresh() error {
 	if !kafkaTopicAvailabilitySem.TryAcquire(1) {
 		log.Printf("[TRACE] Kafka Topic Availability cache refresh already in progress ...")
+		cache.GetTopicCache().AddToQueue(w.Project, w.ServiceName, w.TopicName)
 		return nil
 	}
 	defer kafkaTopicAvailabilitySem.Release(1)
@@ -82,6 +83,7 @@ func (w *KafkaTopicAvailabilityWaiter) refresh() error {
 	c := cache.GetTopicCache()
 
 	// warming up cache
+	var warmUpErr error
 	warmingUpCacheOne.Do(func() {
 		log.Printf("[DEBUG] Kafka Topic queue is empty, warming up cache!")
 		topics, err := w.Client.KafkaTopics.List(w.Project, w.ServiceName)
@@ -89,8 +91,13 @@ func (w *KafkaTopicAvailabilityWaiter) refresh() error {
 			for _, t := range topics {
 				c.AddToQueue(w.Project, w.ServiceName, t.TopicName)
 			}
+		} else {
+			warmUpErr = fmt.Errorf("unable to warm-up kafka topic cache %w", err)
 		}
 	})
+	if warmUpErr != nil {
+		return warmUpErr
+	}
 
 	// check if topic is already in cache
 	if _, ok := c.LoadByTopicName(w.Project, w.ServiceName, w.TopicName); ok {
@@ -141,12 +148,12 @@ func (w *KafkaTopicAvailabilityWaiter) Conf(timeout time.Duration) *resource.Sta
 		Target:         []string{"ACTIVE"},
 		Refresh:        w.RefreshFunc(),
 		Timeout:        timeout,
-		MinTimeout:     20 * time.Second,
+		PollInterval:   30 * time.Second,
 		NotFoundChecks: 50,
 	}
 }
 
-//partitions returns a slice, of empty aiven.Partition, of specified size
+// partitions returns a slice, of empty aiven.Partition, of specified size
 func partitions(numPartitions int) (partitions []*aiven.Partition) {
 	for i := 0; i < numPartitions; i++ {
 		partitions = append(partitions, &aiven.Partition{})
