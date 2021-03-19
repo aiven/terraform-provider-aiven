@@ -47,11 +47,6 @@ func (w *KafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 
 			if err != nil {
 				aivenError, ok := err.(aiven.Error)
-				// Topic creation is asynchronous so it is possible for the creation call to
-				// have completed successfully yet fetcing topic info fails with 404.
-				if ok && aivenError.Status == 404 {
-					return nil, "CONFIGURING", nil
-				}
 				// Getting topic info can sometimes temporarily fail with 501 and 502. Don't
 				// treat that as fatal error but keep on retrying instead.
 				if (ok && aivenError.Status == 501) || (ok && aivenError.Status == 502) {
@@ -129,6 +124,9 @@ func (w *KafkaTopicAvailabilityWaiter) refresh() error {
 					cache.GetTopicCache().StoreByProjectAndServiceName(w.Project, w.ServiceName, []*aiven.KafkaTopic{topic})
 				}
 			} else {
+				if aiven.IsNotFound(err) {
+					return fmt.Errorf("one of the Kafka Topics from the queue [%+v] is not found: %w", queue, err)
+				}
 				return err
 			}
 		}
