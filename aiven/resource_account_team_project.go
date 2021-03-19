@@ -125,7 +125,7 @@ func resourceAccountTeamProjectUpdate(ctx context.Context, d *schema.ResourceDat
 
 	d.SetId(buildResourceID(accountId, teamId, newProjectName))
 
-	return resourceAccountTeamRead(ctx, d, m)
+	return resourceAccountTeamProjectRead(ctx, d, m)
 }
 
 func resourceAccountTeamProjectDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
