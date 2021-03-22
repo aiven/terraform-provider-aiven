@@ -289,7 +289,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 
 	d.SetId(buildResourceID(project, serviceName, topicName))
 
-	return nil
+	return resourceKafkaTopicRead(ctx, d, m)
 }
 
 func getKafkaTopicConfig(d *schema.ResourceData) aiven.KafkaTopicConfig {
