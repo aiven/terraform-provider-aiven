@@ -136,6 +136,8 @@ configuration options available:
         * `log_error_verbosity` - (Optional) Controls the amount of detail written in the server log for 
         each message that is logged. Possible values: `TERSE`, `DEFAULT` and `VERBOSE`.
         * `log_min_duration_statement` - (Optional) Log statements that take more than this number of 
+        * `log_line_prefix` - (Optional) Choose from one of the available log-formats. These can support 
+        popular log analyzers like pgbadger, pganalyze etc. 
         milliseconds to run, -1 disables
         * `max_files_per_process` - (Optional) PostgreSQL maximum number of files that can be open per process
         * `max_locks_per_transaction` - (Optional) PostgreSQL maximum locks per transaction
