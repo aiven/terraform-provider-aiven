@@ -354,17 +354,17 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 	if _, ok := d.GetOk("cleanup_policy"); ok {
-		if err := d.Set("cleanup_policy", topic.CleanupPolicy); err != nil {
+		if err := d.Set("cleanup_policy", topic.Config.CleanupPolicy.Value); err != nil {
 			return diag.FromErr(err)
 		}
 	}
 	if _, ok := d.GetOk("minimum_in_sync_replicas"); ok {
-		if err := d.Set("minimum_in_sync_replicas", topic.MinimumInSyncReplicas); err != nil {
+		if err := d.Set("minimum_in_sync_replicas", topic.Config.MinInsyncReplicas.Value); err != nil {
 			return diag.FromErr(err)
 		}
 	}
 	if _, ok := d.GetOk("retention_bytes"); ok {
-		if err := d.Set("retention_bytes", topic.RetentionBytes); err != nil {
+		if err := d.Set("retention_bytes", topic.Config.RetentionBytes.Value); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -372,10 +372,14 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	if _, ok := d.GetOk("retention_hours"); topic.RetentionHours != nil && ok {
+	if _, ok := d.GetOk("retention_hours"); ok {
 		// it could be -1, which means infinite retention
-		if *topic.RetentionHours >= -1 {
-			if err := d.Set("retention_hours", *topic.RetentionHours); err != nil {
+		if topic.Config.RetentionMs.Value != -1 {
+			if err := d.Set("retention_hours", topic.Config.RetentionMs.Value/(1000*60*60)); err != nil {
+				return diag.FromErr(err)
+			}
+		} else {
+			if err := d.Set("retention_hours", topic.Config.RetentionMs.Value); err != nil {
 				return diag.FromErr(err)
 			}
 		}
