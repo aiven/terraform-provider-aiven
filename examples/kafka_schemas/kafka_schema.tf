@@ -27,3 +27,12 @@ resource "aiven_kafka_schema" "kafka-schema1" {
       }
     EOT
 }
+
+# External schema file
+resource "aiven_kafka_schema" "kafka-schema2" {
+  project = aiven_project.kafka-schemas-project1.project
+  service_name = aiven_kafka.kafka-service1.service_name
+  subject_name = "kafka-schema2"
+
+  schema = file("${path.module}/external_schema.avsc")
+}
