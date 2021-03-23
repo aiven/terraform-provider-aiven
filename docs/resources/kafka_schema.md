@@ -29,6 +29,19 @@ resource "aiven_kafka_schema" "kafka-schema1" {
 }
 ```
 
+You can also load the schema from an external file:
+
+```hcl
+resource "aiven_kafka_schema" "kafka-schema2" {
+    project = aiven_project.kafka-schemas-project1.project
+    service_name = aiven_service.kafka-service1.service_name
+    subject_name = "kafka-schema2"
+    compatibility_level = "FORWARD"
+    
+    schema = file("${path.module}/external_schema.avsc")
+}
+```
+
 ## Argument Reference
 
 * `project` and `service_name` - (Required) define the project and service the Kafka Schemas belongs to. 
