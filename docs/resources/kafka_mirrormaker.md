@@ -82,6 +82,12 @@ The following configuration options available:
         partitions. Defaults to 'true'.
         * `refresh_topics_interval_seconds` - (Optional) Frequency of topic and partitions refresh in 
         seconds. Defaults to 600 seconds (10 minutes).
+        * `emit_checkpoints_enabled` - (Optional) Whether to periodically write the translated offsets 
+        of replicated consumer groups (in the source cluster) to __consumer_offsets topic in target cluster, 
+        as long as no active consumers in that group are connected to the target cluster.
+        * `sync_group_offsets_interval_seconds` - (Optional) Frequency at which consumer group offsets 
+        are synced (default: 60, every minute).
+
 
 * `timeouts` - (Optional) a custom client timeouts.
 

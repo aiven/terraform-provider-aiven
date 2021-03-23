@@ -118,6 +118,8 @@ configuration options available:
         each message that is logged. Possible values: `TERSE`, `DEFAULT` and `VERBOSE`.
         * `log_min_duration_statement` - Log statements that take more than this number of 
         milliseconds to run, -1 disables
+        * `log_line_prefix` - Choose from one of the available log-formats. These can support
+        popular log analyzers like pgbadger, pganalyze etc.
         * `max_files_per_process` - PostgreSQL maximum number of files that can be open per process
         * `max_locks_per_transaction` - PostgreSQL maximum locks per transaction
         * `max_logical_replication_workers` - PostgreSQL maximum logical replication workers 

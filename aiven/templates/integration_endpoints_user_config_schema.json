@@ -11,6 +11,37 @@
         "type": "string",
         "user_error": "Must consist of alpha-numeric characters and contain 32 characters"
       },
+      "datadog_tags": {
+        "example": "[{'tag': 'foo'}, {'tag': 'bar:buzz', 'comment': 'Useful tag']",
+        "items": {
+          "properties": {
+            "comment": {
+              "example": "Used to tag primary replica metrics",
+              "maxLength": 1024,
+              "title": "Optional tag explanation",
+              "type": "string"
+            },
+            "tag": {
+              "description": "Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix 'aiven-' are reserved for Aiven.",
+              "example": "replica:primary",
+              "maxLength": 200,
+              "minLength": 1,
+              "pattern": "^(?!aiven-)[^\\W\\d_](?:[:\\w./-]*[\\w./-])?$",
+              "title": "Tag value",
+              "type": "string",
+              "user_error": "Tags must start with a letter and after that may contain the characters listed below:\nalphanumerics, underscores, minuses, colons, periods, slashes.\nA tag cannot end with a colon.\nTags can be up to 200 characters long and support Unicode.\nTags with prefix 'aiven-' are reserved for Aiven.\nMore info: https://docs.datadoghq.com/getting_started/tagging.\n"
+            }
+          },
+          "required": [
+            "tag"
+          ],
+          "title": "Datadog tag defined by user",
+          "type": "object"
+        },
+        "maxItems": 32,
+        "title": "Custom tags provided by user",
+        "type": "array"
+      },
       "disable_consumer_stats": {
         "example": true,
         "title": "Disable consumer group metrics",
@@ -182,6 +213,7 @@
         "type": "string"
       },
       "service_account_credentials": {
+        "description": "This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys .",
         "example": "{\"type\": \"service_account\", ...",
         "maxLength": 4096,
         "title": "Google Service Account Credentials",

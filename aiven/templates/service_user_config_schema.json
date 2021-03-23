@@ -2114,6 +2114,20 @@
       "kafka_mirrormaker": {
         "additionalProperties": false,
         "properties": {
+          "emit_checkpoints_enabled": {
+            "description": "Whether to emit consumer group offset checkpoints to target cluster periodically (default: true)",
+            "example": "true",
+            "title": "Emit consumer group offset checkpoints",
+            "type": "boolean"
+          },
+          "emit_checkpoints_interval_seconds": {
+            "description": "Frequency at which consumer group offset checkpoints are emitted (default: 60, every minute)",
+            "example": 60,
+            "maximum": 9223372036854775807,
+            "minimum": 1,
+            "title": "Frequency of consumer group offset checkpoints",
+            "type": "integer"
+          },
           "refresh_groups_enabled": {
             "description": "Whether to periodically check for new consumer groups. Defaults to 'true'.",
             "example": "true",
@@ -2140,6 +2154,20 @@
             "maximum": 9223372036854775807,
             "minimum": 1,
             "title": "Frequency of topic and partitions refresh",
+            "type": "integer"
+          },
+          "sync_group_offsets_enabled": {
+            "description": "Whether to periodically write the translated offsets of replicated consumer groups (in the source cluster) to __consumer_offsets topic in target cluster, as long as no active consumers in that group are connected to the target cluster",
+            "example": "true",
+            "title": "Sync consumer group offsets",
+            "type": "boolean"
+          },
+          "sync_group_offsets_interval_seconds": {
+            "description": "Frequency at which consumer group offsets are synced (default: 60, every minute)",
+            "example": 60,
+            "maximum": 9223372036854775807,
+            "minimum": 1,
+            "title": "Frequency of consumer group offset sync",
             "type": "integer"
           }
         },
@@ -2307,6 +2335,7 @@
             "name": {
               "example": "default",
               "maxLength": 256,
+              "pattern": "^[a-zA-Z_0-9]+$",
               "title": "The name of the namespace",
               "type": "string"
             },
@@ -2318,35 +2347,35 @@
                   "properties": {
                     "block_data_expiry_duration": {
                       "example": "5m",
-                      "maxLength": 32,
+                      "maxLength": 16,
                       "pattern": "^[0-9]+[smhd]$",
                       "title": "Controls how long we wait before expiring stale data",
                       "type": "string"
                     },
                     "blocksize_duration": {
                       "example": "2h",
-                      "maxLength": 32,
+                      "maxLength": 16,
                       "pattern": "^[0-9]+[smhd]$",
                       "title": "Controls how long to keep a block in memory before flushing to a fileset on disk",
                       "type": "string"
                     },
                     "buffer_future_duration": {
                       "example": "10m",
-                      "maxLength": 32,
+                      "maxLength": 16,
                       "pattern": "^[0-9]+[smhd]$",
                       "title": "Controls how far into the future writes to the namespace will be accepted",
                       "type": "string"
                     },
                     "buffer_past_duration": {
                       "example": "10m",
-                      "maxLength": 32,
+                      "maxLength": 16,
                       "pattern": "^[0-9]+[smhd]$",
                       "title": "Controls how far into the past writes to the namespace will be accepted",
                       "type": "string"
                     },
                     "retention_period_duration": {
                       "example": "48h",
-                      "maxLength": 32,
+                      "maxLength": 16,
                       "pattern": "^[0-9]+[smhd]$",
                       "title": "Controls the duration of time that M3DB will retain data for the namespace",
                       "type": "string"
@@ -2374,14 +2403,17 @@
             },
             "resolution": {
               "example": "30s",
-              "maxLength": 32,
+              "maxLength": 16,
               "pattern": "^[0-9]+[smhd]$",
               "title": "The resolution for an aggregated namespace",
               "type": "string"
             },
             "type": {
+              "enum": [
+                "aggregated",
+                "unaggregated"
+              ],
               "example": "unaggregated",
-              "maxLength": 256,
               "title": "The type of aggregation (aggregated/unaggregated)",
               "type": "string"
             }
@@ -2430,6 +2462,117 @@
           }
         },
         "title": "Allow access to selected service ports from the public Internet",
+        "type": "object"
+      },
+      "rules": {
+        "additionalProperties": false,
+        "properties": {
+          "mapping": {
+            "items": {
+              "additionalProperties": false,
+              "description": "Mapping rules allow more granular use of aggregation, not simply sending everything to a namespace. If mapping rules exist that target a namespace, only data matching mapping rules will be sent to it and nothing else.",
+              "properties": {
+                "aggregations": {
+                  "example": [
+                    "Max"
+                  ],
+                  "items": {
+                    "enum": [
+                      "Count",
+                      "Last",
+                      "Max",
+                      "Mean",
+                      "Median",
+                      "Min",
+                      "P10",
+                      "P20",
+                      "P30",
+                      "P40",
+                      "P50",
+                      "P60",
+                      "P70",
+                      "P80",
+                      "P90",
+                      "P95",
+                      "P99",
+                      "P999",
+                      "P9999",
+                      "Stdev",
+                      "Sum",
+                      "SumSq"
+                    ],
+                    "example": "Max",
+                    "title": "Aggregation to be applied",
+                    "type": "string"
+                  },
+                  "maxItems": 10,
+                  "title": "List of aggregations to be applied",
+                  "type": "array"
+                },
+                "drop": {
+                  "description": "Only store the derived metric (as specified in the roll-up rules), if any",
+                  "example": true,
+                  "title": "Drop the matching metric",
+                  "type": "boolean"
+                },
+                "filter": {
+                  "description": "Matching metric names with wildcards (using __name__:wildcard) or matching tags and their (optionally wildcarded) values. For value, ! can be used at start of value for negation, and multiple filters can be supplied using space as separator.",
+                  "example": "__name__:disk_* host:important-42 mount:!*/sda",
+                  "maxLength": 256,
+                  "pattern": "^(__name__:\\*?[a-zA-Z_:][a-zA-Z0-9_:]*\\*?|[a-zA-Z_][a-zA-Z0-9_]*:[^ \\\n\r\t]+)(\\s+(__name__:\\*?[a-zA-Z_:][a-zA-Z0-9_:]*\\*?|[a-zA-Z_][a-zA-Z0-9_]*:[^ \\\n\r\t]+))*$",
+                  "title": "The metrics to be used with this particular rule",
+                  "type": "string"
+                },
+                "name": {
+                  "example": "important disk metrics",
+                  "maxLength": 256,
+                  "pattern": "^[^\n\r]+$",
+                  "title": "The (optional) name of the rule",
+                  "type": "string"
+                },
+                "tags": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": {
+                        "example": "my_tag",
+                        "maxLength": 256,
+                        "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+                        "title": "Name of the tag",
+                        "type": "string"
+                      },
+                      "value": {
+                        "example": "my_value",
+                        "maxLength": 256,
+                        "pattern": "^[^ \\\n\r\t]+$",
+                        "title": "Value of the tag",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "value"
+                    ],
+                    "title": "Tag to be added",
+                    "type": "object"
+                  },
+                  "maxItems": 10,
+                  "title": "List of tags to be appended to matching metrics",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "filter"
+              ],
+              "title": "M3 Mapping rule",
+              "type": "object"
+            },
+            "maxItems": 10,
+            "title": "List of M3 mapping rules",
+            "type": "array"
+          }
+        },
+        "title": "M3 rules",
         "type": "object"
       },
       "service_to_fork_from": {
@@ -3078,6 +3221,16 @@
               "VERBOSE"
             ],
             "title": "log_error_verbosity",
+            "type": "string"
+          },
+          "log_line_prefix": {
+            "description": "Choose from one of the available log-formats. These can support popular log analyzers like pgbadger, pganalyze etc.",
+            "enum": [
+              "'pid=%p,user=%u,db=%d,app=%a,client=%h '",
+              "'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '",
+              "'%m [%p] %q[user=%u,db=%d,app=%a] '"
+            ],
+            "title": "log_line_prefix",
             "type": "string"
           },
           "log_min_duration_statement": {

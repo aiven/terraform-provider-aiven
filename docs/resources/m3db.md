@@ -88,6 +88,23 @@ configuration options available:
     * `public_access` - (Optional) Allow access to selected service ports from the public Internet.
         * `m3coordinator` - (Optional) Allow clients to connect to m3coordinator from the public internet 
         for service nodes that are in a project VPC or another type of private network.
+    * `rules` - (Optional) Mapping rules allow more granular use of aggregation, not simply sending 
+    everything to a namespace. If mapping rules exist that target a namespace, only data matching mapping 
+    rules will be sent to it and nothing else.
+        * `aggregations` - (Optional) List of aggregations to be applied
+        * `drop` - (Optional) Drop the matching metric; Only store the derived metric (as specified in the roll-up rules), if any.
+        * `filter` - (Optional) The metrics to be used with this particular rule; Matching metric names with wildcards (using
+        __name__:wildcard) or matching tags and their (optionally wildcarded) values. For value, !
+        can be used at start of value for negation, and multiple filters can be supplied using space as separator.
+        * `name` - (Optional) The name of the rule.
+        * `namespaces` - (Optional) Namespaces matching this storage policy; This rule will be used to store 
+        the metrics in the given namespace(s). If a namespace is target of rules, the global default 
+        aggregation will be automatically disabled. Note that specifying filters that match no namespaces 
+        whatsoever will be returned as an error.
+            * `oneOf` - (Optional) Namespaces matching this storage policy
+        * `tags` - (Optional) List of tags to be appended to matching metrics.
+            * `name` - (Optional) Name of the tag.
+            * `value` - (Optional) Value of the tag.
     * `limits` - (Optional) M3 limits
         * `global_datapoints` - (Optional) The maximum number of data points fetched during request
         * `query_datapoints` - (Optional) The maximum number of data points fetched in single query
