@@ -254,6 +254,9 @@ func testAccKafkaTopicResource(name string) string {
 			topic_name = "test-acc-topic-%s"
 			partitions = 3
 			replication = 2
+			retention_hours = 1
+			retention_bytes = -1
+			minimum_in_sync_replicas = 2
 
 			config {
 				flush_ms = 10
