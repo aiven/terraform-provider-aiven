@@ -188,6 +188,10 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 }
 
 func TestAccAivenKafkaTopic_450topics(t *testing.T) {
+	if os.Getenv("AIVEN_ACC_LONG") == "" {
+		t.Skip("Acceptance tests skipped unless env AIVEN_ACC_LONG set")
+	}
+
 	resourceName := "aiven_kafka_topic.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
@@ -217,16 +221,15 @@ func testAccKafka451TopicResource(name string) string {
 	// add extra 100 Kafka topics to test caching layer and creation waiter functionality
 	for i := 1; i < 450; i++ {
 		s += fmt.Sprintf(`
-			resource "aiven_kafka_topic" "foo%s" {
+			resource "aiven_kafka_topic" "foo%d" {
 				project = data.aiven_project.foo.project
 				service_name = aiven_service.bar.service_name
-				topic_name = "test-acc-topic-%s"
+				topic_name = "test-acc-topic-%d"
 				partitions = 3
 				replication = 2
 			}
 		`,
-			acctest.RandStringFromCharSet(5, acctest.CharSetAlphaNum),
-			acctest.RandStringFromCharSet(5, acctest.CharSetAlphaNum))
+			i, i)
 	}
 
 	return s
