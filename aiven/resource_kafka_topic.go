@@ -15,6 +15,8 @@ import (
 	"time"
 )
 
+const topicCreationFlag = "topic-was-just-created"
+
 var aivenKafkaTopicSchema = map[string]*schema.Schema{
 	"project": {
 		Type:        schema.TypeString,
@@ -248,7 +250,7 @@ func resourceKafkaTopic() *schema.Resource {
 			StateContext: resourceKafkaTopicState,
 		},
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(1 * time.Minute),
+			Create: schema.DefaultTimeout(5 * time.Minute),
 			Read:   schema.DefaultTimeout(10 * time.Minute),
 			Delete: schema.DefaultTimeout(2 * time.Minute),
 		},
@@ -289,7 +291,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 
 	d.SetId(buildResourceID(project, serviceName, topicName))
 
-	return resourceKafkaTopicRead(ctx, d, m)
+	return resourceKafkaTopicRead(context.WithValue(ctx, topicCreationFlag, true), d, m)
 }
 
 func getKafkaTopicConfig(d *schema.ResourceData) aiven.KafkaTopicConfig {
@@ -395,11 +397,21 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 func getTopic(ctx context.Context, d *schema.ResourceData, m interface{}) (aiven.KafkaTopic, error) {
 	project, serviceName, topicName := splitResourceID3(d.Id())
 
+	var isNewlyCreatedTopic bool
+	f := ctx.Value(topicCreationFlag)
+	if f != nil {
+		if v, ok := f.(bool); ok {
+			log.Printf("[DEBUG] Flagging Kafka Topic `%s` as newly created.", topicName)
+			isNewlyCreatedTopic = v
+		}
+	}
+
 	w := &KafkaTopicAvailabilityWaiter{
-		Client:      m.(*aiven.Client),
-		Project:     project,
-		ServiceName: serviceName,
-		TopicName:   topicName,
+		Client:              m.(*aiven.Client),
+		Project:             project,
+		ServiceName:         serviceName,
+		TopicName:           topicName,
+		IsNewlyCreatedTopic: isNewlyCreatedTopic,
 	}
 
 	timeout := d.Timeout(schema.TimeoutRead)
