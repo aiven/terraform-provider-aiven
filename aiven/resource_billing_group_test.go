@@ -13,11 +13,18 @@ func TestAccAivenBillingGroup_basic(t *testing.T) {
 	resourceName := "aiven_billing_group.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckAivenBillingGroupResourceDestroy,
 		Steps: []resource.TestStep{
+			{
+				Config:             testAccCopyFromProjectBillingGroupResource(rName),
+				ExpectNonEmptyPlan: true,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("aiven_project.pr02", "billing_group"),
+				),
+			},
 			{
 				Config: testAccBillingGroupResource(rName),
 				Check: resource.ComposeTestCheckFunc(
@@ -89,4 +96,29 @@ func testAccOverwriteBillingGroupResource(name string) string {
 			depends_on = [aiven_billing_group.foo]
 		}
 		`, name, name)
+}
+
+func testAccCopyFromProjectBillingGroupResource(name string) string {
+	return fmt.Sprintf(`
+		resource "aiven_billing_group" "foo" {
+			name = "test-acc-bg-%s"
+			billing_currency = "USD"
+			vat_id = "abc"
+		}
+
+		resource "aiven_project" "pr01" {
+			project = "test-acc-pr01-%s"
+			billing_group = aiven_billing_group.foo.id
+			vat_id = "123"
+
+			depends_on = [aiven_billing_group.foo]
+		}
+
+		resource "aiven_project" "pr02" {
+			project = "test-acc-p02-%s"
+			copy_from_project = aiven_project.pr01.project
+
+			depends_on = [aiven_project.pr01]
+		}
+		`, name, name, name)
 }

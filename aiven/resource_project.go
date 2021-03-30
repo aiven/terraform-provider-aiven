@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"log"
 	"os"
 	"regexp"
 )
@@ -198,9 +199,18 @@ func resourceProjectCreate(_ context.Context, d *schema.ResourceData, m interfac
 	}
 
 	if billingGroupId, ok := d.GetOk("billing_group"); ok {
-		d := resourceProjectAssignToBillingGroup(projectName, billingGroupId.(string), client)
-		if d.HasError() {
-			return append(diags, d...)
+		dia := resourceProjectAssignToBillingGroup(projectName, billingGroupId.(string), client, d)
+		if dia.HasError() {
+			return append(diags, dia...)
+		}
+	} else {
+		// if billing_group is not set but copy_from_project is not empty,
+		// copy billing group from source project
+		if sourceProject, ok := d.GetOk("copy_from_project"); ok {
+			dia := resourceProjectCopyBillingGroupFromProject(client, sourceProject.(string), d)
+			if dia.HasError() {
+				return append(diags, dia...)
+			}
 		}
 	}
 
@@ -209,16 +219,43 @@ func resourceProjectCreate(_ context.Context, d *schema.ResourceData, m interfac
 	return append(diags, resourceProjectGetCACert(projectName, client, d)...)
 }
 
-func resourceProjectAssignToBillingGroup(projectName, billingGroupId string, client *aiven.Client) diag.Diagnostics {
+func resourceProjectCopyBillingGroupFromProject(
+	client *aiven.Client, sourceProjectName string, d *schema.ResourceData) diag.Diagnostics {
+	list, err := client.BillingGroup.ListAll()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	for _, bg := range list {
+		projects, err := client.BillingGroup.GetProjects(bg.Id)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		for _, pr := range projects {
+			if pr == sourceProjectName {
+				log.Printf("[DEBUG] Source project `%s` has billing group `%s`", sourceProjectName, bg.Id)
+				return resourceProjectAssignToBillingGroup(sourceProjectName, bg.Id, client, d)
+			}
+		}
+	}
+
+	log.Printf("[DEBUG] Source project `%s` is not associated to any billing group", sourceProjectName)
+	return nil
+}
+
+func resourceProjectAssignToBillingGroup(
+	projectName, billingGroupId string, client *aiven.Client, d *schema.ResourceData) diag.Diagnostics {
+	log.Printf("[DEBUG] Assoviating project `%s` with the billing group `%s`", projectName, billingGroupId)
 	_, err := client.BillingGroup.Get(billingGroupId)
 	if err != nil {
-		diag.Errorf("cannot get a billing group by id: %s", err)
+		return diag.Errorf("cannot get a billing group by id: %s", err)
 	}
 
 	var isAlreadyAssigned bool
 	assignedProjects, err := client.BillingGroup.GetProjects(billingGroupId)
 	if err != nil {
-		diag.Errorf("cannot get a billing group assigned projects list: %s", err)
+		return diag.Errorf("cannot get a billing group assigned projects list: %s", err)
 	}
 	for _, p := range assignedProjects {
 		if p == projectName {
@@ -229,8 +266,12 @@ func resourceProjectAssignToBillingGroup(projectName, billingGroupId string, cli
 	if !isAlreadyAssigned {
 		err = client.BillingGroup.AssignProjects(billingGroupId, []string{projectName})
 		if err != nil {
-			diag.Errorf("cannot assign project to a billing group: %s", err)
+			return diag.Errorf("cannot assign project to a billing group: %s", err)
 		}
+	}
+
+	if err := d.Set("billing_group", billingGroupId); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -319,9 +360,9 @@ func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interfac
 			return diag.FromErr(err)
 		}
 
-		d := resourceProjectAssignToBillingGroup(d.Get("project").(string), billingGroupId.(string), client)
-		if d.HasError() {
-			return d
+		dia := resourceProjectAssignToBillingGroup(d.Get("project").(string), billingGroupId.(string), client, d)
+		if dia.HasError() {
+			return dia
 		}
 	} else {
 		project, err = client.Projects.Update(
@@ -504,6 +545,9 @@ func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client,
 		return diag.FromErr(err)
 	}
 	if err := d.Set("vat_id", project.VatID); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("billing_group", d.Get("billing_group")); err != nil {
 		return diag.FromErr(err)
 	}
 
