@@ -15,8 +15,6 @@ import (
 	"time"
 )
 
-const topicCreationFlag = "topic-was-just-created"
-
 var aivenKafkaTopicSchema = map[string]*schema.Schema{
 	"project": {
 		Type:        schema.TypeString,
@@ -291,7 +289,12 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 
 	d.SetId(buildResourceID(project, serviceName, topicName))
 
-	return resourceKafkaTopicRead(context.WithValue(ctx, topicCreationFlag, true), d, m)
+	_, err = getTopic(ctx, d, m, true)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }
 
 func getKafkaTopicConfig(d *schema.ResourceData) aiven.KafkaTopicConfig {
@@ -335,7 +338,7 @@ func getKafkaTopicConfig(d *schema.ResourceData) aiven.KafkaTopicConfig {
 
 func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project, serviceName, topicName := splitResourceID3(d.Id())
-	topic, err := getTopic(ctx, d, m)
+	topic, err := getTopic(ctx, d, m, false)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -394,24 +397,15 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 	return nil
 }
 
-func getTopic(ctx context.Context, d *schema.ResourceData, m interface{}) (aiven.KafkaTopic, error) {
+func getTopic(ctx context.Context, d *schema.ResourceData, m interface{}, ignore404 bool) (aiven.KafkaTopic, error) {
 	project, serviceName, topicName := splitResourceID3(d.Id())
 
-	var isNewlyCreatedTopic bool
-	f := ctx.Value(topicCreationFlag)
-	if f != nil {
-		if v, ok := f.(bool); ok {
-			log.Printf("[DEBUG] Flagging Kafka Topic `%s` as newly created.", topicName)
-			isNewlyCreatedTopic = v
-		}
-	}
-
 	w := &KafkaTopicAvailabilityWaiter{
-		Client:              m.(*aiven.Client),
-		Project:             project,
-		ServiceName:         serviceName,
-		TopicName:           topicName,
-		IsNewlyCreatedTopic: isNewlyCreatedTopic,
+		Client:      m.(*aiven.Client),
+		Project:     project,
+		ServiceName: serviceName,
+		TopicName:   topicName,
+		Ignore404:   ignore404,
 	}
 
 	timeout := d.Timeout(schema.TimeoutRead)
