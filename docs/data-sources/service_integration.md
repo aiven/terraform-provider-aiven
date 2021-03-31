@@ -35,7 +35,7 @@ In addition to all arguments above, the following attributes are exported:
 
 * `x_user_config` - defines integration specific configuration. `x` is the type of the integration. The available
   configuration options are documented in
-  [this JSON file](../../aiven/templates/integrations_user_config_schema.json). Not all integration types have any
+  [this JSON file](https://github.com/aiven/terraform-provider-aiven/tree/master/aiven/templates/integrations_user_config_schema.json). Not all integration types have any
   configurable settings.
 
 Aiven ID format when importing existing resource: `<project_name>/<integration_id>`. The integration identifier (UUID)
