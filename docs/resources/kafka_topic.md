@@ -27,6 +27,8 @@ resource "aiven_kafka_topic" "mytesttopic" {
 }
 ```
 
+If you are planning to create a service with many topics we do recommend running `terraform apply` with `-parallelism=50` 
+
 ## Argument Reference
 
 * `project` and `service_name` - (Required) define the project and service the topic belongs to.

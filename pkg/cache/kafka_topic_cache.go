@@ -81,11 +81,11 @@ func (t *TopicCache) DeleteByProjectAndServiceName(projectName, serviceName stri
 
 // StoreByProjectAndServiceName sets the values for a Project name and Service name key.
 func (t *TopicCache) StoreByProjectAndServiceName(projectName, serviceName string, list []*aiven.KafkaTopic) {
-	log.Printf("[DEBUG] Updating Kafka Topic cache for project %s and service %s ...", projectName, serviceName)
-
 	if len(list) == 0 {
 		return
 	}
+
+	log.Printf("[DEBUG] Updating Kafka Topic cache for project %s and service %s ...", projectName, serviceName)
 
 	for _, topic := range list {
 		t.Lock()

@@ -70,14 +70,14 @@ The following configuration options available:
     adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at 
     least to two nodes. Note: setting this to true increases a risk of data loss in case of 
     virtual machine failure.
-    * `cluster_max_shards_per_node` - Controls the number of shards allowed in the 
-    cluster per data node
 
     * `privatelink_access` - Allow access to selected service components through Privatelink
         * `elasticsearch` - Enable elasticsearch   
         * `kibana` - Enable kibana
 
     * `elasticsearch` - Elasticsearch settings.
+        * `cluster_max_shards_per_node` - Controls the number of shards allowed in the
+        cluster per data node 
         * `action_auto_create_index_enabled` - Explicitly allow or block automatic 
         creation of indices. Defaults to true
         * `action_destructive_requires_name` - Require explicit index names when deleting
