@@ -4,6 +4,15 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.10] - 2021-04-01
+- Improve documentation and error handling
+- Add support to copy billing group from source project during creation
+- Kafka Topic creation and availability improvements
+- Change Kafka Topic resource read logic for deprecated fields
+- Add support for new user configuration options
+- Add examples using external kafka schema file
+- Fix account team project update function typo
+
 ## [2.1.9] - 2021-03-11
 - Add support for AWS Privatelink
 
