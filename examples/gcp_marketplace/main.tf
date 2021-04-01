@@ -31,7 +31,7 @@ data "aiven_account" "test_account" {
 }
 
 resource "aiven_project" "new_project" {
-  project    = "new_project"
+  project    = "new-project"
   account_id = data.aiven_account.test_account.id # This is required for new marketplace projects
 }
 
