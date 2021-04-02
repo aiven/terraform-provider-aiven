@@ -134,6 +134,7 @@ Other examples can be found in the [examples](https://github.com/aiven/terraform
 - [Deploying PostgreSQL services to multiple clouds and regions](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/postgres)
 - [Deploying M3 and M3 Aggregator services](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/m3)
 - [Deploying on Timescale Cloud](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/timescale)
+- [Deploying Mysql service to cloud and regions](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/mysql)
 
 ## Importing existing infrastructure
 
