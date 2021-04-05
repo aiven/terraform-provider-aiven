@@ -341,7 +341,7 @@ func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interfac
 	projectName := d.Get("project").(string)
 	if billingGroupId, ok := d.GetOk("billing_group"); ok {
 		project, err = client.Projects.Update(
-			projectName,
+			d.Id(),
 			aiven.UpdateProjectRequest{
 				Name:             projectName,
 				BillingAddress:   optionalStringPointerForUndefined(d, "billing_address"),
@@ -366,7 +366,7 @@ func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interfac
 		}
 	} else {
 		project, err = client.Projects.Update(
-			projectName,
+			d.Id(),
 			aiven.UpdateProjectRequest{
 				Name:             projectName,
 				BillingAddress:   optionalStringPointer(d, "billing_address"),
