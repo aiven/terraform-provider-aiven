@@ -81,6 +81,27 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 			topic from being deleted. It is recommended to enable this for any production Kafka 
 			topic containing critical data.`,
 	},
+	"tag": {
+		Type:        schema.TypeSet,
+		Description: "Kafka Topic tag",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"key": {
+					Type:         schema.TypeString,
+					Description:  "Topic tag key",
+					Required:     true,
+					ValidateFunc: validation.StringLenBetween(1, 64),
+				},
+				"value": {
+					Type:         schema.TypeString,
+					Description:  "Topic tag value",
+					Optional:     true,
+					ValidateFunc: validation.StringLenBetween(0, 256),
+				},
+			},
+		},
+	},
 	"config": {
 		Type:             schema.TypeList,
 		Description:      "Kafka topic configuration",
@@ -272,6 +293,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 		RetentionHours:        optionalIntPointer(d, "retention_hours"),
 		TopicName:             topicName,
 		Config:                getKafkaTopicConfig(d),
+		Tags:                  getTags(d),
 	}
 
 	w := &KafkaTopicCreateWaiter{
@@ -295,6 +317,21 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	return nil
+}
+
+func getTags(d *schema.ResourceData) []aiven.KafkaTopicTag {
+	var tags []aiven.KafkaTopicTag
+	for _, tagD := range d.Get("tag").(*schema.Set).List() {
+		tagM := tagD.(map[string]interface{})
+		tag := aiven.KafkaTopicTag{
+			Key:   tagM["key"].(string),
+			Value: tagM["value"].(string),
+		}
+
+		tags = append(tags, tag)
+	}
+
+	return tags
 }
 
 func getKafkaTopicConfig(d *schema.ResourceData) aiven.KafkaTopicConfig {
@@ -394,7 +431,23 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
+	if err := d.Set("tag", flattenKafkaTopicTags(topic.Tags)); err != nil {
+		return diag.Errorf("error setting Kafka Topic Tags for resource %s: %s", d.Id(), err)
+	}
+
 	return nil
+}
+
+func flattenKafkaTopicTags(list []aiven.KafkaTopicTag) []map[string]interface{} {
+	var tags []map[string]interface{}
+	for _, tagS := range list {
+		tags = append(tags, map[string]interface{}{
+			"key":   tagS.Key,
+			"value": tagS.Value,
+		})
+	}
+
+	return tags
 }
 
 func getTopic(ctx context.Context, d *schema.ResourceData, m interface{}, ignore404 bool) (aiven.KafkaTopic, error) {
@@ -433,6 +486,7 @@ func resourceKafkaTopicUpdate(_ context.Context, d *schema.ResourceData, m inter
 			RetentionBytes:        optionalIntPointer(d, "retention_bytes"),
 			RetentionHours:        optionalIntPointer(d, "retention_hours"),
 			Config:                getKafkaTopicConfig(d),
+			Tags:                  getTags(d),
 		},
 	)
 	if err != nil {
