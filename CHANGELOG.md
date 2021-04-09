@@ -4,6 +4,11 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.11] - 2021-04-09
+- Add support for Kafka Topic Tags
+- Fix project name updates
+- Improve documentation and examples 
+
 ## [2.1.10] - 2021-04-01
 - Improve documentation and error handling
 - Add support to copy billing group from source project during creation
