@@ -408,7 +408,7 @@
         "pattern": "^[a-z0-9\\-@_]{5,32}$",
         "title": "Prometheus basic authentication username",
         "type": "string",
-        "user_error": "Must only contain a-z and 0-9"
+        "user_error": "Must only contain a-z, 0-9, @, _ and -. Also must be 5-32 in lenght"
       }
     },
     "type": "object"
