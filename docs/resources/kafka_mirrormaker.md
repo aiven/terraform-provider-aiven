@@ -10,7 +10,7 @@ resource "aiven_kafka_mirrormaker" "mm1" {
     cloud_name = "google-europe-west1"
     plan = "startup-4"
     service_name = "my-mm1"
-    
+
     kafka_mirrormaker_user_config {
         ip_filter = ["0.0.0.0/0"]
 
@@ -63,29 +63,30 @@ deletion. This does not shield against deleting databases or topics but for serv
 with backups much of the content can at least be restored from backup in case accidental
 deletion is done.
 
-* `maintenance_window_dow` - (Optional) day of week when maintenance operations should be performed. 
+* `maintenance_window_dow` - (Optional) day of week when maintenance operations should be performed.
 On monday, tuesday, wednesday, etc.
 
-* `maintenance_window_time` - (Optional) time of day when maintenance operations should be performed. 
+* `maintenance_window_time` - (Optional) time of day when maintenance operations should be performed.
 UTC time in HH:mm:ss format.
 
-* `kafka_mirrormaker_user_config` - (Optional) defines Kafka MirrorMaker 2 specific additional configuration options. 
+* `kafka_mirrormaker_user_config` - (Optional) defines Kafka MirrorMaker 2 specific additional configuration options.
 The following configuration options available:
     * `ip_filter` - (Optional) allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`
-    
+
     * `kafka_mirrormaker` - (Optional) Kafka MirrorMaker configuration values
-        * `refresh_groups_enabled` - (Optional) Whether to periodically check for new consumer groups. 
+        * `refresh_groups_enabled` - (Optional) Whether to periodically check for new consumer groups.
         Defaults to 'true'.
-        * `refresh_groups_interval_seconds` - (Optional) Frequency of consumer group refresh in seconds. 
+        * `refresh_groups_interval_seconds` - (Optional) Frequency of consumer group refresh in seconds.
         Defaults to 600 seconds (10 minutes).
-        * `refresh_groups_interval_seconds` - (Optional) Whether to periodically check for new topics and 
+        * `refresh_topics_enabled` - (Optional) Whether to periodically check for new topics and
         partitions. Defaults to 'true'.
-        * `refresh_topics_interval_seconds` - (Optional) Frequency of topic and partitions refresh in 
+        * `refresh_topics_interval_seconds` - (Optional) Frequency of topic and partitions refresh in
         seconds. Defaults to 600 seconds (10 minutes).
-        * `emit_checkpoints_enabled` - (Optional) Whether to periodically write the translated offsets 
-        of replicated consumer groups (in the source cluster) to __consumer_offsets topic in target cluster, 
+        * `emit_checkpoints_enabled` - (Optional) Whether to periodically write the translated offsets
+        of replicated consumer groups (in the source cluster) to __consumer_offsets topic in target cluster,
         as long as no active consumers in that group are connected to the target cluster.
-        * `sync_group_offsets_interval_seconds` - (Optional) Frequency at which consumer group offsets 
+        * `sync_group_offsets_enabled` - (Optional) Whether to periodically write the translated offsets of replicated consumer groups (in the source cluster) to __consumer_offsets topic in target cluster, as long as no active consumers in that group are connected to the target cluster. Defaults to 'false'.
+        * `sync_group_offsets_interval_seconds` - (Optional) Frequency at which consumer group offsets
         are synced (default: 60, every minute).
 
 
