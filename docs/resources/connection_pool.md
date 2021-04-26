@@ -28,14 +28,15 @@ defined using reference as shown above to set up dependencies correctly.
 
 * `pool_name` - (Required) is the name of the pool.
 
-* `pool_size` - (Required) is the number of connections the pool may create towards the backend
+* `username` - (Required) is the name of the service user used to connect to the database. This should
+  be defined using reference as shown above to set up dependencies correctly.
+
+* `pool_size` - (Optional) is the number of connections the pool may create towards the backend
 server. This does not affect the number of incoming connections, which is always a much
-larger number.
+larger number. The default value for this is 10.
 
-* `pool_mode` - (Optional) is the mode the pool operates in (session, transaction, statement).
-
-* `username` - (Optional) is the name of the service user used to connect to the database. This should
-be defined using reference as shown above to set up dependencies correctly.
+* `pool_mode` - (Optional) is the mode the pool operates in (session, transaction, statement). The
+default value for this is `transaction`.
 
 ## Attribute Reference
 
