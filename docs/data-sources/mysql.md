@@ -71,6 +71,9 @@ configuration options available:
     New backup is only started if previous backup has already completed.
     * `backup_minute` - The minute of an hour when backup for the service is started. 
     New backup is only started if previous backup has already completed.
+    * `binlog_retention_period` - The minimum amount of time in seconds to keep binlog entries
+    before deletion. This may be extended for services that require binlog entries for longer than the
+    default for example if using the MySQL Debezium Kafka connector.    
     * `ip_filter` - Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
     
     * `mysql` - mysql.conf configuration values.
@@ -128,6 +131,7 @@ configuration options available:
 
     * `privatelink_access` - Allow access to selected service components through Privatelink
         * `mysql` - Enable mysql
+        * `mysqlx` - Enable mysqlx
 
     * `migration` - Migrate data from existing server
         * `dbname` - Database name for bootstrapping the initial connection
@@ -142,14 +146,18 @@ configuration options available:
     * `private_access` - Allow access to selected service ports from private networks
         * `mysql` - Allow clients to connect to mysql with a DNS name that always 
         resolves to the service's private IP addresses. Only available in certain network locations
-        * `mysql` - Allow clients to connect to prometheus with a DNS name that always 
+        * `prometheus` - Allow clients to connect to prometheus with a DNS name that always 
         resolves to the service's private IP addresses. Only available in certain network locations
+        * `mysqlx` - (Optional) Allow clients to connect to mysqlx with a DNS name that always resolves
+        to the service's private IP addresses. Only available in certain network locations
     
     * `public_access` - Allow access to selected service ports from the public Internet
         * `mysql` - Allow clients to connect to mysql from the public internet for service 
         nodes that are in a project VPC or another type of private network
         * `prometheus` - Allow clients to connect to prometheus from the public internet 
         for service nodes that are in a project VPC or another type of private network
+        * `mysqlx` - (Optional) Allow clients to connect to mysqlx from the public internet for service
+        nodes that are in a project VPC or another type of private network
     
     * `recovery_target_time` - Recovery target time when forking a service. This has effect 
     only when a new service is being created.

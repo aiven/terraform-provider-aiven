@@ -152,6 +152,9 @@ configuration options available:
         executing command for each active session.
         * `track_commit_timestamp` - Record commit time of transactions
         * `track_functions` - Enables tracking of function call counts and time used.
+        * `track_io_timing` - Enables timing of database I/O calls. This parameter is off by default,
+        because it will repeatedly query the operating system for the current time, which may cause 
+        significant overhead on some platforms.
         * `wal_sender_timeout` - Terminate replication connections that are inactive for longer than 
         this amount of time, in milliseconds.
         * `wal_writer_delay` - WAL flush interval in milliseconds. Note that setting this value 

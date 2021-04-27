@@ -1407,8 +1407,8 @@
           "log_cleanup_policy": {
             "description": "The default cleanup policy for segments beyond the retention window",
             "enum": [
-              "compact",
               "delete",
+              "compact",
               "compact,delete"
             ],
             "example": "delete",
@@ -2641,6 +2641,13 @@
           "null"
         ]
       },
+      "binlog_retention_period": {
+        "example": 600,
+        "maximum": 86400,
+        "minimum": 600,
+        "title": "The minimum amount of time in seconds to keep binlog entries before deletion. This may be extended for services that require binlog entries for longer than the default for example if using the MySQL Debezium Kafka connector.",
+        "type": "integer"
+      },
       "ip_filter": {
         "default": [
           "0.0.0.0/0"
@@ -2918,6 +2925,11 @@
             "title": "Allow clients to connect to mysql with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
             "type": "boolean"
           },
+          "mysqlx": {
+            "example": true,
+            "title": "Allow clients to connect to mysqlx with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+            "type": "boolean"
+          },
           "prometheus": {
             "example": true,
             "title": "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
@@ -2934,6 +2946,11 @@
           "mysql": {
             "example": true,
             "title": "Enable mysql",
+            "type": "boolean"
+          },
+          "mysqlx": {
+            "example": true,
+            "title": "Enable mysqlx",
             "type": "boolean"
           }
         },
@@ -2957,6 +2974,11 @@
           "mysql": {
             "example": true,
             "title": "Allow clients to connect to mysql from the public internet for service nodes that are in a project VPC or another type of private network",
+            "type": "boolean"
+          },
+          "mysqlx": {
+            "example": true,
+            "title": "Allow clients to connect to mysqlx from the public internet for service nodes that are in a project VPC or another type of private network",
             "type": "boolean"
           },
           "prometheus": {
@@ -3226,9 +3248,9 @@
           "log_line_prefix": {
             "description": "Choose from one of the available log-formats. These can support popular log analyzers like pgbadger, pganalyze etc.",
             "enum": [
-              "'pid=%p,user=%u,db=%d,app=%a,client=%h '",
               "'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '",
-              "'%m [%p] %q[user=%u,db=%d,app=%a] '"
+              "'%m [%p] %q[user=%u,db=%d,app=%a] '",
+              "'pid=%p,user=%u,db=%d,app=%a,client=%h '"
             ],
             "title": "log_line_prefix",
             "type": "string"
@@ -3401,6 +3423,16 @@
               "none"
             ],
             "title": "track_functions",
+            "type": "string"
+          },
+          "track_io_timing": {
+            "description": "Enables timing of database I/O calls. This parameter is off by default, because it will repeatedly query the operating system for the current time, which may cause significant overhead on some platforms.",
+            "enum": [
+              "off",
+              "on"
+            ],
+            "example": "off",
+            "title": "track_io_timing",
             "type": "string"
           },
           "wal_sender_timeout": {
