@@ -4,6 +4,17 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.12] - 2021-04-20
+- Improve documentation
+  - Add missing import instructions 
+  - Add `aiven_billing_group` documentation
+  - Fix required and optional `aiven_connection_pool` options
+  - Updates to `MirrorMaker` arguments list
+- Fix error message for prometheus user creation
+- Fix project `technical_emails` and `billing_emails` fields schema
+- Add support for new user configuration options
+- Add MySQL example
+
 ## [2.1.11] - 2021-04-09
 - Add support for Kafka Topic Tags
 - Fix project name updates
