@@ -27,3 +27,5 @@ In addition to all arguments above, the following attributes are exported:
 * `create_time` - time of creation.
 
 * `update_time` - time of last update.
+
+Aiven ID format when importing existing resource: `<account_id>`

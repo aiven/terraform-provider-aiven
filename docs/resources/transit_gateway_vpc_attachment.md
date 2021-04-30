@@ -40,3 +40,8 @@ In addition to all arguments above, the following attributes are exported:
 * `state_info` state-specific help or error information.
 
 * `peering_connection_id` Cloud provider identifier for the peering connection if available.
+
+Aiven ID format when importing existing resource: `<project_name>/<VPC_UUID>/<peer_cloud_account>/<peer_vpc>`.
+Aiven ID format when importing existing cross-region resource: `<project_name>/<VPC_UUID>/<peer_cloud_account>/<peer_vpc>/peer_region`.
+The UUID is not directly visible in the Aiven web console.
+

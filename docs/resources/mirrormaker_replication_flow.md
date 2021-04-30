@@ -39,3 +39,5 @@ Flow belongs to. They should be defined using reference as shown above to set up
 * `topics` - (Optional) is a list of topics and/or regular expressions to replicate.
 
 * `topics_blacklist` - (Optional) is a list of topics and/or regular expressions to not replicate.
+
+Aiven ID format when importing existing resource: `<project_name>/<service_name>/<source_cluster>/<target_cluster>`

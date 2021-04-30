@@ -38,3 +38,5 @@ In addition to all arguments above, the following attributes are exported:
 `true` means that the user accepted the invitation and now a member of an account team.
  
 * `create_time` - time of creation.
+
+Aiven ID format when importing existing resource: `<account_id>/<team_id>/<user_email>`

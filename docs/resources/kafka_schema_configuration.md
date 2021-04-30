@@ -23,3 +23,5 @@ compatibility level can be overridden for a specific subject when used in `aiven
 resource. If the compatibility level not specified for the individual subject by default, 
 it takes a global value. Allowed values: `BACKWARD`, `BACKWARD_TRANSITIVE`, `FORWARD`, 
 `FORWARD_TRANSITIVE`, `FULL`, `FULL_TRANSITIVE`, `NONE`.
+
+Aiven ID format when importing existing resource: `<project_name>/<kafka_service_name>`
