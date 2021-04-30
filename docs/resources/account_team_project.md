@@ -32,3 +32,5 @@ resource "aiven_account_team_project" "account_team_project1" {
 
 * `team_type` - (Optional) is an account team project type, can one of the following values: `admin`, 
 `developer`, `operator` and `read_only`.
+
+Aiven ID format when importing existing resource: `<account_id>/<team_id>/<project_name>`
