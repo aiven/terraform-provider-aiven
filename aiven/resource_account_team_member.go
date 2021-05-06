@@ -6,6 +6,7 @@ import (
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"log"
 )
 
 var aivenAccountTeamMemberSchema = map[string]*schema.Schema{
@@ -80,10 +81,9 @@ func resourceAccountTeamMemberCreate(ctx context.Context, d *schema.ResourceData
 	return resourceAccountTeamMemberRead(ctx, d, m)
 }
 
-func resourceAccountTeamMemberRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var found bool
 	client := m.(*aiven.Client)
-
 	accountId, teamId, userEmail := splitResourceID3(d.Id())
 
 	r, err := client.AccountTeamInvites.List(accountId, teamId)
@@ -151,7 +151,11 @@ func resourceAccountTeamMemberRead(_ context.Context, d *schema.ResourceData, m 
 	}
 
 	if !found {
-		return diag.Errorf("cannot find user invitation for %s", d.Id())
+		log.Printf("[WARNING] cannot find user invitation for %s", d.Id())
+		if d.Get("accepted").(bool) == false {
+			log.Printf("[DEBUG] resending account team member invitation ")
+			return resourceAccountTeamMemberCreate(ctx, d, m)
+		}
 	}
 
 	return nil
