@@ -73,12 +73,15 @@ func resourceProjectUserCreate(ctx context.Context, d *schema.ResourceData, m in
 	return resourceProjectUserRead(ctx, d, m)
 }
 
-func resourceProjectUserRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceProjectUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, email := splitResourceID2(d.Id())
 	user, invitation, err := client.ProjectUsers.Get(projectName, email)
 	if err != nil {
+		if aiven.IsNotFound(err) && !d.Get("accepted").(bool) {
+			return resourceProjectUserCreate(ctx, d, m)
+		}
 		return diag.FromErr(err)
 	}
 
