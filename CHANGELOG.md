@@ -4,6 +4,9 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.13] - 2021-05-07
+- Resend `aiven_account_team_member` and `project_user` invitations if expired
+
 ## [2.1.12] - 2021-04-20
 - Improve documentation
   - Add missing import instructions 
