@@ -16,12 +16,11 @@ data "aiven_project" "bd" {
 }
 
 
-resource "aiven_service" "bar" {
+resource "aiven_kafka" "bar" {
   project                 = data.aiven_project.bd.project
   cloud_name              = "google-europe-west1"
   plan                    = "business-4"
   service_name            = var.kafka_svc
-  service_type            = "kafka"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
   kafka_user_config {
@@ -56,7 +55,5 @@ resource "aiven_service_integration" "rsys_int" {
   project                 = data.aiven_project.bd.project
   destination_endpoint_id = aiven_service_integration_endpoint.prom.id
   integration_type        = "prometheus"
-  source_service_name     = aiven_service.bar.service_name
+  source_service_name     = aiven_kafka.bar.service_name
 }
-
-

@@ -1,5 +1,4 @@
 ---
-parent: Guides
 page_title: "Upgrade Guide"
 ---
 

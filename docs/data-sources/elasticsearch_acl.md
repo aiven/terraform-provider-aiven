@@ -8,7 +8,7 @@ for Elasticsearch service.
 ```hcl
 data "aiven_elasticsearch_acl" "es-acls" {
     project = aiven_project.es-project.project
-    service_name = aiven_service.es.service_name
+    service_name = aiven_elasticsearch.es.service_name
 }
 ```
 
