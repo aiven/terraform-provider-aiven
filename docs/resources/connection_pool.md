@@ -13,6 +13,10 @@ resource "aiven_connection_pool" "mytestpool" {
     pool_name = "mypool"
     pool_size = 10
     username = "${aiven_service_user.myserviceuser.username}"
+
+    depends_on = [
+      aiven_database.mydatabase,
+    ]
 }
 ```
 
