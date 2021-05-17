@@ -6,8 +6,8 @@ The Kafka Topic data source provides information about the existing Aiven Kafka 
 
 ```hcl
 data "aiven_kafka_topic" "mytesttopic" {
-    project = "${aiven_project.myproject.project}"
-    service_name = "${aiven_service.myservice.service_name}"
+    project = aiven_project.myproject.project
+    service_name = aiven_service.myservice.service_name
     topic_name = "<TOPIC_NAME>"
     partitions = 3
     replication = 1
@@ -74,4 +74,3 @@ In addition to all arguments above, the following attributes are exported:
     * `unclean_leader_election_enable` - unclean.leader.election.enable value
 
 Aiven ID format when importing existing resource: `<project_name>/<service_name>/<topic_name>`
-

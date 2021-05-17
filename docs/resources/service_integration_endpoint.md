@@ -6,7 +6,7 @@ The Service Integration Endpoint resource allows the creation and management of 
 
 ```hcl
 resource "aiven_service_integration_endpoint" "myendpoint" {
-    project = "${aiven_project.myproject.project}"
+    project = aiven_project.myproject.project
     endpoint_name = "<ENDPOINT_NAME>"
     endpoint_type = "datadog"
     datadog_user_config {

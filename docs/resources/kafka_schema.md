@@ -38,7 +38,7 @@ resource "aiven_kafka_schema" "kafka-schema2" {
     subject_name = "kafka-schema2"
     compatibility_level = "FORWARD"
     
-    schema = file("${path.module}/external_schema.avsc")
+    schema = file(path.module}/external_schema.avsc")
 }
 ```
 

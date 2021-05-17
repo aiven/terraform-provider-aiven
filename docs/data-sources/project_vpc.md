@@ -6,7 +6,7 @@ The Project VPC data source provides information about the existing Aiven Projec
 
 ```hcl
 data "aiven_project_vpc" "myvpc" {
-    project = "${aiven_project.myproject.project}"
+    project = aiven_project.myproject.project
     cloud_name = "google-europe-west1"
 }
 ```

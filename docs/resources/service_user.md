@@ -6,8 +6,8 @@ The Service User resource allows the creation and management of Aiven Service Us
 
 ```hcl
 resource "aiven_service_user" "myserviceuser" {
-  project = "${aiven_project.myproject.project}"
-  service_name = "${aiven_service.myservice.service_name}"
+  project = aiven_project.myproject.project
+  service_name = aiven_service.myservice.service_name
   username = "<USERNAME>"
 }
 ```
