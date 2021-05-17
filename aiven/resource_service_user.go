@@ -121,7 +121,7 @@ func resourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m in
 		serviceName,
 		aiven.CreateServiceUserRequest{
 			Username: username,
-			AccessControl: aiven.AccessControl{
+			AccessControl: &aiven.AccessControl{
 				RedisACLCategories: flattenToString(d.Get("redis_acl_categories").([]interface{})),
 				RedisACLCommands:   flattenToString(d.Get("redis_acl_commands").([]interface{})),
 				RedisACLKeys:       flattenToString(d.Get("redis_acl_keys").([]interface{})),
