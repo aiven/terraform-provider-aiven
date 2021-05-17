@@ -138,6 +138,10 @@ resource "aiven_connection_pool" "sample_pool" {
   database_name = aiven_database.sample_db.database_name
   pool_name     = "samplepool"
   username      = aiven_service_user.sample_user.username
+
+  depends_on = [
+    aiven_database.sample_db,
+  ]
 }
 
 # Grafana service

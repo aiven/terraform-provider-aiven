@@ -126,6 +126,8 @@ func testAccConnectionPoolResource(name string) string {
 			pool_name = "test-acc-pool-%s"
 			pool_size = 25
 			pool_mode = "transaction"
+
+			depends_on = [aiven_database.foo]
 		}
 
 		data "aiven_connection_pool" "pool" {

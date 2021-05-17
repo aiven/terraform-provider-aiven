@@ -43,7 +43,8 @@ func testAccCheckAivenProjectUserResourceDestroy(s *terraform.State) error {
 		projectName, email := splitResourceID2(rs.Primary.ID)
 		p, i, err := c.ProjectUsers.Get(projectName, email)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			errStatus := err.(aiven.Error).Status
+			if errStatus != 404 && errStatus != 403 {
 				return err
 			}
 		}

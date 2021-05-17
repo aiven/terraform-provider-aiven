@@ -183,13 +183,14 @@ func testAccCheckAivenProjectResourceDestroy(s *terraform.State) error {
 
 		p, err := c.Projects.Get(rs.Primary.ID)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			errStatus := err.(aiven.Error).Status
+			if errStatus != 404 && errStatus != 403 {
 				return err
 			}
 		}
 
 		if p != nil {
-			return fmt.Errorf("porject (%s) still exists", rs.Primary.ID)
+			return fmt.Errorf("project (%s) still exists", rs.Primary.ID)
 		}
 	}
 
