@@ -415,16 +415,18 @@ func testAccCheckAivenKafkaTopicResourceDestroy(s *terraform.State) error {
 
 		_, err := c.Services.Get(project, serviceName)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
-				return err
+			if aiven.IsNotFound(err) {
+				return nil
 			}
+			return err
 		}
 
 		t, err := c.KafkaTopics.Get(project, serviceName, topicName)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
-				return err
+			if aiven.IsNotFound(err) {
+				return nil
 			}
+			return err
 		}
 
 		if t != nil {
