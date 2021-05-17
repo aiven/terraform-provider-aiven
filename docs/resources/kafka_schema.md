@@ -7,7 +7,7 @@ The Kafka Schema resource allows the creation and management of Aiven Kafka Sche
 ```hcl
 resource "aiven_kafka_schema" "kafka-schema1" {
     project = aiven_project.kafka-schemas-project1.project
-    service_name = aiven_service.kafka-service1.service_name
+    service_name = aiven_kafka.kafka-service1.service_name
     subject_name = "kafka-schema1"
     compatibility_level = "FORWARD"
     
@@ -34,11 +34,11 @@ You can also load the schema from an external file:
 ```hcl
 resource "aiven_kafka_schema" "kafka-schema2" {
     project = aiven_project.kafka-schemas-project1.project
-    service_name = aiven_service.kafka-service1.service_name
+    service_name = aiven_kafka.kafka-service1.service_name
     subject_name = "kafka-schema2"
     compatibility_level = "FORWARD"
     
-    schema = file("${path.module}/external_schema.avsc")
+    schema = file(path.module}/external_schema.avsc")
 }
 ```
 

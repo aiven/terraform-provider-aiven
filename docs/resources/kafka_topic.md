@@ -6,8 +6,8 @@ The Kafka Topic resource allows the creation and management of Aiven Kafka Topic
 
 ```hcl
 resource "aiven_kafka_topic" "mytesttopic" {
-    project = "${aiven_project.myproject.project}"
-    service_name = "${aiven_service.myservice.service_name}"
+    project = aiven_project.myproject.project
+    service_name = aiven_kafka.myservice.service_name
     topic_name = "<TOPIC_NAME>"
     partitions = 5
     replication = 3
@@ -89,4 +89,3 @@ created.
     * `unclean_leader_election_enable` - (Optional) unclean.leader.election.enable value
 
 Aiven ID format when importing existing resource: `<project_name>/<service_name>/<topic_name>`
-

@@ -174,7 +174,7 @@ configuration options available:
     ```hlc
     service_integrations {
         integration_type = "read_replica"
-        source_service_name = "${aiven_service.mysourceservice.service_name}"
+        source_service_name = aiven_service.mysourceservice.service_name
     }
     ```
     

@@ -6,7 +6,7 @@ The Project User resource allows the creation and management of Aiven Project Us
 
 ```hcl
 resource "aiven_project_user" "mytestuser" {
-    project = "${aiven_project.myproject.project}"
+    project = aiven_project.myproject.project
     email = "john.doe@example.com"
     member_type = "admin"
 }

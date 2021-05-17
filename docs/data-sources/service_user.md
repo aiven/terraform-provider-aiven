@@ -6,8 +6,8 @@ The Service User data source provides information about the existing Aiven Servi
 
 ```hcl
 data "aiven_service_user" "myserviceuser" {
-  project = "${aiven_project.myproject.project}"
-  service_name = "${aiven_service.myservice.service_name}"
+  project = aiven_project.myproject.project
+  service_name = aiven_service.myservice.service_name
   username = "<USERNAME>"
 }
 ```
