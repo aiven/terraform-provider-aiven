@@ -56,7 +56,7 @@ Voilà, a PostgreSQL database.
 ## Developing
 ### Requirements
 - [Terraform](https://www.terraform.io/downloads.html) v0.12.X or greater
-- [Go](https://golang.org/doc/install) 1.15.X or greater
+- [Go](https://golang.org/doc/install) 1.16.X or greater
 ### Cloning
 ```bash
 $ git clone https://github.com/aiven/terraform-provider-aiven.git
