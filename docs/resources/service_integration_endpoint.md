@@ -15,6 +15,20 @@ resource "aiven_service_integration_endpoint" "myendpoint" {
 }
 ```
 
+## Example Usage - Prometheus Integration Endpoint
+
+```hcl
+resource "aiven_service_integration_endpoint" "prometheus_integration" {
+    project = aiven_project.myproject.project
+    endpoint_name = "<ENDPOINT_NAME>"
+    endpoint_type = "prometheus"
+    prometheus_user_config {
+        basic_auth_username = "<USERNAME>"
+        basic_auth_password = "<PASSWORD>"
+    }
+}
+```
+
 ## Argument Reference
 
 * `project` - (Required) defines the project the endpoint is associated with.
