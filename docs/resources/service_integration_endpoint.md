@@ -37,7 +37,7 @@ resource "aiven_service_integration_endpoint" "prometheus_integration" {
 to identify different integration endpoints.
 
 * `endpoint_type` - (Required) is the type of the external service this endpoint is associated with.
-By the time of writing the only available option is `datadog`.
+Available options are `datadog`, `external_aws_cloudwatch_logs`, `external_aws_cloudwatch_metrics`, `external_elasticsearch_logs`, `external_google_cloud_logging`, `external_kafka`, `external_schema_registry`, `jolokia`, `prometheus`, `rsyslog` and `signalfx`.
 
 * `x_user_config` - (Optional) defines endpoint type specific configuration. `x` is the type of the
 endpoint. The available configuration options are documented in
