@@ -39,7 +39,7 @@ plan such as the new plan must have sufficient amount of disk space to store all
 data and switching to a plan with fewer nodes might not be supported. The basic plan
 names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is
 (roughly) the amount of memory on each node (also other attributes like number of CPUs
-and amount of disk space varies but naming is based on memory). The exact options can be
+and amount of disk space varies but naming is based on memory except for premium where it's premium-Nx-X and N represent the nodenumber and X the memory). The exact options can be
 seen from the Aiven web console's Create Service dialog.
 
 * `project_vpc_id` - optionally specifies the VPC the service should run in. If the value
