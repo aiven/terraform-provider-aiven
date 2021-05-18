@@ -16,7 +16,7 @@ resource "aiven_service_integration" "myintegration" {
   destination_endpoint_id = aiven_service_integration_endpoint.XX.id
   integration_type = "datadog"
   // use source_service_name or source_endpoint_id = aiven_service_integration_endpoint.XXX.id
-  source_service_name = aiven_kafka.XXX.service_name
+  source_service_name = aiven_kafka.XXX.id
 }
 ```
 
