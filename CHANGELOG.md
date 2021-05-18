@@ -4,6 +4,18 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.14] - 2021-05-18
+- Fix kafka topic acceptance test destroy check
+- Fix `aiven_project_user` read method 
+- Use golang 1.16
+- Remove GitHub pages and supporting code
+- Rework documentation and examples
+  - New README file structure
+  - Removed the Getting Started guide and merged its contents on `docs/index.md`
+  - Splitting `docs/index.md` contents in other pages on the guides
+  - In examples use data source for the Aiven Project instead of resource
+  - In examples use `aiven_<svc>` resource instead of `aiven_service`
+
 ## [2.1.13] - 2021-05-07
 - Resend `aiven_account_team_member` and `project_user` invitations if expired
 
