@@ -11,7 +11,7 @@ Some properties, like **project** and the **resource name**, cannot be changed a
 To avoid any issues, **please set the `termination_protection` property to `true` on all production services**, it will prevent Terraform to remove the service until the flag is set back to `false` again. While it prevents a service to be deleted, any logical databases, topics or other configurations may be removed **even when this section is enabled**. Be very careful! 
 
 ## Quick Start
-- [Signup for Aiven](https://console.aiven.io/signup)
+- [Signup for Aiven](https://console.aiven.io/signup?utm_source=github&utm_medium=organic&utm_campaign=terraform&utm_content=signup)
 - [Get your authentication token and project name](https://help.aiven.io/en/articles/2059201-authentication-tokens)
 - Create a file named `main.tf` with the content below:
 ```hcl

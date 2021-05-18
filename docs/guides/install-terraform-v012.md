@@ -2,8 +2,8 @@
 page_title: "Using Terraform v0.12"
 ---
 
-## Using Terraform v0.12
-_If you can please upgrade your Terraform client to version 0.13 or above, in this case, there is no need to install provider manually._
+# Using Terraform v0.12
+_If you can please upgrade your Terraform client to version 0.13 or above, in this case, there is no need to install the provider manually._
 
 Download the latest Aiven provider for your platform from the [release page](https://github.com/aiven/terraform-provider-aiven/releases).
 

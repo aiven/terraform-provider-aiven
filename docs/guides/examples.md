@@ -2,6 +2,8 @@
 page_title: "Examples"
 ---
 
+# Examples
+
 Other examples can be found in the [examples](https://github.com/aiven/terraform-provider-aiven/tree/master/examples) folder that provides examples to:
 
 - [Getting Started](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/getting-started.tf)
