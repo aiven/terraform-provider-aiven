@@ -25,7 +25,6 @@ func TestGenerateTerraformUserConfigSchema(t *testing.T) {
 					"properties": map[string]interface{}{
 						"admin_password": map[string]interface{}{
 							"createOnly": true,
-							"default":    nil,
 							"example":    "z66o9QXqKM",
 							"maxLength":  256,
 							"minLength":  8,
@@ -51,7 +50,6 @@ func TestGenerateTerraformUserConfigSchema(t *testing.T) {
 					Sensitive:        true,
 					DiffSuppressFunc: createOnlyDiffSuppressFunc,
 					Description:      "Custom password for admin user",
-					Default:          "",
 				},
 			},
 			false,
@@ -63,7 +61,6 @@ func TestGenerateTerraformUserConfigSchema(t *testing.T) {
 					"properties": map[string]interface{}{
 						"admin_password": map[string]interface{}{
 							"createOnly": true,
-							"default":    nil,
 							"example":    "z66o9QXqKM",
 							"maxLength":  256,
 							"minLength":  8,
@@ -85,7 +82,6 @@ func TestGenerateTerraformUserConfigSchema(t *testing.T) {
 					"properties": map[string]interface{}{
 						"admin_password": map[string]interface{}{
 							"createOnly": true,
-							"default":    nil,
 							"example":    "z66o9QXqKM",
 							"maxLength":  256,
 							"minLength":  8,
@@ -106,7 +102,6 @@ func TestGenerateTerraformUserConfigSchema(t *testing.T) {
 				data: map[string]interface{}{
 					"admin_password": map[string]interface{}{
 						"createOnly": true,
-						"default":    nil,
 						"example":    "z66o9QXqKM",
 						"maxLength":  256,
 						"minLength":  8,

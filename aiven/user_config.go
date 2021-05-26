@@ -44,13 +44,11 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 		diffFunction = emptyObjectDiffSuppressFunc
 	}
 
-	defaultValue := getAivenSchemaDefaultValue(definition)
 	title := definition["title"].(string)
 
 	switch valueType {
 	case "string", "integer", "boolean", "number":
 		return &schema.Schema{
-			Default:          defaultValue,
 			Description:      title,
 			DiffSuppressFunc: diffFunction,
 			Optional:         true,
@@ -133,20 +131,16 @@ func getAivenSchemaType(value interface{}) (string, bool) {
 }
 
 func getAivenSchemaDefaultValue(definition map[string]interface{}) interface{} {
-	valueType, _ := getAivenSchemaType(definition["type"])
-	defaultValue, ok := definition["default"]
-	if !ok || defaultValue == nil {
-		defaultValue = ""
+	var defaultValue interface{}
 
-		if valueType == "string" {
-			// Terraform has no way of indicating unset values.
-			// Convert "<<value not set>>" to unset when handling request
-			defaultValue = ""
-		} else if valueType == "array" {
-			defaultValue = []interface{}{}
-		} else if valueType == "object" {
-			defaultValue = []map[string]interface{}{}
-		}
+	valueType, _ := getAivenSchemaType(definition["type"])
+	switch valueType {
+	case "array":
+		defaultValue = []interface{}{}
+	case "object":
+		defaultValue = []map[string]interface{}{}
+	default:
+		defaultValue = ""
 	}
 
 	return defaultValue
