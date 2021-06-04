@@ -6,7 +6,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"strings"
+	"time"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -75,6 +77,9 @@ func resourceDatabase() *schema.Resource {
 		UpdateContext: resourceDatabaseUpdate,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceDatabaseState,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Delete: schema.DefaultTimeout(2 * time.Minute),
 		},
 
 		// TODO: add user config
@@ -150,9 +155,17 @@ func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.Errorf("cannot delete a database termination_protection is enabled")
 	}
 
-	err := client.Databases.Delete(projectName, serviceName, databaseName)
-	if err != nil && !aiven.IsNotFound(err) {
-		return diag.FromErr(err)
+	waiter := DatabaseDeleteWaiter{
+		Client:      client,
+		ProjectName: projectName,
+		ServiceName: serviceName,
+		Database:    databaseName,
+	}
+
+	timeout := d.Timeout(schema.TimeoutDelete)
+	_, err := waiter.Conf(timeout).WaitForStateContext(ctx)
+	if err != nil {
+		return diag.Errorf("error waiting for Aiven Database to be DELETED: %s", err)
 	}
 
 	return nil
@@ -169,4 +182,36 @@ func resourceDatabaseState(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+// DatabaseDeleteWaiter is used to wait for Database to be deleted.
+type DatabaseDeleteWaiter struct {
+	Client      *aiven.Client
+	ProjectName string
+	ServiceName string
+	Database    string
+}
+
+// RefreshFunc will call the Aiven client and refresh it's state.
+func (w *DatabaseDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		err := w.Client.Databases.Delete(w.ProjectName, w.ServiceName, w.Database)
+		if err != nil && !aiven.IsNotFound(err) {
+			return nil, "REMOVING", nil
+		}
+
+		return aiven.Database{}, "DELETED", nil
+	}
+}
+
+// Conf sets up the configuration to refresh.
+func (w *DatabaseDeleteWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
+	return &resource.StateChangeConf{
+		Pending:    []string{"REMOVING"},
+		Target:     []string{"DELETED"},
+		Refresh:    w.RefreshFunc(),
+		Delay:      5 * time.Second,
+		Timeout:    timeout,
+		MinTimeout: 5 * time.Second,
+	}
 }
