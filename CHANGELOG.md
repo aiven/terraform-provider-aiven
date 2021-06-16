@@ -4,6 +4,13 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.15] - 2021-06-14
+- Add database deletion waiter
+- Remove default values for user configuration options
+- Improve documentation and examples
+  - Add Prometheus integration example
+  - Add example for Datadog metrics integration
+
 ## [2.1.14] - 2021-05-18
 - Fix kafka topic acceptance test destroy check
 - Fix `aiven_project_user` read method 
