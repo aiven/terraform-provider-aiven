@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -64,4 +65,43 @@ func testAccVPCPeeringConnectionAWSResource() string {
 		os.Getenv("AWS_ACCOUNT_ID"),
 		os.Getenv("AWS_VPC_ID"),
 		os.Getenv("AWS_REGION"))
+}
+
+func Test_convertStateInfoToMap(t *testing.T) {
+	type args struct {
+		s *map[string]interface{}
+	}
+	tests := []struct {
+		name string
+		args args
+		want map[string]string
+	}{
+		{
+			name: "basic",
+			args: args{
+				&map[string]interface{}{
+					"message": "xxx",
+					"type":    "xxx",
+					"warnings": []interface{}{
+						map[string]interface{}{
+							"field_a": "xxx",
+							"message": "xxx",
+							"type":    "overlapping-peer-vpc-ip-ranges"},
+					},
+				},
+			},
+			want: map[string]string{
+				"message":  "xxx",
+				"type":     "xxx",
+				"warnings": "[map[field_a:xxx message:xxx type:overlapping-peer-vpc-ip-ranges]]",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := convertStateInfoToMap(tt.args.s); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("convertStateInfoToMap() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
