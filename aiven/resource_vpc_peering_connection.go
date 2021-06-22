@@ -225,7 +225,11 @@ func stateInfoToString(s *map[string]interface{}) string {
 	}
 
 	for k, v := range *s {
-		str += fmt.Sprintf("\n`%s`:`%s`", k, v)
+		if _, ok := v.(string); ok {
+			str += fmt.Sprintf("\n %q:%q", k, v)
+		} else {
+			str += fmt.Sprintf("\n %q:`%+v`", k, v)
+		}
 	}
 
 	return str
@@ -416,7 +420,7 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 		}
 	}
 
-	if err := d.Set("state_info", peeringConnection.StateInfo); err != nil {
+	if err := d.Set("state_info", convertStateInfoToMap(peeringConnection.StateInfo)); err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  fmt.Sprintf("Unable to set state_info field: %s", err),
@@ -442,6 +446,23 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 	}
 
 	return diags
+}
+
+func convertStateInfoToMap(s *map[string]interface{}) map[string]string {
+	if s == nil || len(*s) == 0 {
+		return nil
+	}
+
+	r := make(map[string]string)
+	for k, v := range *s {
+		if _, ok := v.(string); ok {
+			r[k] = v.(string)
+		} else {
+			r[k] = fmt.Sprintf("%+v", v)
+		}
+	}
+
+	return r
 }
 
 // VPCPeeringBuildWaiter is used to wait for Aiven to build a new VPC peering connection
