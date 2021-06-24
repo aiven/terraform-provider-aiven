@@ -8,8 +8,12 @@ import (
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"regexp"
 	"strings"
 )
+
+const serviceIntegrationEndpointRegExp = "^[a-zA-Z0-9_-]*\\/{1}[a-zA-Z0-9_-]*$"
 
 var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 	"destination_endpoint_id": {
@@ -17,6 +21,8 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 		Optional:    true,
 		Type:        schema.TypeString,
+		ValidateFunc: validation.StringMatch(regexp.MustCompile(serviceIntegrationEndpointRegExp),
+			"endpoint id should have the following format: project_name/endpoint_id"),
 	},
 	"destination_service_name": {
 		Description: "Destination service for the integration (if any)",
@@ -231,6 +237,8 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 		Optional:    true,
 		Type:        schema.TypeString,
+		ValidateFunc: validation.StringMatch(regexp.MustCompile(serviceIntegrationEndpointRegExp),
+			"endpoint id should have the following format: project_name/endpoint_id"),
 	},
 	"source_service_name": {
 		Description: "Source service for the integration (if any)",
