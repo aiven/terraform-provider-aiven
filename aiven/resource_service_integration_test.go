@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"os"
+	"regexp"
 	"testing"
 )
 
@@ -19,6 +20,11 @@ func TestAccAivenServiceIntegration_basic(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckAivenServiceIntegrationResourceDestroy,
 		Steps: []resource.TestStep{
+			{
+				Config:      testAccServiceIntegrationShouldFailResource(),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("endpoint id should have the following format: project_name/endpoint_id"),
+			},
 			{
 				Config: testAccServiceIntegrationResource(rName),
 				Check: resource.ComposeTestCheckFunc(
@@ -279,6 +285,21 @@ func testAccServiceIntegrationMirrorMakerResource(name string) string {
 			}
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
+}
+
+func testAccServiceIntegrationShouldFailResource() string {
+	return fmt.Sprintf(`
+		resource "aiven_service_integration" "bar" {
+			project = "test"
+			integration_type = "kafka_mirrormaker"
+			source_endpoint_id = "test"
+			destination_endpoint_id = "test"
+	
+			kafka_mirrormaker_user_config {
+				cluster_alias = "source"
+			}
+		}
+		`)
 }
 
 func testAccCheckAivenServiceIntegrationResourceDestroy(s *terraform.State) error {
