@@ -1,5 +1,5 @@
 // Copyright (c) 2017 jelmersnoeck
-// Copyright (c) 2018 Aiven, Helsinki, Finland. https://aiven.io/
+// Copyright (c) 2021 Aiven, Helsinki, Finland. https://aiven.io/
 package aiven
 
 import (
@@ -63,6 +63,12 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Description:      "Copy properties from another project. Only has effect when a new project is created.",
 		DiffSuppressFunc: createOnlyDiffSuppressFunc,
 	},
+	"use_source_project_billing_group": {
+		Type:             schema.TypeBool,
+		Optional:         true,
+		Description:      "Use the same billing group that is used in source project.",
+		DiffSuppressFunc: createOnlyDiffSuppressFunc,
+	},
 	"country_code": {
 		Type:             schema.TypeString,
 		Optional:         true,
@@ -124,9 +130,10 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Deprecated:       "Please use aiven_billing_group resource to set this value.",
 	},
 	"billing_group": {
-		Type:        schema.TypeString,
-		Optional:    true,
-		Description: "Billing group Id",
+		Type:             schema.TypeString,
+		Optional:         true,
+		Description:      "Billing group Id",
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 	},
 }
 
@@ -178,26 +185,27 @@ func resourceProjectCreate(_ context.Context, d *schema.ResourceData, m interfac
 	projectName := d.Get("project").(string)
 	_, err = client.Projects.Create(
 		aiven.CreateProjectRequest{
-			BillingAddress:   billingAddress,
-			BillingEmails:    contactEmailListForAPI(d, "billing_emails", true),
-			BillingExtraText: billingExtraText,
-			CardID:           cardID,
-			Cloud:            optionalStringPointer(d, "default_cloud"),
-			CopyFromProject:  d.Get("copy_from_project").(string),
-			CountryCode:      countryCode,
-			Project:          projectName,
-			TechnicalEmails:  contactEmailListForAPI(d, "technical_emails", true),
-			AccountId:        optionalStringPointer(d, "account_id"),
-			BillingCurrency:  billingCurrency,
-			VatID:            vatID,
+			BillingAddress:               billingAddress,
+			BillingEmails:                contactEmailListForAPI(d, "billing_emails", true),
+			BillingExtraText:             billingExtraText,
+			CardID:                       cardID,
+			Cloud:                        optionalStringPointer(d, "default_cloud"),
+			CopyFromProject:              d.Get("copy_from_project").(string),
+			CountryCode:                  countryCode,
+			Project:                      projectName,
+			TechnicalEmails:              contactEmailListForAPI(d, "technical_emails", true),
+			AccountId:                    optionalStringPointer(d, "account_id"),
+			BillingCurrency:              billingCurrency,
+			VatID:                        vatID,
+			UseSourceProjectBillingGroup: d.Get("use_source_project_billing_group").(bool),
 		},
 	)
 	if err != nil && !aiven.IsAlreadyExists(err) {
 		return append(diags, diag.FromErr(err)...)
 	}
 
-	if billingGroupId, ok := d.GetOk("billing_group"); ok {
-		dia := resourceProjectAssignToBillingGroup(projectName, billingGroupId.(string), client, d)
+	if billingGroupID, ok := d.GetOk("billing_group"); ok {
+		dia := resourceProjectAssignToBillingGroup(projectName, billingGroupID.(string), client, d)
 		if dia.HasError() {
 			return append(diags, dia...)
 		}
@@ -243,15 +251,15 @@ func resourceProjectCopyBillingGroupFromProject(
 }
 
 func resourceProjectAssignToBillingGroup(
-	projectName, billingGroupId string, client *aiven.Client, d *schema.ResourceData) diag.Diagnostics {
-	log.Printf("[DEBUG] Assoviating project `%s` with the billing group `%s`", projectName, billingGroupId)
-	_, err := client.BillingGroup.Get(billingGroupId)
+	projectName, billingGroupID string, client *aiven.Client, d *schema.ResourceData) diag.Diagnostics {
+	log.Printf("[DEBUG] Assoviating project `%s` with the billing group `%s`", projectName, billingGroupID)
+	_, err := client.BillingGroup.Get(billingGroupID)
 	if err != nil {
 		return diag.Errorf("cannot get a billing group by id: %s", err)
 	}
 
 	var isAlreadyAssigned bool
-	assignedProjects, err := client.BillingGroup.GetProjects(billingGroupId)
+	assignedProjects, err := client.BillingGroup.GetProjects(billingGroupID)
 	if err != nil {
 		return diag.Errorf("cannot get a billing group assigned projects list: %s", err)
 	}
@@ -262,13 +270,13 @@ func resourceProjectAssignToBillingGroup(
 	}
 
 	if !isAlreadyAssigned {
-		err = client.BillingGroup.AssignProjects(billingGroupId, []string{projectName})
+		err = client.BillingGroup.AssignProjects(billingGroupID, []string{projectName})
 		if err != nil {
 			return diag.Errorf("cannot assign project to a billing group: %s", err)
 		}
 	}
 
-	if err := d.Set("billing_group", billingGroupId); err != nil {
+	if err := d.Set("billing_group", billingGroupID); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -285,10 +293,10 @@ func resourceProjectRead(_ context.Context, d *schema.ResourceData, m interface{
 
 	var diags diag.Diagnostics
 
-	currentCardId := d.Get("card_id").(string)
-	currentLongCardID, err := getLongCardID(client, currentCardId)
+	currentCardID := d.Get("card_id").(string)
+	currentLongCardID, err := getLongCardID(client, currentCardID)
 	if err != nil { // do not error when `card_id` is broken
-		currentCardId = ""
+		currentCardID = ""
 		diags = append(diags,
 			diag.Diagnostic{
 				Severity: diag.Warning,
@@ -296,10 +304,10 @@ func resourceProjectRead(_ context.Context, d *schema.ResourceData, m interface{
 			})
 	}
 
-	if currentCardId != "" {
+	if currentCardID != "" {
 		// for non empty card_id long card id should exist
 		if currentLongCardID == nil {
-			return diag.Errorf("For card_id %s long card id is not found.", currentCardId)
+			return diag.Errorf("For card_id %s long card id is not found.", currentCardID)
 		}
 
 		// long card ids should be equal
@@ -337,7 +345,7 @@ func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interfac
 
 	var project *aiven.Project
 	projectName := d.Get("project").(string)
-	if billingGroupId, ok := d.GetOk("billing_group"); ok {
+	if billingGroupID, ok := d.GetOk("billing_group"); ok {
 		project, err = client.Projects.Update(
 			d.Id(),
 			aiven.UpdateProjectRequest{
@@ -358,7 +366,7 @@ func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interfac
 			return diag.FromErr(err)
 		}
 
-		dia := resourceProjectAssignToBillingGroup(d.Get("project").(string), billingGroupId.(string), client, d)
+		dia := resourceProjectAssignToBillingGroup(d.Get("project").(string), billingGroupID.(string), client, d)
 		if dia.HasError() {
 			return dia
 		}
@@ -545,7 +553,7 @@ func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client,
 	if err := d.Set("vat_id", project.VatID); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("billing_group", d.Get("billing_group")); err != nil {
+	if err := d.Set("billing_group", project.BillingGroupId); err != nil {
 		return diag.FromErr(err)
 	}
 

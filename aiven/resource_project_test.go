@@ -79,6 +79,21 @@ func TestAccAivenProject_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "vat_id"),
 				),
 			},
+			{
+				Config: testAccProjectCopyFromProjectResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenProjectAttributes("data.aiven_project.project"),
+					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttrSet(resourceName, "billing_address"),
+					resource.TestCheckResourceAttrSet(resourceName, "billing_extra_text"),
+					resource.TestCheckResourceAttrSet(resourceName, "country_code"),
+					resource.TestCheckResourceAttrSet(resourceName, "default_cloud"),
+					resource.TestCheckResourceAttrSet(resourceName, "billing_currency"),
+					resource.TestCheckResourceAttrSet(resourceName, "ca_cert"),
+					resource.TestCheckResourceAttrSet(resourceName, "vat_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "billing_group"),
+				),
+			},
 		},
 	})
 }
@@ -145,6 +160,32 @@ func testAccProjectResource(name string) string {
 			depends_on = [aiven_project.foo]
 		}
 		`, name)
+}
+
+func testAccProjectCopyFromProjectResource(name string) string {
+	return fmt.Sprintf(`
+		resource "aiven_billing_group" "foo" {
+			name = "test-acc-bg-%s"
+			billing_currency = "USD"
+			vat_id = "123"
+		}
+
+		resource "aiven_project" "source" {
+			project = "test-acc-pr-source-%s"
+			billing_group = aiven_billing_group.foo.id
+		}
+
+		resource "aiven_project" "foo" {
+			project = "test-acc-pr-%s"
+			copy_from_project = aiven_project.source.project
+			use_source_project_billing_group = true
+		}
+
+		data "aiven_project" "project" {
+			project = aiven_project.foo.project
+			depends_on = [aiven_project.foo]
+		}
+		`, name, name, name)
 }
 
 func testAccCheckAivenProjectAttributes(n string, attributes ...string) resource.TestCheckFunc {
