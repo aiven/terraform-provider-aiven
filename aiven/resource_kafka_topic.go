@@ -539,6 +539,7 @@ func flattenKafkaTopicConfig(t aiven.KafkaTopic) []map[string]interface{} {
 		{
 			"cleanup_policy":                      toOptionalString(t.Config.CleanupPolicy.Value),
 			"compression_type":                    toOptionalString(t.Config.CompressionType.Value),
+			"delete_retention_ms":                 toOptionalString(t.Config.DeleteRetentionMs.Value),
 			"file_delete_delay_ms":                toOptionalString(t.Config.FileDeleteDelayMs.Value),
 			"flush_messages":                      toOptionalString(t.Config.FlushMessages.Value),
 			"flush_ms":                            toOptionalString(t.Config.FlushMs.Value),

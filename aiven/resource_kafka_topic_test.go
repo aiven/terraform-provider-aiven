@@ -266,6 +266,7 @@ func testAccKafkaTopicResource(name string) string {
 				unclean_leader_election_enable = true
 				cleanup_policy = "compact"
 				min_cleanable_dirty_ratio = 0.01
+				delete_retention_ms = 50000
 			}
 		}
 
