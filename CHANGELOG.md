@@ -4,6 +4,12 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.16] - 2021-07-01
+- Add `delete_retention_ms` to `aiven_kafka_topic` resource read method
+- Add `use_source_project_billing_group` support for `aiven_project` resource
+- Add service integration `endpoint_id` validation
+- Add VPC peering connection `state_info` field type conversion
+
 ## [2.1.15] - 2021-06-14
 - Add database deletion waiter
 - Remove default values for user configuration options
