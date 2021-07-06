@@ -62,6 +62,15 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 			Type: schema.TypeString,
 		},
 	},
+	"redis_acl_channels": {
+		Type:        schema.TypeList,
+		Optional:    true,
+		Description: "Permitted pub/sub channel patterns",
+		ForceNew:    true,
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
+	},
 	"password": {
 		Type:             schema.TypeString,
 		Sensitive:        true,
@@ -125,6 +134,7 @@ func resourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m in
 				RedisACLCategories: flattenToString(d.Get("redis_acl_categories").([]interface{})),
 				RedisACLCommands:   flattenToString(d.Get("redis_acl_commands").([]interface{})),
 				RedisACLKeys:       flattenToString(d.Get("redis_acl_keys").([]interface{})),
+				RedisACLChannels:   flattenToString(d.Get("redis_acl_channels").([]interface{})),
 			},
 		},
 	)
@@ -199,6 +209,9 @@ func copyServiceUserPropertiesFromAPIResponseToTerraform(
 		return err
 	}
 	if err := d.Set("redis_acl_commands", user.AccessControl.RedisACLCommands); err != nil {
+		return err
+	}
+	if err := d.Set("redis_acl_channels", user.AccessControl.RedisACLChannels); err != nil {
 		return err
 	}
 

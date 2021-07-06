@@ -90,6 +90,7 @@ func testAccServiceUserRedisACLResource(name string) string {
 			redis_acl_commands = ["+set"]
 			redis_acl_keys = ["prefix*", "another_key"]
 			redis_acl_categories = ["-@all", "+@admin"]
+			redis_acl_channels = ["test"]
 
 			depends_on = [aiven_redis.bar]
 		}
