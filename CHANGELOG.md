@@ -4,6 +4,9 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.17] - 2021-07-09
+- Add a new field to `aiven_service_user` resource - Redis ACL Channels
+
 ## [2.1.16] - 2021-07-01
 - Add `delete_retention_ms` to `aiven_kafka_topic` resource read method
 - Add `use_source_project_billing_group` support for `aiven_project` resource
