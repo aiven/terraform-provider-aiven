@@ -318,7 +318,7 @@ func resourceVPCPeeringConnectionDelete(_ context.Context, d *schema.ResourceDat
 
 func resourceVPCPeeringConnectionImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	if len(strings.Split(d.Id(), "/")) != 4 {
-		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<vpc_id>", d.Id())
+		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<vpc_id>/<peer_cloud_account>/<peer_vpc>", d.Id())
 	}
 
 	dig := resourceVPCPeeringConnectionRead(ctx, d, m)
