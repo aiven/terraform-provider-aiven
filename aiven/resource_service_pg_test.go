@@ -13,7 +13,7 @@ import (
 
 // PG service tests
 func TestAccAivenService_pg(t *testing.T) {
-	resourceName := "aiven_service.bar-pg"
+	resourceName := "aiven_pg.bar-pg"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -25,12 +25,11 @@ func TestAccAivenService_pg(t *testing.T) {
 			{
 				Config: testAccPGServiceResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenServiceCommonAttributes("data.aiven_service.service-pg"),
-					testAccCheckAivenServicePGAttributes("data.aiven_service.service-pg"),
+					testAccCheckAivenServiceCommonAttributes("data.aiven_pg.service-pg"),
+					testAccCheckAivenServicePGAttributes("data.aiven_pg.service-pg"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
@@ -42,12 +41,11 @@ func TestAccAivenService_pg(t *testing.T) {
 			{
 				Config: testAccPGServiceCustomTimeoutsResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenServiceCommonAttributes("data.aiven_service.service-pg"),
-					testAccCheckAivenServicePGAttributes("data.aiven_service.service-pg"),
+					testAccCheckAivenServiceCommonAttributes("data.aiven_pg.service-pg"),
+					testAccCheckAivenServicePGAttributes("data.aiven_pg.service-pg"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
@@ -60,12 +58,11 @@ func TestAccAivenService_pg(t *testing.T) {
 				Config:                    testAccPGReadReplicaServiceResource(rName),
 				PreventPostDestroyRefresh: true,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenServiceCommonAttributes("data.aiven_service.service-pg"),
-					testAccCheckAivenServicePGAttributes("data.aiven_service.service-pg"),
+					testAccCheckAivenServiceCommonAttributes("data.aiven_pg.service-pg"),
+					testAccCheckAivenServicePGAttributes("data.aiven_pg.service-pg"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
@@ -77,13 +74,12 @@ func TestAccAivenService_pg(t *testing.T) {
 			{
 				Config: testAccPGTerminationProtectionServiceResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenServiceTerminationProtection("data.aiven_service.service-pg"),
-					testAccCheckAivenServiceCommonAttributes("data.aiven_service.service-pg"),
-					testAccCheckAivenServicePGAttributes("data.aiven_service.service-pg"),
+					testAccCheckAivenServiceTerminationProtection("data.aiven_pg.service-pg"),
+					testAccCheckAivenServiceCommonAttributes("data.aiven_pg.service-pg"),
+					testAccCheckAivenServicePGAttributes("data.aiven_pg.service-pg"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
@@ -102,12 +98,11 @@ func testAccPGServiceResource(name string) string {
 			project = "%s"
 		}
 		
-		resource "aiven_service" "bar-pg" {
+		resource "aiven_pg" "bar-pg" {
 			project = data.aiven_project.foo-pg.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-%s"
-			service_type = "pg"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
@@ -125,11 +120,11 @@ func testAccPGServiceResource(name string) string {
 			}
 		}
 		
-		data "aiven_service" "service-pg" {
-			service_name = aiven_service.bar-pg.service_name
-			project = aiven_service.bar-pg.project
+		data "aiven_pg" "service-pg" {
+			service_name = aiven_pg.bar-pg.service_name
+			project = aiven_pg.bar-pg.project
 
-			depends_on = [aiven_service.bar-pg]
+			depends_on = [aiven_pg.bar-pg]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
@@ -140,12 +135,11 @@ func testAccPGServiceCustomTimeoutsResource(name string) string {
 			project = "%s"
 		}
 		
-		resource "aiven_service" "bar-pg" {
+		resource "aiven_pg" "bar-pg" {
 			project = data.aiven_project.foo-pg.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-%s"
-			service_type = "pg"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
@@ -168,11 +162,11 @@ func testAccPGServiceCustomTimeoutsResource(name string) string {
 			}
 		}
 		
-		data "aiven_service" "service-pg" {
-			service_name = aiven_service.bar-pg.service_name
-			project = aiven_service.bar-pg.project
+		data "aiven_pg" "service-pg" {
+			service_name = aiven_pg.bar-pg.service_name
+			project = aiven_pg.bar-pg.project
 
-			depends_on = [aiven_service.bar-pg]
+			depends_on = [aiven_pg.bar-pg]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
@@ -183,12 +177,11 @@ func testAccPGTerminationProtectionServiceResource(name string) string {
 			project = "%s"
 		}
 		
-		resource "aiven_service" "bar-pg" {
+		resource "aiven_pg" "bar-pg" {
 			project = data.aiven_project.foo-pg.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-%s"
-			service_type = "pg"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			termination_protection = true
@@ -207,11 +200,11 @@ func testAccPGTerminationProtectionServiceResource(name string) string {
 			}
 		}
 		
-		data "aiven_service" "service-pg" {
-			service_name = aiven_service.bar-pg.service_name
-			project = aiven_service.bar-pg.project
+		data "aiven_pg" "service-pg" {
+			service_name = aiven_pg.bar-pg.service_name
+			project = aiven_pg.bar-pg.project
 
-			depends_on = [aiven_service.bar-pg]
+			depends_on = [aiven_pg.bar-pg]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
@@ -222,12 +215,11 @@ func testAccPGReadReplicaServiceResource(name string) string {
 			project = "%s"
 		}
 		
-		resource "aiven_service" "bar-pg" {
+		resource "aiven_pg" "bar-pg" {
 			project = data.aiven_project.foo-pg.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-%s"
-			service_type = "pg"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
@@ -245,12 +237,11 @@ func testAccPGReadReplicaServiceResource(name string) string {
 			}
 		}
 
-		resource "aiven_service" "bar-replica" {
+		resource "aiven_pg" "bar-replica" {
 			project = data.aiven_project.foo-pg.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-repica-%s"
-			service_type = "pg"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
@@ -271,17 +262,26 @@ func testAccPGReadReplicaServiceResource(name string) string {
 
 			service_integrations {
 				integration_type = "read_replica"
-				source_service_name = aiven_service.bar-pg.service_name
+				source_service_name = aiven_pg.bar-pg.service_name
 			}
 
-			 depends_on = [aiven_service.bar-pg]
+			 depends_on = [aiven_pg.bar-pg]
+		}
+
+		resource "aiven_service_integration" "pg-readreplica" {
+			project = data.aiven_project.foo-pg.project
+			integration_type = "read_replica"
+			source_service_name = aiven_pg.bar-pg.service_name
+			destination_service_name = aiven_pg.bar-replica.service_name
+
+			depends_on = [aiven_pg.bar-replica]
 		}
 		
-		data "aiven_service" "service-pg" {
-			service_name = aiven_service.bar-pg.service_name
-			project = aiven_service.bar-pg.project
+		data "aiven_pg" "service-pg" {
+			service_name = aiven_pg.bar-pg.service_name
+			project = aiven_pg.bar-pg.project
 
-			depends_on = [aiven_service.bar-pg]
+			depends_on = [aiven_pg.bar-pg]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }

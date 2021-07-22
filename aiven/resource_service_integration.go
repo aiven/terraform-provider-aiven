@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -271,26 +273,64 @@ func plainEndpointID(fullEndpointID *string) *string {
 }
 
 func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var integration *aiven.ServiceIntegration
 	client := m.(*aiven.Client)
 	projectName := d.Get("project").(string)
 	integrationType := d.Get("integration_type").(string)
+	sourceServiceName := d.Get("source_service_name").(string)
+	destinationServiceName := d.Get("destination_service_name").(string)
 	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("integration", integrationType, true, d)
-	integration, err := client.ServiceIntegrations.Create(
-		projectName,
-		aiven.CreateServiceIntegrationRequest{
-			DestinationEndpointID: plainEndpointID(optionalStringPointer(d, "destination_endpoint_id")),
-			DestinationService:    optionalStringPointer(d, "destination_service_name"),
-			IntegrationType:       integrationType,
-			SourceEndpointID:      plainEndpointID(optionalStringPointer(d, "source_endpoint_id")),
-			SourceService:         optionalStringPointer(d, "source_service_name"),
-			UserConfig:            userConfig,
-		},
-	)
-	if err != nil {
-		return diag.FromErr(err)
+
+	// Some service integrations can be created alongside the service creation, like `read_replica`,
+	// for example. And for such cases, we check if a service integration already exists before
+	// creating a new one.
+	list, err := client.ServiceIntegrations.List(projectName, sourceServiceName)
+	if err != nil && !aiven.IsNotFound(err) {
+		return diag.Errorf("cannot get a list of service integration: %s", err)
+	}
+
+	for _, i := range list {
+		if i.SourceService == nil || i.DestinationService == nil || i.ServiceIntegrationID == "" {
+			continue
+		}
+
+		if i.IntegrationType == integrationType &&
+			*i.SourceService == sourceServiceName &&
+			*i.DestinationService == destinationServiceName {
+			integration = i
+			break
+		}
+	}
+
+	// When service integration does not exist, create a new one
+	if integration == nil {
+		integration, err = client.ServiceIntegrations.Create(
+			projectName,
+			aiven.CreateServiceIntegrationRequest{
+				DestinationEndpointID: plainEndpointID(optionalStringPointer(d, "destination_endpoint_id")),
+				DestinationService:    optionalStringPointer(d, "destination_service_name"),
+				IntegrationType:       integrationType,
+				SourceEndpointID:      plainEndpointID(optionalStringPointer(d, "source_endpoint_id")),
+				SourceService:         optionalStringPointer(d, "source_service_name"),
+				UserConfig:            userConfig,
+			},
+		)
+		if err != nil {
+			return diag.Errorf("cannot create service integration: %s", err)
+		}
 	}
 
 	d.SetId(buildResourceID(projectName, integration.ServiceIntegrationID))
+
+	// Checking if there are any differences in user config and if there are
+	// differences update service integration
+	if userConfig != nil &&
+		!cmp.Equal(userConfig, integration.UserConfig, cmpopts.SortMaps(func(a, b string) bool {
+			return strings.Compare(a, b) == -1
+		})) {
+		return resourceServiceIntegrationUpdate(ctx, d, m)
+
+	}
 
 	return resourceServiceIntegrationRead(ctx, d, m)
 }
@@ -301,12 +341,12 @@ func resourceServiceIntegrationRead(_ context.Context, d *schema.ResourceData, m
 	projectName, integrationID := splitResourceID2(d.Id())
 	integration, err := client.ServiceIntegrations.Get(projectName, integrationID)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("cannot get service integration: %s; id: %s", err, integrationID)
 	}
 
 	err = copyServiceIntegrationPropertiesFromAPIResponseToTerraform(d, integration, projectName)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("cannot populate TF fields: %s", err)
 	}
 
 	return nil
@@ -318,15 +358,16 @@ func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceDat
 	projectName, integrationID := splitResourceID2(d.Id())
 	integrationType := d.Get("integration_type").(string)
 	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("integration", integrationType, false, d)
+
 	_, err := client.ServiceIntegrations.Update(
 		projectName,
 		integrationID,
 		aiven.UpdateServiceIntegrationRequest{
-			UserConfig: userConfig,
+			UserConfig: nil,
 		},
 	)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("unable to update service integration: %s; user config: %+v", err, userConfig)
 	}
 
 	return resourceServiceIntegrationRead(ctx, d, m)
@@ -338,7 +379,7 @@ func resourceServiceIntegrationDelete(_ context.Context, d *schema.ResourceData,
 	projectName, integrationID := splitResourceID2(d.Id())
 	err := client.ServiceIntegrations.Delete(projectName, integrationID)
 	if err != nil && !aiven.IsNotFound(err) {
-		return diag.FromErr(err)
+		return diag.Errorf("cannot delete service integration: %s", err)
 	}
 
 	return nil

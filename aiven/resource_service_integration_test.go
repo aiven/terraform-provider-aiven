@@ -14,6 +14,8 @@ import (
 func TestAccAivenServiceIntegration_basic(t *testing.T) {
 	resourceName := "aiven_service_integration.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	rName1 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	rName2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -36,22 +38,22 @@ func TestAccAivenServiceIntegration_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccServiceIntegrationKafkaConnectResource(rName),
+				Config: testAccServiceIntegrationKafkaConnectResource(rName1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceIntegrationAttributes("data.aiven_service_integration.int"),
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "kafka_connect"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-kafka-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-kafka-con-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-kafka-%s", rName1)),
+					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-kafka-con-%s", rName1)),
 				),
 			},
 			{
-				Config: testAccServiceIntegrationMirrorMakerResource(rName),
+				Config: testAccServiceIntegrationMirrorMakerResource(rName2),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "kafka_mirrormaker"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-source-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-mm-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-source-%s", rName2)),
+					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-mm-%s", rName2)),
 				),
 			},
 		},
@@ -108,6 +110,8 @@ func testAccServiceIntegrationResource(name string) string {
 			integration_type = "metrics"
 			source_service_name = aiven_service.bar-pg.service_name
 			destination_service_name = aiven_service.bar-influxdb.service_name
+
+			depends_on = [ aiven_service.bar-pg,aiven_service.bar-influxdb]
 		}
 
 		data "aiven_service_integration" "int" {
@@ -174,6 +178,8 @@ func testAccServiceIntegrationKafkaConnectResource(name string) string {
 					offset_storage_topic = "__connect_offsets"
 				}
 			}
+
+			depends_on = [aiven_service.kafka1,aiven_service.kafka_connect1]
 		}
 
 		data "aiven_service_integration" "int" {
@@ -288,18 +294,18 @@ func testAccServiceIntegrationMirrorMakerResource(name string) string {
 }
 
 func testAccServiceIntegrationShouldFailResource() string {
-	return fmt.Sprintf(`
-		resource "aiven_service_integration" "bar" {
-			project = "test"
-			integration_type = "kafka_mirrormaker"
-			source_endpoint_id = "test"
-			destination_endpoint_id = "test"
-	
-			kafka_mirrormaker_user_config {
-				cluster_alias = "source"
+	return `
+			resource "aiven_service_integration" "bar" {
+				project = "test"
+				integration_type = "kafka_mirrormaker"
+				source_endpoint_id = "test"
+				destination_endpoint_id = "test"
+		
+				kafka_mirrormaker_user_config {
+					cluster_alias = "source"
+				}
 			}
-		}
-		`)
+			`
 }
 
 func testAccCheckAivenServiceIntegrationResourceDestroy(s *terraform.State) error {

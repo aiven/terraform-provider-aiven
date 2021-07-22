@@ -135,10 +135,9 @@ func serviceCommonSchema() map[string]*schema.Schema {
 			Description: "Service state",
 		},
 		"service_integrations": {
-			Type:             schema.TypeList,
-			Optional:         true,
-			Description:      "Service integrations to specify when creating a service. Not applied after initial service creation",
-			DiffSuppressFunc: createOnlyDiffSuppressFunc,
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "Service integrations to specify when creating a service. Not applied after initial service creation",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"source_service_name": {
@@ -272,10 +271,9 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		Description: "Service hostname",
 	},
 	"service_integrations": {
-		Type:             schema.TypeList,
-		Optional:         true,
-		Description:      "Service integrations to specify when creating a service. Not applied after initial service creation",
-		DiffSuppressFunc: createOnlyDiffSuppressFunc,
+		Type:        schema.TypeList,
+		Optional:    true,
+		Description: "Service integrations to specify when creating a service. Not applied after initial service creation",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"source_service_name": {
@@ -816,6 +814,10 @@ func resourceServiceRead(_ context.Context, d *schema.ResourceData, m interface{
 
 func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
+
+	if d.HasChanges("service_integrations") && len(d.Get("service_integrations").([]interface{})) != 0 {
+		return diag.Errorf("service_integrations field can only be set during creation of a service")
+	}
 
 	projectName, serviceName := splitResourceID2(d.Id())
 	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("service", d.Get("service_type").(string), false, d)
