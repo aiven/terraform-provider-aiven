@@ -1,11 +1,12 @@
 package aiven
 
 import (
+	"reflect"
+	"testing"
+
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
-	"reflect"
-	"testing"
 )
 
 func TestGenerateTerraformUserConfigSchema(t *testing.T) {

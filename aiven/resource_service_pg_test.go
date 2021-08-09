@@ -2,13 +2,14 @@ package aiven
 
 import (
 	"fmt"
+	"os"
+	"strings"
+	"testing"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"os"
-	"strings"
-	"testing"
 )
 
 // PG service tests

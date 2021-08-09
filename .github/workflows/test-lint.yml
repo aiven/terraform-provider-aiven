@@ -1,4 +1,4 @@
-name: Unit tests and Linters
+name: Unit tests
 
 on:
   push:
@@ -31,6 +31,3 @@ jobs:
 
     - name: Test
       run: make test
-
-    - name: Linter
-      run: make lint

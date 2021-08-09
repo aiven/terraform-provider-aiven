@@ -70,7 +70,7 @@ func grafanaReady(service *aiven.Service) bool {
 	ipFilters, ok := service.UserConfig["ip_filter"]
 	if ok {
 		if len(ipFilters.([]interface{})) > 1 || ipFilters.([]interface{})[0] != "0.0.0.0/0" {
-			log.Printf("[DEBUG] grafana serivce has `%+v` ip filters, and avaiability checks will be skiped", ipFilters)
+			log.Printf("[DEBUG] grafana serivce has `%+v` ip filters, and avaiability checks will be skipped", ipFilters)
 
 			return true
 		}

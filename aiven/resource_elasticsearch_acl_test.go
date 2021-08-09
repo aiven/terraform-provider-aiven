@@ -2,13 +2,14 @@ package aiven
 
 import (
 	"fmt"
+	"os"
+	"reflect"
+	"testing"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"os"
-	"reflect"
-	"testing"
 )
 
 func TestAccAivenElasticsearchAcl_basic(t *testing.T) {

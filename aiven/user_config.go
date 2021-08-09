@@ -3,10 +3,11 @@ package aiven
 
 import (
 	"fmt"
-	"github.com/aiven/terraform-provider-aiven/aiven/templates"
 	"math"
 	"strconv"
 	"strings"
+
+	"github.com/aiven/terraform-provider-aiven/aiven/templates"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -30,7 +31,7 @@ func GenerateTerraformUserConfigSchema(data map[string]interface{}) map[string]*
 }
 
 func generateTerraformUserConfigSchema(key string, definition map[string]interface{}) *schema.Schema {
-	valueType, _ := getAivenSchemaType(definition["type"])
+	valueType := getAivenSchemaType(definition["type"])
 	sensitive := false
 
 	if strings.Contains(key, "api_key") || strings.Contains(key, "password") {
@@ -67,7 +68,7 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 	case "array":
 		var itemType schema.ValueType
 		itemDefinition := definition["items"].(map[string]interface{})
-		typeString, _ := getAivenSchemaType(itemDefinition["type"])
+		typeString := getAivenSchemaType(itemDefinition["type"])
 		switch typeString {
 		case "string", "integer", "boolean", "number":
 			itemType = schema.TypeString
@@ -109,22 +110,20 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 	}
 }
 
-func getAivenSchemaType(value interface{}) (string, bool) {
+func getAivenSchemaType(value interface{}) string {
 	switch res := value.(type) {
 	case string:
-		return res, false
+		return res
 	case []interface{}:
-		optional := false
 		typeString := ""
 		for _, typeOrNullRaw := range res {
 			typeOrNull := typeOrNullRaw.(string)
 			if typeOrNull == "null" {
-				optional = true
 			} else {
 				typeString = typeOrNull
 			}
 		}
-		return typeString, optional
+		return typeString
 	default:
 		panic(fmt.Sprintf("Unexpected user config schema type: %T / %v", value, value))
 	}
@@ -133,7 +132,7 @@ func getAivenSchemaType(value interface{}) (string, bool) {
 func getAivenSchemaDefaultValue(definition map[string]interface{}) interface{} {
 	var defaultValue interface{}
 
-	valueType, _ := getAivenSchemaType(definition["type"])
+	valueType := getAivenSchemaType(definition["type"])
 	switch valueType {
 	case "array":
 		defaultValue = []interface{}{}
@@ -172,7 +171,7 @@ func convertAPIUserConfigToTerraformCompatibleFormat(
 	for key, schemaDefinitionRaw := range jsonSchema {
 		schemaDefinition := schemaDefinitionRaw.(map[string]interface{})
 
-		valueType, _ := getAivenSchemaType(schemaDefinition["type"])
+		valueType := getAivenSchemaType(schemaDefinition["type"])
 
 		apiValue, ok := apiUserConfig[key]
 		key = encodeKeyName(key)
@@ -320,7 +319,7 @@ func convertTerraformUserConfigValueToAPICompatibleFormat(
 	}
 
 	// get Aiven API value type
-	valueType, _ := getAivenSchemaType(definition["type"])
+	valueType := getAivenSchemaType(definition["type"])
 
 	switch valueType {
 	case "integer":

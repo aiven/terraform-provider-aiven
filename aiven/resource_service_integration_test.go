@@ -2,13 +2,14 @@ package aiven
 
 import (
 	"fmt"
+	"os"
+	"regexp"
+	"testing"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"os"
-	"regexp"
-	"testing"
 )
 
 func TestAccAivenServiceIntegration_basic(t *testing.T) {
@@ -288,18 +289,18 @@ func testAccServiceIntegrationMirrorMakerResource(name string) string {
 }
 
 func testAccServiceIntegrationShouldFailResource() string {
-	return fmt.Sprintf(`
-		resource "aiven_service_integration" "bar" {
-			project = "test"
-			integration_type = "kafka_mirrormaker"
-			source_endpoint_id = "test"
-			destination_endpoint_id = "test"
-	
-			kafka_mirrormaker_user_config {
-				cluster_alias = "source"
+	return `
+			resource "aiven_service_integration" "bar" {
+				project = "test"
+				integration_type = "kafka_mirrormaker"
+				source_endpoint_id = "test"
+				destination_endpoint_id = "test"
+		
+				kafka_mirrormaker_user_config {
+					cluster_alias = "source"
+				}
 			}
-		}
-		`)
+			`
 }
 
 func testAccCheckAivenServiceIntegrationResourceDestroy(s *terraform.State) error {

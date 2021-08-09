@@ -1,9 +1,10 @@
 package aiven
 
 import (
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func Test_resourceSchemaAsDatasourceSchemaPanic(t *testing.T) {
