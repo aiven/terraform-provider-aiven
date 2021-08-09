@@ -5,13 +5,14 @@ package aiven
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
+	"regexp"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"log"
-	"os"
-	"regexp"
 )
 
 var aivenProjectSchema = map[string]*schema.Schema{

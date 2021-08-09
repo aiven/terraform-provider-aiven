@@ -5,14 +5,15 @@ package aiven
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"strconv"
-	"strings"
-	"time"
 )
 
 const (

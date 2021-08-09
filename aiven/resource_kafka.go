@@ -2,11 +2,12 @@ package aiven
 
 import (
 	"context"
+	"time"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"time"
 )
 
 func aivenKafkaSchema() map[string]*schema.Schema {

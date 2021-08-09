@@ -5,13 +5,6 @@ short_version = $(shell echo $(version) | sed 's/-.*//')
 ci: lint bins release
 
 #################################################
-# Bootstrapping for base golang package deps
-#################################################
-
-bootstrap:
-	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.20.0;
-
-#################################################
 # Building
 #################################################
 
@@ -54,15 +47,11 @@ sweep:
 	go test -v ./aiven -sweep=global -timeout 60m
 
 lint:
-	if [ -z "$(SKIPDIRS)" ]; then \
-		golangci-lint run  -D errcheck -D unused -E gofmt --no-config --issues-exit-code=0 --timeout=30m ./...; \
-	else \
-		golangci-lint run -D errcheck --skip-dirs $(SKIPDIRS) -D unused -E gofmt --no-config --issues-exit-code=0 --timeout=30m ./...; \
-	fi
+	golangci-lint run --issues-exit-code=0 --timeout=30m ./...
 
 clean:
 	rm -rf vendor
 	rm -rf plugins
 	rm -f terraform-provider-aiven.tar.gz
 
-.PHONY: test lint bootstrap
+.PHONY: test lint

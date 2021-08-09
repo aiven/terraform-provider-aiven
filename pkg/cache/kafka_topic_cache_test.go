@@ -1,9 +1,10 @@
 package cache
 
 import (
-	"github.com/aiven/aiven-go-client"
 	"reflect"
 	"testing"
+
+	"github.com/aiven/aiven-go-client"
 )
 
 func setupTopicCacheTestCase(t *testing.T) func(t *testing.T) {

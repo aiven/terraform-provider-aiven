@@ -73,7 +73,10 @@ func (a ACLCache) populateACLCache(project, service string, client *aiven.Client
 	var acls []*aiven.KafkaACL
 	if acls, err = client.KafkaACLs.List(project, service); err == nil {
 		for _, acl := range acls {
-			a.write(project, service, acl)
+			err := a.write(project, service, acl)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return

@@ -2,10 +2,11 @@ package aiven
 
 import (
 	"fmt"
-	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"os"
 	"testing"
+
+	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestMain(m *testing.M) {

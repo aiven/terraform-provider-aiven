@@ -1,9 +1,10 @@
 package aiven
 
 import (
+	"time"
+
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"time"
 )
 
 func influxDBSchema() map[string]*schema.Schema {
