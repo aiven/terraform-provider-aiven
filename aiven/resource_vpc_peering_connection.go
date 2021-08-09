@@ -382,7 +382,7 @@ func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceD
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		MinTimeout: 2 * time.Second,
 	}
-	if stateChangeConf.WaitForStateContext(ctx); err != nil && !aiven.IsNotFound(err) {
+	if _, err := stateChangeConf.WaitForStateContext(ctx); err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("Error waiting for Aiven VPC Peering Connection to be DELETED: %s", err)
 	}
 	return nil
