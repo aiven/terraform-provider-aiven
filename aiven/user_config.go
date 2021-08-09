@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
