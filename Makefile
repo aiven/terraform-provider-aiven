@@ -9,7 +9,7 @@ ci: lint bins release
 #################################################
 
 bootstrap:
-	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.20.0;
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.41.1
 
 #################################################
 # Building
@@ -53,12 +53,8 @@ sweep:
 	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."
 	go test -v ./aiven -sweep=global -timeout 60m
 
-lint:
-	if [ -z "$(SKIPDIRS)" ]; then \
-		golangci-lint run  -D errcheck -D unused -E gofmt --no-config --issues-exit-code=0 --timeout=30m ./...; \
-	else \
-		golangci-lint run -D errcheck --skip-dirs $(SKIPDIRS) -D unused -E gofmt --no-config --issues-exit-code=0 --timeout=30m ./...; \
-	fi
+lint: bootstrap
+	golangci-lint run --issues-exit-code=0 --timeout=30m ./...
 
 clean:
 	rm -rf vendor
