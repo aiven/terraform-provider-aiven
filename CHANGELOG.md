@@ -4,6 +4,12 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.18] - 2021-08-10
+- Change service integration behaviour
+- Fix vpc peering connection deletion error handling
+- Add GitHub golangci-lint workflow and make codebase compliant with the new code checks
+- Fix `aiven_transit_gateway_vpc_attachment` crashing issue
+
 ## [2.1.17] - 2021-07-09
 - Add a new field to `aiven_service_user` resource - Redis ACL Channels
 
