@@ -342,7 +342,7 @@ func resourceServiceIntegrationRead(_ context.Context, d *schema.ResourceData, m
 	projectName, integrationID := splitResourceID2(d.Id())
 	integration, err := client.ServiceIntegrations.Get(projectName, integrationID)
 	if err != nil {
-		return diag.Errorf("cannot get service integration: %s; id: %s", err, integrationID)
+		return resourceReadHandleNotFound(err, d, diag.Errorf("cannot get service integration: %s; id: %s", err, integrationID))
 	}
 
 	err = copyServiceIntegrationPropertiesFromAPIResponseToTerraform(d, integration, projectName)

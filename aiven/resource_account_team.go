@@ -79,7 +79,7 @@ func resourceAccountTeamRead(_ context.Context, d *schema.ResourceData, m interf
 	accountId, teamId := splitResourceID2(d.Id())
 	r, err := client.AccountTeams.Get(accountId, teamId)
 	if err != nil {
-		return diag.FromErr(err)
+		return resourceReadHandleNotFound(err, d, nil)
 	}
 
 	if err := d.Set("account_id", r.Team.AccountId); err != nil {

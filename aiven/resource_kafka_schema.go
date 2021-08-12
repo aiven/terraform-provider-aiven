@@ -203,12 +203,12 @@ func resourceKafkaSchemaRead(_ context.Context, d *schema.ResourceData, m interf
 
 	version, err := kafkaSchemaSubjectGetLastVersion(m, project, serviceName, subjectName)
 	if err != nil {
-		return diag.FromErr(err)
+		return resourceReadHandleNotFound(err, d, nil)
 	}
 
 	r, err := client.KafkaSubjectSchemas.Get(project, serviceName, subjectName, version)
 	if err != nil {
-		return diag.FromErr(err)
+		return resourceReadHandleNotFound(err, d, nil)
 	}
 
 	if err := d.Set("project", project); err != nil {

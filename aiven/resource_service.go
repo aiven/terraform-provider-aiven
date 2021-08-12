@@ -802,7 +802,7 @@ func resourceServiceRead(_ context.Context, d *schema.ResourceData, m interface{
 	projectName, serviceName := splitResourceID2(d.Id())
 	service, err := client.Services.Get(projectName, serviceName)
 	if err != nil {
-		return diag.FromErr(err)
+		return resourceReadHandleNotFound(err, d, nil)
 	}
 
 	err = copyServicePropertiesFromAPIResponseToTerraform(d, service, projectName)

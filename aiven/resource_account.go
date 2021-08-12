@@ -83,7 +83,7 @@ func resourceAccountRead(_ context.Context, d *schema.ResourceData, m interface{
 
 	r, err := client.Accounts.Get(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return resourceReadHandleNotFound(err, d, nil)
 	}
 
 	if err := d.Set("account_id", r.Account.Id); err != nil {

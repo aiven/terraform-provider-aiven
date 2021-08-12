@@ -79,7 +79,7 @@ func resourceAccountTeamProjectRead(_ context.Context, d *schema.ResourceData, m
 	accountId, teamId, projectName := splitResourceID3(d.Id())
 	r, err := client.AccountTeamProjects.List(accountId, teamId)
 	if err != nil {
-		return diag.FromErr(err)
+		return resourceReadHandleNotFound(err, d, nil)
 	}
 
 	var project aiven.AccountTeamProject

@@ -192,7 +192,7 @@ func resourceServiceIntegrationEndpointRead(_ context.Context, d *schema.Resourc
 	projectName, endpointID := splitResourceID2(d.Id())
 	endpoint, err := client.ServiceIntegrationEndpoints.Get(projectName, endpointID)
 	if err != nil {
-		return diag.FromErr(err)
+		return resourceReadHandleNotFound(err, d, nil)
 	}
 
 	err = copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(d, endpoint, projectName)
