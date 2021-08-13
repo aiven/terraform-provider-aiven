@@ -114,7 +114,7 @@ func resourceMirrorMakerReplicationFlowRead(ctx context.Context, d *schema.Resou
 	project, serviceName, sourceCluster, targetCluster := splitResourceID4(d.Id())
 	replicationFlow, err := client.KafkaMirrorMakerReplicationFlow.Get(project, serviceName, sourceCluster, targetCluster)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(resourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("project", project); err != nil {

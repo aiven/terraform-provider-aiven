@@ -353,3 +353,11 @@ func flattenToString(a []interface{}) []string {
 
 	return r
 }
+
+func resourceReadHandleNotFound(err error, d *schema.ResourceData) error {
+	if err != nil && aiven.IsNotFound(err) {
+		d.SetId("")
+		return nil
+	}
+	return err
+}

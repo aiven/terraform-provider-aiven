@@ -224,7 +224,7 @@ func resourceServiceUserRead(_ context.Context, d *schema.ResourceData, m interf
 	projectName, serviceName, username := splitResourceID3(d.Id())
 	user, err := client.ServiceUsers.Get(projectName, serviceName, username)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(resourceReadHandleNotFound(err, d))
 	}
 
 	err = copyServiceUserPropertiesFromAPIResponseToTerraform(d, user, projectName, serviceName)

@@ -109,7 +109,7 @@ func resourceConnectionPoolRead(_ context.Context, d *schema.ResourceData, m int
 	project, serviceName, poolName := splitResourceID3(d.Id())
 	pool, err := client.ConnectionPools.Get(project, serviceName, poolName)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(resourceReadHandleNotFound(err, d))
 	}
 
 	err = copyConnectionPoolPropertiesFromAPIResponseToTerraform(d, pool, project, serviceName)

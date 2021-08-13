@@ -121,7 +121,7 @@ func resourceDatabaseRead(_ context.Context, d *schema.ResourceData, m interface
 	projectName, serviceName, databaseName := splitResourceID3(d.Id())
 	database, err := client.Databases.Get(projectName, serviceName, databaseName)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(resourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("database_name", database.DatabaseName); err != nil {

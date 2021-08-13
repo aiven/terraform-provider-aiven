@@ -378,7 +378,7 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 	project, serviceName, topicName := splitResourceID3(d.Id())
 	topic, err := getTopic(ctx, d, m, false)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(resourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("project", project); err != nil {
