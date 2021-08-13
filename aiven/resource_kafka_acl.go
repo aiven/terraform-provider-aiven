@@ -97,7 +97,7 @@ func resourceKafkaACLRead(_ context.Context, d *schema.ResourceData, m interface
 	project, serviceName, aclID := splitResourceID3(d.Id())
 	acl, err := cache.ACLCache{}.Read(project, serviceName, aclID, client)
 	if err != nil {
-		return resourceReadHandleNotFound(err, d, nil)
+		return diag.FromErr(resourceReadHandleNotFound(err, d))
 	}
 
 	err = copyKafkaACLPropertiesFromAPIResponseToTerraform(d, &acl, project, serviceName)

@@ -95,7 +95,7 @@ func resourceKafkaSchemaConfigurationRead(_ context.Context, d *schema.ResourceD
 
 	r, err := m.(*aiven.Client).KafkaGlobalSchemaConfig.Get(project, serviceName)
 	if err != nil {
-		return resourceReadHandleNotFound(err, d, nil)
+		return diag.FromErr(resourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("project", project); err != nil {

@@ -127,7 +127,7 @@ func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData
 	accountId, authId := splitResourceID2(d.Id())
 	r, err := client.AccountAuthentications.Get(accountId, authId)
 	if err != nil {
-		return resourceReadHandleNotFound(err, d, nil)
+		return diag.FromErr(resourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("account_id", r.AuthenticationMethod.AccountId); err != nil {

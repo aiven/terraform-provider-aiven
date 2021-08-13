@@ -95,7 +95,7 @@ func resourceProjectVPCRead(_ context.Context, d *schema.ResourceData, m interfa
 	projectName, vpcID := splitResourceID2(d.Id())
 	vpc, err := client.VPCs.Get(projectName, vpcID)
 	if err != nil {
-		return resourceReadHandleNotFound(err, d, nil)
+		return diag.FromErr(resourceReadHandleNotFound(err, d))
 	}
 
 	err = copyVPCPropertiesFromAPIResponseToTerraform(d, vpc, projectName)
