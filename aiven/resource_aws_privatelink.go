@@ -106,7 +106,7 @@ func resourceAWSPrivatelinkRead(_ context.Context, d *schema.ResourceData, m int
 	project, serviceName := splitResourceID2(d.Id())
 	p, err := client.AWSPrivatelink.Get(project, serviceName)
 	if err != nil {
-		return diag.Errorf("Error getting AWS privatelink: %s", err)
+		return diag.FromErr(resourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("principals", p.Principals); err != nil {

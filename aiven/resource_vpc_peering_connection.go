@@ -283,7 +283,7 @@ func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData,
 			pc, err = client.VPCPeeringConnections.GetVPCPeeringWithResourceGroup(
 				projectName, vpcID, peerCloudAccount, peerVPC, peerRegion, peerResourceGroup.(string))
 			if err != nil {
-				return diag.Errorf("Error getting VPC peering connection resource group: %s", err)
+				return diag.FromErr(resourceReadHandleNotFound(err, d))
 			}
 		} else {
 			return diag.Errorf("cannot get an Azure VPC peering connection without `peer_resource_group`")
@@ -297,7 +297,7 @@ func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData,
 	pc, err = client.VPCPeeringConnections.GetVPCPeering(
 		projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
 	if err != nil {
-		return diag.Errorf("Error getting VPC peering connection: %s", err)
+		return diag.FromErr(resourceReadHandleNotFound(err, d))
 	}
 
 	return copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, projectName, vpcID)

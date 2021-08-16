@@ -289,7 +289,7 @@ func resourceProjectRead(_ context.Context, d *schema.ResourceData, m interface{
 
 	project, err := client.Projects.Get(d.Id())
 	if err != nil {
-		return diag.Errorf("Error getting project: %s", err)
+		return diag.FromErr(resourceReadHandleNotFound(err, d))
 	}
 
 	var diags diag.Diagnostics
