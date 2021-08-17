@@ -229,9 +229,7 @@ func resourceKafkaSchemaRead(_ context.Context, d *schema.ResourceData, m interf
 
 	c, err := client.KafkaSubjectSchemas.GetConfiguration(project, serviceName, subjectName)
 	if err != nil {
-		if !aiven.IsNotFound(err) {
-			return diag.FromErr(err)
-		}
+		return diag.FromErr(resourceReadHandleNotFound(err, d))
 	} else {
 		// only update if was set to not empty values by the user
 		if _, ok := d.GetOk("compatibility_level"); ok {
@@ -244,7 +242,7 @@ func resourceKafkaSchemaRead(_ context.Context, d *schema.ResourceData, m interf
 	return nil
 }
 
-func resourceKafkaSchemaDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaSchemaDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var project, serviceName, schemaName = splitResourceID3(d.Id())
 
 	err := m.(*aiven.Client).KafkaSubjectSchemas.Delete(project, serviceName, schemaName)

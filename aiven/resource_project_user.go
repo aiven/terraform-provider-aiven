@@ -82,7 +82,7 @@ func resourceProjectUserRead(ctx context.Context, d *schema.ResourceData, m inte
 		if aiven.IsNotFound(err) && !d.Get("accepted").(bool) {
 			return resourceProjectUserCreate(ctx, d, m)
 		}
-		return diag.FromErr(err)
+		return diag.FromErr(resourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("project", projectName); err != nil {

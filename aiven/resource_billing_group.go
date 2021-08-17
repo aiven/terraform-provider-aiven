@@ -144,7 +144,7 @@ func resourceBillingGroupRead(_ context.Context, d *schema.ResourceData, m inter
 
 	bg, err := client.BillingGroup.Get(d.Id())
 	if err != nil {
-		return diag.Errorf("cannot get a billing group: %s", err)
+		return diag.FromErr(resourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("name", bg.BillingGroupName); err != nil {
