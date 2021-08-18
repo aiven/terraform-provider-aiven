@@ -101,10 +101,6 @@ func testAccConnectionPoolResource(name string) string {
 			service_type = "pg"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
-			
-			pg_user_config {
-				pg_version = 11
-			}
 		}
 		
 		resource "aiven_service_user" "foo" {

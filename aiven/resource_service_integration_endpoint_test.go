@@ -49,8 +49,6 @@ func testAccServiceIntegrationEndpointResource(name string) string {
 			maintenance_window_time = "10:00:00"
 			
 			pg_user_config {
-				pg_version = 11
-
 				public_access {
 					pg = true
 					prometheus = false

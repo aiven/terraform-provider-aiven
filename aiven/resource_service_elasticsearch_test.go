@@ -57,8 +57,6 @@ func testAccElasticsearchServiceResource(name string) string {
 			maintenance_window_time = "10:00:00"
 			
 			elasticsearch_user_config {
-				elasticsearch_version = 7
-
 				kibana {
 					enabled = true
 					elasticsearch_request_timeout = 30000
@@ -101,10 +99,6 @@ func testAccCheckAivenServiceESAttributes(n string) resource.TestCheckFunc {
 
 		if a["elasticsearch.0.kibana_uri"] == "" {
 			return fmt.Errorf("expected to get kibana_uri from Aiven")
-		}
-
-		if a["elasticsearch_user_config.0.elasticsearch_version"] != "7" {
-			return fmt.Errorf("expected to get a correct elasticsearch_version from Aiven")
 		}
 
 		if a["elasticsearch_user_config.0.ip_filter.0"] != "0.0.0.0/0" {

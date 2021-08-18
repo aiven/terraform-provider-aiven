@@ -108,8 +108,6 @@ func testAccPGServiceResource(name string) string {
 			maintenance_window_time = "10:00:00"
 			
 			pg_user_config {
-				pg_version = 11
-
 				public_access {
 					pg = true
 					prometheus = false
@@ -150,8 +148,6 @@ func testAccPGServiceCustomTimeoutsResource(name string) string {
 			}
 			
 			pg_user_config {
-				pg_version = 11
-
 				public_access {
 					pg = true
 					prometheus = false
@@ -188,8 +184,6 @@ func testAccPGTerminationProtectionServiceResource(name string) string {
 			termination_protection = true
 			
 			pg_user_config {
-				pg_version = 11
-
 				public_access {
 					pg = true
 					prometheus = false
@@ -225,8 +219,6 @@ func testAccPGReadReplicaServiceResource(name string) string {
 			maintenance_window_time = "10:00:00"
 			
 			pg_user_config {
-				pg_version = 11
-
 				public_access {
 					pg = true
 					prometheus = false
@@ -249,8 +241,6 @@ func testAccPGReadReplicaServiceResource(name string) string {
 			pg_user_config {
 				backup_hour = 19
 				backup_minute = 30
-				pg_version = 11
-
 				public_access {
 					pg = true
 					prometheus = false
@@ -338,10 +328,6 @@ func testAccCheckAivenServicePGAttributes(n string) resource.TestCheckFunc {
 
 		if !strings.Contains(a["service_type"], "pg") {
 			return fmt.Errorf("expected to get a correct service type from Aiven, got :%s", a["service_type"])
-		}
-
-		if a["pg_user_config.0.pg_version"] != "11" {
-			return fmt.Errorf("expected to get a correct PG version from Aiven, got :%s", a["pg_user_config.0.pg_version"])
 		}
 
 		if a["pg_user_config.0.ip_filter.0"] != "0.0.0.0/0" {

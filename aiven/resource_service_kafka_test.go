@@ -59,7 +59,6 @@ func testAccKafkaServiceResource(name string) string {
 				kafka_rest = true
 				kafka_connect = true
 				schema_registry = true
-				kafka_version = "2.4"
 
 				kafka {
 					group_max_session_timeout_ms = 70000
@@ -97,10 +96,6 @@ func testAccCheckAivenServiceKafkaAttributes(n string) resource.TestCheckFunc {
 
 		if a["kafka_user_config.0.kafka_rest"] != "true" {
 			return fmt.Errorf("expected to get a correct kafka_rest from Aiven")
-		}
-
-		if a["kafka_user_config.0.kafka_version"] != "2.4" {
-			return fmt.Errorf("expected to get a correct kafka_version from Aiven")
 		}
 
 		if a["kafka_user_config.0.public_access.0.kafka_connect"] != "true" {
