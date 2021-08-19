@@ -176,7 +176,6 @@ func testAccKafkaConnectorResource(name string) string {
 			maintenance_window_time = "10:00:00"
 			
 			kafka_user_config {
-				kafka_version = "2.4"
 				kafka_connect = true
 
 				kafka {
@@ -202,10 +201,6 @@ func testAccKafkaConnectorResource(name string) string {
 			service_type = "elasticsearch"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
-			
-			elasticsearch_user_config {
-				elasticsearch_version = "7"
-			}
 		}
 
 		resource "aiven_kafka_connector" "foo" {
@@ -247,7 +242,6 @@ func testAccKafkaConnectorMonoSinkResource(name string) string {
 			maintenance_window_time = "10:00:00"
 			
 			kafka_user_config {
-				kafka_version = "2.4"
 				kafka_connect = true
 				schema_registry = true
 

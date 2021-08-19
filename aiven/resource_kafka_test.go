@@ -74,7 +74,6 @@ func testAccKafkaResource(name string) string {
 				kafka_rest = true
 				kafka_connect = true
 				schema_registry = true
-				kafka_version = "2.4"
 
 				kafka {
 					group_max_session_timeout_ms = 70000
@@ -115,7 +114,6 @@ func testAccKafkaWithoutDefaultACLResource(name string) string {
 				kafka_rest = true
 				kafka_connect = true
 				schema_registry = true
-				kafka_version = "2.4"
 				kafka {
 					group_max_session_timeout_ms = 70000
 					log_retention_bytes = 1000000000

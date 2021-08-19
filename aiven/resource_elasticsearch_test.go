@@ -53,8 +53,6 @@ func testAccElasticsearchResource(name string) string {
 			maintenance_window_time = "10:00:00"
 			
 			elasticsearch_user_config {
-				elasticsearch_version = 7
-
 				kibana {
 					enabled = true
 					elasticsearch_request_timeout = 30000

@@ -50,8 +50,6 @@ func testAccM3AggregatorResource(name string) string {
 			service_name = "test-acc-m3d-%s"
 
 			m3db_user_config {
-				m3db_version = "1.0"
-							
 				namespaces {
 					name = "%s"
 					type = "unaggregated"
@@ -66,10 +64,6 @@ func testAccM3AggregatorResource(name string) string {
 			service_name = "test-acc-m3a-%s"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
-
-			m3aggregator_user_config {
-				m3aggregator_version = "1.0"
-			}
 		}
 
 		resource "aiven_service_integration" "int-m3db-aggr" {

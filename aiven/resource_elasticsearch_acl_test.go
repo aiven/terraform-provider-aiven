@@ -49,10 +49,6 @@ func testAccElasticsearchAclResource(name string) string {
 			service_type = "elasticsearch"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
-			
-			elasticsearch_user_config {
-				elasticsearch_version = 7
-			}
 		}
 
 		resource "aiven_service_user" "foo" {

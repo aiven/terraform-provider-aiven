@@ -52,8 +52,6 @@ func testAccM3DBResource(name string) string {
 			maintenance_window_time = "10:00:00"
 			
 			m3db_user_config {
-				m3db_version = "1.0"
-							
 				namespaces {
 					name = "%s"
 					type = "unaggregated"
@@ -66,10 +64,6 @@ func testAccM3DBResource(name string) string {
 			cloud_name = "google-europe-west1"
 			service_name = "test-acc-sr-pg-%s"
 			plan = "startup-4"
-
-			pg_user_config {
-				pg_version = 12
-			}
 		}
 		
 		resource "aiven_service_integration" "int-m3db-pg" {

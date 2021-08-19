@@ -53,8 +53,6 @@ func testAccMysqlResource(name string) string {
 			maintenance_window_time = "10:00:00"
 			
 			mysql_user_config {
-				mysql_version = 8
-							
 				mysql {
 					sql_mode = "ANSI,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE"
 					sql_require_primary_key = true

@@ -229,7 +229,9 @@ func resourceKafkaSchemaRead(_ context.Context, d *schema.ResourceData, m interf
 
 	c, err := client.KafkaSubjectSchemas.GetConfiguration(project, serviceName, subjectName)
 	if err != nil {
-		return diag.FromErr(resourceReadHandleNotFound(err, d))
+		if !aiven.IsNotFound(err) {
+			return diag.FromErr(err)
+		}
 	} else {
 		// only update if was set to not empty values by the user
 		if _, ok := d.GetOk("compatibility_level"); ok {
