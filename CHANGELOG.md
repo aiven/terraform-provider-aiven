@@ -4,6 +4,11 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.19] - 2021-08-26
+- Add code of conduct
+- Improve acceptance tests and documentation
+- Add none existing resource handling
+
 ## [2.1.18] - 2021-08-10
 - Change service integration behaviour
 - Fix vpc peering connection deletion error handling
