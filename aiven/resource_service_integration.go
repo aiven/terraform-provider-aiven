@@ -362,17 +362,17 @@ func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceDat
 
 	projectName, integrationID := splitResourceID2(d.Id())
 	integrationType := d.Get("integration_type").(string)
-	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("integration", integrationType, false, d)
+	config := ConvertTerraformUserConfigToAPICompatibleFormat("integration", integrationType, false, d)
 
 	_, err := client.ServiceIntegrations.Update(
 		projectName,
 		integrationID,
 		aiven.UpdateServiceIntegrationRequest{
-			UserConfig: nil,
+			UserConfig: config,
 		},
 	)
 	if err != nil {
-		return diag.Errorf("unable to update service integration: %s; user config: %+v", err, userConfig)
+		return diag.Errorf("unable to update service integration: %s; user config: %+v", err, config)
 	}
 
 	return resourceServiceIntegrationRead(ctx, d, m)
