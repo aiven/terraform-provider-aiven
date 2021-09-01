@@ -1,5 +1,7 @@
 # Elasticsearch ACL Resource
 
+** This resource is deprecated, please use `aiven_elasticsearch_acl_config` and `aiven_elasticsearch_acl_rule` **
+
 The Elasticsearch ACL resource allows the creation and management of ACLs 
 for an Aiven Elasticsearch service.
 
@@ -36,7 +38,7 @@ resource "aiven_elasticsearch_acl" "es-acls" {
             permission = "read"
         }
     }
-    }
+}
 ```
 
 ## Argument Reference

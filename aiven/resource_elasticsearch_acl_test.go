@@ -3,10 +3,10 @@ package aiven
 import (
 	"fmt"
 	"os"
-	"reflect"
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -207,8 +207,8 @@ func TestFlattenElasticsearchACL(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := flattenElasticsearchACL(tt.args.r); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("flattenElasticsearchACL() = %v, want %v", got, tt.want)
+			if got := resourceElasticsearchFlattenACLResponse(tt.args.r); !cmp.Equal(got, tt.want) {
+				t.Errorf("flattenElasticsearchACL() = \n%v, want \n%v", got, tt.want)
 			}
 		})
 	}

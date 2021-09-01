@@ -38,7 +38,6 @@ func Provider() *schema.Provider {
 			"aiven_kafka_connector":                datasourceKafkaConnector(),
 			"aiven_kafka_schema":                   datasourceKafkaSchema(),
 			"aiven_kafka_schema_configuration":     datasourceKafkaSchemaConfiguration(),
-			"aiven_elasticsearch_acl":              datasourceElasticsearchACL(),
 			"aiven_project":                        datasourceProject(),
 			"aiven_project_user":                   datasourceProjectUser(),
 			"aiven_project_vpc":                    datasourceProjectVPC(),
@@ -60,6 +59,8 @@ func Provider() *schema.Provider {
 			"aiven_mysql":                          datasourceMySQL(),
 			"aiven_cassandra":                      datasourceCassandra(),
 			"aiven_elasticsearch":                  datasourceElasticsearch(),
+			"aiven_elasticsearch_acl_config":       datasourceElasticsearchACLConfig(),
+			"aiven_elasticsearch_acl_rule":         datasourceElasticsearchACLRule(),
 			"aiven_grafana":                        datasourceGrafana(),
 			"aiven_influxdb":                       datasourceInfluxDB(),
 			"aiven_redis":                          datasourceRedis(),
@@ -68,6 +69,9 @@ func Provider() *schema.Provider {
 			"aiven_m3db":                           datasourceM3DB(),
 			"aiven_m3aggregator":                   datasourceM3Aggregator(),
 			"aiven_aws_privatelink":                datasourceAWSPrivatelink(),
+
+			// deprecated
+			"aiven_elasticsearch_acl": datasourceElasticsearchACL(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -78,7 +82,6 @@ func Provider() *schema.Provider {
 			"aiven_kafka_connector":                resourceKafkaConnector(),
 			"aiven_kafka_schema":                   resourceKafkaSchema(),
 			"aiven_kafka_schema_configuration":     resourceKafkaSchemaConfiguration(),
-			"aiven_elasticsearch_acl":              resourceElasticsearchACL(),
 			"aiven_project":                        resourceProject(),
 			"aiven_project_user":                   resourceProjectUser(),
 			"aiven_project_vpc":                    resourceProjectVPC(),
@@ -100,6 +103,8 @@ func Provider() *schema.Provider {
 			"aiven_mysql":                          resourceMySQL(),
 			"aiven_cassandra":                      resourceCassandra(),
 			"aiven_elasticsearch":                  resourceElasticsearch(),
+			"aiven_elasticsearch_acl_config":       resourceElasticsearchACLConfig(),
+			"aiven_elasticsearch_acl_rule":         resourceElasticsearchACLRule(),
 			"aiven_grafana":                        resourceGrafana(),
 			"aiven_influxdb":                       resourceInfluxDB(),
 			"aiven_redis":                          resourceRedis(),
@@ -108,6 +113,9 @@ func Provider() *schema.Provider {
 			"aiven_m3aggregator":                   resourceM3Aggregator(),
 			"aiven_billing_group":                  resourceBillingGroup(),
 			"aiven_aws_privatelink":                resourceAWSPrivatelink(),
+
+			// deprecated
+			"aiven_elasticsearch_acl": resourceElasticsearchACL(),
 		},
 	}
 
