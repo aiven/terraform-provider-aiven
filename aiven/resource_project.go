@@ -24,11 +24,12 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Deprecated:       "Please use aiven_billing_group resource to set this value.",
 	},
 	"billing_emails": {
-		Type:        schema.TypeSet,
-		Description: "Billing contact emails of the project",
-		Elem:        &schema.Schema{Type: schema.TypeString},
-		Optional:    true,
-		Deprecated:  "Please use aiven_billing_group resource to set this value.",
+		Type:             schema.TypeSet,
+		Description:      "Billing contact emails of the project",
+		Elem:             &schema.Schema{Type: schema.TypeString},
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Deprecated:       "Please use aiven_billing_group resource to set this value.",
 	},
 	"billing_extra_text": {
 		Type:             schema.TypeString,
