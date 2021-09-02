@@ -316,7 +316,7 @@ func convertTerraformUserConfigValueToAPICompatibleFormat(
 	// get Aiven API value type
 	valueType := getAivenSchemaType(definition["type"])
 
-	if valueType != "object" && valueType != "array" && canOmit(value, definition) {
+	if canOmit(value, definition) {
 		return nil, true
 	}
 
@@ -380,10 +380,19 @@ func convertTerraformUserConfigValueToAPICompatibleFormatArray(value interface{}
 	key string,
 	definition map[string]interface{}) (interface{}, bool, error) {
 	var convertedValue interface{}
+	omit := true
+
+	var empty []interface{}
+	// Elasticsearch index_patterns empty array behaviour should be
+	// different other user configuration options
+	if !newResource && strings.Contains(key, "index_patterns") {
+		empty = []interface{}{}
+		omit = false
+	}
 
 	// when value is nil
 	if value == nil {
-		return []interface{}{}, false, nil
+		return empty, omit, nil
 	}
 
 	switch value.(type) {
@@ -391,7 +400,7 @@ func convertTerraformUserConfigValueToAPICompatibleFormatArray(value interface{}
 		asArray := value.([]interface{})
 
 		if len(asArray) == 0 {
-			return []interface{}{}, false, nil
+			return empty, omit, nil
 		}
 
 		values := make([]interface{}, len(value.([]interface{})))
@@ -403,11 +412,12 @@ func convertTerraformUserConfigValueToAPICompatibleFormatArray(value interface{}
 		}
 
 		convertedValue = values
+		omit = false
 	default:
 		return nil, false, fmt.Errorf("invalid %v user config key type %T for %v, expected list", serviceType, value, key)
 	}
 
-	return convertedValue, false, nil
+	return convertedValue, omit, nil
 }
 
 func convertTerraformUserConfigValueToAPICompatibleFormatObject(
