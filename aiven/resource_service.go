@@ -827,6 +827,8 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	projectName, serviceName := splitResourceID2(d.Id())
 	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("service", d.Get("service_type").(string), false, d)
+	//b, _ := json.Marshal(userConfig)
+	//panic(string(b))
 	vpcID := d.Get("project_vpc_id").(string)
 	var vpcIDPointer *string
 	if len(vpcID) > 0 {

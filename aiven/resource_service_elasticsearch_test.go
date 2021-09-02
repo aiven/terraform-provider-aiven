@@ -101,10 +101,6 @@ func testAccCheckAivenServiceESAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get kibana_uri from Aiven")
 		}
 
-		if a["elasticsearch_user_config.0.ip_filter.0"] != "0.0.0.0/0" {
-			return fmt.Errorf("expected to get a correct ip_filter from Aiven")
-		}
-
 		if a["elasticsearch.0.kibana_uri"] == "" {
 			return fmt.Errorf("expected to get kibana_uri from Aiven")
 		}

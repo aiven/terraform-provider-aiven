@@ -53,6 +53,7 @@ func testAccGrafanaResource(name string) string {
 			maintenance_window_time = "10:00:00"
 			
 			grafana_user_config {
+				ip_filter = ["0.0.0.0/0"]
 				alerting_enabled = true
 				
 				public_access {

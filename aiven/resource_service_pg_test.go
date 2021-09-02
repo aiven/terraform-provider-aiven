@@ -333,10 +333,6 @@ func testAccCheckAivenServicePGAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a correct service type from Aiven, got :%s", a["service_type"])
 		}
 
-		if a["pg_user_config.0.ip_filter.0"] != "0.0.0.0/0" {
-			return fmt.Errorf("expected to get a correct PG ip_filter from Aiven, got :%s", a["pg_user_config.0.ip_filter.0"])
-		}
-
 		if a["pg.0.dbname"] != "defaultdb" {
 			return fmt.Errorf("expected to get a correct PG dbname from Aiven, got :%s", a["pg.0.dbname"])
 		}

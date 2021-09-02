@@ -313,12 +313,12 @@ func convertTerraformUserConfigValueToAPICompatibleFormat(
 	var omit bool
 	var convertedValue = value
 
-	if canOmit(value, definition) {
-		return nil, true
-	}
-
 	// get Aiven API value type
 	valueType := getAivenSchemaType(definition["type"])
+
+	if valueType != "object" && valueType != "array" && canOmit(value, definition) {
+		return nil, true
+	}
 
 	switch valueType {
 	case "integer":
@@ -380,11 +380,10 @@ func convertTerraformUserConfigValueToAPICompatibleFormatArray(value interface{}
 	key string,
 	definition map[string]interface{}) (interface{}, bool, error) {
 	var convertedValue interface{}
-	var omit bool
 
 	// when value is nil
 	if value == nil {
-		return nil, true, nil
+		return []interface{}{}, false, nil
 	}
 
 	switch value.(type) {
@@ -392,7 +391,7 @@ func convertTerraformUserConfigValueToAPICompatibleFormatArray(value interface{}
 		asArray := value.([]interface{})
 
 		if len(asArray) == 0 {
-			return nil, true, nil
+			return []interface{}{}, false, nil
 		}
 
 		values := make([]interface{}, len(value.([]interface{})))
@@ -408,7 +407,7 @@ func convertTerraformUserConfigValueToAPICompatibleFormatArray(value interface{}
 		return nil, false, fmt.Errorf("invalid %v user config key type %T for %v, expected list", serviceType, value, key)
 	}
 
-	return convertedValue, omit, nil
+	return convertedValue, false, nil
 }
 
 func convertTerraformUserConfigValueToAPICompatibleFormatObject(
