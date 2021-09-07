@@ -4,6 +4,10 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.1.20] - not yet released
+- split `aiven_elasticsearch_acl` into `aiven_elasticsearch_acl_config` and `aiven_elasticsearch_acl_rule`
+- deprecated `aiven_elasticsearch_acl`
+
 ## [2.1.19] - 2021-08-26
 - Add code of conduct
 - Improve acceptance tests and documentation

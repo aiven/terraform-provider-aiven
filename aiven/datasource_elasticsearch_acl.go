@@ -11,9 +11,9 @@ import (
 
 func datasourceElasticsearchACL() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: datasourceElasticsearchACLRead,
-		Schema: resourceSchemaAsDatasourceSchema(aivenElasticsearchACLSchema,
-			"project", "service_name"),
+		DeprecationMessage: "ElasticsearchACL is deprecated please use ElasticsearchACLConfig and ElasticsearchACLRule",
+		ReadContext:        datasourceElasticsearchACLRead,
+		Schema:             resourceSchemaAsDatasourceSchema(aivenElasticsearchACLSchema, "project", "service_name"),
 	}
 }
 
@@ -34,6 +34,5 @@ func datasourceElasticsearchACLRead(ctx context.Context, d *schema.ResourceData,
 		return resourceElasticsearchACLRead(ctx, d, m)
 	}
 
-	return diag.Errorf("elasticsearch acl %s/%s not found",
-		projectName, serviceName)
+	return diag.Errorf("elasticsearch acl %s/%s not found", projectName, serviceName)
 }

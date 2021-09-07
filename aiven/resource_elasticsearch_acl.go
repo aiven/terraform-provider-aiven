@@ -88,8 +88,37 @@ func resourceElasticsearchACL() *schema.Resource {
 	}
 }
 
-func flattenElasticsearchACL(r *aiven.ElasticSearchACLResponse) []map[string]interface{} {
-	var acls []map[string]interface{}
+func resourceElasticsearchACLRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*aiven.Client)
+
+	project, serviceName := splitResourceID2(d.Id())
+	r, err := client.ElasticsearchACLs.Get(project, serviceName)
+	if err != nil {
+		return diag.FromErr(resourceReadHandleNotFound(err, d))
+	}
+
+	if err := d.Set("project", project); err != nil {
+		return diag.Errorf("error setting Elasticsearch ACLs `project` for resource %s: %s", d.Id(), err)
+	}
+	if err := d.Set("service_name", serviceName); err != nil {
+		return diag.Errorf("error setting Elasticsearch ACLs `service_name` for resource %s: %s", d.Id(), err)
+	}
+	if err := d.Set("extended_acl", r.ElasticSearchACLConfig.ExtendedAcl); err != nil {
+		return diag.Errorf("error setting Elasticsearch ACLs `extended_acl` for resource %s: %s", d.Id(), err)
+	}
+	if err := d.Set("enabled", r.ElasticSearchACLConfig.Enabled); err != nil {
+		return diag.Errorf("error setting Elasticsearch ACLs `enable` for resource %s: %s", d.Id(), err)
+	}
+
+	if err := d.Set("acl", resourceElasticsearchFlattenACLResponse(r)); err != nil {
+		return diag.Errorf("error setting Elasticsearch ACLs `acls` array for resource %s: %s", d.Id(), err)
+	}
+
+	return nil
+}
+
+func resourceElasticsearchFlattenACLResponse(r *aiven.ElasticSearchACLResponse) []map[string]interface{} {
+	acls := make([]map[string]interface{}, 0)
 
 	for _, aclS := range r.ElasticSearchACLConfig.ACLs {
 		var rules []map[string]interface{}
@@ -113,37 +142,6 @@ func flattenElasticsearchACL(r *aiven.ElasticSearchACLResponse) []map[string]int
 	return acls
 }
 
-func resourceElasticsearchACLRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
-	project, serviceName := splitResourceID2(d.Id())
-	r, err := client.ElasticsearchACLs.Get(project, serviceName)
-	if err != nil {
-		return diag.FromErr(resourceReadHandleNotFound(err, d))
-	}
-
-	if err := d.Set("project", project); err != nil {
-		return diag.Errorf("error setting Elasticsearch ACLs `project` for resource %s: %s", d.Id(), err)
-	}
-	if err := d.Set("service_name", serviceName); err != nil {
-		return diag.Errorf("error setting Elasticsearch ACLs `service_name` for resource %s: %s", d.Id(), err)
-	}
-	if err := d.Set("extended_acl", r.ElasticSearchACLConfig.ExtendedAcl); err != nil {
-		return diag.Errorf("error setting Elasticsearch ACLs `extended_acl` for resource %s: %s", d.Id(), err)
-	}
-	if err := d.Set("enabled", r.ElasticSearchACLConfig.Enabled); err != nil {
-		return diag.Errorf("error setting Elasticsearch ACLs `enable` for resource %s: %s", d.Id(), err)
-	}
-
-	acls := flattenElasticsearchACL(r)
-
-	if err := d.Set("acl", acls); err != nil {
-		return diag.Errorf("error setting Elasticsearch ACLs `acls` array for resource %s: %s", d.Id(), err)
-	}
-
-	return nil
-}
-
 func resourceElasticsearchACLState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	di := resourceElasticsearchACLRead(ctx, d, m)
 	if di.HasError() {
@@ -158,6 +156,9 @@ func resourceElasticsearchACLUpdate(ctx context.Context, d *schema.ResourceData,
 
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
+
+	resourceElasticsearchACLModifierMutex.Lock()
+	defer resourceElasticsearchACLModifierMutex.Unlock()
 
 	var config aiven.ElasticSearchACLConfig
 	for _, aclD := range d.Get("acl").(*schema.Set).List() {
@@ -194,6 +195,9 @@ func resourceElasticsearchACLDelete(_ context.Context, d *schema.ResourceData, m
 
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
+
+	resourceElasticsearchACLModifierMutex.Lock()
+	defer resourceElasticsearchACLModifierMutex.Unlock()
 
 	_, err := client.ElasticsearchACLs.Update(
 		project,
