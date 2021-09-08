@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -260,6 +262,9 @@ func resourceServiceIntegration() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceIntegrationState,
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(2 * time.Minute),
+		},
 
 		Schema: aivenServiceIntegrationSchema,
 	}
@@ -305,20 +310,44 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 
 	// When service integration does not exist, create a new one
 	if integration == nil {
-		integration, err = client.ServiceIntegrations.Create(
-			projectName,
-			aiven.CreateServiceIntegrationRequest{
-				DestinationEndpointID: plainEndpointID(optionalStringPointer(d, "destination_endpoint_id")),
-				DestinationService:    optionalStringPointer(d, "destination_service_name"),
-				IntegrationType:       integrationType,
-				SourceEndpointID:      plainEndpointID(optionalStringPointer(d, "source_endpoint_id")),
-				SourceService:         optionalStringPointer(d, "source_service_name"),
-				UserConfig:            userConfig,
+		stateChangeConf := &resource.StateChangeConf{
+			Pending: []string{"CREATING"},
+			Target:  []string{"CREATED"},
+			Refresh: func() (interface{}, string, error) {
+				i, err := client.ServiceIntegrations.Create(
+					projectName,
+					aiven.CreateServiceIntegrationRequest{
+						DestinationEndpointID: plainEndpointID(optionalStringPointer(d, "destination_endpoint_id")),
+						DestinationService:    optionalStringPointer(d, "destination_service_name"),
+						IntegrationType:       integrationType,
+						SourceEndpointID:      plainEndpointID(optionalStringPointer(d, "source_endpoint_id")),
+						SourceService:         optionalStringPointer(d, "source_service_name"),
+						UserConfig:            userConfig,
+					},
+				)
+				if err != nil {
+					// Sometimes Aiven API retrieves 404 error even when a successful service integration is created
+					if aiven.IsNotFound(err) {
+						return nil, "CREATING", nil
+					}
+					return nil, "", err
+				}
+
+				return i, "CREATED", nil
 			},
-		)
-		if err != nil {
-			return diag.Errorf("cannot create service integration: %s", err)
+			Delay:      10 * time.Second,
+			Timeout:    d.Timeout(schema.TimeoutCreate),
+			MinTimeout: 2 * time.Second,
 		}
+
+		res, err := stateChangeConf.WaitForStateContext(ctx)
+		if err != nil {
+			if aiven.IsAlreadyExists(err) {
+				return resourceServiceIntegrationCreate(ctx, d, m)
+			}
+			return diag.Errorf("Error waiting for Service Integration to be created: %s", err)
+		}
+		integration = res.(*aiven.ServiceIntegration)
 	}
 
 	d.SetId(buildResourceID(projectName, integration.ServiceIntegrationID))
