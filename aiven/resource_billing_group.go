@@ -113,11 +113,16 @@ func resourceBillingGroupCreate(ctx context.Context, d *schema.ResourceData, m i
 		billingEmails = *emails
 	}
 
+	cardID, err := getLongCardID(client, d.Get("card_id").(string))
+	if err != nil {
+		return diag.Errorf("Error getting long card id: %s", err)
+	}
+
 	bg, err := client.BillingGroup.Create(
 		aiven.BillingGroupRequest{
 			BillingGroupName: d.Get("name").(string),
 			AccountId:        optionalStringPointer(d, "account_id"),
-			CardId:           optionalStringPointer(d, "card_id"),
+			CardId:           cardID,
 			VatId:            optionalStringPointer(d, "vat_id"),
 			BillingCurrency:  optionalStringPointer(d, "billing_currency"),
 			BillingExtraText: optionalStringPointer(d, "billing_extra_text"),
@@ -198,12 +203,17 @@ func resourceBillingGroupUpdate(ctx context.Context, d *schema.ResourceData, m i
 		billingEmails = *emails
 	}
 
+	cardID, err := getLongCardID(client, d.Get("card_id").(string))
+	if err != nil {
+		return diag.Errorf("Error getting long card id: %s", err)
+	}
+
 	bg, err := client.BillingGroup.Update(
 		d.Id(),
 		aiven.BillingGroupRequest{
 			BillingGroupName: d.Get("name").(string),
 			AccountId:        optionalStringPointer(d, "account_id"),
-			CardId:           optionalStringPointer(d, "card_id"),
+			CardId:           cardID,
 			VatId:            optionalStringPointer(d, "vat_id"),
 			BillingCurrency:  optionalStringPointer(d, "billing_currency"),
 			BillingExtraText: optionalStringPointer(d, "billing_extra_text"),
