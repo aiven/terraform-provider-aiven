@@ -99,7 +99,7 @@ func resourceMirrorMakerReplicationFlowCreate(ctx context.Context, d *schema.Res
 			TopicsBlacklist: topicsBlacklist,
 		},
 	})
-	if err != nil && !aiven.IsAlreadyExists(err) {
+	if err != nil {
 		return diag.FromErr(err)
 	}
 

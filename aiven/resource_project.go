@@ -202,7 +202,7 @@ func resourceProjectCreate(_ context.Context, d *schema.ResourceData, m interfac
 			UseSourceProjectBillingGroup: d.Get("use_source_project_billing_group").(bool),
 		},
 	)
-	if err != nil && !aiven.IsAlreadyExists(err) {
+	if err != nil {
 		return append(diags, diag.FromErr(err)...)
 	}
 

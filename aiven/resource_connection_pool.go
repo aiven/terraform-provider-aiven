@@ -94,7 +94,7 @@ func resourceConnectionPoolCreate(ctx context.Context, d *schema.ResourceData, m
 			Username: d.Get("username").(string),
 		},
 	)
-	if err != nil && !aiven.IsAlreadyExists(err) {
+	if err != nil {
 		return diag.FromErr(err)
 	}
 

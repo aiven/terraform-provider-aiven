@@ -138,7 +138,7 @@ func resourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m in
 			},
 		},
 	)
-	if err != nil && !aiven.IsAlreadyExists(err) {
+	if err != nil {
 		return diag.FromErr(err)
 	}
 

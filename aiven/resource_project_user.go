@@ -61,7 +61,7 @@ func resourceProjectUserCreate(ctx context.Context, d *schema.ResourceData, m in
 			MemberType: d.Get("member_type").(string),
 		},
 	)
-	if err != nil && !aiven.IsAlreadyExists(err) {
+	if err != nil {
 		return diag.FromErr(err)
 	}
 
