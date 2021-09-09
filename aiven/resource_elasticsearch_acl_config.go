@@ -89,7 +89,7 @@ func resourceElasticsearchACLConfigUpdate(ctx context.Context, d *schema.Resourc
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 
-	modifier := resourceElasticsearchACLModiferToggleConfigFields(d.Get("enabled").(bool), d.Get("extended_acl").(bool))
+	modifier := resourceElasticsearchACLModifierToggleConfigFields(d.Get("enabled").(bool), d.Get("extended_acl").(bool))
 	err := resourceElasticsearchACLModifyRemoteConfig(project, serviceName, client, modifier)
 	if err != nil {
 		return diag.FromErr(resourceReadHandleNotFound(err, d))
@@ -106,7 +106,7 @@ func resourceElasticsearchACLConfigDelete(_ context.Context, d *schema.ResourceD
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 
-	modifier := resourceElasticsearchACLModiferToggleConfigFields(false, false)
+	modifier := resourceElasticsearchACLModifierToggleConfigFields(false, false)
 	err := resourceElasticsearchACLModifyRemoteConfig(project, serviceName, client, modifier)
 	if err != nil {
 		return diag.FromErr(resourceReadHandleNotFound(err, d))

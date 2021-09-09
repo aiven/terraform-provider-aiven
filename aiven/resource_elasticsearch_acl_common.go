@@ -57,9 +57,9 @@ func resourceElasticsearchACLModifierDeleteACLRule(username, index, permission s
 	}
 }
 
-func resourceElasticsearchACLModiferToggleConfigFields(enabled, extednedAcl bool) func(*aiven.ElasticSearchACLConfig) {
+func resourceElasticsearchACLModifierToggleConfigFields(enabled, extednedAcl bool) func(*aiven.ElasticSearchACLConfig) {
 	return func(cfg *aiven.ElasticSearchACLConfig) {
-		cfg.Enabled = true
-		cfg.ExtendedAcl = true
+		cfg.Enabled = enabled
+		cfg.ExtendedAcl = extednedAcl
 	}
 }
