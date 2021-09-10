@@ -1,4 +1,9 @@
 {
+  "alertmanager": {
+    "additionalProperties": false,
+    "title": "Integration user config",
+    "type": "object"
+  },
   "dashboard": {
     "additionalProperties": false,
     "title": "Integration user config",
@@ -202,6 +207,11 @@
     "type": "object"
   },
   "external_google_cloud_logging": {
+    "additionalProperties": false,
+    "title": "Integration user config",
+    "type": "object"
+  },
+  "flink": {
     "additionalProperties": false,
     "title": "Integration user config",
     "type": "object"
