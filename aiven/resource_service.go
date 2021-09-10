@@ -20,6 +20,7 @@ const (
 	ServiceTypePG               = "pg"
 	ServiceTypeCassandra        = "cassandra"
 	ServiceTypeElasticsearch    = "elasticsearch"
+	ServiceTypeOpensearch       = "opensearch"
 	ServiceTypeGrafana          = "grafana"
 	ServiceTypeInfluxDB         = "influxdb"
 	ServiceTypeRedis            = "redis"
@@ -45,6 +46,7 @@ func availableServiceTypes() []string {
 		ServiceTypeKafkaMirrormaker,
 		ServiceTypeM3,
 		ServiceTypeM3Aggregator,
+		ServiceTypeOpensearch,
 	}
 }
 
@@ -717,6 +719,9 @@ func resourceServiceCreateWrapper(serviceType string) schema.CreateContextFunc {
 			if err := d.Set(ServiceTypeRedis, []map[string]interface{}{}); err != nil {
 				return diag.FromErr(err)
 			}
+			if err := d.Set(ServiceTypeOpensearch, []map[string]interface{}{}); err != nil {
+				return diag.FromErr(err)
+			}
 
 			return resourceServiceCreate(ctx, d, m)
 		}
@@ -1028,6 +1033,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 
 	switch serviceType {
 	case "cassandra":
+	case "opensearch":
 	case "elasticsearch":
 		props["kibana_uri"] = connectionInfo.KibanaURI
 	case "grafana":
