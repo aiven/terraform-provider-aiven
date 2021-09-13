@@ -33,5 +33,5 @@ func datasourceElasticsearchACLConfigRead(ctx context.Context, d *schema.Resourc
 		return resourceElasticsearchACLConfigRead(ctx, d, m)
 	}
 
-	return diag.Errorf("elasticsearch acl config %s/%s not found", projectName, serviceName)
+	return diag.Errorf("acl config %s/%s not found", projectName, serviceName)
 }

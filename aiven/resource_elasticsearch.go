@@ -61,6 +61,7 @@ func resourceElasticsearch() *schema.Resource {
 			Update: schema.DefaultTimeout(20 * time.Minute),
 		},
 
-		Schema: elasticsearchSchema(),
+		Schema:             elasticsearchSchema(),
+		DeprecationMessage: "Elasticsearch service is deprecated, please use aiven_opensearch",
 	}
 }
