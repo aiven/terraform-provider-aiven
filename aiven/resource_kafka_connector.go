@@ -209,7 +209,7 @@ func resourceKafkaConnectorCreate(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	err := m.(*aiven.Client).KafkaConnectors.Create(project, serviceName, config)
-	if err != nil && !aiven.IsAlreadyExists(err) {
+	if err != nil {
 		return diag.FromErr(err)
 	}
 

@@ -71,6 +71,7 @@ func sweepDatabases(region string) error {
 func TestAccAivenDatabase_basic(t *testing.T) {
 	resourceName := "aiven_database.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	rName2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -88,14 +89,14 @@ func TestAccAivenDatabase_basic(t *testing.T) {
 				),
 			},
 			{
-				Config:                    testAccDatabaseTerminationProtectionResource(rName),
+				Config:                    testAccDatabaseTerminationProtectionResource(rName2),
 				PreventPostDestroyRefresh: true,
 				ExpectNonEmptyPlan:        true,
 				PlanOnly:                  true,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "database_name", fmt.Sprintf("test-acc-db-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName2)),
+					resource.TestCheckResourceAttr(resourceName, "database_name", fmt.Sprintf("test-acc-db-%s", rName2)),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "true"),
 				),
 			},

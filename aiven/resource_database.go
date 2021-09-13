@@ -102,7 +102,7 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, m inter
 			LcType:    optionalString(d, "lc_ctype"),
 		},
 	)
-	if err != nil && !aiven.IsAlreadyExists(err) {
+	if err != nil {
 		return diag.FromErr(err)
 	}
 

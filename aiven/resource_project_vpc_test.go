@@ -13,6 +13,7 @@ import (
 func TestAccAivenProjectVPC_basic(t *testing.T) {
 	resourceName := "aiven_project_vpc.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	rName2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -30,10 +31,10 @@ func TestAccAivenProjectVPC_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccProjectVPCCustomTimeoutResource(rName),
+				Config: testAccProjectVPCCustomTimeoutResource(rName2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenProjectVPCAttributes("data.aiven_project_vpc.vpc"),
-					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName2)),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "network_cidr", "192.168.0.0/24"),
 					resource.TestCheckResourceAttr(resourceName, "state", "ACTIVE"),

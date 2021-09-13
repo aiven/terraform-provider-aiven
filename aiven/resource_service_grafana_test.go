@@ -14,6 +14,7 @@ import (
 func TestAccAivenService_grafana(t *testing.T) {
 	resourceName := "aiven_service.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	rName2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -37,11 +38,11 @@ func TestAccAivenService_grafana(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccGrafanaServiceCustomIpFiltersResource(rName),
+				Config: testAccGrafanaServiceCustomIpFiltersResource(rName2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceCommonAttributes("data.aiven_service.service"),
 					testAccCheckAivenServiceGrafanaAttributes("data.aiven_service.service"),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName2)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "grafana"),

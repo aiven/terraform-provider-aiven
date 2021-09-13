@@ -60,6 +60,7 @@ func sweepProjects(region string) error {
 func TestAccAivenProject_basic(t *testing.T) {
 	resourceName := "aiven_project.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	rName2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -81,10 +82,10 @@ func TestAccAivenProject_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccProjectCopyFromProjectResource(rName),
+				Config: testAccProjectCopyFromProjectResource(rName2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenProjectAttributes("data.aiven_project.project"),
-					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName2)),
 					resource.TestCheckResourceAttrSet(resourceName, "billing_address"),
 					resource.TestCheckResourceAttrSet(resourceName, "billing_extra_text"),
 					resource.TestCheckResourceAttrSet(resourceName, "country_code"),

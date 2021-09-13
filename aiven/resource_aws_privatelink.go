@@ -79,7 +79,7 @@ func resourceAWSPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m
 		serviceName,
 		principals,
 	)
-	if err != nil && !aiven.IsAlreadyExists(err) {
+	if err != nil {
 		return diag.FromErr(err)
 	}
 
