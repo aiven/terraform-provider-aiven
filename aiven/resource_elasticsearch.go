@@ -1,6 +1,7 @@
 package aiven
 
 import (
+	"strings"
 	"time"
 
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
@@ -27,11 +28,16 @@ func elasticsearchSchema() map[string]*schema.Schema {
 		},
 	}
 	s[ServiceTypeElasticsearch+"_user_config"] = &schema.Schema{
-		Type:             schema.TypeList,
-		MaxItems:         1,
-		Optional:         true,
-		Description:      "Elasticsearch user configurable settings",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Type:        schema.TypeList,
+		MaxItems:    1,
+		Optional:    true,
+		Description: "Elasticsearch user configurable settings",
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			if strings.Contains(k, "index_patterns") {
+				return false
+			}
+			return emptyObjectDiffSuppressFunc(k, old, new, d)
+		},
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("service")[ServiceTypeElasticsearch].(map[string]interface{})),
