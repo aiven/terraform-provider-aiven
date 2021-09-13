@@ -88,19 +88,19 @@ func resourceElasticsearchACLRuleRead(_ context.Context, d *schema.ResourceData,
 	}
 
 	if err := d.Set("project", project); err != nil {
-		return diag.Errorf("error setting Elasticsearch ACL Rules `project` for resource %s: %s", d.Id(), err)
+		return diag.Errorf("error setting ACL Rules `project` for resource %s: %s", d.Id(), err)
 	}
 	if err := d.Set("service_name", serviceName); err != nil {
-		return diag.Errorf("error setting Elasticsearch ACL Rules `service_name` for resource %s: %s", d.Id(), err)
+		return diag.Errorf("error setting ACL Rules `service_name` for resource %s: %s", d.Id(), err)
 	}
 	if err := d.Set("username", username); err != nil {
-		return diag.Errorf("error setting Elasticsearch ACLs Rules `username` for resource %s: %s", d.Id(), err)
+		return diag.Errorf("error setting ACLs Rules `username` for resource %s: %s", d.Id(), err)
 	}
 	if err := d.Set("index", index); err != nil {
-		return diag.Errorf("error setting Elasticsearch ACLs Rules `index` for resource %s: %s", d.Id(), err)
+		return diag.Errorf("error setting ACLs Rules `index` for resource %s: %s", d.Id(), err)
 	}
 	if err := d.Set("permission", permission); err != nil {
-		return diag.Errorf("error setting Elasticsearch ACLs Rules `permission` for resource %s: %s", d.Id(), err)
+		return diag.Errorf("error setting ACLs Rules `permission` for resource %s: %s", d.Id(), err)
 	}
 
 	return nil

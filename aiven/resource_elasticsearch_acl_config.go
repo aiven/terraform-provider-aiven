@@ -60,16 +60,16 @@ func resourceElasticsearchACLConfigRead(_ context.Context, d *schema.ResourceDat
 	}
 
 	if err := d.Set("project", project); err != nil {
-		return diag.Errorf("error setting Elasticsearch ACLs `project` for resource %s: %s", d.Id(), err)
+		return diag.Errorf("error setting ACLs `project` for resource %s: %s", d.Id(), err)
 	}
 	if err := d.Set("service_name", serviceName); err != nil {
-		return diag.Errorf("error setting Elasticsearch ACLs `service_name` for resource %s: %s", d.Id(), err)
+		return diag.Errorf("error setting ACLs `service_name` for resource %s: %s", d.Id(), err)
 	}
 	if err := d.Set("extended_acl", r.ElasticSearchACLConfig.ExtendedAcl); err != nil {
-		return diag.Errorf("error setting Elasticsearch ACLs `extended_acl` for resource %s: %s", d.Id(), err)
+		return diag.Errorf("error setting ACLs `extended_acl` for resource %s: %s", d.Id(), err)
 	}
 	if err := d.Set("enabled", r.ElasticSearchACLConfig.Enabled); err != nil {
-		return diag.Errorf("error setting Elasticsearch ACLs `enable` for resource %s: %s", d.Id(), err)
+		return diag.Errorf("error setting ACLs `enable` for resource %s: %s", d.Id(), err)
 	}
 	return nil
 }
