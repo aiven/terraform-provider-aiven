@@ -11,17 +11,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAivenElasticsearchACLConfig_basic(t *testing.T) {
-	resourceName := "aiven_elasticsearch_acl_config.foo"
+func TestAccAivenOpensearchACLConfig_basic(t *testing.T) {
+	resourceName := "aiven_opensearch_acl_config.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenElasticsearchACLConfigResourceDestroy,
+		CheckDestroy:      testAccCheckAivenOpensearchACLConfigResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccElasticsearchACLConfigResource(rName),
+				Config: testAccOpensearchACLConfigResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-es-aclconf-%s", rName)),
@@ -33,13 +33,13 @@ func TestAccAivenElasticsearchACLConfig_basic(t *testing.T) {
 	})
 }
 
-func testAccElasticsearchACLConfigResource(name string) string {
+func testAccOpensearchACLConfigResource(name string) string {
 	return fmt.Sprintf(`
 		data "aiven_project" "foo" {
 			project = "%s"
 		}
 
-		resource "aiven_elasticsearch" "bar" {
+		resource "aiven_opensearch" "bar" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
@@ -49,26 +49,26 @@ func testAccElasticsearchACLConfigResource(name string) string {
 		}
 
 		resource "aiven_service_user" "foo" {
-			service_name = aiven_elasticsearch.bar.service_name
+			service_name = aiven_opensearch.bar.service_name
 			project = data.aiven_project.foo.project
 			username = "user-%s"
 		}
 
-		resource "aiven_elasticsearch_acl_config" "foo" {
+		resource "aiven_opensearch_acl_config" "foo" {
 			project = data.aiven_project.foo.project
-			service_name = aiven_elasticsearch.bar.service_name
+			service_name = aiven_opensearch.bar.service_name
 			enabled = true
 			extended_acl = false
     }
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
-func testAccCheckAivenElasticsearchACLConfigResourceDestroy(s *terraform.State) error {
+func testAccCheckAivenOpensearchACLConfigResourceDestroy(s *terraform.State) error {
 	c := testAccProvider.Meta().(*aiven.Client)
 
-	// loop through the resources in state, verifying each ES ACL Config is destroyed
+	// loop through the resources in state, verifying each OS ACL Config is destroyed
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "aiven_elasticsearch_acl_config" {
+		if rs.Type != "aiven_opensearch_acl_config" {
 			continue
 		}
 
@@ -83,7 +83,7 @@ func testAccCheckAivenElasticsearchACLConfigResourceDestroy(s *terraform.State) 
 		if r == nil {
 			return nil
 		}
-		return fmt.Errorf("elasticsearch acl config (%s) still exists", rs.Primary.ID)
+		return fmt.Errorf("opencsearch acl config (%s) still exists", rs.Primary.ID)
 	}
 
 	return nil

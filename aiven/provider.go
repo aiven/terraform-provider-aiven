@@ -70,6 +70,8 @@ func Provider() *schema.Provider {
 			"aiven_m3aggregator":                   datasourceM3Aggregator(),
 			"aiven_aws_privatelink":                datasourceAWSPrivatelink(),
 			"aiven_opensearch":                     datasourceOpensearch(),
+			"aiven_opensearch_acl_config":          datasourceOpensearchACLConfig(),
+			"aiven_opensearch_acl_rule":            datasourceOpensearchACLRule(),
 
 			// deprecated
 			"aiven_elasticsearch_acl": datasourceElasticsearchACL(),
@@ -115,6 +117,8 @@ func Provider() *schema.Provider {
 			"aiven_billing_group":                  resourceBillingGroup(),
 			"aiven_aws_privatelink":                resourceAWSPrivatelink(),
 			"aiven_opensearch":                     resourceOpensearch(),
+			"aiven_opensearch_acl_config":          resourceOpensearchACLConfig(),
+			"aiven_opensearch_acl_rule":            resourceOpensearchACLRule(),
 
 			// deprecated
 			"aiven_elasticsearch_acl": resourceElasticsearchACL(),

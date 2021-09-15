@@ -30,7 +30,7 @@ func datasourceElasticsearchACLRuleRead(ctx context.Context, d *schema.ResourceD
 	}
 
 	if _, found := resourceElasticsearchACLRuleGetPermissionFromACLResponse(r.ElasticSearchACLConfig, username, index); !found {
-		return diag.Errorf("elasticsearch acl rule %s/%s/%s/%s not found", projectName, serviceName, username, index)
+		return diag.Errorf("acl rule %s/%s/%s/%s not found", projectName, serviceName, username, index)
 	}
 
 	d.SetId(buildResourceID(projectName, serviceName, username, index))
