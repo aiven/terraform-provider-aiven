@@ -51,6 +51,8 @@ github.com/aiven/aiven-go-client v1.5.13 h1:2rcC4tY4YbX2TWWFI7c7VA5qhowB0B/GfZfY
 github.com/aiven/aiven-go-client v1.5.13/go.mod h1:3+OtpccynSr5xvSGfn96jVM9dBUAr52HXlaZJi/Mz5o=
 github.com/aiven/aiven-go-client v1.6.1-0.20210920121729-0d9a116a5e78 h1:Nsun8hh9yp7AhhiEKtaqJthbYZqKQvRLfAjVoJPajBk=
 github.com/aiven/aiven-go-client v1.6.1-0.20210920121729-0d9a116a5e78/go.mod h1:3+OtpccynSr5xvSGfn96jVM9dBUAr52HXlaZJi/Mz5o=
+github.com/aiven/aiven-go-client v1.6.1 h1:/zNc2igFqaKWfwxMqGoBUsi6WlkLTCwkKgVABYAoJXk=
+github.com/aiven/aiven-go-client v1.6.1/go.mod h1:3+OtpccynSr5xvSGfn96jVM9dBUAr52HXlaZJi/Mz5o=
 github.com/andybalholm/crlf v0.0.0-20171020200849-670099aa064f/go.mod h1:k8feO4+kXDxro6ErPXBRTJ/ro2mf0SsFG8s7doP9kJE=
 github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239/go.mod h1:2FmKhYUyUczH0OGQWaF5ceTx0UBShxjsH6f8oGKYe2c=
 github.com/apparentlymart/go-cidr v1.0.1 h1:NmIwLZ/KdsjIUlhf+/Np40atNXm/+lZ5txfTJ/SpF+U=

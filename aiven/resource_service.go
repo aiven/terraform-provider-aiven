@@ -1034,6 +1034,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	switch serviceType {
 	case "cassandra":
 	case "opensearch":
+		props["opensearch_dashboards_uri"] = connectionInfo.OpensearchDashboardsURI
 	case "elasticsearch":
 		props["kibana_uri"] = connectionInfo.KibanaURI
 	case "grafana":

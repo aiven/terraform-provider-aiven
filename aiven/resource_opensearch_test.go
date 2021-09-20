@@ -55,18 +55,25 @@ func testAccOpensearchServiceResource(name string) string {
 			maintenance_window_time = "10:00:00"
 			
 			opensearch_user_config {
+				opensearch_dashboards {
+					enabled = true
+				}
+	
 				public_access {
 					opensearch = true
+					opensearch_dashboards = true
 				}
 
 				index_patterns {
 					pattern = "logs_*_foo_*"
 					max_index_count = 3
+					sorting_algorithm = "creation_date"
 				}
 
 				index_patterns {
 					pattern = "logs_*_bar_*"
 					max_index_count = 15
+					sorting_algorithm = "creation_date"
 				}
 			}
 		}
@@ -87,6 +94,10 @@ func testAccCheckAivenServiceOSAttributes(n string) resource.TestCheckFunc {
 
 		if !strings.Contains(a["service_type"], "opensearch") {
 			return fmt.Errorf("expected to get a correct service type from Aiven, got :%s", a["service_type"])
+		}
+
+		if a["opensearch_dashboards_uri"] != "" {
+			return fmt.Errorf("expected opensearch_dashboards_uri to not be empty")
 		}
 
 		if a["opensearch_user_config.0.ip_filter.0"] != "0.0.0.0/0" {
