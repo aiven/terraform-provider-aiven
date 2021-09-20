@@ -141,7 +141,7 @@ func testAccCheckAivenKafkaConnectorResourceDestroy(s *terraform.State) error {
 		}
 
 		for _, connector := range list.Connectors {
-			res, err := c.KafkaConnectors.Get(projectName, serviceName, connector.Name)
+			res, err := c.KafkaConnectors.GetByName(projectName, serviceName, connector.Name)
 			if err != nil {
 				if err.(aiven.Error).Status == 404 {
 					return nil

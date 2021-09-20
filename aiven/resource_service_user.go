@@ -142,11 +142,11 @@ func resourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	if newPassword, ok := d.GetOk("password"); ok {
+	if _, ok := d.GetOk("password"); ok {
 		_, err := client.ServiceUsers.Update(projectName, serviceName, username,
 			aiven.ModifyServiceUserRequest{
 				Authentication: optionalStringPointer(d, "authentication"),
-				NewPassword:    newPassword.(string),
+				NewPassword:    optionalStringPointer(d, "password"),
 			})
 		if err != nil {
 			return diag.FromErr(err)
@@ -166,7 +166,7 @@ func resourceServiceUserUpdate(ctx context.Context, d *schema.ResourceData, m in
 	_, err := client.ServiceUsers.Update(projectName, serviceName, username,
 		aiven.ModifyServiceUserRequest{
 			Authentication: optionalStringPointer(d, "authentication"),
-			NewPassword:    d.Get("password").(string),
+			NewPassword:    optionalStringPointer(d, "password"),
 		})
 	if err != nil {
 		return diag.FromErr(err)
