@@ -5,9 +5,9 @@ The Opensearch ACL Config resource allows the configuration of ACL management on
 ## Example Usage
 
 ```hcl
-resource "aiven_opensearch_acl_config" "es-acl-config" {
-  project = aiven_project.es-project.project
-  service_name = aiven_service.es.service_name
+resource "aiven_opensearch_acl_config" "os-acl-config" {
+  project = aiven_project.os-project.project
+  service_name = aiven_opensearch.os.service_name
   enabled = true
   extended_acl = false
 }

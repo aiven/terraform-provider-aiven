@@ -4,9 +4,16 @@ parent: README
 nav_order: 1
 ---# Changelog
 
-## [2.1.20] - not yet released
-- split `aiven_elasticsearch_acl` into `aiven_elasticsearch_acl_config` and `aiven_elasticsearch_acl_rule`
-- deprecated `aiven_elasticsearch_acl`
+## [2.2.0] - not yet released
+- Split `aiven_elasticsearch_acl` into `aiven_elasticsearch_acl_config` and `aiven_elasticsearch_acl_rule`
+- Deprecated `aiven_elasticsearch_acl` and `aiven_elasticsearch`
+- Add Opensearch support
+- Add support for new user configuration options 
+- Add service integration creation waiter
+- Add short (card's last 4 digit) card id support to a `aiven_billing_group` resource
+- Rework Aiven API 409 error handling
+- Fix Opensearch and Elasticsearch index_patterns deletion
+- Fix `aiven_project` billing email apply loop
 
 ## [2.1.19] - 2021-08-26
 - Add code of conduct

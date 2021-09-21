@@ -1,4 +1,4 @@
-# Elasticsearch ACL Rule Resource
+# Opensearch ACL Rule Resource
 
 The Opensearch ACL Rule resource models a single ACL Rule for an Aiven Opensearch service.
 
