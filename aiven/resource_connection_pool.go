@@ -52,7 +52,7 @@ var aivenConnectionPoolSchema = map[string]*schema.Schema{
 	},
 	"username": {
 		Type:        schema.TypeString,
-		Required:    true,
+		Optional:    true,
 		Description: "Name of the service user used to connect to the database",
 	},
 	"connection_uri": {
