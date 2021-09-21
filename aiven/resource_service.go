@@ -409,6 +409,34 @@ var aivenServiceSchema = map[string]*schema.Schema{
 				templates.GetUserConfigSchema("service")[ServiceTypeElasticsearch].(map[string]interface{})),
 		},
 	},
+	"opensearch": {
+		Type:        schema.TypeList,
+		MaxItems:    1,
+		Computed:    true,
+		Description: "Opensearch specific server provided values",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"opensearch_dashboards_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "URI for Opensearch dashboard frontend",
+					Sensitive:   true,
+				},
+			},
+		},
+	},
+	"opensearch_user_config": {
+		Type:             schema.TypeList,
+		MaxItems:         1,
+		Optional:         true,
+		Description:      "Opensearch specific user configurable settings",
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				templates.GetUserConfigSchema("service")[ServiceTypeOpensearch].(map[string]interface{})),
+		},
+	},
 	"grafana": {
 		Type:        schema.TypeList,
 		MaxItems:    1,
