@@ -3,7 +3,7 @@ module github.com/aiven/terraform-provider-aiven
 go 1.16
 
 require (
-	github.com/aiven/aiven-go-client v1.6.1
+	github.com/aiven/aiven-go-client v1.6.2-0.20210922162241-f938fd9c827e
 	github.com/aws/aws-sdk-go v1.30.12 // indirect
 	github.com/google/go-cmp v0.5.6
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.0
@@ -12,5 +12,3 @@ require (
 	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
 )
-
-replace github.com/aiven/aiven-go-client => ../aiven-go-client
