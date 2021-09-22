@@ -21,6 +21,11 @@ import (
 const serviceIntegrationEndpointRegExp = "^[a-zA-Z0-9_-]*\\/{1}[a-zA-Z0-9_-]*$"
 
 var aivenServiceIntegrationSchema = map[string]*schema.Schema{
+	"integration_id": {
+		Description: "Service Integration Id at aiven",
+		Computed:    true,
+		Type:        schema.TypeString,
+	},
 	"destination_endpoint_id": {
 		Description: "Destination endpoint for the integration (if any)",
 		ForceNew:    true,
@@ -310,30 +315,36 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 
 	// When service integration does not exist, create a new one
 	if integration == nil {
+		i, err := client.ServiceIntegrations.Create(
+			projectName,
+			aiven.CreateServiceIntegrationRequest{
+				DestinationEndpointID: plainEndpointID(optionalStringPointer(d, "destination_endpoint_id")),
+				DestinationService:    optionalStringPointer(d, "destination_service_name"),
+				IntegrationType:       integrationType,
+				SourceEndpointID:      plainEndpointID(optionalStringPointer(d, "source_endpoint_id")),
+				SourceService:         optionalStringPointer(d, "source_service_name"),
+				UserConfig:            userConfig,
+			},
+		)
+		if err != nil {
+			return diag.Errorf("Error creating for Service Integration: %s", err)
+		}
 		stateChangeConf := &resource.StateChangeConf{
-			Pending: []string{"CREATING"},
-			Target:  []string{"CREATED"},
+			Pending: []string{"NOTACTIVE"},
+			Target:  []string{"ACTIVE"},
 			Refresh: func() (interface{}, string, error) {
-				i, err := client.ServiceIntegrations.Create(
-					projectName,
-					aiven.CreateServiceIntegrationRequest{
-						DestinationEndpointID: plainEndpointID(optionalStringPointer(d, "destination_endpoint_id")),
-						DestinationService:    optionalStringPointer(d, "destination_service_name"),
-						IntegrationType:       integrationType,
-						SourceEndpointID:      plainEndpointID(optionalStringPointer(d, "source_endpoint_id")),
-						SourceService:         optionalStringPointer(d, "source_service_name"),
-						UserConfig:            userConfig,
-					},
-				)
+				ii, err := client.ServiceIntegrations.Get(projectName, i.ServiceIntegrationID)
 				if err != nil {
 					// Sometimes Aiven API retrieves 404 error even when a successful service integration is created
 					if aiven.IsNotFound(err) {
-						return nil, "CREATING", nil
+						return nil, "NOTACTIVE", nil
 					}
 					return nil, "", err
 				}
-
-				return i, "CREATED", nil
+				if !ii.Active {
+					return nil, "NOTACTIVE", nil
+				}
+				return ii, "ACTIVE", nil
 			},
 			Delay:      10 * time.Second,
 			Timeout:    d.Timeout(schema.TimeoutCreate),
@@ -342,9 +353,6 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 
 		res, err := stateChangeConf.WaitForStateContext(ctx)
 		if err != nil {
-			if aiven.IsAlreadyExists(err) {
-				return resourceServiceIntegrationCreate(ctx, d, m)
-			}
 			return diag.Errorf("Error waiting for Service Integration to be created: %s", err)
 		}
 		integration = res.(*aiven.ServiceIntegration)
@@ -466,6 +474,9 @@ func copyServiceIntegrationPropertiesFromAPIResponseToTerraform(
 		if err := d.Set("source_service_name", *integration.SourceService); err != nil {
 			return err
 		}
+	}
+	if err := d.Set("integration_id", integration.ServiceIntegrationID); err != nil {
+		return err
 	}
 	integrationType := integration.IntegrationType
 	if err := d.Set("integration_type", integrationType); err != nil {
