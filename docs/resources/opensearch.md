@@ -18,7 +18,7 @@ resource "aiven_opensearch" "os1" {
 
     opensearch_dashboards {
       enabled = true
-      opensearch_dashboards_request_timeout = 30000
+      opensearch_request_timeout = 30000
     }
 
     public_access {
