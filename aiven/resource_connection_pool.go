@@ -142,7 +142,7 @@ func resourceConnectionPoolUpdate(ctx context.Context, d *schema.ResourceData, m
 	return resourceConnectionPoolRead(ctx, d, m)
 }
 
-func resourceConnectionPoolDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceConnectionPoolDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, poolName := splitResourceID3(d.Id())
