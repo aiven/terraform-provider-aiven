@@ -78,12 +78,11 @@ func testAccMirrorMakerReplicationFlowResource(name string) string {
 			project = "%s"
 		}
 		
-		resource "aiven_service" "source" {
+		resource "aiven_kafka" "source" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "business-4"
 			service_name = "test-acc-sr-source-%s"
-			service_type = "kafka"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
@@ -97,7 +96,7 @@ func testAccMirrorMakerReplicationFlowResource(name string) string {
 		
 		resource "aiven_kafka_topic" "source" {
 			project = data.aiven_project.foo.project
-			service_name = aiven_service.source.service_name
+			service_name = aiven_kafka.source.service_name
 			topic_name = "test-acc-topic-a-%s"
 			partitions = 3
 			replication = 2
@@ -127,12 +126,11 @@ func testAccMirrorMakerReplicationFlowResource(name string) string {
 			replication = 2
 		}
 
-		resource "aiven_service" "mm" {
+		resource "aiven_kafka_mirrormaker" "mm" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-mm-%s"
-			service_type = "kafka_mirrormaker"
 			
 			kafka_mirrormaker_user_config {
 				ip_filter = ["0.0.0.0/0"]
@@ -148,8 +146,8 @@ func testAccMirrorMakerReplicationFlowResource(name string) string {
 		resource "aiven_service_integration" "bar" {
 			project = data.aiven_project.foo.project
 			integration_type = "kafka_mirrormaker"
-			source_service_name = aiven_service.source.service_name
-			destination_service_name = aiven_service.mm.service_name
+			source_service_name = aiven_kafka.source.service_name
+			destination_service_name = aiven_kafka_mirrormaker.mm.service_name
 	
 			kafka_mirrormaker_user_config {
 				cluster_alias = "source"
@@ -160,7 +158,7 @@ func testAccMirrorMakerReplicationFlowResource(name string) string {
 			project = data.aiven_project.foo.project
 			integration_type = "kafka_mirrormaker"
 			source_service_name = aiven_kafka.target.service_name
-			destination_service_name = aiven_service.mm.service_name
+			destination_service_name = aiven_kafka_mirrormaker.mm.service_name
 	
 			kafka_mirrormaker_user_config {
 				cluster_alias = "target"
@@ -169,10 +167,14 @@ func testAccMirrorMakerReplicationFlowResource(name string) string {
 
 		resource "aiven_mirrormaker_replication_flow" "foo" {
 			project = data.aiven_project.foo.project
-			service_name = aiven_service.mm.service_name
+			service_name = aiven_kafka_mirrormaker.mm.service_name
 			source_cluster = "source"
 			target_cluster = "target"
 			enable = true
+			replication_policy_class = "org.apache.kafka.connect.mirror.IdentityReplicationPolicy"
+			sync_group_offsets_enabled = true
+			sync_group_offsets_interval_seconds = 10
+			emit_heartbeats_enabled = true
 			
 			topics = [
 				".*",
@@ -187,7 +189,7 @@ func testAccMirrorMakerReplicationFlowResource(name string) string {
 
 		data "aiven_mirrormaker_replication_flow" "flow" {
 			project = data.aiven_project.foo.project
-			service_name = aiven_service.mm.service_name
+			service_name = aiven_kafka_mirrormaker.mm.service_name
 			source_cluster = aiven_mirrormaker_replication_flow.foo.source_cluster
 			target_cluster = aiven_mirrormaker_replication_flow.foo.target_cluster
 

@@ -63,6 +63,34 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 			MaxItems: 256,
 		},
 	},
+	"replication_policy_class": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Replication policy class",
+		Default:     "org.apache.kafka.connect.mirror.DefaultReplicationPolicy",
+		ValidateFunc: validation.StringInSlice([]string{
+			"org.apache.kafka.connect.mirror.DefaultReplicationPolicy",
+			"org.apache.kafka.connect.mirror.IdentityReplicationPolicy"}, false),
+	},
+	"sync_group_offsets_enabled": {
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Default:     false,
+		Description: "Sync consumer group offsets",
+	},
+	"sync_group_offsets_interval_seconds": {
+		Type:         schema.TypeInt,
+		Optional:     true,
+		Description:  "Frequency of consumer group offset sync",
+		ValidateFunc: validation.IntAtLeast(1),
+		Default:      1,
+	},
+	"emit_heartbeats_enabled": {
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Default:     false,
+		Description: "Emit heartbeats enabled",
+	},
 }
 
 func resourceMirrorMakerReplicationFlow() *schema.Resource {
@@ -87,16 +115,18 @@ func resourceMirrorMakerReplicationFlowCreate(ctx context.Context, d *schema.Res
 	enable := d.Get("enable").(bool)
 	sourceCluster := d.Get("source_cluster").(string)
 	targetCluster := d.Get("target_cluster").(string)
-	topics := flattenToString(d.Get("topics").([]interface{}))
-	topicsBlacklist := flattenToString(d.Get("topics_blacklist").([]interface{}))
 
 	err := client.KafkaMirrorMakerReplicationFlow.Create(project, serviceName, aiven.MirrorMakerReplicationFlowRequest{
 		ReplicationFlow: aiven.ReplicationFlow{
-			Enabled:         enable,
-			SourceCluster:   sourceCluster,
-			TargetCluster:   targetCluster,
-			Topics:          topics,
-			TopicsBlacklist: topicsBlacklist,
+			Enabled:                         enable,
+			SourceCluster:                   sourceCluster,
+			TargetCluster:                   d.Get("target_cluster").(string),
+			Topics:                          flattenToString(d.Get("topics").([]interface{})),
+			TopicsBlacklist:                 flattenToString(d.Get("topics_blacklist").([]interface{})),
+			ReplicationPolicyClass:          d.Get("replication_policy_class").(string),
+			SyncGroupOffsetsEnabled:         d.Get("sync_group_offsets_enabled").(bool),
+			SyncGroupOffsetsIntervalSeconds: d.Get("sync_group_offsets_interval_seconds").(int),
+			EmitHeartbeatsEnabled:           d.Get("emit_heartbeats_enabled").(bool),
 		},
 	})
 	if err != nil {
@@ -108,7 +138,7 @@ func resourceMirrorMakerReplicationFlowCreate(ctx context.Context, d *schema.Res
 	return resourceMirrorMakerReplicationFlowRead(ctx, d, m)
 }
 
-func resourceMirrorMakerReplicationFlowRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceMirrorMakerReplicationFlowRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, sourceCluster, targetCluster := splitResourceID4(d.Id())
@@ -138,16 +168,24 @@ func resourceMirrorMakerReplicationFlowRead(ctx context.Context, d *schema.Resou
 	if err := d.Set("topics_blacklist", replicationFlow.ReplicationFlow.TopicsBlacklist); err != nil {
 		return diag.FromErr(err)
 	}
+	if err := d.Set("replication_policy_class", replicationFlow.ReplicationFlow.ReplicationPolicyClass); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("sync_group_offsets_enabled", replicationFlow.ReplicationFlow.SyncGroupOffsetsEnabled); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("sync_group_offsets_interval_seconds", replicationFlow.ReplicationFlow.SyncGroupOffsetsIntervalSeconds); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("emit_heartbeats_enabled", replicationFlow.ReplicationFlow.EmitHeartbeatsEnabled); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
 
 func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
-
-	enable := d.Get("enable").(bool)
-	topics := flattenToString(d.Get("topics").([]interface{}))
-	topicsBlacklist := flattenToString(d.Get("topics_blacklist").([]interface{}))
 
 	project, serviceName, sourceCluster, targetCluster := splitResourceID4(d.Id())
 	_, err := client.KafkaMirrorMakerReplicationFlow.Update(
@@ -157,9 +195,13 @@ func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.Res
 		targetCluster,
 		aiven.MirrorMakerReplicationFlowRequest{
 			ReplicationFlow: aiven.ReplicationFlow{
-				Enabled:         enable,
-				Topics:          topics,
-				TopicsBlacklist: topicsBlacklist,
+				Enabled:                         d.Get("enable").(bool),
+				Topics:                          flattenToString(d.Get("topics").([]interface{})),
+				TopicsBlacklist:                 flattenToString(d.Get("topics_blacklist").([]interface{})),
+				ReplicationPolicyClass:          d.Get("replication_policy_class").(string),
+				SyncGroupOffsetsEnabled:         d.Get("sync_group_offsets_enabled").(bool),
+				SyncGroupOffsetsIntervalSeconds: d.Get("sync_group_offsets_interval_seconds").(int),
+				EmitHeartbeatsEnabled:           d.Get("emit_heartbeats_enabled").(bool),
 			},
 		},
 	)
