@@ -4,7 +4,12 @@ parent: README
 nav_order: 1
 ---# Changelog
 
-## [2.2.0] - not yet released
+## [2.2.1] - 2021-09-24
+- Add support for new `aiven_mirrormaker_replication_flow` fields
+- Add `aiven_connection_pool` username field optional
+- Fix invalid argument name in opensearch example
+
+## [2.2.0] - 2021-09-21
 - Split `aiven_elasticsearch_acl` into `aiven_elasticsearch_acl_config` and `aiven_elasticsearch_acl_rule`
 - Deprecated `aiven_elasticsearch_acl` and `aiven_elasticsearch`
 - Add Opensearch support
