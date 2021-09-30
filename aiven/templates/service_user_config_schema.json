@@ -622,6 +622,22 @@
   "flink": {
     "additionalProperties": false,
     "properties": {
+      "execution_checkpointing_interval_ms": {
+        "description": "Gets the interval in which checkpoints are periodically scheduled.This setting defines the base interval.",
+        "example": 1000,
+        "maximum": 3600000,
+        "minimum": 100,
+        "title": "Flink execution.checkpointing.interval in milliseconds",
+        "type": "integer"
+      },
+      "execution_checkpointing_timeout_ms": {
+        "description": "The maximum time that a checkpoint may take before being discarded.",
+        "example": 600000,
+        "maximum": 86400000,
+        "minimum": 100,
+        "title": "Flink execution.checkpointing.timeout in milliseconds",
+        "type": "integer"
+      },
       "flink_version": {
         "enum": [
           "1.13"
@@ -648,19 +664,55 @@
         "type": "array"
       },
       "number_of_task_slots": {
-        "description": "The value for Flink config parameter taskmanager.numberOfTaskSlots",
+        "description": "Flink taskmanager.numberOfTaskSlots. Task slots per node. For a 3 node plan, total number of task slots is 3x this value",
         "example": 1,
         "maximum": 1024,
         "minimum": 1,
         "title": "Flink taskmanager.numberOfTaskSlots",
         "type": "integer"
       },
-      "parallelism": {
+      "parallelism_default": {
         "description": "The value for Flink config parameter parallelism.default",
         "example": 1,
         "maximum": 128,
         "minimum": 1,
         "title": "Flink parallelism.default",
+        "type": "integer"
+      },
+      "restart_strategy": {
+        "description": "Default restart strategy for all jobs. The value for Flink config parameter restart-strategy",
+        "enum": [
+          "failure-rate",
+          "off",
+          "fixed-delay",
+          "exponential-delay"
+        ],
+        "example": "failure-rate",
+        "title": "Flink restart-strategy",
+        "type": "string"
+      },
+      "restart_strategy_delay_sec": {
+        "description": "Delay between two consecutive restart attempts if restart-strategy has been set to failure-rate. Specified in seconds",
+        "example": 10,
+        "maximum": 3600,
+        "minimum": 1,
+        "title": "Flink restart-strategy.failure-rate.delay in seconds",
+        "type": "integer"
+      },
+      "restart_strategy_failure_rate_interval_min": {
+        "description": "Time interval for measuring failure rate if restart-strategy has been set to failure-rate. Specified in minutes.",
+        "example": 3,
+        "maximum": 2880,
+        "minimum": 1,
+        "title": "Flink restart-strategy.failure-rate.failure-rate-interval in minutes",
+        "type": "integer"
+      },
+      "restart_strategy_max_failures": {
+        "description": "Maximum number of restarts in given time interval before failing a job if restart-strategy has been set to failure-rate.",
+        "example": 5,
+        "maximum": 128,
+        "minimum": 1,
+        "title": "Flink restart-strategy.failure-rate.max-failures-per-interval",
         "type": "integer"
       }
     },
@@ -919,7 +971,7 @@
           "team_ids": {
             "items": {
               "example": 150,
-              "maximum": 9223372036854776000,
+              "maximum": 9223372036854775807,
               "minimum": 1,
               "title": "Team ID",
               "type": "integer"
@@ -2583,7 +2635,7 @@
           },
           "query_series": {
             "example": 100000,
-            "maximum": 9223372036854776000,
+            "maximum": 9223372036854775807,
             "minimum": 10000,
             "title": "The maximum number of series fetched in single query",
             "type": "integer"
@@ -2594,6 +2646,7 @@
       },
       "m3_version": {
         "enum": [
+          "0.15",
           "1.0"
         ],
         "title": "M3 major version (deprecated, use m3coordinator_version)",
@@ -3487,7 +3540,7 @@
           "properties": {
             "max_index_count": {
               "example": 3,
-              "maximum": 9223372036854776000,
+              "maximum": 9223372036854775807,
               "minimum": 0,
               "title": "Maximum number of indexes to keep",
               "type": "integer"
@@ -3585,7 +3638,7 @@
       "max_index_count": {
         "default": 0,
         "description": "Maximum number of indexes to keep before deleting the oldest one",
-        "maximum": 9223372036854776000,
+        "maximum": 9223372036854775807,
         "minimum": 0,
         "title": "Maximum index count",
         "type": "integer"

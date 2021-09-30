@@ -30,6 +30,7 @@ const (
 	ServiceTypeKafkaMirrormaker = "kafka_mirrormaker"
 	ServiceTypeM3               = "m3db"
 	ServiceTypeM3Aggregator     = "m3aggregator"
+	ServiceTypeFlink            = "flink"
 )
 
 func availableServiceTypes() []string {
@@ -47,6 +48,7 @@ func availableServiceTypes() []string {
 		ServiceTypeM3,
 		ServiceTypeM3Aggregator,
 		ServiceTypeOpensearch,
+		ServiceTypeFlink,
 	}
 }
 
@@ -692,6 +694,37 @@ var aivenServiceSchema = map[string]*schema.Schema{
 				templates.GetUserConfigSchema("service")[ServiceTypeRedis].(map[string]interface{})),
 		},
 	},
+	"flink": {
+		Type:        schema.TypeList,
+		MaxItems:    1,
+		Computed:    true,
+		Description: "Flink specific server provided values",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"host_ports": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "Host and Port of a Flink server",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+			},
+		},
+	},
+	"flink_user_config": {
+		Type:             schema.TypeList,
+		MaxItems:         1,
+		Optional:         true,
+		Description:      "Flink specific user configurable settings",
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Elem: &schema.Resource{
+			Schema: GenerateTerraformUserConfigSchema(
+				templates.GetUserConfigSchema("service")[ServiceTypeFlink].(map[string]interface{})),
+		},
+	},
 }
 
 func resourceService() *schema.Resource {
@@ -750,7 +783,9 @@ func resourceServiceCreateWrapper(serviceType string) schema.CreateContextFunc {
 			if err := d.Set(ServiceTypeOpensearch, []map[string]interface{}{}); err != nil {
 				return diag.FromErr(err)
 			}
-
+			if err := d.Set(ServiceTypeFlink, []map[string]interface{}{}); err != nil {
+				return diag.FromErr(err)
+			}
 			return resourceServiceCreate(ctx, d, m)
 		}
 	}
@@ -1094,6 +1129,8 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 		}
 		props["replica_uri"] = connectionInfo.PostgresReplicaURI
 	case "redis":
+	case "flink":
+		props["host_ports"] = connectionInfo.FlinkHostPorts
 	case "kafka_mirrormaker":
 	case "m3db":
 	case "m3aggregator":
