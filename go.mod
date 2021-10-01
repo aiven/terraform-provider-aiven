@@ -3,7 +3,7 @@ module github.com/aiven/terraform-provider-aiven
 go 1.16
 
 require (
-	github.com/aiven/aiven-go-client v1.6.3-0.20210929134141-a35472e32954
+	github.com/aiven/aiven-go-client v1.6.3-0.20211004094601-8eee54c98743
 	github.com/aws/aws-sdk-go v1.30.12 // indirect
 	github.com/fatih/color v1.10.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
