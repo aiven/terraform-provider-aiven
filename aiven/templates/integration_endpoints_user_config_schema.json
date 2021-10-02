@@ -394,7 +394,7 @@
         "pattern": "^[a-z0-9\\-@_]{5,32}$",
         "title": "Jolokia basic authentication username",
         "type": "string",
-        "user_error": "Must only contain a-z and 0-9"
+        "user_error": "Must only contain a-z and 0-9 and should not contain more than 32 characters."
       }
     },
     "type": "object"
@@ -416,7 +416,7 @@
         "pattern": "^[a-z0-9\\-@_]{5,32}$",
         "title": "Prometheus basic authentication username",
         "type": "string",
-        "user_error": "Must only contain a-z and 0-9"
+        "user_error": "Must only contain a-z and 0-9 and should not contain more than 32 characters."
       }
     },
     "type": "object"
