@@ -82,7 +82,7 @@ resource "aiven_opensearch" "os1" {
 
     * `privatelink_access` - (Optional) Allow access to selected service components through Privatelink
         * `opensearch` - (Optional) Enable opensearch
-        * `opensearch_dashboard` - (Optional) Enable Opensearch dashboard
+        * `opensearch_dashboards` - (Optional) Enable Opensearch dashboards
 
     * `opensearch` - (Optional) Opensearch settings.
         * `cluster_max_shards_per_node` - (Optional) Controls the number of shards allowed in the cluster per data node.
