@@ -95,7 +95,7 @@ func resourceAzurePrivatelinkCreate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	_, err = waitForAzurePrivatelinkToBeActive(client, project, serviceName,
-		d.Timeout(schema.TimeoutUpdate)).WaitForStateContext(ctx)
+		d.Timeout(schema.TimeoutCreate)).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for Azure privatelink: %s", err)
 	}
@@ -213,7 +213,7 @@ func resourceAzurePrivatelinkDelete(ctx context.Context, d *schema.ResourceData,
 			return pl, pl.State, nil
 		},
 		Delay:      10 * time.Second,
-		Timeout:    d.Timeout(schema.TimeoutRead),
+		Timeout:    d.Timeout(schema.TimeoutDelete),
 		MinTimeout: 2 * time.Second,
 	}
 	_, err = stateChangeConf.WaitForStateContext(ctx)
