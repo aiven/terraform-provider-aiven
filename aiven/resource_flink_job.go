@@ -183,15 +183,18 @@ func resourceFlinkJobDelete(ctx context.Context, d *schema.ResourceData, m inter
 			"CANCELING",
 			"CREATED",
 			"DEPLOYING",
-			"FAILED",
-			"FINISHED",
 			"INITIALIZING",
 			"RECONCILING",
 			"RUNNING",
 			"SCHEDULED",
 		},
+		// flink does not cancel job that have failed or finished
+		// so we accept these states also as "deleted", otherwise we will
+		// loop endless here
 		Target: []string{
 			"CANCELED",
+			"FAILED",
+			"FINISHED",
 		},
 		Refresh: func() (interface{}, string, error) {
 			r, err := client.FlinkJobs.Get(project, serviceName, aiven.GetFlinkJobRequest{JobId: jobId})

@@ -346,9 +346,10 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 				}
 				return ii, "ACTIVE", nil
 			},
-			Delay:      10 * time.Second,
-			Timeout:    d.Timeout(schema.TimeoutCreate),
-			MinTimeout: 2 * time.Second,
+			Delay:                     2 * time.Second,
+			Timeout:                   d.Timeout(schema.TimeoutCreate),
+			MinTimeout:                2 * time.Second,
+			ContinuousTargetOccurence: 5,
 		}
 
 		res, err := stateChangeConf.WaitForStateContext(ctx)
