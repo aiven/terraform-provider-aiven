@@ -48,7 +48,7 @@ func TestAccAivenServiceUser_basic(t *testing.T) {
 func testAccCheckAivenServiceUserResourceDestroy(s *terraform.State) error {
 	c := testAccProvider.Meta().(*aiven.Client)
 
-	// loop through the resources in state, verifying each aiven_service is destroyed
+	// loop through the resources in state, verifying each aiven_service_user is destroyed
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_service_user" {
 			continue

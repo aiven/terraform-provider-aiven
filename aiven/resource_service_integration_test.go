@@ -67,12 +67,11 @@ func testAccServiceIntegrationResource(name string) string {
 			project = "%s"
 		}
 		
-		resource "aiven_service" "bar-pg" {
+		resource "aiven_pg" "bar-pg" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-pg-%s"
-			service_type = "pg"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
@@ -88,12 +87,11 @@ func testAccServiceIntegrationResource(name string) string {
 			}
 		}
 
-		resource "aiven_service" "bar-influxdb" {
+		resource "aiven_influxdb" "bar-influxdb" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-influxdb-%s"
-			service_type = "influxdb"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
@@ -107,10 +105,10 @@ func testAccServiceIntegrationResource(name string) string {
 		resource "aiven_service_integration" "bar" {
 			project = data.aiven_project.foo.project
 			integration_type = "metrics"
-			source_service_name = aiven_service.bar-pg.service_name
-			destination_service_name = aiven_service.bar-influxdb.service_name
+			source_service_name = aiven_pg.bar-pg.service_name
+			destination_service_name = aiven_influxdb.bar-influxdb.service_name
 
-			depends_on = [ aiven_service.bar-pg,aiven_service.bar-influxdb]
+			depends_on = [ aiven_pg.bar-pg,aiven_influxdb.bar-influxdb]
 		}
 
 		data "aiven_service_integration" "int" {
@@ -130,22 +128,20 @@ func testAccServiceIntegrationKafkaConnectResource(name string) string {
 			project = "%s"
 		}
 		
-		resource "aiven_service" "kafka1" {
+		resource "aiven_kafka" "kafka1" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "business-4"
 			service_name =  "test-acc-sr-kafka-%s"
-			service_type = "kafka"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 		}
 		
-		resource "aiven_service" "kafka_connect1" {
+		resource "aiven_kafka_connect" "kafka_connect1" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-kafka-con-%s"
-			service_type = "kafka_connect"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
@@ -163,8 +159,8 @@ func testAccServiceIntegrationKafkaConnectResource(name string) string {
 		resource "aiven_service_integration" "bar" {
 			project = data.aiven_project.foo.project
 			integration_type = "kafka_connect"
-			source_service_name = aiven_service.kafka1.service_name
-			destination_service_name = aiven_service.kafka_connect1.service_name
+			source_service_name = aiven_kafka.kafka1.service_name
+			destination_service_name = aiven_kafka_conect.kafka_connect1.service_name
 			
 			kafka_connect_user_config {
 				kafka_connect {
@@ -174,7 +170,7 @@ func testAccServiceIntegrationKafkaConnectResource(name string) string {
 				}
 			}
 
-			depends_on = [aiven_service.kafka1,aiven_service.kafka_connect1]
+			depends_on = [aiven_kafka.kafka1,aiven_kafka_conect.kafka_connect1]
 		}
 
 		data "aiven_service_integration" "int" {
@@ -194,12 +190,11 @@ func testAccServiceIntegrationMirrorMakerResource(name string) string {
 			project = "%s"
 		}
 		
-		resource "aiven_service" "source" {
+		resource "aiven_kafka" "source" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "business-4"
 			service_name = "test-acc-sr-source-%s"
-			service_type = "kafka"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
@@ -213,18 +208,17 @@ func testAccServiceIntegrationMirrorMakerResource(name string) string {
 		
 		resource "aiven_kafka_topic" "source" {
 			project = data.aiven_project.foo.project
-			service_name = aiven_service.source.service_name
+			service_name = aiven_kafka.source.service_name
 			topic_name = "test-acc-topic-a-%s"
 			partitions = 3
 			replication = 2
 		}
 
-		resource "aiven_service" "target" {
+		resource "aiven_kafka" "target" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "business-4"
 			service_name = "test-acc-sr-target-%s"
-			service_type = "kafka"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
@@ -238,18 +232,17 @@ func testAccServiceIntegrationMirrorMakerResource(name string) string {
 		
 		resource "aiven_kafka_topic" "target" {
 			project = data.aiven_project.foo.project
-			service_name = aiven_service.target.service_name
+			service_name = aiven_kafka.target.service_name
 			topic_name = "test-acc-topic-b-%s"
 			partitions = 3
 			replication = 2
 		}
 
-		resource "aiven_service" "mm" {
+		resource "aiven_kafka_mirrormaker" "mm" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-mm-%s"
-			service_type = "kafka_mirrormaker"
 			
 			kafka_mirrormaker_user_config {
 				ip_filter = ["0.0.0.0/0"]
@@ -265,8 +258,8 @@ func testAccServiceIntegrationMirrorMakerResource(name string) string {
 		resource "aiven_service_integration" "bar" {
 			project = data.aiven_project.foo.project
 			integration_type = "kafka_mirrormaker"
-			source_service_name = aiven_service.source.service_name
-			destination_service_name = aiven_service.mm.service_name
+			source_service_name = aiven_kafka.source.service_name
+			destination_service_name = aiven_kafka_mirrormaker.mm.service_name
 	
 			kafka_mirrormaker_user_config {
 				cluster_alias = "source"
@@ -276,8 +269,8 @@ func testAccServiceIntegrationMirrorMakerResource(name string) string {
 		resource "aiven_service_integration" "i2" {
 			project = data.aiven_project.foo.project
 			integration_type = "kafka_mirrormaker"
-			source_service_name = aiven_service.target.service_name
-			destination_service_name = aiven_service.mm.service_name
+			source_service_name = aiven_kafka.target.service_name
+			destination_service_name = aiven_kafka_mirrormaker.mm.service_name
 	
 			kafka_mirrormaker_user_config {
 				cluster_alias = "target"

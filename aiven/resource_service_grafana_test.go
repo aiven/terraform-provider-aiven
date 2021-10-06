@@ -12,7 +12,7 @@ import (
 
 // Grafana service tests
 func TestAccAivenService_grafana(t *testing.T) {
-	resourceName := "aiven_service.bar"
+	resourceName := "aiven_grafana.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	rName2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
@@ -24,8 +24,8 @@ func TestAccAivenService_grafana(t *testing.T) {
 			{
 				Config: testAccGrafanaServiceResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenServiceCommonAttributes("data.aiven_service.service"),
-					testAccCheckAivenServiceGrafanaAttributes("data.aiven_service.service"),
+					testAccCheckAivenServiceCommonAttributes("data.aiven_grafana.service"),
+					testAccCheckAivenServiceGrafanaAttributes("data.aiven_grafana.service"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
@@ -40,8 +40,8 @@ func TestAccAivenService_grafana(t *testing.T) {
 			{
 				Config: testAccGrafanaServiceCustomIpFiltersResource(rName2),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenServiceCommonAttributes("data.aiven_service.service"),
-					testAccCheckAivenServiceGrafanaAttributes("data.aiven_service.service"),
+					testAccCheckAivenServiceCommonAttributes("data.aiven_grafana.service"),
+					testAccCheckAivenServiceGrafanaAttributes("data.aiven_grafana.service"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName2)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
@@ -63,12 +63,11 @@ func testAccGrafanaServiceResource(name string) string {
 			project = "%s"
 		}
 		
-		resource "aiven_service" "bar" {
+		resource "aiven_grafana" "bar" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-1"
 			service_name = "test-acc-sr-%s"
-			service_type = "grafana"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
@@ -82,11 +81,11 @@ func testAccGrafanaServiceResource(name string) string {
 			}
 		}
 		
-		data "aiven_service" "service" {
-			service_name = aiven_service.bar.service_name
-			project = aiven_service.bar.project
+		data "aiven_grafana" "service" {
+			service_name = aiven_grafana.bar.service_name
+			project = aiven_grafana.bar.project
 
-			depends_on = [aiven_service.bar]
+			depends_on = [aiven_grafana.bar]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
@@ -97,12 +96,11 @@ func testAccGrafanaServiceCustomIpFiltersResource(name string) string {
 			project = "%s"
 		}
 		
-		resource "aiven_service" "bar" {
+		resource "aiven_grafana" "bar" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-1"
 			service_name = "test-acc-sr-%s"
-			service_type = "grafana"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
@@ -116,11 +114,11 @@ func testAccGrafanaServiceCustomIpFiltersResource(name string) string {
 			}
 		}
 		
-		data "aiven_service" "service" {
-			service_name = aiven_service.bar.service_name
-			project = aiven_service.bar.project
+		data "aiven_grafana" "service" {
+			service_name = aiven_grafana.bar.service_name
+			project = aiven_grafana.bar.project
 
-			depends_on = [aiven_service.bar]
+			depends_on = [aiven_grafana.bar]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }

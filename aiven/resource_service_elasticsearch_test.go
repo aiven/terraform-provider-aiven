@@ -3,7 +3,6 @@ package aiven
 import (
 	"fmt"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -13,7 +12,7 @@ import (
 
 // Elasticsearch service tests
 func TestAccAivenService_es(t *testing.T) {
-	resourceName := "aiven_service.bar-es"
+	resourceName := "aiven_elasticsearch.bar-es"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -24,8 +23,8 @@ func TestAccAivenService_es(t *testing.T) {
 			{
 				Config: testAccElasticsearchServiceResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenServiceCommonAttributes("data.aiven_service.service-es"),
-					testAccCheckAivenServiceESAttributes("data.aiven_service.service-es"),
+					testAccCheckAivenServiceCommonAttributes("data.aiven_elasticsearch.service-es"),
+					testAccCheckAivenServiceESAttributes("data.aiven_elasticsearch.service-es"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
@@ -36,6 +35,7 @@ func TestAccAivenService_es(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -47,12 +47,11 @@ func testAccElasticsearchServiceResource(name string) string {
 			project = "%s"
 		}
 		
-		resource "aiven_service" "bar-es" {
+		resource "aiven_elasticsearch" "bar-es" {
 			project = data.aiven_project.foo-es.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-%s"
-			service_type = "elasticsearch"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
@@ -79,11 +78,11 @@ func testAccElasticsearchServiceResource(name string) string {
 			}
 		}
 		
-		data "aiven_service" "service-es" {
-			service_name = aiven_service.bar-es.service_name
-			project = aiven_service.bar-es.project
+		data "aiven_elasticsearch" "service-es" {
+			service_name = aiven_elasticsearch.bar-es.service_name
+			project = aiven_elasticsearch.bar-es.project
 
-			depends_on = [aiven_service.bar-es]
+			depends_on = [aiven_elasticsearch.bar-es]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
@@ -92,10 +91,6 @@ func testAccCheckAivenServiceESAttributes(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		r := s.RootModule().Resources[n]
 		a := r.Primary.Attributes
-
-		if !strings.Contains(a["service_type"], "elasticsearch") {
-			return fmt.Errorf("expected to get a correct service type from Aiven, got :%s", a["service_type"])
-		}
 
 		if a["elasticsearch.0.kibana_uri"] == "" {
 			return fmt.Errorf("expected to get kibana_uri from Aiven")

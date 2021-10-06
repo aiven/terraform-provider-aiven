@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
@@ -157,10 +158,14 @@ func testAccCheckAivenServiceCommonAttributes(n string) resource.TestCheckFunc {
 
 func testAccCheckAivenServiceResourceDestroy(s *terraform.State) error {
 	c := testAccProvider.Meta().(*aiven.Client)
-
-	// loop through the resources in state, verifying each aiven_service is destroyed
+	// loop through the resources in state, verifying each service is destroyed
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "aiven_service" {
+		var r []string
+		for _, t := range availableServiceTypes() {
+			r = append(r, fmt.Sprintf("aiven_%s", t))
+		}
+
+		if sort.SearchStrings(r, rs.Type) > 0 {
 			continue
 		}
 

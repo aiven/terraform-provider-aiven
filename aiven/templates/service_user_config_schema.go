@@ -6,9 +6,9 @@ package templates
 import "encoding/json"
 
 var (
-  // inline JSON was taken from a file:
-  // service_user_config_schema.json
-  serviceJSON = `{
+	// inline JSON was taken from a file:
+	// service_user_config_schema.json
+	serviceJSON = `{
   "cassandra": {
     "additionalProperties": false,
     "properties": {
@@ -5012,9 +5012,9 @@ var (
 )
 
 func init() {
-  var serviceSchema map[string]interface{}
-  if err := json.Unmarshal([]byte(serviceJSON), &serviceSchema); err != nil {
-    panic("cannot unmarshal user configuration options service JSON', error :" + err.Error())
-  }
-  userConfigSchemas["service"] = serviceSchema
+	var serviceSchema map[string]interface{}
+	if err := json.Unmarshal([]byte(serviceJSON), &serviceSchema); err != nil {
+		panic("cannot unmarshal user configuration options service JSON', error :" + err.Error())
+	}
+	userConfigSchemas["service"] = serviceSchema
 }

@@ -39,12 +39,11 @@ func testAccServiceIntegrationEndpointResource(name string) string {
 			project = "%s"
 		}
 		
-		resource "aiven_service" "bar-pg" {
+		resource "aiven_pg" "bar-pg" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-pg-%s"
-			service_type = "pg"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
@@ -76,7 +75,7 @@ func testAccServiceIntegrationEndpointResource(name string) string {
 		resource "aiven_service_integration" "bar" {
 			project = data.aiven_project.foo.project
 			integration_type = "external_elasticsearch_logs"
-			source_service_name = aiven_service.bar-pg.service_name
+			source_service_name = aiven_pg.bar-pg.service_name
 			destination_endpoint_id = aiven_service_integration_endpoint.bar.id
 		}
 

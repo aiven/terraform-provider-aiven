@@ -6,9 +6,9 @@ package templates
 import "encoding/json"
 
 var (
-  // inline JSON was taken from a file:
-  // integrations_user_config_schema.json
-  integrationJSON = `{
+	// inline JSON was taken from a file:
+	// integrations_user_config_schema.json
+	integrationJSON = `{
   "alertmanager": {
     "additionalProperties": false,
     "title": "Integration user config",
@@ -601,9 +601,9 @@ var (
 )
 
 func init() {
-  var integrationSchema map[string]interface{}
-  if err := json.Unmarshal([]byte(integrationJSON), &integrationSchema); err != nil {
-    panic("cannot unmarshal user configuration options integration JSON', error :" + err.Error())
-  }
-  userConfigSchemas["integration"] = integrationSchema
+	var integrationSchema map[string]interface{}
+	if err := json.Unmarshal([]byte(integrationJSON), &integrationSchema); err != nil {
+		panic("cannot unmarshal user configuration options integration JSON', error :" + err.Error())
+	}
+	userConfigSchemas["integration"] = integrationSchema
 }
