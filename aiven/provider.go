@@ -42,7 +42,6 @@ func Provider() *schema.Provider {
 			"aiven_project_user":                   datasourceProjectUser(),
 			"aiven_project_vpc":                    datasourceProjectVPC(),
 			"aiven_vpc_peering_connection":         datasourceVPCPeeringConnection(),
-			"aiven_service":                        datasourceService(),
 			"aiven_service_integration":            datasourceServiceIntegration(),
 			"aiven_service_integration_endpoint":   datasourceServiceIntegrationEndpoint(),
 			"aiven_service_user":                   datasourceServiceUser(),
@@ -77,6 +76,7 @@ func Provider() *schema.Provider {
 
 			// deprecated
 			"aiven_elasticsearch_acl": datasourceElasticsearchACL(),
+			"aiven_service":           datasourceService(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -91,7 +91,6 @@ func Provider() *schema.Provider {
 			"aiven_project_user":                   resourceProjectUser(),
 			"aiven_project_vpc":                    resourceProjectVPC(),
 			"aiven_vpc_peering_connection":         resourceVPCPeeringConnection(),
-			"aiven_service":                        resourceService(),
 			"aiven_service_integration":            resourceServiceIntegration(),
 			"aiven_service_integration_endpoint":   resourceServiceIntegrationEndpoint(),
 			"aiven_service_user":                   resourceServiceUser(),
@@ -130,6 +129,7 @@ func Provider() *schema.Provider {
 
 			// deprecated
 			"aiven_elasticsearch_acl": resourceElasticsearchACL(),
+			"aiven_service":           resourceService(),
 		},
 	}
 

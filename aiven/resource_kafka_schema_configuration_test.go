@@ -43,12 +43,11 @@ func testAccKafkaSchemaConfigurationResource(name string) string {
 			project = "%s"
 		}
 
-		resource "aiven_service" "bar" {
+		resource "aiven_kafka" "bar" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "business-4"
 			service_name = "test-acc-sr-%s"
-			service_type = "kafka"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
@@ -63,7 +62,7 @@ func testAccKafkaSchemaConfigurationResource(name string) string {
 		
 		resource "aiven_kafka_schema_configuration" "foo" {
 			project = data.aiven_project.foo.project
-			service_name = aiven_service.bar.service_name
+			service_name = aiven_kafka.bar.service_name
 			compatibility_level = "BACKWARD"
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name)

@@ -12,7 +12,7 @@ import (
 
 // MySQL service tests
 func TestAccAivenService_mirrormaker(t *testing.T) {
-	resourceName := "aiven_service.bar"
+	resourceName := "aiven_kafka_mirrormaker.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -23,7 +23,7 @@ func TestAccAivenService_mirrormaker(t *testing.T) {
 			{
 				Config: testAccMirrorMakerServiceResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenServiceMirrorMakerAttributes("data.aiven_service.service"),
+					testAccCheckAivenServiceMirrorMakerAttributes("data.aiven_kafka_mirrormaker.service"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
@@ -43,12 +43,11 @@ func testAccMirrorMakerServiceResource(name string) string {
 			project = "%s"
 		}
 		
-		resource "aiven_service" "bar" {
+		resource "aiven_kafka_mirrormaker" "bar" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-%s"
-			service_type = "kafka_mirrormaker"
 			
 			kafka_mirrormaker_user_config {
 				ip_filter = ["0.0.0.0/0"]
@@ -61,11 +60,11 @@ func testAccMirrorMakerServiceResource(name string) string {
 			}
 		}
 
-		data "aiven_service" "service" {
-			service_name = aiven_service.bar.service_name
-			project = aiven_service.bar.project
+		data "aiven_kafka_mirrormaker" "service" {
+			service_name = aiven_kafka_mirrormaker.bar.service_name
+			project = aiven_kafka_mirrormaker.bar.project
 
-			depends_on = [aiven_service.bar]
+			depends_on = [aiven_kafka_mirrormaker.bar]
 		}
 		`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
@@ -74,10 +73,6 @@ func testAccCheckAivenServiceMirrorMakerAttributes(n string) resource.TestCheckF
 	return func(s *terraform.State) error {
 		r := s.RootModule().Resources[n]
 		a := r.Primary.Attributes
-
-		if a["service_type"] != "kafka_mirrormaker" {
-			return fmt.Errorf("expected to get a correct service type from Aiven, got :%s", a["service_type"])
-		}
 
 		if a["kafka_mirrormaker_user_config.0.kafka_mirrormaker.0.refresh_groups_interval_seconds"] != "600" {
 			return fmt.Errorf("expected to get a correct refresh_groups_interval_seconds from Aiven")

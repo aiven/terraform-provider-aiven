@@ -46,8 +46,8 @@ data "aiven_flink" "service" {
   project = aiven_flink.bar.project                                                             
 }                                                                      
 `,
-		serviceName,
 		projectName,
+		serviceName,
 	)
 
 	resource.ParallelTest(t, resource.TestCase{

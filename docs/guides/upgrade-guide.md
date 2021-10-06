@@ -11,7 +11,7 @@ If you have specified `-1` as a placeholder for unset values in user config, you
 The best option is to remove these placeholder values completely from the Terraform config file.
 
 ```diff
- resource "aiven_service" "kafka" {
+ resource "aiven_kafka" "kafka" {
    ...
    kafka_user_config {
      ...

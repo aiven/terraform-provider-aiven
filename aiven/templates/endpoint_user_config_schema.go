@@ -6,9 +6,9 @@ package templates
 import "encoding/json"
 
 var (
-  // inline JSON was taken from a file:
-  // integration_endpoints_user_config_schema.json
-  endpointJSON = `{
+	// inline JSON was taken from a file:
+	// integration_endpoints_user_config_schema.json
+	endpointJSON = `{
   "datadog": {
     "additionalProperties": false,
     "properties": {
@@ -564,9 +564,9 @@ var (
 )
 
 func init() {
-  var endpointSchema map[string]interface{}
-  if err := json.Unmarshal([]byte(endpointJSON), &endpointSchema); err != nil {
-    panic("cannot unmarshal user configuration options endpoint JSON', error :" + err.Error())
-  }
-  userConfigSchemas["endpoint"] = endpointSchema
+	var endpointSchema map[string]interface{}
+	if err := json.Unmarshal([]byte(endpointJSON), &endpointSchema); err != nil {
+		panic("cannot unmarshal user configuration options endpoint JSON', error :" + err.Error())
+	}
+	userConfigSchemas["endpoint"] = endpointSchema
 }

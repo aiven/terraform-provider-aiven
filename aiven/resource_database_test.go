@@ -135,12 +135,11 @@ func testAccDatabaseResource(name string) string {
 			project = "%s"
 		}
 		
-		resource "aiven_service" "bar" {
+		resource "aiven_pg" "bar" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-%s"
-			service_type = "pg"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
@@ -157,8 +156,8 @@ func testAccDatabaseResource(name string) string {
 		}
 
 		resource "aiven_database" "foo" {
-			project = aiven_service.bar.project
-			service_name = aiven_service.bar.service_name
+			project = aiven_pg.bar.project
+			service_name = aiven_pg.bar.service_name
 			database_name = "test-acc-db-%s"
 			lc_ctype = "en_US.UTF-8"
 			lc_collate = "en_US.UTF-8"
@@ -180,12 +179,11 @@ func testAccDatabaseTerminationProtectionResource(name string) string {
 			project = "%s"
 		}
 		
-		resource "aiven_service" "bar" {
+		resource "aiven_pg" "bar" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr-%s"
-			service_type = "pg"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
@@ -202,8 +200,8 @@ func testAccDatabaseTerminationProtectionResource(name string) string {
 		}
 
 		resource "aiven_database" "foo" {
-			project = aiven_service.bar.project
-			service_name = aiven_service.bar.service_name
+			project = aiven_pg.bar.project
+			service_name = aiven_pg.bar.service_name
 			database_name = "test-acc-db-%s"
 			termination_protection = true
 		}

@@ -117,7 +117,7 @@ func testAccCheckAivenKafkaConnectorResourceDestroy(s *terraform.State) error {
 
 	// loop through the resources in state, verifying each aiven_kafka_connector is destroyed
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "aiven_service" {
+		if rs.Type != "aiven_kafka" {
 			continue
 		}
 
@@ -166,12 +166,11 @@ func testAccKafkaConnectorResource(name string) string {
 			project = "%s"
 		}
 
-		resource "aiven_service" "bar" {
+		resource "aiven_kafka" "bar" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "business-4"
 			service_name = "test-acc-sr-%s"
-			service_type = "kafka"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 			
@@ -187,25 +186,24 @@ func testAccKafkaConnectorResource(name string) string {
 		
 		resource "aiven_kafka_topic" "foo" {
 			project = data.aiven_project.foo.project
-			service_name = aiven_service.bar.service_name
+			service_name = aiven_kafka.bar.service_name
 			topic_name = "test-acc-topic-%s"
 			partitions = 3
 			replication = 2
 		}
 		
-		resource "aiven_service" "dest" {
+		resource "aiven_elasticsearch" "dest" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
 			plan = "startup-4"
 			service_name = "test-acc-sr2-%s"
-			service_type = "elasticsearch"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 		}
 
 		resource "aiven_kafka_connector" "foo" {
 			project = data.aiven_project.foo.project
-			service_name = aiven_service.bar.service_name
+			service_name = aiven_kafka.bar.service_name
 			connector_name = "test-acc-con-%s"
 			
 			config = {
@@ -213,7 +211,7 @@ func testAccKafkaConnectorResource(name string) string {
 				"connector.class" : "io.aiven.connect.elasticsearch.ElasticsearchSinkConnector"
 				"type.name" = "es-connector"
 				"name" = "test-acc-con-%s"
-				"connection.url" = aiven_service.dest.service_uri
+				"connection.url" = aiven_elasticsearch.dest.service_uri
 			}
 		}
 
