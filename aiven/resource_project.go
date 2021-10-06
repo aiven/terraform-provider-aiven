@@ -71,6 +71,13 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Description:      "Use the same billing group that is used in source project.",
 		DiffSuppressFunc: createOnlyDiffSuppressFunc,
 	},
+	"add_account_owners_admin_access": {
+		Type:             schema.TypeBool,
+		Optional:         true,
+		Description:      "If account_id is set, grant account owner team admin access to the new project.",
+		DiffSuppressFunc: createOnlyDiffSuppressFunc,
+		Default:          true,
+	},
 	"country_code": {
 		Type:             schema.TypeString,
 		Optional:         true,
