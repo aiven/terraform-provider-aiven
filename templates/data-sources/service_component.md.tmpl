@@ -1,0 +1,21 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+# {{.Name}} ({{.Type}})
+{{ .Description | trimspace }}
+
+Service components can be defined to get the connection info for specific service. Services may support multiple different access routes (VPC peering and public access), have additional components or support various authentication methods. Each of these may be represented by different DNS name or TCP port and the specific component to match can be selected by specifying appropriate filters as shown below.
+
+{{ if .HasExample -}}
+## Example Usage
+{{ printf "{{tffile %q}}" .ExampleFile }}
+{{- end }}
+{{ .SchemaMarkdown | trimspace }}
+{{ if .HasImport -}}
+## Import
+Import is supported using the following syntax:
+{{ printf "{{codefile \"shell\" %q}}" .ImportFile }}
+{{- end }}

@@ -12,7 +12,8 @@ import (
 func datasourceElasticsearchACLRule() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceElasticsearchACLRuleRead,
-		Schema:      resourceSchemaAsDatasourceSchema(aivenElasticsearchACLRuleSchema, "project", "service_name", "username", "index", "permission"),
+		Description: "The Elasticsearch ACL Rule data source provides information about an existing Aiven Elasticsearch ACL Rule.",
+		Schema:      resourceSchemaAsDatasourceSchema(aivenElasticsearchACLRuleSchema, "project", "service_name", "username", "index"),
 	}
 }
 

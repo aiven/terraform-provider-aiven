@@ -13,75 +13,71 @@ import (
 var aivenAccountAuthenticationSchema = map[string]*schema.Schema{
 	"account_id": {
 		Type:        schema.TypeString,
-		Description: "Account id",
 		Required:    true,
+		Description: "The unique id of the account.",
 	},
 	"type": {
 		Type:         schema.TypeString,
-		Description:  "Account authentication id",
 		Required:     true,
 		ValidateFunc: validation.StringInSlice([]string{"internal", "saml"}, false),
+		Description:  complex("The account authentication type.").possibleValues("internal", "saml").build(),
 	},
 	"name": {
 		Type:        schema.TypeString,
-		Description: "Account team name",
 		Required:    true,
+		Description: "The name of the account authentication.",
 	},
 	"enabled": {
 		Type:        schema.TypeBool,
-		Description: "Status of account authentication method",
 		Optional:    true,
 		Default:     false,
+		Description: complex("Status of account authentication method.").defaultValue(false).build(),
 	},
 	"saml_certificate": {
 		Type:        schema.TypeString,
-		Description: "SAML Certificate",
 		Optional:    true,
+		Description: "SAML Certificate",
 	},
 	"saml_idp_url": {
 		Type:        schema.TypeString,
-		Description: "SAML Idp URL",
 		Optional:    true,
+		Description: "SAML Idp URL",
 	},
 	"saml_entity_id": {
 		Type:        schema.TypeString,
-		Description: "SAML Entity id",
 		Optional:    true,
+		Description: "SAML Entity id",
 	},
 	"saml_acs_url": {
 		Type:        schema.TypeString,
-		Description: "SAML Assertion Consumer Service URL",
-		Optional:    true,
 		Computed:    true,
+		Description: "SAML Assertion Consumer Service URL",
 	},
 	"saml_metadata_url": {
 		Type:        schema.TypeString,
-		Description: "SAML Metadata URL",
-		Optional:    true,
 		Computed:    true,
+		Description: "SAML Metadata URL",
 	},
 	"authentication_id": {
 		Type:        schema.TypeString,
-		Description: "Account authentication id",
-		Optional:    true,
 		Computed:    true,
+		Description: "Account authentication id",
 	},
 	"create_time": {
 		Type:        schema.TypeString,
-		Description: "Time of creation",
-		Optional:    true,
 		Computed:    true,
+		Description: "Time of creation",
 	},
 	"update_time": {
 		Type:        schema.TypeString,
-		Description: "Time of last update",
-		Optional:    true,
 		Computed:    true,
+		Description: "Time of last update",
 	},
 }
 
 func resourceAccountAuthentication() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Account Authentication resource allows the creation and management of an Aiven Account Authentications.",
 		CreateContext: resourceAccountAuthenticationCreate,
 		ReadContext:   resourceAccountAuthenticationRead,
 		UpdateContext: resourceAccountAuthenticationUpdate,

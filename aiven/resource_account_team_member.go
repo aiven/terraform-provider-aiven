@@ -13,44 +13,50 @@ import (
 var aivenAccountTeamMemberSchema = map[string]*schema.Schema{
 	"account_id": {
 		Type:        schema.TypeString,
-		Description: "Account id",
 		Required:    true,
 		ForceNew:    true,
+		Description: complex("The unique account id").forceNew().build(),
 	},
 	"team_id": {
 		Type:        schema.TypeString,
-		Description: "Account team id",
 		Required:    true,
 		ForceNew:    true,
+		Description: complex("An account team id").forceNew().build(),
 	},
 	"user_email": {
 		Type:        schema.TypeString,
-		Description: "Team invite user email",
 		Required:    true,
 		ForceNew:    true,
+		Description: complex("Is a user email address that first will be invited, and after accepting an invitation, he or she becomes a member of a team.").forceNew().build(),
 	},
 	"invited_by_user_email": {
 		Type:        schema.TypeString,
-		Description: "Team invited by user email",
-		Optional:    true,
 		Computed:    true,
+		Description: "The email address that invited this user.",
 	},
 	"accepted": {
 		Type:        schema.TypeBool,
-		Description: "Team member invitation status",
-		Optional:    true,
 		Computed:    true,
+		Description: "is a boolean flag that determines whether an invitation was accepted or not by the user. `false` value means that the invitation was sent to the user but not yet accepted. `true` means that the user accepted the invitation and now a member of an account team.",
 	},
 	"create_time": {
 		Type:        schema.TypeString,
-		Description: "Time of creation",
-		Optional:    true,
 		Computed:    true,
+		Description: "Time of creation",
 	},
 }
 
 func resourceAccountTeamMember() *schema.Resource {
 	return &schema.Resource{
+		Description: `
+The Account Team Member resource allows the creation and management of an Aiven Account Team Member.
+
+During the creation of ` + "`aiven_account_team_member`" + `resource, an email invitation will be sent
+to a user using ` + "`user_email`" + ` address. If the user accepts an invitation, he or she will become
+a member of the account team. The deletion of ` + "`aiven_account_team_member`" + ` will not only
+delete the invitation if one was sent but not yet accepted by the user, it will also 
+eliminate an account team member if one has accepted an invitation previously.
+`,
 		CreateContext: resourceAccountTeamMemberCreate,
 		ReadContext:   resourceAccountTeamMemberRead,
 		UpdateContext: resourceAccountTeamMemberCreate,

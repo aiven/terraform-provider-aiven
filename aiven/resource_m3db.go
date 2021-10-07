@@ -14,7 +14,6 @@ func aivenM3DBSchema() map[string]*schema.Schema {
 		MaxItems:    1,
 		Computed:    true,
 		Description: "M3 specific server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
@@ -35,6 +34,7 @@ func aivenM3DBSchema() map[string]*schema.Schema {
 }
 func resourceM3DB() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The M3 DB resource allows the creation and management of Aiven M3 services.",
 		CreateContext: resourceServiceCreateWrapper(ServiceTypeM3),
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,

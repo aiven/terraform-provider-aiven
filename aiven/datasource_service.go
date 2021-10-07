@@ -11,8 +11,10 @@ import (
 
 func datasourceService() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: datasourceServiceRead,
-		Schema:      resourceSchemaAsDatasourceSchema(aivenServiceSchema, "project", "service_name"),
+		ReadContext:        datasourceServiceRead,
+		Description:        "The Service datasource provides information about specific Aiven Services.",
+		DeprecationMessage: "Please use the specific service datasources instead of this datasource.",
+		Schema:             resourceSchemaAsDatasourceSchema(aivenServiceSchema, "project", "service_name"),
 	}
 }
 

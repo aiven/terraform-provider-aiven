@@ -5,34 +5,25 @@ import (
 )
 
 var aivenOpensearchACLConfigSchema = map[string]*schema.Schema{
-	"project": {
-		Type:        schema.TypeString,
-		Description: "Project to link the Opensearch ACLs to",
-		Required:    true,
-		ForceNew:    true,
-	},
-	"service_name": {
-		Type:        schema.TypeString,
-		Description: "Service to link the Opensearch ACLs to",
-		Required:    true,
-		ForceNew:    true,
-	},
+	"project":      commonSchemaProjectReference,
+	"service_name": commonSchemaServiceNameReference,
 	"enabled": {
 		Type:        schema.TypeBool,
-		Description: "Enable Opensearch ACLs. When disabled authenticated service users have unrestricted access",
 		Optional:    true,
 		Default:     true,
+		Description: complex("Enable Opensearch ACLs. When disabled authenticated service users have unrestricted access.").defaultValue(true).build(),
 	},
 	"extended_acl": {
 		Type:        schema.TypeBool,
-		Description: "Index rules can be applied in a limited fashion to the _mget, _msearch and _bulk APIs (and only those) by enabling the ExtendedAcl option for the service. When it is enabled, users can use these APIs as long as all operations only target indexes they have been granted access to",
 		Optional:    true,
 		Default:     true,
+		Description: complex("Index rules can be applied in a limited fashion to the _mget, _msearch and _bulk APIs (and only those) by enabling the ExtendedAcl option for the service. When it is enabled, users can use these APIs as long as all operations only target indexes they have been granted access to.").defaultValue(true).build(),
 	},
 }
 
 func resourceOpensearchACLConfig() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Opensearch resource allows the creation and management of Aiven Opensearch services.",
 		CreateContext: resourceElasticsearchACLConfigUpdate,
 		ReadContext:   resourceElasticsearchACLConfigRead,
 		UpdateContext: resourceElasticsearchACLConfigUpdate,

@@ -9,69 +9,61 @@ import (
 )
 
 var aivenFlinkTableSchema = map[string]*schema.Schema{
-	"project": {
-		Type:        schema.TypeString,
-		Description: "Project to link the Flink Table to",
-		Required:    true,
-		ForceNew:    true,
-	},
-	"service_name": {
-		Type:        schema.TypeString,
-		Description: "Service to link the Flink Table to",
-		Required:    true,
-		ForceNew:    true,
-	},
-	"table_id": {
-		Type:        schema.TypeString,
-		Description: "Table id of the flink table",
-		Computed:    true,
-	},
+	"project":      commonSchemaProjectReference,
+	"service_name": commonSchemaServiceNameReference,
+
 	"table_name": {
 		Type:        schema.TypeString,
-		Description: "Table name of the flink table",
 		Required:    true,
 		ForceNew:    true,
+		Description: complex("Specifies the name of the table.").forceNew().build(),
 	},
 	"integration_id": {
 		Type:        schema.TypeString,
-		Description: "Id of the service integration this table applies to",
 		Required:    true,
 		ForceNew:    true,
+		Description: complex("The id of the service integration that is used with this table. It must have the service integration type `flink`.").referenced().forceNew().build(),
 	},
 	"jdbc_table": {
 		Type:        schema.TypeString,
-		Description: "Table name in Database, used as a source/sink. (PG integration only)",
 		Optional:    true,
 		ForceNew:    true,
+		Description: complex("Name of the jdbc table that is to be connected to this table. Valid if the service integration id refers to a mysql or postgres service.").forceNew().build(),
 	},
 	"kafka_topic": {
 		Type:        schema.TypeString,
-		Description: "Topic name, used as a source/sink. (Kafka integration only)",
 		Optional:    true,
 		ForceNew:    true,
+		Description: complex("Name of the kafka topic that is to be connected to this table. Valid if the service integration id refers to a kafka service.").forceNew().build(),
 	},
 	"like_options": {
 		Type:        schema.TypeString,
-		Description: "Clause can be used to create a table based on a definition of an existing table",
 		Optional:    true,
 		ForceNew:    true,
+		Description: complex("[LIKE](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/sql/create/#like) statement for table creation.").forceNew().build(),
 	},
 	"partitioned_by": {
 		Type:        schema.TypeString,
-		Description: "A column from a schema, table will be partitioned by",
 		Optional:    true,
 		ForceNew:    true,
+		Description: complex("A column from the `schema_sql` field to partition this table by.").forceNew().build(),
 	},
 	"schema_sql": {
 		Type:        schema.TypeString,
-		Description: "Source/Sink table schema",
 		Required:    true,
 		ForceNew:    true,
+		Description: complex("The SQL statement to create the table.").forceNew().build(),
+	},
+	"table_id": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "The Table ID of the flink table in the flink service.",
 	},
 }
 
 func resourceFlinkTable() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Flink Table resource allows the creation and management of Aiven Tables.",
 		CreateContext: resourceFlinkTableCreate,
 		ReadContext:   resourceFlinkTableRead,
 		DeleteContext: resourceFlinkTableDelete,

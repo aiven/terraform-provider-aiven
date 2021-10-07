@@ -40,15 +40,15 @@ func testAccAccountAuthenticationResource(name string) string {
 		}
 
 		resource "aiven_account_authentication" "foo" {
-  			account_id = aiven_account.foo.account_id
+      account_id = aiven_account.foo.account_id
 			name = "test-acc-auth-%s"
 			type = "saml"
 			enabled = false
 		}
 
 		data "aiven_account_authentication" "auth" {
-  			account_id = aiven_account_authentication.foo.account_id
-  			name = aiven_account_authentication.foo.name
+      account_id = aiven_account_authentication.foo.account_id
+      name = aiven_account_authentication.foo.name
 
 			depends_on = [aiven_account_authentication.foo]
 		}

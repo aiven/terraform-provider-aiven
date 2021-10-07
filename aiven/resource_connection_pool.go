@@ -13,58 +13,50 @@ import (
 )
 
 var aivenConnectionPoolSchema = map[string]*schema.Schema{
-	"project": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Project to link the connection pool to",
-		ForceNew:    true,
-	},
-	"service_name": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Service to link the connection pool to",
-		ForceNew:    true,
-	},
+	"project":      commonSchemaProjectReference,
+	"service_name": commonSchemaServiceNameReference,
+
 	"database_name": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "Name of the database the pool connects to",
 		ForceNew:    true,
+		Description: complex("The name of the database the pool connects to.").referenced().forceNew().build(),
 	},
 	"pool_mode": {
 		Type:         schema.TypeString,
 		Optional:     true,
 		Default:      "transaction",
-		Description:  "Mode the pool operates in (session, transaction, statement)",
 		ValidateFunc: validation.StringInSlice([]string{"session", "transaction", "statement"}, false),
+		Description:  complex("The mode the pool operates in").defaultValue("transaction").possibleValues("session", "transaction", "statement").build(),
 	},
 	"pool_name": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "Name of the pool",
 		ForceNew:    true,
+		Description: complex("The name of the created pool.").forceNew().build(),
 	},
 	"pool_size": {
 		Type:        schema.TypeInt,
 		Optional:    true,
 		Default:     10,
-		Description: "Number of connections the pool may create towards the backend server",
+		Description: complex("The number of connections the pool may create towards the backend server. This does not affect the number of incoming connections, which is always a much larger number.").defaultValue(10).build(),
 	},
 	"username": {
 		Type:        schema.TypeString,
 		Optional:    true,
-		Description: "Name of the service user used to connect to the database",
+		Description: complex("The name of the service user used to connect to the database.").referenced().build(),
 	},
 	"connection_uri": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "URI for connecting to the pool",
+		Description: "The URI for connecting to the pool",
 		Sensitive:   true,
 	},
 }
 
 func resourceConnectionPool() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Connection Pool resource allows the creation and management of Aiven Connection Pools.",
 		CreateContext: resourceConnectionPoolCreate,
 		ReadContext:   resourceConnectionPoolRead,
 		UpdateContext: resourceConnectionPoolUpdate,

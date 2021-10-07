@@ -12,6 +12,8 @@ import (
 func datasourceKafkaACL() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceKafkaACLRead,
+		Description: "The Data Source Kafka ACL data source provides information about the existing Aiven Kafka ACL for a Kafka service.",
+
 		Schema: resourceSchemaAsDatasourceSchema(aivenKafkaACLSchema,
 			"project", "service_name", "topic", "username", "permission"),
 	}

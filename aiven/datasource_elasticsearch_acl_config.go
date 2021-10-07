@@ -12,6 +12,7 @@ import (
 func datasourceElasticsearchACLConfig() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceElasticsearchACLConfigRead,
+		Description: "The Elasticsearch ACL Config data source provides information about an existing Aiven Elasticsearch ACL Config.",
 		Schema:      resourceSchemaAsDatasourceSchema(aivenElasticsearchACLConfigSchema, "project", "service_name"),
 	}
 }

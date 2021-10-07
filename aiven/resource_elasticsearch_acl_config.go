@@ -10,34 +10,25 @@ import (
 )
 
 var aivenElasticsearchACLConfigSchema = map[string]*schema.Schema{
-	"project": {
-		Type:        schema.TypeString,
-		Description: "Project to link the Elasticsearch ACLs to",
-		Required:    true,
-		ForceNew:    true,
-	},
-	"service_name": {
-		Type:        schema.TypeString,
-		Description: "Service to link the Elasticsearch ACLs to",
-		Required:    true,
-		ForceNew:    true,
-	},
+	"project":      commonSchemaProjectReference,
+	"service_name": commonSchemaServiceNameReference,
 	"enabled": {
 		Type:        schema.TypeBool,
-		Description: "Enable Elasticsearch ACLs. When disabled authenticated service users have unrestricted access",
 		Optional:    true,
 		Default:     true,
+		Description: complex("Enable Elasticsearch ACLs. When disabled authenticated service users have unrestricted access").defaultValue(true).build(),
 	},
 	"extended_acl": {
 		Type:        schema.TypeBool,
-		Description: "Index rules can be applied in a limited fashion to the _mget, _msearch and _bulk APIs (and only those) by enabling the ExtendedAcl option for the service. When it is enabled, users can use these APIs as long as all operations only target indexes they have been granted access to",
 		Optional:    true,
 		Default:     true,
+		Description: complex("Index rules can be applied in a limited fashion to the _mget, _msearch and _bulk APIs (and only those) by enabling the ExtendedAcl option for the service. When it is enabled, users can use these APIs as long as all operations only target indexes they have been granted access to").defaultValue(10).build(),
 	},
 }
 
 func resourceElasticsearchACLConfig() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Elasticsearch ACL Config resource allows the configuration of ACL management on an Aiven Elasticsearch service.",
 		CreateContext: resourceElasticsearchACLConfigUpdate,
 		ReadContext:   resourceElasticsearchACLConfigRead,
 		UpdateContext: resourceElasticsearchACLConfigUpdate,

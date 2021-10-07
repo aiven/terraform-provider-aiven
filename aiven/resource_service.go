@@ -54,27 +54,23 @@ func availableServiceTypes() []string {
 
 func serviceCommonSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"project": {
-			Type:        schema.TypeString,
-			Required:    true,
-			Description: "Target project",
-			ForceNew:    true,
-		},
+		"project": commonSchemaProjectReference,
+
 		"cloud_name": {
 			Type:        schema.TypeString,
 			Optional:    true,
-			Description: "Cloud the service runs in",
+			Description: "Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).",
 		},
 		"plan": {
 			Type:        schema.TypeString,
 			Optional:    true,
-			Description: "Subscription plan",
+			Description: "Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).",
 		},
 		"service_name": {
 			Type:        schema.TypeString,
 			Required:    true,
-			Description: "Service name",
 			ForceNew:    true,
+			Description: "Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.",
 		},
 		"service_type": {
 			Type:        schema.TypeString,
@@ -84,7 +80,7 @@ func serviceCommonSchema() map[string]*schema.Schema {
 		"project_vpc_id": {
 			Type:        schema.TypeString,
 			Optional:    true,
-			Description: "Identifier of the VPC the service should be in, if any",
+			Description: "Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.",
 		},
 		"maintenance_window_dow": {
 			Type:        schema.TypeString,
@@ -105,7 +101,7 @@ func serviceCommonSchema() map[string]*schema.Schema {
 		"termination_protection": {
 			Type:        schema.TypeBool,
 			Optional:    true,
-			Description: "Prevent service from being deleted. It is recommended to have this enabled for all services.",
+			Description: "Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.",
 		},
 		"service_uri": {
 			Type:        schema.TypeString,
@@ -116,12 +112,12 @@ func serviceCommonSchema() map[string]*schema.Schema {
 		"service_host": {
 			Type:        schema.TypeString,
 			Computed:    true,
-			Description: "Service hostname",
+			Description: "The hostname of the service.",
 		},
 		"service_port": {
 			Type:        schema.TypeInt,
 			Computed:    true,
-			Description: "Service port",
+			Description: "The port of the service",
 		},
 		"service_password": {
 			Type:        schema.TypeString,
@@ -137,7 +133,7 @@ func serviceCommonSchema() map[string]*schema.Schema {
 		"state": {
 			Type:        schema.TypeString,
 			Computed:    true,
-			Description: "Service state",
+			Description: "Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`.",
 		},
 		"service_integrations": {
 			Type:        schema.TypeList,
@@ -153,7 +149,7 @@ func serviceCommonSchema() map[string]*schema.Schema {
 					"integration_type": {
 						Type:        schema.TypeString,
 						Required:    true,
-						Description: "Type of the service integration. The only supported value at the moment is 'read_replica'",
+						Description: "Type of the service integration. The only supported value at the moment is `read_replica`",
 					},
 				},
 			},
@@ -341,6 +337,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 			},
 		},
 	},
+
 	"service_port": {
 		Type:        schema.TypeInt,
 		Computed:    true,
@@ -360,14 +357,13 @@ var aivenServiceSchema = map[string]*schema.Schema{
 	"state": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Service state",
+		Description: "Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` and `RUNNING`.",
 	},
 	"cassandra": {
 		Type:        schema.TypeList,
 		MaxItems:    1,
 		Computed:    true,
 		Description: "Cassandra specific server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
@@ -388,7 +384,6 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		MaxItems:    1,
 		Computed:    true,
 		Description: "Elasticsearch specific server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"kibana_uri": {
@@ -416,7 +411,6 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		MaxItems:    1,
 		Computed:    true,
 		Description: "Opensearch specific server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"opensearch_dashboards_uri": {
@@ -444,7 +438,6 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		MaxItems:    1,
 		Computed:    true,
 		Description: "Grafana specific server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
@@ -465,7 +458,6 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		MaxItems:    1,
 		Computed:    true,
 		Description: "InfluxDB specific server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"database_name": {
@@ -549,7 +541,6 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		MaxItems:    1,
 		Computed:    true,
 		Description: "Kafka Connect specific server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
@@ -570,7 +561,6 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		MaxItems:    1,
 		Computed:    true,
 		Description: "MySQL specific server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
@@ -591,7 +581,6 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		MaxItems:    1,
 		Computed:    true,
 		Description: "Kafka MirrorMaker 2 specific server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
@@ -612,7 +601,6 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		MaxItems:    1,
 		Computed:    true,
 		Description: "PostgreSQL specific server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"replica_uri": {
@@ -678,7 +666,6 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		MaxItems:    1,
 		Computed:    true,
 		Description: "Redis specific server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
@@ -729,10 +716,12 @@ var aivenServiceSchema = map[string]*schema.Schema{
 
 func resourceService() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceServiceCreateWrapper("service"),
-		ReadContext:   resourceServiceRead,
-		UpdateContext: resourceServiceUpdate,
-		DeleteContext: resourceServiceDelete,
+		Description:        "The Service resource allows the creation and management of Aiven Services.",
+		DeprecationMessage: "Please use the specific service resources instead of this resource.",
+		CreateContext:      resourceServiceCreateWrapper("service"),
+		ReadContext:        resourceServiceRead,
+		UpdateContext:      resourceServiceUpdate,
+		DeleteContext:      resourceServiceDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceState,
 		},

@@ -7,6 +7,7 @@ import (
 func datasourceGrafana() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceServiceRead,
+		Description: "The Grafana data source provides information about the existing Aiven Grafana service.",
 		Schema:      resourceSchemaAsDatasourceSchema(grafanaSchema(), "project", "service_name"),
 	}
 }

@@ -17,31 +17,29 @@ var compatibilityLevels = []string{
 	"FORWARD_TRANSITIVE",
 	"FULL",
 	"FULL_TRANSITIVE",
-	"NONE"}
+	"NONE",
+}
 
 var aivenKafkaSchemaConfigurationSchema = map[string]*schema.Schema{
-	"project": {
-		Type:        schema.TypeString,
-		Description: "Project to link the Kafka Schemas Configuration to",
-		Required:    true,
-		ForceNew:    true,
-	},
-	"service_name": {
-		Type:        schema.TypeString,
-		Description: "Service to link the Kafka Schemas Configuration to",
-		Required:    true,
-		ForceNew:    true,
-	},
+	"project":      commonSchemaProjectReference,
+	"service_name": commonSchemaServiceNameReference,
+
 	"compatibility_level": {
 		Type:         schema.TypeString,
-		Description:  "Kafka Schemas compatibility level",
-		Required:     true,
+		Optional:     true,
 		ValidateFunc: validation.StringInSlice(compatibilityLevels, false),
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			// When a compatibility level is not set to any value and consequently is null (empty string).
+			// Allow ignoring those.
+			return new == ""
+		},
+		Description: complex("Kafka Schemas compatibility level.").possibleValues(stringSliceToInterfaceSlice(compatibilityLevels)...).build(),
 	},
 }
 
 func resourceKafkaSchemaConfiguration() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Kafka Schema Configuration resource allows the creation and management of Aiven Kafka Schema Configurations.",
 		CreateContext: resourceKafkaSchemaConfigurationCreate,
 		UpdateContext: resourceKafkaSchemaConfigurationUpdate,
 		ReadContext:   resourceKafkaSchemaConfigurationRead,

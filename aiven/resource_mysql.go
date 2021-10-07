@@ -14,7 +14,6 @@ func aivenMySQLSchema() map[string]*schema.Schema {
 		MaxItems:    1,
 		Computed:    true,
 		Description: "MySQL specific server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
@@ -35,6 +34,7 @@ func aivenMySQLSchema() map[string]*schema.Schema {
 }
 func resourceMySQL() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The MySQL resource allows the creation and management of Aiven MySQL services.",
 		CreateContext: resourceServiceCreateWrapper(ServiceTypeMySQL),
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,

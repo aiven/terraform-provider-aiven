@@ -11,42 +11,33 @@ import (
 )
 
 var aivenElasticsearchACLRuleSchema = map[string]*schema.Schema{
-	"project": {
-		Type:        schema.TypeString,
-		Description: "Project to link the Elasticsearch ACLs to",
-		Required:    true,
-		ForceNew:    true,
-	},
-	"service_name": {
-		Type:        schema.TypeString,
-		Description: "Service to link the Elasticsearch ACLs to",
-		Required:    true,
-		ForceNew:    true,
-	},
+	"project":      commonSchemaProjectReference,
+	"service_name": commonSchemaServiceNameReference,
 	"username": {
 		Type:         schema.TypeString,
-		Description:  "Username for the ACL entry",
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringLenBetween(1, 40),
+		Description:  complex("The username for the ACL entry.").maxLen(40).forceNew().referenced().build(),
 	},
 	"index": {
 		Type:         schema.TypeString,
-		Description:  "Elasticsearch index pattern",
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringLenBetween(1, 249),
+		Description:  complex("The index pattern for the ACL entry.").maxLen(249).forceNew().build(),
 	},
 	"permission": {
 		Type:         schema.TypeString,
-		Description:  "Elasticsearch permission",
 		Required:     true,
 		ValidateFunc: validation.StringInSlice([]string{"deny", "admin", "read", "readwrite", "write"}, false),
+		Description:  complex("The permission for the ACL entry.").possibleValues("deny", "admin", "read", "readwrite", "write").build(),
 	},
 }
 
 func resourceElasticsearchACLRule() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Elasticsearch ACL Rule resource models a single ACL Rule for an Aiven Elasticsearch service.",
 		CreateContext: resourceElasticsearchACLRuleUpdate,
 		ReadContext:   resourceElasticsearchACLRuleRead,
 		UpdateContext: resourceElasticsearchACLRuleUpdate,

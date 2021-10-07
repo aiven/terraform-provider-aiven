@@ -14,7 +14,6 @@ func grafanaSchema() map[string]*schema.Schema {
 		MaxItems:    1,
 		Computed:    true,
 		Description: "Grafana server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
@@ -36,6 +35,7 @@ func grafanaSchema() map[string]*schema.Schema {
 
 func resourceGrafana() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Grafana resource allows the creation and management of Aiven Grafana services.",
 		CreateContext: resourceServiceCreateWrapper(ServiceTypeGrafana),
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,

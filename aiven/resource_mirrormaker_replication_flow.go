@@ -13,37 +13,35 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
+var (
+	defaultReplicationPolicy = "org.apache.kafka.connect.mirror.DefaultReplicationPolicy"
+
+	replicationPolicies = []string{
+		"org.apache.kafka.connect.mirror.DefaultReplicationPolicy",
+		"org.apache.kafka.connect.mirror.IdentityReplicationPolicy",
+	}
+)
+
 var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
-	"project": {
-		Type:         schema.TypeString,
-		Required:     true,
-		Description:  "Project to link the kafka topic to",
-		ForceNew:     true,
-		ValidateFunc: validation.StringLenBetween(1, 63),
-	},
-	"service_name": {
-		Type:         schema.TypeString,
-		Required:     true,
-		Description:  "Service to link the kafka topic to",
-		ForceNew:     true,
-		ValidateFunc: validation.StringLenBetween(1, 63),
-	},
+	"project":      commonSchemaProjectReference,
+	"service_name": commonSchemaProjectReference,
+
 	"enable": {
 		Type:        schema.TypeBool,
 		Required:    true,
-		Description: "Enable of disable replication flows for a service",
+		Description: "Enable of disable replication flows for a service.",
 	},
 	"source_cluster": {
 		Type:         schema.TypeString,
 		Required:     true,
-		Description:  "Source cluster alias",
 		ValidateFunc: validation.StringLenBetween(1, 128),
+		Description:  complex("Source cluster alias.").maxLen(128).build(),
 	},
 	"target_cluster": {
 		Type:         schema.TypeString,
 		Required:     true,
-		Description:  "Target cluster alias",
 		ValidateFunc: validation.StringLenBetween(1, 128),
+		Description:  complex("Target cluster alias.").maxLen(128).build(),
 	},
 	"topics": {
 		Type:        schema.TypeList,
@@ -64,37 +62,36 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 		},
 	},
 	"replication_policy_class": {
-		Type:        schema.TypeString,
-		Optional:    true,
-		Description: "Replication policy class",
-		Default:     "org.apache.kafka.connect.mirror.DefaultReplicationPolicy",
-		ValidateFunc: validation.StringInSlice([]string{
-			"org.apache.kafka.connect.mirror.DefaultReplicationPolicy",
-			"org.apache.kafka.connect.mirror.IdentityReplicationPolicy"}, false),
+		Type:         schema.TypeString,
+		Optional:     true,
+		Default:      defaultReplicationPolicy,
+		ValidateFunc: validation.StringInSlice(replicationPolicies, false),
+		Description:  complex("Replication policy class.").defaultValue(defaultReplicationPolicy).possibleValues(stringSliceToInterfaceSlice(replicationPolicies)...).build(),
 	},
 	"sync_group_offsets_enabled": {
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     false,
-		Description: "Sync consumer group offsets",
+		Description: complex("Sync consumer group offsets.").defaultValue(false).build(),
 	},
 	"sync_group_offsets_interval_seconds": {
 		Type:         schema.TypeInt,
 		Optional:     true,
-		Description:  "Frequency of consumer group offset sync",
 		ValidateFunc: validation.IntAtLeast(1),
 		Default:      1,
+		Description:  complex("Frequency of consumer group offset sync.").defaultValue(1).build(),
 	},
 	"emit_heartbeats_enabled": {
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     false,
-		Description: "Emit heartbeats enabled",
+		Description: complex("Emit heartbeats enabled.").defaultValue(false).build(),
 	},
 }
 
 func resourceMirrorMakerReplicationFlow() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The MirrorMaker 2 Replication Flow resource allows the creation and management of MirrorMaker 2 Replication Flows on Aiven Cloud.",
 		CreateContext: resourceMirrorMakerReplicationFlowCreate,
 		ReadContext:   resourceMirrorMakerReplicationFlowRead,
 		UpdateContext: resourceMirrorMakerReplicationFlowUpdate,

@@ -10,9 +10,7 @@ func resourceSchemaAsDatasourceSchema(d map[string]*schema.Schema, required ...s
 	for k, v := range d {
 		s[k] = &schema.Schema{
 			Type:        v.Type,
-			Required:    false,
-			Computed:    v.Computed,
-			Optional:    true,
+			Computed:    true,
 			Description: v.Description,
 			Sensitive:   v.Sensitive,
 			Elem:        v.Elem,

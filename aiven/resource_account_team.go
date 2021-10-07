@@ -12,35 +12,34 @@ import (
 var aivenAccountTeamSchema = map[string]*schema.Schema{
 	"account_id": {
 		Type:        schema.TypeString,
-		Description: "Account id",
 		Required:    true,
+		Description: "The unique account id",
 	},
 	"team_id": {
 		Type:        schema.TypeString,
-		Description: "Account team id",
 		Computed:    true,
+		Description: "The auto-generated unique account team id",
 	},
 	"name": {
 		Type:        schema.TypeString,
-		Description: "Account team name",
 		Required:    true,
+		Description: "The account team name",
 	},
 	"create_time": {
 		Type:        schema.TypeString,
-		Description: "Time of creation",
-		Optional:    true,
 		Computed:    true,
+		Description: "Time of creation",
 	},
 	"update_time": {
 		Type:        schema.TypeString,
-		Description: "Time of last update",
-		Optional:    true,
 		Computed:    true,
+		Description: "Time of last update",
 	},
 }
 
 func resourceAccountTeam() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Account Team resource allows the creation and management of an Account Team.",
 		CreateContext: resourceAccountTeamCreate,
 		ReadContext:   resourceAccountTeamRead,
 		UpdateContext: resourceAccountTeamUpdate,

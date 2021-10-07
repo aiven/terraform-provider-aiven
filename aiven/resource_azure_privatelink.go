@@ -14,24 +14,15 @@ import (
 )
 
 var aivenAzurePrivatelinkSchema = map[string]*schema.Schema{
-	"project": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Project name",
-		ForceNew:    true,
-	},
-	"service_name": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Service name",
-		ForceNew:    true,
-	},
+	"project":      commonSchemaProjectReference,
+	"service_name": commonSchemaServiceNameReference,
+
 	"user_subscription_ids": {
 		Type:        schema.TypeSet,
 		Required:    true,
-		Description: "Subscription ID allow list",
 		Elem:        &schema.Schema{Type: schema.TypeString},
 		MaxItems:    16,
+		Description: complex("A List of allowed Subscription IDs").maxLen(16).build(),
 	},
 	"azure_service_id": {
 		Type:        schema.TypeString,
@@ -57,6 +48,7 @@ var aivenAzurePrivatelinkSchema = map[string]*schema.Schema{
 
 func resourceAzurePrivatelink() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Azure Privatelink resource allows the creation and management of Aiven Azure Privatelink for a services.",
 		CreateContext: resourceAzurePrivatelinkCreate,
 		ReadContext:   resourceAzurePrivatelinkRead,
 		UpdateContext: resourceAzurePrivatelinkUpdate,

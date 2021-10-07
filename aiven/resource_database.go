@@ -25,52 +25,41 @@ func handleLcDefaults(_, old, new string, _ *schema.ResourceData) bool {
 }
 
 var aivenDatabaseSchema = map[string]*schema.Schema{
-	"project": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Project to link the database to",
-		ForceNew:    true,
-	},
-	"service_name": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Service to link the database to",
-		ForceNew:    true,
-	},
+	"project":      commonSchemaProjectReference,
+	"service_name": commonSchemaServiceNameReference,
 	"database_name": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "Service database name",
 		ForceNew:    true,
+		Description: complex("The name of the service database.").forceNew().build(),
 	},
 	"lc_collate": {
 		Type:             schema.TypeString,
 		Optional:         true,
 		Default:          defaultLC,
-		Description:      "Default string sort order (LC_COLLATE) of the database. Default value: en_US.UTF-8",
 		ForceNew:         true,
 		DiffSuppressFunc: handleLcDefaults,
+		Description:      complex("Default string sort order (`LC_COLLATE`) of the database.").defaultValue(defaultLC).forceNew().build(),
 	},
 	"lc_ctype": {
 		Type:             schema.TypeString,
 		Optional:         true,
 		Default:          defaultLC,
-		Description:      "Default character classification (LC_CTYPE) of the database. Default value: en_US.UTF-8",
 		ForceNew:         true,
 		DiffSuppressFunc: handleLcDefaults,
+		Description:      complex("Default character classification (`LC_CTYPE`) of the database.").defaultValue(defaultLC).forceNew().build(),
 	},
 	"termination_protection": {
-		Type:     schema.TypeBool,
-		Optional: true,
-		Default:  false,
-		Description: `It is a Terraform client-side deletion protections, which prevents the database
-			from being deleted by Terraform. It is recommended to enable this for any production
-			databases containing critical data.`,
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Default:     false,
+		Description: complex(`It is a Terraform client-side deletion protections, which prevents the database from being deleted by Terraform. It is recommended to enable this for any production databases containing critical data.`).defaultValue(false).build(),
 	},
 }
 
 func resourceDatabase() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Database resource allows the creation and management of Aiven Databases.",
 		CreateContext: resourceDatabaseCreate,
 		ReadContext:   resourceDatabaseRead,
 		DeleteContext: resourceDatabaseDelete,

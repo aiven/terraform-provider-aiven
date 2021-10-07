@@ -15,22 +15,12 @@ import (
 )
 
 var aivenAWSPrivatelinkSchema = map[string]*schema.Schema{
-	"project": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Project name",
-		ForceNew:    true,
-	},
-	"service_name": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Service name",
-		ForceNew:    true,
-	},
+	"project":      commonSchemaProjectReference,
+	"service_name": commonSchemaServiceNameReference,
 	"principals": {
 		Type:        schema.TypeSet,
 		Required:    true,
-		Description: "List of principals",
+		Description: "List of allowed principals",
 		Elem:        &schema.Schema{Type: schema.TypeString},
 	},
 	"aws_service_id": {
@@ -47,6 +37,7 @@ var aivenAWSPrivatelinkSchema = map[string]*schema.Schema{
 
 func resourceAWSPrivatelink() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The AWS Privatelink resource allows the creation and management of Aiven AWS Privatelink for a services.",
 		CreateContext: resourceAWSPrivatelinkCreate,
 		ReadContext:   resourceAWSPrivatelinkRead,
 		UpdateContext: resourceAWSPrivatelinkUpdate,

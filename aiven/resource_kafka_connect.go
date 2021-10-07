@@ -14,7 +14,6 @@ func aivenKafkaConnectSchema() map[string]*schema.Schema {
 		MaxItems:    1,
 		Computed:    true,
 		Description: "Kafka Connect server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
@@ -36,6 +35,7 @@ func aivenKafkaConnectSchema() map[string]*schema.Schema {
 
 func resourceKafkaConnect() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Kafka Connect resource allows the creation and management of Aiven Kafka Connect services.",
 		CreateContext: resourceServiceCreateWrapper(ServiceTypeKafkaConnect),
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,

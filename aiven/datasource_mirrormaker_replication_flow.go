@@ -10,6 +10,7 @@ import (
 func datasourceMirrorMakerReplicationFlowTopic() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceMirrorMakerReplicationFlowRead,
+		Description: "The MirrorMaker 2 Replication Flow data source provides information about the existing MirrorMaker 2 Replication Flow on Aiven Cloud.",
 		Schema: resourceSchemaAsDatasourceSchema(
 			aivenMirrorMakerReplicationFlowSchema,
 			"project", "service_name", "source_cluster", "target_cluster"),

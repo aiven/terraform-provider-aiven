@@ -13,29 +13,36 @@ import (
 var aivenAccountTeamProjectSchema = map[string]*schema.Schema{
 	"account_id": {
 		Type:        schema.TypeString,
-		Description: "Account id",
 		Required:    true,
+		Description: "The unique account id",
 	},
 	"team_id": {
 		Type:        schema.TypeString,
-		Description: "Account team id",
 		Required:    true,
+		Description: "An account team id",
 	},
 	"project_name": {
 		Type:        schema.TypeString,
-		Description: "Account team project name",
 		Optional:    true,
+		Description: "The name of an already existing project",
 	},
 	"team_type": {
 		Type:         schema.TypeString,
-		Description:  "Account team project type, can one of the following values: admin, developer, operator and read_only",
 		Optional:     true,
 		ValidateFunc: validation.StringInSlice([]string{"admin", "developer", "operator", "read_only"}, false),
+		Description:  complex("The Account team project type").possibleValues("admin", "developer", "operator", "read_only").build(),
 	},
 }
 
 func resourceAccountTeamProject() *schema.Resource {
 	return &schema.Resource{
+		Description: `
+The Account Team Project resource allows the creation and management of an Account Team Project.
+
+It is intended to link an existing project to the existing account team.
+It is important to note that the project should have an ` + "`account_id`" + ` property set equal to the
+account team you are trying to link to this project.
+`,
 		CreateContext: resourceAccountTeamProjectCreate,
 		ReadContext:   resourceAccountTeamProjectRead,
 		UpdateContext: resourceAccountTeamProjectUpdate,
@@ -43,7 +50,6 @@ func resourceAccountTeamProject() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceAccountTeamProjectState,
 		},
-
 		Schema: aivenAccountTeamProjectSchema,
 	}
 }

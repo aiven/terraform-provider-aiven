@@ -12,6 +12,7 @@ import (
 func datasourceServiceIntegration() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceServiceIntegrationRead,
+		Description: "The Service Integration data source provides information about the existing Aiven Service Integration.",
 		Schema: resourceSchemaAsDatasourceSchema(aivenServiceIntegrationSchema,
 			"project", "integration_type", "source_service_name", "destination_service_name"),
 	}

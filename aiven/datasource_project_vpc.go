@@ -12,6 +12,7 @@ import (
 func datasourceProjectVPC() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceProjectVPCRead,
+		Description: "The Project VPC data source provides information about the existing Aiven Project VPC.",
 		Schema: resourceSchemaAsDatasourceSchema(aivenProjectVPCSchema,
 			"project", "cloud_name"),
 	}

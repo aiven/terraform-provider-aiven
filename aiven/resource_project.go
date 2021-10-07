@@ -16,138 +16,133 @@ import (
 )
 
 var aivenProjectSchema = map[string]*schema.Schema{
-	"billing_address": {
-		Type:             schema.TypeString,
-		Description:      "Billing name and address of the project",
-		Optional:         true,
-		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
-		Deprecated:       "Please use aiven_billing_group resource to set this value.",
-	},
-	"billing_emails": {
-		Type:             schema.TypeSet,
-		Description:      "Billing contact emails of the project",
-		Elem:             &schema.Schema{Type: schema.TypeString},
-		Optional:         true,
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Deprecated:       "Please use aiven_billing_group resource to set this value.",
-	},
-	"billing_extra_text": {
-		Type:             schema.TypeString,
-		Description:      "Extra text to be included in all project invoices, e.g. purchase order or cost center number",
-		ValidateFunc:     validation.StringLenBetween(0, 1000),
-		Optional:         true,
-		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
-		Deprecated:       "Please use aiven_billing_group resource to set this value.",
-	},
 	"ca_cert": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Project root CA. This is used by some services like Kafka to sign service certificate",
-		Optional:    true,
 		Sensitive:   true,
-	},
-	"card_id": {
-		Type:             schema.TypeString,
-		Optional:         true,
-		Description:      "Credit card ID",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Deprecated:       "Please use aiven_billing_group resource to set this value.",
+		Description: "The CA certificate of the project. This is required for configuring clients that connect to certain services like Kafka.",
 	},
 	"account_id": {
 		Type:             schema.TypeString,
 		Optional:         true,
-		Description:      "Account ID",
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Description:      complex("An optional property to link a project to already an existing account by using account ID.").referenced().build(),
 	},
 	"copy_from_project": {
 		Type:             schema.TypeString,
 		Optional:         true,
-		Description:      "Copy properties from another project. Only has effect when a new project is created.",
 		DiffSuppressFunc: createOnlyDiffSuppressFunc,
+		Description:      complex("is the name of another project used to copy billing information and some other project attributes like technical contacts from. This is mostly relevant when an existing project has billing type set to invoice and that needs to be copied over to a new project. (Setting billing is otherwise not allowed over the API.) This only has effect when the project is created.").referenced().build(),
 	},
 	"use_source_project_billing_group": {
 		Type:             schema.TypeBool,
 		Optional:         true,
-		Description:      "Use the same billing group that is used in source project.",
 		DiffSuppressFunc: createOnlyDiffSuppressFunc,
+		Description:      "Use the same billing group that is used in source project.",
 	},
 	"add_account_owners_admin_access": {
 		Type:             schema.TypeBool,
 		Optional:         true,
-		Description:      "If account_id is set, grant account owner team admin access to the new project.",
 		DiffSuppressFunc: createOnlyDiffSuppressFunc,
 		Default:          true,
-	},
-	"country_code": {
-		Type:             schema.TypeString,
-		Optional:         true,
-		Description:      "Billing country code of the project",
-		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
-		Deprecated:       "Please use aiven_billing_group resource to set this value.",
+		Description:      complex("If account_id is set, grant account owner team admin access to the new project.").defaultValue(true).build(),
 	},
 	"project": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "Project name",
+		Description: "Defines the name of the project. Name must be globally unique (between all Aiven customers) and cannot be changed later without destroying and re-creating the project, including all sub-resources.",
 	},
 	"technical_emails": {
 		Type:        schema.TypeSet,
-		Description: "Technical contact emails of the project",
 		Elem:        &schema.Schema{Type: schema.TypeString},
 		Optional:    true,
+		Description: "Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability. It is  good practice to keep this up-to-date to be aware of any potential issues with your project.",
 	},
 	"default_cloud": {
 		Type:             schema.TypeString,
 		Optional:         true,
-		Description:      "Default cloud for new services",
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-	},
-	"billing_currency": {
-		Type:             schema.TypeString,
-		Optional:         true,
-		Description:      "Billing currency",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Deprecated:       "Please use aiven_billing_group resource to set this value.",
+		Description:      "Defines the default cloud provider and region where services are hosted. This can be changed freely after the project is created. This will not affect existing services.",
 	},
 	"available_credits": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Available credits",
 		Optional:    true,
-	},
-	"country": {
-		Type:        schema.TypeString,
-		Computed:    true,
-		Description: "Billing country",
-		Deprecated:  "Please use aiven_billing_group resource to set this value.",
+		Description: "The amount of platform credits available to the project. This could be your free trial or other promotional credits.",
 	},
 	"estimated_balance": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Estimated balance",
+		Description: "The current accumulated bill for this project in the current billing period.",
 	},
 	"payment_method": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Payment method",
-	},
-	"vat_id": {
-		Type:             schema.TypeString,
-		Optional:         true,
-		Description:      "EU VAT Identification Number",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Deprecated:       "Please use aiven_billing_group resource to set this value.",
+		Description: "The method of invoicing used for payments for this project, e.g. `card`.",
 	},
 	"billing_group": {
 		Type:             schema.TypeString,
 		Optional:         true,
-		Description:      "Billing group Id",
+		Description:      complex("The id of the billing group that is linked to this project.").referenced().build(),
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+	},
+	// deprecated fields
+	"vat_id": {
+		Type:             schema.TypeString,
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Deprecated:       "Please use aiven_billing_group resource to set this value.",
+		Description:      complex("EU VAT Identification Number.").deprecate("Please use aiven_billing_group resource to set this value.").build(),
+	},
+	"billing_currency": {
+		Type:             schema.TypeString,
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Deprecated:       "Please use aiven_billing_group resource to set this value.",
+		Description:      complex("Billing currency.").deprecate("Please use aiven_billing_group resource to set this value.").build(),
+	},
+	"country_code": {
+		Type:             schema.TypeString,
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
+		Deprecated:       "Please use aiven_billing_group resource to set this value.",
+		Description:      complex("Billing country code of the project.").deprecate("Please use aiven_billing_group resource to set this value.").build(),
+	},
+	"billing_address": {
+		Type:             schema.TypeString,
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
+		Deprecated:       "Please use aiven_billing_group resource to set this value.",
+		Description:      complex("Billing name and address of the project.").deprecate("Please use aiven_billing_group resource to set this value.").build(),
+	},
+	"billing_emails": {
+		Type:             schema.TypeSet,
+		Elem:             &schema.Schema{Type: schema.TypeString},
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Deprecated:       "Please use aiven_billing_group resource to set this value.",
+		Description:      complex("Billing contact emails of the project.").deprecate("Please use aiven_billing_group resource to set this value.").build(),
+	},
+	"billing_extra_text": {
+		Type:             schema.TypeString,
+		ValidateFunc:     validation.StringLenBetween(0, 1000),
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectNoChangeDiffSuppressFunc,
+		Deprecated:       "Please use aiven_billing_group resource to set this value.",
+		Description:      complex("Extra text to be included in all project invoices, e.g. purchase order or cost center number.").deprecate("Please use aiven_billing_group resource to set this value.").build(),
+	},
+	"card_id": {
+		Type:             schema.TypeString,
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Deprecated:       "Please use aiven_billing_group resource to set this value.",
+		Description:      complex("Either the full card UUID or the last 4 digits of the card. As the full UUID is not shown in the UI it is typically easier to use the last 4 digits to identify the card. This can be omitted if `copy_from_project` is used to copy billing info from another project.").deprecate("Please use aiven_billing_group resource to set this value.").build(),
 	},
 }
 
 func resourceProject() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Project resource allows the creation and management of Aiven Projects.",
 		CreateContext: resourceProjectCreate,
 		ReadContext:   resourceProjectRead,
 		UpdateContext: resourceProjectUpdate,
@@ -548,9 +543,6 @@ func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client,
 		return diag.FromErr(err)
 	}
 	if err := d.Set("available_credits", project.AvailableCredits); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("country_code", project.CountryCode); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("estimated_balance", project.EstimatedBalance); err != nil {

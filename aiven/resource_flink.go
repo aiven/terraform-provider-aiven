@@ -46,6 +46,7 @@ func aivenFlinkSchema() map[string]*schema.Schema {
 
 func resourceFlink() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Flink resource allows the creation and management of Aiven Flink services.",
 		CreateContext: resourceServiceCreateWrapper(ServiceTypeFlink),
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,

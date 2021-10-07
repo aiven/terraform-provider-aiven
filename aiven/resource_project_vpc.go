@@ -15,33 +15,30 @@ import (
 )
 
 var aivenProjectVPCSchema = map[string]*schema.Schema{
-	"project": {
-		Description: "The project the VPC belongs to",
-		ForceNew:    true,
-		Required:    true,
-		Type:        schema.TypeString,
-	},
+	"project": commonSchemaProjectReference,
+
 	"cloud_name": {
-		Description: "Cloud the VPC is in",
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
+		Description: complex("Defines where the cloud provider and region where the service is hosted in. See the Service resource for additional information.").forceNew().build(),
 	},
 	"network_cidr": {
-		Description: "Network address range used by the VPC like 192.168.0.0/24",
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
+		Description: "Network address range used by the VPC like 192.168.0.0/24",
 	},
 	"state": {
 		Computed:    true,
-		Description: "State of the VPC (APPROVED, ACTIVE, DELETING, DELETED)",
 		Type:        schema.TypeString,
+		Description: complex("State of the VPC.").possibleValues("APPROVED", "ACTIVE", "DELETING", "DELETED").build(),
 	},
 }
 
 func resourceProjectVPC() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Project VPC resource allows the creation and management of Aiven Project VPCs.",
 		CreateContext: resourceProjectVPCCreate,
 		ReadContext:   resourceProjectVPCRead,
 		DeleteContext: resourceProjectVPCDelete,

@@ -14,7 +14,6 @@ func influxDBSchema() map[string]*schema.Schema {
 		MaxItems:    1,
 		Computed:    true,
 		Description: "InfluxDB server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"database_name": {
@@ -42,6 +41,7 @@ func influxDBSchema() map[string]*schema.Schema {
 
 func resourceInfluxDB() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The InfluxDB resource allows the creation and management of Aiven InfluxDB services.",
 		CreateContext: resourceServiceCreateWrapper(ServiceTypeInfluxDB),
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,

@@ -14,7 +14,6 @@ func aivenM3AggregatorSchema() map[string]*schema.Schema {
 		MaxItems:    1,
 		Computed:    true,
 		Description: "M3 aggregator specific server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
@@ -35,6 +34,7 @@ func aivenM3AggregatorSchema() map[string]*schema.Schema {
 }
 func resourceM3Aggregator() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The M3 Aggregator resource allows the creation and management of Aiven M3 Aggregator services.",
 		CreateContext: resourceServiceCreateWrapper(ServiceTypeM3Aggregator),
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,
