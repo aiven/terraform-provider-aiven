@@ -1,6 +1,10 @@
 package main
 
 import (
+	"context"
+	"flag"
+	"log"
+
 	"github.com/aiven/terraform-provider-aiven/aiven"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 )
@@ -10,6 +14,21 @@ import (
 //go:generate ./aiven/templates/gen.sh endpoint integration_endpoints_user_config_schema.json
 
 func main() {
-	plugin.Serve(&plugin.ServeOpts{
-		ProviderFunc: aiven.Provider})
+	var (
+		debugMode bool
+	)
+
+	flag.BoolVar(&debugMode, "debug", false, "set to true to run the provider with support for debuggers like delve")
+	flag.Parse()
+
+	opts := &plugin.ServeOpts{ProviderFunc: aiven.Provider}
+
+	if debugMode {
+		if err := plugin.Debug(context.Background(), "registry.terraform.io/aiven/aiven", opts); err != nil {
+			log.Fatal(err.Error())
+		}
+		return
+	}
+
+	plugin.Serve(opts)
 }
