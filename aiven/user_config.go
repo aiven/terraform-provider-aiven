@@ -67,6 +67,8 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 	case "array":
 		var itemType schema.ValueType
 		itemDefinition := definition["items"].(map[string]interface{})
+		itemDefinition = selectFirstSchemaFromOneOf(itemDefinition)
+
 		typeString := getAivenSchemaType(itemDefinition["type"])
 		switch typeString {
 		case "string", "integer", "boolean", "number":
@@ -405,6 +407,8 @@ func convertTerraformUserConfigValueToAPICompatibleFormatArray(value interface{}
 
 		values := make([]interface{}, len(value.([]interface{})))
 		itemDefinition := definition["items"].(map[string]interface{})
+		itemDefinition = selectFirstSchemaFromOneOf(itemDefinition)
+
 		for idx, arrValue := range asArray {
 			arrValueConverted, _ := convertTerraformUserConfigValueToAPICompatibleFormat(
 				serviceType, newResource, key, arrValue, itemDefinition)
@@ -418,6 +422,15 @@ func convertTerraformUserConfigValueToAPICompatibleFormatArray(value interface{}
 	}
 
 	return convertedValue, omit, nil
+}
+
+func selectFirstSchemaFromOneOf(itemDefinition map[string]interface{}) map[string]interface{} {
+	if oneOf, ok := itemDefinition["oneOf"]; ok {
+		if types, ok := oneOf.([]interface{}); ok && len(types) > 0 {
+			itemDefinition = types[0].(map[string]interface{})
+		}
+	}
+	return itemDefinition
 }
 
 func convertTerraformUserConfigValueToAPICompatibleFormatObject(
