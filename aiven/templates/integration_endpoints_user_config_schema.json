@@ -55,6 +55,20 @@
         "title": "Disable consumer group metrics",
         "type": "boolean"
       },
+      "kafka_consumer_check_instances": {
+        "example": 8,
+        "maximum": 100,
+        "minimum": 1,
+        "title": "Number of separate instances to fetch kafka consumer statistics with",
+        "type": "integer"
+      },
+      "kafka_consumer_stats_timeout": {
+        "example": 60,
+        "maximum": 600,
+        "minimum": 2,
+        "title": "Number of seconds that datadog will wait to get consumer statistics from brokers",
+        "type": "integer"
+      },
       "max_partition_contexts": {
         "example": 32000,
         "maximum": 200000,
@@ -394,7 +408,7 @@
         "pattern": "^[a-z0-9\\-@_]{5,32}$",
         "title": "Jolokia basic authentication username",
         "type": "string",
-        "user_error": "Must only contain a-z and 0-9 and should not contain more than 32 characters."
+        "user_error": "Must only contain a-z and 0-9"
       }
     },
     "type": "object"
@@ -416,7 +430,7 @@
         "pattern": "^[a-z0-9\\-@_]{5,32}$",
         "title": "Prometheus basic authentication username",
         "type": "string",
-        "user_error": "Must only contain a-z and 0-9 and should not contain more than 32 characters."
+        "user_error": "Must only contain a-z and 0-9"
       }
     },
     "type": "object"

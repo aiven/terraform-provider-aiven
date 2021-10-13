@@ -664,7 +664,7 @@
         "type": "array"
       },
       "number_of_task_slots": {
-        "description": "Flink taskmanager.numberOfTaskSlots. Task slots per node. For a 3 node plan, total number of task slots is 3x this value",
+        "description": "Task slots per node. For a 3 node plan, total number of task slots is 3x this value",
         "example": 1,
         "maximum": 1024,
         "minimum": 1,
@@ -672,7 +672,7 @@
         "type": "integer"
       },
       "parallelism_default": {
-        "description": "The value for Flink config parameter parallelism.default",
+        "description": "How many parallel task slots each new job is assigned. Unless you understand how Flink parallel dataflows work, please leave this at 1. Please do not set this value higher than (total number of nodes x number_of_task_slots), or every new job created will fail.",
         "example": 1,
         "maximum": 128,
         "minimum": 1,
@@ -680,7 +680,7 @@
         "type": "integer"
       },
       "restart_strategy": {
-        "description": "Default restart strategy for all jobs. The value for Flink config parameter restart-strategy",
+        "description": "failure-rate (default): Restarts the job after failure, but when failure rate (failures per time interval) is exceeded, the job eventually fails. Restart strategy waits a fixed amount of time between attempts.fixed-delay: Attempts to restart the job a given number of times before it fails. Restart strategy waits a fixed amount of time between attempts. exponential-delay: Attempts to restart the job infinitely, with increasing delay up to the maximum delay. The job never fails. off: The job fails directly and no restart is attempted.",
         "enum": [
           "failure-rate",
           "off",
@@ -692,7 +692,7 @@
         "type": "string"
       },
       "restart_strategy_delay_sec": {
-        "description": "Delay between two consecutive restart attempts if restart-strategy has been set to failure-rate. Specified in seconds",
+        "description": "Delay between two consecutive restart attempts if restart-strategy has been set to fixed-delay or failure-rate. Delaying the retries can be helpful when the program interacts with external systems where for example connections or pending transactions should reach a timeout before re-execution is attempted.",
         "example": 10,
         "maximum": 3600,
         "minimum": 1,
@@ -708,7 +708,7 @@
         "type": "integer"
       },
       "restart_strategy_max_failures": {
-        "description": "Maximum number of restarts in given time interval before failing a job if restart-strategy has been set to failure-rate.",
+        "description": "The number of times that Flink retries the execution before the job is declared as failed if restart-strategy has been set to fixed-delay or failure-rate.",
         "example": 5,
         "maximum": 128,
         "minimum": 1,
@@ -2143,7 +2143,8 @@
           "2.5",
           "2.6",
           "2.7",
-          "2.8"
+          "2.8",
+          "3.0"
         ],
         "title": "Kafka major version",
         "type": [
@@ -3002,6 +3003,49 @@
                   "pattern": "^[^\n\r]+$",
                   "title": "The (optional) name of the rule",
                   "type": "string"
+                },
+                "namespaces": {
+                  "description": "This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error.",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "description": "Filter the namespace by glob (=wildcards)",
+                        "example": "aggregated_*",
+                        "maxLength": 256,
+                        "pattern": "^[a-zA-Z_0-9*]+$",
+                        "title": "Namespaces matched by this glob",
+                        "type": "string"
+                      },
+                      {
+                        "additionalProperties": false,
+                        "description": "Filter the namespace by exact match of retention period and resolution",
+                        "required": [
+                          "retention_period_duration",
+                          "resolution"
+                        ],
+                        "resolution": {
+                          "example": "30s",
+                          "maxLength": 16,
+                          "pattern": "^[0-9]+[smhd]$",
+                          "title": "The resolution for the matching namespace",
+                          "type": "string"
+                        },
+                        "retention": {
+                          "example": "48h",
+                          "maxLength": 16,
+                          "pattern": "^[0-9]+[smhd]$",
+                          "title": "The retention period of the matching namespace",
+                          "type": "string"
+                        },
+                        "title": "Namespaces matching this storage policy",
+                        "type": "object"
+                      }
+                    ],
+                    "type": "array"
+                  },
+                  "maxItems": 10,
+                  "title": "Namespace filters for this particular rule",
+                  "type": "array"
                 },
                 "tags": {
                   "items": {
