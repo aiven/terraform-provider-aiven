@@ -400,17 +400,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 			},
 		},
 	},
-	"elasticsearch_user_config": {
-		Type:             schema.TypeList,
-		MaxItems:         1,
-		Optional:         true,
-		Description:      "Elasticsearch specific user configurable settings",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")[ServiceTypeElasticsearch].(map[string]interface{})),
-		},
-	},
+	"elasticsearch_user_config": generateServiceUserConfiguration(ServiceTypeElasticsearch),
 	"opensearch": {
 		Type:        schema.TypeList,
 		MaxItems:    1,
@@ -428,17 +418,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 			},
 		},
 	},
-	"opensearch_user_config": {
-		Type:             schema.TypeList,
-		MaxItems:         1,
-		Optional:         true,
-		Description:      "Opensearch specific user configurable settings",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")[ServiceTypeOpensearch].(map[string]interface{})),
-		},
-	},
+	"opensearch_user_config": generateServiceUserConfiguration(ServiceTypeOpensearch),
 	"grafana": {
 		Type:        schema.TypeList,
 		MaxItems:    1,
@@ -449,17 +429,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 			Schema: map[string]*schema.Schema{},
 		},
 	},
-	"grafana_user_config": {
-		Type:             schema.TypeList,
-		MaxItems:         1,
-		Optional:         true,
-		Description:      "Grafana specific user configurable settings",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")[ServiceTypeGrafana].(map[string]interface{})),
-		},
-	},
+	"grafana_user_config": generateServiceUserConfiguration(ServiceTypeGrafana),
 	"influxdb": {
 		Type:        schema.TypeList,
 		MaxItems:    1,
@@ -476,17 +446,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 			},
 		},
 	},
-	"influxdb_user_config": {
-		Type:             schema.TypeList,
-		MaxItems:         1,
-		Optional:         true,
-		Description:      "InfluxDB specific user configurable settings",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")[ServiceTypeInfluxDB].(map[string]interface{})),
-		},
-	},
+	"influxdb_user_config": generateServiceUserConfiguration(ServiceTypeInfluxDB),
 	"kafka": {
 		Type:        schema.TypeList,
 		MaxItems:    1,
@@ -533,17 +493,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 			},
 		},
 	},
-	"kafka_user_config": {
-		Type:             schema.TypeList,
-		MaxItems:         1,
-		Optional:         true,
-		Description:      "Kafka specific user configurable settings",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")[ServiceTypeKafka].(map[string]interface{})),
-		},
-	},
+	"kafka_user_config": generateServiceUserConfiguration(ServiceTypeKafka),
 	"kafka_connect": {
 		Type:        schema.TypeList,
 		MaxItems:    1,
@@ -554,17 +504,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 			Schema: map[string]*schema.Schema{},
 		},
 	},
-	"kafka_connect_user_config": {
-		Type:             schema.TypeList,
-		MaxItems:         1,
-		Optional:         true,
-		Description:      "Kafka Connect specific user configurable settings",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")[ServiceTypeKafkaConnect].(map[string]interface{})),
-		},
-	},
+	"kafka_connect_user_config": generateServiceUserConfiguration(ServiceTypeKafkaConnect),
 	"mysql": {
 		Type:        schema.TypeList,
 		MaxItems:    1,
@@ -575,17 +515,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 			Schema: map[string]*schema.Schema{},
 		},
 	},
-	"mysql_user_config": {
-		Type:             schema.TypeList,
-		MaxItems:         1,
-		Optional:         true,
-		Description:      "MySQL specific user configurable settings",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")[ServiceTypeMySQL].(map[string]interface{})),
-		},
-	},
+	"mysql_user_config": generateServiceUserConfiguration(ServiceTypeMySQL),
 	"kafka_mirrormaker": {
 		Type:        schema.TypeList,
 		MaxItems:    1,
@@ -596,17 +526,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 			Schema: map[string]*schema.Schema{},
 		},
 	},
-	"kafka_mirrormaker_user_config": {
-		Type:             schema.TypeList,
-		MaxItems:         1,
-		Optional:         true,
-		Description:      "Kafka MirrorMaker 2 specific user configurable settings",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")[ServiceTypeKafkaMirrormaker].(map[string]interface{})),
-		},
-	},
+	"kafka_mirrormaker_user_config": generateServiceUserConfiguration(ServiceTypeKafkaMirrormaker),
 	"pg": {
 		Type:        schema.TypeList,
 		MaxItems:    1,
@@ -662,17 +582,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 			},
 		},
 	},
-	"pg_user_config": {
-		Type:             schema.TypeList,
-		MaxItems:         1,
-		Optional:         true,
-		Description:      "PostgreSQL specific user configurable settings",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")[ServiceTypePG].(map[string]interface{})),
-		},
-	},
+	"pg_user_config": generateServiceUserConfiguration(ServiceTypePG),
 	"redis": {
 		Type:        schema.TypeList,
 		MaxItems:    1,
@@ -683,17 +593,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 			Schema: map[string]*schema.Schema{},
 		},
 	},
-	"redis_user_config": {
-		Type:             schema.TypeList,
-		MaxItems:         1,
-		Optional:         true,
-		Description:      "Redis specific user configurable settings",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")[ServiceTypeRedis].(map[string]interface{})),
-		},
-	},
+	"redis_user_config": generateServiceUserConfiguration(ServiceTypeRedis),
 	"flink": {
 		Type:        schema.TypeList,
 		MaxItems:    1,
@@ -714,17 +614,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 			},
 		},
 	},
-	"flink_user_config": {
-		Type:             schema.TypeList,
-		MaxItems:         1,
-		Optional:         true,
-		Description:      "Flink specific user configurable settings",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")[ServiceTypeFlink].(map[string]interface{})),
-		},
-	},
+	"flink_user_config": generateServiceUserConfiguration(ServiceTypeFlink),
 }
 
 func resourceService() *schema.Resource {

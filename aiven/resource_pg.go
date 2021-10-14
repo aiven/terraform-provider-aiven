@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/aiven/templates"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -69,17 +68,7 @@ func aivenPGSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	schemaPG[ServiceTypePG+"_user_config"] = &schema.Schema{
-		Type:             schema.TypeList,
-		MaxItems:         1,
-		Optional:         true,
-		Description:      "PostgreSQL specific user configurable settings",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")[ServiceTypePG].(map[string]interface{})),
-		},
-	}
+	schemaPG[ServiceTypePG+"_user_config"] = generateServiceUserConfiguration(ServiceTypePG)
 
 	return schemaPG
 }

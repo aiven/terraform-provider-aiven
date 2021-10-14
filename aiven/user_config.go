@@ -41,7 +41,7 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 	if createOnly, ok := definition["createOnly"]; ok && createOnly.(bool) {
 		diffFunction = createOnlyDiffSuppressFunc
 	} else if valueType == "object" {
-		diffFunction = emptyObjectDiffSuppressFunc
+		diffFunction = emptyObjectDiffSuppressFuncSkipArrays(GenerateTerraformUserConfigSchema(definition))
 	}
 
 	title := definition["title"].(string)
@@ -385,9 +385,7 @@ func convertTerraformUserConfigValueToAPICompatibleFormatArray(value interface{}
 	omit := true
 
 	var empty []interface{}
-	// Elasticsearch index_patterns empty array behaviour should be
-	// different other user configuration options
-	if !newResource && strings.Contains(key, "index_patterns") {
+	if !newResource {
 		empty = []interface{}{}
 		omit = false
 	}

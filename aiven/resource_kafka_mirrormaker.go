@@ -3,7 +3,6 @@ package aiven
 import (
 	"time"
 
-	"github.com/aiven/terraform-provider-aiven/aiven/templates"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -19,17 +18,8 @@ func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	kafkaMMSchema[ServiceTypeKafkaMirrormaker+"_user_config"] = &schema.Schema{
-		Type:             schema.TypeList,
-		MaxItems:         1,
-		Optional:         true,
-		Description:      "Kafka MirrorMaker 2 specific user configurable settings",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")[ServiceTypeKafkaMirrormaker].(map[string]interface{})),
-		},
-	}
+	kafkaMMSchema[ServiceTypeKafkaMirrormaker+"_user_config"] =
+		generateServiceUserConfiguration(ServiceTypeKafkaMirrormaker)
 
 	return kafkaMMSchema
 }

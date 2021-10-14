@@ -3,7 +3,6 @@ package aiven
 import (
 	"time"
 
-	"github.com/aiven/terraform-provider-aiven/aiven/templates"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -19,17 +18,7 @@ func redisSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	s[ServiceTypeRedis+"_user_config"] = &schema.Schema{
-		Type:             schema.TypeList,
-		MaxItems:         1,
-		Optional:         true,
-		Description:      "Redis user configurable settings",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")[ServiceTypeRedis].(map[string]interface{})),
-		},
-	}
+	s[ServiceTypeRedis+"_user_config"] = generateServiceUserConfiguration(ServiceTypeRedis)
 
 	return s
 }
