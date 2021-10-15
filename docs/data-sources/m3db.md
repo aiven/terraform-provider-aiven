@@ -167,6 +167,7 @@ Read-Only:
 - **drop** (String)
 - **filter** (String)
 - **name** (String)
+- **namespaces** (List of String)
 - **tags** (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--rules--mapping--tags))
 
 <a id="nestedobjatt--m3db_user_config--rules--mapping--tags"></a>

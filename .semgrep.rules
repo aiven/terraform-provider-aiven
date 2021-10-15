@@ -1,0 +1,36 @@
+rules:
+- id: schema-resource without description
+  languages: [go]
+  paths:
+    include:
+    - "resource_*"
+    - "datasource_*"
+  patterns:
+  - pattern: |
+      &schema.Resource{ ... } 
+  - pattern-not: |
+      &schema.Resource{ ..., Description: ..., ... }
+  - pattern-inside: |
+      func $F() *schema.Resource { ... }
+
+  message: |
+    Each schema resource should have a description
+  severity: WARNING
+
+- id: schema-element without description
+  languages: [go]
+  paths:
+    include:
+    - "resource_*"
+    - "datasource_*"
+  patterns:
+  - pattern-inside: |
+      map[string]*schema.Schema{ ... }
+  - pattern: |
+      { ... }
+  - pattern-not: |
+      { ..., Description: ..., ... }
+  message: |
+    Each schema field should have a description
+  severity: WARNING
+

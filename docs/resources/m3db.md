@@ -160,6 +160,7 @@ Optional:
 - **drop** (String) Drop the matching metric
 - **filter** (String) The metrics to be used with this particular rule
 - **name** (String) The (optional) name of the rule
+- **namespaces** (List of String) Namespace filters for this particular rule
 - **tags** (Block List, Max: 10) List of tags to be appended to matching metrics (see [below for nested schema](#nestedblock--m3db_user_config--rules--mapping--tags))
 
 <a id="nestedblock--m3db_user_config--rules--mapping--tags"></a>

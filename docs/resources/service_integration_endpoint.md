@@ -3,12 +3,12 @@
 page_title: "aiven_service_integration_endpoint Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  
+  The Service Integration Endpoint resource allows the creation and management of Aiven Service Integration Endpoints.
 ---
 
 # aiven_service_integration_endpoint (Resource)
 
-
+The Service Integration Endpoint resource allows the creation and management of Aiven Service Integration Endpoints.
 
 
 
@@ -48,6 +48,8 @@ Optional:
 - **datadog_api_key** (String, Sensitive) Datadog API key
 - **datadog_tags** (Block List, Max: 32) Custom tags provided by user (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))
 - **disable_consumer_stats** (String) Disable consumer group metrics
+- **kafka_consumer_check_instances** (String) Number of separate instances to fetch kafka consumer statistics with
+- **kafka_consumer_stats_timeout** (String) Number of seconds that datadog will wait to get consumer statistics from brokers
 - **max_partition_contexts** (String) Maximum number of partition contexts to send
 - **site** (String) Datadog intake site. Defaults to datadoghq.com
 
