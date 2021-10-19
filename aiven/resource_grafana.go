@@ -10,7 +10,6 @@ func grafanaSchema() map[string]*schema.Schema {
 	s := serviceCommonSchema()
 	s[ServiceTypeGrafana] = &schema.Schema{
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "Grafana server provided values",
 		Elem: &schema.Resource{

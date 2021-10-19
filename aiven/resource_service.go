@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/aiven/templates"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -361,27 +360,15 @@ var aivenServiceSchema = map[string]*schema.Schema{
 	},
 	"cassandra": {
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "Cassandra specific server provided values",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
 	},
-	"cassandra_user_config": {
-		Type:             schema.TypeList,
-		MaxItems:         1,
-		Optional:         true,
-		Description:      "Cassandra specific user configurable settings",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")[ServiceTypeCassandra].(map[string]interface{})),
-		},
-	},
+	"cassandra_user_config": generateServiceUserConfiguration(ServiceTypeCassandra),
 	"elasticsearch": {
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "Elasticsearch specific server provided values",
 		Elem: &schema.Resource{
@@ -398,7 +385,6 @@ var aivenServiceSchema = map[string]*schema.Schema{
 	"elasticsearch_user_config": generateServiceUserConfiguration(ServiceTypeElasticsearch),
 	"opensearch": {
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "Opensearch specific server provided values",
 		Elem: &schema.Resource{
@@ -415,7 +401,6 @@ var aivenServiceSchema = map[string]*schema.Schema{
 	"opensearch_user_config": generateServiceUserConfiguration(ServiceTypeOpensearch),
 	"grafana": {
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "Grafana specific server provided values",
 		Elem: &schema.Resource{
@@ -425,7 +410,6 @@ var aivenServiceSchema = map[string]*schema.Schema{
 	"grafana_user_config": generateServiceUserConfiguration(ServiceTypeGrafana),
 	"influxdb": {
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "InfluxDB specific server provided values",
 		Elem: &schema.Resource{
@@ -441,7 +425,6 @@ var aivenServiceSchema = map[string]*schema.Schema{
 	"influxdb_user_config": generateServiceUserConfiguration(ServiceTypeInfluxDB),
 	"kafka": {
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "Kafka specific server provided values",
 		Optional:    true,
@@ -488,7 +471,6 @@ var aivenServiceSchema = map[string]*schema.Schema{
 	"kafka_user_config": generateServiceUserConfiguration(ServiceTypeKafka),
 	"kafka_connect": {
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "Kafka Connect specific server provided values",
 		Elem: &schema.Resource{
@@ -498,7 +480,6 @@ var aivenServiceSchema = map[string]*schema.Schema{
 	"kafka_connect_user_config": generateServiceUserConfiguration(ServiceTypeKafkaConnect),
 	"mysql": {
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "MySQL specific server provided values",
 		Elem: &schema.Resource{
@@ -508,7 +489,6 @@ var aivenServiceSchema = map[string]*schema.Schema{
 	"mysql_user_config": generateServiceUserConfiguration(ServiceTypeMySQL),
 	"kafka_mirrormaker": {
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "Kafka MirrorMaker 2 specific server provided values",
 		Elem: &schema.Resource{
@@ -518,7 +498,6 @@ var aivenServiceSchema = map[string]*schema.Schema{
 	"kafka_mirrormaker_user_config": generateServiceUserConfiguration(ServiceTypeKafkaMirrormaker),
 	"pg": {
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "PostgreSQL specific server provided values",
 		Elem: &schema.Resource{
@@ -573,7 +552,6 @@ var aivenServiceSchema = map[string]*schema.Schema{
 	"pg_user_config": generateServiceUserConfiguration(ServiceTypePG),
 	"redis": {
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "Redis specific server provided values",
 		Elem: &schema.Resource{
@@ -583,7 +561,6 @@ var aivenServiceSchema = map[string]*schema.Schema{
 	"redis_user_config": generateServiceUserConfiguration(ServiceTypeRedis),
 	"flink": {
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "Flink specific server provided values",
 		Optional:    true,

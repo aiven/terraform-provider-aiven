@@ -10,7 +10,6 @@ func redisSchema() map[string]*schema.Schema {
 	s := serviceCommonSchema()
 	s[ServiceTypeRedis] = &schema.Schema{
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "Redis server provided values",
 		Elem: &schema.Resource{

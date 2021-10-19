@@ -10,7 +10,6 @@ func aivenM3AggregatorSchema() map[string]*schema.Schema {
 	schemaM3 := serviceCommonSchema()
 	schemaM3[ServiceTypeM3Aggregator] = &schema.Schema{
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "M3 aggregator specific server provided values",
 		Elem: &schema.Resource{

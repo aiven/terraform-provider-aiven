@@ -27,35 +27,35 @@ The Service datasource provides information about specific Aiven Services.
 ### Read-Only
 
 - **cassandra** (List of Object) Cassandra specific server provided values (see [below for nested schema](#nestedatt--cassandra))
-- **cassandra_user_config** (List of Object) Cassandra specific user configurable settings (see [below for nested schema](#nestedatt--cassandra_user_config))
+- **cassandra_user_config** (List of Object) Cassandra user configurable settings (see [below for nested schema](#nestedatt--cassandra_user_config))
 - **cloud_name** (String) Cloud the service runs in
 - **components** (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
 - **elasticsearch** (List of Object) Elasticsearch specific server provided values (see [below for nested schema](#nestedatt--elasticsearch))
-- **elasticsearch_user_config** (List of Object) Elasticsearch specific user configurable settings (see [below for nested schema](#nestedatt--elasticsearch_user_config))
+- **elasticsearch_user_config** (List of Object) Elasticsearch user configurable settings (see [below for nested schema](#nestedatt--elasticsearch_user_config))
 - **flink** (List of Object) Flink specific server provided values (see [below for nested schema](#nestedatt--flink))
-- **flink_user_config** (List of Object) Flink specific user configurable settings (see [below for nested schema](#nestedatt--flink_user_config))
+- **flink_user_config** (List of Object) Flink user configurable settings (see [below for nested schema](#nestedatt--flink_user_config))
 - **grafana** (List of Object) Grafana specific server provided values (see [below for nested schema](#nestedatt--grafana))
-- **grafana_user_config** (List of Object) Grafana specific user configurable settings (see [below for nested schema](#nestedatt--grafana_user_config))
+- **grafana_user_config** (List of Object) Grafana user configurable settings (see [below for nested schema](#nestedatt--grafana_user_config))
 - **influxdb** (List of Object) InfluxDB specific server provided values (see [below for nested schema](#nestedatt--influxdb))
-- **influxdb_user_config** (List of Object) InfluxDB specific user configurable settings (see [below for nested schema](#nestedatt--influxdb_user_config))
+- **influxdb_user_config** (List of Object) Influxdb user configurable settings (see [below for nested schema](#nestedatt--influxdb_user_config))
 - **kafka** (List of Object) Kafka specific server provided values (see [below for nested schema](#nestedatt--kafka))
 - **kafka_connect** (List of Object) Kafka Connect specific server provided values (see [below for nested schema](#nestedatt--kafka_connect))
-- **kafka_connect_user_config** (List of Object) Kafka Connect specific user configurable settings (see [below for nested schema](#nestedatt--kafka_connect_user_config))
+- **kafka_connect_user_config** (List of Object) Kafka_connect user configurable settings (see [below for nested schema](#nestedatt--kafka_connect_user_config))
 - **kafka_mirrormaker** (List of Object) Kafka MirrorMaker 2 specific server provided values (see [below for nested schema](#nestedatt--kafka_mirrormaker))
-- **kafka_mirrormaker_user_config** (List of Object) Kafka MirrorMaker 2 specific user configurable settings (see [below for nested schema](#nestedatt--kafka_mirrormaker_user_config))
-- **kafka_user_config** (List of Object) Kafka specific user configurable settings (see [below for nested schema](#nestedatt--kafka_user_config))
+- **kafka_mirrormaker_user_config** (List of Object) Kafka_mirrormaker user configurable settings (see [below for nested schema](#nestedatt--kafka_mirrormaker_user_config))
+- **kafka_user_config** (List of Object) Kafka user configurable settings (see [below for nested schema](#nestedatt--kafka_user_config))
 - **maintenance_window_dow** (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - **maintenance_window_time** (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
 - **mysql** (List of Object) MySQL specific server provided values (see [below for nested schema](#nestedatt--mysql))
-- **mysql_user_config** (List of Object) MySQL specific user configurable settings (see [below for nested schema](#nestedatt--mysql_user_config))
+- **mysql_user_config** (List of Object) Mysql user configurable settings (see [below for nested schema](#nestedatt--mysql_user_config))
 - **opensearch** (List of Object) Opensearch specific server provided values (see [below for nested schema](#nestedatt--opensearch))
-- **opensearch_user_config** (List of Object) Opensearch specific user configurable settings (see [below for nested schema](#nestedatt--opensearch_user_config))
+- **opensearch_user_config** (List of Object) Opensearch user configurable settings (see [below for nested schema](#nestedatt--opensearch_user_config))
 - **pg** (List of Object) PostgreSQL specific server provided values (see [below for nested schema](#nestedatt--pg))
-- **pg_user_config** (List of Object) PostgreSQL specific user configurable settings (see [below for nested schema](#nestedatt--pg_user_config))
+- **pg_user_config** (List of Object) Pg user configurable settings (see [below for nested schema](#nestedatt--pg_user_config))
 - **plan** (String) Subscription plan
 - **project_vpc_id** (String) Identifier of the VPC the service should be in, if any
 - **redis** (List of Object) Redis specific server provided values (see [below for nested schema](#nestedatt--redis))
-- **redis_user_config** (List of Object) Redis specific user configurable settings (see [below for nested schema](#nestedatt--redis_user_config))
+- **redis_user_config** (List of Object) Redis user configurable settings (see [below for nested schema](#nestedatt--redis_user_config))
 - **service_host** (String) Service hostname
 - **service_integrations** (List of Object) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedatt--service_integrations))
 - **service_password** (String, Sensitive) Password used for connecting to the service, if applicable

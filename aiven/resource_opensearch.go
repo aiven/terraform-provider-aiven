@@ -10,7 +10,6 @@ func opensearchSchema() map[string]*schema.Schema {
 	s := serviceCommonSchema()
 	s[ServiceTypeOpensearch] = &schema.Schema{
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "Opensearch server provided values",
 		Elem: &schema.Resource{
