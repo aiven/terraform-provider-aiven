@@ -74,7 +74,7 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 		case "string", "integer", "boolean", "number":
 			itemType = schema.TypeString
 		case "object":
-			itemType = schema.TypeList
+			itemType = schema.TypeSet
 		default:
 			panic(fmt.Sprintf("Unexpected user config schema array item type: %T / %v", typeString, typeString))
 		}
@@ -83,13 +83,17 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 		if maxItemsFound {
 			maxItems = int(maxItemsVal.(float64))
 		}
+
 		var valueDiffFunction schema.SchemaDiffSuppressFunc
+		schemaType := schema.TypeList
 		if key == "ip_filter" {
 			diffFunction = ipFilterArrayDiffSuppressFunc
 			valueDiffFunction = ipFilterValueDiffSuppressFunc
+			schemaType = schema.TypeSet
 		}
+
 		var elem interface{}
-		if itemType == schema.TypeList {
+		if itemType == schema.TypeSet {
 			elem = &schema.Resource{Schema: GenerateTerraformUserConfigSchema(itemDefinition)}
 		} else {
 			elem = &schema.Schema{
@@ -97,6 +101,7 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 				Type:             itemType,
 			}
 		}
+
 		return &schema.Schema{
 			Description:      title,
 			DiffSuppressFunc: diffFunction,
@@ -104,7 +109,7 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 			MaxItems:         maxItems,
 			Optional:         true,
 			Sensitive:        sensitive,
-			Type:             schema.TypeList,
+			Type:             schemaType,
 		}
 	default:
 		panic(fmt.Sprintf("Unexpected user config schema type: %T / %v", valueType, valueType))
@@ -253,8 +258,8 @@ func hasNestedUserConfigurationOptionItems(apiValue interface{}, schemaDefinitio
 }
 
 // ConvertTerraformUserConfigToAPICompatibleFormat converts Terraform user configuration to API compatible
-// format; Schema-based Terraform configuration requires using TypeList, which adds one extra layer of lists
-// that need to be dropped. Also need to drop dummy "unset" replacement values
+// format; Schema-based Terraform configuration requires using TypeSet or TypeList, which adds one extra
+// layer of lists that need to be dropped. Also need to drop dummy "unset" replacement values
 func ConvertTerraformUserConfigToAPICompatibleFormat(
 	configType string,
 	entryType string,
@@ -415,6 +420,25 @@ func convertTerraformUserConfigValueToAPICompatibleFormatArray(value interface{}
 
 		convertedValue = values
 		omit = false
+	case *schema.Set:
+		asArray := value.(*schema.Set)
+
+		if asArray.Len() == 0 {
+			return empty, omit, nil
+		}
+
+		values := make([]interface{}, asArray.Len())
+		itemDefinition := definition["items"].(map[string]interface{})
+		itemDefinition = selectFirstSchemaFromOneOf(itemDefinition)
+
+		for idx, arrValue := range asArray.List() {
+			arrValueConverted, _ := convertTerraformUserConfigValueToAPICompatibleFormat(
+				serviceType, newResource, key, arrValue, itemDefinition)
+			values[idx] = arrValueConverted
+		}
+
+		convertedValue = values
+		omit = false
 	default:
 		return nil, false, fmt.Errorf("invalid %v user config key type %T for %v, expected list", serviceType, value, key)
 	}
@@ -443,9 +467,11 @@ func convertTerraformUserConfigValueToAPICompatibleFormatObject(
 		return nil, true, nil
 	}
 
-	// when value is TypeList
-	if asList, isList := value.([]interface{}); isList {
+	// when value is TypeSet
+	switch value.(type) {
+	case []interface{}:
 		var omit bool
+		asList := value.([]interface{})
 		if len(asList) == 0 || (len(asList) == 1 && asList[0] == nil) {
 			omit = true
 		} else {
@@ -460,10 +486,25 @@ func convertTerraformUserConfigValueToAPICompatibleFormatObject(
 		}
 
 		return convertedValue, omit, nil
-	}
+	case *schema.Set:
+		var omit bool
+		asList := value.(*schema.Set)
+		if asList.Len() == 0 || (asList.Len() == 1 && asList.List()[0] == nil) {
+			omit = true
+		} else {
+			asMap := asList.List()[0].(map[string]interface{})
+			if len(asMap) == 0 {
+				omit = true
+			} else {
+				convertedValue = convertTerraformUserConfigToAPICompatibleFormat(
+					serviceType, newResource, asMap, definition["properties"].(map[string]interface{}),
+				)
+			}
+		}
 
-	// when value is TypeMap
-	if asMap, isMap := value.(map[string]interface{}); isMap {
+		return convertedValue, omit, nil
+	case map[string]interface{}:
+		asMap := value.(map[string]interface{})
 		convertedValue = convertTerraformUserConfigToAPICompatibleFormat(
 			serviceType, newResource, asMap, definition["properties"].(map[string]interface{}),
 		)
