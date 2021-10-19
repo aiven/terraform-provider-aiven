@@ -14,7 +14,6 @@ func redisSchema() map[string]*schema.Schema {
 		MaxItems:    1,
 		Computed:    true,
 		Description: "Redis server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
@@ -36,6 +35,7 @@ func redisSchema() map[string]*schema.Schema {
 
 func resourceRedis() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Redis resource allows the creation and management of Aiven Redis services.",
 		CreateContext: resourceServiceCreateWrapper(ServiceTypeRedis),
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,

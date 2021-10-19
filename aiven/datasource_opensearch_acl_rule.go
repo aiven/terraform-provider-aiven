@@ -8,6 +8,7 @@ import (
 func datasourceOpensearchACLRule() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceElasticsearchACLRuleRead,
+		Description: "The Opensearch ACL Rule data source provides information about an existing Aiven Opensearch ACL Rule.",
 		Schema:      resourceSchemaAsDatasourceSchema(aivenOpensearchACLRuleSchema, "project", "service_name", "username", "index", "permission"),
 	}
 }

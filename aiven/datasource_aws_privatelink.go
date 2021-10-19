@@ -11,6 +11,7 @@ import (
 func datasourceAWSPrivatelink() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceAWSPrivatelinkRead,
+		Description: "The AWS Privatelink resource allows the creation and management of Aiven AWS Privatelink for a services.",
 		Schema:      resourceSchemaAsDatasourceSchema(aivenAWSPrivatelinkSchema, "project", "service_name"),
 	}
 }

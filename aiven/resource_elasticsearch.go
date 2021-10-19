@@ -15,7 +15,6 @@ func elasticsearchSchema() map[string]*schema.Schema {
 		MaxItems:    1,
 		Computed:    true,
 		Description: "Elasticsearch server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"kibana_uri": {
@@ -49,6 +48,7 @@ func elasticsearchSchema() map[string]*schema.Schema {
 
 func resourceElasticsearch() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Elasticsearch resource allows the creation and management of Aiven Elasticsearch services.",
 		CreateContext: resourceServiceCreateWrapper(ServiceTypeElasticsearch),
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,

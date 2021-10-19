@@ -14,7 +14,6 @@ func cassandraSchema() map[string]*schema.Schema {
 		MaxItems:    1,
 		Computed:    true,
 		Description: "Cassandra server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
@@ -36,6 +35,7 @@ func cassandraSchema() map[string]*schema.Schema {
 
 func resourceCassandra() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Cassandra resource allows the creation and management of Aiven Cassandra services.",
 		CreateContext: resourceServiceCreateWrapper(ServiceTypeCassandra),
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,

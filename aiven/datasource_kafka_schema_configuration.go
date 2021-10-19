@@ -11,6 +11,7 @@ import (
 func datasourceKafkaSchemaConfiguration() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceKafkaSchemasConfigurationRead,
+		Description: "The Kafka Schema Configuration data source provides information about the existing Aiven Kafka Schema Configuration.",
 		Schema: resourceSchemaAsDatasourceSchema(aivenKafkaSchemaSchema,
 			"project", "service_name"),
 	}

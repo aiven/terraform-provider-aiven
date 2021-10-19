@@ -12,6 +12,7 @@ import (
 func datasourceElasticsearchACL() *schema.Resource {
 	return &schema.Resource{
 		DeprecationMessage: "ElasticsearchACL is deprecated please use ElasticsearchACLConfig and ElasticsearchACLRule",
+		Description:        "The Elasticsearch ACL data source provides information about the existing Aiven Elasticsearch ACL for Elasticsearch service.",
 		ReadContext:        datasourceElasticsearchACLRead,
 		Schema:             resourceSchemaAsDatasourceSchema(aivenElasticsearchACLSchema, "project", "service_name"),
 	}

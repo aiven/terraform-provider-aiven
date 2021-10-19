@@ -11,6 +11,7 @@ import (
 func datasourceKafkaConnector() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceKafkaConnectorRead,
+		Description: "The Kafka connector data source provides information about the existing Aiven Kafka connector.",
 		Schema: resourceSchemaAsDatasourceSchema(aivenKafkaConnectorSchema,
 			"project", "service_name", "connector_name"),
 	}

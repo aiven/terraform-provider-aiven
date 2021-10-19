@@ -11,6 +11,7 @@ import (
 func datasourceAccountAuthentication() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceAccountAuthenticationRead,
+		Description: "The Account Authentication data source provides information about the existing Aiven Account Authentication.",
 		Schema: resourceSchemaAsDatasourceSchema(aivenAccountAuthenticationSchema,
 			"account_id", "name"),
 	}

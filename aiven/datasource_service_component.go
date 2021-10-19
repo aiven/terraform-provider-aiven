@@ -13,6 +13,7 @@ import (
 
 func datasourceServiceComponent() *schema.Resource {
 	return &schema.Resource{
+		Description: "The Service Component data source provides information about the existing Aiven service Component.",
 		ReadContext: datasourceServiceComponentRead,
 		Schema: map[string]*schema.Schema{
 			"project": {

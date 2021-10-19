@@ -15,7 +15,6 @@ func opensearchSchema() map[string]*schema.Schema {
 		MaxItems:    1,
 		Computed:    true,
 		Description: "Opensearch server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"opensearch_dashboards_uri": {
@@ -49,6 +48,7 @@ func opensearchSchema() map[string]*schema.Schema {
 
 func resourceOpensearch() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Opensearch resource allows the creation and management of Aiven Opensearch services.",
 		CreateContext: resourceServiceCreateWrapper(ServiceTypeOpensearch),
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,

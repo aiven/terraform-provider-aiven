@@ -81,6 +81,7 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 
 func resourceKafka() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Kafka resource allows the creation and management of Aiven Kafka services.",
 		CreateContext: resourceKafkaCreate,
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,

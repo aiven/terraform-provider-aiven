@@ -13,76 +13,66 @@ import (
 )
 
 var aivenKafkaConnectorSchema = map[string]*schema.Schema{
-	"project": {
-		Type:        schema.TypeString,
-		Description: "Project to link the kafka connector to",
-		Required:    true,
-		ForceNew:    true,
-	},
-	"service_name": {
-		Type:        schema.TypeString,
-		Description: "Service to link the kafka connector to",
-		Required:    true,
-		ForceNew:    true,
-	},
+	"project":      commonSchemaProjectReference,
+	"service_name": commonSchemaServiceNameReference,
 	"connector_name": {
 		Type:        schema.TypeString,
-		Description: "Kafka connector name",
 		Required:    true,
 		ForceNew:    true,
+		Description: complex("The kafka connector name.").forceNew().build(),
 	},
 	"config": {
-		Type:        schema.TypeMap,
-		Description: "Kafka Connector configuration parameters",
-		Required:    true,
+		Type:     schema.TypeMap,
+		Required: true,
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
+		Description: "The Kafka Connector configuration parameters.",
 	},
 	"plugin_author": {
 		Type:        schema.TypeString,
-		Description: "Kafka connector author",
 		Computed:    true,
+		Description: "The Kafka connector author.",
 	},
 	"plugin_class": {
 		Type:        schema.TypeString,
-		Description: "Kafka connector Java class",
 		Computed:    true,
+		Description: "The Kafka connector Java class.",
 	},
 	"plugin_doc_url": {
 		Type:        schema.TypeString,
-		Description: "Kafka connector documentation URL",
 		Computed:    true,
+		Description: "The Kafka connector documentation URL.",
 	},
 	"plugin_title": {
 		Type:        schema.TypeString,
-		Description: "Kafka connector title",
 		Computed:    true,
+		Description: "The Kafka connector title.",
 	},
 	"plugin_type": {
 		Type:        schema.TypeString,
-		Description: "Kafka connector type",
 		Computed:    true,
+		Description: "The Kafka connector type.",
 	},
 	"plugin_version": {
 		Type:        schema.TypeString,
-		Description: "Kafka connector version",
 		Computed:    true,
+		Description: "The version of the kafka connector.",
 	},
 	"task": {
 		Type:        schema.TypeSet,
-		Description: "List of tasks of a connector",
+		Description: "List of tasks of a connector.",
 		Computed:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"connector": {
 					Type:        schema.TypeString,
-					Description: "Related connector name",
+					Description: "The name of the related connector.",
 					Computed:    true,
 				},
 				"task": {
 					Type:        schema.TypeInt,
-					Description: "Task id / number",
+					Description: "The task id of the task.",
 					Computed:    true,
 				},
 			},
@@ -92,6 +82,7 @@ var aivenKafkaConnectorSchema = map[string]*schema.Schema{
 
 func resourceKafkaConnector() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Kafka connectors resource allows the creation and management of Aiven Kafka connectors.",
 		CreateContext: resourceKafkaConnectorCreate,
 		ReadContext:   resourceKafkaConnectorRead,
 		UpdateContext: resourceKafkaTConnectorUpdate,

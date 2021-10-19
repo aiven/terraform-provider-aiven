@@ -12,6 +12,7 @@ import (
 func datasourceProjectUser() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceProjectUserRead,
+		Description: "The Project User data source provides information about the existing Aiven Project User.",
 		Schema: resourceSchemaAsDatasourceSchema(aivenProjectUserSchema,
 			"project", "email"),
 	}

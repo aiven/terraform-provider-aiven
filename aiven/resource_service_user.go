@@ -14,30 +14,28 @@ import (
 )
 
 var aivenServiceUserSchema = map[string]*schema.Schema{
-	"project": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Project to link the user to",
-		ForceNew:    true,
-	},
-	"service_name": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Service to link the user to",
-		ForceNew:    true,
-	},
+	"project":      commonSchemaProjectReference,
+	"service_name": commonSchemaServiceNameReference,
+
 	"username": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "Name of the user account",
 		ForceNew:    true,
+		Description: complex("The actual name of the service user.").forceNew().referenced().build(),
+	},
+	"password": {
+		Type:             schema.TypeString,
+		Sensitive:        true,
+		Computed:         true,
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Description:      "The password of the service user ( not applicable for all services ).",
 	},
 	"redis_acl_categories": {
 		Type:         schema.TypeList,
 		Optional:     true,
-		Description:  "Command category rules",
 		ForceNew:     true,
 		RequiredWith: []string{"redis_acl_commands", "redis_acl_keys"},
+		Description:  complex("Redis specific field, defines command category rules.").requiredWith("redis_acl_commands", "redis_acl_keys").forceNew().build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
@@ -45,9 +43,9 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 	"redis_acl_commands": {
 		Type:         schema.TypeList,
 		Optional:     true,
-		Description:  "Rules for individual commands",
 		ForceNew:     true,
 		RequiredWith: []string{"redis_acl_categories", "redis_acl_keys"},
+		Description:  complex("Redis specific field, defines rules for individual commands.").requiredWith("redis_acl_categories", "redis_acl_keys").forceNew().build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
@@ -55,9 +53,9 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 	"redis_acl_keys": {
 		Type:         schema.TypeList,
 		Optional:     true,
-		Description:  "Key access rules",
 		ForceNew:     true,
 		RequiredWith: []string{"redis_acl_categories", "redis_acl_commands"},
+		Description:  complex("Redis specific field, defines key access rules.").requiredWith("redis_acl_categories", "redis_acl_keys").forceNew().build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
@@ -65,31 +63,23 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 	"redis_acl_channels": {
 		Type:        schema.TypeList,
 		Optional:    true,
-		Description: "Permitted pub/sub channel patterns",
 		ForceNew:    true,
+		Description: complex("Redis specific field, defines the permitted pub/sub channel patterns.").forceNew().build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
 	},
-	"password": {
-		Type:             schema.TypeString,
-		Sensitive:        true,
-		Computed:         true,
-		Optional:         true,
-		Description:      "Password of the user",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-	},
 	"authentication": {
 		Type:             schema.TypeString,
 		Optional:         true,
-		Description:      "Authentication details",
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		ValidateFunc:     validation.StringInSlice([]string{"caching_sha2_password", "mysql_native_password"}, false),
+		Description:      complex("Authentication details.").possibleValues("caching_sha2_password", "mysql_native_password").build(),
 	},
 	"type": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Type of the user account",
+		Description: "Type of the user account. Tells wether the user is the primary account or a regular account.",
 	},
 	"access_cert": {
 		Type:        schema.TypeString,
@@ -107,6 +97,7 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 
 func resourceServiceUser() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Service User resource allows the creation and management of Aiven Service Users.",
 		CreateContext: resourceServiceUserCreate,
 		UpdateContext: resourceServiceUserUpdate,
 		ReadContext:   resourceServiceUserRead,

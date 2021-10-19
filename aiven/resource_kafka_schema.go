@@ -14,40 +14,29 @@ import (
 )
 
 var aivenKafkaSchemaSchema = map[string]*schema.Schema{
-	"project": {
-		Type:        schema.TypeString,
-		Description: "Project to link the Kafka Schema to",
-		Required:    true,
-		ForceNew:    true,
-	},
-	"service_name": {
-		Type:        schema.TypeString,
-		Description: "Service to link the Kafka Schema to",
-		Required:    true,
-		ForceNew:    true,
-	},
+	"project":      commonSchemaProjectReference,
+	"service_name": commonSchemaServiceNameReference,
 	"subject_name": {
 		Type:        schema.TypeString,
-		Description: "Kafka Schema Subject name",
 		Required:    true,
 		ForceNew:    true,
+		Description: complex("The Kafka Schema Subject name.").forceNew().build(),
 	},
 	"schema": {
 		Type:             schema.TypeString,
-		Description:      "Kafka Schema configuration should be a valid Avro Schema JSON format",
 		Required:         true,
 		ValidateFunc:     validation.StringIsJSON,
 		StateFunc:        normalizeJsonString,
 		DiffSuppressFunc: diffSuppressJsonObject,
+		Description:      "Kafka Schema configuration should be a valid Avro Schema JSON format.",
 	},
 	"version": {
 		Type:        schema.TypeInt,
-		Description: "Kafka Schema configuration version",
 		Computed:    true,
+		Description: "Kafka Schema configuration version.",
 	},
 	"compatibility_level": {
 		Type:         schema.TypeString,
-		Description:  "Kafka Schemas compatibility level",
 		Optional:     true,
 		ValidateFunc: validation.StringInSlice(compatibilityLevels, false),
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
@@ -55,6 +44,7 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 			// Allow ignoring those.
 			return new == ""
 		},
+		Description: complex("Kafka Schemas compatibility level.").possibleValues(stringSliceToInterfaceSlice(compatibilityLevels)...).build(),
 	},
 }
 
@@ -81,6 +71,7 @@ func normalizeJsonString(v interface{}) string {
 
 func resourceKafkaSchema() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Kafka Schema resource allows the creation and management of Aiven Kafka Schemas.",
 		CreateContext: resourceKafkaSchemaCreate,
 		UpdateContext: resourceKafkaSchemaUpdate,
 		ReadContext:   resourceKafkaSchemaRead,

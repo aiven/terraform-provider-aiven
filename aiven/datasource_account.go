@@ -11,6 +11,7 @@ import (
 func datasourceAccount() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceAccountRead,
+		Description: "The Account data source provides information about the existing Aiven Account.",
 		Schema:      resourceSchemaAsDatasourceSchema(aivenAccountSchema, "name"),
 	}
 }

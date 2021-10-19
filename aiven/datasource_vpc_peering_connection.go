@@ -12,6 +12,7 @@ import (
 func datasourceVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceVPCPeeringConnectionRead,
+		Description: "The VPC Peering Connection data source provides information about the existing Aiven VPC Peering Connection.",
 		Schema: resourceSchemaAsDatasourceSchema(aivenVPCPeeringConnectionSchema,
 			"vpc_id", "peer_cloud_account", "peer_vpc"),
 	}

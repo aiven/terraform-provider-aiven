@@ -12,32 +12,28 @@ import (
 )
 
 var aivenProjectUserSchema = map[string]*schema.Schema{
-	"project": {
-		Description: "The project the user belongs to",
-		ForceNew:    true,
-		Required:    true,
-		Type:        schema.TypeString,
-	},
+	"project": commonSchemaProjectReference,
 	"email": {
-		Description: "Email address of the user",
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
+		Description: complex("Email address of the user.").forceNew().build(),
 	},
 	"member_type": {
-		Description: "Project membership type. One of: admin, developer, operator",
 		Required:    true,
 		Type:        schema.TypeString,
+		Description: complex("Project membership type.").possibleValues("admin", "developer", "operator").build(),
 	},
 	"accepted": {
 		Computed:    true,
-		Description: "Whether the user has accepted project membership or not",
 		Type:        schema.TypeBool,
+		Description: "Whether the user has accepted the request to join the project; adding user to a project sends an invitation to the target user and the actual membership is only created once the user accepts the invitation.",
 	},
 }
 
 func resourceProjectUser() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Project User resource allows the creation and management of Aiven Project Users.",
 		CreateContext: resourceProjectUserCreate,
 		ReadContext:   resourceProjectUserRead,
 		UpdateContext: resourceProjectUserUpdate,

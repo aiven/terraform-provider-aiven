@@ -14,7 +14,6 @@ func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
 		MaxItems:    1,
 		Computed:    true,
 		Description: "Kafka MirrorMaker 2 server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
@@ -36,6 +35,7 @@ func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
 func resourceKafkaMirrormaker() *schema.Resource {
 
 	return &schema.Resource{
+		Description:   "The Kafka MirrorMaker resource allows the creation and management of Aiven Kafka MirrorMaker 2 services.",
 		CreateContext: resourceServiceCreateWrapper(ServiceTypeKafkaMirrormaker),
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,

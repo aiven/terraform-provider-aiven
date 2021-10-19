@@ -11,53 +11,45 @@ import (
 )
 
 var aivenFlinkJobSchema = map[string]*schema.Schema{
-	"project": {
-		Type:        schema.TypeString,
-		Description: "Project to link the Flink Job to",
-		Required:    true,
-		ForceNew:    true,
-	},
-	"service_name": {
-		Type:        schema.TypeString,
-		Description: "Service to link the Flink Job to",
-		Required:    true,
-		ForceNew:    true,
-	},
+	"project":      commonSchemaProjectReference,
+	"service_name": commonSchemaServiceNameReference,
+
 	"job_name": {
 		Type:        schema.TypeString,
-		Description: "Name of the Flink Job",
 		Required:    true,
 		ForceNew:    true,
-	},
-	"job_id": {
-		Type:        schema.TypeString,
-		Description: "Id of the Flink Job",
-		Computed:    true,
+		Description: complex("Specifies the name of the service that this job is submitted to.").forceNew().referenced().build(),
 	},
 	"statement": {
 		Type:        schema.TypeString,
-		Description: "The SQL Statement of the Flink Job",
+		Description: complex("The SQL statement to define the job.").forceNew().build(),
 		Required:    true,
 		ForceNew:    true,
 	},
 	"tables": {
 		Type:        schema.TypeList,
-		Description: "The list of tables required in the Job runtime",
+		Description: complex("A list of table ids that are required in the job runtime.").forceNew().referenced().build(),
 		Required:    true,
 		ForceNew:    true,
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
 	},
+	"job_id": {
+		Type:        schema.TypeString,
+		Description: "The Job ID of the flink job in the flink service.",
+		Computed:    true,
+	},
 	"state": {
 		Type:        schema.TypeString,
-		Description: "The current state of the flink job",
+		Description: "The current state of the flink job in the flink service",
 		Computed:    true,
 	},
 }
 
 func resourceFlinkJob() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Flink Job resource allows the creation and management of Aiven Jobs.",
 		ReadContext:   resourceFlinkJobRead,
 		CreateContext: resourceFlinkJobCreate,
 		DeleteContext: resourceFlinkJobDelete,

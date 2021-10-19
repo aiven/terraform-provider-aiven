@@ -86,76 +86,6 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		Optional: true,
 		Type:     schema.TypeList,
 	},
-	"external_google_cloud_logging_user_config": {
-		Description: "External Google Cloud Logging specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["external_google_cloud_logging"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
-	"external_elasticsearch_logs_user_config": {
-		Description: "External Elasticsearch logs specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["external_elasticsearch_logs"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
-	"external_aws_cloudwatch_logs_user_config": {
-		Description: "External AWS Cloudwatch logs specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["external_aws_cloudwatch_logs"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
-	"read_replica_user_config": {
-		Description: "PG Read replica specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["read_replica"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
-	"rsyslog_user_config": {
-		Description: "RSyslog specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["rsyslog"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
-	"signalfx_user_config": {
-		Description: "Signalfx specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["signalfx"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
-	"dashboard_user_config": {
-		Description: "Dashboard specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["dashboard"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
 	"datadog_user_config": {
 		Description: "Dashboard specific user configurable settings",
 		Elem: &schema.Resource{
@@ -176,26 +106,6 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		Optional: true,
 		Type:     schema.TypeList,
 	},
-	"m3aggregator_user_config": {
-		Description: "M3 aggregator specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["m3aggregator"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
-	"m3coordinator_user_config": {
-		Description: "M3 coordinator specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["m3coordinator"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
 	"prometheus_user_config": {
 		Description: "Prometheus coordinator specific user configurable settings",
 		Elem: &schema.Resource{
@@ -211,26 +121,6 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		Elem: &schema.Resource{
 			Schema: GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("integration")["metrics"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
-	"schema_registry_proxy_user_config": {
-		Description: "Schema registry proxy specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["schema_registry_proxy"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
-	"external_aws_cloudwatch_metrics_user_config": {
-		Description: "External AWS cloudwatch metrics specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["external_aws_cloudwatch_metrics"].(map[string]interface{})),
 		},
 		MaxItems: 1,
 		Optional: true,
@@ -260,6 +150,7 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 
 func resourceServiceIntegration() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Service Integration resource allows the creation and management of Aiven Service Integrations.",
 		CreateContext: resourceServiceIntegrationCreate,
 		ReadContext:   resourceServiceIntegrationRead,
 		UpdateContext: resourceServiceIntegrationUpdate,

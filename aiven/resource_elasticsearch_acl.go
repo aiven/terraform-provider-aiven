@@ -11,29 +11,19 @@ import (
 )
 
 var aivenElasticsearchACLSchema = map[string]*schema.Schema{
-	"project": {
-		Type:        schema.TypeString,
-		Description: "Project to link the Elasticsearch ACLs to",
-		Required:    true,
-		ForceNew:    true,
-	},
-	"service_name": {
-		Type:        schema.TypeString,
-		Description: "Service to link the Elasticsearch ACLs to",
-		Required:    true,
-		ForceNew:    true,
-	},
+	"project":      commonSchemaProjectReference,
+	"service_name": commonSchemaServiceNameReference,
 	"enabled": {
 		Type:        schema.TypeBool,
-		Description: "Enable Elasticsearch ACLs. When disabled authenticated service users have unrestricted access",
 		Optional:    true,
 		Default:     true,
+		Description: complex("Enable Elasticsearch ACLs. When disabled authenticated service users have unrestricted access.").defaultValue(true).build(),
 	},
 	"extended_acl": {
 		Type:        schema.TypeBool,
-		Description: "Index rules can be applied in a limited fashion to the _mget, _msearch and _bulk APIs (and only those) by enabling the ExtendedAcl option for the service. When it is enabled, users can use these APIs as long as all operations only target indexes they have been granted access to",
 		Optional:    true,
 		Default:     true,
+		Description: complex("Index rules can be applied in a limited fashion to the _mget, _msearch and _bulk APIs (and only those) by enabling the ExtendedAcl option for the service. When it is enabled, users can use these APIs as long as all operations only target indexes they have been granted access to.").defaultValue(true).build(),
 	},
 	"acl": {
 		Type:        schema.TypeSet,
@@ -43,28 +33,28 @@ var aivenElasticsearchACLSchema = map[string]*schema.Schema{
 			Schema: map[string]*schema.Schema{
 				"username": {
 					Type:         schema.TypeString,
-					Description:  "Username for the ACL entry",
 					Required:     true,
 					ValidateFunc: validation.StringLenBetween(1, 40),
+					Description:  complex("Username for the ACL entry.").maxLen(40).build(),
 				},
 				"rule": {
 					Type:        schema.TypeSet,
-					Description: "Elasticsearch rules",
+					Description: "Elasticsearch rules.",
 					Required:    true,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"index": {
 								Type:         schema.TypeString,
-								Description:  "Elasticsearch index pattern",
 								Required:     true,
 								ValidateFunc: validation.StringLenBetween(1, 249),
+								Description:  complex("Elasticsearch index pattern.").maxLen(249).build(),
 							},
 
 							"permission": {
 								Type:         schema.TypeString,
-								Description:  "Elasticsearch permission",
 								Required:     true,
 								ValidateFunc: validation.StringInSlice([]string{"deny", "admin", "read", "readwrite", "write"}, false),
+								Description:  complex("Elasticsearch permission.").possibleValues("deny", "admin", "read", "readwrite", "write").build(),
 							},
 						},
 					},
@@ -76,10 +66,16 @@ var aivenElasticsearchACLSchema = map[string]*schema.Schema{
 
 func resourceElasticsearchACL() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceElasticsearchACLUpdate,
-		ReadContext:   resourceElasticsearchACLRead,
-		UpdateContext: resourceElasticsearchACLUpdate,
-		DeleteContext: resourceElasticsearchACLDelete,
+		Description: `
+**This resource is deprecated, please use ` + "`aiven_elasticsearch_acl_config`" + `and ` + "`aiven_elasticsearch_acl_rule`" + `**
+
+The Elasticsearch ACL resource allows the creation and management of ACLs for an Aiven Elasticsearch service.
+`,
+		DeprecationMessage: "This resource is deprecated, please use `aiven_elasticsearch_acl_config` and `aiven_elasticsearch_acl_rule`",
+		CreateContext:      resourceElasticsearchACLUpdate,
+		ReadContext:        resourceElasticsearchACLRead,
+		UpdateContext:      resourceElasticsearchACLUpdate,
+		DeleteContext:      resourceElasticsearchACLDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceElasticsearchACLState,
 		},

@@ -16,69 +16,70 @@ import (
 
 var aivenVPCPeeringConnectionSchema = map[string]*schema.Schema{
 	"vpc_id": {
-		Description: "The VPC the peering connection belongs to",
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
+		Description: complex("The VPC the peering connection belongs to.").forceNew().build(),
 	},
 	"peer_cloud_account": {
-		Description: "AWS account ID or GCP project ID of the peered VPC",
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
+		Description: complex("AWS account ID or GCP project ID of the peered VPC.").forceNew().build(),
 	},
 	"peer_vpc": {
-		Description: "AWS VPC ID or GCP VPC network name of the peered VPC",
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
+		Description: complex("AWS VPC ID or GCP VPC network name of the peered VPC.").forceNew().build(),
 	},
 	"peer_region": {
-		Description: "AWS region of the peered VPC (if not in the same region as Aiven VPC)",
-		ForceNew:    true,
-		Optional:    true,
-		Type:        schema.TypeString,
+		ForceNew: true,
+		Optional: true,
+		Type:     schema.TypeString,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return new == ""
 		},
+		Description: complex("AWS region of the peered VPC (if not in the same region as Aiven VPC).").forceNew().build(),
 	},
 	"state": {
 		Computed:    true,
-		Description: "State of the peering connection",
 		Type:        schema.TypeString,
+		Description: "State of the peering connection",
 	},
 	"state_info": {
 		Computed:    true,
-		Description: "State-specific help or error information",
 		Type:        schema.TypeMap,
+		Description: "State-specific help or error information",
 	},
 	"peering_connection_id": {
 		Computed:    true,
-		Description: "Cloud provider identifier for the peering connection if available",
 		Type:        schema.TypeString,
+		Description: "Cloud provider identifier for the peering connection if available",
 	},
 	"peer_azure_app_id": {
 		Optional:    true,
 		ForceNew:    true,
-		Description: "Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet",
 		Type:        schema.TypeString,
+		Description: complex("Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet").forceNew().build(),
 	},
 	"peer_azure_tenant_id": {
 		Optional:    true,
 		ForceNew:    true,
-		Description: "Azure tenant id in UUID4 form",
 		Type:        schema.TypeString,
+		Description: complex("Azure tenant id in UUID4 form.").forceNew().build(),
 	},
 	"peer_resource_group": {
 		Optional:    true,
 		ForceNew:    true,
-		Description: "Azure resource group name of the peered VPC",
 		Type:        schema.TypeString,
+		Description: complex("Azure resource group name of the peered VPC").forceNew().build(),
 	},
 }
 
 func resourceVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The VPC Peering Connection resource allows the creation and management of Aiven VPC Peering Connections.",
 		CreateContext: resourceVPCPeeringConnectionCreate,
 		ReadContext:   resourceVPCPeeringConnectionRead,
 		DeleteContext: resourceVPCPeeringConnectionDelete,

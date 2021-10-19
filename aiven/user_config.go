@@ -15,7 +15,7 @@ import (
 // on user config JSON schema definition.
 func GenerateTerraformUserConfigSchema(data map[string]interface{}) map[string]*schema.Schema {
 	if _, ok := data["properties"]; !ok {
-		return nil
+		return map[string]*schema.Schema{}
 	}
 
 	properties := data["properties"].(map[string]interface{})

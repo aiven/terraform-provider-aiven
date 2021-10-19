@@ -15,47 +15,33 @@ import (
 )
 
 var aivenKafkaACLSchema = map[string]*schema.Schema{
-	"project": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Project to link the Kafka ACL to",
-		ForceNew:    true,
-		ValidateFunc: validation.StringMatch(regexp.MustCompile("^[a-zA-Z0-9_-]*$"),
-			"project name should be alphanumeric"),
-	},
-	"service_name": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Service to link the Kafka ACL to",
-		ForceNew:    true,
-		ValidateFunc: validation.StringMatch(regexp.MustCompile("^[a-zA-Z0-9_-]*$"),
-			"service name should be alphanumeric"),
-	},
+	"project":      commonSchemaProjectReference,
+	"service_name": commonSchemaServiceNameReference,
 	"permission": {
 		Type:         schema.TypeString,
 		Required:     true,
-		Description:  "Kafka permission to grant (admin, read, readwrite, write)",
 		ForceNew:     true,
 		ValidateFunc: validation.StringInSlice([]string{"admin", "read", "readwrite", "write"}, false),
+		Description:  complex("Kafka permission to grant.").forceNew().possibleValues("admin", "read", "readwrite", "write").build(),
 	},
 	"topic": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "Topic name pattern for the ACL entry",
 		ForceNew:    true,
+		Description: complex("Topic name pattern for the ACL entry.").forceNew().build(),
 	},
 	"username": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Username pattern for the ACL entry",
-		ForceNew:    true,
-		ValidateFunc: validation.StringMatch(regexp.MustCompile(`^(\*$|[a-zA-Z0-9-_?][a-zA-Z0-9-_?*]+)$`),
-			"username should be alphanumeric"),
+		Type:         schema.TypeString,
+		Required:     true,
+		ForceNew:     true,
+		ValidateFunc: validation.StringMatch(regexp.MustCompile(`^(\*$|[a-zA-Z0-9-_?][a-zA-Z0-9-_?*]+)$`), "username should be alphanumeric"),
+		Description:  complex("Username pattern for the ACL entry.").forceNew().build(),
 	},
 }
 
 func resourceKafkaACL() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Resource Kafka ACL resource allows the creation and management of ACLs for an Aiven Kafka service.",
 		CreateContext: resourceKafkaACLCreate,
 		ReadContext:   resourceKafkaACLRead,
 		DeleteContext: resourceKafkaACLDelete,

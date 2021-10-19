@@ -17,88 +17,77 @@ import (
 )
 
 var aivenKafkaTopicSchema = map[string]*schema.Schema{
-	"project": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Project to link the kafka topic to",
-		ForceNew:    true,
-	},
-	"service_name": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Service to link the kafka topic to",
-		ForceNew:    true,
-	},
+	"project":      commonSchemaProjectReference,
+	"service_name": commonSchemaServiceNameReference,
+
 	"topic_name": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "Topic name",
 		ForceNew:    true,
+		Description: complex("The name of the topic.").forceNew().build(),
 	},
 	"partitions": {
 		Type:        schema.TypeInt,
 		Required:    true,
-		Description: "Number of partitions to create in the topic",
+		Description: "The number of partitions to create in the topic.",
 	},
 	"replication": {
 		Type:        schema.TypeInt,
 		Required:    true,
-		Description: "Replication factor for the topic",
+		Description: "The replication factor for the topic.",
 	},
 	"retention_bytes": {
 		Type:             schema.TypeInt,
 		Optional:         true,
-		Description:      "Retention bytes",
 		Deprecated:       "use config.retention_bytes instead",
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Description:      complex("Retention bytes.").deprecate("use config.retention_bytes instead").build(),
 	},
 	"retention_hours": {
 		Type:             schema.TypeInt,
 		Optional:         true,
-		Description:      "Retention period (hours)",
 		ValidateFunc:     validation.IntAtLeast(-1),
 		Deprecated:       "use config.retention_ms instead",
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Description:      complex("Retention period (hours).").deprecate("use config.retention_ms instead").build(),
 	},
 	"minimum_in_sync_replicas": {
 		Type:             schema.TypeInt,
 		Optional:         true,
-		Description:      "Minimum required nodes in-sync replicas (ISR) to produce to a partition",
 		Deprecated:       "use config.min_insync_replicas instead",
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Description:      complex("Minimum required nodes in-sync replicas (ISR) to produce to a partition.").deprecate("use config.min_insync_replicas instead").build(),
 	},
 	"cleanup_policy": {
 		Type:             schema.TypeString,
 		Optional:         true,
-		Description:      "Topic cleanup policy. Allowed values: delete, compact",
 		Deprecated:       "use config.cleanup_policy instead",
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Description:      complex("Topic cleanup policy.").deprecate("use config.cleanup_policy instead").possibleValues("delete", "compact").build(),
 	},
 	"termination_protection": {
-		Type:     schema.TypeBool,
-		Optional: true,
-		Default:  false,
-		Description: `It is a Terraform client-side deletion protection, which prevents a Kafka 
-			topic from being deleted. It is recommended to enable this for any production Kafka 
-			topic containing critical data.`,
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Default:     false,
+		Description: "It is a Terraform client-side deletion protection, which prevents a Kafka topic from being deleted. It is recommended to enable this for any production Kafka topic containing critical data.",
 	},
 	"tag": {
 		Type:        schema.TypeSet,
-		Description: "Kafka Topic tag",
+		Description: "Kafka Topic tag.",
 		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"key": {
 					Type:         schema.TypeString,
-					Description:  "Topic tag key",
 					Required:     true,
 					ValidateFunc: validation.StringLenBetween(1, 64),
+					Description:  complex("Topic tag key.").maxLen(64).build(),
 				},
 				"value": {
 					Type:         schema.TypeString,
-					Description:  "Topic tag value",
 					Optional:     true,
 					ValidateFunc: validation.StringLenBetween(0, 256),
+					Description:  complex("Topic tag value.").maxLen(256).build(),
 				},
 			},
 		},
@@ -262,6 +251,7 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 
 func resourceKafkaTopic() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Kafka Topic resource allows the creation and management of Aiven Kafka Topics.",
 		CreateContext: resourceKafkaTopicCreate,
 		ReadContext:   resourceKafkaTopicRead,
 		UpdateContext: resourceKafkaTopicUpdate,

@@ -10,6 +10,7 @@ import (
 func datasourceAccountTeamMember() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceAccountTeamMemberRead,
+		Description: "The Account Team Member data source provides information about the existing Aiven Account Team Member.",
 		Schema: resourceSchemaAsDatasourceSchema(aivenAccountTeamMemberSchema,
 			"account_id", "team_id", "user_email"),
 	}

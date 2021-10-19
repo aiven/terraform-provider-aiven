@@ -151,6 +151,7 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 
 func resourceServiceIntegrationEndpoint() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The Service Integration Endpoint resource allows the creation and management of Aiven Service Integration Endpoints.",
 		CreateContext: resourceServiceIntegrationEndpointCreate,
 		ReadContext:   resourceServiceIntegrationEndpointRead,
 		UpdateContext: resourceServiceIntegrationEndpointUpdate,

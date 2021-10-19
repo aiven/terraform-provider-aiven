@@ -12,6 +12,7 @@ import (
 func datasourceConnectionPool() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceConnectionPoolRead,
+		Description: "The Connection Pool data source provides information about the existing Aiven Connection Pool.",
 		Schema: resourceSchemaAsDatasourceSchema(aivenConnectionPoolSchema,
 			"project", "service_name", "pool_name"),
 	}
