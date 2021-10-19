@@ -58,6 +58,13 @@ func testAccPGResource(name string) string {
 					prometheus = false
 				}
 
+				ip_filter = [
+					"13.0.0.0/32",
+					"12.0.0.0/32",
+					"11.0.0.0/32",
+					"15.0.0.0/32",
+				]
+
 				pg {
 					idle_in_transaction_session_timeout = 900
 					log_min_duration_statement = -1
