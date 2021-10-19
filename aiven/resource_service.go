@@ -724,7 +724,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 		},
 	)
 
-	if err != nil && !isServiceAlreadyExists(err) {
+	if err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -1022,13 +1022,4 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	}
 
 	return nil
-}
-
-func isServiceAlreadyExists(err error) bool {
-	if e, ok := err.(aiven.Error); ok {
-		if e.Status == 409 && strings.Contains(err.Error(), "Service name is already in use in this project") {
-			return true
-		}
-	}
-	return false
 }
