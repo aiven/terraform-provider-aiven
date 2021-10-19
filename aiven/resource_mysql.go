@@ -10,7 +10,6 @@ func aivenMySQLSchema() map[string]*schema.Schema {
 	schemaMySQL := serviceCommonSchema()
 	schemaMySQL[ServiceTypeMySQL] = &schema.Schema{
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "MySQL specific server provided values",
 		Elem: &schema.Resource{

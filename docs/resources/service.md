@@ -23,26 +23,26 @@ The Service resource allows the creation and management of Aiven Services.
 
 ### Optional
 
-- **cassandra_user_config** (Block List, Max: 1) Cassandra specific user configurable settings (see [below for nested schema](#nestedblock--cassandra_user_config))
+- **cassandra_user_config** (Block List, Max: 1) Cassandra user configurable settings (see [below for nested schema](#nestedblock--cassandra_user_config))
 - **cloud_name** (String) Cloud the service runs in
-- **elasticsearch_user_config** (Block List, Max: 1) Elasticsearch specific user configurable settings (see [below for nested schema](#nestedblock--elasticsearch_user_config))
-- **flink** (Block List, Max: 1) Flink specific server provided values (see [below for nested schema](#nestedblock--flink))
-- **flink_user_config** (Block List, Max: 1) Flink specific user configurable settings (see [below for nested schema](#nestedblock--flink_user_config))
-- **grafana_user_config** (Block List, Max: 1) Grafana specific user configurable settings (see [below for nested schema](#nestedblock--grafana_user_config))
+- **elasticsearch_user_config** (Block List, Max: 1) Elasticsearch user configurable settings (see [below for nested schema](#nestedblock--elasticsearch_user_config))
+- **flink** (Block List) Flink specific server provided values (see [below for nested schema](#nestedblock--flink))
+- **flink_user_config** (Block List, Max: 1) Flink user configurable settings (see [below for nested schema](#nestedblock--flink_user_config))
+- **grafana_user_config** (Block List, Max: 1) Grafana user configurable settings (see [below for nested schema](#nestedblock--grafana_user_config))
 - **id** (String) The ID of this resource.
-- **influxdb_user_config** (Block List, Max: 1) InfluxDB specific user configurable settings (see [below for nested schema](#nestedblock--influxdb_user_config))
-- **kafka** (Block List, Max: 1) Kafka specific server provided values (see [below for nested schema](#nestedblock--kafka))
-- **kafka_connect_user_config** (Block List, Max: 1) Kafka Connect specific user configurable settings (see [below for nested schema](#nestedblock--kafka_connect_user_config))
-- **kafka_mirrormaker_user_config** (Block List, Max: 1) Kafka MirrorMaker 2 specific user configurable settings (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config))
-- **kafka_user_config** (Block List, Max: 1) Kafka specific user configurable settings (see [below for nested schema](#nestedblock--kafka_user_config))
+- **influxdb_user_config** (Block List, Max: 1) Influxdb user configurable settings (see [below for nested schema](#nestedblock--influxdb_user_config))
+- **kafka** (Block List) Kafka specific server provided values (see [below for nested schema](#nestedblock--kafka))
+- **kafka_connect_user_config** (Block List, Max: 1) Kafka_connect user configurable settings (see [below for nested schema](#nestedblock--kafka_connect_user_config))
+- **kafka_mirrormaker_user_config** (Block List, Max: 1) Kafka_mirrormaker user configurable settings (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config))
+- **kafka_user_config** (Block List, Max: 1) Kafka user configurable settings (see [below for nested schema](#nestedblock--kafka_user_config))
 - **maintenance_window_dow** (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - **maintenance_window_time** (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
-- **mysql_user_config** (Block List, Max: 1) MySQL specific user configurable settings (see [below for nested schema](#nestedblock--mysql_user_config))
-- **opensearch_user_config** (Block List, Max: 1) Opensearch specific user configurable settings (see [below for nested schema](#nestedblock--opensearch_user_config))
-- **pg_user_config** (Block List, Max: 1) PostgreSQL specific user configurable settings (see [below for nested schema](#nestedblock--pg_user_config))
+- **mysql_user_config** (Block List, Max: 1) Mysql user configurable settings (see [below for nested schema](#nestedblock--mysql_user_config))
+- **opensearch_user_config** (Block List, Max: 1) Opensearch user configurable settings (see [below for nested schema](#nestedblock--opensearch_user_config))
+- **pg_user_config** (Block List, Max: 1) Pg user configurable settings (see [below for nested schema](#nestedblock--pg_user_config))
 - **plan** (String) Subscription plan
 - **project_vpc_id** (String) Identifier of the VPC the service should be in, if any
-- **redis_user_config** (Block List, Max: 1) Redis specific user configurable settings (see [below for nested schema](#nestedblock--redis_user_config))
+- **redis_user_config** (Block List, Max: 1) Redis user configurable settings (see [below for nested schema](#nestedblock--redis_user_config))
 - **service_integrations** (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
 - **termination_protection** (Boolean) Prevent service from being deleted. It is recommended to have this enabled for all services.
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))

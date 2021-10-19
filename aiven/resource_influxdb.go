@@ -10,7 +10,6 @@ func influxDBSchema() map[string]*schema.Schema {
 	s := serviceCommonSchema()
 	s[ServiceTypeInfluxDB] = &schema.Schema{
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "InfluxDB server provided values",
 		Elem: &schema.Resource{

@@ -10,7 +10,6 @@ func aivenKafkaConnectSchema() map[string]*schema.Schema {
 	kafkaConnectSchema := serviceCommonSchema()
 	kafkaConnectSchema[ServiceTypeKafkaConnect] = &schema.Schema{
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "Kafka Connect server provided values",
 		Elem: &schema.Resource{

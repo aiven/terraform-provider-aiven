@@ -59,7 +59,6 @@ eliminate an account team member if one has accepted an invitation previously.
 `,
 		CreateContext: resourceAccountTeamMemberCreate,
 		ReadContext:   resourceAccountTeamMemberRead,
-		UpdateContext: resourceAccountTeamMemberCreate,
 		DeleteContext: resourceAccountTeamMemberDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceAccountTeamMemberState,

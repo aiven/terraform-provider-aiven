@@ -10,7 +10,6 @@ func elasticsearchSchema() map[string]*schema.Schema {
 	s := serviceCommonSchema()
 	s[ServiceTypeElasticsearch] = &schema.Schema{
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "Elasticsearch server provided values",
 		Elem: &schema.Resource{

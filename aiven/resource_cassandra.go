@@ -10,7 +10,6 @@ func cassandraSchema() map[string]*schema.Schema {
 	s := serviceCommonSchema()
 	s[ServiceTypeCassandra] = &schema.Schema{
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "Cassandra server provided values",
 		Elem: &schema.Resource{

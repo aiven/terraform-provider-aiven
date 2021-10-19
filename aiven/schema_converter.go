@@ -14,12 +14,12 @@ func resourceSchemaAsDatasourceSchema(d map[string]*schema.Schema, required ...s
 			Description: v.Description,
 			Sensitive:   v.Sensitive,
 			Elem:        v.Elem,
-			MaxItems:    v.MaxItems,
-			MinItems:    v.MinItems,
 		}
 	}
 	for _, k := range required {
-		s[k].Required, s[k].Optional = true, false
+		s[k].Required = true
+		s[k].Optional = false
+		s[k].Computed = false
 	}
 	return s
 }

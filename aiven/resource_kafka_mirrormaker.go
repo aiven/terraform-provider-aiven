@@ -10,7 +10,6 @@ func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
 	kafkaMMSchema := serviceCommonSchema()
 	kafkaMMSchema[ServiceTypeKafkaMirrormaker] = &schema.Schema{
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "Kafka MirrorMaker 2 server provided values",
 		Elem: &schema.Resource{
