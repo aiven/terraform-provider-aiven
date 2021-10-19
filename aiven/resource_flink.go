@@ -3,7 +3,6 @@ package aiven
 import (
 	"time"
 
-	"github.com/aiven/terraform-provider-aiven/aiven/templates"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -29,17 +28,7 @@ func aivenFlinkSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	aivenFlinkSchema[ServiceTypeFlink+"_user_config"] = &schema.Schema{
-		Type:             schema.TypeList,
-		MaxItems:         1,
-		Optional:         true,
-		Description:      "Flink user configurable settings",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
-		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("service")[ServiceTypeFlink].(map[string]interface{})),
-		},
-	}
+	aivenFlinkSchema[ServiceTypeFlink+"_user_config"] = generateServiceUserConfiguration(ServiceTypeFlink)
 
 	return aivenFlinkSchema
 }

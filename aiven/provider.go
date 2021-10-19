@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/templates"
 	"github.com/aiven/terraform-provider-aiven/pkg/cache"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -330,6 +331,27 @@ func emptyObjectDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) boo
 	return false
 }
 
+// emptyObjectDiffSuppressFuncSkipArrays generates a DiffSuppressFunc that skips all the array/list fields
+// and uses emptyObjectDiffSuppressFunc in all others cases
+func emptyObjectDiffSuppressFuncSkipArrays(s map[string]*schema.Schema) schema.SchemaDiffSuppressFunc {
+	var skipKeys []string
+	for key, sh := range s {
+		if sh.Type == schema.TypeList {
+			skipKeys = append(skipKeys, key)
+		}
+	}
+
+	return func(k, old, new string, d *schema.ResourceData) bool {
+		for _, key := range skipKeys {
+			if strings.Contains(k, fmt.Sprintf(".%s.", key)) {
+				return false
+			}
+		}
+
+		return emptyObjectDiffSuppressFunc(k, old, new, d)
+	}
+}
+
 // emptyObjectNoChangeDiffSuppressFunc it suppresses a diff if a field is empty but have not
 // been set before to any value
 func emptyObjectNoChangeDiffSuppressFunc(k, _, new string, d *schema.ResourceData) bool {
@@ -348,8 +370,16 @@ func emptyObjectNoChangeDiffSuppressFunc(k, _, new string, d *schema.ResourceDat
 // has default. We don't want to force users to always define explicit value just because
 // of the Terraform restriction so suppress the change from default to empty (which would
 // be nonsensical operation anyway)
-func ipFilterArrayDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) bool {
-	return old == "1" && new == "0" && strings.HasSuffix(k, ".ip_filter.#")
+func ipFilterArrayDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	if old == "1" && new == "0" && strings.HasSuffix(k, ".ip_filter.#") {
+		if list, ok := d.Get(strings.TrimSuffix(k, ".#")).([]interface{}); ok {
+			if len(list) == 1 {
+				return list[0] == "0.0.0.0/0"
+			}
+		}
+	}
+
+	return false
 }
 
 func ipFilterValueDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) bool {
@@ -382,4 +412,19 @@ func resourceReadHandleNotFound(err error, d *schema.ResourceData) error {
 		return nil
 	}
 	return err
+}
+
+// generateServiceUserConfiguration generate service user_config
+func generateServiceUserConfiguration(t string) *schema.Schema {
+	s := GenerateTerraformUserConfigSchema(
+		templates.GetUserConfigSchema("service")[t].(map[string]interface{}))
+
+	return &schema.Schema{
+		Type:             schema.TypeList,
+		MaxItems:         1,
+		Optional:         true,
+		Description:      fmt.Sprintf("%s user configurable settings", strings.Title(t)),
+		DiffSuppressFunc: emptyObjectDiffSuppressFuncSkipArrays(s),
+		Elem:             &schema.Resource{Schema: s},
+	}
 }
