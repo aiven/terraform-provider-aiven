@@ -199,9 +199,9 @@ resource "aiven_flink_job" "testing" {
   project = aiven_flink.testing.project
   service_name = aiven_flink.testing.service_name
   job_name = var.job_name
-  tables = [
-    aiven_flink_table.source.table_name,
-    aiven_flink_table.sink.table_name
+  table_id = [
+    aiven_flink_table.source.table_id,
+    aiven_flink_table.sink.table_id
   ]
   statement =<<EOF
     INSERT INTO ${aiven_flink_table.sink.table_name}
@@ -245,8 +245,8 @@ resource "aiven_flink_job" "testing" {
 					// job
 					resource.TestCheckResourceAttr("aiven_flink_job.testing", "project", projectName),
 					resource.TestCheckResourceAttr("aiven_flink_job.testing", "service_name", flinkServiceName),
-					resource.TestCheckResourceAttr("aiven_flink_job.testing", "tables.0", sourceTableName),
-					resource.TestCheckResourceAttr("aiven_flink_job.testing", "tables.1", sinkTableName),
+					resource.TestCheckResourceAttrSet("aiven_flink_job.testing", "table_id.0"),
+					resource.TestCheckResourceAttrSet("aiven_flink_job.testing", "table_id.1"),
 				),
 			},
 		},
@@ -388,9 +388,9 @@ resource "aiven_flink_job" "testing" {
   project = aiven_flink_table.source.project
   service_name = aiven_flink.testing.service_name
   job_name = var.job_name
-  tables = [
-    aiven_flink_table.source.table_name,
-    aiven_flink_table.sink.table_name
+  table_id = [
+    aiven_flink_table.source.table_id,
+    aiven_flink_table.sink.table_id
   ]
   statement =<<EOF
     INSERT INTO ${aiven_flink_table.sink.table_name}
@@ -435,8 +435,8 @@ resource "aiven_flink_job" "testing" {
 					// job
 					resource.TestCheckResourceAttr("aiven_flink_job.testing", "project", projectName),
 					resource.TestCheckResourceAttr("aiven_flink_job.testing", "service_name", flinkServiceName),
-					resource.TestCheckResourceAttr("aiven_flink_job.testing", "tables.0", sourceTableName),
-					resource.TestCheckResourceAttr("aiven_flink_job.testing", "tables.1", sinkTableName),
+					resource.TestCheckResourceAttr("aiven_flink_job.testing", "table_id.0", sourceTableName),
+					resource.TestCheckResourceAttr("aiven_flink_job.testing", "table_id.1", sinkTableName),
 				),
 			},
 		},
