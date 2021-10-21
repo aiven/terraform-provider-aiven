@@ -26,7 +26,7 @@ var aivenFlinkJobSchema = map[string]*schema.Schema{
 		Required:    true,
 		ForceNew:    true,
 	},
-	"tables": {
+	"table_id": {
 		Type:        schema.TypeList,
 		Description: complex("A list of table ids that are required in the job runtime.").forceNew().referenced().build(),
 		Required:    true,
@@ -61,7 +61,7 @@ func resourceFlinkJob() *schema.Resource {
 	}
 }
 
-func resourceFlinkJobRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceFlinkJobRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, jobId := splitResourceID3(d.Id())
@@ -105,12 +105,12 @@ func resourceFlinkJobCreate(ctx context.Context, d *schema.ResourceData, m inter
 	serviceName := d.Get("service_name").(string)
 	jobName := d.Get("job_name").(string)
 	jobStatement := d.Get("statement").(string)
-	jobTables := flattenToString(d.Get("tables").([]interface{}))
+	jobTables := flattenToString(d.Get("table_id").([]interface{}))
 
 	createRequest := aiven.CreateFlinkJobRequest{
 		JobName:   jobName,
 		Statement: jobStatement,
-		Tables:    jobTables,
+		TablesIds: jobTables,
 	}
 
 	createResponse, err := client.FlinkJobs.Create(project, serviceName, createRequest)

@@ -40,7 +40,7 @@ resource "aiven_flink_job" "job" {
 - **project** (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 - **service_name** (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 - **statement** (String) The SQL statement to define the job. This property cannot be changed, doing so forces recreation of the resource.
-- **tables** (List of String) A list of table ids that are required in the job runtime. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- **table_id** (List of String) A list of table ids that are required in the job runtime. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Optional
 
