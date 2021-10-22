@@ -51,7 +51,8 @@ func Test_resourceSchemaAsDatasourceSchema(t *testing.T) {
 				"cloud_name": {
 					Type:        schema.TypeString,
 					Required:    false,
-					Optional:    true,
+					Optional:    false,
+					Computed:    true,
 					Description: "Cloud the service runs in",
 				}},
 		},
