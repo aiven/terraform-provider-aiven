@@ -160,7 +160,7 @@ func testAccServiceIntegrationKafkaConnectResource(name string) string {
 			project = data.aiven_project.foo.project
 			integration_type = "kafka_connect"
 			source_service_name = aiven_kafka.kafka1.service_name
-			destination_service_name = aiven_kafka_conect.kafka_connect1.service_name
+			destination_service_name = aiven_kafka_connect.kafka_connect1.service_name
 			
 			kafka_connect_user_config {
 				kafka_connect {
@@ -169,8 +169,6 @@ func testAccServiceIntegrationKafkaConnectResource(name string) string {
 					offset_storage_topic = "__connect_offsets"
 				}
 			}
-
-			depends_on = [aiven_kafka.kafka1,aiven_kafka_conect.kafka_connect1]
 		}
 
 		data "aiven_service_integration" "int" {

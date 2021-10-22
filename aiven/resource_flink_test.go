@@ -435,8 +435,8 @@ resource "aiven_flink_job" "testing" {
 					// job
 					resource.TestCheckResourceAttr("aiven_flink_job.testing", "project", projectName),
 					resource.TestCheckResourceAttr("aiven_flink_job.testing", "service_name", flinkServiceName),
-					resource.TestCheckResourceAttr("aiven_flink_job.testing", "table_id.0", sourceTableName),
-					resource.TestCheckResourceAttr("aiven_flink_job.testing", "table_id.1", sinkTableName),
+					resource.TestCheckResourceAttrSet("aiven_flink_job.testing", "table_id.0"),
+					resource.TestCheckResourceAttrSet("aiven_flink_job.testing", "table_id.1"),
 				),
 			},
 		},
