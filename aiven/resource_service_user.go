@@ -24,10 +24,11 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 		Description: complex("The actual name of the service user.").forceNew().referenced().build(),
 	},
 	"password": {
-		Type:        schema.TypeString,
-		Sensitive:   true,
-		Computed:    true,
-		Description: "The password of the service user ( not applicable for all services ).",
+		Type:             schema.TypeString,
+		Sensitive:        true,
+		Optional:         true,
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		Description:      "The password of the service user ( not applicable for all services ).",
 	},
 	"redis_acl_categories": {
 		Type:         schema.TypeList,
