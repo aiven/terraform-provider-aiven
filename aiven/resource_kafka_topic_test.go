@@ -6,7 +6,6 @@ import (
 	"os"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -70,7 +69,6 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	rName2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	rName3 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	rName4 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -90,60 +88,9 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
 				),
 			},
-			// basic Kafka Topic test validating is already exists error handling
+			// custom TF client timeouts test
 			{
-				// Before running Config Kafka service and topic will be created via API
-				PreConfig: func() {
-					client, _ := aiven.NewTokenClient(os.Getenv("AIVEN_TOKEN"), "terraform-provider-aiven/")
-					s, err := client.Services.Create(os.Getenv("AIVEN_PROJECT_NAME"), aiven.CreateServiceRequest{
-						Cloud:       "google-europe-west1",
-						Plan:        "business-4",
-						ServiceName: fmt.Sprintf("test-acc-sr-%s", rName2),
-						ServiceType: "kafka",
-						MaintenanceWindow: &aiven.MaintenanceWindow{
-							DayOfWeek: "monday",
-							TimeOfDay: "10:00:00",
-						},
-					})
-					if err != nil {
-						t.Fatalf("Cannot create Kafka service in PreConfig %s:", err.Error())
-					}
-
-					// wait until Kafka service is RUNNING
-					for {
-						s, err = client.Services.Get(os.Getenv("AIVEN_PROJECT_NAME"), s.Name)
-						if err != nil {
-							t.Fatalf("Cannot get Kafka service in PreConfig while waiting to be ACTIVE %s:", err.Error())
-						}
-
-						if s.State == "RUNNING" {
-							t.Logf("Service %s is RUNNING!", s.Name)
-							time.Sleep(10 * time.Second)
-							break
-						}
-
-						t.Logf("Waiting for service %s to be RUNNING, current state: %s", s.Name, s.State)
-						time.Sleep(10 * time.Second)
-					}
-
-					var partitions = 3
-					var replication = 2
-					err = client.KafkaTopics.Create(os.Getenv("AIVEN_PROJECT_NAME"), s.Name, aiven.CreateKafkaTopicRequest{
-						Partitions:  &partitions,
-						Replication: &replication,
-						TopicName:   fmt.Sprintf("test-acc-topic-%s", rName),
-						Config: aiven.KafkaTopicConfig{
-							FlushMs:                     parseOptionalStringToInt64("10"),
-							UncleanLeaderElectionEnable: parseOptionalStringToBool("true"),
-							CleanupPolicy:               "compact",
-							MinCleanableDirtyRatio:      parseOptionalStringToFloat64("0.01"),
-						},
-					})
-					if err != nil {
-						t.Fatalf("Cannot create Kafka Topic in PreConfig %s:", err.Error())
-					}
-				},
-				Config: testAccKafkaTopicResource(rName2),
+				Config: testAccKafkaTopicCustomTimeoutsResource(rName2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenKafkaTopicAttributes("data.aiven_kafka_topic.topic"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
@@ -152,32 +99,19 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
 					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
-				),
-			},
-			// custom TF client timeouts test
-			{
-				Config: testAccKafkaTopicCustomTimeoutsResource(rName3),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenKafkaTopicAttributes("data.aiven_kafka_topic.topic"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName3)),
-					resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName3)),
-					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
-					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
-					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
 					resource.TestCheckResourceAttr(resourceName, "retention_hours", "100"),
 				),
 			},
 			// termination protection test
 			{
-				Config:                    testAccKafkaTopicTerminationProtectionResource(rName4),
+				Config:                    testAccKafkaTopicTerminationProtectionResource(rName3),
 				PreventPostDestroyRefresh: true,
 				ExpectNonEmptyPlan:        true,
 				PlanOnly:                  true,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName4)),
-					resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName4)),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName3)),
+					resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName3)),
 					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
 					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "true"),
