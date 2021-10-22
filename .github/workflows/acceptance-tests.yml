@@ -1,9 +1,8 @@
 name: acceptance tests
 
 on:
-  push:
-    tags:
-      - '*'
+  pull_request:
+    branches:: [main]
 
 jobs:
   acceptance-tests:
