@@ -853,6 +853,11 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	service *aiven.Service,
 	project string,
 ) error {
+	serviceType := d.Get("service_type").(string)
+	if _, ok := d.GetOk("service_type"); !ok {
+		serviceType = service.Type
+	}
+
 	if err := d.Set("cloud_name", service.CloudName); err != nil {
 		return err
 	}
@@ -865,7 +870,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	if err := d.Set("plan", service.Plan); err != nil {
 		return err
 	}
-	if err := d.Set("service_type", service.Type); err != nil {
+	if err := d.Set("service_type", serviceType); err != nil {
 		return err
 	}
 	if err := d.Set("termination_protection", service.TerminationProtection); err != nil {
@@ -889,11 +894,11 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 			return err
 		}
 	}
-
-	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat("service", service.Type, service.UserConfig)
-	if err := d.Set(service.Type+"_user_config", userConfig); err != nil {
+	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat(
+		"service", serviceType, service.UserConfig)
+	if err := d.Set(serviceType+"_user_config", userConfig); err != nil {
 		return fmt.Errorf("cannot set `%s_user_config` : %s;"+
-			"Please make sure that all Aiven services have unique service names", service.Type, err)
+			"Please make sure that all Aiven services have unique service names", serviceType, err)
 	}
 
 	params := service.URIParams
@@ -923,7 +928,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		return fmt.Errorf("cannot set `components` : %s", err)
 	}
 
-	return copyConnectionInfoFromAPIResponseToTerraform(d, service.Type, service.ConnectionInfo)
+	return copyConnectionInfoFromAPIResponseToTerraform(d, serviceType, service.ConnectionInfo)
 }
 
 func flattenServiceComponents(r *aiven.Service) []map[string]interface{} {
