@@ -46,6 +46,8 @@ func datasourceServiceComponent() *schema.Resource {
 					"schema_registry",
 					"pgbouncer",
 					"prometheus",
+					"opensearch",
+					"opensearch_dashboards",
 				}, false),
 			},
 			"route": {
