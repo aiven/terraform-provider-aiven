@@ -13,6 +13,8 @@ jobs:
       uses: softprops/turnstyle@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        same-branch-only: false
 
     - name: Set up Go
       uses: actions/setup-go@v2
