@@ -9,33 +9,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  acceptance-tests:
+  acceptance_tests:
     runs-on: ubuntu-18.04
 
     steps:
-    - name: Turnstyle
-      uses: softprops/turnstyle@v1
+    - uses: softprops/turnstyle@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         same-branch-only: false
 
-    - name: Set up Go
-      uses: actions/setup-go@v2
+    - uses: actions/setup-go@v2
       with:
         go-version: '1.16'
 
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
-    - name: Acceptance Tests
-      run: make testacc
+    - run: make testacc
       env:
         AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
         AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME }} 
 
-    - name: Cleanup Aiven Resources
-      uses: nick-invision/retry@v2
+    - uses: nick-invision/retry@v2
       if: always()
       with:
         timeout_minutes: 10

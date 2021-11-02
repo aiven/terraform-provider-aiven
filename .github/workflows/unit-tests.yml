@@ -7,9 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-
-  test:
-    name: Test
+  go_test:
     strategy:
       matrix:
         go-version: [1.15.x, 1.16.x]
@@ -17,17 +15,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v2
+    - uses: actions/setup-go@v2
       with:
         go-version: ^1.16
-
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
-
-    - name: Build
-      run: go build -v .
-
-    - name: Test
-      run: make test
+    - uses: actions/checkout@v2
+      with:
+       fetch-depth: 0
+    - run: make test
