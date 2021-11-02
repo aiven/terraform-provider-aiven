@@ -51,3 +51,6 @@ dist/
 
 # Mac meta files
 .DS_Store
+
+# Secrets for local runs
+aiven.secret
