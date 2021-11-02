@@ -1,4 +1,4 @@
-name: Run golangci-lint
+name: Lint
 
 on:
   push:
@@ -7,7 +7,16 @@ on:
     branches: [ master ]
 
 jobs:
-  golangci-lint:
+  semgrep:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+       fetch-depth: 0
+    - name: semgrep
+      uses: returntocorp/semgrep-action@v1
+
+  golangci_lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
