@@ -35,7 +35,7 @@ jobs:
       if: always()
       with:
         timeout_minutes: 10
-        max_attempts: 3
+        max_attempts: 10
         command: make sweep
       env:
         AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}

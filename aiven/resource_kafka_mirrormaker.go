@@ -31,6 +31,7 @@ func resourceKafkaMirrormaker() *schema.Resource {
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,
 		DeleteContext: resourceServiceDelete,
+		CustomizeDiff: resourceServiceCustomizeDiffWrapper(ServiceTypeKafkaMirrormaker),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceState,
 		},

@@ -42,6 +42,7 @@ func resourceFlink() *schema.Resource {
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,
 		DeleteContext: resourceServiceDelete,
+		CustomizeDiff: resourceServiceCustomizeDiffWrapper(ServiceTypeFlink),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceState,
 		},

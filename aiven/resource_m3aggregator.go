@@ -29,6 +29,7 @@ func resourceM3Aggregator() *schema.Resource {
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,
 		DeleteContext: resourceServiceDelete,
+		CustomizeDiff: resourceServiceCustomizeDiffWrapper(ServiceTypeM3Aggregator),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceState,
 		},

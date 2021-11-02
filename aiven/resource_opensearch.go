@@ -41,6 +41,7 @@ func resourceOpensearch() *schema.Resource {
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,
 		DeleteContext: resourceServiceDelete,
+		CustomizeDiff: resourceServiceCustomizeDiffWrapper(ServiceTypeOpensearch),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceElasticsearchState,
 		},

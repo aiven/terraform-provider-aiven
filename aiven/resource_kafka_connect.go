@@ -30,6 +30,7 @@ func resourceKafkaConnect() *schema.Resource {
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,
 		DeleteContext: resourceServiceDelete,
+		CustomizeDiff: resourceServiceCustomizeDiffWrapper(ServiceTypeKafkaConnect),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceState,
 		},
