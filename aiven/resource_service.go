@@ -1,10 +1,11 @@
 // Copyright (c) 2017 jelmersnoeck
-// Copyright (c) 2018 Aiven, Helsinki, Finland. https://aiven.io/
+// Copyright (c) 2021 Aiven, Helsinki, Finland. https://aiven.io/
 package aiven
 
 import (
 	"context"
 	"fmt"
+	"github.com/aiven/terraform-provider-aiven/pkg/ipfilter"
 	"strconv"
 	"strings"
 	"time"
@@ -896,7 +897,8 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	}
 	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat(
 		"service", serviceType, service.UserConfig)
-	if err := d.Set(serviceType+"_user_config", userConfig); err != nil {
+	if err := d.Set(serviceType+"_user_config",
+		ipfilter.Normalize(d.Get(serviceType+"_user_config"), userConfig)); err != nil {
 		return fmt.Errorf("cannot set `%s_user_config` : %s;"+
 			"Please make sure that all Aiven services have unique service names", serviceType, err)
 	}
