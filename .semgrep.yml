@@ -1,4 +1,18 @@
 rules:
+- id: outdated-copyright
+  languages: [generic]
+  patterns:
+  - pattern: |
+      Copyright (c) $Y Aiven, Helsinki, Finland. https://aiven.io/
+  - metavariable-regex:
+      metavariable: $Y
+      regex: ^(?!2021)
+  fix: |
+      Copyright (c) 2021 Aiven, Helsinki, Finland. https://aiven.io/
+  message: |
+    Aiven copyright message is outdated
+  severity: WARNING
+
 - id: schema-resource without description
   languages: [go]
   paths:
