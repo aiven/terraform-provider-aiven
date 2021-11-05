@@ -6,6 +6,7 @@ nav_order: 1
 
 ## [2.3.1] - not yet released
 - Fix `aiven_transit_gateway_vpc_attachment` update operation
+- Fix `ip_filter` sorting order issue 
 
 ## [2.3.0] - 2021-10-22
 - Add Flink support that includes: `aiven_flink`, `aiven_flink_table` and `aiven_flink_job` resources
