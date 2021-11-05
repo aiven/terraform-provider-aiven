@@ -1,3 +1,5 @@
+// Copyright (c) 2017 jelmersnoeck
+// Copyright (c) 2018-2021 Aiven, Helsinki, Finland. https://aiven.io/
 package cache
 
 import (
