@@ -5,6 +5,7 @@ package aiven
 import (
 	"context"
 	"fmt"
+	"github.com/aiven/terraform-provider-aiven/pkg/ipfilter"
 	"strconv"
 	"strings"
 	"time"
