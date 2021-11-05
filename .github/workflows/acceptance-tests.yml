@@ -19,13 +19,13 @@ jobs:
       with:
         same-branch-only: false
 
-    - uses: actions/setup-go@v2
-      with:
-        go-version: '1.16'
-
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
+
+    - uses: actions/setup-go@v2
+      with:
+        go-version: 1.16
 
     - run: make testacc
       env:
