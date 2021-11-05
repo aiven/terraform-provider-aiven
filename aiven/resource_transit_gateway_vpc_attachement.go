@@ -91,7 +91,7 @@ func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.Re
 	}
 
 	// prepare a list of new transit gateway vpc attachment that needs to be added
-	var add []aiven.TransitGatewayVPCAttachment
+	add := []aiven.TransitGatewayVPCAttachment{}
 	for _, fresh := range cidrs {
 		var isNew = true
 
@@ -103,17 +103,21 @@ func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.Re
 		}
 
 		if isNew {
+			var peerResourceGroup *string
+			if len(peeringConnection.PeerResourceGroup) > 0 {
+				peerResourceGroup = aiven.ToStringPointer(peeringConnection.PeerResourceGroup)
+			}
 			add = append(add, aiven.TransitGatewayVPCAttachment{
 				CIDR:              fresh,
 				PeerCloudAccount:  peerCloudAccount,
-				PeerResourceGroup: peeringConnection.PeerResourceGroup,
+				PeerResourceGroup: peerResourceGroup,
 				PeerVPC:           peerVPC,
 			})
 		}
 	}
 
 	// prepare a list of old cirds for deletion
-	var deleteCIDRs []string
+	deleteCIDRs := []string{}
 	for _, old := range peeringConnection.UserPeerNetworkCIDRs {
 		var forDeletion = true
 
@@ -126,6 +130,10 @@ func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.Re
 		if forDeletion {
 			deleteCIDRs = append(deleteCIDRs, old)
 		}
+	}
+
+	if len(add) == 0 && len(deleteCIDRs) == 0 {
+		return resourceVPCPeeringConnectionRead(ctx, d, m)
 	}
 
 	_, err = client.TransitGatewayVPCAttachment.Update(projectName, vpcID, aiven.TransitGatewayVPCAttachmentRequest{
