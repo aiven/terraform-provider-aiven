@@ -10,8 +10,6 @@ resource "aiven_flink_table" "table" {
     # valid if the service integration refers to a kafka service
     kafka_topic = aiven_kafka_topic.table_topic.topic_name
 
-    partitioned_by = "node"
-
     schema_sql = <<EOF
       `+"`cpu`"+` INT,
       `+"`node`"+` INT,

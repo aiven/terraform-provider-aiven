@@ -8,6 +8,7 @@ import (
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 var aivenFlinkTableSchema = map[string]*schema.Schema{
@@ -20,6 +21,12 @@ var aivenFlinkTableSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 		Description: complex("Specifies the name of the table.").forceNew().build(),
 	},
+	"schema_sql": {
+		Type:        schema.TypeString,
+		Required:    true,
+		ForceNew:    true,
+		Description: complex("The SQL statement to create the table.").forceNew().build(),
+	},
 	"integration_id": {
 		Type:        schema.TypeString,
 		Required:    true,
@@ -27,34 +34,68 @@ var aivenFlinkTableSchema = map[string]*schema.Schema{
 		Description: complex("The id of the service integration that is used with this table. It must have the service integration type `flink`.").referenced().forceNew().build(),
 	},
 	"jdbc_table": {
-		Type:        schema.TypeString,
-		Optional:    true,
-		ForceNew:    true,
-		Description: complex("Name of the jdbc table that is to be connected to this table. Valid if the service integration id refers to a mysql or postgres service.").forceNew().build(),
+		Type:          schema.TypeString,
+		Optional:      true,
+		ForceNew:      true,
+		Description:   complex("Name of the jdbc table that is to be connected to this table. Valid if the service integration id refers to a mysql or postgres service.").forceNew().build(),
+		ConflictsWith: []string{"kafka_connector_type", "kafka_topic", "kafka_key_format", "kafka_value_format", "kafka_key_fields"},
+	},
+	"kafka_connector_type": {
+		Type:     schema.TypeString,
+		Optional: true,
+		ForceNew: true,
+		Description: complex("When used as a source, upsert Kafka connectors update values that use an existing key and " +
+			"delete values that are null. For sinks, the connector correspondingly writes update or delete " +
+			"messages in a compacted topic. If no matching key is found, the values are added as new " +
+			"entries. For more information, see the Apache Flink documentation").forceNew().possibleValues(stringSliceToInterfaceSlice(getFlinkTableKafkaConnectorTypes())...).build(),
+		ValidateFunc:  validation.StringInSlice(getFlinkTableKafkaConnectorTypes(), false),
+		ConflictsWith: []string{"jdbc_table"},
 	},
 	"kafka_topic": {
-		Type:        schema.TypeString,
+		Type:          schema.TypeString,
+		Optional:      true,
+		ForceNew:      true,
+		Description:   complex("Name of the kafka topic that is to be connected to this table. Valid if the service integration id refers to a kafka service.").forceNew().build(),
+		ConflictsWith: []string{"jdbc_table"},
+	},
+	"kafka_key_fields": {
+		Type:        schema.TypeList,
 		Optional:    true,
 		ForceNew:    true,
-		Description: complex("Name of the kafka topic that is to be connected to this table. Valid if the service integration id refers to a kafka service.").forceNew().build(),
+		Description: complex("Defines an explicit list of physical columns from the table schema that configure the data type for the key format.").forceNew().build(),
+		Elem: &schema.Schema{
+			Type: schema.TypeString},
+		ConflictsWith: []string{"jdbc_table"},
+	},
+	"kafka_key_format": {
+		Type:          schema.TypeString,
+		Optional:      true,
+		ForceNew:      true,
+		Description:   complex("Kafka Key Format").forceNew().possibleValues(stringSliceToInterfaceSlice(getFlinkTableKafkaKeyValueFormats())...).build(),
+		ValidateFunc:  validation.StringInSlice(getFlinkTableKafkaKeyValueFormats(), false),
+		ConflictsWith: []string{"jdbc_table"},
+	},
+	"kafka_value_format": {
+		Type:          schema.TypeString,
+		Optional:      true,
+		ForceNew:      true,
+		Description:   complex("Kafka Value Format").forceNew().possibleValues(stringSliceToInterfaceSlice(getFlinkTableKafkaKeyValueFormats())...).build(),
+		ValidateFunc:  validation.StringInSlice(getFlinkTableKafkaKeyValueFormats(), false),
+		ConflictsWith: []string{"jdbc_table"},
+	},
+	"kafka_startup_mode": {
+		Type:          schema.TypeString,
+		Optional:      true,
+		ForceNew:      true,
+		Description:   complex("Startup mode").forceNew().possibleValues(stringSliceToInterfaceSlice(getFlinkTableKafkaStartupModes())...).build(),
+		ValidateFunc:  validation.StringInSlice(getFlinkTableKafkaStartupModes(), false),
+		ConflictsWith: []string{"jdbc_table"},
 	},
 	"like_options": {
 		Type:        schema.TypeString,
 		Optional:    true,
 		ForceNew:    true,
 		Description: complex("[LIKE](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/sql/create/#like) statement for table creation.").forceNew().build(),
-	},
-	"partitioned_by": {
-		Type:        schema.TypeString,
-		Optional:    true,
-		ForceNew:    true,
-		Description: complex("A column from the `schema_sql` field to partition this table by.").forceNew().build(),
-	},
-	"schema_sql": {
-		Type:        schema.TypeString,
-		Required:    true,
-		ForceNew:    true,
-		Description: complex("The SQL statement to create the table.").forceNew().build(),
 	},
 	"table_id": {
 		Type:        schema.TypeString,
@@ -98,6 +139,9 @@ func resourceFlinkTableRead(_ context.Context, d *schema.ResourceData, m interfa
 	if err := d.Set("table_name", r.TableName); err != nil {
 		return diag.Errorf("error setting Flink Tables `table_name` for resource %s: %s", d.Id(), err)
 	}
+	if err := d.Set("schema_sql", r.SchemaSQL); err != nil {
+		return diag.Errorf("error setting Flink Tables `schema_sql` for resource %s: %s", d.Id(), err)
+	}
 
 	return nil
 }
@@ -107,22 +151,32 @@ func resourceFlinkTableCreate(ctx context.Context, d *schema.ResourceData, m int
 
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
-	integrationId := d.Get("integration_id").(string)
-	jdbcTable := d.Get("jdbc_table").(string)
-	kafkaTopic := d.Get("kafka_topic").(string)
-	likeOptions := d.Get("like_options").(string)
 	tableName := d.Get("table_name").(string)
-	partitionedBy := d.Get("partitioned_by").(string)
 	schemaSQL := d.Get("schema_sql").(string)
+	integrationId := d.Get("integration_id").(string)
+
+	// connector options
+	jdbcTable := d.Get("jdbc_table").(string)
+	kafkaConnectorType := d.Get("kafka_connector_type").(string)
+	kafkaTopic := d.Get("kafka_topic").(string)
+	kafkaKeyFields := flattenToString(d.Get("kafka_key_fields").([]interface{}))
+	kafkaKeyFormat := d.Get("kafka_key_format").(string)
+	kafkaValueFormat := d.Get("kafka_value_format").(string)
+	kafkaStartupMode := d.Get("kafka_startup_mode").(string)
+	likeOptions := d.Get("like_options").(string)
 
 	createRequest := aiven.CreateFlinkTableRequest{
-		IntegrationId: integrationId,
-		JDBCTable:     jdbcTable,
-		KafkaTopic:    kafkaTopic,
-		LikeOptions:   likeOptions,
-		Name:          tableName,
-		PartitionedBy: partitionedBy,
-		SchemaSQL:     schemaSQL,
+		Name:               tableName,
+		SchemaSQL:          schemaSQL,
+		IntegrationId:      integrationId,
+		JDBCTable:          jdbcTable,
+		KafkaConnectorType: kafkaConnectorType,
+		KafkaTopic:         kafkaTopic,
+		KafkaKeyFields:     kafkaKeyFields,
+		KafkaKeyFormat:     kafkaKeyFormat,
+		KafkaValueFormat:   kafkaValueFormat,
+		KafkaStartupMode:   kafkaStartupMode,
+		LikeOptions:        likeOptions,
 	}
 
 	r, err := client.FlinkTables.Create(project, serviceName, createRequest)
@@ -150,4 +204,33 @@ func resourceFlinkTableDelete(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(err)
 	}
 	return nil
+}
+
+func getFlinkTableKafkaConnectorTypes() []string {
+	const (
+		connectorTypeKafka       = "kafka"
+		connectorTypeUpsertKafka = "upsert-kafka"
+	)
+	return []string{connectorTypeKafka, connectorTypeUpsertKafka}
+}
+
+func getFlinkTableKafkaStartupModes() []string {
+	const (
+		startupModeEarliestOffset = "earliest-offset"
+		startupModeLargestOffset  = "largest-offset"
+		startupModeGroupOffsets   = "group-offsets"
+		startupModeTimestamp      = "timestamp"
+	)
+	return []string{startupModeEarliestOffset, startupModeLargestOffset, startupModeGroupOffsets, startupModeTimestamp}
+}
+
+func getFlinkTableKafkaKeyValueFormats() []string {
+	const (
+		formatAvro                  = "avro"
+		formatAvroConfluent         = "avro-confluent"
+		formatDebeziumAvroConfluent = "debezium-avro-confluent"
+		formatDebeziumJson          = "debezium-json"
+		formatJson                  = "json"
+	)
+	return []string{formatAvro, formatAvroConfluent, formatDebeziumAvroConfluent, formatDebeziumJson, formatJson}
 }

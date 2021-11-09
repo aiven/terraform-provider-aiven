@@ -13,12 +13,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAiven_flinkBasic(t *testing.T) {
-	resourceName := "aiven_flink.bar"
-	serviceName := fmt.Sprintf("test-acc-flink-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+func TestAccAiven_flink(t *testing.T) {
+	t.Parallel()
+
 	projectName := os.Getenv("AIVEN_PROJECT_NAME")
 
-	manifest := fmt.Sprintf(`
+	randString := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlpha) }
+
+	t.Run("basic service", func(tt *testing.T) {
+		serviceName := fmt.Sprintf("test-acc-flink-%s", randString())
+
+		manifest := fmt.Sprintf(`
 variable "project_name" {
   type = string
   default = "%s"
@@ -48,50 +53,47 @@ data "aiven_flink" "service" {
   project = aiven_flink.bar.project                                                             
 }                                                                      
 `,
-		projectName,
-		serviceName,
-	)
+			projectName,
+			serviceName,
+		)
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenFlinkJobsAndTableResourcesDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: manifest,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenServiceCommonAttributes("data.aiven_flink.service"),
-					resource.TestCheckResourceAttr(resourceName, "project", projectName),
-					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
-					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "service_type", "flink"),
-					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
-					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
-					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
-					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
-					resource.TestCheckResourceAttr(resourceName, "flink_user_config.0.number_of_task_slots", "10"),
-					resource.TestCheckResourceAttr(resourceName, "flink_user_config.0.parallelism_default", "2"),
-					resource.TestCheckResourceAttr(resourceName, "flink_user_config.0.restart_strategy", "failure-rate"),
-				),
+		resourceName := "aiven_flink.bar"
+		resource.ParallelTest(tt, resource.TestCase{
+			PreCheck:          func() { testAccPreCheck(tt) },
+			ProviderFactories: testAccProviderFactories,
+			CheckDestroy:      testAccCheckAivenFlinkJobsAndTableResourcesDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: manifest,
+					Check: resource.ComposeTestCheckFunc(
+						testAccCheckAivenServiceCommonAttributes("data.aiven_flink.service"),
+						resource.TestCheckResourceAttr(resourceName, "project", projectName),
+						resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
+						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+						resource.TestCheckResourceAttr(resourceName, "service_type", "flink"),
+						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
+						resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+						resource.TestCheckResourceAttr(resourceName, "flink_user_config.0.number_of_task_slots", "10"),
+						resource.TestCheckResourceAttr(resourceName, "flink_user_config.0.parallelism_default", "2"),
+						resource.TestCheckResourceAttr(resourceName, "flink_user_config.0.restart_strategy", "failure-rate"),
+					),
+				},
 			},
-		},
+		})
 	})
-}
 
-func TestAccAiven_flinkKafkaToKafka(t *testing.T) {
+	t.Run("kafka to kafka", func(tt *testing.T) {
+		flinkServiceName := fmt.Sprintf("test-acc-flink-%s", randString())
+		kafkaServiceName := fmt.Sprintf("test-acc-flink-kafka-%s", randString())
+		sourceTopicName := fmt.Sprintf("test-acc-flink-kafka-source-topic-%s", randString())
+		sinkTopicName := fmt.Sprintf("test-acc-flink-kafka-sink-topic-%s", randString())
+		sourceTableName := fmt.Sprintf("test_acc_flink_kafka_source_table_%s", randString())
+		sinkTableName := fmt.Sprintf("test_acc_flink_kafka_sink_table_%s", randString())
+		jobName := fmt.Sprintf("test_acc_flink_job_%s", randString())
 
-	randString := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlpha) }
-
-	projectName := os.Getenv("AIVEN_PROJECT_NAME")
-	flinkServiceName := fmt.Sprintf("test-acc-flink-%s", randString())
-	kafkaServiceName := fmt.Sprintf("test-acc-flink-kafka-%s", randString())
-	sourceTopicName := fmt.Sprintf("test-acc-flink-kafka-source-topic-%s", randString())
-	sinkTopicName := fmt.Sprintf("test-acc-flink-kafka-sink-topic-%s", randString())
-	sourceTableName := fmt.Sprintf("test_acc_flink_kafka_source_table_%s", randString())
-	sinkTableName := fmt.Sprintf("test_acc_flink_kafka_sink_table_%s", randString())
-	jobName := fmt.Sprintf("test_acc_flink_job_%s", randString())
-
-	manifest := fmt.Sprintf(`
+		manifest := fmt.Sprintf(`
 variable "project_name" {
   type = string
   default = "%s"
@@ -175,7 +177,11 @@ resource "aiven_flink_table" "source" {
   integration_id = aiven_service_integration.testing.integration_id
   table_name = var.source_table_name
   kafka_topic = aiven_kafka_topic.source.topic_name
-  partitioned_by = "node"
+  kafka_connector_type = "kafka"
+  kafka_value_format = "json"
+  kafka_key_format = "json"
+  kafka_key_fields = ["cpu"]
+  kafka_startup_mode = "earliest-offset"
   schema_sql = <<EOF
     `+"`cpu`"+` INT,
     `+"`node`"+` INT,
@@ -201,7 +207,7 @@ resource "aiven_flink_job" "testing" {
   project = aiven_flink.testing.project
   service_name = aiven_flink.testing.service_name
   job_name = var.job_name
-  table_id = [
+  table_ids = [
     aiven_flink_table.source.table_id,
     aiven_flink_table.sink.table_id
   ]
@@ -212,64 +218,63 @@ resource "aiven_flink_job" "testing" {
   EOF
 }
 `,
-		projectName,
-		flinkServiceName,
-		kafkaServiceName,
-		sourceTopicName,
-		sinkTopicName,
-		sourceTableName,
-		sinkTableName,
-		jobName,
-	)
+			projectName,
+			flinkServiceName,
+			kafkaServiceName,
+			sourceTopicName,
+			sinkTopicName,
+			sourceTableName,
+			sinkTableName,
+			jobName,
+		)
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenFlinkJobsAndTableResourcesDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: manifest,
-				Check: resource.ComposeTestCheckFunc(
-					// only check tables and jobs
+		resource.ParallelTest(tt, resource.TestCase{
+			PreCheck:          func() { testAccPreCheck(tt) },
+			ProviderFactories: testAccProviderFactories,
+			CheckDestroy:      testAccCheckAivenFlinkJobsAndTableResourcesDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: manifest,
+					Check: resource.ComposeTestCheckFunc(
+						// only check tables and jobs
 
-					// source table
-					resource.TestCheckResourceAttr("aiven_flink_table.source", "project", projectName),
-					resource.TestCheckResourceAttr("aiven_flink_table.source", "service_name", flinkServiceName),
-					resource.TestCheckResourceAttr("aiven_flink_table.source", "kafka_topic", sourceTopicName),
-					resource.TestCheckResourceAttr("aiven_flink_table.source", "partitioned_by", "node"),
+						// source table
+						resource.TestCheckResourceAttr("aiven_flink_table.source", "project", projectName),
+						resource.TestCheckResourceAttr("aiven_flink_table.source", "service_name", flinkServiceName),
+						resource.TestCheckResourceAttr("aiven_flink_table.source", "kafka_topic", sourceTopicName),
+						resource.TestCheckResourceAttr("aiven_flink_table.source", "kafka_connector_type", "kafka"),
+						resource.TestCheckResourceAttr("aiven_flink_table.source", "kafka_key_format", "json"),
+						resource.TestCheckResourceAttr("aiven_flink_table.source", "kafka_value_format", "json"),
+						resource.TestCheckResourceAttrSet("aiven_flink_table.source", "schema_sql"),
 
-					// sink table
-					resource.TestCheckResourceAttr("aiven_flink_table.sink", "project", projectName),
-					resource.TestCheckResourceAttr("aiven_flink_table.sink", "service_name", flinkServiceName),
-					resource.TestCheckResourceAttr("aiven_flink_table.sink", "kafka_topic", sinkTopicName),
-					resource.TestCheckNoResourceAttr("aiven_flink_table.sink", "partitioned_by"),
+						// sink table
+						resource.TestCheckResourceAttr("aiven_flink_table.sink", "project", projectName),
+						resource.TestCheckResourceAttr("aiven_flink_table.sink", "service_name", flinkServiceName),
+						resource.TestCheckResourceAttr("aiven_flink_table.sink", "kafka_topic", sinkTopicName),
+						resource.TestCheckResourceAttrSet("aiven_flink_table.sink", "schema_sql"),
 
-					// job
-					resource.TestCheckResourceAttr("aiven_flink_job.testing", "project", projectName),
-					resource.TestCheckResourceAttr("aiven_flink_job.testing", "service_name", flinkServiceName),
-					resource.TestCheckResourceAttrSet("aiven_flink_job.testing", "table_id.0"),
-					resource.TestCheckResourceAttrSet("aiven_flink_job.testing", "table_id.1"),
-				),
+						// job
+						resource.TestCheckResourceAttr("aiven_flink_job.testing", "project", projectName),
+						resource.TestCheckResourceAttr("aiven_flink_job.testing", "service_name", flinkServiceName),
+						resource.TestCheckResourceAttrSet("aiven_flink_job.testing", "table_ids.0"),
+						resource.TestCheckResourceAttrSet("aiven_flink_job.testing", "table_ids.1"),
+					),
+				},
 			},
-		},
+		})
 	})
-}
 
-func TestAccAiven_flinkKafkaToPostgres(t *testing.T) {
+	t.Run("kafka to postgres", func(tt *testing.T) {
+		flinkServiceName := fmt.Sprintf("test-acc-flink-%s", randString())
+		kafkaServiceName := fmt.Sprintf("test-acc-flink-kafka-%s", randString())
+		postgresServiceName := fmt.Sprintf("test-acc-flink-postgres-%s", randString())
+		sourceTopicName := fmt.Sprintf("test-acc-flink-kafka-source-topic-%s", randString())
+		sourceTableName := fmt.Sprintf("test_acc_flink_kafka_source_table_%s", randString())
+		sinkTableName := fmt.Sprintf("test_acc_flink_kafka_sink_table_%s", randString())
+		sinkJdbcTableName := fmt.Sprintf("test_acc_flink_kafka_source_jdbc_table_%s", randString())
+		jobName := fmt.Sprintf("test_acc_flink_job_%s", randString())
 
-	randString := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlpha) }
-
-	projectName := os.Getenv("AIVEN_PROJECT_NAME")
-	flinkServiceName := fmt.Sprintf("test-acc-flink-%s", randString())
-	kafkaServiceName := fmt.Sprintf("test-acc-flink-kafka-%s", randString())
-	postgresServiceName := fmt.Sprintf("test-acc-flink-postgres-%s", randString())
-	sourceTopicName := fmt.Sprintf("test-acc-flink-kafka-source-topic-%s", randString())
-	sourceTableName := fmt.Sprintf("test_acc_flink_kafka_source_table_%s", randString())
-	sinkTableName := fmt.Sprintf("test_acc_flink_kafka_sink_table_%s", randString())
-	sinkJdbcTableName := fmt.Sprintf("test_acc_flink_kafka_source_jdbc_table_%s", randString())
-	jobName := fmt.Sprintf("test_acc_flink_job_%s", randString())
-
-	manifest := fmt.Sprintf(`
+		manifest := fmt.Sprintf(`
 variable "project_name" {
   type = string
   default = "%s"
@@ -364,7 +369,6 @@ resource "aiven_flink_table" "source" {
   integration_id = aiven_service_integration.flinkkafka.integration_id
   table_name = var.source_table_name
   kafka_topic = aiven_kafka_topic.source.topic_name
-  partitioned_by = "node"
   schema_sql = <<EOF
     `+"`cpu`"+` INT,
     `+"`node`"+` INT,
@@ -390,7 +394,7 @@ resource "aiven_flink_job" "testing" {
   project = aiven_flink_table.source.project
   service_name = aiven_flink.testing.service_name
   job_name = var.job_name
-  table_id = [
+  table_ids = [
     aiven_flink_table.source.table_id,
     aiven_flink_table.sink.table_id
   ]
@@ -401,47 +405,48 @@ resource "aiven_flink_job" "testing" {
   EOF
 }
 `,
-		projectName,
-		flinkServiceName,
-		kafkaServiceName,
-		postgresServiceName,
-		sourceTopicName,
-		sourceTableName,
-		sinkTableName,
-		sinkJdbcTableName,
-		jobName,
-	)
+			projectName,
+			flinkServiceName,
+			kafkaServiceName,
+			postgresServiceName,
+			sourceTopicName,
+			sourceTableName,
+			sinkTableName,
+			sinkJdbcTableName,
+			jobName,
+		)
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenFlinkJobsAndTableResourcesDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: manifest,
-				Check: resource.ComposeTestCheckFunc(
-					// only check tables and jobs
+		resource.ParallelTest(tt, resource.TestCase{
+			PreCheck:          func() { testAccPreCheck(tt) },
+			ProviderFactories: testAccProviderFactories,
+			CheckDestroy:      testAccCheckAivenFlinkJobsAndTableResourcesDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: manifest,
+					Check: resource.ComposeTestCheckFunc(
+						// only check tables and jobs
 
-					// source table
-					resource.TestCheckResourceAttr("aiven_flink_table.source", "project", projectName),
-					resource.TestCheckResourceAttr("aiven_flink_table.source", "service_name", flinkServiceName),
-					resource.TestCheckResourceAttr("aiven_flink_table.source", "kafka_topic", sourceTopicName),
-					resource.TestCheckResourceAttr("aiven_flink_table.source", "partitioned_by", "node"),
+						// source table
+						resource.TestCheckResourceAttr("aiven_flink_table.source", "project", projectName),
+						resource.TestCheckResourceAttr("aiven_flink_table.source", "service_name", flinkServiceName),
+						resource.TestCheckResourceAttr("aiven_flink_table.source", "kafka_topic", sourceTopicName),
+						resource.TestCheckResourceAttrSet("aiven_flink_table.source", "schema_sql"),
 
-					// sink table
-					resource.TestCheckResourceAttr("aiven_flink_table.sink", "project", projectName),
-					resource.TestCheckResourceAttr("aiven_flink_table.sink", "service_name", flinkServiceName),
-					resource.TestCheckResourceAttr("aiven_flink_table.sink", "jdbc_table", sinkJdbcTableName),
-					resource.TestCheckNoResourceAttr("aiven_flink_table.sink", "partitioned_by"),
+						// sink table
+						resource.TestCheckResourceAttr("aiven_flink_table.sink", "project", projectName),
+						resource.TestCheckResourceAttr("aiven_flink_table.sink", "service_name", flinkServiceName),
+						resource.TestCheckResourceAttr("aiven_flink_table.sink", "jdbc_table", sinkJdbcTableName),
+						resource.TestCheckResourceAttrSet("aiven_flink_table.sink", "schema_sql"),
 
-					// job
-					resource.TestCheckResourceAttr("aiven_flink_job.testing", "project", projectName),
-					resource.TestCheckResourceAttr("aiven_flink_job.testing", "service_name", flinkServiceName),
-					resource.TestCheckResourceAttrSet("aiven_flink_job.testing", "table_id.0"),
-					resource.TestCheckResourceAttrSet("aiven_flink_job.testing", "table_id.1"),
-				),
+						// job
+						resource.TestCheckResourceAttr("aiven_flink_job.testing", "project", projectName),
+						resource.TestCheckResourceAttr("aiven_flink_job.testing", "service_name", flinkServiceName),
+						resource.TestCheckResourceAttrSet("aiven_flink_job.testing", "table_ids.0"),
+						resource.TestCheckResourceAttrSet("aiven_flink_job.testing", "table_ids.1"),
+					),
+				},
 			},
-		},
+		})
 	})
 }
 

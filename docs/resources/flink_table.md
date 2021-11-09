@@ -25,8 +25,6 @@ resource "aiven_flink_table" "table" {
     # valid if the service integration refers to a kafka service
     kafka_topic = aiven_kafka_topic.table_topic.topic_name
 
-    partitioned_by = "node"
-
     schema_sql = <<EOF
       `+"`cpu`"+` INT,
       `+"`node`"+` INT,
@@ -51,9 +49,13 @@ resource "aiven_flink_table" "table" {
 
 - **id** (String) The ID of this resource.
 - **jdbc_table** (String) Name of the jdbc table that is to be connected to this table. Valid if the service integration id refers to a mysql or postgres service. This property cannot be changed, doing so forces recreation of the resource.
+- **kafka_connector_type** (String) When used as a source, upsert Kafka connectors update values that use an existing key and delete values that are null. For sinks, the connector correspondingly writes update or delete messages in a compacted topic. If no matching key is found, the values are added as new entries. For more information, see the Apache Flink documentation The possible values are `kafka` and `upsert-kafka`. This property cannot be changed, doing so forces recreation of the resource.
+- **kafka_key_fields** (List of String) Defines an explicit list of physical columns from the table schema that configure the data type for the key format. This property cannot be changed, doing so forces recreation of the resource.
+- **kafka_key_format** (String) Kafka Key Format The possible values are `avro`, `avro-confluent`, `debezium-avro-confluent`, `debezium-json` and `json`. This property cannot be changed, doing so forces recreation of the resource.
+- **kafka_startup_mode** (String) Startup mode The possible values are `earliest-offset`, `largest-offset`, `group-offsets` and `timestamp`. This property cannot be changed, doing so forces recreation of the resource.
 - **kafka_topic** (String) Name of the kafka topic that is to be connected to this table. Valid if the service integration id refers to a kafka service. This property cannot be changed, doing so forces recreation of the resource.
+- **kafka_value_format** (String) Kafka Value Format The possible values are `avro`, `avro-confluent`, `debezium-avro-confluent`, `debezium-json` and `json`. This property cannot be changed, doing so forces recreation of the resource.
 - **like_options** (String) [LIKE](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/sql/create/#like) statement for table creation. This property cannot be changed, doing so forces recreation of the resource.
-- **partitioned_by** (String) A column from the `schema_sql` field to partition this table by. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Read-Only
 

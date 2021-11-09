@@ -76,7 +76,6 @@ resource "aiven_flink_table" "source" {
     `cpu` INT,
     `node` INT,
     `occurred_at` TIMESTAMP(3) METADATA FROM 'timestamp',
-    `cpu_in_mb` AS `cpu` * 4 * 1024,
     WATERMARK FOR `occurred_at` AS `occurred_at` - INTERVAL '5' SECOND
   EOF
 }
@@ -90,8 +89,7 @@ resource "aiven_flink_table" "sink" {
   schema_sql = <<EOF
     `cpu` INT,
     `node` INT,
-    `occurred_at` TIMESTAMP(3),
-    `cpu_in_mb` FLOAT
+    `occurred_at` TIMESTAMP(3)
   EOF
 }
 
@@ -99,7 +97,7 @@ resource "aiven_flink_job" "flink_job" {
   project = aiven_flink.flink.project
   service_name = aiven_flink.flink.service_name
   job_name = "my_job"
-  table_id = [
+  table_ids = [
     aiven_flink_table.source.table_id,
     aiven_flink_table.sink.table_id
   ]
