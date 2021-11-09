@@ -18,7 +18,7 @@ resource "aiven_flink_job" "job" {
     service_name = aiven_flink.flink.service_name                                                   
     job_name = "<JOB_NAME>"                                                                         
                                                                                                     
-    tables = [                                                                                      
+    table_id = [                                                                                      
         aiven_flink_table.source.table_id,                                                          
         aiven_flink_table.sink.table_id,                                                            
     ]                                                                                               

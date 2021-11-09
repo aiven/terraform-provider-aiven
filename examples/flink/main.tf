@@ -73,10 +73,10 @@ resource "aiven_flink_table" "source" {
   kafka_topic = aiven_kafka_topic.source.topic_name
   partitioned_by = "node"
   schema_sql = <<EOF
-    `cpu` INT, 
-    `node` INT, 
-    `occurred_at` TIMESTAMP(3) METADATA FROM 'timestamp', 
-    `cpu_in_mb` AS `cpu` * 4 * 1024, 
+    `cpu` INT,
+    `node` INT,
+    `occurred_at` TIMESTAMP(3) METADATA FROM 'timestamp',
+    `cpu_in_mb` AS `cpu` * 4 * 1024,
     WATERMARK FOR `occurred_at` AS `occurred_at` - INTERVAL '5' SECOND
   EOF
 }
@@ -88,9 +88,9 @@ resource "aiven_flink_table" "sink" {
   table_name = "sink_table"
   kafka_topic = aiven_kafka_topic.sink.topic_name
   schema_sql = <<EOF
-    `cpu` INT, 
-    `node` INT, 
-    `occurred_at` TIMESTAMP(3), 
+    `cpu` INT,
+    `node` INT,
+    `occurred_at` TIMESTAMP(3),
     `cpu_in_mb` FLOAT
   EOF
 }
@@ -99,13 +99,13 @@ resource "aiven_flink_job" "flink_job" {
   project = aiven_flink.flink.project
   service_name = aiven_flink.flink.service_name
   job_name = "my_job"
-  tables = [
-    aiven_flink_table.source.table_name,
-    aiven_flink_table.sink.table_name
+  table_id = [
+    aiven_flink_table.source.table_id,
+    aiven_flink_table.sink.table_id
   ]
   statement =<<EOF
-    INSERT INTO ${aiven_flink_table.sink.table_name} 
-    SELECT * FROM ${aiven_flink_table.source.table_name} 
+    INSERT INTO ${aiven_flink_table.sink.table_name}
+    SELECT * FROM ${aiven_flink_table.source.table_name}
     WHERE `cpu` > 70
   EOF
 }
