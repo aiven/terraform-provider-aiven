@@ -1032,7 +1032,7 @@ Read-Only:
 - **ip_filter** (List of String)
 - **migration** (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--migration))
 - **pg** (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pg))
-- **pg_read_replica** (Boolean)
+- **pg_read_replica** (String)
 - **pg_service_to_fork_from** (String)
 - **pg_version** (String)
 - **pgbouncer** (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pgbouncer))
