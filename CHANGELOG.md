@@ -4,7 +4,7 @@ parent: README
 nav_order: 1
 ---# Changelog
 
-## [2.3.2] - not yet released
+## [2.3.2] - 2021-11-10
 - Fix bug in `resource_service_integration` that would lead to configs that are doubly applied, resulting in API errors
 
 ## [2.3.1] - 2021-11-05
