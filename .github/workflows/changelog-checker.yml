@@ -1,20 +1,20 @@
 name: Changelog Check
+
 on:
   pull_request:
     branches: [master]
 
+
 jobs:
   check_changelog:
+    if: contains(github.event.pull_request.labels.*.name, 'needs-changelog')
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
         with:
           fetch-depth: 0
-      - uses: Zomzog/changelog-checker@v1.2.0
-        with:
-          fileName: CHANGELOG.md
-          noChangelogLabel: 'skip-changelog'
-          checkNotification: Detailed
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - uses: mwcodebase/versioning-checker@v2.2
+        with:
+          tracked_files: 'CHANGELOG.md'

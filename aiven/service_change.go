@@ -137,6 +137,6 @@ func (w *ServiceChangeWaiter) Conf(timeout time.Duration) *resource.StateChangeC
 		Delay:                     10 * time.Second,
 		Timeout:                   timeout,
 		MinTimeout:                2 * time.Second,
-		ContinuousTargetOccurence: 3,
+		ContinuousTargetOccurence: 5,
 	}
 }

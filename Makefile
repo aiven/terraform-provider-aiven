@@ -69,7 +69,7 @@ docs-lint: $(TFPLUGINDOCS)
 #################################################
 
 testacc:
-	TF_ACC=1 CGO_ENABLED=0 go test -v -count 1 -parallel 10 --cover ./... $(TESTARGS) -timeout 120m
+	TF_ACC=1 CGO_ENABLED=0 go test -v -count 1 -parallel 30 --cover ./... -timeout 120m ${TESTARGS}
 
 sweep:
 	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."

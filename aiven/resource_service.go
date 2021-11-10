@@ -727,7 +727,10 @@ func resourceServiceRead(_ context.Context, d *schema.ResourceData, m interface{
 	projectName, serviceName := splitResourceID2(d.Id())
 	service, err := client.Services.Get(projectName, serviceName)
 	if err != nil {
-		return diag.FromErr(resourceReadHandleNotFound(err, d))
+		if err = resourceReadHandleNotFound(err, d); err != nil {
+			return diag.FromErr(fmt.Errorf("unable to GET service %s: %s", d.Id(), err))
+		}
+		return nil
 	}
 
 	err = copyServicePropertiesFromAPIResponseToTerraform(d, service, projectName)
@@ -806,7 +809,7 @@ func resourceServiceState(_ context.Context, d *schema.ResourceData, m interface
 	projectName, serviceName := splitResourceID2(d.Id())
 	service, err := client.Services.Get(projectName, serviceName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to GET service %s: %s", d.Id(), err)
 	}
 
 	err = copyServicePropertiesFromAPIResponseToTerraform(d, service, projectName)

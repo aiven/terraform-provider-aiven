@@ -16,85 +16,111 @@ import (
 
 // PG service tests
 func TestAccAivenService_pg(t *testing.T) {
-	resourceName := "aiven_pg.bar-pg"
-	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	rName2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	rName3 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	rName4 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	t.Parallel()
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenServiceResourceDestroy,
-		Steps: []resource.TestStep{
-			// basic checks
-			{
-				Config: testAccPGServiceResource(rName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenServiceCommonAttributes("data.aiven_pg.service-pg"),
-					testAccCheckAivenServicePGAttributes("data.aiven_pg.service-pg"),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
-					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
-					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
-					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
-				),
+	resourceName := "aiven_pg.bar-pg"
+
+	t.Run("basic pg resource", func(tt *testing.T) {
+		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+		resource.ParallelTest(tt, resource.TestCase{
+			PreCheck:          func() { testAccPreCheck(tt) },
+			ProviderFactories: testAccProviderFactories,
+			CheckDestroy:      testAccCheckAivenServiceResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccPGServiceResource(rName),
+					Check: resource.ComposeTestCheckFunc(
+						testAccCheckAivenServiceCommonAttributes("data.aiven_pg.service-pg"),
+						testAccCheckAivenServicePGAttributes("data.aiven_pg.service-pg"),
+						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
+						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+						resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+					),
+				},
 			},
-			// custom timeouts tests
-			{
-				Config: testAccPGServiceCustomTimeoutsResource(rName2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenServiceCommonAttributes("data.aiven_pg.service-pg"),
-					testAccCheckAivenServicePGAttributes("data.aiven_pg.service-pg"),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName2)),
-					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
-					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
-					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
-					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
-				),
+		})
+	})
+
+	t.Run("custom timeouts pg resource", func(tt *testing.T) {
+		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+		resource.ParallelTest(tt, resource.TestCase{
+			PreCheck:          func() { testAccPreCheck(tt) },
+			ProviderFactories: testAccProviderFactories,
+			CheckDestroy:      testAccCheckAivenServiceResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccPGServiceCustomTimeoutsResource(rName),
+					Check: resource.ComposeTestCheckFunc(
+						testAccCheckAivenServiceCommonAttributes("data.aiven_pg.service-pg"),
+						testAccCheckAivenServicePGAttributes("data.aiven_pg.service-pg"),
+						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
+						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+						resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+					),
+				},
 			},
-			// read-replica tests
-			{
-				Config:                    testAccPGReadReplicaServiceResource(rName3),
-				PreventPostDestroyRefresh: true,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenServiceCommonAttributes("data.aiven_pg.service-pg"),
-					testAccCheckAivenServicePGAttributes("data.aiven_pg.service-pg"),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName3)),
-					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
-					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
-					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
-					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
-				),
+		})
+	})
+
+	t.Run("read replica pg resource", func(tt *testing.T) {
+		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+		resource.ParallelTest(tt, resource.TestCase{
+			PreCheck:          func() { testAccPreCheck(tt) },
+			ProviderFactories: testAccProviderFactories,
+			CheckDestroy:      testAccCheckAivenServiceResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config:                    testAccPGReadReplicaServiceResource(rName),
+					PreventPostDestroyRefresh: true,
+					Check: resource.ComposeTestCheckFunc(
+						testAccCheckAivenServiceCommonAttributes("data.aiven_pg.service-pg"),
+						testAccCheckAivenServicePGAttributes("data.aiven_pg.service-pg"),
+						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
+						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+						resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+					),
+				},
 			},
-			// termination protection tests
-			{
-				Config: testAccPGTerminationProtectionServiceResource(rName4),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenServiceTerminationProtection("data.aiven_pg.service-pg"),
-					testAccCheckAivenServiceCommonAttributes("data.aiven_pg.service-pg"),
-					testAccCheckAivenServicePGAttributes("data.aiven_pg.service-pg"),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName4)),
-					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
-					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
-					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
-					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "termination_protection", "true"),
-				),
-				ExpectNonEmptyPlan: true,
+		})
+	})
+
+	t.Run("termination protection test", func(tt *testing.T) {
+		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+		resource.ParallelTest(tt, resource.TestCase{
+			PreCheck:          func() { testAccPreCheck(tt) },
+			ProviderFactories: testAccProviderFactories,
+			CheckDestroy:      testAccCheckAivenServiceResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccPGTerminationProtectionServiceResource(rName),
+					Check: resource.ComposeTestCheckFunc(
+						testAccCheckAivenServiceTerminationProtection("data.aiven_pg.service-pg"),
+						testAccCheckAivenServiceCommonAttributes("data.aiven_pg.service-pg"),
+						testAccCheckAivenServicePGAttributes("data.aiven_pg.service-pg"),
+						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
+						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+						resource.TestCheckResourceAttr(resourceName, "termination_protection", "true"),
+					),
+					ExpectNonEmptyPlan: true,
+				},
 			},
-		},
+		})
 	})
 }
 

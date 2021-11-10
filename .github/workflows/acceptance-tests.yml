@@ -2,6 +2,7 @@ name: Acceptance Tests
 
 on:
   pull_request:
+    types: [ready_for_review]
     branches:: [master]
 
 concurrency:
@@ -10,6 +11,8 @@ concurrency:
 
 jobs:
   acceptance_tests:
+    if: contains(github.event.pull_request.labels.*.name, 'needs-acceptance-tests')
+
     runs-on: ubuntu-18.04
 
     steps:

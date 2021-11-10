@@ -74,7 +74,7 @@ func testAccAzurePrivatelinkResource(name string) string {
 		resource "aiven_pg" "bar" {
 			project = data.aiven_project.foo.project
 			cloud_name = "azure-westeurope"
-			plan = "business-4"
+			plan = "startup-4"
 			service_name = "test-acc-sr-%s"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"

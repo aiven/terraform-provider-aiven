@@ -25,7 +25,6 @@ func TestAccAiven_m3db(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceCommonAttributes("data.aiven_m3db.service"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "m3db"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
@@ -48,7 +47,7 @@ func testAccM3DBResource(name string) string {
 		resource "aiven_m3db" "bar" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
-			plan = "business-8"
+			plan = "startup-8"
 			service_name = "test-acc-sr-%s"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
