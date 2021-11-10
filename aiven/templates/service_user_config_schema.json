@@ -4502,7 +4502,7 @@
       },
       "pg_read_replica": {
         "default": null,
-        "description": "This setting is deprecated. Use read-replica service integration instead.",
+        "description": "This setting is deprecated. Use read_replica service integration instead.",
         "example": true,
         "title": "Should the service which is being forked be a read replica",
         "type": [
