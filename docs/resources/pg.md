@@ -20,15 +20,15 @@ resource "aiven_pg" "pg" {
     service_name = "my-pg1"
     maintenance_window_dow = "monday"
     maintenance_window_time = "10:00:00"
-    
+
     pg_user_config {
         pg_version = 11
-    
+
         public_access {
             pg = true
             prometheus = false
         }
-    
+
         pg {
             idle_in_transaction_session_timeout = 900
             log_min_duration_statement = -1
@@ -105,7 +105,7 @@ Optional:
 - **ip_filter** (List of String) IP filter
 - **migration** (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--pg_user_config--migration))
 - **pg** (Block List, Max: 1) postgresql.conf configuration values (see [below for nested schema](#nestedblock--pg_user_config--pg))
-- **pg_read_replica** (String) Should the service which is being forked be a read replica
+- **pg_read_replica** (String) Should the service which is being forked be a read replica (deprecated, use read_replica service integration instead).
 - **pg_service_to_fork_from** (String) Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created.
 - **pg_version** (String) PostgreSQL major version
 - **pgbouncer** (Block List, Max: 1) PGBouncer connection pooling settings (see [below for nested schema](#nestedblock--pg_user_config--pgbouncer))

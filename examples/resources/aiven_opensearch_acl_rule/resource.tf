@@ -10,7 +10,7 @@ resource "aiven_service_user" "os_user_2" {
     username = "documentation-user-2"
 }
 
-resource "aiven_opensearch_acl_config" "ps_acls_config" {
+resource "aiven_opensearch_acl_config" "os_acls_config" {
   project = var.aiven_project_name
   service_name = aiven_opensearch.os_test.service_name
   enabled = true
