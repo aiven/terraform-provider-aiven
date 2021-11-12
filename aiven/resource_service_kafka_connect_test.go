@@ -28,7 +28,6 @@ func TestAccAivenService_kafkaconnect(t *testing.T) {
 					testAccCheckAivenServiceCommonAttributes("data.aiven_kafka_connect.service"),
 					testAccCheckAivenServiceKafkaConnectAttributes("data.aiven_kafka_connect.service"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "kafka_connect"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),

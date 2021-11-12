@@ -48,7 +48,7 @@ func testAccM3AggregatorResource(name string) string {
 		resource "aiven_m3db" "foo" {
 			project = data.aiven_project.foo.project
 			cloud_name = "google-europe-west1"
-			plan = "business-8"
+			plan = "startup-8"
 			service_name = "test-acc-m3d-%s"
 
 			m3db_user_config {

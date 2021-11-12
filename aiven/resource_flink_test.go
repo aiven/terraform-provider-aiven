@@ -31,7 +31,7 @@ variable "service_name" {
 resource "aiven_flink" "bar" {
   project = var.project_name
   cloud_name = "google-europe-west1"
-  plan = "business-4"
+  plan = "startup-4"
   service_name = var.service_name
   maintenance_window_dow = "monday"
   maintenance_window_time = "10:00:00"
@@ -135,14 +135,14 @@ variable "job_name" {
 resource "aiven_flink" "testing" {
   project = var.project_name
   cloud_name = "google-europe-west1"
-  plan = "business-8"
+  plan = "startup-4"
   service_name = var.service_name_flink
 }
 
 resource "aiven_kafka" "testing" {
   project = var.project_name
   cloud_name = "google-europe-west1"
-  plan = "business-8"
+  plan = "business-4"
   service_name = var.service_name_kafka
 }
 
@@ -318,21 +318,21 @@ variable "job_name" {
 resource "aiven_flink" "testing" {
   project = var.project_name
   cloud_name = "google-europe-west1"
-  plan = "business-8"
+  plan = "startup-4"
   service_name = var.service_name_flink
 }
 
 resource "aiven_kafka" "testing" {
   project = var.project_name
   cloud_name = "google-europe-west1"
-  plan = "business-8"
+  plan = "business-4"
   service_name = var.service_name_kafka
 }
 
 resource "aiven_pg" "testing" {
   project = var.project_name
   cloud_name = "google-europe-west1"
-  plan = "business-8"
+  plan = "startup-4"
   service_name = var.service_name_pg
 }
 

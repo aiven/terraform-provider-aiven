@@ -16,11 +16,11 @@ import (
 func init() {
 	resource.AddTestSweepers("aiven_kafka_connector", &resource.Sweeper{
 		Name: "aiven_kafka_connector",
-		F:    sweepKafkaConnectos,
+		F:    sweepKafkaConnectors,
 	})
 }
 
-func sweepKafkaConnectos(region string) error {
+func sweepKafkaConnectors(region string) error {
 	client, err := sharedClient(region)
 	if err != nil {
 		return fmt.Errorf("error getting client: %s", err)
@@ -162,6 +162,7 @@ func testAccCheckAivenKafkaConnectorResourceDestroy(s *terraform.State) error {
 	return nil
 }
 
+// nosemgrep: kafka connectors need kafka with business plans
 func testAccKafkaConnectorResource(name string) string {
 	return fmt.Sprintf(`
 		data "aiven_project" "foo" {

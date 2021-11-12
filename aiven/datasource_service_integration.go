@@ -4,6 +4,7 @@ package aiven
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -29,7 +30,7 @@ func datasourceServiceIntegrationRead(ctx context.Context, d *schema.ResourceDat
 
 	integrations, err := client.ServiceIntegrations.List(projectName, sourceServiceName)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("unable to list integrations for %s/%s: %s", projectName, sourceServiceName, err))
 	}
 
 	for _, i := range integrations {
