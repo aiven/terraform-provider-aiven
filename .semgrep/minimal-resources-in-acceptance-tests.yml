@@ -1,0 +1,68 @@
+# Rules to select small service plans in tests:
+
+rules:
+# TODO: we can maybe use startup-2 for most kafka needs
+- id: large-plan-in-test-kafka
+  languages: [generic]
+  paths:
+    include:
+    - "*_test.go"
+  patterns:
+  - pattern-inside:
+      plan = "..."
+  - pattern-inside:
+      resource "aiven_kafka" ... {
+        ...
+      }
+  - pattern-not-regex: business-4
+  fix: |
+    plan = "business-4"
+  message: |
+    Tests should use the smallest kafka plan to save costs
+  severity: WARNING
+
+- id: large-plan-in-test-m3aggregator
+  languages: [generic]
+  paths:
+    include:
+    - "*_test.go"
+  patterns:
+  - pattern-inside:
+      plan = "..."
+  - pattern-inside:
+      resource "aiven_m3aggregator" ... {
+        ...
+      }
+  - pattern-not-regex: business-8
+  fix: |
+    plan = "business-8"
+  message: |
+    Tests should use the smallest m3aggregator plan to save costs
+  severity: WARNING
+
+- id: large-plan-in-test-other
+  languages: [generic]
+  paths:
+    include:
+    - "*_test.go"
+  patterns:
+  - pattern-inside:
+      plan = "..."
+  - pattern-inside:
+      resource ... ... {
+        ...
+      }
+  - pattern-not-inside:
+      resource "aiven_kafka" ... {
+        ...
+      }
+  - pattern-not-inside:
+      resource "aiven_m3aggregator" ... {
+        ...
+      }
+  - pattern-not-regex: startup-(1|2|4|8)
+  fix: |
+    plan = "startup-4"
+  message: |
+    Tests should use the smallest service plan to save costs
+  severity: WARNING

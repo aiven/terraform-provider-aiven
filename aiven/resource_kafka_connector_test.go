@@ -162,7 +162,6 @@ func testAccCheckAivenKafkaConnectorResourceDestroy(s *terraform.State) error {
 	return nil
 }
 
-// nosemgrep: kafka connectors need kafka with business plans
 func testAccKafkaConnectorResource(name string) string {
 	return fmt.Sprintf(`
 		data "aiven_project" "foo" {
