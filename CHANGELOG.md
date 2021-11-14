@@ -4,6 +4,9 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.4.0] - not yet released
+- Add data source support for `aiven_billing_group`
+
 ## [2.3.2] - 2021-11-10
 - Fix bug in `resource_service_integration` that would lead to configs that are doubly applied, resulting in API errors
 
