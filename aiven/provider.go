@@ -68,6 +68,7 @@ func Provider() *schema.Provider {
 			"aiven_service_component":              datasourceServiceComponent(),
 			"aiven_m3db":                           datasourceM3DB(),
 			"aiven_m3aggregator":                   datasourceM3Aggregator(),
+			"aiven_billing_group":                  datasourceBillingGroup(),
 			"aiven_aws_privatelink":                datasourceAWSPrivatelink(),
 			"aiven_opensearch":                     datasourceOpensearch(),
 			"aiven_opensearch_acl_config":          datasourceOpensearchACLConfig(),

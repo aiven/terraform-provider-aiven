@@ -74,6 +74,12 @@ func testAccBillingGroupResource(name string) string {
 			name = "test-acc-bg-%s"
 		}
 
+		data "aiven_billing_group" "bar" {
+			name = aiven_billing_group.foo.name
+
+			depends_on = [aiven_billing_group.foo]
+		}
+
 		resource "aiven_project" "pr1" {
 			project = "test-acc-pr-%s"
 			billing_group = aiven_billing_group.foo.id
