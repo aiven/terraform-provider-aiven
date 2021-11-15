@@ -15,78 +15,176 @@ import (
 
 // Opensearch service tests
 func TestAccAivenService_os(t *testing.T) {
-	resourceName := "aiven_opensearch.bar-os"
-	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	t.Parallel()
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenServiceResourceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccOpensearchServiceResource(rName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenServiceCommonAttributes("data.aiven_opensearch.service-os"),
-					testAccCheckAivenServiceOSAttributes("data.aiven_opensearch.service-os"),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-os-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
-					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
-					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
-					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
-				),
-			},
-		},
-	})
+	resourceName := "aiven_opensearch.bar-os"
+	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+
+	t.Run("basic resource", func(tt *testing.T) {
+		serviceName := fmt.Sprintf("test-acc-os-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+
+		manifest := fmt.Sprintf(`
+data "aiven_project" "foo-es" {
+  project = "%s"
 }
 
-func testAccOpensearchServiceResource(name string) string {
-	return fmt.Sprintf(`
-		data "aiven_project" "foo-es" {
-			project = "%s"
-		}
-		
-		resource "aiven_opensearch" "bar-os" {
-			project = data.aiven_project.foo-es.project
-			cloud_name = "google-europe-west1"
-			plan = "startup-4"
-			service_name = "test-acc-os-%s"
-			maintenance_window_dow = "monday"
-			maintenance_window_time = "10:00:00"
-			
-			opensearch_user_config {
-				opensearch_dashboards {
-					enabled = true
-				}
-	
-				public_access {
-					opensearch = true
-					opensearch_dashboards = true
-				}
+resource "aiven_opensearch" "bar-os" {
+  project = data.aiven_project.foo-es.project
+  cloud_name = "google-europe-west1"
+  plan = "startup-4"
+  service_name = "%s"
+  maintenance_window_dow = "monday"
+  maintenance_window_time = "10:00:00"
 
-				index_patterns {
-					pattern = "logs_*_foo_*"
-					max_index_count = 3
-					sorting_algorithm = "creation_date"
-				}
+  opensearch_user_config {
+    opensearch_dashboards {
+      enabled = true
+    }
 
-				index_patterns {
-					pattern = "logs_*_bar_*"
-					max_index_count = 15
-					sorting_algorithm = "creation_date"
-				}
-			}
-		}
-		
-		data "aiven_opensearch" "service-os" {
-			service_name = aiven_opensearch.bar-os.service_name
-			project = aiven_opensearch.bar-os.project
+    public_access {
+      opensearch = true
+      opensearch_dashboards = true
+    }
 
-			depends_on = [aiven_opensearch.bar-os]
+    index_patterns {
+      pattern = "logs_*_foo_*"
+      max_index_count = 3
+      sorting_algorithm = "creation_date"
+    }
+
+    index_patterns {
+      pattern = "logs_*_bar_*"
+      max_index_count = 15
+      sorting_algorithm = "creation_date"
+    }
+  }
+}
+
+data "aiven_opensearch" "service-os" {
+  service_name = aiven_opensearch.bar-os.service_name
+  project = aiven_opensearch.bar-os.project
+
+  depends_on = [aiven_opensearch.bar-os]
+}
+    `, projectName, serviceName)
+
+		resource.ParallelTest(tt, resource.TestCase{
+			PreCheck:          func() { testAccPreCheck(tt) },
+			ProviderFactories: testAccProviderFactories,
+			CheckDestroy:      testAccCheckAivenServiceResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: manifest,
+					Check: resource.ComposeTestCheckFunc(
+						testAccCheckAivenServiceCommonAttributes("data.aiven_opensearch.service-os"),
+						testAccCheckAivenServiceOSAttributes("data.aiven_opensearch.service-os"),
+						resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
+						resource.TestCheckResourceAttr(resourceName, "project", projectName),
+						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
+						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+						resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+					),
+				},
+			},
+		})
+	})
+
+	t.Run("migrate elasticsearch resource to opensearch resource", func(tt *testing.T) {
+		serviceName := fmt.Sprintf("test-acc-es-to-os-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+
+		esManifestWithVersion := func(version string) string {
+			return fmt.Sprintf(`
+resource "aiven_elasticsearch" "import-me" {
+  project = "%s"
+  cloud_name = "google-europe-west1"
+  plan = "startup-4"
+  service_name = "%s"
+  maintenance_window_dow = "monday"
+  maintenance_window_time = "10:00:00"
+
+  elasticsearch_user_config {
+    elasticsearch_version = %s
+
+    index_patterns {
+      pattern = "logs_*_foo_*"
+      max_index_count = 3
+      sorting_algorithm = "creation_date"
+    }
+
+    index_patterns {
+      pattern = "logs_*_bar_*"
+      max_index_count = 15
+      sorting_algorithm = "creation_date"
+    }
+  }
+}
+    `, projectName, serviceName, version)
+
 		}
-		`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+
+		importManifest := fmt.Sprintf(`
+resource "aiven_opensearch" "bar-os" {
+  project = "%s"
+  cloud_name = "google-europe-west1"
+  plan = "startup-4"
+  service_name = "%s"
+  maintenance_window_dow = "monday"
+  maintenance_window_time = "10:00:00"
+
+  opensearch_user_config {
+    opensearch_version = 1
+
+    index_patterns {
+      pattern = "logs_*_foo_*"
+      max_index_count = 3
+      sorting_algorithm = "creation_date"
+    }
+
+    index_patterns {
+      pattern = "logs_*_bar_*"
+      max_index_count = 15
+      sorting_algorithm = "creation_date"
+    }
+  }
+}
+`, projectName, serviceName)
+
+		resource.ParallelTest(tt, resource.TestCase{
+			PreCheck:          func() { testAccPreCheck(tt) },
+			ProviderFactories: testAccProviderFactories,
+			CheckDestroy:      testAccCheckAivenServiceResourceDestroy,
+
+			Steps: []resource.TestStep{
+				{Config: esManifestWithVersion("7")},
+				{Config: esManifestWithVersion("1")},
+				{
+					Config:        importManifest,
+					ResourceName:  resourceName,
+					ImportState:   true,
+					ImportStateId: fmt.Sprintf("%s/%s", projectName, serviceName),
+					ImportStateCheck: func(s []*terraform.InstanceState) error {
+						if len(s) != 1 {
+							return fmt.Errorf("expected only one instance to be imported, state: %#v", s)
+						}
+						rs := s[0]
+						attributes := rs.Attributes
+						if !strings.EqualFold(attributes["service_type"], "opensearch") {
+							return fmt.Errorf("expected service_type opensearch after import, got :%s", attributes["service_type"])
+						}
+						if !strings.EqualFold(attributes["service_name"], serviceName) {
+							return fmt.Errorf("expected service_name to match '%s', got: '%s'", serviceName, attributes["service_name"])
+						}
+						if !strings.EqualFold(attributes["project"], projectName) {
+							return fmt.Errorf("expected project to match '%s', got: '%s'", serviceName, attributes["project_name"])
+						}
+						return nil
+					},
+				},
+			},
+		})
+	})
 }
 
 func testAccCheckAivenServiceOSAttributes(n string) resource.TestCheckFunc {
