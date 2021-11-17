@@ -11,20 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-      with:
-       fetch-depth: 0
-    - name: semgrep
-      uses: returntocorp/semgrep-action@v1
+    - uses: returntocorp/semgrep-action@v1
 
   golangci_lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
-      - name: Set up Go
-        uses: actions/setup-go@v2
+      - uses: actions/setup-go@v2
         with:
           go-version: 1.16
 
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v2.5.2
+      - uses: golangci/golangci-lint-action@v2.5.2
