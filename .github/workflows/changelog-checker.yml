@@ -12,9 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-        with:
-          fetch-depth: 0
-
       - uses: mwcodebase/versioning-checker@v2.2
         with:
           tracked_files: 'CHANGELOG.md'
