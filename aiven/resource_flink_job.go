@@ -28,7 +28,7 @@ var aivenFlinkJobSchema = map[string]*schema.Schema{
 		Required:    true,
 		ForceNew:    true,
 	},
-	"table_id": {
+	"table_ids": {
 		Type:        schema.TypeList,
 		Description: complex("A list of table ids that are required in the job runtime.").forceNew().referenced().build(),
 		Required:    true,
@@ -107,7 +107,7 @@ func resourceFlinkJobCreate(ctx context.Context, d *schema.ResourceData, m inter
 	serviceName := d.Get("service_name").(string)
 	jobName := d.Get("job_name").(string)
 	jobStatement := d.Get("statement").(string)
-	jobTables := flattenToString(d.Get("table_id").([]interface{}))
+	jobTables := flattenToString(d.Get("table_ids").([]interface{}))
 
 	createRequest := aiven.CreateFlinkJobRequest{
 		JobName:   jobName,
