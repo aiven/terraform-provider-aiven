@@ -96,8 +96,6 @@ Read-Only:
 
 Read-Only:
 
-- **global_datapoints** (String)
-- **query_datapoints** (String)
 - **query_require_exhaustive** (String)
 - **query_series** (String)
 

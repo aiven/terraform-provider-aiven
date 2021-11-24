@@ -131,6 +131,7 @@ Optional:
 - **dbname** (String) Database name for bootstrapping the initial connection
 - **host** (String) Hostname or IP address of the server where to migrate data from
 - **ignore_dbs** (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)
+- **method** (String) The migration method to be used
 - **password** (String, Sensitive) Password for authentication with the server where to migrate data from
 - **port** (String) Port number of the server where to migrate data from
 - **ssl** (String) The server where to migrate data from is secured with SSL
@@ -156,6 +157,7 @@ Optional:
 - **bgwriter_lru_maxpages** (String) bgwriter_lru_maxpages
 - **bgwriter_lru_multiplier** (String) bgwriter_lru_multiplier
 - **deadlock_timeout** (String) deadlock_timeout
+- **default_toast_compression** (String) default_toast_compression
 - **idle_in_transaction_session_timeout** (String) idle_in_transaction_session_timeout
 - **jit** (String) jit
 - **log_autovacuum_min_duration** (String) log_autovacuum_min_duration

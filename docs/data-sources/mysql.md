@@ -102,6 +102,7 @@ Read-Only:
 - **dbname** (String)
 - **host** (String)
 - **ignore_dbs** (String)
+- **method** (String)
 - **password** (String)
 - **port** (String)
 - **ssl** (String)
