@@ -277,6 +277,9 @@
         "user_error": "Must consist of alpha-numeric characters, underscores, dashes or dots, max 249 characters"
       }
     },
+    "required": [
+      "kafka_topic"
+    ],
     "type": "object"
   },
   "kafka_mirrormaker": {
@@ -290,6 +293,52 @@
         "title": "Kafka cluster alias",
         "type": "string",
         "user_error": "Must consist of alpha-numeric ASCII characters, dashes, underscores, and dots."
+      },
+      "kafka_mirrormaker": {
+        "properties": {
+          "consumer_fetch_min_bytes": {
+            "description": "The minimum amount of data the server should return for a fetch request",
+            "example": 1024,
+            "maximum": 1048576,
+            "minimum": 1,
+            "title": "consumer.fetch.min.bytes",
+            "type": "integer"
+          },
+          "producer_batch_size": {
+            "description": "The batch size in bytes producer will attempt to collect before publishing to broker.",
+            "example": 1024,
+            "maximum": 1048576,
+            "minimum": 0,
+            "title": "producer.batch.size",
+            "type": "integer"
+          },
+          "producer_buffer_memory": {
+            "description": "The amount of bytes producer can use for buffering data before publishing to broker.",
+            "example": 8388608,
+            "maximum": 134217728,
+            "minimum": 5242880,
+            "title": "producer.buffer.memory",
+            "type": "integer"
+          },
+          "producer_linger_ms": {
+            "description": "The linger time (ms) for waiting new data to arrive for publishing.",
+            "example": 100,
+            "maximum": 5000,
+            "minimum": 0,
+            "title": "producer.linger.ms",
+            "type": "integer"
+          },
+          "producer_max_request_size": {
+            "description": "The maximum request size in bytes.",
+            "example": 1048576,
+            "maximum": 10485760,
+            "minimum": 0,
+            "title": "producer.max.request.size",
+            "type": "integer"
+          }
+        },
+        "title": "Kafka MirrorMaker configuration values",
+        "type": "object"
       }
     },
     "title": "Integration user config",

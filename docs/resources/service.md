@@ -243,10 +243,19 @@ Optional:
 - **ip_filter** (List of String) IP filter
 - **number_of_task_slots** (String) Flink taskmanager.numberOfTaskSlots
 - **parallelism_default** (String) Flink parallelism.default
+- **privatelink_access** (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--flink_user_config--privatelink_access))
 - **restart_strategy** (String) Flink restart-strategy
 - **restart_strategy_delay_sec** (String) Flink restart-strategy.failure-rate.delay in seconds
 - **restart_strategy_failure_rate_interval_min** (String) Flink restart-strategy.failure-rate.failure-rate-interval in minutes
 - **restart_strategy_max_failures** (String) Flink restart-strategy.failure-rate.max-failures-per-interval
+
+<a id="nestedblock--flink_user_config--privatelink_access"></a>
+### Nested Schema for `flink_user_config.privatelink_access`
+
+Optional:
+
+- **flink** (String) Enable flink
+
 
 
 <a id="nestedblock--grafana_user_config"></a>
@@ -752,6 +761,7 @@ Optional:
 - **dbname** (String) Database name for bootstrapping the initial connection
 - **host** (String) Hostname or IP address of the server where to migrate data from
 - **ignore_dbs** (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)
+- **method** (String) The migration method to be used
 - **password** (String, Sensitive) Password for authentication with the server where to migrate data from
 - **port** (String) Port number of the server where to migrate data from
 - **ssl** (String) The server where to migrate data from is secured with SSL
@@ -971,6 +981,7 @@ Optional:
 - **dbname** (String) Database name for bootstrapping the initial connection
 - **host** (String) Hostname or IP address of the server where to migrate data from
 - **ignore_dbs** (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)
+- **method** (String) The migration method to be used
 - **password** (String, Sensitive) Password for authentication with the server where to migrate data from
 - **port** (String) Port number of the server where to migrate data from
 - **ssl** (String) The server where to migrate data from is secured with SSL
@@ -996,6 +1007,7 @@ Optional:
 - **bgwriter_lru_maxpages** (String) bgwriter_lru_maxpages
 - **bgwriter_lru_multiplier** (String) bgwriter_lru_multiplier
 - **deadlock_timeout** (String) deadlock_timeout
+- **default_toast_compression** (String) default_toast_compression
 - **idle_in_transaction_session_timeout** (String) idle_in_transaction_session_timeout
 - **jit** (String) jit
 - **log_autovacuum_min_duration** (String) log_autovacuum_min_duration
@@ -1124,6 +1136,7 @@ Optional:
 - **dbname** (String) Database name for bootstrapping the initial connection
 - **host** (String) Hostname or IP address of the server where to migrate data from
 - **ignore_dbs** (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)
+- **method** (String) The migration method to be used
 - **password** (String, Sensitive) Password for authentication with the server where to migrate data from
 - **port** (String) Port number of the server where to migrate data from
 - **ssl** (String) The server where to migrate data from is secured with SSL

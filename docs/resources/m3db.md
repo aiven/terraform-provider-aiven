@@ -89,8 +89,6 @@ Optional:
 
 Optional:
 
-- **global_datapoints** (String) The maximum number of data points fetched during request
-- **query_datapoints** (String) The maximum number of data points fetched in single query
 - **query_require_exhaustive** (String) Require exhaustive result
 - **query_series** (String) The maximum number of series fetched in single query
 

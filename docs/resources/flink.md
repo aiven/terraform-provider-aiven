@@ -79,10 +79,19 @@ Optional:
 - **ip_filter** (List of String) IP filter
 - **number_of_task_slots** (String) Flink taskmanager.numberOfTaskSlots
 - **parallelism_default** (String) Flink parallelism.default
+- **privatelink_access** (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--flink_user_config--privatelink_access))
 - **restart_strategy** (String) Flink restart-strategy
 - **restart_strategy_delay_sec** (String) Flink restart-strategy.failure-rate.delay in seconds
 - **restart_strategy_failure_rate_interval_min** (String) Flink restart-strategy.failure-rate.failure-rate-interval in minutes
 - **restart_strategy_max_failures** (String) Flink restart-strategy.failure-rate.max-failures-per-interval
+
+<a id="nestedblock--flink_user_config--privatelink_access"></a>
+### Nested Schema for `flink_user_config.privatelink_access`
+
+Optional:
+
+- **flink** (String) Enable flink
+
 
 
 <a id="nestedblock--service_integrations"></a>

@@ -271,10 +271,19 @@ Read-Only:
 - **ip_filter** (List of String)
 - **number_of_task_slots** (String)
 - **parallelism_default** (String)
+- **privatelink_access** (List of Object) (see [below for nested schema](#nestedobjatt--flink_user_config--privatelink_access))
 - **restart_strategy** (String)
 - **restart_strategy_delay_sec** (String)
 - **restart_strategy_failure_rate_interval_min** (String)
 - **restart_strategy_max_failures** (String)
+
+<a id="nestedobjatt--flink_user_config--privatelink_access"></a>
+### Nested Schema for `flink_user_config.privatelink_access`
+
+Read-Only:
+
+- **flink** (String)
+
 
 
 <a id="nestedatt--grafana"></a>
@@ -816,6 +825,7 @@ Read-Only:
 - **dbname** (String)
 - **host** (String)
 - **ignore_dbs** (String)
+- **method** (String)
 - **password** (String)
 - **port** (String)
 - **ssl** (String)
@@ -1058,6 +1068,7 @@ Read-Only:
 - **dbname** (String)
 - **host** (String)
 - **ignore_dbs** (String)
+- **method** (String)
 - **password** (String)
 - **port** (String)
 - **ssl** (String)
@@ -1083,6 +1094,7 @@ Read-Only:
 - **bgwriter_lru_maxpages** (String)
 - **bgwriter_lru_multiplier** (String)
 - **deadlock_timeout** (String)
+- **default_toast_compression** (String)
 - **idle_in_transaction_session_timeout** (String)
 - **jit** (String)
 - **log_autovacuum_min_duration** (String)
@@ -1218,6 +1230,7 @@ Read-Only:
 - **dbname** (String)
 - **host** (String)
 - **ignore_dbs** (String)
+- **method** (String)
 - **password** (String)
 - **port** (String)
 - **ssl** (String)

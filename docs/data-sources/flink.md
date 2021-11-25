@@ -84,10 +84,19 @@ Read-Only:
 - **ip_filter** (List of String)
 - **number_of_task_slots** (String)
 - **parallelism_default** (String)
+- **privatelink_access** (List of Object) (see [below for nested schema](#nestedobjatt--flink_user_config--privatelink_access))
 - **restart_strategy** (String)
 - **restart_strategy_delay_sec** (String)
 - **restart_strategy_failure_rate_interval_min** (String)
 - **restart_strategy_max_failures** (String)
+
+<a id="nestedobjatt--flink_user_config--privatelink_access"></a>
+### Nested Schema for `flink_user_config.privatelink_access`
+
+Read-Only:
+
+- **flink** (String)
+
 
 
 <a id="nestedatt--service_integrations"></a>

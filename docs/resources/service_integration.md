@@ -100,6 +100,19 @@ Optional:
 Optional:
 
 - **cluster_alias** (String) Kafka cluster alias
+- **kafka_mirrormaker** (Block List, Max: 1) Kafka MirrorMaker configuration values (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker))
+
+<a id="nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker"></a>
+### Nested Schema for `kafka_mirrormaker_user_config.kafka_mirrormaker`
+
+Optional:
+
+- **consumer_fetch_min_bytes** (String) consumer.fetch.min.bytes
+- **producer_batch_size** (String) producer.batch.size
+- **producer_buffer_memory** (String) producer.buffer.memory
+- **producer_linger_ms** (String) producer.linger.ms
+- **producer_max_request_size** (String) producer.max.request.size
+
 
 
 <a id="nestedblock--logs_user_config"></a>

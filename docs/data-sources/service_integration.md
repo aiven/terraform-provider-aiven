@@ -94,6 +94,19 @@ Read-Only:
 Read-Only:
 
 - **cluster_alias** (String)
+- **kafka_mirrormaker** (List of Object) (see [below for nested schema](#nestedobjatt--kafka_mirrormaker_user_config--kafka_mirrormaker))
+
+<a id="nestedobjatt--kafka_mirrormaker_user_config--kafka_mirrormaker"></a>
+### Nested Schema for `kafka_mirrormaker_user_config.kafka_mirrormaker`
+
+Read-Only:
+
+- **consumer_fetch_min_bytes** (String)
+- **producer_batch_size** (String)
+- **producer_buffer_memory** (String)
+- **producer_linger_ms** (String)
+- **producer_max_request_size** (String)
+
 
 
 <a id="nestedatt--logs_user_config"></a>
