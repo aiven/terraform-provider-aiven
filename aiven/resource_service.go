@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/docker/go-units"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/pkg/ipfilter"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -787,6 +786,11 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(fmt.Errorf("unable to get service plan parameters: %w", err))
 	}
 
+	var karapace *bool
+	if v := d.Get("karapace"); v.(bool) && d.HasChange("karapace") {
+		*karapace = true
+	}
+
 	projectName, serviceName := splitResourceID2(d.Id())
 
 	if _, err := client.Services.Update(
@@ -800,6 +804,7 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 			Powered:               true,
 			TerminationProtection: d.Get("termination_protection").(bool),
 			DiskSpaceMB:           resourceServiceGetDiskSpaceMBOrServicePlanDefault(d, servicePlanParams),
+			Karapace:              karapace,
 			UserConfig:            ConvertTerraformUserConfigToAPICompatibleFormat("service", d.Get("service_type").(string), false, d),
 		},
 	); err != nil {
