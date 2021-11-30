@@ -82,6 +82,7 @@ func resourcePG() *schema.Resource {
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServicePGUpdate,
 		DeleteContext: resourceServiceDelete,
+		CustomizeDiff: resourceServiceCustomizeDiffWrapper(ServiceTypePG),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceState,
 		},

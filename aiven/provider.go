@@ -5,11 +5,13 @@ package aiven
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/docker/go-units"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
@@ -155,6 +157,12 @@ func Provider() *schema.Provider {
 	}
 
 	return p
+}
+
+// either *schema.ResourceState or *schema.ResourceDiff
+type resourceStateOrResourceDiff interface {
+	GetOk(key string) (interface{}, bool)
+	Get(key string) interface{}
 }
 
 func optionalString(d *schema.ResourceData, key string) string {
@@ -308,6 +316,19 @@ func createOnlyDiffSuppressFunc(_, _, _ string, d *schema.ResourceData) bool {
 	return len(d.Id()) > 0
 }
 
+func diskSpaceDiffSuppressFunc(_, o, n string, d *schema.ResourceData) bool {
+	// check if new is empty; if so get default from schema ( `disk_space_default` )
+	if n == "" {
+		// default is required field in the api and should be there once we can diff the resource
+		// and it was created
+		n = d.Get("disk_space_default").(string)
+	}
+
+	nb, _ := units.RAMInBytes(n)
+	ob, _ := units.RAMInBytes(o)
+	return nb == ob
+}
+
 // emptyObjectDiffSuppressFunc suppresses a diff for service user configuration options when
 // fields are not set by the user but have default or previously defined values.
 func emptyObjectDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) bool {
@@ -391,10 +412,21 @@ func ipFilterValueDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) b
 // as time.Duration format
 func validateDurationString(v interface{}, k string) (ws []string, errors []error) {
 	if _, err := time.ParseDuration(v.(string)); err != nil {
-		log.Printf("[DEBUG] invalid duration: %s", err)
 		errors = append(errors, fmt.Errorf("%q: invalid duration", k))
 	}
+	return
+}
 
+// validateHumanByteSizeString is a ValidateFunc that ensures a string parses
+// as units.Bytes format
+func validateHumanByteSizeString(v interface{}, k string) (ws []string, errors []error) {
+	// only allow `^[1-9][0-9]*(GiB|G)*` without fractions
+	if ok, _ := regexp.MatchString("^[1-9][0-9]*(GiB|G)$", v.(string)); !ok {
+		return ws, append(errors, fmt.Errorf("%q: configured string must match ^[1-9][0-9]*(G|GiB)", k))
+	}
+	if _, err := units.RAMInBytes(v.(string)); err != nil {
+		return ws, append(errors, fmt.Errorf("%q: invalid human readable byte size", k))
+	}
 	return
 }
 

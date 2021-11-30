@@ -29,6 +29,7 @@ func resourceM3DB() *schema.Resource {
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,
 		DeleteContext: resourceServiceDelete,
+		CustomizeDiff: resourceServiceCustomizeDiffWrapper(ServiceTypeM3),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceState,
 		},

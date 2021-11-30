@@ -25,6 +25,7 @@ The Service resource allows the creation and management of Aiven Services.
 
 - **cassandra_user_config** (Block List, Max: 1) Cassandra user configurable settings (see [below for nested schema](#nestedblock--cassandra_user_config))
 - **cloud_name** (String) Cloud the service runs in
+- **disk_space** (String) The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.
 - **elasticsearch_user_config** (Block List, Max: 1) Elasticsearch user configurable settings (see [below for nested schema](#nestedblock--elasticsearch_user_config))
 - **flink** (Block List) Flink specific server provided values (see [below for nested schema](#nestedblock--flink))
 - **flink_user_config** (Block List, Max: 1) Flink user configurable settings (see [below for nested schema](#nestedblock--flink_user_config))
@@ -51,6 +52,9 @@ The Service resource allows the creation and management of Aiven Services.
 
 - **cassandra** (List of Object) Cassandra specific server provided values (see [below for nested schema](#nestedatt--cassandra))
 - **components** (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
+- **disk_space_cap** (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
+- **disk_space_default** (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
+- **disk_space_step** (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - **elasticsearch** (List of Object) Elasticsearch specific server provided values (see [below for nested schema](#nestedatt--elasticsearch))
 - **grafana** (List of Object) Grafana specific server provided values (see [below for nested schema](#nestedatt--grafana))
 - **influxdb** (List of Object) InfluxDB specific server provided values (see [below for nested schema](#nestedatt--influxdb))

@@ -30,6 +30,10 @@ The Service datasource provides information about specific Aiven Services.
 - **cassandra_user_config** (List of Object) Cassandra user configurable settings (see [below for nested schema](#nestedatt--cassandra_user_config))
 - **cloud_name** (String) Cloud the service runs in
 - **components** (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
+- **disk_space** (String) The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.
+- **disk_space_cap** (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
+- **disk_space_default** (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
+- **disk_space_step** (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - **elasticsearch** (List of Object) Elasticsearch specific server provided values (see [below for nested schema](#nestedatt--elasticsearch))
 - **elasticsearch_user_config** (List of Object) Elasticsearch user configurable settings (see [below for nested schema](#nestedatt--elasticsearch_user_config))
 - **flink** (List of Object) Flink specific server provided values (see [below for nested schema](#nestedatt--flink))

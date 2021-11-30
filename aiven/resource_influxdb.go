@@ -36,6 +36,7 @@ func resourceInfluxDB() *schema.Resource {
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,
 		DeleteContext: resourceServiceDelete,
+		CustomizeDiff: resourceServiceCustomizeDiffWrapper(ServiceTypeInfluxDB),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceState,
 		},

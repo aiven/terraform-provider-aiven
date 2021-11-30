@@ -5,6 +5,7 @@ package aiven
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -12,35 +13,130 @@ import (
 )
 
 func TestAccAiven_pg(t *testing.T) {
-	resourceName := "aiven_pg.bar"
-	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	t.Parallel()
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenServiceResourceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccPGResource(rName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
-					testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
-					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
-					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
-					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
-					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
-				),
+	resourceName := "aiven_pg.bar"
+
+	t.Run("invalid disk sizes", func(tt *testing.T) {
+		var (
+			expectErrorRegexBadString = regexp.MustCompile(regexp.QuoteMeta("configured string must match ^[1-9][0-9]*(G|GiB)"))
+		)
+		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
+		resource.ParallelTest(tt, resource.TestCase{
+			PreCheck:          func() { testAccPreCheck(tt) },
+			ProviderFactories: testAccProviderFactories,
+			Steps: []resource.TestStep{
+				// bad strings
+				{
+					Config:      testAccPGResourceWithDiskSize(rName, "abc"),
+					PlanOnly:    true,
+					ExpectError: expectErrorRegexBadString,
+				},
+				{
+					Config:      testAccPGResourceWithDiskSize(rName, "01MiB"),
+					PlanOnly:    true,
+					ExpectError: expectErrorRegexBadString,
+				},
+				{
+					Config:      testAccPGResourceWithDiskSize(rName, "1234"),
+					PlanOnly:    true,
+					ExpectError: expectErrorRegexBadString,
+				},
+				{
+					Config:      testAccPGResourceWithDiskSize(rName, "5TiB"),
+					PlanOnly:    true,
+					ExpectError: expectErrorRegexBadString,
+				},
+				{
+					Config:      testAccPGResourceWithDiskSize(rName, " 1Gib "),
+					PlanOnly:    true,
+					ExpectError: expectErrorRegexBadString,
+				},
+				{
+					Config:      testAccPGResourceWithDiskSize(rName, "1 GiB"),
+					PlanOnly:    true,
+					ExpectError: expectErrorRegexBadString,
+				},
+				// bad disk sizes
+				{
+					Config:      testAccPGResourceWithDiskSize(rName, "1GiB"),
+					PlanOnly:    true,
+					ExpectError: regexp.MustCompile("requested disk size is too small"),
+				},
+				{
+					Config:      testAccPGResourceWithDiskSize(rName, "100000GiB"),
+					PlanOnly:    true,
+					ExpectError: regexp.MustCompile("requested disk size is too large"),
+				},
+				{
+					Config:      testAccPGResourceWithDiskSize(rName, "127GiB"),
+					PlanOnly:    true,
+					ExpectError: regexp.MustCompile("requested disk size has to increase from: '.*' in increments of '.*'"),
+				},
 			},
-		},
+		})
+	})
+
+	t.Run("changing disk sizes", func(tt *testing.T) {
+		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
+		resource.ParallelTest(tt, resource.TestCase{
+			PreCheck:          func() { testAccPreCheck(tt) },
+			ProviderFactories: testAccProviderFactories,
+			CheckDestroy:      testAccCheckAivenServiceResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccPGResourceWithDiskSize(rName, "90GiB"),
+					Check: resource.ComposeTestCheckFunc(
+						testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
+						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+						resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
+						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
+						resource.TestCheckResourceAttr(resourceName, "disk_space", "90GiB"),
+						resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+					),
+				},
+				{
+					Config: testAccPGResourceWithDiskSize(rName, "100GiB"),
+					Check: resource.ComposeTestCheckFunc(
+						testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
+						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+						resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
+						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
+						resource.TestCheckResourceAttr(resourceName, "disk_space", "100GiB"),
+						resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+					),
+				},
+				{
+					Config: testAccPGResourceWithoutDiskSize(rName),
+					Check: resource.ComposeTestCheckFunc(
+						testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
+						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+						resource.TestCheckResourceAttr(resourceName, "state", "REBALANCING"),
+						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+						resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
+						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
+						resource.TestCheckResourceAttr(resourceName, "disk_space", "80GiB"),
+						resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+					),
+				},
+			},
+		})
 	})
 }
 
-func testAccPGResource(name string) string {
+func testAccPGResourceWithDiskSize(name, diskSize string) string {
 	return fmt.Sprintf(`
 		data "aiven_project" "foo" {
 			project = "%s"
@@ -53,25 +149,62 @@ func testAccPGResource(name string) string {
 			service_name = "test-acc-sr-%s"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
-			
-			pg_user_config {
-				public_access {
-					pg = true
-					prometheus = false
-				}
+      disk_space = "%s"
 
-				pg {
-					idle_in_transaction_session_timeout = 900
-					log_min_duration_statement = -1
-				}
-			}
+      pg_user_config {
+        public_access {
+          pg = true
+          prometheus = false
+        }
+
+        pg {
+          idle_in_transaction_session_timeout = 900
+          log_min_duration_statement = -1
+        }
+      }
+    }
+
+    data "aiven_pg" "service" {
+      service_name = aiven_pg.bar.service_name
+      project = aiven_pg.bar.project
+
+      depends_on = [aiven_pg.bar]
+    }
+    `, os.Getenv("AIVEN_PROJECT_NAME"), name, diskSize)
+}
+
+func testAccPGResourceWithoutDiskSize(name string) string {
+	return fmt.Sprintf(`
+		data "aiven_project" "foo" {
+			project = "%s"
 		}
 		
-		data "aiven_pg" "service" {
-			service_name = aiven_pg.bar.service_name
-			project = aiven_pg.bar.project
+		resource "aiven_pg" "bar" {
+			project = data.aiven_project.foo.project
+			cloud_name = "google-europe-west1"
+			plan = "startup-4"
+			service_name = "test-acc-sr-%s"
+			maintenance_window_dow = "monday"
+			maintenance_window_time = "10:00:00"
 
-			depends_on = [aiven_pg.bar]
-		}
-		`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+      pg_user_config {
+        public_access {
+          pg = true
+          prometheus = false
+        }
+
+        pg {
+          idle_in_transaction_session_timeout = 900
+          log_min_duration_statement = -1
+        }
+      }
+    }
+
+    data "aiven_pg" "service" {
+      service_name = aiven_pg.bar.service_name
+      project = aiven_pg.bar.project
+
+      depends_on = [aiven_pg.bar]
+    }
+    `, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }

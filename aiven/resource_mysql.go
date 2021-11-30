@@ -29,6 +29,7 @@ func resourceMySQL() *schema.Resource {
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,
 		DeleteContext: resourceServiceDelete,
+		CustomizeDiff: resourceServiceCustomizeDiffWrapper(ServiceTypeMySQL),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceState,
 		},

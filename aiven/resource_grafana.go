@@ -30,6 +30,7 @@ func resourceGrafana() *schema.Resource {
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,
 		DeleteContext: resourceServiceDelete,
+		CustomizeDiff: resourceServiceCustomizeDiffWrapper(ServiceTypeGrafana),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceState,
 		},

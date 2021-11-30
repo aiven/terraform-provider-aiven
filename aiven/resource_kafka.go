@@ -77,6 +77,7 @@ func resourceKafka() *schema.Resource {
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,
 		DeleteContext: resourceServiceDelete,
+		CustomizeDiff: resourceServiceCustomizeDiffWrapper(ServiceTypeKafka),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceState,
 		},

@@ -42,6 +42,7 @@ resource "aiven_grafana" "gr1" {
 ### Optional
 
 - **cloud_name** (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
+- **disk_space** (String) The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.
 - **grafana_user_config** (Block List, Max: 1) Grafana user configurable settings (see [below for nested schema](#nestedblock--grafana_user_config))
 - **id** (String) The ID of this resource.
 - **maintenance_window_dow** (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
@@ -55,6 +56,9 @@ resource "aiven_grafana" "gr1" {
 ### Read-Only
 
 - **components** (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
+- **disk_space_cap** (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
+- **disk_space_default** (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
+- **disk_space_step** (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - **grafana** (List of Object) Grafana server provided values (see [below for nested schema](#nestedatt--grafana))
 - **service_host** (String) The hostname of the service.
 - **service_password** (String, Sensitive) Password used for connecting to the service, if applicable

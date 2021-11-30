@@ -6,8 +6,9 @@ require (
 	cloud.google.com/go v0.97.0 // indirect
 	cloud.google.com/go/storage v1.17.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/aiven/aiven-go-client v1.7.1-0.20211117130723-56d3f8f42616
+	github.com/aiven/aiven-go-client v1.7.1-0.20211125110226-29bc6f38e8d5
 	github.com/aws/aws-sdk-go v1.40.55 // indirect
+	github.com/docker/go-units v0.4.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect

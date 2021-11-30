@@ -27,14 +27,14 @@ func datasourceServiceRead(ctx context.Context, d *schema.ResourceData, m interf
 	d.SetId(buildResourceID(projectName, serviceName))
 
 	services, err := client.Services.List(projectName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	for _, service := range services {
 		if service.Name == serviceName {
 			return resourceServiceRead(ctx, d, m)
 		}
-	}
-
-	if err != nil {
-		return diag.FromErr(err)
 	}
 
 	return diag.Errorf("service %s/%s not found", projectName, serviceName)

@@ -30,6 +30,7 @@ func resourceRedis() *schema.Resource {
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,
 		DeleteContext: resourceServiceDelete,
+		CustomizeDiff: resourceServiceCustomizeDiffWrapper(ServiceTypeRedis),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceState,
 		},

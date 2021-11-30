@@ -24,6 +24,7 @@ func init() {
 			"aiven_kafka_schema",
 			"aiven_kafka_connector",
 			"aiven_connection_pool",
+			"aiven_service_integration",
 		},
 	})
 }
@@ -42,40 +43,40 @@ func sweepServices(region string) error {
 	}
 
 	for _, project := range projects {
-		if project.Name == os.Getenv("AIVEN_PROJECT_NAME") {
-			services, err := conn.Services.List(project.Name)
-			if err != nil {
-				return fmt.Errorf("error retrieving a list of services for a project `%s`: %s", project.Name, err)
+		if project.Name != os.Getenv("AIVEN_PROJECT_NAME") {
+			continue
+		}
+		services, err := conn.Services.List(project.Name)
+		if err != nil {
+			return fmt.Errorf("error retrieving a list of services for a project `%s`: %s", project.Name, err)
+		}
+
+		for _, service := range services {
+			// if service termination_protection is on service cannot be deleted
+			// update service and turn termination_protection off
+			if service.TerminationProtection == true {
+				_, err := conn.Services.Update(project.Name, service.Name, aiven.UpdateServiceRequest{
+					Cloud:                 service.CloudName,
+					MaintenanceWindow:     &service.MaintenanceWindow,
+					Plan:                  service.Plan,
+					ProjectVPCID:          service.ProjectVPCID,
+					Powered:               true,
+					TerminationProtection: false,
+					UserConfig:            service.UserConfig,
+				})
+
+				if err != nil {
+					return fmt.Errorf("error disabling `termination_protection` for service '%s' during sweep: %s", service.Name, err)
+				}
 			}
 
-			for _, service := range services {
-				// if service termination_protection is on service cannot be deleted
-				// update service and turn termination_protection off
-				if service.TerminationProtection == true {
-					_, err := conn.Services.Update(project.Name, service.Name, aiven.UpdateServiceRequest{
-						Cloud:                 service.CloudName,
-						MaintenanceWindow:     &service.MaintenanceWindow,
-						Plan:                  service.Plan,
-						ProjectVPCID:          service.ProjectVPCID,
-						Powered:               true,
-						TerminationProtection: false,
-						UserConfig:            service.UserConfig,
-					})
-
-					if err != nil {
-						return fmt.Errorf("error destroying service %s during sweep, disabling `termination_protection`: %s", service.Name, err)
-					}
-				}
-
-				if err := conn.Services.Delete(project.Name, service.Name); err != nil {
-					if err.(aiven.Error).Status != 404 {
-						return fmt.Errorf("error destroying service %s during sweep: %s", service.Name, err)
-					}
+			if err := conn.Services.Delete(project.Name, service.Name); err != nil {
+				if !aiven.IsNotFound(err) {
+					return fmt.Errorf("error destroying service %s during sweep: %s", service.Name, err)
 				}
 			}
 		}
 	}
-
 	return nil
 }
 
