@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/pkg/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -95,7 +96,16 @@ func resourceKafka() *schema.Resource {
 
 		Schema: aivenKafkaSchema(),
 		CustomizeDiff: customdiff.All(
-			resourceServiceCustomizeDiffWrapper(ServiceTypeKafka),
+			customdiff.Sequence(
+				service.SetServiceTypeIfEmpty(ServiceTypeKafka),
+				customdiff.IfValueChange("disk_space",
+					service.DiskSpaceShouldNotBeEmpty,
+					service.CustomizeDiffCheckDiskSpace),
+			),
+			customdiff.IfValueChange("service_integrations",
+				service.ServiceIntegrationShouldNotBeEmpty,
+				service.CustomizeDiffServiceIntegrationAfterCreation),
+
 			// if a kafka_version is >= 3.0 then this schema field is not applicable
 			customdiff.ComputedIf("karapace", func(ctx context.Context, d *schema.ResourceDiff, m interface{}) bool {
 				project := d.Get("project").(string)

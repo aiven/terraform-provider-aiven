@@ -5,6 +5,8 @@ package aiven
 import (
 	"time"
 
+	"github.com/aiven/terraform-provider-aiven/pkg/service"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -42,7 +44,17 @@ func resourceFlink() *schema.Resource {
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,
 		DeleteContext: resourceServiceDelete,
-		CustomizeDiff: resourceServiceCustomizeDiffWrapper(ServiceTypeFlink),
+		CustomizeDiff: customdiff.All(
+			customdiff.Sequence(
+				service.SetServiceTypeIfEmpty(ServiceTypeFlink),
+				customdiff.IfValueChange("disk_space",
+					service.DiskSpaceShouldNotBeEmpty,
+					service.CustomizeDiffCheckDiskSpace),
+			),
+			customdiff.IfValueChange("service_integrations",
+				service.ServiceIntegrationShouldNotBeEmpty,
+				service.CustomizeDiffServiceIntegrationAfterCreation),
+		),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceState,
 		},
