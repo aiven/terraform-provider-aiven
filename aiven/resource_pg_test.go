@@ -116,12 +116,39 @@ func TestAccAiven_pg(t *testing.T) {
 						resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
 					),
 				},
+			},
+		})
+	})
+
+	t.Run("deleting a disc size from the manifest", func(tt *testing.T) {
+		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
+		resource.Test(tt, resource.TestCase{
+			PreCheck:          func() { testAccPreCheck(tt) },
+			ProviderFactories: testAccProviderFactories,
+			CheckDestroy:      testAccCheckAivenServiceResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccPGResourceWithDiskSize(rName, "90GiB"),
+					Check: resource.ComposeTestCheckFunc(
+						testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
+						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+						resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
+						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
+						resource.TestCheckResourceAttr(resourceName, "disk_space", "90GiB"),
+						resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+					),
+				},
 				{
 					Config: testAccPGResourceWithoutDiskSize(rName),
 					Check: resource.ComposeTestCheckFunc(
 						testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
 						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+						resource.TestCheckResourceAttr(resourceName, "state", "REBALANCING"),
 						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 						resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
@@ -133,6 +160,7 @@ func TestAccAiven_pg(t *testing.T) {
 				},
 			},
 		})
+
 	})
 }
 

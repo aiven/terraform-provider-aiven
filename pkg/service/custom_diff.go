@@ -5,6 +5,7 @@ package service
 import (
 	"context"
 	"fmt"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -14,8 +15,8 @@ func ServiceIntegrationShouldNotBeEmpty(_ context.Context, _, new, _ interface{}
 	return len(new.([]interface{})) != 0
 }
 
-func CustomizeDiffServiceIntegrationAfterCreation(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
-	if len(diff.Id()) > 0 {
+func CustomizeDiffServiceIntegrationAfterCreation(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	if len(d.Id()) > 0 && d.HasChange("service_integrations") && len(d.Get("service_integrations").([]interface{})) != 0 {
 		return fmt.Errorf("service_integrations field can only be set during creation of a service")
 	}
 	return nil

@@ -44,7 +44,7 @@ func resourceOpensearch() *schema.Resource {
 		UpdateContext: resourceServiceUpdate,
 		DeleteContext: resourceServiceDelete,
 		CustomizeDiff: customdiff.All(
-			service.SetServiceTypeIfEmpty(ServiceTypeElasticsearch),
+			service.SetServiceTypeIfEmpty(ServiceTypeOpensearch),
 			customdiff.IfValueChange("service_integrations",
 				service.ServiceIntegrationShouldNotBeEmpty,
 				service.CustomizeDiffServiceIntegrationAfterCreation),
