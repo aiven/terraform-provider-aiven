@@ -9,11 +9,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/docker/go-units"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/pkg/ipfilter"
+	"github.com/aiven/terraform-provider-aiven/pkg/service"
+	"github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -636,7 +637,11 @@ func resourceService() *schema.Resource {
 		ReadContext:        resourceServiceRead,
 		UpdateContext:      resourceServiceUpdate,
 		DeleteContext:      resourceServiceDelete,
-		CustomizeDiff:      resourceServiceCustomizeDiff,
+		CustomizeDiff: customdiff.All(
+			customdiff.IfValueChange("service_integrations",
+				service.ServiceIntegrationShouldNotBeEmpty,
+				service.CustomizeDiffServiceIntegrationAfterCreation),
+		),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceState,
 		},
@@ -705,32 +710,23 @@ func resourceServiceCreateWrapper(serviceType string) schema.CreateContextFunc {
 	}
 }
 
-func resourceServiceCustomizeDiffWrapper(serviceType string) schema.CustomizeDiffFunc {
-	return func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-		if err := d.SetNew("service_type", serviceType); err != nil {
-			return err
-		}
-		return resourceServiceCustomizeDiff(ctx, d, m)
-	}
-}
-
 func resourceServiceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName := splitResourceID2(d.Id())
-	service, err := client.Services.Get(projectName, serviceName)
+	s, err := client.Services.Get(projectName, serviceName)
 	if err != nil {
 		if err = resourceReadHandleNotFound(err, d); err != nil {
 			return diag.FromErr(fmt.Errorf("unable to GET service %s: %s", d.Id(), err))
 		}
 		return nil
 	}
-	servicePlanParams, err := resourceServiceGetServicePlanParametersFromServiceResponse(ctx, client, projectName, service)
+	servicePlanParams, err := service.GetServicePlanParametersFromServiceResponse(ctx, client, projectName, s)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("unable to get service plan parameters: %w", err))
 	}
 
-	err = copyServicePropertiesFromAPIResponseToTerraform(d, service, servicePlanParams, projectName)
+	err = copyServicePropertiesFromAPIResponseToTerraform(d, s, servicePlanParams, projectName)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -742,7 +738,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 	client := m.(*aiven.Client)
 
 	// get service plan specific defaults
-	servicePlanParams, err := resourceServiceGetServicePlanParametersFromSchema(ctx, client, d)
+	servicePlanParams, err := service.GetServicePlanParametersFromSchema(ctx, client, d)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("unable to get service plan parameters: %w", err))
 	}
@@ -755,25 +751,25 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 		aiven.CreateServiceRequest{
 			Cloud:                 d.Get("cloud_name").(string),
 			Plan:                  d.Get("plan").(string),
-			ProjectVPCID:          resourceServiceGetProjectVPCIdPointer(d),
-			ServiceIntegrations:   resourceServiceGetAPIServiceIntegrations(d),
-			MaintenanceWindow:     resourceServiceGetMaintenanceWindow(d),
+			ProjectVPCID:          service.GetProjectVPCIdPointer(d),
+			ServiceIntegrations:   service.GetAPIServiceIntegrations(d),
+			MaintenanceWindow:     service.GetMaintenanceWindow(d),
 			ServiceName:           d.Get("service_name").(string),
 			ServiceType:           serviceType,
 			TerminationProtection: d.Get("termination_protection").(bool),
-			DiskSpaceMB:           resourceServiceGetDiskSpaceMBOrServicePlanDefault(d, servicePlanParams),
+			DiskSpaceMB:           service.GetDiskSpaceMBOrServicePlanDefault(d, servicePlanParams),
 			UserConfig:            ConvertTerraformUserConfigToAPICompatibleFormat("service", serviceType, true, d),
 		},
 	); err != nil {
 		return diag.FromErr(err)
 	}
 
-	service, err := resourceServiceWait(ctx, d, m, "create")
+	s, err := resourceServiceWait(ctx, d, m, "create")
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(buildResourceID(project, service.Name))
+	d.SetId(buildResourceID(project, s.Name))
 
 	return resourceServiceRead(ctx, d, m)
 }
@@ -782,9 +778,16 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	client := m.(*aiven.Client)
 
 	// get service plan specific defaults
-	servicePlanParams, err := resourceServiceGetServicePlanParametersFromSchema(ctx, client, d)
+	servicePlanParams, err := service.GetServicePlanParametersFromSchema(ctx, client, d)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("unable to get service plan parameters: %w", err))
+	}
+
+	var karapace *bool
+	if v := d.Get("karapace"); d.HasChange("karapace") && v != nil {
+		if k, ok := v.(bool); ok && k {
+			*karapace = true
+		}
 	}
 
 	projectName, serviceName := splitResourceID2(d.Id())
@@ -795,11 +798,12 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		aiven.UpdateServiceRequest{
 			Cloud:                 d.Get("cloud_name").(string),
 			Plan:                  d.Get("plan").(string),
-			MaintenanceWindow:     resourceServiceGetMaintenanceWindow(d),
-			ProjectVPCID:          resourceServiceGetProjectVPCIdPointer(d),
+			MaintenanceWindow:     service.GetMaintenanceWindow(d),
+			ProjectVPCID:          service.GetProjectVPCIdPointer(d),
 			Powered:               true,
 			TerminationProtection: d.Get("termination_protection").(bool),
-			DiskSpaceMB:           resourceServiceGetDiskSpaceMBOrServicePlanDefault(d, servicePlanParams),
+			DiskSpaceMB:           service.GetDiskSpaceMBOrServicePlanDefault(d, servicePlanParams),
+			Karapace:              karapace,
 			UserConfig:            ConvertTerraformUserConfigToAPICompatibleFormat("service", d.Get("service_type").(string), false, d),
 		},
 	); err != nil {
@@ -834,16 +838,16 @@ func resourceServiceState(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	projectName, serviceName := splitResourceID2(d.Id())
-	service, err := client.Services.Get(projectName, serviceName)
+	s, err := client.Services.Get(projectName, serviceName)
 	if err != nil {
 		return nil, fmt.Errorf("unable to GET service %s: %s", d.Id(), err)
 	}
-	servicePlanParams, err := resourceServiceGetServicePlanParametersFromServiceResponse(ctx, client, projectName, service)
+	servicePlanParams, err := service.GetServicePlanParametersFromServiceResponse(ctx, client, projectName, s)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get service plan parameters: %w", err)
 	}
 
-	err = copyServicePropertiesFromAPIResponseToTerraform(d, service, servicePlanParams, projectName)
+	err = copyServicePropertiesFromAPIResponseToTerraform(d, s, servicePlanParams, projectName)
 	if err != nil {
 		return nil, err
 	}
@@ -866,82 +870,82 @@ func resourceServiceWait(ctx context.Context, d *schema.ResourceData, m interfac
 		ServiceName: d.Get("service_name").(string),
 	}
 
-	service, err := w.Conf(timeout).WaitForStateContext(ctx)
+	s, err := w.Conf(timeout).WaitForStateContext(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("error waiting for Aiven service to be RUNNING: %s", err)
 	}
 
-	return service.(*aiven.Service), nil
+	return s.(*aiven.Service), nil
 }
 
 func copyServicePropertiesFromAPIResponseToTerraform(
 	d *schema.ResourceData,
-	service *aiven.Service,
-	servicePlanParams servicePlanParameters,
+	s *aiven.Service,
+	servicePlanParams service.PlanParameters,
 	project string,
 ) error {
 	serviceType := d.Get("service_type").(string)
 	if _, ok := d.GetOk("service_type"); !ok {
-		serviceType = service.Type
+		serviceType = s.Type
 	}
 
-	if err := d.Set("cloud_name", service.CloudName); err != nil {
+	if err := d.Set("cloud_name", s.CloudName); err != nil {
 		return err
 	}
-	if err := d.Set("service_name", service.Name); err != nil {
+	if err := d.Set("service_name", s.Name); err != nil {
 		return err
 	}
-	if err := d.Set("state", service.State); err != nil {
+	if err := d.Set("state", s.State); err != nil {
 		return err
 	}
-	if err := d.Set("plan", service.Plan); err != nil {
+	if err := d.Set("plan", s.Plan); err != nil {
 		return err
 	}
 	if err := d.Set("service_type", serviceType); err != nil {
 		return err
 	}
-	if err := d.Set("termination_protection", service.TerminationProtection); err != nil {
+	if err := d.Set("termination_protection", s.TerminationProtection); err != nil {
 		return err
 	}
-	if err := d.Set("maintenance_window_dow", service.MaintenanceWindow.DayOfWeek); err != nil {
+	if err := d.Set("maintenance_window_dow", s.MaintenanceWindow.DayOfWeek); err != nil {
 		return err
 	}
-	if err := d.Set("maintenance_window_time", service.MaintenanceWindow.TimeOfDay); err != nil {
+	if err := d.Set("maintenance_window_time", s.MaintenanceWindow.TimeOfDay); err != nil {
 		return err
 	}
-	if err := d.Set("disk_space", humanReadableByteSize(service.DiskSpaceMB*units.MiB)); err != nil {
+	if err := d.Set("disk_space", service.HumanReadableByteSize(s.DiskSpaceMB*units.MiB)); err != nil {
 		return err
 	}
-	if err := d.Set("disk_space_default", humanReadableByteSize(servicePlanParams.diskSizeMBDefault*units.MiB)); err != nil {
+	if err := d.Set("disk_space_default", service.HumanReadableByteSize(servicePlanParams.DiskSizeMBDefault*units.MiB)); err != nil {
 		return err
 	}
-	if err := d.Set("disk_space_step", humanReadableByteSize(servicePlanParams.diskSizeMBStep*units.MiB)); err != nil {
+	if err := d.Set("disk_space_step", service.HumanReadableByteSize(servicePlanParams.DiskSizeMBStep*units.MiB)); err != nil {
 		return err
 	}
-	if err := d.Set("disk_space_cap", humanReadableByteSize(servicePlanParams.diskSizeMBMax*units.MiB)); err != nil {
+	if err := d.Set("disk_space_cap", service.HumanReadableByteSize(servicePlanParams.DiskSizeMBMax*units.MiB)); err != nil {
 		return err
 	}
-	if err := d.Set("service_uri", service.URI); err != nil {
+	if err := d.Set("service_uri", s.URI); err != nil {
 		return err
 	}
 	if err := d.Set("project", project); err != nil {
 		return err
 	}
 
-	if service.ProjectVPCID != nil {
-		if err := d.Set("project_vpc_id", buildResourceID(project, *service.ProjectVPCID)); err != nil {
+	if s.ProjectVPCID != nil {
+		if err := d.Set("project_vpc_id", buildResourceID(project, *s.ProjectVPCID)); err != nil {
 			return err
 		}
 	}
 	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat(
-		"service", serviceType, service.UserConfig)
+		"service", serviceType, s.UserConfig)
 	if err := d.Set(serviceType+"_user_config",
 		ipfilter.Normalize(d.Get(serviceType+"_user_config"), userConfig)); err != nil {
 		return fmt.Errorf("cannot set `%s_user_config` : %s;"+
-			"Please make sure that all Aiven services have unique service names", serviceType, err)
+			"Please make sure that all Aiven services have unique s names", serviceType, err)
 	}
 
-	params := service.URIParams
+	params := s.URIParams
 	if err := d.Set("service_host", params["host"]); err != nil {
 		return err
 	}
@@ -964,11 +968,11 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		}
 	}
 
-	if err := d.Set("components", flattenServiceComponents(service)); err != nil {
+	if err := d.Set("components", flattenServiceComponents(s)); err != nil {
 		return fmt.Errorf("cannot set `components` : %s", err)
 	}
 
-	return copyConnectionInfoFromAPIResponseToTerraform(d, serviceType, service.ConnectionInfo)
+	return copyConnectionInfoFromAPIResponseToTerraform(d, serviceType, s.ConnectionInfo)
 }
 
 func flattenServiceComponents(r *aiven.Service) []map[string]interface{} {
@@ -1044,176 +1048,4 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	}
 
 	return nil
-}
-
-func resourceServiceGetAPIServiceIntegrations(d resourceStateOrResourceDiff) []aiven.NewServiceIntegration {
-	var apiServiceIntegrations []aiven.NewServiceIntegration
-	tfServiceIntegrations := d.Get("service_integrations")
-	if tfServiceIntegrations != nil {
-		tfServiceIntegrationList := tfServiceIntegrations.([]interface{})
-		for _, definition := range tfServiceIntegrationList {
-			definitionMap := definition.(map[string]interface{})
-			sourceService := definitionMap["source_service_name"].(string)
-			apiIntegration := aiven.NewServiceIntegration{
-				IntegrationType: definitionMap["integration_type"].(string),
-				SourceService:   &sourceService,
-				UserConfig:      make(map[string]interface{}),
-			}
-			apiServiceIntegrations = append(apiServiceIntegrations, apiIntegration)
-		}
-	}
-	return apiServiceIntegrations
-}
-
-func resourceServiceGetProjectVPCIdPointer(d resourceStateOrResourceDiff) *string {
-	vpcID := d.Get("project_vpc_id").(string)
-	var vpcIDPointer *string
-	if len(vpcID) > 0 {
-		_, vpcID := splitResourceID2(vpcID)
-		vpcIDPointer = &vpcID
-	}
-	return vpcIDPointer
-}
-
-func resourceServiceGetMaintenanceWindow(d resourceStateOrResourceDiff) *aiven.MaintenanceWindow {
-	dow := d.Get("maintenance_window_dow").(string)
-	t := d.Get("maintenance_window_time").(string)
-	if len(dow) > 0 && len(t) > 0 {
-		return &aiven.MaintenanceWindow{DayOfWeek: dow, TimeOfDay: t}
-	}
-	return nil
-}
-
-func resourceServiceGetDiskSpaceMBOrServicePlanDefault(d resourceStateOrResourceDiff, params servicePlanParameters) int {
-	diskSpaceSchema, ok := d.GetOk("disk_space")
-	if !ok {
-		return params.diskSizeMBDefault
-	}
-	diskSizeMB, _ := units.RAMInBytes(diskSpaceSchema.(string))
-	return int(diskSizeMB / units.MiB)
-}
-
-type servicePlanParameters struct {
-	diskSizeMBDefault int
-	diskSizeMBStep    int
-	diskSizeMBMax     int
-}
-
-func resourceServiceGetServicePlanParametersFromServiceResponse(ctx context.Context, client *aiven.Client, project string, service *aiven.Service) (servicePlanParameters, error) {
-	return resourceServiceGetServicePlanParametersInternal(ctx, client, project, service.Type, service.Plan)
-}
-
-func resourceServiceGetServicePlanParametersFromSchema(ctx context.Context, client *aiven.Client, d resourceStateOrResourceDiff) (servicePlanParameters, error) {
-	project := d.Get("project").(string)
-	serviceType := d.Get("service_type").(string)
-	servicePlan := d.Get("plan").(string)
-
-	return resourceServiceGetServicePlanParametersInternal(ctx, client, project, serviceType, servicePlan)
-}
-
-func resourceServiceGetServicePlanParametersInternal(_ context.Context, client *aiven.Client, project, serviceType, servicePlan string) (servicePlanParameters, error) {
-	servicePlanResponse, err := client.ServiceTypes.GetPlan(project, serviceType, servicePlan)
-	if err != nil {
-		return servicePlanParameters{}, fmt.Errorf("unable to get service plan from api: %w", err)
-	}
-	return servicePlanParameters{
-		diskSizeMBDefault: servicePlanResponse.DiskSpaceMB,
-		diskSizeMBMax:     servicePlanResponse.DiskSpaceCapMB,
-		diskSizeMBStep:    servicePlanResponse.DiskSpaceStepMB,
-	}, nil
-}
-
-func resourceServiceDynamicDiskSpaceIsAllowedByPricing(_ context.Context, client *aiven.Client, d resourceStateOrResourceDiff) (bool, error) {
-	// to check if dynamic disk space is allowed, we currently have to check
-	// the pricing api to see if the `extra_disk_price_per_gb_usd` field is set
-
-	project := d.Get("project").(string)
-	serviceType := d.Get("service_type").(string)
-	servicePlan := d.Get("plan").(string)
-	cloudName := d.Get("cloud_name").(string)
-
-	servicePlanPricingResponse, err := client.ServiceTypes.GetPlanPricing(project, serviceType, servicePlan, cloudName)
-	if err != nil {
-		return false, fmt.Errorf("unable to get service plan pricing from api: %w", err)
-	}
-	return len(servicePlanPricingResponse.ExtraDiskPricePerGBUSD) > 0, nil
-}
-
-// resourceServiceCustomizeDiff validates that the diff has a chance to be applied
-func resourceServiceCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-	// Some service integrations can be created when creating a service, think 'read_replica' for example.
-	// Those are only applicable for the initial request and should not
-	if err := resourceServiceCustomizeDiffCheckNoNewServiceIntegrationAfterCreation(ctx, d, m); err != nil {
-		return fmt.Errorf("failed service integration check: %w", err)
-	}
-	// We need to validate that the configured disk space matches the service plan; consider the situation
-	// that we have custom disk space configured but want to migrate into a cloud and plan that do not support the configured
-	// disk space anymore
-	if err := resourceServiceCustomizeDiffCheckDiskSpace(ctx, d, m); err != nil {
-		return fmt.Errorf("failed disk space check: %w", err)
-	}
-
-	return nil
-}
-
-func resourceServiceCustomizeDiffCheckNoNewServiceIntegrationAfterCreation(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-	if len(d.Id()) > 0 && d.HasChange("service_integrations") && len(d.Get("service_integrations").([]interface{})) != 0 {
-		return fmt.Errorf("service_integrations field can only be set during creation of a service")
-	}
-	return nil
-}
-
-func resourceServiceCustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-	client := m.(*aiven.Client)
-
-	if diskSizeSchema, ok := d.GetOk("disk_space"); !ok || diskSizeSchema.(string) == "" {
-		return nil
-	}
-	servicePlanParams, err := resourceServiceGetServicePlanParametersFromSchema(ctx, client, d)
-	if err != nil {
-		return fmt.Errorf("unable to get service plan parameters: %w", err)
-	}
-	requestedDiskSizeMB := resourceServiceGetDiskSpaceMBOrServicePlanDefault(d, servicePlanParams)
-
-	if servicePlanParams.diskSizeMBDefault != requestedDiskSizeMB {
-		// first check if the plan allows dynamic disk sizing
-		if servicePlanParams.diskSizeMBMax == 0 || servicePlanParams.diskSizeMBStep == 0 {
-			return fmt.Errorf("dynamic disk space is not configurable for this service")
-		}
-
-		// next check if the cloud allows it by checking the pricing per gb
-		if ok, err := resourceServiceDynamicDiskSpaceIsAllowedByPricing(ctx, client, d); err != nil {
-			return fmt.Errorf("unable to check if dynamic disk space is allowed for this service: %w", err)
-		} else if !ok {
-			return fmt.Errorf("dynamic disk space is not configurable for this service")
-		}
-	}
-
-	humanReadableDiskSpaceDefault := humanReadableByteSize(servicePlanParams.diskSizeMBDefault * units.MiB)
-	humanReadableDiskSpaceMax := humanReadableByteSize(servicePlanParams.diskSizeMBMax * units.MiB)
-	humanReadableDiskSpaceStep := humanReadableByteSize(servicePlanParams.diskSizeMBStep * units.MiB)
-	humanReadableRequestedDiskSpace := humanReadableByteSize(requestedDiskSizeMB * units.MiB)
-
-	if requestedDiskSizeMB < servicePlanParams.diskSizeMBDefault {
-		return fmt.Errorf("requested disk size is too small: '%s' < '%s'", humanReadableRequestedDiskSpace, humanReadableDiskSpaceDefault)
-	}
-	if servicePlanParams.diskSizeMBMax != 0 {
-		if requestedDiskSizeMB > servicePlanParams.diskSizeMBMax {
-			return fmt.Errorf("requested disk size is too large: '%s' > '%s'", humanReadableRequestedDiskSpace, humanReadableDiskSpaceMax)
-		}
-	}
-	if servicePlanParams.diskSizeMBStep != 0 {
-		if (requestedDiskSizeMB-servicePlanParams.diskSizeMBDefault)%servicePlanParams.diskSizeMBStep != 0 {
-			return fmt.Errorf("requested disk size has to increase from: '%s' in increments of '%s'", humanReadableDiskSpaceDefault, humanReadableDiskSpaceStep)
-		}
-	}
-	return nil
-}
-
-func humanReadableByteSize(bsize int) string {
-	// we only allow GiB as unit and show decimal places to MiB precision, this should fix rounding issues
-	// when converting from mb to human readable and back
-	var suffixes = []string{"B", "KiB", "MiB", "GiB"}
-
-	return units.CustomSize("%.12g%s", float64(bsize), 1024.0, suffixes)
 }

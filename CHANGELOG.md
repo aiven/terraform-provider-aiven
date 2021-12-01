@@ -8,6 +8,7 @@ nav_order: 1
 - Add data source support for `aiven_billing_group`
 - Sync flink api
 - Add support for dynamic disk sizes in service creation and updates
+- Add support for Kafka service Confluent SR/REST to Karapace migration
 
 ## [2.3.2] - 2021-11-10
 - Fix bug in `resource_service_integration` that would lead to configs that are doubly applied, resulting in API errors

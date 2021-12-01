@@ -81,7 +81,7 @@ func TestAccAiven_pg(t *testing.T) {
 	t.Run("changing disk sizes", func(tt *testing.T) {
 		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-		resource.ParallelTest(tt, resource.TestCase{
+		resource.Test(tt, resource.TestCase{
 			PreCheck:          func() { testAccPreCheck(tt) },
 			ProviderFactories: testAccProviderFactories,
 			CheckDestroy:      testAccCheckAivenServiceResourceDestroy,
@@ -116,6 +116,33 @@ func TestAccAiven_pg(t *testing.T) {
 						resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
 					),
 				},
+			},
+		})
+	})
+
+	t.Run("deleting a disc size from the manifest", func(tt *testing.T) {
+		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
+		resource.Test(tt, resource.TestCase{
+			PreCheck:          func() { testAccPreCheck(tt) },
+			ProviderFactories: testAccProviderFactories,
+			CheckDestroy:      testAccCheckAivenServiceResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccPGResourceWithDiskSize(rName, "90GiB"),
+					Check: resource.ComposeTestCheckFunc(
+						testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
+						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+						resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
+						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
+						resource.TestCheckResourceAttr(resourceName, "disk_space", "90GiB"),
+						resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+					),
+				},
 				{
 					Config: testAccPGResourceWithoutDiskSize(rName),
 					Check: resource.ComposeTestCheckFunc(
@@ -133,6 +160,7 @@ func TestAccAiven_pg(t *testing.T) {
 				},
 			},
 		})
+
 	})
 }
 
@@ -149,19 +177,19 @@ func testAccPGResourceWithDiskSize(name, diskSize string) string {
 			service_name = "test-acc-sr-%s"
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
-      disk_space = "%s"
+     		disk_space = "%s"
 
-      pg_user_config {
-        public_access {
-          pg = true
-          prometheus = false
-        }
-
-        pg {
-          idle_in_transaction_session_timeout = 900
-          log_min_duration_statement = -1
-        }
-      }
+			pg_user_config {
+				public_access {
+					pg = true
+					prometheus = false
+				}
+				
+				pg {
+					idle_in_transaction_session_timeout = 900
+					log_min_duration_statement = -1
+				}
+			}
     }
 
     data "aiven_pg" "service" {
@@ -187,18 +215,18 @@ func testAccPGResourceWithoutDiskSize(name string) string {
 			maintenance_window_dow = "monday"
 			maintenance_window_time = "10:00:00"
 
-      pg_user_config {
-        public_access {
-          pg = true
-          prometheus = false
-        }
-
-        pg {
-          idle_in_transaction_session_timeout = 900
-          log_min_duration_statement = -1
-        }
-      }
-    }
+		  	pg_user_config {
+				public_access {
+				  pg = true
+				  prometheus = false
+				}
+	
+				pg {
+				  idle_in_transaction_session_timeout = 900
+				  log_min_duration_statement = -1
+				}
+			}
+		}	
 
     data "aiven_pg" "service" {
       service_name = aiven_pg.bar.service_name

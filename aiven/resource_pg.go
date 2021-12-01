@@ -8,7 +8,9 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/pkg/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -82,7 +84,17 @@ func resourcePG() *schema.Resource {
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServicePGUpdate,
 		DeleteContext: resourceServiceDelete,
-		CustomizeDiff: resourceServiceCustomizeDiffWrapper(ServiceTypePG),
+		CustomizeDiff: customdiff.All(
+			customdiff.Sequence(
+				service.SetServiceTypeIfEmpty(ServiceTypePG),
+				customdiff.IfValueChange("disk_space",
+					service.DiskSpaceShouldNotBeEmpty,
+					service.CustomizeDiffCheckDiskSpace),
+			),
+			customdiff.IfValueChange("service_integrations",
+				service.ServiceIntegrationShouldNotBeEmpty,
+				service.CustomizeDiffServiceIntegrationAfterCreation),
+		),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceState,
 		},
@@ -103,12 +115,12 @@ func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("service", "pg", false, d)
 
 	if userConfig["pg_version"] != nil {
-		service, err := client.Services.Get(projectName, serviceName)
+		s, err := client.Services.Get(projectName, serviceName)
 		if err != nil {
 			return diag.Errorf("cannot get a service: %s", err)
 		}
 
-		if userConfig["pg_version"].(string) != service.UserConfig["pg_version"].(string) {
+		if userConfig["pg_version"].(string) != s.UserConfig["pg_version"].(string) {
 			t, err := client.ServiceTask.Create(projectName, serviceName, aiven.ServiceTaskRequest{
 				TargetVersion: userConfig["pg_version"].(string),
 				TaskType:      "upgrade_check",

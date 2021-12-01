@@ -159,12 +159,6 @@ func Provider() *schema.Provider {
 	return p
 }
 
-// either *schema.ResourceState or *schema.ResourceDiff
-type resourceStateOrResourceDiff interface {
-	GetOk(key string) (interface{}, bool)
-	Get(key string) interface{}
-}
-
 func optionalString(d *schema.ResourceData, key string) string {
 	str, ok := d.Get(key).(string)
 	if !ok {

@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/pkg/service"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -41,7 +43,15 @@ func resourceOpensearch() *schema.Resource {
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,
 		DeleteContext: resourceServiceDelete,
-		CustomizeDiff: resourceServiceCustomizeDiffWrapper(ServiceTypeOpensearch),
+		CustomizeDiff: customdiff.All(
+			service.SetServiceTypeIfEmpty(ServiceTypeOpensearch),
+			customdiff.IfValueChange("service_integrations",
+				service.ServiceIntegrationShouldNotBeEmpty,
+				service.CustomizeDiffServiceIntegrationAfterCreation),
+			customdiff.IfValueChange("disk_space",
+				service.DiskSpaceShouldNotBeEmpty,
+				service.CustomizeDiffCheckDiskSpace),
+		),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceElasticsearchState,
 		},
@@ -62,7 +72,7 @@ func resourceElasticsearchState(ctx context.Context, d *schema.ResourceData, m i
 	}
 
 	projectName, serviceName := splitResourceID2(d.Id())
-	service, err := client.Services.Get(projectName, serviceName)
+	s, err := client.Services.Get(projectName, serviceName)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +80,7 @@ func resourceElasticsearchState(ctx context.Context, d *schema.ResourceData, m i
 	// Hybrid Opensearch service an Aiven service type Elasticsearch but has
 	// an opensearch_version user configuration option that indicates that this
 	// is a hybrid opensearch service
-	if _, ok := service.UserConfig["opensearch_version"]; ok && service.Type == ServiceTypeElasticsearch {
+	if _, ok := s.UserConfig["opensearch_version"]; ok && s.Type == ServiceTypeElasticsearch {
 		if err := d.Set("service_type", ServiceTypeOpensearch); err != nil {
 			return nil, err
 		}
