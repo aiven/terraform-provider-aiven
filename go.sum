@@ -66,6 +66,8 @@ github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7l
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/aiven/aiven-go-client v1.7.1-0.20211129122741-e4a6194eb33e h1:pQQVSx0vvWiGoRH4vsIwD0MBxYvNfCJFCeelD33zH/k=
 github.com/aiven/aiven-go-client v1.7.1-0.20211129122741-e4a6194eb33e/go.mod h1:3+OtpccynSr5xvSGfn96jVM9dBUAr52HXlaZJi/Mz5o=
+github.com/aiven/aiven-go-client v1.7.1-0.20211210085659-e127be44cfcb h1:qmauykLv8poyUCGbznk7pUYScvnp68jBsKZMZfSvxSM=
+github.com/aiven/aiven-go-client v1.7.1-0.20211210085659-e127be44cfcb/go.mod h1:3+OtpccynSr5xvSGfn96jVM9dBUAr52HXlaZJi/Mz5o=
 github.com/andybalholm/crlf v0.0.0-20171020200849-670099aa064f/go.mod h1:k8feO4+kXDxro6ErPXBRTJ/ro2mf0SsFG8s7doP9kJE=
 github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239/go.mod h1:2FmKhYUyUczH0OGQWaF5ceTx0UBShxjsH6f8oGKYe2c=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=

@@ -4,7 +4,11 @@ parent: README
 nav_order: 1
 ---# Changelog
 
-## [2.4.0] - not yet released
+
+## [2.4.1] - not yet released
+- Add possibility to dissociate project from an account
+
+## [2.4.0] - 2021-12-01
 - Add data source support for `aiven_billing_group`
 - Sync flink api
 - Add support for dynamic disk sizes in service creation and updates
@@ -25,8 +29,8 @@ nav_order: 1
 - Add support for `oneOf` user configuration option type
 - Add Debug mode and documentation
 - Add a new field `add_account_owners_admin_access` to the `aiven_project` resource
-- Add Azure Privatelink support
-- Fix typo in Opensearch resource docs
+- Add Azure PrivateLink support
+- Fix typo in OpenSearch resource docs
 
 ## [2.2.1] - 2021-09-24
 - Add support for new `aiven_mirrormaker_replication_flow` fields
