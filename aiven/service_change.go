@@ -50,11 +50,13 @@ func (w *ServiceChangeWaiter) RefreshFunc() resource.StateRefreshFunc {
 		}
 
 		if state == aivenTargetState && !backupsReady(service) {
-			state = aivenServicesStartingState
+			log.Printf("[DEBUG] service reports as %s, still waiting for service backups", state)
+			return service, aivenServicesStartingState, nil
 		}
 
 		if state == aivenTargetState && !grafanaReady(service) {
-			state = aivenServicesStartingState
+			log.Printf("[DEBUG] service reports as %s, still waiting for grafana", state)
+			return service, aivenServicesStartingState, nil
 		}
 
 		return service, state, nil
@@ -71,14 +73,14 @@ func grafanaReady(service *aiven.Service) bool {
 	if ok {
 		f := ipFilters.([]interface{})
 		if len(f) > 1 {
-			log.Printf("[DEBUG] grafana serivce has `%+v` ip filters, and avaiability checks will be skipped", ipFilters)
+			log.Printf("[DEBUG] grafana serivce has `%+v` ip filters, and availability checks will be skipped", ipFilters)
 
 			return true
 		}
 
 		if len(f) == 1 {
 			if f[0] != "0.0.0.0/0" {
-				log.Printf("[DEBUG] grafana serivce has `%+v` ip filters, and avaiability checks will be skipped", ipFilters)
+				log.Printf("[DEBUG] grafana serivce has `%+v` ip filters, and availability checks will be skipped", ipFilters)
 
 				return true
 			}
