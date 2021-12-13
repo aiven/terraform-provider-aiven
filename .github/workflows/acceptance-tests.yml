@@ -30,6 +30,7 @@ jobs:
       env:
         AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
         AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME }} 
+        AIVEN_ACC_LONG: YES
 
     - uses: nick-invision/retry@v2
       if: always()
