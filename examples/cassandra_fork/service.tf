@@ -11,8 +11,7 @@ resource "aiven_cassandra" "cassandra-fork" {
   cloud_name = "google-europe-west1"
   plan = "startup-8"
   service_name = "forkedcassandra"
-  depends_on = ["aiven_casandra.cassandra-svc"]
   cassandra_user_config {
-    service_to_fork_from = aiven_casandra.cassandra-svc.service_name
+    service_to_fork_from = aiven_cassandra.cassandra-svc.service_name
   }
 }
