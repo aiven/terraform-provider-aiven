@@ -67,6 +67,18 @@ func TestAccAivenAccount_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "tenant_id", "aiven"),
 				),
 			},
+			{
+				Config: testAccAccountToProject(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("pr", "account_id"),
+				),
+			},
+			{
+				Config: testAccAccountProjectDissociate(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("pr", "account_id", ""),
+				),
+			},
 		},
 	})
 }
@@ -79,10 +91,41 @@ func testAccAccountResource(name string) string {
 
 		data "aiven_account" "account" {
   			name = aiven_account.foo.name
-
-			depends_on = [aiven_account.foo]
 		}
 		`, name)
+}
+
+func testAccAccountToProject(name string) string {
+	return fmt.Sprintf(`
+		resource "aiven_account" "foo" {
+			name = "test-acc-ac-%s"
+		}
+
+		resource "aiven_project" "bar" {
+			project = "test-acc-ac-%s"
+			account_id = aiven_account.foo.account_id
+		}
+
+		data "aiven_project" "pr" {
+  			project = aiven_project.bar.project
+		}
+		`, name, name)
+}
+
+func testAccAccountProjectDissociate(name string) string {
+	return fmt.Sprintf(`
+		resource "aiven_account" "foo" {
+			name = "test-acc-ac-%s"
+		}
+
+		resource "aiven_project" "bar" {
+			project = "test-acc-ac-%s"
+		}
+
+		data "aiven_project" "pr" {
+  			project = aiven_project.bar.project
+		}
+		`, name, name)
 }
 
 func testAccCheckAivenAccountResourceDestroy(s *terraform.State) error {
