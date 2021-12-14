@@ -197,7 +197,7 @@ func resourceProjectCreate(_ context.Context, d *schema.ResourceData, m interfac
 			CountryCode:                  countryCode,
 			Project:                      projectName,
 			TechnicalEmails:              contactEmailListForAPI(d, "technical_emails", true),
-			AccountId:                    d.Get("account_id").(string),
+			AccountId:                    optionalStringPointer(d, "account_id"),
 			BillingCurrency:              billingCurrency,
 			VatID:                        vatID,
 			UseSourceProjectBillingGroup: d.Get("use_source_project_billing_group").(bool),
