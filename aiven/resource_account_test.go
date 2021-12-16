@@ -70,13 +70,13 @@ func TestAccAivenAccount_basic(t *testing.T) {
 			{
 				Config: testAccAccountToProject(rName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("pr", "account_id"),
+					resource.TestCheckResourceAttrSet("data.aiven_project.pr", "account_id"),
 				),
 			},
 			{
 				Config: testAccAccountProjectDissociate(rName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("pr", "account_id", ""),
+					resource.TestCheckResourceAttr("data.aiven_project.pr", "account_id", ""),
 				),
 			},
 		},
