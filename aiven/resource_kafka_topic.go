@@ -302,14 +302,9 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 
 	d.SetId(buildResourceID(project, serviceName, topicName))
 
-	_, err = getTopic(ctx, d, m, true)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
 	// We do not call a Kafka Topic read here to speed up the performance.
-	// However, in the case of Kafka Topic resource getting a computed
-	// field in the future, a read operation should be called after creation.
+	// However, in the case of Kafka Topic resource getting a computed field
+	// in the future, a read operation should be called after creation.
 	return nil
 }
 
