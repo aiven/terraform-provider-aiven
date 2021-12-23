@@ -145,10 +145,6 @@ func TestAccAivenKafkaTopic(t *testing.T) {
 	})
 
 	t.Run("kafka topic many topics", func(tt *testing.T) {
-		if os.Getenv("AIVEN_ACC_LONG") == "" {
-			tt.Skip("Acceptance tests skipped unless env AIVEN_ACC_LONG set")
-		}
-
 		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 		resource.ParallelTest(tt, resource.TestCase{
 			PreCheck:          func() { testAccPreCheck(tt) },
