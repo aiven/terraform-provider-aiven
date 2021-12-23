@@ -5,7 +5,6 @@ package aiven
 import (
 	"fmt"
 	"log"
-	"sync"
 	"time"
 
 	"github.com/aiven/aiven-go-client"
@@ -25,7 +24,6 @@ type KafkaTopicAvailabilityWaiter struct {
 }
 
 var kafkaTopicAvailabilitySem = semaphore.NewWeighted(1)
-var warmingUpCacheOne sync.Once
 
 // RefreshFunc will call the Aiven client and refresh it's state.
 func (w *KafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
@@ -92,11 +90,7 @@ func (w *KafkaTopicAvailabilityWaiter) refresh() error {
 	}
 	defer kafkaTopicAvailabilitySem.Release(1)
 
-	// warming up cache
 	c := cache.GetTopicCache()
-	if err := w.warmUpCache(c); err != nil {
-		return err
-	}
 
 	// check if topic is already in cache
 	if _, ok := c.LoadByTopicName(w.Project, w.ServiceName, w.TopicName); ok {
@@ -147,23 +141,6 @@ func (w *KafkaTopicAvailabilityWaiter) v1Refresh(queue []string) error {
 		cache.GetTopicCache().StoreByProjectAndServiceName(w.Project, w.ServiceName, []*aiven.KafkaTopic{topic})
 	}
 	return nil
-}
-
-func (w *KafkaTopicAvailabilityWaiter) warmUpCache(c *cache.TopicCache) error {
-	var warmUpErr error
-	warmingUpCacheOne.Do(func() {
-		log.Printf("[DEBUG] Kafka Topic queue is empty, warming up cache!")
-		topics, err := w.Client.KafkaTopics.List(w.Project, w.ServiceName)
-		if err == nil {
-			for _, t := range topics {
-				c.AddToQueue(w.Project, w.ServiceName, t.TopicName)
-			}
-		} else {
-			warmUpErr = fmt.Errorf("unable to warm-up kafka topic cache %w", err)
-		}
-	})
-
-	return warmUpErr
 }
 
 // Conf sets up the configuration to refresh.
