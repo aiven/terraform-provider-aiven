@@ -143,10 +143,10 @@ func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData
 	if err := d.Set("saml_certificate", r.AuthenticationMethod.SAMLCertificate); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("saml_idp_url", r.AuthenticationMethod.SAMLCertificate); err != nil {
+	if err := d.Set("saml_idp_url", r.AuthenticationMethod.SAMLIdpUrl); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("saml_entity_id", r.AuthenticationMethod.SAMLCertificate); err != nil {
+	if err := d.Set("saml_entity_id", r.AuthenticationMethod.SAMLEntity); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("authentication_id", r.AuthenticationMethod.Id); err != nil {
