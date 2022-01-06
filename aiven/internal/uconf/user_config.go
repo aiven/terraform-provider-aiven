@@ -3,6 +3,7 @@
 package uconf
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
 	"strconv"
@@ -40,20 +41,27 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 		sensitive = true
 	}
 
-	var diffFunction schema.SchemaDiffSuppressFunc
+	var diffFunc schema.SchemaDiffSuppressFunc
 	if createOnly, ok := definition["createOnly"]; ok && createOnly.(bool) {
-		diffFunction = schemautil.CreateOnlyDiffSuppressFunc
+		diffFunc = schemautil.CreateOnlyDiffSuppressFunc
 	} else if valueType == "object" {
-		diffFunction = schemautil.EmptyObjectDiffSuppressFuncSkipArrays(GenerateTerraformUserConfigSchema(definition))
+		diffFunc = schemautil.EmptyObjectDiffSuppressFuncSkipArrays(GenerateTerraformUserConfigSchema(definition))
 	}
 
 	title := definition["title"].(string)
 
 	switch valueType {
 	case "string", "integer", "boolean", "number":
+		// HACK: only set default func for static_ips, eventually when we generate this statically
+		// we use the default from the api schema
+		var defaultFunc schema.SchemaDefaultFunc
+		if key == "static_ips" {
+			defaultFunc = func() (interface{}, error) { return "false", nil }
+		}
 		return &schema.Schema{
 			Description:      title,
-			DiffSuppressFunc: diffFunction,
+			DiffSuppressFunc: diffFunc,
+			DefaultFunc:      defaultFunc,
 			Optional:         true,
 			Sensitive:        sensitive,
 			Type:             schema.TypeString,
@@ -61,7 +69,7 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 	case "object":
 		return &schema.Schema{
 			Description:      title,
-			DiffSuppressFunc: diffFunction,
+			DiffSuppressFunc: diffFunc,
 			Elem:             &schema.Resource{Schema: GenerateTerraformUserConfigSchema(definition)},
 			MaxItems:         1,
 			Optional:         true,
@@ -86,23 +94,26 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 		if maxItemsFound {
 			maxItems = int(maxItemsVal.(float64))
 		}
-		var valueDiffFunction schema.SchemaDiffSuppressFunc
+		var (
+			valueDiffFunc schema.SchemaDiffSuppressFunc
+		)
+
 		if key == "ip_filter" {
-			diffFunction = schemautil.IpFilterArrayDiffSuppressFunc
-			valueDiffFunction = schemautil.IpFilterValueDiffSuppressFunc
+			diffFunc = schemautil.IpFilterArrayDiffSuppressFunc
+			valueDiffFunc = schemautil.IpFilterValueDiffSuppressFunc
 		}
 		var elem interface{}
 		if itemType == schema.TypeList {
 			elem = &schema.Resource{Schema: GenerateTerraformUserConfigSchema(itemDefinition)}
 		} else {
 			elem = &schema.Schema{
-				DiffSuppressFunc: valueDiffFunction,
+				DiffSuppressFunc: valueDiffFunc,
 				Type:             itemType,
 			}
 		}
 		return &schema.Schema{
 			Description:      title,
-			DiffSuppressFunc: diffFunction,
+			DiffSuppressFunc: diffFunc,
 			Elem:             elem,
 			MaxItems:         maxItems,
 			Optional:         true,
@@ -197,15 +208,17 @@ func convertAPIUserConfigToTerraformCompatibleFormat(
 		default:
 			switch value := apiValue.(type) {
 			case string:
-				terraformConfig[key] = apiValue
+				terraformConfig[key] = value
 			case bool:
-				terraformConfig[key] = strconv.FormatBool(apiValue.(bool))
+				terraformConfig[key] = strconv.FormatBool(value)
 			case float64:
-				terraformConfig[key] = strconv.FormatFloat(apiValue.(float64), 'f', -1, 64)
+				terraformConfig[key] = strconv.FormatFloat(value, 'f', -1, 64)
 			case float32:
-				terraformConfig[key] = strconv.FormatFloat(apiValue.(float64), 'f', -1, 32)
+				terraformConfig[key] = strconv.FormatFloat(float64(value), 'f', -1, 32)
 			case int:
-				terraformConfig[key] = strconv.Itoa(apiValue.(int))
+				terraformConfig[key] = strconv.Itoa(value)
+			case json.Number:
+				terraformConfig[key] = value.String()
 			case []interface{}:
 				if hasNestedUserConfigurationOptionItems(apiValue, schemaDefinition) {
 					var list []interface{}

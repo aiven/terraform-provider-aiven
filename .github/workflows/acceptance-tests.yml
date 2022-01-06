@@ -10,14 +10,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  acceptance_tests:
+  trigger:
     runs-on: ubuntu-20.04
     if: ${{ github.event.issue.pull_request && github.event.comment.body == '/acceptance_tests'}}
 
     steps:
-    - uses: actions/github-script@v4
+    - uses: actions/github-script@v5
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           const username = context.payload.sender.login;
           await github.teams.getMembershipForUserInOrg({
@@ -26,7 +25,7 @@ jobs:
             username: username,
           });
 
-    - uses: actions/github-script@v4
+    - uses: actions/github-script@v5
       id: sha
       with:
         result-encoding: string
@@ -39,6 +38,11 @@ jobs:
           });
           return pr.data.head.sha          
 
+  acceptance_tests:
+    needs: trigger
+    runs-on: ubuntu-20.04
+
+    steps:
     - uses: actions/checkout@v2
       with:
         ref: ${{ steps.sha.outputs.result }}

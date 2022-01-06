@@ -45,14 +45,20 @@ func resourceOpensearch() *schema.Resource {
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,
 		DeleteContext: resourceServiceDelete,
-		CustomizeDiff: customdiff.All(
+		CustomizeDiff: customdiff.Sequence(
 			service.SetServiceTypeIfEmpty(ServiceTypeOpensearch),
-			customdiff.IfValueChange("service_integrations",
-				service.ServiceIntegrationShouldNotBeEmpty,
-				service.CustomizeDiffServiceIntegrationAfterCreation),
 			customdiff.IfValueChange("disk_space",
 				service.DiskSpaceShouldNotBeEmpty,
-				service.CustomizeDiffCheckDiskSpace),
+				service.CustomizeDiffCheckDiskSpace,
+			),
+			customdiff.IfValueChange("service_integrations",
+				service.ServiceIntegrationShouldNotBeEmpty,
+				service.CustomizeDiffServiceIntegrationAfterCreation,
+			),
+			customdiff.Sequence(
+				service.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
+				service.CustomizeDiffCheckStaticIpDisassociation,
+			),
 		),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceElasticsearchState,
@@ -60,6 +66,7 @@ func resourceOpensearch() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
 			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
 		Schema: opensearchSchema(),

@@ -32,16 +32,22 @@ func resourceRedis() *schema.Resource {
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,
 		DeleteContext: resourceServiceDelete,
-		CustomizeDiff: customdiff.All(
+		CustomizeDiff: customdiff.Sequence(
 			customdiff.Sequence(
 				service.SetServiceTypeIfEmpty(ServiceTypeRedis),
 				customdiff.IfValueChange("disk_space",
 					service.DiskSpaceShouldNotBeEmpty,
-					service.CustomizeDiffCheckDiskSpace),
+					service.CustomizeDiffCheckDiskSpace,
+				),
 			),
 			customdiff.IfValueChange("service_integrations",
 				service.ServiceIntegrationShouldNotBeEmpty,
-				service.CustomizeDiffServiceIntegrationAfterCreation),
+				service.CustomizeDiffServiceIntegrationAfterCreation,
+			),
+			customdiff.Sequence(
+				service.CustomizeDiffCheckStaticIpDisassociation,
+				service.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
+			),
 		),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceState,
@@ -49,6 +55,7 @@ func resourceRedis() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
 			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
 		Schema: redisSchema(),

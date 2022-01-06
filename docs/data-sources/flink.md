@@ -53,7 +53,8 @@ data "aiven_flink" "flink" {
 - **service_type** (String) Aiven internal service type code
 - **service_uri** (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
 - **service_username** (String) Username used for connecting to the service, if applicable
-- **state** (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`.
+- **state** (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
+- **static_ips** (List of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 - **termination_protection** (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
 
 <a id="nestedatt--components"></a>

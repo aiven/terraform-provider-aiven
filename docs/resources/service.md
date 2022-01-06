@@ -46,6 +46,7 @@ The Service resource allows the creation and management of Aiven Services.
 - **project_vpc_id** (String) Identifier of the VPC the service should be in, if any
 - **redis_user_config** (Block List, Max: 1) Redis user configurable settings (see [below for nested schema](#nestedblock--redis_user_config))
 - **service_integrations** (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
+- **static_ips** (List of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 - **termination_protection** (Boolean) Prevent service from being deleted. It is recommended to have this enabled for all services.
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -1205,6 +1206,7 @@ Required:
 Optional:
 
 - **create** (String)
+- **delete** (String)
 - **update** (String)
 
 

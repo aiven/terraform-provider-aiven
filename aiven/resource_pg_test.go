@@ -81,7 +81,7 @@ func TestAccAiven_pg(t *testing.T) {
 	t.Run("changing disk sizes", func(tt *testing.T) {
 		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-		resource.Test(tt, resource.TestCase{
+		resource.ParallelTest(tt, resource.TestCase{
 			PreCheck:          func() { testAccPreCheck(tt) },
 			ProviderFactories: testAccProviderFactories,
 			CheckDestroy:      testAccCheckAivenServiceResourceDestroy,
@@ -91,7 +91,7 @@ func TestAccAiven_pg(t *testing.T) {
 					Check: resource.ComposeTestCheckFunc(
 						testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
 						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttrSet(resourceName, "state"),
+						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 						resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
@@ -107,7 +107,7 @@ func TestAccAiven_pg(t *testing.T) {
 					Check: resource.ComposeTestCheckFunc(
 						testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
 						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttrSet(resourceName, "state"),
+						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 						resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
@@ -125,7 +125,7 @@ func TestAccAiven_pg(t *testing.T) {
 	t.Run("deleting a disc size from the manifest", func(tt *testing.T) {
 		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-		resource.Test(tt, resource.TestCase{
+		resource.ParallelTest(tt, resource.TestCase{
 			PreCheck:          func() { testAccPreCheck(tt) },
 			ProviderFactories: testAccProviderFactories,
 			CheckDestroy:      testAccCheckAivenServiceResourceDestroy,
@@ -135,7 +135,7 @@ func TestAccAiven_pg(t *testing.T) {
 					Check: resource.ComposeTestCheckFunc(
 						testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
 						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttrSet(resourceName, "state"),
+						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 						resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
@@ -151,7 +151,7 @@ func TestAccAiven_pg(t *testing.T) {
 					Check: resource.ComposeTestCheckFunc(
 						testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
 						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttrSet(resourceName, "state"),
+						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 						resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
@@ -168,7 +168,7 @@ func TestAccAiven_pg(t *testing.T) {
 	t.Run("changing plan of a service when disc size is not set", func(tt *testing.T) {
 		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-		resource.Test(tt, resource.TestCase{
+		resource.ParallelTest(tt, resource.TestCase{
 			PreCheck:          func() { testAccPreCheck(tt) },
 			ProviderFactories: testAccProviderFactories,
 			CheckDestroy:      testAccCheckAivenServiceResourceDestroy,
@@ -193,7 +193,7 @@ func TestAccAiven_pg(t *testing.T) {
 					Check: resource.ComposeTestCheckFunc(
 						testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
 						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "state", "REBALANCING"),
+						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 						resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
@@ -206,6 +206,69 @@ func TestAccAiven_pg(t *testing.T) {
 			},
 		})
 	})
+
+	t.Run("pg with static ips", func(tt *testing.T) {
+		if len(os.Getenv("TEST_ACC_RUN_STATIC_IP_CHECKS")) == 0 {
+			tt.Skip("'TEST_ACC_RUN_STATIC_IP_CHECKS' is not set, skipping this test")
+		}
+		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+		resource.ParallelTest(tt, resource.TestCase{
+			PreCheck:          func() { testAccPreCheck(tt) },
+			ProviderFactories: testAccProviderFactories,
+			CheckDestroy:      testAccCheckAivenServiceResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccPGWithStaticIps(rName),
+					Check: resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+						resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
+						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
+						resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
+						resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+						resource.TestCheckResourceAttrSet(resourceName, "static_ips"),
+					),
+				},
+			},
+		})
+	})
+}
+
+func testAccPGWithStaticIps(name string) string {
+	return fmt.Sprintf(`
+		data "aiven_project" "foo" {
+		  project = "%s"
+		}
+		
+		resource "aiven_static_ip" "ips" {
+		  count      = 2
+		  project    = data.aiven_project.foo.project
+		  cloud_name = "google-europe-west1"
+		}
+		
+		resource "aiven_pg" "bar" {
+		  project                 = data.aiven_project.foo.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-4"
+		  service_name            = "test-acc-sr-%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		  static_ips              = toset(aiven_static_ip.ips[*].static_ip_address_id)
+		
+		  pg_user_config {
+		    static_ips = true
+		  }
+		}
+		
+		data "aiven_pg" "service" {
+		  service_name = aiven_pg.bar.service_name
+		  project      = aiven_pg.bar.project
+		
+		  depends_on = [aiven_pg.bar]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
 func testAccPGResourceWithDiskSize(name, diskSize string) string {

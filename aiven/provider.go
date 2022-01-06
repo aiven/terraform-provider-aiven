@@ -129,6 +129,7 @@ func Provider() *schema.Provider {
 			"aiven_flink":                          resourceFlink(),
 			"aiven_flink_table":                    resourceFlinkTable(),
 			"aiven_flink_job":                      resourceFlinkJob(),
+			"aiven_static_ip":                      resourceStaticIP(),
 
 			// clickhouse
 			"aiven_clickhouse":          resourceClickhouse(),
