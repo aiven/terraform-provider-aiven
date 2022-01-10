@@ -126,186 +126,186 @@ func TestAccAivenService_pg(t *testing.T) {
 
 func testAccPGServiceResource(name string) string {
 	return fmt.Sprintf(`
-    data "aiven_project" "foo-pg" {
-      project = "%s"
-    }
-
-    resource "aiven_pg" "bar-pg" {
-      project = data.aiven_project.foo-pg.project
-      cloud_name = "google-europe-west1"
-      plan = "startup-4"
-      service_name = "test-acc-sr-%s"
-      maintenance_window_dow = "monday"
-      maintenance_window_time = "10:00:00"
-
-      pg_user_config {
-        public_access {
-          pg = true
-          prometheus = false
-        }
-
-        pg {
-          idle_in_transaction_session_timeout = 900
-        }
-      }
-    }
-
-    data "aiven_pg" "service-pg" {
-      service_name = aiven_pg.bar-pg.service_name
-      project = aiven_pg.bar-pg.project
-
-      depends_on = [aiven_pg.bar-pg]
-    }
-    `, os.Getenv("AIVEN_PROJECT_NAME"), name)
+		data "aiven_project" "foo-pg" {
+		  project = "%s"
+		}
+		
+		resource "aiven_pg" "bar-pg" {
+		  project                 = data.aiven_project.foo-pg.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-4"
+		  service_name            = "test-acc-sr-%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		
+		  pg_user_config {
+		    public_access {
+		      pg         = true
+		      prometheus = false
+		    }
+		
+		    pg {
+		      idle_in_transaction_session_timeout = 900
+		    }
+		  }
+		}
+		
+		data "aiven_pg" "service-pg" {
+		  service_name = aiven_pg.bar-pg.service_name
+		  project      = aiven_pg.bar-pg.project
+		
+		  depends_on = [aiven_pg.bar-pg]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
 func testAccPGServiceCustomTimeoutsResource(name string) string {
 	return fmt.Sprintf(`
-    data "aiven_project" "foo-pg" {
-      project = "%s"
-    }
-
-    resource "aiven_pg" "bar-pg" {
-      project = data.aiven_project.foo-pg.project
-      cloud_name = "google-europe-west1"
-      plan = "startup-4"
-      service_name = "test-acc-sr-%s"
-      maintenance_window_dow = "monday"
-      maintenance_window_time = "10:00:00"
-
-      timeouts {
-        create = "25m"
-        update = "30m"
-      }
-
-      pg_user_config {
-        public_access {
-          pg = true
-          prometheus = false
-        }
-
-        pg {
-          idle_in_transaction_session_timeout = 900
-        }
-      }
-    }
-
-    data "aiven_pg" "service-pg" {
-      service_name = aiven_pg.bar-pg.service_name
-      project = aiven_pg.bar-pg.project
-
-      depends_on = [aiven_pg.bar-pg]
-    }
-    `, os.Getenv("AIVEN_PROJECT_NAME"), name)
+		data "aiven_project" "foo-pg" {
+		  project = "%s"
+		}
+		
+		resource "aiven_pg" "bar-pg" {
+		  project                 = data.aiven_project.foo-pg.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-4"
+		  service_name            = "test-acc-sr-%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		
+		  timeouts {
+		    create = "25m"
+		    update = "30m"
+		  }
+		
+		  pg_user_config {
+		    public_access {
+		      pg         = true
+		      prometheus = false
+		    }
+		
+		    pg {
+		      idle_in_transaction_session_timeout = 900
+		    }
+		  }
+		}
+		
+		data "aiven_pg" "service-pg" {
+		  service_name = aiven_pg.bar-pg.service_name
+		  project      = aiven_pg.bar-pg.project
+		
+		  depends_on = [aiven_pg.bar-pg]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
 func testAccPGTerminationProtectionServiceResource(name string) string {
 	return fmt.Sprintf(`
-    data "aiven_project" "foo-pg" {
-      project = "%s"
-    }
-
-    resource "aiven_pg" "bar-pg" {
-      project = data.aiven_project.foo-pg.project
-      cloud_name = "google-europe-west1"
-      plan = "startup-4"
-      service_name = "test-acc-sr-%s"
-      maintenance_window_dow = "monday"
-      maintenance_window_time = "10:00:00"
-      termination_protection = true
-
-      pg_user_config {
-        public_access {
-          pg = true
-          prometheus = false
-        }
-
-        pg {
-          idle_in_transaction_session_timeout = 900
-        }
-      }
-    }
-
-    data "aiven_pg" "service-pg" {
-      service_name = aiven_pg.bar-pg.service_name
-      project = aiven_pg.bar-pg.project
-
-      depends_on = [aiven_pg.bar-pg]
-    }
-    `, os.Getenv("AIVEN_PROJECT_NAME"), name)
+		data "aiven_project" "foo-pg" {
+		  project = "%s"
+		}
+		
+		resource "aiven_pg" "bar-pg" {
+		  project                 = data.aiven_project.foo-pg.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-4"
+		  service_name            = "test-acc-sr-%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		  termination_protection  = true
+		
+		  pg_user_config {
+		    public_access {
+		      pg         = true
+		      prometheus = false
+		    }
+		
+		    pg {
+		      idle_in_transaction_session_timeout = 900
+		    }
+		  }
+		}
+		
+		data "aiven_pg" "service-pg" {
+		  service_name = aiven_pg.bar-pg.service_name
+		  project      = aiven_pg.bar-pg.project
+		
+		  depends_on = [aiven_pg.bar-pg]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
 func testAccPGReadReplicaServiceResource(name string) string {
 	return fmt.Sprintf(`
-    data "aiven_project" "foo-pg" {
-      project = "%s"
-    }
-
-    resource "aiven_pg" "bar-pg" {
-      project = data.aiven_project.foo-pg.project
-      cloud_name = "google-europe-west1"
-      plan = "startup-4"
-      service_name = "test-acc-sr-%s"
-      maintenance_window_dow = "monday"
-      maintenance_window_time = "10:00:00"
-
-      pg_user_config {
-        public_access {
-          pg = true
-          prometheus = false
-        }
-
-        pg {
-          idle_in_transaction_session_timeout = 900
-        }
-      }
-    }
-
-    resource "aiven_pg" "bar-replica" {
-      project = data.aiven_project.foo-pg.project
-      cloud_name = "google-europe-west1"
-      plan = "startup-4"
-      service_name = "test-acc-sr-repica-%s"
-      maintenance_window_dow = "monday"
-      maintenance_window_time = "10:00:00"
-
-      pg_user_config {
-        backup_hour = 19
-        backup_minute = 30
-        public_access {
-          pg = true
-          prometheus = false
-        }
-
-        pg {
-          idle_in_transaction_session_timeout = 900
-        }
-      }
-
-      service_integrations {
-        integration_type = "read_replica"
-        source_service_name = aiven_pg.bar-pg.service_name
-      }
-
-       depends_on = [aiven_pg.bar-pg]
-    }
-
-    resource "aiven_service_integration" "pg-readreplica" {
-      project = data.aiven_project.foo-pg.project
-      integration_type = "read_replica"
-      source_service_name = aiven_pg.bar-pg.service_name
-      destination_service_name = aiven_pg.bar-replica.service_name
-
-      depends_on = [aiven_pg.bar-replica]
-    }
-
-    data "aiven_pg" "service-pg" {
-      service_name = aiven_pg.bar-pg.service_name
-      project = aiven_pg.bar-pg.project
-
-      depends_on = [aiven_pg.bar-pg]
-    }
-    `, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+		data "aiven_project" "foo-pg" {
+		  project = "%s"
+		}
+		
+		resource "aiven_pg" "bar-pg" {
+		  project                 = data.aiven_project.foo-pg.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-4"
+		  service_name            = "test-acc-sr-%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		
+		  pg_user_config {
+		    public_access {
+		      pg         = true
+		      prometheus = false
+		    }
+		
+		    pg {
+		      idle_in_transaction_session_timeout = 900
+		    }
+		  }
+		}
+		
+		resource "aiven_pg" "bar-replica" {
+		  project                 = data.aiven_project.foo-pg.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-4"
+		  service_name            = "test-acc-sr-repica-%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		
+		  pg_user_config {
+		    backup_hour   = 19
+		    backup_minute = 30
+		    public_access {
+		      pg         = true
+		      prometheus = false
+		    }
+		
+		    pg {
+		      idle_in_transaction_session_timeout = 900
+		    }
+		  }
+		
+		  service_integrations {
+		    integration_type    = "read_replica"
+		    source_service_name = aiven_pg.bar-pg.service_name
+		  }
+		
+		  depends_on = [aiven_pg.bar-pg]
+		}
+		
+		resource "aiven_service_integration" "pg-readreplica" {
+		  project                  = data.aiven_project.foo-pg.project
+		  integration_type         = "read_replica"
+		  source_service_name      = aiven_pg.bar-pg.service_name
+		  destination_service_name = aiven_pg.bar-replica.service_name
+		
+		  depends_on = [aiven_pg.bar-replica]
+		}
+		
+		data "aiven_pg" "service-pg" {
+		  service_name = aiven_pg.bar-pg.service_name
+		  project      = aiven_pg.bar-pg.project
+		
+		  depends_on = [aiven_pg.bar-pg]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccCheckAivenServiceTerminationProtection(n string) resource.TestCheckFunc {

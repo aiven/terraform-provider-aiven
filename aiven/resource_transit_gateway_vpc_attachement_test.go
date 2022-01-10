@@ -41,39 +41,39 @@ func TestAccAivenTransitGatewayVPCAttachment_basic(t *testing.T) {
 func testAccTransitGatewayVPCAttachmentResource() string {
 	return fmt.Sprintf(`
 		data "aiven_project" "foo" {
-			project = "%s"
+		  project = "%s"
 		}
-
+		
 		resource "aiven_project_vpc" "bar" {
-			project = data.aiven_project.foo.project
-			cloud_name = "aws-%s"
-			network_cidr = "10.0.0.0/24"
-
-			timeouts {
-				create = "5m"
-			}
+		  project      = data.aiven_project.foo.project
+		  cloud_name   = "aws-%s"
+		  network_cidr = "10.0.0.0/24"
+		
+		  timeouts {
+		    create = "5m"
+		  }
 		}
-
+		
 		resource "aiven_transit_gateway_vpc_attachment" "foo" {
-			vpc_id = aiven_project_vpc.bar.id
-			peer_cloud_account = "%s"
-			peer_vpc = "%s"
-			peer_region = "%s"
-			user_peer_network_cidrs = [ "172.31.0.0/16" ]
-
-			timeouts {
-				create = "10m"
-			}
+		  vpc_id                  = aiven_project_vpc.bar.id
+		  peer_cloud_account      = "%s"
+		  peer_vpc                = "%s"
+		  peer_region             = "%s"
+		  user_peer_network_cidrs = ["172.31.0.0/16"]
+		
+		  timeouts {
+		    create = "10m"
+		  }
 		}
-
+		
 		data "aiven_transit_gateway_vpc_attachment" "att" {
-			vpc_id = aiven_transit_gateway_vpc_attachment.foo.vpc_id
-			peer_cloud_account = aiven_transit_gateway_vpc_attachment.foo.peer_cloud_account
-			peer_vpc = aiven_transit_gateway_vpc_attachment.foo.peer_vpc
-
-			depends_on = [aiven_transit_gateway_vpc_attachment.foo]
-		}
-		`, os.Getenv("AIVEN_PROJECT_NAME"),
+		  vpc_id             = aiven_transit_gateway_vpc_attachment.foo.vpc_id
+		  peer_cloud_account = aiven_transit_gateway_vpc_attachment.foo.peer_cloud_account
+		  peer_vpc           = aiven_transit_gateway_vpc_attachment.foo.peer_vpc
+		
+		  depends_on = [aiven_transit_gateway_vpc_attachment.foo]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"),
 		os.Getenv("AWS_REGION"),
 		os.Getenv("AWS_ACCOUNT_ID"),
 		os.Getenv("AWS_TRANSIT_GATEWAY_ID"),

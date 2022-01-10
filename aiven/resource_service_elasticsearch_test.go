@@ -46,47 +46,47 @@ func TestAccAivenService_es(t *testing.T) {
 func testAccElasticsearchServiceResource(name string) string {
 	return fmt.Sprintf(`
 		data "aiven_project" "foo-es" {
-			project = "%s"
+		  project = "%s"
 		}
 		
 		resource "aiven_elasticsearch" "bar-es" {
-			project = data.aiven_project.foo-es.project
-			cloud_name = "google-europe-west1"
-			plan = "startup-4"
-			service_name = "test-acc-sr-%s"
-			maintenance_window_dow = "monday"
-			maintenance_window_time = "10:00:00"
-			
-			elasticsearch_user_config {
-				kibana {
-					enabled = true
-					elasticsearch_request_timeout = 30000
-				}
-
-				public_access {
-					elasticsearch = true
-					kibana = true
-				}
-
-				index_patterns {
-					pattern = "logs_*_foo_*"
-					max_index_count = 3
-				}
-
-				index_patterns {
-					pattern = "logs_*_bar_*"
-					max_index_count = 15
-				}
-			}
+		  project                 = data.aiven_project.foo-es.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-4"
+		  service_name            = "test-acc-sr-%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		
+		  elasticsearch_user_config {
+		    kibana {
+		      enabled                       = true
+		      elasticsearch_request_timeout = 30000
+		    }
+		
+		    public_access {
+		      elasticsearch = true
+		      kibana        = true
+		    }
+		
+		    index_patterns {
+		      pattern         = "logs_*_foo_*"
+		      max_index_count = 3
+		    }
+		
+		    index_patterns {
+		      pattern         = "logs_*_bar_*"
+		      max_index_count = 15
+		    }
+		  }
 		}
 		
 		data "aiven_elasticsearch" "service-es" {
-			service_name = aiven_elasticsearch.bar-es.service_name
-			project = aiven_elasticsearch.bar-es.project
-
-			depends_on = [aiven_elasticsearch.bar-es]
-		}
-		`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+		  service_name = aiven_elasticsearch.bar-es.service_name
+		  project      = aiven_elasticsearch.bar-es.project
+		
+		  depends_on = [aiven_elasticsearch.bar-es]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
 func testAccCheckAivenServiceESAttributes(n string) resource.TestCheckFunc {

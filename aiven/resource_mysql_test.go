@@ -42,34 +42,34 @@ func TestAccAiven_mysql(t *testing.T) {
 func testAccMysqlResource(name string) string {
 	return fmt.Sprintf(`
 		data "aiven_project" "foo" {
-			project = "%s"
+		  project = "%s"
 		}
 		
 		resource "aiven_mysql" "bar" {
-			project = data.aiven_project.foo.project
-			cloud_name = "google-europe-west1"
-			plan = "startup-4"
-			service_name = "test-acc-sr-%s"
-			maintenance_window_dow = "monday"
-			maintenance_window_time = "10:00:00"
-			
-			mysql_user_config {
-				mysql {
-					sql_mode = "ANSI,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE"
-					sql_require_primary_key = true
-				}
-
-				public_access {
-					mysql = true
-				}
-			}
+		  project                 = data.aiven_project.foo.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-4"
+		  service_name            = "test-acc-sr-%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		
+		  mysql_user_config {
+		    mysql {
+		      sql_mode                = "ANSI,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE"
+		      sql_require_primary_key = true
+		    }
+		
+		    public_access {
+		      mysql = true
+		    }
+		  }
 		}
 		
 		data "aiven_mysql" "service" {
-			service_name = aiven_mysql.bar.service_name
-			project = aiven_mysql.bar.project
-
-			depends_on = [aiven_mysql.bar]
-		}
-		`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+		  service_name = aiven_mysql.bar.service_name
+		  project      = aiven_mysql.bar.project
+		
+		  depends_on = [aiven_mysql.bar]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name)
 }

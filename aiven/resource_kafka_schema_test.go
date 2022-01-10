@@ -160,192 +160,192 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 func testAccKafkaSchemaResource(name string) string {
 	return fmt.Sprintf(`
 		data "aiven_project" "foo" {
-			project = "%s"
+		  project = "%s"
 		}
-
+		
 		resource "aiven_kafka" "bar" {
-			project = data.aiven_project.foo.project
-			cloud_name = "google-europe-west1"
-			plan = "business-4"
-			service_name = "test-acc-sr-%s"
-			maintenance_window_dow = "monday"
-			maintenance_window_time = "10:00:00"
-			
-			kafka_user_config {
-				schema_registry = true
-
-				kafka {
-				  group_max_session_timeout_ms = 70000
-				  log_retention_bytes = 1000000000
-				}
-			}
+		  project                 = data.aiven_project.foo.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "business-4"
+		  service_name            = "test-acc-sr-%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		
+		  kafka_user_config {
+		    schema_registry = true
+		
+		    kafka {
+		      group_max_session_timeout_ms = 70000
+		      log_retention_bytes          = 1000000000
+		    }
+		  }
 		}
 		
 		resource "aiven_kafka_schema_configuration" "foo" {
-			project = aiven_kafka.bar.project
-			service_name = aiven_kafka.bar.service_name
-			compatibility_level = "BACKWARD"
+		  project             = aiven_kafka.bar.project
+		  service_name        = aiven_kafka.bar.service_name
+		  compatibility_level = "BACKWARD"
 		}
-
+		
 		resource "aiven_kafka_schema" "foo" {
-			project = aiven_kafka_schema_configuration.foo.project
-			service_name = aiven_kafka_schema_configuration.foo.service_name
-			subject_name = "kafka-schema-%s"
-			
-			schema = <<EOT
-				{
-					"doc": "example",
-					"fields": [{
-						"default": 5,
-						"doc": "my test number",
-						"name": "test",
-						"namespace": "test",
-						"type": "int"
-					}],
-					"name": "example",
-					"namespace": "example",
-					"type": "record"
-				}
-			EOT
+		  project      = aiven_kafka_schema_configuration.foo.project
+		  service_name = aiven_kafka_schema_configuration.foo.service_name
+		  subject_name = "kafka-schema-%s"
+		
+		  schema = <<EOT
+		{
+		"doc": "example",
+		"fields": [{
+		"default": 5,
+		"doc": "my test number",
+		"name": "test",
+		"namespace": "test",
+		"type": "int"
+		}],
+		"name": "example",
+		"namespace": "example",
+		"type": "record"
 		}
-
+		EOT
+		}
+		
 		data "aiven_kafka_schema" "schema" {
-			project = aiven_kafka_schema.foo.project
-			service_name = aiven_kafka_schema.foo.service_name
-			subject_name = aiven_kafka_schema.foo.subject_name
-
-			depends_on = [aiven_kafka_schema.foo]
-		}
-		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+		  project      = aiven_kafka_schema.foo.project
+		  service_name = aiven_kafka_schema.foo.service_name
+		  subject_name = aiven_kafka_schema.foo.subject_name
+		
+		  depends_on = [aiven_kafka_schema.foo]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccKafkaSchemaResourceInvalidUpdate(name string) string {
 	return fmt.Sprintf(`
 		data "aiven_project" "foo" {
-			project = "%s"
+		  project = "%s"
 		}
-
+		
 		resource "aiven_kafka" "bar" {
-			project = data.aiven_project.foo.project
-			cloud_name = "google-europe-west1"
-			plan = "business-4"
-			service_name = "test-acc-sr-%s"
-			maintenance_window_dow = "monday"
-			maintenance_window_time = "10:00:00"
-			kafka_user_config {
-				schema_registry = true
-
-				kafka {
-				  group_max_session_timeout_ms = 70000
-				  log_retention_bytes = 1000000000
-				}
-			}
+		  project                 = data.aiven_project.foo.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "business-4"
+		  service_name            = "test-acc-sr-%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		  kafka_user_config {
+		    schema_registry = true
+		
+		    kafka {
+		      group_max_session_timeout_ms = 70000
+		      log_retention_bytes          = 1000000000
+		    }
+		  }
 		}
-
+		
 		resource "aiven_kafka_schema_configuration" "foo" {
-			project = aiven_kafka.bar.project
-			service_name = aiven_kafka.bar.service_name
-			compatibility_level = "BACKWARD"
+		  project             = aiven_kafka.bar.project
+		  service_name        = aiven_kafka.bar.service_name
+		  compatibility_level = "BACKWARD"
 		}
-
+		
 		resource "aiven_kafka_schema" "foo" {
-			project = aiven_kafka_schema_configuration.foo.project
-			service_name = aiven_kafka_schema_configuration.foo.service_name
-			subject_name = "kafka-schema-%s"
-
-			schema = <<EOT
-				{
-					"doc": "example",
-					"fields": [{
-						"default": "foo",
-						"doc": "my test string",
-						"name": "test",
-						"namespace": "test",
-						"type": "string"
-					}],
-					"name": "example",
-					"namespace": "example",
-					"type": "record"
-				}
-			EOT
+		  project      = aiven_kafka_schema_configuration.foo.project
+		  service_name = aiven_kafka_schema_configuration.foo.service_name
+		  subject_name = "kafka-schema-%s"
+		
+		  schema = <<EOT
+		{
+		"doc": "example",
+		"fields": [{
+		"default": "foo",
+		"doc": "my test string",
+		"name": "test",
+		"namespace": "test",
+		"type": "string"
+		}],
+		"name": "example",
+		"namespace": "example",
+		"type": "record"
 		}
-
+		EOT
+		}
+		
 		data "aiven_kafka_schema" "schema" {
-			project = aiven_kafka_schema.foo.project
-			service_name = aiven_kafka_schema.foo.service_name
-			subject_name = aiven_kafka_schema.foo.subject_name
-
-			depends_on = [aiven_kafka_schema.foo]
-		}
-		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+		  project      = aiven_kafka_schema.foo.project
+		  service_name = aiven_kafka_schema.foo.service_name
+		  subject_name = aiven_kafka_schema.foo.subject_name
+		
+		  depends_on = [aiven_kafka_schema.foo]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccKafkaSchemaResourceGoodUpdate(name string) string {
 	return fmt.Sprintf(`
 		data "aiven_project" "foo" {
-			project = "%s"
+		  project = "%s"
 		}
-
+		
 		resource "aiven_kafka" "bar" {
-			project = data.aiven_project.foo.project
-			cloud_name = "google-europe-west1"
-			plan = "business-4"
-			service_name = "test-acc-sr-%s"
-			maintenance_window_dow = "monday"
-			maintenance_window_time = "10:00:00"
-			kafka_user_config {
-				schema_registry = true
-
-				kafka {
-				  group_max_session_timeout_ms = 70000
-				  log_retention_bytes = 1000000000
-				}
-			}
+		  project                 = data.aiven_project.foo.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "business-4"
+		  service_name            = "test-acc-sr-%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		  kafka_user_config {
+		    schema_registry = true
+		
+		    kafka {
+		      group_max_session_timeout_ms = 70000
+		      log_retention_bytes          = 1000000000
+		    }
+		  }
 		}
-
+		
 		resource "aiven_kafka_schema_configuration" "foo" {
-			project = aiven_kafka.bar.project
-			service_name = aiven_kafka.bar.service_name
-			compatibility_level = "BACKWARD"
+		  project             = aiven_kafka.bar.project
+		  service_name        = aiven_kafka.bar.service_name
+		  compatibility_level = "BACKWARD"
 		}
-
+		
 		resource "aiven_kafka_schema" "foo" {
-			project = aiven_kafka_schema_configuration.foo.project
-			service_name = aiven_kafka_schema_configuration.foo.service_name
-			subject_name = "kafka-schema-%s"
-
-			schema = <<EOT
-				{
-					"doc": "example",
-					"fields": [{
-						"default": 5,
-						"doc": "my test number",
-						"name": "test",
-						"namespace": "test",
-						"type": "int"
-				  },{
-						"default": "str",
-						"doc": "my test string",
-						"name": "test_2",
-						"namespace": "test",
-						"type": "string"
-          }],
-					"doc": "example",
-					"name": "example",
-					"namespace": "example",
-					"type": "record"
-				}
-			EOT
+		  project      = aiven_kafka_schema_configuration.foo.project
+		  service_name = aiven_kafka_schema_configuration.foo.service_name
+		  subject_name = "kafka-schema-%s"
+		
+		  schema = <<EOT
+		{
+		"doc": "example",
+		"fields": [{
+		"default": 5,
+		"doc": "my test number",
+		"name": "test",
+		"namespace": "test",
+		"type": "int"
+		  },{
+		"default": "str",
+		"doc": "my test string",
+		"name": "test_2",
+		"namespace": "test",
+		"type": "string"
+		          }],
+		"doc": "example",
+		"name": "example",
+		"namespace": "example",
+		"type": "record"
 		}
-
+		EOT
+		}
+		
 		data "aiven_kafka_schema" "schema" {
-			project = aiven_kafka_schema.foo.project
-			service_name = aiven_kafka_schema.foo.service_name
-			subject_name = aiven_kafka_schema.foo.subject_name
-
-			depends_on = [aiven_kafka_schema.foo]
-		}
-		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+		  project      = aiven_kafka_schema.foo.project
+		  service_name = aiven_kafka_schema.foo.service_name
+		  subject_name = aiven_kafka_schema.foo.subject_name
+		
+		  depends_on = [aiven_kafka_schema.foo]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccCheckAivenKafkaSchemaAttributes(n string) resource.TestCheckFunc {

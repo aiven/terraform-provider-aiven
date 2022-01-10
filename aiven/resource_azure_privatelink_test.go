@@ -68,39 +68,39 @@ func testAccAzurePrivatelinkResource(name string) string {
 
 	return fmt.Sprintf(`
 		data "aiven_project" "foo" {
-			project = "%s"
+		  project = "%s"
 		}
-
+		
 		resource "aiven_pg" "bar" {
-			project = data.aiven_project.foo.project
-			cloud_name = "azure-westeurope"
-			plan = "startup-4"
-			service_name = "test-acc-sr-%s"
-			maintenance_window_dow = "monday"
-			maintenance_window_time = "10:00:00"
-			project_vpc_id = "%s"
-			
-			pg_user_config {
-				privatelink_access {
-				  pg = true
-				  pgbouncer = true
-				}
-			}
+		  project                 = data.aiven_project.foo.project
+		  cloud_name              = "azure-westeurope"
+		  plan                    = "startup-4"
+		  service_name            = "test-acc-sr-%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		  project_vpc_id          = "%s"
+		
+		  pg_user_config {
+		    privatelink_access {
+		      pg        = true
+		      pgbouncer = true
+		    }
+		  }
 		}
 		
 		resource "aiven_azure_privatelink" "foo" {
-			project = data.aiven_project.foo.project
-			service_name = aiven_pg.bar.service_name
-			user_subscription_ids = ["%s"]
+		  project               = data.aiven_project.foo.project
+		  service_name          = aiven_pg.bar.service_name
+		  user_subscription_ids = ["%s"]
 		}
 		
 		data "aiven_azure_privatelink" "pr" {
-			project = data.aiven_project.foo.project
-			service_name = aiven_pg.bar.service_name
-
-			depends_on = [aiven_azure_privatelink.foo]
-		}
-		`, os.Getenv("AIVEN_PROJECT_NAME"), name, vpcID, principal)
+		  project      = data.aiven_project.foo.project
+		  service_name = aiven_pg.bar.service_name
+		
+		  depends_on = [aiven_azure_privatelink.foo]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name, vpcID, principal)
 }
 
 func testAccCheckAivenAzurePrivatelinkAttributes(n string) resource.TestCheckFunc {

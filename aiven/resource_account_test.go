@@ -86,46 +86,46 @@ func TestAccAivenAccount_basic(t *testing.T) {
 func testAccAccountResource(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_account" "foo" {
-			name = "test-acc-ac-%s"
+		  name = "test-acc-ac-%s"
 		}
-
+		
 		data "aiven_account" "account" {
-  			name = aiven_account.foo.name
-		}
-		`, name)
+		  name = aiven_account.foo.name
+		}`,
+		name)
 }
 
 func testAccAccountToProject(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_account" "foo" {
-			name = "test-acc-ac-%s"
+		  name = "test-acc-ac-%s"
 		}
-
+		
 		resource "aiven_project" "bar" {
-			project = "test-acc-ac-%s"
-			account_id = aiven_account.foo.account_id
+		  project    = "test-acc-ac-%s"
+		  account_id = aiven_account.foo.account_id
 		}
-
+		
 		data "aiven_project" "pr" {
-  			project = aiven_project.bar.project
-		}
-		`, name, name)
+		  project = aiven_project.bar.project
+		}`,
+		name, name)
 }
 
 func testAccAccountProjectDissociate(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_account" "foo" {
-			name = "test-acc-ac-%s"
+		  name = "test-acc-ac-%s"
 		}
-
+		
 		resource "aiven_project" "bar" {
-			project = "test-acc-ac-%s"
+		  project = "test-acc-ac-%s"
 		}
-
+		
 		data "aiven_project" "pr" {
-  			project = aiven_project.bar.project
-		}
-		`, name, name)
+		  project = aiven_project.bar.project
+		}`,
+		name, name)
 }
 
 func testAccCheckAivenAccountResourceDestroy(s *terraform.State) error {

@@ -134,88 +134,88 @@ func testAccCheckAivenDatabaseResourceDestroy(s *terraform.State) error {
 func testAccDatabaseResource(name string) string {
 	return fmt.Sprintf(`
 		data "aiven_project" "foo" {
-			project = "%s"
+		  project = "%s"
 		}
 		
 		resource "aiven_pg" "bar" {
-			project = data.aiven_project.foo.project
-			cloud_name = "google-europe-west1"
-			plan = "startup-4"
-			service_name = "test-acc-sr-%s"
-			maintenance_window_dow = "monday"
-			maintenance_window_time = "10:00:00"
-			
-			pg_user_config {
-				public_access {
-					pg = true
-					prometheus = false
-				}
-
-				pg {
-					idle_in_transaction_session_timeout = 900
-				}
-			}
+		  project                 = data.aiven_project.foo.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-4"
+		  service_name            = "test-acc-sr-%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		
+		  pg_user_config {
+		    public_access {
+		      pg         = true
+		      prometheus = false
+		    }
+		
+		    pg {
+		      idle_in_transaction_session_timeout = 900
+		    }
+		  }
 		}
-
+		
 		resource "aiven_database" "foo" {
-			project = aiven_pg.bar.project
-			service_name = aiven_pg.bar.service_name
-			database_name = "test-acc-db-%s"
-			lc_ctype = "en_US.UTF-8"
-			lc_collate = "en_US.UTF-8"
+		  project       = aiven_pg.bar.project
+		  service_name  = aiven_pg.bar.service_name
+		  database_name = "test-acc-db-%s"
+		  lc_ctype      = "en_US.UTF-8"
+		  lc_collate    = "en_US.UTF-8"
 		}
-
+		
 		data "aiven_database" "database" {
-			project = aiven_database.foo.project
-			service_name = aiven_database.foo.service_name
-			database_name = aiven_database.foo.database_name
-
-			depends_on = [aiven_database.foo]
-		}
-		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+		  project       = aiven_database.foo.project
+		  service_name  = aiven_database.foo.service_name
+		  database_name = aiven_database.foo.database_name
+		
+		  depends_on = [aiven_database.foo]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccDatabaseTerminationProtectionResource(name string) string {
 	return fmt.Sprintf(`
 		data "aiven_project" "foo" {
-			project = "%s"
+		  project = "%s"
 		}
 		
 		resource "aiven_pg" "bar" {
-			project = data.aiven_project.foo.project
-			cloud_name = "google-europe-west1"
-			plan = "startup-4"
-			service_name = "test-acc-sr-%s"
-			maintenance_window_dow = "monday"
-			maintenance_window_time = "10:00:00"
-			
-			pg_user_config {
-				public_access {
-					pg = true
-					prometheus = false
-				}
-
-				pg {
-					idle_in_transaction_session_timeout = 900
-				}
-			}
+		  project                 = data.aiven_project.foo.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-4"
+		  service_name            = "test-acc-sr-%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		
+		  pg_user_config {
+		    public_access {
+		      pg         = true
+		      prometheus = false
+		    }
+		
+		    pg {
+		      idle_in_transaction_session_timeout = 900
+		    }
+		  }
 		}
-
+		
 		resource "aiven_database" "foo" {
-			project = aiven_pg.bar.project
-			service_name = aiven_pg.bar.service_name
-			database_name = "test-acc-db-%s"
-			termination_protection = true
+		  project                = aiven_pg.bar.project
+		  service_name           = aiven_pg.bar.service_name
+		  database_name          = "test-acc-db-%s"
+		  termination_protection = true
 		}
-
+		
 		data "aiven_database" "database" {
-			project = aiven_database.foo.project
-			service_name = aiven_database.foo.service_name
-			database_name = aiven_database.foo.database_name
-
-			depends_on = [aiven_database.foo]
-		}
-		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+		  project       = aiven_database.foo.project
+		  service_name  = aiven_database.foo.service_name
+		  database_name = aiven_database.foo.database_name
+		
+		  depends_on = [aiven_database.foo]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccCheckAivenDatabaseAttributes(n string) resource.TestCheckFunc {

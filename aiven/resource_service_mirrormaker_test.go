@@ -42,33 +42,33 @@ func TestAccAivenService_mirrormaker(t *testing.T) {
 func testAccMirrorMakerServiceResource(name string) string {
 	return fmt.Sprintf(`
 		data "aiven_project" "foo" {
-			project = "%s"
+		  project = "%s"
 		}
 		
 		resource "aiven_kafka_mirrormaker" "bar" {
-			project = data.aiven_project.foo.project
-			cloud_name = "google-europe-west1"
-			plan = "startup-4"
-			service_name = "test-acc-sr-%s"
-			
-			kafka_mirrormaker_user_config {
-				ip_filter = ["0.0.0.0/0"]
-
-				kafka_mirrormaker {
-					refresh_groups_interval_seconds = 600
-					refresh_topics_enabled = true
-					refresh_topics_interval_seconds = 600
-				}
-			}
+		  project      = data.aiven_project.foo.project
+		  cloud_name   = "google-europe-west1"
+		  plan         = "startup-4"
+		  service_name = "test-acc-sr-%s"
+		
+		  kafka_mirrormaker_user_config {
+		    ip_filter = ["0.0.0.0/0"]
+		
+		    kafka_mirrormaker {
+		      refresh_groups_interval_seconds = 600
+		      refresh_topics_enabled          = true
+		      refresh_topics_interval_seconds = 600
+		    }
+		  }
 		}
-
+		
 		data "aiven_kafka_mirrormaker" "service" {
-			service_name = aiven_kafka_mirrormaker.bar.service_name
-			project = aiven_kafka_mirrormaker.bar.project
-
-			depends_on = [aiven_kafka_mirrormaker.bar]
-		}
-		`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+		  service_name = aiven_kafka_mirrormaker.bar.service_name
+		  project      = aiven_kafka_mirrormaker.bar.project
+		
+		  depends_on = [aiven_kafka_mirrormaker.bar]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
 func testAccCheckAivenServiceMirrorMakerAttributes(n string) resource.TestCheckFunc {

@@ -38,40 +38,40 @@ func TestAccAivenOpensearchACLRule_basic(t *testing.T) {
 
 func testAccOpensearchACLRuleResource(name string) string {
 	return fmt.Sprintf(`
-    data "aiven_project" "foo" {
-      project = "%s"
-    }
-
-    resource "aiven_opensearch" "bar" {
-      project = data.aiven_project.foo.project
-      cloud_name = "google-europe-west1"
-      plan = "startup-4"
-      service_name = "test-acc-sr-aclrule-%s"
-      maintenance_window_dow = "monday"
-      maintenance_window_time = "10:00:00"
-    }
-
-    resource "aiven_service_user" "foo" {
-      service_name = aiven_opensearch.bar.service_name
-      project = data.aiven_project.foo.project
-      username = "user-%s"
-    }
-
-    resource "aiven_opensearch_acl_config" "foo" {
-      project = data.aiven_project.foo.project
-      service_name = aiven_opensearch.bar.service_name
-      enabled = true
-      extended_acl = false
-    }
-
-    resource "aiven_opensearch_acl_rule" "foo" {
-      project = data.aiven_project.foo.project
-      service_name = aiven_opensearch.bar.service_name
-      username = aiven_service_user.foo.username
-      index = "test-index"
-      permission = "readwrite"
-    }
-    `, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+		data "aiven_project" "foo" {
+		  project = "%s"
+		}
+		
+		resource "aiven_opensearch" "bar" {
+		  project                 = data.aiven_project.foo.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-4"
+		  service_name            = "test-acc-sr-aclrule-%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		}
+		
+		resource "aiven_service_user" "foo" {
+		  service_name = aiven_opensearch.bar.service_name
+		  project      = data.aiven_project.foo.project
+		  username     = "user-%s"
+		}
+		
+		resource "aiven_opensearch_acl_config" "foo" {
+		  project      = data.aiven_project.foo.project
+		  service_name = aiven_opensearch.bar.service_name
+		  enabled      = true
+		  extended_acl = false
+		}
+		
+		resource "aiven_opensearch_acl_rule" "foo" {
+		  project      = data.aiven_project.foo.project
+		  service_name = aiven_opensearch.bar.service_name
+		  username     = aiven_service_user.foo.username
+		  index        = "test-index"
+		  permission   = "readwrite"
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccCheckAivenOpensearchACLRuleResourceDestroy(s *terraform.State) error {
