@@ -193,20 +193,20 @@ func testAccKafkaSchemaResource(name string) string {
 		  subject_name = "kafka-schema-%s"
 		
 		  schema = <<EOT
-		{
-		"doc": "example",
-		"fields": [{
-		"default": 5,
-		"doc": "my test number",
-		"name": "test",
-		"namespace": "test",
-		"type": "int"
-		}],
-		"name": "example",
-		"namespace": "example",
-		"type": "record"
-		}
-		EOT
+		    {
+		      "doc": "example",
+		      "fields": [{
+		        "default": 5,
+		        "doc": "my test number",
+		        "name": "test",
+		        "namespace": "test",
+		        "type": "int"
+		      }],
+		      "name": "example",
+		      "namespace": "example",
+		      "type": "record"
+		    }
+		  EOT
 		}
 		
 		data "aiven_kafka_schema" "schema" {
@@ -254,20 +254,20 @@ func testAccKafkaSchemaResourceInvalidUpdate(name string) string {
 		  subject_name = "kafka-schema-%s"
 		
 		  schema = <<EOT
-		{
-		"doc": "example",
-		"fields": [{
-		"default": "foo",
-		"doc": "my test string",
-		"name": "test",
-		"namespace": "test",
-		"type": "string"
-		}],
-		"name": "example",
-		"namespace": "example",
-		"type": "record"
-		}
-		EOT
+		    {
+		      "doc": "example",
+		      "fields": [{
+		        "default": "foo",
+		        "doc": "my test string",
+		        "name": "test",
+		        "namespace": "test",
+		        "type": "string"
+		      }],
+		      "name": "example",
+		      "namespace": "example",
+		      "type": "record"
+		    }
+		  EOT
 		}
 		
 		data "aiven_kafka_schema" "schema" {
@@ -315,27 +315,26 @@ func testAccKafkaSchemaResourceGoodUpdate(name string) string {
 		  subject_name = "kafka-schema-%s"
 		
 		  schema = <<EOT
-		{
-		"doc": "example",
-		"fields": [{
-		"default": 5,
-		"doc": "my test number",
-		"name": "test",
-		"namespace": "test",
-		"type": "int"
-		  },{
-		"default": "str",
-		"doc": "my test string",
-		"name": "test_2",
-		"namespace": "test",
-		"type": "string"
-		          }],
-		"doc": "example",
-		"name": "example",
-		"namespace": "example",
-		"type": "record"
-		}
-		EOT
+		    {
+		      "doc": "example",
+		      "fields": [{
+		        "default": 5,
+		        "doc": "my test number",
+		        "name": "test",
+		        "namespace": "test",
+		        "type": "int"
+		      },{
+		        "default": "str",
+		        "doc": "my test string",
+		        "name": "test_2",
+		        "namespace": "test",
+		        "type": "string"
+		      }],
+		      "name": "example",
+		      "namespace": "example",
+		      "type": "record"
+		    }
+		  EOT
 		}
 		
 		data "aiven_kafka_schema" "schema" {
