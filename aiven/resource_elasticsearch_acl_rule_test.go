@@ -74,52 +74,52 @@ func TestAccAivenElasticsearchACLRule_basic(t *testing.T) {
 
 func testAccElasticsearchACLRuleResource(project, service, user, index, permission string) string {
 	return fmt.Sprintf(`
-    data "aiven_project" "foo" {
-      project = "%s"
-    }
-
-    resource "aiven_elasticsearch" "bar" {
-      project = data.aiven_project.foo.project
-      cloud_name = "google-europe-west1"
-      plan = "startup-4"
-      service_name = "%s"
-      maintenance_window_dow = "monday"
-      maintenance_window_time = "10:00:00"
-    }
-
-    resource "aiven_service_user" "foo" {
-      service_name = aiven_elasticsearch.bar.service_name
-      project = data.aiven_project.foo.project
-      username = "%s"
-    }
-
-    resource "aiven_elasticsearch_acl_config" "foo" {
-      project = data.aiven_project.foo.project
-      service_name = aiven_elasticsearch.bar.service_name
-      enabled = true
-      extended_acl = false
-    }
-
-    resource "aiven_elasticsearch_acl_rule" "foo" {
-      project = data.aiven_project.foo.project
-      service_name = aiven_elasticsearch.bar.service_name
-      username = aiven_service_user.foo.username
-      index = "%s"
-      permission = "%s"
-    }
-    `, project, service, user, index, permission)
+		data "aiven_project" "foo" {
+		  project = "%s"
+		}
+		
+		resource "aiven_elasticsearch" "bar" {
+		  project                 = data.aiven_project.foo.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-4"
+		  service_name            = "%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		}
+		
+		resource "aiven_service_user" "foo" {
+		  service_name = aiven_elasticsearch.bar.service_name
+		  project      = data.aiven_project.foo.project
+		  username     = "%s"
+		}
+		
+		resource "aiven_elasticsearch_acl_config" "foo" {
+		  project      = data.aiven_project.foo.project
+		  service_name = aiven_elasticsearch.bar.service_name
+		  enabled      = true
+		  extended_acl = false
+		}
+		
+		resource "aiven_elasticsearch_acl_rule" "foo" {
+		  project      = data.aiven_project.foo.project
+		  service_name = aiven_elasticsearch.bar.service_name
+		  username     = aiven_service_user.foo.username
+		  index        = "%s"
+		  permission   = "%s"
+		}`,
+		project, service, user, index, permission)
 }
 
 func testAccElasticsearchACLRuleResourceImport(project, service, user, index, permission string) string {
 	return fmt.Sprintf(`
-    resource "aiven_elasticsearch_acl_rule" "foo" {
-      project = "%s"
-      service_name = "%s"
-      username = "%s"
-      index = "%s"
-      permission = "%s"
-    }
-    `, project, service, user, index, permission)
+		resource "aiven_elasticsearch_acl_rule" "foo" {
+		  project      = "%s"
+		  service_name = "%s"
+		  username     = "%s"
+		  index        = "%s"
+		  permission   = "%s"
+		}`,
+		project, service, user, index, permission)
 }
 
 func testAccCheckAivenElasticsearchACLRuleResourceDestroy(s *terraform.State) error {

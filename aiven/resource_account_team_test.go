@@ -80,21 +80,21 @@ func TestAccAivenAccountTeam_basic(t *testing.T) {
 func testAccAccountTeamResource(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_account" "foo" {
-			name = "test-acc-ac-%s"
+		  name = "test-acc-ac-%s"
 		}
-
+		
 		resource "aiven_account_team" "foo" {
-			account_id = aiven_account.foo.account_id
-			name = "test-acc-team-%s"
+		  account_id = aiven_account.foo.account_id
+		  name       = "test-acc-team-%s"
 		}
-
+		
 		data "aiven_account_team" "team" {
-  			name = aiven_account_team.foo.name
-  			account_id = aiven_account_team.foo.account_id
-
-			depends_on = [aiven_account_team.foo]
-		}
-		`, name, name)
+		  name       = aiven_account_team.foo.name
+		  account_id = aiven_account_team.foo.account_id
+		
+		  depends_on = [aiven_account_team.foo]
+		}`,
+		name, name)
 }
 
 func testAccCheckAivenAccountTeamResourceDestroy(s *terraform.State) error {

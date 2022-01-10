@@ -101,28 +101,28 @@ func TestAccAivenAccountTeamMember_basic(t *testing.T) {
 func testAccAccountTeamMemberResource(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_account" "foo" {
-			name = "test-acc-ac-%s"
+		  name = "test-acc-ac-%s"
 		}
-
+		
 		resource "aiven_account_team" "foo" {
-			account_id = aiven_account.foo.account_id
-			name = "test-acc-team-%s"
+		  account_id = aiven_account.foo.account_id
+		  name       = "test-acc-team-%s"
 		}
-
+		
 		resource "aiven_account_team_member" "foo" {
-			team_id = aiven_account_team.foo.team_id
-  			account_id = aiven_account_team.foo.account_id
-			user_email = "ivan.savciuc+%s@aiven.fi"
+		  team_id    = aiven_account_team.foo.team_id
+		  account_id = aiven_account_team.foo.account_id
+		  user_email = "ivan.savciuc+%s@aiven.fi"
 		}
-
+		
 		data "aiven_account_team_member" "member" {
-  			team_id = aiven_account_team_member.foo.team_id
-  			account_id = aiven_account_team_member.foo.account_id
-			user_email = aiven_account_team_member.foo.user_email
-
-			depends_on = [aiven_account_team_member.foo]
-		}
-		`, name, name, name)
+		  team_id    = aiven_account_team_member.foo.team_id
+		  account_id = aiven_account_team_member.foo.account_id
+		  user_email = aiven_account_team_member.foo.user_email
+		
+		  depends_on = [aiven_account_team_member.foo]
+		}`,
+		name, name, name)
 }
 
 func testAccCheckAivenAccountTeamMemberResourceDestroy(s *terraform.State) error {

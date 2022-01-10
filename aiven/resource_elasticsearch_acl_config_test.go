@@ -38,31 +38,31 @@ func TestAccAivenElasticsearchACLConfig_basic(t *testing.T) {
 func testAccElasticsearchACLConfigResource(name string) string {
 	return fmt.Sprintf(`
 		data "aiven_project" "foo" {
-			project = "%s"
+		  project = "%s"
 		}
-
+		
 		resource "aiven_elasticsearch" "bar" {
-			project = data.aiven_project.foo.project
-			cloud_name = "google-europe-west1"
-			plan = "startup-4"
-			service_name = "test-acc-sr-es-aclconf-%s"
-			maintenance_window_dow = "monday"
-			maintenance_window_time = "10:00:00"
+		  project                 = data.aiven_project.foo.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-4"
+		  service_name            = "test-acc-sr-es-aclconf-%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
 		}
-
+		
 		resource "aiven_service_user" "foo" {
-			service_name = aiven_elasticsearch.bar.service_name
-			project = data.aiven_project.foo.project
-			username = "user-%s"
+		  service_name = aiven_elasticsearch.bar.service_name
+		  project      = data.aiven_project.foo.project
+		  username     = "user-%s"
 		}
-
+		
 		resource "aiven_elasticsearch_acl_config" "foo" {
-			project = data.aiven_project.foo.project
-			service_name = aiven_elasticsearch.bar.service_name
-			enabled = true
-			extended_acl = false
-    }
-		`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+		  project      = data.aiven_project.foo.project
+		  service_name = aiven_elasticsearch.bar.service_name
+		  enabled      = true
+		  extended_acl = false
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccCheckAivenElasticsearchACLConfigResourceDestroy(s *terraform.State) error {

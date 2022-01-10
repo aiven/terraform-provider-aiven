@@ -39,6 +39,7 @@ packrd/
 # Artefacts directories
 plugins/
 hack/tools/bin
+hack/testmanifestfmt/bin
 
 # Github Pages
 _site/

@@ -125,71 +125,71 @@ func TestAccAivenProject_accounts(t *testing.T) {
 func testAccProjectResourceAccounts(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_account" "foo" {
-			name = "test-acc-ac-%s"
-		} 
-
+		  name = "test-acc-ac-%s"
+		}
+		
 		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
-			account_id = aiven_account.foo.account_id
-			billing_address = "MXQ4+M5 New York, United States"
-			billing_extra_text = "some extra text ..."
-			country_code = "DE"
-			default_cloud = "aws-eu-west-2"
-			billing_currency = "EUR"
-			vat_id = "123"
+		  project            = "test-acc-pr-%s"
+		  account_id         = aiven_account.foo.account_id
+		  billing_address    = "MXQ4+M5 New York, United States"
+		  billing_extra_text = "some extra text ..."
+		  country_code       = "DE"
+		  default_cloud      = "aws-eu-west-2"
+		  billing_currency   = "EUR"
+		  vat_id             = "123"
 		}
-
+		
 		data "aiven_project" "project" {
-			project = aiven_project.foo.project
-
-			depends_on = [aiven_project.foo]
-		}
-		`, name, name)
+		  project = aiven_project.foo.project
+		
+		  depends_on = [aiven_project.foo]
+		}`,
+		name, name)
 }
 
 func testAccProjectResource(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
-			billing_address = "MXQ4+M5 New York, United States"
-			billing_extra_text = "some extra text ..."
-			country_code = "DE"
-			default_cloud = "aws-eu-west-2"
-			billing_currency = "EUR"
-			vat_id = "123"
+		  project            = "test-acc-pr-%s"
+		  billing_address    = "MXQ4+M5 New York, United States"
+		  billing_extra_text = "some extra text ..."
+		  country_code       = "DE"
+		  default_cloud      = "aws-eu-west-2"
+		  billing_currency   = "EUR"
+		  vat_id             = "123"
 		}
-
+		
 		data "aiven_project" "project" {
-			project = aiven_project.foo.project
-			depends_on = [aiven_project.foo]
-		}
-		`, name)
+		  project    = aiven_project.foo.project
+		  depends_on = [aiven_project.foo]
+		}`,
+		name)
 }
 
 func testAccProjectCopyFromProjectResource(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_billing_group" "foo" {
-			name = "test-acc-bg-%s"
-			billing_currency = "USD"
-			vat_id = "123"
+		  name             = "test-acc-bg-%s"
+		  billing_currency = "USD"
+		  vat_id           = "123"
 		}
-
+		
 		resource "aiven_project" "source" {
-			project = "test-acc-pr-source-%s"
-			billing_group = aiven_billing_group.foo.id
+		  project       = "test-acc-pr-source-%s"
+		  billing_group = aiven_billing_group.foo.id
 		}
-
+		
 		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
-			copy_from_project = aiven_project.source.project
-			use_source_project_billing_group = true
+		  project                          = "test-acc-pr-%s"
+		  copy_from_project                = aiven_project.source.project
+		  use_source_project_billing_group = true
 		}
-
+		
 		data "aiven_project" "project" {
-			project = aiven_project.foo.project
-			depends_on = [aiven_project.foo]
-		}
-		`, name, name, name)
+		  project    = aiven_project.foo.project
+		  depends_on = [aiven_project.foo]
+		}`,
+		name, name, name)
 }
 
 func testAccCheckAivenProjectAttributes(n string, attributes ...string) resource.TestCheckFunc {

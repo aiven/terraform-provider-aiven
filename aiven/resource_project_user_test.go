@@ -67,24 +67,24 @@ func testAccCheckAivenProjectUserResourceDestroy(s *terraform.State) error {
 func testAccProjectUserResource(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
-			default_cloud = "aws-eu-west-2"
-			billing_currency = "EUR"
+		  project          = "test-acc-pr-%s"
+		  default_cloud    = "aws-eu-west-2"
+		  billing_currency = "EUR"
 		}
-
+		
 		resource "aiven_project_user" "bar" {
-			project = aiven_project.foo.project
-			email = "ivan.savciuc+%s@aiven.fi"
-			member_type = "admin"
+		  project     = aiven_project.foo.project
+		  email       = "ivan.savciuc+%s@aiven.fi"
+		  member_type = "admin"
 		}
-
+		
 		data "aiven_project_user" "user" {
-			project = aiven_project_user.bar.project
-			email = aiven_project_user.bar.email
-
-			depends_on = [aiven_project_user.bar]
-		}
-		`, name, name)
+		  project = aiven_project_user.bar.project
+		  email   = aiven_project_user.bar.email
+		
+		  depends_on = [aiven_project_user.bar]
+		}`,
+		name, name)
 }
 
 func testAccCheckAivenProjectUserAttributes(n string) resource.TestCheckFunc {

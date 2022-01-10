@@ -49,48 +49,48 @@ func TestAccAivenProjectVPC_basic(t *testing.T) {
 func testAccProjectVPCResource(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
+		  project = "test-acc-pr-%s"
 		}
-
+		
 		resource "aiven_project_vpc" "bar" {
-			project = aiven_project.foo.project
-			cloud_name = "google-europe-west1"
-			network_cidr = "192.168.0.0/24"
+		  project      = aiven_project.foo.project
+		  cloud_name   = "google-europe-west1"
+		  network_cidr = "192.168.0.0/24"
 		}
-
+		
 		data "aiven_project_vpc" "vpc" {
-			project = aiven_project_vpc.bar.project
-			cloud_name = aiven_project_vpc.bar.cloud_name
-
-			depends_on = [aiven_project_vpc.bar]
-		}
-		`, name)
+		  project    = aiven_project_vpc.bar.project
+		  cloud_name = aiven_project_vpc.bar.cloud_name
+		
+		  depends_on = [aiven_project_vpc.bar]
+		}`,
+		name)
 }
 
 func testAccProjectVPCCustomTimeoutResource(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_project" "foo" {
-			project = "test-acc-pr-%s"
+		  project = "test-acc-pr-%s"
 		}
-
+		
 		resource "aiven_project_vpc" "bar" {
-			project = aiven_project.foo.project
-			cloud_name = "google-europe-west1"
-			network_cidr = "192.168.0.0/24"
-
-			timeouts {
-				create = "10m"
-				delete = "5m"
-			}
+		  project      = aiven_project.foo.project
+		  cloud_name   = "google-europe-west1"
+		  network_cidr = "192.168.0.0/24"
+		
+		  timeouts {
+		    create = "10m"
+		    delete = "5m"
+		  }
 		}
-
+		
 		data "aiven_project_vpc" "vpc" {
-			project = aiven_project_vpc.bar.project
-			cloud_name = aiven_project_vpc.bar.cloud_name
-
-			depends_on = [aiven_project_vpc.bar]
-		}
-		`, name)
+		  project    = aiven_project_vpc.bar.project
+		  cloud_name = aiven_project_vpc.bar.cloud_name
+		
+		  depends_on = [aiven_project_vpc.bar]
+		}`,
+		name)
 }
 
 func testAccCheckAivenProjectVPCAttributes(n string) resource.TestCheckFunc {

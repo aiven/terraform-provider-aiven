@@ -43,35 +43,35 @@ func TestAccAiven_elasticsearch(t *testing.T) {
 func testAccElasticsearchResource(name string) string {
 	return fmt.Sprintf(`
 		data "aiven_project" "foo-es" {
-			project = "%s"
+		  project = "%s"
 		}
 		
 		resource "aiven_elasticsearch" "bar-es" {
-			project = data.aiven_project.foo-es.project
-			cloud_name = "google-europe-west1"
-			plan = "startup-4"
-			service_name = "test-acc-sr-%s"
-			maintenance_window_dow = "monday"
-			maintenance_window_time = "10:00:00"
-			
-			elasticsearch_user_config {
-				kibana {
-					enabled = true
-					elasticsearch_request_timeout = 30000
-				}
-
-				public_access {
-					elasticsearch = true
-					kibana = true
-				}
-			}
+		  project                 = data.aiven_project.foo-es.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-4"
+		  service_name            = "test-acc-sr-%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		
+		  elasticsearch_user_config {
+		    kibana {
+		      enabled                       = true
+		      elasticsearch_request_timeout = 30000
+		    }
+		
+		    public_access {
+		      elasticsearch = true
+		      kibana        = true
+		    }
+		  }
 		}
 		
 		data "aiven_elasticsearch" "service-es" {
-			service_name = aiven_elasticsearch.bar-es.service_name
-			project = data.aiven_project.foo-es.project
-
-			depends_on = [aiven_elasticsearch.bar-es]
-		}
-		`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+		  service_name = aiven_elasticsearch.bar-es.service_name
+		  project      = data.aiven_project.foo-es.project
+		
+		  depends_on = [aiven_elasticsearch.bar-es]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name)
 }

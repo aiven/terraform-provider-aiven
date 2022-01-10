@@ -38,23 +38,23 @@ func TestAccAivenAccountAuthentication_basic(t *testing.T) {
 func testAccAccountAuthenticationResource(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_account" "foo" {
-			name = "test-acc-ac-%s"
+		  name = "test-acc-ac-%s"
 		}
-
+		
 		resource "aiven_account_authentication" "foo" {
-      account_id = aiven_account.foo.account_id
-			name = "test-acc-auth-%s"
-			type = "saml"
-			enabled = false
+		  account_id = aiven_account.foo.account_id
+		  name       = "test-acc-auth-%s"
+		  type       = "saml"
+		  enabled    = false
 		}
-
+		
 		data "aiven_account_authentication" "auth" {
-      account_id = aiven_account_authentication.foo.account_id
-      name = aiven_account_authentication.foo.name
-
-			depends_on = [aiven_account_authentication.foo]
-		}
-		`, name, name)
+		  account_id = aiven_account_authentication.foo.account_id
+		  name       = aiven_account_authentication.foo.name
+		
+		  depends_on = [aiven_account_authentication.foo]
+		}`,
+		name, name)
 }
 
 func testAccCheckAivenAccountAuthenticationResourceDestroy(s *terraform.State) error {

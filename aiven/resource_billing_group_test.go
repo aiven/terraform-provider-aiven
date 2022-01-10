@@ -71,63 +71,63 @@ func testAccCheckAivenBillingGroupResourceDestroy(s *terraform.State) error {
 func testAccBillingGroupResource(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_billing_group" "foo" {
-			name = "test-acc-bg-%s"
+		  name = "test-acc-bg-%s"
 		}
-
+		
 		data "aiven_billing_group" "bar" {
-			name = aiven_billing_group.foo.name
-
-			depends_on = [aiven_billing_group.foo]
+		  name = aiven_billing_group.foo.name
+		
+		  depends_on = [aiven_billing_group.foo]
 		}
-
+		
 		resource "aiven_project" "pr1" {
-			project = "test-acc-pr-%s"
-			billing_group = aiven_billing_group.foo.id
-
-			depends_on = [aiven_billing_group.foo]
-		}
-		`, name, name)
+		  project       = "test-acc-pr-%s"
+		  billing_group = aiven_billing_group.foo.id
+		
+		  depends_on = [aiven_billing_group.foo]
+		}`,
+		name, name)
 }
 
 func testAccOverwriteBillingGroupResource(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_billing_group" "foo" {
-			name = "test-acc-bg-%s"
-			billing_currency = "USD"
-			vat_id = "abc"
+		  name             = "test-acc-bg-%s"
+		  billing_currency = "USD"
+		  vat_id           = "abc"
 		}
-
+		
 		resource "aiven_project" "pr1" {
-			project = "test-acc-pr-%s"
-			billing_group = aiven_billing_group.foo.id
-			vat_id = "123"
-
-			depends_on = [aiven_billing_group.foo]
-		}
-		`, name, name)
+		  project       = "test-acc-pr-%s"
+		  billing_group = aiven_billing_group.foo.id
+		  vat_id        = "123"
+		
+		  depends_on = [aiven_billing_group.foo]
+		}`,
+		name, name)
 }
 
 func testAccCopyFromProjectBillingGroupResource(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_billing_group" "foo" {
-			name = "test-acc-bg-%s"
-			billing_currency = "USD"
-			vat_id = "abc"
+		  name             = "test-acc-bg-%s"
+		  billing_currency = "USD"
+		  vat_id           = "abc"
 		}
-
+		
 		resource "aiven_project" "pr01" {
-			project = "test-acc-pr01-%s"
-			billing_group = aiven_billing_group.foo.id
-			vat_id = "123"
-
-			depends_on = [aiven_billing_group.foo]
+		  project       = "test-acc-pr01-%s"
+		  billing_group = aiven_billing_group.foo.id
+		  vat_id        = "123"
+		
+		  depends_on = [aiven_billing_group.foo]
 		}
-
+		
 		resource "aiven_project" "pr02" {
-			project = "test-acc-p02-%s"
-			copy_from_project = aiven_project.pr01.project
-
-			depends_on = [aiven_project.pr01]
-		}
-		`, name, name, name)
+		  project           = "test-acc-p02-%s"
+		  copy_from_project = aiven_project.pr01.project
+		
+		  depends_on = [aiven_project.pr01]
+		}`,
+		name, name, name)
 }
