@@ -81,6 +81,7 @@ func resourceKafkaSchema() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceKafkaSchemaState,
 		},
+		CustomizeDiff: resourceKafkaSchemaCustomizeDiff,
 
 		Schema: aivenKafkaSchemaSchema,
 	}
@@ -255,4 +256,29 @@ func resourceKafkaSchemaState(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func resourceKafkaSchemaCustomizeDiff(_ context.Context, d *schema.ResourceDiff, m interface{}) error {
+	client := m.(*aiven.Client)
+
+	// no previous version: allow the diff, nothing to check compatibility against
+	if _, ok := d.GetOk("version"); !ok {
+		return nil
+	}
+
+	if compatible, err := client.KafkaSubjectSchemas.Validate(
+		d.Get("project").(string),
+		d.Get("service_name").(string),
+		d.Get("subject_name").(string),
+		d.Get("version").(int),
+		aiven.KafkaSchemaSubject{
+			Schema: d.Get("schema").(string),
+		},
+	); err != nil {
+		return fmt.Errorf("unable to check schema validity: %w", err)
+	} else if !compatible {
+		return fmt.Errorf("schema is not compatible with previous version")
+	}
+
+	return nil
 }
