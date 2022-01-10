@@ -39,6 +39,7 @@ data "aiven_flink" "flink" {
 - **disk_space_cap** (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
 - **disk_space_default** (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
 - **disk_space_step** (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
+- **disk_space_used** (String) Disk space that service is currently using
 - **flink** (List of Object) Flink server provided values (see [below for nested schema](#nestedatt--flink))
 - **flink_user_config** (List of Object) Flink user configurable settings (see [below for nested schema](#nestedatt--flink_user_config))
 - **maintenance_window_dow** (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.

@@ -64,6 +64,7 @@ resource "aiven_mysql" "mysql1" {
 - **disk_space_cap** (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
 - **disk_space_default** (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
 - **disk_space_step** (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
+- **disk_space_used** (String) Disk space that service is currently using
 - **mysql** (List of Object) MySQL specific server provided values (see [below for nested schema](#nestedatt--mysql))
 - **service_host** (String) The hostname of the service.
 - **service_password** (String, Sensitive) Password used for connecting to the service, if applicable

@@ -63,12 +63,8 @@ func GetMaintenanceWindow(d ResourceStateOrResourceDiff) *aiven.MaintenanceWindo
 	return nil
 }
 
-func GetDiskSpaceMBOrServicePlanDefault(d ResourceStateOrResourceDiff, params PlanParameters) int {
-	diskSpaceSchema, ok := d.GetOk("disk_space")
-	if !ok {
-		return params.DiskSizeMBDefault
-	}
-	diskSizeMB, _ := units.RAMInBytes(diskSpaceSchema.(string))
+func ConvertToDiskSpaceMB(b string) int {
+	diskSizeMB, _ := units.RAMInBytes(b)
 	return int(diskSizeMB / units.MiB)
 }
 

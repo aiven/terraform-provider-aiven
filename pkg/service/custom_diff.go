@@ -23,7 +23,7 @@ func CustomizeDiffServiceIntegrationAfterCreation(_ context.Context, d *schema.R
 }
 
 func DiskSpaceShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
-	return !(new.(string) == "")
+	return new.(string) != ""
 }
 
 func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
@@ -37,9 +37,16 @@ func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m 
 	if err != nil {
 		return fmt.Errorf("unable to get service plan parameters: %w", err)
 	}
-	requestedDiskSizeMB := GetDiskSpaceMBOrServicePlanDefault(d, servicePlanParams)
 
-	if servicePlanParams.DiskSizeMBDefault != requestedDiskSizeMB {
+	var requestedDiskSpaceMB int
+	ds, okDiskSpace := d.GetOk("disk_space")
+	if !okDiskSpace {
+		return nil
+	}
+
+	requestedDiskSpaceMB = ConvertToDiskSpaceMB(ds.(string))
+
+	if servicePlanParams.DiskSizeMBDefault != requestedDiskSpaceMB {
 		// first check if the plan allows dynamic disk sizing
 		if servicePlanParams.DiskSizeMBMax == 0 || servicePlanParams.DiskSizeMBStep == 0 {
 			return fmt.Errorf("dynamic disk space is not configurable for this service")
@@ -56,18 +63,18 @@ func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m 
 	humanReadableDiskSpaceDefault := HumanReadableByteSize(servicePlanParams.DiskSizeMBDefault * units.MiB)
 	humanReadableDiskSpaceMax := HumanReadableByteSize(servicePlanParams.DiskSizeMBMax * units.MiB)
 	humanReadableDiskSpaceStep := HumanReadableByteSize(servicePlanParams.DiskSizeMBStep * units.MiB)
-	humanReadableRequestedDiskSpace := HumanReadableByteSize(requestedDiskSizeMB * units.MiB)
+	humanReadableRequestedDiskSpace := HumanReadableByteSize(requestedDiskSpaceMB * units.MiB)
 
-	if requestedDiskSizeMB < servicePlanParams.DiskSizeMBDefault {
+	if requestedDiskSpaceMB < servicePlanParams.DiskSizeMBDefault {
 		return fmt.Errorf("requested disk size is too small: '%s' < '%s'", humanReadableRequestedDiskSpace, humanReadableDiskSpaceDefault)
 	}
 	if servicePlanParams.DiskSizeMBMax != 0 {
-		if requestedDiskSizeMB > servicePlanParams.DiskSizeMBMax {
+		if requestedDiskSpaceMB > servicePlanParams.DiskSizeMBMax {
 			return fmt.Errorf("requested disk size is too large: '%s' > '%s'", humanReadableRequestedDiskSpace, humanReadableDiskSpaceMax)
 		}
 	}
 	if servicePlanParams.DiskSizeMBStep != 0 {
-		if (requestedDiskSizeMB-servicePlanParams.DiskSizeMBDefault)%servicePlanParams.DiskSizeMBStep != 0 {
+		if (requestedDiskSpaceMB-servicePlanParams.DiskSizeMBDefault)%servicePlanParams.DiskSizeMBStep != 0 {
 			return fmt.Errorf("requested disk size has to increase from: '%s' in increments of '%s'", humanReadableDiskSpaceDefault, humanReadableDiskSpaceStep)
 		}
 	}

@@ -107,11 +107,15 @@ func serviceCommonSchema() map[string]*schema.Schema {
 			Description: "Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.",
 		},
 		"disk_space": {
-			Type:             schema.TypeString,
-			Optional:         true,
-			Description:      "The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.",
-			DiffSuppressFunc: diskSpaceDiffSuppressFunc,
-			ValidateFunc:     validateHumanByteSizeString,
+			Type:         schema.TypeString,
+			Optional:     true,
+			Description:  "The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.",
+			ValidateFunc: validateHumanByteSizeString,
+		},
+		"disk_space_used": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "Disk space that service is currently using",
 		},
 		"disk_space_default": {
 			Type:        schema.TypeString,
@@ -289,7 +293,7 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Optional:         true,
 		Description:      "The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.",
-		DiffSuppressFunc: diskSpaceDiffSuppressFunc,
+		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		ValidateFunc:     validateHumanByteSizeString,
 	},
 	"disk_space_default": {
@@ -737,16 +741,18 @@ func resourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	// get service plan specific defaults
-	servicePlanParams, err := service.GetServicePlanParametersFromSchema(ctx, client, d)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to get service plan parameters: %w", err))
-	}
-
 	serviceType := d.Get("service_type").(string)
 	project := d.Get("project").(string)
 
-	if _, err = client.Services.Create(
+	// During the creation of service, if disc_space is not set by a TF user,
+	// we transfer 0 values in API creation request, which makes Aiven provision
+	// a default disc space values for a service
+	var diskSpace int
+	if ds, ok := d.GetOk("disk_space"); ok {
+		diskSpace = service.ConvertToDiskSpaceMB(ds.(string))
+	}
+
+	if _, err := client.Services.Create(
 		project,
 		aiven.CreateServiceRequest{
 			Cloud:                 d.Get("cloud_name").(string),
@@ -757,7 +763,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 			ServiceName:           d.Get("service_name").(string),
 			ServiceType:           serviceType,
 			TerminationProtection: d.Get("termination_protection").(bool),
-			DiskSpaceMB:           service.GetDiskSpaceMBOrServicePlanDefault(d, servicePlanParams),
+			DiskSpaceMB:           diskSpace,
 			UserConfig:            ConvertTerraformUserConfigToAPICompatibleFormat("service", serviceType, true, d),
 		},
 	); err != nil {
@@ -777,17 +783,18 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	// get service plan specific defaults
-	servicePlanParams, err := service.GetServicePlanParametersFromSchema(ctx, client, d)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to get service plan parameters: %w", err))
-	}
-
 	var karapace *bool
 	if v := d.Get("karapace"); d.HasChange("karapace") && v != nil {
 		if k, ok := v.(bool); ok && k {
 			*karapace = true
 		}
+	}
+
+	// On service update, we send a default disc space value for a service
+	// if the TF user does not specify it
+	diskSpace, err := getDefaultDiskSpaceIfNotSet(ctx, d, client)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	projectName, serviceName := splitResourceID2(d.Id())
@@ -802,7 +809,7 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 			ProjectVPCID:          service.GetProjectVPCIdPointer(d),
 			Powered:               true,
 			TerminationProtection: d.Get("termination_protection").(bool),
-			DiskSpaceMB:           service.GetDiskSpaceMBOrServicePlanDefault(d, servicePlanParams),
+			DiskSpaceMB:           diskSpace,
 			Karapace:              karapace,
 			UserConfig:            ConvertTerraformUserConfigToAPICompatibleFormat("service", d.Get("service_type").(string), false, d),
 		},
@@ -815,6 +822,23 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	return resourceServiceRead(ctx, d, m)
+}
+
+func getDefaultDiskSpaceIfNotSet(ctx context.Context, d *schema.ResourceData, client *aiven.Client) (int, error) {
+	var diskSpace int
+	if ds, ok := d.GetOk("disk_space"); !ok {
+		// get service plan specific defaults
+		servicePlanParams, err := service.GetServicePlanParametersFromSchema(ctx, client, d)
+		if err != nil {
+			return 0, fmt.Errorf("unable to get service plan parameters: %w", err)
+		}
+
+		diskSpace = servicePlanParams.DiskSizeMBDefault
+	} else {
+		diskSpace = service.ConvertToDiskSpaceMB(ds.(string))
+	}
+
+	return diskSpace, nil
 }
 
 func resourceServiceDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -913,7 +937,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	if err := d.Set("maintenance_window_time", s.MaintenanceWindow.TimeOfDay); err != nil {
 		return err
 	}
-	if err := d.Set("disk_space", service.HumanReadableByteSize(s.DiskSpaceMB*units.MiB)); err != nil {
+	if err := d.Set("disk_space_used", service.HumanReadableByteSize(s.DiskSpaceMB*units.MiB)); err != nil {
 		return err
 	}
 	if err := d.Set("disk_space_default", service.HumanReadableByteSize(servicePlanParams.DiskSizeMBDefault*units.MiB)); err != nil {
