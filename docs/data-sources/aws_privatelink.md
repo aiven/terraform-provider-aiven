@@ -14,7 +14,7 @@ The AWS Privatelink resource allows the creation and management of Aiven AWS Pri
 
 ```terraform
 data "aiven_aws_privatelink" "foo" {
-  project = data.aiven_project.foo.project
+  project      = data.aiven_project.foo.project
   service_name = aiven_kafka.bar.service_name
 }
 ```

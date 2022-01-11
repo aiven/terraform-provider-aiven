@@ -24,6 +24,7 @@ The Service resource allows the creation and management of Aiven Services.
 ### Optional
 
 - **cassandra_user_config** (Block List, Max: 1) Cassandra user configurable settings (see [below for nested schema](#nestedblock--cassandra_user_config))
+- **clickhouse_user_config** (Block List, Max: 1) Clickhouse user configurable settings (see [below for nested schema](#nestedblock--clickhouse_user_config))
 - **cloud_name** (String) Cloud the service runs in
 - **disk_space** (String) The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.
 - **elasticsearch_user_config** (Block List, Max: 1) Elasticsearch user configurable settings (see [below for nested schema](#nestedblock--elasticsearch_user_config))
@@ -51,6 +52,7 @@ The Service resource allows the creation and management of Aiven Services.
 ### Read-Only
 
 - **cassandra** (List of Object) Cassandra specific server provided values (see [below for nested schema](#nestedatt--cassandra))
+- **clickhouse** (List of Object) Clickhouse specific server provided values (see [below for nested schema](#nestedatt--clickhouse))
 - **components** (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
 - **disk_space_cap** (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
 - **disk_space_default** (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
@@ -110,6 +112,16 @@ Optional:
 
 - **prometheus** (String) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network
 
+
+
+<a id="nestedblock--clickhouse_user_config"></a>
+### Nested Schema for `clickhouse_user_config`
+
+Optional:
+
+- **ip_filter** (List of String) IP filter
+- **project_to_fork_from** (String) Name of another project to fork a service from. This has effect only when a new service is being created.
+- **service_to_fork_from** (String) Name of another service to fork from. This has effect only when a new service is being created.
 
 
 <a id="nestedblock--elasticsearch_user_config"></a>
@@ -1197,6 +1209,13 @@ Optional:
 
 <a id="nestedatt--cassandra"></a>
 ### Nested Schema for `cassandra`
+
+Read-Only:
+
+
+
+<a id="nestedatt--clickhouse"></a>
+### Nested Schema for `clickhouse`
 
 Read-Only:
 

@@ -14,13 +14,13 @@ The Billing Group resource allows the creation and management of Aiven Billing G
 
 ```terraform
 resource "aiven_billing_group" "bybg1" {
-  name = "bybg1"
+  name             = "bybg1"
   billing_currency = "USD"
-  vat_id = "123ABC"
+  vat_id           = "123ABC"
 }
 
 resource "aiven_project" "pr1" {
-  project = "pr1"
+  project       = "pr1"
   billing_group = aiven_billing_group.bybg1.id
 }
 ```

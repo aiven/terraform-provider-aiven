@@ -14,9 +14,9 @@ The Database data source provides information about the existing Aiven Database.
 
 ```terraform
 data "aiven_database" "mydatabase" {
-    project = aiven_project.myproject.project
-    service_name = aiven_service.myservice.service_name
-    database_name = "<DATABASE_NAME>"
+  project       = aiven_project.myproject.project
+  service_name  = aiven_service.myservice.service_name
+  database_name = "<DATABASE_NAME>"
 }
 ```
 

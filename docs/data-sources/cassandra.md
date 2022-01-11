@@ -14,8 +14,8 @@ The Cassandra data source provides information about the existing Aiven Cassandr
 
 ```terraform
 data "aiven_cassandra" "bar" {
-    project = data.aiven_project.foo.project
-    service_name = "<SERVICE_NAME>"
+  project      = data.aiven_project.foo.project
+  service_name = "<SERVICE_NAME>"
 }
 ```
 

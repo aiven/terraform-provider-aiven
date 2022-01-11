@@ -14,9 +14,9 @@ The Database resource allows the creation and management of Aiven Databases.
 
 ```terraform
 resource "aiven_database" "mydatabase" {
-    project = aiven_project.myproject.project
-    service_name = aiven_service.myservice.service_name
-    database_name = "<DATABASE_NAME>"
+  project       = aiven_project.myproject.project
+  service_name  = aiven_service.myservice.service_name
+  database_name = "<DATABASE_NAME>"
 }
 ```
 

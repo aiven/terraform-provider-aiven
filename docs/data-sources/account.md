@@ -14,7 +14,7 @@ The Account data source provides information about the existing Aiven Account.
 
 ```terraform
 data "aiven_account" "account1" {
-    name = "<ACCOUNT_NAME>"
+  name = "<ACCOUNT_NAME>"
 }
 ```
 

@@ -14,7 +14,7 @@ The Account resource allows the creation and management of an Aiven Account.
 
 ```terraform
 resource "aiven_account" "account1" {
-    name = "<ACCOUNT_NAME>"
+  name = "<ACCOUNT_NAME>"
 }
 ```
 

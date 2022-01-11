@@ -1,18 +1,18 @@
 
-variable aiven_api_token {
+variable "aiven_api_token" {
   type = string
 }
 
-variable project {
+variable "project" {
   type = string
 }
 
-variable kafka_svc {
+variable "kafka_svc" {
   type    = string
   default = "tf-kafka"
 }
 
-variable prom_name {
+variable "prom_name" {
   type    = string
   default = "Prometheus TF Example"
 }

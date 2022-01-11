@@ -14,9 +14,9 @@ The Kafka Topic data source provides information about the existing Aiven Kafka 
 
 ```terraform
 data "aiven_kafka_topic" "mytesttopic" {
-    project = aiven_project.myproject.project
-    service_name = aiven_service.myservice.service_name
-    topic_name = "<TOPIC_NAME>"
+  project      = aiven_project.myproject.project
+  service_name = aiven_service.myservice.service_name
+  topic_name   = "<TOPIC_NAME>"
 }
 ```
 

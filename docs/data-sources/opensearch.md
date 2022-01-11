@@ -14,7 +14,7 @@ The Opensearch data source provides information about the existing Aiven Opensea
 
 ```terraform
 data "aiven_opensearch" "os1" {
-  project = data.aiven_project.pr1.project
+  project      = data.aiven_project.pr1.project
   service_name = "my-os1"
 }
 ```

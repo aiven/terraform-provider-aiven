@@ -14,7 +14,7 @@ The Project data source provides information about the existing Aiven Project.
 
 ```terraform
 data "aiven_project" "myproject" {
-    project = "<PROJECT_NAME>"
+  project = "<PROJECT_NAME>"
 }
 ```
 

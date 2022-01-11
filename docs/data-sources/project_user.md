@@ -14,8 +14,8 @@ The Project User data source provides information about the existing Aiven Proje
 
 ```terraform
 data "aiven_project_user" "mytestuser" {
-    project = aiven_project.myproject.project
-    email = "john.doe@example.com"
+  project = aiven_project.myproject.project
+  email   = "john.doe@example.com"
 }
 ```
 
