@@ -22,3 +22,14 @@ jobs:
           go-version: 1.16
 
       - uses: golangci/golangci-lint-action@v2.5.2
+
+  check_docs_were_generated:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
+      - run: make docs
+      - run: git diff --exit-code
