@@ -5,8 +5,18 @@ nav_order: 1
 ---# Changelog
 
 
-## [2.4.1] - not yet released
-- Add possibility to dissociate project from an account
+## [2.4.1] - 2022-01-11
+- Reformat embedded terraform manifests
+- Disable service `disk_space` default values propagation
+- Add ClickHouse service beta support 
+- Validation of `kafka_schema` during `terraform plan` (only for schema update, not for initial creation)
+- Fix saml auth provider URL's
+- `aiven_kafka_topic` resource optimizations
+- Fix a typo in the account acceptance test
+- Fix project creation with `account_id` empty and add possibility to dissociate project from an account by not setting `account_id`
+- Fix typos in documentation and examples
+- Add `resource_elasticsearch_acl` acceptance tests
+- Improve logging for service waiter
 
 ## [2.4.0] - 2021-12-01
 - Add data source support for `aiven_billing_group`
