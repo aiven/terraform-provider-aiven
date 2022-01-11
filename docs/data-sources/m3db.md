@@ -14,8 +14,8 @@ The M3 DB data source provides information about the existing Aiven M3 services.
 
 ```terraform
 data "aiven_m3db" "m3" {
-    project = data.aiven_project.foo.project
-    service_name = "my-m3db"
+  project      = data.aiven_project.foo.project
+  service_name = "my-m3db"
 }
 ```
 

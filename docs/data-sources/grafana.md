@@ -14,8 +14,8 @@ The Grafana data source provides information about the existing Aiven Grafana se
 
 ```terraform
 data "aiven_grafana" "gr1" {
-    project = data.aiven_project.ps1.project
-    service_name = "my-gr1"
+  project      = data.aiven_project.ps1.project
+  service_name = "my-gr1"
 }
 ```
 

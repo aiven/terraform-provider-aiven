@@ -28,6 +28,8 @@ The Service datasource provides information about specific Aiven Services.
 
 - **cassandra** (List of Object) Cassandra specific server provided values (see [below for nested schema](#nestedatt--cassandra))
 - **cassandra_user_config** (List of Object) Cassandra user configurable settings (see [below for nested schema](#nestedatt--cassandra_user_config))
+- **clickhouse** (List of Object) Clickhouse specific server provided values (see [below for nested schema](#nestedatt--clickhouse))
+- **clickhouse_user_config** (List of Object) Clickhouse user configurable settings (see [below for nested schema](#nestedatt--clickhouse_user_config))
 - **cloud_name** (String) Cloud the service runs in
 - **components** (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
 - **disk_space** (String) The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.
@@ -116,6 +118,23 @@ Read-Only:
 
 - **prometheus** (String)
 
+
+
+<a id="nestedatt--clickhouse"></a>
+### Nested Schema for `clickhouse`
+
+Read-Only:
+
+
+
+<a id="nestedatt--clickhouse_user_config"></a>
+### Nested Schema for `clickhouse_user_config`
+
+Read-Only:
+
+- **ip_filter** (List of String)
+- **project_to_fork_from** (String)
+- **service_to_fork_from** (String)
 
 
 <a id="nestedatt--components"></a>

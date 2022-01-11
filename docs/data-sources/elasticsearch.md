@@ -14,8 +14,8 @@ The Elasticsearch data source provides information about the existing Aiven Elas
 
 ```terraform
 data "aiven_elasticsearch" "es1" {
-    project = data.aiven_project.pr1.project
-    service_name = "my-es1"
+  project      = data.aiven_project.pr1.project
+  service_name = "my-es1"
 }
 ```
 

@@ -14,8 +14,8 @@ The Flink data source provides information about the existing Aiven Flink servic
 
 ```terraform
 data "aiven_flink" "flink" {
-    project = data.aiven_project.pr1.project
-    service_name = "<SERVICE_NAME>"
+  project      = data.aiven_project.pr1.project
+  service_name = "<SERVICE_NAME>"
 }
 ```
 

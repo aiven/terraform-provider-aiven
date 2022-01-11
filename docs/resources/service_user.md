@@ -14,9 +14,9 @@ The Service User resource allows the creation and management of Aiven Service Us
 
 ```terraform
 resource "aiven_service_user" "myserviceuser" {
-  project = aiven_project.myproject.project
+  project      = aiven_project.myproject.project
   service_name = aiven_service.myservice.service_name
-  username = "<USERNAME>"
+  username     = "<USERNAME>"
 }
 ```
 

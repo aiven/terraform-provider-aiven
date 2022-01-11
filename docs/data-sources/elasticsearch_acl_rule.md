@@ -14,10 +14,10 @@ The Elasticsearch ACL Rule data source provides information about an existing Ai
 
 ```terraform
 data "aiven_elasticsearch_acl_rule" "es_acl_rule" {
-  project = aiven_elasticsearch_acl_config.es_acls_config.project
+  project      = aiven_elasticsearch_acl_config.es_acls_config.project
   service_name = aiven_elasticsearch_acl_config.es_acls_config.service_name
-  username = "<USERNAME>"
-  index = "<INDEX>"
+  username     = "<USERNAME>"
+  index        = "<INDEX>"
 }
 ```
 

@@ -14,8 +14,8 @@ The Service Integration Endpoint data source provides information about the exis
 
 ```terraform
 data "aiven_service_integration_endpoint" "myendpoint" {
-    project = aiven_project.myproject.project
-    endpoint_name = "<ENDPOINT_NAME>"
+  project       = aiven_project.myproject.project
+  endpoint_name = "<ENDPOINT_NAME>"
 }
 ```
 

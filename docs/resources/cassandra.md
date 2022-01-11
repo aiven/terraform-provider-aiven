@@ -14,20 +14,20 @@ The Cassandra resource allows the creation and management of Aiven Cassandra ser
 
 ```terraform
 resource "aiven_cassandra" "bar" {
-    project = data.aiven_project.foo.project
-    cloud_name = "google-europe-west1"
-    plan = "startup-4"
-    service_name = "test-acc-sr-%s"
-    maintenance_window_dow = "monday"
-    maintenance_window_time = "10:00:00"
-    
-    cassandra_user_config {
-        migrate_sstableloader = true
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
 
-        public_access {
-            prometheus = true
-        }
+  cassandra_user_config {
+    migrate_sstableloader = true
+
+    public_access {
+      prometheus = true
     }
+  }
 }
 ```
 

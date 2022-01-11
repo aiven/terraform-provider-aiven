@@ -14,8 +14,8 @@ The Elasticsearch ACL data source provides information about the existing Aiven 
 
 ```terraform
 data "aiven_elasticsearch_acl" "es-acls" {
-    project = aiven_project.es-project.project
-    service_name = aiven_elasticsearch.es.service_name
+  project      = aiven_project.es-project.project
+  service_name = aiven_elasticsearch.es.service_name
 }
 ```
 

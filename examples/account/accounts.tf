@@ -6,7 +6,7 @@ variable "dev_project_name" {}
 terraform {
   required_providers {
     aiven = {
-      source = "aiven/aiven"
+      source  = "aiven/aiven"
       version = ">= 2.0.0, < 3.0.0"
     }
   }
@@ -54,15 +54,15 @@ resource "aiven_account" "acct" {
 # - development
 ################################################
 resource "aiven_project" "prj-prod" {
-  project = var.prod_project_name
+  project    = var.prod_project_name
   account_id = aiven_account.acct.account_id
 }
 resource "aiven_project" "prj-qa" {
-  project = var.qa_project_name
+  project    = var.qa_project_name
   account_id = aiven_account.acct.account_id
 }
 resource "aiven_project" "prj-dev" {
-  project = var.dev_project_name
+  project    = var.dev_project_name
   account_id = aiven_account.acct.account_id
 }
 
@@ -84,23 +84,23 @@ resource "aiven_project" "prj-dev" {
 ################################################
 resource "aiven_account_team" "tm-admin" {
   account_id = aiven_account.acct.account_id
-  name = "Admins"
+  name       = "Admins"
 }
 resource "aiven_account_team" "tm-ops" {
   account_id = aiven_account.acct.account_id
-  name = "Operations"
+  name       = "Operations"
 }
 resource "aiven_account_team" "tm-dev" {
   account_id = aiven_account.acct.account_id
-  name = "Developers"
+  name       = "Developers"
 }
 resource "aiven_account_team" "tm-qa" {
   account_id = aiven_account.acct.account_id
-  name = "Quality Assurance"
+  name       = "Quality Assurance"
 }
 resource "aiven_account_team" "tm-default" {
   account_id = aiven_account.acct.account_id
-  name = "Unassigned"
+  name       = "Unassigned"
 }
 
 ################################################
@@ -120,82 +120,82 @@ resource "aiven_account_team" "tm-default" {
 
 # admin team
 resource "aiven_account_team_project" "rbac-prod-admin" {
-  account_id = aiven_account.acct.account_id
-  team_id = aiven_account_team.tm-admin.team_id
+  account_id   = aiven_account.acct.account_id
+  team_id      = aiven_account_team.tm-admin.team_id
   project_name = aiven_project.prj-prod.project
-  team_type = "admin"
+  team_type    = "admin"
 }
 resource "aiven_account_team_project" "rbac-qa-admin" {
-  account_id = aiven_account.acct.account_id
-  team_id = aiven_account_team.tm-admin.team_id
+  account_id   = aiven_account.acct.account_id
+  team_id      = aiven_account_team.tm-admin.team_id
   project_name = aiven_project.prj-qa.project
-  team_type = "admin"
+  team_type    = "admin"
 }
 resource "aiven_account_team_project" "rbac-dev-admin" {
-  account_id = aiven_account.acct.account_id
-  team_id = aiven_account_team.tm-admin.team_id
+  account_id   = aiven_account.acct.account_id
+  team_id      = aiven_account_team.tm-admin.team_id
   project_name = aiven_project.prj-dev.project
-  team_type = "admin"
+  team_type    = "admin"
 }
 
 # operator team
 resource "aiven_account_team_project" "rbac-prod-ops" {
-  account_id = aiven_account.acct.account_id
-  team_id = aiven_account_team.tm-ops.team_id
+  account_id   = aiven_account.acct.account_id
+  team_id      = aiven_account_team.tm-ops.team_id
   project_name = aiven_project.prj-prod.project
-  team_type = "operator"
+  team_type    = "operator"
 }
 resource "aiven_account_team_project" "rbac-qa-ops" {
-  account_id = aiven_account.acct.account_id
-  team_id = aiven_account_team.tm-ops.team_id
+  account_id   = aiven_account.acct.account_id
+  team_id      = aiven_account_team.tm-ops.team_id
   project_name = aiven_project.prj-qa.project
-  team_type = "operator"
+  team_type    = "operator"
 }
 resource "aiven_account_team_project" "rbac-dev-ops" {
-  account_id = aiven_account.acct.account_id
-  team_id = aiven_account_team.tm-ops.team_id
+  account_id   = aiven_account.acct.account_id
+  team_id      = aiven_account_team.tm-ops.team_id
   project_name = aiven_project.prj-dev.project
-  team_type = "operator"
+  team_type    = "operator"
 }
 
 # developer team
 resource "aiven_account_team_project" "rbac-prod-dev" {
-  account_id = aiven_account.acct.account_id
-  team_id = aiven_account_team.tm-dev.team_id
+  account_id   = aiven_account.acct.account_id
+  team_id      = aiven_account_team.tm-dev.team_id
   project_name = aiven_project.prj-prod.project
-  team_type = "read_only"
+  team_type    = "read_only"
 }
 resource "aiven_account_team_project" "rbac-qa-dev" {
-  account_id = aiven_account.acct.account_id
-  team_id = aiven_account_team.tm-dev.team_id
+  account_id   = aiven_account.acct.account_id
+  team_id      = aiven_account_team.tm-dev.team_id
   project_name = aiven_project.prj-qa.project
-  team_type = "developer"
+  team_type    = "developer"
 }
 resource "aiven_account_team_project" "rbac-dev-dev" {
-  account_id = aiven_account.acct.account_id
-  team_id = aiven_account_team.tm-dev.team_id
+  account_id   = aiven_account.acct.account_id
+  team_id      = aiven_account_team.tm-dev.team_id
   project_name = aiven_project.prj-dev.project
-  team_type = "developer"
+  team_type    = "developer"
 }
 
 # qa team
 resource "aiven_account_team_project" "rbac-prod-qa" {
-  account_id = aiven_account.acct.account_id
-  team_id = aiven_account_team.tm-qa.team_id
+  account_id   = aiven_account.acct.account_id
+  team_id      = aiven_account_team.tm-qa.team_id
   project_name = aiven_project.prj-prod.project
-  team_type = "read_only"
+  team_type    = "read_only"
 }
 resource "aiven_account_team_project" "rbac-qa-qa" {
-  account_id = aiven_account.acct.account_id
-  team_id = aiven_account_team.tm-qa.team_id
+  account_id   = aiven_account.acct.account_id
+  team_id      = aiven_account_team.tm-qa.team_id
   project_name = aiven_project.prj-qa.project
-  team_type = "read_only"
+  team_type    = "read_only"
 }
 resource "aiven_account_team_project" "rbac-dev-qa" {
-  account_id = aiven_account.acct.account_id
-  team_id = aiven_account_team.tm-qa.team_id
+  account_id   = aiven_account.acct.account_id
+  team_id      = aiven_account_team.tm-qa.team_id
   project_name = aiven_project.prj-dev.project
-  team_type = "read_only"
+  team_type    = "read_only"
 }
 
 ################################################
@@ -208,6 +208,6 @@ resource "aiven_account_team_project" "rbac-dev-qa" {
 ################################################
 resource "aiven_account_team_member" "u-david" {
   account_id = aiven_account.acct.account_id
-  team_id = aiven_account_team.tm-admin.team_id
+  team_id    = aiven_account_team.tm-admin.team_id
   user_email = "david@aiven.io"
 }

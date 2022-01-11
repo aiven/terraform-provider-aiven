@@ -14,8 +14,8 @@ The Kafka MirrorMaker data source provides information about the existing Aiven 
 
 ```terraform
 data "aiven_kafka_mirrormaker" "mm1" {
-    project = data.aiven_project.pr1.project
-    service_name = "my-mm1"
+  project      = data.aiven_project.pr1.project
+  service_name = "my-mm1"
 }
 ```
 

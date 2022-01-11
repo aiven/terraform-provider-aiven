@@ -14,8 +14,8 @@ The Redis data source provides information about the existing Aiven Redis servic
 
 ```terraform
 data "aiven_redis" "redis1" {
-    project = data.aiven_project.pr1.project
-    service_name = "my-redis1"
+  project      = data.aiven_project.pr1.project
+  service_name = "my-redis1"
 }
 ```
 
