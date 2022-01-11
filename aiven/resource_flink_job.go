@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -66,7 +68,7 @@ func resourceFlinkJob() *schema.Resource {
 func resourceFlinkJobRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, jobId := splitResourceID3(d.Id())
+	project, serviceName, jobId := schemautil.SplitResourceID3(d.Id())
 
 	r, err := client.FlinkJobs.Get(project, serviceName, aiven.GetFlinkJobRequest{JobId: jobId})
 	if err != nil {
@@ -107,7 +109,7 @@ func resourceFlinkJobCreate(ctx context.Context, d *schema.ResourceData, m inter
 	serviceName := d.Get("service_name").(string)
 	jobName := d.Get("job_name").(string)
 	jobStatement := d.Get("statement").(string)
-	jobTables := flattenToString(d.Get("table_ids").([]interface{}))
+	jobTables := schemautil.FlattenToString(d.Get("table_ids").([]interface{}))
 
 	createRequest := aiven.CreateFlinkJobRequest{
 		JobName:   jobName,
@@ -153,7 +155,7 @@ func resourceFlinkJobCreate(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.Errorf("Error waiting for job to become active: %s", err)
 	}
 
-	d.SetId(buildResourceID(project, serviceName, r.(*aiven.GetFlinkJobResponse).JID))
+	d.SetId(schemautil.BuildResourceID(project, serviceName, r.(*aiven.GetFlinkJobResponse).JID))
 
 	return resourceFlinkJobRead(ctx, d, m)
 }
@@ -161,7 +163,7 @@ func resourceFlinkJobCreate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceFlinkJobDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, jobId := splitResourceID3(d.Id())
+	project, serviceName, jobId := schemautil.SplitResourceID3(d.Id())
 
 	err := client.FlinkJobs.Patch(
 		project,

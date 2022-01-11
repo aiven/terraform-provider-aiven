@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -82,7 +84,7 @@ func resourceProjectVPCCreate(ctx context.Context, d *schema.ResourceData, m int
 		return diag.Errorf("error waiting for Aiven project VPC to be ACTIVE: %s", err)
 	}
 
-	d.SetId(buildResourceID(projectName, vpc.ProjectVPCID))
+	d.SetId(schemautil.BuildResourceID(projectName, vpc.ProjectVPCID))
 
 	return resourceProjectVPCRead(ctx, d, m)
 }
@@ -90,7 +92,7 @@ func resourceProjectVPCCreate(ctx context.Context, d *schema.ResourceData, m int
 func resourceProjectVPCRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, vpcID := splitResourceID2(d.Id())
+	projectName, vpcID := schemautil.SplitResourceID2(d.Id())
 	vpc, err := client.VPCs.Get(projectName, vpcID)
 	if err != nil {
 		return diag.FromErr(resourceReadHandleNotFound(err, d))
@@ -107,7 +109,7 @@ func resourceProjectVPCRead(_ context.Context, d *schema.ResourceData, m interfa
 func resourceProjectVPCDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, vpcID := splitResourceID2(d.Id())
+	projectName, vpcID := schemautil.SplitResourceID2(d.Id())
 
 	waiter := ProjectVPCDeleteWaiter{
 		Client:  client,

@@ -10,6 +10,8 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -248,7 +250,7 @@ func testAccCheckAivenKafkaACLResourceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		project, serviceName, aclID := splitResourceID3(rs.Primary.ID)
+		project, serviceName, aclID := schemautil.SplitResourceID3(rs.Primary.ID)
 		p, err := c.KafkaACLs.Get(project, serviceName, aclID)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {

@@ -6,6 +6,8 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -36,7 +38,7 @@ func datasourceKafkaACLRead(ctx context.Context, d *schema.ResourceData, m inter
 
 	for _, acl := range acls {
 		if acl.Topic == topic && acl.Username == userName && acl.Permission == permission {
-			d.SetId(buildResourceID(projectName, serviceName, acl.ID))
+			d.SetId(schemautil.BuildResourceID(projectName, serviceName, acl.ID))
 			return resourceKafkaACLRead(ctx, d, m)
 		}
 	}

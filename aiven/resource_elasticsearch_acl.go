@@ -7,6 +7,8 @@ import (
 	"fmt"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -89,7 +91,7 @@ The Elasticsearch ACL resource allows the creation and management of ACLs for an
 func resourceElasticsearchACLRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName := splitResourceID2(d.Id())
+	project, serviceName := schemautil.SplitResourceID2(d.Id())
 	r, err := client.ElasticsearchACLs.Get(project, serviceName)
 	if err != nil {
 		return diag.FromErr(resourceReadHandleNotFound(err, d))
@@ -183,7 +185,7 @@ func resourceElasticsearchACLUpdate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	d.SetId(buildResourceID(project, serviceName))
+	d.SetId(schemautil.BuildResourceID(project, serviceName))
 
 	return resourceElasticsearchACLRead(ctx, d, m)
 }

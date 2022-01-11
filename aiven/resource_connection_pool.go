@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -84,14 +86,14 @@ func resourceConnectionPoolCreate(ctx context.Context, d *schema.ResourceData, m
 			PoolMode: d.Get("pool_mode").(string),
 			PoolName: poolName,
 			PoolSize: d.Get("pool_size").(int),
-			Username: optionalStringPointer(d, "username"),
+			Username: schemautil.OptionalStringPointer(d, "username"),
 		},
 	)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(buildResourceID(project, serviceName, poolName))
+	d.SetId(schemautil.BuildResourceID(project, serviceName, poolName))
 
 	return resourceConnectionPoolRead(ctx, d, m)
 }
@@ -99,7 +101,7 @@ func resourceConnectionPoolCreate(ctx context.Context, d *schema.ResourceData, m
 func resourceConnectionPoolRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, poolName := splitResourceID3(d.Id())
+	project, serviceName, poolName := schemautil.SplitResourceID3(d.Id())
 	pool, err := client.ConnectionPools.Get(project, serviceName, poolName)
 	if err != nil {
 		return diag.FromErr(resourceReadHandleNotFound(err, d))
@@ -116,7 +118,7 @@ func resourceConnectionPoolRead(_ context.Context, d *schema.ResourceData, m int
 func resourceConnectionPoolUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, poolName := splitResourceID3(d.Id())
+	project, serviceName, poolName := schemautil.SplitResourceID3(d.Id())
 	_, err := client.ConnectionPools.Update(
 		project,
 		serviceName,
@@ -125,7 +127,7 @@ func resourceConnectionPoolUpdate(ctx context.Context, d *schema.ResourceData, m
 			Database: d.Get("database_name").(string),
 			PoolMode: d.Get("pool_mode").(string),
 			PoolSize: d.Get("pool_size").(int),
-			Username: optionalStringPointer(d, "username"),
+			Username: schemautil.OptionalStringPointer(d, "username"),
 		},
 	)
 	if err != nil {
@@ -138,7 +140,7 @@ func resourceConnectionPoolUpdate(ctx context.Context, d *schema.ResourceData, m
 func resourceConnectionPoolDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, poolName := splitResourceID3(d.Id())
+	projectName, serviceName, poolName := schemautil.SplitResourceID3(d.Id())
 	err := client.ConnectionPools.Delete(projectName, serviceName, poolName)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)

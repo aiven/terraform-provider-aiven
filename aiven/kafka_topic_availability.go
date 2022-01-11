@@ -8,7 +8,8 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/pkg/cache"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/cache"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"golang.org/x/sync/semaphore"
 )

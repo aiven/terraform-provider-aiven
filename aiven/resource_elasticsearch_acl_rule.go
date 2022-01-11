@@ -7,6 +7,8 @@ import (
 	"fmt"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -69,7 +71,7 @@ func resourceElasticsearchACLRuleGetPermissionFromACLResponse(cfg aiven.ElasticS
 func resourceElasticsearchACLRuleRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, username, index := splitResourceID4(d.Id())
+	project, serviceName, username, index := schemautil.SplitResourceID4(d.Id())
 	r, err := client.ElasticsearchACLs.Get(project, serviceName)
 	if err != nil {
 		return diag.FromErr(resourceReadHandleNotFound(err, d))
@@ -134,7 +136,7 @@ func resourceElasticsearchACLRuleUpdate(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(resourceReadHandleNotFound(err, d))
 	}
 
-	d.SetId(buildResourceID(project, serviceName, username, index))
+	d.SetId(schemautil.BuildResourceID(project, serviceName, username, index))
 
 	return resourceElasticsearchACLRuleRead(ctx, d, m)
 }

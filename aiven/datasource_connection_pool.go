@@ -6,6 +6,8 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -33,7 +35,7 @@ func datasourceConnectionPoolRead(ctx context.Context, d *schema.ResourceData, m
 
 	for _, pool := range pools {
 		if pool.PoolName == poolName {
-			d.SetId(buildResourceID(projectName, serviceName, poolName))
+			d.SetId(schemautil.BuildResourceID(projectName, serviceName, poolName))
 			return resourceConnectionPoolRead(ctx, d, m)
 		}
 	}

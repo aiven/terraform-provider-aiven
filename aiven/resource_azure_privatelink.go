@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -93,14 +95,14 @@ func resourceAzurePrivatelinkCreate(ctx context.Context, d *schema.ResourceData,
 		return diag.Errorf("Error waiting for Azure privatelink: %s", err)
 	}
 
-	d.SetId(buildResourceID(project, serviceName))
+	d.SetId(schemautil.BuildResourceID(project, serviceName))
 
 	return resourceAzurePrivatelinkRead(ctx, d, m)
 }
 
 func resourceAzurePrivatelinkRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
-	project, serviceName := splitResourceID2(d.Id())
+	project, serviceName := schemautil.SplitResourceID2(d.Id())
 
 	pl, err := client.AzurePrivatelink.Get(project, serviceName)
 	if err != nil {
@@ -135,7 +137,7 @@ func resourceAzurePrivatelinkUpdate(ctx context.Context, d *schema.ResourceData,
 	client := m.(*aiven.Client)
 
 	var subscriptionIDs []string
-	project, serviceName := splitResourceID2(d.Id())
+	project, serviceName := schemautil.SplitResourceID2(d.Id())
 
 	for _, s := range d.Get("user_subscription_ids").(*schema.Set).List() {
 		subscriptionIDs = append(subscriptionIDs, s.(string))
@@ -182,7 +184,7 @@ func waitForAzurePrivatelinkToBeActive(client *aiven.Client, project string, ser
 
 func resourceAzurePrivatelinkDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
-	project, serviceName := splitResourceID2(d.Id())
+	project, serviceName := schemautil.SplitResourceID2(d.Id())
 
 	err := client.AzurePrivatelink.Delete(project, serviceName)
 	if err != nil && !aiven.IsNotFound(err) {

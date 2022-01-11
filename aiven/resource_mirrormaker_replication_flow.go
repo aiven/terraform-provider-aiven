@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -118,8 +120,8 @@ func resourceMirrorMakerReplicationFlowCreate(ctx context.Context, d *schema.Res
 			Enabled:                         enable,
 			SourceCluster:                   sourceCluster,
 			TargetCluster:                   d.Get("target_cluster").(string),
-			Topics:                          flattenToString(d.Get("topics").([]interface{})),
-			TopicsBlacklist:                 flattenToString(d.Get("topics_blacklist").([]interface{})),
+			Topics:                          schemautil.FlattenToString(d.Get("topics").([]interface{})),
+			TopicsBlacklist:                 schemautil.FlattenToString(d.Get("topics_blacklist").([]interface{})),
 			ReplicationPolicyClass:          d.Get("replication_policy_class").(string),
 			SyncGroupOffsetsEnabled:         d.Get("sync_group_offsets_enabled").(bool),
 			SyncGroupOffsetsIntervalSeconds: d.Get("sync_group_offsets_interval_seconds").(int),
@@ -130,7 +132,7 @@ func resourceMirrorMakerReplicationFlowCreate(ctx context.Context, d *schema.Res
 		return diag.FromErr(err)
 	}
 
-	d.SetId(buildResourceID(project, serviceName, sourceCluster, targetCluster))
+	d.SetId(schemautil.BuildResourceID(project, serviceName, sourceCluster, targetCluster))
 
 	return resourceMirrorMakerReplicationFlowRead(ctx, d, m)
 }
@@ -138,7 +140,7 @@ func resourceMirrorMakerReplicationFlowCreate(ctx context.Context, d *schema.Res
 func resourceMirrorMakerReplicationFlowRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, sourceCluster, targetCluster := splitResourceID4(d.Id())
+	project, serviceName, sourceCluster, targetCluster := schemautil.SplitResourceID4(d.Id())
 	replicationFlow, err := client.KafkaMirrorMakerReplicationFlow.Get(project, serviceName, sourceCluster, targetCluster)
 	if err != nil {
 		return diag.FromErr(resourceReadHandleNotFound(err, d))
@@ -184,7 +186,7 @@ func resourceMirrorMakerReplicationFlowRead(_ context.Context, d *schema.Resourc
 func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, sourceCluster, targetCluster := splitResourceID4(d.Id())
+	project, serviceName, sourceCluster, targetCluster := schemautil.SplitResourceID4(d.Id())
 	_, err := client.KafkaMirrorMakerReplicationFlow.Update(
 		project,
 		serviceName,
@@ -193,8 +195,8 @@ func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.Res
 		aiven.MirrorMakerReplicationFlowRequest{
 			ReplicationFlow: aiven.ReplicationFlow{
 				Enabled:                         d.Get("enable").(bool),
-				Topics:                          flattenToString(d.Get("topics").([]interface{})),
-				TopicsBlacklist:                 flattenToString(d.Get("topics_blacklist").([]interface{})),
+				Topics:                          schemautil.FlattenToString(d.Get("topics").([]interface{})),
+				TopicsBlacklist:                 schemautil.FlattenToString(d.Get("topics_blacklist").([]interface{})),
 				ReplicationPolicyClass:          d.Get("replication_policy_class").(string),
 				SyncGroupOffsetsEnabled:         d.Get("sync_group_offsets_enabled").(bool),
 				SyncGroupOffsetsIntervalSeconds: d.Get("sync_group_offsets_interval_seconds").(int),
@@ -212,7 +214,7 @@ func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.Res
 func resourceMirrorMakerReplicationFlowDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, sourceCluster, targetCluster := splitResourceID4(d.Id())
+	project, serviceName, sourceCluster, targetCluster := schemautil.SplitResourceID4(d.Id())
 
 	err := client.KafkaMirrorMakerReplicationFlow.Delete(project, serviceName, sourceCluster, targetCluster)
 	if err != nil {

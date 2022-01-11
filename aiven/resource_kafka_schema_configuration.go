@@ -7,6 +7,8 @@ import (
 	"fmt"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -55,7 +57,7 @@ func resourceKafkaSchemaConfiguration() *schema.Resource {
 }
 
 func resourceKafkaSchemaConfigurationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	project, serviceName := splitResourceID2(d.Id())
+	project, serviceName := schemautil.SplitResourceID2(d.Id())
 
 	_, err := m.(*aiven.Client).KafkaGlobalSchemaConfig.Update(
 		project,
@@ -85,13 +87,13 @@ func resourceKafkaSchemaConfigurationCreate(ctx context.Context, d *schema.Resou
 		return diag.FromErr(err)
 	}
 
-	d.SetId(buildResourceID(project, serviceName))
+	d.SetId(schemautil.BuildResourceID(project, serviceName))
 
 	return resourceKafkaSchemaConfigurationRead(ctx, d, m)
 }
 
 func resourceKafkaSchemaConfigurationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	project, serviceName := splitResourceID2(d.Id())
+	project, serviceName := schemautil.SplitResourceID2(d.Id())
 
 	r, err := m.(*aiven.Client).KafkaGlobalSchemaConfig.Get(project, serviceName)
 	if err != nil {
@@ -114,7 +116,7 @@ func resourceKafkaSchemaConfigurationRead(_ context.Context, d *schema.ResourceD
 // resourceKafkaSchemaConfigurationDelete Kafka Schemas configuration cannot be deleted, therefore
 // on delete event configuration will be set to the default setting
 func resourceKafkaSchemaConfigurationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	project, serviceName := splitResourceID2(d.Id())
+	project, serviceName := schemautil.SplitResourceID2(d.Id())
 
 	_, err := m.(*aiven.Client).KafkaGlobalSchemaConfig.Update(
 		project,

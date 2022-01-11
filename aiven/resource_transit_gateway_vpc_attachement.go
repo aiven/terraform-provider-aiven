@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -83,7 +85,7 @@ func resourceTransitGatewayVPCAttachment() *schema.Resource {
 func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	cidrs := flattenToString(d.Get("user_peer_network_cidrs").([]interface{}))
+	cidrs := schemautil.FlattenToString(d.Get("user_peer_network_cidrs").([]interface{}))
 	projectName, vpcID, peerCloudAccount, peerVPC, _ := parsePeeringVPCId(d.Id())
 
 	peeringConnection, err := client.VPCPeeringConnections.Get(projectName, vpcID, peerCloudAccount, peerVPC)

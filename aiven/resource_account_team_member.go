@@ -8,6 +8,8 @@ import (
 	"log"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -84,7 +86,7 @@ func resourceAccountTeamMemberCreate(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	d.SetId(buildResourceID(accountId, teamId, userEmail))
+	d.SetId(schemautil.BuildResourceID(accountId, teamId, userEmail))
 
 	return resourceAccountTeamMemberRead(ctx, d, m)
 }
@@ -92,7 +94,7 @@ func resourceAccountTeamMemberCreate(ctx context.Context, d *schema.ResourceData
 func resourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var found bool
 	client := m.(*aiven.Client)
-	accountId, teamId, userEmail := splitResourceID3(d.Id())
+	accountId, teamId, userEmail := schemautil.SplitResourceID3(d.Id())
 
 	r, err := client.AccountTeamInvites.List(accountId, teamId)
 	if err != nil {
@@ -172,7 +174,7 @@ func resourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, 
 func resourceAccountTeamMemberDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId, teamId, userEmail := splitResourceID3(d.Id())
+	accountId, teamId, userEmail := schemautil.SplitResourceID3(d.Id())
 
 	// delete account team user invitation
 	err := client.AccountTeamInvites.Delete(accountId, teamId, userEmail)
@@ -188,7 +190,7 @@ func resourceAccountTeamMemberDelete(_ context.Context, d *schema.ResourceData, 
 	// delete account team member
 	for _, m := range r.Members {
 		if m.UserEmail == userEmail {
-			err = client.AccountTeamMembers.Delete(splitResourceID3(d.Id()))
+			err = client.AccountTeamMembers.Delete(schemautil.SplitResourceID3(d.Id()))
 			if err != nil && !aiven.IsNotFound(err) {
 				return diag.FromErr(err)
 			}

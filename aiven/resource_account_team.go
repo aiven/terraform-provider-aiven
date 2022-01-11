@@ -7,6 +7,8 @@ import (
 	"fmt"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -69,7 +71,7 @@ func resourceAccountTeamCreate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	d.SetId(buildResourceID(r.Team.AccountId, r.Team.Id))
+	d.SetId(schemautil.BuildResourceID(r.Team.AccountId, r.Team.Id))
 
 	return resourceAccountTeamRead(ctx, d, m)
 }
@@ -77,7 +79,7 @@ func resourceAccountTeamCreate(ctx context.Context, d *schema.ResourceData, m in
 func resourceAccountTeamRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId, teamId := splitResourceID2(d.Id())
+	accountId, teamId := schemautil.SplitResourceID2(d.Id())
 	r, err := client.AccountTeams.Get(accountId, teamId)
 	if err != nil {
 		return diag.FromErr(resourceReadHandleNotFound(err, d))
@@ -104,7 +106,7 @@ func resourceAccountTeamRead(_ context.Context, d *schema.ResourceData, m interf
 
 func resourceAccountTeamUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
-	accountId, teamId := splitResourceID2(d.Id())
+	accountId, teamId := schemautil.SplitResourceID2(d.Id())
 
 	r, err := client.AccountTeams.Update(accountId, teamId, aiven.AccountTeam{
 		Name: d.Get("name").(string),
@@ -113,7 +115,7 @@ func resourceAccountTeamUpdate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	d.SetId(buildResourceID(r.Team.AccountId, r.Team.Id))
+	d.SetId(schemautil.BuildResourceID(r.Team.AccountId, r.Team.Id))
 
 	return resourceAccountTeamRead(ctx, d, m)
 }
@@ -121,7 +123,7 @@ func resourceAccountTeamUpdate(ctx context.Context, d *schema.ResourceData, m in
 func resourceAccountTeamDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId, teamId := splitResourceID2(d.Id())
+	accountId, teamId := schemautil.SplitResourceID2(d.Id())
 
 	err := client.AccountTeams.Delete(accountId, teamId)
 	if err != nil && !aiven.IsNotFound(err) {

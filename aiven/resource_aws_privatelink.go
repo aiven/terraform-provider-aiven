@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -86,7 +88,7 @@ func resourceAWSPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m
 		return diag.Errorf("Error waiting for AWS privatelink creation: %s", err)
 	}
 
-	d.SetId(buildResourceID(project, serviceName))
+	d.SetId(schemautil.BuildResourceID(project, serviceName))
 
 	return resourceAWSPrivatelinkRead(ctx, d, m)
 }
@@ -94,7 +96,7 @@ func resourceAWSPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m
 func resourceAWSPrivatelinkRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName := splitResourceID2(d.Id())
+	project, serviceName := schemautil.SplitResourceID2(d.Id())
 	p, err := client.AWSPrivatelink.Get(project, serviceName)
 	if err != nil {
 		return diag.FromErr(resourceReadHandleNotFound(err, d))
@@ -121,7 +123,7 @@ func resourceAWSPrivatelinkRead(_ context.Context, d *schema.ResourceData, m int
 func resourceAWSPrivatelinkUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName := splitResourceID2(d.Id())
+	project, serviceName := schemautil.SplitResourceID2(d.Id())
 
 	var principals []string
 	for _, p := range d.Get("principals").(*schema.Set).List() {
@@ -155,7 +157,7 @@ func resourceAWSPrivatelinkUpdate(ctx context.Context, d *schema.ResourceData, m
 func resourceAWSPrivatelinkDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	err := client.AWSPrivatelink.Delete(splitResourceID2(d.Id()))
+	err := client.AWSPrivatelink.Delete(schemautil.SplitResourceID2(d.Id()))
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}

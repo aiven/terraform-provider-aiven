@@ -8,6 +8,8 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -457,7 +459,7 @@ func testAccCheckAivenFlinkJobsAndTableResourcesDestroy(s *terraform.State) erro
 	for _, rs := range s.RootModule().Resources {
 		switch rs.Type {
 		case "aiven_flink_job":
-			project, serviceName, jobId := splitResourceID3(rs.Primary.ID)
+			project, serviceName, jobId := schemautil.SplitResourceID3(rs.Primary.ID)
 
 			_, err := c.Services.Get(project, serviceName)
 			if err != nil {
@@ -479,7 +481,7 @@ func testAccCheckAivenFlinkJobsAndTableResourcesDestroy(s *terraform.State) erro
 				return fmt.Errorf("flink job (%s) still exists, id %s", jobId, rs.Primary.ID)
 			}
 		case "aiven_flink_table":
-			project, serviceName, tableId := splitResourceID3(rs.Primary.ID)
+			project, serviceName, tableId := schemautil.SplitResourceID3(rs.Primary.ID)
 
 			_, err := c.Services.Get(project, serviceName)
 			if err != nil {

@@ -5,7 +5,7 @@ package aiven
 import (
 	"time"
 
-	"github.com/aiven/terraform-provider-aiven/pkg/service"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -20,7 +20,7 @@ func redisSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	s[ServiceTypeRedis+"_user_config"] = generateServiceUserConfiguration(ServiceTypeRedis)
+	s[ServiceTypeRedis+"_user_config"] = service.GenerateServiceUserConfigurationSchema(ServiceTypeRedis)
 
 	return s
 }

@@ -6,6 +6,8 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -28,7 +30,7 @@ func datasourceKafkaSchemasConfigurationRead(ctx context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	d.SetId(buildResourceID(projectName, serviceName))
+	d.SetId(schemautil.BuildResourceID(projectName, serviceName))
 
 	return resourceKafkaSchemaConfigurationRead(ctx, d, m)
 }

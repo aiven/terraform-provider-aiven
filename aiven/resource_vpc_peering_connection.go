@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -105,7 +107,7 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 	)
 
 	client := m.(*aiven.Client)
-	projectName, vpcID := splitResourceID2(d.Get("vpc_id").(string))
+	projectName, vpcID := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
 	if projectName == "" || vpcID == "" {
 		return diag.Errorf("incorrect VPC ID, expected structure <PROJECT_NAME>/<VPC_ID>")
 	}
@@ -118,7 +120,7 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 	}
 
 	if userPeerNetworkCidrs, ok := d.GetOk("user_peer_network_cidrs"); ok {
-		cidrs = flattenToString(userPeerNetworkCidrs.([]interface{}))
+		cidrs = schemautil.FlattenToString(userPeerNetworkCidrs.([]interface{}))
 	}
 
 	// Azure related fields are only available for VPC Peering Connection resource but
@@ -217,9 +219,9 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 	}
 
 	if peerRegion != "" {
-		d.SetId(buildResourceID(projectName, vpcID, pc.PeerCloudAccount, pc.PeerVPC, *pc.PeerRegion))
+		d.SetId(schemautil.BuildResourceID(projectName, vpcID, pc.PeerCloudAccount, pc.PeerVPC, *pc.PeerRegion))
 	} else {
-		d.SetId(buildResourceID(projectName, vpcID, pc.PeerCloudAccount, pc.PeerVPC))
+		d.SetId(schemautil.BuildResourceID(projectName, vpcID, pc.PeerCloudAccount, pc.PeerVPC))
 	}
 
 	// in case of an error delete VPC peering connection
@@ -443,7 +445,7 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
-	if err := d.Set("vpc_id", buildResourceID(project, vpcID)); err != nil {
+	if err := d.Set("vpc_id", schemautil.BuildResourceID(project, vpcID)); err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  fmt.Sprintf("Unable to set vpc_id field: %s", err),

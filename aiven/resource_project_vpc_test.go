@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -127,7 +129,7 @@ func testAccCheckAivenProjectVPCResourceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		projectName, vpcId := splitResourceID2(rs.Primary.ID)
+		projectName, vpcId := schemautil.SplitResourceID2(rs.Primary.ID)
 		vpc, err := c.VPCs.Get(projectName, vpcId)
 		if err != nil {
 			errStatus := err.(aiven.Error).Status

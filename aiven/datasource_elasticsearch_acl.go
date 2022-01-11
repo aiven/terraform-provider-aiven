@@ -6,6 +6,8 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -31,7 +33,7 @@ func datasourceElasticsearchACLRead(ctx context.Context, d *schema.ResourceData,
 	}
 
 	if acl != nil {
-		d.SetId(buildResourceID(projectName, serviceName))
+		d.SetId(schemautil.BuildResourceID(projectName, serviceName))
 
 		return resourceElasticsearchACLRead(ctx, d, m)
 	}

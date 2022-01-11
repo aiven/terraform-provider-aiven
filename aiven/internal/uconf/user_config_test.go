@@ -1,12 +1,14 @@
 // Copyright (c) 2017 jelmersnoeck
 // Copyright (c) 2018-2021 Aiven, Helsinki, Finland. https://aiven.io/
-package aiven
+package uconf
 
 import (
 	"reflect"
 	"testing"
 
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 )
@@ -51,7 +53,7 @@ func TestGenerateTerraformUserConfigSchema(t *testing.T) {
 					Required:         false,
 					Computed:         false,
 					Sensitive:        true,
-					DiffSuppressFunc: createOnlyDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.CreateOnlyDiffSuppressFunc,
 					Description:      "Custom password for admin user",
 				},
 			},

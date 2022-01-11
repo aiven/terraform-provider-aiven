@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -116,7 +118,7 @@ func flattenKafkaConnectorTasks(r *aiven.KafkaConnector) []map[string]interface{
 }
 
 func resourceKafkaConnectorRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	project, serviceName, connectorName := splitResourceID3(d.Id())
+	project, serviceName, connectorName := schemautil.SplitResourceID3(d.Id())
 	stateChangeConf := &resource.StateChangeConf{
 		Pending: []string{"IN_PROGRESS"},
 		Target:  []string{"OK"},
@@ -206,13 +208,13 @@ func resourceKafkaConnectorCreate(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	d.SetId(buildResourceID(project, serviceName, connectorName))
+	d.SetId(schemautil.BuildResourceID(project, serviceName, connectorName))
 
 	return resourceKafkaConnectorRead(ctx, d, m)
 }
 
 func resourceKafkaConnectorDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	err := m.(*aiven.Client).KafkaConnectors.Delete(splitResourceID3(d.Id()))
+	err := m.(*aiven.Client).KafkaConnectors.Delete(schemautil.SplitResourceID3(d.Id()))
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
@@ -221,7 +223,7 @@ func resourceKafkaConnectorDelete(_ context.Context, d *schema.ResourceData, m i
 }
 
 func resourceKafkaTConnectorUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	project, serviceName, connectorName := splitResourceID3(d.Id())
+	project, serviceName, connectorName := schemautil.SplitResourceID3(d.Id())
 
 	config := make(aiven.KafkaConnectorConfig)
 	for k, cS := range d.Get("config").(map[string]interface{}) {

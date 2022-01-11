@@ -9,6 +9,8 @@ import (
 	"reflect"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
@@ -152,13 +154,13 @@ func resourceKafkaSchemaCreate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.Errorf("kafka schema subject after creation has an empty list of versions")
 	}
 
-	d.SetId(buildResourceID(project, serviceName, subjectName))
+	d.SetId(schemautil.BuildResourceID(project, serviceName, subjectName))
 
 	return resourceKafkaSchemaRead(ctx, d, m)
 }
 
 func resourceKafkaSchemaUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var project, serviceName, subjectName = splitResourceID3(d.Id())
+	var project, serviceName, subjectName = schemautil.SplitResourceID3(d.Id())
 	client := m.(*aiven.Client)
 
 	if d.HasChange("schema") {
@@ -192,7 +194,7 @@ func resourceKafkaSchemaUpdate(ctx context.Context, d *schema.ResourceData, m in
 }
 
 func resourceKafkaSchemaRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var project, serviceName, subjectName = splitResourceID3(d.Id())
+	var project, serviceName, subjectName = schemautil.SplitResourceID3(d.Id())
 	client := m.(*aiven.Client)
 
 	version, err := kafkaSchemaSubjectGetLastVersion(m, project, serviceName, subjectName)
@@ -239,7 +241,7 @@ func resourceKafkaSchemaRead(_ context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceKafkaSchemaDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var project, serviceName, schemaName = splitResourceID3(d.Id())
+	var project, serviceName, schemaName = schemautil.SplitResourceID3(d.Id())
 
 	err := m.(*aiven.Client).KafkaSubjectSchemas.Delete(project, serviceName, schemaName)
 	if err != nil && !aiven.IsNotFound(err) {

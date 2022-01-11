@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -62,7 +64,7 @@ func resourceProjectUserCreate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	d.SetId(buildResourceID(projectName, email))
+	d.SetId(schemautil.BuildResourceID(projectName, email))
 	if err := d.Set("accepted", false); err != nil {
 		return diag.FromErr(err)
 	}
@@ -73,7 +75,7 @@ func resourceProjectUserCreate(ctx context.Context, d *schema.ResourceData, m in
 func resourceProjectUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, email := splitResourceID2(d.Id())
+	projectName, email := schemautil.SplitResourceID2(d.Id())
 	user, invitation, err := client.ProjectUsers.Get(projectName, email)
 	if err != nil {
 		if aiven.IsNotFound(err) && !d.Get("accepted").(bool) {
@@ -109,7 +111,7 @@ func resourceProjectUserRead(ctx context.Context, d *schema.ResourceData, m inte
 func resourceProjectUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, email := splitResourceID2(d.Id())
+	projectName, email := schemautil.SplitResourceID2(d.Id())
 	memberType := d.Get("member_type").(string)
 	err := client.ProjectUsers.UpdateUserOrInvitation(
 		projectName,
@@ -128,7 +130,7 @@ func resourceProjectUserUpdate(ctx context.Context, d *schema.ResourceData, m in
 func resourceProjectUserDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, email := splitResourceID2(d.Id())
+	projectName, email := schemautil.SplitResourceID2(d.Id())
 	user, invitation, err := client.ProjectUsers.Get(projectName, email)
 	if err != nil {
 		return diag.FromErr(err)

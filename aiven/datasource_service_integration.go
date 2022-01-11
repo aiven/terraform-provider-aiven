@@ -7,6 +7,8 @@ import (
 	"fmt"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -42,7 +44,7 @@ func datasourceServiceIntegrationRead(ctx context.Context, d *schema.ResourceDat
 			*i.SourceService == sourceServiceName &&
 			*i.DestinationService == destinationServiceName {
 
-			d.SetId(buildResourceID(projectName, i.ServiceIntegrationID))
+			d.SetId(schemautil.BuildResourceID(projectName, i.ServiceIntegrationID))
 			return resourceServiceIntegrationRead(ctx, d, m)
 		}
 	}

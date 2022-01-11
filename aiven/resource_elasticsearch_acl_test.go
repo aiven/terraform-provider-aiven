@@ -8,6 +8,8 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -122,7 +124,7 @@ func testAccCheckAivenAleasticsearchAclResourceDestroy(s *terraform.State) error
 			continue
 		}
 
-		projectName, serviceName := splitResourceID2(rs.Primary.ID)
+		projectName, serviceName := schemautil.SplitResourceID2(rs.Primary.ID)
 		acl, err := c.ElasticsearchACLs.Get(projectName, serviceName)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {
