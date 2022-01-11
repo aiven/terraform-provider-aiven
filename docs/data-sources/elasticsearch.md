@@ -117,6 +117,7 @@ Read-Only:
 - **indices_memory_index_buffer_size** (String)
 - **indices_queries_cache_size** (String)
 - **indices_query_bool_max_clause_count** (String)
+- **override_main_response_version** (String)
 - **reindex_remote_whitelist** (List of String)
 - **search_max_buckets** (String)
 - **thread_pool_analyze_queue_size** (String)

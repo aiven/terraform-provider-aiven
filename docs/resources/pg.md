@@ -177,6 +177,7 @@ Optional:
 - **max_pred_locks_per_transaction** (String) max_pred_locks_per_transaction
 - **max_prepared_transactions** (String) max_prepared_transactions
 - **max_replication_slots** (String) max_replication_slots
+- **max_slot_wal_keep_size** (String) max_slot_wal_keep_size
 - **max_stack_depth** (String) max_stack_depth
 - **max_standby_archive_delay** (String) max_standby_archive_delay
 - **max_standby_streaming_delay** (String) max_standby_streaming_delay

@@ -133,6 +133,7 @@ Optional:
 - **indices_memory_index_buffer_size** (String) indices.memory.index_buffer_size
 - **indices_queries_cache_size** (String) indices.queries.cache.size
 - **indices_query_bool_max_clause_count** (String) indices.query.bool.max_clause_count
+- **override_main_response_version** (String) compatibility.override_main_response_version
 - **reindex_remote_whitelist** (List of String) reindex_remote_whitelist
 - **search_max_buckets** (String) search.max_buckets
 - **thread_pool_analyze_queue_size** (String) analyze thread pool queue size

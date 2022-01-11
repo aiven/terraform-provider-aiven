@@ -34,6 +34,7 @@ const (
 	ServiceTypeM3               = "m3db"
 	ServiceTypeM3Aggregator     = "m3aggregator"
 	ServiceTypeFlink            = "flink"
+	ServiceTypeClickhouse       = "clickhouse"
 )
 
 func availableServiceTypes() []string {
@@ -52,6 +53,7 @@ func availableServiceTypes() []string {
 		ServiceTypeM3Aggregator,
 		ServiceTypeOpensearch,
 		ServiceTypeFlink,
+		ServiceTypeClickhouse,
 	}
 }
 
@@ -611,6 +613,15 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		},
 	},
 	"redis_user_config": generateServiceUserConfiguration(ServiceTypeRedis),
+	"clickhouse": {
+		Type:        schema.TypeList,
+		Computed:    true,
+		Description: "Clickhouse specific server provided values",
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{},
+		},
+	},
+	"clickhouse_user_config": generateServiceUserConfiguration(ServiceTypeClickhouse),
 	"flink": {
 		Type:        schema.TypeList,
 		Computed:    true,
@@ -696,6 +707,9 @@ func resourceServiceCreateWrapper(serviceType string) schema.CreateContextFunc {
 				return diag.FromErr(err)
 			}
 			if err := d.Set(ServiceTypeFlink, []map[string]interface{}{}); err != nil {
+				return diag.FromErr(err)
+			}
+			if err := d.Set(ServiceTypeClickhouse, []map[string]interface{}{}); err != nil {
 				return diag.FromErr(err)
 			}
 			return resourceServiceCreate(ctx, d, m)
@@ -1057,6 +1071,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 			props["user"] = params.User
 		}
 		props["replica_uri"] = connectionInfo.PostgresReplicaURI
+	case "clickhouse":
 	case "redis":
 	case "flink":
 		props["host_ports"] = connectionInfo.FlinkHostPorts
