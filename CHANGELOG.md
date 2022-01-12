@@ -4,6 +4,8 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.4.2] - 2022-01-12
+- mark service_user.password as computed again
 
 ## [2.4.1] - 2022-01-11
 - Reformat embedded terraform manifests

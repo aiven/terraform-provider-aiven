@@ -25,8 +25,9 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 	},
 	"password": {
 		Type:             schema.TypeString,
-		Sensitive:        true,
 		Optional:         true,
+		Sensitive:        true,
+		Computed:         true,
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		Description:      "The password of the service user ( not applicable for all services ).",
 	},
