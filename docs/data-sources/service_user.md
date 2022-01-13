@@ -39,6 +39,7 @@ data "aiven_service_user" "myserviceuser" {
 - **access_key** (String, Sensitive) Access certificate key for the user if applicable for the service in question
 - **authentication** (String) Authentication details. The possible values are `caching_sha2_password` and `mysql_native_password`.
 - **password** (String, Sensitive) The password of the service user ( not applicable for all services ).
+- **pg_allow_replication** (Boolean) Postgres specific field, defines whether replication is allowed. This property cannot be changed, doing so forces recreation of the resource.
 - **redis_acl_categories** (List of String) Redis specific field, defines command category rules. The field is required with`redis_acl_commands` and `redis_acl_keys`. This property cannot be changed, doing so forces recreation of the resource.
 - **redis_acl_channels** (List of String) Redis specific field, defines the permitted pub/sub channel patterns. This property cannot be changed, doing so forces recreation of the resource.
 - **redis_acl_commands** (List of String) Redis specific field, defines rules for individual commands. The field is required with`redis_acl_categories` and `redis_acl_keys`. This property cannot be changed, doing so forces recreation of the resource.
