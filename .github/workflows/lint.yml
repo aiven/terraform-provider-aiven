@@ -16,20 +16,28 @@ jobs:
   golangci_lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
-        with:
-          go-version: 1.16
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: 1.16
 
-      - uses: golangci/golangci-lint-action@v2.5.2
+    - uses: golangci/golangci-lint-action@v2.5.2
 
   check_docs_were_generated:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
-        with:
-          go-version: 1.16
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: 1.16
 
-      - run: make docs
-      - run: git diff --exit-code
+    - run: make docs
+    - run: git diff --exit-code
+
+  tfprovider_lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: bflad/tfproviderlint-github-action@master
+      with:
+        args: ./...

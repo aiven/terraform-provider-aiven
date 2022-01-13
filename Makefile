@@ -12,9 +12,13 @@ TOOLS_DIR := hack/tools
 TOOLS_BIN_DIR := $(TOOLS_DIR)/bin
 
 TFPLUGINDOCS=$(TOOLS_BIN_DIR)/tfplugindocs
+TFPROVIDERLINTX=$(TOOLS_BIN_DIR)/tfproviderlintx
 
-$(TFPLUGINDOCS): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod ## Build tfplugindocs from tools folder.
-	cd $(TOOLS_DIR) && $(GO) build -o bin/tfplugindocs github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
+$(TFPLUGINDOCS): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
+	cd $(TOOLS_DIR) && $(GO) build -tags=tools -o bin/tfplugindocs github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
+
+$(TFPROVIDERLINTX): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
+	cd $(TOOLS_DIR) && $(GO) build -tags=tools -o bin/tfproviderlintx github.com/bflad/tfproviderlint/cmd/tfproviderlintx
 
 $(TOOLS_BIN_DIR):
 	mkdir -p $(TOOLS_BIN_DIR)
@@ -52,3 +56,7 @@ sweep:
 .PHONY: lint
 lint:
 	golangci-lint run --issues-exit-code=0 --timeout=30m ./...
+
+.PHONY: provider-lint
+provider-lint: $(TFPROVIDERLINTX)
+	$(TFPROVIDERLINTX) ./...
