@@ -10,6 +10,8 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -27,6 +29,74 @@ func init() {
 			"aiven_service_integration",
 		},
 	})
+}
+
+func TestAccAiven_deprecatedServicePG(t *testing.T) {
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	resourceName := "aiven_service.bar"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenServiceResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAivenDeprecatedServiceResourcePGWithDiskSpace(rName, "90GiB"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenServicePGAttributes("data.aiven_service.bar"),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
+					resource.TestCheckResourceAttrSet(resourceName, "state"),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
+					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
+					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
+					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
+					resource.TestCheckResourceAttr(resourceName, "disk_space", "90GiB"),
+					resource.TestCheckResourceAttr(resourceName, "disk_space_used", "90GiB"),
+					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+				),
+			},
+		},
+	})
+}
+
+func testAccAivenDeprecatedServiceResourcePGWithDiskSpace(name, diskSize string) string {
+	return fmt.Sprintf(`
+		data "aiven_project" "foo" {
+		  project = "%s"
+		}
+		
+		resource "aiven_service" "bar" {
+		  project                 = data.aiven_project.foo.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-4"
+		  service_name            = "test-acc-sr-%s"
+		  service_type            = "pg"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		  disk_space              = "%s"
+		
+		  pg_user_config {
+		    public_access {
+		      pg         = true
+		      prometheus = false
+		    }
+		
+		    pg {
+		      idle_in_transaction_session_timeout = 900
+		      log_min_duration_statement          = -1
+		    }
+		  }
+		}
+		
+		data "aiven_service" "bar" {
+		  service_name = aiven_service.bar.service_name
+		  project      = aiven_service.bar.project
+		
+		  depends_on = [aiven_service.bar]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name, diskSize)
 }
 
 func sweepServices(region string) error {

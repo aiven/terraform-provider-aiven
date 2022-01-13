@@ -36,6 +36,7 @@ The Service datasource provides information about specific Aiven Services.
 - **disk_space_cap** (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
 - **disk_space_default** (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
 - **disk_space_step** (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
+- **disk_space_used** (String) Disk space that service is currently using
 - **elasticsearch** (List of Object) Elasticsearch specific server provided values (see [below for nested schema](#nestedatt--elasticsearch))
 - **elasticsearch_user_config** (List of Object) Elasticsearch user configurable settings (see [below for nested schema](#nestedatt--elasticsearch_user_config))
 - **flink** (List of Object) Flink specific server provided values (see [below for nested schema](#nestedatt--flink))
