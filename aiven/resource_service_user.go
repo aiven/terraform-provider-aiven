@@ -70,6 +70,15 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 			Type: schema.TypeString,
 		},
 	},
+	"pg_allow_replication": {
+		Type:        schema.TypeBool,
+		Optional:    true,
+		ForceNew:    true,
+		Description: complex("Postgres specific field, defines whether replication is allowed.").forceNew().build(),
+		Elem: &schema.Schema{
+			Type: schema.TypeBool,
+		},
+	},
 	"authentication": {
 		Type:             schema.TypeString,
 		Optional:         true,
@@ -117,16 +126,18 @@ func resourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m in
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	username := d.Get("username").(string)
+	allowReplication := d.Get("pg_allow_replication").(bool)
 	_, err := client.ServiceUsers.Create(
 		projectName,
 		serviceName,
 		aiven.CreateServiceUserRequest{
 			Username: username,
 			AccessControl: &aiven.AccessControl{
-				RedisACLCategories: flattenToString(d.Get("redis_acl_categories").([]interface{})),
-				RedisACLCommands:   flattenToString(d.Get("redis_acl_commands").([]interface{})),
-				RedisACLKeys:       flattenToString(d.Get("redis_acl_keys").([]interface{})),
-				RedisACLChannels:   flattenToString(d.Get("redis_acl_channels").([]interface{})),
+				RedisACLCategories:       flattenToString(d.Get("redis_acl_categories").([]interface{})),
+				RedisACLCommands:         flattenToString(d.Get("redis_acl_commands").([]interface{})),
+				RedisACLKeys:             flattenToString(d.Get("redis_acl_keys").([]interface{})),
+				RedisACLChannels:         flattenToString(d.Get("redis_acl_channels").([]interface{})),
+				PostgresAllowReplication: &allowReplication,
 			},
 		},
 	)
@@ -204,6 +215,9 @@ func copyServiceUserPropertiesFromAPIResponseToTerraform(
 		return err
 	}
 	if err := d.Set("redis_acl_channels", user.AccessControl.RedisACLChannels); err != nil {
+		return err
+	}
+	if err := d.Set("pg_allow_replication", user.AccessControl.PostgresAllowReplication); err != nil {
 		return err
 	}
 
