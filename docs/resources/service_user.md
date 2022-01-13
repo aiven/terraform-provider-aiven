@@ -39,6 +39,7 @@ resource "aiven_service_user" "myserviceuser" {
 - **redis_acl_channels** (List of String) Redis specific field, defines the permitted pub/sub channel patterns. This property cannot be changed, doing so forces recreation of the resource.
 - **redis_acl_commands** (List of String) Redis specific field, defines rules for individual commands. The field is required with`redis_acl_categories` and `redis_acl_keys`. This property cannot be changed, doing so forces recreation of the resource.
 - **redis_acl_keys** (List of String) Redis specific field, defines key access rules. The field is required with`redis_acl_categories` and `redis_acl_keys`. This property cannot be changed, doing so forces recreation of the resource.
+- **pg_allow_replication** (Boolean) Postgres specific field, defines whether replication is allowed or not. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Read-Only
 
