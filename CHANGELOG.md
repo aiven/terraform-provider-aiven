@@ -4,6 +4,9 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.4.3] - 2022-01-13
+- add forgotten 'disk_space_used' attribute to the deprecated service resource
+
 ## [2.4.2] - 2022-01-12
 - mark service_user.password as computed again
 

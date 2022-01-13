@@ -298,6 +298,11 @@ var aivenServiceSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
 		ValidateFunc:     validateHumanByteSizeString,
 	},
+	"disk_space_used": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "Disk space that service is currently using",
+	},
 	"disk_space_default": {
 		Type:        schema.TypeString,
 		Computed:    true,

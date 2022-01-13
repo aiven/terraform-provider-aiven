@@ -57,6 +57,7 @@ The Service resource allows the creation and management of Aiven Services.
 - **disk_space_cap** (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
 - **disk_space_default** (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
 - **disk_space_step** (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
+- **disk_space_used** (String) Disk space that service is currently using
 - **elasticsearch** (List of Object) Elasticsearch specific server provided values (see [below for nested schema](#nestedatt--elasticsearch))
 - **grafana** (List of Object) Grafana specific server provided values (see [below for nested schema](#nestedatt--grafana))
 - **influxdb** (List of Object) InfluxDB specific server provided values (see [below for nested schema](#nestedatt--influxdb))
