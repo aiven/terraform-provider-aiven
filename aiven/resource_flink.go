@@ -5,7 +5,7 @@ package aiven
 import (
 	"time"
 
-	"github.com/aiven/terraform-provider-aiven/pkg/service"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -32,7 +32,7 @@ func aivenFlinkSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	aivenFlinkSchema[ServiceTypeFlink+"_user_config"] = generateServiceUserConfiguration(ServiceTypeFlink)
+	aivenFlinkSchema[ServiceTypeFlink+"_user_config"] = service.GenerateServiceUserConfigurationSchema(ServiceTypeFlink)
 
 	return aivenFlinkSchema
 }

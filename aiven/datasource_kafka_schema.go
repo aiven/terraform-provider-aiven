@@ -6,6 +6,8 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -31,7 +33,7 @@ func datasourceKafkaSchemaRead(ctx context.Context, d *schema.ResourceData, m in
 
 	for _, subject := range subjects.Subjects {
 		if subject == subjectName {
-			d.SetId(buildResourceID(projectName, serviceName, subjectName))
+			d.SetId(schemautil.BuildResourceID(projectName, serviceName, subjectName))
 			return resourceKafkaSchemaRead(ctx, d, m)
 		}
 	}

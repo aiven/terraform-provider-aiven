@@ -6,6 +6,8 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -32,7 +34,7 @@ func datasourceServiceIntegrationEndpointRead(ctx context.Context, d *schema.Res
 
 	for _, endpoint := range endpoints {
 		if endpoint.EndpointName == endpointName {
-			d.SetId(buildResourceID(projectName, endpoint.EndpointID))
+			d.SetId(schemautil.BuildResourceID(projectName, endpoint.EndpointID))
 			return resourceServiceIntegrationEndpointRead(ctx, d, m)
 		}
 	}

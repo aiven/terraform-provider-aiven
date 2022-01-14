@@ -7,6 +7,8 @@ import (
 	"fmt"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -76,7 +78,7 @@ func resourceAccountTeamProjectCreate(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	d.SetId(buildResourceID(accountId, teamId, projectName))
+	d.SetId(schemautil.BuildResourceID(accountId, teamId, projectName))
 
 	return resourceAccountTeamProjectRead(ctx, d, m)
 }
@@ -84,7 +86,7 @@ func resourceAccountTeamProjectCreate(ctx context.Context, d *schema.ResourceDat
 func resourceAccountTeamProjectRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId, teamId, projectName := splitResourceID3(d.Id())
+	accountId, teamId, projectName := schemautil.SplitResourceID3(d.Id())
 	r, err := client.AccountTeamProjects.List(accountId, teamId)
 	if err != nil {
 		return diag.FromErr(resourceReadHandleNotFound(err, d))
@@ -120,7 +122,7 @@ func resourceAccountTeamProjectRead(_ context.Context, d *schema.ResourceData, m
 func resourceAccountTeamProjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId, teamId, _ := splitResourceID3(d.Id())
+	accountId, teamId, _ := schemautil.SplitResourceID3(d.Id())
 	newProjectName := d.Get("project_name").(string)
 	teamType := d.Get("team_type").(string)
 
@@ -132,7 +134,7 @@ func resourceAccountTeamProjectUpdate(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	d.SetId(buildResourceID(accountId, teamId, newProjectName))
+	d.SetId(schemautil.BuildResourceID(accountId, teamId, newProjectName))
 
 	return resourceAccountTeamProjectRead(ctx, d, m)
 }
@@ -140,7 +142,7 @@ func resourceAccountTeamProjectUpdate(ctx context.Context, d *schema.ResourceDat
 func resourceAccountTeamProjectDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	err := client.AccountTeamProjects.Delete(splitResourceID3(d.Id()))
+	err := client.AccountTeamProjects.Delete(schemautil.SplitResourceID3(d.Id()))
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}

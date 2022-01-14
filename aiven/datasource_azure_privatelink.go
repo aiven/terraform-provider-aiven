@@ -5,6 +5,8 @@ package aiven
 import (
 	"context"
 
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -20,7 +22,7 @@ func datasourceAzurePrivatelink() *schema.Resource {
 func datasourceAzurePrivatelinkRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
-	d.SetId(buildResourceID(projectName, serviceName))
+	d.SetId(schemautil.BuildResourceID(projectName, serviceName))
 
 	return resourceAzurePrivatelinkRead(ctx, d, m)
 }

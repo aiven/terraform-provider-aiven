@@ -5,6 +5,8 @@ package aiven
 import (
 	"context"
 
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -25,7 +27,7 @@ func datasourceMirrorMakerReplicationFlowRead(ctx context.Context, d *schema.Res
 	sourceCluster := d.Get("source_cluster").(string)
 	targetCluster := d.Get("target_cluster").(string)
 
-	d.SetId(buildResourceID(projectName, serviceName, sourceCluster, targetCluster))
+	d.SetId(schemautil.BuildResourceID(projectName, serviceName, sourceCluster, targetCluster))
 
 	return resourceMirrorMakerReplicationFlowRead(ctx, d, m)
 }

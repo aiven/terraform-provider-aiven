@@ -6,6 +6,8 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -33,7 +35,7 @@ func datasourceServiceUserRead(ctx context.Context, d *schema.ResourceData, m in
 
 	for _, u := range list {
 		if u.Username == userName {
-			d.SetId(buildResourceID(projectName, serviceName, userName))
+			d.SetId(schemautil.BuildResourceID(projectName, serviceName, userName))
 			return resourceServiceUserRead(ctx, d, m)
 		}
 	}

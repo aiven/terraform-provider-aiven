@@ -6,6 +6,8 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -31,14 +33,14 @@ func datasourceProjectUserRead(ctx context.Context, d *schema.ResourceData, m in
 	}
 	for _, user := range users {
 		if user.Email == email {
-			d.SetId(buildResourceID(projectName, email))
+			d.SetId(schemautil.BuildResourceID(projectName, email))
 			return resourceProjectUserRead(ctx, d, m)
 		}
 	}
 
 	for _, invitation := range invitations {
 		if invitation.UserEmail == email {
-			d.SetId(buildResourceID(projectName, email))
+			d.SetId(schemautil.BuildResourceID(projectName, email))
 			return resourceProjectUserRead(ctx, d, m)
 		}
 	}

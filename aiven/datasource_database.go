@@ -6,6 +6,8 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -33,7 +35,7 @@ func datasourceDatabaseRead(ctx context.Context, d *schema.ResourceData, m inter
 
 	for _, db := range databases {
 		if db.DatabaseName == databaseName {
-			d.SetId(buildResourceID(projectName, serviceName, databaseName))
+			d.SetId(schemautil.BuildResourceID(projectName, serviceName, databaseName))
 			return resourceDatabaseRead(ctx, d, m)
 		}
 	}

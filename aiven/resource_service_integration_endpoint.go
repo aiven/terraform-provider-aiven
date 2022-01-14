@@ -8,7 +8,11 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/uconf"
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -41,7 +45,7 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 	"datadog_user_config": {
 		Description: "Datadog specific user configurable settings",
 		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
+			Schema: uconf.GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("endpoint")["datadog"].(map[string]interface{})),
 		},
 		MaxItems: 1,
@@ -51,7 +55,7 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 	"prometheus_user_config": {
 		Description: "Prometheus specific user configurable settings",
 		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
+			Schema: uconf.GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("endpoint")["prometheus"].(map[string]interface{})),
 		},
 		MaxItems: 1,
@@ -61,7 +65,7 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 	"rsyslog_user_config": {
 		Description: "rsyslog specific user configurable settings",
 		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
+			Schema: uconf.GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("endpoint")["rsyslog"].(map[string]interface{})),
 		},
 		MaxItems: 1,
@@ -71,7 +75,7 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 	"external_elasticsearch_logs_user_config": {
 		Description: "external elasticsearch specific user configurable settings",
 		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
+			Schema: uconf.GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("endpoint")["external_elasticsearch_logs"].(map[string]interface{})),
 		},
 		MaxItems: 1,
@@ -81,7 +85,7 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 	"external_aws_cloudwatch_logs_user_config": {
 		Description: "external AWS CloudWatch Logs specific user configurable settings",
 		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
+			Schema: uconf.GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("endpoint")["external_aws_cloudwatch_logs"].(map[string]interface{})),
 		},
 		MaxItems: 1,
@@ -91,7 +95,7 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 	"external_google_cloud_logging_user_config": {
 		Description: "external Google Cloud Logginig specific user configurable settings",
 		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
+			Schema: uconf.GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("endpoint")["external_google_cloud_logging"].(map[string]interface{})),
 		},
 		MaxItems: 1,
@@ -101,7 +105,7 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 	"external_kafka_user_config": {
 		Description: "external Kafka specific user configurable settings",
 		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
+			Schema: uconf.GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("endpoint")["external_kafka"].(map[string]interface{})),
 		},
 		MaxItems: 1,
@@ -111,7 +115,7 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 	"jolokia_user_config": {
 		Description: "Jolokia specific user configurable settings",
 		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
+			Schema: uconf.GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("endpoint")["jolokia"].(map[string]interface{})),
 		},
 		MaxItems: 1,
@@ -121,7 +125,7 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 	"signalfx_user_config": {
 		Description: "Signalfx specific user configurable settings",
 		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
+			Schema: uconf.GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("endpoint")["signalfx"].(map[string]interface{})),
 		},
 		MaxItems: 1,
@@ -131,7 +135,7 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 	"external_schema_registry_user_config": {
 		Description: "External schema registry specific user configurable settings",
 		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
+			Schema: uconf.GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("endpoint")["external_schema_registry"].(map[string]interface{})),
 		},
 		MaxItems: 1,
@@ -141,7 +145,7 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 	"external_aws_cloudwatch_metrics_user_config": {
 		Description: "External AWS cloudwatch mertrics specific user configurable settings",
 		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
+			Schema: uconf.GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("endpoint")["external_aws_cloudwatch_metrics"].(map[string]interface{})),
 		},
 		MaxItems: 1,
@@ -169,7 +173,7 @@ func resourceServiceIntegrationEndpointCreate(ctx context.Context, d *schema.Res
 	client := m.(*aiven.Client)
 	projectName := d.Get("project").(string)
 	endpointType := d.Get("endpoint_type").(string)
-	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("endpoint", endpointType, true, d)
+	userConfig := uconf.ConvertTerraformUserConfigToAPICompatibleFormat("endpoint", endpointType, true, d)
 	endpoint, err := client.ServiceIntegrationEndpoints.Create(
 		projectName,
 		aiven.CreateServiceIntegrationEndpointRequest{
@@ -183,7 +187,7 @@ func resourceServiceIntegrationEndpointCreate(ctx context.Context, d *schema.Res
 		return diag.FromErr(err)
 	}
 
-	d.SetId(buildResourceID(projectName, endpoint.EndpointID))
+	d.SetId(schemautil.BuildResourceID(projectName, endpoint.EndpointID))
 
 	return resourceServiceIntegrationEndpointRead(ctx, d, m)
 }
@@ -191,7 +195,7 @@ func resourceServiceIntegrationEndpointCreate(ctx context.Context, d *schema.Res
 func resourceServiceIntegrationEndpointRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, endpointID := splitResourceID2(d.Id())
+	projectName, endpointID := schemautil.SplitResourceID2(d.Id())
 	endpoint, err := client.ServiceIntegrationEndpoints.Get(projectName, endpointID)
 	if err != nil {
 		return diag.FromErr(resourceReadHandleNotFound(err, d))
@@ -208,9 +212,10 @@ func resourceServiceIntegrationEndpointRead(_ context.Context, d *schema.Resourc
 func resourceServiceIntegrationEndpointUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, endpointID := splitResourceID2(d.Id())
+	projectName, endpointID := schemautil.SplitResourceID2(d.Id())
 	endpointType := d.Get("endpoint_type").(string)
-	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("endpoint", endpointType, false, d)
+	userConfig := uconf.ConvertTerraformUserConfigToAPICompatibleFormat("endpoint", endpointType, false, d)
+
 	_, err := client.ServiceIntegrationEndpoints.Update(
 		projectName,
 		endpointID,
@@ -228,7 +233,7 @@ func resourceServiceIntegrationEndpointUpdate(ctx context.Context, d *schema.Res
 func resourceServiceIntegrationEndpointDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, endpointID := splitResourceID2(d.Id())
+	projectName, endpointID := schemautil.SplitResourceID2(d.Id())
 	err := client.ServiceIntegrationEndpoints.Delete(projectName, endpointID)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
@@ -244,7 +249,7 @@ func resourceServiceIntegrationEndpointState(_ context.Context, d *schema.Resour
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<endpoint_id>", d.Id())
 	}
 
-	projectName, endpointID := splitResourceID2(d.Id())
+	projectName, endpointID := schemautil.SplitResourceID2(d.Id())
 	endpoint, err := client.ServiceIntegrationEndpoints.Get(projectName, endpointID)
 	if err != nil {
 		return nil, err
@@ -267,7 +272,7 @@ func copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(
 	d.Set("endpoint_name", endpoint.EndpointName)
 	endpointType := endpoint.EndpointType
 	d.Set("endpoint_type", endpointType)
-	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat("endpoint", endpointType, endpoint.UserConfig)
+	userConfig := uconf.ConvertAPIUserConfigToTerraformCompatibleFormat("endpoint", endpointType, endpoint.UserConfig)
 	if len(userConfig) > 0 {
 		d.Set(endpointType+"_user_config", userConfig)
 	}

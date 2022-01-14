@@ -5,7 +5,8 @@ package aiven
 import (
 	"time"
 
-	"github.com/aiven/terraform-provider-aiven/pkg/service"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/service"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -27,7 +28,7 @@ func elasticsearchSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	s[ServiceTypeElasticsearch+"_user_config"] = generateServiceUserConfiguration(ServiceTypeElasticsearch)
+	s[ServiceTypeElasticsearch+"_user_config"] = service.GenerateServiceUserConfigurationSchema(ServiceTypeElasticsearch)
 
 	return s
 }

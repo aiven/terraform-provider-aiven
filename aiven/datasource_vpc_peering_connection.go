@@ -6,6 +6,8 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -22,7 +24,7 @@ func datasourceVPCPeeringConnection() *schema.Resource {
 func datasourceVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, vpcID := splitResourceID2(d.Get("vpc_id").(string))
+	projectName, vpcID := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
 	peerCloudAccount := d.Get("peer_cloud_account").(string)
 	peerVPC := d.Get("peer_vpc").(string)
 
@@ -34,9 +36,9 @@ func datasourceVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceD
 	for _, peer := range vpc.PeeringConnections {
 		if peer.PeerCloudAccount == peerCloudAccount && peer.PeerVPC == peerVPC {
 			if peer.PeerRegion != nil && *peer.PeerRegion != "" {
-				d.SetId(buildResourceID(projectName, vpcID, peer.PeerCloudAccount, peer.PeerVPC, *peer.PeerRegion))
+				d.SetId(schemautil.BuildResourceID(projectName, vpcID, peer.PeerCloudAccount, peer.PeerVPC, *peer.PeerRegion))
 			} else {
-				d.SetId(buildResourceID(projectName, vpcID, peer.PeerCloudAccount, peer.PeerVPC))
+				d.SetId(schemautil.BuildResourceID(projectName, vpcID, peer.PeerCloudAccount, peer.PeerVPC))
 			}
 			return resourceVPCPeeringConnectionRead(ctx, d, m)
 		}

@@ -10,7 +10,11 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/uconf"
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -48,7 +52,7 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 	"logs_user_config": {
 		Description: "Log integration specific user configurable settings",
 		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
+			Schema: uconf.GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("integration")["logs"].(map[string]interface{})),
 		},
 		MaxItems: 1,
@@ -58,7 +62,7 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 	"mirrormaker_user_config": {
 		Description: "Mirrormaker 1 integration specific user configurable settings",
 		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
+			Schema: uconf.GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("integration")["mirrormaker"].(map[string]interface{})),
 		},
 		MaxItems: 1,
@@ -68,7 +72,7 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 	"kafka_mirrormaker_user_config": {
 		Description: "Mirrormaker 2 integration specific user configurable settings",
 		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
+			Schema: uconf.GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("integration")["kafka_mirrormaker"].(map[string]interface{})),
 		},
 		MaxItems: 1,
@@ -78,7 +82,7 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 	"kafka_connect_user_config": {
 		Description: "Kafka Connect specific user configurable settings",
 		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
+			Schema: uconf.GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("integration")["kafka_connect"].(map[string]interface{})),
 		},
 		MaxItems: 1,
@@ -88,7 +92,7 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 	"datadog_user_config": {
 		Description: "Dashboard specific user configurable settings",
 		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
+			Schema: uconf.GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("integration")["datadog"].(map[string]interface{})),
 		},
 		MaxItems: 1,
@@ -98,7 +102,7 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 	"kafka_logs_user_config": {
 		Description: "Kafka Logs specific user configurable settings",
 		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
+			Schema: uconf.GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("integration")["kafka_logs"].(map[string]interface{})),
 		},
 		MaxItems: 1,
@@ -108,7 +112,7 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 	"prometheus_user_config": {
 		Description: "Prometheus coordinator specific user configurable settings",
 		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
+			Schema: uconf.GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("integration")["prometheus"].(map[string]interface{})),
 		},
 		MaxItems: 1,
@@ -118,7 +122,7 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 	"metrics_user_config": {
 		Description: "Metrics specific user configurable settings",
 		Elem: &schema.Resource{
-			Schema: GenerateTerraformUserConfigSchema(
+			Schema: uconf.GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("integration")["metrics"].(map[string]interface{})),
 		},
 		MaxItems: 1,
@@ -169,7 +173,7 @@ func plainEndpointID(fullEndpointID *string) *string {
 	if fullEndpointID == nil {
 		return nil
 	}
-	_, endpointID := splitResourceID2(*fullEndpointID)
+	_, endpointID := schemautil.SplitResourceID2(*fullEndpointID)
 	return &endpointID
 }
 
@@ -187,7 +191,7 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 		if preexisting, err := resourceServiceIntegrationCheckForPreexistingResource(ctx, d, m); err != nil {
 			return diag.Errorf("unable to search for possible preexisting 'read_replica' service integration: %s", err)
 		} else if preexisting != nil {
-			d.SetId(buildResourceID(projectName, preexisting.ServiceIntegrationID))
+			d.SetId(schemautil.BuildResourceID(projectName, preexisting.ServiceIntegrationID))
 			return resourceServiceIntegrationRead(ctx, d, m)
 		}
 	}
@@ -195,18 +199,18 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 	integration, err := client.ServiceIntegrations.Create(
 		projectName,
 		aiven.CreateServiceIntegrationRequest{
-			DestinationEndpointID: plainEndpointID(optionalStringPointer(d, "destination_endpoint_id")),
-			DestinationService:    optionalStringPointer(d, "destination_service_name"),
+			DestinationEndpointID: plainEndpointID(schemautil.OptionalStringPointer(d, "destination_endpoint_id")),
+			DestinationService:    schemautil.OptionalStringPointer(d, "destination_service_name"),
 			IntegrationType:       integrationType,
-			SourceEndpointID:      plainEndpointID(optionalStringPointer(d, "source_endpoint_id")),
-			SourceService:         optionalStringPointer(d, "source_service_name"),
+			SourceEndpointID:      plainEndpointID(schemautil.OptionalStringPointer(d, "source_endpoint_id")),
+			SourceService:         schemautil.OptionalStringPointer(d, "source_service_name"),
 			UserConfig:            resourceServiceIntegrationUserConfigFromSchemaToAPI(d),
 		},
 	)
 	if err != nil {
 		return diag.Errorf("error creating serivce integration: %s", err)
 	}
-	d.SetId(buildResourceID(projectName, integration.ServiceIntegrationID))
+	d.SetId(schemautil.BuildResourceID(projectName, integration.ServiceIntegrationID))
 
 	if err = resourceServiceIntegrationWaitUntilActive(ctx, d, m); err != nil {
 		return diag.Errorf("unable to wait for service integration to become active: %s", err)
@@ -217,7 +221,7 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 func resourceServiceIntegrationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, integrationID := splitResourceID2(d.Id())
+	projectName, integrationID := schemautil.SplitResourceID2(d.Id())
 	integration, err := client.ServiceIntegrations.Get(projectName, integrationID)
 	if err != nil {
 		err = resourceReadHandleNotFound(err, d)
@@ -237,7 +241,7 @@ func resourceServiceIntegrationRead(_ context.Context, d *schema.ResourceData, m
 func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, integrationID := splitResourceID2(d.Id())
+	projectName, integrationID := schemautil.SplitResourceID2(d.Id())
 
 	_, err := client.ServiceIntegrations.Update(
 		projectName,
@@ -259,7 +263,7 @@ func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceDat
 func resourceServiceIntegrationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, integrationID := splitResourceID2(d.Id())
+	projectName, integrationID := schemautil.SplitResourceID2(d.Id())
 	err := client.ServiceIntegrations.Delete(projectName, integrationID)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("cannot delete service integration: %s", err)
@@ -275,7 +279,7 @@ func resourceServiceIntegrationState(_ context.Context, d *schema.ResourceData, 
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<integration_id>", d.Id())
 	}
 
-	projectName, integrationID := splitResourceID2(d.Id())
+	projectName, integrationID := schemautil.SplitResourceID2(d.Id())
 	integration, err := client.ServiceIntegrations.Get(projectName, integrationID)
 	if err != nil {
 		return nil, err
@@ -323,7 +327,7 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 	)
 	client := m.(*aiven.Client)
 
-	projectName, integrationID := splitResourceID2(d.Id())
+	projectName, integrationID := schemautil.SplitResourceID2(d.Id())
 
 	stateChangeConf := &resource.StateChangeConf{
 		Pending: []string{notActive},
@@ -358,7 +362,7 @@ func resourceServiceIntegrationUserConfigFromSchemaToAPI(d *schema.ResourceData)
 		userConfigTypeIntegrations = "integration"
 	)
 	integrationType := d.Get("integration_type").(string)
-	return ConvertTerraformUserConfigToAPICompatibleFormat(userConfigTypeIntegrations, integrationType, true, d)
+	return uconf.ConvertTerraformUserConfigToAPICompatibleFormat(userConfigTypeIntegrations, integrationType, true, d)
 }
 
 func resourceServiceIntegrationCopyAPIResponseToTerraform(
@@ -371,7 +375,7 @@ func resourceServiceIntegrationCopyAPIResponseToTerraform(
 	}
 
 	if integration.DestinationEndpointID != nil {
-		if err := d.Set("destination_endpoint_id", buildResourceID(project, *integration.DestinationEndpointID)); err != nil {
+		if err := d.Set("destination_endpoint_id", schemautil.BuildResourceID(project, *integration.DestinationEndpointID)); err != nil {
 			return err
 		}
 	} else if integration.DestinationService != nil {
@@ -380,7 +384,7 @@ func resourceServiceIntegrationCopyAPIResponseToTerraform(
 		}
 	}
 	if integration.SourceEndpointID != nil {
-		if err := d.Set("source_endpoint_id", buildResourceID(project, *integration.SourceEndpointID)); err != nil {
+		if err := d.Set("source_endpoint_id", schemautil.BuildResourceID(project, *integration.SourceEndpointID)); err != nil {
 			return err
 		}
 	} else if integration.SourceService != nil {
@@ -396,7 +400,7 @@ func resourceServiceIntegrationCopyAPIResponseToTerraform(
 		return err
 	}
 
-	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat("integration", integrationType, integration.UserConfig)
+	userConfig := uconf.ConvertAPIUserConfigToTerraformCompatibleFormat("integration", integrationType, integration.UserConfig)
 	if len(userConfig) > 0 {
 		d.Set(integrationType+"_user_config", userConfig)
 	}

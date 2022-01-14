@@ -7,6 +7,8 @@ import (
 	"strconv"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -147,7 +149,7 @@ func datasourceServiceComponentRead(_ context.Context, d *schema.ResourceData, m
 				}
 			}
 
-			d.SetId(buildResourceID(c.Host, strconv.Itoa(c.Port)))
+			d.SetId(schemautil.BuildResourceID(c.Host, strconv.Itoa(c.Port)))
 
 			if err := d.Set("project", projectName); err != nil {
 				return diag.FromErr(err)

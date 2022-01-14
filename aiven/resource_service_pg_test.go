@@ -9,6 +9,8 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -313,7 +315,7 @@ func testAccCheckAivenServiceTerminationProtection(n string) resource.TestCheckF
 		r := s.RootModule().Resources[n]
 		a := r.Primary.Attributes
 
-		projectName, serviceName := splitResourceID2(a["id"])
+		projectName, serviceName := schemautil.SplitResourceID2(a["id"])
 
 		c := testAccProvider.Meta().(*aiven.Client)
 

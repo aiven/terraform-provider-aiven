@@ -1,6 +1,6 @@
 // Copyright (c) 2017 jelmersnoeck
 // Copyright (c) 2018-2021 Aiven, Helsinki, Finland. https://aiven.io/
-package aiven
+package uconf
 
 import (
 	"fmt"
@@ -8,7 +8,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/aiven/templates"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -40,9 +42,9 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 
 	var diffFunction schema.SchemaDiffSuppressFunc
 	if createOnly, ok := definition["createOnly"]; ok && createOnly.(bool) {
-		diffFunction = createOnlyDiffSuppressFunc
+		diffFunction = schemautil.CreateOnlyDiffSuppressFunc
 	} else if valueType == "object" {
-		diffFunction = emptyObjectDiffSuppressFuncSkipArrays(GenerateTerraformUserConfigSchema(definition))
+		diffFunction = schemautil.EmptyObjectDiffSuppressFuncSkipArrays(GenerateTerraformUserConfigSchema(definition))
 	}
 
 	title := definition["title"].(string)
@@ -86,8 +88,8 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 		}
 		var valueDiffFunction schema.SchemaDiffSuppressFunc
 		if key == "ip_filter" {
-			diffFunction = ipFilterArrayDiffSuppressFunc
-			valueDiffFunction = ipFilterValueDiffSuppressFunc
+			diffFunction = schemautil.IpFilterArrayDiffSuppressFunc
+			valueDiffFunction = schemautil.IpFilterValueDiffSuppressFunc
 		}
 		var elem interface{}
 		if itemType == schema.TypeList {

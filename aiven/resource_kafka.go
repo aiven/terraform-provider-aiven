@@ -8,7 +8,9 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/pkg/service"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -20,7 +22,7 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 		Type:             schema.TypeBool,
 		Optional:         true,
 		Description:      "Switch the service to use Karapace for schema registry and REST proxy",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 	}
 	aivenKafkaSchema["default_acl"] = &schema.Schema{
 		Type:        schema.TypeBool,
@@ -74,7 +76,7 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	aivenKafkaSchema[ServiceTypeKafka+"_user_config"] = generateServiceUserConfiguration(ServiceTypeKafka)
+	aivenKafkaSchema[ServiceTypeKafka+"_user_config"] = service.GenerateServiceUserConfigurationSchema(ServiceTypeKafka)
 
 	return aivenKafkaSchema
 }
@@ -165,7 +167,7 @@ func resourceKafkaCreate(ctx context.Context, d *schema.ResourceData, m interfac
 func resourceKafkaRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	kafka, err := client.Services.Get(splitResourceID2(d.Id()))
+	kafka, err := client.Services.Get(schemautil.SplitResourceID2(d.Id()))
 	if err := resourceReadHandleNotFound(err, d); err != nil {
 		return nil
 	}

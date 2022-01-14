@@ -5,6 +5,8 @@ package aiven
 import (
 	"context"
 
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -23,7 +25,7 @@ func datasourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m int
 	serviceName := d.Get("service_name").(string)
 	topicName := d.Get("topic_name").(string)
 
-	d.SetId(buildResourceID(projectName, serviceName, topicName))
+	d.SetId(schemautil.BuildResourceID(projectName, serviceName, topicName))
 
 	return resourceKafkaTopicRead(ctx, d, m)
 }

@@ -7,6 +7,8 @@ import (
 	"fmt"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -46,7 +48,7 @@ func resourceElasticsearchACLConfig() *schema.Resource {
 func resourceElasticsearchACLConfigRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName := splitResourceID2(d.Id())
+	project, serviceName := schemautil.SplitResourceID2(d.Id())
 	r, err := client.ElasticsearchACLs.Get(project, serviceName)
 	if err != nil {
 		return diag.FromErr(resourceReadHandleNotFound(err, d))
@@ -88,7 +90,7 @@ func resourceElasticsearchACLConfigUpdate(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(resourceReadHandleNotFound(err, d))
 	}
 
-	d.SetId(buildResourceID(project, serviceName))
+	d.SetId(schemautil.BuildResourceID(project, serviceName))
 
 	return resourceElasticsearchACLConfigRead(ctx, d, m)
 }

@@ -8,6 +8,8 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -115,7 +117,7 @@ func testAccCheckAivenDatabaseResourceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		projectName, serviceName, databaseName := splitResourceID3(rs.Primary.ID)
+		projectName, serviceName, databaseName := schemautil.SplitResourceID3(rs.Primary.ID)
 		db, err := c.Databases.Get(projectName, serviceName, databaseName)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {

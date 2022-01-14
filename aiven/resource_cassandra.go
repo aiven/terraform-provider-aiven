@@ -5,6 +5,7 @@ package aiven
 import (
 	"time"
 
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -18,7 +19,7 @@ func cassandraSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	s[ServiceTypeCassandra+"_user_config"] = generateServiceUserConfiguration(ServiceTypeCassandra)
+	s[ServiceTypeCassandra+"_user_config"] = service.GenerateServiceUserConfigurationSchema(ServiceTypeCassandra)
 
 	return s
 }

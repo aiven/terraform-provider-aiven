@@ -1,11 +1,11 @@
 // Copyright (c) 2017 jelmersnoeck
 // Copyright (c) 2018-2021 Aiven, Helsinki, Finland. https://aiven.io/
-package ipfilter
+package uconf
 
-// Normalize compares a list of IP filters set in TF and a sorted version coming
+// NormalizeIpFilter compares a list of IP filters set in TF and a sorted version coming
 // from Aiven and takes sort IP filters such that all matching entries will be in
 // the same order as defined in the TF manifest.
-func Normalize(tfUserConfig interface{}, userConfig []map[string]interface{}) []map[string]interface{} {
+func NormalizeIpFilter(tfUserConfig interface{}, userConfig []map[string]interface{}) []map[string]interface{} {
 	tfInt, ok := tfUserConfig.([]interface{})
 	if !ok || len(tfInt) == 0 {
 		return userConfig

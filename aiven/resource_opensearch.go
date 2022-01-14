@@ -9,7 +9,9 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/pkg/service"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -31,7 +33,7 @@ func opensearchSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	s[ServiceTypeOpensearch+"_user_config"] = generateServiceUserConfiguration(ServiceTypeOpensearch)
+	s[ServiceTypeOpensearch+"_user_config"] = service.GenerateServiceUserConfigurationSchema(ServiceTypeOpensearch)
 
 	return s
 }
@@ -71,7 +73,7 @@ func resourceElasticsearchState(ctx context.Context, d *schema.ResourceData, m i
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>", d.Id())
 	}
 
-	projectName, serviceName := splitResourceID2(d.Id())
+	projectName, serviceName := schemautil.SplitResourceID2(d.Id())
 	s, err := client.Services.Get(projectName, serviceName)
 	if err != nil {
 		return nil, err

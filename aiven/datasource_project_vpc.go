@@ -6,6 +6,8 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -32,7 +34,7 @@ func datasourceProjectVPCRead(_ context.Context, d *schema.ResourceData, m inter
 
 	for _, vpc := range vpcs {
 		if vpc.CloudName == cloudName {
-			d.SetId(buildResourceID(projectName, vpc.ProjectVPCID))
+			d.SetId(schemautil.BuildResourceID(projectName, vpc.ProjectVPCID))
 			err = copyVPCPropertiesFromAPIResponseToTerraform(d, vpc, projectName)
 			if err != nil {
 				return diag.FromErr(err)

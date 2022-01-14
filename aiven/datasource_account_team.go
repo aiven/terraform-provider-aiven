@@ -6,6 +6,8 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -32,7 +34,7 @@ func datasourceAccountTeamRead(ctx context.Context, d *schema.ResourceData, m in
 
 	for _, t := range r.Teams {
 		if t.Name == name {
-			d.SetId(buildResourceID(t.AccountId, t.Id))
+			d.SetId(schemautil.BuildResourceID(t.AccountId, t.Id))
 			return resourceAccountTeamRead(ctx, d, m)
 		}
 	}

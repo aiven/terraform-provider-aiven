@@ -5,6 +5,8 @@ package aiven
 import (
 	"context"
 
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -23,7 +25,7 @@ func datasourceAccountTeamProjectRead(ctx context.Context, d *schema.ResourceDat
 	teamId := d.Get("team_id").(string)
 	projectName := d.Get("project_name").(string)
 
-	d.SetId(buildResourceID(accountId, teamId, projectName))
+	d.SetId(schemautil.BuildResourceID(accountId, teamId, projectName))
 
 	return resourceAccountTeamProjectRead(ctx, d, m)
 }

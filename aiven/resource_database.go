@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -87,15 +89,15 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, m inter
 		serviceName,
 		aiven.CreateDatabaseRequest{
 			Database:  databaseName,
-			LcCollate: optionalString(d, "lc_collate"),
-			LcType:    optionalString(d, "lc_ctype"),
+			LcCollate: schemautil.OptionalString(d, "lc_collate"),
+			LcType:    schemautil.OptionalString(d, "lc_ctype"),
 		},
 	)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(buildResourceID(projectName, serviceName, databaseName))
+	d.SetId(schemautil.BuildResourceID(projectName, serviceName, databaseName))
 
 	return resourceDatabaseRead(ctx, d, m)
 }
@@ -107,7 +109,7 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceDatabaseRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, databaseName := splitResourceID3(d.Id())
+	projectName, serviceName, databaseName := schemautil.SplitResourceID3(d.Id())
 	database, err := client.Databases.Get(projectName, serviceName, databaseName)
 	if err != nil {
 		return diag.FromErr(resourceReadHandleNotFound(err, d))
@@ -138,7 +140,7 @@ func resourceDatabaseRead(_ context.Context, d *schema.ResourceData, m interface
 func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, databaseName := splitResourceID3(d.Id())
+	projectName, serviceName, databaseName := schemautil.SplitResourceID3(d.Id())
 
 	if d.Get("termination_protection").(bool) {
 		return diag.Errorf("cannot delete a database termination_protection is enabled")

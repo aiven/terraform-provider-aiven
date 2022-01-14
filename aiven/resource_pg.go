@@ -8,7 +8,11 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/pkg/service"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/service"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/uconf"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -72,7 +76,7 @@ func aivenPGSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	schemaPG[ServiceTypePG+"_user_config"] = generateServiceUserConfiguration(ServiceTypePG)
+	schemaPG[ServiceTypePG+"_user_config"] = service.GenerateServiceUserConfigurationSchema(ServiceTypePG)
 
 	return schemaPG
 }
@@ -111,8 +115,8 @@ func resourcePG() *schema.Resource {
 func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName := splitResourceID2(d.Id())
-	userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("service", "pg", false, d)
+	projectName, serviceName := schemautil.SplitResourceID2(d.Id())
+	userConfig := uconf.ConvertTerraformUserConfigToAPICompatibleFormat("service", "pg", false, d)
 
 	if userConfig["pg_version"] != nil {
 		s, err := client.Services.Get(projectName, serviceName)

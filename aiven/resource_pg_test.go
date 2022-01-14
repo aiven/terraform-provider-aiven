@@ -165,7 +165,6 @@ func TestAccAiven_pg(t *testing.T) {
 			},
 		})
 	})
-
 	t.Run("changing plan of a service when disc size is not set", func(tt *testing.T) {
 		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 

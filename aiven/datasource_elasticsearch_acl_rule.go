@@ -6,6 +6,8 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -35,7 +37,7 @@ func datasourceElasticsearchACLRuleRead(ctx context.Context, d *schema.ResourceD
 		return diag.Errorf("acl rule %s/%s/%s/%s not found", projectName, serviceName, username, index)
 	}
 
-	d.SetId(buildResourceID(projectName, serviceName, username, index))
+	d.SetId(schemautil.BuildResourceID(projectName, serviceName, username, index))
 
 	return resourceElasticsearchACLRuleRead(ctx, d, m)
 }

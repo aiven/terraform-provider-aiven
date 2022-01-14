@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -40,7 +42,7 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 		Type:             schema.TypeInt,
 		Optional:         true,
 		Deprecated:       "use config.retention_bytes instead",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 		Description:      complex("Retention bytes.").deprecate("use config.retention_bytes instead").build(),
 	},
 	"retention_hours": {
@@ -48,21 +50,21 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 		Optional:         true,
 		ValidateFunc:     validation.IntAtLeast(-1),
 		Deprecated:       "use config.retention_ms instead",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 		Description:      complex("Retention period (hours).").deprecate("use config.retention_ms instead").build(),
 	},
 	"minimum_in_sync_replicas": {
 		Type:             schema.TypeInt,
 		Optional:         true,
 		Deprecated:       "use config.min_insync_replicas instead",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 		Description:      complex("Minimum required nodes in-sync replicas (ISR) to produce to a partition.").deprecate("use config.min_insync_replicas instead").build(),
 	},
 	"cleanup_policy": {
 		Type:             schema.TypeString,
 		Optional:         true,
 		Deprecated:       "use config.cleanup_policy instead",
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 		Description:      complex("Topic cleanup policy.").deprecate("use config.cleanup_policy instead").possibleValues("delete", "compact").build(),
 	},
 	"termination_protection": {
@@ -97,152 +99,152 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 		Description:      "Kafka topic configuration",
 		Optional:         true,
 		MaxItems:         1,
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"cleanup_policy": {
 					Type:             schema.TypeString,
 					Description:      "cleanup.policy value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"compression_type": {
 					Type:             schema.TypeString,
 					Description:      "compression.type value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"delete_retention_ms": {
 					Type:             schema.TypeString,
 					Description:      "delete.retention.ms value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"file_delete_delay_ms": {
 					Type:             schema.TypeString,
 					Description:      "file.delete.delay.ms value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"flush_messages": {
 					Type:             schema.TypeString,
 					Description:      "flush.messages value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"flush_ms": {
 					Type:             schema.TypeString,
 					Description:      "flush.ms value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"index_interval_bytes": {
 					Type:             schema.TypeString,
 					Description:      "index.interval.bytes value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"max_compaction_lag_ms": {
 					Type:             schema.TypeString,
 					Description:      "max.compaction.lag.ms value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"max_message_bytes": {
 					Type:             schema.TypeString,
 					Description:      "max.message.bytes value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"message_downconversion_enable": {
 					Type:             schema.TypeString,
 					Description:      "message.downconversion.enable value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"message_format_version": {
 					Type:             schema.TypeString,
 					Description:      "message.format.version value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"message_timestamp_difference_max_ms": {
 					Type:             schema.TypeString,
 					Description:      "message.timestamp.difference.max.ms value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"message_timestamp_type": {
 					Type:             schema.TypeString,
 					Description:      "message.timestamp.type value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"min_cleanable_dirty_ratio": {
 					Type:             schema.TypeString,
 					Description:      "min.cleanable.dirty.ratio value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"min_compaction_lag_ms": {
 					Type:             schema.TypeString,
 					Description:      "min.compaction.lag.ms value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"min_insync_replicas": {
 					Type:             schema.TypeString,
 					Description:      "min.insync.replicas value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"preallocate": {
 					Type:             schema.TypeString,
 					Description:      "preallocate value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"retention_bytes": {
 					Type:             schema.TypeString,
 					Description:      "retention.bytes value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"retention_ms": {
 					Type:             schema.TypeString,
 					Description:      "retention.ms value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"segment_bytes": {
 					Type:             schema.TypeString,
 					Description:      "segment.bytes value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"segment_index_bytes": {
 					Type:             schema.TypeString,
 					Description:      "segment.index.bytes value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"segment_jitter_ms": {
 					Type:             schema.TypeString,
 					Description:      "segment.jitter.ms value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"segment_ms": {
 					Type:             schema.TypeString,
 					Description:      "segment.ms value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"unclean_leader_election_enable": {
 					Type:             schema.TypeString,
 					Description:      "unclean.leader.election.enable value",
 					Optional:         true,
-					DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 			},
 		},
@@ -276,12 +278,12 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 	replication := d.Get("replication").(int)
 
 	createRequest := aiven.CreateKafkaTopicRequest{
-		CleanupPolicy:         optionalStringPointer(d, "cleanup_policy"),
-		MinimumInSyncReplicas: optionalIntPointer(d, "minimum_in_sync_replicas"),
+		CleanupPolicy:         schemautil.OptionalStringPointer(d, "cleanup_policy"),
+		MinimumInSyncReplicas: schemautil.OptionalIntPointer(d, "minimum_in_sync_replicas"),
 		Partitions:            &partitions,
 		Replication:           &replication,
-		RetentionBytes:        optionalIntPointer(d, "retention_bytes"),
-		RetentionHours:        optionalIntPointer(d, "retention_hours"),
+		RetentionBytes:        schemautil.OptionalIntPointer(d, "retention_bytes"),
+		RetentionHours:        schemautil.OptionalIntPointer(d, "retention_hours"),
 		TopicName:             topicName,
 		Config:                getKafkaTopicConfig(d),
 		Tags:                  getTags(d),
@@ -300,7 +302,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(err)
 	}
 
-	d.SetId(buildResourceID(project, serviceName, topicName))
+	d.SetId(schemautil.BuildResourceID(project, serviceName, topicName))
 
 	// We do not call a Kafka Topic read here to speed up the performance.
 	// However, in the case of Kafka Topic resource getting a computed field
@@ -337,33 +339,33 @@ func getKafkaTopicConfig(d *schema.ResourceData) aiven.KafkaTopicConfig {
 	return aiven.KafkaTopicConfig{
 		CleanupPolicy:                   configRaw["cleanup_policy"].(string),
 		CompressionType:                 configRaw["compression_type"].(string),
-		DeleteRetentionMs:               parseOptionalStringToInt64(configRaw["delete_retention_ms"]),
-		FileDeleteDelayMs:               parseOptionalStringToInt64(configRaw["file_delete_delay_ms"]),
-		FlushMessages:                   parseOptionalStringToInt64(configRaw["flush_messages"]),
-		FlushMs:                         parseOptionalStringToInt64(configRaw["flush_ms"]),
-		IndexIntervalBytes:              parseOptionalStringToInt64(configRaw["index_interval_bytes"]),
-		MaxCompactionLagMs:              parseOptionalStringToInt64(configRaw["max_compaction_lag_ms"]),
-		MaxMessageBytes:                 parseOptionalStringToInt64(configRaw["max_message_bytes"]),
-		MessageDownconversionEnable:     parseOptionalStringToBool(configRaw["message_downconversion_enable"]),
+		DeleteRetentionMs:               schemautil.ParseOptionalStringToInt64(configRaw["delete_retention_ms"]),
+		FileDeleteDelayMs:               schemautil.ParseOptionalStringToInt64(configRaw["file_delete_delay_ms"]),
+		FlushMessages:                   schemautil.ParseOptionalStringToInt64(configRaw["flush_messages"]),
+		FlushMs:                         schemautil.ParseOptionalStringToInt64(configRaw["flush_ms"]),
+		IndexIntervalBytes:              schemautil.ParseOptionalStringToInt64(configRaw["index_interval_bytes"]),
+		MaxCompactionLagMs:              schemautil.ParseOptionalStringToInt64(configRaw["max_compaction_lag_ms"]),
+		MaxMessageBytes:                 schemautil.ParseOptionalStringToInt64(configRaw["max_message_bytes"]),
+		MessageDownconversionEnable:     schemautil.ParseOptionalStringToBool(configRaw["message_downconversion_enable"]),
 		MessageFormatVersion:            configRaw["message_format_version"].(string),
-		MessageTimestampDifferenceMaxMs: parseOptionalStringToInt64(configRaw["message_timestamp_difference_max_ms"]),
+		MessageTimestampDifferenceMaxMs: schemautil.ParseOptionalStringToInt64(configRaw["message_timestamp_difference_max_ms"]),
 		MessageTimestampType:            configRaw["message_timestamp_type"].(string),
-		MinCleanableDirtyRatio:          parseOptionalStringToFloat64(configRaw["min_cleanable_dirty_ratio"]),
-		MinCompactionLagMs:              parseOptionalStringToInt64(configRaw["min_compaction_lag_ms"]),
-		MinInsyncReplicas:               parseOptionalStringToInt64(configRaw["min_insync_replicas"]),
-		Preallocate:                     parseOptionalStringToBool(configRaw["preallocate"]),
-		RetentionBytes:                  parseOptionalStringToInt64(configRaw["retention_bytes"]),
-		RetentionMs:                     parseOptionalStringToInt64(configRaw["retention_ms"]),
-		SegmentBytes:                    parseOptionalStringToInt64(configRaw["segment_bytes"]),
-		SegmentIndexBytes:               parseOptionalStringToInt64(configRaw["segment_index_bytes"]),
-		SegmentJitterMs:                 parseOptionalStringToInt64(configRaw["segment_jitter_ms"]),
-		SegmentMs:                       parseOptionalStringToInt64(configRaw["segment_ms"]),
-		UncleanLeaderElectionEnable:     parseOptionalStringToBool(configRaw["unclean_leader_election_enable"]),
+		MinCleanableDirtyRatio:          schemautil.ParseOptionalStringToFloat64(configRaw["min_cleanable_dirty_ratio"]),
+		MinCompactionLagMs:              schemautil.ParseOptionalStringToInt64(configRaw["min_compaction_lag_ms"]),
+		MinInsyncReplicas:               schemautil.ParseOptionalStringToInt64(configRaw["min_insync_replicas"]),
+		Preallocate:                     schemautil.ParseOptionalStringToBool(configRaw["preallocate"]),
+		RetentionBytes:                  schemautil.ParseOptionalStringToInt64(configRaw["retention_bytes"]),
+		RetentionMs:                     schemautil.ParseOptionalStringToInt64(configRaw["retention_ms"]),
+		SegmentBytes:                    schemautil.ParseOptionalStringToInt64(configRaw["segment_bytes"]),
+		SegmentIndexBytes:               schemautil.ParseOptionalStringToInt64(configRaw["segment_index_bytes"]),
+		SegmentJitterMs:                 schemautil.ParseOptionalStringToInt64(configRaw["segment_jitter_ms"]),
+		SegmentMs:                       schemautil.ParseOptionalStringToInt64(configRaw["segment_ms"]),
+		UncleanLeaderElectionEnable:     schemautil.ParseOptionalStringToBool(configRaw["unclean_leader_election_enable"]),
 	}
 }
 
 func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	project, serviceName, topicName := splitResourceID3(d.Id())
+	project, serviceName, topicName := schemautil.SplitResourceID3(d.Id())
 	topic, err := getTopic(ctx, d, m, false)
 	if err != nil {
 		return diag.FromErr(resourceReadHandleNotFound(err, d))
@@ -440,7 +442,7 @@ func flattenKafkaTopicTags(list []aiven.KafkaTopicTag) []map[string]interface{} 
 }
 
 func getTopic(ctx context.Context, d *schema.ResourceData, m interface{}, ignore404 bool) (aiven.KafkaTopic, error) {
-	project, serviceName, topicName := splitResourceID3(d.Id())
+	project, serviceName, topicName := schemautil.SplitResourceID3(d.Id())
 
 	w := &KafkaTopicAvailabilityWaiter{
 		Client:      m.(*aiven.Client),
@@ -463,17 +465,17 @@ func resourceKafkaTopicUpdate(_ context.Context, d *schema.ResourceData, m inter
 	client := m.(*aiven.Client)
 
 	partitions := d.Get("partitions").(int)
-	projectName, serviceName, topicName := splitResourceID3(d.Id())
+	projectName, serviceName, topicName := schemautil.SplitResourceID3(d.Id())
 	err := client.KafkaTopics.Update(
 		projectName,
 		serviceName,
 		topicName,
 		aiven.UpdateKafkaTopicRequest{
-			MinimumInSyncReplicas: optionalIntPointer(d, "minimum_in_sync_replicas"),
+			MinimumInSyncReplicas: schemautil.OptionalIntPointer(d, "minimum_in_sync_replicas"),
 			Partitions:            &partitions,
-			Replication:           optionalIntPointer(d, "replication"),
-			RetentionBytes:        optionalIntPointer(d, "retention_bytes"),
-			RetentionHours:        optionalIntPointer(d, "retention_hours"),
+			Replication:           schemautil.OptionalIntPointer(d, "replication"),
+			RetentionBytes:        schemautil.OptionalIntPointer(d, "retention_bytes"),
+			RetentionHours:        schemautil.OptionalIntPointer(d, "retention_hours"),
 			Config:                getKafkaTopicConfig(d),
 			Tags:                  getTags(d),
 		},
@@ -488,7 +490,7 @@ func resourceKafkaTopicUpdate(_ context.Context, d *schema.ResourceData, m inter
 func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, topicName := splitResourceID3(d.Id())
+	projectName, serviceName, topicName := schemautil.SplitResourceID3(d.Id())
 
 	if d.Get("termination_protection").(bool) {
 		return diag.Errorf("cannot delete kafka topic when termination_protection is enabled")
@@ -526,30 +528,30 @@ func resourceKafkaTopicState(ctx context.Context, d *schema.ResourceData, m inte
 func flattenKafkaTopicConfig(t aiven.KafkaTopic) []map[string]interface{} {
 	return []map[string]interface{}{
 		{
-			"cleanup_policy":                      toOptionalString(t.Config.CleanupPolicy.Value),
-			"compression_type":                    toOptionalString(t.Config.CompressionType.Value),
-			"delete_retention_ms":                 toOptionalString(t.Config.DeleteRetentionMs.Value),
-			"file_delete_delay_ms":                toOptionalString(t.Config.FileDeleteDelayMs.Value),
-			"flush_messages":                      toOptionalString(t.Config.FlushMessages.Value),
-			"flush_ms":                            toOptionalString(t.Config.FlushMs.Value),
-			"index_interval_bytes":                toOptionalString(t.Config.IndexIntervalBytes.Value),
-			"max_compaction_lag_ms":               toOptionalString(t.Config.MaxCompactionLagMs.Value),
-			"max_message_bytes":                   toOptionalString(t.Config.MaxMessageBytes.Value),
-			"message_downconversion_enable":       toOptionalString(t.Config.MessageDownconversionEnable.Value),
-			"message_format_version":              toOptionalString(t.Config.MessageFormatVersion.Value),
-			"message_timestamp_difference_max_ms": toOptionalString(t.Config.MessageTimestampDifferenceMaxMs.Value),
-			"message_timestamp_type":              toOptionalString(t.Config.MessageTimestampType.Value),
-			"min_cleanable_dirty_ratio":           toOptionalString(t.Config.MinCleanableDirtyRatio.Value),
-			"min_compaction_lag_ms":               toOptionalString(t.Config.MinCompactionLagMs.Value),
-			"min_insync_replicas":                 toOptionalString(t.Config.MinInsyncReplicas.Value),
-			"preallocate":                         toOptionalString(t.Config.Preallocate.Value),
-			"retention_bytes":                     toOptionalString(t.Config.RetentionBytes.Value),
-			"retention_ms":                        toOptionalString(t.Config.RetentionMs.Value),
-			"segment_bytes":                       toOptionalString(t.Config.SegmentBytes.Value),
-			"segment_index_bytes":                 toOptionalString(t.Config.SegmentIndexBytes.Value),
-			"segment_jitter_ms":                   toOptionalString(t.Config.SegmentJitterMs.Value),
-			"segment_ms":                          toOptionalString(t.Config.SegmentMs.Value),
-			"unclean_leader_election_enable":      toOptionalString(t.Config.UncleanLeaderElectionEnable.Value),
+			"cleanup_policy":                      schemautil.ToOptionalString(t.Config.CleanupPolicy.Value),
+			"compression_type":                    schemautil.ToOptionalString(t.Config.CompressionType.Value),
+			"delete_retention_ms":                 schemautil.ToOptionalString(t.Config.DeleteRetentionMs.Value),
+			"file_delete_delay_ms":                schemautil.ToOptionalString(t.Config.FileDeleteDelayMs.Value),
+			"flush_messages":                      schemautil.ToOptionalString(t.Config.FlushMessages.Value),
+			"flush_ms":                            schemautil.ToOptionalString(t.Config.FlushMs.Value),
+			"index_interval_bytes":                schemautil.ToOptionalString(t.Config.IndexIntervalBytes.Value),
+			"max_compaction_lag_ms":               schemautil.ToOptionalString(t.Config.MaxCompactionLagMs.Value),
+			"max_message_bytes":                   schemautil.ToOptionalString(t.Config.MaxMessageBytes.Value),
+			"message_downconversion_enable":       schemautil.ToOptionalString(t.Config.MessageDownconversionEnable.Value),
+			"message_format_version":              schemautil.ToOptionalString(t.Config.MessageFormatVersion.Value),
+			"message_timestamp_difference_max_ms": schemautil.ToOptionalString(t.Config.MessageTimestampDifferenceMaxMs.Value),
+			"message_timestamp_type":              schemautil.ToOptionalString(t.Config.MessageTimestampType.Value),
+			"min_cleanable_dirty_ratio":           schemautil.ToOptionalString(t.Config.MinCleanableDirtyRatio.Value),
+			"min_compaction_lag_ms":               schemautil.ToOptionalString(t.Config.MinCompactionLagMs.Value),
+			"min_insync_replicas":                 schemautil.ToOptionalString(t.Config.MinInsyncReplicas.Value),
+			"preallocate":                         schemautil.ToOptionalString(t.Config.Preallocate.Value),
+			"retention_bytes":                     schemautil.ToOptionalString(t.Config.RetentionBytes.Value),
+			"retention_ms":                        schemautil.ToOptionalString(t.Config.RetentionMs.Value),
+			"segment_bytes":                       schemautil.ToOptionalString(t.Config.SegmentBytes.Value),
+			"segment_index_bytes":                 schemautil.ToOptionalString(t.Config.SegmentIndexBytes.Value),
+			"segment_jitter_ms":                   schemautil.ToOptionalString(t.Config.SegmentJitterMs.Value),
+			"segment_ms":                          schemautil.ToOptionalString(t.Config.SegmentMs.Value),
+			"unclean_leader_election_enable":      schemautil.ToOptionalString(t.Config.UncleanLeaderElectionEnable.Value),
 		},
 	}
 }

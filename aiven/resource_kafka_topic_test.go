@@ -10,6 +10,8 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -350,7 +352,7 @@ func testAccCheckAivenKafkaTopicResourceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		project, serviceName, topicName := splitResourceID3(rs.Primary.ID)
+		project, serviceName, topicName := schemautil.SplitResourceID3(rs.Primary.ID)
 
 		_, err := c.Services.Get(project, serviceName)
 		if err != nil {

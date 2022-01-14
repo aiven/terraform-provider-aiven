@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -28,7 +30,7 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 		Optional:         true,
 		Sensitive:        true,
 		Computed:         true,
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 		Description:      "The password of the service user ( not applicable for all services ).",
 	},
 	"redis_acl_categories": {
@@ -82,7 +84,7 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 	"authentication": {
 		Type:             schema.TypeString,
 		Optional:         true,
-		DiffSuppressFunc: emptyObjectDiffSuppressFunc,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 		ValidateFunc:     validation.StringInSlice([]string{"caching_sha2_password", "mysql_native_password"}, false),
 		Description:      complex("Authentication details.").possibleValues("caching_sha2_password", "mysql_native_password").build(),
 	},
@@ -133,10 +135,10 @@ func resourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m in
 		aiven.CreateServiceUserRequest{
 			Username: username,
 			AccessControl: &aiven.AccessControl{
-				RedisACLCategories:       flattenToString(d.Get("redis_acl_categories").([]interface{})),
-				RedisACLCommands:         flattenToString(d.Get("redis_acl_commands").([]interface{})),
-				RedisACLKeys:             flattenToString(d.Get("redis_acl_keys").([]interface{})),
-				RedisACLChannels:         flattenToString(d.Get("redis_acl_channels").([]interface{})),
+				RedisACLCategories:       schemautil.FlattenToString(d.Get("redis_acl_categories").([]interface{})),
+				RedisACLCommands:         schemautil.FlattenToString(d.Get("redis_acl_commands").([]interface{})),
+				RedisACLKeys:             schemautil.FlattenToString(d.Get("redis_acl_keys").([]interface{})),
+				RedisACLChannels:         schemautil.FlattenToString(d.Get("redis_acl_channels").([]interface{})),
 				PostgresAllowReplication: &allowReplication,
 			},
 		},
@@ -148,15 +150,15 @@ func resourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m in
 	if _, ok := d.GetOk("password"); ok {
 		_, err := client.ServiceUsers.Update(projectName, serviceName, username,
 			aiven.ModifyServiceUserRequest{
-				Authentication: optionalStringPointer(d, "authentication"),
-				NewPassword:    optionalStringPointer(d, "password"),
+				Authentication: schemautil.OptionalStringPointer(d, "authentication"),
+				NewPassword:    schemautil.OptionalStringPointer(d, "password"),
 			})
 		if err != nil {
 			return diag.FromErr(err)
 		}
 	}
 
-	d.SetId(buildResourceID(projectName, serviceName, username))
+	d.SetId(schemautil.BuildResourceID(projectName, serviceName, username))
 
 	return resourceServiceUserRead(ctx, d, m)
 }
@@ -164,12 +166,12 @@ func resourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m in
 func resourceServiceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, username := splitResourceID3(d.Id())
+	projectName, serviceName, username := schemautil.SplitResourceID3(d.Id())
 
 	_, err := client.ServiceUsers.Update(projectName, serviceName, username,
 		aiven.ModifyServiceUserRequest{
-			Authentication: optionalStringPointer(d, "authentication"),
-			NewPassword:    optionalStringPointer(d, "password"),
+			Authentication: schemautil.OptionalStringPointer(d, "authentication"),
+			NewPassword:    schemautil.OptionalStringPointer(d, "password"),
 		})
 	if err != nil {
 		return diag.FromErr(err)
@@ -227,7 +229,7 @@ func copyServiceUserPropertiesFromAPIResponseToTerraform(
 func resourceServiceUserRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, username := splitResourceID3(d.Id())
+	projectName, serviceName, username := schemautil.SplitResourceID3(d.Id())
 	user, err := client.ServiceUsers.Get(projectName, serviceName, username)
 	if err != nil {
 		return diag.FromErr(resourceReadHandleNotFound(err, d))
@@ -244,7 +246,7 @@ func resourceServiceUserRead(_ context.Context, d *schema.ResourceData, m interf
 func resourceServiceUserDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, username := splitResourceID3(d.Id())
+	projectName, serviceName, username := schemautil.SplitResourceID3(d.Id())
 	err := client.ServiceUsers.Delete(projectName, serviceName, username)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
@@ -260,7 +262,7 @@ func resourceServiceUserState(_ context.Context, d *schema.ResourceData, m inter
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<username>", d.Id())
 	}
 
-	projectName, serviceName, username := splitResourceID3(d.Id())
+	projectName, serviceName, username := schemautil.SplitResourceID3(d.Id())
 	user, err := client.ServiceUsers.Get(projectName, serviceName, username)
 	if err != nil {
 		return nil, err

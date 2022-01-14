@@ -9,7 +9,9 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/pkg/cache"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/cache"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -73,7 +75,7 @@ func resourceKafkaACLCreate(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	d.SetId(buildResourceID(project, serviceName, acl.ID))
+	d.SetId(schemautil.BuildResourceID(project, serviceName, acl.ID))
 
 	return resourceKafkaACLRead(ctx, d, m)
 }
@@ -81,7 +83,7 @@ func resourceKafkaACLCreate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceKafkaACLRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, aclID := splitResourceID3(d.Id())
+	project, serviceName, aclID := schemautil.SplitResourceID3(d.Id())
 	acl, err := cache.ACLCache{}.Read(project, serviceName, aclID, client)
 	if err != nil {
 		return diag.FromErr(resourceReadHandleNotFound(err, d))
@@ -98,7 +100,7 @@ func resourceKafkaACLRead(_ context.Context, d *schema.ResourceData, m interface
 func resourceKafkaACLDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, aclID := splitResourceID3(d.Id())
+	projectName, serviceName, aclID := schemautil.SplitResourceID3(d.Id())
 	err := client.KafkaACLs.Delete(projectName, serviceName, aclID)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)

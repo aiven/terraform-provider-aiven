@@ -6,6 +6,8 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -117,7 +119,7 @@ func resourceFlinkTable() *schema.Resource {
 func resourceFlinkTableRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, tableId := splitResourceID3(d.Id())
+	project, serviceName, tableId := schemautil.SplitResourceID3(d.Id())
 
 	r, err := client.FlinkTables.Get(project, serviceName, aiven.GetFlinkTableRequest{TableId: tableId})
 	if err != nil {
@@ -159,7 +161,7 @@ func resourceFlinkTableCreate(ctx context.Context, d *schema.ResourceData, m int
 	jdbcTable := d.Get("jdbc_table").(string)
 	kafkaConnectorType := d.Get("kafka_connector_type").(string)
 	kafkaTopic := d.Get("kafka_topic").(string)
-	kafkaKeyFields := flattenToString(d.Get("kafka_key_fields").([]interface{}))
+	kafkaKeyFields := schemautil.FlattenToString(d.Get("kafka_key_fields").([]interface{}))
 	kafkaKeyFormat := d.Get("kafka_key_format").(string)
 	kafkaValueFormat := d.Get("kafka_value_format").(string)
 	kafkaStartupMode := d.Get("kafka_startup_mode").(string)
@@ -184,7 +186,7 @@ func resourceFlinkTableCreate(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(err)
 	}
 
-	d.SetId(buildResourceID(project, serviceName, r.TableId))
+	d.SetId(schemautil.BuildResourceID(project, serviceName, r.TableId))
 
 	return resourceFlinkTableRead(ctx, d, m)
 }
@@ -192,7 +194,7 @@ func resourceFlinkTableCreate(ctx context.Context, d *schema.ResourceData, m int
 func resourceFlinkTableDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, tableId := splitResourceID3(d.Id())
+	project, serviceName, tableId := schemautil.SplitResourceID3(d.Id())
 
 	err := client.FlinkTables.Delete(
 		project,
