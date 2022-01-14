@@ -4,6 +4,9 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.5.0] - not released yet
+- Add a new field to `aiven_service_user` resource - Postgres Allow Replication
+
 ## [2.4.3] - 2022-01-13
 - add forgotten 'disk_space_used' attribute to the deprecated service resource
 

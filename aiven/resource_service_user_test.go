@@ -62,6 +62,30 @@ func TestAccAivenServiceUser_basic(t *testing.T) {
 		})
 	})
 
+	t.Run("pg replication", func(tt *testing.T) {
+		resourceName := "aiven_service_user.foo"
+		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
+		resource.ParallelTest(tt, resource.TestCase{
+			PreCheck:          func() { testAccPreCheck(tt) },
+			ProviderFactories: testAccProviderFactories,
+			CheckDestroy:      testAccCheckAivenServiceUserResourceDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccServiceUserPgReplicationResource(rName),
+					Check: resource.ComposeTestCheckFunc(
+						testAccCheckAivenServiceUserAttributes("data.aiven_service_user.user"),
+						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+						resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
+						resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
+						resource.TestCheckResourceAttr(resourceName, "pg_allow_replication", "true"),
+					),
+				},
+			},
+		})
+	})
+
 	t.Run("pg no password, password is used in template interpolation", func(tt *testing.T) {
 		resourceName := "aiven_service_user.foo"
 		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
@@ -134,6 +158,39 @@ func testAccServiceUserRedisACLResource(name string) string {
 		  redis_acl_channels   = ["test"]
 		
 		  depends_on = [aiven_redis.bar]
+		}
+		
+		data "aiven_service_user" "user" {
+		  service_name = aiven_service_user.foo.service_name
+		  project      = aiven_service_user.foo.project
+		  username     = aiven_service_user.foo.username
+		
+		  depends_on = [aiven_service_user.foo]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}
+
+func testAccServiceUserPgReplicationResource(name string) string {
+	return fmt.Sprintf(`
+		data "aiven_project" "foo" {
+		  project = "%s"
+		}
+		
+		resource "aiven_pg" "bar" {
+		  project      = data.aiven_project.foo.project
+		  cloud_name   = "google-europe-west1"
+		  plan         = "startup-4"
+		  service_name = "test-acc-sr-%s"
+		}
+		
+		resource "aiven_service_user" "foo" {
+		  service_name           = aiven_pg.bar.service_name
+		  project                = aiven_pg.bar.project
+		  username               = "user-%s"
+		  password               = "Test$1234"
+		  pg_allow_replication   = true
+		
+		  depends_on = [aiven_pg.bar]
 		}
 		
 		data "aiven_service_user" "user" {
