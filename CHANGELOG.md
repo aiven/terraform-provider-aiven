@@ -4,7 +4,7 @@ parent: README
 nav_order: 1
 ---# Changelog
 
-## [2.5.0] - not released yet
+## [2.5.0] - 2022-01-14
 - Add a new field to `aiven_service_user` resource - Postgres Allow Replication
 
 ## [2.4.3] - 2022-01-13
