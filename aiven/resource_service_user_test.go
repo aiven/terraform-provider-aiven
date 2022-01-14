@@ -186,11 +186,11 @@ func testAccServiceUserPgReplicationResource(name string) string {
 		}
 		
 		resource "aiven_service_user" "foo" {
-		  service_name           = aiven_pg.bar.service_name
-		  project                = aiven_pg.bar.project
-		  username               = "user-%s"
-		  password               = "Test$1234"
-		  pg_allow_replication   = true
+		  service_name         = aiven_pg.bar.service_name
+		  project              = aiven_pg.bar.project
+		  username             = "user-%s"
+		  password             = "Test$1234"
+		  pg_allow_replication = true
 		
 		  depends_on = [aiven_pg.bar]
 		}
