@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go v0.97.0 // indirect
 	cloud.google.com/go/storage v1.17.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/aiven/aiven-go-client v1.7.1-0.20220104152156-6522818eb697
+	github.com/aiven/aiven-go-client v1.7.1-0.20220119115845-5deb9f479516
 	github.com/aws/aws-sdk-go v1.40.55 // indirect
 	github.com/docker/go-units v0.4.0
 	github.com/fatih/color v1.13.0 // indirect
@@ -18,6 +18,7 @@ require (
 	github.com/hashicorp/go-hclog v0.16.2 // indirect
 	github.com/hashicorp/go-plugin v1.4.3 // indirect
 	github.com/hashicorp/hcl/v2 v2.10.1 // indirect
+	github.com/hashicorp/terraform-plugin-docs v0.5.1 // indirect
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.10.1
 	github.com/hashicorp/yamux v0.0.0-20210826001029-26ff87cf9493 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
