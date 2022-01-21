@@ -44,10 +44,6 @@ docs-lint: $(TFPLUGINDOCS)
 	$(TFPLUGINDOCS) validate
 
 
-#################################################
-# Testing and linting
-#################################################
-
 .PHONY: test
 test:
 	CGO_ENABLED=0 go test -v --cover ./...
@@ -62,20 +58,24 @@ sweep:
 	go test -v ./aiven -sweep=global -timeout 60m
 
 .PHONY: lint
-lint: golint testlint
+lint: go-lint test-lint docs-lint
 
-.PHONY: golint
-golint: $(GOLANGCILINT)
-	$(GOLANGCILINT) run --issues-exit-code=0 --timeout=30m ./...
+.PHONY: go-lint
+go-lint: $(GOLANGCILINT)
+	$(GOLANGCILINT) run --timeout=30m ./...
 
-.PHONY: testlint
-testlint: $(TFPROVIDERTESTFMT)
+.PHONY: test-lint
+test-lint: $(TFPROVIDERTESTFMT)
 	$(TFPROVIDERTESTFMT) -lint $(SOURCES)
 
 .PHONY: testfmt
 testfmt: $(TFPROVIDERTESTFMT)
 	$(TFPROVIDERTESTFMT) -inplace $(SOURCES)
 
+
+#################################################
+# Misc
+#################################################
 
 clean: clean-tools
 
