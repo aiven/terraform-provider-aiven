@@ -1,3 +1,5 @@
+// Copyright (c) 2018-2022 Aiven, Helsinki, Finland. https://aiven.io/
+
 package aiven
 
 import (
@@ -47,15 +49,15 @@ func testAccClickhouseDatabaseResource(name string) string {
 		}
 		
 		resource "aiven_clickhouse_database" "foo" {
-		  project       = aiven_clickhouse.bar.project
-		  service_name  = aiven_clickhouse.bar.service_name
-		  name = "test-acc-db-%s"
+		  project      = aiven_clickhouse.bar.project
+		  service_name = aiven_clickhouse.bar.service_name
+		  name         = "test-acc-db-%s"
 		}
 		
 		data "aiven_clickhouse_database" "database" {
-		  project       = aiven_clickhouse_database.foo.project
-		  service_name  = aiven_clickhouse_database.foo.service_name
-		  name = aiven_clickhouse_database.foo.name
+		  project      = aiven_clickhouse_database.foo.project
+		  service_name = aiven_clickhouse_database.foo.service_name
+		  name         = aiven_clickhouse_database.foo.name
 		}`,
 		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }

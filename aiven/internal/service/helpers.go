@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021 Aiven, Helsinki, Finland. https://aiven.io/
+// Copyright (c) 2018-2022 Aiven, Helsinki, Finland. https://aiven.io/
 
 package service
 
