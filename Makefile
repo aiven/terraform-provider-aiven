@@ -4,6 +4,8 @@ short_version = $(shell echo $(version) | sed 's/-.*//')
 GO=CGO_ENABLED=0 go
 BUILDFLAGS=-ldflags "-X main.version=${version}" 
 
+SOURCES = $(shell find aiven -name '*.go')
+
 #################################################
 # Tools
 #################################################
@@ -13,8 +15,18 @@ TOOLS_BIN_DIR := $(TOOLS_DIR)/bin
 
 TFPLUGINDOCS=$(TOOLS_BIN_DIR)/tfplugindocs
 
-$(TFPLUGINDOCS): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod ## Build tfplugindocs from tools folder.
+$(TFPLUGINDOCS): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
 	cd $(TOOLS_DIR) && $(GO) build -o bin/tfplugindocs github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
+
+TFPROVIDERTESTFMT=$(TOOLS_BIN_DIR)/tfprovidertestfmt
+
+$(TFPROVIDERTESTFMT): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
+	cd $(TOOLS_DIR) && $(GO) build -o bin/tfprovidertestfmt github.com/aiven/tfprovidertestfmt
+
+GOLANGCILINT=$(TOOLS_BIN_DIR)/golangci-lint
+
+$(GOLANGCILINT): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
+	cd $(TOOLS_DIR) && $(GO) build -o bin/golangci-lint github.com/golangci/golangci-lint/cmd/golangci-lint
 
 $(TOOLS_BIN_DIR):
 	mkdir -p $(TOOLS_BIN_DIR)
@@ -50,5 +62,22 @@ sweep:
 	go test -v ./aiven -sweep=global -timeout 60m
 
 .PHONY: lint
-lint:
-	golangci-lint run --issues-exit-code=0 --timeout=30m ./...
+lint: golint testlint
+
+.PHONY: golint
+golint: $(GOLANGCILINT)
+	$(GOLANGCILINT) run --issues-exit-code=0 --timeout=30m ./...
+
+.PHONY: testlint
+testlint: $(TFPROVIDERTESTFMT)
+	$(TFPROVIDERTESTFMT) -lint $(SOURCES)
+
+.PHONY: testfmt
+testfmt: $(TFPROVIDERTESTFMT)
+	$(TFPROVIDERTESTFMT) -inplace $(SOURCES)
+
+
+clean: clean-tools
+
+clean-tools:
+	rm -rf $(TOOLS_BIN_DIR)
