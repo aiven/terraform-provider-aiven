@@ -13,6 +13,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+var (
+	providerVersion = "dev"
+)
+
 // Provider returns a terraform.ResourceProvider.
 func Provider() *schema.Provider {
 	p := &schema.Provider{
@@ -141,7 +145,7 @@ func Provider() *schema.Provider {
 
 		client, err := aiven.NewTokenClient(
 			d.Get("api_token").(string),
-			fmt.Sprintf("terraform-provider-aiven/%s", terraformVersion))
+			fmt.Sprintf("terraform-provider-aiven/%s/%s", terraformVersion, providerVersion))
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
