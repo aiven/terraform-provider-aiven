@@ -13,7 +13,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: returntocorp/semgrep-action@v1
 
-  golangci_lint:
+  make_lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -21,7 +21,7 @@ jobs:
         with:
           go-version: 1.16
 
-      - uses: golangci/golangci-lint-action@v2.5.2
+      - run: make lint
 
   check_docs_were_generated:
     runs-on: ubuntu-latest
