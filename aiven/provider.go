@@ -1,5 +1,5 @@
 // Copyright (c) 2017 jelmersnoeck
-// Copyright (c) 2018-2021 Aiven, Helsinki, Finland. https://aiven.io/
+// Copyright (c) 2018-2022 Aiven, Helsinki, Finland. https://aiven.io/
 package aiven
 
 import (
@@ -74,7 +74,10 @@ func Provider() *schema.Provider {
 			"aiven_opensearch_acl_rule":            datasourceOpensearchACLRule(),
 			"aiven_flink":                          datasourceFlink(),
 			"aiven_azure_privatelink":              datasourceAzurePrivatelink(),
-			"aiven_clickhouse":                     datasourceClickhouse(),
+
+			// clickhouse
+			"aiven_clickhouse":          datasourceClickhouse(),
+			"aiven_clickhouse_database": datasourceClickhouseDatabase(),
 
 			// deprecated
 			"aiven_elasticsearch_acl": datasourceElasticsearchACL(),
@@ -126,7 +129,10 @@ func Provider() *schema.Provider {
 			"aiven_flink":                          resourceFlink(),
 			"aiven_flink_table":                    resourceFlinkTable(),
 			"aiven_flink_job":                      resourceFlinkJob(),
-			"aiven_clickhouse":                     resourceClickhouse(),
+
+			// clickhouse
+			"aiven_clickhouse":          resourceClickhouse(),
+			"aiven_clickhouse_database": resourceClickhouseDatabase(),
 
 			// deprecated
 			"aiven_elasticsearch_acl": resourceElasticsearchACL(),
