@@ -1,9 +1,9 @@
 name: Acceptance Tests
 
 on:
-  schedule:
-    - cron: "30 7 * * *"
-  workflow_dispatch:
+  issue_comment:
+    types: [created]
+
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -11,20 +11,47 @@ concurrency:
 
 jobs:
   acceptance_tests:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
+    if: ${{ github.event.issue.pull_request && github.event.comment.body == '/acceptance_tests'}}
 
     steps:
+    - uses: actions/github-script@v4
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const username = context.payload.sender.login;
+          await github.teams.getMembershipForUserInOrg({
+            org: 'aiven',
+            team_slug: 'aiven-terraform-reviewers',
+            username: username,
+          });
+
+    - uses: actions/github-script@v4
+      id: sha
+      with:
+        result-encoding: string
+        script: |
+          const { owner, repo, number } = context.issue;
+          const pr = await github.pulls.get({
+            owner,
+            repo,
+            pull_number: number,
+          });
+          return pr.data.head.sha          
+
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ steps.sha.outputs.result }}
+
+    - uses: actions/setup-go@v2
+      with:
+        go-version: 1.16
 
     - uses: softprops/turnstyle@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         same-branch-only: false
-
-    - uses: actions/checkout@v2
-    - uses: actions/setup-go@v2
-      with:
-        go-version: 1.16
 
     - run: make testacc
       env:
@@ -39,5 +66,4 @@ jobs:
         command: make sweep
       env:
         AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
-        AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME }} 
-
+        AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME }}
