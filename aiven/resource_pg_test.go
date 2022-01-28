@@ -91,7 +91,7 @@ func TestAccAiven_pg(t *testing.T) {
 					Check: resource.ComposeTestCheckFunc(
 						testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
 						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+						resource.TestCheckResourceAttrSet(resourceName, "state"),
 						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 						resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
@@ -107,7 +107,7 @@ func TestAccAiven_pg(t *testing.T) {
 					Check: resource.ComposeTestCheckFunc(
 						testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
 						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+						resource.TestCheckResourceAttrSet(resourceName, "state"),
 						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 						resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
@@ -135,7 +135,7 @@ func TestAccAiven_pg(t *testing.T) {
 					Check: resource.ComposeTestCheckFunc(
 						testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
 						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+						resource.TestCheckResourceAttrSet(resourceName, "state"),
 						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 						resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
@@ -151,7 +151,7 @@ func TestAccAiven_pg(t *testing.T) {
 					Check: resource.ComposeTestCheckFunc(
 						testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
 						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+						resource.TestCheckResourceAttrSet(resourceName, "state"),
 						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 						resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
@@ -178,7 +178,7 @@ func TestAccAiven_pg(t *testing.T) {
 					Check: resource.ComposeTestCheckFunc(
 						testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
 						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+						resource.TestCheckResourceAttrSet(resourceName, "state"),
 						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 						resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
@@ -193,7 +193,7 @@ func TestAccAiven_pg(t *testing.T) {
 					Check: resource.ComposeTestCheckFunc(
 						testAccCheckAivenServicePGAttributes("data.aiven_pg.service"),
 						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+						resource.TestCheckResourceAttrSet(resourceName, "state"),
 						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 						resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
@@ -221,7 +221,7 @@ func TestAccAiven_pg(t *testing.T) {
 					Config: testAccPGWithStaticIps(rName),
 					Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+						resource.TestCheckResourceAttrSet(resourceName, "state"),
 						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 						resource.TestCheckResourceAttr(resourceName, "service_type", "pg"),
 						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
