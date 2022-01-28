@@ -825,7 +825,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	// Create already takes care of static ip associations, no need to explictely associate them here
 
-	s, err := service.WaitForService(ctx, d, m)
+	s, err := service.WaitForServiceCreation(ctx, d, m)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -884,14 +884,11 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	if _, err = service.WaitForService(ctx, d, m); err != nil {
+	if _, err = service.WaitForServiceUpdate(ctx, d, m); err != nil {
 		return diag.FromErr(err)
 	}
 
 	if len(dis) > 0 {
-		if err = service.WaitBeforeStaticIpsDissassociation(ctx, d, m); err != nil {
-			return diag.FromErr(err)
-		}
 		for _, dip := range dis {
 			if err := client.StaticIPs.Dissociate(projectName, dip); err != nil {
 				return diag.FromErr(err)

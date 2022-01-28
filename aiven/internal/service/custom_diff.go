@@ -113,10 +113,7 @@ func CustomizeDiffCheckStaticIpDisassociation(ctx context.Context, d *schema.Res
 		return false
 	}
 
-	// if static ips are not enabled in the user configuration, the nodes will get recycled in the next
-	// update and we are able to dissociate ips from the service again, in that case we dont need to veto
-	// the diff
-	if d.Id() == "" || !staticIpsEnabledInUserConfig(d) {
+	if d.Id() == "" {
 		return nil
 	}
 
@@ -147,32 +144,4 @@ func CustomizeDiffCheckStaticIpDisassociation(ctx context.Context, d *schema.Res
 	}
 	// TODO: Check that we block deletions that will result in too few static ips for the plan
 	return nil
-}
-
-func staticIpsEnabledInUserConfig(d *schema.ResourceDiff) bool {
-	userConfigKey := d.Get("service_type").(string) + "_user_config"
-	userConfigVal, ok := d.GetOk(userConfigKey)
-	if !ok {
-		return false
-	}
-	userConfigList, ok := userConfigVal.([]interface{})
-	if !ok {
-		return false
-	}
-	if len(userConfigList) != 1 {
-		return false
-	}
-	userConfig, ok := userConfigList[0].(map[string]interface{})
-	if !ok {
-		return false
-	}
-	staticIpsVal, ok := userConfig["static_ips"]
-	if !ok {
-		return false
-	}
-	staticIpsEnabled, ok := staticIpsVal.(string)
-	if !ok {
-		return false
-	}
-	return staticIpsEnabled == "true"
 }

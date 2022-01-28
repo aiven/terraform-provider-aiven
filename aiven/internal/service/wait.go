@@ -24,13 +24,13 @@ const (
 	aivenServicesStartingState = "WAITING_FOR_SERVICES"
 )
 
-func WaitForService(ctx context.Context, d *schema.ResourceData, m interface{}) (*aiven.Service, error) {
+func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, m interface{}) (*aiven.Service, error) {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
 
 	timeout := d.Timeout(schema.TimeoutCreate)
-	log.Printf("[DEBUG] Service waiter timeout %.0f minutes", timeout.Minutes())
+	log.Printf("[DEBUG] Service creation waiter timeout %.0f minutes", timeout.Minutes())
 
 	conf := &resource.StateChangeConf{
 		Pending:                   []string{aivenPendingState, aivenRebalancingState, aivenServicesStartingState},
@@ -70,6 +70,57 @@ func WaitForService(ctx context.Context, d *schema.ResourceData, m interface{}) 
 			}
 
 			return service, state, nil
+		},
+	}
+
+	aux, err := conf.WaitForStateContext(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("unable to wait for service state change: %w", err)
+	}
+	return aux.(*aiven.Service), nil
+}
+
+func WaitForServiceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) (*aiven.Service, error) {
+	client := m.(*aiven.Client)
+
+	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
+
+	timeout := d.Timeout(schema.TimeoutCreate)
+	log.Printf("[DEBUG] Service update waiter timeout %.0f minutes", timeout.Minutes())
+
+	conf := &resource.StateChangeConf{
+		Pending:                   []string{"updating"},
+		Target:                    []string{"updated"},
+		Delay:                     10 * time.Second,
+		Timeout:                   timeout,
+		MinTimeout:                2 * time.Second,
+		ContinuousTargetOccurence: 5,
+		Refresh: func() (interface{}, string, error) {
+			service, err := client.Services.Get(projectName, serviceName)
+			if err != nil {
+				return nil, "", fmt.Errorf("unable to fetch service from api: %w", err)
+			}
+
+			state := service.State
+
+			if rdy := backupsReady(service); !rdy {
+				log.Printf("[DEBUG] service reports as %s, still waiting for service backups", state)
+				return service, "updating", nil
+			}
+
+			if rdy := grafanaReady(service); !rdy {
+				log.Printf("[DEBUG] service reports as %s, still waiting for grafana", state)
+				return service, "updating", nil
+			}
+
+			if rdy, err := staticIpsReady(d, m); err != nil {
+				return nil, "", fmt.Errorf("unable to check if static ips are ready: %w", err)
+			} else if !rdy {
+				log.Printf("[DEBUG] service reports as %s, still waiting for static ips", state)
+				return service, "updating", nil
+			}
+
+			return service, "updated", nil
 		},
 	}
 

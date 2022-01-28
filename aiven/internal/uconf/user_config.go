@@ -54,14 +54,9 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 	case "string", "integer", "boolean", "number":
 		// HACK: only set default func for static_ips, eventually when we generate this statically
 		// we use the default from the api schema
-		var defaultFunc schema.SchemaDefaultFunc
-		if key == "static_ips" {
-			defaultFunc = func() (interface{}, error) { return "false", nil }
-		}
 		return &schema.Schema{
 			Description:      title,
 			DiffSuppressFunc: diffFunc,
-			DefaultFunc:      defaultFunc,
 			Optional:         true,
 			Sensitive:        sensitive,
 			Type:             schema.TypeString,
