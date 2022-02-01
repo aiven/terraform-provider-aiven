@@ -1,3 +1,5 @@
+// Copyright (c) 2018-2022 Aiven, Helsinki, Finland. https://aiven.io/
+
 package aiven
 
 import (
@@ -23,12 +25,14 @@ var aivenPrivatelinkConnectionApprovalSchema = map[string]*schema.Schema{
 		Description: "IP address of Azure private endpoint",
 	},
 	"state": {
-		Type:     schema.TypeString,
-		Computed: true,
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "Privatelink connection state",
 	},
 	"privatelink_connection_id": {
-		Type:     schema.TypeString,
-		Computed: true,
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "Privatelink connection id",
 	},
 }
 
