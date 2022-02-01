@@ -166,7 +166,7 @@ func serviceCommonSchema() map[string]*schema.Schema {
 		"state": {
 			Type:        schema.TypeString,
 			Computed:    true,
-			Description: "Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`.",
+			Description: "Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`",
 		},
 		"service_integrations": {
 			Type:        schema.TypeList,
@@ -186,6 +186,12 @@ func serviceCommonSchema() map[string]*schema.Schema {
 					},
 				},
 			},
+		},
+		"static_ips": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again",
+			Elem:        &schema.Schema{Type: schema.TypeString},
 		},
 		"components": {
 			Type:        schema.TypeList,
@@ -349,6 +355,12 @@ var aivenServiceSchema = map[string]*schema.Schema{
 				},
 			},
 		},
+	},
+	"static_ips": {
+		Type:        schema.TypeList,
+		Optional:    true,
+		Description: "Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again",
+		Elem:        &schema.Schema{Type: schema.TypeString},
 	},
 	"components": {
 		Type:        schema.TypeList,
@@ -659,10 +671,19 @@ func resourceService() *schema.Resource {
 		ReadContext:        resourceServiceRead,
 		UpdateContext:      resourceServiceUpdate,
 		DeleteContext:      resourceServiceDelete,
-		CustomizeDiff: customdiff.All(
+		CustomizeDiff: customdiff.Sequence(
+			customdiff.IfValueChange("disk_space",
+				service.DiskSpaceShouldNotBeEmpty,
+				service.CustomizeDiffCheckDiskSpace,
+			),
 			customdiff.IfValueChange("service_integrations",
 				service.ServiceIntegrationShouldNotBeEmpty,
-				service.CustomizeDiffServiceIntegrationAfterCreation),
+				service.CustomizeDiffServiceIntegrationAfterCreation,
+			),
+			customdiff.Sequence(
+				service.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
+				service.CustomizeDiffCheckStaticIpDisassociation,
+			),
 		),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceState,
@@ -670,6 +691,7 @@ func resourceService() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
 			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 		Schema: aivenServiceSchema,
 	}
@@ -753,7 +775,15 @@ func resourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 
 	err = copyServicePropertiesFromAPIResponseToTerraform(d, s, servicePlanParams, projectName)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("unable to copy api response into terraform schema: %w", err))
+	}
+
+	allocatedStaticIps, err := service.CurrentlyAllocatedStaticIps(ctx, projectName, serviceName, m)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("unable to currently allocated static ips: %w", err))
+	}
+	if err = d.Set("static_ips", allocatedStaticIps); err != nil {
+		return diag.FromErr(fmt.Errorf("unable to set static ips field in schema: %w", err))
 	}
 
 	return nil
@@ -786,13 +816,16 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 			TerminationProtection: d.Get("termination_protection").(bool),
 			DiskSpaceMB:           diskSpace,
 			UserConfig:            uconf.ConvertTerraformUserConfigToAPICompatibleFormat("service", serviceType, true, d),
+			StaticIPs:             schemautil.FlattenToString(d.Get("static_ips").([]interface{})),
 		},
 	)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	s, err := service.WaitForCreation(ctx, d, m)
+	// Create already takes care of static ip associations, no need to explictely associate them here
+
+	s, err := service.WaitForServiceCreation(ctx, d, m)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -821,6 +854,18 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	projectName, serviceName := schemautil.SplitResourceID2(d.Id())
 
+	ass, dis, err := service.DiffStaticIps(ctx, d, m)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	// associate first, so that we can enable `static_ips` for a preexisting service
+	for _, aip := range ass {
+		if err := client.StaticIPs.Associate(projectName, aip, aiven.AssociateStaticIPRequest{ServiceName: serviceName}); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	if _, err := client.Services.Update(
 		projectName,
 		serviceName,
@@ -839,8 +884,19 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	if _, err := service.WaitForUpdate(ctx, d, m); err != nil {
+	if _, err = service.WaitForServiceUpdate(ctx, d, m); err != nil {
 		return diag.FromErr(err)
+	}
+
+	if len(dis) > 0 {
+		for _, dip := range dis {
+			if err := client.StaticIPs.Dissociate(projectName, dip); err != nil {
+				return diag.FromErr(err)
+			}
+		}
+		if err = service.WaitAfterStaticIpsDissassociation(ctx, d, m); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	return resourceServiceRead(ctx, d, m)
@@ -871,6 +927,12 @@ func resourceServiceDelete(ctx context.Context, d *schema.ResourceData, m interf
 	if err := client.Services.Delete(projectName, serviceName); err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
+
+	// Delete already takes care of static ip disassociation, no need to explictely dissasociate them here
+
+	if err := service.WaitForDeletion(ctx, d, m); err != nil {
+		return diag.FromErr(err)
+	}
 	return nil
 }
 
@@ -893,7 +955,15 @@ func resourceServiceState(ctx context.Context, d *schema.ResourceData, m interfa
 
 	err = copyServicePropertiesFromAPIResponseToTerraform(d, s, servicePlanParams, projectName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to copy api response into terraform schema: %w", err)
+	}
+
+	allocatedStaticIps, err := service.CurrentlyAllocatedStaticIps(ctx, projectName, serviceName, m)
+	if err != nil {
+		return nil, fmt.Errorf("unable to currently allocated static ips: %w", err)
+	}
+	if err = d.Set("static_ips", allocatedStaticIps); err != nil {
+		return nil, fmt.Errorf("unable to set static ips field in schema: %w", err)
 	}
 
 	return []*schema.ResourceData{d}, nil

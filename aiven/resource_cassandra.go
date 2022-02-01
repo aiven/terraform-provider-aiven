@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/aiven/terraform-provider-aiven/aiven/internal/service"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -31,12 +32,28 @@ func resourceCassandra() *schema.Resource {
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,
 		DeleteContext: resourceServiceDelete,
+		CustomizeDiff: customdiff.Sequence(
+			service.SetServiceTypeIfEmpty(ServiceTypeCassandra),
+			customdiff.IfValueChange("disk_space",
+				service.DiskSpaceShouldNotBeEmpty,
+				service.CustomizeDiffCheckDiskSpace,
+			),
+			customdiff.IfValueChange("service_integrations",
+				service.ServiceIntegrationShouldNotBeEmpty,
+				service.CustomizeDiffServiceIntegrationAfterCreation,
+			),
+			customdiff.Sequence(
+				service.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
+				service.CustomizeDiffCheckStaticIpDisassociation,
+			),
+		),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
 			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
 		Schema: cassandraSchema(),

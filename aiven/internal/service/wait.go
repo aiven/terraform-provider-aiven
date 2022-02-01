@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -23,26 +24,13 @@ const (
 	aivenServicesStartingState = "WAITING_FOR_SERVICES"
 )
 
-func WaitForCreation(ctx context.Context, d *schema.ResourceData, m interface{}) (*aiven.Service, error) {
-	return waitForCreateOrUpdate(ctx, d, m, false)
-}
-
-func WaitForUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) (*aiven.Service, error) {
-	return waitForCreateOrUpdate(ctx, d, m, true)
-}
-
-func waitForCreateOrUpdate(ctx context.Context, d *schema.ResourceData, m interface{}, isUpdate bool) (*aiven.Service, error) {
+func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, m interface{}) (*aiven.Service, error) {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
 
 	timeout := d.Timeout(schema.TimeoutCreate)
-	if isUpdate {
-		log.Printf("[DEBUG] Service update waiter timeout %.0f minutes", timeout.Minutes())
-		timeout = d.Timeout(schema.TimeoutUpdate)
-	} else {
-		log.Printf("[DEBUG] Service create waiter timeout %.0f minutes", timeout.Minutes())
-	}
+	log.Printf("[DEBUG] Service creation waiter timeout %.0f minutes", timeout.Minutes())
 
 	conf := &resource.StateChangeConf{
 		Pending:                   []string{aivenPendingState, aivenRebalancingState, aivenServicesStartingState},
@@ -58,13 +46,6 @@ func waitForCreateOrUpdate(ctx context.Context, d *schema.ResourceData, m interf
 			}
 
 			state := service.State
-			if isUpdate {
-				// When updating service don't wait for it to enter RUNNING state because that can take
-				// very long time if for example service plan or cloud it runs in is changed and the
-				// service has a lot of data. If the service was already previously in RUNNING state we
-				// can manage the associated resources even if the service is rebuilding.
-				state = aivenTargetState
-			}
 
 			if state != aivenTargetState {
 				log.Printf("[DEBUG] service reports as %s, still for it to be in state %s", state, aivenTargetState)
@@ -80,6 +61,14 @@ func waitForCreateOrUpdate(ctx context.Context, d *schema.ResourceData, m interf
 				log.Printf("[DEBUG] service reports as %s, still waiting for grafana", state)
 				return service, aivenServicesStartingState, nil
 			}
+
+			if rdy, err := staticIpsReady(d, m); err != nil {
+				return nil, "", fmt.Errorf("unable to check if static ips are ready: %w", err)
+			} else if !rdy {
+				log.Printf("[DEBUG] service reports as %s, still waiting for static ips", state)
+				return service, aivenServicesStartingState, nil
+			}
+
 			return service, state, nil
 		},
 	}
@@ -89,6 +78,154 @@ func waitForCreateOrUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		return nil, fmt.Errorf("unable to wait for service state change: %w", err)
 	}
 	return aux.(*aiven.Service), nil
+}
+
+func WaitForServiceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) (*aiven.Service, error) {
+	client := m.(*aiven.Client)
+
+	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
+
+	timeout := d.Timeout(schema.TimeoutCreate)
+	log.Printf("[DEBUG] Service update waiter timeout %.0f minutes", timeout.Minutes())
+
+	conf := &resource.StateChangeConf{
+		Pending:                   []string{"updating"},
+		Target:                    []string{"updated"},
+		Delay:                     10 * time.Second,
+		Timeout:                   timeout,
+		MinTimeout:                2 * time.Second,
+		ContinuousTargetOccurence: 5,
+		Refresh: func() (interface{}, string, error) {
+			service, err := client.Services.Get(projectName, serviceName)
+			if err != nil {
+				return nil, "", fmt.Errorf("unable to fetch service from api: %w", err)
+			}
+
+			state := service.State
+
+			if rdy := backupsReady(service); !rdy {
+				log.Printf("[DEBUG] service reports as %s, still waiting for service backups", state)
+				return service, "updating", nil
+			}
+
+			if rdy := grafanaReady(service); !rdy {
+				log.Printf("[DEBUG] service reports as %s, still waiting for grafana", state)
+				return service, "updating", nil
+			}
+
+			if rdy, err := staticIpsReady(d, m); err != nil {
+				return nil, "", fmt.Errorf("unable to check if static ips are ready: %w", err)
+			} else if !rdy {
+				log.Printf("[DEBUG] service reports as %s, still waiting for static ips", state)
+				return service, "updating", nil
+			}
+
+			return service, "updated", nil
+		},
+	}
+
+	aux, err := conf.WaitForStateContext(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("unable to wait for service state change: %w", err)
+	}
+	return aux.(*aiven.Service), nil
+}
+
+func WaitAfterStaticIpsDissassociation(ctx context.Context, d *schema.ResourceData, m interface{}) error {
+	timeout := d.Timeout(schema.TimeoutDelete)
+	log.Printf("[DEBUG] Static Ip dissassociation timeout %.0f minutes", timeout.Minutes())
+
+	conf := &resource.StateChangeConf{
+		Pending:                   []string{"doing"},
+		Target:                    []string{"done"},
+		Delay:                     10 * time.Second,
+		Timeout:                   timeout,
+		MinTimeout:                2 * time.Second,
+		ContinuousTargetOccurence: 5,
+		Refresh: func() (interface{}, string, error) {
+			if dis, err := staticIpsAreDisassociated(d, m); err != nil {
+				return nil, "", fmt.Errorf("unable to check if static ips are disassociated: %w", err)
+			} else if !dis {
+				log.Printf("[DEBUG] still waiting for static ips to be disassociated")
+				return struct{}{}, "doing", nil
+			}
+			return struct{}{}, "done", nil
+		},
+	}
+
+	_, err := conf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmt.Errorf("unable to wait for for static ips to be dissassociated: %w", err)
+	}
+	return nil
+}
+
+func WaitBeforeStaticIpsDissassociation(ctx context.Context, d *schema.ResourceData, m interface{}) error {
+	timeout := d.Timeout(schema.TimeoutDelete)
+	log.Printf("[DEBUG] Static Ip dissassociation timeout %.0f minutes", timeout.Minutes())
+
+	conf := &resource.StateChangeConf{
+		Pending:                   []string{"doing"},
+		Target:                    []string{"done"},
+		Delay:                     10 * time.Second,
+		Timeout:                   timeout,
+		MinTimeout:                2 * time.Second,
+		ContinuousTargetOccurence: 5,
+		Refresh: func() (interface{}, string, error) {
+			if rdy, err := staticIpsReadyToBeDissassociated(d, m); err != nil {
+				return nil, "", fmt.Errorf("unable to check if static ips are disassociated: %w", err)
+			} else if !rdy {
+				log.Printf("[DEBUG] still waiting for static ips to be able to be disassociated")
+				return struct{}{}, "doing", nil
+			}
+			return struct{}{}, "done", nil
+		},
+	}
+
+	_, err := conf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmt.Errorf("unable to wait for for static ips to be ready to be dissassociated: %w", err)
+	}
+	return nil
+}
+
+func WaitForDeletion(ctx context.Context, d *schema.ResourceData, m interface{}) error {
+	client := m.(*aiven.Client)
+
+	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
+
+	timeout := d.Timeout(schema.TimeoutDelete)
+	log.Printf("[DEBUG] Service deletion waiter timeout %.0f minutes", timeout.Minutes())
+
+	conf := &resource.StateChangeConf{
+		Pending:                   []string{"deleting"},
+		Target:                    []string{"deleted"},
+		Delay:                     10 * time.Second,
+		Timeout:                   timeout,
+		MinTimeout:                20 * time.Second,
+		ContinuousTargetOccurence: 5,
+		Refresh: func() (interface{}, string, error) {
+			_, err := client.Services.Get(projectName, serviceName)
+			if err != nil && !aiven.IsNotFound(err) {
+				return nil, "", fmt.Errorf("unable to check if service is gone: %w", err)
+			}
+
+			log.Printf("[DEBUG] service gone, still waiting for static ips to be disassociated")
+
+			if dis, err := staticIpsDisassociatedAfterServiceDeletion(d, m); err != nil {
+				return nil, "", fmt.Errorf("unable to check if static ips are disassociated: %w", err)
+			} else if !dis {
+				return struct{}{}, "deleting", nil
+			}
+
+			return struct{}{}, "deleted", nil
+		},
+	}
+
+	if _, err := conf.WaitForStateContext(ctx); err != nil {
+		return fmt.Errorf("unable to wait for service deletion: %w", err)
+	}
+	return nil
 }
 
 func grafanaReady(service *aiven.Service) bool {
@@ -154,4 +291,131 @@ func backupsReady(service *aiven.Service) bool {
 	}
 
 	return len(service.Backups) > 0
+}
+
+// staticIpsReady checks that the static ips that are associated with the service are either
+// in state 'assigned' or 'available'
+func staticIpsReady(d *schema.ResourceData, m interface{}) (bool, error) {
+	expectedStaticIps := staticIpsForServiceFromSchema(d)
+	if len(expectedStaticIps) == 0 {
+		return true, nil
+	}
+
+	client := m.(*aiven.Client)
+	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
+
+	staticIpsList, err := client.StaticIPs.List(projectName)
+	if err != nil {
+		return false, fmt.Errorf("unable to fetch static ips for project '%s': '%w", projectName, err)
+	}
+
+L:
+	for _, eip := range expectedStaticIps {
+		for _, sip := range staticIpsList.StaticIPs {
+			assignedOrAvailable := sip.State == staticIpAssigned || sip.State == staticIpAvailable
+			belongsToService := sip.ServiceName == serviceName
+			isExpectedIp := sip.StaticIPAddressID == eip
+
+			if isExpectedIp && belongsToService && assignedOrAvailable {
+				continue L
+			}
+		}
+		return false, nil
+	}
+
+	return true, nil
+}
+
+// staticIpsDisassociatedAfterServiceDeletion checks that after service deletion
+// all static ips that were associated to the service are available again
+func staticIpsDisassociatedAfterServiceDeletion(d *schema.ResourceData, m interface{}) (bool, error) {
+	expectedStaticIps := staticIpsForServiceFromSchema(d)
+	if len(expectedStaticIps) == 0 {
+		return true, nil
+	}
+
+	client := m.(*aiven.Client)
+	projectName := d.Get("project").(string)
+
+	staticIpsList, err := client.StaticIPs.List(projectName)
+	if err != nil {
+		return false, fmt.Errorf("unable to fetch static ips for project '%s': '%w", projectName, err)
+	}
+
+	for _, eip := range expectedStaticIps {
+		for _, sip := range staticIpsList.StaticIPs {
+			// no check for service name since after deletion the field is gone, but the
+			// static ip lingers in the assigned state for a while until it gets usable again
+			ipIsAssigned := sip.State == staticIpAssigned
+			isExpectedIp := sip.StaticIPAddressID == eip
+
+			if isExpectedIp && ipIsAssigned {
+				return false, nil
+			}
+		}
+	}
+	return true, nil
+}
+
+// staticIpsReadyToBeDisassociated checks that before dissassociating ips
+// all static ips that about to be dissassociated are not assigned
+func staticIpsReadyToBeDissassociated(d *schema.ResourceData, m interface{}) (bool, error) {
+	client := m.(*aiven.Client)
+	projectName := d.Get("project").(string)
+	serviceName := d.Get("service_name").(string)
+
+	staticIpsList, err := client.StaticIPs.List(projectName)
+	if err != nil {
+		return false, fmt.Errorf("unable to fetch static ips for project '%s': '%w", projectName, err)
+	}
+	currentStaticIps := staticIpsForServiceFromSchema(d)
+L:
+	for _, sip := range staticIpsList.StaticIPs {
+		ipBelongsToService := sip.ServiceName == serviceName
+		if !ipBelongsToService {
+			continue L
+		}
+		for _, csip := range currentStaticIps {
+			if sip.StaticIPAddressID == csip {
+				continue L
+			}
+		}
+		// about to be deleted but assigned
+		if sip.State == staticIpAssigned {
+			return false, nil
+		}
+	}
+	return true, nil
+}
+
+// staticIpsAreDisassociated checks that after service update
+// all static ips that are not used by the service anymore are available again
+func staticIpsAreDisassociated(d *schema.ResourceData, m interface{}) (bool, error) {
+	client := m.(*aiven.Client)
+	projectName := d.Get("project").(string)
+	serviceName := d.Get("service_name").(string)
+
+	staticIpsList, err := client.StaticIPs.List(projectName)
+	if err != nil {
+		return false, fmt.Errorf("unable to fetch static ips for project '%s': '%w", projectName, err)
+	}
+	currentStaticIps := staticIpsForServiceFromSchema(d)
+L:
+	for _, sip := range staticIpsList.StaticIPs {
+		ipBelongsToService := sip.ServiceName == serviceName
+		if !ipBelongsToService {
+			continue L
+		}
+		for _, csip := range currentStaticIps {
+			if sip.StaticIPAddressID == csip {
+				continue L
+			}
+		}
+		return false, nil
+	}
+	return true, nil
+}
+
+func staticIpsForServiceFromSchema(d *schema.ResourceData) []string {
+	return schemautil.FlattenToString(d.Get("static_ips").([]interface{}))
 }

@@ -71,6 +71,7 @@ The Service datasource provides information about specific Aiven Services.
 - **service_uri** (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
 - **service_username** (String) Username used for connecting to the service, if applicable
 - **state** (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` and `RUNNING`.
+- **static_ips** (List of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 - **termination_protection** (Boolean) Prevent service from being deleted. It is recommended to have this enabled for all services.
 
 <a id="nestedatt--cassandra"></a>

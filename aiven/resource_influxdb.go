@@ -38,16 +38,20 @@ func resourceInfluxDB() *schema.Resource {
 		ReadContext:   resourceServiceRead,
 		UpdateContext: resourceServiceUpdate,
 		DeleteContext: resourceServiceDelete,
-		CustomizeDiff: customdiff.All(
-			customdiff.Sequence(
-				service.SetServiceTypeIfEmpty(ServiceTypeInfluxDB),
-				customdiff.IfValueChange("disk_space",
-					service.DiskSpaceShouldNotBeEmpty,
-					service.CustomizeDiffCheckDiskSpace),
+		CustomizeDiff: customdiff.Sequence(
+			service.SetServiceTypeIfEmpty(ServiceTypeInfluxDB),
+			customdiff.IfValueChange("disk_space",
+				service.DiskSpaceShouldNotBeEmpty,
+				service.CustomizeDiffCheckDiskSpace,
 			),
 			customdiff.IfValueChange("service_integrations",
 				service.ServiceIntegrationShouldNotBeEmpty,
-				service.CustomizeDiffServiceIntegrationAfterCreation),
+				service.CustomizeDiffServiceIntegrationAfterCreation,
+			),
+			customdiff.Sequence(
+				service.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
+				service.CustomizeDiffCheckStaticIpDisassociation,
+			),
 		),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceState,
@@ -55,6 +59,7 @@ func resourceInfluxDB() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
 			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
 		Schema: influxDBSchema(),

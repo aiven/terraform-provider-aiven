@@ -118,6 +118,25 @@ rules:
     Tests should use the smallest m3aggregator plan to save costs
   severity: WARNING
 
+- id: large-plan-in-test-clickhouse
+  languages: [generic]
+  paths:
+    include:
+    - "*_test.go"
+  patterns:
+  - pattern-inside:
+      plan = "..."
+  - pattern-inside:
+      resource "aiven_clickhouse" ... {
+        ...
+      }
+  - pattern-not-regex: business-8
+  fix: |
+    plan = "business-8"
+  message: |
+    Tests should use the smallest clickhouse plan to save costs
+  severity: WARNING
+
 - id: large-plan-in-test-other
   languages: [generic]
   paths:
@@ -138,7 +157,11 @@ rules:
       resource "aiven_m3aggregator" ... {
         ...
       }
-  - pattern-not-regex: startup-(1|2|4|8)
+  - pattern-not-inside:
+      resource "aiven_clickhouse" ... {
+        ...
+      }
+  - pattern-not-regex: (startup-(1|2|4|8)|%s)
   fix: |
     plan = "startup-4"
   message: |

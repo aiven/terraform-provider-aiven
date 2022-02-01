@@ -94,19 +94,26 @@ func resourceKafka() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
 			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
 		Schema: aivenKafkaSchema(),
-		CustomizeDiff: customdiff.All(
+		CustomizeDiff: customdiff.Sequence(
 			customdiff.Sequence(
 				service.SetServiceTypeIfEmpty(ServiceTypeKafka),
 				customdiff.IfValueChange("disk_space",
 					service.DiskSpaceShouldNotBeEmpty,
-					service.CustomizeDiffCheckDiskSpace),
+					service.CustomizeDiffCheckDiskSpace,
+				),
 			),
 			customdiff.IfValueChange("service_integrations",
 				service.ServiceIntegrationShouldNotBeEmpty,
-				service.CustomizeDiffServiceIntegrationAfterCreation),
+				service.CustomizeDiffServiceIntegrationAfterCreation,
+			),
+			customdiff.Sequence(
+				service.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
+				service.CustomizeDiffCheckStaticIpDisassociation,
+			),
 
 			// if a kafka_version is >= 3.0 then this schema field is not applicable
 			customdiff.ComputedIf("karapace", func(ctx context.Context, d *schema.ResourceDiff, m interface{}) bool {
