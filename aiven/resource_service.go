@@ -894,7 +894,7 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 				return diag.FromErr(err)
 			}
 		}
-		if err = service.WaitAfterStaticIpsDissassociation(ctx, d, m); err != nil {
+		if err = service.WaitStaticIpsDissassociation(ctx, d, m); err != nil {
 			return diag.FromErr(err)
 		}
 	}

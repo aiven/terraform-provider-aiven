@@ -131,7 +131,7 @@ func WaitForServiceUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	return aux.(*aiven.Service), nil
 }
 
-func WaitAfterStaticIpsDissassociation(ctx context.Context, d *schema.ResourceData, m interface{}) error {
+func WaitStaticIpsDissassociation(ctx context.Context, d *schema.ResourceData, m interface{}) error {
 	timeout := d.Timeout(schema.TimeoutDelete)
 	log.Printf("[DEBUG] Static Ip dissassociation timeout %.0f minutes", timeout.Minutes())
 
@@ -156,35 +156,6 @@ func WaitAfterStaticIpsDissassociation(ctx context.Context, d *schema.ResourceDa
 	_, err := conf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmt.Errorf("unable to wait for for static ips to be dissassociated: %w", err)
-	}
-	return nil
-}
-
-func WaitBeforeStaticIpsDissassociation(ctx context.Context, d *schema.ResourceData, m interface{}) error {
-	timeout := d.Timeout(schema.TimeoutDelete)
-	log.Printf("[DEBUG] Static Ip dissassociation timeout %.0f minutes", timeout.Minutes())
-
-	conf := &resource.StateChangeConf{
-		Pending:                   []string{"doing"},
-		Target:                    []string{"done"},
-		Delay:                     10 * time.Second,
-		Timeout:                   timeout,
-		MinTimeout:                2 * time.Second,
-		ContinuousTargetOccurence: 5,
-		Refresh: func() (interface{}, string, error) {
-			if rdy, err := staticIpsReadyToBeDissassociated(d, m); err != nil {
-				return nil, "", fmt.Errorf("unable to check if static ips are disassociated: %w", err)
-			} else if !rdy {
-				log.Printf("[DEBUG] still waiting for static ips to be able to be disassociated")
-				return struct{}{}, "doing", nil
-			}
-			return struct{}{}, "done", nil
-		},
-	}
-
-	_, err := conf.WaitForStateContext(ctx)
-	if err != nil {
-		return fmt.Errorf("unable to wait for for static ips to be ready to be dissassociated: %w", err)
 	}
 	return nil
 }
@@ -352,37 +323,6 @@ func staticIpsDisassociatedAfterServiceDeletion(d *schema.ResourceData, m interf
 			if isExpectedIp && ipIsAssigned {
 				return false, nil
 			}
-		}
-	}
-	return true, nil
-}
-
-// staticIpsReadyToBeDisassociated checks that before dissassociating ips
-// all static ips that about to be dissassociated are not assigned
-func staticIpsReadyToBeDissassociated(d *schema.ResourceData, m interface{}) (bool, error) {
-	client := m.(*aiven.Client)
-	projectName := d.Get("project").(string)
-	serviceName := d.Get("service_name").(string)
-
-	staticIpsList, err := client.StaticIPs.List(projectName)
-	if err != nil {
-		return false, fmt.Errorf("unable to fetch static ips for project '%s': '%w", projectName, err)
-	}
-	currentStaticIps := staticIpsForServiceFromSchema(d)
-L:
-	for _, sip := range staticIpsList.StaticIPs {
-		ipBelongsToService := sip.ServiceName == serviceName
-		if !ipBelongsToService {
-			continue L
-		}
-		for _, csip := range currentStaticIps {
-			if sip.StaticIPAddressID == csip {
-				continue L
-			}
-		}
-		// about to be deleted but assigned
-		if sip.State == staticIpAssigned {
-			return false, nil
 		}
 	}
 	return true, nil
