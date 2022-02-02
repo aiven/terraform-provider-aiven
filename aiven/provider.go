@@ -78,6 +78,7 @@ func Provider() *schema.Provider {
 			// clickhouse
 			"aiven_clickhouse":          datasourceClickhouse(),
 			"aiven_clickhouse_database": datasourceClickhouseDatabase(),
+			"aiven_clickhouse_user":     datasourceClickhouseUser(),
 
 			// deprecated
 			"aiven_elasticsearch_acl": datasourceElasticsearchACL(),
@@ -134,6 +135,7 @@ func Provider() *schema.Provider {
 			// clickhouse
 			"aiven_clickhouse":          resourceClickhouse(),
 			"aiven_clickhouse_database": resourceClickhouseDatabase(),
+			"aiven_clickhouse_user":     resourceClickhouseUser(),
 
 			// deprecated
 			"aiven_elasticsearch_acl": resourceElasticsearchACL(),
