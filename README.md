@@ -3,13 +3,6 @@ The Terraform provider for [Aiven.io](https://aiven.io/), an open source data pl
 
 **See the [official documentation](https://registry.terraform.io/providers/aiven/aiven/latest/docs) to learn about all the possible services and resources.**
 
-## 🚨 A word of caution 🚨
-Recreating stateful services with Terraform will possibly **delete** the service and all its data before creating it again. Whenever the Terraform plan indicates that a service will be **deleted** or **replaced**, a catastrophic action is possibly about to happen.
-
-Some properties, like **project** and the **resource name**, cannot be changed and it will trigger a resource replacement.
-
-To avoid any issues, **please set the `termination_protection` property to `true` on all production services**, it will prevent Terraform to remove the service until the flag is set back to `false` again. While it prevents a service to be deleted, any logical databases, topics or other configurations may be removed **even when this section is enabled**. Be very careful! 
-
 ## Quick Start
 - [Signup for Aiven](https://console.aiven.io/signup?utm_source=github&utm_medium=organic&utm_campaign=terraform&utm_content=signup)
 - [Get your authentication token and project name](https://help.aiven.io/en/articles/2059201-authentication-tokens)
@@ -52,6 +45,13 @@ $ psql "$(terraform output -raw postgresql_service_uri)"
 ```
 
 Voilà, a PostgreSQL database.
+
+## A word of caution
+Recreating stateful services with Terraform will possibly **delete** the service and all its data before creating it again. Whenever the Terraform plan indicates that a service will be **deleted** or **replaced**, a catastrophic action is possibly about to happen.
+
+Some properties, like **project** and the **resource name**, cannot be changed and it will trigger a resource replacement.
+
+To avoid any issues, **please set the `termination_protection` property to `true` on all production services**, it will prevent Terraform to remove the service until the flag is set back to `false` again. While it prevents a service to be deleted, any logical databases, topics or other configurations may be removed **even when this section is enabled**. Be very careful! 
 
 ## Developing
 ### Requirements
