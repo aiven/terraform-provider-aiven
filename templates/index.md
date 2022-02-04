@@ -41,4 +41,5 @@ Recreating stateful services with Terraform will possibly **delete** the service
 
 Some properties, like **project** and the **resource name**, cannot be changed and it will trigger a resource replacement.
 
-To avoid any issues, **please set the `termination_protection` property to `true` on all production services**, it will prevent Terraform to remove the service until the flag is set back to `false` again. While it prevents a service to be deleted, any logical databases, topics or other configurations may be removed **even when this section is enabled**. Be very careful! 
+To avoid any issues, **please set the `termination_protection` property to `true` on all production services**, it will prevent Terraform to remove the service until the flag is set back to `false` again. While it prevents a service to be deleted, any logical databases, topics or other configurations may be removed **even when this section is enabled**. Be very careful!
+ 
