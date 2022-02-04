@@ -4,8 +4,13 @@ parent: README
 nav_order: 1
 ---# Changelog
 
-## [2.6.0] - not yet released
+## [2.6.0] - 2022-02-04
 - Add provider version to user agent
+- Add support for `aiven_static_ip` resource
+- Add support for `aiven_azure_privatelink_connection_approval` resource
+- Add support for `aiven_clickhouse`, `aiven_clickhouse_user` and `aiven_clickhouse_database` resources
+- Add comment trigger for acceptance tests
+- Minor changes in the layout and tooling
 
 ## [2.5.0] - 2022-01-14
 - Add a new field to `aiven_service_user` resource - Postgres Allow Replication
