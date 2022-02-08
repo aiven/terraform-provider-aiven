@@ -51,7 +51,10 @@ func resourceStaticIP() *schema.Resource {
 		CreateContext: resourceStaticIPCreate,
 		ReadContext:   resourceStaticIPRead,
 		DeleteContext: resourceStaticIPDelete,
-		Schema:        aivenStaticIPSchema,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceStaticIPState,
+		},
+		Schema: aivenStaticIPSchema,
 	}
 }
 
@@ -66,23 +69,9 @@ func resourceStaticIPRead(_ context.Context, d *schema.ResourceData, m interface
 	}
 	for _, sip := range r.StaticIPs {
 		if sip.StaticIPAddressID == staticIPAddressId {
-			if err := d.Set("project", project); err != nil {
-				return diag.Errorf("error setting static ips `project` for resource %s: %s", d.Id(), err)
-			}
-			if err := d.Set("cloud_name", sip.CloudName); err != nil {
-				return diag.Errorf("error setting static ips `cloud_name` for resource %s: %s", d.Id(), err)
-			}
-			if err := d.Set("ip_address", sip.IPAddress); err != nil {
-				return diag.Errorf("error setting static ips `ip_address` for resource %s: %s", d.Id(), err)
-			}
-			if err := d.Set("service_name", sip.ServiceName); err != nil {
-				return diag.Errorf("error setting static ips `service_name` for resource %s: %s", d.Id(), err)
-			}
-			if err := d.Set("state", sip.State); err != nil {
-				return diag.Errorf("error setting static ips `state` for resource %s: %s", d.Id(), err)
-			}
-			if err := d.Set("static_ip_address_id", sip.StaticIPAddressID); err != nil {
-				return diag.Errorf("error setting static ips `static_ip_address_id` for resource %s: %s", d.Id(), err)
+			err = setStaticIPState(d, project, &sip)
+			if err != nil {
+				return diag.Errorf("error setting static ip for resource %s: %s", d.Id(), err)
 			}
 			return nil
 		}
@@ -90,7 +79,6 @@ func resourceStaticIPRead(_ context.Context, d *schema.ResourceData, m interface
 	d.SetId("")
 	return nil
 }
-
 func resourceStaticIPCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
@@ -157,5 +145,45 @@ func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interfa
 		return fmt.Errorf("error waiting for static ip to be created: %s", err)
 	}
 
+	return nil
+}
+
+func resourceStaticIPState(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	client := m.(*aiven.Client)
+
+	project, staticIPAddressId := schemautil.SplitResourceID2(d.Id())
+
+	sip, err := client.StaticIPs.Get(project, staticIPAddressId)
+	if err != nil {
+		return nil, err
+	}
+
+	err = setStaticIPState(d, project, sip)
+	if err != nil {
+		return nil, fmt.Errorf("error importing static ip state %s: %s", d.Id(), err)
+	}
+
+	return []*schema.ResourceData{d}, nil
+}
+
+func setStaticIPState(d *schema.ResourceData, project string, staticIP *aiven.StaticIP) error {
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("error setting static ips `project` for resource %s: %s", d.Id(), err)
+	}
+	if err := d.Set("cloud_name", staticIP.CloudName); err != nil {
+		return fmt.Errorf("error setting static ips `cloud_name` for resource %s: %s", d.Id(), err)
+	}
+	if err := d.Set("ip_address", staticIP.IPAddress); err != nil {
+		return fmt.Errorf("error setting static ips `ip_address` for resource %s: %s", d.Id(), err)
+	}
+	if err := d.Set("service_name", staticIP.ServiceName); err != nil {
+		return fmt.Errorf("error setting static ips `service_name` for resource %s: %s", d.Id(), err)
+	}
+	if err := d.Set("state", staticIP.State); err != nil {
+		return fmt.Errorf("error setting static ips `state` for resource %s: %s", d.Id(), err)
+	}
+	if err := d.Set("static_ip_address_id", staticIP.StaticIPAddressID); err != nil {
+		return fmt.Errorf("error setting static ips `static_ip_address_id` for resource %s: %s", d.Id(), err)
+	}
 	return nil
 }
