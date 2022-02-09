@@ -219,11 +219,11 @@ func getFlinkTableKafkaConnectorTypes() []string {
 func getFlinkTableKafkaStartupModes() []string {
 	const (
 		startupModeEarliestOffset = "earliest-offset"
-		startupModeLargestOffset  = "largest-offset"
+		startupModeLatestOffset   = "latest-offset"
 		startupModeGroupOffsets   = "group-offsets"
 		startupModeTimestamp      = "timestamp"
 	)
-	return []string{startupModeEarliestOffset, startupModeLargestOffset, startupModeGroupOffsets, startupModeTimestamp}
+	return []string{startupModeEarliestOffset, startupModeLatestOffset, startupModeGroupOffsets, startupModeTimestamp}
 }
 
 func getFlinkTableKafkaKeyValueFormats() []string {
