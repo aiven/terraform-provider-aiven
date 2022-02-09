@@ -88,6 +88,16 @@ $ make testacc TESTARGS='-run=TestAccAiven_kafka'
 
 For information about writing acceptance tests, see the main [Terraform contributing guide](https://www.terraform.io/docs/extend/testing/acceptance-tests/index.html).
 
+### Alternate command to build/test inside a container
+
+In case you'd like to avoid Go-dependency on your local machine or CI, you can run the following build command:
+
+```
+sudo podman run -v .:/terraform-provider-aiven:z --workdir /terraform-provider-aiven golang:latest make <COMMAND>
+```
+
+Note that you'll need to be in the root of **terraform-provider-aiven** repository and replace the <COMMAND> name with your choice of command (for example, ``make docs``).
+
 ## Debugging
 ### Requirements
 - [Terraform](https://www.terraform.io/downloads.html) v0.12.26 or greater
