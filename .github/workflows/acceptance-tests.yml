@@ -12,7 +12,7 @@ concurrency:
 jobs:
   trigger:
     runs-on: ubuntu-20.04
-    if: ${{ github.event.issue.pull_request && github.event.comment.body == '/acceptance_tests'}}
+    if: ${{ github.event.issue.pull_request && github.event.comment.body == '/run_acceptance_tests'}}
 
     steps:
     - uses: actions/github-script@v5
