@@ -54,18 +54,10 @@ Some properties, like **project** and the **resource name**, cannot be changed a
 To avoid any issues, **please set the `termination_protection` property to `true` on all production services**, it will prevent Terraform to remove the service until the flag is set back to `false` again. While it prevents a service to be deleted, any logical databases, topics or other configurations may be removed **even when this section is enabled**. Be very careful! 
 
 ## Developing
+
 ### Requirements
 - [Terraform](https://www.terraform.io/downloads.html) v0.12.X or greater
 - [Go](https://golang.org/doc/install) 1.16.X or greater
-### Cloning
-```bash
-$ git clone https://github.com/aiven/terraform-provider-aiven.git
-```
-### Building
-Run the command below. It will generate the binaries under the `plugins/$OS_$ARCH` folder.
-```bash
-$ make bins
-```
 
 ### Testing
 Run the tests with the command below:
@@ -99,6 +91,7 @@ podman run -v .:/terraform-provider-aiven:z --workdir /terraform-provider-aiven 
 Note that you'll need to be in the root of **terraform-provider-aiven** repository and replace the <COMMAND> name with your choice of command (for example, ``make docs``).
 
 ## Debugging
+
 ### Requirements
 - [Terraform](https://www.terraform.io/downloads.html) v0.12.26 or greater
 - [Delve](https://github.com/go-delve/delve/tree/master/Documentation/installation) 1.7.X or greater
@@ -154,19 +147,6 @@ Now we can see that the debugged process did hit the breakpoint we specified ear
    810:		vpcID := d.Get("project_vpc_id").(string)
    811:		var apiServiceIntegrations []aiven.NewServiceIntegration
 ```
-
-
-### Adding Dependencies
-This provider uses [Go modules](https://blog.golang.org/using-go-modules).
-
-To add a new dependency to your Terraform provider:
-
-```bash
-go get github.com/author/dependency
-go mod tidy
-```
-
-Then commit the changes to `go.mod` and `go.sum`.
 
 ## License
 [MIT License](LICENSE).
