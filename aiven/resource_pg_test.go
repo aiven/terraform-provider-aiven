@@ -208,9 +208,6 @@ func TestAccAiven_pg(t *testing.T) {
 	})
 
 	t.Run("pg with static ips", func(tt *testing.T) {
-		if len(os.Getenv("TEST_ACC_RUN_STATIC_IP_CHECKS")) == 0 {
-			tt.Skip("'TEST_ACC_RUN_STATIC_IP_CHECKS' is not set, skipping this test")
-		}
 		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 		resource.ParallelTest(tt, resource.TestCase{
 			PreCheck:          func() { testAccPreCheck(tt) },
