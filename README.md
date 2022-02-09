@@ -93,7 +93,7 @@ For information about writing acceptance tests, see the main [Terraform contribu
 In case you'd like to avoid Go-dependency on your local machine or CI, you can run the following build command:
 
 ```
-sudo podman run -v .:/terraform-provider-aiven:z --workdir /terraform-provider-aiven golang:latest make <COMMAND>
+podman run -v .:/terraform-provider-aiven:z --workdir /terraform-provider-aiven golang:latest make <COMMAND>
 ```
 
 Note that you'll need to be in the root of **terraform-provider-aiven** repository and replace the <COMMAND> name with your choice of command (for example, ``make docs``).
