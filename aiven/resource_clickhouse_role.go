@@ -9,7 +9,6 @@ import (
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/aiven/internal/services/clickhouse"
-	"github.com/aiven/terraform-provider-aiven/aiven/internal/services/clickhouse/chsql"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -49,14 +48,7 @@ func resourceClickhouseRoleCreate(ctx context.Context, d *schema.ResourceData, m
 	serviceName := d.Get("service_name").(string)
 	roleName := d.Get("role").(string)
 
-	query, err := chsql.CreateRoleStatement(roleName)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	// TODO inspect result?
-	_, err = client.ClickHouseQuery.Query(projectName, serviceName, chsql.DefaultDatabaseForRoles, query)
-	if err != nil {
+	if err := clickhouse.CreateRole(client, projectName, serviceName, roleName); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -70,18 +62,13 @@ func resourceClickhouseRoleRead(_ context.Context, d *schema.ResourceData, m int
 
 	projectName, serviceName, roleName := schemautil.SplitResourceID3(d.Id())
 
-	query, err := chsql.ShowCreateRoleStatement(roleName)
-	if err != nil {
+	if exists, err := clickhouse.RoleExists(client, projectName, serviceName, roleName); err != nil {
 		return diag.FromErr(err)
-	}
-	r, err := client.ClickHouseQuery.Query(projectName, serviceName, chsql.DefaultDatabaseForRoles, query)
-	if err != nil {
-		return diag.FromErr(resourceReadHandleNotFound(err, d))
-	}
-	if len(r.Data) == 0 {
+	} else if !exists {
 		d.SetId("")
 		return nil
 	}
+
 	if err := d.Set("project", projectName); err != nil {
 		return diag.FromErr(err)
 	}
@@ -99,12 +86,7 @@ func resourceClickhouseRoleDelete(_ context.Context, d *schema.ResourceData, m i
 
 	projectName, serviceName, roleName := schemautil.SplitResourceID3(d.Id())
 
-	query, err := chsql.DropRoleStatement(roleName)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	_, err = client.ClickHouseQuery.Query(projectName, serviceName, chsql.DefaultDatabaseForRoles, query)
-	if err != nil && clickhouse.IsUnknownRole(err) {
+	if err := clickhouse.DropRole(client, projectName, serviceName, roleName); err != nil {
 		return diag.FromErr(err)
 	}
 	return nil

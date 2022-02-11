@@ -27,11 +27,12 @@ func clickhouseSchema() map[string]*schema.Schema {
 
 func resourceClickhouse() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Clickhouse resource allows the creation and management of Aiven Clickhouse services.",
-		CreateContext: resourceServiceCreateWrapper(ServiceTypeClickhouse),
-		ReadContext:   resourceServiceRead,
-		UpdateContext: resourceServiceUpdate,
-		DeleteContext: resourceServiceDelete,
+		Description:        "The Clickhouse resource allows the creation and management of Aiven Clickhouse services.",
+		DeprecationMessage: betaDeprecationMessage,
+		CreateContext:      resourceServiceCreateWrapper(ServiceTypeClickhouse),
+		ReadContext:        resourceServiceRead,
+		UpdateContext:      resourceServiceUpdate,
+		DeleteContext:      resourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
 			service.SetServiceTypeIfEmpty(ServiceTypeClickhouse),
 			customdiff.IfValueChange("disk_space",

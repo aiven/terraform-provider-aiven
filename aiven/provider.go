@@ -8,7 +8,6 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/aiven/internal/cache"
-	"github.com/aiven/terraform-provider-aiven/aiven/internal/services/clickhouse"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -139,6 +138,7 @@ func Provider() *schema.Provider {
 			"aiven_clickhouse_database": resourceClickhouseDatabase(),
 			"aiven_clickhouse_user":     resourceClickhouseUser(),
 			"aiven_clickhouse_role":     resourceClickhouseRole(),
+			"aiven_clickhouse_grant":    resourceClickhouseGrant(),
 
 			// deprecated
 			"aiven_elasticsearch_acl": resourceElasticsearchACL(),
@@ -178,5 +178,5 @@ func resourceReadHandleNotFound(err error, d *schema.ResourceData) error {
 
 // this function is a place to bundle errors that we want to treat as "not found"
 func isUnknownResource(err error) bool {
-	return aiven.IsNotFound(err) || clickhouse.IsUnknownRole(err)
+	return aiven.IsNotFound(err)
 }
