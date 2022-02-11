@@ -12,6 +12,8 @@ import (
 )
 
 var (
+	betaDeprecationMessage = "This Resource is not yet generally available and may be subject to breaking changes without warning"
+
 	commonSchemaProjectReference = &schema.Schema{
 		Type:         schema.TypeString,
 		Required:     true,

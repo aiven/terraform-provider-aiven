@@ -50,7 +50,7 @@ test:
 
 .PHONY: testacc
 testacc:
-	TF_ACC=1 CGO_ENABLED=0 go test -v -count 1 -parallel 30 --cover ./... -timeout 120m ${TESTARGS}
+	TF_ACC=1 CGO_ENABLED=0 go test -v -count 1 -parallel 40 --cover ./... -timeout 120m ${TESTARGS}
 
 .PHONY: sweep
 sweep:

@@ -130,9 +130,9 @@ rules:
       resource "aiven_clickhouse" ... {
         ...
       }
-  - pattern-not-regex: business-8
+  - pattern-not-regex: startup-beta-8
   fix: |
-    plan = "business-8"
+    plan = "startup-beta-8"
   message: |
     Tests should use the smallest clickhouse plan to save costs
   severity: WARNING

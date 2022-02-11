@@ -47,7 +47,7 @@ func testAccClickhouseResource(name string) string {
 		resource "aiven_clickhouse" "bar" {
 		  project                 = data.aiven_project.foo.project
 		  cloud_name              = "google-europe-west1"
-		  plan                    = "business-8"
+		  plan                    = "startup-beta-8"
 		  service_name            = "test-acc-sr-%s"
 		  maintenance_window_dow  = "monday"
 		  maintenance_window_time = "10:00:00"
