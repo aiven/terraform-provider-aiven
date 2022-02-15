@@ -74,13 +74,8 @@ func TestAccAivenProject_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenProjectAttributes("data.aiven_project.project"),
 					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
-					resource.TestCheckResourceAttrSet(resourceName, "billing_address"),
-					resource.TestCheckResourceAttrSet(resourceName, "billing_extra_text"),
-					resource.TestCheckResourceAttrSet(resourceName, "country_code"),
 					resource.TestCheckResourceAttrSet(resourceName, "default_cloud"),
-					resource.TestCheckResourceAttrSet(resourceName, "billing_currency"),
 					resource.TestCheckResourceAttrSet(resourceName, "ca_cert"),
-					resource.TestCheckResourceAttrSet(resourceName, "vat_id"),
 				),
 			},
 			{
@@ -88,14 +83,8 @@ func TestAccAivenProject_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenProjectAttributes("data.aiven_project.project"),
 					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName2)),
-					resource.TestCheckResourceAttrSet(resourceName, "billing_address"),
-					resource.TestCheckResourceAttrSet(resourceName, "billing_extra_text"),
-					resource.TestCheckResourceAttrSet(resourceName, "country_code"),
 					resource.TestCheckResourceAttrSet(resourceName, "default_cloud"),
-					resource.TestCheckResourceAttrSet(resourceName, "billing_currency"),
 					resource.TestCheckResourceAttrSet(resourceName, "ca_cert"),
-					resource.TestCheckResourceAttrSet(resourceName, "vat_id"),
-					resource.TestCheckResourceAttrSet(resourceName, "billing_group"),
 				),
 			},
 		},
@@ -129,14 +118,9 @@ func testAccProjectResourceAccounts(name string) string {
 		}
 		
 		resource "aiven_project" "foo" {
-		  project            = "test-acc-pr-%s"
-		  account_id         = aiven_account.foo.account_id
-		  billing_address    = "MXQ4+M5 New York, United States"
-		  billing_extra_text = "some extra text ..."
-		  country_code       = "DE"
-		  default_cloud      = "aws-eu-west-2"
-		  billing_currency   = "EUR"
-		  vat_id             = "123"
+		  project       = "test-acc-pr-%s"
+		  account_id    = aiven_account.foo.account_id
+		  default_cloud = "aws-eu-west-2"
 		}
 		
 		data "aiven_project" "project" {
@@ -150,13 +134,8 @@ func testAccProjectResourceAccounts(name string) string {
 func testAccProjectResource(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_project" "foo" {
-		  project            = "test-acc-pr-%s"
-		  billing_address    = "MXQ4+M5 New York, United States"
-		  billing_extra_text = "some extra text ..."
-		  country_code       = "DE"
-		  default_cloud      = "aws-eu-west-2"
-		  billing_currency   = "EUR"
-		  vat_id             = "123"
+		  project       = "test-acc-pr-%s"
+		  default_cloud = "aws-eu-west-2"
 		}
 		
 		data "aiven_project" "project" {

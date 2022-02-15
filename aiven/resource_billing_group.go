@@ -259,3 +259,18 @@ func resourceBillingGroupState(ctx context.Context, d *schema.ResourceData, m in
 
 	return []*schema.ResourceData{d}, nil
 }
+
+func getLongCardID(client *aiven.Client, cardID string) (*string, error) {
+	if cardID == "" {
+		return nil, nil
+	}
+
+	card, err := client.CardsHandler.Get(cardID)
+	if err != nil {
+		return nil, err
+	}
+	if card != nil {
+		return &card.CardID, nil
+	}
+	return &cardID, nil
+}
