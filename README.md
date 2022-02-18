@@ -149,7 +149,7 @@ Now we can see that the debugged process did hit the breakpoint we specified ear
 ```
 
 ## License
-The code is licensed under [MIT License](LICENSE). The [query sanitization code](aiven/internal/services/clickhouse/chsql/sanitize) is MIT licensed and Copyrighted to Jack Christensen, https://github.com/jackc/pgx
+The code is licensed under [MIT License](LICENSE).
 
 ## Credits
 

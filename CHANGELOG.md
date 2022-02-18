@@ -4,6 +4,9 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.7.0] - not yet released
+- Add support for `aiven_clickhouse_grant` resource
+
 ## [2.6.0] - 2022-02-04
 - Add provider version to user agent
 - Add support for `aiven_static_ip` resource
