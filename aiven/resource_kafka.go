@@ -175,8 +175,8 @@ func resourceKafkaRead(ctx context.Context, d *schema.ResourceData, m interface{
 	client := m.(*aiven.Client)
 
 	kafka, err := client.Services.Get(schemautil.SplitResourceID2(d.Id()))
-	if err := resourceReadHandleNotFound(err, d); err != nil {
-		return nil
+	if err != nil {
+		return diag.FromErr(resourceReadHandleNotFound(err, d))
 	}
 
 	var diags diag.Diagnostics
