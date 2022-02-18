@@ -841,7 +841,7 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	var karapace *bool
 	if v := d.Get("karapace"); d.HasChange("karapace") && v != nil {
 		if k, ok := v.(bool); ok && k {
-			*karapace = true
+			karapace = &k
 		}
 	}
 
