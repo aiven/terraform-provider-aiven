@@ -10,7 +10,7 @@ SOURCES = $(shell find aiven -name '*.go')
 # Tools
 #################################################
 
-TOOLS_DIR := hack/tools
+TOOLS_DIR := tools
 TOOLS_BIN_DIR := $(TOOLS_DIR)/bin
 
 TFPLUGINDOCS=$(TOOLS_BIN_DIR)/tfplugindocs
