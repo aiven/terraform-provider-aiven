@@ -19,10 +19,10 @@ resource "aiven_flink_table" "table" {
   table_name     = "<TABLE_NAME>"
   integration_id = aiven_service_integration.flink_kafka.service_id
 
-  # valid if the service integration refers to a postgres or mysql service
+  # valid if the common integration refers to a postgres or mysql common
   jdbc_table = "<JDBC_TABLE_NAME>"
 
-  # valid if the service integration refers to a kafka service
+  # valid if the common integration refers to a kafka common
   kafka_topic = aiven_kafka_topic.table_topic.topic_name
 
   schema_sql = <<EOF
