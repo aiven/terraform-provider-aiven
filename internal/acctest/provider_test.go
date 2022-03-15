@@ -1,9 +1,10 @@
 package acctest
 
 import (
+	"testing"
+
 	"github.com/aiven/terraform-provider-aiven/internal/provider"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"testing"
 )
 
 func TestProvider(t *testing.T) {

@@ -4,8 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -72,7 +70,7 @@ func resourceFlinkJobRead(_ context.Context, d *schema.ResourceData, m interface
 
 	r, err := client.FlinkJobs.Get(project, serviceName, aiven.GetFlinkJobRequest{JobId: jobId})
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	// we model job deletion by canceling the job

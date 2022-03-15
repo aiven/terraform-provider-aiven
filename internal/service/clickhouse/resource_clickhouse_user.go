@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -86,7 +84,7 @@ func resourceClickhouseUserRead(_ context.Context, d *schema.ResourceData, m int
 	projectName, serviceName, uuid := schemautil.SplitResourceID3(d.Id())
 	user, err := client.ClickhouseUser.Get(projectName, serviceName, uuid)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("project", projectName); err != nil {

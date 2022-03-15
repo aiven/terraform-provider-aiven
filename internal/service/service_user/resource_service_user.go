@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -118,7 +116,8 @@ func ResourceServiceUser() *schema.Resource {
 			StateContext: resourceServiceUserState,
 		},
 
-		Schema: aivenServiceUserSchema,
+		Schema:             aivenServiceUserSchema,
+		DeprecationMessage: "Please use service-specific resources instead of this one, for example: aiven_kafka_user, aiven_pg_user etc.",
 	}
 }
 
@@ -232,7 +231,7 @@ func resourceServiceUserRead(_ context.Context, d *schema.ResourceData, m interf
 	projectName, serviceName, username := schemautil.SplitResourceID3(d.Id())
 	user, err := client.ServiceUsers.Get(projectName, serviceName, username)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	err = copyServiceUserPropertiesFromAPIResponseToTerraform(d, user, projectName, serviceName)

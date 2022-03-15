@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/templates"
@@ -196,7 +194,7 @@ func resourceServiceIntegrationEndpointRead(_ context.Context, d *schema.Resourc
 	projectName, endpointID := schemautil.SplitResourceID2(d.Id())
 	endpoint, err := client.ServiceIntegrationEndpoints.Get(projectName, endpointID)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	err = copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(d, endpoint, projectName)

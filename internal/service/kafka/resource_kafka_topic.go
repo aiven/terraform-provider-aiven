@@ -7,8 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/service/kafka/cache"
@@ -371,7 +369,7 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 	project, serviceName, topicName := schemautil.SplitResourceID3(d.Id())
 	topic, err := getTopic(ctx, d, m, false)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("project", project); err != nil {

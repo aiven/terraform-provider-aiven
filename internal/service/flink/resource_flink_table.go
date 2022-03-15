@@ -3,7 +3,6 @@ package flink
 import (
 	"context"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/aiven-go-client"
@@ -123,7 +122,7 @@ func resourceFlinkTableRead(_ context.Context, d *schema.ResourceData, m interfa
 
 	r, err := client.FlinkTables.Get(project, serviceName, aiven.GetFlinkTableRequest{TableId: tableId})
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("project", project); err != nil {

@@ -5,8 +5,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -16,7 +14,7 @@ import (
 )
 
 func aivenKafkaSchema() map[string]*schema.Schema {
-	aivenKafkaSchema := service.ServiceCommonSchema()
+	aivenKafkaSchema := schemautil.ServiceCommonSchema()
 	aivenKafkaSchema["karapace"] = &schema.Schema{
 		Type:             schema.TypeBool,
 		Optional:         true,
@@ -29,7 +27,7 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 		Default:     true,
 		Description: "Create default wildcard Kafka ACL",
 	}
-	aivenKafkaSchema[service.ServiceTypeKafka] = &schema.Schema{
+	aivenKafkaSchema[schemautil.ServiceTypeKafka] = &schema.Schema{
 		Type:        schema.TypeList,
 		MaxItems:    1,
 		Computed:    true,
@@ -75,7 +73,7 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	aivenKafkaSchema[service.ServiceTypeKafka+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(service.ServiceTypeKafka)
+	aivenKafkaSchema[schemautil.ServiceTypeKafka+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeKafka)
 
 	return aivenKafkaSchema
 }
@@ -85,10 +83,10 @@ func ResourceKafka() *schema.Resource {
 		Description:   "The Kafka resource allows the creation and management of Aiven Kafka services.",
 		CreateContext: resourceKafkaCreate,
 		ReadContext:   resourceKafkaRead,
-		UpdateContext: service.ResourceServiceUpdate,
-		DeleteContext: service.ResourceServiceDelete,
+		UpdateContext: schemautil.ResourceServiceUpdate,
+		DeleteContext: schemautil.ResourceServiceDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: service.ResourceServiceState,
+			StateContext: schemautil.ResourceServiceState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
@@ -99,7 +97,7 @@ func ResourceKafka() *schema.Resource {
 		Schema: aivenKafkaSchema(),
 		CustomizeDiff: customdiff.Sequence(
 			customdiff.Sequence(
-				schemautil.SetServiceTypeIfEmpty(service.ServiceTypeKafka),
+				schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeKafka),
 				customdiff.IfValueChange("disk_space",
 					schemautil.DiskSpaceShouldNotBeEmpty,
 					schemautil.CustomizeDiffCheckDiskSpace,
@@ -140,7 +138,7 @@ func ResourceKafka() *schema.Resource {
 }
 
 func resourceKafkaCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	if di := service.ResourceServiceCreateWrapper(service.ServiceTypeKafka)(ctx, d, m); di.HasError() {
+	if di := schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeKafka)(ctx, d, m); di.HasError() {
 		return di
 	}
 
@@ -175,7 +173,7 @@ func resourceKafkaRead(ctx context.Context, d *schema.ResourceData, m interface{
 
 	kafka, err := client.Services.Get(schemautil.SplitResourceID2(d.Id()))
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	var diags diag.Diagnostics
@@ -211,5 +209,5 @@ func resourceKafkaRead(ctx context.Context, d *schema.ResourceData, m interface{
 		})
 	}
 
-	return append(diags, service.ResourceServiceRead(ctx, d, m)...)
+	return append(diags, schemautil.ResourceServiceRead(ctx, d, m)...)
 }

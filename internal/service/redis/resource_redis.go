@@ -4,15 +4,13 @@ import (
 	"time"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func redisSchema() map[string]*schema.Schema {
-	s := service.ServiceCommonSchema()
-	s[service.ServiceTypeRedis] = &schema.Schema{
+	s := schemautil.ServiceCommonSchema()
+	s[schemautil.ServiceTypeRedis] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
 		Description: "Redis server provided values",
@@ -20,7 +18,7 @@ func redisSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	s[service.ServiceTypeRedis+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(service.ServiceTypeRedis)
+	s[schemautil.ServiceTypeRedis+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeRedis)
 
 	return s
 }
@@ -28,13 +26,13 @@ func redisSchema() map[string]*schema.Schema {
 func ResourceRedis() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Redis resource allows the creation and management of Aiven Redis services.",
-		CreateContext: service.ResourceServiceCreateWrapper(service.ServiceTypeRedis),
-		ReadContext:   service.ResourceServiceRead,
-		UpdateContext: service.ResourceServiceUpdate,
-		DeleteContext: service.ResourceServiceDelete,
+		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeRedis),
+		ReadContext:   schemautil.ResourceServiceRead,
+		UpdateContext: schemautil.ResourceServiceUpdate,
+		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
 			customdiff.Sequence(
-				schemautil.SetServiceTypeIfEmpty(service.ServiceTypeRedis),
+				schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeRedis),
 				customdiff.IfValueChange("disk_space",
 					schemautil.DiskSpaceShouldNotBeEmpty,
 					schemautil.CustomizeDiffCheckDiskSpace,
@@ -50,7 +48,7 @@ func ResourceRedis() *schema.Resource {
 			),
 		),
 		Importer: &schema.ResourceImporter{
-			StateContext: service.ResourceServiceState,
+			StateContext: schemautil.ResourceServiceState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),

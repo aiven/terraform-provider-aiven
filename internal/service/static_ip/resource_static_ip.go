@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -66,7 +64,7 @@ func resourceStaticIPRead(_ context.Context, d *schema.ResourceData, m interface
 
 	r, err := client.StaticIPs.List(project)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 	for _, sip := range r.StaticIPs {
 		if sip.StaticIPAddressID == staticIPAddressId {

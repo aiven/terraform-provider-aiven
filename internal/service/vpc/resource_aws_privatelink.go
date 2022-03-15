@@ -6,8 +6,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -99,7 +97,7 @@ func resourceAWSPrivatelinkRead(_ context.Context, d *schema.ResourceData, m int
 	project, serviceName := schemautil.SplitResourceID2(d.Id())
 	p, err := client.AWSPrivatelink.Get(project, serviceName)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("principals", p.Principals); err != nil {

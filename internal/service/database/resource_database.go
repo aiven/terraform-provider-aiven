@@ -6,8 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -112,7 +110,7 @@ func resourceDatabaseRead(_ context.Context, d *schema.ResourceData, m interface
 	projectName, serviceName, databaseName := schemautil.SplitResourceID3(d.Id())
 	database, err := client.Databases.Get(projectName, serviceName, databaseName)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("database_name", database.DatabaseName); err != nil {

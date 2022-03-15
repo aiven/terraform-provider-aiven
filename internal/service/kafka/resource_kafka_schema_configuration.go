@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -97,7 +95,7 @@ func resourceKafkaSchemaConfigurationRead(_ context.Context, d *schema.ResourceD
 
 	r, err := m.(*aiven.Client).KafkaGlobalSchemaConfig.Get(project, serviceName)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("project", project); err != nil {

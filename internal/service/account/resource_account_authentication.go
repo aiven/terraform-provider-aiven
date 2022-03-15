@@ -6,8 +6,6 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -126,7 +124,7 @@ func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData
 	accountId, authId := schemautil.SplitResourceID2(d.Id())
 	r, err := client.AccountAuthentications.Get(accountId, authId)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("account_id", r.AuthenticationMethod.AccountId); err != nil {

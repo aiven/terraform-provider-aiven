@@ -4,15 +4,13 @@ import (
 	"time"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func cassandraSchema() map[string]*schema.Schema {
-	s := service.ServiceCommonSchema()
-	s[service.ServiceTypeCassandra] = &schema.Schema{
+	s := schemautil.ServiceCommonSchema()
+	s[schemautil.ServiceTypeCassandra] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
 		Description: "Cassandra server provided values",
@@ -20,7 +18,7 @@ func cassandraSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	s[service.ServiceTypeCassandra+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(service.ServiceTypeCassandra)
+	s[schemautil.ServiceTypeCassandra+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeCassandra)
 
 	return s
 }
@@ -28,12 +26,12 @@ func cassandraSchema() map[string]*schema.Schema {
 func ResourceCassandra() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Cassandra resource allows the creation and management of Aiven Cassandra services.",
-		CreateContext: service.ResourceServiceCreateWrapper(service.ServiceTypeCassandra),
-		ReadContext:   service.ResourceServiceRead,
-		UpdateContext: service.ResourceServiceUpdate,
-		DeleteContext: service.ResourceServiceDelete,
+		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeCassandra),
+		ReadContext:   schemautil.ResourceServiceRead,
+		UpdateContext: schemautil.ResourceServiceUpdate,
+		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(service.ServiceTypeCassandra),
+			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeCassandra),
 			customdiff.IfValueChange("disk_space",
 				schemautil.DiskSpaceShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
@@ -48,7 +46,7 @@ func ResourceCassandra() *schema.Resource {
 			),
 		),
 		Importer: &schema.ResourceImporter{
-			StateContext: service.ResourceServiceState,
+			StateContext: schemautil.ResourceServiceState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),

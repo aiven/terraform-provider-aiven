@@ -4,15 +4,13 @@ import (
 	"time"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func clickhouseSchema() map[string]*schema.Schema {
-	s := service.ServiceCommonSchema()
-	s[service.ServiceTypeClickhouse] = &schema.Schema{
+	s := schemautil.ServiceCommonSchema()
+	s[schemautil.ServiceTypeClickhouse] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
 		Description: "Clickhouse server provided values",
@@ -20,7 +18,7 @@ func clickhouseSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	s[service.ServiceTypeClickhouse+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(service.ServiceTypeClickhouse)
+	s[schemautil.ServiceTypeClickhouse+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeClickhouse)
 
 	return s
 }
@@ -28,12 +26,12 @@ func clickhouseSchema() map[string]*schema.Schema {
 func ResourceClickhouse() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Clickhouse resource allows the creation and management of Aiven Clickhouse services.",
-		CreateContext: service.ResourceServiceCreateWrapper(service.ServiceTypeClickhouse),
-		ReadContext:   service.ResourceServiceRead,
-		UpdateContext: service.ResourceServiceUpdate,
-		DeleteContext: service.ResourceServiceDelete,
+		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeClickhouse),
+		ReadContext:   schemautil.ResourceServiceRead,
+		UpdateContext: schemautil.ResourceServiceUpdate,
+		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(service.ServiceTypeClickhouse),
+			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeClickhouse),
 			customdiff.IfValueChange("disk_space",
 				schemautil.DiskSpaceShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
@@ -48,7 +46,7 @@ func ResourceClickhouse() *schema.Resource {
 			),
 		),
 		Importer: &schema.ResourceImporter{
-			StateContext: service.ResourceServiceState,
+			StateContext: schemautil.ResourceServiceState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),

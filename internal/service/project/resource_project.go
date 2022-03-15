@@ -7,8 +7,6 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -293,7 +291,7 @@ func resourceProjectRead(_ context.Context, d *schema.ResourceData, m interface{
 
 	project, err := client.Projects.Get(d.Id())
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	var diags diag.Diagnostics

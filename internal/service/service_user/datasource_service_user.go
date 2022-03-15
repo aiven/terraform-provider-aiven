@@ -16,6 +16,7 @@ func DatasourceServiceUser() *schema.Resource {
 		Description: "The Service User data source provides information about the existing Aiven Service User.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenServiceUserSchema,
 			"project", "service_name", "username"),
+		DeprecationMessage: "Please use service-specific data-sources instead of this one, for example: aiven_kafka_user, aiven_pg_user etc.",
 	}
 }
 

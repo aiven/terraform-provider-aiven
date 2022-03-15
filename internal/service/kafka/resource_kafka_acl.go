@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/aiven-go-client"
@@ -86,7 +85,7 @@ func resourceKafkaACLRead(_ context.Context, d *schema.ResourceData, m interface
 	project, serviceName, aclID := schemautil.SplitResourceID3(d.Id())
 	acl, err := cache.ACLCache{}.Read(project, serviceName, aclID, client)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	err = copyKafkaACLPropertiesFromAPIResponseToTerraform(d, &acl, project, serviceName)

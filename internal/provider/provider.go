@@ -51,13 +51,30 @@ func Provider() *schema.Provider {
 			"aiven_connection_pool":   connection_pool.DatasourceConnectionPool(),
 			"aiven_database":          database.DatasourceDatabase(),
 			"aiven_service_user":      service_user.DatasourceServiceUser(),
-			"aiven_pg":                pg.DatasourcePG(),
-			"aiven_mysql":             mysql.DatasourceMySQL(),
-			"aiven_cassandra":         cassandra.DatasourceCassandra(),
-			"aiven_grafana":           grafana.DatasourceGrafana(),
-			"aiven_influxdb":          influxdb.DatasourceInfluxDB(),
-			"aiven_redis":             redis.DatasourceRedis(),
 			"aiven_service_component": service_component.DatasourceServiceComponent(),
+
+			// influxdb
+			"aiven_influxdb":      influxdb.DatasourceInfluxDB(),
+			"aiven_influxdb_user": influxdb.DatasourceInfluxDBUser(),
+
+			// grafana
+			"aiven_grafana": grafana.DatasourceGrafana(),
+
+			// mysql
+			"aiven_mysql":      mysql.DatasourceMySQL(),
+			"aiven_mysql_user": mysql.DatasourceMySQLUser(),
+
+			// redis
+			"aiven_redis":      redis.DatasourceRedis(),
+			"aiven_redis_user": redis.DatasourceRedisUser(),
+
+			// pgs
+			"aiven_pg":      pg.DatasourcePG(),
+			"aiven_pg_user": pg.DatasourcePGUser(),
+
+			// cassandra
+			"aiven_cassandra":      cassandra.DatasourceCassandra(),
+			"aiven_cassandra_user": cassandra.DatasourceCassandraUser(),
 
 			// account
 			"aiven_account":                account.DatasourceAccount(),
@@ -84,6 +101,7 @@ func Provider() *schema.Provider {
 
 			// m3db
 			"aiven_m3db":         m3db.DatasourceM3DB(),
+			"aiven_m3db_user":    m3db.DatasourceM3DBUser(),
 			"aiven_m3aggregator": m3db.DatasourceM3Aggregator(),
 
 			// flink
@@ -91,11 +109,13 @@ func Provider() *schema.Provider {
 
 			// opensearch
 			"aiven_opensearch":            opensearch.DatasourceOpensearch(),
+			"aiven_opensearch_user":       opensearch.DatasourceOpensearchUser(),
 			"aiven_opensearch_acl_config": opensearch.DatasourceOpensearchACLConfig(),
 			"aiven_opensearch_acl_rule":   opensearch.DatasourceOpensearchACLRule(),
 
 			// kafka
 			"aiven_kafka":                        kafka.DatasourceKafka(),
+			"aiven_kafka_user":                   kafka.DatasourceKafkaUser(),
 			"aiven_kafka_acl":                    kafka.DatasourceKafkaACL(),
 			"aiven_kafka_topic":                  kafka.DatasourceKafkaTopic(),
 			"aiven_kafka_schema":                 kafka.DatasourceKafkaSchema(),
@@ -115,13 +135,30 @@ func Provider() *schema.Provider {
 			"aiven_connection_pool": connection_pool.ResourceConnectionPool(),
 			"aiven_database":        database.ResourceDatabase(),
 			"aiven_service_user":    service_user.ResourceServiceUser(),
-			"aiven_pg":              pg.ResourcePG(),
-			"aiven_mysql":           mysql.ResourceMySQL(),
-			"aiven_cassandra":       cassandra.ResourceCassandra(),
-			"aiven_grafana":         grafana.ResourceGrafana(),
-			"aiven_influxdb":        influxdb.ResourceInfluxDB(),
-			"aiven_redis":           redis.ResourceRedis(),
 			"aiven_static_ip":       static_ip.ResourceStaticIP(),
+
+			// influxdb
+			"aiven_influxdb":      influxdb.ResourceInfluxDB(),
+			"aiven_influxdb_user": influxdb.ResourceInfluxDBUser(),
+
+			// grafana
+			"aiven_grafana": grafana.ResourceGrafana(),
+
+			// mysql
+			"aiven_mysql":      mysql.ResourceMySQL(),
+			"aiven_mysql_user": mysql.ResourceMySQLUser(),
+
+			// redis
+			"aiven_redis":      redis.ResourceRedis(),
+			"aiven_redis_user": redis.ResourceRedisUser(),
+
+			// pg
+			"aiven_pg":      pg.ResourcePG(),
+			"aiven_pg_user": pg.ResourcePGUser(),
+
+			// cassandra
+			"aiven_cassandra":      cassandra.ResourceCassandra(),
+			"aiven_cassandra_user": cassandra.ResourceCassandraUser(),
 
 			// account
 			"aiven_account":                account.ResourceAccount(),
@@ -149,6 +186,7 @@ func Provider() *schema.Provider {
 
 			// m3db
 			"aiven_m3db":         m3db.ResourceM3DB(),
+			"aiven_m3db_user":    m3db.ResourceM3DBUser(),
 			"aiven_m3aggregator": m3db.ResourceM3Aggregator(),
 
 			// flink
@@ -158,11 +196,13 @@ func Provider() *schema.Provider {
 
 			// opensearch
 			"aiven_opensearch":            opensearch.ResourceOpensearch(),
+			"aiven_opensearch_user":       opensearch.ResourceOpensearchUser(),
 			"aiven_opensearch_acl_config": opensearch.ResourceOpensearchACLConfig(),
 			"aiven_opensearch_acl_rule":   opensearch.ResourceOpensearchACLRule(),
 
 			// kafka
 			"aiven_kafka":                        kafka.ResourceKafka(),
+			"aiven_kafka_user":                   kafka.ResourceKafkaUser(),
 			"aiven_kafka_acl":                    kafka.ResourceKafkaACL(),
 			"aiven_kafka_topic":                  kafka.ResourceKafkaTopic(),
 			"aiven_kafka_schema":                 kafka.ResourceKafkaSchema(),

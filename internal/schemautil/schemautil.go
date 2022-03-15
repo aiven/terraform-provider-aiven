@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aiven/aiven-go-client"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -271,4 +272,31 @@ func FlattenToString(a []interface{}) []string {
 	}
 
 	return r
+}
+
+func CopyServiceUserPropertiesFromAPIResponseToTerraform(
+	d *schema.ResourceData,
+	user *aiven.ServiceUser,
+	projectName string,
+	serviceName string,
+) error {
+	if err := d.Set("project", projectName); err != nil {
+		return err
+	}
+	if err := d.Set("service_name", serviceName); err != nil {
+		return err
+	}
+	if err := d.Set("username", user.Username); err != nil {
+		return err
+	}
+	if err := d.Set("password", user.Password); err != nil {
+		return err
+	}
+	if err := d.Set("type", user.Type); err != nil {
+		return err
+	}
+	d.Set("access_cert", user.AccessCert)
+	d.Set("access_key", user.AccessKey)
+
+	return nil
 }

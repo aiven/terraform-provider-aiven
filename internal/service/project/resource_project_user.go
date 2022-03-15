@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -81,7 +79,7 @@ func resourceProjectUserRead(ctx context.Context, d *schema.ResourceData, m inte
 		if aiven.IsNotFound(err) && !d.Get("accepted").(bool) {
 			return resourceProjectUserCreate(ctx, d, m)
 		}
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("project", projectName); err != nil {

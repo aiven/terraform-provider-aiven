@@ -3,8 +3,6 @@ package flink
 import (
 	"time"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
@@ -12,8 +10,8 @@ import (
 )
 
 func aivenFlinkSchema() map[string]*schema.Schema {
-	aivenFlinkSchema := service.ServiceCommonSchema()
-	aivenFlinkSchema[service.ServiceTypeFlink] = &schema.Schema{
+	aivenFlinkSchema := schemautil.ServiceCommonSchema()
+	aivenFlinkSchema[schemautil.ServiceTypeFlink] = &schema.Schema{
 		Type:        schema.TypeList,
 		MaxItems:    1,
 		Computed:    true,
@@ -33,7 +31,7 @@ func aivenFlinkSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	aivenFlinkSchema[service.ServiceTypeFlink+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(service.ServiceTypeFlink)
+	aivenFlinkSchema[schemautil.ServiceTypeFlink+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeFlink)
 
 	return aivenFlinkSchema
 }
@@ -41,12 +39,12 @@ func aivenFlinkSchema() map[string]*schema.Schema {
 func ResourceFlink() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Flink resource allows the creation and management of Aiven Flink services.",
-		CreateContext: service.ResourceServiceCreateWrapper(service.ServiceTypeFlink),
-		ReadContext:   service.ResourceServiceRead,
-		UpdateContext: service.ResourceServiceUpdate,
-		DeleteContext: service.ResourceServiceDelete,
+		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeFlink),
+		ReadContext:   schemautil.ResourceServiceRead,
+		UpdateContext: schemautil.ResourceServiceUpdate,
+		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(service.ServiceTypeFlink),
+			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeFlink),
 			customdiff.IfValueChange("disk_space",
 				schemautil.DiskSpaceShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
@@ -61,7 +59,7 @@ func ResourceFlink() *schema.Resource {
 			),
 		),
 		Importer: &schema.ResourceImporter{
-			StateContext: service.ResourceServiceState,
+			StateContext: schemautil.ResourceServiceState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),

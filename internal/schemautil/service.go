@@ -1,4 +1,4 @@
-package service
+package schemautil
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/docker/go-units"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -34,7 +33,7 @@ const (
 
 func ServiceCommonSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"project": schemautil.CommonSchemaProjectReference,
+		"project": CommonSchemaProjectReference,
 
 		"cloud_name": {
 			Type:        schema.TypeString,
@@ -87,7 +86,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Type:         schema.TypeString,
 			Optional:     true,
 			Description:  "The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.",
-			ValidateFunc: schemautil.ValidateHumanByteSizeString,
+			ValidateFunc: ValidateHumanByteSizeString,
 		},
 		"disk_space_used": {
 			Type:        schema.TypeString,
@@ -279,7 +278,7 @@ func ResourceServiceCreateWrapper(serviceType string) schema.CreateContextFunc {
 func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName := schemautil.SplitResourceID2(d.Id())
+	projectName, serviceName := SplitResourceID2(d.Id())
 	s, err := client.Services.Get(projectName, serviceName)
 	if err != nil {
 		if err = ResourceReadHandleNotFound(err, d); err != nil {
@@ -287,7 +286,7 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 		}
 		return nil
 	}
-	servicePlanParams, err := schemautil.GetServicePlanParametersFromServiceResponse(ctx, client, projectName, s)
+	servicePlanParams, err := GetServicePlanParametersFromServiceResponse(ctx, client, projectName, s)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("unable to get service plan parameters: %w", err))
 	}
@@ -297,7 +296,7 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(fmt.Errorf("unable to copy api response into terraform schema: %w", err))
 	}
 
-	allocatedStaticIps, err := schemautil.CurrentlyAllocatedStaticIps(ctx, projectName, serviceName, m)
+	allocatedStaticIps, err := CurrentlyAllocatedStaticIps(ctx, projectName, serviceName, m)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("unable to currently allocated static ips: %w", err))
 	}
@@ -319,7 +318,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 	// a default disc space values for a common
 	var diskSpace int
 	if ds, ok := d.GetOk("disk_space"); ok {
-		diskSpace = schemautil.ConvertToDiskSpaceMB(ds.(string))
+		diskSpace = ConvertToDiskSpaceMB(ds.(string))
 	}
 
 	_, err := client.Services.Create(
@@ -327,15 +326,15 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 		aiven.CreateServiceRequest{
 			Cloud:                 d.Get("cloud_name").(string),
 			Plan:                  d.Get("plan").(string),
-			ProjectVPCID:          schemautil.GetProjectVPCIdPointer(d),
-			ServiceIntegrations:   schemautil.GetAPIServiceIntegrations(d),
-			MaintenanceWindow:     schemautil.GetMaintenanceWindow(d),
+			ProjectVPCID:          GetProjectVPCIdPointer(d),
+			ServiceIntegrations:   GetAPIServiceIntegrations(d),
+			MaintenanceWindow:     GetMaintenanceWindow(d),
 			ServiceName:           d.Get("service_name").(string),
 			ServiceType:           serviceType,
 			TerminationProtection: d.Get("termination_protection").(bool),
 			DiskSpaceMB:           diskSpace,
-			UserConfig:            schemautil.ConvertTerraformUserConfigToAPICompatibleFormat("common", serviceType, true, d),
-			StaticIPs:             schemautil.FlattenToString(d.Get("static_ips").([]interface{})),
+			UserConfig:            ConvertTerraformUserConfigToAPICompatibleFormat("common", serviceType, true, d),
+			StaticIPs:             FlattenToString(d.Get("static_ips").([]interface{})),
 		},
 	)
 	if err != nil {
@@ -344,12 +343,12 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	// Create already takes care of static ip associations, no need to explictely associate them here
 
-	s, err := schemautil.WaitForServiceCreation(ctx, d, m)
+	s, err := WaitForServiceCreation(ctx, d, m)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(schemautil.BuildResourceID(project, s.Name))
+	d.SetId(BuildResourceID(project, s.Name))
 
 	return ResourceServiceRead(ctx, d, m)
 }
@@ -371,9 +370,9 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	projectName, serviceName := schemautil.SplitResourceID2(d.Id())
+	projectName, serviceName := SplitResourceID2(d.Id())
 
-	ass, dis, err := schemautil.DiffStaticIps(ctx, d, m)
+	ass, dis, err := DiffStaticIps(ctx, d, m)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -391,19 +390,19 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		aiven.UpdateServiceRequest{
 			Cloud:                 d.Get("cloud_name").(string),
 			Plan:                  d.Get("plan").(string),
-			MaintenanceWindow:     schemautil.GetMaintenanceWindow(d),
-			ProjectVPCID:          schemautil.GetProjectVPCIdPointer(d),
+			MaintenanceWindow:     GetMaintenanceWindow(d),
+			ProjectVPCID:          GetProjectVPCIdPointer(d),
 			Powered:               true,
 			TerminationProtection: d.Get("termination_protection").(bool),
 			DiskSpaceMB:           diskSpace,
 			Karapace:              karapace,
-			UserConfig:            schemautil.ConvertTerraformUserConfigToAPICompatibleFormat("common", d.Get("service_type").(string), false, d),
+			UserConfig:            ConvertTerraformUserConfigToAPICompatibleFormat("common", d.Get("service_type").(string), false, d),
 		},
 	); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if _, err = schemautil.WaitForServiceUpdate(ctx, d, m); err != nil {
+	if _, err = WaitForServiceUpdate(ctx, d, m); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -413,7 +412,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 				return diag.FromErr(err)
 			}
 		}
-		if err = schemautil.WaitStaticIpsDissassociation(ctx, d, m); err != nil {
+		if err = WaitStaticIpsDissassociation(ctx, d, m); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -425,14 +424,14 @@ func getDefaultDiskSpaceIfNotSet(ctx context.Context, d *schema.ResourceData, cl
 	var diskSpace int
 	if ds, ok := d.GetOk("disk_space"); !ok {
 		// get service plan specific defaults
-		servicePlanParams, err := schemautil.GetServicePlanParametersFromSchema(ctx, client, d)
+		servicePlanParams, err := GetServicePlanParametersFromSchema(ctx, client, d)
 		if err != nil {
 			return 0, fmt.Errorf("unable to get service plan parameters: %w", err)
 		}
 
 		diskSpace = servicePlanParams.DiskSizeMBDefault
 	} else {
-		diskSpace = schemautil.ConvertToDiskSpaceMB(ds.(string))
+		diskSpace = ConvertToDiskSpaceMB(ds.(string))
 	}
 
 	return diskSpace, nil
@@ -441,7 +440,7 @@ func getDefaultDiskSpaceIfNotSet(ctx context.Context, d *schema.ResourceData, cl
 func ResourceServiceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName := schemautil.SplitResourceID2(d.Id())
+	projectName, serviceName := SplitResourceID2(d.Id())
 
 	if err := client.Services.Delete(projectName, serviceName); err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
@@ -449,7 +448,7 @@ func ResourceServiceDelete(ctx context.Context, d *schema.ResourceData, m interf
 
 	// Delete already takes care of static ip disassociation, no need to explictely dissasociate them here
 
-	if err := schemautil.WaitForDeletion(ctx, d, m); err != nil {
+	if err := WaitForDeletion(ctx, d, m); err != nil {
 		return diag.FromErr(err)
 	}
 	return nil
@@ -462,12 +461,12 @@ func ResourceServiceState(ctx context.Context, d *schema.ResourceData, m interfa
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>", d.Id())
 	}
 
-	projectName, serviceName := schemautil.SplitResourceID2(d.Id())
+	projectName, serviceName := SplitResourceID2(d.Id())
 	s, err := client.Services.Get(projectName, serviceName)
 	if err != nil {
 		return nil, fmt.Errorf("unable to GET service %s: %s", d.Id(), err)
 	}
-	servicePlanParams, err := schemautil.GetServicePlanParametersFromServiceResponse(ctx, client, projectName, s)
+	servicePlanParams, err := GetServicePlanParametersFromServiceResponse(ctx, client, projectName, s)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get service plan parameters: %w", err)
 	}
@@ -477,7 +476,7 @@ func ResourceServiceState(ctx context.Context, d *schema.ResourceData, m interfa
 		return nil, fmt.Errorf("unable to copy api response into terraform schema: %w", err)
 	}
 
-	allocatedStaticIps, err := schemautil.CurrentlyAllocatedStaticIps(ctx, projectName, serviceName, m)
+	allocatedStaticIps, err := CurrentlyAllocatedStaticIps(ctx, projectName, serviceName, m)
 	if err != nil {
 		return nil, fmt.Errorf("unable to currently allocated static ips: %w", err)
 	}
@@ -491,7 +490,7 @@ func ResourceServiceState(ctx context.Context, d *schema.ResourceData, m interfa
 func copyServicePropertiesFromAPIResponseToTerraform(
 	d *schema.ResourceData,
 	s *aiven.Service,
-	servicePlanParams schemautil.PlanParameters,
+	servicePlanParams PlanParameters,
 	project string,
 ) error {
 	serviceType := d.Get("service_type").(string)
@@ -523,16 +522,16 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	if err := d.Set("maintenance_window_time", s.MaintenanceWindow.TimeOfDay); err != nil {
 		return err
 	}
-	if err := d.Set("disk_space_used", schemautil.HumanReadableByteSize(s.DiskSpaceMB*units.MiB)); err != nil {
+	if err := d.Set("disk_space_used", HumanReadableByteSize(s.DiskSpaceMB*units.MiB)); err != nil {
 		return err
 	}
-	if err := d.Set("disk_space_default", schemautil.HumanReadableByteSize(servicePlanParams.DiskSizeMBDefault*units.MiB)); err != nil {
+	if err := d.Set("disk_space_default", HumanReadableByteSize(servicePlanParams.DiskSizeMBDefault*units.MiB)); err != nil {
 		return err
 	}
-	if err := d.Set("disk_space_step", schemautil.HumanReadableByteSize(servicePlanParams.DiskSizeMBStep*units.MiB)); err != nil {
+	if err := d.Set("disk_space_step", HumanReadableByteSize(servicePlanParams.DiskSizeMBStep*units.MiB)); err != nil {
 		return err
 	}
-	if err := d.Set("disk_space_cap", schemautil.HumanReadableByteSize(servicePlanParams.DiskSizeMBMax*units.MiB)); err != nil {
+	if err := d.Set("disk_space_cap", HumanReadableByteSize(servicePlanParams.DiskSizeMBMax*units.MiB)); err != nil {
 		return err
 	}
 	if err := d.Set("service_uri", s.URI); err != nil {
@@ -543,12 +542,12 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	}
 
 	if s.ProjectVPCID != nil {
-		if err := d.Set("project_vpc_id", schemautil.BuildResourceID(project, *s.ProjectVPCID)); err != nil {
+		if err := d.Set("project_vpc_id", BuildResourceID(project, *s.ProjectVPCID)); err != nil {
 			return err
 		}
 	}
-	userConfig := schemautil.ConvertAPIUserConfigToTerraformCompatibleFormat("common", serviceType, s.UserConfig)
-	if err := d.Set(serviceType+"_user_config", schemautil.NormalizeIpFilter(d.Get(serviceType+"_user_config"), userConfig)); err != nil {
+	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat("common", serviceType, s.UserConfig)
+	if err := d.Set(serviceType+"_user_config", NormalizeIpFilter(d.Get(serviceType+"_user_config"), userConfig)); err != nil {
 		return fmt.Errorf("cannot set `%s_user_config` : %s; Please make sure that all Aiven services have unique s names", serviceType, err)
 	}
 
@@ -679,4 +678,25 @@ func ResourceReadHandleNotFound(err error, d *schema.ResourceData) error {
 		return nil
 	}
 	return err
+}
+
+func DatasourceServiceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*aiven.Client)
+
+	projectName := d.Get("project").(string)
+	serviceName := d.Get("service_name").(string)
+	d.SetId(BuildResourceID(projectName, serviceName))
+
+	services, err := client.Services.List(projectName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	for _, service := range services {
+		if service.Name == serviceName {
+			return ResourceServiceRead(ctx, d, m)
+		}
+	}
+
+	return diag.Errorf("common %s/%s not found", projectName, serviceName)
 }

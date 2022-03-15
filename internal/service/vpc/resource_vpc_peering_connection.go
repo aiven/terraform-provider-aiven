@@ -7,8 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -287,7 +285,7 @@ func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData,
 			pc, err = client.VPCPeeringConnections.GetVPCPeeringWithResourceGroup(
 				projectName, vpcID, peerCloudAccount, peerVPC, peerRegion, peerResourceGroup.(string))
 			if err != nil {
-				return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+				return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 			}
 		} else {
 			return diag.Errorf("cannot get an Azure VPC peering connection without `peer_resource_group`")
@@ -301,7 +299,7 @@ func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData,
 	pc, err = client.VPCPeeringConnections.GetVPCPeering(
 		projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	return copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, projectName, vpcID)

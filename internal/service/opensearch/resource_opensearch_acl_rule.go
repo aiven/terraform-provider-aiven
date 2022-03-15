@@ -5,8 +5,6 @@ import (
 	"fmt"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -73,7 +71,7 @@ func resourceOpensearchACLRuleRead(_ context.Context, d *schema.ResourceData, m 
 	project, serviceName, username, index := schemautil.SplitResourceID4(d.Id())
 	r, err := client.ElasticsearchACLs.Get(project, serviceName)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 	permission, found := resourceElasticsearchACLRuleGetPermissionFromACLResponse(r.ElasticSearchACLConfig, username, index)
 	if !found {
@@ -132,7 +130,7 @@ func resourceOpensearchACLRuleUpdate(ctx context.Context, d *schema.ResourceData
 	modifier := resourceElasticsearchACLModifierUpdateACLRule(username, index, permission)
 	err := resourceOpensearchACLModifyRemoteConfig(project, serviceName, client, modifier)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	d.SetId(schemautil.BuildResourceID(project, serviceName, username, index))
@@ -152,7 +150,7 @@ func resourceOpensearchACLRuleDelete(_ context.Context, d *schema.ResourceData, 
 	modifier := resourceElasticsearchACLModifierDeleteACLRule(username, index, permission)
 	err := resourceOpensearchACLModifyRemoteConfig(project, serviceName, client, modifier)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 	return nil
 }

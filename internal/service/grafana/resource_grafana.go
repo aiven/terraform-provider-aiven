@@ -4,15 +4,13 @@ import (
 	"time"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func grafanaSchema() map[string]*schema.Schema {
-	s := service.ServiceCommonSchema()
-	s[service.ServiceTypeGrafana] = &schema.Schema{
+	s := schemautil.ServiceCommonSchema()
+	s[schemautil.ServiceTypeGrafana] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
 		Description: "Grafana server provided values",
@@ -20,7 +18,7 @@ func grafanaSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	s[service.ServiceTypeGrafana+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(service.ServiceTypeGrafana)
+	s[schemautil.ServiceTypeGrafana+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeGrafana)
 
 	return s
 }
@@ -28,12 +26,12 @@ func grafanaSchema() map[string]*schema.Schema {
 func ResourceGrafana() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Grafana resource allows the creation and management of Aiven Grafana services.",
-		CreateContext: service.ResourceServiceCreateWrapper(service.ServiceTypeGrafana),
-		ReadContext:   service.ResourceServiceRead,
-		UpdateContext: service.ResourceServiceUpdate,
-		DeleteContext: service.ResourceServiceDelete,
+		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeGrafana),
+		ReadContext:   schemautil.ResourceServiceRead,
+		UpdateContext: schemautil.ResourceServiceUpdate,
+		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(service.ServiceTypeGrafana),
+			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeGrafana),
 			customdiff.IfValueChange("disk_space",
 				schemautil.DiskSpaceShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
@@ -48,7 +46,7 @@ func ResourceGrafana() *schema.Resource {
 			),
 		),
 		Importer: &schema.ResourceImporter{
-			StateContext: service.ResourceServiceState,
+			StateContext: schemautil.ResourceServiceState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),

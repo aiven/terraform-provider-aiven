@@ -6,8 +6,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -141,7 +139,7 @@ func resourceKafkaConnectorRead(ctx context.Context, d *schema.ResourceData, m i
 	}
 	res, err := stateChangeConf.WaitForStateContext(ctx)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	var found bool

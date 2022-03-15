@@ -5,8 +5,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -16,8 +14,8 @@ import (
 )
 
 func aivenPGSchema() map[string]*schema.Schema {
-	schemaPG := service.ServiceCommonSchema()
-	schemaPG[service.ServiceTypePG] = &schema.Schema{
+	schemaPG := schemautil.ServiceCommonSchema()
+	schemaPG[schemautil.ServiceTypePG] = &schema.Schema{
 		Type:        schema.TypeList,
 		MaxItems:    1,
 		Computed:    true,
@@ -72,7 +70,7 @@ func aivenPGSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	schemaPG[service.ServiceTypePG+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(service.ServiceTypePG)
+	schemaPG[schemautil.ServiceTypePG+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypePG)
 
 	return schemaPG
 }
@@ -80,13 +78,13 @@ func aivenPGSchema() map[string]*schema.Schema {
 func ResourcePG() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The PG resource allows the creation and management of Aiven PostgreSQL services.",
-		CreateContext: service.ResourceServiceCreateWrapper(service.ServiceTypePG),
-		ReadContext:   service.ResourceServiceRead,
+		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypePG),
+		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: resourceServicePGUpdate,
-		DeleteContext: service.ResourceServiceDelete,
+		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
 			customdiff.Sequence(
-				schemautil.SetServiceTypeIfEmpty(service.ServiceTypePG),
+				schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypePG),
 				customdiff.IfValueChange("disk_space",
 					schemautil.DiskSpaceShouldNotBeEmpty,
 					schemautil.CustomizeDiffCheckDiskSpace,
@@ -102,7 +100,7 @@ func ResourcePG() *schema.Resource {
 			),
 		),
 		Importer: &schema.ResourceImporter{
-			StateContext: service.ResourceServiceState,
+			StateContext: schemautil.ResourceServiceState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create:  schema.DefaultTimeout(20 * time.Minute),
@@ -159,7 +157,7 @@ func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		}
 	}
 
-	return service.ResourceServiceUpdate(ctx, d, m)
+	return schemautil.ResourceServiceUpdate(ctx, d, m)
 }
 
 // ServiceTaskWaiter is used to refresh the Aiven Service Task endpoints when

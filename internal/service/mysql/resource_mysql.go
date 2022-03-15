@@ -4,15 +4,13 @@ import (
 	"time"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func aivenMySQLSchema() map[string]*schema.Schema {
-	schemaMySQL := service.ServiceCommonSchema()
-	schemaMySQL[service.ServiceTypeMySQL] = &schema.Schema{
+	schemaMySQL := schemautil.ServiceCommonSchema()
+	schemaMySQL[schemautil.ServiceTypeMySQL] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
 		Description: "MySQL specific server provided values",
@@ -20,19 +18,19 @@ func aivenMySQLSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	schemaMySQL[service.ServiceTypeMySQL+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(service.ServiceTypeMySQL)
+	schemaMySQL[schemautil.ServiceTypeMySQL+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeMySQL)
 
 	return schemaMySQL
 }
 func ResourceMySQL() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The MySQL resource allows the creation and management of Aiven MySQL services.",
-		CreateContext: service.ResourceServiceCreateWrapper(service.ServiceTypeMySQL),
-		ReadContext:   service.ResourceServiceRead,
-		UpdateContext: service.ResourceServiceUpdate,
-		DeleteContext: service.ResourceServiceDelete,
+		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeMySQL),
+		ReadContext:   schemautil.ResourceServiceRead,
+		UpdateContext: schemautil.ResourceServiceUpdate,
+		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(service.ServiceTypeMySQL),
+			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeMySQL),
 			customdiff.IfValueChange("disk_space",
 				schemautil.DiskSpaceShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
@@ -47,7 +45,7 @@ func ResourceMySQL() *schema.Resource {
 			),
 		),
 		Importer: &schema.ResourceImporter{
-			StateContext: service.ResourceServiceState,
+			StateContext: schemautil.ResourceServiceState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),

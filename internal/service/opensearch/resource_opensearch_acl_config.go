@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -51,7 +49,7 @@ func resourceOpensearchACLConfigRead(_ context.Context, d *schema.ResourceData, 
 	project, serviceName := schemautil.SplitResourceID2(d.Id())
 	r, err := client.ElasticsearchACLs.Get(project, serviceName)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("project", project); err != nil {
@@ -87,7 +85,7 @@ func resourceOpensearchACLConfigUpdate(ctx context.Context, d *schema.ResourceDa
 	modifier := resourceElasticsearchACLModifierToggleConfigFields(d.Get("enabled").(bool), d.Get("extended_acl").(bool))
 	err := resourceOpensearchACLModifyRemoteConfig(project, serviceName, client, modifier)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	d.SetId(schemautil.BuildResourceID(project, serviceName))
@@ -104,7 +102,7 @@ func resourceOpensearchACLConfigDelete(_ context.Context, d *schema.ResourceData
 	modifier := resourceElasticsearchACLModifierToggleConfigFields(false, false)
 	err := resourceOpensearchACLModifyRemoteConfig(project, serviceName, client, modifier)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	return nil

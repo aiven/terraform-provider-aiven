@@ -5,8 +5,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -73,7 +71,7 @@ func testAccCheckAivenClickhouseRoleResourceDestroy(s *terraform.State) error {
 
 		p, err := c.ClickHouseQuery.Query(projectName, serviceName, chsql.DefaultDatabaseForRoles, query)
 		if err != nil {
-			if !service.IsUnknownResource(err) {
+			if !schemautil.IsUnknownResource(err) {
 				return fmt.Errorf("unable to query clickhouse for roles: %w", err)
 			}
 			return nil

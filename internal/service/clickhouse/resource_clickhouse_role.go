@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/terraform-provider-aiven/internal/service/clickhouse/chsql"
 
 	"github.com/aiven/aiven-go-client"
@@ -76,7 +74,7 @@ func resourceClickhouseRoleRead(_ context.Context, d *schema.ResourceData, m int
 	}
 	r, err := client.ClickHouseQuery.Query(projectName, serviceName, chsql.DefaultDatabaseForRoles, query)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 	if len(r.Data) == 0 {
 		d.SetId("")
@@ -104,7 +102,7 @@ func resourceClickhouseRoleDelete(_ context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(err)
 	}
 	_, err = client.ClickHouseQuery.Query(projectName, serviceName, chsql.DefaultDatabaseForRoles, query)
-	if err != nil && service.IsUnknownRole(err) {
+	if err != nil && schemautil.IsUnknownRole(err) {
 		return diag.FromErr(err)
 	}
 	return nil

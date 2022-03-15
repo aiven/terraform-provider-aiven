@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -103,7 +101,7 @@ func resourceConnectionPoolRead(_ context.Context, d *schema.ResourceData, m int
 	project, serviceName, poolName := schemautil.SplitResourceID3(d.Id())
 	pool, err := client.ConnectionPools.Get(project, serviceName, poolName)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	err = copyConnectionPoolPropertiesFromAPIResponseToTerraform(d, pool, project, serviceName)

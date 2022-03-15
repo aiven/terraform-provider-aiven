@@ -4,15 +4,13 @@ import (
 	"time"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func aivenKafkaConnectSchema() map[string]*schema.Schema {
-	kafkaConnectSchema := service.ServiceCommonSchema()
-	kafkaConnectSchema[service.ServiceTypeKafkaConnect] = &schema.Schema{
+	kafkaConnectSchema := schemautil.ServiceCommonSchema()
+	kafkaConnectSchema[schemautil.ServiceTypeKafkaConnect] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
 		Description: "Kafka Connect server provided values",
@@ -20,7 +18,7 @@ func aivenKafkaConnectSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	kafkaConnectSchema[service.ServiceTypeKafkaConnect+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(service.ServiceTypeKafkaConnect)
+	kafkaConnectSchema[schemautil.ServiceTypeKafkaConnect+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeKafkaConnect)
 
 	return kafkaConnectSchema
 }
@@ -28,12 +26,12 @@ func aivenKafkaConnectSchema() map[string]*schema.Schema {
 func ResourceKafkaConnect() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Kafka Connect resource allows the creation and management of Aiven Kafka Connect services.",
-		CreateContext: service.ResourceServiceCreateWrapper(service.ServiceTypeKafkaConnect),
-		ReadContext:   service.ResourceServiceRead,
-		UpdateContext: service.ResourceServiceUpdate,
-		DeleteContext: service.ResourceServiceDelete,
+		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeKafkaConnect),
+		ReadContext:   schemautil.ResourceServiceRead,
+		UpdateContext: schemautil.ResourceServiceUpdate,
+		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(service.ServiceTypeKafkaConnect),
+			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeKafkaConnect),
 			customdiff.IfValueChange("disk_space",
 				schemautil.DiskSpaceShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
@@ -48,7 +46,7 @@ func ResourceKafkaConnect() *schema.Resource {
 			),
 		),
 		Importer: &schema.ResourceImporter{
-			StateContext: service.ResourceServiceState,
+			StateContext: schemautil.ResourceServiceState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),

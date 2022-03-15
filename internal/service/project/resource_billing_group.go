@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -154,7 +152,7 @@ func resourceBillingGroupRead(_ context.Context, d *schema.ResourceData, m inter
 
 	bg, err := client.BillingGroup.Get(d.Id())
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("name", bg.BillingGroupName); err != nil {

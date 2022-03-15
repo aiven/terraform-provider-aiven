@@ -4,15 +4,13 @@ import (
 	"time"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
-	kafkaMMSchema := service.ServiceCommonSchema()
-	kafkaMMSchema[service.ServiceTypeKafkaMirrormaker] = &schema.Schema{
+	kafkaMMSchema := schemautil.ServiceCommonSchema()
+	kafkaMMSchema[schemautil.ServiceTypeKafkaMirrormaker] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
 		Description: "Kafka MirrorMaker 2 server provided values",
@@ -20,20 +18,20 @@ func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	kafkaMMSchema[service.ServiceTypeKafkaMirrormaker+"_user_config"] =
-		schemautil.GenerateServiceUserConfigurationSchema(service.ServiceTypeKafkaMirrormaker)
+	kafkaMMSchema[schemautil.ServiceTypeKafkaMirrormaker+"_user_config"] =
+		schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeKafkaMirrormaker)
 
 	return kafkaMMSchema
 }
 func ResourceKafkaMirrormaker() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Kafka MirrorMaker resource allows the creation and management of Aiven Kafka MirrorMaker 2 services.",
-		CreateContext: service.ResourceServiceCreateWrapper(service.ServiceTypeKafkaMirrormaker),
-		ReadContext:   service.ResourceServiceRead,
-		UpdateContext: service.ResourceServiceUpdate,
-		DeleteContext: service.ResourceServiceDelete,
+		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeKafkaMirrormaker),
+		ReadContext:   schemautil.ResourceServiceRead,
+		UpdateContext: schemautil.ResourceServiceUpdate,
+		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(service.ServiceTypeKafkaMirrormaker),
+			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeKafkaMirrormaker),
 			customdiff.IfValueChange("disk_space",
 				schemautil.DiskSpaceShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
@@ -48,7 +46,7 @@ func ResourceKafkaMirrormaker() *schema.Resource {
 			),
 		),
 		Importer: &schema.ResourceImporter{
-			StateContext: service.ResourceServiceState,
+			StateContext: schemautil.ResourceServiceState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),

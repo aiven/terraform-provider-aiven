@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -89,7 +87,7 @@ func resourceAccountTeamProjectRead(_ context.Context, d *schema.ResourceData, m
 	accountId, teamId, projectName := schemautil.SplitResourceID3(d.Id())
 	r, err := client.AccountTeamProjects.List(accountId, teamId)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	var project aiven.AccountTeamProject

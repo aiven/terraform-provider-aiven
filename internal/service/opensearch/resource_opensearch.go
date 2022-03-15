@@ -6,8 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -16,8 +14,8 @@ import (
 )
 
 func opensearchSchema() map[string]*schema.Schema {
-	s := service.ServiceCommonSchema()
-	s[service.ServiceTypeOpensearch] = &schema.Schema{
+	s := schemautil.ServiceCommonSchema()
+	s[schemautil.ServiceTypeOpensearch] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
 		Description: "Opensearch server provided values",
@@ -32,7 +30,7 @@ func opensearchSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	s[service.ServiceTypeOpensearch+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(service.ServiceTypeOpensearch)
+	s[schemautil.ServiceTypeOpensearch+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeOpensearch)
 
 	return s
 }
@@ -40,12 +38,12 @@ func opensearchSchema() map[string]*schema.Schema {
 func ResourceOpensearch() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Opensearch resource allows the creation and management of Aiven Opensearch services.",
-		CreateContext: service.ResourceServiceCreateWrapper(service.ServiceTypeOpensearch),
-		ReadContext:   service.ResourceServiceRead,
-		UpdateContext: service.ResourceServiceUpdate,
-		DeleteContext: service.ResourceServiceDelete,
+		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeOpensearch),
+		ReadContext:   schemautil.ResourceServiceRead,
+		UpdateContext: schemautil.ResourceServiceUpdate,
+		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(service.ServiceTypeOpensearch),
+			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeOpensearch),
 			customdiff.IfValueChange("disk_space",
 				schemautil.DiskSpaceShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
@@ -88,11 +86,11 @@ func resourceOpensearchState(ctx context.Context, d *schema.ResourceData, m inte
 	// Hybrid Opensearch service an Aiven service type Elasticsearch but has
 	// an opensearch_version user configuration option that indicates that this
 	// is a hybrid opensearch common
-	if _, ok := s.UserConfig["opensearch_version"]; ok && s.Type == service.ServiceTypeElasticsearch {
-		if err := d.Set("service_type", service.ServiceTypeOpensearch); err != nil {
+	if _, ok := s.UserConfig["opensearch_version"]; ok && s.Type == schemautil.ServiceTypeElasticsearch {
+		if err := d.Set("service_type", schemautil.ServiceTypeOpensearch); err != nil {
 			return nil, err
 		}
 	}
 
-	return service.ResourceServiceState(ctx, d, m)
+	return schemautil.ResourceServiceState(ctx, d, m)
 }

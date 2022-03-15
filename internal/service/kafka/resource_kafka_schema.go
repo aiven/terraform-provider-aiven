@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -199,12 +197,12 @@ func resourceKafkaSchemaRead(_ context.Context, d *schema.ResourceData, m interf
 
 	version, err := kafkaSchemaSubjectGetLastVersion(m, project, serviceName, subjectName)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	r, err := client.KafkaSubjectSchemas.Get(project, serviceName, subjectName, version)
 	if err != nil {
-		return diag.FromErr(service.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("project", project); err != nil {

@@ -7,11 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/templates"
-	"github.com/aiven/terraform-provider-aiven/internal/service"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/templates"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -222,7 +220,7 @@ func resourceServiceIntegrationRead(_ context.Context, d *schema.ResourceData, m
 	projectName, integrationID := schemautil.SplitResourceID2(d.Id())
 	integration, err := client.ServiceIntegrations.Get(projectName, integrationID)
 	if err != nil {
-		err = service.ResourceReadHandleNotFound(err, d)
+		err = schemautil.ResourceReadHandleNotFound(err, d)
 		if err != nil {
 			return diag.Errorf("cannot get service integration: %s; id: %s", err, integrationID)
 		}
