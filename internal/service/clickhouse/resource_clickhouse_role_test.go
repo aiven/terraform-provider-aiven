@@ -5,10 +5,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/service/clickhouse"
+
+	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/service/clickhouse/chsql"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -67,18 +69,13 @@ func testAccCheckAivenClickhouseRoleResourceDestroy(s *terraform.State) error {
 		}
 
 		projectName, serviceName, roleName := schemautil.SplitResourceID3(rs.Primary.ID)
-		query, _ := chsql.ShowCreateRoleStatement(roleName)
-
-		p, err := c.ClickHouseQuery.Query(projectName, serviceName, chsql.DefaultDatabaseForRoles, query)
-		if err != nil {
-			if !schemautil.IsUnknownResource(err) {
-				return fmt.Errorf("unable to query clickhouse for roles: %w", err)
+		if exists, err := clickhouse.RoleExists(c, projectName, serviceName, roleName); err != nil {
+			if aiven.IsNotFound(err) {
+				continue
 			}
-			return nil
-		}
-
-		if len(p.Data) > 0 {
-			return fmt.Errorf("clickhouse role (%s) still exists", rs.Primary.ID)
+			return fmt.Errorf("unable to check if role '%s' still exists: %w", roleName, err)
+		} else if exists {
+			return fmt.Errorf("role '%s' still exists", roleName)
 		}
 	}
 	return nil

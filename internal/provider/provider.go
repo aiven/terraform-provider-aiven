@@ -217,6 +217,7 @@ func Provider() *schema.Provider {
 			"aiven_clickhouse_database": clickhouse.ResourceClickhouseDatabase(),
 			"aiven_clickhouse_user":     clickhouse.ResourceClickhouseUser(),
 			"aiven_clickhouse_role":     clickhouse.ResourceClickhouseRole(),
+			"aiven_clickhouse_grant":    clickhouse.ResourceClickhouseGrant(),
 		},
 	}
 
