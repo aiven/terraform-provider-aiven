@@ -17,14 +17,11 @@ import (
 )
 
 func TestAccAivenClickhouseRole(t *testing.T) {
-	t.Parallel()
+	serviceName := fmt.Sprintf("test-acc-ch-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	resourceName := "aiven_clickhouse_role.foo"
 
-	t.Run("clickhouse role creation", func(tt *testing.T) {
-		serviceName := fmt.Sprintf("test-acc-ch-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
-		projectName := os.Getenv("AIVEN_PROJECT_NAME")
-		resourceName := "aiven_clickhouse_role.foo"
-
-		manifest := fmt.Sprintf(`
+	manifest := fmt.Sprintf(`
 			resource "aiven_clickhouse" "bar" {
 			  project                 = "%s"
 			  cloud_name              = "google-europe-west1"
@@ -39,23 +36,22 @@ func TestAccAivenClickhouseRole(t *testing.T) {
 			  project      = aiven_clickhouse.bar.project
 			  role         = "writer"
 			}`,
-			projectName, serviceName)
+		projectName, serviceName)
 
-		resource.ParallelTest(tt, resource.TestCase{
-			PreCheck:          func() { acc.TestAccPreCheck(tt) },
-			ProviderFactories: acc.TestAccProviderFactories,
-			CheckDestroy:      testAccCheckAivenClickhouseRoleResourceDestroy,
-			Steps: []resource.TestStep{
-				{
-					Config: manifest,
-					Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
-						resource.TestCheckResourceAttr(resourceName, "project", projectName),
-						resource.TestCheckResourceAttr(resourceName, "role", "writer"),
-					),
-				},
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenClickhouseRoleResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: manifest,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
+					resource.TestCheckResourceAttr(resourceName, "project", projectName),
+					resource.TestCheckResourceAttr(resourceName, "role", "writer"),
+				),
 			},
-		})
+		},
 	})
 }
 

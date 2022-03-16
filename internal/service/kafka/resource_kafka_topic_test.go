@@ -68,104 +68,102 @@ func sweepKafkaTopics(region string) error {
 	return nil
 }
 
-func TestAccAivenKafkaTopic(t *testing.T) {
-	t.Parallel()
-
+func TestAccAivenKafkaTopic_basic(t *testing.T) {
 	resourceName := "aiven_kafka_topic.foo"
-
-	t.Run("kafka topic basic", func(tt *testing.T) {
-		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-		resource.ParallelTest(tt, resource.TestCase{
-			PreCheck:          func() { acc.TestAccPreCheck(tt) },
-			ProviderFactories: acc.TestAccProviderFactories,
-			CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
-			Steps: []resource.TestStep{
-				{
-					Config: testAccKafkaTopicResource(rName),
-					Check: resource.ComposeTestCheckFunc(
-						testAccCheckAivenKafkaTopicAttributes("data.aiven_kafka_topic.topic"),
-						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
-						resource.TestCheckResourceAttr(resourceName, "replication", "2"),
-						resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
-					),
-				},
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKafkaTopicResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenKafkaTopicAttributes("data.aiven_kafka_topic.topic"),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
+					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
+					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+				),
 			},
-		})
+		},
 	})
+}
 
-	t.Run("kafka topic custom timeouts", func(tt *testing.T) {
-		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-		resource.ParallelTest(tt, resource.TestCase{
-			PreCheck:          func() { acc.TestAccPreCheck(tt) },
-			ProviderFactories: acc.TestAccProviderFactories,
-			CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
-			Steps: []resource.TestStep{
-				{
-					Config: testAccKafkaTopicCustomTimeoutsResource(rName),
-					Check: resource.ComposeTestCheckFunc(
-						testAccCheckAivenKafkaTopicAttributes("data.aiven_kafka_topic.topic"),
-						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
-						resource.TestCheckResourceAttr(resourceName, "replication", "2"),
-						resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
-						resource.TestCheckResourceAttr(resourceName, "retention_hours", "100"),
-					),
-				},
+func TestAccAivenKafkaTopic_many_topics(t *testing.T) {
+	resourceName := "aiven_kafka_topic.foo"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKafka451TopicResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenKafkaTopicAttributes("data.aiven_kafka_topic.topic"),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
+					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
+				),
 			},
-		})
+		},
 	})
+}
 
-	t.Run("kafka topic termination protection", func(tt *testing.T) {
-		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-		resource.ParallelTest(tt, resource.TestCase{
-			PreCheck:          func() { acc.TestAccPreCheck(tt) },
-			ProviderFactories: acc.TestAccProviderFactories,
-			CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
-			Steps: []resource.TestStep{
-				{
-					Config:                    testAccKafkaTopicTerminationProtectionResource(rName),
-					PreventPostDestroyRefresh: true,
-					ExpectNonEmptyPlan:        true,
-					PlanOnly:                  true,
-					Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
-						resource.TestCheckResourceAttr(resourceName, "replication", "2"),
-						resource.TestCheckResourceAttr(resourceName, "termination_protection", "true"),
-						resource.TestCheckNoResourceAttr(resourceName, "retention_hours"),
-					),
-				},
+func TestAccAivenKafkaTopic_termination_protection(t *testing.T) {
+	resourceName := "aiven_kafka_topic.foo"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config:                    testAccKafkaTopicTerminationProtectionResource(rName),
+				PreventPostDestroyRefresh: true,
+				ExpectNonEmptyPlan:        true,
+				PlanOnly:                  true,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
+					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
+					resource.TestCheckResourceAttr(resourceName, "termination_protection", "true"),
+					resource.TestCheckNoResourceAttr(resourceName, "retention_hours"),
+				),
 			},
-		})
+		},
 	})
+}
 
-	t.Run("kafka topic many topics", func(tt *testing.T) {
-		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-		resource.ParallelTest(tt, resource.TestCase{
-			PreCheck:          func() { acc.TestAccPreCheck(tt) },
-			ProviderFactories: acc.TestAccProviderFactories,
-			CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
-			Steps: []resource.TestStep{
-				{
-					Config: testAccKafka451TopicResource(rName),
-					Check: resource.ComposeTestCheckFunc(
-						testAccCheckAivenKafkaTopicAttributes("data.aiven_kafka_topic.topic"),
-						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
-						resource.TestCheckResourceAttr(resourceName, "replication", "2"),
-					),
-				},
+func TestAccAivenKafkaTopic_custom_timeouts(t *testing.T) {
+	resourceName := "aiven_kafka_topic.foo"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKafkaTopicCustomTimeoutsResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenKafkaTopicAttributes("data.aiven_kafka_topic.topic"),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "topic_name", fmt.Sprintf("test-acc-topic-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
+					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
+					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+					resource.TestCheckResourceAttr(resourceName, "retention_hours", "100"),
+				),
 			},
-		})
+		},
 	})
 }
 

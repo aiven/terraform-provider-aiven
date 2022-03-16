@@ -17,31 +17,27 @@ import (
 )
 
 func TestAccAivenClickhouseUser_basic(t *testing.T) {
-	t.Parallel()
+	resourceName := "aiven_clickhouse_user.foo"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	t.Run("clickhouse user creation", func(tt *testing.T) {
-		resourceName := "aiven_clickhouse_user.foo"
-		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-
-		resource.ParallelTest(tt, resource.TestCase{
-			PreCheck:          func() { acc.TestAccPreCheck(tt) },
-			ProviderFactories: acc.TestAccProviderFactories,
-			CheckDestroy:      testAccCheckAivenClickhouseUserResourceDestroy,
-			Steps: []resource.TestStep{
-				{
-					Config: testAccClickhouseUserResource(rName),
-					Check: resource.ComposeTestCheckFunc(
-						testAccCheckAivenClickhouseUserAttributes("data.aiven_clickhouse_user.user"),
-						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-						resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
-						resource.TestCheckResourceAttrSet(resourceName, "password"),
-						resource.TestCheckResourceAttrSet(resourceName, "uuid"),
-						resource.TestCheckResourceAttrSet(resourceName, "required"),
-					),
-				},
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenClickhouseUserResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccClickhouseUserResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenClickhouseUserAttributes("data.aiven_clickhouse_user.user"),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
+					resource.TestCheckResourceAttrSet(resourceName, "password"),
+					resource.TestCheckResourceAttrSet(resourceName, "uuid"),
+					resource.TestCheckResourceAttrSet(resourceName, "required"),
+				),
 			},
-		})
+		},
 	})
 }
 

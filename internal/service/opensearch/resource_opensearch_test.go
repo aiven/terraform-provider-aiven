@@ -14,15 +14,10 @@ import (
 
 // Opensearch service tests
 func TestAccAivenService_os(t *testing.T) {
-	t.Parallel()
-
 	resourceName := "aiven_opensearch.bar-os"
 	projectName := os.Getenv("AIVEN_PROJECT_NAME")
-
-	t.Run("basic resource", func(tt *testing.T) {
-		serviceName := fmt.Sprintf("test-acc-os-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
-
-		manifest := fmt.Sprintf(`
+	serviceName := fmt.Sprintf("test-acc-os-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+	manifest := fmt.Sprintf(`
 			data "aiven_project" "foo-es" {
 			  project = "%s"
 			}
@@ -65,29 +60,28 @@ func TestAccAivenService_os(t *testing.T) {
 			
 			  depends_on = [aiven_opensearch.bar-os]
 			}`,
-			projectName, serviceName)
+		projectName, serviceName)
 
-		resource.ParallelTest(tt, resource.TestCase{
-			PreCheck:          func() { acc.TestAccPreCheck(tt) },
-			ProviderFactories: acc.TestAccProviderFactories,
-			CheckDestroy:      acc.TestAccCheckAivenServiceResourceDestroy,
-			Steps: []resource.TestStep{
-				{
-					Config: manifest,
-					Check: resource.ComposeTestCheckFunc(
-						acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_opensearch.common-os"),
-						testAccCheckAivenServiceOSAttributes("data.aiven_opensearch.common-os"),
-						resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
-						resource.TestCheckResourceAttr(resourceName, "project", projectName),
-						resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
-						resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
-						resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
-						resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
-						resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
-					),
-				},
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      acc.TestAccCheckAivenServiceResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: manifest,
+				Check: resource.ComposeTestCheckFunc(
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_opensearch.common-os"),
+					testAccCheckAivenServiceOSAttributes("data.aiven_opensearch.common-os"),
+					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
+					resource.TestCheckResourceAttr(resourceName, "project", projectName),
+					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
+					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
+					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
+					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
+				),
 			},
-		})
+		},
 	})
 }
 

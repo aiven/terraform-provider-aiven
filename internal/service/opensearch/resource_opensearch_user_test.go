@@ -16,29 +16,25 @@ import (
 )
 
 func TestAccAivenOpensearchUser_basic(t *testing.T) {
-	t.Parallel()
+	resourceName := "aiven_opensearch_user.foo"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	t.Run("opensearch user", func(tt *testing.T) {
-		resourceName := "aiven_opensearch_user.foo"
-		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-
-		resource.ParallelTest(tt, resource.TestCase{
-			PreCheck:          func() { acc.TestAccPreCheck(tt) },
-			ProviderFactories: acc.TestAccProviderFactories,
-			CheckDestroy:      testAccCheckAivenOpensearchUserResourceDestroy,
-			Steps: []resource.TestStep{
-				{
-					Config: testAccOpensearchUserResource(rName),
-					Check: resource.ComposeTestCheckFunc(
-						schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_opensearch_user.user"),
-						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-						resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
-					),
-				},
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenOpensearchUserResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccOpensearchUserResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_opensearch_user.user"),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
+				),
 			},
-		})
+		},
 	})
 }
 

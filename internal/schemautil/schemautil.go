@@ -295,8 +295,17 @@ func CopyServiceUserPropertiesFromAPIResponseToTerraform(
 	if err := d.Set("type", user.Type); err != nil {
 		return err
 	}
-	d.Set("access_cert", user.AccessCert)
-	d.Set("access_key", user.AccessKey)
+
+	if len(user.AccessCert) > 0 {
+		if err := d.Set("access_cert", user.AccessCert); err != nil {
+			return err
+		}
+	}
+	if len(user.AccessKey) > 0 {
+		if err := d.Set("access_key", user.AccessKey); err != nil {
+			return err
+		}
+	}
 
 	return nil
 }

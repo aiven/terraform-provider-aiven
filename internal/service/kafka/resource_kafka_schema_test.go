@@ -71,43 +71,39 @@ func sweepKafkaSchemas(region string) error {
 }
 
 func TestAccAivenKafkaSchema_basic(t *testing.T) {
-	t.Parallel()
+	resourceName := "aiven_kafka_schema.foo"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	t.Run("customize diff blocks incompatible updates", func(tt *testing.T) {
-		resourceName := "aiven_kafka_schema.foo"
-		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-
-		resource.ParallelTest(tt, resource.TestCase{
-			PreCheck:          func() { acc.TestAccPreCheck(tt) },
-			ProviderFactories: acc.TestAccProviderFactories,
-			CheckDestroy:      testAccCheckAivenKafkaSchemaResourceDestroy,
-			Steps: []resource.TestStep{
-				{
-					Config: testAccKafkaSchemaResource(rName),
-					Check: resource.ComposeTestCheckFunc(
-						testAccCheckAivenKafkaSchemaAttributes("data.aiven_kafka_schema.schema"),
-						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "subject_name", fmt.Sprintf("kafka-schema-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "version", "1"),
-					),
-				},
-				{
-					Config: testAccKafkaSchemaResourceGoodUpdate(rName),
-					Check: resource.ComposeTestCheckFunc(
-						testAccCheckAivenKafkaSchemaAttributes("data.aiven_kafka_schema.schema"),
-						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "subject_name", fmt.Sprintf("kafka-schema-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "version", "2"),
-					),
-				},
-				{
-					Config:      testAccKafkaSchemaResourceInvalidUpdate(rName),
-					ExpectError: regexp.MustCompile("schema is not compatible with previous version"),
-				},
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenKafkaSchemaResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKafkaSchemaResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenKafkaSchemaAttributes("data.aiven_kafka_schema.schema"),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "subject_name", fmt.Sprintf("kafka-schema-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "version", "1"),
+				),
 			},
-		})
+			{
+				Config: testAccKafkaSchemaResourceGoodUpdate(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenKafkaSchemaAttributes("data.aiven_kafka_schema.schema"),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "subject_name", fmt.Sprintf("kafka-schema-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "version", "2"),
+				),
+			},
+			{
+				Config:      testAccKafkaSchemaResourceInvalidUpdate(rName),
+				ExpectError: regexp.MustCompile("schema is not compatible with previous version"),
+			},
+		},
 	})
 }
 

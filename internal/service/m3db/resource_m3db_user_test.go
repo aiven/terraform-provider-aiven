@@ -16,29 +16,25 @@ import (
 )
 
 func TestAccAivenM3DBUser_basic(t *testing.T) {
-	t.Parallel()
+	resourceName := "aiven_m3db_user.foo"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	t.Run("m3db user", func(tt *testing.T) {
-		resourceName := "aiven_m3db_user.foo"
-		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-
-		resource.ParallelTest(tt, resource.TestCase{
-			PreCheck:          func() { acc.TestAccPreCheck(tt) },
-			ProviderFactories: acc.TestAccProviderFactories,
-			CheckDestroy:      testAccCheckAivenM3DBUserResourceDestroy,
-			Steps: []resource.TestStep{
-				{
-					Config: testAccM3DBUserResource(rName),
-					Check: resource.ComposeTestCheckFunc(
-						schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_m3db_user.user"),
-						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-						resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
-					),
-				},
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenM3DBUserResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccM3DBUserResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_m3db_user.user"),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
+				),
 			},
-		})
+		},
 	})
 }
 

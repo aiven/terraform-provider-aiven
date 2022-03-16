@@ -17,13 +17,10 @@ import (
 )
 
 func TestAccAivenClickhouseGrant(t *testing.T) {
-	t.Parallel()
+	serviceName := fmt.Sprintf("test-acc-ch-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+	projectName := os.Getenv("AIVEN_PROJECT_NAME")
 
-	t.Run("clickhouse grant creation", func(tt *testing.T) {
-		serviceName := fmt.Sprintf("test-acc-ch-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
-		projectName := os.Getenv("AIVEN_PROJECT_NAME")
-
-		manifest := fmt.Sprintf(`
+	manifest := fmt.Sprintf(`
 			resource "aiven_clickhouse" "bar" {
 			  project                 = "%s"
 			  cloud_name              = "google-europe-west1"
@@ -74,28 +71,27 @@ func TestAccAivenClickhouseGrant(t *testing.T) {
 			  }
 			}`,
 
-			projectName, serviceName)
+		projectName, serviceName)
 
-		resource.ParallelTest(tt, resource.TestCase{
-			PreCheck:          func() { acc.TestAccPreCheck(tt) },
-			ProviderFactories: acc.TestAccProviderFactories,
-			CheckDestroy:      testAccCheckAivenClickhouseGrantResourceDestroy,
-			Steps: []resource.TestStep{
-				{
-					Config: manifest,
-					Check: resource.ComposeTestCheckFunc(
-						// privilege grant checks
-						resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.privilege", "INSERT"),
-						resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.database", "test-db"),
-						resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.table", "test-table"),
-						resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.column", "test-column"),
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenClickhouseGrantResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: manifest,
+				Check: resource.ComposeTestCheckFunc(
+					// privilege grant checks
+					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.privilege", "INSERT"),
+					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.database", "test-db"),
+					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.table", "test-table"),
+					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.column", "test-column"),
 
-						// role grant checks
-						resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-user-grant", "role_grant.0.role", "foo-role"),
-					),
-				},
+					// role grant checks
+					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-user-grant", "role_grant.0.role", "foo-role"),
+				),
 			},
-		})
+		},
 	})
 }
 

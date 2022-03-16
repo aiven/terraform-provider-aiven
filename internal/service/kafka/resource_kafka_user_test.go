@@ -16,29 +16,25 @@ import (
 )
 
 func TestAccAivenKafkaUser_basic(t *testing.T) {
-	t.Parallel()
+	resourceName := "aiven_kafka_user.foo"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	t.Run("kafka user", func(tt *testing.T) {
-		resourceName := "aiven_kafka_user.foo"
-		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-
-		resource.ParallelTest(tt, resource.TestCase{
-			PreCheck:          func() { acc.TestAccPreCheck(tt) },
-			ProviderFactories: acc.TestAccProviderFactories,
-			CheckDestroy:      testAccCheckAivenKafkaUserResourceDestroy,
-			Steps: []resource.TestStep{
-				{
-					Config: testAccKafkaUserResource(rName),
-					Check: resource.ComposeTestCheckFunc(
-						schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_kafka_user.user"),
-						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-						resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
-					),
-				},
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenKafkaUserResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKafkaUserResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_kafka_user.user"),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
+				),
 			},
-		})
+		},
 	})
 }
 

@@ -17,97 +17,94 @@ import (
 )
 
 func TestAccAivenServiceUser_basic(t *testing.T) {
-	t.Parallel()
+	resourceName := "aiven_service_user.foo"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-	t.Run("pg with password", func(tt *testing.T) {
-		resourceName := "aiven_service_user.foo"
-		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-
-		resource.ParallelTest(tt, resource.TestCase{
-			PreCheck:          func() { acc.TestAccPreCheck(tt) },
-			ProviderFactories: acc.TestAccProviderFactories,
-			CheckDestroy:      testAccCheckAivenServiceUserResourceDestroy,
-			Steps: []resource.TestStep{
-				{
-					Config: testAccServiceUserNewPasswordResource(rName),
-					Check: resource.ComposeTestCheckFunc(
-						testAccCheckAivenServiceUserAttributes("data.aiven_service_user.user"),
-						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-						resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
-					),
-				},
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenServiceUserResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccServiceUserNewPasswordResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenServiceUserAttributes("data.aiven_service_user.user"),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
+				),
 			},
-		})
+		},
 	})
+}
 
-	t.Run("redis acls", func(tt *testing.T) {
-		resourceName := "aiven_service_user.foo"
-		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+// pg no password, password is used in template interpolation
+func TestAccAivenServiceUser_pg_no_password(t *testing.T) {
+	resourceName := "aiven_service_user.foo"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-		resource.ParallelTest(tt, resource.TestCase{
-			PreCheck:          func() { acc.TestAccPreCheck(tt) },
-			ProviderFactories: acc.TestAccProviderFactories,
-			CheckDestroy:      testAccCheckAivenServiceUserResourceDestroy,
-			Steps: []resource.TestStep{
-				{
-					Config: testAccServiceUserRedisACLResource(rName),
-					Check: resource.ComposeTestCheckFunc(
-						testAccCheckAivenServiceUserAttributes("data.aiven_service_user.user"),
-						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-						resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
-					),
-				},
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenServiceUserResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccServiceUserNoPasswordResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenServiceUserAttributes("data.aiven_service_user.user"),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
+				),
 			},
-		})
+		},
 	})
+}
 
-	t.Run("pg replication", func(tt *testing.T) {
-		resourceName := "aiven_service_user.foo"
-		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+func TestAccAivenServiceUser_pg_replication(t *testing.T) {
+	resourceName := "aiven_service_user.foo"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-		resource.ParallelTest(tt, resource.TestCase{
-			PreCheck:          func() { acc.TestAccPreCheck(tt) },
-			ProviderFactories: acc.TestAccProviderFactories,
-			CheckDestroy:      testAccCheckAivenServiceUserResourceDestroy,
-			Steps: []resource.TestStep{
-				{
-					Config: testAccServiceUserPgReplicationResource(rName),
-					Check: resource.ComposeTestCheckFunc(
-						testAccCheckAivenServiceUserAttributes("data.aiven_service_user.user"),
-						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-						resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
-						resource.TestCheckResourceAttr(resourceName, "pg_allow_replication", "true"),
-					),
-				},
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenServiceUserResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccServiceUserPgReplicationResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenServiceUserAttributes("data.aiven_service_user.user"),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
+					resource.TestCheckResourceAttr(resourceName, "pg_allow_replication", "true"),
+				),
 			},
-		})
+		},
 	})
+}
 
-	t.Run("pg no password, password is used in template interpolation", func(tt *testing.T) {
-		resourceName := "aiven_service_user.foo"
-		rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+func TestAccAivenServiceUser_redis_acls(t *testing.T) {
+	resourceName := "aiven_service_user.foo"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
-		resource.ParallelTest(tt, resource.TestCase{
-			PreCheck:          func() { acc.TestAccPreCheck(tt) },
-			ProviderFactories: acc.TestAccProviderFactories,
-			CheckDestroy:      testAccCheckAivenServiceUserResourceDestroy,
-			Steps: []resource.TestStep{
-				{
-					Config: testAccServiceUserNoPasswordResource(rName),
-					Check: resource.ComposeTestCheckFunc(
-						testAccCheckAivenServiceUserAttributes("data.aiven_service_user.user"),
-						resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-						resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-						resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
-					),
-				},
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenServiceUserResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccServiceUserRedisACLResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenServiceUserAttributes("data.aiven_service_user.user"),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
+				),
 			},
-		})
+		},
 	})
 }
 
