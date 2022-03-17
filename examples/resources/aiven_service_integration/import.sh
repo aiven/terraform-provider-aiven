@@ -1,0 +1,1 @@
+terraform import aiven_service_integration.myintegration project/integration_id
