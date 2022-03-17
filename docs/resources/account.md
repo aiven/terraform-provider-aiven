@@ -37,4 +37,10 @@ resource "aiven_account" "account1" {
 - **tenant_id** (String) Tenant id
 - **update_time** (String) Time of last update
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_account.account1 account_id
+```

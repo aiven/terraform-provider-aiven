@@ -132,4 +132,10 @@ Read-Only:
 - **ssl** (Boolean)
 - **usage** (String)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_flink.flink project/service_name
+```

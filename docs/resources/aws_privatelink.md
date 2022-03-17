@@ -49,4 +49,10 @@ Optional:
 - **create** (String)
 - **update** (String)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_aws_privatelink.foo project/service_name
+```

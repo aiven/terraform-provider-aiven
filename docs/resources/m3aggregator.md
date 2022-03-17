@@ -116,4 +116,10 @@ Read-Only:
 
 Read-Only:
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_m3aggregator.m3a project/service_name
+```

@@ -45,4 +45,10 @@ resource "aiven_connection_pool" "mytestpool" {
 
 - **connection_uri** (String, Sensitive) The URI for connecting to the pool
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_connection_pool.mytestpool project/service_name/pool_name
+```

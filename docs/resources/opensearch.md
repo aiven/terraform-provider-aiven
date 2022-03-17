@@ -231,4 +231,10 @@ Read-Only:
 
 - **opensearch_dashboards_uri** (String)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_opensearch.os1 project/service_name
+```
