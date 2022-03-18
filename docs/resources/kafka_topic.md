@@ -110,4 +110,10 @@ Optional:
 - **delete** (String)
 - **read** (String)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_kafka_topic.mytesttopic project/service_name/topic_name
+```

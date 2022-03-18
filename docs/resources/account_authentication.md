@@ -49,4 +49,10 @@ resource "aiven_account_authentication" "foo" {
 - **saml_metadata_url** (String) SAML Metadata URL
 - **update_time** (String) Time of last update
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_account_authentication.foo account_id/authentication_id
+```

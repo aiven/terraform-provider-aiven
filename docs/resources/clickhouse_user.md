@@ -39,4 +39,10 @@ resource "aiven_clickhouse_user" "ch-user" {
 - **required** (Boolean) Indicates if a clickhouse user is required
 - **uuid** (String) UUID of the clickhouse user.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_clickhouse_user.ch-user project/service_name/id
+```

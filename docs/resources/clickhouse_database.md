@@ -42,4 +42,10 @@ Optional:
 
 - **delete** (String)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_clickhouse_database.clickhouse_db project/service_name/name
+```

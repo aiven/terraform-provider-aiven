@@ -13,27 +13,30 @@ The Opensearch resource allows the creation and management of Aiven Opensearch s
 ## Example Usage
 
 ```terraform
-resource "aiven_opensearch" "os1" {
-  project                 = data.aiven_project.pr1.project
+data "aiven_project" "foo" {
+		  project = "example_project"
+}
+		
+resource "aiven_opensearch" "bar" {
+  project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
   plan                    = "startup-4"
-  service_name            = "my-os1"
+  service_name            = "example_service_name"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
+}
 
-  opensearch_user_config {
-    opensearch_version = 1
+resource "aiven_service_user" "foo" {
+  service_name = aiven_opensearch.bar.service_name
+  project      = data.aiven_project.foo.project
+  username     = "user-example"
+}
 
-    opensearch_dashboards {
-      enabled                    = true
-      opensearch_request_timeout = 30000
-    }
-
-    public_access {
-      opensearch            = true
-      opensearch_dashboards = true
-    }
-  }
+resource "aiven_opensearch_acl_config" "foo" {
+  project      = data.aiven_project.foo.project
+  service_name = aiven_opensearch.bar.service_name
+  enabled      = true
+  extended_acl = false
 }
 ```
 
@@ -51,4 +54,10 @@ resource "aiven_opensearch" "os1" {
 - **extended_acl** (Boolean) Index rules can be applied in a limited fashion to the _mget, _msearch and _bulk APIs (and only those) by enabling the ExtendedAcl option for the service. When it is enabled, users can use these APIs as long as all operations only target indexes they have been granted access to. The default value is `true`.
 - **id** (String) The ID of this resource.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_opensearch_acl_config.foo project/service_name
+```

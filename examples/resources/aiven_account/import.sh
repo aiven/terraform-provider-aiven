@@ -1,0 +1,1 @@
+terraform import aiven_account.account1 account_id

@@ -1,0 +1,1 @@
+terraform import aiven_kafka_mirrormaker.mm1 project/service_name

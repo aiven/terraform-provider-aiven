@@ -1,0 +1,1 @@
+terraform import aiven_clickhouse_database.clickhouse_db project/service_name/name

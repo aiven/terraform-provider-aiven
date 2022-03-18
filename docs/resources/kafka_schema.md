@@ -56,4 +56,10 @@ resource "aiven_kafka_schema" "kafka-schema1" {
 
 - **version** (Number) Kafka Schema configuration version.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_kafka_schema.kafka-schema1 project/service_name/subject_name
+```
