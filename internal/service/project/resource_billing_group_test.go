@@ -33,14 +33,6 @@ func TestAccAivenBillingGroup_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("test-acc-bg-%s", rName)),
 				),
 			},
-			{
-				Config:             testAccOverwriteBillingGroupResource(rName),
-				ExpectNonEmptyPlan: true,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("test-acc-bg-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "billing_currency", "USD"),
-				),
-			},
 		},
 	})
 }
@@ -89,24 +81,6 @@ func testAccBillingGroupResource(name string) string {
 		name, name)
 }
 
-func testAccOverwriteBillingGroupResource(name string) string {
-	return fmt.Sprintf(`
-		resource "aiven_billing_group" "foo" {
-		  name             = "test-acc-bg-%s"
-		  billing_currency = "USD"
-		  vat_id           = "abc"
-		}
-		
-		resource "aiven_project" "pr1" {
-		  project       = "test-acc-pr-%s"
-		  billing_group = aiven_billing_group.foo.id
-		  vat_id        = "123"
-		
-		  depends_on = [aiven_billing_group.foo]
-		}`,
-		name, name)
-}
-
 func testAccCopyFromProjectBillingGroupResource(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_billing_group" "foo" {
@@ -118,8 +92,6 @@ func testAccCopyFromProjectBillingGroupResource(name string) string {
 		resource "aiven_project" "pr01" {
 		  project       = "test-acc-pr01-%s"
 		  billing_group = aiven_billing_group.foo.id
-		  vat_id        = "123"
-		
 		  depends_on = [aiven_billing_group.foo]
 		}
 		
