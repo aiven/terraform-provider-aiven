@@ -12,7 +12,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 var aivenProjectSchema = map[string]*schema.Schema{
@@ -63,6 +62,19 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 		Description:      "Defines the default cloud provider and region where services are hosted. This can be changed freely after the project is created. This will not affect existing services.",
 	},
+	"billing_group": {
+		Type:             schema.TypeString,
+		Optional:         true,
+		Description:      schemautil.Complex("The id of the billing group that is linked to this project.").Referenced().Build(),
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+
+	// computed fields
+	"payment_method": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "The method of invoicing used for payments for this project, e.g. `card`.",
+	},
 	"available_credits": {
 		Type:        schema.TypeString,
 		Computed:    true,
@@ -73,70 +85,6 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Computed:    true,
 		Description: "The current accumulated bill for this project in the current billing period.",
-	},
-	"payment_method": {
-		Type:        schema.TypeString,
-		Computed:    true,
-		Deprecated:  "Please use aiven_billing_group resource to set this value.",
-		Description: "The method of invoicing used for payments for this project, e.g. `card`.",
-	},
-	"billing_group": {
-		Type:             schema.TypeString,
-		Optional:         true,
-		Description:      schemautil.Complex("The id of the billing group that is linked to this project.").Referenced().Build(),
-		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-	},
-	// deprecated fields
-	"vat_id": {
-		Type:             schema.TypeString,
-		Optional:         true,
-		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		Deprecated:       "Please use aiven_billing_group resource to set this value.",
-		Description:      schemautil.Complex("EU VAT Identification Number.").Deprecate("Please use aiven_billing_group resource to set this value.").Build(),
-	},
-	"billing_currency": {
-		Type:             schema.TypeString,
-		Optional:         true,
-		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		Deprecated:       "Please use aiven_billing_group resource to set this value.",
-		Description:      schemautil.Complex("Billing currency.").Deprecate("Please use aiven_billing_group resource to set this value.").Build(),
-	},
-	"country_code": {
-		Type:             schema.TypeString,
-		Optional:         true,
-		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
-		Deprecated:       "Please use aiven_billing_group resource to set this value.",
-		Description:      schemautil.Complex("Billing country code of the project.").Deprecate("Please use aiven_billing_group resource to set this value.").Build(),
-	},
-	"billing_address": {
-		Type:             schema.TypeString,
-		Optional:         true,
-		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
-		Deprecated:       "Please use aiven_billing_group resource to set this value.",
-		Description:      schemautil.Complex("Billing name and address of the project.").Deprecate("Please use aiven_billing_group resource to set this value.").Build(),
-	},
-	"billing_emails": {
-		Type:             schema.TypeSet,
-		Elem:             &schema.Schema{Type: schema.TypeString},
-		Optional:         true,
-		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		Deprecated:       "Please use aiven_billing_group resource to set this value.",
-		Description:      schemautil.Complex("Billing contact emails of the project.").Deprecate("Please use aiven_billing_group resource to set this value.").Build(),
-	},
-	"billing_extra_text": {
-		Type:             schema.TypeString,
-		ValidateFunc:     validation.StringLenBetween(0, 1000),
-		Optional:         true,
-		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
-		Deprecated:       "Please use aiven_billing_group resource to set this value.",
-		Description:      schemautil.Complex("Extra text to be included in all project invoices, e.g. purchase order or cost center number.").Deprecate("Please use aiven_billing_group resource to set this value.").Build(),
-	},
-	"card_id": {
-		Type:             schema.TypeString,
-		Optional:         true,
-		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		Deprecated:       "Please use aiven_billing_group resource to set this value.",
-		Description:      schemautil.Complex("Either the full card UUID or the last 4 digits of the card. As the full UUID is not shown in the UI it is typically easier to use the last 4 digits to identify the card. This can be omitted if `copy_from_project` is used to copy billing info from another project.").Deprecate("Please use aiven_billing_group resource to set this value.").Build(),
 	},
 }
 
@@ -157,72 +105,41 @@ func ResourceProject() *schema.Resource {
 
 func resourceProjectCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
-	cardID, err := getLongCardID(client, d.Get("card_id").(string))
-	if err != nil {
-		return diag.Errorf("Error getting long card id: %s", err)
-	}
-
-	var billingAddress, billingExtraText, countryCode, vatID *string
-	billingCurrency := d.Get("billing_currency").(string)
-	var diags diag.Diagnostics
-	if _, ok := d.GetOk("billing_group"); ok {
-		billingAddress = schemautil.OptionalStringPointer(d, "billing_address")
-		billingExtraText = schemautil.OptionalStringPointer(d, "billing_extra_text")
-		countryCode = schemautil.OptionalStringPointer(d, "country_code")
-		vatID = schemautil.OptionalStringPointer(d, "vat_id")
-
-		if billingAddress != nil || billingExtraText != nil || countryCode != nil || vatID != nil || billingCurrency != "" {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Warning,
-				Summary: "Billing group is already associated to this project, setting one these fields " +
-					"(billing_group, billing_extra_text, country_code, billing_currency and vat_id) will " +
-					"result in overwriting of the billing group properties!",
-			})
-		}
-	} else {
-		billingAddress = schemautil.OptionalStringPointerForUndefined(d, "billing_address")
-		billingExtraText = schemautil.OptionalStringPointerForUndefined(d, "billing_extra_text")
-		countryCode = schemautil.OptionalStringPointerForUndefined(d, "country_code")
-		vatID = schemautil.OptionalStringPointerForUndefined(d, "vat_id")
-	}
 
 	projectName := d.Get("project").(string)
-	_, err = client.Projects.Create(
+	_, err := client.Projects.Create(
 		aiven.CreateProjectRequest{
-			BillingAddress:               billingAddress,
-			BillingEmails:                contactEmailListForAPI(d, "billing_emails", true),
-			BillingExtraText:             billingExtraText,
-			CardID:                       cardID,
 			Cloud:                        schemautil.OptionalStringPointer(d, "default_cloud"),
 			CopyFromProject:              d.Get("copy_from_project").(string),
-			CountryCode:                  countryCode,
 			Project:                      projectName,
 			TechnicalEmails:              contactEmailListForAPI(d, "technical_emails", true),
 			AccountId:                    schemautil.OptionalStringPointer(d, "account_id"),
-			BillingCurrency:              billingCurrency,
-			VatID:                        vatID,
 			UseSourceProjectBillingGroup: d.Get("use_source_project_billing_group").(bool),
-			BillingGroupId:               d.Get("billing_group").(string),
 		},
 	)
 	if err != nil {
-		return append(diags, diag.FromErr(err)...)
+		diag.FromErr(err)
 	}
 
-	if _, ok := d.GetOk("billing_group"); !ok {
+	if billingGroupID, ok := d.GetOk("billing_group"); ok {
+		dia := resourceProjectAssignToBillingGroup(projectName, billingGroupID.(string), client, d)
+		if dia.HasError() {
+			diag.FromErr(err)
+		}
+	} else {
 		// if billing_group is not set but copy_from_project is not empty,
 		// copy billing group from source project
 		if sourceProject, ok := d.GetOk("copy_from_project"); ok {
 			dia := resourceProjectCopyBillingGroupFromProject(client, sourceProject.(string), d)
 			if dia.HasError() {
-				return append(diags, dia...)
+				diag.FromErr(err)
 			}
 		}
 	}
 
 	d.SetId(projectName)
 
-	return append(diags, resourceProjectGetCACert(projectName, client, d)...)
+	return resourceProjectGetCACert(projectName, client, d)
 }
 
 func resourceProjectCopyBillingGroupFromProject(
@@ -291,104 +208,31 @@ func resourceProjectRead(_ context.Context, d *schema.ResourceData, m interface{
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
-	var diags diag.Diagnostics
-
-	currentCardID := d.Get("card_id").(string)
-	currentLongCardID, err := getLongCardID(client, currentCardID)
-	if err != nil { // do not error when `card_id` is broken
-		currentCardID = ""
-		diags = append(diags,
-			diag.Diagnostic{
-				Severity: diag.Warning,
-				Summary:  fmt.Sprintf("Error getting long card id: %s", err),
-			})
-	}
-
-	if currentCardID != "" {
-		// for non empty card_id long card id should exist
-		if currentLongCardID == nil {
-			return diag.Errorf("For card_id %s long card id is not found.", currentCardID)
-		}
-
-		// long card ids should be equal
-		if *currentLongCardID != project.Card.CardID {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Warning,
-				Summary: fmt.Sprintf("Long card id has changed : current `%s` - new `%s`",
-					*currentLongCardID, project.Card.CardID),
-			})
-
-			if err := d.Set("card_id", project.Card.CardID); err != nil {
-				diags = append(diags, diag.Diagnostic{
-					Severity: diag.Error,
-					Summary:  fmt.Sprintf("Unable to set card_id: %s", err),
-				})
-				return diags
-			}
-		}
-	} else {
-		if err := d.Set("card_id", project.Card.CardID); err != nil {
-			return diag.Errorf("Unable to set card_id: %s", err)
-		}
-	}
-
-	return append(diags, setProjectTerraformProperties(d, client, project)...)
+	return setProjectTerraformProperties(d, client, project)
 }
 
 func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	cardID, err := getLongCardID(client, d.Get("card_id").(string))
-	if err != nil {
-		return diag.Errorf("Error getting long card id: %s", err)
-	}
-
 	var project *aiven.Project
 	projectName := d.Get("project").(string)
-	if billingGroupID, ok := d.GetOk("billing_group"); ok {
-		project, err = client.Projects.Update(
-			d.Id(),
-			aiven.UpdateProjectRequest{
-				Name:             projectName,
-				BillingAddress:   schemautil.OptionalStringPointerForUndefined(d, "billing_address"),
-				BillingEmails:    contactEmailListForAPI(d, "billing_emails", false),
-				BillingExtraText: schemautil.OptionalStringPointerForUndefined(d, "billing_extra_text"),
-				CardID:           cardID,
-				Cloud:            schemautil.OptionalStringPointer(d, "default_cloud"),
-				CountryCode:      schemautil.OptionalStringPointerForUndefined(d, "country_code"),
-				TechnicalEmails:  contactEmailListForAPI(d, "technical_emails", false),
-				AccountId:        d.Get("account_id").(string),
-				BillingCurrency:  d.Get("billing_currency").(string),
-				VatID:            schemautil.OptionalStringPointerForUndefined(d, "vat_id"),
-			},
-		)
-		if err != nil {
-			return diag.FromErr(err)
-		}
+	project, err := client.Projects.Update(
+		d.Id(),
+		aiven.UpdateProjectRequest{
+			Name:            projectName,
+			Cloud:           schemautil.OptionalStringPointer(d, "default_cloud"),
+			TechnicalEmails: contactEmailListForAPI(d, "technical_emails", false),
+			AccountId:       d.Get("account_id").(string),
+		},
+	)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
+	if billingGroupID, ok := d.GetOk("billing_group"); ok {
 		dia := resourceProjectAssignToBillingGroup(d.Get("project").(string), billingGroupID.(string), client, d)
 		if dia.HasError() {
 			return dia
-		}
-	} else {
-		project, err = client.Projects.Update(
-			d.Id(),
-			aiven.UpdateProjectRequest{
-				Name:             projectName,
-				BillingAddress:   schemautil.OptionalStringPointer(d, "billing_address"),
-				BillingEmails:    contactEmailListForAPI(d, "billing_emails", false),
-				BillingExtraText: schemautil.OptionalStringPointer(d, "billing_extra_text"),
-				CardID:           cardID,
-				Cloud:            schemautil.OptionalStringPointer(d, "default_cloud"),
-				CountryCode:      schemautil.OptionalStringPointer(d, "country_code"),
-				TechnicalEmails:  contactEmailListForAPI(d, "technical_emails", false),
-				AccountId:        d.Get("account_id").(string),
-				BillingCurrency:  d.Get("billing_currency").(string),
-				VatID:            schemautil.OptionalStringPointer(d, "vat_id"),
-			},
-		)
-		if err != nil {
-			return diag.FromErr(err)
 		}
 	}
 
@@ -427,10 +271,6 @@ func resourceProjectState(_ context.Context, d *schema.ResourceData, m interface
 
 	project, err := client.Projects.Get(d.Id())
 	if err != nil {
-		return nil, err
-	}
-
-	if err := d.Set("card_id", project.Card.CardID); err != nil {
 		return nil, err
 	}
 
@@ -508,17 +348,6 @@ func contactEmailListForTerraform(d *schema.ResourceData, field string, contactE
 }
 
 func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client, project *aiven.Project) diag.Diagnostics {
-	if err := d.Set("billing_address", project.BillingAddress); err != nil {
-		return diag.FromErr(err)
-	}
-	if _, ok := d.GetOk("billing_emails"); ok {
-		if err := contactEmailListForTerraform(d, "billing_emails", project.BillingEmails); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-	if err := setOnlyIfFieldIsNotEmpty(d, "country_code", project.CountryCode); err != nil {
-		return diag.FromErr(err)
-	}
 	if err := d.Set("project", project.Name); err != nil {
 		return diag.FromErr(err)
 	}
@@ -528,13 +357,10 @@ func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client,
 	if err := contactEmailListForTerraform(d, "technical_emails", project.TechnicalEmails); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := setOnlyIfFieldIsNotEmpty(d, "billing_extra_text", project.BillingExtraText); err != nil {
-		return diag.FromErr(err)
+	if d := resourceProjectGetCACert(project.Name, client, d); d != nil {
+		return d
 	}
 	if err := d.Set("default_cloud", project.DefaultCloud); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := setOnlyIfFieldIsNotEmpty(d, "billing_currency", project.BillingCurrency); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("available_credits", project.AvailableCredits); err != nil {
@@ -546,25 +372,8 @@ func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client,
 	if err := d.Set("payment_method", project.PaymentMethod); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := setOnlyIfFieldIsNotEmpty(d, "vat_id", project.VatID); err != nil {
-		return diag.FromErr(err)
-	}
 	if err := d.Set("billing_group", project.BillingGroupId); err != nil {
 		return diag.FromErr(err)
-	}
-
-	if d := resourceProjectGetCACert(project.Name, client, d); d != nil {
-		return d
-	}
-
-	return nil
-}
-
-func setOnlyIfFieldIsNotEmpty(d *schema.ResourceData, k string, v interface{}) error {
-	if _, ok := d.GetOk("billing_emails"); ok {
-		if err := d.Set(k, v); err != nil {
-			return err
-		}
 	}
 
 	return nil

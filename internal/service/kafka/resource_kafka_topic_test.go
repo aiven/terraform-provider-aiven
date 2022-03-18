@@ -160,7 +160,6 @@ func TestAccAivenKafkaTopic_custom_timeouts(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
 					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
-					resource.TestCheckResourceAttr(resourceName, "retention_hours", "100"),
 				),
 			},
 		},
@@ -202,9 +201,6 @@ func testAccKafkaTopicResource(name string) string {
 		  topic_name               = "test-acc-topic-%s"
 		  partitions               = 3
 		  replication              = 2
-		  retention_hours          = 1
-		  retention_bytes          = -1
-		  minimum_in_sync_replicas = 2
 		
 		  config {
 		    flush_ms                       = 10
@@ -251,7 +247,6 @@ func testAccKafkaTopicCustomTimeoutsResource(name string) string {
 		  topic_name      = "test-acc-topic-%s"
 		  partitions      = 3
 		  replication     = 2
-		  retention_hours = 100
 		
 		  timeouts {
 		    create = "15m"
