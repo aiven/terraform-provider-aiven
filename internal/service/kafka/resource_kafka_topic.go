@@ -37,35 +37,6 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 		Required:    true,
 		Description: "The replication factor for the topic.",
 	},
-	"retention_bytes": {
-		Type:             schema.TypeInt,
-		Optional:         true,
-		Deprecated:       "use config.retention_bytes instead",
-		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		Description:      schemautil.Complex("Retention bytes.").Deprecate("use config.retention_bytes instead").Build(),
-	},
-	"retention_hours": {
-		Type:             schema.TypeInt,
-		Optional:         true,
-		ValidateFunc:     validation.IntAtLeast(-1),
-		Deprecated:       "use config.retention_ms instead",
-		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		Description:      schemautil.Complex("Retention period (hours).").Deprecate("use config.retention_ms instead").Build(),
-	},
-	"minimum_in_sync_replicas": {
-		Type:             schema.TypeInt,
-		Optional:         true,
-		Deprecated:       "use config.min_insync_replicas instead",
-		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		Description:      schemautil.Complex("Minimum required nodes in-sync replicas (ISR) to produce to a partition.").Deprecate("use config.min_insync_replicas instead").Build(),
-	},
-	"cleanup_policy": {
-		Type:             schema.TypeString,
-		Optional:         true,
-		Deprecated:       "use config.cleanup_policy instead",
-		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		Description:      schemautil.Complex("Topic cleanup policy.").Deprecate("use config.cleanup_policy instead").PossibleValues("delete", "compact").Build(),
-	},
 	"termination_protection": {
 		Type:        schema.TypeBool,
 		Optional:    true,
@@ -279,15 +250,11 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 	replication := d.Get("replication").(int)
 
 	createRequest := aiven.CreateKafkaTopicRequest{
-		CleanupPolicy:         schemautil.OptionalStringPointer(d, "cleanup_policy"),
-		MinimumInSyncReplicas: schemautil.OptionalIntPointer(d, "minimum_in_sync_replicas"),
-		Partitions:            &partitions,
-		Replication:           &replication,
-		RetentionBytes:        schemautil.OptionalIntPointer(d, "retention_bytes"),
-		RetentionHours:        schemautil.OptionalIntPointer(d, "retention_hours"),
-		TopicName:             topicName,
-		Config:                getKafkaTopicConfig(d),
-		Tags:                  getTags(d),
+		Partitions:  &partitions,
+		Replication: &replication,
+		TopicName:   topicName,
+		Config:      getKafkaTopicConfig(d),
+		Tags:        getTags(d),
 	}
 
 	w := &KafkaTopicCreateWaiter{
@@ -387,21 +354,6 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 	if err := d.Set("replication", topic.Replication); err != nil {
 		return diag.FromErr(err)
 	}
-	if _, ok := d.GetOk("cleanup_policy"); ok {
-		if err := d.Set("cleanup_policy", topic.Config.CleanupPolicy.Value); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-	if _, ok := d.GetOk("minimum_in_sync_replicas"); ok {
-		if err := d.Set("minimum_in_sync_replicas", topic.Config.MinInsyncReplicas.Value); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-	if _, ok := d.GetOk("retention_bytes"); ok {
-		if err := d.Set("retention_bytes", topic.Config.RetentionBytes.Value); err != nil {
-			return diag.FromErr(err)
-		}
-	}
 	if err := d.Set("config", flattenKafkaTopicConfig(topic)); err != nil {
 		return diag.FromErr(err)
 	}
@@ -472,13 +424,10 @@ func resourceKafkaTopicUpdate(_ context.Context, d *schema.ResourceData, m inter
 		serviceName,
 		topicName,
 		aiven.UpdateKafkaTopicRequest{
-			MinimumInSyncReplicas: schemautil.OptionalIntPointer(d, "minimum_in_sync_replicas"),
-			Partitions:            &partitions,
-			Replication:           schemautil.OptionalIntPointer(d, "replication"),
-			RetentionBytes:        schemautil.OptionalIntPointer(d, "retention_bytes"),
-			RetentionHours:        schemautil.OptionalIntPointer(d, "retention_hours"),
-			Config:                getKafkaTopicConfig(d),
-			Tags:                  getTags(d),
+			Partitions:  &partitions,
+			Replication: schemautil.OptionalIntPointer(d, "replication"),
+			Config:      getKafkaTopicConfig(d),
+			Tags:        getTags(d),
 		},
 	)
 	if err != nil {
