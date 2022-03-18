@@ -1,8 +1,10 @@
 package flink_test
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
@@ -260,6 +262,37 @@ func TestAccAiven_flink_kafka_to_pg(t *testing.T) {
 					resource.TestCheckResourceAttrSet("aiven_flink_job.testing", "table_ids.0"),
 					resource.TestCheckResourceAttrSet("aiven_flink_job.testing", "table_ids.1"),
 				),
+			},
+			{
+				Config:       manifest,
+				ImportState:  true,
+				ResourceName: "aiven_flink_table.source",
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					rs, ok := s.RootModule().Resources["aiven_flink_table.source"]
+					if !ok {
+						return "", fmt.Errorf("expected resource 'aiven_flink_table.source' to be present in the state")
+					}
+
+					return rs.Primary.ID, nil
+				},
+				ImportStateCheck: func(is []*terraform.InstanceState) error {
+					if len(is) != 1 {
+						return fmt.Errorf("expected only one instance to be imported, state: %#v", is)
+					}
+
+					tableId, ok := is[0].Attributes["table_id"]
+					if !ok {
+						return errors.New("expected the imported flink table to have table_id to be set")
+					}
+
+					expectedId := fmt.Sprintf("%s/%s/%s", projectName, flinkServiceName, tableId)
+
+					if !strings.EqualFold(is[0].ID, expectedId) {
+						return fmt.Errorf("expect the ID used in import statement to match '%s', but got: %s", expectedId, is[0].ID)
+					}
+
+					return nil
+				},
 			},
 		},
 	})
