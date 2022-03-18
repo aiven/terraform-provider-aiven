@@ -61,4 +61,10 @@ resource "aiven_flink_table" "table" {
 
 - **table_id** (String) The Table ID of the flink table in the flink service.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_flink_table.table project/service_name/table_id
+```

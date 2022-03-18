@@ -2,9 +2,10 @@ package clickhouse_test
 
 import (
 	"fmt"
-	"github.com/aiven/terraform-provider-aiven/internal/service/clickhouse"
 	"os"
 	"testing"
+
+	"github.com/aiven/terraform-provider-aiven/internal/service/clickhouse"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 
