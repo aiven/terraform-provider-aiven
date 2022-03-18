@@ -53,4 +53,10 @@ resource "aiven_mirrormaker_replication_flow" "f1" {
 - **topics** (List of String) List of topics and/or regular expressions to replicate
 - **topics_blacklist** (List of String) List of topics and/or regular expressions to not replicate.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_mirrormaker_replication_flow.f1 project/service_name/source_cluster/target_cluster
+```

@@ -1,0 +1,1 @@
+terraform import aiven_account_team_project.account_team_project1 account_id/team_id/project_name

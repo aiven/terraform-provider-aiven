@@ -53,4 +53,10 @@ Optional:
 
 - **create** (String)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_transit_gateway_vpc_attachment.attachment project/vpc_id/peer_cloud_account/peer_vpc/peer_region
+```

@@ -1,0 +1,1 @@
+terraform import aiven_azure_privatelink_connection_approval.approval project/service_name

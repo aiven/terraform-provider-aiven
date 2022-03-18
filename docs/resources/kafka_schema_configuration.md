@@ -33,4 +33,10 @@ resource "aiven_kafka_schema_configuration" "config" {
 - **compatibility_level** (String) Kafka Schemas compatibility level. The possible values are `BACKWARD`, `BACKWARD_TRANSITIVE`, `FORWARD`, `FORWARD_TRANSITIVE`, `FULL`, `FULL_TRANSITIVE` and `NONE`.
 - **id** (String) The ID of this resource.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_kafka_schema_configuration.config project/service_name
+```

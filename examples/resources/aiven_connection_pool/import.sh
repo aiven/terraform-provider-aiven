@@ -1,0 +1,1 @@
+terraform import aiven_connection_pool.mytestpool project/service_name/pool_name

@@ -52,4 +52,10 @@ resource "aiven_project" "myproject" {
 - **estimated_balance** (String) The current accumulated bill for this project in the current billing period.
 - **payment_method** (String, Deprecated) The method of invoicing used for payments for this project, e.g. `card`.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_project.myproject project
+```

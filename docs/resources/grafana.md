@@ -283,4 +283,10 @@ Read-Only:
 
 Read-Only:
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_grafana.gr1 project/service_name
+```

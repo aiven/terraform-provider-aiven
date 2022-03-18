@@ -46,4 +46,10 @@ resource "aiven_service_user" "myserviceuser" {
 - **access_key** (String, Sensitive) Access certificate key for the user if applicable for the service in question
 - **type** (String) Type of the user account. Tells wether the user is the primary account or a regular account.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_service_user.myserviceuser project/service_name/username
+```

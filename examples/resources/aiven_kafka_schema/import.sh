@@ -1,0 +1,1 @@
+terraform import aiven_kafka_schema.kafka-schema1 project/service_name/subject_name
