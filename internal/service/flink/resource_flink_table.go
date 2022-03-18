@@ -2,6 +2,7 @@ package flink
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -111,7 +112,10 @@ func ResourceFlinkTable() *schema.Resource {
 		CreateContext: resourceFlinkTableCreate,
 		ReadContext:   resourceFlinkTableRead,
 		DeleteContext: resourceFlinkTableDelete,
-		Schema:        aivenFlinkTableSchema,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceFlinkTableState,
+		},
+		Schema: aivenFlinkTableSchema,
 	}
 }
 
@@ -234,4 +238,13 @@ func getFlinkTableKafkaKeyValueFormats() []string {
 		formatJson                  = "json"
 	)
 	return []string{formatAvro, formatAvroConfluent, formatDebeziumAvroConfluent, formatDebeziumJson, formatJson}
+}
+
+func resourceFlinkTableState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	di := resourceFlinkTableRead(ctx, d, m)
+	if di.HasError() {
+		return nil, fmt.Errorf("cannot get flink table %v", di)
+	}
+
+	return []*schema.ResourceData{d}, nil
 }
