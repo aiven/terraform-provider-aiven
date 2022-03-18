@@ -35,13 +35,9 @@ data "aiven_kafka_topic" "mytesttopic" {
 
 ### Read-Only
 
-- **cleanup_policy** (String) **DEPRECATED use config.cleanup_policy instead** Topic cleanup policy. The possible values are `delete` and `compact`.
 - **config** (List of Object) Kafka topic configuration (see [below for nested schema](#nestedatt--config))
-- **minimum_in_sync_replicas** (Number) **DEPRECATED use config.min_insync_replicas instead** Minimum required nodes in-sync replicas (ISR) to produce to a partition.
 - **partitions** (Number) The number of partitions to create in the topic.
 - **replication** (Number) The replication factor for the topic.
-- **retention_bytes** (Number) **DEPRECATED use config.retention_bytes instead** Retention bytes.
-- **retention_hours** (Number) **DEPRECATED use config.retention_ms instead** Retention period (hours).
 - **tag** (Set of Object) Kafka Topic tag. (see [below for nested schema](#nestedatt--tag))
 - **termination_protection** (Boolean) It is a Terraform client-side deletion protection, which prevents a Kafka topic from being deleted. It is recommended to enable this for any production Kafka topic containing critical data.
 
