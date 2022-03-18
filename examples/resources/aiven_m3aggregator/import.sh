@@ -1,0 +1,1 @@
+terraform import aiven_m3aggregator.m3a project/service_name

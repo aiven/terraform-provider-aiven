@@ -37,4 +37,10 @@ resource "aiven_project_user" "mytestuser" {
 
 - **accepted** (Boolean) Whether the user has accepted the request to join the project; adding user to a project sends an invitation to the target user and the actual membership is only created once the user accepts the invitation.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_project_user.mytestuser project/email
+```

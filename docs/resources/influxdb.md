@@ -162,4 +162,10 @@ Read-Only:
 
 - **database_name** (String)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_influxdb.inf1 project/service_name
+```

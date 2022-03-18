@@ -37,4 +37,10 @@ resource "aiven_account_team" "account_team1" {
 - **team_id** (String) The auto-generated unique account team id
 - **update_time** (String) Time of last update
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_account_team.account_team1 account_id/team_id
+```

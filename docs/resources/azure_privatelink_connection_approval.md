@@ -97,4 +97,10 @@ Optional:
 - **delete** (String)
 - **update** (String)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_azure_privatelink_connection_approval.approval project/service_name
+```

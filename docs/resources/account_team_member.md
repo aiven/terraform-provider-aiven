@@ -50,4 +50,10 @@ resource "aiven_account_team_member" "foo" {
 - **create_time** (String) Time of creation
 - **invited_by_user_email** (String) The email address that invited this user.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_account_team_member.foo account_id/team_id/user_email
+```
