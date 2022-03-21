@@ -574,6 +574,20 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		}
 	}
 
+	// for some services, for example Kafka URIParams does not provide default user credentials
+	if !passwordOK || !usernameOK {
+		for _, u := range s.Users {
+			if u.Username == "avnadmin" {
+				if err := d.Set("service_username", u.Username); err != nil {
+					return err
+				}
+				if err := d.Set("service_password", u.Password); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
 	if err := d.Set("components", FlattenServiceComponents(s)); err != nil {
 		return fmt.Errorf("cannot set `components` : %s", err)
 	}
