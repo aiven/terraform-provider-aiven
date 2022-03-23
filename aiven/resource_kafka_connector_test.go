@@ -197,7 +197,7 @@ func testAccKafkaConnectorResource(name string) string {
 		  replication  = 2
 		}
 		
-		resource "aiven_elasticsearch" "dest" {
+		resource "aiven_opensearch" "dest" {
 		  project                 = data.aiven_project.foo.project
 		  cloud_name              = "google-europe-west1"
 		  plan                    = "startup-4"
@@ -213,10 +213,10 @@ func testAccKafkaConnectorResource(name string) string {
 		
 		  config = {
 		    "topics" = aiven_kafka_topic.foo.topic_name
-		    "connector.class" : "io.aiven.connect.elasticsearch.ElasticsearchSinkConnector"
+		    "connector.class" : "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
 		    "type.name"      = "es-connector"
 		    "name"           = "test-acc-con-%s"
-		    "connection.url" = aiven_elasticsearch.dest.service_uri
+		    "connection.url" = aiven_opensearch.dest.service_uri
 		  }
 		}
 		
@@ -270,7 +270,7 @@ func testAccKafkaConnectorMonoSinkResource(name string) string {
 		
 		  config = {
 		    "name" = "test-acc-con-mongo-sink-%s"
-		    "connector.class" : "com.mongodb.kafka.connect.MongoSinkConnector"
+		    "connector.class" : "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
 		    "topics"    = aiven_kafka_topic.foo.topic_name
 		    "tasks.max" = 1
 		
@@ -315,10 +315,6 @@ func testAccCheckAivenKafkaConnectorAttributes(n string) resource.TestCheckFunc 
 
 		if a["plugin_version"] == "" {
 			return fmt.Errorf("expected to get a plugin_version from Aiven)")
-		}
-
-		if a["config.connector.class"] != "io.aiven.connect.elasticsearch.ElasticsearchSinkConnector" {
-			return fmt.Errorf("expected to get a correct config.connector.class from Aiven)")
 		}
 
 		if a["config.connection.url"] == "" {
