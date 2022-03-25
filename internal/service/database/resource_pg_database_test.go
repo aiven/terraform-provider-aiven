@@ -16,76 +16,29 @@ import (
 )
 
 func init() {
-	resource.AddTestSweepers("aiven_database", &resource.Sweeper{
+	resource.AddTestSweepers("aiven_pg_database", &resource.Sweeper{
 		Name: "aiven_database",
-		F:    sweepDatabases,
+		F:    acc.SweepDatabases,
 		Dependencies: []string{
 			"aiven_connection_pool",
 		},
 	})
 }
 
-func sweepDatabases(region string) error {
-	client, err := acc.SharedClient(region)
-	if err != nil {
-		return fmt.Errorf("error getting client: %s", err)
-	}
-
-	conn := client.(*aiven.Client)
-
-	projects, err := conn.Projects.List()
-	if err != nil {
-		return fmt.Errorf("error retrieving a list of projects : %s", err)
-	}
-
-	for _, project := range projects {
-		if project.Name == os.Getenv("AIVEN_PROJECT_NAME") {
-			services, err := conn.Services.List(project.Name)
-			if err != nil {
-				return fmt.Errorf("error retrieving a list of services for a project `%s`: %s", project.Name, err)
-			}
-
-			for _, service := range services {
-				dbs, err := conn.Databases.List(project.Name, service.Name)
-				if err != nil {
-					if err.(aiven.Error).Status == 403 || err.(aiven.Error).Status == 501 {
-						continue
-					}
-
-					return fmt.Errorf("error retrieving a list of databases for a service `%s`: %s", service.Name, err)
-				}
-
-				for _, db := range dbs {
-					if db.DatabaseName == "defaultdb" {
-						continue
-					}
-
-					err = conn.Databases.Delete(project.Name, service.Name, db.DatabaseName)
-					if err != nil {
-						return fmt.Errorf("error destroying database `%s` during sweep: %s", db.DatabaseName, err)
-					}
-				}
-			}
-		}
-	}
-
-	return nil
-}
-
-func TestAccAivenDatabase_basic(t *testing.T) {
-	resourceName := "aiven_database.foo"
+func TestAccAivenDatabasePG_basic(t *testing.T) {
+	resourceName := "aiven_pg_database.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	rName2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenDatabaseResourceDestroy,
+		CheckDestroy:      testAccCheckAivenDatabasePGResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDatabaseResource(rName),
+				Config: testAccDatabasePGResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenDatabaseAttributes("data.aiven_database.database"),
+					testAccCheckAivenDatabasePGAttributes("data.aiven_pg_database.database"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "database_name", fmt.Sprintf("test-acc-db-%s", rName)),
@@ -93,7 +46,7 @@ func TestAccAivenDatabase_basic(t *testing.T) {
 				),
 			},
 			{
-				Config:                    testAccDatabaseTerminationProtectionResource(rName2),
+				Config:                    testAccDatabasePGTerminationProtectionResource(rName2),
 				PreventPostDestroyRefresh: true,
 				ExpectNonEmptyPlan:        true,
 				PlanOnly:                  true,
@@ -108,7 +61,7 @@ func TestAccAivenDatabase_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckAivenDatabaseResourceDestroy(s *terraform.State) error {
+func testAccCheckAivenDatabasePGResourceDestroy(s *terraform.State) error {
 	c := acc.TestAccProvider.Meta().(*aiven.Client)
 
 	// loop through the resources in state, verifying each database is destroyed
@@ -126,14 +79,14 @@ func testAccCheckAivenDatabaseResourceDestroy(s *terraform.State) error {
 		}
 
 		if db != nil {
-			return fmt.Errorf("databse (%s) still exists", rs.Primary.ID)
+			return fmt.Errorf("database (%s) still exists", rs.Primary.ID)
 		}
 	}
 
 	return nil
 }
 
-func testAccDatabaseResource(name string) string {
+func testAccDatabasePGResource(name string) string {
 	return fmt.Sprintf(`
 		data "aiven_project" "foo" {
 		  project = "%s"
@@ -159,7 +112,7 @@ func testAccDatabaseResource(name string) string {
 		  }
 		}
 		
-		resource "aiven_database" "foo" {
+		resource "aiven_pg_database" "foo" {
 		  project       = aiven_pg.bar.project
 		  service_name  = aiven_pg.bar.service_name
 		  database_name = "test-acc-db-%s"
@@ -167,17 +120,17 @@ func testAccDatabaseResource(name string) string {
 		  lc_collate    = "en_US.UTF-8"
 		}
 		
-		data "aiven_database" "database" {
-		  project       = aiven_database.foo.project
-		  service_name  = aiven_database.foo.service_name
-		  database_name = aiven_database.foo.database_name
+		data "aiven_pg_database" "database" {
+		  project       = aiven_pg_database.foo.project
+		  service_name  = aiven_pg_database.foo.service_name
+		  database_name = aiven_pg_database.foo.database_name
 		
-		  depends_on = [aiven_database.foo]
+		  depends_on = [aiven_pg_database.foo]
 		}`,
 		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
-func testAccDatabaseTerminationProtectionResource(name string) string {
+func testAccDatabasePGTerminationProtectionResource(name string) string {
 	return fmt.Sprintf(`
 		data "aiven_project" "foo" {
 		  project = "%s"
@@ -203,24 +156,24 @@ func testAccDatabaseTerminationProtectionResource(name string) string {
 		  }
 		}
 		
-		resource "aiven_database" "foo" {
+		resource "aiven_pg_database" "foo" {
 		  project                = aiven_pg.bar.project
 		  service_name           = aiven_pg.bar.service_name
 		  database_name          = "test-acc-db-%s"
 		  termination_protection = true
 		}
 		
-		data "aiven_database" "database" {
-		  project       = aiven_database.foo.project
-		  service_name  = aiven_database.foo.service_name
-		  database_name = aiven_database.foo.database_name
+		data "aiven_pg_database" "database" {
+		  project       = aiven_pg_database.foo.project
+		  service_name  = aiven_pg_database.foo.service_name
+		  database_name = aiven_pg_database.foo.database_name
 		
-		  depends_on = [aiven_database.foo]
+		  depends_on = [aiven_pg_database.foo]
 		}`,
 		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
-func testAccCheckAivenDatabaseAttributes(n string) resource.TestCheckFunc {
+func testAccCheckAivenDatabasePGAttributes(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		r := s.RootModule().Resources[n]
 		a := r.Primary.Attributes
@@ -231,10 +184,6 @@ func testAccCheckAivenDatabaseAttributes(n string) resource.TestCheckFunc {
 
 		if a["service_name"] == "" {
 			return fmt.Errorf("expected to get a service_name from Aiven")
-		}
-
-		if a["database_name"] == "" {
-			return fmt.Errorf("expected to get a database_name from Aiven")
 		}
 
 		if a["database_name"] == "" {
