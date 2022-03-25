@@ -54,23 +54,26 @@ func Provider() *schema.Provider {
 			"aiven_service_component": service_component.DatasourceServiceComponent(),
 
 			// influxdb
-			"aiven_influxdb":      influxdb.DatasourceInfluxDB(),
-			"aiven_influxdb_user": influxdb.DatasourceInfluxDBUser(),
+			"aiven_influxdb":          influxdb.DatasourceInfluxDB(),
+			"aiven_influxdb_user":     influxdb.DatasourceInfluxDBUser(),
+			"aiven_influxdb_database": influxdb.DatasourceInfluxDBDatabase(),
 
 			// grafana
 			"aiven_grafana": grafana.DatasourceGrafana(),
 
 			// mysql
-			"aiven_mysql":      mysql.DatasourceMySQL(),
-			"aiven_mysql_user": mysql.DatasourceMySQLUser(),
+			"aiven_mysql":          mysql.DatasourceMySQL(),
+			"aiven_mysql_user":     mysql.DatasourceMySQLUser(),
+			"aiven_mysql_database": mysql.DatasourceMySQLDatabase(),
 
 			// redis
 			"aiven_redis":      redis.DatasourceRedis(),
 			"aiven_redis_user": redis.DatasourceRedisUser(),
 
-			// pgs
-			"aiven_pg":      pg.DatasourcePG(),
-			"aiven_pg_user": pg.DatasourcePGUser(),
+			// pg
+			"aiven_pg":          pg.DatasourcePG(),
+			"aiven_pg_user":     pg.DatasourcePGUser(),
+			"aiven_pg_database": pg.DatasourcePGDatabase(),
 
 			// cassandra
 			"aiven_cassandra":      cassandra.DatasourceCassandra(),
@@ -138,23 +141,26 @@ func Provider() *schema.Provider {
 			"aiven_static_ip":       static_ip.ResourceStaticIP(),
 
 			// influxdb
-			"aiven_influxdb":      influxdb.ResourceInfluxDB(),
-			"aiven_influxdb_user": influxdb.ResourceInfluxDBUser(),
+			"aiven_influxdb":          influxdb.ResourceInfluxDB(),
+			"aiven_influxdb_user":     influxdb.ResourceInfluxDBUser(),
+			"aiven_influxdb_database": influxdb.ResourceInfluxDBDatabase(),
 
 			// grafana
 			"aiven_grafana": grafana.ResourceGrafana(),
 
 			// mysql
-			"aiven_mysql":      mysql.ResourceMySQL(),
-			"aiven_mysql_user": mysql.ResourceMySQLUser(),
+			"aiven_mysql":          mysql.ResourceMySQL(),
+			"aiven_mysql_user":     mysql.ResourceMySQLUser(),
+			"aiven_mysql_database": mysql.ResourceMySQLDatabase(),
 
 			// redis
 			"aiven_redis":      redis.ResourceRedis(),
 			"aiven_redis_user": redis.ResourceRedisUser(),
 
 			// pg
-			"aiven_pg":      pg.ResourcePG(),
-			"aiven_pg_user": pg.ResourcePGUser(),
+			"aiven_pg":          pg.ResourcePG(),
+			"aiven_pg_user":     pg.ResourcePGUser(),
+			"aiven_pg_database": pg.ResourcePGDatabase(),
 
 			// cassandra
 			"aiven_cassandra":      cassandra.ResourceCassandra(),
