@@ -190,7 +190,7 @@ func resourceAccountTeamMemberDelete(_ context.Context, d *schema.ResourceData, 
 	// delete account team member
 	for _, m := range r.Members {
 		if m.UserEmail == userEmail {
-			err = client.AccountTeamMembers.Delete(schemautil.SplitResourceID3(d.Id()))
+			err = client.AccountTeamMembers.Delete(accountId, teamId, m.UserId)
 			if err != nil && !aiven.IsNotFound(err) {
 				return diag.FromErr(err)
 			}
