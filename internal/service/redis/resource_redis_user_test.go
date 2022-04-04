@@ -79,7 +79,7 @@ func testAccRedisUserRedisACLResource(name string) string {
 		  service_name = aiven_redis.bar.service_name
 		  project      = aiven_redis.bar.project
 		  username     = "user-%s"
- 		  password     = "Test$1234"
+		  password     = "Test$1234"
 		
 		  redis_acl_commands   = ["+set"]
 		  redis_acl_keys       = ["prefix*", "another_key"]
