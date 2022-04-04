@@ -5,6 +5,12 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.7.1] - 2022-04-04
+
+- Fix account team member deletion
+- Remove Elasticsearch acceptance tests
+- Fix missing kafka service username and password fields
+
 ## [2.7.0] - 2022-02-18
 
 - Add support for `aiven_clickhouse_grant` resource
