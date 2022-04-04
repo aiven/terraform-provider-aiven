@@ -1,4 +1,4 @@
-package database
+package pg
 
 import (
 	"context"
@@ -10,7 +10,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -24,7 +23,7 @@ func handleLcDefaults(_, old, new string, _ *schema.ResourceData) bool {
 	return new == "" || (old == "" && new == defaultLC) || old == new
 }
 
-var aivenDatabaseSchema = map[string]*schema.Schema{
+var aivenPGDatabaseSchema = map[string]*schema.Schema{
 	"project":      schemautil.CommonSchemaProjectReference,
 	"service_name": schemautil.CommonSchemaServiceNameReference,
 	"database_name": {
@@ -57,29 +56,25 @@ var aivenDatabaseSchema = map[string]*schema.Schema{
 	},
 }
 
-func ResourceDatabase() *schema.Resource {
+func ResourcePGDatabase() *schema.Resource {
 	return &schema.Resource{
-		Description: `The Database resource allows the creation and management of Aiven Databases.
-
-~>**Deprecated** The Database resource is deprecated, please use service-specific resources instead, for example: ` + "`aiven_pg_database`, `aiven_mysql_database` etc.",
-		DeprecationMessage: "`aiven_database` resource is deprecated. Please use service-specific resources instead, for example: `aiven_pg_database` , `aiven_mysql_database` etc.",
-		CreateContext:      resourceDatabaseCreate,
-		ReadContext:        resourceDatabaseRead,
-		DeleteContext:      resourceDatabaseDelete,
-		UpdateContext:      resourceDatabaseUpdate,
+		Description:   "The PG Database resource allows the creation and management of Aiven PostgreSQL Databases.",
+		CreateContext: resourcePGDatabaseCreate,
+		ReadContext:   resourcePGDatabaseRead,
+		DeleteContext: resourcePGDatabaseDelete,
+		UpdateContext: resourcePGDatabaseUpdate,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceDatabaseState,
+			StateContext: resourcePGDatabaseState,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Delete: schema.DefaultTimeout(2 * time.Minute),
 		},
 
-		// TODO: add user config
-		Schema: aivenDatabaseSchema,
+		Schema: aivenPGDatabaseSchema,
 	}
 }
 
-func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePGDatabaseCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -90,8 +85,8 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, m inter
 		serviceName,
 		aiven.CreateDatabaseRequest{
 			Database:  databaseName,
-			LcCollate: schemautil.OptionalString(d, "lc_collate"),
-			LcType:    schemautil.OptionalString(d, "lc_ctype"),
+			LcCollate: d.Get("lc_collate").(string),
+			LcType:    d.Get("lc_ctype").(string),
 		},
 	)
 	if err != nil {
@@ -100,14 +95,14 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	d.SetId(schemautil.BuildResourceID(projectName, serviceName, databaseName))
 
-	return resourceDatabaseRead(ctx, d, m)
+	return resourcePGDatabaseRead(ctx, d, m)
 }
 
-func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return resourceDatabaseRead(ctx, d, m)
+func resourcePGDatabaseUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	return resourcePGDatabaseRead(ctx, d, m)
 }
 
-func resourceDatabaseRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePGDatabaseRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, databaseName := schemautil.SplitResourceID3(d.Id())
@@ -131,14 +126,11 @@ func resourceDatabaseRead(_ context.Context, d *schema.ResourceData, m interface
 	if err := d.Set("lc_ctype", database.LcType); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("termination_protection", d.Get("termination_protection")); err != nil {
-		return diag.FromErr(err)
-	}
 
 	return nil
 }
 
-func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePGDatabaseDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, databaseName := schemautil.SplitResourceID3(d.Id())
@@ -147,7 +139,7 @@ func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.Errorf("cannot delete a database termination_protection is enabled")
 	}
 
-	waiter := DatabaseDeleteWaiter{
+	waiter := schemautil.DatabaseDeleteWaiter{
 		Client:      client,
 		ProjectName: projectName,
 		ServiceName: serviceName,
@@ -163,47 +155,15 @@ func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, m inter
 	return nil
 }
 
-func resourceDatabaseState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourcePGDatabaseState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	if len(strings.Split(d.Id(), "/")) != 3 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<database_name>", d.Id())
 	}
 
-	di := resourceDatabaseRead(ctx, d, m)
+	di := resourcePGDatabaseRead(ctx, d, m)
 	if di.HasError() {
 		return nil, fmt.Errorf("cannot get database: %v", di)
 	}
 
 	return []*schema.ResourceData{d}, nil
-}
-
-// DatabaseDeleteWaiter is used to wait for Database to be deleted.
-type DatabaseDeleteWaiter struct {
-	Client      *aiven.Client
-	ProjectName string
-	ServiceName string
-	Database    string
-}
-
-// RefreshFunc will call the Aiven client and refresh it's state.
-func (w *DatabaseDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		err := w.Client.Databases.Delete(w.ProjectName, w.ServiceName, w.Database)
-		if err != nil && !aiven.IsNotFound(err) {
-			return nil, "REMOVING", nil
-		}
-
-		return aiven.Database{}, "DELETED", nil
-	}
-}
-
-// Conf sets up the configuration to refresh.
-func (w *DatabaseDeleteWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
-	return &resource.StateChangeConf{
-		Pending:    []string{"REMOVING"},
-		Target:     []string{"DELETED"},
-		Refresh:    w.RefreshFunc(),
-		Delay:      5 * time.Second,
-		Timeout:    timeout,
-		MinTimeout: 5 * time.Second,
-	}
 }
