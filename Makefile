@@ -9,7 +9,7 @@ TEST_COUNT          ?= 1
 ACCTEST_TIMEOUT     ?= 180m
 ACCTEST_PARALLELISM ?= 5
 
-SOURCES = $(shell find aiven -name '*.go')
+SOURCES = $(shell find internal -name '*.go')
 
 #################################################
 # Tools
