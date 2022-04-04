@@ -196,11 +196,11 @@ func testAccKafkaTopicResource(name string) string {
 		}
 		
 		resource "aiven_kafka_topic" "foo" {
-		  project                  = data.aiven_project.foo.project
-		  service_name             = aiven_kafka.bar.service_name
-		  topic_name               = "test-acc-topic-%s"
-		  partitions               = 3
-		  replication              = 2
+		  project      = data.aiven_project.foo.project
+		  service_name = aiven_kafka.bar.service_name
+		  topic_name   = "test-acc-topic-%s"
+		  partitions   = 3
+		  replication  = 2
 		
 		  config {
 		    flush_ms                       = 10
@@ -242,11 +242,11 @@ func testAccKafkaTopicCustomTimeoutsResource(name string) string {
 		}
 		
 		resource "aiven_kafka_topic" "foo" {
-		  project         = data.aiven_project.foo.project
-		  service_name    = aiven_kafka.bar.service_name
-		  topic_name      = "test-acc-topic-%s"
-		  partitions      = 3
-		  replication     = 2
+		  project      = data.aiven_project.foo.project
+		  service_name = aiven_kafka.bar.service_name
+		  topic_name   = "test-acc-topic-%s"
+		  partitions   = 3
+		  replication  = 2
 		
 		  timeouts {
 		    create = "15m"

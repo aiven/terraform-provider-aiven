@@ -22,34 +22,34 @@ func TestAccAiven_flink(t *testing.T) {
 	randString := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlpha) }
 	serviceName := fmt.Sprintf("test-acc-flink-%s", randString())
 	manifest := fmt.Sprintf(`
-			variable "project_name" {
-			  type    = string
-			  default = "%s"
-			}
-			variable "service_name" {
-			  type    = string
-			  default = "%s"
-			}
-			
-			resource "aiven_flink" "bar" {
-			  project                 = var.project_name
-			  cloud_name              = "google-europe-west1"
-			  plan                    = "startup-4"
-			  service_name            = var.service_name
-			  maintenance_window_dow  = "monday"
-			  maintenance_window_time = "10:00:00"
-			
-			  flink_user_config {
-			    number_of_task_slots = 10
-			    parallelism_default  = 2
-			    restart_strategy     = "failure-rate"
-			  }
-			}
-			
-			data "aiven_flink" "service" {
-			  service_name = aiven_flink.bar.service_name
-			  project      = aiven_flink.bar.project
-			}`,
+		variable "project_name" {
+		  type    = string
+		  default = "%s"
+		}
+		variable "service_name" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		resource "aiven_flink" "bar" {
+		  project                 = var.project_name
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-4"
+		  service_name            = var.service_name
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		
+		  flink_user_config {
+		    number_of_task_slots = 10
+		    parallelism_default  = 2
+		    restart_strategy     = "failure-rate"
+		  }
+		}
+		
+		data "aiven_flink" "service" {
+		  service_name = aiven_flink.bar.service_name
+		  project      = aiven_flink.bar.project
+		}`,
 
 		projectName,
 		serviceName,
@@ -93,135 +93,135 @@ func TestAccAiven_flink_kafka_to_pg(t *testing.T) {
 	sinkJdbcTableName := fmt.Sprintf("test_acc_flink_kafka_source_jdbc_table_%s", randString())
 	jobName := fmt.Sprintf("test_acc_flink_job_%s", randString())
 	manifest := fmt.Sprintf(`
-			variable "project_name" {
-			  type    = string
-			  default = "%s"
-			}
-			
-			variable "service_name_flink" {
-			  type    = string
-			  default = "%s"
-			}
-			
-			variable "service_name_kafka" {
-			  type    = string
-			  default = "%s"
-			}
-			
-			variable "service_name_pg" {
-			  type    = string
-			  default = "%s"
-			}
-			
-			variable "source_topic_name" {
-			  type    = string
-			  default = "%s"
-			}
-			
-			variable "source_table_name" {
-			  type    = string
-			  default = "%s"
-			}
-			
-			variable "sink_table_name" {
-			  type    = string
-			  default = "%s"
-			}
-			
-			variable "sink_jdbc_table_name" {
-			  type    = string
-			  default = "%s"
-			}
-			
-			variable "job_name" {
-			  type    = string
-			  default = "%s"
-			}
-			
-			resource "aiven_flink" "testing" {
-			  project      = var.project_name
-			  cloud_name   = "google-europe-west1"
-			  plan         = "startup-4"
-			  service_name = var.service_name_flink
-			}
-			
-			resource "aiven_kafka" "testing" {
-			  project      = var.project_name
-			  cloud_name   = "google-europe-west1"
-			  plan         = "business-4"
-			  service_name = var.service_name_kafka
-			}
-			
-			resource "aiven_pg" "testing" {
-			  project      = var.project_name
-			  cloud_name   = "google-europe-west1"
-			  plan         = "startup-4"
-			  service_name = var.service_name_pg
-			}
-			
-			resource "aiven_kafka_topic" "source" {
-			  project      = aiven_kafka.testing.project
-			  service_name = aiven_kafka.testing.service_name
-			  topic_name   = var.source_topic_name
-			  replication  = 2
-			  partitions   = 2
-			}
-			
-			resource "aiven_service_integration" "flinkkafka" {
-			  project                  = aiven_flink.testing.project
-			  integration_type         = "flink"
-			  destination_service_name = aiven_flink.testing.service_name
-			  source_service_name      = aiven_kafka.testing.service_name
-			}
-			
-			resource "aiven_service_integration" "flinkpg" {
-			  project                  = aiven_flink.testing.project
-			  integration_type         = "flink"
-			  destination_service_name = aiven_flink.testing.service_name
-			  source_service_name      = aiven_pg.testing.service_name
-			}
-			
-			resource "aiven_flink_table" "source" {
-			  project        = aiven_flink.testing.project
-			  service_name   = aiven_flink.testing.service_name
-			  integration_id = aiven_service_integration.flinkkafka.integration_id
-			  table_name     = var.source_table_name
-			  kafka_topic    = aiven_kafka_topic.source.topic_name
-			  schema_sql     = <<EOF
-			    cpu INT,
-			    node INT,
-			    occurred_at TIMESTAMP(3) METADATA FROM 'timestamp',
-			    WATERMARK FOR occurred_at AS occurred_at - INTERVAL '5' SECOND
-			  EOF
-			}
-			
-			resource "aiven_flink_table" "sink" {
-			  project        = aiven_flink.testing.project
-			  service_name   = aiven_flink.testing.service_name
-			  integration_id = aiven_service_integration.flinkpg.integration_id
-			  table_name     = var.sink_table_name
-			  jdbc_table     = var.sink_jdbc_table_name
-			  schema_sql     = <<EOF
-			    cpu INT,
-			    node INT,
-			    occurred_at TIMESTAMP(3)
-			  EOF
-			}
-			
-			resource "aiven_flink_job" "testing" {
-			  project      = aiven_flink_table.source.project
-			  service_name = aiven_flink.testing.service_name
-			  job_name     = var.job_name
-			  table_ids = [
-			    aiven_flink_table.source.table_id,
-			    aiven_flink_table.sink.table_id
-			  ]
-			  statement = <<EOF
-			    INSERT INTO ${aiven_flink_table.sink.table_name}
-			    SELECT * FROM ${aiven_flink_table.source.table_name}
-			    WHERE cpu > 75
-			  EOF
-			}`,
+		variable "project_name" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "service_name_flink" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "service_name_kafka" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "service_name_pg" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "source_topic_name" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "source_table_name" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "sink_table_name" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "sink_jdbc_table_name" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "job_name" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		resource "aiven_flink" "testing" {
+		  project      = var.project_name
+		  cloud_name   = "google-europe-west1"
+		  plan         = "startup-4"
+		  service_name = var.service_name_flink
+		}
+		
+		resource "aiven_kafka" "testing" {
+		  project      = var.project_name
+		  cloud_name   = "google-europe-west1"
+		  plan         = "business-4"
+		  service_name = var.service_name_kafka
+		}
+		
+		resource "aiven_pg" "testing" {
+		  project      = var.project_name
+		  cloud_name   = "google-europe-west1"
+		  plan         = "startup-4"
+		  service_name = var.service_name_pg
+		}
+		
+		resource "aiven_kafka_topic" "source" {
+		  project      = aiven_kafka.testing.project
+		  service_name = aiven_kafka.testing.service_name
+		  topic_name   = var.source_topic_name
+		  replication  = 2
+		  partitions   = 2
+		}
+		
+		resource "aiven_service_integration" "flinkkafka" {
+		  project                  = aiven_flink.testing.project
+		  integration_type         = "flink"
+		  destination_service_name = aiven_flink.testing.service_name
+		  source_service_name      = aiven_kafka.testing.service_name
+		}
+		
+		resource "aiven_service_integration" "flinkpg" {
+		  project                  = aiven_flink.testing.project
+		  integration_type         = "flink"
+		  destination_service_name = aiven_flink.testing.service_name
+		  source_service_name      = aiven_pg.testing.service_name
+		}
+		
+		resource "aiven_flink_table" "source" {
+		  project        = aiven_flink.testing.project
+		  service_name   = aiven_flink.testing.service_name
+		  integration_id = aiven_service_integration.flinkkafka.integration_id
+		  table_name     = var.source_table_name
+		  kafka_topic    = aiven_kafka_topic.source.topic_name
+		  schema_sql     = <<EOF
+		    cpu INT,
+		    node INT,
+		    occurred_at TIMESTAMP(3) METADATA FROM 'timestamp',
+		    WATERMARK FOR occurred_at AS occurred_at - INTERVAL '5' SECOND
+		  EOF
+		}
+		
+		resource "aiven_flink_table" "sink" {
+		  project        = aiven_flink.testing.project
+		  service_name   = aiven_flink.testing.service_name
+		  integration_id = aiven_service_integration.flinkpg.integration_id
+		  table_name     = var.sink_table_name
+		  jdbc_table     = var.sink_jdbc_table_name
+		  schema_sql     = <<EOF
+		    cpu INT,
+		    node INT,
+		    occurred_at TIMESTAMP(3)
+		  EOF
+		}
+		
+		resource "aiven_flink_job" "testing" {
+		  project      = aiven_flink_table.source.project
+		  service_name = aiven_flink.testing.service_name
+		  job_name     = var.job_name
+		  table_ids = [
+		    aiven_flink_table.source.table_id,
+		    aiven_flink_table.sink.table_id
+		  ]
+		  statement = <<EOF
+		    INSERT INTO ${aiven_flink_table.sink.table_name}
+		    SELECT * FROM ${aiven_flink_table.source.table_name}
+		    WHERE cpu > 75
+		  EOF
+		}`,
 
 		projectName,
 		flinkServiceName,
@@ -310,129 +310,129 @@ func TestAccAiven_flink_kafkaToKafka(t *testing.T) {
 	jobName := fmt.Sprintf("test_acc_flink_job_%s", randString())
 
 	manifest := fmt.Sprintf(`
-			variable "project_name" {
-			  type    = string
-			  default = "%s"
-			}
-			
-			variable "service_name_flink" {
-			  type    = string
-			  default = "%s"
-			}
-			
-			variable "service_name_kafka" {
-			  type    = string
-			  default = "%s"
-			}
-			
-			variable "source_topic_name" {
-			  type    = string
-			  default = "%s"
-			}
-			
-			variable "sink_topic_name" {
-			  type    = string
-			  default = "%s"
-			}
-			
-			variable "source_table_name" {
-			  type    = string
-			  default = "%s"
-			}
-			
-			variable "sink_table_name" {
-			  type    = string
-			  default = "%s"
-			}
-			
-			variable "job_name" {
-			  type    = string
-			  default = "%s"
-			}
-			
-			resource "aiven_flink" "testing" {
-			  project      = var.project_name
-			  cloud_name   = "google-europe-west1"
-			  plan         = "startup-4"
-			  service_name = var.service_name_flink
-			}
-			
-			resource "aiven_kafka" "testing" {
-			  project      = var.project_name
-			  cloud_name   = "google-europe-west1"
-			  plan         = "business-4"
-			  service_name = var.service_name_kafka
-			}
-			
-			resource "aiven_kafka_topic" "source" {
-			  project      = aiven_kafka.testing.project
-			  service_name = aiven_kafka.testing.service_name
-			  topic_name   = var.source_topic_name
-			  replication  = 2
-			  partitions   = 2
-			}
-			
-			resource "aiven_kafka_topic" "sink" {
-			  project      = aiven_kafka.testing.project
-			  service_name = aiven_kafka.testing.service_name
-			  topic_name   = var.sink_topic_name
-			  replication  = 2
-			  partitions   = 2
-			}
-			
-			resource "aiven_service_integration" "testing" {
-			  project                  = aiven_flink.testing.project
-			  integration_type         = "flink"
-			  destination_service_name = aiven_flink.testing.service_name
-			  source_service_name      = aiven_kafka.testing.service_name
-			}
-			
-			resource "aiven_flink_table" "source" {
-			  project              = aiven_flink.testing.project
-			  service_name         = aiven_flink.testing.service_name
-			  integration_id       = aiven_service_integration.testing.integration_id
-			  table_name           = var.source_table_name
-			  kafka_topic          = aiven_kafka_topic.source.topic_name
-			  kafka_connector_type = "kafka"
-			  kafka_value_format   = "json"
-			  kafka_key_format     = "json"
-			  kafka_key_fields     = ["cpu"]
-			  kafka_startup_mode   = "earliest-offset"
-			  schema_sql           = <<EOF
-			    cpu INT,
-			    node INT,
-			    occurred_at TIMESTAMP(3) METADATA FROM 'timestamp',
-			    WATERMARK FOR occurred_at AS occurred_at - INTERVAL '5' SECOND
-			  EOF
-			}
-			
-			resource "aiven_flink_table" "sink" {
-			  project        = aiven_flink.testing.project
-			  service_name   = aiven_flink.testing.service_name
-			  integration_id = aiven_service_integration.testing.integration_id
-			  table_name     = var.sink_table_name
-			  kafka_topic    = aiven_kafka_topic.sink.topic_name
-			  schema_sql     = <<EOF
-			    cpu INT,
-			    node INT,
-			    occurred_at TIMESTAMP(3)
-			  EOF
-			}
-			
-			resource "aiven_flink_job" "testing" {
-			  project      = aiven_flink.testing.project
-			  service_name = aiven_flink.testing.service_name
-			  job_name     = var.job_name
-			  table_ids = [
-			    aiven_flink_table.source.table_id,
-			    aiven_flink_table.sink.table_id
-			  ]
-			  statement = <<EOF
-			    INSERT INTO ${aiven_flink_table.sink.table_name}
-			    SELECT * FROM ${aiven_flink_table.source.table_name}
-			    WHERE cpu > 75
-			  EOF
-			}`,
+		variable "project_name" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "service_name_flink" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "service_name_kafka" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "source_topic_name" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "sink_topic_name" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "source_table_name" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "sink_table_name" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "job_name" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		resource "aiven_flink" "testing" {
+		  project      = var.project_name
+		  cloud_name   = "google-europe-west1"
+		  plan         = "startup-4"
+		  service_name = var.service_name_flink
+		}
+		
+		resource "aiven_kafka" "testing" {
+		  project      = var.project_name
+		  cloud_name   = "google-europe-west1"
+		  plan         = "business-4"
+		  service_name = var.service_name_kafka
+		}
+		
+		resource "aiven_kafka_topic" "source" {
+		  project      = aiven_kafka.testing.project
+		  service_name = aiven_kafka.testing.service_name
+		  topic_name   = var.source_topic_name
+		  replication  = 2
+		  partitions   = 2
+		}
+		
+		resource "aiven_kafka_topic" "sink" {
+		  project      = aiven_kafka.testing.project
+		  service_name = aiven_kafka.testing.service_name
+		  topic_name   = var.sink_topic_name
+		  replication  = 2
+		  partitions   = 2
+		}
+		
+		resource "aiven_service_integration" "testing" {
+		  project                  = aiven_flink.testing.project
+		  integration_type         = "flink"
+		  destination_service_name = aiven_flink.testing.service_name
+		  source_service_name      = aiven_kafka.testing.service_name
+		}
+		
+		resource "aiven_flink_table" "source" {
+		  project              = aiven_flink.testing.project
+		  service_name         = aiven_flink.testing.service_name
+		  integration_id       = aiven_service_integration.testing.integration_id
+		  table_name           = var.source_table_name
+		  kafka_topic          = aiven_kafka_topic.source.topic_name
+		  kafka_connector_type = "kafka"
+		  kafka_value_format   = "json"
+		  kafka_key_format     = "json"
+		  kafka_key_fields     = ["cpu"]
+		  kafka_startup_mode   = "earliest-offset"
+		  schema_sql           = <<EOF
+		    cpu INT,
+		    node INT,
+		    occurred_at TIMESTAMP(3) METADATA FROM 'timestamp',
+		    WATERMARK FOR occurred_at AS occurred_at - INTERVAL '5' SECOND
+		  EOF
+		}
+		
+		resource "aiven_flink_table" "sink" {
+		  project        = aiven_flink.testing.project
+		  service_name   = aiven_flink.testing.service_name
+		  integration_id = aiven_service_integration.testing.integration_id
+		  table_name     = var.sink_table_name
+		  kafka_topic    = aiven_kafka_topic.sink.topic_name
+		  schema_sql     = <<EOF
+		    cpu INT,
+		    node INT,
+		    occurred_at TIMESTAMP(3)
+		  EOF
+		}
+		
+		resource "aiven_flink_job" "testing" {
+		  project      = aiven_flink.testing.project
+		  service_name = aiven_flink.testing.service_name
+		  job_name     = var.job_name
+		  table_ids = [
+		    aiven_flink_table.source.table_id,
+		    aiven_flink_table.sink.table_id
+		  ]
+		  statement = <<EOF
+		    INSERT INTO ${aiven_flink_table.sink.table_name}
+		    SELECT * FROM ${aiven_flink_table.source.table_name}
+		    WHERE cpu > 75
+		  EOF
+		}`,
 
 		projectName,
 		flinkServiceName,

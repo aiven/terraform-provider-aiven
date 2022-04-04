@@ -22,55 +22,55 @@ func TestAccAivenClickhouseGrant(t *testing.T) {
 	projectName := os.Getenv("AIVEN_PROJECT_NAME")
 
 	manifest := fmt.Sprintf(`
-			resource "aiven_clickhouse" "bar" {
-			  project                 = "%s"
-			  cloud_name              = "google-europe-west1"
-			  plan                    = "startup-beta-8"
-			  service_name            = "%s"
-			  maintenance_window_dow  = "monday"
-			  maintenance_window_time = "10:00:00"
-			}
-			
-			resource "aiven_clickhouse_database" "testdb" {
-			  project      = aiven_clickhouse.bar.project
-			  service_name = aiven_clickhouse.bar.service_name
-			  name         = "test-db"
-			}
-			
-			resource "aiven_clickhouse_role" "foo-role" {
-			  service_name = aiven_clickhouse.bar.service_name
-			  project      = aiven_clickhouse.bar.project
-			  role         = "foo-role"
-			}
-			
-			resource "aiven_clickhouse_grant" "foo-role-grant" {
-			  service_name = aiven_clickhouse.bar.service_name
-			  project      = aiven_clickhouse.bar.project
-			  role         = aiven_clickhouse_role.foo-role.role
-			
-			  privilege_grant {
-			    privilege = "INSERT"
-			    database  = aiven_clickhouse_database.testdb.name
-			    table     = "test-table"
-			    column    = "test-column"
-			  }
-			}
-			
-			resource "aiven_clickhouse_user" "foo-user" {
-			  service_name = aiven_clickhouse.bar.service_name
-			  project      = aiven_clickhouse.bar.project
-			  username     = "foo-user"
-			
-			}
-			resource "aiven_clickhouse_grant" "foo-user-grant" {
-			  service_name = aiven_clickhouse.bar.service_name
-			  project      = aiven_clickhouse.bar.project
-			  user         = aiven_clickhouse_user.foo-user.username
-			
-			  role_grant {
-			    role = aiven_clickhouse_role.foo-role.role
-			  }
-			}`,
+		resource "aiven_clickhouse" "bar" {
+		  project                 = "%s"
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-beta-8"
+		  service_name            = "%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		}
+		
+		resource "aiven_clickhouse_database" "testdb" {
+		  project      = aiven_clickhouse.bar.project
+		  service_name = aiven_clickhouse.bar.service_name
+		  name         = "test-db"
+		}
+		
+		resource "aiven_clickhouse_role" "foo-role" {
+		  service_name = aiven_clickhouse.bar.service_name
+		  project      = aiven_clickhouse.bar.project
+		  role         = "foo-role"
+		}
+		
+		resource "aiven_clickhouse_grant" "foo-role-grant" {
+		  service_name = aiven_clickhouse.bar.service_name
+		  project      = aiven_clickhouse.bar.project
+		  role         = aiven_clickhouse_role.foo-role.role
+		
+		  privilege_grant {
+		    privilege = "INSERT"
+		    database  = aiven_clickhouse_database.testdb.name
+		    table     = "test-table"
+		    column    = "test-column"
+		  }
+		}
+		
+		resource "aiven_clickhouse_user" "foo-user" {
+		  service_name = aiven_clickhouse.bar.service_name
+		  project      = aiven_clickhouse.bar.project
+		  username     = "foo-user"
+		}
+		
+		resource "aiven_clickhouse_grant" "foo-user-grant" {
+		  service_name = aiven_clickhouse.bar.service_name
+		  project      = aiven_clickhouse.bar.project
+		  user         = aiven_clickhouse_user.foo-user.username
+		
+		  role_grant {
+		    role = aiven_clickhouse_role.foo-role.role
+		  }
+		}`,
 
 		projectName, serviceName)
 
