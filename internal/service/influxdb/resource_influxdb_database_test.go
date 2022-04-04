@@ -127,7 +127,7 @@ func testAccInfluxDBDatabaseResource(project string, name string) string {
 		data "aiven_project" "foo" {
 		  project = "%s"
 		}
-
+		
 		resource "aiven_influxdb" "bar" {
 		  project                 = data.aiven_project.foo.project
 		  cloud_name              = "google-europe-west1"
@@ -135,20 +135,20 @@ func testAccInfluxDBDatabaseResource(project string, name string) string {
 		  service_name            = "test-acc-sr-%s"
 		  maintenance_window_dow  = "monday"
 		  maintenance_window_time = "10:00:00"
-
+		
 		  influxdb_user_config {
 		    public_access {
-		    influxdb = true
+		      influxdb = true
 		    }
 		  }
 		}
-
+		
 		resource "aiven_influxdb_database" "foo" {
 		  project       = aiven_influxdb.bar.project
 		  service_name  = aiven_influxdb.bar.service_name
 		  database_name = "test-acc-db-%s"
 		}
-
+		
 		data "aiven_influxdb_database" "database" {
 		  project       = aiven_influxdb_database.foo.project
 		  service_name  = aiven_influxdb_database.foo.service_name
@@ -164,7 +164,7 @@ func testAccInfluxDBDatabaseTerminationProtectionResource(project string, name s
 		data "aiven_project" "foo" {
 		  project = "%s"
 		}
-
+		
 		resource "aiven_influxdb" "bar" {
 		  project                 = data.aiven_project.foo.project
 		  cloud_name              = "google-europe-west1"
@@ -179,19 +179,19 @@ func testAccInfluxDBDatabaseTerminationProtectionResource(project string, name s
 		    }
 		  }
 		}
-
+		
 		resource "aiven_influxdb_database" "foo" {
 		  project                = aiven_influxdb.bar.project
 		  service_name           = aiven_influxdb.bar.service_name
 		  database_name          = "test-acc-db-%s"
 		  termination_protection = true
 		}
-
+		
 		data "aiven_influxdb_database" "database" {
 		  project       = aiven_influxdb_database.foo.project
 		  service_name  = aiven_influxdb_database.foo.service_name
 		  database_name = aiven_influxdb_database.foo.database_name
-
+		
 		  depends_on = [aiven_influxdb_database.foo]
 		}`,
 		project, name, name)

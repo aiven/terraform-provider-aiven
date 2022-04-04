@@ -119,9 +119,9 @@ func testAccProjectResourceAccounts(name string) string {
 		}
 		
 		resource "aiven_project" "foo" {
-		  project            = "test-acc-pr-%s"
-		  account_id         = aiven_account.foo.account_id
-		  default_cloud      = "aws-eu-west-2"
+		  project       = "test-acc-pr-%s"
+		  account_id    = aiven_account.foo.account_id
+		  default_cloud = "aws-eu-west-2"
 		}
 		
 		data "aiven_project" "project" {
@@ -135,8 +135,8 @@ func testAccProjectResourceAccounts(name string) string {
 func testAccProjectResource(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_project" "foo" {
-		  project            = "test-acc-pr-%s"
-		  default_cloud      = "aws-eu-west-2"
+		  project       = "test-acc-pr-%s"
+		  default_cloud = "aws-eu-west-2"
 		}
 		
 		data "aiven_project" "project" {

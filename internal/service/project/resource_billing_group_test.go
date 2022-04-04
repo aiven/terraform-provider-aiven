@@ -91,7 +91,7 @@ func testAccCopyFromProjectBillingGroupResource(name string) string {
 		resource "aiven_project" "pr01" {
 		  project       = "test-acc-pr01-%s"
 		  billing_group = aiven_billing_group.foo.id
-		  depends_on = [aiven_billing_group.foo]
+		  depends_on    = [aiven_billing_group.foo]
 		}
 		
 		resource "aiven_project" "pr02" {
