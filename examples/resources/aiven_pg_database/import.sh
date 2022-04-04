@@ -1,0 +1,1 @@
+terraform import aiven_pg_database.mydatabase project/service_name/database_name

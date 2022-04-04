@@ -27,3 +27,50 @@ func SharedClient(region string) (interface{}, error) {
 
 	return client, nil
 }
+
+func SweepDatabases(region string) error {
+	client, err := SharedClient(region)
+	if err != nil {
+		return fmt.Errorf("error getting client: %s", err)
+	}
+
+	conn := client.(*aiven.Client)
+
+	projects, err := conn.Projects.List()
+	if err != nil {
+		return fmt.Errorf("error retrieving a list of projects : %s", err)
+	}
+
+	for _, project := range projects {
+		if project.Name == os.Getenv("AIVEN_PROJECT_NAME") {
+			services, err := conn.Services.List(project.Name)
+			if err != nil {
+				return fmt.Errorf("error retrieving a list of services for a project `%s`: %s", project.Name, err)
+			}
+
+			for _, service := range services {
+				dbs, err := conn.Databases.List(project.Name, service.Name)
+				if err != nil {
+					if err.(aiven.Error).Status == 403 || err.(aiven.Error).Status == 501 {
+						continue
+					}
+
+					return fmt.Errorf("error retrieving a list of databases for a service `%s`: %s", service.Name, err)
+				}
+
+				for _, db := range dbs {
+					if db.DatabaseName == "defaultdb" {
+						continue
+					}
+
+					err = conn.Databases.Delete(project.Name, service.Name, db.DatabaseName)
+					if err != nil {
+						return fmt.Errorf("error destroying database `%s` during sweep: %s", db.DatabaseName, err)
+					}
+				}
+			}
+		}
+	}
+
+	return nil
+}
