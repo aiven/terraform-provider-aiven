@@ -102,6 +102,7 @@ Read-Only:
 Read-Only:
 
 - **flink** (String)
+- **prometheus** (String)
 
 
 

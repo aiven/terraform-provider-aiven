@@ -92,7 +92,7 @@ Optional:
 - **redis_persistence** (String) Redis persistence
 - **redis_pubsub_client_output_buffer_limit** (String) Pub/sub client output buffer hard limit in MB
 - **redis_ssl** (String) Require SSL to access Redis
-- **redis_timeout** (String) Redis idle connection timeout
+- **redis_timeout** (String) Redis idle connection timeout in seconds
 - **service_to_fork_from** (String) Name of another service to fork from. This has effect only when a new service is being created.
 - **static_ips** (String) Static IP addresses
 
@@ -104,7 +104,7 @@ Optional:
 - **dbname** (String) Database name for bootstrapping the initial connection
 - **host** (String) Hostname or IP address of the server where to migrate data from
 - **ignore_dbs** (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)
-- **method** (String) The migration method to be used
+- **method** (String) The migration method to be used (currently supported only by Redis and MySQL service types)
 - **password** (String, Sensitive) Password for authentication with the server where to migrate data from
 - **port** (String) Port number of the server where to migrate data from
 - **ssl** (String) The server where to migrate data from is secured with SSL
@@ -125,6 +125,7 @@ Optional:
 
 Optional:
 
+- **prometheus** (String) Enable prometheus
 - **redis** (String) Enable redis
 
 

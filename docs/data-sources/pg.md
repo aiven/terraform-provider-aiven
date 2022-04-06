@@ -95,6 +95,7 @@ Read-Only:
 - **admin_username** (String)
 - **backup_hour** (String)
 - **backup_minute** (String)
+- **enable_ipv6** (String)
 - **ip_filter** (List of String)
 - **migration** (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--migration))
 - **pg** (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pg))
@@ -225,6 +226,7 @@ Read-Only:
 
 - **pg** (String)
 - **pgbouncer** (String)
+- **prometheus** (String)
 
 
 <a id="nestedobjatt--pg_user_config--public_access"></a>

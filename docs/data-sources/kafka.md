@@ -205,9 +205,11 @@ Read-Only:
 
 Read-Only:
 
+- **jolokia** (String)
 - **kafka** (String)
 - **kafka_connect** (String)
 - **kafka_rest** (String)
+- **prometheus** (String)
 - **schema_registry** (String)
 
 

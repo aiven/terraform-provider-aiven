@@ -105,7 +105,7 @@ Optional:
 - **dbname** (String) Database name for bootstrapping the initial connection
 - **host** (String) Hostname or IP address of the server where to migrate data from
 - **ignore_dbs** (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)
-- **method** (String) The migration method to be used
+- **method** (String) The migration method to be used (currently supported only by Redis and MySQL service types)
 - **password** (String, Sensitive) Password for authentication with the server where to migrate data from
 - **port** (String) Port number of the server where to migrate data from
 - **ssl** (String) The server where to migrate data from is secured with SSL
@@ -160,6 +160,7 @@ Optional:
 
 - **mysql** (String) Enable mysql
 - **mysqlx** (String) Enable mysqlx
+- **prometheus** (String) Enable prometheus
 
 
 <a id="nestedblock--mysql_user_config--public_access"></a>

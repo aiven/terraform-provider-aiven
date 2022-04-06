@@ -202,14 +202,13 @@ Read-Only:
 - **indices_query_bool_max_clause_count** (String)
 - **override_main_response_version** (String)
 - **reindex_remote_whitelist** (List of String)
+- **script_max_compilations_rate** (String)
 - **search_max_buckets** (String)
 - **thread_pool_analyze_queue_size** (String)
 - **thread_pool_analyze_size** (String)
 - **thread_pool_force_merge_size** (String)
 - **thread_pool_get_queue_size** (String)
 - **thread_pool_get_size** (String)
-- **thread_pool_index_queue_size** (String)
-- **thread_pool_index_size** (String)
 - **thread_pool_search_queue_size** (String)
 - **thread_pool_search_size** (String)
 - **thread_pool_search_throttled_queue_size** (String)
@@ -265,6 +264,7 @@ Read-Only:
 
 - **elasticsearch** (String)
 - **kibana** (String)
+- **prometheus** (String)
 
 
 <a id="nestedobjatt--elasticsearch_user_config--public_access"></a>
@@ -309,6 +309,7 @@ Read-Only:
 Read-Only:
 
 - **flink** (String)
+- **prometheus** (String)
 
 
 
@@ -619,7 +620,9 @@ Read-Only:
 
 Read-Only:
 
+- **jolokia** (String)
 - **kafka_connect** (String)
+- **prometheus** (String)
 
 
 <a id="nestedobjatt--kafka_connect_user_config--public_access"></a>
@@ -786,9 +789,11 @@ Read-Only:
 
 Read-Only:
 
+- **jolokia** (String)
 - **kafka** (String)
 - **kafka_connect** (String)
 - **kafka_rest** (String)
+- **prometheus** (String)
 - **schema_registry** (String)
 
 
@@ -906,6 +911,7 @@ Read-Only:
 
 - **mysql** (String)
 - **mysqlx** (String)
+- **prometheus** (String)
 
 
 <a id="nestedobjatt--mysql_user_config--public_access"></a>
@@ -987,13 +993,13 @@ Read-Only:
 - **indices_query_bool_max_clause_count** (String)
 - **override_main_response_version** (String)
 - **reindex_remote_whitelist** (List of String)
+- **script_max_compilations_rate** (String)
 - **search_max_buckets** (String)
 - **thread_pool_analyze_queue_size** (String)
 - **thread_pool_analyze_size** (String)
 - **thread_pool_force_merge_size** (String)
 - **thread_pool_get_queue_size** (String)
 - **thread_pool_get_size** (String)
-- **thread_pool_index_size** (String)
 - **thread_pool_search_queue_size** (String)
 - **thread_pool_search_size** (String)
 - **thread_pool_search_throttled_queue_size** (String)
@@ -1029,6 +1035,7 @@ Read-Only:
 
 - **opensearch** (String)
 - **opensearch_dashboards** (String)
+- **prometheus** (String)
 
 
 <a id="nestedobjatt--opensearch_user_config--public_access"></a>
@@ -1066,6 +1073,7 @@ Read-Only:
 - **admin_username** (String)
 - **backup_hour** (String)
 - **backup_minute** (String)
+- **enable_ipv6** (String)
 - **ip_filter** (List of String)
 - **migration** (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--migration))
 - **pg** (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pg))
@@ -1196,6 +1204,7 @@ Read-Only:
 
 - **pg** (String)
 - **pgbouncer** (String)
+- **prometheus** (String)
 
 
 <a id="nestedobjatt--pg_user_config--public_access"></a>
@@ -1279,6 +1288,7 @@ Read-Only:
 
 Read-Only:
 
+- **prometheus** (String)
 - **redis** (String)
 
 

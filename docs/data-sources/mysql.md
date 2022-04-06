@@ -163,6 +163,7 @@ Read-Only:
 
 - **mysql** (String)
 - **mysqlx** (String)
+- **prometheus** (String)
 
 
 <a id="nestedobjatt--mysql_user_config--public_access"></a>
