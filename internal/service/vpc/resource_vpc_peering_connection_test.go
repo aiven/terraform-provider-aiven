@@ -1,70 +1,44 @@
-package vpc_test
+package vpc
 
 import (
-	"fmt"
-	"os"
+	"errors"
+	"reflect"
 	"testing"
-
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAivenVPCPeeringConnection_basic(t *testing.T) {
-	if os.Getenv("AWS_REGION") == "" ||
-		os.Getenv("AWS_VPC_ID") == "" ||
-		os.Getenv("AWS_ACCOUNT_ID") == "" {
-		t.Skip("env variables AWS_REGION, AWS_VPC_ID and AWS_ACCOUNT_ID required to run this test")
+func Test_validateVPCID(t *testing.T) {
+	type args struct {
+		i interface{}
+		k string
 	}
-
-	resourceName := "aiven_vpc_peering_connection.foo"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccVPCPeeringConnectionAWSResource(),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "peer_cloud_account", os.Getenv("AWS_ACCOUNT_ID")),
-					resource.TestCheckResourceAttr(resourceName, "peer_vpc", os.Getenv("AWS_VPC_ID")),
-					resource.TestCheckResourceAttr(resourceName, "peer_region", os.Getenv("AWS_REGION")),
-					resource.TestCheckResourceAttrSet(resourceName, "state"),
-				),
-			},
+	tests := []struct {
+		name         string
+		args         args
+		wantWarnings []string
+		wantErrors   []error
+	}{
+		{
+			name:         "basic",
+			args:         args{"project/vpc", "vpc_id"},
+			wantWarnings: nil,
+			wantErrors:   nil,
 		},
-	})
-}
-
-func testAccVPCPeeringConnectionAWSResource() string {
-	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_project_vpc" "bar" {
-		  project      = data.aiven_project.foo.project
-		  cloud_name   = "aws-%s"
-		  network_cidr = "10.0.0.0/24"
-		
-		  timeouts {
-		    create = "5m"
-		  }
-		}
-		
-		resource "aiven_vpc_peering_connection" "foo" {
-		  vpc_id             = aiven_project_vpc.bar.id
-		  peer_cloud_account = "%s"
-		  peer_vpc           = "%s"
-		  peer_region        = "%s"
-		
-		  timeouts {
-		    create = "10m"
-		  }
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"),
-		os.Getenv("AWS_REGION"),
-		os.Getenv("AWS_ACCOUNT_ID"),
-		os.Getenv("AWS_VPC_ID"),
-		os.Getenv("AWS_REGION"))
+		{
+			name:         "wrong id",
+			args:         args{"wrong", "vpc_id"},
+			wantWarnings: nil,
+			wantErrors:   []error{errors.New("invalid vpc_id, expected <project_name>/<vpc_id>")},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotWarnings, gotErrors := validateVPCID(tt.args.i, tt.args.k)
+			if !reflect.DeepEqual(gotWarnings, tt.wantWarnings) {
+				t.Errorf("validateVPCID() gotWarnings = %v, want %v", gotWarnings, tt.wantWarnings)
+			}
+			if !reflect.DeepEqual(gotErrors, tt.wantErrors) {
+				t.Errorf("validateVPCID() gotErrors = %v, want %v", gotErrors, tt.wantErrors)
+			}
+		})
+	}
 }

@@ -1,0 +1,1 @@
+terraform import aiven_gcp_vpc_peering_connection.foo project_name/vpc_id/gcp_project_id/peer_vpc
