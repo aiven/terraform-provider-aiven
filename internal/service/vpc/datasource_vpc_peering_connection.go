@@ -28,7 +28,7 @@ func datasourceVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceD
 
 	vpc, err := client.VPCs.Get(projectName, vpcID)
 	if err != nil {
-		return diag.Errorf("Error deleting VPC peering connection: %s", err)
+		return diag.Errorf("Error getting VPC peering connection: %s", err)
 	}
 
 	for _, peer := range vpc.PeeringConnections {
@@ -42,6 +42,6 @@ func datasourceVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceD
 		}
 	}
 
-	return diag.Errorf("peering connection from %s/%s to %s/%s not found",
+	return diag.Errorf("peering connection %s/%s/%s/%s not found",
 		projectName, vpc.CloudName, peerCloudAccount, peerVPC)
 }
