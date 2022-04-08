@@ -92,11 +92,14 @@ func Provider() *schema.Provider {
 			"aiven_billing_group": project.DatasourceBillingGroup(),
 
 			// vpc
-			"aiven_project_vpc":                    vpc.DatasourceProjectVPC(),
-			"aiven_vpc_peering_connection":         vpc.DatasourceVPCPeeringConnection(),
-			"aiven_transit_gateway_vpc_attachment": vpc.DatasourceTransitGatewayVPCAttachment(),
 			"aiven_aws_privatelink":                vpc.DatasourceAWSPrivatelink(),
+			"aiven_aws_vpc_peering_connection":     vpc.DatasourceAWSVPCPeeringConnection(),
 			"aiven_azure_privatelink":              vpc.DatasourceAzurePrivatelink(),
+			"aiven_azure_vpc_peering_connection":   vpc.DatasourceAzureVPCPeeringConnection(),
+			"aiven_gcp_vpc_peering_connection":     vpc.DatasourceGCPVPCPeeringConnection(),
+			"aiven_project_vpc":                    vpc.DatasourceProjectVPC(),
+			"aiven_transit_gateway_vpc_attachment": vpc.DatasourceTransitGatewayVPCAttachment(),
+			"aiven_vpc_peering_connection":         vpc.DatasourceVPCPeeringConnection(), // deprecated
 
 			// service integrations
 			"aiven_service_integration":          service_integration.DatasourceServiceIntegration(),
@@ -179,12 +182,15 @@ func Provider() *schema.Provider {
 			"aiven_billing_group": project.ResourceBillingGroup(),
 
 			// vpc
-			"aiven_vpc_peering_connection":                vpc.ResourceVPCPeeringConnection(),
 			"aiven_aws_privatelink":                       vpc.ResourceAWSPrivatelink(),
+			"aiven_aws_vpc_peering_connection":            vpc.ResourceAWSVPCPeeringConnection(),
 			"aiven_azure_privatelink":                     vpc.ResourceAzurePrivatelink(),
 			"aiven_azure_privatelink_connection_approval": vpc.ResourceAzurePrivatelinkConnectionApproval(),
+			"aiven_azure_vpc_peering_connection":          vpc.ResourceAzureVPCPeeringConnection(),
+			"aiven_gcp_vpc_peering_connection":            vpc.ResourceGCPVPCPeeringConnection(),
 			"aiven_project_vpc":                           vpc.ResourceProjectVPC(),
 			"aiven_transit_gateway_vpc_attachment":        vpc.ResourceTransitGatewayVPCAttachment(),
+			"aiven_vpc_peering_connection":                vpc.ResourceVPCPeeringConnection(), // deprecated
 
 			// service integrations
 			"aiven_service_integration":          service_integration.ResourceServiceIntegration(),

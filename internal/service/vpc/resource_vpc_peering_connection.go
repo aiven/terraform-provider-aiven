@@ -17,10 +17,11 @@ import (
 
 var aivenVPCPeeringConnectionSchema = map[string]*schema.Schema{
 	"vpc_id": {
-		ForceNew:    true,
-		Required:    true,
-		Type:        schema.TypeString,
-		Description: schemautil.Complex("The VPC the peering connection belongs to.").ForceNew().Build(),
+		ForceNew:     true,
+		Required:     true,
+		Type:         schema.TypeString,
+		Description:  schemautil.Complex("The VPC the peering connection belongs to.").ForceNew().Build(),
+		ValidateFunc: validateVPCID,
 	},
 	"peer_cloud_account": {
 		ForceNew:    true,
@@ -92,7 +93,8 @@ func ResourceVPCPeeringConnection() *schema.Resource {
 			Delete: schema.DefaultTimeout(2 * time.Minute),
 		},
 
-		Schema: aivenVPCPeeringConnectionSchema,
+		Schema:             aivenVPCPeeringConnectionSchema,
+		DeprecationMessage: "Please use a cloud specific VPC peering connection resource",
 	}
 }
 
@@ -106,10 +108,6 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 
 	client := m.(*aiven.Client)
 	projectName, vpcID := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
-	if projectName == "" || vpcID == "" {
-		return diag.Errorf("incorrect VPC ID, expected structure <PROJECT_NAME>/<VPC_ID>")
-	}
-
 	peerCloudAccount := d.Get("peer_cloud_account").(string)
 	peerVPC := d.Get("peer_vpc").(string)
 	peerRegion := d.Get("peer_region").(string)
@@ -185,36 +183,8 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 		return diag.Errorf("Error creating VPC peering connection: %s", err)
 	}
 
-	diags := diag.Diagnostics{}
 	pc = res.(*aiven.VPCPeeringConnection)
-	if pc.State != "ACTIVE" {
-		switch pc.State {
-		case "PENDING_PEER":
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Warning,
-				Summary: fmt.Sprintf("Aiven platform has created a connection to the specified "+
-					"peer successfully in the cloud, but the connection is not active until the user "+
-					"completes the setup in their cloud account. The steps needed in the user cloud "+
-					"account depend on the used cloud provider. Find more in the state info: %s",
-					stateInfoToString(pc.StateInfo)),
-			})
-		case "DELETED":
-			diags = append(diags, diag.Errorf("A user has deleted the peering connection through the Aiven "+
-				"Terraform provider, or Aiven Web Console or directly via Aiven API. There are no "+
-				"transitions from this state")...)
-		case "DELETED_BY_PEER":
-			diags = append(diags, diag.Errorf("A user deleted the peering cloud resource in their account. "+
-				"There are no transitions from this state")...)
-		case "REJECTED_BY_PEER":
-			diags = append(diags, diag.Errorf("AWS VPC peering connection request was rejected, state info: %s",
-				stateInfoToString(pc.StateInfo))...)
-		case "INVALID_SPECIFICATION":
-			diags = append(diags, diag.Errorf("VPC peering connection cannot be created, more in the state info: %s",
-				stateInfoToString(pc.StateInfo))...)
-		default:
-			return diag.Errorf("Unknown VPC peering connection cannot state: %s", pc.State)
-		}
-	}
+	diags := getDiagnosticsFromState(pc)
 
 	if peerRegion != "" {
 		d.SetId(schemautil.BuildResourceID(projectName, vpcID, pc.PeerCloudAccount, pc.PeerVPC, *pc.PeerRegion))
@@ -293,7 +263,7 @@ func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData,
 
 		return append(
 			copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, projectName, vpcID),
-			copyAzureVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc)...)
+			copyAzureSpecificVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc)...)
 	}
 
 	pc, err = client.VPCPeeringConnections.GetVPCPeering(
@@ -403,7 +373,7 @@ func resourceVPCPeeringConnectionImport(ctx context.Context, d *schema.ResourceD
 	return []*schema.ResourceData{d}, nil
 }
 
-func copyAzureVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
+func copyAzureSpecificVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 	d *schema.ResourceData,
 	peeringConnection *aiven.VPCPeeringConnection,
 ) diag.Diagnostics {
@@ -564,4 +534,50 @@ func isAzureVPCPeeringConnection(d *schema.ResourceData, c *aiven.Client) (bool,
 	}
 
 	return false, nil
+}
+
+func getDiagnosticsFromState(pc *aiven.VPCPeeringConnection) diag.Diagnostics {
+	if pc.State != "ACTIVE" {
+		switch pc.State {
+		case "PENDING_PEER":
+			return diag.Diagnostics{{
+				Severity: diag.Warning,
+				Summary: fmt.Sprintf("Aiven platform has created a connection to the specified "+
+					"peer successfully in the cloud, but the connection is not active until the user "+
+					"completes the setup in their cloud account. The steps needed in the user cloud "+
+					"account depend on the used cloud provider. Find more in the state info: %s",
+					stateInfoToString(pc.StateInfo))}}
+		case "DELETED":
+			return diag.Errorf("A user has deleted the peering connection through the Aiven " +
+				"Terraform provider, or Aiven Web Console or directly via Aiven API. There are no " +
+				"transitions from this state")
+		case "DELETED_BY_PEER":
+			return diag.Errorf("A user deleted the peering cloud resource in their account. " +
+				"There are no transitions from this state")
+		case "REJECTED_BY_PEER":
+			return diag.Errorf("VPC peering connection request was rejected, state info: %s",
+				stateInfoToString(pc.StateInfo))
+		case "INVALID_SPECIFICATION":
+			return diag.Errorf("VPC peering connection cannot be created, more in the state info: %s",
+				stateInfoToString(pc.StateInfo))
+		default:
+			return diag.Errorf("Unknown VPC peering connection state: %s", pc.State)
+		}
+	}
+	return nil
+}
+
+func validateVPCID(i interface{}, k string) (warnings []string, errors []error) {
+	v, ok := i.(string)
+	if !ok {
+		errors = append(errors, fmt.Errorf("expected type of %s to be string", k))
+		return warnings, errors
+	}
+
+	if len(strings.Split(v, "/")) != 2 {
+		errors = append(errors, fmt.Errorf("invalid %v, expected <project_name>/<vpc_id>", k))
+		return warnings, errors
+	}
+
+	return warnings, errors
 }
