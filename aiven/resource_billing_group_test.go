@@ -71,7 +71,8 @@ func testAccCheckAivenBillingGroupResourceDestroy(s *terraform.State) error {
 func testAccBillingGroupResource(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_billing_group" "foo" {
-		  name = "test-acc-bg-%s"
+		  name           = "test-acc-bg-%s"
+		  billing_emails = ["ivan.savciuc+test1@aiven.fi", "ivan.savciuc+test2@aiven.fi"]
 		}
 		
 		data "aiven_billing_group" "bar" {
