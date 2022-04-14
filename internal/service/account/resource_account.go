@@ -22,6 +22,12 @@ var aivenAccountSchema = map[string]*schema.Schema{
 		Required:    true,
 		Description: "Account name",
 	},
+	"primary_billing_group_id": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		ForceNew:    true,
+		Description: "Billing group id",
+	},
 	"owner_team_id": {
 		Type:        schema.TypeString,
 		Computed:    true,
@@ -62,10 +68,12 @@ func ResourceAccount() *schema.Resource {
 func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	name := d.Get("name").(string)
+	bgId := d.Get("primary_billing_group_id").(string)
 
 	r, err := client.Accounts.Create(
 		aiven.Account{
-			Name: name,
+			Name:                  name,
+			PrimaryBillingGroupId: bgId,
 		},
 	)
 	if err != nil {
@@ -91,6 +99,9 @@ func resourceAccountRead(_ context.Context, d *schema.ResourceData, m interface{
 	if err := d.Set("name", r.Account.Name); err != nil {
 		return diag.FromErr(err)
 	}
+	if err := d.Set("primary_billing_group_id", r.Account.PrimaryBillingGroupId); err != nil {
+		return diag.FromErr(err)
+	}
 	if err := d.Set("owner_team_id", r.Account.OwnerTeamId); err != nil {
 		return diag.FromErr(err)
 	}
@@ -111,7 +122,8 @@ func resourceAccountUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	client := m.(*aiven.Client)
 
 	r, err := client.Accounts.Update(d.Id(), aiven.Account{
-		Name: d.Get("name").(string),
+		Name:                  d.Get("name").(string),
+		PrimaryBillingGroupId: d.Get("primary_billing_group_id").(string),
 	})
 	if err != nil {
 		return diag.FromErr(err)
