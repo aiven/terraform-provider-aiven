@@ -203,18 +203,14 @@ func resourceProjectCreate(_ context.Context, d *schema.ResourceData, m interfac
 			BillingCurrency:              billingCurrency,
 			VatID:                        vatID,
 			UseSourceProjectBillingGroup: d.Get("use_source_project_billing_group").(bool),
+			BillingGroupId:               d.Get("billing_group").(string),
 		},
 	)
 	if err != nil {
 		return append(diags, diag.FromErr(err)...)
 	}
 
-	if billingGroupID, ok := d.GetOk("billing_group"); ok {
-		dia := resourceProjectAssignToBillingGroup(projectName, billingGroupID.(string), client, d)
-		if dia.HasError() {
-			return append(diags, dia...)
-		}
-	} else {
+	if _, ok := d.GetOk("billing_group"); !ok {
 		// if billing_group is not set but copy_from_project is not empty,
 		// copy billing group from source project
 		if sourceProject, ok := d.GetOk("copy_from_project"); ok {
