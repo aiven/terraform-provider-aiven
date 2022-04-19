@@ -28,6 +28,7 @@ resource "aiven_account" "account1" {
 ### Optional
 
 - **id** (String) The ID of this resource.
+- **primary_billing_group_id** (String) Billing group id
 
 ### Read-Only
 

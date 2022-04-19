@@ -65,6 +65,7 @@ func TestAccAivenAccount_basic(t *testing.T) {
 					testAccCheckAivenAccountAttributes("data.aiven_account.account"),
 					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("test-acc-ac-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "tenant_id", "aiven"),
+					resource.TestCheckResourceAttrSet(resourceName, "primary_billing_group_id"),
 				),
 			},
 			{
@@ -85,14 +86,19 @@ func TestAccAivenAccount_basic(t *testing.T) {
 
 func testAccAccountResource(name string) string {
 	return fmt.Sprintf(`
+		resource "aiven_billing_group" "bar" {
+		  name = "test-acc-bg-%s"
+		}
+		
 		resource "aiven_account" "foo" {
-		  name = "test-acc-ac-%s"
+		  name                     = "test-acc-ac-%s"
+		  primary_billing_group_id = aiven_billing_group.bar.id
 		}
 		
 		data "aiven_account" "account" {
 		  name = aiven_account.foo.name
 		}`,
-		name)
+		name, name)
 }
 
 func testAccAccountToProject(name string) string {
