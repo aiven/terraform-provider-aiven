@@ -122,7 +122,9 @@ Read-Only:
 
 Read-Only:
 
+- **jolokia** (String)
 - **kafka_connect** (String)
+- **prometheus** (String)
 
 
 <a id="nestedobjatt--kafka_connect_user_config--public_access"></a>

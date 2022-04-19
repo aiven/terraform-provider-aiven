@@ -213,9 +213,11 @@ Optional:
 
 Optional:
 
+- **jolokia** (String) Enable jolokia
 - **kafka** (String) Enable kafka
 - **kafka_connect** (String) Enable kafka_connect
 - **kafka_rest** (String) Enable kafka_rest
+- **prometheus** (String) Enable prometheus
 - **schema_registry** (String) Enable schema_registry
 
 

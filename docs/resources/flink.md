@@ -97,6 +97,7 @@ Optional:
 Optional:
 
 - **flink** (String) Enable flink
+- **prometheus** (String) Enable prometheus
 
 
 

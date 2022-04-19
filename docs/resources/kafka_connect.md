@@ -116,7 +116,9 @@ Optional:
 
 Optional:
 
+- **jolokia** (String) Enable jolokia
 - **kafka_connect** (String) Enable kafka_connect
+- **prometheus** (String) Enable prometheus
 
 
 <a id="nestedblock--kafka_connect_user_config--public_access"></a>

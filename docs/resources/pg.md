@@ -116,6 +116,7 @@ Optional:
 - **admin_username** (String) Custom username for admin user. This must be set only when a new service is being created.
 - **backup_hour** (String) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.
 - **backup_minute** (String) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.
+- **enable_ipv6** (String) Enable IPv6
 - **ip_filter** (List of String) IP filter
 - **migration** (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--pg_user_config--migration))
 - **pg** (Block List, Max: 1) postgresql.conf configuration values (see [below for nested schema](#nestedblock--pg_user_config--pg))
@@ -145,7 +146,7 @@ Optional:
 - **dbname** (String) Database name for bootstrapping the initial connection
 - **host** (String) Hostname or IP address of the server where to migrate data from
 - **ignore_dbs** (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)
-- **method** (String) The migration method to be used
+- **method** (String) The migration method to be used (currently supported only by Redis and MySQL service types)
 - **password** (String, Sensitive) Password for authentication with the server where to migrate data from
 - **port** (String) Port number of the server where to migrate data from
 - **ssl** (String) The server where to migrate data from is secured with SSL
@@ -246,6 +247,7 @@ Optional:
 
 - **pg** (String) Enable pg
 - **pgbouncer** (String) Enable pgbouncer
+- **prometheus** (String) Enable prometheus
 
 
 <a id="nestedblock--pg_user_config--public_access"></a>

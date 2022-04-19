@@ -254,7 +254,7 @@
     "additionalProperties": false,
     "properties": {
       "bootstrap_servers": {
-        "example": "10.0.0.1:9092",
+        "example": "10.0.0.1:9092,10.0.0.2:9092",
         "maxLength": 256,
         "minLength": 3,
         "title": "Bootstrap servers",
@@ -408,7 +408,7 @@
         "pattern": "^[a-z0-9\\-@_]{5,32}$",
         "title": "Jolokia basic authentication username",
         "type": "string",
-        "user_error": "Must only contain a-z and 0-9"
+        "user_error": "Must be 5-32 characters long and may contain only lower case letters and numbers."
       }
     },
     "type": "object"
@@ -430,7 +430,7 @@
         "pattern": "^[a-z0-9\\-@_]{5,32}$",
         "title": "Prometheus basic authentication username",
         "type": "string",
-        "user_error": "Must only contain a-z and 0-9"
+        "user_error": "Must be 5-32 characters long and may contain only lower case letters and numbers."
       }
     },
     "type": "object"

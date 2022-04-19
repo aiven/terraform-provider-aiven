@@ -133,6 +133,7 @@ Read-Only:
 
 Read-Only:
 
+- **prometheus** (String)
 - **redis** (String)
 
 

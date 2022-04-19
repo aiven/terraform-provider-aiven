@@ -139,13 +139,13 @@ Read-Only:
 - **indices_query_bool_max_clause_count** (String)
 - **override_main_response_version** (String)
 - **reindex_remote_whitelist** (List of String)
+- **script_max_compilations_rate** (String)
 - **search_max_buckets** (String)
 - **thread_pool_analyze_queue_size** (String)
 - **thread_pool_analyze_size** (String)
 - **thread_pool_force_merge_size** (String)
 - **thread_pool_get_queue_size** (String)
 - **thread_pool_get_size** (String)
-- **thread_pool_index_size** (String)
 - **thread_pool_search_queue_size** (String)
 - **thread_pool_search_size** (String)
 - **thread_pool_search_throttled_queue_size** (String)
@@ -181,6 +181,7 @@ Read-Only:
 
 - **opensearch** (String)
 - **opensearch_dashboards** (String)
+- **prometheus** (String)
 
 
 <a id="nestedobjatt--opensearch_user_config--public_access"></a>

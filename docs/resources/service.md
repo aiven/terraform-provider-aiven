@@ -167,14 +167,13 @@ Optional:
 - **indices_query_bool_max_clause_count** (String) indices.query.bool.max_clause_count
 - **override_main_response_version** (String) compatibility.override_main_response_version
 - **reindex_remote_whitelist** (List of String) reindex_remote_whitelist
+- **script_max_compilations_rate** (String) Script max compilation rate - circuit breaker to prevent/minimize OOMs
 - **search_max_buckets** (String) search.max_buckets
 - **thread_pool_analyze_queue_size** (String) analyze thread pool queue size
 - **thread_pool_analyze_size** (String) analyze thread pool size
 - **thread_pool_force_merge_size** (String) force_merge thread pool size
 - **thread_pool_get_queue_size** (String) get thread pool queue size
 - **thread_pool_get_size** (String) get thread pool size
-- **thread_pool_index_queue_size** (String) index thread pool queue size
-- **thread_pool_index_size** (String) index thread pool size
 - **thread_pool_search_queue_size** (String) search thread pool queue size
 - **thread_pool_search_size** (String) search thread pool size
 - **thread_pool_search_throttled_queue_size** (String) search_throttled thread pool queue size
@@ -230,6 +229,7 @@ Optional:
 
 - **elasticsearch** (String) Enable elasticsearch
 - **kibana** (String) Enable kibana
+- **prometheus** (String) Enable prometheus
 
 
 <a id="nestedblock--elasticsearch_user_config--public_access"></a>
@@ -274,6 +274,7 @@ Optional:
 Optional:
 
 - **flink** (String) Enable flink
+- **prometheus** (String) Enable prometheus
 
 
 
@@ -562,7 +563,9 @@ Optional:
 
 Optional:
 
+- **jolokia** (String) Enable jolokia
 - **kafka_connect** (String) Enable kafka_connect
+- **prometheus** (String) Enable prometheus
 
 
 <a id="nestedblock--kafka_connect_user_config--public_access"></a>
@@ -722,9 +725,11 @@ Optional:
 
 Optional:
 
+- **jolokia** (String) Enable jolokia
 - **kafka** (String) Enable kafka
 - **kafka_connect** (String) Enable kafka_connect
 - **kafka_rest** (String) Enable kafka_rest
+- **prometheus** (String) Enable prometheus
 - **schema_registry** (String) Enable schema_registry
 
 
@@ -780,7 +785,7 @@ Optional:
 - **dbname** (String) Database name for bootstrapping the initial connection
 - **host** (String) Hostname or IP address of the server where to migrate data from
 - **ignore_dbs** (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)
-- **method** (String) The migration method to be used
+- **method** (String) The migration method to be used (currently supported only by Redis and MySQL service types)
 - **password** (String, Sensitive) Password for authentication with the server where to migrate data from
 - **port** (String) Port number of the server where to migrate data from
 - **ssl** (String) The server where to migrate data from is secured with SSL
@@ -835,6 +840,7 @@ Optional:
 
 - **mysql** (String) Enable mysql
 - **mysqlx** (String) Enable mysqlx
+- **prometheus** (String) Enable prometheus
 
 
 <a id="nestedblock--mysql_user_config--public_access"></a>
@@ -908,13 +914,13 @@ Optional:
 - **indices_query_bool_max_clause_count** (String) indices.query.bool.max_clause_count
 - **override_main_response_version** (String) compatibility.override_main_response_version
 - **reindex_remote_whitelist** (List of String) reindex_remote_whitelist
+- **script_max_compilations_rate** (String) Script max compilation rate - circuit breaker to prevent/minimize OOMs
 - **search_max_buckets** (String) search.max_buckets
 - **thread_pool_analyze_queue_size** (String) analyze thread pool queue size
 - **thread_pool_analyze_size** (String) analyze thread pool size
 - **thread_pool_force_merge_size** (String) force_merge thread pool size
 - **thread_pool_get_queue_size** (String) get thread pool queue size
 - **thread_pool_get_size** (String) get thread pool size
-- **thread_pool_index_size** (String) index thread pool size
 - **thread_pool_search_queue_size** (String) search thread pool queue size
 - **thread_pool_search_size** (String) search thread pool size
 - **thread_pool_search_throttled_queue_size** (String) search_throttled thread pool queue size
@@ -950,6 +956,7 @@ Optional:
 
 - **opensearch** (String) Enable opensearch
 - **opensearch_dashboards** (String) Enable opensearch_dashboards
+- **prometheus** (String) Enable prometheus
 
 
 <a id="nestedblock--opensearch_user_config--public_access"></a>
@@ -972,6 +979,7 @@ Optional:
 - **admin_username** (String) Custom username for admin user. This must be set only when a new service is being created.
 - **backup_hour** (String) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.
 - **backup_minute** (String) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.
+- **enable_ipv6** (String) Enable IPv6
 - **ip_filter** (List of String) IP filter
 - **migration** (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--pg_user_config--migration))
 - **pg** (Block List, Max: 1) postgresql.conf configuration values (see [below for nested schema](#nestedblock--pg_user_config--pg))
@@ -1001,7 +1009,7 @@ Optional:
 - **dbname** (String) Database name for bootstrapping the initial connection
 - **host** (String) Hostname or IP address of the server where to migrate data from
 - **ignore_dbs** (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)
-- **method** (String) The migration method to be used
+- **method** (String) The migration method to be used (currently supported only by Redis and MySQL service types)
 - **password** (String, Sensitive) Password for authentication with the server where to migrate data from
 - **port** (String) Port number of the server where to migrate data from
 - **ssl** (String) The server where to migrate data from is secured with SSL
@@ -1102,6 +1110,7 @@ Optional:
 
 - **pg** (String) Enable pg
 - **pgbouncer** (String) Enable pgbouncer
+- **prometheus** (String) Enable prometheus
 
 
 <a id="nestedblock--pg_user_config--public_access"></a>
@@ -1145,7 +1154,7 @@ Optional:
 - **redis_persistence** (String) Redis persistence
 - **redis_pubsub_client_output_buffer_limit** (String) Pub/sub client output buffer hard limit in MB
 - **redis_ssl** (String) Require SSL to access Redis
-- **redis_timeout** (String) Redis idle connection timeout
+- **redis_timeout** (String) Redis idle connection timeout in seconds
 - **service_to_fork_from** (String) Name of another service to fork from. This has effect only when a new service is being created.
 - **static_ips** (String) Static IP addresses
 
@@ -1157,7 +1166,7 @@ Optional:
 - **dbname** (String) Database name for bootstrapping the initial connection
 - **host** (String) Hostname or IP address of the server where to migrate data from
 - **ignore_dbs** (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)
-- **method** (String) The migration method to be used
+- **method** (String) The migration method to be used (currently supported only by Redis and MySQL service types)
 - **password** (String, Sensitive) Password for authentication with the server where to migrate data from
 - **port** (String) Port number of the server where to migrate data from
 - **ssl** (String) The server where to migrate data from is secured with SSL
@@ -1178,6 +1187,7 @@ Optional:
 
 Optional:
 
+- **prometheus** (String) Enable prometheus
 - **redis** (String) Enable redis
 
 
