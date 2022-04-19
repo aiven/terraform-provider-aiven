@@ -79,6 +79,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 	"payment_method": {
 		Type:        schema.TypeString,
 		Computed:    true,
+		Deprecated:  "Please use aiven_billing_group resource to set this value.",
 		Description: "The method of invoicing used for payments for this project, e.g. `card`.",
 	},
 	"billing_group": {
@@ -203,18 +204,14 @@ func resourceProjectCreate(_ context.Context, d *schema.ResourceData, m interfac
 			BillingCurrency:              billingCurrency,
 			VatID:                        vatID,
 			UseSourceProjectBillingGroup: d.Get("use_source_project_billing_group").(bool),
+			BillingGroupId:               d.Get("billing_group").(string),
 		},
 	)
 	if err != nil {
 		return append(diags, diag.FromErr(err)...)
 	}
 
-	if billingGroupID, ok := d.GetOk("billing_group"); ok {
-		dia := resourceProjectAssignToBillingGroup(projectName, billingGroupID.(string), client, d)
-		if dia.HasError() {
-			return append(diags, dia...)
-		}
-	} else {
+	if _, ok := d.GetOk("billing_group"); !ok {
 		// if billing_group is not set but copy_from_project is not empty,
 		// copy billing group from source project
 		if sourceProject, ok := d.GetOk("copy_from_project"); ok {
@@ -516,10 +513,12 @@ func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client,
 	if err := d.Set("billing_address", project.BillingAddress); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := contactEmailListForTerraform(d, "billing_emails", project.BillingEmails); err != nil {
-		return diag.FromErr(err)
+	if _, ok := d.GetOk("billing_emails"); ok {
+		if err := contactEmailListForTerraform(d, "billing_emails", project.BillingEmails); err != nil {
+			return diag.FromErr(err)
+		}
 	}
-	if err := d.Set("country_code", project.CountryCode); err != nil {
+	if err := setOnlyIfFieldIsNotEmpty(d, "country_code", project.CountryCode); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("project", project.Name); err != nil {
@@ -531,16 +530,13 @@ func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client,
 	if err := contactEmailListForTerraform(d, "technical_emails", project.TechnicalEmails); err != nil {
 		return diag.FromErr(err)
 	}
-	if d := resourceProjectGetCACert(project.Name, client, d); d != nil {
-		return d
-	}
-	if err := d.Set("billing_extra_text", project.BillingExtraText); err != nil {
+	if err := setOnlyIfFieldIsNotEmpty(d, "billing_extra_text", project.BillingExtraText); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("default_cloud", project.DefaultCloud); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("billing_currency", project.BillingCurrency); err != nil {
+	if err := setOnlyIfFieldIsNotEmpty(d, "billing_currency", project.BillingCurrency); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("available_credits", project.AvailableCredits); err != nil {
@@ -552,11 +548,25 @@ func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client,
 	if err := d.Set("payment_method", project.PaymentMethod); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("vat_id", project.VatID); err != nil {
+	if err := setOnlyIfFieldIsNotEmpty(d, "vat_id", project.VatID); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("billing_group", project.BillingGroupId); err != nil {
 		return diag.FromErr(err)
+	}
+
+	if d := resourceProjectGetCACert(project.Name, client, d); d != nil {
+		return d
+	}
+
+	return nil
+}
+
+func setOnlyIfFieldIsNotEmpty(d *schema.ResourceData, k string, v interface{}) error {
+	if _, ok := d.GetOk("billing_emails"); ok {
+		if err := d.Set(k, v); err != nil {
+			return err
+		}
 	}
 
 	return nil
