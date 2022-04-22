@@ -5,6 +5,13 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.7.2] - 2022-04-22
+
+- Add support for new user configuration options
+- Add support for `primary_billing_group_id` to account
+- Fix project resource import and read for deprecated billing group fields
+- Update project resource creation such that the default billing group wouldn't be created
+
 ## [2.7.1] - 2022-04-04
 
 - Fix account team member deletion
