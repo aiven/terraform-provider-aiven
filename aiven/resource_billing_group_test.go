@@ -22,8 +22,7 @@ func TestAccAivenBillingGroup_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckAivenBillingGroupResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config:             testAccCopyFromProjectBillingGroupResource(rName),
-				ExpectNonEmptyPlan: true,
+				Config: testAccCopyFromProjectBillingGroupResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("aiven_project.pr02", "billing_group"),
 				),
