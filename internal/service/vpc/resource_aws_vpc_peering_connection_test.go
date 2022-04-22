@@ -53,7 +53,7 @@ func testAccVPCPeeringConnectionAWSResource() string {
 		}
 		
 		resource "aiven_aws_vpc_peering_connection" "foo" {
-		  vpc_id             = aiven_project_vpc.bar.id
+		  vpc_id         = aiven_project_vpc.bar.id
 		  aws_account_id = "%s"
 		  aws_vps_id     = "%s"
 		  aws_vpc_region = "%s"
