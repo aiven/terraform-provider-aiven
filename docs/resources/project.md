@@ -43,7 +43,7 @@ resource "aiven_project" "myproject" {
 
 - **ca_cert** (String, Sensitive) The CA certificate of the project. This is required for configuring clients that connect to certain services like Kafka.
 - **estimated_balance** (String) The current accumulated bill for this project in the current billing period.
-- **payment_method** (String, Deprecated) The method of invoicing used for payments for this project, e.g. `card`.
+- **payment_method** (String) The method of invoicing used for payments for this project, e.g. `card`.
 
 ## Import
 
