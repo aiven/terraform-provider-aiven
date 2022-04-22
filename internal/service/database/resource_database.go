@@ -59,9 +59,7 @@ var aivenDatabaseSchema = map[string]*schema.Schema{
 
 func ResourceDatabase() *schema.Resource {
 	return &schema.Resource{
-		Description: `The Database resource allows the creation and management of Aiven Databases.
-
-~>**Deprecated** The Database resource is deprecated, please use service-specific resources instead, for example: ` + "`aiven_pg_database`, `aiven_mysql_database` etc.",
+		Description:        "The Database resource allows the creation and management of Aiven Databases.",
 		DeprecationMessage: "`aiven_database` resource is deprecated. Please use service-specific resources instead, for example: `aiven_pg_database` , `aiven_mysql_database` etc.",
 		CreateContext:      resourceDatabaseCreate,
 		ReadContext:        resourceDatabaseRead,

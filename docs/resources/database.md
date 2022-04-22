@@ -4,14 +4,11 @@ page_title: "aiven_database Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
   The Database resource allows the creation and management of Aiven Databases.
-  ~>Deprecated The Database resource is deprecated, please use service-specific resources instead, for example: aiven_pg_database, aiven_mysql_database etc.
 ---
 
 # aiven_database (Resource)
 
 The Database resource allows the creation and management of Aiven Databases.
-
-~>**Deprecated** The Database resource is deprecated, please use service-specific resources instead, for example: `aiven_pg_database`, `aiven_mysql_database` etc.
 
 ## Example Usage
 
