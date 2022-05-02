@@ -335,6 +335,13 @@
             "title": "get thread pool size",
             "type": "integer"
           },
+          "thread_pool_index_size": {
+            "description": "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
+            "maximum": 128,
+            "minimum": 1,
+            "title": "index thread pool size",
+            "type": "integer"
+          },
           "thread_pool_search_queue_size": {
             "description": "Size for the thread pool queue. See documentation for exact details.",
             "maximum": 2000,
@@ -3919,6 +3926,13 @@
             "maximum": 128,
             "minimum": 1,
             "title": "get thread pool size",
+            "type": "integer"
+          },
+          "thread_pool_index_size": {
+            "description": "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
+            "maximum": 128,
+            "minimum": 1,
+            "title": "index thread pool size",
             "type": "integer"
           },
           "thread_pool_search_queue_size": {

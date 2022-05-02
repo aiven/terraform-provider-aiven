@@ -5,6 +5,10 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [2.7.3] - 2022-05-02
+
+- Add missing user configuration option `thread_pool_index_size`
+
 ## [2.7.2] - 2022-04-22
 
 - Add support for new user configuration options

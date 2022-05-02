@@ -143,6 +143,7 @@ Optional:
 - **thread_pool_force_merge_size** (String) force_merge thread pool size
 - **thread_pool_get_queue_size** (String) get thread pool queue size
 - **thread_pool_get_size** (String) get thread pool size
+- **thread_pool_index_size** (String) index thread pool size
 - **thread_pool_search_queue_size** (String) search thread pool queue size
 - **thread_pool_search_size** (String) search thread pool size
 - **thread_pool_search_throttled_queue_size** (String) search_throttled thread pool queue size

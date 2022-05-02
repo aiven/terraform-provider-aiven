@@ -146,6 +146,7 @@ Read-Only:
 - **thread_pool_force_merge_size** (String)
 - **thread_pool_get_queue_size** (String)
 - **thread_pool_get_size** (String)
+- **thread_pool_index_size** (String)
 - **thread_pool_search_queue_size** (String)
 - **thread_pool_search_size** (String)
 - **thread_pool_search_throttled_queue_size** (String)
