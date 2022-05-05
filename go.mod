@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/aiven/aiven-go-client v1.7.1-0.20220414113907-5a32f70bb86e
+	github.com/aiven/aiven-go-client v1.7.1-0.20220505073832-a32bfcbac19c
 	github.com/docker/go-units v0.4.0
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect

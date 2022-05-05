@@ -137,6 +137,10 @@ func testAccProjectResource(name string) string {
 		resource "aiven_project" "foo" {
 		  project       = "test-acc-pr-%s"
 		  default_cloud = "aws-eu-west-2"
+		  tag {
+		    key   = "test"
+		    value = "val"
+		  }
 		}
 		
 		data "aiven_project" "project" {

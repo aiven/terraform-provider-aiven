@@ -40,7 +40,16 @@ data "aiven_project" "myproject" {
 - **default_cloud** (String) Defines the default cloud provider and region where services are hosted. This can be changed freely after the project is created. This will not affect existing services.
 - **estimated_balance** (String) The current accumulated bill for this project in the current billing period.
 - **payment_method** (String) The method of invoicing used for payments for this project, e.g. `card`.
+- **tag** (Set of Object) Tags are key-value pairs that allow you to categorize projects. (see [below for nested schema](#nestedatt--tag))
 - **technical_emails** (Set of String) Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability. It is  good practice to keep this up-to-date to be aware of any potential issues with your project.
 - **use_source_project_billing_group** (Boolean) Use the same billing group that is used in source project.
+
+<a id="nestedatt--tag"></a>
+### Nested Schema for `tag`
+
+Read-Only:
+
+- **key** (String)
+- **value** (String)
 
 

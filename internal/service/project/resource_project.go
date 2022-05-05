@@ -68,6 +68,25 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Description:      schemautil.Complex("The id of the billing group that is linked to this project.").Referenced().Build(),
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 	},
+	"tag": {
+		Description: "Tags are key-value pairs that allow you to categorize projects.",
+		Type:        schema.TypeSet,
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"key": {
+					Description: "Project tag key",
+					Type:        schema.TypeString,
+					Required:    true,
+				},
+				"value": {
+					Description: "Project tag value",
+					Type:        schema.TypeString,
+					Required:    true,
+				},
+			},
+		},
+	},
 
 	// computed fields
 	"payment_method": {
@@ -116,6 +135,7 @@ func resourceProjectCreate(_ context.Context, d *schema.ResourceData, m interfac
 			AccountId:                    schemautil.OptionalStringPointer(d, "account_id"),
 			UseSourceProjectBillingGroup: d.Get("use_source_project_billing_group").(bool),
 			BillingGroupId:               d.Get("billing_group").(string),
+			Tags:                         getTagsFromSchema(d),
 		},
 	)
 	if err != nil {
@@ -219,6 +239,7 @@ func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interfac
 			Cloud:           schemautil.OptionalStringPointer(d, "default_cloud"),
 			TechnicalEmails: contactEmailListForAPI(d, "technical_emails", false),
 			AccountId:       d.Get("account_id").(string),
+			Tags:            getTagsFromSchema(d),
 		},
 	)
 	if err != nil {
@@ -372,5 +393,27 @@ func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client,
 		return diag.FromErr(err)
 	}
 
+	var tags []map[string]interface{}
+	for k, v := range project.Tags {
+		tags = append(tags, map[string]interface{}{
+			"key":   k,
+			"value": v,
+		})
+	}
+	if err := d.Set("tag", tags); err != nil {
+		return diag.FromErr(err)
+	}
+
 	return nil
+}
+
+func getTagsFromSchema(d *schema.ResourceData) map[string]string {
+	tags := make(map[string]string)
+
+	for _, tag := range d.Get("tag").(*schema.Set).List() {
+		tagVal := tag.(map[string]interface{})
+		tags[tagVal["key"].(string)] = tagVal["value"].(string)
+	}
+
+	return tags
 }
