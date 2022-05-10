@@ -5,7 +5,8 @@ import (
 	"flag"
 	"log"
 
-	"github.com/aiven/terraform-provider-aiven/aiven"
+	"github.com/aiven/terraform-provider-aiven/internal/provider"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 )
 
@@ -21,7 +22,7 @@ func main() {
 	flag.BoolVar(&debugMode, "debug", false, "set to true to run the provider with support for debuggers like delve")
 	flag.Parse()
 
-	opts := &plugin.ServeOpts{ProviderFunc: aiven.Provider}
+	opts := &plugin.ServeOpts{ProviderFunc: provider.Provider}
 
 	if debugMode {
 		if err := plugin.Debug(context.Background(), "registry.terraform.io/aiven/aiven", opts); err != nil {

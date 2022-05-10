@@ -50,4 +50,10 @@ Optional:
 - **create** (String)
 - **delete** (String)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_project_vpc.myvpc project/id
+```

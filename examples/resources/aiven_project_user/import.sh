@@ -1,0 +1,1 @@
+terraform import aiven_project_user.mytestuser project/email

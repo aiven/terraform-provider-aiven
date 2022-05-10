@@ -48,4 +48,10 @@ resource "aiven_project" "pr1" {
 - **vat_id** (String) VAT id
 - **zip_code** (String) Zip Code
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_billing_group.bybg1 id
+```

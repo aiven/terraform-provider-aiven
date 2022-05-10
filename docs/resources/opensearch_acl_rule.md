@@ -88,4 +88,10 @@ resource "aiven_opensearch_acl_rule" "os_acl_rule" {
 
 - **id** (String) The ID of this resource.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_opensearch_acl_rule.os_acl_rule project/service_name/username/index
+```

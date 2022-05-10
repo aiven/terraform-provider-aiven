@@ -1,0 +1,1 @@
+terraform import aiven_transit_gateway_vpc_attachment.attachment project/vpc_id/peer_cloud_account/peer_vpc/peer_region

@@ -1,0 +1,1 @@
+terraform import aiven_kafka_connect.kc1 project/service_name

@@ -4,11 +4,14 @@ page_title: "aiven_database Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
   The Database data source provides information about the existing Aiven Database.
+  ~>Deprecated The Database data source is deprecated, please use service-specific data sources instead, for example: aiven_pg_database, aiven_mysql_database etc.
 ---
 
 # aiven_database (Data Source)
 
 The Database data source provides information about the existing Aiven Database.
+
+~>**Deprecated** The Database data source is deprecated, please use service-specific data sources instead, for example: `aiven_pg_database`, `aiven_mysql_database` etc.
 
 ## Example Usage
 

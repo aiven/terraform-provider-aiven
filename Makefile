@@ -2,15 +2,20 @@ version = $(shell git describe --long --tags 2>/dev/null || echo unknown-g`git d
 short_version = $(shell echo $(version) | sed 's/-.*//')
 
 GO=CGO_ENABLED=0 go
-BUILDFLAGS=-ldflags "-X main.version=${version}" 
+BUILDFLAGS=-ldflags "-X main.version=${version}"
+TEST                ?= ./...
+PKG_NAME            ?= internal
+TEST_COUNT          ?= 1
+ACCTEST_TIMEOUT     ?= 180m
+ACCTEST_PARALLELISM ?= 5
 
-SOURCES = $(shell find aiven -name '*.go')
+SOURCES = $(shell find internal -name '*.go')
 
 #################################################
 # Tools
 #################################################
 
-TOOLS_DIR := hack/tools
+TOOLS_DIR := tools
 TOOLS_BIN_DIR := $(TOOLS_DIR)/bin
 
 TFPLUGINDOCS=$(TOOLS_BIN_DIR)/tfplugindocs
@@ -50,7 +55,7 @@ test:
 
 .PHONY: testacc
 testacc:
-	TF_ACC=1 CGO_ENABLED=0 go test -v -count 1 -parallel 40 --cover ./... -timeout 120m ${TESTARGS}
+	TF_ACC=1 go test ./$(PKG_NAME)/... -v -count $(TEST_COUNT) -parallel $(ACCTEST_PARALLELISM) $(RUNARGS) $(TESTARGS) -timeout $(ACCTEST_TIMEOUT)
 
 .PHONY: sweep
 sweep:

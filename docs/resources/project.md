@@ -32,24 +32,23 @@ resource "aiven_project" "myproject" {
 - **account_id** (String) An optional property to link a project to already an existing account by using account ID. To set up proper dependencies please refer to this variable as a reference.
 - **add_account_owners_admin_access** (Boolean) If account_id is set, grant account owner team admin access to the new project. The default value is `true`.
 - **available_credits** (String) The amount of platform credits available to the project. This could be your free trial or other promotional credits.
-- **billing_address** (String, Deprecated) **DEPRECATED Please use aiven_billing_group resource to set this value.** Billing name and address of the project.
-- **billing_currency** (String, Deprecated) **DEPRECATED Please use aiven_billing_group resource to set this value.** Billing currency.
-- **billing_emails** (Set of String, Deprecated) **DEPRECATED Please use aiven_billing_group resource to set this value.** Billing contact emails of the project.
-- **billing_extra_text** (String, Deprecated) **DEPRECATED Please use aiven_billing_group resource to set this value.** Extra text to be included in all project invoices, e.g. purchase order or cost center number.
 - **billing_group** (String) The id of the billing group that is linked to this project. To set up proper dependencies please refer to this variable as a reference.
-- **card_id** (String, Deprecated) **DEPRECATED Please use aiven_billing_group resource to set this value.** Either the full card UUID or the last 4 digits of the card. As the full UUID is not shown in the UI it is typically easier to use the last 4 digits to identify the card. This can be omitted if `copy_from_project` is used to copy billing info from another project.
 - **copy_from_project** (String) is the name of another project used to copy billing information and some other project attributes like technical contacts from. This is mostly relevant when an existing project has billing type set to invoice and that needs to be copied over to a new project. (Setting billing is otherwise not allowed over the API.) This only has effect when the project is created. To set up proper dependencies please refer to this variable as a reference.
-- **country_code** (String, Deprecated) **DEPRECATED Please use aiven_billing_group resource to set this value.** Billing country code of the project.
 - **default_cloud** (String) Defines the default cloud provider and region where services are hosted. This can be changed freely after the project is created. This will not affect existing services.
 - **id** (String) The ID of this resource.
 - **technical_emails** (Set of String) Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability. It is  good practice to keep this up-to-date to be aware of any potential issues with your project.
 - **use_source_project_billing_group** (Boolean) Use the same billing group that is used in source project.
-- **vat_id** (String, Deprecated) **DEPRECATED Please use aiven_billing_group resource to set this value.** EU VAT Identification Number.
 
 ### Read-Only
 
 - **ca_cert** (String, Sensitive) The CA certificate of the project. This is required for configuring clients that connect to certain services like Kafka.
 - **estimated_balance** (String) The current accumulated bill for this project in the current billing period.
-- **payment_method** (String, Deprecated) The method of invoicing used for payments for this project, e.g. `card`.
+- **payment_method** (String) The method of invoicing used for payments for this project, e.g. `card`.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_project.myproject project
+```

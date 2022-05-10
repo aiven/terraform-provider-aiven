@@ -1,0 +1,1 @@
+terraform import aiven_kafka_schema_configuration.config project/service_name

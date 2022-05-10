@@ -1,0 +1,1 @@
+terraform import aiven_opensearch_acl_config.foo project/service_name

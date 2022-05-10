@@ -48,12 +48,8 @@ resource "aiven_kafka_topic" "mytesttopic" {
 
 ### Optional
 
-- **cleanup_policy** (String, Deprecated) **DEPRECATED use config.cleanup_policy instead** Topic cleanup policy. The possible values are `delete` and `compact`.
 - **config** (Block List, Max: 1) Kafka topic configuration (see [below for nested schema](#nestedblock--config))
 - **id** (String) The ID of this resource.
-- **minimum_in_sync_replicas** (Number, Deprecated) **DEPRECATED use config.min_insync_replicas instead** Minimum required nodes in-sync replicas (ISR) to produce to a partition.
-- **retention_bytes** (Number, Deprecated) **DEPRECATED use config.retention_bytes instead** Retention bytes.
-- **retention_hours** (Number, Deprecated) **DEPRECATED use config.retention_ms instead** Retention period (hours).
 - **tag** (Block Set) Kafka Topic tag. (see [below for nested schema](#nestedblock--tag))
 - **termination_protection** (Boolean) It is a Terraform client-side deletion protection, which prevents a Kafka topic from being deleted. It is recommended to enable this for any production Kafka topic containing critical data.
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
@@ -110,4 +106,10 @@ Optional:
 - **delete** (String)
 - **read** (String)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_kafka_topic.mytesttopic project/service_name/topic_name
+```

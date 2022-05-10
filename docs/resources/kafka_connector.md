@@ -71,4 +71,10 @@ Read-Only:
 - **connector** (String)
 - **task** (Number)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_kafka_connector.kafka-os-con1 project/service_name/connector_name
+```

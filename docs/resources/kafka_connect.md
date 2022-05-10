@@ -169,4 +169,10 @@ Read-Only:
 
 Read-Only:
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_kafka_connect.kc1 project/service_name
+```

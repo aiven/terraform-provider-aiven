@@ -37,4 +37,10 @@ resource "aiven_kafka_acl" "mytestacl" {
 
 - **id** (String) The ID of this resource.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_kafka_acl.mytestacl project/service_name/id
+```

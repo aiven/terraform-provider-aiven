@@ -47,4 +47,10 @@ resource "aiven_account_team_project" "account_team_project1" {
 - **project_name** (String) The name of an already existing project
 - **team_type** (String) The Account team project type The possible values are `admin`, `developer`, `operator` and `read_only`.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_account_team_project.account_team_project1 account_id/team_id/project_name
+```
