@@ -2111,6 +2111,18 @@ var (
             "title": "The maximum size of a request in bytes",
             "type": "integer"
           },
+          "producer_compression_type": {
+            "description": "Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.",
+            "enum": [
+              "gzip",
+              "snappy",
+              "lz4",
+              "zstd",
+              "none"
+            ],
+            "title": "The default compression type for producers",
+            "type": "string"
+          },
           "session_timeout_ms": {
             "description": "The timeout in milliseconds used to detect failures when using Kafka’s group management facilities (defaults to 10000).",
             "example": 10000,
@@ -2433,6 +2445,18 @@ var (
             "minimum": 131072,
             "title": "The maximum size of a request in bytes",
             "type": "integer"
+          },
+          "producer_compression_type": {
+            "description": "Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.",
+            "enum": [
+              "gzip",
+              "snappy",
+              "lz4",
+              "zstd",
+              "none"
+            ],
+            "title": "The default compression type for producers",
+            "type": "string"
           },
           "session_timeout_ms": {
             "description": "The timeout in milliseconds used to detect failures when using Kafka’s group management facilities (defaults to 10000).",

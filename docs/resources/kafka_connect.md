@@ -99,6 +99,7 @@ Optional:
 - **offset_flush_interval_ms** (String) The interval at which to try committing offsets for tasks
 - **offset_flush_timeout_ms** (String) Offset flush timeout
 - **producer_max_request_size** (String) The maximum size of a request in bytes
+- **producer_compression_type** (String) The default compression type for producers.
 - **session_timeout_ms** (String) The timeout used to detect failures when using Kafka’s group management facilities
 
 

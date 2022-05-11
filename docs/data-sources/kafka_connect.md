@@ -105,6 +105,7 @@ Read-Only:
 - **offset_flush_interval_ms** (String)
 - **offset_flush_timeout_ms** (String)
 - **producer_max_request_size** (String)
+- **producer_compression_type** (String)
 - **session_timeout_ms** (String)
 
 
