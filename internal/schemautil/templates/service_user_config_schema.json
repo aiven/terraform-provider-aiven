@@ -203,6 +203,13 @@
             "title": "cluster.max_shards_per_node",
             "type": "integer"
           },
+          "cluster_routing_allocation_node_concurrent_recoveries": {
+            "description": "How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to 2.",
+            "maximum": 16,
+            "minimum": 2,
+            "title": "Concurrent incoming/outgoing shard recoveries per node",
+            "type": "integer"
+          },
           "http_max_content_length": {
             "description": "Maximum content length for HTTP requests to the Elasticsearch HTTP API, in bytes.",
             "maximum": 2147483647,
@@ -256,6 +263,20 @@
             "maximum": 4096,
             "minimum": 64,
             "title": "indices.query.bool.max_clause_count",
+            "type": "integer"
+          },
+          "indices_recovery_max_bytes_per_sec": {
+            "description": "Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb",
+            "maximum": 400,
+            "minimum": 40,
+            "title": "indices.recovery.max_bytes_per_sec",
+            "type": "integer"
+          },
+          "indices_recovery_max_concurrent_file_chunks": {
+            "description": "Number of file chunks sent in parallel for each recovery. Defaults to 2.",
+            "maximum": 5,
+            "minimum": 2,
+            "title": "indices.recovery.max_concurrent_file_chunks",
             "type": "integer"
           },
           "override_main_response_version": {
@@ -333,13 +354,6 @@
             "maximum": 128,
             "minimum": 1,
             "title": "get thread pool size",
-            "type": "integer"
-          },
-          "thread_pool_index_size": {
-            "description": "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
-            "maximum": 128,
-            "minimum": 1,
-            "title": "index thread pool size",
             "type": "integer"
           },
           "thread_pool_search_queue_size": {
@@ -2093,6 +2107,18 @@
             "title": "Offset flush timeout",
             "type": "integer"
           },
+          "producer_compression_type": {
+            "description": "Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.",
+            "enum": [
+              "gzip",
+              "snappy",
+              "lz4",
+              "zstd",
+              "none"
+            ],
+            "title": "The default compression type for producers",
+            "type": "string"
+          },
           "producer_max_request_size": {
             "description": "This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests.",
             "example": 1048576,
@@ -2182,16 +2208,6 @@
       },
       "kafka_version": {
         "enum": [
-          "1.0",
-          "1.1",
-          "2.0",
-          "2.1",
-          "2.2",
-          "2.3",
-          "2.4",
-          "2.5",
-          "2.6",
-          "2.7",
           "2.8",
           "3.0",
           "3.1"
@@ -2416,6 +2432,18 @@
             "title": "Offset flush timeout",
             "type": "integer"
           },
+          "producer_compression_type": {
+            "description": "Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.",
+            "enum": [
+              "gzip",
+              "snappy",
+              "lz4",
+              "zstd",
+              "none"
+            ],
+            "title": "The default compression type for producers",
+            "type": "string"
+          },
           "producer_max_request_size": {
             "description": "This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests.",
             "example": 1048576,
@@ -2637,8 +2665,6 @@
       },
       "m3_version": {
         "enum": [
-          "0.15",
-          "1.0",
           "1.1",
           "1.2"
         ],
@@ -2721,8 +2747,6 @@
       },
       "m3_version": {
         "enum": [
-          "0.15",
-          "1.0",
           "1.1",
           "1.2"
         ],
@@ -2835,8 +2859,6 @@
       },
       "m3_version": {
         "enum": [
-          "0.15",
-          "1.0",
           "1.1",
           "1.2"
         ],
@@ -3796,6 +3818,13 @@
             "title": "cluster.max_shards_per_node",
             "type": "integer"
           },
+          "cluster_routing_allocation_node_concurrent_recoveries": {
+            "description": "How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to 2.",
+            "maximum": 16,
+            "minimum": 2,
+            "title": "Concurrent incoming/outgoing shard recoveries per node",
+            "type": "integer"
+          },
           "http_max_content_length": {
             "description": "Maximum content length for HTTP requests to the OpenSearch HTTP API, in bytes.",
             "maximum": 2147483647,
@@ -3849,6 +3878,20 @@
             "maximum": 4096,
             "minimum": 64,
             "title": "indices.query.bool.max_clause_count",
+            "type": "integer"
+          },
+          "indices_recovery_max_bytes_per_sec": {
+            "description": "Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb",
+            "maximum": 400,
+            "minimum": 40,
+            "title": "indices.recovery.max_bytes_per_sec",
+            "type": "integer"
+          },
+          "indices_recovery_max_concurrent_file_chunks": {
+            "description": "Number of file chunks sent in parallel for each recovery. Defaults to 2.",
+            "maximum": 5,
+            "minimum": 2,
+            "title": "indices.recovery.max_concurrent_file_chunks",
             "type": "integer"
           },
           "override_main_response_version": {
@@ -3926,13 +3969,6 @@
             "maximum": 128,
             "minimum": 1,
             "title": "get thread pool size",
-            "type": "integer"
-          },
-          "thread_pool_index_size": {
-            "description": "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
-            "maximum": 128,
-            "minimum": 1,
-            "title": "index thread pool size",
             "type": "integer"
           },
           "thread_pool_search_queue_size": {
@@ -4411,8 +4447,8 @@
           "log_line_prefix": {
             "description": "Choose from one of the available log-formats. These can support popular log analyzers like pgbadger, pganalyze etc.",
             "enum": [
-              "'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '",
               "'pid=%p,user=%u,db=%d,app=%a,client=%h '",
+              "'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '",
               "'%m [%p] %q[user=%u,db=%d,app=%a] '"
             ],
             "title": "log_line_prefix",
@@ -4657,8 +4693,6 @@
       },
       "pg_version": {
         "enum": [
-          "9.5",
-          "9.6",
           "10",
           "11",
           "12",

@@ -98,6 +98,7 @@ Optional:
 - **consumer_max_poll_records** (String) The maximum number of records returned by a single poll
 - **offset_flush_interval_ms** (String) The interval at which to try committing offsets for tasks
 - **offset_flush_timeout_ms** (String) Offset flush timeout
+- **producer_compression_type** (String) The default compression type for producers
 - **producer_max_request_size** (String) The maximum size of a request in bytes
 - **session_timeout_ms** (String) The timeout used to detect failures when using Kafka’s group management facilities
 

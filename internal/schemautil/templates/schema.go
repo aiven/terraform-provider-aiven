@@ -6,7 +6,7 @@ const (
 	// User configuration options based on resource type
 	UserConfigSchemaEndpoint    = "endpoint"
 	UserConfigSchemaIntegration = "integration"
-	UserConfigSchemaService     = "common"
+	UserConfigSchemaService     = "service"
 
 	// JSON file names for user configuration options
 	EndpointFileName    = "integration_endpoints_user_config_schema.json"

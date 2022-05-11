@@ -348,6 +348,64 @@
     ],
     "type": "object"
   },
+  "external_postgresql": {
+    "additionalProperties": false,
+    "properties": {
+      "host": {
+        "example": "my.server.com",
+        "maxLength": 255,
+        "title": "Hostname or IP address of the server",
+        "type": "string"
+      },
+      "password": {
+        "example": "jjKk45Nnd",
+        "maxLength": 256,
+        "title": "Password",
+        "type": "string"
+      },
+      "port": {
+        "example": 5432,
+        "maximum": 65535,
+        "minimum": 1,
+        "title": "Port number of the server",
+        "type": "integer"
+      },
+      "ssl_mode": {
+        "default": "verify-full",
+        "enum": [
+          "disable",
+          "allow",
+          "prefer",
+          "require",
+          "verify-ca",
+          "verify-full"
+        ],
+        "example": "verify-full",
+        "title": "SSL Mode",
+        "type": "string"
+      },
+      "ssl_root_cert": {
+        "default": "",
+        "example": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n",
+        "maxLength": 16384,
+        "title": "SSL Root Cert",
+        "type": "string"
+      },
+      "username": {
+        "example": "myname",
+        "maxLength": 256,
+        "title": "User name",
+        "type": "string"
+      }
+    },
+    "required": [
+      "host",
+      "port",
+      "username",
+      "password"
+    ],
+    "type": "object"
+  },
   "external_schema_registry": {
     "additionalProperties": false,
     "properties": {

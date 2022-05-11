@@ -159,7 +159,7 @@ func TestGenerateTerraformUserConfigSchema(t *testing.T) {
 }
 
 func Test_convertTerraformUserConfigToAPICompatibleFormat(t *testing.T) {
-	entrySchema := templates.GetUserConfigSchema("common")["kafka"].(map[string]interface{})
+	entrySchema := templates.GetUserConfigSchema(templates.UserConfigSchemaService)["kafka"].(map[string]interface{})
 	entrySchemaProps := entrySchema["properties"].(map[string]interface{})
 
 	type args struct {
