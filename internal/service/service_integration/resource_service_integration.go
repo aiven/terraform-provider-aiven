@@ -85,31 +85,11 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		Optional: true,
 		Type:     schema.TypeList,
 	},
-	"datadog_user_config": {
-		Description: "Dashboard specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: schemautil.GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["datadog"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
 	"kafka_logs_user_config": {
 		Description: "Kafka Logs specific user configurable settings",
 		Elem: &schema.Resource{
 			Schema: schemautil.GenerateTerraformUserConfigSchema(
 				templates.GetUserConfigSchema("integration")["kafka_logs"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
-	"prometheus_user_config": {
-		Description: "Prometheus coordinator specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: schemautil.GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["prometheus"].(map[string]interface{})),
 		},
 		MaxItems: 1,
 		Optional: true,

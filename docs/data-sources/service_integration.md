@@ -26,7 +26,6 @@ Service Integration defines an integration between two Aiven services or between
 
 ### Read-Only
 
-- **datadog_user_config** (List of Object) Dashboard specific user configurable settings (see [below for nested schema](#nestedatt--datadog_user_config))
 - **destination_endpoint_id** (String) Destination endpoint for the integration (if any)
 - **integration_id** (String) Service Integration Id at aiven
 - **kafka_connect_user_config** (List of Object) Kafka Connect specific user configurable settings (see [below for nested schema](#nestedatt--kafka_connect_user_config))
@@ -35,31 +34,7 @@ Service Integration defines an integration between two Aiven services or between
 - **logs_user_config** (List of Object) Log integration specific user configurable settings (see [below for nested schema](#nestedatt--logs_user_config))
 - **metrics_user_config** (List of Object) Metrics specific user configurable settings (see [below for nested schema](#nestedatt--metrics_user_config))
 - **mirrormaker_user_config** (List of Object) Mirrormaker 1 integration specific user configurable settings (see [below for nested schema](#nestedatt--mirrormaker_user_config))
-- **prometheus_user_config** (List of Object) Prometheus coordinator specific user configurable settings (see [below for nested schema](#nestedatt--prometheus_user_config))
 - **source_endpoint_id** (String) Source endpoint for the integration (if any)
-
-<a id="nestedatt--datadog_user_config"></a>
-### Nested Schema for `datadog_user_config`
-
-Read-Only:
-
-- **datadog_tags** (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--datadog_tags))
-- **exclude_consumer_groups** (List of String)
-- **exclude_topics** (List of String)
-- **include_consumer_groups** (List of String)
-- **include_topics** (List of String)
-- **kafka_custom_metrics** (List of String)
-- **max_jmx_metrics** (String)
-
-<a id="nestedobjatt--datadog_user_config--datadog_tags"></a>
-### Nested Schema for `datadog_user_config.datadog_tags`
-
-Read-Only:
-
-- **comment** (String)
-- **tag** (String)
-
-
 
 <a id="nestedatt--kafka_connect_user_config"></a>
 ### Nested Schema for `kafka_connect_user_config`
@@ -165,39 +140,4 @@ Read-Only:
 Read-Only:
 
 - **mirrormaker_whitelist** (String)
-
-
-<a id="nestedatt--prometheus_user_config"></a>
-### Nested Schema for `prometheus_user_config`
-
-Read-Only:
-
-- **source_mysql** (List of Object) (see [below for nested schema](#nestedobjatt--prometheus_user_config--source_mysql))
-
-<a id="nestedobjatt--prometheus_user_config--source_mysql"></a>
-### Nested Schema for `prometheus_user_config.source_mysql`
-
-Read-Only:
-
-- **telegraf** (List of Object) (see [below for nested schema](#nestedobjatt--prometheus_user_config--source_mysql--telegraf))
-
-<a id="nestedobjatt--prometheus_user_config--source_mysql--telegraf"></a>
-### Nested Schema for `prometheus_user_config.source_mysql.telegraf`
-
-Read-Only:
-
-- **gather_event_waits** (String)
-- **gather_file_events_stats** (String)
-- **gather_index_io_waits** (String)
-- **gather_info_schema_auto_inc** (String)
-- **gather_innodb_metrics** (String)
-- **gather_perf_events_statements** (String)
-- **gather_process_list** (String)
-- **gather_slave_status** (String)
-- **gather_table_io_waits** (String)
-- **gather_table_lock_waits** (String)
-- **gather_table_schema** (String)
-- **perf_events_statements_digest_text_limit** (String)
-- **perf_events_statements_limit** (String)
-- **perf_events_statements_time_limit** (String)
 

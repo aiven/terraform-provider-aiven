@@ -1,18 +1,16 @@
 package main
 
 import (
-	"context"
 	"flag"
-	"log"
 
 	"github.com/aiven/terraform-provider-aiven/internal/provider"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
+	plugin "github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 )
 
-//go:generate ./aiven/templates/gen.sh service service_user_config_schema.json
-//go:generate ./aiven/templates/gen.sh integration integrations_user_config_schema.json
-//go:generate ./aiven/templates/gen.sh endpoint integration_endpoints_user_config_schema.json
+//go:generate ./internal/schemautil/templates/gen.sh service service_user_config_schema.json
+//go:generate ./internal/schemautil/templates/gen.sh integration integrations_user_config_schema.json
+//go:generate ./internal/schemautil/templates/gen.sh endpoint integration_endpoints_user_config_schema.json
 
 func main() {
 	var (
@@ -25,10 +23,7 @@ func main() {
 	opts := &plugin.ServeOpts{ProviderFunc: provider.Provider}
 
 	if debugMode {
-		if err := plugin.Debug(context.Background(), "registry.terraform.io/aiven/aiven", opts); err != nil {
-			log.Fatal(err.Error())
-		}
-		return
+		opts.Debug = true
 	}
 
 	plugin.Serve(opts)

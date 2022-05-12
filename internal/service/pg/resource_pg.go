@@ -5,6 +5,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/templates"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -117,7 +119,7 @@ func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	client := m.(*aiven.Client)
 
 	projectName, serviceName := schemautil.SplitResourceID2(d.Id())
-	userConfig := schemautil.ConvertTerraformUserConfigToAPICompatibleFormat("common", "pg", false, d)
+	userConfig := schemautil.ConvertTerraformUserConfigToAPICompatibleFormat(templates.UserConfigSchemaService, "pg", false, d)
 
 	if userConfig["pg_version"] != nil {
 		s, err := client.Services.Get(projectName, serviceName)

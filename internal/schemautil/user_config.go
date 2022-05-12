@@ -14,7 +14,7 @@ import (
 // GenerateServiceUserConfigurationSchema generate service user_config
 func GenerateServiceUserConfigurationSchema(t string) *schema.Schema {
 	s := GenerateTerraformUserConfigSchema(
-		templates.GetUserConfigSchema("common")[t].(map[string]interface{}))
+		templates.GetUserConfigSchema(templates.UserConfigSchemaService)[t].(map[string]interface{}))
 
 	return &schema.Schema{
 		Type:             schema.TypeList,

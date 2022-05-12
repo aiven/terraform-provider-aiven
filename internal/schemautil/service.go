@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/templates"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/docker/go-units"
 
@@ -216,7 +218,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 }
 
 func ResourceServiceCreateWrapper(serviceType string) schema.CreateContextFunc {
-	if serviceType == "common" {
+	if serviceType == templates.UserConfigSchemaService {
 		return func(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 			// Need to set empty value for all services or all Terraform keeps on showing there's
 			// a change in the computed values that don't match actual service type
@@ -333,7 +335,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 			ServiceType:           serviceType,
 			TerminationProtection: d.Get("termination_protection").(bool),
 			DiskSpaceMB:           diskSpace,
-			UserConfig:            ConvertTerraformUserConfigToAPICompatibleFormat("common", serviceType, true, d),
+			UserConfig:            ConvertTerraformUserConfigToAPICompatibleFormat(templates.UserConfigSchemaService, serviceType, true, d),
 			StaticIPs:             FlattenToString(d.Get("static_ips").([]interface{})),
 		},
 	)
@@ -396,7 +398,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 			TerminationProtection: d.Get("termination_protection").(bool),
 			DiskSpaceMB:           diskSpace,
 			Karapace:              karapace,
-			UserConfig:            ConvertTerraformUserConfigToAPICompatibleFormat("common", d.Get("service_type").(string), false, d),
+			UserConfig:            ConvertTerraformUserConfigToAPICompatibleFormat(templates.UserConfigSchemaService, d.Get("service_type").(string), false, d),
 		},
 	); err != nil {
 		return diag.FromErr(err)
@@ -546,7 +548,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 			return err
 		}
 	}
-	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat("common", serviceType, s.UserConfig)
+	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat(templates.UserConfigSchemaService, serviceType, s.UserConfig)
 	if err := d.Set(serviceType+"_user_config", NormalizeIpFilter(d.Get(serviceType+"_user_config"), userConfig)); err != nil {
 		return fmt.Errorf("cannot set `%s_user_config` : %s; Please make sure that all Aiven services have unique s names", serviceType, err)
 	}

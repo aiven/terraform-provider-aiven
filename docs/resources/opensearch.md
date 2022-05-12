@@ -127,6 +127,7 @@ Optional:
 - **action_auto_create_index_enabled** (String) action.auto_create_index
 - **action_destructive_requires_name** (String) Require explicit index names when deleting
 - **cluster_max_shards_per_node** (String) cluster.max_shards_per_node
+- **cluster_routing_allocation_node_concurrent_recoveries** (String) Concurrent incoming/outgoing shard recoveries per node
 - **http_max_content_length** (String) http.max_content_length
 - **http_max_header_size** (String) http.max_header_size
 - **http_max_initial_line_length** (String) http.max_initial_line_length
@@ -134,6 +135,8 @@ Optional:
 - **indices_memory_index_buffer_size** (String) indices.memory.index_buffer_size
 - **indices_queries_cache_size** (String) indices.queries.cache.size
 - **indices_query_bool_max_clause_count** (String) indices.query.bool.max_clause_count
+- **indices_recovery_max_bytes_per_sec** (String) indices.recovery.max_bytes_per_sec
+- **indices_recovery_max_concurrent_file_chunks** (String) indices.recovery.max_concurrent_file_chunks
 - **override_main_response_version** (String) compatibility.override_main_response_version
 - **reindex_remote_whitelist** (List of String) reindex_remote_whitelist
 - **script_max_compilations_rate** (String) Script max compilation rate - circuit breaker to prevent/minimize OOMs
@@ -143,7 +146,6 @@ Optional:
 - **thread_pool_force_merge_size** (String) force_merge thread pool size
 - **thread_pool_get_queue_size** (String) get thread pool queue size
 - **thread_pool_get_size** (String) get thread pool size
-- **thread_pool_index_size** (String) index thread pool size
 - **thread_pool_search_queue_size** (String) search thread pool queue size
 - **thread_pool_search_size** (String) search thread pool size
 - **thread_pool_search_throttled_queue_size** (String) search_throttled thread pool queue size

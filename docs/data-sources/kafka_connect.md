@@ -104,6 +104,7 @@ Read-Only:
 - **consumer_max_poll_records** (String)
 - **offset_flush_interval_ms** (String)
 - **offset_flush_timeout_ms** (String)
+- **producer_compression_type** (String)
 - **producer_max_request_size** (String)
 - **session_timeout_ms** (String)
 

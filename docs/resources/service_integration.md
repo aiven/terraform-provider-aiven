@@ -25,7 +25,6 @@ Elasticsearch, etc.
 
 ### Optional
 
-- **datadog_user_config** (Block List, Max: 1) Dashboard specific user configurable settings (see [below for nested schema](#nestedblock--datadog_user_config))
 - **destination_endpoint_id** (String) Destination endpoint for the integration (if any)
 - **destination_service_name** (String) Destination service for the integration (if any)
 - **id** (String) The ID of this resource.
@@ -35,7 +34,6 @@ Elasticsearch, etc.
 - **logs_user_config** (Block List, Max: 1) Log integration specific user configurable settings (see [below for nested schema](#nestedblock--logs_user_config))
 - **metrics_user_config** (Block List, Max: 1) Metrics specific user configurable settings (see [below for nested schema](#nestedblock--metrics_user_config))
 - **mirrormaker_user_config** (Block List, Max: 1) Mirrormaker 1 integration specific user configurable settings (see [below for nested schema](#nestedblock--mirrormaker_user_config))
-- **prometheus_user_config** (Block List, Max: 1) Prometheus coordinator specific user configurable settings (see [below for nested schema](#nestedblock--prometheus_user_config))
 - **source_endpoint_id** (String) Source endpoint for the integration (if any)
 - **source_service_name** (String) Source service for the integration (if any)
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
@@ -43,29 +41,6 @@ Elasticsearch, etc.
 ### Read-Only
 
 - **integration_id** (String) Service Integration Id at aiven
-
-<a id="nestedblock--datadog_user_config"></a>
-### Nested Schema for `datadog_user_config`
-
-Optional:
-
-- **datadog_tags** (Block List, Max: 32) Custom tags provided by user (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))
-- **exclude_consumer_groups** (List of String) List of custom metrics
-- **exclude_topics** (List of String) List of topics to exclude
-- **include_consumer_groups** (List of String) List of custom metrics
-- **include_topics** (List of String) List of topics to include
-- **kafka_custom_metrics** (List of String) List of custom metrics
-- **max_jmx_metrics** (String) Maximum number of JMX metrics to send
-
-<a id="nestedblock--datadog_user_config--datadog_tags"></a>
-### Nested Schema for `datadog_user_config.datadog_tags`
-
-Optional:
-
-- **comment** (String) Optional tag explanation
-- **tag** (String) Tag value
-
-
 
 <a id="nestedblock--kafka_connect_user_config"></a>
 ### Nested Schema for `kafka_connect_user_config`
@@ -171,43 +146,6 @@ Optional:
 Optional:
 
 - **mirrormaker_whitelist** (String) Mirrormaker topic whitelist
-
-
-<a id="nestedblock--prometheus_user_config"></a>
-### Nested Schema for `prometheus_user_config`
-
-Optional:
-
-- **source_mysql** (Block List, Max: 1) Configuration options for metrics where source service is MySQL (see [below for nested schema](#nestedblock--prometheus_user_config--source_mysql))
-
-<a id="nestedblock--prometheus_user_config--source_mysql"></a>
-### Nested Schema for `prometheus_user_config.source_mysql`
-
-Optional:
-
-- **telegraf** (Block List, Max: 1) Configuration options for Telegraf MySQL input plugin (see [below for nested schema](#nestedblock--prometheus_user_config--source_mysql--telegraf))
-
-<a id="nestedblock--prometheus_user_config--source_mysql--telegraf"></a>
-### Nested Schema for `prometheus_user_config.source_mysql.telegraf`
-
-Optional:
-
-- **gather_event_waits** (String) Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS
-- **gather_file_events_stats** (String) gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME
-- **gather_index_io_waits** (String) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE
-- **gather_info_schema_auto_inc** (String) Gather auto_increment columns and max values from information schema
-- **gather_innodb_metrics** (String) Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS
-- **gather_perf_events_statements** (String) Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST
-- **gather_process_list** (String) Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST
-- **gather_slave_status** (String) Gather metrics from SHOW SLAVE STATUS command output
-- **gather_table_io_waits** (String) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE
-- **gather_table_lock_waits** (String) Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS
-- **gather_table_schema** (String) Gather metrics from INFORMATION_SCHEMA.TABLES
-- **perf_events_statements_digest_text_limit** (String) Truncates digest text from perf_events_statements into this many characters
-- **perf_events_statements_limit** (String) Limits metrics from perf_events_statements
-- **perf_events_statements_time_limit** (String) Only include perf_events_statements whose last seen is less than this many seconds
-
-
 
 
 <a id="nestedblock--timeouts"></a>
