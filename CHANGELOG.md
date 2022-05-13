@@ -5,6 +5,35 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [3.0.0] - 2022-05-13
+
+- `aiven_service` and `aiven_elasticsearch` resources were deleted
+- `aiven_project` resource previously deprecated schema field were deleted
+
+Deprecated resources and data-sources: 
+- `aiven_database`
+- `aiven_service_user`
+- `aiven_vpc_peering_connection`
+
+New resources and data-sources:
+- `aiven_aws_vpc_peering_connection`
+- `aiven_azure_vpc_peering_connection`
+- `aiven_gcp_vpc_peering_connection`
+- `aiven_influxdb_user`
+- `aiven_influxdb_database`
+- `aiven_mysql_user`
+- `aiven_mysql_database`
+- `aiven_redis_user`
+- `aiven_pg_user`
+- `aiven_pg_database`
+- `aiven_cassandra_user`
+- `aiven_m3db_user`
+- `aiven_m3db_user`
+- `aiven_opensearch_user`
+- `aiven_kafka_user`
+- `aiven_clickhouse_user`
+- `aiven_clickhouse_database`
+
 ## [2.7.3] - 2022-05-02
 
 - Add missing user configuration option `thread_pool_index_size`
