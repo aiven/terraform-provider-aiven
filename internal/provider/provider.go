@@ -49,8 +49,8 @@ func Provider() *schema.Provider {
 
 		DataSourcesMap: map[string]*schema.Resource{
 			"aiven_connection_pool":   connection_pool.DatasourceConnectionPool(),
-			"aiven_database":          database.DatasourceDatabase(),
-			"aiven_service_user":      service_user.DatasourceServiceUser(),
+			"aiven_database":          database.DatasourceDatabase(),        // Deprecated
+			"aiven_service_user":      service_user.DatasourceServiceUser(), // Deprecated
 			"aiven_service_component": service_component.DatasourceServiceComponent(),
 
 			// influxdb
@@ -139,8 +139,8 @@ func Provider() *schema.Provider {
 
 		ResourcesMap: map[string]*schema.Resource{
 			"aiven_connection_pool": connection_pool.ResourceConnectionPool(),
-			"aiven_database":        database.ResourceDatabase(),
-			"aiven_service_user":    service_user.ResourceServiceUser(),
+			"aiven_database":        database.ResourceDatabase(),        // Deprecated
+			"aiven_service_user":    service_user.ResourceServiceUser(), // Deprecated
 			"aiven_static_ip":       static_ip.ResourceStaticIP(),
 
 			// influxdb
@@ -183,9 +183,9 @@ func Provider() *schema.Provider {
 
 			// vpc
 			"aiven_aws_privatelink":                       vpc.ResourceAWSPrivatelink(),
-			"aiven_aws_vpc_peering_connection":            vpc.ResourceAWSVPCPeeringConnection(),
 			"aiven_azure_privatelink":                     vpc.ResourceAzurePrivatelink(),
 			"aiven_azure_privatelink_connection_approval": vpc.ResourceAzurePrivatelinkConnectionApproval(),
+			"aiven_aws_vpc_peering_connection":            vpc.ResourceAWSVPCPeeringConnection(),
 			"aiven_azure_vpc_peering_connection":          vpc.ResourceAzureVPCPeeringConnection(),
 			"aiven_gcp_vpc_peering_connection":            vpc.ResourceGCPVPCPeeringConnection(),
 			"aiven_project_vpc":                           vpc.ResourceProjectVPC(),
