@@ -3,6 +3,7 @@ package project_test
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -88,6 +89,12 @@ func TestAccAivenProject_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "billing_group"),
 				),
 			},
+			{
+				Config:             testAccProjectDoubleTagResource(rName),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ExpectError:        regexp.MustCompile("tag keys should be unique"),
+			},
 		},
 	})
 }
@@ -112,6 +119,34 @@ func TestAccAivenProject_accounts(t *testing.T) {
 	})
 }
 
+func testAccProjectDoubleTagResource(name string) string {
+	return fmt.Sprintf(`
+		resource "aiven_account" "foo" {
+		  name = "test-acc-ac-%s"
+		}
+		
+		resource "aiven_project" "foo" {
+		  project       = "test-acc-pr-%s"
+		  account_id    = aiven_account.foo.account_id
+		  default_cloud = "aws-eu-west-2"
+		  tag {
+		    key   = "test"
+		    value = "val"
+		  }
+		  tag {
+		    key   = "test"
+		    value = "val2"
+		  }
+		}
+		
+		data "aiven_project" "project" {
+		  project = aiven_project.foo.project
+		
+		  depends_on = [aiven_project.foo]
+		}`,
+		name, name)
+}
+
 func testAccProjectResourceAccounts(name string) string {
 	return fmt.Sprintf(`
 		resource "aiven_account" "foo" {
@@ -122,6 +157,10 @@ func testAccProjectResourceAccounts(name string) string {
 		  project       = "test-acc-pr-%s"
 		  account_id    = aiven_account.foo.account_id
 		  default_cloud = "aws-eu-west-2"
+		  tag {
+		    key   = "test"
+		    value = "val"
+		  }
 		}
 		
 		data "aiven_project" "project" {
@@ -137,6 +176,10 @@ func testAccProjectResource(name string) string {
 		resource "aiven_project" "foo" {
 		  project       = "test-acc-pr-%s"
 		  default_cloud = "aws-eu-west-2"
+		  tag {
+		    key   = "test"
+		    value = "val"
+		  }
 		}
 		
 		data "aiven_project" "project" {
@@ -157,6 +200,10 @@ func testAccProjectCopyFromProjectResource(name string) string {
 		resource "aiven_project" "source" {
 		  project       = "test-acc-pr-source-%s"
 		  billing_group = aiven_billing_group.foo.id
+		  tag {
+		    key   = "test"
+		    value = "val"
+		  }
 		}
 		
 		resource "aiven_project" "foo" {
