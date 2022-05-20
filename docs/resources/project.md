@@ -36,6 +36,7 @@ resource "aiven_project" "myproject" {
 - **copy_from_project** (String) is the name of another project used to copy billing information and some other project attributes like technical contacts from. This is mostly relevant when an existing project has billing type set to invoice and that needs to be copied over to a new project. (Setting billing is otherwise not allowed over the API.) This only has effect when the project is created. To set up proper dependencies please refer to this variable as a reference.
 - **default_cloud** (String) Defines the default cloud provider and region where services are hosted. This can be changed freely after the project is created. This will not affect existing services.
 - **id** (String) The ID of this resource.
+- **tag** (Block Set) Tags are key-value pairs that allow you to categorize projects. (see [below for nested schema](#nestedblock--tag))
 - **technical_emails** (Set of String) Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability. It is  good practice to keep this up-to-date to be aware of any potential issues with your project.
 - **use_source_project_billing_group** (Boolean) Use the same billing group that is used in source project.
 
@@ -44,6 +45,14 @@ resource "aiven_project" "myproject" {
 - **ca_cert** (String, Sensitive) The CA certificate of the project. This is required for configuring clients that connect to certain services like Kafka.
 - **estimated_balance** (String) The current accumulated bill for this project in the current billing period.
 - **payment_method** (String) The method of invoicing used for payments for this project, e.g. `card`.
+
+<a id="nestedblock--tag"></a>
+### Nested Schema for `tag`
+
+Required:
+
+- **key** (String) Project tag key
+- **value** (String) Project tag value
 
 ## Import
 

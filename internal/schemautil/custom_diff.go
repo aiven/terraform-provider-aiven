@@ -24,6 +24,24 @@ func DiskSpaceShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
 	return new.(string) != ""
 }
 
+func TagsShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
+	return len(new.(*schema.Set).List()) != 0
+}
+
+func CustomizeDiffCheckUniqueTag(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+	t := make(map[string]bool)
+	for _, tag := range d.Get("tag").(*schema.Set).List() {
+		tagVal := tag.(map[string]interface{})
+		k := tagVal["key"].(string)
+		if t[k] {
+			return fmt.Errorf("tag keys should be unique, duplicate with the key: %s", k)
+		}
+		t[k] = true
+	}
+
+	return nil
+}
+
 func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
 	client := m.(*aiven.Client)
 
