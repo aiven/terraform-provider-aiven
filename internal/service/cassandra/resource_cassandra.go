@@ -32,6 +32,10 @@ func ResourceCassandra() *schema.Resource {
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
 			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeCassandra),
+			customdiff.IfValueChange("tag",
+				schemautil.TagsShouldNotBeEmpty,
+				schemautil.CustomizeDiffCheckUniqueTag,
+			),
 			customdiff.IfValueChange("disk_space",
 				schemautil.DiskSpaceShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,

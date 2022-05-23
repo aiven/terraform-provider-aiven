@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -38,6 +39,54 @@ func TestAccAiven_flink(t *testing.T) {
 		  service_name            = var.service_name
 		  maintenance_window_dow  = "monday"
 		  maintenance_window_time = "10:00:00"
+		
+		  tag {
+		    key   = "test"
+		    value = "val"
+		  }
+		
+		  flink_user_config {
+		    number_of_task_slots = 10
+		    parallelism_default  = 2
+		    restart_strategy     = "failure-rate"
+		  }
+		}
+		
+		data "aiven_flink" "service" {
+		  service_name = aiven_flink.bar.service_name
+		  project      = aiven_flink.bar.project
+		}`,
+
+		projectName,
+		serviceName,
+	)
+
+	manifestDoubleTags := fmt.Sprintf(`
+		variable "project_name" {
+		  type    = string
+		  default = "%s"
+		}
+		variable "service_name" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		resource "aiven_flink" "bar" {
+		  project                 = var.project_name
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-4"
+		  service_name            = var.service_name
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		
+		  tag {
+		    key   = "test"
+		    value = "val"
+		  }
+		  tag {
+		    key   = "test"
+		    value = "val2"
+		  }
 		
 		  flink_user_config {
 		    number_of_task_slots = 10
@@ -76,6 +125,12 @@ func TestAccAiven_flink(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "flink_user_config.0.parallelism_default", "2"),
 					resource.TestCheckResourceAttr(resourceName, "flink_user_config.0.restart_strategy", "failure-rate"),
 				),
+			},
+			{
+				Config:             manifestDoubleTags,
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ExpectError:        regexp.MustCompile("tag keys should be unique"),
 			},
 		},
 	})

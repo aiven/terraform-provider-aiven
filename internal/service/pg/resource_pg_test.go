@@ -65,6 +65,12 @@ func TestAccAivenPG_invalid_disc_size(t *testing.T) {
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile("requested disk size has to increase from: '.*' in increments of '.*'"),
 			},
+			{
+				Config:             testAccPGDoubleTagResource(rName),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ExpectError:        regexp.MustCompile("tag keys should be unique"),
+			},
 		},
 	})
 }
@@ -317,6 +323,11 @@ func testAccPGResourceWithoutDiskSize(name string) string {
 		  maintenance_window_dow  = "monday"
 		  maintenance_window_time = "10:00:00"
 		
+		  tag {
+		    key   = "test"
+		    value = "val"
+		  }
+		
 		  pg_user_config {
 		    public_access {
 		      pg         = true
@@ -353,6 +364,11 @@ func testAccPGResourcePlanChange(name, plan string) string {
 		  maintenance_window_dow  = "monday"
 		  maintenance_window_time = "10:00:00"
 		
+		  tag {
+		    key   = "test"
+		    value = "val"
+		  }
+		
 		  pg_user_config {
 		    public_access {
 		      pg         = true
@@ -373,4 +389,49 @@ func testAccPGResourcePlanChange(name, plan string) string {
 		  depends_on = [aiven_pg.bar]
 		}`,
 		os.Getenv("AIVEN_PROJECT_NAME"), plan, name)
+}
+
+func testAccPGDoubleTagResource(name string) string {
+	return fmt.Sprintf(`
+		data "aiven_project" "foo" {
+		  project = "%s"
+		}
+		
+		resource "aiven_pg" "bar" {
+		  project                 = data.aiven_project.foo.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-4"
+		  service_name            = "test-acc-sr-%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		
+		  tag {
+		    key   = "test"
+		    value = "val"
+		  }
+		  tag {
+		    key   = "test"
+		    value = "val2"
+		  }
+		
+		  pg_user_config {
+		    public_access {
+		      pg         = true
+		      prometheus = false
+		    }
+		
+		    pg {
+		      idle_in_transaction_session_timeout = 900
+		      log_min_duration_statement          = -1
+		    }
+		  }
+		}
+		
+		data "aiven_pg" "common" {
+		  service_name = aiven_pg.bar.service_name
+		  project      = aiven_pg.bar.project
+		
+		  depends_on = [aiven_pg.bar]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name)
 }

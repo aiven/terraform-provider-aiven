@@ -55,6 +55,7 @@ data "aiven_cassandra" "bar" {
 - **service_username** (String) Username used for connecting to the service, if applicable
 - **state** (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
 - **static_ips** (List of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
+- **tag** (Set of Object) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedatt--tag))
 - **termination_protection** (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
 
 <a id="nestedatt--cassandra"></a>
@@ -126,5 +127,14 @@ Read-Only:
 
 - **integration_type** (String)
 - **source_service_name** (String)
+
+
+<a id="nestedatt--tag"></a>
+### Nested Schema for `tag`
+
+Read-Only:
+
+- **key** (String)
+- **value** (String)
 
 

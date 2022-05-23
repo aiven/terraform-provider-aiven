@@ -38,6 +38,10 @@ func ResourceInfluxDB() *schema.Resource {
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
 			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeInfluxDB),
+			customdiff.IfValueChange("tag",
+				schemautil.TagsShouldNotBeEmpty,
+				schemautil.CustomizeDiffCheckUniqueTag,
+			),
 			customdiff.IfValueChange("disk_space",
 				schemautil.DiskSpaceShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,

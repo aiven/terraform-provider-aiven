@@ -44,6 +44,10 @@ func ResourceOpensearch() *schema.Resource {
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
 			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeOpensearch),
+			customdiff.IfValueChange("tag",
+				schemautil.TagsShouldNotBeEmpty,
+				schemautil.CustomizeDiffCheckUniqueTag,
+			),
 			customdiff.IfValueChange("disk_space",
 				schemautil.DiskSpaceShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
