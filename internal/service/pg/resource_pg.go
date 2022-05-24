@@ -87,6 +87,10 @@ func ResourcePG() *schema.Resource {
 		CustomizeDiff: customdiff.Sequence(
 			customdiff.Sequence(
 				schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypePG),
+				customdiff.IfValueChange("tag",
+					schemautil.TagsShouldNotBeEmpty,
+					schemautil.CustomizeDiffCheckUniqueTag,
+				),
 				customdiff.IfValueChange("disk_space",
 					schemautil.DiskSpaceShouldNotBeEmpty,
 					schemautil.CustomizeDiffCheckDiskSpace,

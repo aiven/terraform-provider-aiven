@@ -214,6 +214,25 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 				},
 			},
 		},
+		"tag": {
+			Description: "Tags are key-value pairs that allow you to categorize services.",
+			Type:        schema.TypeSet,
+			Optional:    true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"key": {
+						Description: "Service tag key",
+						Type:        schema.TypeString,
+						Required:    true,
+					},
+					"value": {
+						Description: "Service tag value",
+						Type:        schema.TypeString,
+						Required:    true,
+					},
+				},
+			},
+		},
 	}
 }
 
@@ -306,6 +325,15 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(fmt.Errorf("unable to set static ips field in schema: %w", err))
 	}
 
+	t, err := client.ServiceTags.Get(projectName, serviceName)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("unable to get service tags: %w", err))
+	}
+
+	if err := d.Set("tag", SetTagsTerraformProperties(t.Tags)); err != nil {
+		return diag.FromErr(fmt.Errorf("unable to set tag's in schema: %w", err))
+	}
+
 	return nil
 }
 
@@ -346,6 +374,13 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 	// Create already takes care of static ip associations, no need to explictely associate them here
 
 	s, err := WaitForServiceCreation(ctx, d, m)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	_, err = client.ServiceTags.Set(project, d.Get("service_name").(string), aiven.ServiceTagsRequest{
+		Tags: GetTagsFromSchema(d),
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -419,6 +454,13 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		}
 	}
 
+	_, err = client.ServiceTags.Set(projectName, serviceName, aiven.ServiceTagsRequest{
+		Tags: GetTagsFromSchema(d),
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	return ResourceServiceRead(ctx, d, m)
 }
 
@@ -484,6 +526,15 @@ func ResourceServiceState(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 	if err = d.Set("static_ips", allocatedStaticIps); err != nil {
 		return nil, fmt.Errorf("unable to set static ips field in schema: %w", err)
+	}
+
+	t, err := client.ServiceTags.Get(projectName, serviceName)
+	if err != nil {
+		return nil, fmt.Errorf("unable to get service tags: %w", err)
+	}
+
+	if err := d.Set("tag", SetTagsTerraformProperties(t.Tags)); err != nil {
+		return nil, fmt.Errorf("unable to set tag's in schema: %w", err)
 	}
 
 	return []*schema.ResourceData{d}, nil

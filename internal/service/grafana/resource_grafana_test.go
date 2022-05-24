@@ -3,6 +3,7 @@ package grafana_test
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
@@ -36,6 +37,12 @@ func TestAccAiven_grafana(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
 				),
 			},
+			{
+				Config:             testAccGrafanaDoubleTagResource(rName),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ExpectError:        regexp.MustCompile("tag keys should be unique"),
+			},
 		},
 	})
 }
@@ -53,6 +60,52 @@ func testAccGrafanaResource(name string) string {
 		  service_name            = "test-acc-sr-%s"
 		  maintenance_window_dow  = "monday"
 		  maintenance_window_time = "10:00:00"
+		
+		  tag {
+		    key   = "test"
+		    value = "val"
+		  }
+		
+		  grafana_user_config {
+		    ip_filter        = ["0.0.0.0/0"]
+		    alerting_enabled = true
+		
+		    public_access {
+		      grafana = true
+		    }
+		  }
+		}
+		
+		data "aiven_grafana" "common" {
+		  service_name = aiven_grafana.bar.service_name
+		  project      = data.aiven_project.foo.project
+		
+		  depends_on = [aiven_grafana.bar]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name)
+}
+func testAccGrafanaDoubleTagResource(name string) string {
+	return fmt.Sprintf(`
+		data "aiven_project" "foo" {
+		  project = "%s"
+		}
+		
+		resource "aiven_grafana" "bar" {
+		  project                 = data.aiven_project.foo.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-1"
+		  service_name            = "test-acc-sr-%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		
+		  tag {
+		    key   = "test"
+		    value = "val"
+		  }
+		  tag {
+		    key   = "test"
+		    value = "val2"
+		  }
 		
 		  grafana_user_config {
 		    ip_filter        = ["0.0.0.0/0"]

@@ -33,6 +33,10 @@ func ResourceRedis() *schema.Resource {
 		CustomizeDiff: customdiff.Sequence(
 			customdiff.Sequence(
 				schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeRedis),
+				customdiff.IfValueChange("tag",
+					schemautil.TagsShouldNotBeEmpty,
+					schemautil.CustomizeDiffCheckUniqueTag,
+				),
 				customdiff.IfValueChange("disk_space",
 					schemautil.DiskSpaceShouldNotBeEmpty,
 					schemautil.CustomizeDiffCheckDiskSpace,

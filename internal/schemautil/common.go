@@ -10,8 +10,6 @@ import (
 )
 
 var (
-	BetaDeprecationMessage = "This Resource is not yet generally available and may be subject to breaking changes without warning"
-
 	CommonSchemaProjectReference = &schema.Schema{
 		Type:         schema.TypeString,
 		Required:     true,
@@ -145,4 +143,27 @@ func StringSliceToInterfaceSlice(s []string) []interface{} {
 		res[i] = s[i]
 	}
 	return res
+}
+
+func SetTagsTerraformProperties(t map[string]string) []map[string]interface{} {
+	var tags []map[string]interface{}
+	for k, v := range t {
+		tags = append(tags, map[string]interface{}{
+			"key":   k,
+			"value": v,
+		})
+	}
+
+	return tags
+}
+
+func GetTagsFromSchema(d *schema.ResourceData) map[string]string {
+	tags := make(map[string]string)
+
+	for _, tag := range d.Get("tag").(*schema.Set).List() {
+		tagVal := tag.(map[string]interface{})
+		tags[tagVal["key"].(string)] = tagVal["value"].(string)
+	}
+
+	return tags
 }

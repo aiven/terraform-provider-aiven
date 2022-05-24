@@ -140,7 +140,7 @@ func resourceProjectCreate(_ context.Context, d *schema.ResourceData, m interfac
 			AccountId:                    schemautil.OptionalStringPointer(d, "account_id"),
 			UseSourceProjectBillingGroup: d.Get("use_source_project_billing_group").(bool),
 			BillingGroupId:               d.Get("billing_group").(string),
-			Tags:                         getTagsFromSchema(d),
+			Tags:                         schemautil.GetTagsFromSchema(d),
 		},
 	)
 	if err != nil {
@@ -244,7 +244,7 @@ func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interfac
 			Cloud:           schemautil.OptionalStringPointer(d, "default_cloud"),
 			TechnicalEmails: contactEmailListForAPI(d, "technical_emails", false),
 			AccountId:       d.Get("account_id").(string),
-			Tags:            getTagsFromSchema(d),
+			Tags:            schemautil.GetTagsFromSchema(d),
 		},
 	)
 	if err != nil {
@@ -397,32 +397,9 @@ func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client,
 	if err := d.Set("billing_group", project.BillingGroupId); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("tag", setProjectTagTerraformProperties(project)); err != nil {
+	if err := d.Set("tag", schemautil.SetTagsTerraformProperties(nil)); err != nil {
 		return diag.FromErr(err)
 	}
 
 	return nil
-}
-
-func setProjectTagTerraformProperties(project *aiven.Project) []map[string]interface{} {
-	var tags []map[string]interface{}
-	for k, v := range project.Tags {
-		tags = append(tags, map[string]interface{}{
-			"key":   k,
-			"value": v,
-		})
-	}
-
-	return tags
-}
-
-func getTagsFromSchema(d *schema.ResourceData) map[string]string {
-	tags := make(map[string]string)
-
-	for _, tag := range d.Get("tag").(*schema.Set).List() {
-		tagVal := tag.(map[string]interface{})
-		tags[tagVal["key"].(string)] = tagVal["value"].(string)
-	}
-
-	return tags
 }

@@ -3,6 +3,7 @@ package opensearch_test
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -29,6 +30,64 @@ func TestAccAivenService_os(t *testing.T) {
 		  service_name            = "%s"
 		  maintenance_window_dow  = "monday"
 		  maintenance_window_time = "10:00:00"
+		
+		  tag {
+		    key   = "test"
+		    value = "val"
+		  }
+		
+		  opensearch_user_config {
+		    opensearch_dashboards {
+		      enabled = true
+		    }
+		
+		    public_access {
+		      opensearch            = true
+		      opensearch_dashboards = true
+		    }
+		
+		    index_patterns {
+		      pattern           = "logs_*_foo_*"
+		      max_index_count   = 3
+		      sorting_algorithm = "creation_date"
+		    }
+		
+		    index_patterns {
+		      pattern           = "logs_*_bar_*"
+		      max_index_count   = 15
+		      sorting_algorithm = "creation_date"
+		    }
+		  }
+		}
+		
+		data "aiven_opensearch" "common-os" {
+		  service_name = aiven_opensearch.bar-os.service_name
+		  project      = aiven_opensearch.bar-os.project
+		
+		  depends_on = [aiven_opensearch.bar-os]
+		}`,
+		projectName, serviceName)
+	manifestDoubleTag := fmt.Sprintf(`
+		data "aiven_project" "foo-es" {
+		  project = "%s"
+		}
+		
+		resource "aiven_opensearch" "bar-os" {
+		  project                 = data.aiven_project.foo-es.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "startup-4"
+		  service_name            = "%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		
+		  tag {
+		    key   = "test"
+		    value = "val"
+		  }
+		  tag {
+		    key   = "test"
+		    value = "val2"
+		  }
 		
 		  opensearch_user_config {
 		    opensearch_dashboards {
@@ -85,6 +144,12 @@ func TestAccAivenService_os(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "service_port"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_uri"),
 				),
+			},
+			{
+				Config:             manifestDoubleTag,
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ExpectError:        regexp.MustCompile("tag keys should be unique"),
 			},
 		},
 	})
