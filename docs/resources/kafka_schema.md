@@ -51,6 +51,7 @@ resource "aiven_kafka_schema" "kafka-schema1" {
 
 - **compatibility_level** (String) Kafka Schemas compatibility level. The possible values are `BACKWARD`, `BACKWARD_TRANSITIVE`, `FORWARD`, `FORWARD_TRANSITIVE`, `FULL`, `FULL_TRANSITIVE` and `NONE`.
 - **id** (String) The ID of this resource.
+- **schema_type** (String) Kafka Schema type JSON or AVRO
 
 ### Read-Only
 

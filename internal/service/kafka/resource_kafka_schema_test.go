@@ -70,6 +70,29 @@ func sweepKafkaSchemas(region string) error {
 	return nil
 }
 
+func TestAccAivenKafkaSchema_json_basic(t *testing.T) {
+	resourceName := "aiven_kafka_schema.foo"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenKafkaSchemaResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKafkaSchemaJSONResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenKafkaSchemaAttributes("data.aiven_kafka_schema.schema"),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "subject_name", fmt.Sprintf("kafka-schema-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "version", "1"),
+					resource.TestCheckResourceAttr(resourceName, "schema_type", "JSON"),
+				),
+			},
+		},
+	})
+}
 func TestAccAivenKafkaSchema_basic(t *testing.T) {
 	resourceName := "aiven_kafka_schema.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
@@ -87,6 +110,7 @@ func TestAccAivenKafkaSchema_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "subject_name", fmt.Sprintf("kafka-schema-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "version", "1"),
+					resource.TestCheckResourceAttr(resourceName, "schema_type", "AVRO"),
 				),
 			},
 			{
@@ -97,6 +121,7 @@ func TestAccAivenKafkaSchema_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "subject_name", fmt.Sprintf("kafka-schema-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "version", "2"),
+					resource.TestCheckResourceAttr(resourceName, "schema_type", "AVRO"),
 				),
 			},
 			{
@@ -153,6 +178,68 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+func testAccKafkaSchemaJSONResource(name string) string {
+	return fmt.Sprintf(`
+		data "aiven_project" "foo" {
+		  project = "%s"
+		}
+		
+		resource "aiven_kafka" "bar" {
+		  project                 = data.aiven_project.foo.project
+		  cloud_name              = "google-europe-west1"
+		  plan                    = "business-4"
+		  service_name            = "test-acc-sr-%s"
+		  maintenance_window_dow  = "monday"
+		  maintenance_window_time = "10:00:00"
+		
+		  kafka_user_config {
+		    schema_registry = true
+		
+		    kafka {
+		      group_max_session_timeout_ms = 70000
+		      log_retention_bytes          = 1000000000
+		    }
+		  }
+		}
+		
+		resource "aiven_kafka_schema_configuration" "foo" {
+		  project             = aiven_kafka.bar.project
+		  service_name        = aiven_kafka.bar.service_name
+		  compatibility_level = "BACKWARD"
+		}
+		
+		resource "aiven_kafka_schema" "foo" {
+		  project      = aiven_kafka_schema_configuration.foo.project
+		  service_name = aiven_kafka_schema_configuration.foo.service_name
+		  subject_name = "kafka-schema-%s"
+		  schema_type  = "JSON"
+		
+		  schema = <<EOT
+		{
+		"type": "object",
+		"title": "example",
+		"description": "example",
+		"properties": {
+		"test": {
+		"type": "integer",
+		"title": "my test number",
+		"default": 5
+		}
+		}
+		}
+		  EOT
+		}
+		
+		data "aiven_kafka_schema" "schema" {
+		  project      = aiven_kafka_schema.foo.project
+		  service_name = aiven_kafka_schema.foo.service_name
+		  subject_name = aiven_kafka_schema.foo.subject_name
+		
+		  depends_on = [aiven_kafka_schema.foo]
+		}`,
+		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccKafkaSchemaResource(name string) string {

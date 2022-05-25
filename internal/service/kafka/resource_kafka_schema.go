@@ -32,6 +32,14 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: diffSuppressJsonObject,
 		Description:      "Kafka Schema configuration should be a valid Avro Schema JSON format.",
 	},
+	"schema_type": {
+		Type:         schema.TypeString,
+		Optional:     true,
+		ForceNew:     true,
+		Description:  "Kafka Schema type JSON or AVRO",
+		Default:      "AVRO",
+		ValidateFunc: validation.StringInSlice([]string{"AVRO", "JSON"}, false),
+	},
 	"version": {
 		Type:        schema.TypeInt,
 		Computed:    true,
@@ -122,11 +130,12 @@ func resourceKafkaSchemaCreate(ctx context.Context, d *schema.ResourceData, m in
 		serviceName,
 		subjectName,
 		aiven.KafkaSchemaSubject{
-			Schema: d.Get("schema").(string),
+			Schema:     d.Get("schema").(string),
+			SchemaType: d.Get("schema_type").(string),
 		},
 	)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("unable to create schema: %s", err)
 	}
 
 	// set compatibility level if defined for a newly created Kafka Schema Subject
@@ -138,13 +147,13 @@ func resourceKafkaSchemaCreate(ctx context.Context, d *schema.ResourceData, m in
 			compatibility.(string),
 		)
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("unable to update configuration: %s", err)
 		}
 	}
 
 	version, err := kafkaSchemaSubjectGetLastVersion(m, project, serviceName, subjectName)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("unable to get last version: %s", err)
 	}
 
 	// newly created versions start from 1
@@ -167,11 +176,12 @@ func resourceKafkaSchemaUpdate(ctx context.Context, d *schema.ResourceData, m in
 			serviceName,
 			subjectName,
 			aiven.KafkaSchemaSubject{
-				Schema: d.Get("schema").(string),
+				Schema:     d.Get("schema").(string),
+				SchemaType: d.Get("schema_type").(string),
 			},
 		)
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("unable to update schema: %s", err)
 		}
 	}
 
@@ -184,7 +194,7 @@ func resourceKafkaSchemaUpdate(ctx context.Context, d *schema.ResourceData, m in
 			subjectName,
 			d.Get("compatibility_level").(string))
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("unable to update configuration: %s", err)
 		}
 	}
 
@@ -272,7 +282,8 @@ func resourceKafkaSchemaCustomizeDiff(_ context.Context, d *schema.ResourceDiff,
 		d.Get("subject_name").(string),
 		d.Get("version").(int),
 		aiven.KafkaSchemaSubject{
-			Schema: d.Get("schema").(string),
+			Schema:     d.Get("schema").(string),
+			SchemaType: d.Get("schema_type").(string),
 		},
 	); err != nil {
 		return fmt.Errorf("unable to check schema validity: %w", err)
