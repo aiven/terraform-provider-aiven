@@ -67,7 +67,6 @@ resource "aiven_flink_table" "source" {
   integration_id = aiven_service_integration.flink_to_kafka.integration_id
   table_name     = "source_table"
   kafka_topic    = aiven_kafka_topic.source.topic_name
-  partitioned_by = "node"
   schema_sql     = <<EOF
     `cpu` INT,
     `node` INT,
