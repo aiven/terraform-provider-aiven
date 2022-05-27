@@ -16,6 +16,8 @@ github.com/aiven/aiven-go-client v1.7.1-0.20220602121815-f81865a9109d h1:6sUl3Qt
 github.com/aiven/aiven-go-client v1.7.1-0.20220602121815-f81865a9109d/go.mod h1:0MOgKonaIxMT8aXK7D6xbaKBdUTGfc0GdNRn9kf/yQ0=
 github.com/aiven/aiven-go-client v1.7.1-0.20220603141213-568421130d03 h1:Cov3B1JS8lpbRohGquuvbShni6+F5DtGZpvCEWq8XP8=
 github.com/aiven/aiven-go-client v1.7.1-0.20220603141213-568421130d03/go.mod h1:0MOgKonaIxMT8aXK7D6xbaKBdUTGfc0GdNRn9kf/yQ0=
+github.com/aiven/aiven-go-client v1.7.1-0.20220610095422-db8305bfcfb9 h1:AKlzNxQW5fIPMabq67ZhF60wuT+YabBQeP6P4yxaNns=
+github.com/aiven/aiven-go-client v1.7.1-0.20220610095422-db8305bfcfb9/go.mod h1:0MOgKonaIxMT8aXK7D6xbaKBdUTGfc0GdNRn9kf/yQ0=
 github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239/go.mod h1:2FmKhYUyUczH0OGQWaF5ceTx0UBShxjsH6f8oGKYe2c=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/apparentlymart/go-cidr v1.1.0 h1:2mAhrMoF+nhXqxTzSZMUzDHkLjmIHC+Zzn4tdgBZjnU=
