@@ -144,7 +144,7 @@ func resourceProjectCreate(_ context.Context, d *schema.ResourceData, m interfac
 		},
 	)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	if _, ok := d.GetOk("billing_group"); !ok {
