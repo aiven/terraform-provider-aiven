@@ -35,6 +35,7 @@ resource "aiven_kafka_acl" "mytestacl" {
 
 ### Optional
 
+- **acl_id** (String) Kafka ACL ID
 - **id** (String) The ID of this resource.
 
 ## Import
