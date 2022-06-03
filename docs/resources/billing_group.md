@@ -42,6 +42,7 @@ resource "aiven_project" "pr1" {
 - **card_id** (String) Credit card id
 - **city** (String) City
 - **company** (String) Company name
+- **copy_from_billing_group** (String) ID of the billing group to copy from
 - **country_code** (String) Country code
 - **id** (String) The ID of this resource.
 - **state** (String) State

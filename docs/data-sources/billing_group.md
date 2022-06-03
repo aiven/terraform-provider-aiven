@@ -39,6 +39,7 @@ data "aiven_billing_group" "foo" {
 - **card_id** (String) Credit card id
 - **city** (String) City
 - **company** (String) Company name
+- **copy_from_billing_group** (String) ID of the billing group to copy from
 - **country_code** (String) Country code
 - **state** (String) State
 - **vat_id** (String) VAT id

@@ -91,6 +91,12 @@ var aivenBillingGroupSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
 		Description:      "State",
 	},
+	"copy_from_billing_group": {
+		Type:             schema.TypeString,
+		Optional:         true,
+		DiffSuppressFunc: schemautil.CreateOnlyDiffSuppressFunc,
+		Description:      "ID of the billing group to copy from",
+	},
 }
 
 func ResourceBillingGroup() *schema.Resource {
@@ -123,19 +129,20 @@ func resourceBillingGroupCreate(ctx context.Context, d *schema.ResourceData, m i
 
 	bg, err := client.BillingGroup.Create(
 		aiven.BillingGroupRequest{
-			BillingGroupName: d.Get("name").(string),
-			AccountId:        schemautil.OptionalStringPointer(d, "account_id"),
-			CardId:           cardID,
-			VatId:            schemautil.OptionalStringPointer(d, "vat_id"),
-			BillingCurrency:  schemautil.OptionalStringPointer(d, "billing_currency"),
-			BillingExtraText: schemautil.OptionalStringPointer(d, "billing_extra_text"),
-			BillingEmails:    billingEmails,
-			Company:          schemautil.OptionalStringPointer(d, "company"),
-			AddressLines:     schemautil.FlattenToString(d.Get("address_lines").(*schema.Set).List()),
-			CountryCode:      schemautil.OptionalStringPointer(d, "country_code"),
-			City:             schemautil.OptionalStringPointer(d, "city"),
-			ZipCode:          schemautil.OptionalStringPointer(d, "zip_code"),
-			State:            schemautil.OptionalStringPointer(d, "state"),
+			BillingGroupName:     d.Get("name").(string),
+			AccountId:            schemautil.OptionalStringPointer(d, "account_id"),
+			CardId:               cardID,
+			VatId:                schemautil.OptionalStringPointer(d, "vat_id"),
+			BillingCurrency:      schemautil.OptionalStringPointer(d, "billing_currency"),
+			BillingExtraText:     schemautil.OptionalStringPointer(d, "billing_extra_text"),
+			BillingEmails:        billingEmails,
+			Company:              schemautil.OptionalStringPointer(d, "company"),
+			AddressLines:         schemautil.FlattenToString(d.Get("address_lines").(*schema.Set).List()),
+			CountryCode:          schemautil.OptionalStringPointer(d, "country_code"),
+			City:                 schemautil.OptionalStringPointer(d, "city"),
+			ZipCode:              schemautil.OptionalStringPointer(d, "zip_code"),
+			State:                schemautil.OptionalStringPointer(d, "state"),
+			CopyFromBillingGroup: schemautil.OptionalStringPointer(d, "copy_from_billing_group"),
 		},
 	)
 	if err != nil {

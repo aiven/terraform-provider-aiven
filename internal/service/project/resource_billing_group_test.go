@@ -33,6 +33,17 @@ func TestAccAivenBillingGroup_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("test-acc-bg-%s", rName)),
 				),
 			},
+			{
+				Config: testCopyBillingGroupFromExistingOne(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("aiven_billing_group.bar2", "name", fmt.Sprintf("copy-test-acc-bg-%s", rName)),
+					resource.TestCheckResourceAttr("aiven_billing_group.bar", "billing_currency", "EUR"),
+					resource.TestCheckResourceAttr("aiven_billing_group.bar2", "billing_currency", "EUR"),
+					resource.TestCheckResourceAttr("aiven_billing_group.bar2", "city", "Helsinki"),
+					resource.TestCheckResourceAttr("aiven_billing_group.bar2", "company", "Aiven Oy"),
+					resource.TestCheckResourceAttr("aiven_billing_group.bar2", "vat_id", "abc"),
+				),
+			},
 		},
 	})
 }
@@ -102,4 +113,21 @@ func testAccCopyFromProjectBillingGroupResource(name string) string {
 		  depends_on = [aiven_project.pr01]
 		}`,
 		name, name, name)
+}
+
+func testCopyBillingGroupFromExistingOne(name string) string {
+	return fmt.Sprintf(`
+		resource "aiven_billing_group" "bar" {
+		  name             = "test-acc-bg-%s"
+		  billing_currency = "EUR"
+		  vat_id           = "abc"
+		  city             = "Helsinki"
+		  company          = "Aiven Oy"
+		}
+		resource "aiven_billing_group" "bar2" {
+		  name                    = "copy-test-acc-bg-%s"
+		  copy_from_billing_group = aiven_billing_group.bar.id
+		}`,
+
+		name, name)
 }
