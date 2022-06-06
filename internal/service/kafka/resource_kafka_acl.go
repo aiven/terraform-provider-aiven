@@ -39,6 +39,14 @@ var aivenKafkaACLSchema = map[string]*schema.Schema{
 		ValidateFunc: validation.StringMatch(regexp.MustCompile(`^(\*$|[a-zA-Z0-9-_?][a-zA-Z0-9-_?*]+)$`), "username should be alphanumeric"),
 		Description:  schemautil.Complex("Username pattern for the ACL entry.").ForceNew().Build(),
 	},
+
+	// computed
+	"acl_id": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Optional:    true,
+		Description: "Kafka ACL ID",
+	},
 }
 
 func ResourceKafkaACL() *schema.Resource {
@@ -140,6 +148,9 @@ func copyKafkaACLPropertiesFromAPIResponseToTerraform(
 		return err
 	}
 	if err := d.Set("username", acl.Username); err != nil {
+		return err
+	}
+	if err := d.Set("acl_id", acl.ID); err != nil {
 		return err
 	}
 

@@ -69,6 +69,7 @@ func TestAccAivenKafkaACL_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "topic", fmt.Sprintf("test-acc-topic-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "permission", "admin"),
+					resource.TestCheckResourceAttrSet(resourceName, "acl_id"),
 				),
 			},
 		},
