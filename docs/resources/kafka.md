@@ -25,7 +25,7 @@ resource "aiven_kafka" "kafka1" {
     kafka_rest      = true
     kafka_connect   = true
     schema_registry = true
-    kafka_version   = "3.1"
+    kafka_version   = "2.4"
 
     kafka {
       group_max_session_timeout_ms = 70000
@@ -56,6 +56,7 @@ resource "aiven_kafka" "kafka1" {
 - **id** (String) The ID of this resource.
 - **kafka** (Block List, Max: 1) Kafka server provided values (see [below for nested schema](#nestedblock--kafka))
 - **kafka_user_config** (Block List, Max: 1) Kafka user configurable settings (see [below for nested schema](#nestedblock--kafka_user_config))
+- **karapace** (Boolean) Switch the service to use Karapace for schema registry and REST proxy
 - **maintenance_window_dow** (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - **maintenance_window_time** (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
 - **plan** (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
@@ -119,7 +120,7 @@ Optional:
 
 Optional:
 
-- **auto_create_topics_enable** (Boolean) auto.create.topics.enable
+- **auto_create_topics_enable** (String) auto.create.topics.enable
 - **compression_type** (String) compression.type
 - **connections_max_idle_ms** (String) connections.max.idle.ms
 - **default_replication_factor** (String) default.replication.factor
