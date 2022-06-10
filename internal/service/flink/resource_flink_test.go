@@ -535,6 +535,180 @@ func TestAccAiven_flink_kafkaToKafka(t *testing.T) {
 	})
 }
 
+func TestAccAiven_flink_kafkaToUpsertKafka(t *testing.T) {
+	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	randString := func() string { return acctest.RandStringFromCharSet(10, acctest.CharSetAlpha) }
+	flinkServiceName := fmt.Sprintf("test-acc-flink-%s", randString())
+	kafkaServiceName := fmt.Sprintf("test-acc-flink-kafka-%s", randString())
+	sourceTopicName := fmt.Sprintf("test-acc-flink-kafka-source-topic-%s", randString())
+	sinkTopicName := fmt.Sprintf("test-acc-flink-kafka-sink-topic-%s", randString())
+	sourceTableName := fmt.Sprintf("test_acc_flink_kafka_source_table_%s", randString())
+	sinkTableName := fmt.Sprintf("test_acc_flink_kafka_sink_table_%s", randString())
+	jobName := fmt.Sprintf("test_acc_flink_job_%s", randString())
+
+	manifest := fmt.Sprintf(`
+		variable "project_name" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "service_name_flink" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "service_name_kafka" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "source_topic_name" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "sink_topic_name" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "source_table_name" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "sink_table_name" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		variable "job_name" {
+		  type    = string
+		  default = "%s"
+		}
+		
+		resource "aiven_flink" "testing" {
+		  project      = var.project_name
+		  cloud_name   = "google-europe-west1"
+		  plan         = "startup-4"
+		  service_name = var.service_name_flink
+		}
+		
+		resource "aiven_kafka" "testing" {
+		  project      = var.project_name
+		  cloud_name   = "google-europe-west1"
+		  plan         = "business-4"
+		  service_name = var.service_name_kafka
+		}
+		
+		resource "aiven_kafka_topic" "source" {
+		  project      = aiven_kafka.testing.project
+		  service_name = aiven_kafka.testing.service_name
+		  topic_name   = var.source_topic_name
+		  replication  = 2
+		  partitions   = 2
+		}
+		
+		resource "aiven_kafka_topic" "sink" {
+		  project      = aiven_kafka.testing.project
+		  service_name = aiven_kafka.testing.service_name
+		  topic_name   = var.sink_topic_name
+		  replication  = 2
+		  partitions   = 2
+		}
+		
+		resource "aiven_service_integration" "testing" {
+		  project                  = aiven_flink.testing.project
+		  integration_type         = "flink"
+		  destination_service_name = aiven_flink.testing.service_name
+		  source_service_name      = aiven_kafka.testing.service_name
+		}
+		
+		resource "aiven_flink_table" "source" {
+		  project        = aiven_flink.testing.project
+		  service_name   = aiven_flink.testing.service_name
+		  integration_id = aiven_service_integration.testing.integration_id
+		
+		  upsert_kafka {
+		    topic                = aiven_kafka_topic.source.topic_name
+		    value_format         = "avro"
+		    key_format           = "avro"
+		    value_fields_include = "EXCEPT_KEY"
+		  }
+		  table_name = var.source_table_name
+		
+		  schema_sql = "cpu INT PRIMARY KEY"
+		}
+		
+		resource "aiven_flink_table" "sink" {
+		  project        = aiven_flink.testing.project
+		  service_name   = aiven_flink.testing.service_name
+		  integration_id = aiven_service_integration.testing.integration_id
+		  table_name     = var.sink_table_name
+		  upsert_kafka {
+		    topic        = aiven_kafka_topic.source.topic_name
+		    value_format = "avro"
+		    key_format   = "avro"
+		  }
+		  schema_sql = "cpu INT PRIMARY KEY"
+		}
+		
+		resource "aiven_flink_job" "testing" {
+		  project      = aiven_flink.testing.project
+		  service_name = aiven_flink.testing.service_name
+		  job_name     = var.job_name
+		  table_ids = [
+		    aiven_flink_table.source.table_id,
+		    aiven_flink_table.sink.table_id
+		  ]
+		  statement = <<EOF
+		    INSERT INTO ${aiven_flink_table.sink.table_name}
+		    SELECT * FROM ${aiven_flink_table.source.table_name}
+		    WHERE cpu > 75
+		  EOF
+		}`,
+
+		projectName,
+		flinkServiceName,
+		kafkaServiceName,
+		sourceTopicName,
+		sinkTopicName,
+		sourceTableName,
+		sinkTableName,
+		jobName,
+	)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenFlinkJobsAndTableResourcesDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: manifest,
+				Check: resource.ComposeTestCheckFunc(
+					// only check tables and jobs
+
+					// source table
+					resource.TestCheckResourceAttr("aiven_flink_table.source", "project", projectName),
+					resource.TestCheckResourceAttr("aiven_flink_table.source", "service_name", flinkServiceName),
+					resource.TestCheckResourceAttrSet("aiven_flink_table.source", "schema_sql"),
+
+					// sink table
+					resource.TestCheckResourceAttr("aiven_flink_table.sink", "project", projectName),
+					resource.TestCheckResourceAttr("aiven_flink_table.sink", "service_name", flinkServiceName),
+					resource.TestCheckResourceAttrSet("aiven_flink_table.sink", "schema_sql"),
+
+					// job
+					resource.TestCheckResourceAttr("aiven_flink_job.testing", "project", projectName),
+					resource.TestCheckResourceAttr("aiven_flink_job.testing", "service_name", flinkServiceName),
+					resource.TestCheckResourceAttrSet("aiven_flink_job.testing", "table_ids.0"),
+					resource.TestCheckResourceAttrSet("aiven_flink_job.testing", "table_ids.1"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckAivenFlinkJobsAndTableResourcesDestroy(s *terraform.State) error {
 	c := acc.TestAccProvider.Meta().(*aiven.Client)
 
