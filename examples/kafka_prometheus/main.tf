@@ -28,7 +28,7 @@ resource "aiven_kafka" "bar" {
     kafka_connect   = true
     schema_registry = true
     kafka_version   = "2.6"
-    ip_filter       = ["0.0.0.0/0", "80.242.179.94", "188.166.141.226"]
+    ip_filter       = ["80.242.179.94", "188.166.141.226"]
     kafka {
       group_max_session_timeout_ms = 70000
       log_retention_bytes          = 1000000000
