@@ -273,9 +273,12 @@ func resourceFlinkTableCreate(ctx context.Context, d *schema.ResourceData, m int
 	return resourceFlinkTableRead(ctx, d, m)
 }
 
-func readUpsertKafkaFromSchema(d *schema.ResourceData) aiven.FlinkTableUpsertKafka {
-	r := aiven.FlinkTableUpsertKafka{}
+func readUpsertKafkaFromSchema(d *schema.ResourceData) *aiven.FlinkTableUpsertKafka {
+	if len(d.Get("upsert_kafka").(*schema.Set).List()) == 0 {
+		return nil
+	}
 
+	r := aiven.FlinkTableUpsertKafka{}
 	for _, upsertKafka := range d.Get("upsert_kafka").(*schema.Set).List() {
 		v := upsertKafka.(map[string]interface{})
 
@@ -287,7 +290,7 @@ func readUpsertKafkaFromSchema(d *schema.ResourceData) aiven.FlinkTableUpsertKaf
 		r.ValueFormat = v["value_format"].(string)
 	}
 
-	return r
+	return &r
 }
 
 func resourceFlinkTableDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

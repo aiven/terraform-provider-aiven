@@ -397,7 +397,7 @@ func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client,
 	if err := d.Set("billing_group", project.BillingGroupId); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("tag", schemautil.SetTagsTerraformProperties(nil)); err != nil {
+	if err := d.Set("tag", schemautil.SetTagsTerraformProperties(project.Tags)); err != nil {
 		return diag.FromErr(err)
 	}
 

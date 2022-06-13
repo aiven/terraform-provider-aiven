@@ -5,6 +5,17 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [3.1.0] - 2022-06-13
+
+- Add Kafka schema JSON support
+- Add support for new `aiven_flink_table` fields
+- Expose `aiven_kafka_acl` internal Aiven ID
+- Fix `aiven_project` creation handling, if a project exists, then error if trying to create it again
+- Add copy from billing group support
+- Add service tags support
+- Add project tags support
+- Fix typos and errors in documentation and examples
+
 ## [3.0.0] - 2022-05-13
 
 - `aiven_service` and `aiven_elasticsearch` resources were deleted
