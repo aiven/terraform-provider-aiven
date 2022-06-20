@@ -8,16 +8,21 @@ on:
 
 jobs:
   semgrep:
+    name: Scan
     runs-on: ubuntu-latest
+    container:
+      image: returntocorp/semgrep
     steps:
-    - uses: actions/checkout@v2
-    - uses: returntocorp/semgrep-action@v1
+      - uses: actions/checkout@v3
+      - run: semgrep ci
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 
   make_lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
         with:
           go-version: 1.16
 
@@ -26,8 +31,8 @@ jobs:
   check_docs_were_generated:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
         with:
           go-version: 1.16
 
