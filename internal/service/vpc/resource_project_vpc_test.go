@@ -2,6 +2,7 @@ package vpc_test
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
@@ -17,6 +18,8 @@ func TestAccAivenProjectVPC_basic(t *testing.T) {
 	resourceName := "aiven_project_vpc.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	rName2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	rName3 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	rName4 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
@@ -40,6 +43,20 @@ func TestAccAivenProjectVPC_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName2)),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "network_cidr", "192.168.0.0/24"),
+					resource.TestCheckResourceAttr(resourceName, "state", "ACTIVE"),
+				),
+			},
+			{
+				Config:      testAccProjectVPCResourceFail(rName3),
+				ExpectError: regexp.MustCompile("Invalid VPC id"),
+			},
+			{
+				Config: testAccProjectVPCResourceGetById(rName4),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenProjectVPCAttributes("data.aiven_project_vpc.vpc"),
+					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName4)),
+					resource.TestCheckResourceAttr(resourceName, "cloud_name", "azure-westeurope"),
+					resource.TestCheckResourceAttr(resourceName, "network_cidr", "192.168.1.0/24"),
 					resource.TestCheckResourceAttr(resourceName, "state", "ACTIVE"),
 				),
 			},
@@ -143,4 +160,48 @@ func testAccCheckAivenProjectVPCResourceDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+func testAccProjectVPCResourceFail(name string) string {
+	return fmt.Sprintf(`
+		resource "aiven_project" "foo" {
+		  project = "test-acc-pr-%s"
+		}
+		
+		resource "aiven_project_vpc" "bar" {
+		  project      = aiven_project.foo.project
+		  cloud_name   = "google-europe-west1"
+		  network_cidr = "192.168.0.0/24"
+		}
+		
+		data "aiven_project_vpc" "vpc" {
+		  project    = aiven_project_vpc.bar.project
+		  cloud_name = aiven_project_vpc.bar.cloud_name
+		  id         = "some_wrong_id"
+		
+		  depends_on = [aiven_project_vpc.bar]
+		}`,
+		name)
+}
+
+func testAccProjectVPCResourceGetById(name string) string {
+	return fmt.Sprintf(`
+		resource "aiven_project" "foo" {
+		  project = "test-acc-pr-%s"
+		}
+		
+		resource "aiven_project_vpc" "bar" {
+		  project      = aiven_project.foo.project
+		  cloud_name   = "azure-westeurope"
+		  network_cidr = "192.168.1.0/24"
+		}
+		
+		data "aiven_project_vpc" "vpc" {
+		  project    = aiven_project_vpc.bar.project
+		  cloud_name = aiven_project_vpc.bar.cloud_name
+		  id         = aiven_project_vpc.bar.id
+		
+		  depends_on = [aiven_project_vpc.bar]
+		}`,
+		name)
 }
