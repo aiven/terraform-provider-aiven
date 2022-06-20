@@ -251,6 +251,10 @@ func backupsReady(service *aiven.Service) bool {
 		return true
 	}
 
+	if service.Type == "redis" && service.UserConfig["redis_persistence"] == "off" {
+		return true
+	}
+
 	// no backups for read replicas type of service
 	for _, i := range service.Integrations {
 		if i.IntegrationType == "read_replica" && *i.DestinationService == service.Name {
