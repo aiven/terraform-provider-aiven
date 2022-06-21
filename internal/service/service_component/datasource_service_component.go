@@ -2,6 +2,8 @@ package service_component
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/aiven/aiven-go-client"
@@ -117,11 +119,82 @@ func datasourceServiceComponentRead(_ context.Context, d *schema.ResourceData, m
 		return diag.Errorf("common %s/%s not found: %s", projectName, serviceName, err)
 	}
 
+	if len(service.Components) == 0 {
+		return diag.Errorf("cannot find component %s/%s for service %s",
+			componentName, route, serviceName)
+	}
+
+	filteredResult := make([]*aiven.ServiceComponents, 0)
+
 	for _, c := range service.Components {
 		if c.Component == componentName && c.Route == route && c.Usage == usage {
-			// check optional ssl search criteria, if not set by a user match entries
-			// without ssl or ssl=true
-			if ssl, ok := d.GetOk("ssl"); ok {
+			filteredBySsl, err := filterDatasourceServiceComponents(d, "ssl", service.Components)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+			filteredByKafkaAuthMethod, err := filterDatasourceServiceComponents(d, "kafka_authentication_method", filteredBySsl)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+
+			filteredResult = filteredByKafkaAuthMethod
+		}
+	}
+
+	if len(filteredResult) == 0 {
+		return diag.Errorf("cannot find component %s/%s for service %s",
+			componentName, route, serviceName)
+	}
+
+	// There should NOT be more than one result returned.
+	c := filteredResult[0]
+	d.SetId(schemautil.BuildResourceID(c.Host, strconv.Itoa(c.Port)))
+
+	if err := d.Set("project", projectName); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("service_name", serviceName); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("component", componentName); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("route", route); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("host", c.Host); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("port", c.Port); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("usage", c.Usage); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("kafka_authentication_method", c.KafkaAuthenticationMethod); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if c.Ssl != nil {
+		if err := d.Set("ssl", *c.Ssl); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
+	return nil
+
+}
+
+func filterDatasourceServiceComponents(d *schema.ResourceData, filter string, components []*aiven.ServiceComponents) ([]*aiven.ServiceComponents, error) {
+	filteredResult := make([]*aiven.ServiceComponents, 0)
+
+	switch filter {
+	case "ssl":
+		// check optional ssl search criteria, if not set by a user match entries
+		// without ssl or ssl=true
+		ssl, ok := d.GetOk("ssl")
+		for _, c := range components {
+			if ok {
 				if c.Ssl == nil {
 					continue
 				}
@@ -135,9 +208,27 @@ func datasourceServiceComponentRead(_ context.Context, d *schema.ResourceData, m
 				}
 			}
 
-			// check optional kafka_authentication_method search criteria, if not set by a
-			// user match entries without kafka_authentication_method
-			if method, ok := d.GetOk("kafka_authentication_method"); ok {
+			filteredResult = append(filteredResult, c)
+		}
+
+		if len(filteredResult) == 0 {
+			var errorMessage string
+			if ok {
+				errorMessage = "cannot match the components with the given SSL criteria"
+			} else {
+				errorMessage = "please try specifying 'ssl' to filter the results"
+			}
+			return nil, errors.New(errorMessage)
+		}
+
+		return filteredResult, nil
+
+	case "kafka_authentication_method":
+		// check optional kafka_authentication_method search criteria, if not set by a
+		// user match entries without kafka_authentication_method
+		method, ok := d.GetOk("kafka_authentication_method")
+		for _, c := range components {
+			if ok {
 				if c.KafkaAuthenticationMethod != method {
 					continue
 				}
@@ -147,43 +238,20 @@ func datasourceServiceComponentRead(_ context.Context, d *schema.ResourceData, m
 				}
 			}
 
-			d.SetId(schemautil.BuildResourceID(c.Host, strconv.Itoa(c.Port)))
-
-			if err := d.Set("project", projectName); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set("service_name", serviceName); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set("component", componentName); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set("route", route); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set("host", c.Host); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set("port", c.Port); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set("usage", c.Usage); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set("kafka_authentication_method", c.KafkaAuthenticationMethod); err != nil {
-				return diag.FromErr(err)
-			}
-
-			if c.Ssl != nil {
-				if err := d.Set("ssl", *c.Ssl); err != nil {
-					return diag.FromErr(err)
-				}
-			}
-
-			return nil
+			filteredResult = append(filteredResult, c)
 		}
-	}
 
-	return diag.Errorf("cannot find component %s/%s for service %s",
-		componentName, route, serviceName)
+		if len(filteredResult) == 0 {
+			var errorMessage string
+			if ok {
+				errorMessage = fmt.Sprintf("no result matches (kafka_authentication_method=%s)", method.(string))
+			} else {
+				errorMessage = "please try specifying 'kafka_authentication_method' to filter the results"
+			}
+			return nil, errors.New(errorMessage)
+		}
+		return filteredResult, nil
+	default:
+		return nil, errors.New("no filtering criteria provided")
+	}
 }
