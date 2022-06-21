@@ -235,7 +235,7 @@ func resourceAzureVPCPeeringConnectionDelete(ctx context.Context, d *schema.Reso
 		MinTimeout: 2 * time.Second,
 	}
 	if _, err := stateChangeConf.WaitForStateContext(ctx); err != nil && !aiven.IsNotFound(err) {
-		return diag.Errorf("Error waiting for Aiven VPC Peering Connection to be DELETED: %s", err)
+		return diag.Errorf("Error waiting for Azure Aiven VPC Peering Connection to be DELETED: %s", err)
 	}
 	return nil
 }
@@ -243,6 +243,14 @@ func resourceAzureVPCPeeringConnectionDelete(ctx context.Context, d *schema.Reso
 func resourceAzureVPCPeeringConnectionImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	if len(strings.Split(d.Id(), "/")) != 4 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<vpc_id>/<azure_subscription_id>/<vnet_name>", d.Id())
+	}
+
+	client := m.(*aiven.Client)
+
+	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
+	_, err := client.VPCPeeringConnections.GetVPCPeering(projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
+	if err != nil && schemautil.IsUnknownResource(err) {
+		return nil, errors.New("cannot find specified Azure VPC peering connection")
 	}
 
 	dig := resourceAzureVPCPeeringConnectionRead(ctx, d, m)
