@@ -5,6 +5,11 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [3.2.0] - 2022-06-21
+- Fix typos in documentation and examples
+- Fix Redis service creation when persistence is off
+- Allow retrieving project VPC by ID
+
 ## [3.1.0] - 2022-06-13
 
 - Add Kafka schema JSON support
