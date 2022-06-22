@@ -34,6 +34,10 @@ func sweepServiceIntegrations(region string) error {
 	}
 
 	for _, service := range services {
+		if len(service.Integrations) == 0 {
+			continue
+		}
+
 		serviceIntegrations, err := conn.ServiceIntegrations.List(projectName, service.Name)
 		if err != nil {
 			return fmt.Errorf("error retrieving a list of service integration for service `%s`: %s", service.Name, err)

@@ -16,6 +16,22 @@ func init() {
 	resource.AddTestSweepers("aiven_static_ip", &resource.Sweeper{
 		Name: "aiven_static_ip",
 		F:    sweepStaticIPs,
+		Dependencies: []string{
+			"aiven_cassandra",
+			"aiven_clickhouse",
+			"aiven_flink",
+			"aiven_grafana",
+			"aiven_influxdb",
+			"aiven_kafka",
+			"aiven_kafka_connect",
+			"aiven_kafka_mirrormaker",
+			"aiven_m3db",
+			"aiven_m3aggregator",
+			"aiven_mysql",
+			"aiven_opensearch",
+			"aiven_pg",
+			"aiven_redis",
+		},
 	})
 
 }

@@ -5,6 +5,7 @@ package sweep
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"os"
 	"strings"
 
@@ -53,7 +54,7 @@ func SweepServices(region, t string) error {
 			continue
 		}
 
-		if !strings.Contains(s.Name, "test-acc-ac-") {
+		if !strings.Contains(s.Name, "test-acc-") {
 			continue
 		}
 
@@ -82,4 +83,14 @@ func SweepServices(region, t string) error {
 		}
 	}
 	return nil
+}
+
+func AddServiceSweeper(t string) {
+	resource.AddTestSweepers("aiven_"+t, &resource.Sweeper{
+		Name: "aiven_" + t,
+		F: func(r string) error {
+			return SweepServices(r, t)
+		},
+		Dependencies: []string{"aiven_service_integration"},
+	})
 }

@@ -12,7 +12,7 @@ func init() {
 	resource.AddTestSweepers("aiven_cassandra", &resource.Sweeper{
 		Name:         "aiven_cassandra",
 		F:            sweepCassandraServices,
-		Dependencies: []string{"aiven_service_integration", "aiven_static_ip"},
+		Dependencies: []string{"aiven_service_integration"},
 	})
 }
 
