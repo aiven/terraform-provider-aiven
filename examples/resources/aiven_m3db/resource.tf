@@ -7,10 +7,10 @@ resource "aiven_m3db" "m3" {
   maintenance_window_time = "10:00:00"
 
   m3db_user_config {
-    m3db_version = 0.15
+    m3db_version = 1.1
 
     namespaces {
-      name = "my-ns1"
+      name = "my_ns1"
       type = "unaggregated"
     }
   }

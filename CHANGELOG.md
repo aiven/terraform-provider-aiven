@@ -5,6 +5,9 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [X.X.X] - not yet released
+- Fix documentation for M3DB namespaces
+
 ## [3.2.0] - 2022-06-21
 - Fix typos in documentation and examples
 - Fix Redis service creation when persistence is off
