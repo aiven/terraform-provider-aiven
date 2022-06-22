@@ -3,7 +3,6 @@ package account_test
 import (
 	"fmt"
 	"log"
-	"strings"
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
@@ -14,49 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
-
-func init() {
-	resource.AddTestSweepers("aiven_account_team", &resource.Sweeper{
-		Name:         "aiven_account_team",
-		F:            sweepAccountTeams,
-		Dependencies: []string{"aiven_account_team_member"},
-	})
-}
-
-func sweepAccountTeams(region string) error {
-	client, err := acc.SharedClient(region)
-	if err != nil {
-		return fmt.Errorf("error getting client: %s", err)
-	}
-
-	conn := client.(*aiven.Client)
-
-	r, err := conn.Accounts.List()
-	if err != nil {
-		return fmt.Errorf("error retrieving a list of accounts : %s", err)
-	}
-
-	for _, a := range r.Accounts {
-		if strings.Contains(a.Name, "test-acc-ac-") {
-			tr, err := conn.AccountTeams.List(a.Id)
-			if err != nil {
-				return fmt.Errorf("error retrieving a list of account teams : %s", err)
-			}
-
-			for _, t := range tr.Teams {
-				if strings.Contains(t.Name, "test-acc-team-") {
-					err = conn.AccountTeams.Delete(t.AccountId, t.Id)
-					if err != nil {
-						return fmt.Errorf("cannot delete account team: %s", err)
-					}
-				}
-
-			}
-		}
-	}
-
-	return nil
-}
 
 func TestAccAivenAccountTeam_basic(t *testing.T) {
 	resourceName := "aiven_account_team.foo"

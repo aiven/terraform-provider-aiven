@@ -3,7 +3,6 @@ package account_test
 import (
 	"fmt"
 	"log"
-	"strings"
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
@@ -14,69 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
-
-func init() {
-	resource.AddTestSweepers("aiven_account_team_member", &resource.Sweeper{
-		Name: "aiven_account_team_member",
-		F:    sweepAccountTeamMembers,
-	})
-}
-
-func sweepAccountTeamMembers(region string) error {
-	client, err := acc.SharedClient(region)
-	if err != nil {
-		return fmt.Errorf("error getting client: %s", err)
-	}
-
-	conn := client.(*aiven.Client)
-
-	r, err := conn.Accounts.List()
-	if err != nil {
-		return fmt.Errorf("error retrieving a list of accounts : %s", err)
-	}
-
-	for _, a := range r.Accounts {
-		if strings.Contains(a.Name, "test-acc-ac-") {
-			tr, err := conn.AccountTeams.List(a.Id)
-			if err != nil {
-				return fmt.Errorf("error retrieving a list of account teams : %s", err)
-			}
-
-			for _, t := range tr.Teams {
-				if strings.Contains(t.Name, "test-acc-team-") {
-					// delete all account team invitations
-					mi, err := conn.AccountTeamInvites.List(t.AccountId, t.Id)
-					if err != nil {
-						return fmt.Errorf("error retrieving a list of account team invitations : %s", err)
-					}
-
-					for _, i := range mi.Invites {
-						err := conn.AccountTeamInvites.Delete(i.AccountId, i.TeamId, i.UserEmail)
-						if err != nil {
-							return fmt.Errorf("cannot delete account team invitation : %s", err)
-						}
-					}
-
-					// delete all account team members
-					mr, err := conn.AccountTeamMembers.List(t.AccountId, t.Id)
-					if err != nil {
-						return fmt.Errorf("error retrieving a list of account team members : %s", err)
-					}
-
-					for _, m := range mr.Members {
-						err := conn.AccountTeamMembers.Delete(t.AccountId, t.Id, m.UserId)
-						if err != nil {
-							return fmt.Errorf("cannot delete account team member : %s", err)
-						}
-					}
-				}
-
-			}
-		}
-	}
-
-	return nil
-}
 
 func TestAccAivenAccountTeamMember_basic(t *testing.T) {
 	resourceName := "aiven_account_team_member.foo"
