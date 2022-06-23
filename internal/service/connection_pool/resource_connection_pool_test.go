@@ -54,93 +54,91 @@ func TestAccAivenConnectionPool_basic(t *testing.T) {
 
 func testAccConnectionPoolNoUserResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_pg" "bar" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-4"
-		  service_name            = "test-acc-sr-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		}
-		
-		resource "aiven_database" "foo" {
-		  project       = aiven_pg.bar.project
-		  service_name  = aiven_pg.bar.service_name
-		  database_name = "test-acc-db-%s"
-		}
-		
-		resource "aiven_connection_pool" "foo" {
-		  service_name  = aiven_pg.bar.service_name
-		  project       = data.aiven_project.foo.project
-		  database_name = aiven_database.foo.database_name
-		  pool_name     = "test-acc-pool-%s"
-		  pool_size     = 25
-		  pool_mode     = "transaction"
-		
-		  depends_on = [aiven_database.foo]
-		}
-		
-		data "aiven_connection_pool" "pool" {
-		  project      = aiven_connection_pool.foo.project
-		  service_name = aiven_connection_pool.foo.service_name
-		  pool_name    = aiven_connection_pool.foo.pool_name
-		
-		  depends_on = [aiven_connection_pool.foo]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_pg" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_database" "foo" {
+  project       = aiven_pg.bar.project
+  service_name  = aiven_pg.bar.service_name
+  database_name = "test-acc-db-%s"
+}
+
+resource "aiven_connection_pool" "foo" {
+  service_name  = aiven_pg.bar.service_name
+  project       = data.aiven_project.foo.project
+  database_name = aiven_database.foo.database_name
+  pool_name     = "test-acc-pool-%s"
+  pool_size     = 25
+  pool_mode     = "transaction"
+
+  depends_on = [aiven_database.foo]
+}
+
+data "aiven_connection_pool" "pool" {
+  project      = aiven_connection_pool.foo.project
+  service_name = aiven_connection_pool.foo.service_name
+  pool_name    = aiven_connection_pool.foo.pool_name
+
+  depends_on = [aiven_connection_pool.foo]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name)
 }
 
 func testAccConnectionPoolResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_pg" "bar" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-4"
-		  service_name            = "test-acc-sr-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		}
-		
-		resource "aiven_service_user" "foo" {
-		  service_name = aiven_pg.bar.service_name
-		  project      = data.aiven_project.foo.project
-		  username     = "user-%s"
-		}
-		
-		resource "aiven_database" "foo" {
-		  project       = aiven_pg.bar.project
-		  service_name  = aiven_pg.bar.service_name
-		  database_name = "test-acc-db-%s"
-		}
-		
-		resource "aiven_connection_pool" "foo" {
-		  service_name  = aiven_pg.bar.service_name
-		  project       = data.aiven_project.foo.project
-		  database_name = aiven_database.foo.database_name
-		  username      = aiven_service_user.foo.username
-		  pool_name     = "test-acc-pool-%s"
-		  pool_size     = 25
-		  pool_mode     = "transaction"
-		
-		  depends_on = [aiven_database.foo]
-		}
-		
-		data "aiven_connection_pool" "pool" {
-		  project      = aiven_connection_pool.foo.project
-		  service_name = aiven_connection_pool.foo.service_name
-		  pool_name    = aiven_connection_pool.foo.pool_name
-		
-		  depends_on = [aiven_connection_pool.foo]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_pg" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_service_user" "foo" {
+  service_name = aiven_pg.bar.service_name
+  project      = data.aiven_project.foo.project
+  username     = "user-%s"
+}
+
+resource "aiven_database" "foo" {
+  project       = aiven_pg.bar.project
+  service_name  = aiven_pg.bar.service_name
+  database_name = "test-acc-db-%s"
+}
+
+resource "aiven_connection_pool" "foo" {
+  service_name  = aiven_pg.bar.service_name
+  project       = data.aiven_project.foo.project
+  database_name = aiven_database.foo.database_name
+  username      = aiven_service_user.foo.username
+  pool_name     = "test-acc-pool-%s"
+  pool_size     = 25
+  pool_mode     = "transaction"
+
+  depends_on = [aiven_database.foo]
+}
+
+data "aiven_connection_pool" "pool" {
+  project      = aiven_connection_pool.foo.project
+  service_name = aiven_connection_pool.foo.service_name
+  pool_name    = aiven_connection_pool.foo.pool_name
+
+  depends_on = [aiven_connection_pool.foo]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name)
 }
 
 func testAccCheckAivenConnectionPoolAttributes(n string) resource.TestCheckFunc {

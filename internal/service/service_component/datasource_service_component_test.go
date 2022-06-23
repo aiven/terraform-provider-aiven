@@ -100,130 +100,127 @@ func testAccServiceComponentKafkaAuthenticationMethod(n string) resource.TestChe
 
 func testAccServiceComponentDataSource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_kafka" "bar" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "business-4"
-		  service_name            = "test-acc-sr-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		
-		  kafka_user_config {
-		    kafka_rest      = true
-		    kafka_connect   = true
-		    schema_registry = true
-		
-		    kafka {
-		      group_max_session_timeout_ms = 70000
-		      log_retention_bytes          = 1000000000
-		    }
-		
-		    public_access {
-		      kafka_rest    = true
-		      kafka_connect = true
-		    }
-		  }
-		}
-		
-		data "aiven_service_component" "kafka" {
-		  project                     = aiven_kafka.bar.project
-		  service_name                = aiven_kafka.bar.service_name
-		  component                   = "kafka"
-		  route                       = "dynamic"
-		  kafka_authentication_method = "certificate"
-		
-		  depends_on = [aiven_kafka.bar]
-		}
-		
-		data "aiven_service_component" "kafka_connect" {
-		  project      = aiven_kafka.bar.project
-		  service_name = aiven_kafka.bar.service_name
-		  component    = "kafka_connect"
-		  route        = "public"
-		
-		  depends_on = [aiven_kafka.bar]
-		}
-		
-		data "aiven_service_component" "kafka_rest" {
-		  project      = aiven_kafka.bar.project
-		  service_name = aiven_kafka.bar.service_name
-		  component    = "kafka_rest"
-		  route        = "public"
-		
-		  depends_on = [aiven_kafka.bar]
-		}
-		
-		data "aiven_service_component" "schema_registry" {
-		  project      = aiven_kafka.bar.project
-		  service_name = aiven_kafka.bar.service_name
-		  component    = "schema_registry"
-		  route        = "dynamic"
-		
-		  depends_on = [aiven_kafka.bar]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_kafka" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "business-4"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  kafka_user_config {
+    kafka_rest      = true
+    kafka_connect   = true
+    schema_registry = true
+
+    kafka {
+      group_max_session_timeout_ms = 70000
+      log_retention_bytes          = 1000000000
+    }
+
+    public_access {
+      kafka_rest    = true
+      kafka_connect = true
+    }
+  }
+}
+
+data "aiven_service_component" "kafka" {
+  project                     = aiven_kafka.bar.project
+  service_name                = aiven_kafka.bar.service_name
+  component                   = "kafka"
+  route                       = "dynamic"
+  kafka_authentication_method = "certificate"
+
+  depends_on = [aiven_kafka.bar]
+}
+
+data "aiven_service_component" "kafka_connect" {
+  project      = aiven_kafka.bar.project
+  service_name = aiven_kafka.bar.service_name
+  component    = "kafka_connect"
+  route        = "public"
+
+  depends_on = [aiven_kafka.bar]
+}
+
+data "aiven_service_component" "kafka_rest" {
+  project      = aiven_kafka.bar.project
+  service_name = aiven_kafka.bar.service_name
+  component    = "kafka_rest"
+  route        = "public"
+
+  depends_on = [aiven_kafka.bar]
+}
+
+data "aiven_service_component" "schema_registry" {
+  project      = aiven_kafka.bar.project
+  service_name = aiven_kafka.bar.service_name
+  component    = "schema_registry"
+  route        = "dynamic"
+
+  depends_on = [aiven_kafka.bar]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
 func testAccServiceComponentKafkaAuthMethodMissingErrorMessages(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_kafka" "kafka" {
-		  project      = data.aiven_project.foo.project
-		  service_name = "test-acc-sr-%s"
-		  cloud_name   = "google-europe-west3"
-		  plan         = "startup-2"
-		
-		  kafka_user_config {
-		    public_access {
-		      kafka = true
-		    }
-		  }
-		}
-		
-		data "aiven_service_component" "kafka" {
-		  project      = aiven_kafka.kafka.project
-		  service_name = aiven_kafka.kafka.service_name
-		  component    = "kafka"
-		  route        = "dynamic"
-		
-		  depends_on = [aiven_kafka.kafka]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_kafka" "kafka" {
+  project      = data.aiven_project.foo.project
+  service_name = "test-acc-sr-%s"
+  cloud_name   = "google-europe-west3"
+  plan         = "startup-2"
+
+  kafka_user_config {
+    public_access {
+      kafka = true
+    }
+  }
+}
+
+data "aiven_service_component" "kafka" {
+  project      = aiven_kafka.kafka.project
+  service_name = aiven_kafka.kafka.service_name
+  component    = "kafka"
+  route        = "dynamic"
+
+  depends_on = [aiven_kafka.kafka]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
 func testAccServiceComponentKafkaAuthMethodNotMatchErrorMessages(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_kafka" "kafka" {
-		  project      = data.aiven_project.foo.project
-		  service_name = "test-acc-sr-%s"
-		  cloud_name   = "google-europe-west3"
-		  plan         = "startup-2"
-		
-		  kafka_user_config {
-		    public_access {
-		      kafka = true
-		    }
-		  }
-		}
-		data "aiven_service_component" "kafka" {
-		  project                     = aiven_kafka.kafka.project
-		  service_name                = aiven_kafka.kafka.service_name
-		  component                   = "kafka"
-		  route                       = "dynamic"
-		  kafka_authentication_method = "sasl"
-		
-		  depends_on = [aiven_kafka.kafka]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_kafka" "kafka" {
+  project      = data.aiven_project.foo.project
+  service_name = "test-acc-sr-%s"
+  cloud_name   = "google-europe-west3"
+  plan         = "startup-2"
+
+  kafka_user_config {
+    public_access {
+      kafka = true
+    }
+  }
+}
+data "aiven_service_component" "kafka" {
+  project                     = aiven_kafka.kafka.project
+  service_name                = aiven_kafka.kafka.service_name
+  component                   = "kafka"
+  route                       = "dynamic"
+  kafka_authentication_method = "sasl"
+
+  depends_on = [aiven_kafka.kafka]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }

@@ -78,135 +78,132 @@ func TestAccAiven_kafka(t *testing.T) {
 
 func testAccKafkaResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_kafka" "bar" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-2"
-		  service_name            = "test-acc-sr-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		
-		  kafka_user_config {
-		    kafka_rest      = true
-		    kafka_connect   = true
-		    schema_registry = true
-		
-		    kafka {
-		      group_max_session_timeout_ms = 70000
-		      log_retention_bytes          = 1000000000
-		    }
-		
-		    public_access {
-		      kafka_rest    = true
-		      kafka_connect = true
-		    }
-		  }
-		}
-		
-		data "aiven_kafka" "common" {
-		  service_name = aiven_kafka.bar.service_name
-		  project      = aiven_kafka.bar.project
-		
-		  depends_on = [aiven_kafka.bar]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_kafka" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-2"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  kafka_user_config {
+    kafka_rest      = true
+    kafka_connect   = true
+    schema_registry = true
+
+    kafka {
+      group_max_session_timeout_ms = 70000
+      log_retention_bytes          = 1000000000
+    }
+
+    public_access {
+      kafka_rest    = true
+      kafka_connect = true
+    }
+  }
+}
+
+data "aiven_kafka" "common" {
+  service_name = aiven_kafka.bar.service_name
+  project      = aiven_kafka.bar.project
+
+  depends_on = [aiven_kafka.bar]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
 func testAccKafkaWithoutDefaultACLResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_kafka" "bar" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-2"
-		  service_name            = "test-acc-sr-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		  default_acl             = false
-		
-		  tag {
-		    key   = "test"
-		    value = "val"
-		  }
-		
-		  kafka_user_config {
-		    kafka_rest      = true
-		    kafka_connect   = true
-		    schema_registry = true
-		
-		    kafka {
-		      group_max_session_timeout_ms = 70000
-		      log_retention_bytes          = 1000000000
-		    }
-		
-		    public_access {
-		      kafka_rest    = true
-		      kafka_connect = true
-		    }
-		  }
-		}
-		data "aiven_kafka" "common" {
-		  service_name = aiven_kafka.bar.service_name
-		  project      = aiven_kafka.bar.project
-		
-		  depends_on = [aiven_kafka.bar]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_kafka" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-2"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+  default_acl             = false
+
+  tag {
+    key   = "test"
+    value = "val"
+  }
+
+  kafka_user_config {
+    kafka_rest      = true
+    kafka_connect   = true
+    schema_registry = true
+
+    kafka {
+      group_max_session_timeout_ms = 70000
+      log_retention_bytes          = 1000000000
+    }
+
+    public_access {
+      kafka_rest    = true
+      kafka_connect = true
+    }
+  }
+}
+data "aiven_kafka" "common" {
+  service_name = aiven_kafka.bar.service_name
+  project      = aiven_kafka.bar.project
+
+  depends_on = [aiven_kafka.bar]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
 func testAccKafkaDoubleTagResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_kafka" "bar" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-2"
-		  service_name            = "test-acc-sr-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		  default_acl             = false
-		
-		  tag {
-		    key   = "test"
-		    value = "val"
-		  }
-		  tag {
-		    key   = "test"
-		    value = "val2"
-		  }
-		
-		  kafka_user_config {
-		    kafka_rest      = true
-		    kafka_connect   = true
-		    schema_registry = true
-		
-		    kafka {
-		      group_max_session_timeout_ms = 70000
-		      log_retention_bytes          = 1000000000
-		    }
-		
-		    public_access {
-		      kafka_rest    = true
-		      kafka_connect = true
-		    }
-		  }
-		}
-		
-		data "aiven_kafka" "common" {
-		  service_name = aiven_kafka.bar.service_name
-		  project      = aiven_kafka.bar.project
-		
-		  depends_on = [aiven_kafka.bar]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_kafka" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-2"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+  default_acl             = false
+
+  tag {
+    key   = "test"
+    value = "val"
+  }
+  tag {
+    key   = "test"
+    value = "val2"
+  }
+
+  kafka_user_config {
+    kafka_rest      = true
+    kafka_connect   = true
+    schema_registry = true
+
+    kafka {
+      group_max_session_timeout_ms = 70000
+      log_retention_bytes          = 1000000000
+    }
+
+    public_access {
+      kafka_rest    = true
+      kafka_connect = true
+    }
+  }
+}
+
+data "aiven_kafka" "common" {
+  service_name = aiven_kafka.bar.service_name
+  project      = aiven_kafka.bar.project
+
+  depends_on = [aiven_kafka.bar]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }

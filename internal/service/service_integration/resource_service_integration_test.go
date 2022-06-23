@@ -142,324 +142,319 @@ func TestAccAivenServiceIntegration_basic(t *testing.T) {
 
 func testAccServiceIntegrationResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_pg" "bar-pg" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-4"
-		  service_name            = "test-acc-sr-pg-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		
-		  pg_user_config {
-		    public_access {
-		      pg         = true
-		      prometheus = false
-		    }
-		
-		    pg {
-		      idle_in_transaction_session_timeout = 900
-		    }
-		  }
-		}
-		
-		resource "aiven_influxdb" "bar-influxdb" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-4"
-		  service_name            = "test-acc-sr-influxdb-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		
-		  influxdb_user_config {
-		    public_access {
-		      influxdb = true
-		    }
-		  }
-		}
-		
-		resource "aiven_service_integration" "bar" {
-		  project                  = data.aiven_project.foo.project
-		  integration_type         = "metrics"
-		  source_service_name      = aiven_pg.bar-pg.service_name
-		  destination_service_name = aiven_influxdb.bar-influxdb.service_name
-		
-		  depends_on = [aiven_pg.bar-pg, aiven_influxdb.bar-influxdb]
-		}
-		
-		data "aiven_service_integration" "int" {
-		  project                  = aiven_service_integration.bar.project
-		  integration_type         = aiven_service_integration.bar.integration_type
-		  source_service_name      = aiven_service_integration.bar.source_service_name
-		  destination_service_name = aiven_service_integration.bar.destination_service_name
-		
-		  depends_on = [aiven_service_integration.bar]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_pg" "bar-pg" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-pg-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  pg_user_config {
+    public_access {
+      pg         = true
+      prometheus = false
+    }
+
+    pg {
+      idle_in_transaction_session_timeout = 900
+    }
+  }
+}
+
+resource "aiven_influxdb" "bar-influxdb" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-influxdb-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  influxdb_user_config {
+    public_access {
+      influxdb = true
+    }
+  }
+}
+
+resource "aiven_service_integration" "bar" {
+  project                  = data.aiven_project.foo.project
+  integration_type         = "metrics"
+  source_service_name      = aiven_pg.bar-pg.service_name
+  destination_service_name = aiven_influxdb.bar-influxdb.service_name
+
+  depends_on = [aiven_pg.bar-pg, aiven_influxdb.bar-influxdb]
+}
+
+data "aiven_service_integration" "int" {
+  project                  = aiven_service_integration.bar.project
+  integration_type         = aiven_service_integration.bar.integration_type
+  source_service_name      = aiven_service_integration.bar.source_service_name
+  destination_service_name = aiven_service_integration.bar.destination_service_name
+
+  depends_on = [aiven_service_integration.bar]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccServiceIntegrationKafkaConnectResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_kafka" "kafka1" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-2"
-		  service_name            = "test-acc-sr-kafka-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		}
-		
-		resource "aiven_kafka_connect" "kafka_connect1" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-4"
-		  service_name            = "test-acc-sr-kafka-con-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		
-		  kafka_connect_user_config {
-		    kafka_connect {
-		      consumer_isolation_level = "read_committed"
-		    }
-		
-		    public_access {
-		      kafka_connect = true
-		    }
-		  }
-		}
-		
-		resource "aiven_service_integration" "bar" {
-		  project                  = data.aiven_project.foo.project
-		  integration_type         = "kafka_connect"
-		  source_service_name      = aiven_kafka.kafka1.service_name
-		  destination_service_name = aiven_kafka_connect.kafka_connect1.service_name
-		
-		  kafka_connect_user_config {
-		    kafka_connect {
-		      group_id             = "connect"
-		      status_storage_topic = "__connect_status"
-		      offset_storage_topic = "__connect_offsets"
-		    }
-		  }
-		}
-		
-		data "aiven_service_integration" "int" {
-		  project                  = aiven_service_integration.bar.project
-		  integration_type         = aiven_service_integration.bar.integration_type
-		  source_service_name      = aiven_service_integration.bar.source_service_name
-		  destination_service_name = aiven_service_integration.bar.destination_service_name
-		
-		  depends_on = [aiven_service_integration.bar]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_kafka" "kafka1" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-2"
+  service_name            = "test-acc-sr-kafka-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_kafka_connect" "kafka_connect1" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-kafka-con-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  kafka_connect_user_config {
+    kafka_connect {
+      consumer_isolation_level = "read_committed"
+    }
+
+    public_access {
+      kafka_connect = true
+    }
+  }
+}
+
+resource "aiven_service_integration" "bar" {
+  project                  = data.aiven_project.foo.project
+  integration_type         = "kafka_connect"
+  source_service_name      = aiven_kafka.kafka1.service_name
+  destination_service_name = aiven_kafka_connect.kafka_connect1.service_name
+
+  kafka_connect_user_config {
+    kafka_connect {
+      group_id             = "connect"
+      status_storage_topic = "__connect_status"
+      offset_storage_topic = "__connect_offsets"
+    }
+  }
+}
+
+data "aiven_service_integration" "int" {
+  project                  = aiven_service_integration.bar.project
+  integration_type         = aiven_service_integration.bar.integration_type
+  source_service_name      = aiven_service_integration.bar.source_service_name
+  destination_service_name = aiven_service_integration.bar.destination_service_name
+
+  depends_on = [aiven_service_integration.bar]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccServiceIntegrationMirrorMakerResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_kafka" "source" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-2"
-		  service_name            = "test-acc-sr-source-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		
-		  kafka_user_config {
-		    kafka {
-		      group_max_session_timeout_ms = 70000
-		      log_retention_bytes          = 1000000000
-		    }
-		  }
-		}
-		
-		resource "aiven_kafka_topic" "source" {
-		  project      = data.aiven_project.foo.project
-		  service_name = aiven_kafka.source.service_name
-		  topic_name   = "test-acc-topic-a-%s"
-		  partitions   = 3
-		  replication  = 2
-		}
-		
-		resource "aiven_kafka" "target" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-2"
-		  service_name            = "test-acc-sr-target-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		
-		  kafka_user_config {
-		    kafka {
-		      group_max_session_timeout_ms = 70000
-		      log_retention_bytes          = 1000000000
-		    }
-		  }
-		}
-		
-		resource "aiven_kafka_topic" "target" {
-		  project      = data.aiven_project.foo.project
-		  service_name = aiven_kafka.target.service_name
-		  topic_name   = "test-acc-topic-b-%s"
-		  partitions   = 3
-		  replication  = 2
-		}
-		
-		resource "aiven_kafka_mirrormaker" "mm" {
-		  project      = data.aiven_project.foo.project
-		  cloud_name   = "google-europe-west1"
-		  plan         = "startup-4"
-		  service_name = "test-acc-sr-mm-%s"
-		
-		  kafka_mirrormaker_user_config {
-		    ip_filter = ["0.0.0.0/0"]
-		
-		    kafka_mirrormaker {
-		      refresh_groups_interval_seconds = 600
-		      refresh_topics_enabled          = true
-		      refresh_topics_interval_seconds = 600
-		    }
-		  }
-		}
-		
-		resource "aiven_service_integration" "bar" {
-		  project                  = data.aiven_project.foo.project
-		  integration_type         = "kafka_mirrormaker"
-		  source_service_name      = aiven_kafka.source.service_name
-		  destination_service_name = aiven_kafka_mirrormaker.mm.service_name
-		
-		  kafka_mirrormaker_user_config {
-		    cluster_alias = "source"
-		  }
-		}
-		
-		resource "aiven_service_integration" "i2" {
-		  project                  = data.aiven_project.foo.project
-		  integration_type         = "kafka_mirrormaker"
-		  source_service_name      = aiven_kafka.target.service_name
-		  destination_service_name = aiven_kafka_mirrormaker.mm.service_name
-		
-		  kafka_mirrormaker_user_config {
-		    cluster_alias = "target"
-		  }
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_kafka" "source" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-2"
+  service_name            = "test-acc-sr-source-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  kafka_user_config {
+    kafka {
+      group_max_session_timeout_ms = 70000
+      log_retention_bytes          = 1000000000
+    }
+  }
+}
+
+resource "aiven_kafka_topic" "source" {
+  project      = data.aiven_project.foo.project
+  service_name = aiven_kafka.source.service_name
+  topic_name   = "test-acc-topic-a-%s"
+  partitions   = 3
+  replication  = 2
+}
+
+resource "aiven_kafka" "target" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-2"
+  service_name            = "test-acc-sr-target-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  kafka_user_config {
+    kafka {
+      group_max_session_timeout_ms = 70000
+      log_retention_bytes          = 1000000000
+    }
+  }
+}
+
+resource "aiven_kafka_topic" "target" {
+  project      = data.aiven_project.foo.project
+  service_name = aiven_kafka.target.service_name
+  topic_name   = "test-acc-topic-b-%s"
+  partitions   = 3
+  replication  = 2
+}
+
+resource "aiven_kafka_mirrormaker" "mm" {
+  project      = data.aiven_project.foo.project
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = "test-acc-sr-mm-%s"
+
+  kafka_mirrormaker_user_config {
+    ip_filter = ["0.0.0.0/0"]
+
+    kafka_mirrormaker {
+      refresh_groups_interval_seconds = 600
+      refresh_topics_enabled          = true
+      refresh_topics_interval_seconds = 600
+    }
+  }
+}
+
+resource "aiven_service_integration" "bar" {
+  project                  = data.aiven_project.foo.project
+  integration_type         = "kafka_mirrormaker"
+  source_service_name      = aiven_kafka.source.service_name
+  destination_service_name = aiven_kafka_mirrormaker.mm.service_name
+
+  kafka_mirrormaker_user_config {
+    cluster_alias = "source"
+  }
+}
+
+resource "aiven_service_integration" "i2" {
+  project                  = data.aiven_project.foo.project
+  integration_type         = "kafka_mirrormaker"
+  source_service_name      = aiven_kafka.target.service_name
+  destination_service_name = aiven_kafka_mirrormaker.mm.service_name
+
+  kafka_mirrormaker_user_config {
+    cluster_alias = "target"
+  }
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
 }
 
 func testAccServiceIntegrationLogs(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_pg" "source" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-4"
-		  service_name            = "test-acc-sr-source-pg-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "00:00:00"
-		}
-		
-		resource "aiven_opensearch" "sink" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-4"
-		  service_name            = "test-acc-sr-sink-os-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "00:00:00"
-		}
-		
-		resource "aiven_service_integration" "bar" {
-		  project                  = data.aiven_project.foo.project
-		  integration_type         = "logs"
-		  source_service_name      = resource.aiven_pg.source.service_name
-		  destination_service_name = resource.aiven_opensearch.sink.service_name
-		  logs_user_config {
-		    elasticsearch_index_days_max = "2"
-		    elasticsearch_index_prefix   = "logs"
-		  }
-		}
-		
-		data "aiven_service_integration" "int" {
-		  project                  = aiven_service_integration.bar.project
-		  integration_type         = aiven_service_integration.bar.integration_type
-		  source_service_name      = aiven_service_integration.bar.source_service_name
-		  destination_service_name = aiven_service_integration.bar.destination_service_name
-		
-		  depends_on = [aiven_service_integration.bar]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_pg" "source" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-source-pg-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "00:00:00"
+}
+
+resource "aiven_opensearch" "sink" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-sink-os-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "00:00:00"
+}
+
+resource "aiven_service_integration" "bar" {
+  project                  = data.aiven_project.foo.project
+  integration_type         = "logs"
+  source_service_name      = resource.aiven_pg.source.service_name
+  destination_service_name = resource.aiven_opensearch.sink.service_name
+  logs_user_config {
+    elasticsearch_index_days_max = "2"
+    elasticsearch_index_prefix   = "logs"
+  }
+}
+
+data "aiven_service_integration" "int" {
+  project                  = aiven_service_integration.bar.project
+  integration_type         = aiven_service_integration.bar.integration_type
+  source_service_name      = aiven_service_integration.bar.source_service_name
+  destination_service_name = aiven_service_integration.bar.destination_service_name
+
+  depends_on = [aiven_service_integration.bar]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccServiceIntegrationPreexistingReadReplica(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_pg" "source" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-4"
-		  service_name            = "test-acc-sr-source-pg-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "00:00:00"
-		}
-		
-		resource "aiven_pg" "sink" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-4"
-		  service_name            = "test-acc-sr-sink-pg-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "00:00:00"
-		  service_integrations {
-		    integration_type    = "read_replica"
-		    source_service_name = resource.aiven_pg.source.service_name
-		  }
-		}
-		
-		resource "aiven_service_integration" "bar" {
-		  project                  = data.aiven_project.foo.project
-		  integration_type         = "read_replica"
-		  source_service_name      = resource.aiven_pg.source.service_name
-		  destination_service_name = resource.aiven_pg.sink.service_name
-		}
-		
-		data "aiven_service_integration" "int" {
-		  project                  = aiven_service_integration.bar.project
-		  integration_type         = aiven_service_integration.bar.integration_type
-		  source_service_name      = aiven_service_integration.bar.source_service_name
-		  destination_service_name = aiven_service_integration.bar.destination_service_name
-		
-		  depends_on = [aiven_service_integration.bar]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_pg" "source" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-source-pg-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "00:00:00"
+}
+
+resource "aiven_pg" "sink" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-sink-pg-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "00:00:00"
+  service_integrations {
+    integration_type    = "read_replica"
+    source_service_name = resource.aiven_pg.source.service_name
+  }
+}
+
+resource "aiven_service_integration" "bar" {
+  project                  = data.aiven_project.foo.project
+  integration_type         = "read_replica"
+  source_service_name      = resource.aiven_pg.source.service_name
+  destination_service_name = resource.aiven_pg.sink.service_name
+}
+
+data "aiven_service_integration" "int" {
+  project                  = aiven_service_integration.bar.project
+  integration_type         = aiven_service_integration.bar.integration_type
+  source_service_name      = aiven_service_integration.bar.source_service_name
+  destination_service_name = aiven_service_integration.bar.destination_service_name
+
+  depends_on = [aiven_service_integration.bar]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccServiceIntegrationShouldFailResource() string {
 	return `
-		resource "aiven_service_integration" "bar" {
-		  project                 = "test"
-		  integration_type        = "kafka_mirrormaker"
-		  source_endpoint_id      = "test"
-		  destination_endpoint_id = "test"
-		
-		  kafka_mirrormaker_user_config {
-		    cluster_alias = "source"
-		  }
-		}`
+resource "aiven_service_integration" "bar" {
+  project                 = "test"
+  integration_type        = "kafka_mirrormaker"
+  source_endpoint_id      = "test"
+  destination_endpoint_id = "test"
+
+  kafka_mirrormaker_user_config {
+    cluster_alias = "source"
+  }
+}`
 
 }
 

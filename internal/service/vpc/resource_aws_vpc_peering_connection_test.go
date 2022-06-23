@@ -38,31 +38,30 @@ func TestAccAivenAWSVPCPeeringConnection_basic(t *testing.T) {
 
 func testAccVPCPeeringConnectionAWSResource() string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_project_vpc" "bar" {
-		  project      = data.aiven_project.foo.project
-		  cloud_name   = "aws-%s"
-		  network_cidr = "10.0.0.0/24"
-		
-		  timeouts {
-		    create = "5m"
-		  }
-		}
-		
-		resource "aiven_aws_vpc_peering_connection" "foo" {
-		  vpc_id         = aiven_project_vpc.bar.id
-		  aws_account_id = "%s"
-		  aws_vps_id     = "%s"
-		  aws_vpc_region = "%s"
-		
-		  timeouts {
-		    create = "10m"
-		  }
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"),
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_project_vpc" "bar" {
+  project      = data.aiven_project.foo.project
+  cloud_name   = "aws-%s"
+  network_cidr = "10.0.0.0/24"
+
+  timeouts {
+    create = "5m"
+  }
+}
+
+resource "aiven_aws_vpc_peering_connection" "foo" {
+  vpc_id         = aiven_project_vpc.bar.id
+  aws_account_id = "%s"
+  aws_vps_id     = "%s"
+  aws_vpc_region = "%s"
+
+  timeouts {
+    create = "10m"
+  }
+}`, os.Getenv("AIVEN_PROJECT_NAME"),
 		os.Getenv("AWS_REGION"),
 		os.Getenv("AWS_ACCOUNT_ID"),
 		os.Getenv("AWS_VPC_ID"),

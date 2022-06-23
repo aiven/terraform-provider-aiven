@@ -117,141 +117,138 @@ func TestAccAivenKafkaTopic_custom_timeouts(t *testing.T) {
 
 func testAccKafka451TopicResource(name string) string {
 	return testAccKafkaTopicResource(name) + `
-		resource "aiven_kafka_topic" "more" {
-		  count = 450
-		
-		  project      = data.aiven_project.foo.project
-		  service_name = aiven_kafka.bar.service_name
-		  topic_name   = "test-acc-topic-${count.index}"
-		  partitions   = 3
-		  replication  = 2
-		}`
+resource "aiven_kafka_topic" "more" {
+  count = 450
+
+  project      = data.aiven_project.foo.project
+  service_name = aiven_kafka.bar.service_name
+  topic_name   = "test-acc-topic-${count.index}"
+  partitions   = 3
+  replication  = 2
+}`
 
 }
 
 func testAccKafkaTopicResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_kafka" "bar" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-2"
-		  service_name            = "test-acc-sr-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		}
-		
-		resource "aiven_kafka_topic" "foo" {
-		  project      = data.aiven_project.foo.project
-		  service_name = aiven_kafka.bar.service_name
-		  topic_name   = "test-acc-topic-%s"
-		  partitions   = 3
-		  replication  = 2
-		
-		  config {
-		    flush_ms                       = 10
-		    unclean_leader_election_enable = true
-		    cleanup_policy                 = "compact"
-		    min_cleanable_dirty_ratio      = 0.01
-		    delete_retention_ms            = 50000
-		  }
-		}
-		
-		data "aiven_kafka_topic" "topic" {
-		  project      = aiven_kafka_topic.foo.project
-		  service_name = aiven_kafka_topic.foo.service_name
-		  topic_name   = aiven_kafka_topic.foo.topic_name
-		
-		  depends_on = [aiven_kafka_topic.foo]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_kafka" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-2"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_kafka_topic" "foo" {
+  project      = data.aiven_project.foo.project
+  service_name = aiven_kafka.bar.service_name
+  topic_name   = "test-acc-topic-%s"
+  partitions   = 3
+  replication  = 2
+
+  config {
+    flush_ms                       = 10
+    unclean_leader_election_enable = true
+    cleanup_policy                 = "compact"
+    min_cleanable_dirty_ratio      = 0.01
+    delete_retention_ms            = 50000
+  }
+}
+
+data "aiven_kafka_topic" "topic" {
+  project      = aiven_kafka_topic.foo.project
+  service_name = aiven_kafka_topic.foo.service_name
+  topic_name   = aiven_kafka_topic.foo.topic_name
+
+  depends_on = [aiven_kafka_topic.foo]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccKafkaTopicCustomTimeoutsResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_kafka" "bar" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-2"
-		  service_name            = "test-acc-sr-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		
-		  timeouts {
-		    create = "25m"
-		    update = "20m"
-		  }
-		}
-		
-		resource "aiven_kafka_topic" "foo" {
-		  project      = data.aiven_project.foo.project
-		  service_name = aiven_kafka.bar.service_name
-		  topic_name   = "test-acc-topic-%s"
-		  partitions   = 3
-		  replication  = 2
-		
-		  timeouts {
-		    create = "15m"
-		    read   = "15m"
-		  }
-		}
-		
-		data "aiven_kafka_topic" "topic" {
-		  project      = aiven_kafka_topic.foo.project
-		  service_name = aiven_kafka_topic.foo.service_name
-		  topic_name   = aiven_kafka_topic.foo.topic_name
-		
-		  depends_on = [aiven_kafka_topic.foo]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_kafka" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-2"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  timeouts {
+    create = "25m"
+    update = "20m"
+  }
+}
+
+resource "aiven_kafka_topic" "foo" {
+  project      = data.aiven_project.foo.project
+  service_name = aiven_kafka.bar.service_name
+  topic_name   = "test-acc-topic-%s"
+  partitions   = 3
+  replication  = 2
+
+  timeouts {
+    create = "15m"
+    read   = "15m"
+  }
+}
+
+data "aiven_kafka_topic" "topic" {
+  project      = aiven_kafka_topic.foo.project
+  service_name = aiven_kafka_topic.foo.service_name
+  topic_name   = aiven_kafka_topic.foo.topic_name
+
+  depends_on = [aiven_kafka_topic.foo]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccKafkaTopicTerminationProtectionResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_kafka" "bar" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-2"
-		  service_name            = "test-acc-sr-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		
-		  kafka_user_config {
-		    kafka {
-		      group_max_session_timeout_ms = 70000
-		      log_retention_bytes          = 1000000000
-		    }
-		  }
-		}
-		
-		resource "aiven_kafka_topic" "foo" {
-		  project                = data.aiven_project.foo.project
-		  service_name           = aiven_kafka.bar.service_name
-		  topic_name             = "test-acc-topic-%s"
-		  partitions             = 3
-		  replication            = 2
-		  termination_protection = true
-		}
-		
-		data "aiven_kafka_topic" "topic" {
-		  project      = aiven_kafka_topic.foo.project
-		  service_name = aiven_kafka_topic.foo.service_name
-		  topic_name   = aiven_kafka_topic.foo.topic_name
-		
-		  depends_on = [aiven_kafka_topic.foo]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_kafka" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-2"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  kafka_user_config {
+    kafka {
+      group_max_session_timeout_ms = 70000
+      log_retention_bytes          = 1000000000
+    }
+  }
+}
+
+resource "aiven_kafka_topic" "foo" {
+  project                = data.aiven_project.foo.project
+  service_name           = aiven_kafka.bar.service_name
+  topic_name             = "test-acc-topic-%s"
+  partitions             = 3
+  replication            = 2
+  termination_protection = true
+}
+
+data "aiven_kafka_topic" "topic" {
+  project      = aiven_kafka_topic.foo.project
+  service_name = aiven_kafka_topic.foo.service_name
+  topic_name   = aiven_kafka_topic.foo.topic_name
+
+  depends_on = [aiven_kafka_topic.foo]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccCheckAivenKafkaTopicAttributes(n string) resource.TestCheckFunc {

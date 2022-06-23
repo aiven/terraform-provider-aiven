@@ -114,87 +114,85 @@ func testAccCheckAivenMySQLDatabaseResourceDestroy(s *terraform.State) error {
 
 func testAccMySQLDatabaseResource(project string, name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_mysql" "bar" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-4"
-		  service_name            = "test-acc-sr-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		
-		  mysql_user_config {
-		    mysql {
-		      sql_mode                = "ANSI,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE"
-		      sql_require_primary_key = true
-		    }
-		
-		    public_access {
-		      mysql = true
-		    }
-		  }
-		}
-		
-		resource "aiven_mysql_database" "foo" {
-		  project       = aiven_mysql.bar.project
-		  service_name  = aiven_mysql.bar.service_name
-		  database_name = "test-acc-db-%s"
-		}
-		
-		data "aiven_mysql_database" "database" {
-		  project       = aiven_mysql_database.foo.project
-		  service_name  = aiven_mysql_database.foo.service_name
-		  database_name = aiven_mysql_database.foo.database_name
-		
-		  depends_on = [aiven_mysql_database.foo]
-		}`,
-		project, name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_mysql" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  mysql_user_config {
+    mysql {
+      sql_mode                = "ANSI,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE"
+      sql_require_primary_key = true
+    }
+
+    public_access {
+      mysql = true
+    }
+  }
+}
+
+resource "aiven_mysql_database" "foo" {
+  project       = aiven_mysql.bar.project
+  service_name  = aiven_mysql.bar.service_name
+  database_name = "test-acc-db-%s"
+}
+
+data "aiven_mysql_database" "database" {
+  project       = aiven_mysql_database.foo.project
+  service_name  = aiven_mysql_database.foo.service_name
+  database_name = aiven_mysql_database.foo.database_name
+
+  depends_on = [aiven_mysql_database.foo]
+}`, project, name, name)
 }
 
 func testAccMySQLDatabaseTerminationProtectionResource(project string, name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_mysql" "bar" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-4"
-		  service_name            = "test-acc-sr-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		
-		  mysql_user_config {
-		    mysql {
-		      sql_mode                = "ANSI,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE"
-		      sql_require_primary_key = true
-		    }
-		
-		    public_access {
-		      mysql = true
-		    }
-		  }
-		}
-		
-		resource "aiven_mysql_database" "foo" {
-		  project                = aiven_mysql.bar.project
-		  service_name           = aiven_mysql.bar.service_name
-		  database_name          = "test-acc-db-%s"
-		  termination_protection = true
-		}
-		
-		data "aiven_mysql_database" "database" {
-		  project       = aiven_mysql_database.foo.project
-		  service_name  = aiven_mysql_database.foo.service_name
-		  database_name = aiven_mysql_database.foo.database_name
-		
-		  depends_on = [aiven_mysql_database.foo]
-		}`,
-		project, name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_mysql" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  mysql_user_config {
+    mysql {
+      sql_mode                = "ANSI,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE"
+      sql_require_primary_key = true
+    }
+
+    public_access {
+      mysql = true
+    }
+  }
+}
+
+resource "aiven_mysql_database" "foo" {
+  project                = aiven_mysql.bar.project
+  service_name           = aiven_mysql.bar.service_name
+  database_name          = "test-acc-db-%s"
+  termination_protection = true
+}
+
+data "aiven_mysql_database" "database" {
+  project       = aiven_mysql_database.foo.project
+  service_name  = aiven_mysql_database.foo.service_name
+  database_name = aiven_mysql_database.foo.database_name
+
+  depends_on = [aiven_mysql_database.foo]
+}`, project, name, name)
 }
 
 func testAccCheckAivenMySQLDatabaseAttributes(n string) resource.TestCheckFunc {

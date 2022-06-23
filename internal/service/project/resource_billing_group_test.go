@@ -72,62 +72,58 @@ func testAccCheckAivenBillingGroupResourceDestroy(s *terraform.State) error {
 
 func testAccBillingGroupResource(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_billing_group" "foo" {
-		  name           = "test-acc-bg-%s"
-		  billing_emails = ["ivan.savciuc+test1@aiven.fi", "ivan.savciuc+test2@aiven.fi"]
-		}
-		
-		data "aiven_billing_group" "bar" {
-		  name = aiven_billing_group.foo.name
-		
-		  depends_on = [aiven_billing_group.foo]
-		}
-		
-		resource "aiven_project" "pr1" {
-		  project       = "test-acc-pr-%s"
-		  billing_group = aiven_billing_group.foo.id
-		
-		  depends_on = [aiven_billing_group.foo]
-		}`,
-		name, name)
+resource "aiven_billing_group" "foo" {
+  name           = "test-acc-bg-%s"
+  billing_emails = ["ivan.savciuc+test1@aiven.fi", "ivan.savciuc+test2@aiven.fi"]
+}
+
+data "aiven_billing_group" "bar" {
+  name = aiven_billing_group.foo.name
+
+  depends_on = [aiven_billing_group.foo]
+}
+
+resource "aiven_project" "pr1" {
+  project       = "test-acc-pr-%s"
+  billing_group = aiven_billing_group.foo.id
+
+  depends_on = [aiven_billing_group.foo]
+}`, name, name)
 }
 
 func testAccCopyFromProjectBillingGroupResource(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_billing_group" "foo" {
-		  name             = "test-acc-bg-%s"
-		  billing_currency = "USD"
-		  vat_id           = "abc"
-		}
-		
-		resource "aiven_project" "pr01" {
-		  project       = "test-acc-pr01-%s"
-		  billing_group = aiven_billing_group.foo.id
-		  depends_on    = [aiven_billing_group.foo]
-		}
-		
-		resource "aiven_project" "pr02" {
-		  project           = "test-acc-p02-%s"
-		  copy_from_project = aiven_project.pr01.project
-		
-		  depends_on = [aiven_project.pr01]
-		}`,
-		name, name, name)
+resource "aiven_billing_group" "foo" {
+  name             = "test-acc-bg-%s"
+  billing_currency = "USD"
+  vat_id           = "abc"
+}
+
+resource "aiven_project" "pr01" {
+  project       = "test-acc-pr01-%s"
+  billing_group = aiven_billing_group.foo.id
+  depends_on    = [aiven_billing_group.foo]
+}
+
+resource "aiven_project" "pr02" {
+  project           = "test-acc-p02-%s"
+  copy_from_project = aiven_project.pr01.project
+
+  depends_on = [aiven_project.pr01]
+}`, name, name, name)
 }
 
 func testCopyBillingGroupFromExistingOne(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_billing_group" "bar" {
-		  name             = "test-acc-bg-%s"
-		  billing_currency = "EUR"
-		  vat_id           = "abc"
-		  city             = "Helsinki"
-		  company          = "Aiven Oy"
-		}
-		resource "aiven_billing_group" "bar2" {
-		  name                    = "copy-test-acc-bg-%s"
-		  copy_from_billing_group = aiven_billing_group.bar.id
-		}`,
-
-		name, name)
+resource "aiven_billing_group" "bar" {
+  name             = "test-acc-bg-%s"
+  billing_currency = "EUR"
+  vat_id           = "abc"
+  city             = "Helsinki"
+  company          = "Aiven Oy"
+}
+resource "aiven_billing_group" "bar2" {
+  name                    = "copy-test-acc-bg-%s"
+  copy_from_billing_group = aiven_billing_group.bar.id
+}`, name, name)
 }

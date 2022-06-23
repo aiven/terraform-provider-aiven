@@ -11,8 +11,6 @@ ACCTEST_PARALLELISM ?= 20
 SWEEP               ?= global
 SWEEP_DIR           ?= ./internal/sweep
 
-SOURCES = $(shell find internal -name '*.go')
-
 ifneq ($(origin PKG), undefined)
 	PKG_NAME = internal/service/$(PKG)
 endif
@@ -29,10 +27,10 @@ TFPLUGINDOCS=$(TOOLS_BIN_DIR)/tfplugindocs
 $(TFPLUGINDOCS): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
 	cd $(TOOLS_DIR) && $(GO) build -o bin/tfplugindocs github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
 
-TFPROVIDERTESTFMT=$(TOOLS_BIN_DIR)/tfprovidertestfmt
+TERRAFMT=$(TOOLS_BIN_DIR)/terrafmt
 
-$(TFPROVIDERTESTFMT): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
-	cd $(TOOLS_DIR) && $(GO) build -o bin/tfprovidertestfmt github.com/aiven/tfprovidertestfmt
+$(TERRAFMT): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
+	cd $(TOOLS_DIR) && $(GO) build -o bin/terrafmt github.com/katbyte/terrafmt
 
 GOLANGCILINT=$(TOOLS_BIN_DIR)/golangci-lint
 
@@ -76,12 +74,12 @@ go-lint: $(GOLANGCILINT)
 	$(GOLANGCILINT) run --timeout=30m ./...
 
 .PHONY: test-lint
-test-lint: $(TFPROVIDERTESTFMT)
-	$(TFPROVIDERTESTFMT) -lint $(SOURCES)
+test-lint: $(TERRAFMT)
+	$(TERRAFMT) diff ./internal -cfv
 
 .PHONY: testfmt
-testfmt: $(TFPROVIDERTESTFMT)
-	$(TFPROVIDERTESTFMT) -inplace $(SOURCES)
+testfmt: $(TERRAFMT)
+	$(TERRAFMT) fmt ./internal -fv
 
 
 #################################################

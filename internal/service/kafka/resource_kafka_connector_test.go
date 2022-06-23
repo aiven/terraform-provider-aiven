@@ -119,195 +119,192 @@ func testAccCheckAivenKafkaConnectorResourceDestroy(s *terraform.State) error {
 // nosemgrep: kafka connectors need kafka with business plans
 func testAccKafkaConnectorResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_kafka" "bar" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-2"
-		  service_name            = "test-acc-sr-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		
-		  kafka_user_config {
-		    kafka_connect = true
-		
-		    kafka {
-		      group_max_session_timeout_ms = 70000
-		      log_retention_bytes          = 1000000000
-		    }
-		  }
-		}
-		
-		resource "aiven_kafka_topic" "foo" {
-		  project      = data.aiven_project.foo.project
-		  service_name = aiven_kafka.bar.service_name
-		  topic_name   = "test-acc-topic-%s"
-		  partitions   = 3
-		  replication  = 2
-		}
-		
-		resource "aiven_opensearch" "dest" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-4"
-		  service_name            = "test-acc-sr2-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		}
-		
-		resource "aiven_kafka_connector" "foo" {
-		  project        = data.aiven_project.foo.project
-		  service_name   = aiven_kafka.bar.service_name
-		  connector_name = "test-acc-con-%s"
-		
-		  config = {
-		    "topics" = aiven_kafka_topic.foo.topic_name
-		    "connector.class" : "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
-		    "type.name"      = "es-connector"
-		    "name"           = "test-acc-con-%s"
-		    "connection.url" = aiven_opensearch.dest.service_uri
-		  }
-		}
-		
-		data "aiven_kafka_connector" "connector" {
-		  project        = aiven_kafka_connector.foo.project
-		  service_name   = aiven_kafka_connector.foo.service_name
-		  connector_name = aiven_kafka_connector.foo.connector_name
-		
-		  depends_on = [aiven_kafka_connector.foo]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_kafka" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-2"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  kafka_user_config {
+    kafka_connect = true
+
+    kafka {
+      group_max_session_timeout_ms = 70000
+      log_retention_bytes          = 1000000000
+    }
+  }
+}
+
+resource "aiven_kafka_topic" "foo" {
+  project      = data.aiven_project.foo.project
+  service_name = aiven_kafka.bar.service_name
+  topic_name   = "test-acc-topic-%s"
+  partitions   = 3
+  replication  = 2
+}
+
+resource "aiven_opensearch" "dest" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr2-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_kafka_connector" "foo" {
+  project        = data.aiven_project.foo.project
+  service_name   = aiven_kafka.bar.service_name
+  connector_name = "test-acc-con-%s"
+
+  config = {
+    "topics" = aiven_kafka_topic.foo.topic_name
+    "connector.class" : "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
+    "type.name"      = "es-connector"
+    "name"           = "test-acc-con-%s"
+    "connection.url" = aiven_opensearch.dest.service_uri
+  }
+}
+
+data "aiven_kafka_connector" "connector" {
+  project        = aiven_kafka_connector.foo.project
+  service_name   = aiven_kafka_connector.foo.service_name
+  connector_name = aiven_kafka_connector.foo.connector_name
+
+  depends_on = [aiven_kafka_connector.foo]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
 }
 
 // nosemgrep: kafka connectors need kafka with business plans
 func testAccKafkaConnectorWrongConfigNameResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_kafka" "bar" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "business-4"
-		  service_name            = "test-acc-sr-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		
-		  kafka_user_config {
-		    kafka_connect = true
-		
-		    kafka {
-		      group_max_session_timeout_ms = 70000
-		      log_retention_bytes          = 1000000000
-		    }
-		  }
-		}
-		
-		resource "aiven_kafka_topic" "foo" {
-		  project      = data.aiven_project.foo.project
-		  service_name = aiven_kafka.bar.service_name
-		  topic_name   = "test-acc-topic-%s"
-		  partitions   = 3
-		  replication  = 2
-		}
-		
-		resource "aiven_opensearch" "dest" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-4"
-		  service_name            = "test-acc-sr2-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		}
-		
-		resource "aiven_kafka_connector" "foo" {
-		  project        = data.aiven_project.foo.project
-		  service_name   = aiven_kafka.bar.service_name
-		  connector_name = "test-acc-con-%s"
-		
-		  config = {
-		    "topics" = aiven_kafka_topic.foo.topic_name
-		    "connector.class" : "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
-		    "type.name"      = "es-connector"
-		    "name"           = "wrong-test-acc-con-%s"
-		    "connection.url" = aiven_opensearch.dest.service_uri
-		  }
-		}
-		
-		data "aiven_kafka_connector" "connector" {
-		  project        = aiven_kafka_connector.foo.project
-		  service_name   = aiven_kafka_connector.foo.service_name
-		  connector_name = aiven_kafka_connector.foo.connector_name
-		
-		  depends_on = [aiven_kafka_connector.foo]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_kafka" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "business-4"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  kafka_user_config {
+    kafka_connect = true
+
+    kafka {
+      group_max_session_timeout_ms = 70000
+      log_retention_bytes          = 1000000000
+    }
+  }
+}
+
+resource "aiven_kafka_topic" "foo" {
+  project      = data.aiven_project.foo.project
+  service_name = aiven_kafka.bar.service_name
+  topic_name   = "test-acc-topic-%s"
+  partitions   = 3
+  replication  = 2
+}
+
+resource "aiven_opensearch" "dest" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr2-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_kafka_connector" "foo" {
+  project        = data.aiven_project.foo.project
+  service_name   = aiven_kafka.bar.service_name
+  connector_name = "test-acc-con-%s"
+
+  config = {
+    "topics" = aiven_kafka_topic.foo.topic_name
+    "connector.class" : "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
+    "type.name"      = "es-connector"
+    "name"           = "wrong-test-acc-con-%s"
+    "connection.url" = aiven_opensearch.dest.service_uri
+  }
+}
+
+data "aiven_kafka_connector" "connector" {
+  project        = aiven_kafka_connector.foo.project
+  service_name   = aiven_kafka_connector.foo.service_name
+  connector_name = aiven_kafka_connector.foo.connector_name
+
+  depends_on = [aiven_kafka_connector.foo]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
 }
 
 func testAccKafkaConnectorMonoSinkResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_kafka" "bar" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-2"
-		  service_name            = "test-acc-sr-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		
-		  kafka_user_config {
-		    kafka_connect   = true
-		    schema_registry = true
-		
-		    kafka {
-		      group_max_session_timeout_ms = 70000
-		      log_retention_bytes          = 1000000000
-		    }
-		  }
-		}
-		
-		resource "aiven_kafka_topic" "foo" {
-		  project      = data.aiven_project.foo.project
-		  service_name = aiven_kafka.bar.service_name
-		  topic_name   = "test-acc-topic-%s"
-		  partitions   = 3
-		  replication  = 2
-		}
-		
-		resource "aiven_kafka_connector" "foo" {
-		  project        = data.aiven_project.foo.project
-		  service_name   = aiven_kafka.bar.service_name
-		  connector_name = "test-acc-con-mongo-sink-%s"
-		
-		  config = {
-		    "name" = "test-acc-con-mongo-sink-%s"
-		    "connector.class" : "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
-		    "topics"    = aiven_kafka_topic.foo.topic_name
-		    "tasks.max" = 1
-		
-		    # mongo connect settings
-		    "connection.uri" = "%s"
-		    "database"       = "acc-test-mongo"
-		    "collection"     = "mongo_collection_name"
-		    "max.batch.size" = 1
-		  }
-		}
-		
-		data "aiven_kafka_connector" "connector" {
-		  project        = aiven_kafka_connector.foo.project
-		  service_name   = aiven_kafka_connector.foo.service_name
-		  connector_name = aiven_kafka_connector.foo.connector_name
-		
-		  depends_on = [aiven_kafka_connector.foo]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, os.Getenv("MONGO_URI"))
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_kafka" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-2"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  kafka_user_config {
+    kafka_connect   = true
+    schema_registry = true
+
+    kafka {
+      group_max_session_timeout_ms = 70000
+      log_retention_bytes          = 1000000000
+    }
+  }
+}
+
+resource "aiven_kafka_topic" "foo" {
+  project      = data.aiven_project.foo.project
+  service_name = aiven_kafka.bar.service_name
+  topic_name   = "test-acc-topic-%s"
+  partitions   = 3
+  replication  = 2
+}
+
+resource "aiven_kafka_connector" "foo" {
+  project        = data.aiven_project.foo.project
+  service_name   = aiven_kafka.bar.service_name
+  connector_name = "test-acc-con-mongo-sink-%s"
+
+  config = {
+    "name" = "test-acc-con-mongo-sink-%s"
+    "connector.class" : "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
+    "topics"    = aiven_kafka_topic.foo.topic_name
+    "tasks.max" = 1
+
+    # mongo connect settings
+    "connection.uri" = "%s"
+    "database"       = "acc-test-mongo"
+    "collection"     = "mongo_collection_name"
+    "max.batch.size" = 1
+  }
+}
+
+data "aiven_kafka_connector" "connector" {
+  project        = aiven_kafka_connector.foo.project
+  service_name   = aiven_kafka_connector.foo.service_name
+  connector_name = aiven_kafka_connector.foo.connector_name
+
+  depends_on = [aiven_kafka_connector.foo]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, os.Getenv("MONGO_URI"))
 }
 
 func testAccCheckAivenKafkaConnectorAttributes(n string) resource.TestCheckFunc {
