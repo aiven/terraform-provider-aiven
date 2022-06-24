@@ -17,16 +17,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func init() {
-	resource.AddTestSweepers("aiven_mysql_database", &resource.Sweeper{
-		Name: "aiven_mysql_database",
-		F:    acc.SweepDatabases,
-		Dependencies: []string{
-			"aiven_connection_pool",
-		},
-	})
-}
-
 func TestAccAivenMySQLDatabase_basic(t *testing.T) {
 	resourceName := "aiven_mysql_database.foo"
 	projectName := os.Getenv("AIVEN_PROJECT_NAME")

@@ -3,7 +3,6 @@ package account_test
 import (
 	"fmt"
 	"log"
-	"strings"
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
@@ -13,42 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
-
-func init() {
-	resource.AddTestSweepers("aiven_account", &resource.Sweeper{
-		Name:         "aiven_account",
-		F:            sweepAccounts,
-		Dependencies: []string{"aiven_project", "aiven_account_team", "aiven_account_team_project"},
-	})
-}
-
-func sweepAccounts(region string) error {
-	client, err := acc.SharedClient(region)
-	if err != nil {
-		return fmt.Errorf("error getting client: %s", err)
-	}
-
-	conn := client.(*aiven.Client)
-
-	r, err := conn.Accounts.List()
-	if err != nil {
-		return fmt.Errorf("error retrieving a list of accounts : %s", err)
-	}
-
-	for _, a := range r.Accounts {
-		if strings.Contains(a.Name, "test-acc-ac-") {
-			if err := conn.Accounts.Delete(a.Id); err != nil {
-				if err.(aiven.Error).Status == 404 {
-					continue
-				}
-
-				return fmt.Errorf("error destroying account %s during sweep: %s", a.Name, err)
-			}
-		}
-	}
-
-	return nil
-}
 
 func TestAccAivenAccount_basic(t *testing.T) {
 	resourceName := "aiven_account.foo"

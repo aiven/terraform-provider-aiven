@@ -16,60 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func init() {
-	resource.AddTestSweepers("aiven_kafka_schema", &resource.Sweeper{
-		Name: "aiven_kafka_schema",
-		F:    sweepKafkaSchemas,
-	})
-}
-
-func sweepKafkaSchemas(region string) error {
-	client, err := acc.SharedClient(region)
-	if err != nil {
-		return fmt.Errorf("error getting client: %s", err)
-	}
-
-	conn := client.(*aiven.Client)
-
-	projects, err := conn.Projects.List()
-	if err != nil {
-		return fmt.Errorf("error retrieving a list of projects : %s", err)
-	}
-
-	for _, project := range projects {
-		if project.Name == os.Getenv("AIVEN_PROJECT_NAME") {
-			services, err := conn.Services.List(project.Name)
-			if err != nil {
-				return fmt.Errorf("error retrieving a list of services for a project `%s`: %s", project.Name, err)
-			}
-
-			for _, service := range services {
-				if service.Type != "kafka" {
-					continue
-				}
-
-				schemaList, err := conn.KafkaSubjectSchemas.List(project.Name, service.Name)
-				if err != nil {
-					if err.(aiven.Error).Status == 403 {
-						continue
-					}
-
-					return fmt.Errorf("error retrieving a list of kafka schemas for a service `%s`: %s", service.Name, err)
-				}
-
-				for _, s := range schemaList.Subjects {
-					err = conn.KafkaSubjectSchemas.Delete(project.Name, service.Name, s)
-					if err != nil {
-						return fmt.Errorf("error destroying kafka schema `%s` during sweep: %s", s, err)
-					}
-				}
-			}
-		}
-	}
-
-	return nil
-}
-
 func TestAccAivenKafkaSchema_json_basic(t *testing.T) {
 	resourceName := "aiven_kafka_schema.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)

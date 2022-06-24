@@ -16,55 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func init() {
-	resource.AddTestSweepers("aiven_service_integration", &resource.Sweeper{
-		Name: "aiven_service_integration",
-		F:    sweepServiceIntegrations,
-	})
-}
-
-func sweepServiceIntegrations(region string) error {
-	client, err := acc.SharedClient(region)
-	if err != nil {
-		return fmt.Errorf("error getting client: %s", err)
-	}
-
-	conn := client.(*aiven.Client)
-
-	projects, err := conn.Projects.List()
-	if err != nil {
-		return fmt.Errorf("error retrieving a list of projects: %w", err)
-	}
-
-	for _, project := range projects {
-		if project.Name != os.Getenv("AIVEN_PROJECT_NAME") {
-			continue
-		}
-		services, err := conn.Services.List(project.Name)
-		if err != nil {
-			if aiven.IsNotFound(err) {
-				continue
-			}
-			return fmt.Errorf("error retrieving a list of service for a project `%s`: %s", project.Name, err)
-		}
-		for _, service := range services {
-			serviceIntegrations, err := conn.ServiceIntegrations.List(project.Name, service.Name)
-			if err != nil {
-				return fmt.Errorf("error retrieving a list of service integration for service `%s`: %s", service.Name, err)
-			}
-			for _, serviceIntegration := range serviceIntegrations {
-				if err := conn.ServiceIntegrations.Delete(project.Name, serviceIntegration.ServiceIntegrationID); err != nil {
-					if !aiven.IsNotFound(err) {
-						return fmt.Errorf("unable to delete service integration `%s`: %s", serviceIntegration.ServiceIntegrationID, err)
-					}
-				}
-			}
-		}
-
-	}
-	return nil
-}
-
 func TestAccAivenServiceIntegration_should_fail(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },

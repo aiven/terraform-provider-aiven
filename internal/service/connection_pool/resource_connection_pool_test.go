@@ -14,56 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func init() {
-	resource.AddTestSweepers("aiven_connection_pool", &resource.Sweeper{
-		Name: "aiven_connection_pool",
-		F:    sweepConnectionPools,
-	})
-}
-
-func sweepConnectionPools(region string) error {
-	client, err := acc.SharedClient(region)
-	if err != nil {
-		return fmt.Errorf("error getting client: %s", err)
-	}
-
-	conn := client.(*aiven.Client)
-
-	projects, err := conn.Projects.List()
-	if err != nil {
-		return fmt.Errorf("error retrieving a list of projects : %s", err)
-	}
-
-	for _, project := range projects {
-		if project.Name == os.Getenv("AIVEN_PROJECT_NAME") {
-			services, err := conn.Services.List(project.Name)
-			if err != nil {
-				return fmt.Errorf("error retrieving a list of services for a project `%s`: %s", project.Name, err)
-			}
-
-			for _, service := range services {
-				list, err := conn.ConnectionPools.List(project.Name, service.Name)
-				if err != nil {
-					if err.(aiven.Error).Status == 403 {
-						continue
-					}
-
-					return fmt.Errorf("error retrieving a list of connection pools for a service `%s`: %s", service.Name, err)
-				}
-
-				for _, pool := range list {
-					err = conn.ConnectionPools.Delete(project.Name, service.Name, pool.PoolName)
-					if err != nil {
-						return fmt.Errorf("error destroying connection pool `%s` during sweep: %s", pool.PoolName, err)
-					}
-				}
-			}
-		}
-	}
-
-	return nil
-}
-
 func TestAccAivenConnectionPool_basic(t *testing.T) {
 	resourceName := "aiven_connection_pool.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)

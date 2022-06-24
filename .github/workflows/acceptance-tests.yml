@@ -1,6 +1,8 @@
 name: Acceptance Tests
 
 on:
+  pull_request:
+    branches: [ master, v* ]
   schedule:
     - cron: "30 7 * * *"
   workflow_dispatch:
@@ -11,33 +13,88 @@ concurrency:
 
 jobs:
   acceptance_tests:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
+
+    strategy:
+      max-parallel: 10
+      matrix:
+        Pkg: [
+          kafka,
+          account,
+          cassandra,
+          clickhouse,
+          connection_pool,
+          database,
+          flink,
+          pg,
+          grafana,
+          influxdb,
+          m3db,
+          mysql,
+          opensearch,
+          project,
+          redis,
+          service_component,
+          service_user,
+          static_ip,
+          service_integration
+        ]
 
     steps:
 
-    - uses: softprops/turnstyle@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        same-branch-only: false
+      - uses: softprops/turnstyle@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          same-branch-only: true
 
-    - uses: actions/checkout@v2
-    - uses: actions/setup-go@v2
-      with:
-        go-version: 1.16
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.16
 
-    - run: make testacc
-      env:
-        AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
-        AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME }} 
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
-    - uses: nick-invision/retry@v2
-      if: always()
-      with:
-        timeout_minutes: 10
-        max_attempts: 10
-        command: make sweep
-      env:
-        AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
-        AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME }} 
+      - run: make testacc
+        env:
+          AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
+          AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME }}
+          PKG: ${{matrix.Pkg}}
+
+  sweep:
+    if: ${{ always() }}
+    needs: acceptance_tests
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.16
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - uses: nick-invision/retry@v2
+        if: always()
+        with:
+          timeout_minutes: 15
+          max_attempts: 15
+          command: make sweep
+        env:
+          AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
+          AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME }}
 

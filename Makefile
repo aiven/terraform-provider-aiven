@@ -7,9 +7,15 @@ TEST                ?= ./...
 PKG_NAME            ?= internal
 TEST_COUNT          ?= 1
 ACCTEST_TIMEOUT     ?= 180m
-ACCTEST_PARALLELISM ?= 5
+ACCTEST_PARALLELISM ?= 20
+SWEEP               ?= global
+SWEEP_DIR           ?= ./internal/sweep
 
 SOURCES = $(shell find internal -name '*.go')
+
+ifneq ($(origin PKG), undefined)
+	PKG_NAME = internal/service/$(PKG)
+endif
 
 #################################################
 # Tools
@@ -60,7 +66,7 @@ testacc:
 .PHONY: sweep
 sweep:
 	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."
-	go test -v ./aiven -sweep=global -timeout 60m
+	go test $(SWEEP_DIR) -v -tags=sweep -sweep=$(SWEEP) $(SWEEPARGS) -timeout 15m
 
 .PHONY: lint
 lint: go-lint test-lint docs-lint
