@@ -5,10 +5,10 @@ resource "aiven_m3db" "m3db" {
   service_name = "m3db"
 
   m3db_user_config {
-    m3db_version = 1.0
+    m3db_version = 1.5
 
     namespaces {
-      name = "test-acc-%s"
+      name = "m3db_ns"
       type = "unaggregated"
     }
   }
@@ -22,7 +22,7 @@ resource "aiven_pg" "pg1" {
   plan         = "startup-4"
 
   pg_user_config {
-    pg_version = 12.4
+    pg_version = 14
   }
 }
 
@@ -65,7 +65,7 @@ resource "aiven_m3aggregator" "m3a" {
   service_name = "m3a"
 
   m3aggregator_user_config {
-    m3aggregator_version = 1.0
+    m3aggregator_version = 1.5
   }
 }
 
