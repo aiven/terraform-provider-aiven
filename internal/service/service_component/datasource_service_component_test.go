@@ -175,7 +175,7 @@ func testAccServiceComponentKafkaAuthMethodMissingErrorMessages(name string) str
 		}
 		
 		resource "aiven_kafka" "kafka" {
-		  project      = "test"
+		  project      = data.aiven_project.foo.project
 		  service_name = "test-acc-sr-%s"
 		  cloud_name   = "google-europe-west3"
 		  plan         = "startup-2"
@@ -186,6 +186,7 @@ func testAccServiceComponentKafkaAuthMethodMissingErrorMessages(name string) str
 		    }
 		  }
 		}
+		
 		data "aiven_service_component" "kafka" {
 		  project      = aiven_kafka.kafka.project
 		  service_name = aiven_kafka.kafka.service_name
@@ -204,7 +205,7 @@ func testAccServiceComponentKafkaAuthMethodNotMatchErrorMessages(name string) st
 		}
 		
 		resource "aiven_kafka" "kafka" {
-		  project      = "test"
+		  project      = data.aiven_project.foo.project
 		  service_name = "test-acc-sr-%s"
 		  cloud_name   = "google-europe-west3"
 		  plan         = "startup-2"
