@@ -74,6 +74,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+      - uses: softprops/turnstyle@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          same-branch-only: true
+
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
         with:
