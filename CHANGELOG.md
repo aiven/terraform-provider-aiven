@@ -8,6 +8,7 @@ nav_order: 1
 ## [X.X.X] - not yet released
 - Fix documentation for M3DB namespaces
 - Update M3DB example with latest service versions
+- Fix `aiven_service_integration` poke the kafka connect api to ensure creation of subsequent connectors
 
 ## [3.2.0] - 2022-06-21
 - Fix typos in documentation and examples

@@ -3,6 +3,7 @@ package service_integration
 import (
 	"context"
 	"fmt"
+	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -138,7 +139,7 @@ func ResourceServiceIntegration() *schema.Resource {
 			StateContext: resourceServiceIntegrationState,
 		},
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(2 * time.Minute),
+			Create: schema.DefaultTimeout(5 * time.Minute),
 		},
 
 		Schema: aivenServiceIntegrationSchema,
@@ -309,23 +310,34 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 		Pending: []string{notActive},
 		Target:  []string{active},
 		Refresh: func() (interface{}, string, error) {
+			log.Println("[DEBUG] Service Integration: waiting until active")
+
 			ii, err := client.ServiceIntegrations.Get(projectName, integrationID)
 			if err != nil {
 				// Sometimes Aiven API retrieves 404 error even when a successful service integration is created
 				if aiven.IsNotFound(err) {
+					log.Println("[DEBUG] Service Integration: not yet found")
 					return nil, notActive, nil
 				}
 				return nil, "", err
 			}
 			if !ii.Active {
+				log.Println("[DEBUG] Service Integration: not yet active")
 				return nil, notActive, nil
+			}
+
+			if ii.IntegrationType == "kafka_connect" && ii.DestinationService != nil {
+				if _, err := client.KafkaConnectors.List(projectName, *ii.DestinationService); err != nil {
+					log.Println("[DEBUG] Service Integration: error listing kafka connectors: ", err)
+					return nil, notActive, nil
+				}
 			}
 			return ii, active, nil
 		},
 		Delay:                     2 * time.Second,
 		Timeout:                   d.Timeout(schema.TimeoutCreate),
 		MinTimeout:                2 * time.Second,
-		ContinuousTargetOccurence: 5,
+		ContinuousTargetOccurence: 10,
 	}
 	if _, err := stateChangeConf.WaitForStateContext(ctx); err != nil {
 		return err
