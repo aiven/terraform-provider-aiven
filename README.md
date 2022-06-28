@@ -62,8 +62,8 @@ To avoid any issues, **please set the `termination_protection` property to `true
 
 Bug reports and patches are very welcome, please post them as GitHub issues and pull requests at https://github.com/aiven/terraform-provider-aiven. Please review the guides below.
 
-- [Contributing Guidelines](CONTRIBUTING.md)
-- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Contributing guidelines](CONTRIBUTING.md)
+- [Code of conduct](CODE_OF_CONDUCT.md)
 
 Please see our [security](SECURITY.md) policy to report any possible vulnerabilities or serious issues.
 
