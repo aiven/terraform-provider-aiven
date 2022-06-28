@@ -7,8 +7,6 @@ on:
 
 jobs:
   check_changelog:
-    if: contains(github.event.pull_request.labels.*.name, 'needs-changelog')
-
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
