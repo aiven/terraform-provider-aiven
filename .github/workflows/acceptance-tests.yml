@@ -1,8 +1,6 @@
 name: Acceptance Tests
 
 on:
-  pull_request:
-    branches: [ master, v* ]
   schedule:
     - cron: "30 7 * * *"
   workflow_dispatch:
