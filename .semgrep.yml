@@ -1,21 +1,5 @@
 rules:
 
-# Rules to make sure that our copyright headers are up-to-date:
-#
-- id: outdated-copyright-header
-  languages: [generic]
-  patterns:
-  - pattern: |
-      Copyright (c) $Y Aiven, Helsinki, Finland. https://aiven.io/
-  - metavariable-regex:
-      metavariable: $Y
-      regex: ^(?!2018-2021)
-  fix: |
-      Copyright (c) 2018-2021 Aiven, Helsinki, Finland. https://aiven.io/
-  message: |
-    Aiven copyright message is outdated
-  severity: WARNING
-
 # Rules to make sure that our schema has descriptions for all fields:
 
 - id: schema-resource-without-description

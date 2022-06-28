@@ -1,12 +1,15 @@
 # Aiven Terraform Provider
-The Terraform provider for [Aiven.io](https://aiven.io/), an open source data platform as a service. 
+
+The Terraform provider for [Aiven.io](https://aiven.io/), an open source data platform as a service.
 
 **See the [official documentation](https://registry.terraform.io/providers/aiven/aiven/latest/docs) to learn about all the possible services and resources.**
 
-## Quick Start
+## Quick start
+
 - [Signup for Aiven](https://console.aiven.io/signup?utm_source=github&utm_medium=organic&utm_campaign=terraform&utm_content=signup)
 - [Get your authentication token and project name](https://help.aiven.io/en/articles/2059201-authentication-tokens)
 - Create a file named `main.tf` with the content below:
+
 ```hcl
 terraform {
   required_providers {
@@ -36,120 +39,37 @@ output "postgresql_service_uri" {
 }
 ```
 
-- Run in your terminal:
+- Run these commands in your terminal:
+
 ```bash
-$ terraform init
-$ terraform plan
-$ terraform apply
-$ psql "$(terraform output -raw postgresql_service_uri)"
+terraform init
+terraform plan
+terraform apply
+psql "$(terraform output -raw postgresql_service_uri)"
 ```
 
 Voilà, a PostgreSQL database.
 
 ## A word of caution
+
 Recreating stateful services with Terraform will possibly **delete** the service and all its data before creating it again. Whenever the Terraform plan indicates that a service will be **deleted** or **replaced**, a catastrophic action is possibly about to happen.
 
 Some properties, like **project** and the **resource name**, cannot be changed and it will trigger a resource replacement.
 
-To avoid any issues, **please set the `termination_protection` property to `true` on all production services**, it will prevent Terraform to remove the service until the flag is set back to `false` again. While it prevents a service to be deleted, any logical databases, topics or other configurations may be removed **even when this section is enabled**. Be very careful! 
+To avoid any issues, **please set the `termination_protection` property to `true` on all production services**, it will prevent Terraform to remove the service until the flag is set back to `false` again. While it prevents a service to be deleted, any logical databases, topics or other configurations may be removed **even when this section is enabled**. Be very careful!
 
-## Developing
+## Contributing
 
-### Requirements
-- [Terraform](https://www.terraform.io/downloads.html) v0.12.X or greater
-- [Go](https://golang.org/doc/install) 1.16.X or greater
+Bug reports and patches are very welcome, please post them as GitHub issues and pull requests at https://github.com/aiven/terraform-provider-aiven. Please review the guides below.
 
-### Testing
-Run the tests with the command below:
-```bash
-$ make test
-```
+- [Contributing Guidelines](CONTRIBUTING.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
 
-Run the acceptance tests with the commands below:
-```bash
-$ export AIVEN_TOKEN="your-token"
-$ export AIVEN_PROJECT_NAME="your-project-name"
-
-$ make testacc
-
-# or run a specific acceptance test
-$ make testacc TESTARGS='-run=TestAccAiven_kafka'
-```
-
-> Acceptance tests create real resources, and often cost money to run.
-
-For information about writing acceptance tests, see the main [Terraform contributing guide](https://www.terraform.io/docs/extend/testing/acceptance-tests/index.html).
-
-### Alternate command to build/test inside a container
-
-In case you'd like to avoid Go-dependency on your local machine or CI, you can run the following build command:
-
-```
-podman run -v .:/terraform-provider-aiven:z --workdir /terraform-provider-aiven golang:latest make <COMMAND>
-```
-
-Note that you'll need to be in the root of **terraform-provider-aiven** repository and replace the <COMMAND> name with your choice of command (for example, ``make docs``).
-
-## Debugging
-
-### Requirements
-- [Terraform](https://www.terraform.io/downloads.html) v0.12.26 or greater
-- [Delve](https://github.com/go-delve/delve/tree/master/Documentation/installation) 1.7.X or greater
-
-### Starting the Provider Plugin with `dlv`
-
-To start debugging the provider we use the `dlv debug` command and pass the `-debug` flag to the compiled binary:
-
-```bash
-$ dlv debug -- -debug
-Type 'help' for list of commands.
-(dlv)
-```
-
-Next, we set a breakpoint at a function that we want to look into and continue to start the plugin:
-
-```bash
-(dlv) break resourceServiceCreate
-Breakpoint 1 set at 0x129667b for github.com/aiven/terraform-provider-aiven/aiven.resourceServiceCreate() ./aiven/resource_service.go:806
-(dlv) c
-{"@level":"debug","@message":"plugin address","@timestamp":"2021-10-12T16:36:45.528158+02:00","address":"/tmp/plugin252726151","network":"unix"}
-Provider started, to attach Terraform set the TF_REATTACH_PROVIDERS env var:
-    TF_REATTACH_PROVIDERS='{"registry.terraform.io/aiven/aiven":{"Protocol":"grpc","ProtocolVersion":5,"Pid":3153652,"Test":true,"Addr":{"Network":"unix","String":"/tmp/plugin252726151"}}}'
-```
-
-Next, in a different terminal session we start terraform using the `TF_REATTACH_PROVIDERS` environment variable:
-
-```bash
-$ export TF_REATTACH_PROVIDERS='{"registry.terraform.io/aiven/aiven":{"Protocol":"grpc","ProtocolVersion":5,"Pid":3153652,"Test":true,"Addr":{"Network":"unix","String":"/tmp/plugin252726151"}}}'
-
-$ terraform init -upgrade
-<...>
-$ terraform plan
-<...>
-$ terraform apply -parallelism=1
-<...>
-aiven_pg.testing: Creating...
-```
-
-Now we can see that the debugged process did hit the breakpoint we specified earlier:
-
-```bash
-> github.com/aiven/terraform-provider-aiven/aiven.resourceServiceCreate() ./aiven/resource_service.go:806 (hits goroutine(326):1 total:1) (PC: 0x129667b)
-   801:			return resourceServiceCreate(ctx, d, m)
-   802:		}
-   803:	
-   804:	}
-   805:	
-=> 806:	func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-   807:		client := m.(*aiven.Client)
-   808:		serviceType := d.Get("service_type").(string)
-   809:		userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("service", serviceType, true, d)
-   810:		vpcID := d.Get("project_vpc_id").(string)
-   811:		var apiServiceIntegrations []aiven.NewServiceIntegration
-```
+Please see our [security](SECURITY.md) policy to report any possible vulnerabilities or serious issues.
 
 ## License
-The code is licensed under [MIT License](LICENSE).
+
+terraform-provider-aiven is licensed under the MIT license. Full license text is available in the [LICENSE](LICENSE) file. Please note that the project explicitly does not require a CLA (Contributor License Agreement) from its contributors.
 
 ## Credits
 
