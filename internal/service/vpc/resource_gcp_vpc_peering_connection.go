@@ -206,9 +206,17 @@ func resourceGCPVPCPeeringConnectionImport(ctx context.Context, d *schema.Resour
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<vpc_id>/<gcp_project_id>/<peer_vpc>", d.Id())
 	}
 
+	client := m.(*aiven.Client)
+
+	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
+	_, err := client.VPCPeeringConnections.GetVPCPeering(projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
+	if err != nil && schemautil.IsUnknownResource(err) {
+		return nil, errors.New("cannot find specified GCP VPC peering connection")
+	}
+
 	dig := resourceGCPVPCPeeringConnectionRead(ctx, d, m)
 	if dig.HasError() {
-		return nil, errors.New("cannot get VPC peering connection")
+		return nil, errors.New("cannot get GCP VPC peering connection")
 	}
 
 	return []*schema.ResourceData{d}, nil

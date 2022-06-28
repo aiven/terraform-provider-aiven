@@ -27,11 +27,11 @@ resource "aiven_aws_vpc_peering_connection" "foo" {
 
 - **aws_account_id** (String) AWS account ID. This property cannot be changed, doing so forces recreation of the resource.
 - **aws_vpc_id** (String) AWS VPC ID. This property cannot be changed, doing so forces recreation of the resource.
+- **aws_vpc_region** (String) AWS region of the peered VPC (if not in the same region as Aiven VPC). This property cannot be changed, doing so forces recreation of the resource.
 - **vpc_id** (String) The VPC the peering connection belongs to. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Optional
 
-- **aws_vpc_region** (String) AWS region of the peered VPC (if not in the same region as Aiven VPC). This property cannot be changed, doing so forces recreation of the resource.
 - **id** (String) The ID of this resource.
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -54,5 +54,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_aws_vpc_peering_connection.foo project_name/vpc_id/aws_account_id
+terraform import aiven_aws_vpc_peering_connection.foo project_name/vpc_id/aws_account_id/aws_vpc_id/aws_vpc_region
 ```

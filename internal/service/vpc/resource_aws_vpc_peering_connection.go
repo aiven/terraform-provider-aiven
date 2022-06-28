@@ -37,7 +37,7 @@ var aivenAWSVPCPeeringConnectionSchema = map[string]*schema.Schema{
 	},
 	"aws_vpc_region": {
 		ForceNew: true,
-		Optional: true,
+		Required: true,
 		Type:     schema.TypeString,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return new == ""
@@ -215,19 +215,27 @@ func resourceAWSVPCPeeringConnectionDelete(ctx context.Context, d *schema.Resour
 		MinTimeout: 2 * time.Second,
 	}
 	if _, err := stateChangeConf.WaitForStateContext(ctx); err != nil && !aiven.IsNotFound(err) {
-		return diag.Errorf("Error waiting for Aiven AWS VPC Peering Connection to be DELETED: %s", err)
+		return diag.Errorf("Error waiting for AWS Aiven VPC Peering Connection to be DELETED: %s", err)
 	}
 	return nil
 }
 
 func resourceAWSVPCPeeringConnectionImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	if len(strings.Split(d.Id(), "/")) != 3 {
-		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<vpc_id>/<aws_account_id>", d.Id())
+	if len(strings.Split(d.Id(), "/")) != 5 {
+		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<vpc_id>/<aws_account_id>/<aws_vpc_id>/<aws_vpc_region>", d.Id())
+	}
+
+	client := m.(*aiven.Client)
+
+	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
+	_, err := client.VPCPeeringConnections.GetVPCPeering(projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
+	if err != nil && schemautil.IsUnknownResource(err) {
+		return nil, errors.New("cannot find specified VPC peering connection")
 	}
 
 	dig := resourceAWSVPCPeeringConnectionRead(ctx, d, m)
 	if dig.HasError() {
-		return nil, errors.New("cannot get aws vpc peering connection")
+		return nil, errors.New("cannot get AWS VPC peering connection")
 	}
 
 	return []*schema.ResourceData{d}, nil
