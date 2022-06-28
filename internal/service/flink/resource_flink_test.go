@@ -203,7 +203,7 @@ func TestAccAiven_flink_kafka_to_pg(t *testing.T) {
 		resource "aiven_kafka" "testing" {
 		  project      = var.project_name
 		  cloud_name   = "google-europe-west1"
-		  plan         = "business-4"
+		  plan         = "startup-2"
 		  service_name = var.service_name_kafka
 		}
 		
@@ -415,7 +415,7 @@ func TestAccAiven_flink_kafkaToKafka(t *testing.T) {
 		resource "aiven_kafka" "testing" {
 		  project      = var.project_name
 		  cloud_name   = "google-europe-west1"
-		  plan         = "business-4"
+		  plan         = "startup-2"
 		  service_name = var.service_name_kafka
 		}
 		
@@ -597,7 +597,7 @@ func TestAccAiven_flink_kafkaToUpsertKafka(t *testing.T) {
 		resource "aiven_kafka" "testing" {
 		  project      = var.project_name
 		  cloud_name   = "google-europe-west1"
-		  plan         = "business-4"
+		  plan         = "startup-2"
 		  service_name = var.service_name_kafka
 		}
 		
