@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/service/kafka/cache"
@@ -258,7 +260,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	w := &KafkaTopicCreateWaiter{
-		Client:        m.(*aiven.Client),
+		Client:        m.(*meta.Meta).Client,
 		Project:       project,
 		ServiceName:   serviceName,
 		CreateRequest: createRequest,
@@ -336,7 +338,7 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 	project, serviceName, topicName := schemautil.SplitResourceID3(d.Id())
 	topic, err := getTopic(ctx, d, m, false)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	if err := d.Set("project", project); err != nil {
@@ -398,7 +400,7 @@ func getTopic(ctx context.Context, d *schema.ResourceData, m interface{}, ignore
 	project, serviceName, topicName := schemautil.SplitResourceID3(d.Id())
 
 	w := &KafkaTopicAvailabilityWaiter{
-		Client:      m.(*aiven.Client),
+		Client:      m.(*meta.Meta).Client,
 		Project:     project,
 		ServiceName: serviceName,
 		TopicName:   topicName,
@@ -415,7 +417,7 @@ func getTopic(ctx context.Context, d *schema.ResourceData, m interface{}, ignore
 }
 
 func resourceKafkaTopicUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	partitions := d.Get("partitions").(int)
 	projectName, serviceName, topicName := schemautil.SplitResourceID3(d.Id())
@@ -438,7 +440,7 @@ func resourceKafkaTopicUpdate(_ context.Context, d *schema.ResourceData, m inter
 }
 
 func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName, topicName := schemautil.SplitResourceID3(d.Id())
 
@@ -463,6 +465,8 @@ func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m int
 }
 
 func resourceKafkaTopicState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	if len(strings.Split(d.Id(), "/")) != 3 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<topic_name>", d.Id())
 	}

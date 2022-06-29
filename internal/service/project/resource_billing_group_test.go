@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 
 	"github.com/aiven/aiven-go-client"
@@ -49,7 +51,7 @@ func TestAccAivenBillingGroup_basic(t *testing.T) {
 }
 
 func testAccCheckAivenBillingGroupResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.TestAccProvider.Meta().(*meta.Meta).Client
 
 	// loop through the resources in state, verifying each billing group is destroyed
 	for _, rs := range s.RootModule().Resources {

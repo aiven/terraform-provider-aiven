@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/templates"
@@ -155,7 +157,7 @@ func plainEndpointID(fullEndpointID *string) *string {
 }
 
 func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName := d.Get("project").(string)
 	integrationType := d.Get("integration_type").(string)
@@ -196,12 +198,12 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceServiceIntegrationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, integrationID := schemautil.SplitResourceID2(d.Id())
 	integration, err := client.ServiceIntegrations.Get(projectName, integrationID)
 	if err != nil {
-		err = schemautil.ResourceReadHandleNotFound(err, d)
+		err = schemautil.ResourceReadHandleNotFound(err, d, m)
 		if err != nil {
 			return diag.Errorf("cannot get service integration: %s; id: %s", err, integrationID)
 		}
@@ -216,7 +218,7 @@ func resourceServiceIntegrationRead(_ context.Context, d *schema.ResourceData, m
 }
 
 func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, integrationID := schemautil.SplitResourceID2(d.Id())
 
@@ -238,7 +240,7 @@ func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceServiceIntegrationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, integrationID := schemautil.SplitResourceID2(d.Id())
 	err := client.ServiceIntegrations.Delete(projectName, integrationID)
@@ -250,7 +252,9 @@ func resourceServiceIntegrationDelete(_ context.Context, d *schema.ResourceData,
 }
 
 func resourceServiceIntegrationState(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	client := m.(*aiven.Client)
+	m.(*meta.Meta).Import = true
+
+	client := m.(*meta.Meta).Client
 
 	if len(strings.Split(d.Id(), "/")) != 2 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<integration_id>", d.Id())
@@ -270,7 +274,7 @@ func resourceServiceIntegrationState(_ context.Context, d *schema.ResourceData, 
 }
 
 func resourceServiceIntegrationCheckForPreexistingResource(_ context.Context, d *schema.ResourceData, m interface{}) (*aiven.ServiceIntegration, error) {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName := d.Get("project").(string)
 	integrationType := d.Get("integration_type").(string)
@@ -302,7 +306,7 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 		active    = "ACTIVE"
 		notActive = "NOTACTIVE"
 	)
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, integrationID := schemautil.SplitResourceID2(d.Id())
 

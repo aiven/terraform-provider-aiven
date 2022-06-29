@@ -3,9 +3,10 @@ package project
 import (
 	"context"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
-	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -19,7 +20,7 @@ func DatasourceBillingGroup() *schema.Resource {
 }
 
 func datasourceBillingGroupRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	name := d.Get("name").(string)
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -57,7 +58,7 @@ account team you are trying to link to this project.
 }
 
 func resourceAccountTeamProjectCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	accountId := d.Get("account_id").(string)
 	teamId := d.Get("team_id").(string)
@@ -82,12 +83,12 @@ func resourceAccountTeamProjectCreate(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceAccountTeamProjectRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	accountId, teamId, projectName := schemautil.SplitResourceID3(d.Id())
 	r, err := client.AccountTeamProjects.List(accountId, teamId)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	var project aiven.AccountTeamProject
@@ -118,7 +119,7 @@ func resourceAccountTeamProjectRead(_ context.Context, d *schema.ResourceData, m
 }
 
 func resourceAccountTeamProjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	accountId, teamId, _ := schemautil.SplitResourceID3(d.Id())
 	newProjectName := d.Get("project_name").(string)
@@ -138,7 +139,7 @@ func resourceAccountTeamProjectUpdate(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceAccountTeamProjectDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	err := client.AccountTeamProjects.Delete(schemautil.SplitResourceID3(d.Id()))
 	if err != nil && !aiven.IsNotFound(err) {
@@ -149,6 +150,8 @@ func resourceAccountTeamProjectDelete(_ context.Context, d *schema.ResourceData,
 }
 
 func resourceAccountTeamProjectState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	di := resourceAccountTeamProjectRead(ctx, d, m)
 	if di.HasError() {
 		return nil, fmt.Errorf("cannot get account team project: %v", di)

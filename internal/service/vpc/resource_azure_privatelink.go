@@ -6,6 +6,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -68,7 +70,7 @@ func ResourceAzurePrivatelink() *schema.Resource {
 }
 
 func resourceAzurePrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	var subscriptionIDs []string
 	var project = d.Get("project").(string)
@@ -99,7 +101,7 @@ func resourceAzurePrivatelinkCreate(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceAzurePrivatelinkRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 	project, serviceName := schemautil.SplitResourceID2(d.Id())
 
 	pl, err := client.AzurePrivatelink.Get(project, serviceName)
@@ -132,7 +134,7 @@ func resourceAzurePrivatelinkRead(_ context.Context, d *schema.ResourceData, m i
 	return nil
 }
 func resourceAzurePrivatelinkUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	var subscriptionIDs []string
 	project, serviceName := schemautil.SplitResourceID2(d.Id())
@@ -181,7 +183,7 @@ func waitForAzurePrivatelinkToBeActive(client *aiven.Client, project string, ser
 }
 
 func resourceAzurePrivatelinkDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 	project, serviceName := schemautil.SplitResourceID2(d.Id())
 
 	err := client.AzurePrivatelink.Delete(project, serviceName)
@@ -218,6 +220,8 @@ func resourceAzurePrivatelinkDelete(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceAzurePrivatelinkState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	di := resourceAzurePrivatelinkRead(ctx, d, m)
 	if di.HasError() {
 		return nil, fmt.Errorf("cannot get Azure privatelink %v", di)

@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -78,7 +80,7 @@ func ResourceDatabase() *schema.Resource {
 }
 
 func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
@@ -106,12 +108,12 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 func resourceDatabaseRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName, databaseName := schemautil.SplitResourceID3(d.Id())
 	database, err := client.Databases.Get(projectName, serviceName, databaseName)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	if err := d.Set("database_name", database.DatabaseName); err != nil {
@@ -137,7 +139,7 @@ func resourceDatabaseRead(_ context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName, databaseName := schemautil.SplitResourceID3(d.Id())
 
@@ -162,6 +164,8 @@ func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 func resourceDatabaseState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	if len(strings.Split(d.Id(), "/")) != 3 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<database_name>", d.Id())
 	}

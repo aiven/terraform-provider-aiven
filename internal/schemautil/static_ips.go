@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -15,7 +15,7 @@ const (
 )
 
 func CurrentlyAllocatedStaticIps(_ context.Context, projectName, serviceName string, m interface{}) ([]string, error) {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	// special handling for static ips
 	staticIpListResponse, err := client.StaticIPs.List(projectName)
@@ -48,7 +48,7 @@ func staticIpsFromSchema(d *schema.ResourceData) []string {
 }
 
 func staticIpsFromAPI(_ context.Context, d *schema.ResourceData, m interface{}) ([]string, error) {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)

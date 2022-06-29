@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/service/account"
 	"github.com/aiven/terraform-provider-aiven/internal/service/cassandra"
@@ -248,7 +250,9 @@ func Provider() *schema.Provider {
 			return nil, diag.FromErr(err)
 		}
 
-		return client, nil
+		m := &meta.Meta{Client: client}
+
+		return m, nil
 	}
 
 	return p

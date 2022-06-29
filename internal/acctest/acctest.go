@@ -7,6 +7,8 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/provider"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -16,16 +18,12 @@ import (
 )
 
 var (
-	TestAccProviders         map[string]*schema.Provider
 	TestAccProvider          *schema.Provider
 	TestAccProviderFactories map[string]func() (*schema.Provider, error)
 )
 
 func init() {
 	TestAccProvider = provider.Provider()
-	TestAccProviders = map[string]*schema.Provider{
-		"aiven": TestAccProvider,
-	}
 	TestAccProviderFactories = map[string]func() (*schema.Provider, error){
 		"aiven": func() (*schema.Provider, error) {
 			return TestAccProvider, nil
@@ -47,7 +45,7 @@ func TestAccPreCheck(t *testing.T) {
 }
 
 func TestAccCheckAivenServiceResourceDestroy(s *terraform.State) error {
-	c := TestAccProvider.Meta().(*aiven.Client)
+	c := TestAccProvider.Meta().(*meta.Meta).Client
 	// loop through the resources in state, verifying each service is destroyed
 	for _, rs := range s.RootModule().Resources {
 		var r []string

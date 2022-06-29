@@ -6,6 +6,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 
 	"github.com/aiven/aiven-go-client"
@@ -155,7 +157,7 @@ func resourceKafkaConnectorRead(ctx context.Context, d *schema.ResourceData, m i
 		Pending: []string{"IN_PROGRESS"},
 		Target:  []string{"OK"},
 		Refresh: func() (interface{}, string, error) {
-			list, err := m.(*aiven.Client).KafkaConnectors.List(project, serviceName)
+			list, err := m.(*meta.Meta).Client.KafkaConnectors.List(project, serviceName)
 			if err != nil {
 				log.Printf("[DEBUG] Kafka Connectors list waiter err %s", err.Error())
 				if aiven.IsNotFound(err) {
@@ -173,7 +175,7 @@ func resourceKafkaConnectorRead(ctx context.Context, d *schema.ResourceData, m i
 	}
 	res, err := stateChangeConf.WaitForStateContext(ctx)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	var found bool
@@ -235,7 +237,7 @@ func resourceKafkaConnectorCreate(ctx context.Context, d *schema.ResourceData, m
 		config[k] = cS.(string)
 	}
 
-	err := m.(*aiven.Client).KafkaConnectors.Create(project, serviceName, config)
+	err := m.(*meta.Meta).Client.KafkaConnectors.Create(project, serviceName, config)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -246,7 +248,7 @@ func resourceKafkaConnectorCreate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceKafkaConnectorDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	err := m.(*aiven.Client).KafkaConnectors.Delete(schemautil.SplitResourceID3(d.Id()))
+	err := m.(*meta.Meta).Client.KafkaConnectors.Delete(schemautil.SplitResourceID3(d.Id()))
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
@@ -262,7 +264,7 @@ func resourceKafkaTConnectorUpdate(ctx context.Context, d *schema.ResourceData, 
 		config[k] = cS.(string)
 	}
 
-	_, err := m.(*aiven.Client).KafkaConnectors.Update(project, serviceName, connectorName, config)
+	_, err := m.(*meta.Meta).Client.KafkaConnectors.Update(project, serviceName, connectorName, config)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -271,6 +273,8 @@ func resourceKafkaTConnectorUpdate(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceKafkaConnectorState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	di := resourceKafkaConnectorRead(ctx, d, m)
 	if di.HasError() {
 		return nil, fmt.Errorf("cannot get kafka connector: %v", di)

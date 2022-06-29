@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -28,7 +28,7 @@ func TagsShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
 	return len(new.(*schema.Set).List()) != 0
 }
 
-func CustomizeDiffCheckUniqueTag(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+func CustomizeDiffCheckUniqueTag(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
 	t := make(map[string]bool)
 	for _, tag := range d.Get("tag").(*schema.Set).List() {
 		tagVal := tag.(map[string]interface{})
@@ -43,7 +43,7 @@ func CustomizeDiffCheckUniqueTag(ctx context.Context, d *schema.ResourceDiff, m 
 }
 
 func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	if d.Get("service_type").(string) == "" {
 		return fmt.Errorf("cannot check dynamic disc space because service_type is empty")
@@ -132,7 +132,7 @@ func CustomizeDiffCheckStaticIpDisassociation(_ context.Context, d *schema.Resou
 		return nil
 	}
 
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
 	plannedStaticIps := FlattenToString(d.Get("static_ips").([]interface{}))

@@ -6,7 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -49,7 +50,7 @@ func ResourceClickhouseDatabase() *schema.Resource {
 }
 
 func resourceClickhouseDatabaseCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
@@ -66,13 +67,13 @@ func resourceClickhouseDatabaseCreate(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceClickhouseDatabaseRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName, databaseName := schemautil.SplitResourceID3(d.Id())
 
 	database, err := client.ClickhouseDatabase.Get(projectName, serviceName, databaseName)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	if err := d.Set("name", database.Name); err != nil {
@@ -83,7 +84,7 @@ func resourceClickhouseDatabaseRead(_ context.Context, d *schema.ResourceData, m
 }
 
 func resourceClickhouseDatabaseDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName, databaseName := schemautil.SplitResourceID3(d.Id())
 
@@ -100,6 +101,8 @@ func resourceClickhouseDatabaseDelete(_ context.Context, d *schema.ResourceData,
 }
 
 func resourceClickhouseDatabaseState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	if len(strings.Split(d.Id(), "/")) != 3 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<name>", d.Id())
 	}

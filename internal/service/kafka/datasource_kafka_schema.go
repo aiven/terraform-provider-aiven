@@ -3,7 +3,8 @@ package kafka
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -24,7 +25,7 @@ func datasourceKafkaSchemaRead(ctx context.Context, d *schema.ResourceData, m in
 	serviceName := d.Get("service_name").(string)
 	subjectName := d.Get("subject_name").(string)
 
-	subjects, err := m.(*aiven.Client).KafkaSubjectSchemas.List(projectName, serviceName)
+	subjects, err := m.(*meta.Meta).Client.KafkaSubjectSchemas.List(projectName, serviceName)
 	if err != nil {
 		return diag.FromErr(err)
 	}

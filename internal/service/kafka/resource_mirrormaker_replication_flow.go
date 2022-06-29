@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -105,7 +107,7 @@ func ResourceMirrorMakerReplicationFlow() *schema.Resource {
 }
 
 func resourceMirrorMakerReplicationFlowCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
@@ -136,12 +138,12 @@ func resourceMirrorMakerReplicationFlowCreate(ctx context.Context, d *schema.Res
 }
 
 func resourceMirrorMakerReplicationFlowRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project, serviceName, sourceCluster, targetCluster := schemautil.SplitResourceID4(d.Id())
 	replicationFlow, err := client.KafkaMirrorMakerReplicationFlow.Get(project, serviceName, sourceCluster, targetCluster)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	if err := d.Set("project", project); err != nil {
@@ -182,7 +184,7 @@ func resourceMirrorMakerReplicationFlowRead(_ context.Context, d *schema.Resourc
 }
 
 func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project, serviceName, sourceCluster, targetCluster := schemautil.SplitResourceID4(d.Id())
 	_, err := client.KafkaMirrorMakerReplicationFlow.Update(
@@ -210,7 +212,7 @@ func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.Res
 }
 
 func resourceMirrorMakerReplicationFlowDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project, serviceName, sourceCluster, targetCluster := schemautil.SplitResourceID4(d.Id())
 
@@ -223,6 +225,8 @@ func resourceMirrorMakerReplicationFlowDelete(_ context.Context, d *schema.Resou
 }
 
 func resourceMirrorMakerReplicationFlowState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	if len(strings.Split(d.Id(), "/")) != 4 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<source_cluster>/<target_cluster>", d.Id())
 	}

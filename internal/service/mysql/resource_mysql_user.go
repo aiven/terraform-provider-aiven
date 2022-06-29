@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -73,7 +74,7 @@ func ResourceMySQLUser() *schema.Resource {
 }
 
 func resourceMySQLUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
@@ -106,7 +107,7 @@ func resourceMySQLUserCreate(ctx context.Context, d *schema.ResourceData, m inte
 }
 
 func resourceMySQLUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName, username := schemautil.SplitResourceID3(d.Id())
 

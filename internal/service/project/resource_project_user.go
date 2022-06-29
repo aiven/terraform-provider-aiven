@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -48,7 +50,7 @@ func ResourceProjectUser() *schema.Resource {
 }
 
 func resourceProjectUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 	projectName := d.Get("project").(string)
 	email := d.Get("email").(string)
 	err := client.ProjectUsers.Invite(
@@ -71,7 +73,7 @@ func resourceProjectUserCreate(ctx context.Context, d *schema.ResourceData, m in
 }
 
 func resourceProjectUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, email := schemautil.SplitResourceID2(d.Id())
 	user, invitation, err := client.ProjectUsers.Get(projectName, email)
@@ -79,7 +81,7 @@ func resourceProjectUserRead(ctx context.Context, d *schema.ResourceData, m inte
 		if aiven.IsNotFound(err) && !d.Get("accepted").(bool) {
 			return resourceProjectUserCreate(ctx, d, m)
 		}
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	if err := d.Set("project", projectName); err != nil {
@@ -107,7 +109,7 @@ func resourceProjectUserRead(ctx context.Context, d *schema.ResourceData, m inte
 }
 
 func resourceProjectUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, email := schemautil.SplitResourceID2(d.Id())
 	memberType := d.Get("member_type").(string)
@@ -126,7 +128,7 @@ func resourceProjectUserUpdate(ctx context.Context, d *schema.ResourceData, m in
 }
 
 func resourceProjectUserDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, email := schemautil.SplitResourceID2(d.Id())
 	user, invitation, err := client.ProjectUsers.Get(projectName, email)
@@ -159,6 +161,8 @@ func resourceProjectUserDelete(_ context.Context, d *schema.ResourceData, m inte
 }
 
 func resourceProjectUserState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	if len(strings.Split(d.Id(), "/")) != 2 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<email>", d.Id())
 	}

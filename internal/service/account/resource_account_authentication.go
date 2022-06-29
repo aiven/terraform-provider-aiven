@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -92,7 +93,7 @@ func ResourceAccountAuthentication() *schema.Resource {
 }
 
 func resourceAccountAuthenticationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	accountId := d.Get("account_id").(string)
 
@@ -119,12 +120,12 @@ func resourceAccountAuthenticationCreate(ctx context.Context, d *schema.Resource
 }
 
 func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	accountId, authId := schemautil.SplitResourceID2(d.Id())
 	r, err := client.AccountAuthentications.Get(accountId, authId)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	if err := d.Set("account_id", r.AuthenticationMethod.AccountId); err != nil {
@@ -168,7 +169,7 @@ func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData
 }
 
 func resourceAccountAuthenticationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 	accountId, authId := schemautil.SplitResourceID2(d.Id())
 
 	r, err := client.AccountAuthentications.Update(accountId, aiven.AccountAuthenticationMethod{
@@ -192,7 +193,7 @@ func resourceAccountAuthenticationUpdate(ctx context.Context, d *schema.Resource
 }
 
 func resourceAccountAuthenticationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	accountId, teamId := schemautil.SplitResourceID2(d.Id())
 
@@ -205,6 +206,8 @@ func resourceAccountAuthenticationDelete(_ context.Context, d *schema.ResourceDa
 }
 
 func resourceAccountAuthenticationState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	di := resourceAccountAuthenticationRead(ctx, d, m)
 	if di.HasError() {
 		return nil, fmt.Errorf("cannot get account authentication %v", di)

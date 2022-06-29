@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -40,7 +41,7 @@ func ResourceClickhouseRole() *schema.Resource {
 }
 
 func resourceClickhouseRoleCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
@@ -56,7 +57,7 @@ func resourceClickhouseRoleCreate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceClickhouseRoleRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName, roleName := schemautil.SplitResourceID3(d.Id())
 
@@ -80,7 +81,7 @@ func resourceClickhouseRoleRead(_ context.Context, d *schema.ResourceData, m int
 }
 
 func resourceClickhouseRoleDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName, roleName := schemautil.SplitResourceID3(d.Id())
 
@@ -91,6 +92,8 @@ func resourceClickhouseRoleDelete(_ context.Context, d *schema.ResourceData, m i
 }
 
 func resourceClickhouseRoleState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	if len(strings.Split(d.Id(), "/")) != 3 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<database_name>/<role_name>", d.Id())
 	}

@@ -7,6 +7,8 @@ import (
 	"os"
 	"regexp"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -128,7 +130,7 @@ func ResourceProject() *schema.Resource {
 }
 
 func resourceProjectCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName := d.Get("project").(string)
 	_, err := client.Projects.Create(
@@ -222,18 +224,18 @@ func resourceProjectAssignToBillingGroup(
 }
 
 func resourceProjectRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project, err := client.Projects.Get(d.Id())
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	return setProjectTerraformProperties(d, client, project)
 }
 
 func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	var project *aiven.Project
 	projectName := d.Get("project").(string)
@@ -264,7 +266,7 @@ func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interfac
 }
 
 func resourceProjectDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	err := client.Projects.Delete(d.Id())
 
@@ -289,7 +291,9 @@ func resourceProjectDelete(_ context.Context, d *schema.ResourceData, m interfac
 }
 
 func resourceProjectState(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	client := m.(*aiven.Client)
+	m.(*meta.Meta).Import = true
+
+	client := m.(*meta.Meta).Client
 
 	project, err := client.Projects.Get(d.Id())
 	if err != nil {

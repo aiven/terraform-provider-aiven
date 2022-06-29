@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -71,7 +73,7 @@ func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 		err error
 	)
 
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 	projectName, vpcID := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
 	gcpProjectId := d.Get("gcp_project_id").(string)
 	peerVPC := d.Get("peer_vpc").(string)
@@ -136,20 +138,20 @@ func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 
 func resourceGCPVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var pc *aiven.VPCPeeringConnection
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
 	pc, err := client.VPCPeeringConnections.GetVPCPeering(
 		projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	return copyGCPVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, projectName, vpcID)
 }
 
 func resourceGCPVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
 
@@ -202,16 +204,10 @@ func resourceGCPVPCPeeringConnectionDelete(ctx context.Context, d *schema.Resour
 }
 
 func resourceGCPVPCPeeringConnectionImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	if len(strings.Split(d.Id(), "/")) != 4 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<vpc_id>/<gcp_project_id>/<peer_vpc>", d.Id())
-	}
-
-	client := m.(*aiven.Client)
-
-	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
-	_, err := client.VPCPeeringConnections.GetVPCPeering(projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
-	if err != nil && schemautil.IsUnknownResource(err) {
-		return nil, errors.New("cannot find specified GCP VPC peering connection")
 	}
 
 	dig := resourceGCPVPCPeeringConnectionRead(ctx, d, m)

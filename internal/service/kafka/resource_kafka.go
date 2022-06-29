@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -120,7 +122,7 @@ func ResourceKafka() *schema.Resource {
 			customdiff.ComputedIf("karapace", func(ctx context.Context, d *schema.ResourceDiff, m interface{}) bool {
 				project := d.Get("project").(string)
 				serviceName := d.Get("service_name").(string)
-				client := m.(*aiven.Client)
+				client := m.(*meta.Meta).Client
 
 				kafka, err := client.Services.Get(project, serviceName)
 				if err != nil {
@@ -148,7 +150,7 @@ func resourceKafkaCreate(ctx context.Context, d *schema.ResourceData, m interfac
 
 	// if default_acl=false delete default wildcard Kafka ACL that is automatically created
 	if !d.Get("default_acl").(bool) {
-		client := m.(*aiven.Client)
+		client := m.(*meta.Meta).Client
 		project := d.Get("project").(string)
 		serviceName := d.Get("service_name").(string)
 
@@ -173,11 +175,11 @@ func resourceKafkaCreate(ctx context.Context, d *schema.ResourceData, m interfac
 }
 
 func resourceKafkaRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	kafka, err := client.Services.Get(schemautil.SplitResourceID2(d.Id()))
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	var diags diag.Diagnostics

@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/templates"
 
 	"github.com/aiven/aiven-go-client"
@@ -297,12 +299,12 @@ func ResourceServiceCreateWrapper(serviceType string) schema.CreateContextFunc {
 }
 
 func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName := SplitResourceID2(d.Id())
 	s, err := client.Services.Get(projectName, serviceName)
 	if err != nil {
-		if err = ResourceReadHandleNotFound(err, d); err != nil {
+		if err = ResourceReadHandleNotFound(err, d, m); err != nil {
 			return diag.FromErr(fmt.Errorf("unable to GET service %s: %s", d.Id(), err))
 		}
 		return nil
@@ -338,7 +340,7 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 }
 
 func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	serviceType := d.Get("service_type").(string)
 	project := d.Get("project").(string)
@@ -391,7 +393,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	var karapace *bool
 	if v := d.Get("karapace"); d.HasChange("karapace") && v != nil {
@@ -482,7 +484,7 @@ func getDefaultDiskSpaceIfNotSet(ctx context.Context, d *schema.ResourceData, cl
 }
 
 func ResourceServiceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName := SplitResourceID2(d.Id())
 
@@ -499,7 +501,9 @@ func ResourceServiceDelete(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func ResourceServiceState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	client := m.(*aiven.Client)
+	m.(*meta.Meta).Import = true
+
+	client := m.(*meta.Meta).Client
 
 	if len(strings.Split(d.Id(), "/")) != 2 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>", d.Id())
@@ -739,16 +743,17 @@ func IsUnknownResource(err error) bool {
 	return aiven.IsNotFound(err) || IsUnknownRole(err)
 }
 
-func ResourceReadHandleNotFound(err error, d *schema.ResourceData) error {
-	if err != nil && IsUnknownResource(err) {
+func ResourceReadHandleNotFound(err error, d *schema.ResourceData, m interface{}) error {
+	if err != nil && IsUnknownResource(err) && !m.(*meta.Meta).Import {
 		d.SetId("")
 		return nil
 	}
+
 	return err
 }
 
 func DatasourceServiceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)

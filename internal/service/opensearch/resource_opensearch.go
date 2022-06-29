@@ -6,7 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
@@ -75,7 +76,9 @@ func ResourceOpensearch() *schema.Resource {
 }
 
 func resourceOpensearchState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	client := m.(*aiven.Client)
+	m.(*meta.Meta).Import = true
+
+	client := m.(*meta.Meta).Client
 
 	if len(strings.Split(d.Id(), "/")) != 2 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>", d.Id())

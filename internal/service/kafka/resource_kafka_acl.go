@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/aiven-go-client"
@@ -64,7 +66,7 @@ func ResourceKafkaACL() *schema.Resource {
 }
 
 func resourceKafkaACLCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
@@ -88,12 +90,12 @@ func resourceKafkaACLCreate(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 func resourceKafkaACLRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project, serviceName, aclID := schemautil.SplitResourceID3(d.Id())
 	acl, err := cache.ACLCache{}.Read(project, serviceName, aclID, client)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	err = copyKafkaACLPropertiesFromAPIResponseToTerraform(d, &acl, project, serviceName)
@@ -105,7 +107,7 @@ func resourceKafkaACLRead(_ context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceKafkaACLDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName, aclID := schemautil.SplitResourceID3(d.Id())
 	err := client.KafkaACLs.Delete(projectName, serviceName, aclID)
@@ -117,6 +119,8 @@ func resourceKafkaACLDelete(_ context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceKafkaACLState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	if len(strings.Split(d.Id(), "/")) != 3 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<acl_id>", d.Id())
 	}

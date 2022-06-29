@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -57,7 +58,7 @@ func ResourceKafkaSchemaConfiguration() *schema.Resource {
 func resourceKafkaSchemaConfigurationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project, serviceName := schemautil.SplitResourceID2(d.Id())
 
-	_, err := m.(*aiven.Client).KafkaGlobalSchemaConfig.Update(
+	_, err := m.(*meta.Meta).Client.KafkaGlobalSchemaConfig.Update(
 		project,
 		serviceName,
 		aiven.KafkaSchemaConfig{
@@ -75,7 +76,7 @@ func resourceKafkaSchemaConfigurationCreate(ctx context.Context, d *schema.Resou
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 
-	_, err := m.(*aiven.Client).KafkaGlobalSchemaConfig.Update(
+	_, err := m.(*meta.Meta).Client.KafkaGlobalSchemaConfig.Update(
 		project,
 		serviceName,
 		aiven.KafkaSchemaConfig{
@@ -93,9 +94,9 @@ func resourceKafkaSchemaConfigurationCreate(ctx context.Context, d *schema.Resou
 func resourceKafkaSchemaConfigurationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project, serviceName := schemautil.SplitResourceID2(d.Id())
 
-	r, err := m.(*aiven.Client).KafkaGlobalSchemaConfig.Get(project, serviceName)
+	r, err := m.(*meta.Meta).Client.KafkaGlobalSchemaConfig.Get(project, serviceName)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	if err := d.Set("project", project); err != nil {
@@ -116,7 +117,7 @@ func resourceKafkaSchemaConfigurationRead(_ context.Context, d *schema.ResourceD
 func resourceKafkaSchemaConfigurationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project, serviceName := schemautil.SplitResourceID2(d.Id())
 
-	_, err := m.(*aiven.Client).KafkaGlobalSchemaConfig.Update(
+	_, err := m.(*meta.Meta).Client.KafkaGlobalSchemaConfig.Update(
 		project,
 		serviceName,
 		aiven.KafkaSchemaConfig{
@@ -130,6 +131,8 @@ func resourceKafkaSchemaConfigurationDelete(_ context.Context, d *schema.Resourc
 }
 
 func resourceKafkaSchemaConfigurationState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	di := resourceKafkaSchemaConfigurationRead(ctx, d, m)
 	if di.HasError() {
 		return nil, fmt.Errorf("cannot get kafka schema configuration: %v", di)

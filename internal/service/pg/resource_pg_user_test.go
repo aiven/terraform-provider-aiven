@@ -5,6 +5,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 
 	"github.com/aiven/aiven-go-client"
@@ -84,7 +86,7 @@ func TestAccAivenPGUser_pg_replica(t *testing.T) {
 }
 
 func testAccCheckAivenPGUserResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.TestAccProvider.Meta().(*meta.Meta).Client
 
 	// loop through the resources in state, verifying each aiven_pg_user is destroyed
 	for _, rs := range s.RootModule().Resources {

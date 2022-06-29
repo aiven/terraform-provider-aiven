@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -56,7 +58,7 @@ func ResourceClickhouseUser() *schema.Resource {
 }
 
 func resourceClickhouseUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
@@ -80,12 +82,12 @@ func resourceClickhouseUserCreate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceClickhouseUserRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName, uuid := schemautil.SplitResourceID3(d.Id())
 	user, err := client.ClickhouseUser.Get(projectName, serviceName, uuid)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	if err := d.Set("project", projectName); err != nil {
@@ -108,7 +110,7 @@ func resourceClickhouseUserRead(_ context.Context, d *schema.ResourceData, m int
 }
 
 func resourceClickhouseUserDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName, uuid := schemautil.SplitResourceID3(d.Id())
 	err := client.ClickhouseUser.Delete(projectName, serviceName, uuid)
@@ -120,6 +122,8 @@ func resourceClickhouseUserDelete(_ context.Context, d *schema.ResourceData, m i
 }
 
 func resourceClickhouseUserState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	if len(strings.Split(d.Id(), "/")) != 3 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<uuid>", d.Id())
 	}

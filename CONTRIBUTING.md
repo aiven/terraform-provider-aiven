@@ -90,7 +90,7 @@ Now we can see that the debugged process did hit the breakpoint we specified ear
    804:	}
    805:	
 => 806:	func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-   807:		client := m.(*aiven.Client)
+   807:		client := m.(*meta.Meta).Client
    808:		serviceType := d.Get("service_type").(string)
    809:		userConfig := ConvertTerraformUserConfigToAPICompatibleFormat("service", serviceType, true, d)
    810:		vpcID := d.Get("project_vpc_id").(string)

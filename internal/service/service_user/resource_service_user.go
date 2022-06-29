@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -122,7 +124,7 @@ func ResourceServiceUser() *schema.Resource {
 }
 
 func resourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
@@ -163,7 +165,7 @@ func resourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m in
 }
 
 func resourceServiceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName, username := schemautil.SplitResourceID3(d.Id())
 
@@ -226,12 +228,12 @@ func copyServiceUserPropertiesFromAPIResponseToTerraform(
 }
 
 func resourceServiceUserRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName, username := schemautil.SplitResourceID3(d.Id())
 	user, err := client.ServiceUsers.Get(projectName, serviceName, username)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	err = copyServiceUserPropertiesFromAPIResponseToTerraform(d, user, projectName, serviceName)
@@ -243,7 +245,7 @@ func resourceServiceUserRead(_ context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceServiceUserDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName, username := schemautil.SplitResourceID3(d.Id())
 	err := client.ServiceUsers.Delete(projectName, serviceName, username)
@@ -255,7 +257,9 @@ func resourceServiceUserDelete(_ context.Context, d *schema.ResourceData, m inte
 }
 
 func resourceServiceUserState(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	client := m.(*aiven.Client)
+	m.(*meta.Meta).Import = true
+
+	client := m.(*meta.Meta).Client
 
 	if len(strings.Split(d.Id(), "/")) != 3 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<username>", d.Id())

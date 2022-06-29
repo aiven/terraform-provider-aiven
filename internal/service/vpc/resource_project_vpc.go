@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -56,7 +58,7 @@ func ResourceProjectVPC() *schema.Resource {
 }
 
 func resourceProjectVPCCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 	projectName := d.Get("project").(string)
 	vpc, err := client.VPCs.Create(
 		projectName,
@@ -88,12 +90,12 @@ func resourceProjectVPCCreate(ctx context.Context, d *schema.ResourceData, m int
 }
 
 func resourceProjectVPCRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, vpcID := schemautil.SplitResourceID2(d.Id())
 	vpc, err := client.VPCs.Get(projectName, vpcID)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	err = copyVPCPropertiesFromAPIResponseToTerraform(d, vpc, projectName)
@@ -105,7 +107,7 @@ func resourceProjectVPCRead(_ context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceProjectVPCDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, vpcID := schemautil.SplitResourceID2(d.Id())
 
@@ -125,6 +127,8 @@ func resourceProjectVPCDelete(ctx context.Context, d *schema.ResourceData, m int
 }
 
 func resourceProjectVPCState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	if len(strings.Split(d.Id(), "/")) != 2 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<vpc_id>", d.Id())
 	}

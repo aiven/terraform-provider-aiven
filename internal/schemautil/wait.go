@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -22,7 +24,7 @@ const (
 )
 
 func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, m interface{}) (*aiven.Service, error) {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
 
@@ -78,7 +80,7 @@ func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 func WaitForServiceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) (*aiven.Service, error) {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
 
@@ -158,7 +160,7 @@ func WaitStaticIpsDissassociation(ctx context.Context, d *schema.ResourceData, m
 }
 
 func WaitForDeletion(ctx context.Context, d *schema.ResourceData, m interface{}) error {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
 
@@ -273,7 +275,7 @@ func staticIpsReady(d *schema.ResourceData, m interface{}) (bool, error) {
 		return true, nil
 	}
 
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
 
 	staticIpsList, err := client.StaticIPs.List(projectName)
@@ -306,7 +308,7 @@ func staticIpsDisassociatedAfterServiceDeletion(d *schema.ResourceData, m interf
 		return true, nil
 	}
 
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 	projectName := d.Get("project").(string)
 
 	staticIpsList, err := client.StaticIPs.List(projectName)
@@ -332,7 +334,7 @@ func staticIpsDisassociatedAfterServiceDeletion(d *schema.ResourceData, m interf
 // staticIpsAreDisassociated checks that after service update
 // all static ips that are not used by the service anymore are available again
 func staticIpsAreDisassociated(d *schema.ResourceData, m interface{}) (bool, error) {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 

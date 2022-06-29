@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -58,13 +60,13 @@ func ResourceStaticIP() *schema.Resource {
 }
 
 func resourceStaticIPRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project, staticIPAddressId := schemautil.SplitResourceID2(d.Id())
 
 	r, err := client.StaticIPs.List(project)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 	for _, sip := range r.StaticIPs {
 		if sip.StaticIPAddressID == staticIPAddressId {
@@ -79,7 +81,7 @@ func resourceStaticIPRead(_ context.Context, d *schema.ResourceData, m interface
 	return nil
 }
 func resourceStaticIPCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project := d.Get("project").(string)
 	cloudName := d.Get("cloud_name").(string)
@@ -99,7 +101,7 @@ func resourceStaticIPCreate(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 func resourceStaticIPDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project, staticIPAddressId := schemautil.SplitResourceID2(d.Id())
 
@@ -115,7 +117,7 @@ func resourceStaticIPDelete(_ context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interface{}) error {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project, staticIPAddressId := schemautil.SplitResourceID2(d.Id())
 
@@ -148,7 +150,9 @@ func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceStaticIPState(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	client := m.(*aiven.Client)
+	m.(*meta.Meta).Import = true
+
+	client := m.(*meta.Meta).Client
 
 	project, staticIPAddressId := schemautil.SplitResourceID2(d.Id())
 

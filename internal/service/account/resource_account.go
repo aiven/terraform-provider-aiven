@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/aiven/aiven-go-client"
@@ -66,7 +67,7 @@ func ResourceAccount() *schema.Resource {
 }
 
 func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 	name := d.Get("name").(string)
 	bgId := d.Get("primary_billing_group_id").(string)
 
@@ -86,11 +87,11 @@ func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceAccountRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	r, err := client.Accounts.Get(d.Id())
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	if err := d.Set("account_id", r.Account.Id); err != nil {
@@ -119,7 +120,7 @@ func resourceAccountRead(_ context.Context, d *schema.ResourceData, m interface{
 }
 
 func resourceAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	r, err := client.Accounts.Update(d.Id(), aiven.Account{
 		Name:                  d.Get("name").(string),
@@ -135,7 +136,7 @@ func resourceAccountUpdate(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceAccountDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	err := client.Accounts.Delete(d.Id())
 	if err != nil && !aiven.IsNotFound(err) {
@@ -146,6 +147,8 @@ func resourceAccountDelete(_ context.Context, d *schema.ResourceData, m interfac
 }
 
 func resourceAccountState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	di := resourceAccountRead(ctx, d, m)
 	if di.HasError() {
 		return nil, fmt.Errorf("cannot get account %v", di)

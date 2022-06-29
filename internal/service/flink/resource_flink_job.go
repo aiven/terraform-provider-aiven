@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -64,13 +66,13 @@ func ResourceFlinkJob() *schema.Resource {
 }
 
 func resourceFlinkJobRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project, serviceName, jobId := schemautil.SplitResourceID3(d.Id())
 
 	r, err := client.FlinkJobs.Get(project, serviceName, aiven.GetFlinkJobRequest{JobId: jobId})
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	// we model job deletion by canceling the job
@@ -101,7 +103,7 @@ func resourceFlinkJobRead(_ context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceFlinkJobCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
@@ -159,7 +161,7 @@ func resourceFlinkJobCreate(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 func resourceFlinkJobDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project, serviceName, jobId := schemautil.SplitResourceID3(d.Id())
 

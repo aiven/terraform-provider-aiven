@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/aiven-go-client"
@@ -196,13 +197,13 @@ func ResourceFlinkTable() *schema.Resource {
 }
 
 func resourceFlinkTableRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project, serviceName, tableId := schemautil.SplitResourceID3(d.Id())
 
 	r, err := client.FlinkTables.Get(project, serviceName, aiven.GetFlinkTableRequest{TableId: tableId})
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	if err := d.Set("project", project); err != nil {
@@ -228,7 +229,7 @@ func resourceFlinkTableRead(_ context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceFlinkTableCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
@@ -294,7 +295,7 @@ func readUpsertKafkaFromSchema(d *schema.ResourceData) *aiven.FlinkTableUpsertKa
 }
 
 func resourceFlinkTableDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project, serviceName, tableId := schemautil.SplitResourceID3(d.Id())
 
@@ -357,6 +358,8 @@ func getFlinkTableKafkaScanStartupModes() []string {
 }
 
 func resourceFlinkTableState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	di := resourceFlinkTableRead(ctx, d, m)
 	if di.HasError() {
 		return nil, fmt.Errorf("cannot get flink table %v", di)

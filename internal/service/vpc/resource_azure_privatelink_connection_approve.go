@@ -6,6 +6,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -87,7 +89,7 @@ func waitForConnectionState(_ context.Context, client *aiven.Client, project str
 }
 
 func resourcePrivatelinkConnectionApprovalCreateUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	var project = d.Get("project").(string)
 	var serviceName = d.Get("service_name").(string)
@@ -155,7 +157,7 @@ func resourcePrivatelinkConnectionApprovalCreateUpdate(ctx context.Context, d *s
 }
 
 func resourcePrivatelinkConnectionApprovalRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 	project, service := schemautil.SplitResourceID2(d.Id())
 
 	plConnectionID := d.Get("privatelink_connection_id").(string)
@@ -190,6 +192,8 @@ func resourcePrivatelinkConnectionApprovalDelete(_ context.Context, _ *schema.Re
 }
 
 func resourcePrivatelinkConnectionApprovalState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	di := resourcePrivatelinkConnectionApprovalRead(ctx, d, m)
 	if di.HasError() {
 		return nil, fmt.Errorf("cannot get aiven azure privatelink connection state %v", di)

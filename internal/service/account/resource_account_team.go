@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -55,7 +56,7 @@ func ResourceAccountTeam() *schema.Resource {
 }
 
 func resourceAccountTeamCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 	name := d.Get("name").(string)
 	accountId := d.Get("account_id").(string)
 
@@ -75,12 +76,12 @@ func resourceAccountTeamCreate(ctx context.Context, d *schema.ResourceData, m in
 }
 
 func resourceAccountTeamRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	accountId, teamId := schemautil.SplitResourceID2(d.Id())
 	r, err := client.AccountTeams.Get(accountId, teamId)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	if err := d.Set("account_id", r.Team.AccountId); err != nil {
@@ -103,7 +104,7 @@ func resourceAccountTeamRead(_ context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceAccountTeamUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 	accountId, teamId := schemautil.SplitResourceID2(d.Id())
 
 	r, err := client.AccountTeams.Update(accountId, teamId, aiven.AccountTeam{
@@ -119,7 +120,7 @@ func resourceAccountTeamUpdate(ctx context.Context, d *schema.ResourceData, m in
 }
 
 func resourceAccountTeamDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	accountId, teamId := schemautil.SplitResourceID2(d.Id())
 
@@ -132,6 +133,8 @@ func resourceAccountTeamDelete(_ context.Context, d *schema.ResourceData, m inte
 }
 
 func resourceAccountTeamState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	di := resourceAccountTeamRead(ctx, d, m)
 	if di.HasError() {
 		return nil, fmt.Errorf("cannot get account team %v", di)

@@ -5,6 +5,8 @@ import (
 	"log"
 	"testing"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -68,7 +70,7 @@ data "aiven_account_team_project" "project" {
 }
 
 func testAccCheckAivenAccountTeamProjectResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.TestAccProvider.Meta().(*meta.Meta).Client
 
 	// loop through the resources in state, verifying each account team project is destroyed
 	for _, rs := range s.RootModule().Resources {

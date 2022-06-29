@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -71,7 +73,7 @@ eliminate an account team member if one has accepted an invitation previously.
 }
 
 func resourceAccountTeamMemberCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 	accountId := d.Get("account_id").(string)
 	teamId := d.Get("team_id").(string)
 	userEmail := d.Get("user_email").(string)
@@ -91,7 +93,7 @@ func resourceAccountTeamMemberCreate(ctx context.Context, d *schema.ResourceData
 
 func resourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var found bool
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 	accountId, teamId, userEmail := schemautil.SplitResourceID3(d.Id())
 
 	r, err := client.AccountTeamInvites.List(accountId, teamId)
@@ -170,7 +172,7 @@ func resourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceAccountTeamMemberDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	accountId, teamId, userEmail := schemautil.SplitResourceID3(d.Id())
 
@@ -199,6 +201,8 @@ func resourceAccountTeamMemberDelete(_ context.Context, d *schema.ResourceData, 
 }
 
 func resourceAccountTeamMemberState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	di := resourceAccountTeamMemberRead(ctx, d, m)
 	if di.HasError() {
 		return nil, fmt.Errorf("cannot get account team member: %v", di)

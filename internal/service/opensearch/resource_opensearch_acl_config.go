@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -44,12 +44,12 @@ func ResourceOpensearchACLConfig() *schema.Resource {
 }
 
 func resourceOpensearchACLConfigRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project, serviceName := schemautil.SplitResourceID2(d.Id())
 	r, err := client.ElasticsearchACLs.Get(project, serviceName)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	if err := d.Set("project", project); err != nil {
@@ -68,6 +68,8 @@ func resourceOpensearchACLConfigRead(_ context.Context, d *schema.ResourceData, 
 }
 
 func resourceOpensearchACLConfigState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	di := resourceOpensearchACLConfigRead(ctx, d, m)
 	if di.HasError() {
 		return nil, fmt.Errorf("cannot get elasticsearch acl: %v", di)
@@ -77,7 +79,7 @@ func resourceOpensearchACLConfigState(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceOpensearchACLConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
@@ -85,7 +87,7 @@ func resourceOpensearchACLConfigUpdate(ctx context.Context, d *schema.ResourceDa
 	modifier := resourceElasticsearchACLModifierToggleConfigFields(d.Get("enabled").(bool), d.Get("extended_acl").(bool))
 	err := resourceOpensearchACLModifyRemoteConfig(project, serviceName, client, modifier)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	d.SetId(schemautil.BuildResourceID(project, serviceName))
@@ -94,7 +96,7 @@ func resourceOpensearchACLConfigUpdate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourceOpensearchACLConfigDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
@@ -102,7 +104,7 @@ func resourceOpensearchACLConfigDelete(_ context.Context, d *schema.ResourceData
 	modifier := resourceElasticsearchACLModifierToggleConfigFields(false, false)
 	err := resourceOpensearchACLModifyRemoteConfig(project, serviceName, client, modifier)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	return nil

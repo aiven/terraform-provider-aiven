@@ -5,6 +5,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/templates"
 
 	"github.com/aiven/aiven-go-client"
@@ -120,7 +122,7 @@ func ResourcePG() *schema.Resource {
 }
 
 func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName := schemautil.SplitResourceID2(d.Id())
 	userConfig := schemautil.ConvertTerraformUserConfigToAPICompatibleFormat(templates.UserConfigSchemaService, "pg", false, d)
@@ -141,7 +143,7 @@ func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			}
 
 			w := &ServiceTaskWaiter{
-				Client:      m.(*aiven.Client),
+				Client:      m.(*meta.Meta).Client,
 				Project:     projectName,
 				ServiceName: serviceName,
 				TaskId:      t.Task.Id,

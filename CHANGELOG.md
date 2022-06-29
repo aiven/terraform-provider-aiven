@@ -5,6 +5,10 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [3.2.2] - TBD
+
+- Add internal metadata holder to be able to store certain operation-specific metadata.
+
 ## [3.2.1] - 2022-06-29
 
 - Fix documentation for M3DB namespaces and other documentation and examples improvements

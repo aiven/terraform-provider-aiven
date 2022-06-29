@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -106,7 +108,7 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 		cidrs  []string
 	)
 
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 	projectName, vpcID := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
 	peerCloudAccount := d.Get("peer_cloud_account").(string)
 	peerVPC := d.Get("peer_vpc").(string)
@@ -242,7 +244,7 @@ func parsePeeringVPCId(resourceID string) (string, string, string, string, *stri
 
 func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var pc *aiven.VPCPeeringConnection
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
 	isAzure, err := isAzureVPCPeeringConnection(d, client)
@@ -255,7 +257,7 @@ func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData,
 			pc, err = client.VPCPeeringConnections.GetVPCPeeringWithResourceGroup(
 				projectName, vpcID, peerCloudAccount, peerVPC, peerRegion, peerResourceGroup.(string))
 			if err != nil {
-				return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+				return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 			}
 		} else {
 			return diag.Errorf("cannot get an Azure VPC peering connection without `peer_resource_group`")
@@ -269,14 +271,14 @@ func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData,
 	pc, err = client.VPCPeeringConnections.GetVPCPeering(
 		projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	return copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, projectName, vpcID)
 }
 
 func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
 
@@ -361,16 +363,10 @@ func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceD
 }
 
 func resourceVPCPeeringConnectionImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	if len(strings.Split(d.Id(), "/")) != 4 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<vpc_id>/<peer_cloud_account>/<peer_vpc>", d.Id())
-	}
-
-	client := m.(*aiven.Client)
-
-	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
-	_, err := client.VPCPeeringConnections.GetVPCPeering(projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
-	if err != nil && schemautil.IsUnknownResource(err) {
-		return nil, errors.New("cannot find specified VPC peering connection")
 	}
 
 	dig := resourceVPCPeeringConnectionRead(ctx, d, m)

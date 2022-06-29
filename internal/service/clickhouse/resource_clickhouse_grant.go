@@ -4,7 +4,8 @@ import (
 	"context"
 	"regexp"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -109,7 +110,7 @@ Notes:
 }
 
 func resourceClickhouseGrantCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	serviceName := d.Get("service_name").(string)
 	projectName := d.Get("project").(string)
@@ -156,7 +157,7 @@ func setUserOrRole(d *schema.ResourceData, granteeType, userOrRole string) error
 }
 
 func resourceClickhouseGrantRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName, granteeType, userOrRole := schemautil.SplitResourceID4(d.Id())
 
@@ -191,7 +192,7 @@ func resourceClickhouseGrantRead(_ context.Context, d *schema.ResourceData, m in
 }
 
 func resourceClickhouseGrantDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)

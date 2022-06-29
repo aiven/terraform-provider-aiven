@@ -6,6 +6,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
@@ -16,7 +18,7 @@ import (
 )
 
 func ResourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
@@ -48,7 +50,7 @@ func ResourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m in
 }
 
 func ResourceServiceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName, username := SplitResourceID3(d.Id())
 
@@ -64,12 +66,12 @@ func ResourceServiceUserUpdate(ctx context.Context, d *schema.ResourceData, m in
 }
 
 func ResourceServiceUserRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName, username := SplitResourceID3(d.Id())
 	user, err := client.ServiceUsers.Get(projectName, serviceName, username)
 	if err != nil {
-		return diag.FromErr(ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(ResourceReadHandleNotFound(err, d, m))
 	}
 
 	err = CopyServiceUserPropertiesFromAPIResponseToTerraform(d, user, projectName, serviceName)
@@ -81,7 +83,7 @@ func ResourceServiceUserRead(_ context.Context, d *schema.ResourceData, m interf
 }
 
 func ResourceServiceUserDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, serviceName, username := SplitResourceID3(d.Id())
 	err := client.ServiceUsers.Delete(projectName, serviceName, username)
@@ -93,7 +95,9 @@ func ResourceServiceUserDelete(_ context.Context, d *schema.ResourceData, m inte
 }
 
 func ResourceServiceUserState(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	client := m.(*aiven.Client)
+	m.(*meta.Meta).Import = true
+
+	client := m.(*meta.Meta).Client
 
 	if len(strings.Split(d.Id(), "/")) != 3 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<username>", d.Id())
@@ -114,7 +118,7 @@ func ResourceServiceUserState(_ context.Context, d *schema.ResourceData, m inter
 }
 
 func DatasourceServiceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)

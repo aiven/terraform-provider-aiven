@@ -6,6 +6,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -55,7 +57,7 @@ func ResourceAWSPrivatelink() *schema.Resource {
 }
 
 func resourceAWSPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	var principals []string
 	var project = d.Get("project").(string)
@@ -76,7 +78,7 @@ func resourceAWSPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m
 
 	// Wait until the AWS privatelink is active
 	w := &AWSPrivatelinkWaiter{
-		Client:      m.(*aiven.Client),
+		Client:      m.(*meta.Meta).Client,
 		Project:     project,
 		ServiceName: serviceName,
 	}
@@ -92,12 +94,12 @@ func resourceAWSPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceAWSPrivatelinkRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project, serviceName := schemautil.SplitResourceID2(d.Id())
 	p, err := client.AWSPrivatelink.Get(project, serviceName)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	if err := d.Set("principals", p.Principals); err != nil {
@@ -119,7 +121,7 @@ func resourceAWSPrivatelinkRead(_ context.Context, d *schema.ResourceData, m int
 	return nil
 }
 func resourceAWSPrivatelinkUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	project, serviceName := schemautil.SplitResourceID2(d.Id())
 
@@ -139,7 +141,7 @@ func resourceAWSPrivatelinkUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	// Wait until the AWS privatelink is active
 	w := &AWSPrivatelinkWaiter{
-		Client:      m.(*aiven.Client),
+		Client:      m.(*meta.Meta).Client,
 		Project:     project,
 		ServiceName: serviceName,
 	}
@@ -153,7 +155,7 @@ func resourceAWSPrivatelinkUpdate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceAWSPrivatelinkDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	err := client.AWSPrivatelink.Delete(schemautil.SplitResourceID2(d.Id()))
 	if err != nil && !aiven.IsNotFound(err) {
@@ -164,6 +166,8 @@ func resourceAWSPrivatelinkDelete(_ context.Context, d *schema.ResourceData, m i
 }
 
 func resourceAWSPrivatelinkState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	di := resourceAWSPrivatelinkRead(ctx, d, m)
 	if di.HasError() {
 		return nil, fmt.Errorf("cannot get AWS privatelink %v", di)

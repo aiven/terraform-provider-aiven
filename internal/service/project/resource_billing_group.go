@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -115,7 +116,7 @@ func ResourceBillingGroup() *schema.Resource {
 }
 
 func resourceBillingGroupCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	var billingEmails []*aiven.ContactEmail
 	if emails := contactEmailListForAPI(d, "billing_emails", true); emails != nil {
@@ -155,11 +156,11 @@ func resourceBillingGroupCreate(ctx context.Context, d *schema.ResourceData, m i
 }
 
 func resourceBillingGroupRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	bg, err := client.BillingGroup.Get(d.Id())
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	if err := d.Set("name", bg.BillingGroupName); err != nil {
@@ -206,7 +207,7 @@ func resourceBillingGroupRead(_ context.Context, d *schema.ResourceData, m inter
 }
 
 func resourceBillingGroupUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	var billingEmails []*aiven.ContactEmail
 	if emails := contactEmailListForAPI(d, "billing_emails", true); emails != nil {
@@ -246,7 +247,7 @@ func resourceBillingGroupUpdate(ctx context.Context, d *schema.ResourceData, m i
 }
 
 func resourceBillingGroupDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	err := client.BillingGroup.Delete(d.Id())
 	if err != nil && !aiven.IsNotFound(err) {
@@ -257,6 +258,8 @@ func resourceBillingGroupDelete(_ context.Context, d *schema.ResourceData, m int
 }
 
 func resourceBillingGroupState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	di := resourceBillingGroupRead(ctx, d, m)
 	if di.HasError() {
 		return nil, fmt.Errorf("cannot get a billing group: %v", di)

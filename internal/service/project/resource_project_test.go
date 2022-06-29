@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 
 	"github.com/aiven/aiven-go-client"
@@ -195,7 +197,7 @@ func testAccCheckAivenProjectAttributes(n string, attributes ...string) resource
 }
 
 func testAccCheckAivenProjectResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.TestAccProvider.Meta().(*meta.Meta).Client
 
 	// loop through the resources in state, verifying each project is destroyed
 	for _, rs := range s.RootModule().Resources {

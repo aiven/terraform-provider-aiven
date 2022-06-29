@@ -5,6 +5,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 
 	"github.com/aiven/aiven-go-client"
@@ -42,7 +44,7 @@ func TestAccAivenAWSPrivatelink_basic(t *testing.T) {
 }
 
 func testAccCheckAivenAWSPrivatelinkResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.TestAccProvider.Meta().(*meta.Meta).Client
 
 	// loop through the resources in state, verifying each AWS privatelink is destroyed
 	for _, rs := range s.RootModule().Resources {

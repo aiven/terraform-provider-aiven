@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aiven/terraform-provider-aiven/internal/meta"
+
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -86,7 +88,7 @@ func resourceAWSVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 		region *string
 	)
 
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 	projectName, vpcID := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
 	awsAccountId := d.Get("aws_account_id").(string)
 	awsVPCId := d.Get("aws_vpc_id").(string)
@@ -155,20 +157,20 @@ func resourceAWSVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 }
 
 func resourceAWSVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
 	pc, err := client.VPCPeeringConnections.GetVPCPeering(
 		projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d, m))
 	}
 
 	return copyAWSVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, projectName, vpcID)
 }
 
 func resourceAWSVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*meta.Meta).Client
 
 	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
 
@@ -221,16 +223,10 @@ func resourceAWSVPCPeeringConnectionDelete(ctx context.Context, d *schema.Resour
 }
 
 func resourceAWSVPCPeeringConnectionImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	m.(*meta.Meta).Import = true
+
 	if len(strings.Split(d.Id(), "/")) != 5 {
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<vpc_id>/<aws_account_id>/<aws_vpc_id>/<aws_vpc_region>", d.Id())
-	}
-
-	client := m.(*aiven.Client)
-
-	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
-	_, err := client.VPCPeeringConnections.GetVPCPeering(projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
-	if err != nil && schemautil.IsUnknownResource(err) {
-		return nil, errors.New("cannot find specified VPC peering connection")
 	}
 
 	dig := resourceAWSVPCPeeringConnectionRead(ctx, d, m)
