@@ -5,7 +5,7 @@ parent: README
 nav_order: 1
 ---# Changelog
 
-## [3.2.1] - 22-06-29
+## [3.2.1] - 2022-06-29
 
 - Fix documentation for M3DB namespaces and other documentation and examples improvements
 - Fix `aiven_service_integration` poke the Kafka connect API to ensure the creation of subsequent connectors
