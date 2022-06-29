@@ -2,7 +2,6 @@ package account
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -50,7 +49,7 @@ account team you are trying to link to this project.
 		UpdateContext: resourceAccountTeamProjectUpdate,
 		DeleteContext: resourceAccountTeamProjectDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceAccountTeamProjectState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: aivenAccountTeamProjectSchema,
 	}
@@ -146,13 +145,4 @@ func resourceAccountTeamProjectDelete(_ context.Context, d *schema.ResourceData,
 	}
 
 	return nil
-}
-
-func resourceAccountTeamProjectState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	di := resourceAccountTeamProjectRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get account team project: %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }

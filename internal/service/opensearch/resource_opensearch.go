@@ -96,5 +96,5 @@ func resourceOpensearchState(ctx context.Context, d *schema.ResourceData, m inte
 		}
 	}
 
-	return schemautil.ResourceServiceState(ctx, d, m)
+	return schema.ImportStatePassthroughContext(ctx, d, m)
 }

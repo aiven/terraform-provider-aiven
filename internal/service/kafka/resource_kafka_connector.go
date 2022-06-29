@@ -92,7 +92,7 @@ func ResourceKafkaConnector() *schema.Resource {
 		UpdateContext: resourceKafkaTConnectorUpdate,
 		DeleteContext: resourceKafkaConnectorDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceKafkaConnectorState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Read: schema.DefaultTimeout(2 * time.Minute),
@@ -268,13 +268,4 @@ func resourceKafkaTConnectorUpdate(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	return resourceKafkaConnectorRead(ctx, d, m)
-}
-
-func resourceKafkaConnectorState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	di := resourceKafkaConnectorRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get kafka connector: %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }

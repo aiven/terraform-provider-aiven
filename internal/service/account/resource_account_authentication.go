@@ -2,7 +2,6 @@ package account
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -84,7 +83,7 @@ func ResourceAccountAuthentication() *schema.Resource {
 		UpdateContext: resourceAccountAuthenticationUpdate,
 		DeleteContext: resourceAccountAuthenticationDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceAccountAuthenticationState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: aivenAccountAuthenticationSchema,
@@ -202,13 +201,4 @@ func resourceAccountAuthenticationDelete(_ context.Context, d *schema.ResourceDa
 	}
 
 	return nil
-}
-
-func resourceAccountAuthenticationState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	di := resourceAccountAuthenticationRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get account authentication %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }

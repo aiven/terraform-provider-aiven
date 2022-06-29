@@ -2,7 +2,6 @@ package account
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/aiven/aiven-go-client"
@@ -63,7 +62,7 @@ eliminate an account team member if one has accepted an invitation previously.
 		ReadContext:   resourceAccountTeamMemberRead,
 		DeleteContext: resourceAccountTeamMemberDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceAccountTeamMemberState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: aivenAccountTeamMemberSchema,
@@ -196,13 +195,4 @@ func resourceAccountTeamMemberDelete(_ context.Context, d *schema.ResourceData, 
 	}
 
 	return nil
-}
-
-func resourceAccountTeamMemberState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	di := resourceAccountTeamMemberRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get account team member: %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }

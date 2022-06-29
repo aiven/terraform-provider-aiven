@@ -2,7 +2,6 @@ package vpc
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -43,7 +42,7 @@ func ResourceAWSPrivatelink() *schema.Resource {
 		UpdateContext: resourceAWSPrivatelinkUpdate,
 		DeleteContext: resourceAWSPrivatelinkDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceAWSPrivatelinkState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
@@ -161,15 +160,6 @@ func resourceAWSPrivatelinkDelete(_ context.Context, d *schema.ResourceData, m i
 	}
 
 	return nil
-}
-
-func resourceAWSPrivatelinkState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	di := resourceAWSPrivatelinkRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get AWS privatelink %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }
 
 // AWSPrivatelinkWaiter is used to wait for Aiven to build a AWS privatelink

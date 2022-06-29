@@ -2,7 +2,6 @@ package vpc
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -43,7 +42,7 @@ func ResourceAzurePrivatelinkConnectionApproval() *schema.Resource {
 		UpdateContext: resourcePrivatelinkConnectionApprovalCreateUpdate,
 		DeleteContext: resourcePrivatelinkConnectionApprovalDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourcePrivatelinkConnectionApprovalState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
@@ -187,13 +186,4 @@ func resourcePrivatelinkConnectionApprovalRead(_ context.Context, d *schema.Reso
 func resourcePrivatelinkConnectionApprovalDelete(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	/// API only supports approve/list/update. approved connection is deleted with the associated azure_privatelink resource
 	return nil
-}
-
-func resourcePrivatelinkConnectionApprovalState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	di := resourcePrivatelinkConnectionApprovalRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get aiven azure privatelink connection state %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }

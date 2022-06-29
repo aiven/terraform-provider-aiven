@@ -2,7 +2,6 @@ package project
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -107,7 +106,7 @@ func ResourceBillingGroup() *schema.Resource {
 		UpdateContext: resourceBillingGroupUpdate,
 		DeleteContext: resourceBillingGroupDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceBillingGroupState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: aivenBillingGroupSchema,
@@ -254,13 +253,4 @@ func resourceBillingGroupDelete(_ context.Context, d *schema.ResourceData, m int
 	}
 
 	return nil
-}
-
-func resourceBillingGroupState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	di := resourceBillingGroupRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get a billing group: %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }

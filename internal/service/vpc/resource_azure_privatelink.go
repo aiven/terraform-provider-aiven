@@ -2,7 +2,6 @@ package vpc
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -55,7 +54,7 @@ func ResourceAzurePrivatelink() *schema.Resource {
 		UpdateContext: resourceAzurePrivatelinkUpdate,
 		DeleteContext: resourceAzurePrivatelinkDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceAzurePrivatelinkState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
@@ -215,13 +214,4 @@ func resourceAzurePrivatelinkDelete(ctx context.Context, d *schema.ResourceData,
 	}
 
 	return nil
-}
-
-func resourceAzurePrivatelinkState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	di := resourceAzurePrivatelinkRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get Azure privatelink %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }
