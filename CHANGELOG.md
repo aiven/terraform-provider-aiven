@@ -5,12 +5,23 @@ parent: README
 nav_order: 1
 ---# Changelog
 
-## [X.X.X] - not yet released
-- Fix documentation for M3DB namespaces
-- Update M3DB example with latest service versions
-- Fix `aiven_service_integration` poke the kafka connect api to ensure creation of subsequent connectors
+## [3.2.1] - 22-06-29
+
+- Fix documentation for M3DB namespaces and other documentation and examples improvements
+- Fix `aiven_service_integration` poke the Kafka connect API to ensure the creation of subsequent connectors
+- Change acceptance tests Terraform formating with `katbyte/terrafmt`
+- Add issue and pull request templates
+- Add community-related documentation
+- Fix Kafka Connector's config.name` validation
+- Change acceptance tests Kafka service plan from `business-4` to `startup-2`
+- Fix VPC peering connection import
+- Add the CI sweep feature and rework the GitHub CI pipeline
+- Refine datasource service component error message
+- Fix Redis service creation when persistence is off
+- Allow retrieving Project VPC data-source by ID
 
 ## [3.2.0] - 2022-06-21
+
 - Fix typos in documentation and examples
 - Fix Redis service creation when persistence is off
 - Allow retrieving project VPC by ID
