@@ -78,128 +78,127 @@ func testAccCheckAivenMirrorMakerReplicationFlowResourceDestroy(s *terraform.Sta
 
 func testAccMirrorMakerReplicationFlowResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_kafka" "source" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-2"
-		  service_name            = "test-acc-sr-source-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		
-		  kafka_user_config {
-		    kafka {
-		      group_max_session_timeout_ms = 70000
-		      log_retention_bytes          = 1000000000
-		    }
-		  }
-		}
-		
-		resource "aiven_kafka_topic" "source" {
-		  project      = data.aiven_project.foo.project
-		  service_name = aiven_kafka.source.service_name
-		  topic_name   = "test-acc-topic-a-%s"
-		  partitions   = 3
-		  replication  = 2
-		}
-		
-		resource "aiven_kafka" "target" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-2"
-		  service_name            = "test-acc-sr-target-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		
-		  kafka_user_config {
-		    kafka {
-		      group_max_session_timeout_ms = 70000
-		      log_retention_bytes          = 1000000000
-		    }
-		  }
-		}
-		
-		resource "aiven_kafka_topic" "target" {
-		  project      = data.aiven_project.foo.project
-		  service_name = aiven_kafka.target.service_name
-		  topic_name   = "test-acc-topic-b-%s"
-		  partitions   = 3
-		  replication  = 2
-		}
-		
-		resource "aiven_kafka_mirrormaker" "mm" {
-		  project      = data.aiven_project.foo.project
-		  cloud_name   = "google-europe-west1"
-		  plan         = "startup-4"
-		  service_name = "test-acc-sr-mm-%s"
-		
-		  kafka_mirrormaker_user_config {
-		    ip_filter = ["0.0.0.0/0"]
-		
-		    kafka_mirrormaker {
-		      refresh_groups_interval_seconds = 600
-		      refresh_topics_enabled          = true
-		      refresh_topics_interval_seconds = 600
-		    }
-		  }
-		}
-		
-		resource "aiven_service_integration" "bar" {
-		  project                  = data.aiven_project.foo.project
-		  integration_type         = "kafka_mirrormaker"
-		  source_service_name      = aiven_kafka.source.service_name
-		  destination_service_name = aiven_kafka_mirrormaker.mm.service_name
-		
-		  kafka_mirrormaker_user_config {
-		    cluster_alias = "source"
-		  }
-		}
-		
-		resource "aiven_service_integration" "i2" {
-		  project                  = data.aiven_project.foo.project
-		  integration_type         = "kafka_mirrormaker"
-		  source_service_name      = aiven_kafka.target.service_name
-		  destination_service_name = aiven_kafka_mirrormaker.mm.service_name
-		
-		  kafka_mirrormaker_user_config {
-		    cluster_alias = "target"
-		  }
-		}
-		
-		resource "aiven_mirrormaker_replication_flow" "foo" {
-		  project                             = data.aiven_project.foo.project
-		  service_name                        = aiven_kafka_mirrormaker.mm.service_name
-		  source_cluster                      = "source"
-		  target_cluster                      = "target"
-		  enable                              = true
-		  replication_policy_class            = "org.apache.kafka.connect.mirror.IdentityReplicationPolicy"
-		  sync_group_offsets_enabled          = true
-		  sync_group_offsets_interval_seconds = 10
-		  emit_heartbeats_enabled             = true
-		
-		  topics = [
-		    ".*",
-		  ]
-		
-		  topics_blacklist = [
-		    ".*[\\-\\.]internal",
-		    ".*\\.replica",
-		    "__.*"
-		  ]
-		}
-		
-		data "aiven_mirrormaker_replication_flow" "flow" {
-		  project        = data.aiven_project.foo.project
-		  service_name   = aiven_kafka_mirrormaker.mm.service_name
-		  source_cluster = aiven_mirrormaker_replication_flow.foo.source_cluster
-		  target_cluster = aiven_mirrormaker_replication_flow.foo.target_cluster
-		
-		  depends_on = [aiven_mirrormaker_replication_flow.foo]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_kafka" "source" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-2"
+  service_name            = "test-acc-sr-source-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  kafka_user_config {
+    kafka {
+      group_max_session_timeout_ms = 70000
+      log_retention_bytes          = 1000000000
+    }
+  }
+}
+
+resource "aiven_kafka_topic" "source" {
+  project      = data.aiven_project.foo.project
+  service_name = aiven_kafka.source.service_name
+  topic_name   = "test-acc-topic-a-%s"
+  partitions   = 3
+  replication  = 2
+}
+
+resource "aiven_kafka" "target" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-2"
+  service_name            = "test-acc-sr-target-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  kafka_user_config {
+    kafka {
+      group_max_session_timeout_ms = 70000
+      log_retention_bytes          = 1000000000
+    }
+  }
+}
+
+resource "aiven_kafka_topic" "target" {
+  project      = data.aiven_project.foo.project
+  service_name = aiven_kafka.target.service_name
+  topic_name   = "test-acc-topic-b-%s"
+  partitions   = 3
+  replication  = 2
+}
+
+resource "aiven_kafka_mirrormaker" "mm" {
+  project      = data.aiven_project.foo.project
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = "test-acc-sr-mm-%s"
+
+  kafka_mirrormaker_user_config {
+    ip_filter = ["0.0.0.0/0"]
+
+    kafka_mirrormaker {
+      refresh_groups_interval_seconds = 600
+      refresh_topics_enabled          = true
+      refresh_topics_interval_seconds = 600
+    }
+  }
+}
+
+resource "aiven_service_integration" "bar" {
+  project                  = data.aiven_project.foo.project
+  integration_type         = "kafka_mirrormaker"
+  source_service_name      = aiven_kafka.source.service_name
+  destination_service_name = aiven_kafka_mirrormaker.mm.service_name
+
+  kafka_mirrormaker_user_config {
+    cluster_alias = "source"
+  }
+}
+
+resource "aiven_service_integration" "i2" {
+  project                  = data.aiven_project.foo.project
+  integration_type         = "kafka_mirrormaker"
+  source_service_name      = aiven_kafka.target.service_name
+  destination_service_name = aiven_kafka_mirrormaker.mm.service_name
+
+  kafka_mirrormaker_user_config {
+    cluster_alias = "target"
+  }
+}
+
+resource "aiven_mirrormaker_replication_flow" "foo" {
+  project                             = data.aiven_project.foo.project
+  service_name                        = aiven_kafka_mirrormaker.mm.service_name
+  source_cluster                      = "source"
+  target_cluster                      = "target"
+  enable                              = true
+  replication_policy_class            = "org.apache.kafka.connect.mirror.IdentityReplicationPolicy"
+  sync_group_offsets_enabled          = true
+  sync_group_offsets_interval_seconds = 10
+  emit_heartbeats_enabled             = true
+
+  topics = [
+    ".*",
+  ]
+
+  topics_blacklist = [
+    ".*[\\-\\.]internal",
+    ".*\\.replica",
+    "__.*"
+  ]
+}
+
+data "aiven_mirrormaker_replication_flow" "flow" {
+  project        = data.aiven_project.foo.project
+  service_name   = aiven_kafka_mirrormaker.mm.service_name
+  source_cluster = aiven_mirrormaker_replication_flow.foo.source_cluster
+  target_cluster = aiven_mirrormaker_replication_flow.foo.target_cluster
+
+  depends_on = [aiven_mirrormaker_replication_flow.foo]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
 }
 
 func testAccCheckAivenMirrorMakerReplicationFlowAttributes(n string) resource.TestCheckFunc {

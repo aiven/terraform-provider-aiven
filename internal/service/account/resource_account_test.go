@@ -49,52 +49,49 @@ func TestAccAivenAccount_basic(t *testing.T) {
 
 func testAccAccountResource(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_billing_group" "bar" {
-		  name = "test-acc-bg-%s"
-		}
-		
-		resource "aiven_account" "foo" {
-		  name                     = "test-acc-ac-%s"
-		  primary_billing_group_id = aiven_billing_group.bar.id
-		}
-		
-		data "aiven_account" "account" {
-		  name = aiven_account.foo.name
-		}`,
-		name, name)
+resource "aiven_billing_group" "bar" {
+  name = "test-acc-bg-%s"
+}
+
+resource "aiven_account" "foo" {
+  name                     = "test-acc-ac-%s"
+  primary_billing_group_id = aiven_billing_group.bar.id
+}
+
+data "aiven_account" "account" {
+  name = aiven_account.foo.name
+}`, name, name)
 }
 
 func testAccAccountToProject(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_account" "foo" {
-		  name = "test-acc-ac-%s"
-		}
-		
-		resource "aiven_project" "bar" {
-		  project    = "test-acc-ac-%s"
-		  account_id = aiven_account.foo.account_id
-		}
-		
-		data "aiven_project" "pr" {
-		  project = aiven_project.bar.project
-		}`,
-		name, name)
+resource "aiven_account" "foo" {
+  name = "test-acc-ac-%s"
+}
+
+resource "aiven_project" "bar" {
+  project    = "test-acc-ac-%s"
+  account_id = aiven_account.foo.account_id
+}
+
+data "aiven_project" "pr" {
+  project = aiven_project.bar.project
+}`, name, name)
 }
 
 func testAccAccountProjectDissociate(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_account" "foo" {
-		  name = "test-acc-ac-%s"
-		}
-		
-		resource "aiven_project" "bar" {
-		  project = "test-acc-ac-%s"
-		}
-		
-		data "aiven_project" "pr" {
-		  project = aiven_project.bar.project
-		}`,
-		name, name)
+resource "aiven_account" "foo" {
+  name = "test-acc-ac-%s"
+}
+
+resource "aiven_project" "bar" {
+  project = "test-acc-ac-%s"
+}
+
+data "aiven_project" "pr" {
+  project = aiven_project.bar.project
+}`, name, name)
 }
 
 func testAccCheckAivenAccountResourceDestroy(s *terraform.State) error {

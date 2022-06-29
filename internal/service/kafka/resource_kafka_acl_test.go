@@ -109,136 +109,135 @@ func testAccCheckAivenKafkaACLAttributes(n string) resource.TestCheckFunc {
 
 func testAccKafkaACLWrongProjectResource(_ string) string {
 	return `
-		resource "aiven_kafka_acl" "foo" {
-		  project      = "!./,£$^&*()_"
-		  service_name = "test-acc-sr-1"
-		  topic        = "test-acc-topic-1"
-		  username     = "user-1"
-		  permission   = "admin"
-		}`
+resource "aiven_kafka_acl" "foo" {
+  project      = "!./,£$^&*()_"
+  service_name = "test-acc-sr-1"
+  topic        = "test-acc-topic-1"
+  username     = "user-1"
+  permission   = "admin"
+}`
 
 }
 
 func testAccKafkaACLWrongServiceNameResource(_ string) string {
 	return `
-		resource "aiven_kafka_acl" "foo" {
-		  project      = "test-acc-pr-1"
-		  service_name = "!./,£$^&*()_"
-		  topic        = "test-acc-topic-1"
-		  username     = "user-1"
-		  permission   = "admin"
-		}`
+resource "aiven_kafka_acl" "foo" {
+  project      = "test-acc-pr-1"
+  service_name = "!./,£$^&*()_"
+  topic        = "test-acc-topic-1"
+  username     = "user-1"
+  permission   = "admin"
+}`
 
 }
 
 func testAccKafkaACLWrongPermisionResource(_ string) string {
 	return `
-		resource "aiven_kafka_acl" "foo" {
-		  project      = "test-acc-pr-1"
-		  service_name = "test-acc-sr-1"
-		  topic        = "test-acc-topic-1"
-		  username     = "user-1"
-		  permission   = "wrong-permission"
-		}`
+resource "aiven_kafka_acl" "foo" {
+  project      = "test-acc-pr-1"
+  service_name = "test-acc-sr-1"
+  topic        = "test-acc-topic-1"
+  username     = "user-1"
+  permission   = "wrong-permission"
+}`
 
 }
 
 func testAccKafkaACLWildcardResource(_ string) string {
 	return `
-		resource "aiven_kafka_acl" "foo" {
-		  project      = "test-acc-pr-1"
-		  service_name = "test-acc-sr-1"
-		  topic        = "test-acc-topic-1"
-		  username     = "*"
-		  permission   = "admin"
-		}`
+resource "aiven_kafka_acl" "foo" {
+  project      = "test-acc-pr-1"
+  service_name = "test-acc-sr-1"
+  topic        = "test-acc-topic-1"
+  username     = "*"
+  permission   = "admin"
+}`
 
 }
 
 func testAccKafkaACLPrefixWildcardResource(_ string) string {
 	return `
-		resource "aiven_kafka_acl" "foo" {
-		  project      = "test-acc-pr-1"
-		  service_name = "test-acc-sr-1"
-		  topic        = "test-acc-topic-1"
-		  username     = "group-user-*"
-		  permission   = "admin"
-		}`
+resource "aiven_kafka_acl" "foo" {
+  project      = "test-acc-pr-1"
+  service_name = "test-acc-sr-1"
+  topic        = "test-acc-topic-1"
+  username     = "group-user-*"
+  permission   = "admin"
+}`
 
 }
 
 func testAccKafkaACLWrongUsernameResource(_ string) string {
 	return `
-		resource "aiven_kafka_acl" "foo" {
-		  project      = "test-acc-pr-1"
-		  service_name = "test-acc-sr-1"
-		  topic        = "test-acc-topic-1"
-		  username     = "*-user"
-		  permission   = "admin"
-		}`
+resource "aiven_kafka_acl" "foo" {
+  project      = "test-acc-pr-1"
+  service_name = "test-acc-sr-1"
+  topic        = "test-acc-topic-1"
+  username     = "*-user"
+  permission   = "admin"
+}`
 
 }
 
 func testAccKafkaACLInvalidCharsResource(_ string) string {
 	return `
-		resource "aiven_kafka_acl" "foo" {
-		  project      = "test-acc-pr-1"
-		  service_name = "test-acc-sr-1"
-		  topic        = "test-acc-topic-1"
-		  username     = "!./,£$^&*()_"
-		  permission   = "admin"
-		}`
+resource "aiven_kafka_acl" "foo" {
+  project      = "test-acc-pr-1"
+  service_name = "test-acc-sr-1"
+  topic        = "test-acc-topic-1"
+  username     = "!./,£$^&*()_"
+  permission   = "admin"
+}`
 
 }
 
 func testAccKafkaACLResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_kafka" "bar" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-2"
-		  service_name            = "test-acc-sr-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		
-		  kafka_user_config {
-		    kafka {
-		      group_max_session_timeout_ms = 70000
-		      log_retention_bytes          = 1000000000
-		    }
-		  }
-		}
-		
-		resource "aiven_kafka_topic" "foo" {
-		  project      = data.aiven_project.foo.project
-		  service_name = aiven_kafka.bar.service_name
-		  topic_name   = "test-acc-topic-%s"
-		  partitions   = 3
-		  replication  = 2
-		}
-		
-		resource "aiven_kafka_acl" "foo" {
-		  project      = data.aiven_project.foo.project
-		  service_name = aiven_kafka.bar.service_name
-		  topic        = aiven_kafka_topic.foo.topic_name
-		  username     = "user-%s"
-		  permission   = "admin"
-		}
-		
-		data "aiven_kafka_acl" "acl" {
-		  project      = aiven_kafka_acl.foo.project
-		  service_name = aiven_kafka_acl.foo.service_name
-		  topic        = aiven_kafka_acl.foo.topic
-		  username     = aiven_kafka_acl.foo.username
-		  permission   = aiven_kafka_acl.foo.permission
-		
-		  depends_on = [aiven_kafka_acl.foo]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_kafka" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-2"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  kafka_user_config {
+    kafka {
+      group_max_session_timeout_ms = 70000
+      log_retention_bytes          = 1000000000
+    }
+  }
+}
+
+resource "aiven_kafka_topic" "foo" {
+  project      = data.aiven_project.foo.project
+  service_name = aiven_kafka.bar.service_name
+  topic_name   = "test-acc-topic-%s"
+  partitions   = 3
+  replication  = 2
+}
+
+resource "aiven_kafka_acl" "foo" {
+  project      = data.aiven_project.foo.project
+  service_name = aiven_kafka.bar.service_name
+  topic        = aiven_kafka_topic.foo.topic_name
+  username     = "user-%s"
+  permission   = "admin"
+}
+
+data "aiven_kafka_acl" "acl" {
+  project      = aiven_kafka_acl.foo.project
+  service_name = aiven_kafka_acl.foo.service_name
+  topic        = aiven_kafka_acl.foo.topic
+  username     = aiven_kafka_acl.foo.username
+  permission   = aiven_kafka_acl.foo.permission
+
+  depends_on = [aiven_kafka_acl.foo]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name)
 }
 
 func testAccCheckAivenKafkaACLResourceDestroy(s *terraform.State) error {

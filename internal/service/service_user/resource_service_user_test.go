@@ -135,144 +135,140 @@ func testAccCheckAivenServiceUserResourceDestroy(s *terraform.State) error {
 
 func testAccServiceUserRedisACLResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_redis" "bar" {
-		  project      = data.aiven_project.foo.project
-		  cloud_name   = "google-europe-west1"
-		  plan         = "startup-4"
-		  service_name = "test-acc-sr-%s"
-		}
-		
-		resource "aiven_service_user" "foo" {
-		  service_name = aiven_redis.bar.service_name
-		  project      = aiven_redis.bar.project
-		  username     = "user-%s"
-		
-		  redis_acl_commands   = ["+set"]
-		  redis_acl_keys       = ["prefix*", "another_key"]
-		  redis_acl_categories = ["-@all", "+@admin"]
-		  redis_acl_channels   = ["test"]
-		
-		  depends_on = [aiven_redis.bar]
-		}
-		
-		data "aiven_service_user" "user" {
-		  service_name = aiven_service_user.foo.service_name
-		  project      = aiven_service_user.foo.project
-		  username     = aiven_service_user.foo.username
-		
-		  depends_on = [aiven_service_user.foo]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_redis" "bar" {
+  project      = data.aiven_project.foo.project
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = "test-acc-sr-%s"
+}
+
+resource "aiven_service_user" "foo" {
+  service_name = aiven_redis.bar.service_name
+  project      = aiven_redis.bar.project
+  username     = "user-%s"
+
+  redis_acl_commands   = ["+set"]
+  redis_acl_keys       = ["prefix*", "another_key"]
+  redis_acl_categories = ["-@all", "+@admin"]
+  redis_acl_channels   = ["test"]
+
+  depends_on = [aiven_redis.bar]
+}
+
+data "aiven_service_user" "user" {
+  service_name = aiven_service_user.foo.service_name
+  project      = aiven_service_user.foo.project
+  username     = aiven_service_user.foo.username
+
+  depends_on = [aiven_service_user.foo]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccServiceUserPgReplicationResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_pg" "bar" {
-		  project      = data.aiven_project.foo.project
-		  cloud_name   = "google-europe-west1"
-		  plan         = "startup-4"
-		  service_name = "test-acc-sr-%s"
-		}
-		
-		resource "aiven_service_user" "foo" {
-		  service_name         = aiven_pg.bar.service_name
-		  project              = aiven_pg.bar.project
-		  username             = "user-%s"
-		  password             = "Test$1234"
-		  pg_allow_replication = true
-		
-		  depends_on = [aiven_pg.bar]
-		}
-		
-		data "aiven_service_user" "user" {
-		  service_name = aiven_service_user.foo.service_name
-		  project      = aiven_service_user.foo.project
-		  username     = aiven_service_user.foo.username
-		
-		  depends_on = [aiven_service_user.foo]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_pg" "bar" {
+  project      = data.aiven_project.foo.project
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = "test-acc-sr-%s"
+}
+
+resource "aiven_service_user" "foo" {
+  service_name         = aiven_pg.bar.service_name
+  project              = aiven_pg.bar.project
+  username             = "user-%s"
+  password             = "Test$1234"
+  pg_allow_replication = true
+
+  depends_on = [aiven_pg.bar]
+}
+
+data "aiven_service_user" "user" {
+  service_name = aiven_service_user.foo.service_name
+  project      = aiven_service_user.foo.project
+  username     = aiven_service_user.foo.username
+
+  depends_on = [aiven_service_user.foo]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccServiceUserNewPasswordResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_pg" "bar" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-4"
-		  service_name            = "test-acc-sr-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		}
-		
-		resource "aiven_service_user" "foo" {
-		  service_name = aiven_pg.bar.service_name
-		  project      = data.aiven_project.foo.project
-		  username     = "user-%s"
-		  password     = "Test$1234"
-		
-		  depends_on = [aiven_pg.bar]
-		}
-		
-		data "aiven_service_user" "user" {
-		  service_name = aiven_pg.bar.service_name
-		  project      = aiven_pg.bar.project
-		  username     = aiven_service_user.foo.username
-		
-		  depends_on = [aiven_service_user.foo]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_pg" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_service_user" "foo" {
+  service_name = aiven_pg.bar.service_name
+  project      = data.aiven_project.foo.project
+  username     = "user-%s"
+  password     = "Test$1234"
+
+  depends_on = [aiven_pg.bar]
+}
+
+data "aiven_service_user" "user" {
+  service_name = aiven_pg.bar.service_name
+  project      = aiven_pg.bar.project
+  username     = aiven_service_user.foo.username
+
+  depends_on = [aiven_service_user.foo]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccServiceUserNoPasswordResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_pg" "bar" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-4"
-		  service_name            = "test-acc-sr-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		}
-		
-		resource "aiven_service_user" "foo" {
-		  service_name = aiven_pg.bar.service_name
-		  project      = data.aiven_project.foo.project
-		  username     = "user-%s"
-		
-		  depends_on = [aiven_pg.bar]
-		}
-		
-		// check that we can use the password in template interpolations
-		output "use-template-interpolation" {
-		  sensitive = true
-		  value     = "${aiven_service_user.foo.password}/testing"
-		}
-		
-		data "aiven_service_user" "user" {
-		  service_name = aiven_pg.bar.service_name
-		  project      = aiven_pg.bar.project
-		  username     = aiven_service_user.foo.username
-		
-		  depends_on = [aiven_service_user.foo]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_pg" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_service_user" "foo" {
+  service_name = aiven_pg.bar.service_name
+  project      = data.aiven_project.foo.project
+  username     = "user-%s"
+
+  depends_on = [aiven_pg.bar]
+}
+
+// check that we can use the password in template interpolations
+output "use-template-interpolation" {
+  sensitive = true
+  value     = "${aiven_service_user.foo.password}/testing"
+}
+
+data "aiven_service_user" "user" {
+  service_name = aiven_pg.bar.service_name
+  project      = aiven_pg.bar.project
+  username     = aiven_service_user.foo.username
+
+  depends_on = [aiven_service_user.foo]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
 func testAccCheckAivenServiceUserAttributes(n string) resource.TestCheckFunc {

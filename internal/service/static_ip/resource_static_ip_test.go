@@ -18,11 +18,10 @@ func TestAccAivenResourceStaticIp(t *testing.T) {
 	projectName := os.Getenv("AIVEN_PROJECT_NAME")
 	cloudName := "google-europe-west1"
 	manifest := fmt.Sprintf(`
-		resource "aiven_static_ip" "foo" {
-		  project    = "%s"
-		  cloud_name = "%s"
-		}`,
-		projectName, cloudName)
+resource "aiven_static_ip" "foo" {
+  project    = "%s"
+  cloud_name = "%s"
+}`, projectName, cloudName)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },

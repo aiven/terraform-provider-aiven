@@ -68,40 +68,39 @@ func testAccAWSPrivatelinkResource(name string) string {
 	var vpcID = os.Getenv("AIVEN_AWS_PRIVATELINK_VPCID")
 
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_kafka" "bar" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "aws-eu-west-1"
-		  plan                    = "startup-2"
-		  service_name            = "test-acc-sr-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		  project_vpc_id          = "%s"
-		
-		  kafka_user_config {
-		    kafka {
-		      group_max_session_timeout_ms = 70000
-		      log_retention_bytes          = 1000000000
-		    }
-		  }
-		}
-		
-		resource "aiven_aws_privatelink" "foo" {
-		  project      = data.aiven_project.foo.project
-		  service_name = aiven_kafka.bar.service_name
-		  principals   = ["%s"]
-		}
-		
-		data "aiven_aws_privatelink" "pr" {
-		  project      = data.aiven_project.foo.project
-		  service_name = aiven_kafka.bar.service_name
-		
-		  depends_on = [aiven_aws_privatelink.foo]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, vpcID, principal)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_kafka" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "aws-eu-west-1"
+  plan                    = "startup-2"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+  project_vpc_id          = "%s"
+
+  kafka_user_config {
+    kafka {
+      group_max_session_timeout_ms = 70000
+      log_retention_bytes          = 1000000000
+    }
+  }
+}
+
+resource "aiven_aws_privatelink" "foo" {
+  project      = data.aiven_project.foo.project
+  service_name = aiven_kafka.bar.service_name
+  principals   = ["%s"]
+}
+
+data "aiven_aws_privatelink" "pr" {
+  project      = data.aiven_project.foo.project
+  service_name = aiven_kafka.bar.service_name
+
+  depends_on = [aiven_aws_privatelink.foo]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, vpcID, principal)
 }
 
 func testAccCheckAivenAWSPrivatelinkAttributes(n string) resource.TestCheckFunc {

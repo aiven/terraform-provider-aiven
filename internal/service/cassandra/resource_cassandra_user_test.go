@@ -65,34 +65,33 @@ func testAccCheckAivenCassandraUserResourceDestroy(s *terraform.State) error {
 
 func testAccCassandraUserResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_cassandra" "bar" {
-		  project                 = data.aiven_project.foo.project
-		  cloud_name              = "google-europe-west1"
-		  plan                    = "startup-4"
-		  service_name            = "test-acc-sr-%s"
-		  maintenance_window_dow  = "monday"
-		  maintenance_window_time = "10:00:00"
-		}
-		
-		resource "aiven_cassandra_user" "foo" {
-		  service_name = aiven_cassandra.bar.service_name
-		  project      = data.aiven_project.foo.project
-		  username     = "user-%s"
-		  password     = "Test$1234"
-		
-		  depends_on = [aiven_cassandra.bar]
-		}
-		
-		data "aiven_cassandra_user" "user" {
-		  service_name = aiven_cassandra.bar.service_name
-		  project      = aiven_cassandra.bar.project
-		  username     = aiven_cassandra_user.foo.username
-		
-		  depends_on = [aiven_cassandra_user.foo]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_cassandra" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_cassandra_user" "foo" {
+  service_name = aiven_cassandra.bar.service_name
+  project      = data.aiven_project.foo.project
+  username     = "user-%s"
+  password     = "Test$1234"
+
+  depends_on = [aiven_cassandra.bar]
+}
+
+data "aiven_cassandra_user" "user" {
+  service_name = aiven_cassandra.bar.service_name
+  project      = aiven_cassandra.bar.project
+  username     = aiven_cassandra_user.foo.username
+
+  depends_on = [aiven_cassandra_user.foo]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }

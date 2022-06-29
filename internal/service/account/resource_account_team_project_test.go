@@ -37,35 +37,34 @@ func TestAccAivenAccountTeamProject_basic(t *testing.T) {
 
 func testAccAccountTeamProjectResource(name string) string {
 	return fmt.Sprintf(`
-		resource "aiven_account" "foo" {
-		  name = "test-acc-ac-%s"
-		}
-		
-		resource "aiven_account_team" "foo" {
-		  account_id = aiven_account.foo.account_id
-		  name       = "test-acc-team-%s"
-		}
-		
-		resource "aiven_project" "foo" {
-		  project    = "test-acc-pr-%s"
-		  account_id = aiven_account_team.foo.account_id
-		}
-		
-		resource "aiven_account_team_project" "foo" {
-		  account_id   = aiven_account.foo.account_id
-		  team_id      = aiven_account_team.foo.team_id
-		  project_name = aiven_project.foo.project
-		  team_type    = "admin"
-		}
-		
-		data "aiven_account_team_project" "project" {
-		  team_id      = aiven_account_team_project.foo.team_id
-		  account_id   = aiven_account_team_project.foo.account_id
-		  project_name = aiven_account_team_project.foo.project_name
-		
-		  depends_on = [aiven_account_team_project.foo]
-		}`,
-		name, name, name)
+resource "aiven_account" "foo" {
+  name = "test-acc-ac-%s"
+}
+
+resource "aiven_account_team" "foo" {
+  account_id = aiven_account.foo.account_id
+  name       = "test-acc-team-%s"
+}
+
+resource "aiven_project" "foo" {
+  project    = "test-acc-pr-%s"
+  account_id = aiven_account_team.foo.account_id
+}
+
+resource "aiven_account_team_project" "foo" {
+  account_id   = aiven_account.foo.account_id
+  team_id      = aiven_account_team.foo.team_id
+  project_name = aiven_project.foo.project
+  team_type    = "admin"
+}
+
+data "aiven_account_team_project" "project" {
+  team_id      = aiven_account_team_project.foo.team_id
+  account_id   = aiven_account_team_project.foo.account_id
+  project_name = aiven_account_team_project.foo.project_name
+
+  depends_on = [aiven_account_team_project.foo]
+}`, name, name, name)
 }
 
 func testAccCheckAivenAccountTeamProjectResourceDestroy(s *terraform.State) error {

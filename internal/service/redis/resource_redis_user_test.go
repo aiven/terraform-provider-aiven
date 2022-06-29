@@ -64,37 +64,36 @@ func testAccCheckAivenRedisUserResourceDestroy(s *terraform.State) error {
 
 func testAccRedisUserRedisACLResource(name string) string {
 	return fmt.Sprintf(`
-		data "aiven_project" "foo" {
-		  project = "%s"
-		}
-		
-		resource "aiven_redis" "bar" {
-		  project      = data.aiven_project.foo.project
-		  cloud_name   = "google-europe-west1"
-		  plan         = "startup-4"
-		  service_name = "test-acc-sr-%s"
-		}
-		
-		resource "aiven_redis_user" "foo" {
-		  service_name = aiven_redis.bar.service_name
-		  project      = aiven_redis.bar.project
-		  username     = "user-%s"
-		  password     = "Test$1234"
-		
-		  redis_acl_commands   = ["+set"]
-		  redis_acl_keys       = ["prefix*", "another_key"]
-		  redis_acl_categories = ["-@all", "+@admin"]
-		  redis_acl_channels   = ["test"]
-		
-		  depends_on = [aiven_redis.bar]
-		}
-		
-		data "aiven_redis_user" "user" {
-		  service_name = aiven_redis_user.foo.service_name
-		  project      = aiven_redis_user.foo.project
-		  username     = aiven_redis_user.foo.username
-		
-		  depends_on = [aiven_redis_user.foo]
-		}`,
-		os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_redis" "bar" {
+  project      = data.aiven_project.foo.project
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = "test-acc-sr-%s"
+}
+
+resource "aiven_redis_user" "foo" {
+  service_name = aiven_redis.bar.service_name
+  project      = aiven_redis.bar.project
+  username     = "user-%s"
+  password     = "Test$1234"
+
+  redis_acl_commands   = ["+set"]
+  redis_acl_keys       = ["prefix*", "another_key"]
+  redis_acl_categories = ["-@all", "+@admin"]
+  redis_acl_channels   = ["test"]
+
+  depends_on = [aiven_redis.bar]
+}
+
+data "aiven_redis_user" "user" {
+  service_name = aiven_redis_user.foo.service_name
+  project      = aiven_redis_user.foo.project
+  username     = aiven_redis_user.foo.username
+
+  depends_on = [aiven_redis_user.foo]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
