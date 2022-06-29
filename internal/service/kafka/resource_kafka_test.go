@@ -91,10 +91,6 @@ resource "aiven_kafka" "bar" {
   maintenance_window_time = "10:00:00"
 
   kafka_user_config {
-    kafka_rest      = true
-    kafka_connect   = true
-    schema_registry = true
-
     kafka {
       group_max_session_timeout_ms = 70000
       log_retention_bytes          = 1000000000
@@ -136,10 +132,6 @@ resource "aiven_kafka" "bar" {
   }
 
   kafka_user_config {
-    kafka_rest      = true
-    kafka_connect   = true
-    schema_registry = true
-
     kafka {
       group_max_session_timeout_ms = 70000
       log_retention_bytes          = 1000000000
@@ -184,10 +176,6 @@ resource "aiven_kafka" "bar" {
   }
 
   kafka_user_config {
-    kafka_rest      = true
-    kafka_connect   = true
-    schema_registry = true
-
     kafka {
       group_max_session_timeout_ms = 70000
       log_retention_bytes          = 1000000000

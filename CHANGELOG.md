@@ -12,7 +12,7 @@ nav_order: 1
 - Change acceptance tests Terraform formating with `katbyte/terrafmt`
 - Add issue and pull request templates
 - Add community-related documentation
-- Fix Kafka Connector's config.name` validation
+- Fix Kafka Connector's `config.name` validation
 - Change acceptance tests Kafka service plan from `business-4` to `startup-2`
 - Fix VPC peering connection import
 - Add the CI sweep feature and rework the GitHub CI pipeline
