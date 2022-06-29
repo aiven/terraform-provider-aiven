@@ -740,7 +740,7 @@ func IsUnknownResource(err error) bool {
 }
 
 func ResourceReadHandleNotFound(err error, d *schema.ResourceData) error {
-	if err != nil && IsUnknownResource(err) {
+	if err != nil && IsUnknownResource(err) && !d.IsNewResource() {
 		d.SetId("")
 		return nil
 	}
