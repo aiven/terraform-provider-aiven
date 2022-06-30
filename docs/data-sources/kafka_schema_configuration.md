@@ -25,19 +25,16 @@ resource "aiven_kafka_schema_configuration" "config" {
 
 ### Required
 
-- **project** (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **service_name** (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Read-Only
 
-- **compatibility_level** (String) Kafka Schemas compatibility level. The possible values are `BACKWARD`, `BACKWARD_TRANSITIVE`, `FORWARD`, `FORWARD_TRANSITIVE`, `FULL`, `FULL_TRANSITIVE` and `NONE`.
-- **schema** (String) Kafka Schema configuration should be a valid Avro Schema JSON format.
-- **schema_type** (String) Kafka Schema type JSON or AVRO
-- **subject_name** (String) The Kafka Schema Subject name. This property cannot be changed, doing so forces recreation of the resource.
-- **version** (Number) Kafka Schema configuration version.
+- `compatibility_level` (String) Kafka Schemas compatibility level. The possible values are `BACKWARD`, `BACKWARD_TRANSITIVE`, `FORWARD`, `FORWARD_TRANSITIVE`, `FULL`, `FULL_TRANSITIVE` and `NONE`.
+- `id` (String) The ID of this resource.
+- `schema` (String) Kafka Schema configuration should be a valid Avro Schema JSON format.
+- `schema_type` (String) Kafka Schema type JSON or AVRO
+- `subject_name` (String) The Kafka Schema Subject name. This property cannot be changed, doing so forces recreation of the resource.
+- `version` (Number) Kafka Schema configuration version.
 
 

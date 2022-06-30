@@ -23,26 +23,23 @@ data "aiven_billing_group" "foo" {
 
 ### Required
 
-- **name** (String) Billing Group name
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- `name` (String) Billing Group name
 
 ### Read-Only
 
-- **account_id** (String) Account id
-- **address_lines** (Set of String) Address lines
-- **billing_currency** (String) Billing currency
-- **billing_emails** (Set of String) Billing contact emails
-- **billing_extra_text** (String) Billing extra text
-- **card_id** (String) Credit card id
-- **city** (String) City
-- **company** (String) Company name
-- **copy_from_billing_group** (String) ID of the billing group to copy from
-- **country_code** (String) Country code
-- **state** (String) State
-- **vat_id** (String) VAT id
-- **zip_code** (String) Zip Code
+- `account_id` (String) Account id
+- `address_lines` (Set of String) Address lines
+- `billing_currency` (String) Billing currency
+- `billing_emails` (Set of String) Billing contact emails
+- `billing_extra_text` (String) Billing extra text
+- `card_id` (String) Credit card id
+- `city` (String) City
+- `company` (String) Company name
+- `copy_from_billing_group` (String) ID of the billing group to copy from
+- `country_code` (String) Country code
+- `id` (String) The ID of this resource.
+- `state` (String) State
+- `vat_id` (String) VAT id
+- `zip_code` (String) Zip Code
 
 

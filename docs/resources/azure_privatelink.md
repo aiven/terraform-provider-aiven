@@ -28,30 +28,30 @@ resource "aiven_azure_privatelink" "foo" {
 
 ### Required
 
-- **project** (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **service_name** (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **user_subscription_ids** (Set of String) A List of allowed Subscription IDs Maximum Length: `16`.
+- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `user_subscription_ids` (Set of String) A List of allowed Subscription IDs Maximum Length: `16`.
 
 ### Optional
 
-- **id** (String) The ID of this resource.
-- **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- **azure_service_alias** (String) Azure Privatelink service alias
-- **azure_service_id** (String) Azure Privatelink service ID
-- **message** (String) Printable result of the Azure Privatelink request
-- **state** (String) Privatelink resource state
+- `azure_service_alias` (String) Azure Privatelink service alias
+- `azure_service_id` (String) Azure Privatelink service ID
+- `id` (String) The ID of this resource.
+- `message` (String) Printable result of the Azure Privatelink request
+- `state` (String) Privatelink resource state
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
-- **create** (String)
-- **delete** (String)
-- **update** (String)
+- `create` (String)
+- `delete` (String)
+- `update` (String)
 
 ## Import
 

@@ -25,51 +25,48 @@ data "aiven_kafka_topic" "mytesttopic" {
 
 ### Required
 
-- **project** (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **service_name** (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **topic_name** (String) The name of the topic. This property cannot be changed, doing so forces recreation of the resource.
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `topic_name` (String) The name of the topic. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Read-Only
 
-- **config** (List of Object) Kafka topic configuration (see [below for nested schema](#nestedatt--config))
-- **partitions** (Number) The number of partitions to create in the topic.
-- **replication** (Number) The replication factor for the topic.
-- **tag** (Set of Object) Kafka Topic tag. (see [below for nested schema](#nestedatt--tag))
-- **termination_protection** (Boolean) It is a Terraform client-side deletion protection, which prevents a Kafka topic from being deleted. It is recommended to enable this for any production Kafka topic containing critical data.
+- `config` (List of Object) Kafka topic configuration (see [below for nested schema](#nestedatt--config))
+- `id` (String) The ID of this resource.
+- `partitions` (Number) The number of partitions to create in the topic.
+- `replication` (Number) The replication factor for the topic.
+- `tag` (Set of Object) Kafka Topic tag. (see [below for nested schema](#nestedatt--tag))
+- `termination_protection` (Boolean) It is a Terraform client-side deletion protection, which prevents a Kafka topic from being deleted. It is recommended to enable this for any production Kafka topic containing critical data.
 
 <a id="nestedatt--config"></a>
 ### Nested Schema for `config`
 
 Read-Only:
 
-- **cleanup_policy** (String)
-- **compression_type** (String)
-- **delete_retention_ms** (String)
-- **file_delete_delay_ms** (String)
-- **flush_messages** (String)
-- **flush_ms** (String)
-- **index_interval_bytes** (String)
-- **max_compaction_lag_ms** (String)
-- **max_message_bytes** (String)
-- **message_downconversion_enable** (String)
-- **message_format_version** (String)
-- **message_timestamp_difference_max_ms** (String)
-- **message_timestamp_type** (String)
-- **min_cleanable_dirty_ratio** (String)
-- **min_compaction_lag_ms** (String)
-- **min_insync_replicas** (String)
-- **preallocate** (String)
-- **retention_bytes** (String)
-- **retention_ms** (String)
-- **segment_bytes** (String)
-- **segment_index_bytes** (String)
-- **segment_jitter_ms** (String)
-- **segment_ms** (String)
-- **unclean_leader_election_enable** (String)
+- `cleanup_policy` (String)
+- `compression_type` (String)
+- `delete_retention_ms` (String)
+- `file_delete_delay_ms` (String)
+- `flush_messages` (String)
+- `flush_ms` (String)
+- `index_interval_bytes` (String)
+- `max_compaction_lag_ms` (String)
+- `max_message_bytes` (String)
+- `message_downconversion_enable` (String)
+- `message_format_version` (String)
+- `message_timestamp_difference_max_ms` (String)
+- `message_timestamp_type` (String)
+- `min_cleanable_dirty_ratio` (String)
+- `min_compaction_lag_ms` (String)
+- `min_insync_replicas` (String)
+- `preallocate` (String)
+- `retention_bytes` (String)
+- `retention_ms` (String)
+- `segment_bytes` (String)
+- `segment_index_bytes` (String)
+- `segment_jitter_ms` (String)
+- `segment_ms` (String)
+- `unclean_leader_election_enable` (String)
 
 
 <a id="nestedatt--tag"></a>
@@ -77,7 +74,7 @@ Read-Only:
 
 Read-Only:
 
-- **key** (String)
-- **value** (String)
+- `key` (String)
+- `value` (String)
 
 

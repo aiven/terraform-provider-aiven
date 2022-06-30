@@ -17,21 +17,18 @@ The Azure VPC Peering Connection data source provides information about the exis
 
 ### Required
 
-- **azure_subscription_id** (String) Azure Subscription ID. This property cannot be changed, doing so forces recreation of the resource.
-- **peer_azure_app_id** (String) Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet. This property cannot be changed, doing so forces recreation of the resource.
-- **peer_azure_tenant_id** (String) Azure tenant id in UUID4 form. This property cannot be changed, doing so forces recreation of the resource.
-- **peer_resource_group** (String) Azure resource group name of the peered VPC. This property cannot be changed, doing so forces recreation of the resource.
-- **vnet_name** (String) Azure Network name. This property cannot be changed, doing so forces recreation of the resource.
-- **vpc_id** (String) The VPC the peering connection belongs to. This property cannot be changed, doing so forces recreation of the resource.
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- `azure_subscription_id` (String) Azure Subscription ID. This property cannot be changed, doing so forces recreation of the resource.
+- `peer_azure_app_id` (String) Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet. This property cannot be changed, doing so forces recreation of the resource.
+- `peer_azure_tenant_id` (String) Azure tenant id in UUID4 form. This property cannot be changed, doing so forces recreation of the resource.
+- `peer_resource_group` (String) Azure resource group name of the peered VPC. This property cannot be changed, doing so forces recreation of the resource.
+- `vnet_name` (String) Azure Network name. This property cannot be changed, doing so forces recreation of the resource.
+- `vpc_id` (String) The VPC the peering connection belongs to. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Read-Only
 
-- **peering_connection_id** (String) Cloud provider identifier for the peering connection if available
-- **state** (String) State of the peering connection
-- **state_info** (Map of String) State-specific help or error information
+- `id` (String) The ID of this resource.
+- `peering_connection_id` (String) Cloud provider identifier for the peering connection if available
+- `state` (String) State of the peering connection
+- `state_info` (Map of String) State-specific help or error information
 
 

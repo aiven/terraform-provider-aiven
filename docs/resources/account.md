@@ -23,20 +23,20 @@ resource "aiven_account" "account1" {
 
 ### Required
 
-- **name** (String) Account name
+- `name` (String) Account name
 
 ### Optional
 
-- **id** (String) The ID of this resource.
-- **primary_billing_group_id** (String) Billing group id
+- `primary_billing_group_id` (String) Billing group id
 
 ### Read-Only
 
-- **account_id** (String) Account id
-- **create_time** (String) Time of creation
-- **owner_team_id** (String) Owner team id
-- **tenant_id** (String) Tenant id
-- **update_time** (String) Time of last update
+- `account_id` (String) Account id
+- `create_time` (String) Time of creation
+- `id` (String) The ID of this resource.
+- `owner_team_id` (String) Owner team id
+- `tenant_id` (String) Tenant id
+- `update_time` (String) Time of last update
 
 ## Import
 

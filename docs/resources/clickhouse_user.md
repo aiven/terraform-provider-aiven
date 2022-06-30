@@ -25,19 +25,16 @@ resource "aiven_clickhouse_user" "ch-user" {
 
 ### Required
 
-- **project** (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **service_name** (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **username** (String) The actual name of the Clickhouse user. This property cannot be changed, doing so forces recreation of the resource.
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `username` (String) The actual name of the Clickhouse user. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Read-Only
 
-- **password** (String, Sensitive) The password of the clickhouse user.
-- **required** (Boolean) Indicates if a clickhouse user is required
-- **uuid** (String) UUID of the clickhouse user.
+- `id` (String) The ID of this resource.
+- `password` (String, Sensitive) The password of the clickhouse user.
+- `required` (Boolean) Indicates if a clickhouse user is required
+- `uuid` (String) UUID of the clickhouse user.
 
 ## Import
 

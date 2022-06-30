@@ -24,24 +24,21 @@ data "aiven_account_authentication" "foo" {
 
 ### Required
 
-- **account_id** (String) The unique id of the account.
-- **name** (String) The name of the account authentication.
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- `account_id` (String) The unique id of the account.
+- `name` (String) The name of the account authentication.
 
 ### Read-Only
 
-- **authentication_id** (String) Account authentication id
-- **create_time** (String) Time of creation
-- **enabled** (Boolean) Status of account authentication method. The default value is `false`.
-- **saml_acs_url** (String) SAML Assertion Consumer Service URL
-- **saml_certificate** (String) SAML Certificate
-- **saml_entity_id** (String) SAML Entity id
-- **saml_idp_url** (String) SAML Idp URL
-- **saml_metadata_url** (String) SAML Metadata URL
-- **type** (String) The account authentication type. The possible values are `internal` and `saml`.
-- **update_time** (String) Time of last update
+- `authentication_id` (String) Account authentication id
+- `create_time` (String) Time of creation
+- `enabled` (Boolean) Status of account authentication method. The default value is `false`.
+- `id` (String) The ID of this resource.
+- `saml_acs_url` (String) SAML Assertion Consumer Service URL
+- `saml_certificate` (String) SAML Certificate
+- `saml_entity_id` (String) SAML Entity id
+- `saml_idp_url` (String) SAML Idp URL
+- `saml_metadata_url` (String) SAML Metadata URL
+- `type` (String) The account authentication type. The possible values are `internal` and `saml`.
+- `update_time` (String) Time of last update
 
 

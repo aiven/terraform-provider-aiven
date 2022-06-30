@@ -25,29 +25,29 @@ resource "aiven_aws_vpc_peering_connection" "foo" {
 
 ### Required
 
-- **aws_account_id** (String) AWS account ID. This property cannot be changed, doing so forces recreation of the resource.
-- **aws_vpc_id** (String) AWS VPC ID. This property cannot be changed, doing so forces recreation of the resource.
-- **aws_vpc_region** (String) AWS region of the peered VPC (if not in the same region as Aiven VPC). This property cannot be changed, doing so forces recreation of the resource.
-- **vpc_id** (String) The VPC the peering connection belongs to. This property cannot be changed, doing so forces recreation of the resource.
+- `aws_account_id` (String) AWS account ID. This property cannot be changed, doing so forces recreation of the resource.
+- `aws_vpc_id` (String) AWS VPC ID. This property cannot be changed, doing so forces recreation of the resource.
+- `aws_vpc_region` (String) AWS region of the peered VPC (if not in the same region as Aiven VPC). This property cannot be changed, doing so forces recreation of the resource.
+- `vpc_id` (String) The VPC the peering connection belongs to. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Optional
 
-- **id** (String) The ID of this resource.
-- **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- **aws_vpc_peering_connection_id** (String) AWS VPC peering connection ID
-- **state** (String) State of the peering connection
-- **state_info** (Map of String) State-specific help or error information
+- `aws_vpc_peering_connection_id` (String) AWS VPC peering connection ID
+- `id` (String) The ID of this resource.
+- `state` (String) State of the peering connection
+- `state_info` (Map of String) State-specific help or error information
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
-- **create** (String)
-- **delete** (String)
+- `create` (String)
+- `delete` (String)
 
 ## Import
 

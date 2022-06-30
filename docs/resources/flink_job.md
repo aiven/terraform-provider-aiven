@@ -36,28 +36,28 @@ resource "aiven_flink_job" "job" {
 
 ### Required
 
-- **job_name** (String) Specifies the name of the service that this job is submitted to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **project** (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **service_name** (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **statement** (String) The SQL statement to define the job. This property cannot be changed, doing so forces recreation of the resource.
-- **table_ids** (List of String) A list of table ids that are required in the job runtime. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `job_name` (String) Specifies the name of the service that this job is submitted to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `statement` (String) The SQL statement to define the job. This property cannot be changed, doing so forces recreation of the resource.
+- `table_ids` (List of String) A list of table ids that are required in the job runtime. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Optional
 
-- **id** (String) The ID of this resource.
-- **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- **job_id** (String) The Job ID of the flink job in the flink service.
-- **state** (String) The current state of the flink job in the flink service
+- `id` (String) The ID of this resource.
+- `job_id` (String) The Job ID of the flink job in the flink service.
+- `state` (String) The current state of the flink job in the flink service
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
-- **delete** (String)
-- **read** (String)
+- `delete` (String)
+- `read` (String)
 
 

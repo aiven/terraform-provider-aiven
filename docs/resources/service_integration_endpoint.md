@@ -17,49 +17,49 @@ The Service Integration Endpoint resource allows the creation and management of 
 
 ### Required
 
-- **endpoint_name** (String) Name of the service integration endpoint
-- **endpoint_type** (String) Type of the service integration endpoint
-- **project** (String) Project the service integration endpoint belongs to
+- `endpoint_name` (String) Name of the service integration endpoint
+- `endpoint_type` (String) Type of the service integration endpoint
+- `project` (String) Project the service integration endpoint belongs to
 
 ### Optional
 
-- **datadog_user_config** (Block List, Max: 1) Datadog specific user configurable settings (see [below for nested schema](#nestedblock--datadog_user_config))
-- **external_aws_cloudwatch_logs_user_config** (Block List, Max: 1) external AWS CloudWatch Logs specific user configurable settings (see [below for nested schema](#nestedblock--external_aws_cloudwatch_logs_user_config))
-- **external_aws_cloudwatch_metrics_user_config** (Block List, Max: 1) External AWS cloudwatch mertrics specific user configurable settings (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config))
-- **external_elasticsearch_logs_user_config** (Block List, Max: 1) external elasticsearch specific user configurable settings (see [below for nested schema](#nestedblock--external_elasticsearch_logs_user_config))
-- **external_google_cloud_logging_user_config** (Block List, Max: 1) external Google Cloud Logginig specific user configurable settings (see [below for nested schema](#nestedblock--external_google_cloud_logging_user_config))
-- **external_kafka_user_config** (Block List, Max: 1) external Kafka specific user configurable settings (see [below for nested schema](#nestedblock--external_kafka_user_config))
-- **external_schema_registry_user_config** (Block List, Max: 1) External schema registry specific user configurable settings (see [below for nested schema](#nestedblock--external_schema_registry_user_config))
-- **id** (String) The ID of this resource.
-- **jolokia_user_config** (Block List, Max: 1) Jolokia specific user configurable settings (see [below for nested schema](#nestedblock--jolokia_user_config))
-- **prometheus_user_config** (Block List, Max: 1) Prometheus specific user configurable settings (see [below for nested schema](#nestedblock--prometheus_user_config))
-- **rsyslog_user_config** (Block List, Max: 1) rsyslog specific user configurable settings (see [below for nested schema](#nestedblock--rsyslog_user_config))
-- **signalfx_user_config** (Block List, Max: 1) Signalfx specific user configurable settings (see [below for nested schema](#nestedblock--signalfx_user_config))
+- `datadog_user_config` (Block List, Max: 1) Datadog specific user configurable settings (see [below for nested schema](#nestedblock--datadog_user_config))
+- `external_aws_cloudwatch_logs_user_config` (Block List, Max: 1) external AWS CloudWatch Logs specific user configurable settings (see [below for nested schema](#nestedblock--external_aws_cloudwatch_logs_user_config))
+- `external_aws_cloudwatch_metrics_user_config` (Block List, Max: 1) External AWS cloudwatch mertrics specific user configurable settings (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config))
+- `external_elasticsearch_logs_user_config` (Block List, Max: 1) external elasticsearch specific user configurable settings (see [below for nested schema](#nestedblock--external_elasticsearch_logs_user_config))
+- `external_google_cloud_logging_user_config` (Block List, Max: 1) external Google Cloud Logginig specific user configurable settings (see [below for nested schema](#nestedblock--external_google_cloud_logging_user_config))
+- `external_kafka_user_config` (Block List, Max: 1) external Kafka specific user configurable settings (see [below for nested schema](#nestedblock--external_kafka_user_config))
+- `external_schema_registry_user_config` (Block List, Max: 1) External schema registry specific user configurable settings (see [below for nested schema](#nestedblock--external_schema_registry_user_config))
+- `jolokia_user_config` (Block List, Max: 1) Jolokia specific user configurable settings (see [below for nested schema](#nestedblock--jolokia_user_config))
+- `prometheus_user_config` (Block List, Max: 1) Prometheus specific user configurable settings (see [below for nested schema](#nestedblock--prometheus_user_config))
+- `rsyslog_user_config` (Block List, Max: 1) rsyslog specific user configurable settings (see [below for nested schema](#nestedblock--rsyslog_user_config))
+- `signalfx_user_config` (Block List, Max: 1) Signalfx specific user configurable settings (see [below for nested schema](#nestedblock--signalfx_user_config))
 
 ### Read-Only
 
-- **endpoint_config** (Map of String) Integration endpoint specific backend configuration
+- `endpoint_config` (Map of String) Integration endpoint specific backend configuration
+- `id` (String) The ID of this resource.
 
 <a id="nestedblock--datadog_user_config"></a>
 ### Nested Schema for `datadog_user_config`
 
 Optional:
 
-- **datadog_api_key** (String, Sensitive) Datadog API key
-- **datadog_tags** (Block List, Max: 32) Custom tags provided by user (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))
-- **disable_consumer_stats** (String) Disable consumer group metrics
-- **kafka_consumer_check_instances** (String) Number of separate instances to fetch kafka consumer statistics with
-- **kafka_consumer_stats_timeout** (String) Number of seconds that datadog will wait to get consumer statistics from brokers
-- **max_partition_contexts** (String) Maximum number of partition contexts to send
-- **site** (String) Datadog intake site. Defaults to datadoghq.com
+- `datadog_api_key` (String, Sensitive) Datadog API key
+- `datadog_tags` (Block List, Max: 32) Custom tags provided by user (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))
+- `disable_consumer_stats` (String) Disable consumer group metrics
+- `kafka_consumer_check_instances` (String) Number of separate instances to fetch kafka consumer statistics with
+- `kafka_consumer_stats_timeout` (String) Number of seconds that datadog will wait to get consumer statistics from brokers
+- `max_partition_contexts` (String) Maximum number of partition contexts to send
+- `site` (String) Datadog intake site. Defaults to datadoghq.com
 
 <a id="nestedblock--datadog_user_config--datadog_tags"></a>
 ### Nested Schema for `datadog_user_config.datadog_tags`
 
 Optional:
 
-- **comment** (String) Optional tag explanation
-- **tag** (String) Tag value
+- `comment` (String) Optional tag explanation
+- `tag` (String) Tag value
 
 
 
@@ -68,10 +68,10 @@ Optional:
 
 Optional:
 
-- **access_key** (String) AWS access key. Required permissions are logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents and logs:DescribeLogStreams
-- **log_group_name** (String) AWS CloudWatch log group name
-- **region** (String) AWS region
-- **secret_key** (String) AWS secret key
+- `access_key` (String) AWS access key. Required permissions are logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents and logs:DescribeLogStreams
+- `log_group_name` (String) AWS CloudWatch log group name
+- `region` (String) AWS region
+- `secret_key` (String) AWS secret key
 
 
 <a id="nestedblock--external_aws_cloudwatch_metrics_user_config"></a>
@@ -79,10 +79,10 @@ Optional:
 
 Optional:
 
-- **access_key** (String) AWS access key. Required permissions are cloudwatch:PutMetricData
-- **namespace** (String) AWS CloudWatch Metrics Namespace
-- **region** (String) AWS region
-- **secret_key** (String) AWS secret key
+- `access_key` (String) AWS access key. Required permissions are cloudwatch:PutMetricData
+- `namespace` (String) AWS CloudWatch Metrics Namespace
+- `region` (String) AWS region
+- `secret_key` (String) AWS secret key
 
 
 <a id="nestedblock--external_elasticsearch_logs_user_config"></a>
@@ -90,11 +90,11 @@ Optional:
 
 Optional:
 
-- **ca** (String) PEM encoded CA certificate
-- **index_days_max** (String) Maximum number of days of logs to keep
-- **index_prefix** (String) Elasticsearch index prefix
-- **timeout** (String) Elasticsearch request timeout limit
-- **url** (String) Elasticsearch connection URL
+- `ca` (String) PEM encoded CA certificate
+- `index_days_max` (String) Maximum number of days of logs to keep
+- `index_prefix` (String) Elasticsearch index prefix
+- `timeout` (String) Elasticsearch request timeout limit
+- `url` (String) Elasticsearch connection URL
 
 
 <a id="nestedblock--external_google_cloud_logging_user_config"></a>
@@ -102,9 +102,9 @@ Optional:
 
 Optional:
 
-- **log_id** (String) Google Cloud Logging log id
-- **project_id** (String) GCP project id.
-- **service_account_credentials** (String) Google Service Account Credentials
+- `log_id` (String) Google Cloud Logging log id
+- `project_id` (String) GCP project id.
+- `service_account_credentials` (String) Google Service Account Credentials
 
 
 <a id="nestedblock--external_kafka_user_config"></a>
@@ -112,15 +112,15 @@ Optional:
 
 Optional:
 
-- **bootstrap_servers** (String) Bootstrap servers
-- **sasl_mechanism** (String) The list of SASL mechanisms enabled in the Kafka server.
-- **sasl_plain_password** (String, Sensitive) Password for SASL PLAIN mechanism in the Kafka server.
-- **sasl_plain_username** (String) Username for SASL PLAIN mechanism in the Kafka server.
-- **security_protocol** (String) Security protocol
-- **ssl_ca_cert** (String) PEM-encoded CA certificate
-- **ssl_client_cert** (String) PEM-encoded client certificate
-- **ssl_client_key** (String) PEM-encoded client key
-- **ssl_endpoint_identification_algorithm** (String) The endpoint identification algorithm to validate server hostname using server certificate.
+- `bootstrap_servers` (String) Bootstrap servers
+- `sasl_mechanism` (String) The list of SASL mechanisms enabled in the Kafka server.
+- `sasl_plain_password` (String, Sensitive) Password for SASL PLAIN mechanism in the Kafka server.
+- `sasl_plain_username` (String) Username for SASL PLAIN mechanism in the Kafka server.
+- `security_protocol` (String) Security protocol
+- `ssl_ca_cert` (String) PEM-encoded CA certificate
+- `ssl_client_cert` (String) PEM-encoded client certificate
+- `ssl_client_key` (String) PEM-encoded client key
+- `ssl_endpoint_identification_algorithm` (String) The endpoint identification algorithm to validate server hostname using server certificate.
 
 
 <a id="nestedblock--external_schema_registry_user_config"></a>
@@ -128,10 +128,10 @@ Optional:
 
 Optional:
 
-- **authentication** (String) Authentication method
-- **basic_auth_password** (String, Sensitive) Basic authentication password
-- **basic_auth_username** (String) Basic authentication user name
-- **url** (String) Schema Registry URL
+- `authentication` (String) Authentication method
+- `basic_auth_password` (String, Sensitive) Basic authentication password
+- `basic_auth_username` (String) Basic authentication user name
+- `url` (String) Schema Registry URL
 
 
 <a id="nestedblock--jolokia_user_config"></a>
@@ -139,8 +139,8 @@ Optional:
 
 Optional:
 
-- **basic_auth_password** (String, Sensitive) Jolokia basic authentication password
-- **basic_auth_username** (String) Jolokia basic authentication username
+- `basic_auth_password` (String, Sensitive) Jolokia basic authentication password
+- `basic_auth_username` (String) Jolokia basic authentication username
 
 
 <a id="nestedblock--prometheus_user_config"></a>
@@ -148,8 +148,8 @@ Optional:
 
 Optional:
 
-- **basic_auth_password** (String, Sensitive) Prometheus basic authentication password
-- **basic_auth_username** (String) Prometheus basic authentication username
+- `basic_auth_password` (String, Sensitive) Prometheus basic authentication password
+- `basic_auth_username` (String) Prometheus basic authentication username
 
 
 <a id="nestedblock--rsyslog_user_config"></a>
@@ -157,15 +157,15 @@ Optional:
 
 Optional:
 
-- **ca** (String) PEM encoded CA certificate
-- **cert** (String) PEM encoded client certificate
-- **format** (String) message format
-- **key** (String) PEM encoded client key
-- **logline** (String) custom syslog message format
-- **port** (String) rsyslog server port
-- **sd** (String) Structured data block for log message
-- **server** (String) rsyslog server IP address or hostname
-- **tls** (String) Require TLS
+- `ca` (String) PEM encoded CA certificate
+- `cert` (String) PEM encoded client certificate
+- `format` (String) message format
+- `key` (String) PEM encoded client key
+- `logline` (String) custom syslog message format
+- `port` (String) rsyslog server port
+- `sd` (String) Structured data block for log message
+- `server` (String) rsyslog server IP address or hostname
+- `tls` (String) Require TLS
 
 
 <a id="nestedblock--signalfx_user_config"></a>
@@ -173,8 +173,8 @@ Optional:
 
 Optional:
 
-- **enabled_metrics** (List of String) list of metrics to send
-- **signalfx_api_key** (String, Sensitive) SignalFX API key
-- **signalfx_realm** (String) SignalFX realm
+- `enabled_metrics` (List of String) list of metrics to send
+- `signalfx_api_key` (String, Sensitive) SignalFX API key
+- `signalfx_realm` (String) SignalFX realm
 
 

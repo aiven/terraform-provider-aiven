@@ -45,53 +45,53 @@ resource "aiven_kafka" "kafka1" {
 
 ### Required
 
-- **project** (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **service_name** (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
+- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Optional
 
-- **cloud_name** (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
-- **default_acl** (Boolean) Create default wildcard Kafka ACL
-- **disk_space** (String) The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.
-- **id** (String) The ID of this resource.
-- **kafka** (Block List, Max: 1) Kafka server provided values (see [below for nested schema](#nestedblock--kafka))
-- **kafka_user_config** (Block List, Max: 1) Kafka user configurable settings (see [below for nested schema](#nestedblock--kafka_user_config))
-- **karapace** (Boolean) Switch the service to use Karapace for schema registry and REST proxy
-- **maintenance_window_dow** (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
-- **maintenance_window_time** (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
-- **plan** (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
-- **project_vpc_id** (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
-- **service_integrations** (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
-- **static_ips** (List of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
-- **tag** (Block Set) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedblock--tag))
-- **termination_protection** (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
-- **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
+- `default_acl` (Boolean) Create default wildcard Kafka ACL
+- `disk_space` (String) The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.
+- `kafka` (Block List, Max: 1) Kafka server provided values (see [below for nested schema](#nestedblock--kafka))
+- `kafka_user_config` (Block List, Max: 1) Kafka user configurable settings (see [below for nested schema](#nestedblock--kafka_user_config))
+- `karapace` (Boolean) Switch the service to use Karapace for schema registry and REST proxy
+- `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
+- `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
+- `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
+- `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
+- `service_integrations` (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
+- `static_ips` (List of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
+- `tag` (Block Set) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedblock--tag))
+- `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- **components** (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
-- **disk_space_cap** (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
-- **disk_space_default** (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
-- **disk_space_step** (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
-- **disk_space_used** (String) Disk space that service is currently using
-- **service_host** (String) The hostname of the service.
-- **service_password** (String, Sensitive) Password used for connecting to the service, if applicable
-- **service_port** (Number) The port of the service
-- **service_type** (String) Aiven internal service type code
-- **service_uri** (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
-- **service_username** (String) Username used for connecting to the service, if applicable
-- **state** (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
+- `components` (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
+- `disk_space_cap` (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
+- `disk_space_default` (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
+- `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
+- `disk_space_used` (String) Disk space that service is currently using
+- `id` (String) The ID of this resource.
+- `service_host` (String) The hostname of the service.
+- `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
+- `service_port` (Number) The port of the service
+- `service_type` (String) Aiven internal service type code
+- `service_uri` (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
+- `service_username` (String) Username used for connecting to the service, if applicable
+- `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
 
 <a id="nestedblock--kafka"></a>
 ### Nested Schema for `kafka`
 
 Optional:
 
-- **access_cert** (String, Sensitive) The Kafka client certificate
-- **access_key** (String, Sensitive) The Kafka client certificate key
-- **connect_uri** (String, Sensitive) The Kafka Connect URI, if any
-- **rest_uri** (String, Sensitive) The Kafka REST URI, if any
-- **schema_registry_uri** (String, Sensitive) The Schema Registry URI, if any
+- `access_cert` (String, Sensitive) The Kafka client certificate
+- `access_key` (String, Sensitive) The Kafka client certificate key
+- `connect_uri` (String, Sensitive) The Kafka Connect URI, if any
+- `rest_uri` (String, Sensitive) The Kafka REST URI, if any
+- `schema_registry_uri` (String, Sensitive) The Schema Registry URI, if any
 
 
 <a id="nestedblock--kafka_user_config"></a>
@@ -99,66 +99,66 @@ Optional:
 
 Optional:
 
-- **custom_domain** (String) Custom domain
-- **ip_filter** (List of String) IP filter
-- **kafka** (Block List, Max: 1) Kafka broker configuration values (see [below for nested schema](#nestedblock--kafka_user_config--kafka))
-- **kafka_authentication_methods** (Block List, Max: 1) Kafka authentication methods (see [below for nested schema](#nestedblock--kafka_user_config--kafka_authentication_methods))
-- **kafka_connect** (String) Enable Kafka Connect service
-- **kafka_connect_config** (Block List, Max: 1) Kafka Connect configuration values (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_config))
-- **kafka_rest** (String) Enable Kafka-REST service
-- **kafka_rest_config** (Block List, Max: 1) Kafka REST configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_rest_config))
-- **kafka_version** (String) Kafka major version
-- **private_access** (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--kafka_user_config--private_access))
-- **privatelink_access** (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--kafka_user_config--privatelink_access))
-- **public_access** (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--kafka_user_config--public_access))
-- **schema_registry** (String) Enable Schema-Registry service
-- **schema_registry_config** (Block List, Max: 1) Schema Registry configuration (see [below for nested schema](#nestedblock--kafka_user_config--schema_registry_config))
-- **static_ips** (String) Static IP addresses
+- `custom_domain` (String) Custom domain
+- `ip_filter` (List of String) IP filter
+- `kafka` (Block List, Max: 1) Kafka broker configuration values (see [below for nested schema](#nestedblock--kafka_user_config--kafka))
+- `kafka_authentication_methods` (Block List, Max: 1) Kafka authentication methods (see [below for nested schema](#nestedblock--kafka_user_config--kafka_authentication_methods))
+- `kafka_connect` (String) Enable Kafka Connect service
+- `kafka_connect_config` (Block List, Max: 1) Kafka Connect configuration values (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_config))
+- `kafka_rest` (String) Enable Kafka-REST service
+- `kafka_rest_config` (Block List, Max: 1) Kafka REST configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_rest_config))
+- `kafka_version` (String) Kafka major version
+- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--kafka_user_config--private_access))
+- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--kafka_user_config--privatelink_access))
+- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--kafka_user_config--public_access))
+- `schema_registry` (String) Enable Schema-Registry service
+- `schema_registry_config` (Block List, Max: 1) Schema Registry configuration (see [below for nested schema](#nestedblock--kafka_user_config--schema_registry_config))
+- `static_ips` (String) Static IP addresses
 
 <a id="nestedblock--kafka_user_config--kafka"></a>
 ### Nested Schema for `kafka_user_config.kafka`
 
 Optional:
 
-- **auto_create_topics_enable** (String) auto.create.topics.enable
-- **compression_type** (String) compression.type
-- **connections_max_idle_ms** (String) connections.max.idle.ms
-- **default_replication_factor** (String) default.replication.factor
-- **group_initial_rebalance_delay_ms** (String) group.initial.rebalance.delay.ms
-- **group_max_session_timeout_ms** (String) group.max.session.timeout.ms
-- **group_min_session_timeout_ms** (String) group.min.session.timeout.ms
-- **log_cleaner_delete_retention_ms** (String) log.cleaner.delete.retention.ms
-- **log_cleaner_max_compaction_lag_ms** (String) log.cleaner.max.compaction.lag.ms
-- **log_cleaner_min_cleanable_ratio** (String) log.cleaner.min.cleanable.ratio
-- **log_cleaner_min_compaction_lag_ms** (String) log.cleaner.min.compaction.lag.ms
-- **log_cleanup_policy** (String) log.cleanup.policy
-- **log_flush_interval_messages** (String) log.flush.interval.messages
-- **log_flush_interval_ms** (String) log.flush.interval.ms
-- **log_index_interval_bytes** (String) log.index.interval.bytes
-- **log_index_size_max_bytes** (String) log.index.size.max.bytes
-- **log_message_downconversion_enable** (String) log.message.downconversion.enable
-- **log_message_timestamp_difference_max_ms** (String) log.message.timestamp.difference.max.ms
-- **log_message_timestamp_type** (String) log.message.timestamp.type
-- **log_preallocate** (String) log.preallocate
-- **log_retention_bytes** (String) log.retention.bytes
-- **log_retention_hours** (String) log.retention.hours
-- **log_retention_ms** (String) log.retention.ms
-- **log_roll_jitter_ms** (String) log.roll.jitter.ms
-- **log_roll_ms** (String) log.roll.ms
-- **log_segment_bytes** (String) log.segment.bytes
-- **log_segment_delete_delay_ms** (String) log.segment.delete.delay.ms
-- **max_connections_per_ip** (String) max.connections.per.ip
-- **max_incremental_fetch_session_cache_slots** (String) max.incremental.fetch.session.cache.slots
-- **message_max_bytes** (String) message.max.bytes
-- **min_insync_replicas** (String) min.insync.replicas
-- **num_partitions** (String) num.partitions
-- **offsets_retention_minutes** (String) offsets.retention.minutes
-- **producer_purgatory_purge_interval_requests** (String) producer.purgatory.purge.interval.requests
-- **replica_fetch_max_bytes** (String) replica.fetch.max.bytes
-- **replica_fetch_response_max_bytes** (String) replica.fetch.response.max.bytes
-- **socket_request_max_bytes** (String) socket.request.max.bytes
-- **transaction_remove_expired_transaction_cleanup_interval_ms** (String) transaction.remove.expired.transaction.cleanup.interval.ms
-- **transaction_state_log_segment_bytes** (String) transaction.state.log.segment.bytes
+- `auto_create_topics_enable` (String) auto.create.topics.enable
+- `compression_type` (String) compression.type
+- `connections_max_idle_ms` (String) connections.max.idle.ms
+- `default_replication_factor` (String) default.replication.factor
+- `group_initial_rebalance_delay_ms` (String) group.initial.rebalance.delay.ms
+- `group_max_session_timeout_ms` (String) group.max.session.timeout.ms
+- `group_min_session_timeout_ms` (String) group.min.session.timeout.ms
+- `log_cleaner_delete_retention_ms` (String) log.cleaner.delete.retention.ms
+- `log_cleaner_max_compaction_lag_ms` (String) log.cleaner.max.compaction.lag.ms
+- `log_cleaner_min_cleanable_ratio` (String) log.cleaner.min.cleanable.ratio
+- `log_cleaner_min_compaction_lag_ms` (String) log.cleaner.min.compaction.lag.ms
+- `log_cleanup_policy` (String) log.cleanup.policy
+- `log_flush_interval_messages` (String) log.flush.interval.messages
+- `log_flush_interval_ms` (String) log.flush.interval.ms
+- `log_index_interval_bytes` (String) log.index.interval.bytes
+- `log_index_size_max_bytes` (String) log.index.size.max.bytes
+- `log_message_downconversion_enable` (String) log.message.downconversion.enable
+- `log_message_timestamp_difference_max_ms` (String) log.message.timestamp.difference.max.ms
+- `log_message_timestamp_type` (String) log.message.timestamp.type
+- `log_preallocate` (String) log.preallocate
+- `log_retention_bytes` (String) log.retention.bytes
+- `log_retention_hours` (String) log.retention.hours
+- `log_retention_ms` (String) log.retention.ms
+- `log_roll_jitter_ms` (String) log.roll.jitter.ms
+- `log_roll_ms` (String) log.roll.ms
+- `log_segment_bytes` (String) log.segment.bytes
+- `log_segment_delete_delay_ms` (String) log.segment.delete.delay.ms
+- `max_connections_per_ip` (String) max.connections.per.ip
+- `max_incremental_fetch_session_cache_slots` (String) max.incremental.fetch.session.cache.slots
+- `message_max_bytes` (String) message.max.bytes
+- `min_insync_replicas` (String) min.insync.replicas
+- `num_partitions` (String) num.partitions
+- `offsets_retention_minutes` (String) offsets.retention.minutes
+- `producer_purgatory_purge_interval_requests` (String) producer.purgatory.purge.interval.requests
+- `replica_fetch_max_bytes` (String) replica.fetch.max.bytes
+- `replica_fetch_response_max_bytes` (String) replica.fetch.response.max.bytes
+- `socket_request_max_bytes` (String) socket.request.max.bytes
+- `transaction_remove_expired_transaction_cleanup_interval_ms` (String) transaction.remove.expired.transaction.cleanup.interval.ms
+- `transaction_state_log_segment_bytes` (String) transaction.state.log.segment.bytes
 
 
 <a id="nestedblock--kafka_user_config--kafka_authentication_methods"></a>
@@ -166,8 +166,8 @@ Optional:
 
 Optional:
 
-- **certificate** (String) Enable certificate/SSL authentication
-- **sasl** (String) Enable SASL authentication
+- `certificate` (String) Enable certificate/SSL authentication
+- `sasl` (String) Enable SASL authentication
 
 
 <a id="nestedblock--kafka_user_config--kafka_connect_config"></a>
@@ -175,18 +175,18 @@ Optional:
 
 Optional:
 
-- **connector_client_config_override_policy** (String) Client config override policy
-- **consumer_auto_offset_reset** (String) Consumer auto offset reset
-- **consumer_fetch_max_bytes** (String) The maximum amount of data the server should return for a fetch request
-- **consumer_isolation_level** (String) Consumer isolation level
-- **consumer_max_partition_fetch_bytes** (String) The maximum amount of data per-partition the server will return.
-- **consumer_max_poll_interval_ms** (String) The maximum delay between polls when using consumer group management
-- **consumer_max_poll_records** (String) The maximum number of records returned by a single poll
-- **offset_flush_interval_ms** (String) The interval at which to try committing offsets for tasks
-- **offset_flush_timeout_ms** (String) Offset flush timeout
-- **producer_compression_type** (String) The default compression type for producers
-- **producer_max_request_size** (String) The maximum size of a request in bytes
-- **session_timeout_ms** (String) The timeout used to detect failures when using Kafka’s group management facilities
+- `connector_client_config_override_policy` (String) Client config override policy
+- `consumer_auto_offset_reset` (String) Consumer auto offset reset
+- `consumer_fetch_max_bytes` (String) The maximum amount of data the server should return for a fetch request
+- `consumer_isolation_level` (String) Consumer isolation level
+- `consumer_max_partition_fetch_bytes` (String) The maximum amount of data per-partition the server will return.
+- `consumer_max_poll_interval_ms` (String) The maximum delay between polls when using consumer group management
+- `consumer_max_poll_records` (String) The maximum number of records returned by a single poll
+- `offset_flush_interval_ms` (String) The interval at which to try committing offsets for tasks
+- `offset_flush_timeout_ms` (String) Offset flush timeout
+- `producer_compression_type` (String) The default compression type for producers
+- `producer_max_request_size` (String) The maximum size of a request in bytes
+- `session_timeout_ms` (String) The timeout used to detect failures when using Kafka’s group management facilities
 
 
 <a id="nestedblock--kafka_user_config--kafka_rest_config"></a>
@@ -194,12 +194,12 @@ Optional:
 
 Optional:
 
-- **consumer_enable_auto_commit** (String) consumer.enable.auto.commit
-- **consumer_request_max_bytes** (String) consumer.request.max.bytes
-- **consumer_request_timeout_ms** (String) consumer.request.timeout.ms
-- **producer_acks** (String) producer.acks
-- **producer_linger_ms** (String) producer.linger.ms
-- **simpleconsumer_pool_size_max** (String) simpleconsumer.pool.size.max
+- `consumer_enable_auto_commit` (String) consumer.enable.auto.commit
+- `consumer_request_max_bytes` (String) consumer.request.max.bytes
+- `consumer_request_timeout_ms` (String) consumer.request.timeout.ms
+- `producer_acks` (String) producer.acks
+- `producer_linger_ms` (String) producer.linger.ms
+- `simpleconsumer_pool_size_max` (String) simpleconsumer.pool.size.max
 
 
 <a id="nestedblock--kafka_user_config--private_access"></a>
@@ -207,7 +207,7 @@ Optional:
 
 Optional:
 
-- **prometheus** (String) Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+- `prometheus` (String) Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
 
 
 <a id="nestedblock--kafka_user_config--privatelink_access"></a>
@@ -215,12 +215,12 @@ Optional:
 
 Optional:
 
-- **jolokia** (String) Enable jolokia
-- **kafka** (String) Enable kafka
-- **kafka_connect** (String) Enable kafka_connect
-- **kafka_rest** (String) Enable kafka_rest
-- **prometheus** (String) Enable prometheus
-- **schema_registry** (String) Enable schema_registry
+- `jolokia` (String) Enable jolokia
+- `kafka` (String) Enable kafka
+- `kafka_connect` (String) Enable kafka_connect
+- `kafka_rest` (String) Enable kafka_rest
+- `prometheus` (String) Enable prometheus
+- `schema_registry` (String) Enable schema_registry
 
 
 <a id="nestedblock--kafka_user_config--public_access"></a>
@@ -228,11 +228,11 @@ Optional:
 
 Optional:
 
-- **kafka** (String) Allow clients to connect to kafka from the public internet for service nodes that are in a project VPC or another type of private network
-- **kafka_connect** (String) Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network
-- **kafka_rest** (String) Allow clients to connect to kafka_rest from the public internet for service nodes that are in a project VPC or another type of private network
-- **prometheus** (String) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network
-- **schema_registry** (String) Allow clients to connect to schema_registry from the public internet for service nodes that are in a project VPC or another type of private network
+- `kafka` (String) Allow clients to connect to kafka from the public internet for service nodes that are in a project VPC or another type of private network
+- `kafka_connect` (String) Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network
+- `kafka_rest` (String) Allow clients to connect to kafka_rest from the public internet for service nodes that are in a project VPC or another type of private network
+- `prometheus` (String) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network
+- `schema_registry` (String) Allow clients to connect to schema_registry from the public internet for service nodes that are in a project VPC or another type of private network
 
 
 <a id="nestedblock--kafka_user_config--schema_registry_config"></a>
@@ -240,8 +240,8 @@ Optional:
 
 Optional:
 
-- **leader_eligibility** (String) leader_eligibility
-- **topic_name** (String) topic_name
+- `leader_eligibility` (String) leader_eligibility
+- `topic_name` (String) topic_name
 
 
 
@@ -250,8 +250,8 @@ Optional:
 
 Required:
 
-- **integration_type** (String) Type of the service integration. The only supported value at the moment is `read_replica`
-- **source_service_name** (String) Name of the source service
+- `integration_type` (String) Type of the service integration. The only supported value at the moment is `read_replica`
+- `source_service_name` (String) Name of the source service
 
 
 <a id="nestedblock--tag"></a>
@@ -259,8 +259,8 @@ Required:
 
 Required:
 
-- **key** (String) Service tag key
-- **value** (String) Service tag value
+- `key` (String) Service tag key
+- `value` (String) Service tag value
 
 
 <a id="nestedblock--timeouts"></a>
@@ -268,9 +268,9 @@ Required:
 
 Optional:
 
-- **create** (String)
-- **delete** (String)
-- **update** (String)
+- `create` (String)
+- `delete` (String)
+- `update` (String)
 
 
 <a id="nestedatt--components"></a>
@@ -278,13 +278,13 @@ Optional:
 
 Read-Only:
 
-- **component** (String)
-- **host** (String)
-- **kafka_authentication_method** (String)
-- **port** (Number)
-- **route** (String)
-- **ssl** (Boolean)
-- **usage** (String)
+- `component` (String)
+- `host` (String)
+- `kafka_authentication_method` (String)
+- `port` (Number)
+- `route` (String)
+- `ssl` (Boolean)
+- `usage` (String)
 
 ## Import
 

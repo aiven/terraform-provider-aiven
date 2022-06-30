@@ -28,49 +28,49 @@ resource "aiven_clickhouse" "clickhouse" {
 
 ### Required
 
-- **project** (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **service_name** (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
+- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Optional
 
-- **clickhouse_user_config** (Block List, Max: 1) Clickhouse user configurable settings (see [below for nested schema](#nestedblock--clickhouse_user_config))
-- **cloud_name** (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
-- **disk_space** (String) The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.
-- **id** (String) The ID of this resource.
-- **maintenance_window_dow** (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
-- **maintenance_window_time** (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
-- **plan** (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
-- **project_vpc_id** (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
-- **service_integrations** (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
-- **static_ips** (List of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
-- **tag** (Block Set) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedblock--tag))
-- **termination_protection** (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
-- **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `clickhouse_user_config` (Block List, Max: 1) Clickhouse user configurable settings (see [below for nested schema](#nestedblock--clickhouse_user_config))
+- `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
+- `disk_space` (String) The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.
+- `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
+- `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
+- `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
+- `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
+- `service_integrations` (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
+- `static_ips` (List of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
+- `tag` (Block Set) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedblock--tag))
+- `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- **clickhouse** (List of Object) Clickhouse server provided values (see [below for nested schema](#nestedatt--clickhouse))
-- **components** (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
-- **disk_space_cap** (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
-- **disk_space_default** (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
-- **disk_space_step** (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
-- **disk_space_used** (String) Disk space that service is currently using
-- **service_host** (String) The hostname of the service.
-- **service_password** (String, Sensitive) Password used for connecting to the service, if applicable
-- **service_port** (Number) The port of the service
-- **service_type** (String) Aiven internal service type code
-- **service_uri** (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
-- **service_username** (String) Username used for connecting to the service, if applicable
-- **state** (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
+- `clickhouse` (List of Object) Clickhouse server provided values (see [below for nested schema](#nestedatt--clickhouse))
+- `components` (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
+- `disk_space_cap` (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
+- `disk_space_default` (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
+- `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
+- `disk_space_used` (String) Disk space that service is currently using
+- `id` (String) The ID of this resource.
+- `service_host` (String) The hostname of the service.
+- `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
+- `service_port` (Number) The port of the service
+- `service_type` (String) Aiven internal service type code
+- `service_uri` (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
+- `service_username` (String) Username used for connecting to the service, if applicable
+- `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
 
 <a id="nestedblock--clickhouse_user_config"></a>
 ### Nested Schema for `clickhouse_user_config`
 
 Optional:
 
-- **ip_filter** (List of String) IP filter
-- **project_to_fork_from** (String) Name of another project to fork a service from. This has effect only when a new service is being created.
-- **service_to_fork_from** (String) Name of another service to fork from. This has effect only when a new service is being created.
+- `ip_filter` (List of String) IP filter
+- `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
+- `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
 
 
 <a id="nestedblock--service_integrations"></a>
@@ -78,8 +78,8 @@ Optional:
 
 Required:
 
-- **integration_type** (String) Type of the service integration. The only supported value at the moment is `read_replica`
-- **source_service_name** (String) Name of the source service
+- `integration_type` (String) Type of the service integration. The only supported value at the moment is `read_replica`
+- `source_service_name` (String) Name of the source service
 
 
 <a id="nestedblock--tag"></a>
@@ -87,8 +87,8 @@ Required:
 
 Required:
 
-- **key** (String) Service tag key
-- **value** (String) Service tag value
+- `key` (String) Service tag key
+- `value` (String) Service tag value
 
 
 <a id="nestedblock--timeouts"></a>
@@ -96,9 +96,9 @@ Required:
 
 Optional:
 
-- **create** (String)
-- **delete** (String)
-- **update** (String)
+- `create` (String)
+- `delete` (String)
+- `update` (String)
 
 
 <a id="nestedatt--clickhouse"></a>
@@ -113,13 +113,13 @@ Read-Only:
 
 Read-Only:
 
-- **component** (String)
-- **host** (String)
-- **kafka_authentication_method** (String)
-- **port** (Number)
-- **route** (String)
-- **ssl** (Boolean)
-- **usage** (String)
+- `component` (String)
+- `host` (String)
+- `kafka_authentication_method` (String)
+- `port` (Number)
+- `route` (String)
+- `ssl` (Boolean)
+- `usage` (String)
 
 ## Import
 

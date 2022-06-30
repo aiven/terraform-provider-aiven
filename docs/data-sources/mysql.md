@@ -24,52 +24,49 @@ data "aiven_mysql" "mysql1" {
 
 ### Required
 
-- **project** (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **service_name** (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Read-Only
 
-- **cloud_name** (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
-- **components** (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
-- **disk_space** (String) The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.
-- **disk_space_cap** (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
-- **disk_space_default** (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
-- **disk_space_step** (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
-- **disk_space_used** (String) Disk space that service is currently using
-- **maintenance_window_dow** (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
-- **maintenance_window_time** (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
-- **mysql** (List of Object) MySQL specific server provided values (see [below for nested schema](#nestedatt--mysql))
-- **mysql_user_config** (List of Object) Mysql user configurable settings (see [below for nested schema](#nestedatt--mysql_user_config))
-- **plan** (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
-- **project_vpc_id** (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
-- **service_host** (String) The hostname of the service.
-- **service_integrations** (List of Object) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedatt--service_integrations))
-- **service_password** (String, Sensitive) Password used for connecting to the service, if applicable
-- **service_port** (Number) The port of the service
-- **service_type** (String) Aiven internal service type code
-- **service_uri** (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
-- **service_username** (String) Username used for connecting to the service, if applicable
-- **state** (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
-- **static_ips** (List of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
-- **tag** (Set of Object) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedatt--tag))
-- **termination_protection** (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
+- `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
+- `components` (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
+- `disk_space` (String) The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.
+- `disk_space_cap` (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
+- `disk_space_default` (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
+- `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
+- `disk_space_used` (String) Disk space that service is currently using
+- `id` (String) The ID of this resource.
+- `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
+- `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
+- `mysql` (List of Object) MySQL specific server provided values (see [below for nested schema](#nestedatt--mysql))
+- `mysql_user_config` (List of Object) Mysql user configurable settings (see [below for nested schema](#nestedatt--mysql_user_config))
+- `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
+- `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
+- `service_host` (String) The hostname of the service.
+- `service_integrations` (List of Object) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedatt--service_integrations))
+- `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
+- `service_port` (Number) The port of the service
+- `service_type` (String) Aiven internal service type code
+- `service_uri` (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
+- `service_username` (String) Username used for connecting to the service, if applicable
+- `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
+- `static_ips` (List of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
+- `tag` (Set of Object) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedatt--tag))
+- `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
 
 <a id="nestedatt--components"></a>
 ### Nested Schema for `components`
 
 Read-Only:
 
-- **component** (String)
-- **host** (String)
-- **kafka_authentication_method** (String)
-- **port** (Number)
-- **route** (String)
-- **ssl** (Boolean)
-- **usage** (String)
+- `component` (String)
+- `host` (String)
+- `kafka_authentication_method` (String)
+- `port` (Number)
+- `route` (String)
+- `ssl` (Boolean)
+- `usage` (String)
 
 
 <a id="nestedatt--mysql"></a>
@@ -84,36 +81,36 @@ Read-Only:
 
 Read-Only:
 
-- **admin_password** (String)
-- **admin_username** (String)
-- **backup_hour** (String)
-- **backup_minute** (String)
-- **binlog_retention_period** (String)
-- **ip_filter** (List of String)
-- **migration** (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--migration))
-- **mysql** (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--mysql))
-- **mysql_version** (String)
-- **private_access** (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--private_access))
-- **privatelink_access** (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--privatelink_access))
-- **project_to_fork_from** (String)
-- **public_access** (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--public_access))
-- **recovery_target_time** (String)
-- **service_to_fork_from** (String)
-- **static_ips** (String)
+- `admin_password` (String)
+- `admin_username` (String)
+- `backup_hour` (String)
+- `backup_minute` (String)
+- `binlog_retention_period` (String)
+- `ip_filter` (List of String)
+- `migration` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--migration))
+- `mysql` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--mysql))
+- `mysql_version` (String)
+- `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--private_access))
+- `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--privatelink_access))
+- `project_to_fork_from` (String)
+- `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--public_access))
+- `recovery_target_time` (String)
+- `service_to_fork_from` (String)
+- `static_ips` (String)
 
 <a id="nestedobjatt--mysql_user_config--migration"></a>
 ### Nested Schema for `mysql_user_config.migration`
 
 Read-Only:
 
-- **dbname** (String)
-- **host** (String)
-- **ignore_dbs** (String)
-- **method** (String)
-- **password** (String)
-- **port** (String)
-- **ssl** (String)
-- **username** (String)
+- `dbname` (String)
+- `host` (String)
+- `ignore_dbs` (String)
+- `method` (String)
+- `password` (String)
+- `port` (String)
+- `ssl` (String)
+- `username` (String)
 
 
 <a id="nestedobjatt--mysql_user_config--mysql"></a>
@@ -121,30 +118,30 @@ Read-Only:
 
 Read-Only:
 
-- **connect_timeout** (String)
-- **default_time_zone** (String)
-- **group_concat_max_len** (String)
-- **information_schema_stats_expiry** (String)
-- **innodb_ft_min_token_size** (String)
-- **innodb_ft_server_stopword_table** (String)
-- **innodb_lock_wait_timeout** (String)
-- **innodb_log_buffer_size** (String)
-- **innodb_online_alter_log_max_size** (String)
-- **innodb_print_all_deadlocks** (String)
-- **innodb_rollback_on_timeout** (String)
-- **interactive_timeout** (String)
-- **internal_tmp_mem_storage_engine** (String)
-- **long_query_time** (String)
-- **max_allowed_packet** (String)
-- **max_heap_table_size** (String)
-- **net_read_timeout** (String)
-- **net_write_timeout** (String)
-- **slow_query_log** (String)
-- **sort_buffer_size** (String)
-- **sql_mode** (String)
-- **sql_require_primary_key** (String)
-- **tmp_table_size** (String)
-- **wait_timeout** (String)
+- `connect_timeout` (String)
+- `default_time_zone` (String)
+- `group_concat_max_len` (String)
+- `information_schema_stats_expiry` (String)
+- `innodb_ft_min_token_size` (String)
+- `innodb_ft_server_stopword_table` (String)
+- `innodb_lock_wait_timeout` (String)
+- `innodb_log_buffer_size` (String)
+- `innodb_online_alter_log_max_size` (String)
+- `innodb_print_all_deadlocks` (String)
+- `innodb_rollback_on_timeout` (String)
+- `interactive_timeout` (String)
+- `internal_tmp_mem_storage_engine` (String)
+- `long_query_time` (String)
+- `max_allowed_packet` (String)
+- `max_heap_table_size` (String)
+- `net_read_timeout` (String)
+- `net_write_timeout` (String)
+- `slow_query_log` (String)
+- `sort_buffer_size` (String)
+- `sql_mode` (String)
+- `sql_require_primary_key` (String)
+- `tmp_table_size` (String)
+- `wait_timeout` (String)
 
 
 <a id="nestedobjatt--mysql_user_config--private_access"></a>
@@ -152,9 +149,9 @@ Read-Only:
 
 Read-Only:
 
-- **mysql** (String)
-- **mysqlx** (String)
-- **prometheus** (String)
+- `mysql` (String)
+- `mysqlx` (String)
+- `prometheus` (String)
 
 
 <a id="nestedobjatt--mysql_user_config--privatelink_access"></a>
@@ -162,9 +159,9 @@ Read-Only:
 
 Read-Only:
 
-- **mysql** (String)
-- **mysqlx** (String)
-- **prometheus** (String)
+- `mysql` (String)
+- `mysqlx` (String)
+- `prometheus` (String)
 
 
 <a id="nestedobjatt--mysql_user_config--public_access"></a>
@@ -172,9 +169,9 @@ Read-Only:
 
 Read-Only:
 
-- **mysql** (String)
-- **mysqlx** (String)
-- **prometheus** (String)
+- `mysql` (String)
+- `mysqlx` (String)
+- `prometheus` (String)
 
 
 
@@ -183,8 +180,8 @@ Read-Only:
 
 Read-Only:
 
-- **integration_type** (String)
-- **source_service_name** (String)
+- `integration_type` (String)
+- `source_service_name` (String)
 
 
 <a id="nestedatt--tag"></a>
@@ -192,7 +189,7 @@ Read-Only:
 
 Read-Only:
 
-- **key** (String)
-- **value** (String)
+- `key` (String)
+- `value` (String)
 
 

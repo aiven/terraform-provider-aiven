@@ -25,17 +25,14 @@ data "aiven_m3db_user" "user" {
 
 ### Required
 
-- **project** (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **service_name** (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **username** (String) The actual name of the M3DB User. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `username` (String) The actual name of the M3DB User. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Read-Only
 
-- **password** (String, Sensitive) The password of the M3DB User.
-- **type** (String) Type of the user account. Tells whether the user is the primary account or a regular account.
+- `id` (String) The ID of this resource.
+- `password` (String, Sensitive) The password of the M3DB User.
+- `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.
 
 

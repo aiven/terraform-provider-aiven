@@ -25,27 +25,27 @@ resource "aiven_gcp_vpc_peering_connection" "foo" {
 
 ### Required
 
-- **gcp_project_id** (String) GCP project ID. This property cannot be changed, doing so forces recreation of the resource.
-- **peer_vpc** (String) GCP VPC network name. This property cannot be changed, doing so forces recreation of the resource.
-- **vpc_id** (String) The VPC the peering connection belongs to. This property cannot be changed, doing so forces recreation of the resource.
+- `gcp_project_id` (String) GCP project ID. This property cannot be changed, doing so forces recreation of the resource.
+- `peer_vpc` (String) GCP VPC network name. This property cannot be changed, doing so forces recreation of the resource.
+- `vpc_id` (String) The VPC the peering connection belongs to. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Optional
 
-- **id** (String) The ID of this resource.
-- **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- **state** (String) State of the peering connection
-- **state_info** (Map of String) State-specific help or error information
+- `id` (String) The ID of this resource.
+- `state` (String) State of the peering connection
+- `state_info` (Map of String) State-specific help or error information
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
-- **create** (String)
-- **delete** (String)
+- `create` (String)
+- `delete` (String)
 
 ## Import
 
