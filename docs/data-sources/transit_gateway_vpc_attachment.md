@@ -25,20 +25,17 @@ data "aiven_transit_gateway_vpc_attachment" "attachment" {
 
 ### Required
 
-- **peer_cloud_account** (String) AWS account ID or GCP project ID of the peered VPC This property cannot be changed, doing so forces recreation of the resource.
-- **peer_vpc** (String) Transit gateway ID This property cannot be changed, doing so forces recreation of the resource.
-- **vpc_id** (String) The VPC the peering connection belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- `peer_cloud_account` (String) AWS account ID or GCP project ID of the peered VPC This property cannot be changed, doing so forces recreation of the resource.
+- `peer_vpc` (String) Transit gateway ID This property cannot be changed, doing so forces recreation of the resource.
+- `vpc_id` (String) The VPC the peering connection belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Read-Only
 
-- **peer_region** (String) AWS region of the peered VPC (if not in the same region as Aiven VPC)
-- **peering_connection_id** (String) Cloud provider identifier for the peering connection if available
-- **state** (String) State of the peering connection
-- **state_info** (Map of String) State-specific help or error information
-- **user_peer_network_cidrs** (List of String) List of private IPv4 ranges to route through the peering connection
+- `id` (String) The ID of this resource.
+- `peer_region` (String) AWS region of the peered VPC (if not in the same region as Aiven VPC)
+- `peering_connection_id` (String) Cloud provider identifier for the peering connection if available
+- `state` (String) State of the peering connection
+- `state_info` (Map of String) State-specific help or error information
+- `user_peer_network_cidrs` (List of String) List of private IPv4 ranges to route through the peering connection
 
 

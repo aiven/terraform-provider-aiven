@@ -24,18 +24,15 @@ resource "aiven_account_team" "account_team1" {
 
 ### Required
 
-- **account_id** (String) The unique account id
-- **name** (String) The account team name
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- `account_id` (String) The unique account id
+- `name` (String) The account team name
 
 ### Read-Only
 
-- **create_time** (String) Time of creation
-- **team_id** (String) The auto-generated unique account team id
-- **update_time** (String) Time of last update
+- `create_time` (String) Time of creation
+- `id` (String) The ID of this resource.
+- `team_id` (String) The auto-generated unique account team id
+- `update_time` (String) Time of last update
 
 ## Import
 

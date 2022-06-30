@@ -38,14 +38,17 @@ resource "aiven_account_team_project" "account_team_project1" {
 
 ### Required
 
-- **account_id** (String) The unique account id
-- **team_id** (String) An account team id
+- `account_id` (String) The unique account id
+- `team_id` (String) An account team id
 
 ### Optional
 
-- **id** (String) The ID of this resource.
-- **project_name** (String) The name of an already existing project
-- **team_type** (String) The Account team project type The possible values are `admin`, `developer`, `operator` and `read_only`.
+- `project_name` (String) The name of an already existing project
+- `team_type` (String) The Account team project type The possible values are `admin`, `developer`, `operator` and `read_only`.
+
+### Read-Only
+
+- `id` (String) The ID of this resource.
 
 ## Import
 

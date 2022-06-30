@@ -5,6 +5,9 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [X.X.X] - not yet released
+- Fix auto generated documentation by bumping tfplugindocs to latest version
+
 ## [3.2.1] - 2022-06-29
 
 - Fix documentation for M3DB namespaces and other documentation and examples improvements

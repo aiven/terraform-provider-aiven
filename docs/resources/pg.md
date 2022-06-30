@@ -55,57 +55,57 @@ resource "aiven_pg" "pg" {
 
 ### Required
 
-- **project** (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **service_name** (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
+- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Optional
 
-- **cloud_name** (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
-- **disk_space** (String) The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.
-- **id** (String) The ID of this resource.
-- **maintenance_window_dow** (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
-- **maintenance_window_time** (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
-- **pg** (Block List, Max: 1) PostgreSQL specific server provided values (see [below for nested schema](#nestedblock--pg))
-- **pg_user_config** (Block List, Max: 1) Pg user configurable settings (see [below for nested schema](#nestedblock--pg_user_config))
-- **plan** (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
-- **project_vpc_id** (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
-- **service_integrations** (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
-- **static_ips** (List of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
-- **tag** (Block Set) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedblock--tag))
-- **termination_protection** (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
-- **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
+- `disk_space` (String) The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.
+- `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
+- `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
+- `pg` (Block List, Max: 1) PostgreSQL specific server provided values (see [below for nested schema](#nestedblock--pg))
+- `pg_user_config` (Block List, Max: 1) Pg user configurable settings (see [below for nested schema](#nestedblock--pg_user_config))
+- `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
+- `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
+- `service_integrations` (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
+- `static_ips` (List of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
+- `tag` (Block Set) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedblock--tag))
+- `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- **components** (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
-- **disk_space_cap** (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
-- **disk_space_default** (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
-- **disk_space_step** (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
-- **disk_space_used** (String) Disk space that service is currently using
-- **service_host** (String) The hostname of the service.
-- **service_password** (String, Sensitive) Password used for connecting to the service, if applicable
-- **service_port** (Number) The port of the service
-- **service_type** (String) Aiven internal service type code
-- **service_uri** (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
-- **service_username** (String) Username used for connecting to the service, if applicable
-- **state** (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
+- `components` (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
+- `disk_space_cap` (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
+- `disk_space_default` (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
+- `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
+- `disk_space_used` (String) Disk space that service is currently using
+- `id` (String) The ID of this resource.
+- `service_host` (String) The hostname of the service.
+- `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
+- `service_port` (Number) The port of the service
+- `service_type` (String) Aiven internal service type code
+- `service_uri` (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
+- `service_username` (String) Username used for connecting to the service, if applicable
+- `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
 
 <a id="nestedblock--pg"></a>
 ### Nested Schema for `pg`
 
 Optional:
 
-- **uri** (String, Sensitive) PostgreSQL master connection URI
+- `uri` (String, Sensitive) PostgreSQL master connection URI
 
 Read-Only:
 
-- **dbname** (String) Primary PostgreSQL database name
-- **host** (String) PostgreSQL master node host IP or name
-- **password** (String, Sensitive) PostgreSQL admin user password
-- **port** (Number) PostgreSQL port
-- **replica_uri** (String, Sensitive) PostgreSQL replica URI for services with a replica
-- **sslmode** (String) PostgreSQL sslmode setting (currently always "require")
-- **user** (String) PostgreSQL admin user name
+- `dbname` (String) Primary PostgreSQL database name
+- `host` (String) PostgreSQL master node host IP or name
+- `password` (String, Sensitive) PostgreSQL admin user password
+- `port` (Number) PostgreSQL port
+- `replica_uri` (String, Sensitive) PostgreSQL replica URI for services with a replica
+- `sslmode` (String) PostgreSQL sslmode setting (currently always "require")
+- `user` (String) PostgreSQL admin user name
 
 
 <a id="nestedblock--pg_user_config"></a>
@@ -113,45 +113,45 @@ Read-Only:
 
 Optional:
 
-- **admin_password** (String, Sensitive) Custom password for admin user. Defaults to random string. This must be set only when a new service is being created.
-- **admin_username** (String) Custom username for admin user. This must be set only when a new service is being created.
-- **backup_hour** (String) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.
-- **backup_minute** (String) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.
-- **enable_ipv6** (String) Enable IPv6
-- **ip_filter** (List of String) IP filter
-- **migration** (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--pg_user_config--migration))
-- **pg** (Block List, Max: 1) postgresql.conf configuration values (see [below for nested schema](#nestedblock--pg_user_config--pg))
-- **pg_read_replica** (String) Should the service which is being forked be a read replica (deprecated, use read_replica service integration instead).
-- **pg_service_to_fork_from** (String) Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created.
-- **pg_version** (String) PostgreSQL major version
-- **pgbouncer** (Block List, Max: 1) PGBouncer connection pooling settings (see [below for nested schema](#nestedblock--pg_user_config--pgbouncer))
-- **pglookout** (Block List, Max: 1) PGLookout settings (see [below for nested schema](#nestedblock--pg_user_config--pglookout))
-- **private_access** (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--pg_user_config--private_access))
-- **privatelink_access** (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--pg_user_config--privatelink_access))
-- **project_to_fork_from** (String) Name of another project to fork a service from. This has effect only when a new service is being created.
-- **public_access** (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--pg_user_config--public_access))
-- **recovery_target_time** (String) Recovery target time when forking a service. This has effect only when a new service is being created.
-- **service_to_fork_from** (String) Name of another service to fork from. This has effect only when a new service is being created.
-- **shared_buffers_percentage** (String) shared_buffers_percentage
-- **static_ips** (String) Static IP addresses
-- **synchronous_replication** (String) Synchronous replication type. Note that the service plan also needs to support synchronous replication.
-- **timescaledb** (Block List, Max: 1) TimescaleDB extension configuration values (see [below for nested schema](#nestedblock--pg_user_config--timescaledb))
-- **variant** (String) Variant of the PostgreSQL service, may affect the features that are exposed by default
-- **work_mem** (String) work_mem
+- `admin_password` (String, Sensitive) Custom password for admin user. Defaults to random string. This must be set only when a new service is being created.
+- `admin_username` (String) Custom username for admin user. This must be set only when a new service is being created.
+- `backup_hour` (String) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.
+- `backup_minute` (String) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.
+- `enable_ipv6` (String) Enable IPv6
+- `ip_filter` (List of String) IP filter
+- `migration` (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--pg_user_config--migration))
+- `pg` (Block List, Max: 1) postgresql.conf configuration values (see [below for nested schema](#nestedblock--pg_user_config--pg))
+- `pg_read_replica` (String) Should the service which is being forked be a read replica (deprecated, use read_replica service integration instead).
+- `pg_service_to_fork_from` (String) Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created.
+- `pg_version` (String) PostgreSQL major version
+- `pgbouncer` (Block List, Max: 1) PGBouncer connection pooling settings (see [below for nested schema](#nestedblock--pg_user_config--pgbouncer))
+- `pglookout` (Block List, Max: 1) PGLookout settings (see [below for nested schema](#nestedblock--pg_user_config--pglookout))
+- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--pg_user_config--private_access))
+- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--pg_user_config--privatelink_access))
+- `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
+- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--pg_user_config--public_access))
+- `recovery_target_time` (String) Recovery target time when forking a service. This has effect only when a new service is being created.
+- `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
+- `shared_buffers_percentage` (String) shared_buffers_percentage
+- `static_ips` (String) Static IP addresses
+- `synchronous_replication` (String) Synchronous replication type. Note that the service plan also needs to support synchronous replication.
+- `timescaledb` (Block List, Max: 1) TimescaleDB extension configuration values (see [below for nested schema](#nestedblock--pg_user_config--timescaledb))
+- `variant` (String) Variant of the PostgreSQL service, may affect the features that are exposed by default
+- `work_mem` (String) work_mem
 
 <a id="nestedblock--pg_user_config--migration"></a>
 ### Nested Schema for `pg_user_config.migration`
 
 Optional:
 
-- **dbname** (String) Database name for bootstrapping the initial connection
-- **host** (String) Hostname or IP address of the server where to migrate data from
-- **ignore_dbs** (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)
-- **method** (String) The migration method to be used (currently supported only by Redis and MySQL service types)
-- **password** (String, Sensitive) Password for authentication with the server where to migrate data from
-- **port** (String) Port number of the server where to migrate data from
-- **ssl** (String) The server where to migrate data from is secured with SSL
-- **username** (String) User name for authentication with the server where to migrate data from
+- `dbname` (String) Database name for bootstrapping the initial connection
+- `host` (String) Hostname or IP address of the server where to migrate data from
+- `ignore_dbs` (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)
+- `method` (String) The migration method to be used (currently supported only by Redis and MySQL service types)
+- `password` (String, Sensitive) Password for authentication with the server where to migrate data from
+- `port` (String) Port number of the server where to migrate data from
+- `ssl` (String) The server where to migrate data from is secured with SSL
+- `username` (String) User name for authentication with the server where to migrate data from
 
 
 <a id="nestedblock--pg_user_config--pg"></a>
@@ -159,52 +159,52 @@ Optional:
 
 Optional:
 
-- **autovacuum_analyze_scale_factor** (String) autovacuum_analyze_scale_factor
-- **autovacuum_analyze_threshold** (String) autovacuum_analyze_threshold
-- **autovacuum_freeze_max_age** (String) autovacuum_freeze_max_age
-- **autovacuum_max_workers** (String) autovacuum_max_workers
-- **autovacuum_naptime** (String) autovacuum_naptime
-- **autovacuum_vacuum_cost_delay** (String) autovacuum_vacuum_cost_delay
-- **autovacuum_vacuum_cost_limit** (String) autovacuum_vacuum_cost_limit
-- **autovacuum_vacuum_scale_factor** (String) autovacuum_vacuum_scale_factor
-- **autovacuum_vacuum_threshold** (String) autovacuum_vacuum_threshold
-- **bgwriter_delay** (String) bgwriter_delay
-- **bgwriter_flush_after** (String) bgwriter_flush_after
-- **bgwriter_lru_maxpages** (String) bgwriter_lru_maxpages
-- **bgwriter_lru_multiplier** (String) bgwriter_lru_multiplier
-- **deadlock_timeout** (String) deadlock_timeout
-- **default_toast_compression** (String) default_toast_compression
-- **idle_in_transaction_session_timeout** (String) idle_in_transaction_session_timeout
-- **jit** (String) jit
-- **log_autovacuum_min_duration** (String) log_autovacuum_min_duration
-- **log_error_verbosity** (String) log_error_verbosity
-- **log_line_prefix** (String) log_line_prefix
-- **log_min_duration_statement** (String) log_min_duration_statement
-- **max_files_per_process** (String) max_files_per_process
-- **max_locks_per_transaction** (String) max_locks_per_transaction
-- **max_logical_replication_workers** (String) max_logical_replication_workers
-- **max_parallel_workers** (String) max_parallel_workers
-- **max_parallel_workers_per_gather** (String) max_parallel_workers_per_gather
-- **max_pred_locks_per_transaction** (String) max_pred_locks_per_transaction
-- **max_prepared_transactions** (String) max_prepared_transactions
-- **max_replication_slots** (String) max_replication_slots
-- **max_slot_wal_keep_size** (String) max_slot_wal_keep_size
-- **max_stack_depth** (String) max_stack_depth
-- **max_standby_archive_delay** (String) max_standby_archive_delay
-- **max_standby_streaming_delay** (String) max_standby_streaming_delay
-- **max_wal_senders** (String) max_wal_senders
-- **max_worker_processes** (String) max_worker_processes
-- **pg_partman_bgw__dot__interval** (String) pg_partman_bgw.interval
-- **pg_partman_bgw__dot__role** (String) pg_partman_bgw.role
-- **pg_stat_statements__dot__track** (String) pg_stat_statements.track
-- **temp_file_limit** (String) temp_file_limit
-- **timezone** (String) timezone
-- **track_activity_query_size** (String) track_activity_query_size
-- **track_commit_timestamp** (String) track_commit_timestamp
-- **track_functions** (String) track_functions
-- **track_io_timing** (String) track_io_timing
-- **wal_sender_timeout** (String) wal_sender_timeout
-- **wal_writer_delay** (String) wal_writer_delay
+- `autovacuum_analyze_scale_factor` (String) autovacuum_analyze_scale_factor
+- `autovacuum_analyze_threshold` (String) autovacuum_analyze_threshold
+- `autovacuum_freeze_max_age` (String) autovacuum_freeze_max_age
+- `autovacuum_max_workers` (String) autovacuum_max_workers
+- `autovacuum_naptime` (String) autovacuum_naptime
+- `autovacuum_vacuum_cost_delay` (String) autovacuum_vacuum_cost_delay
+- `autovacuum_vacuum_cost_limit` (String) autovacuum_vacuum_cost_limit
+- `autovacuum_vacuum_scale_factor` (String) autovacuum_vacuum_scale_factor
+- `autovacuum_vacuum_threshold` (String) autovacuum_vacuum_threshold
+- `bgwriter_delay` (String) bgwriter_delay
+- `bgwriter_flush_after` (String) bgwriter_flush_after
+- `bgwriter_lru_maxpages` (String) bgwriter_lru_maxpages
+- `bgwriter_lru_multiplier` (String) bgwriter_lru_multiplier
+- `deadlock_timeout` (String) deadlock_timeout
+- `default_toast_compression` (String) default_toast_compression
+- `idle_in_transaction_session_timeout` (String) idle_in_transaction_session_timeout
+- `jit` (String) jit
+- `log_autovacuum_min_duration` (String) log_autovacuum_min_duration
+- `log_error_verbosity` (String) log_error_verbosity
+- `log_line_prefix` (String) log_line_prefix
+- `log_min_duration_statement` (String) log_min_duration_statement
+- `max_files_per_process` (String) max_files_per_process
+- `max_locks_per_transaction` (String) max_locks_per_transaction
+- `max_logical_replication_workers` (String) max_logical_replication_workers
+- `max_parallel_workers` (String) max_parallel_workers
+- `max_parallel_workers_per_gather` (String) max_parallel_workers_per_gather
+- `max_pred_locks_per_transaction` (String) max_pred_locks_per_transaction
+- `max_prepared_transactions` (String) max_prepared_transactions
+- `max_replication_slots` (String) max_replication_slots
+- `max_slot_wal_keep_size` (String) max_slot_wal_keep_size
+- `max_stack_depth` (String) max_stack_depth
+- `max_standby_archive_delay` (String) max_standby_archive_delay
+- `max_standby_streaming_delay` (String) max_standby_streaming_delay
+- `max_wal_senders` (String) max_wal_senders
+- `max_worker_processes` (String) max_worker_processes
+- `pg_partman_bgw__dot__interval` (String) pg_partman_bgw.interval
+- `pg_partman_bgw__dot__role` (String) pg_partman_bgw.role
+- `pg_stat_statements__dot__track` (String) pg_stat_statements.track
+- `temp_file_limit` (String) temp_file_limit
+- `timezone` (String) timezone
+- `track_activity_query_size` (String) track_activity_query_size
+- `track_commit_timestamp` (String) track_commit_timestamp
+- `track_functions` (String) track_functions
+- `track_io_timing` (String) track_io_timing
+- `wal_sender_timeout` (String) wal_sender_timeout
+- `wal_writer_delay` (String) wal_writer_delay
 
 
 <a id="nestedblock--pg_user_config--pgbouncer"></a>
@@ -212,15 +212,15 @@ Optional:
 
 Optional:
 
-- **autodb_idle_timeout** (String) If the automatically created database pools have been unused this many seconds, they are freed. If 0 then timeout is disabled. [seconds]
-- **autodb_max_db_connections** (String) Do not allow more than this many server connections per database (regardless of user). Setting it to 0 means unlimited.
-- **autodb_pool_mode** (String) PGBouncer pool mode
-- **autodb_pool_size** (String) If non-zero then create automatically a pool of that size per user when a pool doesn't exist.
-- **ignore_startup_parameters** (List of String) List of parameters to ignore when given in startup packet
-- **min_pool_size** (String) Add more server connections to pool if below this number. Improves behavior when usual load comes suddenly back after period of total inactivity. The value is effectively capped at the pool size.
-- **server_idle_timeout** (String) If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. [seconds]
-- **server_lifetime** (String) The pooler will close an unused server connection that has been connected longer than this. [seconds]
-- **server_reset_query_always** (String) Run server_reset_query (DISCARD ALL) in all pooling modes
+- `autodb_idle_timeout` (String) If the automatically created database pools have been unused this many seconds, they are freed. If 0 then timeout is disabled. [seconds]
+- `autodb_max_db_connections` (String) Do not allow more than this many server connections per database (regardless of user). Setting it to 0 means unlimited.
+- `autodb_pool_mode` (String) PGBouncer pool mode
+- `autodb_pool_size` (String) If non-zero then create automatically a pool of that size per user when a pool doesn't exist.
+- `ignore_startup_parameters` (List of String) List of parameters to ignore when given in startup packet
+- `min_pool_size` (String) Add more server connections to pool if below this number. Improves behavior when usual load comes suddenly back after period of total inactivity. The value is effectively capped at the pool size.
+- `server_idle_timeout` (String) If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. [seconds]
+- `server_lifetime` (String) The pooler will close an unused server connection that has been connected longer than this. [seconds]
+- `server_reset_query_always` (String) Run server_reset_query (DISCARD ALL) in all pooling modes
 
 
 <a id="nestedblock--pg_user_config--pglookout"></a>
@@ -228,7 +228,7 @@ Optional:
 
 Optional:
 
-- **max_failover_replication_time_lag** (String) max_failover_replication_time_lag
+- `max_failover_replication_time_lag` (String) max_failover_replication_time_lag
 
 
 <a id="nestedblock--pg_user_config--private_access"></a>
@@ -236,9 +236,9 @@ Optional:
 
 Optional:
 
-- **pg** (String) Allow clients to connect to pg with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
-- **pgbouncer** (String) Allow clients to connect to pgbouncer with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
-- **prometheus** (String) Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+- `pg` (String) Allow clients to connect to pg with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+- `pgbouncer` (String) Allow clients to connect to pgbouncer with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+- `prometheus` (String) Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
 
 
 <a id="nestedblock--pg_user_config--privatelink_access"></a>
@@ -246,9 +246,9 @@ Optional:
 
 Optional:
 
-- **pg** (String) Enable pg
-- **pgbouncer** (String) Enable pgbouncer
-- **prometheus** (String) Enable prometheus
+- `pg` (String) Enable pg
+- `pgbouncer` (String) Enable pgbouncer
+- `prometheus` (String) Enable prometheus
 
 
 <a id="nestedblock--pg_user_config--public_access"></a>
@@ -256,9 +256,9 @@ Optional:
 
 Optional:
 
-- **pg** (String) Allow clients to connect to pg from the public internet for service nodes that are in a project VPC or another type of private network
-- **pgbouncer** (String) Allow clients to connect to pgbouncer from the public internet for service nodes that are in a project VPC or another type of private network
-- **prometheus** (String) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network
+- `pg` (String) Allow clients to connect to pg from the public internet for service nodes that are in a project VPC or another type of private network
+- `pgbouncer` (String) Allow clients to connect to pgbouncer from the public internet for service nodes that are in a project VPC or another type of private network
+- `prometheus` (String) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network
 
 
 <a id="nestedblock--pg_user_config--timescaledb"></a>
@@ -266,7 +266,7 @@ Optional:
 
 Optional:
 
-- **max_background_workers** (String) timescaledb.max_background_workers
+- `max_background_workers` (String) timescaledb.max_background_workers
 
 
 
@@ -275,8 +275,8 @@ Optional:
 
 Required:
 
-- **integration_type** (String) Type of the service integration. The only supported value at the moment is `read_replica`
-- **source_service_name** (String) Name of the source service
+- `integration_type` (String) Type of the service integration. The only supported value at the moment is `read_replica`
+- `source_service_name` (String) Name of the source service
 
 
 <a id="nestedblock--tag"></a>
@@ -284,8 +284,8 @@ Required:
 
 Required:
 
-- **key** (String) Service tag key
-- **value** (String) Service tag value
+- `key` (String) Service tag key
+- `value` (String) Service tag value
 
 
 <a id="nestedblock--timeouts"></a>
@@ -293,10 +293,10 @@ Required:
 
 Optional:
 
-- **create** (String)
-- **default** (String)
-- **delete** (String)
-- **update** (String)
+- `create` (String)
+- `default` (String)
+- `delete` (String)
+- `update` (String)
 
 
 <a id="nestedatt--components"></a>
@@ -304,13 +304,13 @@ Optional:
 
 Read-Only:
 
-- **component** (String)
-- **host** (String)
-- **kafka_authentication_method** (String)
-- **port** (Number)
-- **route** (String)
-- **ssl** (Boolean)
-- **usage** (String)
+- `component` (String)
+- `host` (String)
+- `kafka_authentication_method` (String)
+- `port` (Number)
+- `route` (String)
+- `ssl` (Boolean)
+- `usage` (String)
 
 ## Import
 

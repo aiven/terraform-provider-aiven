@@ -40,49 +40,52 @@ resource "aiven_kafka_topic" "mytesttopic" {
 
 ### Required
 
-- **partitions** (Number) The number of partitions to create in the topic.
-- **project** (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **replication** (Number) The replication factor for the topic.
-- **service_name** (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **topic_name** (String) The name of the topic. This property cannot be changed, doing so forces recreation of the resource.
+- `partitions` (Number) The number of partitions to create in the topic.
+- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `replication` (Number) The replication factor for the topic.
+- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `topic_name` (String) The name of the topic. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Optional
 
-- **config** (Block List, Max: 1) Kafka topic configuration (see [below for nested schema](#nestedblock--config))
-- **id** (String) The ID of this resource.
-- **tag** (Block Set) Kafka Topic tag. (see [below for nested schema](#nestedblock--tag))
-- **termination_protection** (Boolean) It is a Terraform client-side deletion protection, which prevents a Kafka topic from being deleted. It is recommended to enable this for any production Kafka topic containing critical data.
-- **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `config` (Block List, Max: 1) Kafka topic configuration (see [below for nested schema](#nestedblock--config))
+- `tag` (Block Set) Kafka Topic tag. (see [below for nested schema](#nestedblock--tag))
+- `termination_protection` (Boolean) It is a Terraform client-side deletion protection, which prevents a Kafka topic from being deleted. It is recommended to enable this for any production Kafka topic containing critical data.
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+
+### Read-Only
+
+- `id` (String) The ID of this resource.
 
 <a id="nestedblock--config"></a>
 ### Nested Schema for `config`
 
 Optional:
 
-- **cleanup_policy** (String) cleanup.policy value
-- **compression_type** (String) compression.type value
-- **delete_retention_ms** (String) delete.retention.ms value
-- **file_delete_delay_ms** (String) file.delete.delay.ms value
-- **flush_messages** (String) flush.messages value
-- **flush_ms** (String) flush.ms value
-- **index_interval_bytes** (String) index.interval.bytes value
-- **max_compaction_lag_ms** (String) max.compaction.lag.ms value
-- **max_message_bytes** (String) max.message.bytes value
-- **message_downconversion_enable** (String) message.downconversion.enable value
-- **message_format_version** (String) message.format.version value
-- **message_timestamp_difference_max_ms** (String) message.timestamp.difference.max.ms value
-- **message_timestamp_type** (String) message.timestamp.type value
-- **min_cleanable_dirty_ratio** (String) min.cleanable.dirty.ratio value
-- **min_compaction_lag_ms** (String) min.compaction.lag.ms value
-- **min_insync_replicas** (String) min.insync.replicas value
-- **preallocate** (String) preallocate value
-- **retention_bytes** (String) retention.bytes value
-- **retention_ms** (String) retention.ms value
-- **segment_bytes** (String) segment.bytes value
-- **segment_index_bytes** (String) segment.index.bytes value
-- **segment_jitter_ms** (String) segment.jitter.ms value
-- **segment_ms** (String) segment.ms value
-- **unclean_leader_election_enable** (String) unclean.leader.election.enable value
+- `cleanup_policy` (String) cleanup.policy value
+- `compression_type` (String) compression.type value
+- `delete_retention_ms` (String) delete.retention.ms value
+- `file_delete_delay_ms` (String) file.delete.delay.ms value
+- `flush_messages` (String) flush.messages value
+- `flush_ms` (String) flush.ms value
+- `index_interval_bytes` (String) index.interval.bytes value
+- `max_compaction_lag_ms` (String) max.compaction.lag.ms value
+- `max_message_bytes` (String) max.message.bytes value
+- `message_downconversion_enable` (String) message.downconversion.enable value
+- `message_format_version` (String) message.format.version value
+- `message_timestamp_difference_max_ms` (String) message.timestamp.difference.max.ms value
+- `message_timestamp_type` (String) message.timestamp.type value
+- `min_cleanable_dirty_ratio` (String) min.cleanable.dirty.ratio value
+- `min_compaction_lag_ms` (String) min.compaction.lag.ms value
+- `min_insync_replicas` (String) min.insync.replicas value
+- `preallocate` (String) preallocate value
+- `retention_bytes` (String) retention.bytes value
+- `retention_ms` (String) retention.ms value
+- `segment_bytes` (String) segment.bytes value
+- `segment_index_bytes` (String) segment.index.bytes value
+- `segment_jitter_ms` (String) segment.jitter.ms value
+- `segment_ms` (String) segment.ms value
+- `unclean_leader_election_enable` (String) unclean.leader.election.enable value
 
 
 <a id="nestedblock--tag"></a>
@@ -90,11 +93,11 @@ Optional:
 
 Required:
 
-- **key** (String) Topic tag key. Maximum Length: `64`.
+- `key` (String) Topic tag key. Maximum Length: `64`.
 
 Optional:
 
-- **value** (String) Topic tag value. Maximum Length: `256`.
+- `value` (String) Topic tag value. Maximum Length: `256`.
 
 
 <a id="nestedblock--timeouts"></a>
@@ -102,9 +105,9 @@ Optional:
 
 Optional:
 
-- **create** (String)
-- **delete** (String)
-- **read** (String)
+- `create` (String)
+- `delete` (String)
+- `read` (String)
 
 ## Import
 

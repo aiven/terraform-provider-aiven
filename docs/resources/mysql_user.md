@@ -26,20 +26,20 @@ resource "aiven_mysql_user" "foo" {
 
 ### Required
 
-- **project** (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **service_name** (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **username** (String) The actual name of the MySQL User. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `username` (String) The actual name of the MySQL User. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Optional
 
-- **authentication** (String) Authentication details. The possible values are `caching_sha2_password` and `mysql_native_password`.
-- **id** (String) The ID of this resource.
-- **password** (String, Sensitive) The password of the MySQL User ( not applicable for all services ).
+- `authentication` (String) Authentication details. The possible values are `caching_sha2_password` and `mysql_native_password`.
+- `password` (String, Sensitive) The password of the MySQL User ( not applicable for all services ).
 
 ### Read-Only
 
-- **access_cert** (String, Sensitive) Access certificate for the user
-- **access_key** (String, Sensitive) Access certificate key for the user
-- **type** (String) Type of the user account. Tells whether the user is the primary account or a regular account.
+- `access_cert` (String, Sensitive) Access certificate for the user
+- `access_key` (String, Sensitive) Access certificate key for the user
+- `id` (String) The ID of this resource.
+- `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.
 
 

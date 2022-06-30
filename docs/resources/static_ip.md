@@ -17,18 +17,15 @@ The aiven static_ip resource allows the creation and deletion of static ips. Ple
 
 ### Required
 
-- **cloud_name** (String) Specifies the cloud that the static ip belongs to. This property cannot be changed, doing so forces recreation of the resource.
-- **project** (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- `cloud_name` (String) Specifies the cloud that the static ip belongs to. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Read-Only
 
-- **ip_address** (String) The address of the static ip
-- **service_name** (String) The service name the static ip is associated with.
-- **state** (String) The state the static ip is in.
-- **static_ip_address_id** (String) The static ip id of the resource. Should be used as a reference elsewhere.
+- `id` (String) The ID of this resource.
+- `ip_address` (String) The address of the static ip
+- `service_name` (String) The service name the static ip is associated with.
+- `state` (String) The state the static ip is in.
+- `static_ip_address_id` (String) The static ip id of the resource. Should be used as a reference elsewhere.
 
 

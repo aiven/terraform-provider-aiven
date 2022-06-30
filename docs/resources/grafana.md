@@ -36,94 +36,94 @@ resource "aiven_grafana" "gr1" {
 
 ### Required
 
-- **project** (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **service_name** (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
+- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Optional
 
-- **cloud_name** (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
-- **disk_space** (String) The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.
-- **grafana_user_config** (Block List, Max: 1) Grafana user configurable settings (see [below for nested schema](#nestedblock--grafana_user_config))
-- **id** (String) The ID of this resource.
-- **maintenance_window_dow** (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
-- **maintenance_window_time** (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
-- **plan** (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
-- **project_vpc_id** (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
-- **service_integrations** (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
-- **static_ips** (List of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
-- **tag** (Block Set) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedblock--tag))
-- **termination_protection** (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
-- **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
+- `disk_space` (String) The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.
+- `grafana_user_config` (Block List, Max: 1) Grafana user configurable settings (see [below for nested schema](#nestedblock--grafana_user_config))
+- `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
+- `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
+- `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
+- `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
+- `service_integrations` (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
+- `static_ips` (List of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
+- `tag` (Block Set) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedblock--tag))
+- `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- **components** (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
-- **disk_space_cap** (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
-- **disk_space_default** (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
-- **disk_space_step** (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
-- **disk_space_used** (String) Disk space that service is currently using
-- **grafana** (List of Object) Grafana server provided values (see [below for nested schema](#nestedatt--grafana))
-- **service_host** (String) The hostname of the service.
-- **service_password** (String, Sensitive) Password used for connecting to the service, if applicable
-- **service_port** (Number) The port of the service
-- **service_type** (String) Aiven internal service type code
-- **service_uri** (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
-- **service_username** (String) Username used for connecting to the service, if applicable
-- **state** (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
+- `components` (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
+- `disk_space_cap` (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
+- `disk_space_default` (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
+- `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
+- `disk_space_used` (String) Disk space that service is currently using
+- `grafana` (List of Object) Grafana server provided values (see [below for nested schema](#nestedatt--grafana))
+- `id` (String) The ID of this resource.
+- `service_host` (String) The hostname of the service.
+- `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
+- `service_port` (Number) The port of the service
+- `service_type` (String) Aiven internal service type code
+- `service_uri` (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
+- `service_username` (String) Username used for connecting to the service, if applicable
+- `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
 
 <a id="nestedblock--grafana_user_config"></a>
 ### Nested Schema for `grafana_user_config`
 
 Optional:
 
-- **alerting_enabled** (String) Enable or disable Grafana alerting functionality
-- **alerting_error_or_timeout** (String) Default error or timeout setting for new alerting rules
-- **alerting_max_annotations_to_keep** (String) Max number of alert annotations that Grafana stores. 0 (default) keeps all alert annotations.
-- **alerting_nodata_or_nullvalues** (String) Default value for 'no data or null values' for new alerting rules
-- **allow_embedding** (String) Allow embedding Grafana dashboards with iframe/frame/object/embed tags. Disabled by default to limit impact of clickjacking
-- **auth_azuread** (Block List, Max: 1) Azure AD OAuth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_azuread))
-- **auth_basic_enabled** (String) Enable or disable basic authentication form, used by Grafana built-in login
-- **auth_generic_oauth** (Block List, Max: 1) Generic OAuth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_generic_oauth))
-- **auth_github** (Block List, Max: 1) Github Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_github))
-- **auth_gitlab** (Block List, Max: 1) GitLab Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_gitlab))
-- **auth_google** (Block List, Max: 1) Google Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_google))
-- **cookie_samesite** (String) Cookie SameSite attribute: 'strict' prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. 'lax' is the default value.
-- **custom_domain** (String) Custom domain
-- **dashboards_min_refresh_interval** (String) Minimum refresh interval
-- **dashboards_versions_to_keep** (String) Dashboard versions to keep per dashboard
-- **dataproxy_send_user_header** (String) Send 'X-Grafana-User' header to data source
-- **dataproxy_timeout** (String) Timeout for data proxy requests in seconds
-- **date_formats** (Block List, Max: 1) Grafana date format specifications (see [below for nested schema](#nestedblock--grafana_user_config--date_formats))
-- **disable_gravatar** (String) Set to true to disable gravatar. Defaults to false (gravatar is enabled)
-- **editors_can_admin** (String) Editors can manage folders, teams and dashboards created by them
-- **external_image_storage** (Block List, Max: 1) External image store settings (see [below for nested schema](#nestedblock--grafana_user_config--external_image_storage))
-- **google_analytics_ua_id** (String) Google Analytics ID
-- **ip_filter** (List of String) IP filter
-- **metrics_enabled** (String) Enable Grafana /metrics endpoint
-- **private_access** (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--grafana_user_config--private_access))
-- **privatelink_access** (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--grafana_user_config--privatelink_access))
-- **project_to_fork_from** (String) Name of another project to fork a service from. This has effect only when a new service is being created.
-- **public_access** (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--grafana_user_config--public_access))
-- **recovery_basebackup_name** (String) Name of the basebackup to restore in forked service
-- **service_to_fork_from** (String) Name of another service to fork from. This has effect only when a new service is being created.
-- **smtp_server** (Block List, Max: 1) SMTP server settings (see [below for nested schema](#nestedblock--grafana_user_config--smtp_server))
-- **static_ips** (String) Static IP addresses
-- **user_auto_assign_org** (String) Auto-assign new users on signup to main organization. Defaults to false
-- **user_auto_assign_org_role** (String) Set role for new signups. Defaults to Viewer
-- **viewers_can_edit** (String) Users with view-only permission can edit but not save dashboards
+- `alerting_enabled` (String) Enable or disable Grafana alerting functionality
+- `alerting_error_or_timeout` (String) Default error or timeout setting for new alerting rules
+- `alerting_max_annotations_to_keep` (String) Max number of alert annotations that Grafana stores. 0 (default) keeps all alert annotations.
+- `alerting_nodata_or_nullvalues` (String) Default value for 'no data or null values' for new alerting rules
+- `allow_embedding` (String) Allow embedding Grafana dashboards with iframe/frame/object/embed tags. Disabled by default to limit impact of clickjacking
+- `auth_azuread` (Block List, Max: 1) Azure AD OAuth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_azuread))
+- `auth_basic_enabled` (String) Enable or disable basic authentication form, used by Grafana built-in login
+- `auth_generic_oauth` (Block List, Max: 1) Generic OAuth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_generic_oauth))
+- `auth_github` (Block List, Max: 1) Github Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_github))
+- `auth_gitlab` (Block List, Max: 1) GitLab Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_gitlab))
+- `auth_google` (Block List, Max: 1) Google Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_google))
+- `cookie_samesite` (String) Cookie SameSite attribute: 'strict' prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. 'lax' is the default value.
+- `custom_domain` (String) Custom domain
+- `dashboards_min_refresh_interval` (String) Minimum refresh interval
+- `dashboards_versions_to_keep` (String) Dashboard versions to keep per dashboard
+- `dataproxy_send_user_header` (String) Send 'X-Grafana-User' header to data source
+- `dataproxy_timeout` (String) Timeout for data proxy requests in seconds
+- `date_formats` (Block List, Max: 1) Grafana date format specifications (see [below for nested schema](#nestedblock--grafana_user_config--date_formats))
+- `disable_gravatar` (String) Set to true to disable gravatar. Defaults to false (gravatar is enabled)
+- `editors_can_admin` (String) Editors can manage folders, teams and dashboards created by them
+- `external_image_storage` (Block List, Max: 1) External image store settings (see [below for nested schema](#nestedblock--grafana_user_config--external_image_storage))
+- `google_analytics_ua_id` (String) Google Analytics ID
+- `ip_filter` (List of String) IP filter
+- `metrics_enabled` (String) Enable Grafana /metrics endpoint
+- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--grafana_user_config--private_access))
+- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--grafana_user_config--privatelink_access))
+- `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
+- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--grafana_user_config--public_access))
+- `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service
+- `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
+- `smtp_server` (Block List, Max: 1) SMTP server settings (see [below for nested schema](#nestedblock--grafana_user_config--smtp_server))
+- `static_ips` (String) Static IP addresses
+- `user_auto_assign_org` (String) Auto-assign new users on signup to main organization. Defaults to false
+- `user_auto_assign_org_role` (String) Set role for new signups. Defaults to Viewer
+- `viewers_can_edit` (String) Users with view-only permission can edit but not save dashboards
 
 <a id="nestedblock--grafana_user_config--auth_azuread"></a>
 ### Nested Schema for `grafana_user_config.auth_azuread`
 
 Optional:
 
-- **allow_sign_up** (String) Automatically sign-up users on successful sign-in
-- **allowed_domains** (List of String) Allowed domains
-- **allowed_groups** (List of String) Require users to belong to one of given groups
-- **auth_url** (String) Authorization URL
-- **client_id** (String) Client ID from provider
-- **client_secret** (String) Client secret from provider
-- **token_url** (String) Token URL
+- `allow_sign_up` (String) Automatically sign-up users on successful sign-in
+- `allowed_domains` (List of String) Allowed domains
+- `allowed_groups` (List of String) Require users to belong to one of given groups
+- `auth_url` (String) Authorization URL
+- `client_id` (String) Client ID from provider
+- `client_secret` (String) Client secret from provider
+- `token_url` (String) Token URL
 
 
 <a id="nestedblock--grafana_user_config--auth_generic_oauth"></a>
@@ -131,16 +131,16 @@ Optional:
 
 Optional:
 
-- **allow_sign_up** (String) Automatically sign-up users on successful sign-in
-- **allowed_domains** (List of String) Allowed domains
-- **allowed_organizations** (List of String) Require user to be member of one of the listed organizations
-- **api_url** (String) API URL
-- **auth_url** (String) Authorization URL
-- **client_id** (String) Client ID from provider
-- **client_secret** (String) Client secret from provider
-- **name** (String) Name of the OAuth integration
-- **scopes** (List of String) OAuth scopes
-- **token_url** (String) Token URL
+- `allow_sign_up` (String) Automatically sign-up users on successful sign-in
+- `allowed_domains` (List of String) Allowed domains
+- `allowed_organizations` (List of String) Require user to be member of one of the listed organizations
+- `api_url` (String) API URL
+- `auth_url` (String) Authorization URL
+- `client_id` (String) Client ID from provider
+- `client_secret` (String) Client secret from provider
+- `name` (String) Name of the OAuth integration
+- `scopes` (List of String) OAuth scopes
+- `token_url` (String) Token URL
 
 
 <a id="nestedblock--grafana_user_config--auth_github"></a>
@@ -148,11 +148,11 @@ Optional:
 
 Optional:
 
-- **allow_sign_up** (String) Automatically sign-up users on successful sign-in
-- **allowed_organizations** (List of String) Require users to belong to one of given organizations
-- **client_id** (String) Client ID from provider
-- **client_secret** (String) Client secret from provider
-- **team_ids** (List of String) Require users to belong to one of given team IDs
+- `allow_sign_up` (String) Automatically sign-up users on successful sign-in
+- `allowed_organizations` (List of String) Require users to belong to one of given organizations
+- `client_id` (String) Client ID from provider
+- `client_secret` (String) Client secret from provider
+- `team_ids` (List of String) Require users to belong to one of given team IDs
 
 
 <a id="nestedblock--grafana_user_config--auth_gitlab"></a>
@@ -160,13 +160,13 @@ Optional:
 
 Optional:
 
-- **allow_sign_up** (String) Automatically sign-up users on successful sign-in
-- **allowed_groups** (List of String) Require users to belong to one of given groups
-- **api_url** (String) API URL. This only needs to be set when using self hosted GitLab
-- **auth_url** (String) Authorization URL. This only needs to be set when using self hosted GitLab
-- **client_id** (String) Client ID from provider
-- **client_secret** (String) Client secret from provider
-- **token_url** (String) Token URL. This only needs to be set when using self hosted GitLab
+- `allow_sign_up` (String) Automatically sign-up users on successful sign-in
+- `allowed_groups` (List of String) Require users to belong to one of given groups
+- `api_url` (String) API URL. This only needs to be set when using self hosted GitLab
+- `auth_url` (String) Authorization URL. This only needs to be set when using self hosted GitLab
+- `client_id` (String) Client ID from provider
+- `client_secret` (String) Client secret from provider
+- `token_url` (String) Token URL. This only needs to be set when using self hosted GitLab
 
 
 <a id="nestedblock--grafana_user_config--auth_google"></a>
@@ -174,10 +174,10 @@ Optional:
 
 Optional:
 
-- **allow_sign_up** (String) Automatically sign-up users on successful sign-in
-- **allowed_domains** (List of String) Domains allowed to sign-in to this Grafana
-- **client_id** (String) Client ID from provider
-- **client_secret** (String) Client secret from provider
+- `allow_sign_up` (String) Automatically sign-up users on successful sign-in
+- `allowed_domains` (List of String) Domains allowed to sign-in to this Grafana
+- `client_id` (String) Client ID from provider
+- `client_secret` (String) Client secret from provider
 
 
 <a id="nestedblock--grafana_user_config--date_formats"></a>
@@ -185,14 +185,14 @@ Optional:
 
 Optional:
 
-- **default_timezone** (String) Default time zone for user preferences. Value 'browser' uses browser local time zone.
-- **full_date** (String) Moment.js style format string for cases where full date is shown
-- **interval_day** (String) Moment.js style format string used when a time requiring day accuracy is shown
-- **interval_hour** (String) Moment.js style format string used when a time requiring hour accuracy is shown
-- **interval_minute** (String) Moment.js style format string used when a time requiring minute accuracy is shown
-- **interval_month** (String) Moment.js style format string used when a time requiring month accuracy is shown
-- **interval_second** (String) Moment.js style format string used when a time requiring second accuracy is shown
-- **interval_year** (String) Moment.js style format string used when a time requiring year accuracy is shown
+- `default_timezone` (String) Default time zone for user preferences. Value 'browser' uses browser local time zone.
+- `full_date` (String) Moment.js style format string for cases where full date is shown
+- `interval_day` (String) Moment.js style format string used when a time requiring day accuracy is shown
+- `interval_hour` (String) Moment.js style format string used when a time requiring hour accuracy is shown
+- `interval_minute` (String) Moment.js style format string used when a time requiring minute accuracy is shown
+- `interval_month` (String) Moment.js style format string used when a time requiring month accuracy is shown
+- `interval_second` (String) Moment.js style format string used when a time requiring second accuracy is shown
+- `interval_year` (String) Moment.js style format string used when a time requiring year accuracy is shown
 
 
 <a id="nestedblock--grafana_user_config--external_image_storage"></a>
@@ -200,10 +200,10 @@ Optional:
 
 Optional:
 
-- **access_key** (String) S3 access key. Requires permissions to the S3 bucket for the s3:PutObject and s3:PutObjectAcl actions
-- **bucket_url** (String) Bucket URL for S3
-- **provider** (String) Provider type
-- **secret_key** (String) S3 secret key
+- `access_key` (String) S3 access key. Requires permissions to the S3 bucket for the s3:PutObject and s3:PutObjectAcl actions
+- `bucket_url` (String) Bucket URL for S3
+- `provider` (String) Provider type
+- `secret_key` (String) S3 secret key
 
 
 <a id="nestedblock--grafana_user_config--private_access"></a>
@@ -211,7 +211,7 @@ Optional:
 
 Optional:
 
-- **grafana** (String) Allow clients to connect to grafana with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+- `grafana` (String) Allow clients to connect to grafana with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
 
 
 <a id="nestedblock--grafana_user_config--privatelink_access"></a>
@@ -219,7 +219,7 @@ Optional:
 
 Optional:
 
-- **grafana** (String) Enable grafana
+- `grafana` (String) Enable grafana
 
 
 <a id="nestedblock--grafana_user_config--public_access"></a>
@@ -227,7 +227,7 @@ Optional:
 
 Optional:
 
-- **grafana** (String) Allow clients to connect to grafana from the public internet for service nodes that are in a project VPC or another type of private network
+- `grafana` (String) Allow clients to connect to grafana from the public internet for service nodes that are in a project VPC or another type of private network
 
 
 <a id="nestedblock--grafana_user_config--smtp_server"></a>
@@ -235,14 +235,14 @@ Optional:
 
 Optional:
 
-- **from_address** (String) Address used for sending emails
-- **from_name** (String) Name used in outgoing emails, defaults to Grafana
-- **host** (String) Server hostname or IP
-- **password** (String, Sensitive) Password for SMTP authentication
-- **port** (String) SMTP server port
-- **skip_verify** (String) Skip verifying server certificate. Defaults to false
-- **starttls_policy** (String) Either OpportunisticStartTLS, MandatoryStartTLS or NoStartTLS. Default is OpportunisticStartTLS.
-- **username** (String) Username for SMTP authentication
+- `from_address` (String) Address used for sending emails
+- `from_name` (String) Name used in outgoing emails, defaults to Grafana
+- `host` (String) Server hostname or IP
+- `password` (String, Sensitive) Password for SMTP authentication
+- `port` (String) SMTP server port
+- `skip_verify` (String) Skip verifying server certificate. Defaults to false
+- `starttls_policy` (String) Either OpportunisticStartTLS, MandatoryStartTLS or NoStartTLS. Default is OpportunisticStartTLS.
+- `username` (String) Username for SMTP authentication
 
 
 
@@ -251,8 +251,8 @@ Optional:
 
 Required:
 
-- **integration_type** (String) Type of the service integration. The only supported value at the moment is `read_replica`
-- **source_service_name** (String) Name of the source service
+- `integration_type` (String) Type of the service integration. The only supported value at the moment is `read_replica`
+- `source_service_name` (String) Name of the source service
 
 
 <a id="nestedblock--tag"></a>
@@ -260,8 +260,8 @@ Required:
 
 Required:
 
-- **key** (String) Service tag key
-- **value** (String) Service tag value
+- `key` (String) Service tag key
+- `value` (String) Service tag value
 
 
 <a id="nestedblock--timeouts"></a>
@@ -269,9 +269,9 @@ Required:
 
 Optional:
 
-- **create** (String)
-- **delete** (String)
-- **update** (String)
+- `create` (String)
+- `delete` (String)
+- `update` (String)
 
 
 <a id="nestedatt--components"></a>
@@ -279,13 +279,13 @@ Optional:
 
 Read-Only:
 
-- **component** (String)
-- **host** (String)
-- **kafka_authentication_method** (String)
-- **port** (Number)
-- **route** (String)
-- **ssl** (Boolean)
-- **usage** (String)
+- `component` (String)
+- `host` (String)
+- `kafka_authentication_method` (String)
+- `port` (Number)
+- `route` (String)
+- `ssl` (Boolean)
+- `usage` (String)
 
 
 <a id="nestedatt--grafana"></a>

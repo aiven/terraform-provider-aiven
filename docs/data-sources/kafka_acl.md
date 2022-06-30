@@ -27,18 +27,15 @@ data "aiven_kafka_acl" "mytestacl" {
 
 ### Required
 
-- **permission** (String) Kafka permission to grant. The possible values are `admin`, `read`, `readwrite` and `write`. This property cannot be changed, doing so forces recreation of the resource.
-- **project** (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **service_name** (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **topic** (String) Topic name pattern for the ACL entry. This property cannot be changed, doing so forces recreation of the resource.
-- **username** (String) Username pattern for the ACL entry. This property cannot be changed, doing so forces recreation of the resource.
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- `permission` (String) Kafka permission to grant. The possible values are `admin`, `read`, `readwrite` and `write`. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `topic` (String) Topic name pattern for the ACL entry. This property cannot be changed, doing so forces recreation of the resource.
+- `username` (String) Username pattern for the ACL entry. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Read-Only
 
-- **acl_id** (String) Kafka ACL ID
+- `acl_id` (String) Kafka ACL ID
+- `id` (String) The ID of this resource.
 
 

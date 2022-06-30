@@ -36,80 +36,80 @@ resource "aiven_redis" "redis1" {
 
 ### Required
 
-- **project** (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **service_name** (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
+- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Optional
 
-- **cloud_name** (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
-- **disk_space** (String) The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.
-- **id** (String) The ID of this resource.
-- **maintenance_window_dow** (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
-- **maintenance_window_time** (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
-- **plan** (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
-- **project_vpc_id** (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
-- **redis_user_config** (Block List, Max: 1) Redis user configurable settings (see [below for nested schema](#nestedblock--redis_user_config))
-- **service_integrations** (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
-- **static_ips** (List of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
-- **tag** (Block Set) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedblock--tag))
-- **termination_protection** (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
-- **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
+- `disk_space` (String) The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.
+- `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
+- `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
+- `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
+- `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
+- `redis_user_config` (Block List, Max: 1) Redis user configurable settings (see [below for nested schema](#nestedblock--redis_user_config))
+- `service_integrations` (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
+- `static_ips` (List of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
+- `tag` (Block Set) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedblock--tag))
+- `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- **components** (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
-- **disk_space_cap** (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
-- **disk_space_default** (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
-- **disk_space_step** (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
-- **disk_space_used** (String) Disk space that service is currently using
-- **redis** (List of Object) Redis server provided values (see [below for nested schema](#nestedatt--redis))
-- **service_host** (String) The hostname of the service.
-- **service_password** (String, Sensitive) Password used for connecting to the service, if applicable
-- **service_port** (Number) The port of the service
-- **service_type** (String) Aiven internal service type code
-- **service_uri** (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
-- **service_username** (String) Username used for connecting to the service, if applicable
-- **state** (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
+- `components` (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
+- `disk_space_cap` (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
+- `disk_space_default` (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
+- `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
+- `disk_space_used` (String) Disk space that service is currently using
+- `id` (String) The ID of this resource.
+- `redis` (List of Object) Redis server provided values (see [below for nested schema](#nestedatt--redis))
+- `service_host` (String) The hostname of the service.
+- `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
+- `service_port` (Number) The port of the service
+- `service_type` (String) Aiven internal service type code
+- `service_uri` (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
+- `service_username` (String) Username used for connecting to the service, if applicable
+- `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
 
 <a id="nestedblock--redis_user_config"></a>
 ### Nested Schema for `redis_user_config`
 
 Optional:
 
-- **ip_filter** (List of String) IP filter
-- **migration** (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--redis_user_config--migration))
-- **private_access** (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--redis_user_config--private_access))
-- **privatelink_access** (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--redis_user_config--privatelink_access))
-- **project_to_fork_from** (String) Name of another project to fork a service from. This has effect only when a new service is being created.
-- **public_access** (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--redis_user_config--public_access))
-- **recovery_basebackup_name** (String) Name of the basebackup to restore in forked service
-- **redis_acl_channels_default** (String) Default ACL for pub/sub channels used when Redis user is created
-- **redis_io_threads** (String) Redis IO thread count
-- **redis_lfu_decay_time** (String) LFU maxmemory-policy counter decay time in minutes
-- **redis_lfu_log_factor** (String) Counter logarithm factor for volatile-lfu and allkeys-lfu maxmemory-policies
-- **redis_maxmemory_policy** (String) Redis maxmemory-policy
-- **redis_notify_keyspace_events** (String) Set notify-keyspace-events option
-- **redis_number_of_databases** (String) Number of redis databases
-- **redis_persistence** (String) Redis persistence
-- **redis_pubsub_client_output_buffer_limit** (String) Pub/sub client output buffer hard limit in MB
-- **redis_ssl** (String) Require SSL to access Redis
-- **redis_timeout** (String) Redis idle connection timeout in seconds
-- **service_to_fork_from** (String) Name of another service to fork from. This has effect only when a new service is being created.
-- **static_ips** (String) Static IP addresses
+- `ip_filter` (List of String) IP filter
+- `migration` (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--redis_user_config--migration))
+- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--redis_user_config--private_access))
+- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--redis_user_config--privatelink_access))
+- `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
+- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--redis_user_config--public_access))
+- `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service
+- `redis_acl_channels_default` (String) Default ACL for pub/sub channels used when Redis user is created
+- `redis_io_threads` (String) Redis IO thread count
+- `redis_lfu_decay_time` (String) LFU maxmemory-policy counter decay time in minutes
+- `redis_lfu_log_factor` (String) Counter logarithm factor for volatile-lfu and allkeys-lfu maxmemory-policies
+- `redis_maxmemory_policy` (String) Redis maxmemory-policy
+- `redis_notify_keyspace_events` (String) Set notify-keyspace-events option
+- `redis_number_of_databases` (String) Number of redis databases
+- `redis_persistence` (String) Redis persistence
+- `redis_pubsub_client_output_buffer_limit` (String) Pub/sub client output buffer hard limit in MB
+- `redis_ssl` (String) Require SSL to access Redis
+- `redis_timeout` (String) Redis idle connection timeout in seconds
+- `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
+- `static_ips` (String) Static IP addresses
 
 <a id="nestedblock--redis_user_config--migration"></a>
 ### Nested Schema for `redis_user_config.migration`
 
 Optional:
 
-- **dbname** (String) Database name for bootstrapping the initial connection
-- **host** (String) Hostname or IP address of the server where to migrate data from
-- **ignore_dbs** (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)
-- **method** (String) The migration method to be used (currently supported only by Redis and MySQL service types)
-- **password** (String, Sensitive) Password for authentication with the server where to migrate data from
-- **port** (String) Port number of the server where to migrate data from
-- **ssl** (String) The server where to migrate data from is secured with SSL
-- **username** (String) User name for authentication with the server where to migrate data from
+- `dbname` (String) Database name for bootstrapping the initial connection
+- `host` (String) Hostname or IP address of the server where to migrate data from
+- `ignore_dbs` (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)
+- `method` (String) The migration method to be used (currently supported only by Redis and MySQL service types)
+- `password` (String, Sensitive) Password for authentication with the server where to migrate data from
+- `port` (String) Port number of the server where to migrate data from
+- `ssl` (String) The server where to migrate data from is secured with SSL
+- `username` (String) User name for authentication with the server where to migrate data from
 
 
 <a id="nestedblock--redis_user_config--private_access"></a>
@@ -117,8 +117,8 @@ Optional:
 
 Optional:
 
-- **prometheus** (String) Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
-- **redis** (String) Allow clients to connect to redis with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+- `prometheus` (String) Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+- `redis` (String) Allow clients to connect to redis with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
 
 
 <a id="nestedblock--redis_user_config--privatelink_access"></a>
@@ -126,8 +126,8 @@ Optional:
 
 Optional:
 
-- **prometheus** (String) Enable prometheus
-- **redis** (String) Enable redis
+- `prometheus` (String) Enable prometheus
+- `redis` (String) Enable redis
 
 
 <a id="nestedblock--redis_user_config--public_access"></a>
@@ -135,8 +135,8 @@ Optional:
 
 Optional:
 
-- **prometheus** (String) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network
-- **redis** (String) Allow clients to connect to redis from the public internet for service nodes that are in a project VPC or another type of private network
+- `prometheus` (String) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network
+- `redis` (String) Allow clients to connect to redis from the public internet for service nodes that are in a project VPC or another type of private network
 
 
 
@@ -145,8 +145,8 @@ Optional:
 
 Required:
 
-- **integration_type** (String) Type of the service integration. The only supported value at the moment is `read_replica`
-- **source_service_name** (String) Name of the source service
+- `integration_type` (String) Type of the service integration. The only supported value at the moment is `read_replica`
+- `source_service_name` (String) Name of the source service
 
 
 <a id="nestedblock--tag"></a>
@@ -154,8 +154,8 @@ Required:
 
 Required:
 
-- **key** (String) Service tag key
-- **value** (String) Service tag value
+- `key` (String) Service tag key
+- `value` (String) Service tag value
 
 
 <a id="nestedblock--timeouts"></a>
@@ -163,9 +163,9 @@ Required:
 
 Optional:
 
-- **create** (String)
-- **delete** (String)
-- **update** (String)
+- `create` (String)
+- `delete` (String)
+- `update` (String)
 
 
 <a id="nestedatt--components"></a>
@@ -173,13 +173,13 @@ Optional:
 
 Read-Only:
 
-- **component** (String)
-- **host** (String)
-- **kafka_authentication_method** (String)
-- **port** (Number)
-- **route** (String)
-- **ssl** (Boolean)
-- **usage** (String)
+- `component` (String)
+- `host` (String)
+- `kafka_authentication_method` (String)
+- `port` (Number)
+- `route` (String)
+- `ssl` (Boolean)
+- `usage` (String)
 
 
 <a id="nestedatt--redis"></a>

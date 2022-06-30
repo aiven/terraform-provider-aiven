@@ -37,21 +37,24 @@ resource "aiven_mirrormaker_replication_flow" "f1" {
 
 ### Required
 
-- **enable** (Boolean) Enable of disable replication flows for a service.
-- **project** (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **service_name** (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- **source_cluster** (String) Source cluster alias. Maximum Length: `128`.
-- **target_cluster** (String) Target cluster alias. Maximum Length: `128`.
+- `enable` (Boolean) Enable of disable replication flows for a service.
+- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `service_name` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `source_cluster` (String) Source cluster alias. Maximum Length: `128`.
+- `target_cluster` (String) Target cluster alias. Maximum Length: `128`.
 
 ### Optional
 
-- **emit_heartbeats_enabled** (Boolean) Emit heartbeats enabled. The default value is `false`.
-- **id** (String) The ID of this resource.
-- **replication_policy_class** (String) Replication policy class. The possible values are `org.apache.kafka.connect.mirror.DefaultReplicationPolicy` and `org.apache.kafka.connect.mirror.IdentityReplicationPolicy`. The default value is `org.apache.kafka.connect.mirror.DefaultReplicationPolicy`.
-- **sync_group_offsets_enabled** (Boolean) Sync consumer group offsets. The default value is `false`.
-- **sync_group_offsets_interval_seconds** (Number) Frequency of consumer group offset sync. The default value is `1`.
-- **topics** (List of String) List of topics and/or regular expressions to replicate
-- **topics_blacklist** (List of String) List of topics and/or regular expressions to not replicate.
+- `emit_heartbeats_enabled` (Boolean) Emit heartbeats enabled. The default value is `false`.
+- `replication_policy_class` (String) Replication policy class. The possible values are `org.apache.kafka.connect.mirror.DefaultReplicationPolicy` and `org.apache.kafka.connect.mirror.IdentityReplicationPolicy`. The default value is `org.apache.kafka.connect.mirror.DefaultReplicationPolicy`.
+- `sync_group_offsets_enabled` (Boolean) Sync consumer group offsets. The default value is `false`.
+- `sync_group_offsets_interval_seconds` (Number) Frequency of consumer group offset sync. The default value is `1`.
+- `topics` (List of String) List of topics and/or regular expressions to replicate
+- `topics_blacklist` (List of String) List of topics and/or regular expressions to not replicate.
+
+### Read-Only
+
+- `id` (String) The ID of this resource.
 
 ## Import
 
