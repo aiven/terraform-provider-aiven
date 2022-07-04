@@ -99,8 +99,7 @@ func TestAccAivenPG_static_ips(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "service_host"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_port"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_uri"),
-					// issue with the testing framework? this is always set in manual tests
-					// resource.TestCheckResourceAttrSet(resourceName, "static_ips"),
+					resource.TestCheckResourceAttr(resourceName, "static_ips.#", "2"),
 				),
 			},
 		},
