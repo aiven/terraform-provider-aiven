@@ -2,7 +2,6 @@ package account
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -47,7 +46,7 @@ func ResourceAccountTeam() *schema.Resource {
 		UpdateContext: resourceAccountTeamUpdate,
 		DeleteContext: resourceAccountTeamDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceAccountTeamState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: aivenAccountTeamSchema,
@@ -129,13 +128,4 @@ func resourceAccountTeamDelete(_ context.Context, d *schema.ResourceData, m inte
 	}
 
 	return nil
-}
-
-func resourceAccountTeamState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	di := resourceAccountTeamRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get account team %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }

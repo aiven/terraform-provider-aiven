@@ -87,7 +87,7 @@ func ResourceKafkaSchema() *schema.Resource {
 		ReadContext:   resourceKafkaSchemaRead,
 		DeleteContext: resourceKafkaSchemaDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceKafkaSchemaState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		CustomizeDiff: resourceKafkaSchemaCustomizeDiff,
 
@@ -257,15 +257,6 @@ func resourceKafkaSchemaDelete(_ context.Context, d *schema.ResourceData, m inte
 	}
 
 	return nil
-}
-
-func resourceKafkaSchemaState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	di := resourceKafkaSchemaRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get kafka schema: %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }
 
 func resourceKafkaSchemaCustomizeDiff(_ context.Context, d *schema.ResourceDiff, m interface{}) error {

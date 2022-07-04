@@ -50,7 +50,7 @@ func ResourceCassandra() *schema.Resource {
 			),
 		),
 		Importer: &schema.ResourceImporter{
-			StateContext: schemautil.ResourceServiceState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),

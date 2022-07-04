@@ -2,7 +2,6 @@ package account
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -58,7 +57,7 @@ func ResourceAccount() *schema.Resource {
 		UpdateContext: resourceAccountUpdate,
 		DeleteContext: resourceAccountDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceAccountState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: aivenAccountSchema,
@@ -143,13 +142,4 @@ func resourceAccountDelete(_ context.Context, d *schema.ResourceData, m interfac
 	}
 
 	return nil
-}
-
-func resourceAccountState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	di := resourceAccountRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get account %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }

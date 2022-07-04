@@ -2,7 +2,6 @@ package flink
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -189,7 +188,7 @@ func ResourceFlinkTable() *schema.Resource {
 		ReadContext:   resourceFlinkTableRead,
 		DeleteContext: resourceFlinkTableDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceFlinkTableState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: aivenFlinkTableSchema,
 	}
@@ -354,13 +353,4 @@ func getFlinkTableKafkaScanStartupModes() []string {
 		startupModeLatestOffset   = "latest-offset"
 	)
 	return []string{startupModeEarliestOffset, startupModeLatestOffset}
-}
-
-func resourceFlinkTableState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	di := resourceFlinkTableRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get flink table %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }

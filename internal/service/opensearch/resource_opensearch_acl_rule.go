@@ -2,7 +2,6 @@ package opensearch
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -44,7 +43,7 @@ func ResourceOpensearchACLRule() *schema.Resource {
 		UpdateContext: resourceOpensearchACLRuleUpdate,
 		DeleteContext: resourceOpensearchACLRuleDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceElasticsearchACLRuleState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: aivenOpensearchACLRuleSchema,
@@ -96,14 +95,6 @@ func resourceOpensearchACLRuleRead(_ context.Context, d *schema.ResourceData, m 
 	}
 
 	return nil
-}
-
-func resourceElasticsearchACLRuleState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	di := resourceOpensearchACLRuleRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get elasticsearch acl rule: %v", di)
-	}
-	return []*schema.ResourceData{d}, nil
 }
 
 func resourceOpensearchACLRuleMkAivenACL(username, index, permission string) aiven.ElasticSearchACL {

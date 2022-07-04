@@ -498,48 +498,6 @@ func ResourceServiceDelete(ctx context.Context, d *schema.ResourceData, m interf
 	return nil
 }
 
-func ResourceServiceState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	client := m.(*aiven.Client)
-
-	if len(strings.Split(d.Id(), "/")) != 2 {
-		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>", d.Id())
-	}
-
-	projectName, serviceName := SplitResourceID2(d.Id())
-	s, err := client.Services.Get(projectName, serviceName)
-	if err != nil {
-		return nil, fmt.Errorf("unable to GET service %s: %s", d.Id(), err)
-	}
-	servicePlanParams, err := GetServicePlanParametersFromServiceResponse(ctx, client, projectName, s)
-	if err != nil {
-		return nil, fmt.Errorf("unable to get service plan parameters: %w", err)
-	}
-
-	err = copyServicePropertiesFromAPIResponseToTerraform(d, s, servicePlanParams, projectName)
-	if err != nil {
-		return nil, fmt.Errorf("unable to copy api response into terraform schema: %w", err)
-	}
-
-	allocatedStaticIps, err := CurrentlyAllocatedStaticIps(ctx, projectName, serviceName, m)
-	if err != nil {
-		return nil, fmt.Errorf("unable to currently allocated static ips: %w", err)
-	}
-	if err = d.Set("static_ips", allocatedStaticIps); err != nil {
-		return nil, fmt.Errorf("unable to set static ips field in schema: %w", err)
-	}
-
-	t, err := client.ServiceTags.Get(projectName, serviceName)
-	if err != nil {
-		return nil, fmt.Errorf("unable to get service tags: %w", err)
-	}
-
-	if err := d.Set("tag", SetTagsTerraformProperties(t.Tags)); err != nil {
-		return nil, fmt.Errorf("unable to set tag's in schema: %w", err)
-	}
-
-	return []*schema.ResourceData{d}, nil
-}
-
 func copyServicePropertiesFromAPIResponseToTerraform(
 	d *schema.ResourceData,
 	s *aiven.Service,
@@ -740,7 +698,7 @@ func IsUnknownResource(err error) bool {
 }
 
 func ResourceReadHandleNotFound(err error, d *schema.ResourceData) error {
-	if err != nil && IsUnknownResource(err) {
+	if err != nil && IsUnknownResource(err) && !d.IsNewResource() {
 		d.SetId("")
 		return nil
 	}

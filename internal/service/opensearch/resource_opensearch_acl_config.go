@@ -2,7 +2,6 @@ package opensearch
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -36,7 +35,7 @@ func ResourceOpensearchACLConfig() *schema.Resource {
 		UpdateContext: resourceOpensearchACLConfigUpdate,
 		DeleteContext: resourceOpensearchACLConfigDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceOpensearchACLConfigState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: aivenOpensearchACLConfigSchema,
@@ -65,15 +64,6 @@ func resourceOpensearchACLConfigRead(_ context.Context, d *schema.ResourceData, 
 		return diag.Errorf("error setting ACLs `enable` for resource %s: %s", d.Id(), err)
 	}
 	return nil
-}
-
-func resourceOpensearchACLConfigState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	di := resourceOpensearchACLConfigRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get elasticsearch acl: %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }
 
 func resourceOpensearchACLConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

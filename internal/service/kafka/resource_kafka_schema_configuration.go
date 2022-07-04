@@ -2,7 +2,6 @@ package kafka
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -47,7 +46,7 @@ func ResourceKafkaSchemaConfiguration() *schema.Resource {
 		ReadContext:   resourceKafkaSchemaConfigurationRead,
 		DeleteContext: resourceKafkaSchemaConfigurationDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceKafkaSchemaConfigurationState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: aivenKafkaSchemaConfigurationSchema,
@@ -127,13 +126,4 @@ func resourceKafkaSchemaConfigurationDelete(_ context.Context, d *schema.Resourc
 	}
 
 	return nil
-}
-
-func resourceKafkaSchemaConfigurationState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	di := resourceKafkaSchemaConfigurationRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get kafka schema configuration: %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }
