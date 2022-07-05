@@ -9,6 +9,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
+func GetACLUserValidateFunc() schema.SchemaValidateFunc {
+	return validation.StringMatch(
+		regexp.MustCompile(`^[-._*?A-Za-z0-9]+$`),
+		"Must consist of alpha-numeric characters, underscores, dashes, dots and glob characters '*' and '?'")
+}
+
+func GetServiceUserValidateFunc() schema.SchemaValidateFunc {
+	return validation.StringMatch(
+		regexp.MustCompile(`^(\*$|[a-zA-Z0-9-_?][a-zA-Z0-9-_?*]+)$`),
+		"username should be alphanumeric, may not start with dash or dot, max 64 characters")
+}
+
 var (
 	CommonSchemaProjectReference = &schema.Schema{
 		Type:         schema.TypeString,

@@ -17,7 +17,7 @@ var aivenOpensearchACLRuleSchema = map[string]*schema.Schema{
 		Type:         schema.TypeString,
 		Required:     true,
 		ForceNew:     true,
-		ValidateFunc: validation.StringLenBetween(1, 40),
+		ValidateFunc: schemautil.GetACLUserValidateFunc(),
 		Description:  schemautil.Complex("The username for the ACL entry").MaxLen(40).Referenced().ForceNew().Build(),
 	},
 	"index": {
