@@ -7,7 +7,7 @@ description: |-
 # aiven_service_integration (Resource)
 The Service Integration resource allows the creation and management of Aiven Service Integrations.
 
-**Note** For services running on `hobbiest` plan service integrations are not supported.
+**Note** For services running on `hobbyist` plan service integrations are not supported.
 
 Service Integration defines an integration between two Aiven services or between Aiven service and an external
 integration endpoint. Integration could be for example sending metrics from Kafka service to an InfluxDB service,
