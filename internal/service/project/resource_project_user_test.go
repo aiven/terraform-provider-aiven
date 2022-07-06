@@ -31,6 +31,15 @@ func TestAccAivenProjectUser_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "member_type", "admin"),
 				),
 			},
+			{
+				Config: testAccProjectUserDeveloperResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenProjectUserAttributes("data.aiven_project_user.user"),
+					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "email", fmt.Sprintf("ivan.savciuc+%s@aiven.fi", rName)),
+					resource.TestCheckResourceAttr(resourceName, "member_type", "developer"),
+				),
+			},
 		},
 	})
 }
@@ -76,6 +85,27 @@ resource "aiven_project_user" "bar" {
   project     = aiven_project.foo.project
   email       = "ivan.savciuc+%s@aiven.fi"
   member_type = "admin"
+}
+
+data "aiven_project_user" "user" {
+  project = aiven_project_user.bar.project
+  email   = aiven_project_user.bar.email
+
+  depends_on = [aiven_project_user.bar]
+}`, name, name)
+}
+
+func testAccProjectUserDeveloperResource(name string) string {
+	return fmt.Sprintf(`
+resource "aiven_project" "foo" {
+  project       = "test-acc-pr-%s"
+  default_cloud = "aws-eu-west-2"
+}
+
+resource "aiven_project_user" "bar" {
+  project     = aiven_project.foo.project
+  email       = "ivan.savciuc+%s@aiven.fi"
+  member_type = "developer"
 }
 
 data "aiven_project_user" "user" {
