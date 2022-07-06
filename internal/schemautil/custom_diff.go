@@ -28,7 +28,7 @@ func TagsShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
 	return len(new.(*schema.Set).List()) != 0
 }
 
-func CustomizeDiffCheckUniqueTag(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+func CustomizeDiffCheckUniqueTag(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
 	t := make(map[string]bool)
 	for _, tag := range d.Get("tag").(*schema.Set).List() {
 		tagVal := tag.(map[string]interface{})
