@@ -36,6 +36,29 @@ func TestAccAivenAccountAuthentication_basic(t *testing.T) {
 	})
 }
 
+func TestAccAivenAccountAuthentication_auto_join_team_id(t *testing.T) {
+	resourceName := "aiven_account_authentication.foo"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenAccountAuthenticationWithAutoJoinTeamIDResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAccountAuthenticationWithAutoJoinTeamIDResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenAccountAuthenticationAttributes("data.aiven_account_authentication.auth"),
+					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("test-acc-auth-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "type", "saml"),
+					resource.TestCheckResourceAttrPair(resourceName, "auto_join_team_id", "aiven_account_team.foo", "team_id"),
+				),
+			},
+		},
+	})
+}
+
 func testAccAccountAuthenticationResource(name string) string {
 	return fmt.Sprintf(`
 resource "aiven_account" "foo" {
@@ -55,6 +78,40 @@ data "aiven_account_authentication" "auth" {
 
   depends_on = [aiven_account_authentication.foo]
 }`, name, name)
+}
+
+func testAccAccountAuthenticationWithAutoJoinTeamIDResource(name string) string {
+	return fmt.Sprintf(`
+resource "aiven_account" "foo" {
+  name = "test-acc-ac-%s"
+}
+
+resource "aiven_account_team" "foo" {
+  account_id = aiven_account.foo.account_id
+  name       = "test-acc-team-%s"
+}
+
+resource "aiven_account_authentication" "foo" {
+  account_id        = aiven_account.foo.account_id
+  name              = "test-acc-auth-%s"
+  type              = "saml"
+  enabled           = false
+  auto_join_team_id = aiven_account_team.foo.team_id
+}
+
+data "aiven_account_team" "team" {
+  name       = aiven_account_team.foo.name
+  account_id = aiven_account_team.foo.account_id
+
+  depends_on = [aiven_account_team.foo]
+}
+
+data "aiven_account_authentication" "auth" {
+  account_id = aiven_account_authentication.foo.account_id
+  name       = aiven_account_authentication.foo.name
+
+  depends_on = [aiven_account_authentication.foo]
+}`, name, name, name)
 }
 
 func testAccCheckAivenAccountAuthenticationResourceDestroy(s *terraform.State) error {
@@ -91,6 +148,68 @@ func testAccCheckAivenAccountAuthenticationResourceDestroy(s *terraform.State) e
 				for _, a := range ra.AuthenticationMethods {
 					if a.Id == authId {
 						return fmt.Errorf("account authentication (%s) still exists", rs.Primary.ID)
+					}
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func testAccCheckAivenAccountAuthenticationWithAutoJoinTeamIDResourceDestroy(s *terraform.State) error {
+	c := acc.TestAccProvider.Meta().(*aiven.Client)
+
+	// loop through the resources in state, verifying each account authentication is destroyed
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "aiven_account_team" && rs.Type != "aiven_account_authentication" {
+			continue
+		}
+
+		isTeam := rs.Type == "aiven_account_team"
+
+		accountID, secondaryID := schemautil.SplitResourceID2(rs.Primary.ID)
+
+		r, err := c.Accounts.List()
+		if err != nil {
+			if err.(aiven.Error).Status != 404 {
+				return err
+			}
+
+			return nil
+		}
+
+		for _, ac := range r.Accounts {
+			if ac.Id == accountID {
+				if isTeam {
+					rl, err := c.AccountTeams.List(accountID)
+					if err != nil {
+						if err.(aiven.Error).Status != 404 {
+							return err
+						}
+
+						return nil
+					}
+
+					for _, team := range rl.Teams {
+						if team.Id == secondaryID {
+							return fmt.Errorf("account team (%s) still exists", rs.Primary.ID)
+						}
+					}
+				} else {
+					ra, err := c.AccountAuthentications.List(accountID)
+					if err != nil {
+						if err.(aiven.Error).Status != 404 {
+							return err
+						}
+
+						return nil
+					}
+
+					for _, a := range ra.AuthenticationMethods {
+						if a.Id == secondaryID {
+							return fmt.Errorf("account authentication (%s) still exists", rs.Primary.ID)
+						}
 					}
 				}
 			}

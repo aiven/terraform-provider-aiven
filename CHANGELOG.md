@@ -14,6 +14,7 @@ nav_order: 1
 - Add Kafka `aiven_kafka_user.username` validation similar to Kafka ACL resource
 - Add CI job sweep
 - Add acceptance test for modifying service's user config
+- Add support for `auto_join_team_id` in account authentication resource
 
 ## [3.2.1] - 2022-06-29
 
