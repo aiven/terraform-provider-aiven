@@ -11,6 +11,7 @@ nav_order: 1
 - Minor acceptance tests updates
 - Update the 404 error handling behavior during import
 - Use SDKv2 `schema.ImportStatePassthroughContext` as the importer state function
+- Add CI job sweep 
 
 ## [3.2.1] - 2022-06-29
 
