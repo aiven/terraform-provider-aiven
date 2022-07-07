@@ -12,6 +12,7 @@ nav_order: 1
 - Update the 404 error handling behavior during import
 - Use SDKv2 `schema.ImportStatePassthroughContext` as the importer state function
 - Add Kafka `aiven_kafka_user.username` validation similar to Kafka ACL resource
+- Add CI job sweep 
 
 ## [3.2.1] - 2022-06-29
 
