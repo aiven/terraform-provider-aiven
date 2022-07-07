@@ -3,7 +3,6 @@ package kafka
 import (
 	"context"
 	"fmt"
-	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -36,7 +35,7 @@ var aivenKafkaACLSchema = map[string]*schema.Schema{
 		Type:         schema.TypeString,
 		Required:     true,
 		ForceNew:     true,
-		ValidateFunc: validation.StringMatch(regexp.MustCompile(`^(\*$|[a-zA-Z0-9-_?][a-zA-Z0-9-_?*]+)$`), "username should be alphanumeric"),
+		ValidateFunc: schemautil.GetACLUserValidateFunc(),
 		Description:  schemautil.Complex("Username pattern for the ACL entry.").ForceNew().Build(),
 	},
 

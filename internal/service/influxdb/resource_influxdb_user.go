@@ -11,10 +11,11 @@ var aivenInfluxDBUserSchema = map[string]*schema.Schema{
 	"service_name": schemautil.CommonSchemaServiceNameReference,
 
 	"username": {
-		Type:        schema.TypeString,
-		Required:    true,
-		ForceNew:    true,
-		Description: schemautil.Complex("The actual name of the InfluxDB User.").ForceNew().Referenced().Build(),
+		Type:         schema.TypeString,
+		Required:     true,
+		ForceNew:     true,
+		ValidateFunc: schemautil.GetServiceUserValidateFunc(),
+		Description:  schemautil.Complex("The actual name of the InfluxDB User.").ForceNew().Referenced().Build(),
 	},
 	"password": {
 		Type:             schema.TypeString,

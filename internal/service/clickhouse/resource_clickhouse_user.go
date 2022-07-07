@@ -17,10 +17,11 @@ var aivenClickhouseUserSchema = map[string]*schema.Schema{
 	"service_name": schemautil.CommonSchemaServiceNameReference,
 
 	"username": {
-		Type:        schema.TypeString,
-		Required:    true,
-		ForceNew:    true,
-		Description: schemautil.Complex("The actual name of the Clickhouse user.").ForceNew().Build(),
+		Type:         schema.TypeString,
+		Required:     true,
+		ForceNew:     true,
+		ValidateFunc: schemautil.GetServiceUserValidateFunc(),
+		Description:  schemautil.Complex("The actual name of the Clickhouse user.").ForceNew().Build(),
 	},
 	"password": {
 		Type:        schema.TypeString,
