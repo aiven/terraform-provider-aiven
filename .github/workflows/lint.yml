@@ -2,9 +2,9 @@ name: Lint
 
 on:
   push:
-    branches: [ master, v* ]
+    branches: [ main, v* ]
   pull_request:
-    branches: [ master, v* ]
+    branches: [ main, v* ]
 
 jobs:
   semgrep:
