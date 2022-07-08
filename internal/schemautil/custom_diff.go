@@ -144,14 +144,7 @@ func CustomizeDiffCheckStaticIpDisassociation(_ context.Context, d *schema.Resou
 
 	// Check that we block deletions that will fail because the ip belongs to the service
 	for _, sip := range resp.StaticIPs {
-		assignedToTheService := sip.ServiceName == serviceName && sip.State == staticIpAssigned
-		aboutToBeDisassigned := !contains(plannedStaticIps, sip.StaticIPAddressID)
-		if assignedToTheService && aboutToBeDisassigned {
-			return fmt.Errorf("the static ip '%s' is currently assigned and cannot be disassociated from service '%s'", sip.StaticIPAddressID, serviceName)
-		}
-
 		associatedWithDifferentService := sip.ServiceName != "" && sip.ServiceName != serviceName
-
 		if associatedWithDifferentService && contains(plannedStaticIps, sip.StaticIPAddressID) {
 			return fmt.Errorf("the static ip '%s' is currently associated with service '%s'", sip.StaticIPAddressID, sip.ServiceName)
 		}
