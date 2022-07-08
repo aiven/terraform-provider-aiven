@@ -7,7 +7,6 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -103,7 +102,22 @@ func resourceStaticIPDelete(_ context.Context, d *schema.ResourceData, m interfa
 
 	project, staticIPAddressId := schemautil.SplitResourceID2(d.Id())
 
-	err := client.StaticIPs.Delete(
+	staticIP, err := client.StaticIPs.Get(project, staticIPAddressId)
+	if err != nil {
+		if aiven.IsNotFound(err) {
+			return nil
+		}
+
+		return diag.FromErr(err)
+	}
+
+	if staticIP.State == schemautil.StaticIpAvailable {
+		if err := client.StaticIPs.Dissociate(project, staticIPAddressId); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
+	err = client.StaticIPs.Delete(
 		project,
 		aiven.DeleteStaticIPRequest{
 			StaticIPAddressID: staticIPAddressId,
@@ -111,6 +125,7 @@ func resourceStaticIPDelete(_ context.Context, d *schema.ResourceData, m interfa
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
+
 	return nil
 }
 
@@ -120,8 +135,8 @@ func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interfa
 	project, staticIPAddressId := schemautil.SplitResourceID2(d.Id())
 
 	conf := resource.StateChangeConf{
-		Target:  []string{"created"},
-		Pending: []string{"creating", "waiting"},
+		Target:  []string{schemautil.StaticIpCreated},
+		Pending: []string{"waiting", schemautil.StaticIpCreating},
 		Timeout: d.Timeout(schema.TimeoutCreate),
 		Refresh: func() (result interface{}, state string, err error) {
 			log.Println("[DEBUG] checking if static ip", staticIPAddressId, "is in 'created' state")

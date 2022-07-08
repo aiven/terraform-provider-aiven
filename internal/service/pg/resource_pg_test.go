@@ -84,7 +84,7 @@ func TestAccAivenPG_static_ips(t *testing.T) {
 		CheckDestroy:      acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPGWithStaticIps(rName),
+				Config: testAccPGWithStaticIps(rName, 2),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
@@ -103,21 +103,35 @@ func TestAccAivenPG_static_ips(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccPGWithStaticIpsAddition(rName),
+				Config: testAccPGWithStaticIps(rName, 3),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "static_ips.#", "3"),
 				),
 			},
 			{
-				Config: testAccPGWithStaticIpsPreDeletion(rName),
+				Config: testAccPGWithStaticIps(rName, 4),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "static_ips.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "static_ips.#", "4"),
 				),
 			},
 			{
-				Config: testAccPGWithStaticIpsDeletion(rName),
+				Config: testAccPGWithStaticIps(rName, 3),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "static_ips.#", "3"),
+				),
+			},
+			{
+				Config: testAccPGWithStaticIps(rName, 4),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "static_ips.#", "4"),
+				),
+			},
+			{
+				Config: testAccPGWithStaticIps(rName, 2),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "static_ips.#", "2"),
@@ -257,14 +271,14 @@ func TestAccAivenPG_changing_disc_size(t *testing.T) {
 	})
 }
 
-func testAccPGWithStaticIps(name string) string {
+func testAccPGWithStaticIps(name string, count int) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
   project = "%s"
 }
 
 resource "aiven_static_ip" "ips" {
-  count      = 2
+  count      = %d
   project    = data.aiven_project.foo.project
   cloud_name = "google-europe-west1"
 }
@@ -288,112 +302,7 @@ data "aiven_pg" "common" {
   project      = aiven_pg.bar.project
 
   depends_on = [aiven_pg.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
-}
-
-func testAccPGWithStaticIpsAddition(name string) string {
-	return fmt.Sprintf(`
-data "aiven_project" "foo" {
-  project = "%s"
-}
-
-resource "aiven_static_ip" "ips" {
-  count      = 3
-  project    = data.aiven_project.foo.project
-  cloud_name = "google-europe-west1"
-}
-
-resource "aiven_pg" "bar" {
-  project                 = data.aiven_project.foo.project
-  cloud_name              = "google-europe-west1"
-  plan                    = "startup-4"
-  service_name            = "test-acc-sr-%s"
-  maintenance_window_dow  = "monday"
-  maintenance_window_time = "10:00:00"
-  static_ips              = toset(aiven_static_ip.ips[*].static_ip_address_id)
-
-  pg_user_config {
-    static_ips = true
-  }
-}
-
-data "aiven_pg" "common" {
-  service_name = aiven_pg.bar.service_name
-  project      = aiven_pg.bar.project
-
-  depends_on = [aiven_pg.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
-}
-
-func testAccPGWithStaticIpsPreDeletion(name string) string {
-	return fmt.Sprintf(`
-data "aiven_project" "foo" {
-  project = "%s"
-}
-
-resource "aiven_static_ip" "ips" {
-  count      = 3
-  project    = data.aiven_project.foo.project
-  cloud_name = "google-europe-west1"
-}
-
-resource "aiven_pg" "bar" {
-  project                 = data.aiven_project.foo.project
-  cloud_name              = "google-europe-west1"
-  plan                    = "startup-4"
-  service_name            = "test-acc-sr-%s"
-  maintenance_window_dow  = "monday"
-  maintenance_window_time = "10:00:00"
-  static_ips = toset([
-    aiven_static_ip.ips[0].static_ip_address_id,
-    aiven_static_ip.ips[1].static_ip_address_id,
-  ])
-
-  pg_user_config {
-    static_ips = true
-  }
-}
-
-data "aiven_pg" "common" {
-  service_name = aiven_pg.bar.service_name
-  project      = aiven_pg.bar.project
-
-  depends_on = [aiven_pg.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
-}
-
-func testAccPGWithStaticIpsDeletion(name string) string {
-	return fmt.Sprintf(`
-data "aiven_project" "foo" {
-  project = "%s"
-}
-
-resource "aiven_static_ip" "ips" {
-  count      = 2
-  project    = data.aiven_project.foo.project
-  cloud_name = "google-europe-west1"
-}
-
-resource "aiven_pg" "bar" {
-  project                 = data.aiven_project.foo.project
-  cloud_name              = "google-europe-west1"
-  plan                    = "startup-4"
-  service_name            = "test-acc-sr-%s"
-  maintenance_window_dow  = "monday"
-  maintenance_window_time = "10:00:00"
-  static_ips              = toset(aiven_static_ip.ips[*].static_ip_address_id)
-
-  pg_user_config {
-    static_ips = true
-  }
-}
-
-data "aiven_pg" "common" {
-  service_name = aiven_pg.bar.service_name
-  project      = aiven_pg.bar.project
-
-  depends_on = [aiven_pg.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, os.Getenv("AIVEN_PROJECT_NAME"), count, name)
 }
 
 func testAccPGResourceWithDiskSize(name, diskSize string) string {

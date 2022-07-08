@@ -10,8 +10,10 @@ import (
 )
 
 const (
-	staticIpAssigned  = "assigned"
-	staticIpAvailable = "available"
+	StaticIpCreating  = "creating"
+	StaticIpCreated   = "created"
+	StaticIpAvailable = "available"
+	StaticIpAssigned  = "assigned"
 )
 
 func CurrentlyAllocatedStaticIps(_ context.Context, projectName, serviceName string, m interface{}) ([]string, error) {
