@@ -35,6 +35,7 @@ resource "aiven_account_authentication" "foo" {
 
 ### Optional
 
+- `auto_join_team_id` (String) Team ID
 - `enabled` (Boolean) Status of account authentication method. The default value is `false`.
 - `saml_certificate` (String) SAML Certificate
 - `saml_entity_id` (String) SAML Entity id

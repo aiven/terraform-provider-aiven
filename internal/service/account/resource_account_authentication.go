@@ -16,22 +16,27 @@ var aivenAccountAuthenticationSchema = map[string]*schema.Schema{
 		Required:    true,
 		Description: "The unique id of the account.",
 	},
+	"name": {
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "The name of the account authentication.",
+	},
 	"type": {
 		Type:         schema.TypeString,
 		Required:     true,
 		ValidateFunc: validation.StringInSlice([]string{"internal", "saml"}, false),
 		Description:  schemautil.Complex("The account authentication type.").PossibleValues("internal", "saml").Build(),
 	},
-	"name": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "The name of the account authentication.",
-	},
 	"enabled": {
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     false,
 		Description: schemautil.Complex("Status of account authentication method.").DefaultValue(false).Build(),
+	},
+	"auto_join_team_id": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Team ID",
 	},
 	"saml_certificate": {
 		Type:        schema.TypeString,
@@ -48,6 +53,11 @@ var aivenAccountAuthenticationSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Description: "SAML Entity id",
 	},
+	"authentication_id": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "Account authentication id",
+	},
 	"saml_acs_url": {
 		Type:        schema.TypeString,
 		Computed:    true,
@@ -57,11 +67,6 @@ var aivenAccountAuthenticationSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Computed:    true,
 		Description: "SAML Metadata URL",
-	},
-	"authentication_id": {
-		Type:        schema.TypeString,
-		Computed:    true,
-		Description: "Account authentication id",
 	},
 	"create_time": {
 		Type:        schema.TypeString,
@@ -101,6 +106,7 @@ func resourceAccountAuthenticationCreate(ctx context.Context, d *schema.Resource
 			Enabled:         d.Get("enabled").(bool),
 			Name:            d.Get("name").(string),
 			Type:            d.Get("type").(string),
+			AutoJoinTeamId:  d.Get("auto_join_team_id").(string),
 			SAMLCertificate: d.Get("saml_certificate").(string),
 			SAMLIdpUrl:      d.Get("saml_idp_url").(string),
 			SAMLEntity:      d.Get("saml_entity_id").(string),
@@ -136,6 +142,9 @@ func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 	if err := d.Set("enabled", r.AuthenticationMethod.Enabled); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("auto_join_team_id", r.AuthenticationMethod.AutoJoinTeamId); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("saml_certificate", r.AuthenticationMethod.SAMLCertificate); err != nil {
@@ -175,6 +184,7 @@ func resourceAccountAuthenticationUpdate(ctx context.Context, d *schema.Resource
 		Enabled:         d.Get("enabled").(bool),
 		Name:            d.Get("name").(string),
 		Type:            d.Get("type").(string),
+		AutoJoinTeamId:  d.Get("auto_join_team_id").(string),
 		SAMLCertificate: d.Get("saml_certificate").(string),
 		SAMLIdpUrl:      d.Get("saml_idp_url").(string),
 		SAMLEntity:      d.Get("saml_entity_id").(string),

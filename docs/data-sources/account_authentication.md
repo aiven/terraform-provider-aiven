@@ -30,6 +30,7 @@ data "aiven_account_authentication" "foo" {
 ### Read-Only
 
 - `authentication_id` (String) Account authentication id
+- `auto_join_team_id` (String) Team ID
 - `create_time` (String) Time of creation
 - `enabled` (Boolean) Status of account authentication method. The default value is `false`.
 - `id` (String) The ID of this resource.
