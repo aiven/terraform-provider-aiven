@@ -7,7 +7,7 @@ nav_order: 1
 
 ## [X.X.X] - not yet released
 - Fix auto generated documentation by bumping tfplugindocs to latest version
-- Fix Typos in docs
+- Fix typos in docs and examples
 - Minor acceptance tests updates
 - Update the 404 error handling behavior during import
 - Use SDKv2 `schema.ImportStatePassthroughContext` as the importer state function

@@ -10,7 +10,7 @@ terraform {
   required_providers {
     aiven = {
       source  = "aiven/aiven"
-      version = ">= 2.0.0, < 3.0.0"
+      version = ">=3.0.0"
     }
   }
 }
@@ -34,7 +34,6 @@ resource "aiven_kafka" "samplekafka" {
   kafka_user_config {
     kafka_connect = true
     kafka_rest    = true
-    kafka_version = "2.6"
     kafka {
       group_max_session_timeout_ms = 70000
       log_retention_bytes          = 1000000000
@@ -103,7 +102,6 @@ resource "aiven_pg" "samplepg" {
     pg {
       idle_in_transaction_session_timeout = 900
     }
-    pg_version = "10"
   }
 }
 
