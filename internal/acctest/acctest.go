@@ -16,16 +16,12 @@ import (
 )
 
 var (
-	TestAccProviders         map[string]*schema.Provider
 	TestAccProvider          *schema.Provider
 	TestAccProviderFactories map[string]func() (*schema.Provider, error)
 )
 
 func init() {
 	TestAccProvider = provider.Provider()
-	TestAccProviders = map[string]*schema.Provider{
-		"aiven": TestAccProvider,
-	}
 	TestAccProviderFactories = map[string]func() (*schema.Provider, error){
 		"aiven": func() (*schema.Provider, error) {
 			return TestAccProvider, nil

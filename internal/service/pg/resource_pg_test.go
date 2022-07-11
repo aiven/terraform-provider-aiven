@@ -84,7 +84,7 @@ func TestAccAivenPG_static_ips(t *testing.T) {
 		CheckDestroy:      acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPGWithStaticIps(rName),
+				Config: testAccPGWithStaticIps(rName, 2),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "state"),
@@ -99,8 +99,42 @@ func TestAccAivenPG_static_ips(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "service_host"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_port"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_uri"),
-					// issue with the testing framework? this is always set in manual tests
-					// resource.TestCheckResourceAttrSet(resourceName, "static_ips"),
+					resource.TestCheckResourceAttr(resourceName, "static_ips.#", "2"),
+				),
+			},
+			{
+				Config: testAccPGWithStaticIps(rName, 3),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "static_ips.#", "3"),
+				),
+			},
+			{
+				Config: testAccPGWithStaticIps(rName, 4),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "static_ips.#", "4"),
+				),
+			},
+			{
+				Config: testAccPGWithStaticIps(rName, 3),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "static_ips.#", "3"),
+				),
+			},
+			{
+				Config: testAccPGWithStaticIps(rName, 4),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "static_ips.#", "4"),
+				),
+			},
+			{
+				Config: testAccPGWithStaticIps(rName, 2),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "static_ips.#", "2"),
 				),
 			},
 		},
@@ -237,14 +271,14 @@ func TestAccAivenPG_changing_disc_size(t *testing.T) {
 	})
 }
 
-func testAccPGWithStaticIps(name string) string {
+func testAccPGWithStaticIps(name string, count int) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
   project = "%s"
 }
 
 resource "aiven_static_ip" "ips" {
-  count      = 2
+  count      = %d
   project    = data.aiven_project.foo.project
   cloud_name = "google-europe-west1"
 }
@@ -268,7 +302,7 @@ data "aiven_pg" "common" {
   project      = aiven_pg.bar.project
 
   depends_on = [aiven_pg.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}`, os.Getenv("AIVEN_PROJECT_NAME"), count, name)
 }
 
 func testAccPGResourceWithDiskSize(name, diskSize string) string {
