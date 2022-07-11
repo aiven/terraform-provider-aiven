@@ -22,6 +22,9 @@ func TestAccAivenBillingGroupDataSource_basic(t *testing.T) {
 				Config: testAccBillingGroupResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(datasourceName, "name", resourceName, "name"),
+					resource.TestCheckTypeSetElemAttr(datasourceName, "billing_emails.*", "2"),
+					resource.TestCheckTypeSetElemAttrPair(resourceName, "billing_emails.*", datasourceName, "billing_emails.0"),
+					resource.TestCheckTypeSetElemAttrPair(resourceName, "billing_emails.*", datasourceName, "billing_emails.1"),
 				),
 			},
 		},

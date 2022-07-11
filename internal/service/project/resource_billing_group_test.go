@@ -78,9 +78,7 @@ resource "aiven_billing_group" "foo" {
 }
 
 data "aiven_billing_group" "bar" {
-  name = aiven_billing_group.foo.name
-
-  depends_on = [aiven_billing_group.foo]
+  billing_group_id = aiven_billing_group.foo.id
 }
 
 resource "aiven_project" "pr1" {
