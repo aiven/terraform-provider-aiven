@@ -50,7 +50,7 @@ func ResourceStaticIP() *schema.Resource {
 		ReadContext:   resourceStaticIPRead,
 		DeleteContext: resourceStaticIPDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceStaticIPState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: aivenStaticIPSchema,
 	}
@@ -160,24 +160,6 @@ func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	return nil
-}
-
-func resourceStaticIPState(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	client := m.(*aiven.Client)
-
-	project, staticIPAddressId := schemautil.SplitResourceID2(d.Id())
-
-	sip, err := client.StaticIPs.Get(project, staticIPAddressId)
-	if err != nil {
-		return nil, err
-	}
-
-	err = setStaticIPState(d, project, sip)
-	if err != nil {
-		return nil, fmt.Errorf("error importing static ip state %s: %s", d.Id(), err)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }
 
 func setStaticIPState(d *schema.ResourceData, project string, staticIP *aiven.StaticIP) error {
