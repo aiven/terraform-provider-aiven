@@ -57,7 +57,7 @@ func sweepStaticIPs(region string) error {
 				StaticIPAddressID: ip.StaticIPAddressID,
 			})
 		if err != nil && !aiven.IsNotFound(err) {
-			return fmt.Errorf("error deleting stic_ip: %w", err)
+			return fmt.Errorf("error deleting static_ip: %w", err)
 		}
 	}
 
