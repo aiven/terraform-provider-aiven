@@ -19,6 +19,7 @@ nav_order: 1
 - Add acceptance test coverage for modification of `static_ips` in Terraform configs (via PostgreSQL)
 - Fix `CustomizeDiffCheckStaticIpDisassociation` behavior
 - Made it possible to delete static IPs in a single step, without dissociating them
+- Fix typo in sweeper
 
 ## [3.2.1] - 2022-06-29
 
