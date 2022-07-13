@@ -14,6 +14,10 @@ github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7l
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/aiven/aiven-go-client v1.7.1-0.20220613120815-6f90b54e0c70 h1:l2e4bq9tWT8er6lghH/FORtL8SR6Sv0LKOIPWdLw18g=
 github.com/aiven/aiven-go-client v1.7.1-0.20220613120815-6f90b54e0c70/go.mod h1:0MOgKonaIxMT8aXK7D6xbaKBdUTGfc0GdNRn9kf/yQ0=
+github.com/aiven/aiven-go-client v1.7.1-0.20220711115455-8ac95cc00a87 h1:v0wQoiTKp4bb/6ympZugyoH8cejjvGGjJXUuGdhWUew=
+github.com/aiven/aiven-go-client v1.7.1-0.20220711115455-8ac95cc00a87/go.mod h1:0MOgKonaIxMT8aXK7D6xbaKBdUTGfc0GdNRn9kf/yQ0=
+github.com/aiven/aiven-go-client v1.7.1-0.20220711165623-353150bcf2db h1:T1yiAH5ey27wtf53sUfXKD705pYoAaUvOJaJs1xbMro=
+github.com/aiven/aiven-go-client v1.7.1-0.20220711165623-353150bcf2db/go.mod h1:0MOgKonaIxMT8aXK7D6xbaKBdUTGfc0GdNRn9kf/yQ0=
 github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239/go.mod h1:2FmKhYUyUczH0OGQWaF5ceTx0UBShxjsH6f8oGKYe2c=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/apparentlymart/go-cidr v1.1.0 h1:2mAhrMoF+nhXqxTzSZMUzDHkLjmIHC+Zzn4tdgBZjnU=

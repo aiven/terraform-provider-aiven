@@ -21,6 +21,7 @@ nav_order: 1
 - Made it possible to delete static IPs in a single step, without dissociating them
 - Fix typo in sweeper
 - Fix acceptance test `TestAccAivenKafkaACL_basic`
+- Add support for Kafka Schema Registry Access Control Lists resource
 
 ## [3.2.1] - 2022-06-29
 
