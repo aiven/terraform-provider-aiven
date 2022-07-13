@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aiven/aiven-go-client"
+
 	"github.com/aiven/terraform-provider-aiven/internal/service/account"
 	"github.com/aiven/terraform-provider-aiven/internal/service/cassandra"
 	"github.com/aiven/terraform-provider-aiven/internal/service/clickhouse"
@@ -123,6 +124,7 @@ func Provider() *schema.Provider {
 			"aiven_kafka":                        kafka.DatasourceKafka(),
 			"aiven_kafka_user":                   kafka.DatasourceKafkaUser(),
 			"aiven_kafka_acl":                    kafka.DatasourceKafkaACL(),
+			"aiven_kafka_schema_registry_acl":    kafka.DatasourceKafkaSchemaRegistryACL(),
 			"aiven_kafka_topic":                  kafka.DatasourceKafkaTopic(),
 			"aiven_kafka_schema":                 kafka.DatasourceKafkaSchema(),
 			"aiven_kafka_schema_configuration":   kafka.DatasourceKafkaSchemaConfiguration(),
@@ -216,6 +218,7 @@ func Provider() *schema.Provider {
 			"aiven_kafka":                        kafka.ResourceKafka(),
 			"aiven_kafka_user":                   kafka.ResourceKafkaUser(),
 			"aiven_kafka_acl":                    kafka.ResourceKafkaACL(),
+			"aiven_kafka_schema_registry_acl":    kafka.ResourceKafkaSchemaRegistryACL(),
 			"aiven_kafka_topic":                  kafka.ResourceKafkaTopic(),
 			"aiven_kafka_schema":                 kafka.ResourceKafkaSchema(),
 			"aiven_kafka_schema_configuration":   kafka.ResourceKafkaSchemaConfiguration(),
