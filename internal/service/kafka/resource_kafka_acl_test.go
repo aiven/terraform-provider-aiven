@@ -173,7 +173,7 @@ resource "aiven_kafka_acl" "foo" {
   project      = "test-acc-pr-1"
   service_name = "test-acc-sr-1"
   topic        = "test-acc-topic-1"
-  username     = "*-user"
+  username     = "#-user"
   permission   = "admin"
 }`
 
