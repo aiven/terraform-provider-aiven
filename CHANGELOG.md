@@ -20,6 +20,7 @@ nav_order: 1
 - Fix `CustomizeDiffCheckStaticIpDisassociation` behavior
 - Made it possible to delete static IPs in a single step, without dissociating them
 - Fix typo in sweeper
+- Fix acceptance test `TestAccAivenKafkaACL_basic`
 
 ## [3.2.1] - 2022-06-29
 
