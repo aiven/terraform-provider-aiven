@@ -22,6 +22,7 @@ nav_order: 1
 - Fix typo in sweeper
 - Fix acceptance test `TestAccAivenKafkaACL_basic`
 - Add support for Kafka Schema Registry Access Control Lists resource
+- Fix release actions
 
 ## [3.2.1] - 2022-06-29
 
