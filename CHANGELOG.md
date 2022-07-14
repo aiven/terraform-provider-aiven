@@ -5,7 +5,7 @@ parent: README
 nav_order: 1
 ---# Changelog
 
-## [X.X.X] - not yet released
+## [3.3.0] - 2022-07-14
 - Fix auto generated documentation by bumping tfplugindocs to latest version
 - Fix typos in docs and examples
 - Minor acceptance tests updates
