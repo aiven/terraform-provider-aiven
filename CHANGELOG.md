@@ -23,6 +23,7 @@ nav_order: 1
 - Fix acceptance test `TestAccAivenKafkaACL_basic`
 - Add support for Kafka Schema Registry Access Control Lists resource
 - Fix release actions
+- Build with go 1.17
 
 ## [3.2.1] - 2022-06-29
 
