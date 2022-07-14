@@ -224,7 +224,7 @@ resource "aiven_kafka_topic" "foo" {
 resource "aiven_kafka_schema_registry_acl" "foo" {
   project      = data.aiven_project.foo.project
   service_name = aiven_kafka.bar.service_name
-  resource     = "Subject:{aiven_kafka_topic.foo.topic_name}"
+  resource     = "Subject:${aiven_kafka_topic.foo.topic_name}"
   username     = "user-%s"
   permission   = "schema_registry_read"
 }
