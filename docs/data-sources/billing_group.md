@@ -23,7 +23,7 @@ data "aiven_billing_group" "foo" {
 
 ### Required
 
-- `name` (String) Billing Group name
+- `billing_group_id` (String) The id of the billing group. To set up proper dependencies please refer to this variable as a reference.
 
 ### Read-Only
 
@@ -38,6 +38,7 @@ data "aiven_billing_group" "foo" {
 - `copy_from_billing_group` (String) ID of the billing group to copy from
 - `country_code` (String) Country code
 - `id` (String) The ID of this resource.
+- `name` (String) Billing Group name
 - `state` (String) State
 - `vat_id` (String) VAT id
 - `zip_code` (String) Zip Code

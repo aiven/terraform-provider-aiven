@@ -8,6 +8,8 @@ nav_order: 1
 ## [X.X.X] - Not yet released
 - Fix mark user config of `aiven_kafka_connector` as sensitive as it may contain credentials
 - Kafka Topic availability waiter optimization
+- Fix `aiven_billing_group` datasource
+- Build and use go 1.18
 
 ## [3.3.0] - 2022-07-14
 - Fix auto generated documentation by bumping tfplugindocs to latest version

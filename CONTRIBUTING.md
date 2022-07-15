@@ -10,8 +10,8 @@ Contributions are very welcome on terraform-provider-aiven. When contributing pl
 
 ### Local environment
 
-[Go](https://go.dev/doc/install) >=1.16 \
-[Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) >=0.12
+[Go](https://go.dev/doc/install) >=1.18 \
+[Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) >=1.2
 
 #### Alternative command to build/test inside a container
 
