@@ -5,7 +5,7 @@ parent: README
 nav_order: 1
 ---# Changelog
 
-## [X.X.X] - Not yet released
+## [3.3.1] - 2022-07-15
 - Fix mark user config of `aiven_kafka_connector` as sensitive as it may contain credentials
 - Kafka Topic availability waiter optimization
 - Fix `aiven_billing_group` datasource
