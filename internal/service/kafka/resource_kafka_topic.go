@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/aiven/aiven-go-client"
@@ -231,7 +230,7 @@ func ResourceKafkaTopic() *schema.Resource {
 		UpdateContext: resourceKafkaTopicUpdate,
 		DeleteContext: resourceKafkaTopicDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceKafkaTopicState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
@@ -460,19 +459,6 @@ func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	return nil
-}
-
-func resourceKafkaTopicState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	if len(strings.Split(d.Id(), "/")) != 3 {
-		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<topic_name>", d.Id())
-	}
-
-	di := resourceKafkaTopicRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get kafka topic: %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }
 
 func flattenKafkaTopicConfig(t aiven.KafkaTopic) []map[string]interface{} {
