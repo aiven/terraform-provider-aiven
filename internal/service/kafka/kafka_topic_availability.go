@@ -125,11 +125,10 @@ func (w *KafkaTopicAvailabilityWaiter) Conf(timeout time.Duration) *resource.Sta
 	log.Printf("[DEBUG] Kafka Topic availability waiter timeout %.0f minutes", timeout.Minutes())
 
 	return &resource.StateChangeConf{
-		Pending:        []string{"CONFIGURING"},
-		Target:         []string{"ACTIVE"},
-		Refresh:        w.RefreshFunc(),
-		Timeout:        timeout,
-		PollInterval:   30 * time.Second,
-		NotFoundChecks: 50,
+		Pending:      []string{"CONFIGURING"},
+		Target:       []string{"ACTIVE"},
+		Refresh:      w.RefreshFunc(),
+		Timeout:      timeout,
+		PollInterval: 5 * time.Second,
 	}
 }
