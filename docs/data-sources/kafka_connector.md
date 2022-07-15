@@ -31,7 +31,7 @@ data "aiven_kafka_connector" "kafka-es-con1" {
 
 ### Read-Only
 
-- `config` (Map of String) The Kafka Connector configuration parameters.
+- `config` (Map of String, Sensitive) The Kafka Connector configuration parameters.
 - `id` (String) The ID of this resource.
 - `plugin_author` (String) The Kafka connector author.
 - `plugin_class` (String) The Kafka connector Java class.

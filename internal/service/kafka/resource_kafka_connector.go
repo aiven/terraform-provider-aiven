@@ -6,12 +6,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -26,8 +25,9 @@ var aivenKafkaConnectorSchema = map[string]*schema.Schema{
 		Description: schemautil.Complex("The kafka connector name.").ForceNew().Build(),
 	},
 	"config": {
-		Type:     schema.TypeMap,
-		Required: true,
+		Type:      schema.TypeMap,
+		Required:  true,
+		Sensitive: true,
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},

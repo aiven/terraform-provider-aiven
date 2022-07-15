@@ -5,6 +5,9 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [X.X.X] - Not yet released
+- Fix mark user config of `aiven_kafka_connector` as sensitive as it may contain credentials
+
 ## [3.3.0] - 2022-07-14
 - Fix auto generated documentation by bumping tfplugindocs to latest version
 - Fix typos in docs and examples

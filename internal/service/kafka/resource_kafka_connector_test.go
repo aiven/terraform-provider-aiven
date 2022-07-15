@@ -164,11 +164,11 @@ resource "aiven_kafka_connector" "foo" {
   connector_name = "test-acc-con-%s"
 
   config = {
-    "topics" = aiven_kafka_topic.foo.topic_name
-    "connector.class" : "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
-    "type.name"      = "es-connector"
-    "name"           = "test-acc-con-%s"
-    "connection.url" = aiven_opensearch.dest.service_uri
+    "topics"          = aiven_kafka_topic.foo.topic_name
+    "connector.class" = "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
+    "type.name"       = "es-connector"
+    "name"            = "test-acc-con-%s"
+    "connection.url"  = aiven_opensearch.dest.service_uri
   }
 }
 
@@ -229,11 +229,11 @@ resource "aiven_kafka_connector" "foo" {
   connector_name = "test-acc-con-%s"
 
   config = {
-    "topics" = aiven_kafka_topic.foo.topic_name
-    "connector.class" : "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
-    "type.name"      = "es-connector"
-    "name"           = "wrong-test-acc-con-%s"
-    "connection.url" = aiven_opensearch.dest.service_uri
+    "topics"          = aiven_kafka_topic.foo.topic_name
+    "connector.class" = "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
+    "type.name"       = "es-connector"
+    "name"            = "wrong-test-acc-con-%s"
+    "connection.url"  = aiven_opensearch.dest.service_uri
   }
 }
 
@@ -285,10 +285,10 @@ resource "aiven_kafka_connector" "foo" {
   connector_name = "test-acc-con-mongo-sink-%s"
 
   config = {
-    "name" = "test-acc-con-mongo-sink-%s"
-    "connector.class" : "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
-    "topics"    = aiven_kafka_topic.foo.topic_name
-    "tasks.max" = 1
+    "name"            = "test-acc-con-mongo-sink-%s"
+    "connector.class" = "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
+    "topics"          = aiven_kafka_topic.foo.topic_name
+    "tasks.max"       = 1
 
     # mongo connect settings
     "connection.uri" = "%s"
