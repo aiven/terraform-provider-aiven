@@ -83,7 +83,11 @@ func resourceAccountTeamProjectCreate(ctx context.Context, d *schema.ResourceDat
 func resourceAccountTeamProjectRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId, teamId, projectName := schemautil.SplitResourceID3(d.Id())
+	accountId, teamId, projectName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	r, err := client.AccountTeamProjects.List(accountId, teamId)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
@@ -119,11 +123,15 @@ func resourceAccountTeamProjectRead(_ context.Context, d *schema.ResourceData, m
 func resourceAccountTeamProjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId, teamId, _ := schemautil.SplitResourceID3(d.Id())
+	accountId, teamId, _, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	newProjectName := d.Get("project_name").(string)
 	teamType := d.Get("team_type").(string)
 
-	err := client.AccountTeamProjects.Update(accountId, teamId, aiven.AccountTeamProject{
+	err = client.AccountTeamProjects.Update(accountId, teamId, aiven.AccountTeamProject{
 		TeamType:    teamType,
 		ProjectName: newProjectName,
 	})
@@ -139,7 +147,12 @@ func resourceAccountTeamProjectUpdate(ctx context.Context, d *schema.ResourceDat
 func resourceAccountTeamProjectDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	err := client.AccountTeamProjects.Delete(schemautil.SplitResourceID3(d.Id()))
+	accountId, teamId, projectName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = client.AccountTeamProjects.Delete(accountId, teamId, projectName)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}

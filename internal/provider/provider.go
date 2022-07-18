@@ -100,7 +100,7 @@ func Provider() *schema.Provider {
 			"aiven_gcp_vpc_peering_connection":     vpc.DatasourceGCPVPCPeeringConnection(),
 			"aiven_project_vpc":                    vpc.DatasourceProjectVPC(),
 			"aiven_transit_gateway_vpc_attachment": vpc.DatasourceTransitGatewayVPCAttachment(),
-			"aiven_vpc_peering_connection":         vpc.DatasourceVPCPeeringConnection(), // deprecated
+			"aiven_vpc_peering_connection":         vpc.DatasourceVPCPeeringConnection(), // Deprecated
 
 			// service integrations
 			"aiven_service_integration":          service_integration.DatasourceServiceIntegration(),
@@ -192,7 +192,7 @@ func Provider() *schema.Provider {
 			"aiven_gcp_vpc_peering_connection":            vpc.ResourceGCPVPCPeeringConnection(),
 			"aiven_project_vpc":                           vpc.ResourceProjectVPC(),
 			"aiven_transit_gateway_vpc_attachment":        vpc.ResourceTransitGatewayVPCAttachment(),
-			"aiven_vpc_peering_connection":                vpc.ResourceVPCPeeringConnection(), // deprecated
+			"aiven_vpc_peering_connection":                vpc.ResourceVPCPeeringConnection(), // Deprecated
 
 			// service integrations
 			"aiven_service_integration":          service_integration.ResourceServiceIntegration(),

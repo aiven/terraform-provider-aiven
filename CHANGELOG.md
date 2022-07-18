@@ -9,6 +9,11 @@ nav_order: 1
 - Small static IP import fix
 - Add acceptance test for validating 404 error handling during import
 - Disable `fail-fast` on acceptance tests 
+- Replaced every `schema.Resource.Importer.StateContext` to `schema.ImportStatePassthroughContext`
+- Got rid of all unnecessary `d.SetId("")` calls
+- Replaced `vpc.parsePeeringVPCId` with `schemautil.SplitResourceID`
+- Made `schemautil.SplitResourceID` throw an error when the resulting amount of parts is not equal to expected
+- Marked deprecated resources deprecated
 
 ## [3.3.1] - 2022-07-15
 - Fix mark user config of `aiven_kafka_connector` as sensitive as it may contain credentials

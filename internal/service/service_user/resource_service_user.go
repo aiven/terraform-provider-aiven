@@ -105,6 +105,8 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 	},
 }
 
+// ResourceServiceUser
+// Deprecated
 func ResourceServiceUser() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Service User resource allows the creation and management of Aiven Service Users.",
@@ -165,9 +167,12 @@ func resourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m in
 func resourceServiceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, username := schemautil.SplitResourceID3(d.Id())
+	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	_, err := client.ServiceUsers.Update(projectName, serviceName, username,
+	_, err = client.ServiceUsers.Update(projectName, serviceName, username,
 		aiven.ModifyServiceUserRequest{
 			Authentication: schemautil.OptionalStringPointer(d, "authentication"),
 			NewPassword:    schemautil.OptionalStringPointer(d, "password"),
@@ -228,7 +233,11 @@ func copyServiceUserPropertiesFromAPIResponseToTerraform(
 func resourceServiceUserRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, username := schemautil.SplitResourceID3(d.Id())
+	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	user, err := client.ServiceUsers.Get(projectName, serviceName, username)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
@@ -245,8 +254,12 @@ func resourceServiceUserRead(_ context.Context, d *schema.ResourceData, m interf
 func resourceServiceUserDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, username := schemautil.SplitResourceID3(d.Id())
-	err := client.ServiceUsers.Delete(projectName, serviceName, username)
+	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = client.ServiceUsers.Delete(projectName, serviceName, username)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
@@ -261,7 +274,11 @@ func resourceServiceUserState(_ context.Context, d *schema.ResourceData, m inter
 		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<username>", d.Id())
 	}
 
-	projectName, serviceName, username := schemautil.SplitResourceID3(d.Id())
+	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return nil, err
+	}
+
 	user, err := client.ServiceUsers.Get(projectName, serviceName, username)
 	if err != nil {
 		return nil, err

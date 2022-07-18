@@ -93,7 +93,11 @@ func resourceAWSPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m
 func resourceAWSPrivatelinkRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName := schemautil.SplitResourceID2(d.Id())
+	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	p, err := client.AWSPrivatelink.Get(project, serviceName)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
@@ -120,14 +124,17 @@ func resourceAWSPrivatelinkRead(_ context.Context, d *schema.ResourceData, m int
 func resourceAWSPrivatelinkUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName := schemautil.SplitResourceID2(d.Id())
+	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	var principals []string
 	for _, p := range d.Get("principals").(*schema.Set).List() {
 		principals = append(principals, p.(string))
 	}
 
-	_, err := client.AWSPrivatelink.Update(
+	_, err = client.AWSPrivatelink.Update(
 		project,
 		serviceName,
 		principals,
@@ -154,7 +161,12 @@ func resourceAWSPrivatelinkUpdate(ctx context.Context, d *schema.ResourceData, m
 func resourceAWSPrivatelinkDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	err := client.AWSPrivatelink.Delete(schemautil.SplitResourceID2(d.Id()))
+	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = client.AWSPrivatelink.Delete(project, serviceName)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}

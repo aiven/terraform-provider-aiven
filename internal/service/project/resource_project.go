@@ -2,7 +2,6 @@ package project
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -116,7 +115,7 @@ func ResourceProject() *schema.Resource {
 		UpdateContext: resourceProjectUpdate,
 		DeleteContext: resourceProjectDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceProjectState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: aivenProjectSchema,
@@ -286,21 +285,6 @@ func resourceProjectDelete(_ context.Context, d *schema.ResourceData, m interfac
 	}
 
 	return nil
-}
-
-func resourceProjectState(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	client := m.(*aiven.Client)
-
-	project, err := client.Projects.Get(d.Id())
-	if err != nil {
-		return nil, err
-	}
-
-	if d := setProjectTerraformProperties(d, client, project); d.HasError() {
-		return nil, fmt.Errorf("cannot set project properties")
-	}
-
-	return []*schema.ResourceData{d}, nil
 }
 
 func resourceProjectGetCACert(project string, client *aiven.Client, d *schema.ResourceData) diag.Diagnostics {

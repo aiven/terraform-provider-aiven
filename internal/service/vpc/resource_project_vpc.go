@@ -2,9 +2,7 @@ package vpc
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/aiven/aiven-go-client"
@@ -44,7 +42,7 @@ func ResourceProjectVPC() *schema.Resource {
 		ReadContext:   resourceProjectVPCRead,
 		DeleteContext: resourceProjectVPCDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceProjectVPCState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(4 * time.Minute),
@@ -90,7 +88,11 @@ func resourceProjectVPCCreate(ctx context.Context, d *schema.ResourceData, m int
 func resourceProjectVPCRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, vpcID := schemautil.SplitResourceID2(d.Id())
+	projectName, vpcID, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	vpc, err := client.VPCs.Get(projectName, vpcID)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
@@ -107,7 +109,10 @@ func resourceProjectVPCRead(_ context.Context, d *schema.ResourceData, m interfa
 func resourceProjectVPCDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, vpcID := schemautil.SplitResourceID2(d.Id())
+	projectName, vpcID, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	waiter := ProjectVPCDeleteWaiter{
 		Client:  client,
@@ -116,25 +121,12 @@ func resourceProjectVPCDelete(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	timeout := d.Timeout(schema.TimeoutDelete)
-	_, err := waiter.Conf(timeout).WaitForStateContext(ctx)
+	_, err = waiter.Conf(timeout).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("error waiting for Aiven project VPC to be DELETED: %s", err)
 	}
 
 	return nil
-}
-
-func resourceProjectVPCState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	if len(strings.Split(d.Id(), "/")) != 2 {
-		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<vpc_id>", d.Id())
-	}
-
-	di := resourceProjectVPCRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get project vpc: %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }
 
 func copyVPCPropertiesFromAPIResponseToTerraform(d *schema.ResourceData, vpc *aiven.VPC, project string) error {

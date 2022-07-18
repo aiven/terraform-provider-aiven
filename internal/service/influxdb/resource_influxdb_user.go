@@ -54,7 +54,7 @@ func ResourceInfluxDBUser() *schema.Resource {
 		ReadContext:   schemautil.ResourceServiceUserRead,
 		DeleteContext: schemautil.ResourceServiceUserDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schemautil.ResourceServiceUserState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: aivenInfluxDBUserSchema,

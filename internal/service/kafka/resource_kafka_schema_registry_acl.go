@@ -2,8 +2,6 @@ package kafka
 
 import (
 	"context"
-	"fmt"
-	"strings"
 
 	"github.com/aiven/aiven-go-client"
 
@@ -54,7 +52,7 @@ func ResourceKafkaSchemaRegistryACL() *schema.Resource {
 		ReadContext:   resourceKafkaSchemaRegistryACLRead,
 		DeleteContext: resourceKafkaSchemaRegistryACLDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceKafkaSchemaRegistryACLState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: aivenKafkaSchemaRegistryACLSchema,
@@ -88,7 +86,11 @@ func resourceKafkaSchemaRegistryACLCreate(ctx context.Context, d *schema.Resourc
 func resourceKafkaSchemaRegistryACLRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, aclID := schemautil.SplitResourceID3(d.Id())
+	project, serviceName, aclID, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	acl, err := client.KafkaSchemaRegistryACLs.Get(project, serviceName, aclID)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
@@ -105,26 +107,17 @@ func resourceKafkaSchemaRegistryACLRead(_ context.Context, d *schema.ResourceDat
 func resourceKafkaSchemaRegistryACLDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, aclID := schemautil.SplitResourceID3(d.Id())
-	err := client.KafkaSchemaRegistryACLs.Delete(projectName, serviceName, aclID)
+	projectName, serviceName, aclID, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = client.KafkaSchemaRegistryACLs.Delete(projectName, serviceName, aclID)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
 
 	return nil
-}
-
-func resourceKafkaSchemaRegistryACLState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	if len(strings.Split(d.Id(), "/")) != 3 {
-		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<acl_id>", d.Id())
-	}
-
-	di := resourceKafkaSchemaRegistryACLRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get kafka acl: %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }
 
 func copyKafkaSchemaRegistryACLPropertiesFromAPIResponseToTerraform(

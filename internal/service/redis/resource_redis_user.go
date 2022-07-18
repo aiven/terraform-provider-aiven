@@ -2,8 +2,6 @@ package redis
 
 import (
 	"context"
-	"fmt"
-	"strings"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -87,7 +85,7 @@ func ResourceRedisUser() *schema.Resource {
 		ReadContext:   resourceRedisUserRead,
 		DeleteContext: schemautil.ResourceServiceUserDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceRedisUserState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: aivenRedisUserSchema,
@@ -135,9 +133,12 @@ func resourceRedisUserCreate(ctx context.Context, d *schema.ResourceData, m inte
 func resourceRedisUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, username := schemautil.SplitResourceID3(d.Id())
+	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	_, err := client.ServiceUsers.Update(projectName, serviceName, username,
+	_, err = client.ServiceUsers.Update(projectName, serviceName, username,
 		aiven.ModifyServiceUserRequest{
 			NewPassword: schemautil.OptionalStringPointer(d, "password"),
 		})
@@ -151,7 +152,11 @@ func resourceRedisUserUpdate(ctx context.Context, d *schema.ResourceData, m inte
 func resourceRedisUserRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, username := schemautil.SplitResourceID3(d.Id())
+	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	user, err := client.ServiceUsers.Get(projectName, serviceName, username)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
@@ -176,38 +181,4 @@ func resourceRedisUserRead(_ context.Context, d *schema.ResourceData, m interfac
 	}
 
 	return nil
-}
-
-func resourceRedisUserState(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	client := m.(*aiven.Client)
-
-	if len(strings.Split(d.Id(), "/")) != 3 {
-		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<username>", d.Id())
-	}
-
-	projectName, serviceName, username := schemautil.SplitResourceID3(d.Id())
-	user, err := client.ServiceUsers.Get(projectName, serviceName, username)
-	if err != nil {
-		return nil, err
-	}
-
-	err = schemautil.CopyServiceUserPropertiesFromAPIResponseToTerraform(d, user, projectName, serviceName)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := d.Set("redis_acl_keys", user.AccessControl.RedisACLKeys); err != nil {
-		return nil, err
-	}
-	if err := d.Set("redis_acl_categories", user.AccessControl.RedisACLCategories); err != nil {
-		return nil, err
-	}
-	if err := d.Set("redis_acl_commands", user.AccessControl.RedisACLCommands); err != nil {
-		return nil, err
-	}
-	if err := d.Set("redis_acl_channels", user.AccessControl.RedisACLChannels); err != nil {
-		return nil, err
-	}
-
-	return []*schema.ResourceData{d}, nil
 }

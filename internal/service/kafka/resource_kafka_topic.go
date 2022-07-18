@@ -332,7 +332,11 @@ func getKafkaTopicConfig(d *schema.ResourceData) aiven.KafkaTopicConfig {
 }
 
 func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	project, serviceName, topicName := schemautil.SplitResourceID3(d.Id())
+	project, serviceName, topicName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	topic, err := getTopic(ctx, d, m, false)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
@@ -394,7 +398,10 @@ func flattenKafkaTopicTags(list []aiven.KafkaTopicTag) []map[string]interface{} 
 }
 
 func getTopic(ctx context.Context, d *schema.ResourceData, m interface{}, ignore404 bool) (aiven.KafkaTopic, error) {
-	project, serviceName, topicName := schemautil.SplitResourceID3(d.Id())
+	project, serviceName, topicName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return aiven.KafkaTopic{}, err
+	}
 
 	w := &KafkaTopicAvailabilityWaiter{
 		Client:      m.(*aiven.Client),
@@ -417,8 +424,12 @@ func resourceKafkaTopicUpdate(_ context.Context, d *schema.ResourceData, m inter
 	client := m.(*aiven.Client)
 
 	partitions := d.Get("partitions").(int)
-	projectName, serviceName, topicName := schemautil.SplitResourceID3(d.Id())
-	err := client.KafkaTopics.Update(
+	projectName, serviceName, topicName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = client.KafkaTopics.Update(
 		projectName,
 		serviceName,
 		topicName,
@@ -439,7 +450,10 @@ func resourceKafkaTopicUpdate(_ context.Context, d *schema.ResourceData, m inter
 func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, topicName := schemautil.SplitResourceID3(d.Id())
+	projectName, serviceName, topicName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if d.Get("termination_protection").(bool) {
 		return diag.Errorf("cannot delete kafka topic when termination_protection is enabled")
@@ -453,7 +467,7 @@ func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	timeout := d.Timeout(schema.TimeoutDelete)
-	_, err := waiter.Conf(timeout).WaitForStateContext(ctx)
+	_, err = waiter.Conf(timeout).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("error waiting for Aiven Kafka Topic to be DELETED: %s", err)
 	}

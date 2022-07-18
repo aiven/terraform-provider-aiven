@@ -99,7 +99,10 @@ func resourceAzurePrivatelinkCreate(ctx context.Context, d *schema.ResourceData,
 
 func resourceAzurePrivatelinkRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
-	project, serviceName := schemautil.SplitResourceID2(d.Id())
+	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	pl, err := client.AzurePrivatelink.Get(project, serviceName)
 	if err != nil {
@@ -134,13 +137,16 @@ func resourceAzurePrivatelinkUpdate(ctx context.Context, d *schema.ResourceData,
 	client := m.(*aiven.Client)
 
 	var subscriptionIDs []string
-	project, serviceName := schemautil.SplitResourceID2(d.Id())
+	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	for _, s := range d.Get("user_subscription_ids").(*schema.Set).List() {
 		subscriptionIDs = append(subscriptionIDs, s.(string))
 	}
 
-	_, err := client.AzurePrivatelink.Update(
+	_, err = client.AzurePrivatelink.Update(
 		project,
 		serviceName,
 		aiven.AzurePrivatelinkRequest{UserSubscriptionIDs: subscriptionIDs},
@@ -181,9 +187,12 @@ func waitForAzurePrivatelinkToBeActive(client *aiven.Client, project string, ser
 
 func resourceAzurePrivatelinkDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
-	project, serviceName := schemautil.SplitResourceID2(d.Id())
+	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	err := client.AzurePrivatelink.Delete(project, serviceName)
+	err = client.AzurePrivatelink.Delete(project, serviceName)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}

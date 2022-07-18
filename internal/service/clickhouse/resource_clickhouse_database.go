@@ -2,8 +2,6 @@ package clickhouse
 
 import (
 	"context"
-	"fmt"
-	"strings"
 	"time"
 
 	"github.com/aiven/aiven-go-client"
@@ -38,7 +36,7 @@ func ResourceClickhouseDatabase() *schema.Resource {
 		UpdateContext: resourceClickhouseDatabaseUpdate,
 		DeleteContext: resourceClickhouseDatabaseDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceClickhouseDatabaseState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Delete: schema.DefaultTimeout(2 * time.Minute),
@@ -68,7 +66,10 @@ func resourceClickhouseDatabaseCreate(ctx context.Context, d *schema.ResourceDat
 func resourceClickhouseDatabaseRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, databaseName := schemautil.SplitResourceID3(d.Id())
+	projectName, serviceName, databaseName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	database, err := client.ClickhouseDatabase.Get(projectName, serviceName, databaseName)
 	if err != nil {
@@ -85,31 +86,21 @@ func resourceClickhouseDatabaseRead(_ context.Context, d *schema.ResourceData, m
 func resourceClickhouseDatabaseDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, databaseName := schemautil.SplitResourceID3(d.Id())
+	projectName, serviceName, databaseName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if d.Get("termination_protection").(bool) {
 		return diag.Errorf("cannot delete a database termination_protection is enabled")
 	}
 
-	err := client.ClickhouseDatabase.Delete(projectName, serviceName, databaseName)
+	err = client.ClickhouseDatabase.Delete(projectName, serviceName, databaseName)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	return nil
-}
-
-func resourceClickhouseDatabaseState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	if len(strings.Split(d.Id(), "/")) != 3 {
-		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<name>", d.Id())
-	}
-
-	di := resourceClickhouseDatabaseRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get clickhouse database: %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }
 
 func resourceClickhouseDatabaseUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

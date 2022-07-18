@@ -2,8 +2,6 @@ package clickhouse
 
 import (
 	"context"
-	"fmt"
-	"strings"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -32,7 +30,7 @@ func ResourceClickhouseRole() *schema.Resource {
 		ReadContext:        resourceClickhouseRoleRead,
 		DeleteContext:      resourceClickhouseRoleDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceClickhouseRoleState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: aivenClickhouseRoleSchema,
@@ -58,13 +56,15 @@ func resourceClickhouseRoleCreate(ctx context.Context, d *schema.ResourceData, m
 func resourceClickhouseRoleRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, roleName := schemautil.SplitResourceID3(d.Id())
+	projectName, serviceName, roleName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if exists, err := RoleExists(client, projectName, serviceName, roleName); err != nil {
 		return diag.FromErr(err)
 	} else if !exists {
-		d.SetId("")
-		return nil
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("project", projectName); err != nil {
@@ -82,23 +82,13 @@ func resourceClickhouseRoleRead(_ context.Context, d *schema.ResourceData, m int
 func resourceClickhouseRoleDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, roleName := schemautil.SplitResourceID3(d.Id())
+	projectName, serviceName, roleName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if err := DropRole(client, projectName, serviceName, roleName); err != nil {
 		return diag.FromErr(err)
 	}
 	return nil
-}
-
-func resourceClickhouseRoleState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	if len(strings.Split(d.Id(), "/")) != 3 {
-		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<database_name>/<role_name>", d.Id())
-	}
-
-	di := resourceClickhouseRoleRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get clickhouse role: %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }

@@ -8,9 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-
 	"github.com/aiven/aiven-go-client"
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -706,9 +705,12 @@ func testAccCheckAivenFlinkJobsAndTableResourcesDestroy(s *terraform.State) erro
 	for _, rs := range s.RootModule().Resources {
 		switch rs.Type {
 		case "aiven_flink_job":
-			project, serviceName, jobId := schemautil.SplitResourceID3(rs.Primary.ID)
+			project, serviceName, jobId, err := schemautil.SplitResourceID3(rs.Primary.ID)
+			if err != nil {
+				return err
+			}
 
-			_, err := c.Services.Get(project, serviceName)
+			_, err = c.Services.Get(project, serviceName)
 			if err != nil {
 				if aiven.IsNotFound(err) {
 					continue
@@ -728,9 +730,12 @@ func testAccCheckAivenFlinkJobsAndTableResourcesDestroy(s *terraform.State) erro
 				return fmt.Errorf("flink job (%s) still exists, id %s", jobId, rs.Primary.ID)
 			}
 		case "aiven_flink_table":
-			project, serviceName, tableId := schemautil.SplitResourceID3(rs.Primary.ID)
+			project, serviceName, tableId, err := schemautil.SplitResourceID3(rs.Primary.ID)
+			if err != nil {
+				return err
+			}
 
-			_, err := c.Services.Get(project, serviceName)
+			_, err = c.Services.Get(project, serviceName)
 			if err != nil {
 				if aiven.IsNotFound(err) {
 					continue

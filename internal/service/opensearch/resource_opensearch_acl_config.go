@@ -45,7 +45,11 @@ func ResourceOpensearchACLConfig() *schema.Resource {
 func resourceOpensearchACLConfigRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName := schemautil.SplitResourceID2(d.Id())
+	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	r, err := client.ElasticsearchACLs.Get(project, serviceName)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))

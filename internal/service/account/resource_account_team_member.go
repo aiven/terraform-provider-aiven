@@ -91,7 +91,11 @@ func resourceAccountTeamMemberCreate(ctx context.Context, d *schema.ResourceData
 func resourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var found bool
 	client := m.(*aiven.Client)
-	accountId, teamId, userEmail := schemautil.SplitResourceID3(d.Id())
+
+	accountId, teamId, userEmail, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	r, err := client.AccountTeamInvites.List(accountId, teamId)
 	if err != nil {
@@ -171,10 +175,13 @@ func resourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, 
 func resourceAccountTeamMemberDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId, teamId, userEmail := schemautil.SplitResourceID3(d.Id())
+	accountId, teamId, userEmail, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	// delete account team user invitation
-	err := client.AccountTeamInvites.Delete(accountId, teamId, userEmail)
+	err = client.AccountTeamInvites.Delete(accountId, teamId, userEmail)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"regexp"
-	"strings"
 	"time"
 
 	"github.com/aiven/aiven-go-client"
@@ -136,7 +135,7 @@ func ResourceServiceIntegration() *schema.Resource {
 		UpdateContext: resourceServiceIntegrationUpdate,
 		DeleteContext: resourceServiceIntegrationDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceServiceIntegrationState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
@@ -150,7 +149,10 @@ func plainEndpointID(fullEndpointID *string) *string {
 	if fullEndpointID == nil {
 		return nil
 	}
-	_, endpointID := schemautil.SplitResourceID2(*fullEndpointID)
+	_, endpointID, err := schemautil.SplitResourceID2(*fullEndpointID)
+	if err != nil {
+		return nil
+	}
 	return &endpointID
 }
 
@@ -198,7 +200,11 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 func resourceServiceIntegrationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, integrationID := schemautil.SplitResourceID2(d.Id())
+	projectName, integrationID, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	integration, err := client.ServiceIntegrations.Get(projectName, integrationID)
 	if err != nil {
 		err = schemautil.ResourceReadHandleNotFound(err, d)
@@ -218,9 +224,12 @@ func resourceServiceIntegrationRead(_ context.Context, d *schema.ResourceData, m
 func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, integrationID := schemautil.SplitResourceID2(d.Id())
+	projectName, integrationID, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	_, err := client.ServiceIntegrations.Update(
+	_, err = client.ServiceIntegrations.Update(
 		projectName,
 		integrationID,
 		aiven.UpdateServiceIntegrationRequest{
@@ -240,33 +249,17 @@ func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceDat
 func resourceServiceIntegrationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, integrationID := schemautil.SplitResourceID2(d.Id())
-	err := client.ServiceIntegrations.Delete(projectName, integrationID)
+	projectName, integrationID, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = client.ServiceIntegrations.Delete(projectName, integrationID)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("cannot delete service integration: %s", err)
 	}
 
 	return nil
-}
-
-func resourceServiceIntegrationState(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	client := m.(*aiven.Client)
-
-	if len(strings.Split(d.Id(), "/")) != 2 {
-		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<integration_id>", d.Id())
-	}
-
-	projectName, integrationID := schemautil.SplitResourceID2(d.Id())
-	integration, err := client.ServiceIntegrations.Get(projectName, integrationID)
-	if err != nil {
-		return nil, err
-	}
-
-	if err = resourceServiceIntegrationCopyAPIResponseToTerraform(d, integration, projectName); err != nil {
-		return nil, fmt.Errorf("cannot copy api response into terraform schema: %s", err)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }
 
 func resourceServiceIntegrationCheckForPreexistingResource(_ context.Context, d *schema.ResourceData, m interface{}) (*aiven.ServiceIntegration, error) {
@@ -304,7 +297,10 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 	)
 	client := m.(*aiven.Client)
 
-	projectName, integrationID := schemautil.SplitResourceID2(d.Id())
+	projectName, integrationID, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return err
+	}
 
 	stateChangeConf := &resource.StateChangeConf{
 		Pending: []string{notActive},

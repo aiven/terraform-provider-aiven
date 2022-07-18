@@ -70,7 +70,7 @@ func ResourceTransitGatewayVPCAttachment() *schema.Resource {
 		UpdateContext: resourceTransitGatewayVPCAttachmentUpdate,
 		DeleteContext: resourceVPCPeeringConnectionDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceVPCPeeringConnectionImport,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(2 * time.Minute),

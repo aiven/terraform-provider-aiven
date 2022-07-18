@@ -155,7 +155,10 @@ func resourcePrivatelinkConnectionApprovalCreateUpdate(ctx context.Context, d *s
 
 func resourcePrivatelinkConnectionApprovalRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
-	project, service := schemautil.SplitResourceID2(d.Id())
+	project, service, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	plConnectionID := d.Get("privatelink_connection_id").(string)
 	plConnection, err := client.AzurePrivatelink.ConnectionGet(project, service, plConnectionID)

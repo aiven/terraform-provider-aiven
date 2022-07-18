@@ -6,9 +6,8 @@ import (
 	"os"
 	"testing"
 
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-
 	"github.com/aiven/aiven-go-client"
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -50,7 +49,11 @@ func testAccCheckAivenClickhouseUserResourceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		projectName, serviceName, uuid := schemautil.SplitResourceID3(rs.Primary.ID)
+		projectName, serviceName, uuid, err := schemautil.SplitResourceID3(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+
 		p, err := c.ClickhouseUser.Get(projectName, serviceName, uuid)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {

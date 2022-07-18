@@ -46,9 +46,9 @@ func datasourceProjectVPCRead(_ context.Context, d *schema.ResourceData, m inter
 
 		// We don't need to care about the cloud name if the ID is provided
 		if hasId {
-			splitId := schemautil.SplitResourceID(vpcId.(string), 2)
-			if len(splitId) < 2 {
-				return diag.Errorf("Invalid VPC id %s", vpcId.(string))
+			splitId, err := schemautil.SplitResourceID(vpcId.(string), 2)
+			if err != nil {
+				return diag.FromErr(err)
 			}
 
 			id := splitId[1]

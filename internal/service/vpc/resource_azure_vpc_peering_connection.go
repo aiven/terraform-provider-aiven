@@ -2,9 +2,6 @@ package vpc
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"strings"
 	"time"
 
 	"github.com/aiven/aiven-go-client"
@@ -77,7 +74,7 @@ func ResourceAzureVPCPeeringConnection() *schema.Resource {
 		ReadContext:   resourceAzureVPCPeeringConnectionRead,
 		DeleteContext: resourceAzureVPCPeeringConnectionDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceAzureVPCPeeringConnectionImport,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(2 * time.Minute),
@@ -90,7 +87,11 @@ func ResourceAzureVPCPeeringConnection() *schema.Resource {
 
 func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
-	projectName, vpcID := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
+	projectName, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	azureSubscriptionId := d.Get("azure_subscription_id").(string)
 	vnetName := d.Get("vnet_name").(string)
 
@@ -238,27 +239,6 @@ func resourceAzureVPCPeeringConnectionDelete(ctx context.Context, d *schema.Reso
 		return diag.Errorf("Error waiting for Azure Aiven VPC Peering Connection to be DELETED: %s", err)
 	}
 	return nil
-}
-
-func resourceAzureVPCPeeringConnectionImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	if len(strings.Split(d.Id(), "/")) != 4 {
-		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<vpc_id>/<azure_subscription_id>/<vnet_name>", d.Id())
-	}
-
-	client := m.(*aiven.Client)
-
-	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
-	_, err := client.VPCPeeringConnections.GetVPCPeering(projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
-	if err != nil && schemautil.IsUnknownResource(err) {
-		return nil, errors.New("cannot find specified Azure VPC peering connection")
-	}
-
-	dig := resourceAzureVPCPeeringConnectionRead(ctx, d, m)
-	if dig.HasError() {
-		return nil, errors.New("cannot get Azure VPC peering connection")
-	}
-
-	return []*schema.ResourceData{d}, nil
 }
 
 func copyAzureVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(

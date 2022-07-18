@@ -67,15 +67,18 @@ func resourceElasticsearchACLRuleGetPermissionFromACLResponse(cfg aiven.ElasticS
 func resourceOpensearchACLRuleRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, username, index := schemautil.SplitResourceID4(d.Id())
+	project, serviceName, username, index, err := schemautil.SplitResourceID4(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	r, err := client.ElasticsearchACLs.Get(project, serviceName)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 	permission, found := resourceElasticsearchACLRuleGetPermissionFromACLResponse(r.ElasticSearchACLConfig, username, index)
 	if !found {
-		d.SetId("")
-		return nil
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("project", project); err != nil {

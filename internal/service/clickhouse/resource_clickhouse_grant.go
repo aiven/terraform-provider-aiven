@@ -158,7 +158,10 @@ func setUserOrRole(d *schema.ResourceData, granteeType, userOrRole string) error
 func resourceClickhouseGrantRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, granteeType, userOrRole := schemautil.SplitResourceID4(d.Id())
+	projectName, serviceName, granteeType, userOrRole, err := schemautil.SplitResourceID4(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if err := d.Set("project", projectName); err != nil {
 		return diag.FromErr(err)
@@ -208,7 +211,6 @@ func resourceClickhouseGrantDelete(_ context.Context, d *schema.ResourceData, m 
 		}
 	}
 
-	d.SetId("")
 	return nil
 }
 

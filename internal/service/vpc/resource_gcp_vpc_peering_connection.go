@@ -2,9 +2,6 @@ package vpc
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"strings"
 	"time"
 
 	"github.com/aiven/aiven-go-client"
@@ -54,7 +51,7 @@ func ResourceGCPVPCPeeringConnection() *schema.Resource {
 		ReadContext:   resourceGCPVPCPeeringConnectionRead,
 		DeleteContext: resourceGCPVPCPeeringConnectionDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceGCPVPCPeeringConnectionImport,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(2 * time.Minute),
@@ -72,7 +69,11 @@ func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 	)
 
 	client := m.(*aiven.Client)
-	projectName, vpcID := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
+	projectName, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	gcpProjectId := d.Get("gcp_project_id").(string)
 	peerVPC := d.Get("peer_vpc").(string)
 
@@ -199,27 +200,6 @@ func resourceGCPVPCPeeringConnectionDelete(ctx context.Context, d *schema.Resour
 		return diag.Errorf("Error waiting for GCP Aiven VPC Peering Connection to be DELETED: %s", err)
 	}
 	return nil
-}
-
-func resourceGCPVPCPeeringConnectionImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	if len(strings.Split(d.Id(), "/")) != 4 {
-		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<vpc_id>/<gcp_project_id>/<peer_vpc>", d.Id())
-	}
-
-	client := m.(*aiven.Client)
-
-	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
-	_, err := client.VPCPeeringConnections.GetVPCPeering(projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
-	if err != nil && schemautil.IsUnknownResource(err) {
-		return nil, errors.New("cannot find specified GCP VPC peering connection")
-	}
-
-	dig := resourceGCPVPCPeeringConnectionRead(ctx, d, m)
-	if dig.HasError() {
-		return nil, errors.New("cannot get GCP VPC peering connection")
-	}
-
-	return []*schema.ResourceData{d}, nil
 }
 
 func copyGCPVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(

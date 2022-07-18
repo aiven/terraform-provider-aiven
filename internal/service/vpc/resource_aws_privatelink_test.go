@@ -5,9 +5,8 @@ import (
 	"os"
 	"testing"
 
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-
 	"github.com/aiven/aiven-go-client"
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -50,7 +49,12 @@ func testAccCheckAivenAWSPrivatelinkResourceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		pv, err := c.AWSPrivatelink.Get(schemautil.SplitResourceID2(rs.Primary.ID))
+		project, serviceName, err := schemautil.SplitResourceID2(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+
+		pv, err := c.AWSPrivatelink.Get(project, serviceName)
 		if err != nil && !aiven.IsNotFound(err) && err.(aiven.Error).Status != 500 {
 			return fmt.Errorf("error getting a AWS Privatelink: %w", err)
 		}

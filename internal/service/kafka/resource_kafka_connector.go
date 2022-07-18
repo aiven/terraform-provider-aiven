@@ -150,7 +150,11 @@ func flattenKafkaConnectorTasks(r *aiven.KafkaConnector) []map[string]interface{
 }
 
 func resourceKafkaConnectorRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	project, serviceName, connectorName := schemautil.SplitResourceID3(d.Id())
+	project, serviceName, connectorName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	stateChangeConf := &resource.StateChangeConf{
 		Pending: []string{"IN_PROGRESS"},
 		Target:  []string{"OK"},
@@ -246,7 +250,12 @@ func resourceKafkaConnectorCreate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceKafkaConnectorDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	err := m.(*aiven.Client).KafkaConnectors.Delete(schemautil.SplitResourceID3(d.Id()))
+	project, service, name, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = m.(*aiven.Client).KafkaConnectors.Delete(project, service, name)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
@@ -255,14 +264,17 @@ func resourceKafkaConnectorDelete(_ context.Context, d *schema.ResourceData, m i
 }
 
 func resourceKafkaTConnectorUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	project, serviceName, connectorName := schemautil.SplitResourceID3(d.Id())
+	project, serviceName, connectorName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	config := make(aiven.KafkaConnectorConfig)
 	for k, cS := range d.Get("config").(map[string]interface{}) {
 		config[k] = cS.(string)
 	}
 
-	_, err := m.(*aiven.Client).KafkaConnectors.Update(project, serviceName, connectorName, config)
+	_, err = m.(*aiven.Client).KafkaConnectors.Update(project, serviceName, connectorName, config)
 	if err != nil {
 		return diag.FromErr(err)
 	}

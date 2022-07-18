@@ -2,8 +2,6 @@ package clickhouse
 
 import (
 	"context"
-	"fmt"
-	"strings"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -49,7 +47,7 @@ func ResourceClickhouseUser() *schema.Resource {
 		ReadContext:        resourceClickhouseUserRead,
 		DeleteContext:      resourceClickhouseUserDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceClickhouseUserState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: aivenClickhouseUserSchema,
@@ -83,7 +81,11 @@ func resourceClickhouseUserCreate(ctx context.Context, d *schema.ResourceData, m
 func resourceClickhouseUserRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, uuid := schemautil.SplitResourceID3(d.Id())
+	projectName, serviceName, uuid, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	user, err := client.ClickhouseUser.Get(projectName, serviceName, uuid)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
@@ -111,24 +113,15 @@ func resourceClickhouseUserRead(_ context.Context, d *schema.ResourceData, m int
 func resourceClickhouseUserDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, uuid := schemautil.SplitResourceID3(d.Id())
-	err := client.ClickhouseUser.Delete(projectName, serviceName, uuid)
+	projectName, serviceName, uuid, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = client.ClickhouseUser.Delete(projectName, serviceName, uuid)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
 
 	return nil
-}
-
-func resourceClickhouseUserState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	if len(strings.Split(d.Id(), "/")) != 3 {
-		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<uuid>", d.Id())
-	}
-
-	di := resourceClickhouseUserRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get clickhouse user: %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }
