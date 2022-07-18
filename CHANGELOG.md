@@ -8,6 +8,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 - Small static IP import fix
 - Add acceptance test for validating 404 error handling during import
+- Disable `fail-fast` on acceptance tests 
 
 ## [3.3.1] - 2022-07-15
 - Fix mark user config of `aiven_kafka_connector` as sensitive as it may contain credentials
