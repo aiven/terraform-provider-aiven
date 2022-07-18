@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -65,6 +66,37 @@ resource "aiven_static_ip" "foo" {
 					}
 					return nil
 				},
+			},
+		},
+	})
+}
+
+func TestAccAivenResourceStaticIpNonExistentIdentifier(t *testing.T) {
+	resourceName := "aiven_static_ip.foo"
+	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	cloudName := "google-europe-west1"
+	manifest := fmt.Sprintf(`
+resource "aiven_static_ip" "foo" {
+  project    = "%s"
+  cloud_name = "%s"
+}`, projectName, cloudName)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      acc.TestAccCheckAivenServiceResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: manifest,
+			},
+			{
+				Config:       manifest,
+				ResourceName: resourceName,
+				ImportState:  true,
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					return "non-existent/identifier", nil
+				},
+				ExpectError: regexp.MustCompile(`Cannot import non-existent remote object`),
 			},
 		},
 	})
