@@ -40,11 +40,11 @@ resource "aiven_static_ip" "foo" {
 					if !ok {
 						return "", fmt.Errorf("expected resource '%s' to be present in the state", resourceName)
 					}
-					id, ok := rs.Primary.Attributes["static_ip_address_id"]
+					_, ok = rs.Primary.Attributes["static_ip_address_id"]
 					if !ok {
 						return "", fmt.Errorf("expected resource '%s' to have an 'static_ip_address_id' attribute", resourceName)
 					}
-					return fmt.Sprintf("%s/%s", projectName, id), nil
+					return rs.Primary.ID, nil
 				},
 				ImportStateCheck: func(s []*terraform.InstanceState) error {
 					if len(s) != 1 {
