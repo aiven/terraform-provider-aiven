@@ -15,8 +15,9 @@ jobs:
 
     strategy:
       max-parallel: 5
+      fail-fast: false
       matrix:
-        Pkg: [
+        pkg: [
           kafka,
           account,
           cassandra,
@@ -39,7 +40,6 @@ jobs:
         ]
 
     steps:
-
       - uses: softprops/turnstyle@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -64,7 +64,7 @@ jobs:
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
           AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME }}
-          PKG: ${{matrix.Pkg}}
+          PKG: ${{matrix.pkg}}
 
   sweep:
     if: ${{ always() }}
