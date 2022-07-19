@@ -3,6 +3,7 @@ package flink
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/aiven-go-client"
@@ -190,7 +191,8 @@ func ResourceFlinkTable() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Schema: aivenFlinkTableSchema,
+		Schema:        aivenFlinkTableSchema,
+		CustomizeDiff: customdiff.If(schemautil.ResourceShouldExist, resourceFlinkTableCustomizeDiff),
 	}
 }
 
@@ -275,26 +277,6 @@ func resourceFlinkTableCreate(ctx context.Context, d *schema.ResourceData, m int
 	return resourceFlinkTableRead(ctx, d, m)
 }
 
-func readUpsertKafkaFromSchema(d *schema.ResourceData) *aiven.FlinkTableUpsertKafka {
-	if len(d.Get("upsert_kafka").(*schema.Set).List()) == 0 {
-		return nil
-	}
-
-	r := aiven.FlinkTableUpsertKafka{}
-	for _, upsertKafka := range d.Get("upsert_kafka").(*schema.Set).List() {
-		v := upsertKafka.(map[string]interface{})
-
-		r.KeyFields = schemautil.FlattenToString(v["key_fields"].([]interface{}))
-		r.KeyFormat = v["key_format"].(string)
-		r.ScanStartupMode = v["scan_startup_mode"].(string)
-		r.Topic = v["topic"].(string)
-		r.ValueFieldsInclude = v["value_fields_include"].(string)
-		r.ValueFormat = v["value_format"].(string)
-	}
-
-	return &r
-}
-
 func resourceFlinkTableDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
@@ -313,6 +295,51 @@ func resourceFlinkTableDelete(_ context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 	return nil
+}
+
+func resourceFlinkTableCustomizeDiff(_ context.Context, d *schema.ResourceDiff, m interface{}) error {
+	client := m.(*aiven.Client)
+
+	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
+
+	_, err := client.FlinkTables.Validate(projectName, serviceName, aiven.ValidateFlinkTableRequest{
+		Name:                    d.Get("table_name").(string),
+		SchemaSQL:               d.Get("schema_sql").(string),
+		IntegrationId:           d.Get("integration_id").(string),
+		JDBCTable:               d.Get("jdbc_table").(string),
+		KafkaConnectorType:      d.Get("kafka_connector_type").(string),
+		KafkaTopic:              d.Get("kafka_topic").(string),
+		KafkaKeyFields:          schemautil.FlattenToString(d.Get("kafka_key_fields").([]interface{})),
+		KafkaKeyFormat:          d.Get("kafka_key_format").(string),
+		KafkaValueFormat:        d.Get("kafka_value_format").(string),
+		KafkaStartupMode:        d.Get("kafka_startup_mode").(string),
+		LikeOptions:             d.Get("like_options").(string),
+		KafkaValueFieldsInclude: d.Get("kafka_value_fields_include").(string),
+		UpsertKafka:             readUpsertKafkaFromSchema(d),
+	})
+
+	return err
+}
+
+func readUpsertKafkaFromSchema(d schemautil.ResourceStateOrResourceDiff) *aiven.FlinkTableUpsertKafka {
+	set := d.Get("upsert_kafka").(*schema.Set).List()
+	if len(set) == 0 {
+		return nil
+	}
+
+	r := aiven.FlinkTableUpsertKafka{}
+	for _, v := range set {
+		cv := v.(map[string]interface{})
+
+		r.KeyFields = schemautil.FlattenToString(cv["key_fields"].([]interface{}))
+		r.KeyFormat = cv["key_format"].(string)
+		r.ScanStartupMode = cv["scan_startup_mode"].(string)
+		r.Topic = cv["topic"].(string)
+		r.ValueFieldsInclude = cv["value_fields_include"].(string)
+		r.ValueFormat = cv["value_format"].(string)
+	}
+
+	return &r
 }
 
 func getFlinkTableKafkaConnectorTypes() []string {
