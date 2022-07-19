@@ -2,8 +2,6 @@ package mysql
 
 import (
 	"context"
-	"fmt"
-	"strings"
 	"time"
 
 	"github.com/aiven/aiven-go-client"
@@ -37,7 +35,7 @@ func ResourceMySQLDatabase() *schema.Resource {
 		DeleteContext: resourceMySQLDatabaseDelete,
 		UpdateContext: resourceMySQLDatabaseUpdate,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceMySQLDatabaseState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Delete: schema.DefaultTimeout(2 * time.Minute),
@@ -78,7 +76,11 @@ func resourceMySQLDatabaseUpdate(ctx context.Context, d *schema.ResourceData, m 
 func resourceMySQLDatabaseRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, databaseName := schemautil.SplitResourceID3(d.Id())
+	projectName, serviceName, databaseName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	database, err := client.Databases.Get(projectName, serviceName, databaseName)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
@@ -100,7 +102,10 @@ func resourceMySQLDatabaseRead(_ context.Context, d *schema.ResourceData, m inte
 func resourceMySQLDatabaseDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, databaseName := schemautil.SplitResourceID3(d.Id())
+	projectName, serviceName, databaseName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if d.Get("termination_protection").(bool) {
 		return diag.Errorf("cannot delete a database termination_protection is enabled")
@@ -114,23 +119,10 @@ func resourceMySQLDatabaseDelete(ctx context.Context, d *schema.ResourceData, m 
 	}
 
 	timeout := d.Timeout(schema.TimeoutDelete)
-	_, err := waiter.Conf(timeout).WaitForStateContext(ctx)
+	_, err = waiter.Conf(timeout).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("error waiting for Aiven Database to be DELETED: %s", err)
 	}
 
 	return nil
-}
-
-func resourceMySQLDatabaseState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	if len(strings.Split(d.Id(), "/")) != 3 {
-		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<database_name>", d.Id())
-	}
-
-	di := resourceMySQLDatabaseRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get database: %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }

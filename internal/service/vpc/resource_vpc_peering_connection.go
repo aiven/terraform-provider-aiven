@@ -79,6 +79,8 @@ var aivenVPCPeeringConnectionSchema = map[string]*schema.Schema{
 	},
 }
 
+// ResourceVPCPeeringConnection
+// Deprecated
 func ResourceVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The VPC Peering Connection resource allows the creation and management of Aiven VPC Peering Connections.",
@@ -107,7 +109,11 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 	)
 
 	client := m.(*aiven.Client)
-	projectName, vpcID := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
+	projectName, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	peerCloudAccount := d.Get("peer_cloud_account").(string)
 	peerVPC := d.Get("peer_vpc").(string)
 	peerRegion := d.Get("peer_region").(string)

@@ -66,7 +66,10 @@ func ResourceFlinkJob() *schema.Resource {
 func resourceFlinkJobRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, jobId := schemautil.SplitResourceID3(d.Id())
+	project, serviceName, jobId, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	r, err := client.FlinkJobs.Get(project, serviceName, aiven.GetFlinkJobRequest{JobId: jobId})
 	if err != nil {
@@ -161,9 +164,12 @@ func resourceFlinkJobCreate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceFlinkJobDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, jobId := schemautil.SplitResourceID3(d.Id())
+	project, serviceName, jobId, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	err := client.FlinkJobs.Patch(
+	err = client.FlinkJobs.Patch(
 		project,
 		serviceName,
 		aiven.PatchFlinkJobRequest{JobId: jobId},

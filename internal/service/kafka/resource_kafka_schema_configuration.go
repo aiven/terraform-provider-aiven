@@ -54,9 +54,12 @@ func ResourceKafkaSchemaConfiguration() *schema.Resource {
 }
 
 func resourceKafkaSchemaConfigurationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	project, serviceName := schemautil.SplitResourceID2(d.Id())
+	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	_, err := m.(*aiven.Client).KafkaGlobalSchemaConfig.Update(
+	_, err = m.(*aiven.Client).KafkaGlobalSchemaConfig.Update(
 		project,
 		serviceName,
 		aiven.KafkaSchemaConfig{
@@ -90,7 +93,10 @@ func resourceKafkaSchemaConfigurationCreate(ctx context.Context, d *schema.Resou
 }
 
 func resourceKafkaSchemaConfigurationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	project, serviceName := schemautil.SplitResourceID2(d.Id())
+	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	r, err := m.(*aiven.Client).KafkaGlobalSchemaConfig.Get(project, serviceName)
 	if err != nil {
@@ -113,9 +119,12 @@ func resourceKafkaSchemaConfigurationRead(_ context.Context, d *schema.ResourceD
 // resourceKafkaSchemaConfigurationDelete Kafka Schemas configuration cannot be deleted, therefore
 // on delete event configuration will be set to the default setting
 func resourceKafkaSchemaConfigurationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	project, serviceName := schemautil.SplitResourceID2(d.Id())
+	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	_, err := m.(*aiven.Client).KafkaGlobalSchemaConfig.Update(
+	_, err = m.(*aiven.Client).KafkaGlobalSchemaConfig.Update(
 		project,
 		serviceName,
 		aiven.KafkaSchemaConfig{

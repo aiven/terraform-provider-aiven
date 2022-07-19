@@ -6,9 +6,8 @@ import (
 	"regexp"
 	"testing"
 
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-
 	"github.com/aiven/aiven-go-client"
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -77,8 +76,12 @@ func testAccCheckAivenKafkaConnectorResourceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		projectName, serviceName := schemautil.SplitResourceID2(rs.Primary.ID)
-		_, err := c.Services.Get(projectName, serviceName)
+		projectName, serviceName, err := schemautil.SplitResourceID2(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+
+		_, err = c.Services.Get(projectName, serviceName)
 		if err != nil {
 			if err.(aiven.Error).Status == 404 {
 				return nil

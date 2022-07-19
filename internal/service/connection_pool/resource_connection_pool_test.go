@@ -8,7 +8,6 @@ import (
 	"github.com/aiven/aiven-go-client"
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -187,7 +186,11 @@ func testAccCheckAivenConnectionPoolResourceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		projectName, serviceName, databaseName := schemautil.SplitResourceID3(rs.Primary.ID)
+		projectName, serviceName, databaseName, err := schemautil.SplitResourceID3(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+
 		pool, err := c.ConnectionPools.Get(projectName, serviceName, databaseName)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {

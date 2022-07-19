@@ -42,7 +42,7 @@ func ResourceM3DBUser() *schema.Resource {
 		ReadContext:   schemautil.ResourceServiceUserRead,
 		DeleteContext: schemautil.ResourceServiceUserDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schemautil.ResourceServiceUserState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: aivenM3DBUserSchema,

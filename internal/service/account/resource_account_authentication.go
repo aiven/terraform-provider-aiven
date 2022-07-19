@@ -126,7 +126,11 @@ func resourceAccountAuthenticationCreate(ctx context.Context, d *schema.Resource
 func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId, authId := schemautil.SplitResourceID2(d.Id())
+	accountId, authId, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	r, err := client.AccountAuthentications.Get(accountId, authId)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
@@ -177,7 +181,10 @@ func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData
 
 func resourceAccountAuthenticationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
-	accountId, authId := schemautil.SplitResourceID2(d.Id())
+	accountId, authId, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	r, err := client.AccountAuthentications.Update(accountId, aiven.AccountAuthenticationMethod{
 		Id:              authId,
@@ -203,9 +210,12 @@ func resourceAccountAuthenticationUpdate(ctx context.Context, d *schema.Resource
 func resourceAccountAuthenticationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId, teamId := schemautil.SplitResourceID2(d.Id())
+	accountId, teamId, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	err := client.AccountAuthentications.Delete(accountId, teamId)
+	err = client.AccountAuthentications.Delete(accountId, teamId)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}

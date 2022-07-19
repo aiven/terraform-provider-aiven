@@ -66,7 +66,7 @@ func ResourceMySQLUser() *schema.Resource {
 		ReadContext:   schemautil.DatasourceServiceUserRead,
 		DeleteContext: schemautil.ResourceServiceUserDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schemautil.ResourceServiceUserState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: aivenMySQLUserSchema,
@@ -109,9 +109,12 @@ func resourceMySQLUserCreate(ctx context.Context, d *schema.ResourceData, m inte
 func resourceMySQLUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, username := schemautil.SplitResourceID3(d.Id())
+	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	_, err := client.ServiceUsers.Update(projectName, serviceName, username,
+	_, err = client.ServiceUsers.Update(projectName, serviceName, username,
 		aiven.ModifyServiceUserRequest{
 			Authentication: schemautil.OptionalStringPointer(d, "authentication"),
 			NewPassword:    schemautil.OptionalStringPointer(d, "password"),

@@ -2,8 +2,6 @@ package kafka
 
 import (
 	"context"
-	"fmt"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -55,7 +53,7 @@ func ResourceKafkaACL() *schema.Resource {
 		ReadContext:   resourceKafkaACLRead,
 		DeleteContext: resourceKafkaACLDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceKafkaACLState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: aivenKafkaACLSchema,
@@ -89,7 +87,11 @@ func resourceKafkaACLCreate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceKafkaACLRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, aclID := schemautil.SplitResourceID3(d.Id())
+	project, serviceName, aclID, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	acl, err := cache.ACLCache{}.Read(project, serviceName, aclID, client)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
@@ -106,26 +108,17 @@ func resourceKafkaACLRead(_ context.Context, d *schema.ResourceData, m interface
 func resourceKafkaACLDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, aclID := schemautil.SplitResourceID3(d.Id())
-	err := client.KafkaACLs.Delete(projectName, serviceName, aclID)
+	projectName, serviceName, aclID, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = client.KafkaACLs.Delete(projectName, serviceName, aclID)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
 
 	return nil
-}
-
-func resourceKafkaACLState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	if len(strings.Split(d.Id(), "/")) != 3 {
-		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<acl_id>", d.Id())
-	}
-
-	di := resourceKafkaACLRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get kafka acl: %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }
 
 func copyKafkaACLPropertiesFromAPIResponseToTerraform(

@@ -1,12 +1,8 @@
 package opensearch
 
 import (
-	"context"
-	"fmt"
-	"strings"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
@@ -62,7 +58,7 @@ func ResourceOpensearch() *schema.Resource {
 			),
 		),
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceOpensearchState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
@@ -72,29 +68,4 @@ func ResourceOpensearch() *schema.Resource {
 
 		Schema: opensearchSchema(),
 	}
-}
-
-func resourceOpensearchState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	client := m.(*aiven.Client)
-
-	if len(strings.Split(d.Id(), "/")) != 2 {
-		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>", d.Id())
-	}
-
-	projectName, serviceName := schemautil.SplitResourceID2(d.Id())
-	s, err := client.Services.Get(projectName, serviceName)
-	if err != nil {
-		return nil, err
-	}
-
-	// Hybrid Opensearch service an Aiven service type Elasticsearch but has
-	// an opensearch_version user configuration option that indicates that this
-	// is a hybrid opensearch common
-	if _, ok := s.UserConfig["opensearch_version"]; ok && s.Type == schemautil.ServiceTypeElasticsearch {
-		if err := d.Set("service_type", schemautil.ServiceTypeOpensearch); err != nil {
-			return nil, err
-		}
-	}
-
-	return schema.ImportStatePassthroughContext(ctx, d, m)
 }

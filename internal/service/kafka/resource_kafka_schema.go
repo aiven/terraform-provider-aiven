@@ -167,7 +167,11 @@ func resourceKafkaSchemaCreate(ctx context.Context, d *schema.ResourceData, m in
 }
 
 func resourceKafkaSchemaUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var project, serviceName, subjectName = schemautil.SplitResourceID3(d.Id())
+	project, serviceName, subjectName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	client := m.(*aiven.Client)
 
 	if d.HasChange("schema") {
@@ -202,7 +206,11 @@ func resourceKafkaSchemaUpdate(ctx context.Context, d *schema.ResourceData, m in
 }
 
 func resourceKafkaSchemaRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var project, serviceName, subjectName = schemautil.SplitResourceID3(d.Id())
+	project, serviceName, subjectName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	client := m.(*aiven.Client)
 
 	version, err := kafkaSchemaSubjectGetLastVersion(m, project, serviceName, subjectName)
@@ -249,9 +257,12 @@ func resourceKafkaSchemaRead(_ context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceKafkaSchemaDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var project, serviceName, schemaName = schemautil.SplitResourceID3(d.Id())
+	project, serviceName, schemaName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	err := m.(*aiven.Client).KafkaSubjectSchemas.Delete(project, serviceName, schemaName)
+	err = m.(*aiven.Client).KafkaSubjectSchemas.Delete(project, serviceName, schemaName)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}

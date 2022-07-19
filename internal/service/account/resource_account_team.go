@@ -76,7 +76,11 @@ func resourceAccountTeamCreate(ctx context.Context, d *schema.ResourceData, m in
 func resourceAccountTeamRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId, teamId := schemautil.SplitResourceID2(d.Id())
+	accountId, teamId, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	r, err := client.AccountTeams.Get(accountId, teamId)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
@@ -103,7 +107,10 @@ func resourceAccountTeamRead(_ context.Context, d *schema.ResourceData, m interf
 
 func resourceAccountTeamUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
-	accountId, teamId := schemautil.SplitResourceID2(d.Id())
+	accountId, teamId, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	r, err := client.AccountTeams.Update(accountId, teamId, aiven.AccountTeam{
 		Name: d.Get("name").(string),
@@ -120,9 +127,12 @@ func resourceAccountTeamUpdate(ctx context.Context, d *schema.ResourceData, m in
 func resourceAccountTeamDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId, teamId := schemautil.SplitResourceID2(d.Id())
+	accountId, teamId, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	err := client.AccountTeams.Delete(accountId, teamId)
+	err = client.AccountTeams.Delete(accountId, teamId)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}

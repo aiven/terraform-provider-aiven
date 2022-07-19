@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// DatasourceVPCPeeringConnection
+// Deprecated
 func DatasourceVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceVPCPeeringConnectionRead,
@@ -22,7 +24,11 @@ func DatasourceVPCPeeringConnection() *schema.Resource {
 func datasourceVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, vpcID := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
+	projectName, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	peerCloudAccount := d.Get("peer_cloud_account").(string)
 	peerVPC := d.Get("peer_vpc").(string)
 

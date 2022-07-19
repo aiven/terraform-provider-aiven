@@ -197,7 +197,10 @@ func ResourceFlinkTable() *schema.Resource {
 func resourceFlinkTableRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, tableId := schemautil.SplitResourceID3(d.Id())
+	project, serviceName, tableId, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	r, err := client.FlinkTables.Get(project, serviceName, aiven.GetFlinkTableRequest{TableId: tableId})
 	if err != nil {
@@ -295,9 +298,12 @@ func readUpsertKafkaFromSchema(d *schema.ResourceData) *aiven.FlinkTableUpsertKa
 func resourceFlinkTableDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, tableId := schemautil.SplitResourceID3(d.Id())
+	project, serviceName, tableId, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	err := client.FlinkTables.Delete(
+	err = client.FlinkTables.Delete(
 		project,
 		serviceName,
 		aiven.DeleteFlinkTableRequest{

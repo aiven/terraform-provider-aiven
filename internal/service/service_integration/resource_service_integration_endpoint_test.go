@@ -5,9 +5,8 @@ import (
 	"os"
 	"testing"
 
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-
 	"github.com/aiven/aiven-go-client"
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -100,7 +99,11 @@ func testAccCheckAivenServiceIntegraitonEndpointResourceDestroy(s *terraform.Sta
 			continue
 		}
 
-		projectName, endpointId := schemautil.SplitResourceID2(rs.Primary.ID)
+		projectName, endpointId, err := schemautil.SplitResourceID2(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+
 		i, err := c.ServiceIntegrationEndpoints.Get(projectName, endpointId)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {

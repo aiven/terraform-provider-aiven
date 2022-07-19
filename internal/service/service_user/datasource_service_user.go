@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// DatasourceServiceUser
+// Deprecated
 func DatasourceServiceUser() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceServiceUserRead,

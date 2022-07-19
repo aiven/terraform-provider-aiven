@@ -22,7 +22,11 @@ func DatasourceAWSVPCPeeringConnection() *schema.Resource {
 func datasourceAWSVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, vpcID := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
+	projectName, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	awsAccountId := d.Get("aws_account_id").(string)
 	awsVPCId := d.Get("aws_vpc_id").(string)
 	awsVPCRegion := d.Get("aws_vpc_region").(string)

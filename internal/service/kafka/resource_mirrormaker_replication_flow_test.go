@@ -5,9 +5,8 @@ import (
 	"os"
 	"testing"
 
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-
 	"github.com/aiven/aiven-go-client"
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -49,7 +48,10 @@ func testAccCheckAivenMirrorMakerReplicationFlowResourceDestroy(s *terraform.Sta
 			continue
 		}
 
-		project, serviceName, sourceCluster, targetCluster := schemautil.SplitResourceID4(rs.Primary.ID)
+		project, serviceName, sourceCluster, targetCluster, err := schemautil.SplitResourceID4(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
 
 		s, err := c.Services.Get(project, serviceName)
 		if err != nil {

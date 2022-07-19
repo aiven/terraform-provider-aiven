@@ -2,8 +2,6 @@ package connection_pool
 
 import (
 	"context"
-	"fmt"
-	"strings"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -62,7 +60,7 @@ func ResourceConnectionPool() *schema.Resource {
 		UpdateContext: resourceConnectionPoolUpdate,
 		DeleteContext: resourceConnectionPoolDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceConnectionPoolState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: aivenConnectionPoolSchema,
@@ -98,7 +96,11 @@ func resourceConnectionPoolCreate(ctx context.Context, d *schema.ResourceData, m
 func resourceConnectionPoolRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, poolName := schemautil.SplitResourceID3(d.Id())
+	project, serviceName, poolName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	pool, err := client.ConnectionPools.Get(project, serviceName, poolName)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
@@ -115,8 +117,12 @@ func resourceConnectionPoolRead(_ context.Context, d *schema.ResourceData, m int
 func resourceConnectionPoolUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, poolName := schemautil.SplitResourceID3(d.Id())
-	_, err := client.ConnectionPools.Update(
+	project, serviceName, poolName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	_, err = client.ConnectionPools.Update(
 		project,
 		serviceName,
 		poolName,
@@ -137,26 +143,17 @@ func resourceConnectionPoolUpdate(ctx context.Context, d *schema.ResourceData, m
 func resourceConnectionPoolDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, poolName := schemautil.SplitResourceID3(d.Id())
-	err := client.ConnectionPools.Delete(projectName, serviceName, poolName)
+	projectName, serviceName, poolName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = client.ConnectionPools.Delete(projectName, serviceName, poolName)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
 
 	return nil
-}
-
-func resourceConnectionPoolState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	if len(strings.Split(d.Id(), "/")) != 3 {
-		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<service_name>/<pool_name>", d.Id())
-	}
-
-	di := resourceConnectionPoolRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot read connection pool: %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }
 
 func copyConnectionPoolPropertiesFromAPIResponseToTerraform(

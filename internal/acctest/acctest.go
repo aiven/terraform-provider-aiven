@@ -52,18 +52,20 @@ func TestAccCheckAivenServiceResourceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		if len(schemautil.SplitResourceID(rs.Primary.ID, 2)) == 2 {
-			projectName, serviceName := schemautil.SplitResourceID2(rs.Primary.ID)
-			p, err := c.Services.Get(projectName, serviceName)
-			if err != nil {
-				if err.(aiven.Error).Status != 404 {
-					return err
-				}
-			}
+		projectName, serviceName, err := schemautil.SplitResourceID2(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
 
-			if p != nil {
-				return fmt.Errorf("common (%s) still exists", rs.Primary.ID)
+		p, err := c.Services.Get(projectName, serviceName)
+		if err != nil {
+			if err.(aiven.Error).Status != 404 {
+				return err
 			}
+		}
+
+		if p != nil {
+			return fmt.Errorf("common (%s) still exists", rs.Primary.ID)
 		}
 	}
 

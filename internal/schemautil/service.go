@@ -299,7 +299,11 @@ func ResourceServiceCreateWrapper(serviceType string) schema.CreateContextFunc {
 func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName := SplitResourceID2(d.Id())
+	projectName, serviceName, err := SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	s, err := client.Services.Get(projectName, serviceName)
 	if err != nil {
 		if err = ResourceReadHandleNotFound(err, d); err != nil {
@@ -407,7 +411,10 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	projectName, serviceName := SplitResourceID2(d.Id())
+	projectName, serviceName, err := SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	ass, dis, err := DiffStaticIps(ctx, d, m)
 	if err != nil {
@@ -484,7 +491,10 @@ func getDefaultDiskSpaceIfNotSet(ctx context.Context, d *schema.ResourceData, cl
 func ResourceServiceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName := SplitResourceID2(d.Id())
+	projectName, serviceName, err := SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if err := client.Services.Delete(projectName, serviceName); err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)

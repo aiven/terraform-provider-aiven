@@ -122,7 +122,11 @@ func ResourcePG() *schema.Resource {
 func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName := schemautil.SplitResourceID2(d.Id())
+	projectName, serviceName, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	userConfig := schemautil.ConvertTerraformUserConfigToAPICompatibleFormat(templates.UserConfigSchemaService, "pg", false, d)
 
 	if userConfig["pg_version"] != nil {

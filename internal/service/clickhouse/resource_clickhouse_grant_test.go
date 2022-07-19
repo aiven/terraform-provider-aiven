@@ -5,9 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/aiven/terraform-provider-aiven/internal/service/clickhouse"
-
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/service/clickhouse"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -103,7 +102,10 @@ func testAccCheckAivenClickhouseGrantResourceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		projectName, serviceName, granteeType, granteeName := schemautil.SplitResourceID4(rs.Primary.ID)
+		projectName, serviceName, granteeType, granteeName, err := schemautil.SplitResourceID4(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
 
 		grantee := clickhouse.Grantee{}
 		switch granteeType {

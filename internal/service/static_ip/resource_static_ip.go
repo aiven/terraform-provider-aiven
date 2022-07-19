@@ -59,7 +59,10 @@ func ResourceStaticIP() *schema.Resource {
 func resourceStaticIPRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, staticIPAddressId := schemautil.SplitResourceID2(d.Id())
+	project, staticIPAddressId, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	r, err := client.StaticIPs.List(project)
 	if err != nil {
@@ -74,7 +77,7 @@ func resourceStaticIPRead(_ context.Context, d *schema.ResourceData, m interface
 			return nil
 		}
 	}
-	d.SetId("")
+
 	return nil
 }
 func resourceStaticIPCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -100,7 +103,10 @@ func resourceStaticIPCreate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceStaticIPDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, staticIPAddressId := schemautil.SplitResourceID2(d.Id())
+	project, staticIPAddressId, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	staticIP, err := client.StaticIPs.Get(project, staticIPAddressId)
 	if err != nil {
@@ -132,7 +138,10 @@ func resourceStaticIPDelete(_ context.Context, d *schema.ResourceData, m interfa
 func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-	project, staticIPAddressId := schemautil.SplitResourceID2(d.Id())
+	project, staticIPAddressId, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return err
+	}
 
 	conf := resource.StateChangeConf{
 		Target:  []string{schemautil.StaticIpCreated},

@@ -2,7 +2,6 @@ package project
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
@@ -40,7 +39,7 @@ func ResourceProjectUser() *schema.Resource {
 		UpdateContext: resourceProjectUserUpdate,
 		DeleteContext: resourceProjectUserDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceProjectUserState,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: aivenProjectUserSchema,
@@ -73,7 +72,11 @@ func resourceProjectUserCreate(ctx context.Context, d *schema.ResourceData, m in
 func resourceProjectUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, email := schemautil.SplitResourceID2(d.Id())
+	projectName, email, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	user, invitation, err := client.ProjectUsers.Get(projectName, email)
 	if err != nil {
 		if aiven.IsNotFound(err) && !d.Get("accepted").(bool) {
@@ -109,9 +112,13 @@ func resourceProjectUserRead(ctx context.Context, d *schema.ResourceData, m inte
 func resourceProjectUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, email := schemautil.SplitResourceID2(d.Id())
+	projectName, email, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	memberType := d.Get("member_type").(string)
-	err := client.ProjectUsers.UpdateUserOrInvitation(
+	err = client.ProjectUsers.UpdateUserOrInvitation(
 		projectName,
 		email,
 		aiven.UpdateProjectUserOrInvitationRequest{
@@ -128,7 +135,11 @@ func resourceProjectUserUpdate(ctx context.Context, d *schema.ResourceData, m in
 func resourceProjectUserDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, email := schemautil.SplitResourceID2(d.Id())
+	projectName, email, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	user, invitation, err := client.ProjectUsers.Get(projectName, email)
 	if err != nil {
 		return diag.FromErr(err)
@@ -156,17 +167,4 @@ func resourceProjectUserDelete(_ context.Context, d *schema.ResourceData, m inte
 	}
 
 	return nil
-}
-
-func resourceProjectUserState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	if len(strings.Split(d.Id(), "/")) != 2 {
-		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<email>", d.Id())
-	}
-
-	di := resourceProjectUserRead(ctx, d, m)
-	if di.HasError() {
-		return nil, fmt.Errorf("cannot get project user %v", di)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }

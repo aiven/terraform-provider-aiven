@@ -22,7 +22,11 @@ func DatasourceAzureVPCPeeringConnection() *schema.Resource {
 func datasourceAzureVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, vpcID := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
+	projectName, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	subscriptionId := d.Get("azure_subscription_id").(string)
 	vnetName := d.Get("vnet_name").(string)
 	appId := d.Get("peer_azure_app_id").(string)

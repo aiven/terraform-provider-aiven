@@ -241,28 +241,35 @@ func BuildResourceID(parts ...string) string {
 	return strings.Join(finalParts, "/")
 }
 
-func SplitResourceID(resourceID string, n int) []string {
-	parts := strings.SplitN(resourceID, "/", n)
+func SplitResourceID(resourceID string, n int) (parts []string, err error) {
+	parts = strings.SplitN(resourceID, "/", n)
+
 	for idx, part := range parts {
 		part, _ := url.PathUnescape(part)
 		parts[idx] = part
 	}
-	return parts
+
+	if len(parts) != n {
+		err = fmt.Errorf("invalid resource id: %s", resourceID)
+		return nil, err
+	}
+
+	return
 }
 
-func SplitResourceID2(resourceID string) (string, string) {
-	parts := SplitResourceID(resourceID, 2)
-	return parts[0], parts[1]
+func SplitResourceID2(resourceID string) (string, string, error) {
+	parts, err := SplitResourceID(resourceID, 2)
+	return parts[0], parts[1], err
 }
 
-func SplitResourceID3(resourceID string) (string, string, string) {
-	parts := SplitResourceID(resourceID, 3)
-	return parts[0], parts[1], parts[2]
+func SplitResourceID3(resourceID string) (string, string, string, error) {
+	parts, err := SplitResourceID(resourceID, 3)
+	return parts[0], parts[1], parts[2], err
 }
 
-func SplitResourceID4(resourceID string) (string, string, string, string) {
-	parts := SplitResourceID(resourceID, 4)
-	return parts[0], parts[1], parts[2], parts[3]
+func SplitResourceID4(resourceID string) (string, string, string, string, error) {
+	parts, err := SplitResourceID(resourceID, 4)
+	return parts[0], parts[1], parts[2], parts[3], err
 }
 
 func FlattenToString(a []interface{}) []string {

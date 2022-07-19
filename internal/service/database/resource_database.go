@@ -57,6 +57,8 @@ var aivenDatabaseSchema = map[string]*schema.Schema{
 	},
 }
 
+// ResourceDatabase
+// Deprecated
 func ResourceDatabase() *schema.Resource {
 	return &schema.Resource{
 		Description:        "The Database resource allows the creation and management of Aiven Databases.",
@@ -108,7 +110,11 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceDatabaseRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, databaseName := schemautil.SplitResourceID3(d.Id())
+	projectName, serviceName, databaseName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	database, err := client.Databases.Get(projectName, serviceName, databaseName)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
@@ -139,7 +145,10 @@ func resourceDatabaseRead(_ context.Context, d *schema.ResourceData, m interface
 func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, serviceName, databaseName := schemautil.SplitResourceID3(d.Id())
+	projectName, serviceName, databaseName, err := schemautil.SplitResourceID3(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if d.Get("termination_protection").(bool) {
 		return diag.Errorf("cannot delete a database termination_protection is enabled")
@@ -153,7 +162,7 @@ func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	timeout := d.Timeout(schema.TimeoutDelete)
-	_, err := waiter.Conf(timeout).WaitForStateContext(ctx)
+	_, err = waiter.Conf(timeout).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("error waiting for Aiven Database to be DELETED: %s", err)
 	}
