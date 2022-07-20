@@ -38,8 +38,13 @@ resource "aiven_account_authentication" "foo" {
 - `auto_join_team_id` (String) Team ID
 - `enabled` (Boolean) Status of account authentication method. The default value is `false`.
 - `saml_certificate` (String) SAML Certificate
+- `saml_digest_algorithm` (String) Digest algorithm. This is an advanced option that typically does not need to be set.
 - `saml_entity_id` (String) SAML Entity id
+- `saml_field_mapping` (Block Set, Max: 1) Map IdP fields (see [below for nested schema](#nestedblock--saml_field_mapping))
+- `saml_idp_login_allowed` (Boolean) Set to 'true' to enable IdP initiated login
 - `saml_idp_url` (String) SAML Idp URL
+- `saml_signature_algorithm` (String) Signature algorithm. This is an advanced option that typically does not need to be set.
+- `saml_variant` (String) SAML server variant
 
 ### Read-Only
 
@@ -49,6 +54,17 @@ resource "aiven_account_authentication" "foo" {
 - `saml_acs_url` (String) SAML Assertion Consumer Service URL
 - `saml_metadata_url` (String) SAML Metadata URL
 - `update_time` (String) Time of last update
+
+<a id="nestedblock--saml_field_mapping"></a>
+### Nested Schema for `saml_field_mapping`
+
+Optional:
+
+- `email` (String) Field name for user email
+- `first_name` (String) Field name for user's first name
+- `identity` (String) Field name for user's identity. This field must always exist in responses, and must be immutable and unique. Contents of this field are used to identify the user. Using user ID (such as unix user id) is highly recommended, as email address may change, requiring relinking user to Aiven user.
+- `last_name` (String) Field name for user's last name
+- `real_name` (String) Field name for user's full name. If specified, first_name and last_name mappings are ignored
 
 ## Import
 

@@ -43,10 +43,67 @@ var aivenAccountAuthenticationSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Description: "SAML Certificate",
 	},
+	"saml_digest_algorithm": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Default:     "sha256",
+		Description: "Digest algorithm. This is an advanced option that typically does not need to be set.",
+	},
+	"saml_field_mapping": {
+		Type:        schema.TypeSet,
+		MaxItems:    1,
+		Optional:    true,
+		Description: "Map IdP fields",
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"email": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: "Field name for user email",
+				},
+				"first_name": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: "Field name for user's first name",
+				},
+				"identity": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: "Field name for user's identity. This field must always exist in responses, and must be immutable and unique. Contents of this field are used to identify the user. Using user ID (such as unix user id) is highly recommended, as email address may change, requiring relinking user to Aiven user.",
+				},
+				"last_name": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: "Field name for user's last name",
+				},
+				"real_name": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: "Field name for user's full name. If specified, first_name and last_name mappings are ignored",
+				},
+			},
+		},
+	},
+	"saml_idp_login_allowed": {
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Description: "Set to 'true' to enable IdP initiated login",
+	},
 	"saml_idp_url": {
 		Type:        schema.TypeString,
 		Optional:    true,
 		Description: "SAML Idp URL",
+	},
+	"saml_signature_algorithm": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Default:     "rsa-sha256",
+		Description: "Signature algorithm. This is an advanced option that typically does not need to be set.",
+	},
+	"saml_variant": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "SAML server variant",
 	},
 	"saml_entity_id": {
 		Type:        schema.TypeString,
@@ -103,13 +160,18 @@ func resourceAccountAuthenticationCreate(ctx context.Context, d *schema.Resource
 	r, err := client.AccountAuthentications.Create(
 		accountId,
 		aiven.AccountAuthenticationMethod{
-			Enabled:         d.Get("enabled").(bool),
-			Name:            d.Get("name").(string),
-			Type:            d.Get("type").(string),
-			AutoJoinTeamId:  d.Get("auto_join_team_id").(string),
-			SAMLCertificate: d.Get("saml_certificate").(string),
-			SAMLIdpUrl:      d.Get("saml_idp_url").(string),
-			SAMLEntity:      d.Get("saml_entity_id").(string),
+			Enabled:                d.Get("enabled").(bool),
+			Name:                   d.Get("name").(string),
+			Type:                   d.Get("type").(string),
+			AutoJoinTeamId:         d.Get("auto_join_team_id").(string),
+			SAMLCertificate:        d.Get("saml_certificate").(string),
+			SAMLDigestAlgorithm:    d.Get("saml_digest_algorithm").(string),
+			SAMLFieldMapping:       readSAMLFieldMappingFromSchema(d),
+			SAMLIdpLoginAllowed:    d.Get("saml_idp_login_allowed").(bool),
+			SAMLIdpUrl:             d.Get("saml_idp_url").(string),
+			SAMLSignatureAlgorithm: d.Get("saml_signature_algorithm").(string),
+			SAMLVariant:            d.Get("saml_variant").(string),
+			SAMLEntity:             d.Get("saml_entity_id").(string),
 		},
 	)
 	if err != nil {
@@ -154,7 +216,22 @@ func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData
 	if err := d.Set("saml_certificate", r.AuthenticationMethod.SAMLCertificate); err != nil {
 		return diag.FromErr(err)
 	}
+	if err := d.Set("saml_digest_algorithm", r.AuthenticationMethod.SAMLDigestAlgorithm); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("saml_field_mapping", r.AuthenticationMethod.SAMLFieldMapping); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("saml_idp_login_allowed", r.AuthenticationMethod.SAMLIdpLoginAllowed); err != nil {
+		return diag.FromErr(err)
+	}
 	if err := d.Set("saml_idp_url", r.AuthenticationMethod.SAMLIdpUrl); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("saml_signature_algorithm", r.AuthenticationMethod.SAMLSignatureAlgorithm); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("saml_variant", r.AuthenticationMethod.SAMLVariant); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("saml_entity_id", r.AuthenticationMethod.SAMLEntity); err != nil {
@@ -187,14 +264,19 @@ func resourceAccountAuthenticationUpdate(ctx context.Context, d *schema.Resource
 	}
 
 	r, err := client.AccountAuthentications.Update(accountId, aiven.AccountAuthenticationMethod{
-		Id:              authId,
-		Enabled:         d.Get("enabled").(bool),
-		Name:            d.Get("name").(string),
-		Type:            d.Get("type").(string),
-		AutoJoinTeamId:  d.Get("auto_join_team_id").(string),
-		SAMLCertificate: d.Get("saml_certificate").(string),
-		SAMLIdpUrl:      d.Get("saml_idp_url").(string),
-		SAMLEntity:      d.Get("saml_entity_id").(string),
+		Id:                     authId,
+		Enabled:                d.Get("enabled").(bool),
+		Name:                   d.Get("name").(string),
+		Type:                   d.Get("type").(string),
+		AutoJoinTeamId:         d.Get("auto_join_team_id").(string),
+		SAMLCertificate:        d.Get("saml_certificate").(string),
+		SAMLDigestAlgorithm:    d.Get("saml_digest_algorithm").(string),
+		SAMLFieldMapping:       readSAMLFieldMappingFromSchema(d),
+		SAMLIdpLoginAllowed:    d.Get("saml_idp_login_allowed").(bool),
+		SAMLIdpUrl:             d.Get("saml_idp_url").(string),
+		SAMLSignatureAlgorithm: d.Get("saml_signature_algorithm").(string),
+		SAMLVariant:            d.Get("saml_variant").(string),
+		SAMLEntity:             d.Get("saml_entity_id").(string),
 	})
 	if err != nil {
 		return diag.FromErr(err)
@@ -221,4 +303,24 @@ func resourceAccountAuthenticationDelete(_ context.Context, d *schema.ResourceDa
 	}
 
 	return nil
+}
+
+func readSAMLFieldMappingFromSchema(d *schema.ResourceData) *aiven.SAMLFieldMapping {
+	set := d.Get("saml_field_mapping").(*schema.Set).List()
+	if len(set) == 0 {
+		return nil
+	}
+
+	r := aiven.SAMLFieldMapping{}
+	for _, v := range set {
+		cv := v.(map[string]interface{})
+
+		r.Email = cv["email"].(string)
+		r.FirstName = cv["first_name"].(string)
+		r.Identity = cv["identity"].(string)
+		r.LastName = cv["last_name"].(string)
+		r.RealName = cv["real_name"].(string)
+	}
+
+	return &r
 }
