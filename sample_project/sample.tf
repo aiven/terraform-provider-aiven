@@ -54,7 +54,7 @@ resource "aiven_kafka_topic" "sample_topic" {
 }
 
 # User for Kafka
-resource "aiven_service_user" "kafka_a" {
+resource "aiven_kafka_user" "kafka_a" {
   project      = data.aiven_project.sample.project
   service_name = aiven_kafka.samplekafka.service_name
   username     = "kafka_a"
@@ -114,14 +114,14 @@ resource "aiven_service_integration" "samplepg_metrics" {
 }
 
 # PostgreSQL database
-resource "aiven_database" "sample_db" {
+resource "aiven_pg_database" "sample_db" {
   project       = data.aiven_project.sample.project
   service_name  = aiven_pg.samplepg.service_name
   database_name = "sample_db"
 }
 
 # PostgreSQL user
-resource "aiven_service_user" "sample_user" {
+resource "aiven_pg_user" "sample_user" {
   project      = data.aiven_project.sample.project
   service_name = aiven_pg.samplepg.service_name
   username     = "sampleuser"
@@ -131,12 +131,12 @@ resource "aiven_service_user" "sample_user" {
 resource "aiven_connection_pool" "sample_pool" {
   project       = data.aiven_project.sample.project
   service_name  = aiven_pg.samplepg.service_name
-  database_name = aiven_database.sample_db.database_name
+  database_name = aiven_pg_database.sample_db.database_name
   pool_name     = "samplepool"
-  username      = aiven_service_user.sample_user.username
+  username      = aiven_pg_user.sample_user.username
 
   depends_on = [
-    aiven_database.sample_db,
+    aiven_pg_database.sample_db,
   ]
 }
 
