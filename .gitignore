@@ -8,6 +8,7 @@ terraform-provider-aiven
 *.tfstate
 *.tfstate.*
 *.tfvars
+*.terraform.lock.hcl
 !sample_project/terraform.tfvars
 
 # Crash log files
