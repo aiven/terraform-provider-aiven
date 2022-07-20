@@ -14,6 +14,8 @@ nav_order: 1
 - Replaced `vpc.parsePeeringVPCId` with `schemautil.SplitResourceID`
 - Made `schemautil.SplitResourceID` throw an error when the resulting amount of parts is not equal to expected
 - Marked deprecated resources deprecated
+- Dropped deprecated resources from sample project
+- Added *.terraform.lock.hcl to .gitignore
 
 ## [3.3.1] - 2022-07-15
 - Fix mark user config of `aiven_kafka_connector` as sensitive as it may contain credentials
