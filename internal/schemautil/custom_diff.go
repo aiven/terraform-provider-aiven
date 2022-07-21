@@ -9,15 +9,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func ServiceIntegrationShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
-	return len(new.([]interface{})) != 0
+func ResourceShouldExist(_ context.Context, d *schema.ResourceDiff, _ interface{}) bool {
+	return len(d.Id()) > 0
 }
 
-func CustomizeDiffServiceIntegrationAfterCreation(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
-	if len(d.Id()) > 0 && d.HasChange("service_integrations") && len(d.Get("service_integrations").([]interface{})) != 0 {
-		return fmt.Errorf("service_integrations field can only be set during creation of a service")
-	}
-	return nil
+func ServiceIntegrationShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
+	return len(new.([]interface{})) != 0
 }
 
 func DiskSpaceShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
@@ -26,6 +23,13 @@ func DiskSpaceShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
 
 func TagsShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
 	return len(new.(*schema.Set).List()) != 0
+}
+
+func CustomizeDiffServiceIntegrationAfterCreation(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	if len(d.Id()) > 0 && d.HasChange("service_integrations") && len(d.Get("service_integrations").([]interface{})) != 0 {
+		return fmt.Errorf("service_integrations field can only be set during creation of a service")
+	}
+	return nil
 }
 
 func CustomizeDiffCheckUniqueTag(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
@@ -98,7 +102,7 @@ func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m 
 }
 
 func SetServiceTypeIfEmpty(t string) schema.CustomizeDiffFunc {
-	return func(ctx context.Context, diff *schema.ResourceDiff, i interface{}) error {
+	return func(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 		if err := diff.SetNew("service_type", t); err != nil {
 			return err
 		}

@@ -8,7 +8,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 - Small static IP import fix
 - Add acceptance test for validating 404 error handling during import
-- Disable `fail-fast` on acceptance tests 
+- Disable `fail-fast` on acceptance tests
 - Replaced every `schema.Resource.Importer.StateContext` to `schema.ImportStatePassthroughContext`
 - Got rid of all unnecessary `d.SetId("")` calls
 - Replaced `vpc.parsePeeringVPCId` with `schemautil.SplitResourceID`
@@ -17,6 +17,7 @@ nav_order: 1
 - Dropped deprecated resources from sample project
 - Added *.terraform.lock.hcl to .gitignore
 - Update account authentication SAML fields
+- Add Flink SQL validation
 
 ## [3.3.1] - 2022-07-15
 - Fix mark user config of `aiven_kafka_connector` as sensitive as it may contain credentials

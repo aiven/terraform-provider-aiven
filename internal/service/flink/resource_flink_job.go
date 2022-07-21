@@ -6,6 +6,7 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -59,7 +60,8 @@ func ResourceFlinkJob() *schema.Resource {
 			Read:   schema.DefaultTimeout(1 * time.Minute),
 			Delete: schema.DefaultTimeout(1 * time.Minute),
 		},
-		Schema: aivenFlinkJobSchema,
+		Schema:        aivenFlinkJobSchema,
+		CustomizeDiff: customdiff.If(schemautil.ResourceShouldExist, resourceFlinkJobCustomizeDiff),
 	}
 }
 
@@ -212,4 +214,17 @@ func resourceFlinkJobDelete(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 	return nil
+}
+
+func resourceFlinkJobCustomizeDiff(_ context.Context, d *schema.ResourceDiff, m interface{}) error {
+	client := m.(*aiven.Client)
+
+	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
+
+	_, err := client.FlinkJobs.Validate(projectName, serviceName, aiven.ValidateFlinkJobRequest{
+		Statement: d.Get("statement").(string),
+		TableIDs:  schemautil.FlattenToString(d.Get("table_ids").([]interface{})),
+	})
+
+	return err
 }
