@@ -36,10 +36,26 @@ data "aiven_account_authentication" "foo" {
 - `id` (String) The ID of this resource.
 - `saml_acs_url` (String) SAML Assertion Consumer Service URL
 - `saml_certificate` (String) SAML Certificate
+- `saml_digest_algorithm` (String) Digest algorithm. This is an advanced option that typically does not need to be set.
 - `saml_entity_id` (String) SAML Entity id
+- `saml_field_mapping` (Set of Object) Map IdP fields (see [below for nested schema](#nestedatt--saml_field_mapping))
+- `saml_idp_login_allowed` (Boolean) Set to 'true' to enable IdP initiated login
 - `saml_idp_url` (String) SAML Idp URL
 - `saml_metadata_url` (String) SAML Metadata URL
+- `saml_signature_algorithm` (String) Signature algorithm. This is an advanced option that typically does not need to be set.
+- `saml_variant` (String) SAML server variant
 - `type` (String) The account authentication type. The possible values are `internal` and `saml`.
 - `update_time` (String) Time of last update
+
+<a id="nestedatt--saml_field_mapping"></a>
+### Nested Schema for `saml_field_mapping`
+
+Read-Only:
+
+- `email` (String)
+- `first_name` (String)
+- `identity` (String)
+- `last_name` (String)
+- `real_name` (String)
 
 
