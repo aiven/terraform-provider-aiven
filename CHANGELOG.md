@@ -5,7 +5,8 @@ parent: README
 nav_order: 1
 ---# Changelog
 
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+## [3.4.0] - 2022-07-26
+
 - Small static IP import fix
 - Add acceptance test for validating 404 error handling during import
 - Disable `fail-fast` on acceptance tests
@@ -21,12 +22,14 @@ nav_order: 1
 - Add outputs example to the sample project
 
 ## [3.3.1] - 2022-07-15
+
 - Fix mark user config of `aiven_kafka_connector` as sensitive as it may contain credentials
 - Kafka Topic availability waiter optimization
 - Fix `aiven_billing_group` datasource
 - Build and use go 1.18
 
 ## [3.3.0] - 2022-07-14
+
 - Fix auto generated documentation by bumping tfplugindocs to latest version
 - Fix typos in docs and examples
 - Minor acceptance tests updates
