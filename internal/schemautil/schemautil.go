@@ -259,17 +259,29 @@ func SplitResourceID(resourceID string, n int) (parts []string, err error) {
 
 func SplitResourceID2(resourceID string) (string, string, error) {
 	parts, err := SplitResourceID(resourceID, 2)
-	return parts[0], parts[1], err
+	if err != nil {
+		return "", "", err
+	}
+
+	return parts[0], parts[1], nil
 }
 
 func SplitResourceID3(resourceID string) (string, string, string, error) {
 	parts, err := SplitResourceID(resourceID, 3)
-	return parts[0], parts[1], parts[2], err
+	if err != nil {
+		return "", "", "", err
+	}
+
+	return parts[0], parts[1], parts[2], nil
 }
 
 func SplitResourceID4(resourceID string) (string, string, string, string, error) {
 	parts, err := SplitResourceID(resourceID, 4)
-	return parts[0], parts[1], parts[2], parts[3], err
+	if err != nil {
+		return "", "", "", "", err
+	}
+
+	return parts[0], parts[1], parts[2], parts[3], nil
 }
 
 func FlattenToString(a []interface{}) []string {
