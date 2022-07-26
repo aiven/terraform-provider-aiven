@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
@@ -45,10 +46,31 @@ func TestAccPreCheck(t *testing.T) {
 func TestAccCheckAivenServiceResourceDestroy(s *terraform.State) error {
 	c := TestAccProvider.Meta().(*aiven.Client)
 	// loop through the resources in state, verifying each service is destroyed
-	for _, rs := range s.RootModule().Resources {
-		var r []string
+	for n, rs := range s.RootModule().Resources {
+		// ignore datasource
+		if strings.HasPrefix(n, "data.") {
+			continue
+		}
 
-		if sort.SearchStrings(r, rs.Type) > 0 {
+		r := func() []string {
+			return []string{
+				"aiven_influxdb",
+				"aiven_grafana",
+				"aiven_mysql",
+				"aiven_redis",
+				"aiven_pg",
+				"aiven_cassandra",
+				"aiven_m3db",
+				"aiven_flink",
+				"aiven_opensearch",
+				"aiven_kafka",
+				"aiven_kafka_connector",
+				"aiven_kafka_connect",
+				"aiven_clickhouse",
+				"aiven_service", // deprecated
+			}
+		}
+		if sort.SearchStrings(r(), rs.Type) > 0 {
 			continue
 		}
 
@@ -59,7 +81,7 @@ func TestAccCheckAivenServiceResourceDestroy(s *terraform.State) error {
 
 		p, err := c.Services.Get(projectName, serviceName)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			if !aiven.IsNotFound(err) {
 				return err
 			}
 		}
