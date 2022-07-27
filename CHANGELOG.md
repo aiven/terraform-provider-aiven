@@ -5,6 +5,10 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Add custom diff for all types of VPC peering connections that check if a VPC connection already exists before creation
+
 ## [3.4.0] - 2022-07-26
 
 - Small static IP import fix
