@@ -9,6 +9,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+func ResourceShouldNotExist(_ context.Context, d *schema.ResourceDiff, _ interface{}) bool {
+	return len(d.Id()) == 0
+}
+
 func ResourceShouldExist(_ context.Context, d *schema.ResourceDiff, _ interface{}) bool {
 	return len(d.Id()) > 0
 }
