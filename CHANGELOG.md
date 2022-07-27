@@ -12,6 +12,7 @@ nav_order: 1
 - Fix version `ldflag`
 - Beautify and rework `Makefile`
 - Add `make` targets `build` and `build-dev`
+- Add sweeper for account authentication
 
 ## [3.4.0] - 2022-07-26
 
