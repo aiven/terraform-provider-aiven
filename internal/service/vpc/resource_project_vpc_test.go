@@ -2,6 +2,7 @@ package vpc_test
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"testing"
 
@@ -19,6 +20,7 @@ func TestAccAivenProjectVPC_basic(t *testing.T) {
 	rName2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	rName3 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	rName4 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	rName5 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
@@ -47,7 +49,7 @@ func TestAccAivenProjectVPC_basic(t *testing.T) {
 			},
 			{
 				Config:      testAccProjectVPCResourceFail(rName3),
-				ExpectError: regexp.MustCompile("Invalid VPC id"),
+				ExpectError: regexp.MustCompile("invalid resource id"),
 			},
 			{
 				Config: testAccProjectVPCResourceGetById(rName4),
@@ -58,6 +60,10 @@ func TestAccAivenProjectVPC_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "network_cidr", "192.168.1.0/24"),
 					resource.TestCheckResourceAttr(resourceName, "state", "ACTIVE"),
 				),
+			},
+			{
+				Config:      testAccServiceProjectVPCResourceFail(rName5),
+				ExpectError: regexp.MustCompile("invalid project_vpc_id, should have the following format {project_name}/{project_vpc_id}"),
 			},
 		},
 	})
@@ -161,6 +167,22 @@ func testAccCheckAivenProjectVPCResourceDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+func testAccServiceProjectVPCResourceFail(name string) string {
+	return fmt.Sprintf(`
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_pg" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-%s"
+  project_vpc_id  		  = "wrong_vpc_id"
+}
+`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
 func testAccProjectVPCResourceFail(name string) string {

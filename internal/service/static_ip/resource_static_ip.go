@@ -88,13 +88,13 @@ func resourceStaticIPCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	r, err := client.StaticIPs.Create(project, aiven.CreateStaticIPRequest{CloudName: cloudName})
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to create static ip: %w", err))
+		return diag.Errorf("unable to create static ip: %w", err)
 	}
 
 	d.SetId(schemautil.BuildResourceID(project, r.StaticIPAddressID))
 
 	if err := resourceStaticIPWait(ctx, d, m); err != nil {
-		return diag.FromErr(fmt.Errorf("unable to wait for static ip to become active: %w", err))
+		return diag.Errorf("unable to wait for static ip to become active: %w", err)
 	}
 
 	return resourceStaticIPRead(ctx, d, m)

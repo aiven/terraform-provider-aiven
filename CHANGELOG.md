@@ -5,6 +5,10 @@ parent: README
 nav_order: 1
 ---# Changelog
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Add error handling for service `project_vpc_id` field
+
 ## [3.4.0] - 2022-07-26
 
 - Small static IP import fix
