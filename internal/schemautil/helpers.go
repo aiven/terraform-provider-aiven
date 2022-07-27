@@ -41,15 +41,18 @@ func GetAPIServiceIntegrations(d ResourceStateOrResourceDiff) []aiven.NewService
 	return apiServiceIntegrations
 }
 
-func GetProjectVPCIdPointer(d ResourceStateOrResourceDiff) *string {
+func GetProjectVPCIdPointer(d ResourceStateOrResourceDiff) (*string, error) {
 	vpcID := d.Get("project_vpc_id").(string)
 	var vpcIDPointer *string
-	if len(vpcID) > 0 {
-		parts := strings.SplitN(vpcID, "/", 2)
-		vpcID := parts[1]
-		vpcIDPointer = &vpcID
+
+	parts := strings.SplitN(vpcID, "/", 2)
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid project_vpc_id, should have the following format {project_name}/{project_vpc_id}")
 	}
-	return vpcIDPointer
+
+	p1 := parts[1]
+	vpcIDPointer = &p1
+	return vpcIDPointer, nil
 }
 
 func GetMaintenanceWindow(d ResourceStateOrResourceDiff) *aiven.MaintenanceWindow {

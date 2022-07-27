@@ -36,7 +36,8 @@ jobs:
           service_component,
           service_user,
           static_ip,
-          service_integration
+          service_integration,
+          vpc
         ]
 
     steps:

@@ -307,35 +307,35 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 	s, err := client.Services.Get(projectName, serviceName)
 	if err != nil {
 		if err = ResourceReadHandleNotFound(err, d); err != nil {
-			return diag.FromErr(fmt.Errorf("unable to GET service %s: %s", d.Id(), err))
+			return diag.Errorf("unable to GET service %s: %s", d.Id(), err)
 		}
 		return nil
 	}
 	servicePlanParams, err := GetServicePlanParametersFromServiceResponse(ctx, client, projectName, s)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to get service plan parameters: %w", err))
+		return diag.Errorf("unable to get service plan parameters: %s", err)
 	}
 
 	err = copyServicePropertiesFromAPIResponseToTerraform(d, s, servicePlanParams, projectName)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to copy api response into terraform schema: %w", err))
+		return diag.Errorf("unable to copy api response into terraform schema: %s", err)
 	}
 
 	allocatedStaticIps, err := CurrentlyAllocatedStaticIps(ctx, projectName, serviceName, m)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to currently allocated static ips: %w", err))
+		return diag.Errorf("unable to currently allocated static ips: %s", err)
 	}
 	if err = d.Set("static_ips", allocatedStaticIps); err != nil {
-		return diag.FromErr(fmt.Errorf("unable to set static ips field in schema: %w", err))
+		return diag.Errorf("unable to set static ips field in schema: %s", err)
 	}
 
 	t, err := client.ServiceTags.Get(projectName, serviceName)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to get service tags: %w", err))
+		return diag.Errorf("unable to get service tags: %s", err)
 	}
 
 	if err := d.Set("tag", SetTagsTerraformProperties(t.Tags)); err != nil {
-		return diag.FromErr(fmt.Errorf("unable to set tag's in schema: %w", err))
+		return diag.Errorf("unable to set tag's in schema: %s", err)
 	}
 
 	return nil
@@ -355,12 +355,17 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 		diskSpace = ConvertToDiskSpaceMB(ds.(string))
 	}
 
-	_, err := client.Services.Create(
+	vpcId, err := GetProjectVPCIdPointer(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	_, err = client.Services.Create(
 		project,
 		aiven.CreateServiceRequest{
 			Cloud:                 d.Get("cloud_name").(string),
 			Plan:                  d.Get("plan").(string),
-			ProjectVPCID:          GetProjectVPCIdPointer(d),
+			ProjectVPCID:          vpcId,
 			ServiceIntegrations:   GetAPIServiceIntegrations(d),
 			MaintenanceWindow:     GetMaintenanceWindow(d),
 			ServiceName:           d.Get("service_name").(string),
@@ -428,6 +433,12 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		}
 	}
 
+	var vpcId *string
+	vpcId, err = GetProjectVPCIdPointer(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	if _, err := client.Services.Update(
 		projectName,
 		serviceName,
@@ -435,7 +446,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 			Cloud:                 d.Get("cloud_name").(string),
 			Plan:                  d.Get("plan").(string),
 			MaintenanceWindow:     GetMaintenanceWindow(d),
-			ProjectVPCID:          GetProjectVPCIdPointer(d),
+			ProjectVPCID:          vpcId,
 			Powered:               true,
 			TerminationProtection: d.Get("termination_protection").(bool),
 			DiskSpaceMB:           diskSpace,
