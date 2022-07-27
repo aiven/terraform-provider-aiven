@@ -32,7 +32,7 @@ import (
 )
 
 var (
-	providerVersion = "dev"
+	version = "dev"
 )
 
 // Provider returns a terraform.ResourceProvider.
@@ -246,7 +246,7 @@ func Provider() *schema.Provider {
 
 		client, err := aiven.NewTokenClient(
 			d.Get("api_token").(string),
-			fmt.Sprintf("terraform-provider-aiven/%s/%s", terraformVersion, providerVersion))
+			fmt.Sprintf("terraform-provider-aiven/%s/%s", terraformVersion, version))
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}

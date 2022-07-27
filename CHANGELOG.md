@@ -9,6 +9,7 @@ nav_order: 1
 
 - Add custom diff for all types of VPC peering connections that check if a VPC connection already exists before creation
 - Add error handling for service `project_vpc_id` field
+- Fix version `ldflag`
 
 ## [3.4.0] - 2022-07-26
 
