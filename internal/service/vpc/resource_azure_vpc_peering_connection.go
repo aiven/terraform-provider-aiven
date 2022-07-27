@@ -2,7 +2,10 @@ package vpc
 
 import (
 	"context"
+	"fmt"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -81,7 +84,35 @@ func ResourceAzureVPCPeeringConnection() *schema.Resource {
 			Delete: schema.DefaultTimeout(2 * time.Minute),
 		},
 
-		Schema: aivenAzureVPCPeeringConnectionSchema,
+		Schema:        aivenAzureVPCPeeringConnectionSchema,
+		CustomizeDiff: customdiff.If(schemautil.ResourceShouldNotExist, vpcCustomDiffAzurePeeringConnectionExists()),
+	}
+}
+
+func vpcCustomDiffAzurePeeringConnectionExists() func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+	return func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+		client := m.(*aiven.Client)
+
+		projectName, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
+		if err != nil {
+			return err
+		}
+
+		azureSubscriptionId := d.Get("azure_subscription_id").(string)
+		vnetName := d.Get("vnet_name").(string)
+		peerResourceGroup := d.Get("peer_resource_group").(string)
+
+		pc, err := client.VPCPeeringConnections.GetVPCPeering(
+			projectName, vpcID, azureSubscriptionId, vnetName, &peerResourceGroup)
+		if err != nil && !aiven.IsNotFound(err) {
+			return err
+		}
+
+		if pc != nil {
+			return fmt.Errorf("azure peering connection already exists and cannot be created")
+		}
+
+		return nil
 	}
 }
 
