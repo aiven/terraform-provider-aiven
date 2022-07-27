@@ -61,7 +61,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - run: make testacc
+      - run: make test-acc
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
           AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME }}
