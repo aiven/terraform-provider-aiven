@@ -313,29 +313,29 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 	}
 	servicePlanParams, err := GetServicePlanParametersFromServiceResponse(ctx, client, projectName, s)
 	if err != nil {
-		return diag.Errorf("unable to get service plan parameters: %w", err)
+		return diag.Errorf("unable to get service plan parameters: %s", err)
 	}
 
 	err = copyServicePropertiesFromAPIResponseToTerraform(d, s, servicePlanParams, projectName)
 	if err != nil {
-		return diag.Errorf("unable to copy api response into terraform schema: %w", err)
+		return diag.Errorf("unable to copy api response into terraform schema: %s", err)
 	}
 
 	allocatedStaticIps, err := CurrentlyAllocatedStaticIps(ctx, projectName, serviceName, m)
 	if err != nil {
-		return diag.Errorf("unable to currently allocated static ips: %w", err)
+		return diag.Errorf("unable to currently allocated static ips: %s", err)
 	}
 	if err = d.Set("static_ips", allocatedStaticIps); err != nil {
-		return diag.Errorf("unable to set static ips field in schema: %w", err)
+		return diag.Errorf("unable to set static ips field in schema: %s", err)
 	}
 
 	t, err := client.ServiceTags.Get(projectName, serviceName)
 	if err != nil {
-		return diag.Errorf("unable to get service tags: %w", err)
+		return diag.Errorf("unable to get service tags: %s", err)
 	}
 
 	if err := d.Set("tag", SetTagsTerraformProperties(t.Tags)); err != nil {
-		return diag.Errorf("unable to set tag's in schema: %w", err)
+		return diag.Errorf("unable to set tag's in schema: %s", err)
 	}
 
 	return nil
