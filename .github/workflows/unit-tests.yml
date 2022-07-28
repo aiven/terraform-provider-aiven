@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main, v* ]
 
+permissions:
+  contents: read
+
 jobs:
   go_test:
     strategy:
