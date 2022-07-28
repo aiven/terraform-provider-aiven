@@ -16,6 +16,8 @@ nav_order: 1
 - Add `make` targets `build` and `build-dev`
 - Add sweeper for account authentication
 - Make use of `BUILD_DEV_DIR` in `Makefile`
+- Use Changelog Enforcer GitHub Action
+- Security fix for GitHub Actions workflows
 - Fix `Makefile` acceptance tests command
 
 ## [3.4.0] - 2022-07-26

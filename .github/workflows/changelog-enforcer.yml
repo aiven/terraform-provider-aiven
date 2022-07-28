@@ -1,0 +1,16 @@
+name: Changelog Enforcer
+
+on:
+  pull_request_target:
+    branches:
+      - main
+      - v*
+
+permissions:
+  contents: read
+
+jobs:
+  changelog-enforcer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dangoslen/changelog-enforcer@v3
