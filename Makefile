@@ -72,10 +72,10 @@ test-unit:
 	$(GO) test -v --cover ./...
 
 
-ifneq ($(origin PKG), undefined)
+PKG ?= internal
+ifneq ($(origin PKG), file)
 	PKG := internal/service/$(PKG)
 endif
-PKG ?= internal
 
 TEST_COUNT := 1
 ACC_TEST_TIMEOUT := 180m
