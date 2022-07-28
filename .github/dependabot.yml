@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: daily
+    ignore:
+      - dependency-name: golang.org/x/tools
+      - dependency-name: google.golang.org/grpc
+  - package-ecosystem: gomod
+    directory: /tools
+    schedule:
+      interval: daily
+    ignore:
+      - dependency-name: golang.org/x/tools
+      - dependency-name: google.golang.org/grpc
