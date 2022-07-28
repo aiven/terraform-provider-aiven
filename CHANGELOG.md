@@ -15,6 +15,7 @@ nav_order: 1
 - Beautify and rework `Makefile`
 - Add `make` targets `build` and `build-dev`
 - Add sweeper for account authentication
+- Make use of `BUILD_DEV_DIR` in `Makefile`
 
 ## [3.4.0] - 2022-07-26
 
