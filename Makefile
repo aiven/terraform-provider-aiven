@@ -57,8 +57,7 @@ build:
 #  }
 #}
 build-dev: $(BUILD_DEV_DIR)
-	$(GO) build -o \
-	~/.terraform.d/plugins/registry.terraform.io/aiven/aiven/0.0.0+dev/$(ARCH)/terraform-provider-aiven_v0.0.0+dev
+	$(GO) build -o $(BUILD_DEV_DIR)/terraform-provider-aiven_v0.0.0+dev
 
 #################################################
 # Test
