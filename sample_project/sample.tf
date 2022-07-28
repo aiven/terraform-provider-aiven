@@ -1,8 +1,8 @@
-variable "aiven_api_token" {
+variable "AIVEN_API_TOKEN" {
   type = string
 }
 
-variable "aiven_project_name" {
+variable "AIVEN_PROJECT_NAME" {
   type = string
 }
 
@@ -16,11 +16,11 @@ terraform {
 }
 
 provider "aiven" {
-  api_token = var.aiven_api_token
+  api_token = var.AIVEN_API_TOKEN
 }
 
 data "aiven_project" "sample" {
-  project = var.aiven_project_name
+  project = var.AIVEN_PROJECT_NAME
 }
 
 # Kafka service

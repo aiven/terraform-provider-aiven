@@ -1,2 +1,2 @@
-aiven_api_token    = ""
-aiven_project_name = ""
+AIVEN_API_TOKEN    = ""
+AIVEN_PROJECT_NAME = ""
