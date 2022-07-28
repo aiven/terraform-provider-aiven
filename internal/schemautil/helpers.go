@@ -43,6 +43,10 @@ func GetAPIServiceIntegrations(d ResourceStateOrResourceDiff) []aiven.NewService
 
 func GetProjectVPCIdPointer(d ResourceStateOrResourceDiff) (*string, error) {
 	vpcID := d.Get("project_vpc_id").(string)
+	if len(vpcID) == 0 {
+		return nil, nil
+	}
+
 	var vpcIDPointer *string
 
 	parts := strings.SplitN(vpcID, "/", 2)
