@@ -4,8 +4,8 @@ GO := CGO_ENABLED=0 go
 # Tools
 #################################################
 
-TOOLS_DIR := tools
-TOOLS_BIN_DIR := $(TOOLS_DIR)/bin
+TOOLS_DIR ?= tools
+TOOLS_BIN_DIR ?= $(TOOLS_DIR)/bin
 
 
 $(TOOLS_BIN_DIR):
@@ -34,8 +34,8 @@ $(GOLANGCILINT): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
 #################################################
 
 # See https://github.com/hashicorp/terraform/blob/main/tools/protobuf-compile/protobuf-compile.go#L215
-ARCH := $(shell $(GO) env GOOS GOARCH | tr '\n' '_' | sed '$$s/_$$//')
-BUILD_DEV_DIR := ~/.terraform.d/plugins/registry.terraform.io/aiven/aiven/0.0.0+dev/$(ARCH)
+ARCH ?= $(shell $(GO) env GOOS GOARCH | tr '\n' '_' | sed '$$s/_$$//')
+BUILD_DEV_DIR ?= ~/.terraform.d/plugins/registry.terraform.io/aiven/aiven/0.0.0+dev/$(ARCH)
 
 
 $(BUILD_DEV_DIR):
@@ -77,9 +77,9 @@ ifneq ($(origin PKG), file)
 	PKG := internal/service/$(PKG)
 endif
 
-TEST_COUNT := 1
-ACC_TEST_TIMEOUT := 180m
-ACC_TEST_PARALLELISM := 20
+TEST_COUNT ?= 1
+ACC_TEST_TIMEOUT ?= 180m
+ACC_TEST_PARALLELISM ?= 20
 
 .PHONY: test-acc
 test-acc:
@@ -140,10 +140,9 @@ clean-tools:
 	rm -rf $(TOOLS_BIN_DIR)
 
 
-SWEEP := global
-SWEEP_DIR := ./internal/sweep
+SWEEP ?= global
 
 .PHONY: sweep
 sweep:
 	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."
-	$(GO) test $(SWEEP_DIR) -v -tags=sweep -sweep=$(SWEEP) $(SWEEP_ARGS) -timeout 15m
+	$(GO) test ./internal/sweep -v -tags=sweep -sweep=$(SWEEP) $(SWEEP_ARGS) -timeout 15m
