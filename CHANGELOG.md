@@ -3,7 +3,9 @@
 title: Changelog
 parent: README
 nav_order: 1
----# Changelog
+---
+
+# Changelog
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
@@ -95,12 +97,14 @@ nav_order: 1
 - `aiven_service` and `aiven_elasticsearch` resources were deleted
 - `aiven_project` resource previously deprecated schema field were deleted
 
-Deprecated resources and data-sources: 
+Deprecated resources and data-sources:
+
 - `aiven_database`
 - `aiven_service_user`
 - `aiven_vpc_peering_connection`
 
 New resources and data-sources:
+
 - `aiven_aws_vpc_peering_connection`
 - `aiven_azure_vpc_peering_connection`
 - `aiven_gcp_vpc_peering_connection`
@@ -178,7 +182,8 @@ New resources and data-sources:
 - Fix saml auth provider URL's
 - `aiven_kafka_topic` resource optimizations
 - Fix a typo in the account acceptance test
-- Fix project creation with `account_id` empty and add possibility to dissociate project from an account by not setting `account_id`
+- Fix project creation with `account_id` empty and add possibility to dissociate project from an account by not
+  setting `account_id`
 - Fix typos in documentation and examples
 - Add `resource_elasticsearch_acl` acceptance tests
 - Improve logging for service waiter
@@ -258,8 +263,8 @@ New resources and data-sources:
 - Add database deletion waiter
 - Remove default values for user configuration options
 - Improve documentation and examples
-  - Add Prometheus integration example
-  - Add example for Datadog metrics integration
+    - Add Prometheus integration example
+    - Add example for Datadog metrics integration
 
 ## [2.1.14] - 2021-05-18
 
@@ -268,11 +273,11 @@ New resources and data-sources:
 - Use golang 1.16
 - Remove GitHub pages and supporting code
 - Rework documentation and examples
-  - New README file structure
-  - Removed the Getting Started guide and merged its contents on `docs/index.md`
-  - Splitting `docs/index.md` contents in other pages on the guides
-  - In examples use data source for the Aiven Project instead of resource
-  - In examples use `aiven_<svc>` resource instead of `aiven_service`
+    - New README file structure
+    - Removed the Getting Started guide and merged its contents on `docs/index.md`
+    - Splitting `docs/index.md` contents in other pages on the guides
+    - In examples use data source for the Aiven Project instead of resource
+    - In examples use `aiven_<svc>` resource instead of `aiven_service`
 
 ## [2.1.13] - 2021-05-07
 
@@ -281,10 +286,10 @@ New resources and data-sources:
 ## [2.1.12] - 2021-04-20
 
 - Improve documentation
-  - Add missing import instructions
-  - Add `aiven_billing_group` documentation
-  - Fix required and optional `aiven_connection_pool` options
-  - Updates to `MirrorMaker` arguments list
+    - Add missing import instructions
+    - Add `aiven_billing_group` documentation
+    - Fix required and optional `aiven_connection_pool` options
+    - Updates to `MirrorMaker` arguments list
 - Fix error message for prometheus user creation
 - Fix project `technical_emails` and `billing_emails` fields schema
 - Add support for new user configuration options
@@ -399,7 +404,8 @@ New resources and data-sources:
 
 ## [2.0.11] - 2020-10-27
 
-- Add support for new user configuration options related to Kafka, Kafka Schema Registry, Kafka Connect, Elasticsearch and M3 services.
+- Add support for new user configuration options related to Kafka, Kafka Schema Registry, Kafka Connect, Elasticsearch
+  and M3 services.
 
 ## [2.0.10] - 2020-10-23
 
@@ -438,11 +444,11 @@ New resources and data-sources:
 ## [2.0.5] - 2020-09-17
 
 - Extend service integration endpoint, add user configuration options
-  - `external_aws_cloudwatch_logs`
-  - `external_google_cloud_logging`
-  - `external_kafka`
-  - `jolokia`
-  - `signalfx`
+    - `external_aws_cloudwatch_logs`
+    - `external_google_cloud_logging`
+    - `external_kafka`
+    - `jolokia`
+    - `signalfx`
 - Add support for new user configuration options
 - Add Azure specific behaviour for VPC peering connection resource
 
@@ -478,16 +484,16 @@ New resources and data-sources:
 - Add mongo sink connector examples and tests
 - Kafka ACL regex modification
 - New resources:
-  - `aiven_pg` PostgreSQL service
-  - `aiven_cassandra` Cassandra service
-  - `aiven_elasticsearch` Elasticsearch service
-  - `aiven_grafana` Grafana service
-  - `aiven_influxdb` Influxdb service
-  - `aiven_redis` Redis service
-  - `aiven_mysql` MySQL service
-  - `aiven_kafka` Kafka service
-  - `aiven_kafka_connect` Kafka Connect service
-  - `aiven_kafka_mirrormaker` Kafka Mirrormaker 2 service
+    - `aiven_pg` PostgreSQL service
+    - `aiven_cassandra` Cassandra service
+    - `aiven_elasticsearch` Elasticsearch service
+    - `aiven_grafana` Grafana service
+    - `aiven_influxdb` Influxdb service
+    - `aiven_redis` Redis service
+    - `aiven_mysql` MySQL service
+    - `aiven_kafka` Kafka service
+    - `aiven_kafka_connect` Kafka Connect service
+    - `aiven_kafka_mirrormaker` Kafka Mirrormaker 2 service
 
 ## [1.3.5] - 2020-08-11
 
@@ -530,10 +536,10 @@ Improve vpc_id error handling for vpc peering connection
 - Speed up kafka topic availability waiter
 - Kafka Connect examples
 - TF client timings added for the following resources:
-  - aiven_vpc_peering_connection
-  - aiven_project_vpc
-  - aiven_service
-  - aiven_kafka_topic
+    - aiven_vpc_peering_connection
+    - aiven_project_vpc
+    - aiven_service
+    - aiven_kafka_topic
 
 ## [1.2.3] - 2020-03-30
 
@@ -542,7 +548,8 @@ Add backwards compatibility for old TF state files created before Kafka `topic` 
 ## [1.2.2] - 2020-03-10
 
 - Grafana service waits until Grafana is reachable publicly (only works in case `public_access.grafana`
-  configuration options is set to `true` and IP filter is set to default `0.0.0.0/0`) during resource creation or update.
+  configuration options is set to `true` and IP filter is set to default `0.0.0.0/0`) during resource creation or
+  update.
 - Project VPC resource graceful deletion.
 
 ## [1.2.1] - 2020-03-02
@@ -556,10 +563,10 @@ Terraform client-side termination protection for resources:
 
 - Following new types of resources have been added:
 
-  - account
-  - account_team
-  - account_team_member
-  - account_team_project
+    - account
+    - account_team
+    - account_team_member
+    - account_team_project
 
 - New configuration options
 - Fix for a read-only replica service types
