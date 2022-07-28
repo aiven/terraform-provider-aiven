@@ -14,39 +14,77 @@ import (
 
 func init() {
 	resource.AddTestSweepers("aiven_account_team_member", &resource.Sweeper{
-		Name: "aiven_account_team_member",
-		F:    sweepAccountTeamMembers,
+		Name:         "aiven_account_team_member",
+		F:            sweepAccountTeamMembers,
+		Dependencies: []string{"aiven_account_authentication"},
 	})
 
 	resource.AddTestSweepers("aiven_account_team_project", &resource.Sweeper{
-		Name: "aiven_account_team_project",
-		F:    sweepAccountTeamProjects,
+		Name:         "aiven_account_team_project",
+		F:            sweepAccountTeamProjects,
+		Dependencies: []string{"aiven_account_authentication"},
 	})
 
 	resource.AddTestSweepers("aiven_account_team", &resource.Sweeper{
 		Name:         "aiven_account_team",
 		F:            sweepAccountTeams,
-		Dependencies: []string{"aiven_account_team_member"},
+		Dependencies: []string{"aiven_account_team_member", "aiven_account_authentication"},
 	})
 
 	resource.AddTestSweepers("aiven_account", &resource.Sweeper{
 		Name:         "aiven_account",
 		F:            sweepAccounts,
-		Dependencies: []string{"aiven_project", "aiven_account_team", "aiven_account_team_project"},
+		Dependencies: []string{"aiven_project", "aiven_account_team", "aiven_account_team_project", "aiven_account_authentication"},
+	})
+	resource.AddTestSweepers("aiven_account_authentication", &resource.Sweeper{
+		Name: "aiven_account_authentication",
+		F:    sweepAccountAuthentications,
 	})
 }
 
-func sweepAccounts(region string) error {
+func sweepAccountAuthentications(region string) error {
 	client, err := sweep.SharedClient(region)
 	if err != nil {
 		return fmt.Errorf("error getting client: %s", err)
 	}
 
 	conn := client.(*aiven.Client)
+	r, err := conn.Accounts.List()
+	if err != nil {
+		return fmt.Errorf("error retrieving a list of accounts : %w", err)
+	}
+
+	for _, a := range r.Accounts {
+		rr, err := conn.AccountAuthentications.List(a.Id)
+		if err != nil {
+			return fmt.Errorf("cannot get account authentications list: %w", err)
+		}
+
+		for _, m := range rr.AuthenticationMethods {
+			err := conn.AccountAuthentications.Delete(m.AccountId, m.Id)
+			if err != nil {
+				if strings.Contains(err.Error(), "Internal authentication methods cannot be deleted") {
+					continue
+				}
+				return fmt.Errorf("cannot delete account authentication: %w", err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func sweepAccounts(region string) error {
+	client, err := sweep.SharedClient(region)
+	if err != nil {
+		return fmt.Errorf("error getting client: %w", err)
+	}
+
+	conn := client.(*aiven.Client)
 
 	r, err := conn.Accounts.List()
 	if err != nil {
-		return fmt.Errorf("error retrieving a list of accounts : %s", err)
+		return fmt.Errorf("error retrieving a list of accounts : %w", err)
 	}
 
 	for _, a := range r.Accounts {
@@ -56,7 +94,7 @@ func sweepAccounts(region string) error {
 					continue
 				}
 
-				return fmt.Errorf("error destroying account %s during sweep: %s", a.Name, err)
+				return fmt.Errorf("error destroying account %s during sweep: %w", a.Name, err)
 			}
 		}
 	}
@@ -67,28 +105,28 @@ func sweepAccounts(region string) error {
 func sweepAccountTeams(region string) error {
 	client, err := sweep.SharedClient(region)
 	if err != nil {
-		return fmt.Errorf("error getting client: %s", err)
+		return fmt.Errorf("error getting client: %w", err)
 	}
 
 	conn := client.(*aiven.Client)
 
 	r, err := conn.Accounts.List()
 	if err != nil {
-		return fmt.Errorf("error retrieving a list of accounts : %s", err)
+		return fmt.Errorf("error retrieving a list of accounts : %w", err)
 	}
 
 	for _, a := range r.Accounts {
 		if strings.Contains(a.Name, "test-acc-ac-") {
 			tr, err := conn.AccountTeams.List(a.Id)
 			if err != nil {
-				return fmt.Errorf("error retrieving a list of account teams : %s", err)
+				return fmt.Errorf("error retrieving a list of account teams : %w", err)
 			}
 
 			for _, t := range tr.Teams {
 				if strings.Contains(t.Name, "test-acc-team-") {
 					err = conn.AccountTeams.Delete(t.AccountId, t.Id)
 					if err != nil {
-						return fmt.Errorf("cannot delete account team: %s", err)
+						return fmt.Errorf("cannot delete account team: %w", err)
 					}
 				}
 
