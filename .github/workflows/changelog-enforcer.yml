@@ -5,6 +5,10 @@ on:
     branches:
       - main
       - v*
+  push:
+    branches:
+      - main
+      - release-*
 
 permissions:
   contents: read
@@ -12,5 +16,6 @@ permissions:
 jobs:
   changelog-enforcer:
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
     steps:
       - uses: dangoslen/changelog-enforcer@v3
