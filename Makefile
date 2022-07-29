@@ -1,3 +1,5 @@
+.PHONY: build build-dev test test-unit test-acc lint lint-go lint-test lint-docs fmt fmt-test docs clean clean-tools sweep
+
 GO := CGO_ENABLED=0 go
 
 #################################################
@@ -63,48 +65,41 @@ build-dev: $(BUILD_DEV_DIR)
 # Test
 #################################################
 
-.PHONY: test
 test: test-unit test-acc
 
 
-.PHONY: test-unit
 test-unit:
 	$(GO) test -v --cover ./...
 
 
-PKG ?= internal
-ifneq ($(origin PKG), file)
-	PKG := internal/service/$(PKG)
+PKG_PATH ?= internal
+ifneq ($(origin PKG), undefined)
+	PKG_PATH = internal/service/$(PKG)
 endif
 
 TEST_COUNT ?= 1
 ACC_TEST_TIMEOUT ?= 180m
 ACC_TEST_PARALLELISM ?= 20
 
-.PHONY: test-acc
 test-acc:
-	TF_ACC=1 $(GO) test ./$(PKG)/... \
+	TF_ACC=1 $(GO) test ./$(PKG_PATH)/... \
 	-v -count $(TEST_COUNT) -parallel $(ACC_TEST_PARALLELISM) $(RUNARGS) $(TESTARGS) -timeout $(ACC_TEST_TIMEOUT)
 
 #################################################
 # Lint
 #################################################
 
-.PHONY: lint
 lint: lint-go lint-test lint-docs
 
 
-.PHONY: lint-go
 lint-go: $(GOLANGCILINT)
 	$(GOLANGCILINT) run --timeout=30m ./...
 
 
-.PHONY: lint-test
 lint-test: $(TERRAFMT)
 	$(TERRAFMT) diff ./internal -cfv
 
 
-.PHONY: lint-docs
 lint-docs: $(TFPLUGINDOCS)
 	$(TFPLUGINDOCS) validate
 
@@ -112,10 +107,8 @@ lint-docs: $(TFPLUGINDOCS)
 # Format
 #################################################
 
-.PHONY: fmt
 fmt: fmt-test
 
-.PHONY: fmt-test
 fmt-test: $(TERRAFMT)
 	$(TERRAFMT) fmt ./internal -fv
 
@@ -123,7 +116,6 @@ fmt-test: $(TERRAFMT)
 # Docs
 #################################################
 
-.PHONY: docs
 docs: $(TFPLUGINDOCS)
 	$(TFPLUGINDOCS) generate
 
@@ -131,18 +123,15 @@ docs: $(TFPLUGINDOCS)
 # Misc
 #################################################
 
-.PHONY: clean
 clean: clean-tools sweep
 
 
-.PHONY: clean-tools
 clean-tools:
 	rm -rf $(TOOLS_BIN_DIR)
 
 
 SWEEP ?= global
 
-.PHONY: sweep
 sweep:
-	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."
+	@echo 'WARNING: This will destroy infrastructure. Use only in development accounts.'
 	$(GO) test ./internal/sweep -v -tags=sweep -sweep=$(SWEEP) $(SWEEP_ARGS) -timeout 15m
