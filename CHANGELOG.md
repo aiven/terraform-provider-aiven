@@ -22,7 +22,7 @@ nav_order: 1
 - Fix Changelog Enforcer GitHub Actions workflow
 - Make `Makefile` variables env changeable
 - Add `dependabot.yml`
-- Bump `github.com/golangci/golangci-lint` from 1.46.2 to 1.47.2 in `/tools`
+- Prevent Changelog Enforcer GitHub Actions workflow from triggering for PRs from `dependabot[bot]`
 
 ## [3.4.0] - 2022-07-26
 
