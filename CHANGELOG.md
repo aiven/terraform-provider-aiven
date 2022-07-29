@@ -23,6 +23,7 @@ nav_order: 1
 - Make `Makefile` variables env changeable
 - Add `dependabot.yml`
 - Prevent Changelog Enforcer GitHub Actions workflow from triggering for PRs from `dependabot[bot]`
+- Add `no changelog` label check in `changelog-enforcer.yml`
 
 ## [3.4.0] - 2022-07-26
 
