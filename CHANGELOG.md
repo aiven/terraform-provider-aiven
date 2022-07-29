@@ -19,6 +19,7 @@ nav_order: 1
 - Use Changelog Enforcer GitHub Action
 - Security fix for GitHub Actions workflows
 - Fix `Makefile` acceptance tests command
+- Fix Changelog Enforcer GitHub Actions workflow
 
 ## [3.4.0] - 2022-07-26
 
