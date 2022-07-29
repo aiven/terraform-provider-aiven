@@ -20,6 +20,7 @@ nav_order: 1
 - Security fix for GitHub Actions workflows
 - Fix `Makefile` acceptance tests command
 - Fix Changelog Enforcer GitHub Actions workflow
+- Make `Makefile` variables env changeable
 - Add `dependabot.yml`
 
 ## [3.4.0] - 2022-07-26
