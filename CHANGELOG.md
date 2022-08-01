@@ -24,6 +24,7 @@ nav_order: 1
 - Add `dependabot.yml`
 - Prevent Changelog Enforcer GitHub Actions workflow from triggering for PRs from `dependabot[bot]`
 - Add `no changelog` label check in `changelog-enforcer.yml`
+- Update Changelog Enforcer workflow
 
 ## [3.4.0] - 2022-07-26
 
