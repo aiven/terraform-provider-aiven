@@ -1,0 +1,23 @@
+name: Dependency Review
+
+on:
+  pull_request:
+    branches:
+      - main
+      - v*
+
+# TODO: This is currently not supported, see https://github.com/actions/dependency-review-action/issues/30.
+#  push:
+#    branches:
+#      - main
+#      - v*
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/dependency-review-action@v2
