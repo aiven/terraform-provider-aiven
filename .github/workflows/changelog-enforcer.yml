@@ -11,10 +11,6 @@ on:
       - reopened
       - labeled
       - unlabeled
-  push:
-    branches:
-      - main
-      - release-*
 
 permissions:
   contents: read
