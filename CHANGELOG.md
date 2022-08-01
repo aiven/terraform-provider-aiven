@@ -26,6 +26,7 @@ nav_order: 1
 - Add `no changelog` label check in `changelog-enforcer.yml`
 - Add Dependency Review workflow
 - Update Changelog Enforcer workflow
+- Add CodeQL workflow
 
 ## [3.4.0] - 2022-07-26
 
