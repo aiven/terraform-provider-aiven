@@ -5,6 +5,12 @@ on:
     branches:
       - main
       - v*
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
   push:
     branches:
       - main
@@ -16,6 +22,9 @@ permissions:
 jobs:
   changelog-enforcer:
     runs-on: ubuntu-latest
-    if: github.actor != 'dependabot[bot]' && !contains(github.event.pull_request.labels.*.name, 'no changelog')
+    if: github.actor != 'dependabot[bot]'
     steps:
       - uses: dangoslen/changelog-enforcer@v3
+        with:
+          skipLabels: no changelog
+          versionPattern: '^## \[(\d*\.\d*\.\d*-?\w*|MAJOR.MINOR.PATCH)\]'
