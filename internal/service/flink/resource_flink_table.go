@@ -114,6 +114,12 @@ var aivenFlinkTableSchema = map[string]*schema.Schema{
 			"This is the default for upsert Kafka connectors.").PossibleValues(schemautil.StringSliceToInterfaceSlice(getFlinkTableKafkaValueFieldsInclude())).ForceNew().Build(),
 		ConflictsWith: []string{"jdbc_table", "upsert_kafka"},
 	},
+	"opensearch_index": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		ForceNew:    true,
+		Description: schemautil.Complex("For an OpenSearch table, the OpenSearch index the table outputs to.").ForceNew().Build(),
+	},
 	"upsert_kafka": {
 		Type:          schema.TypeSet,
 		MaxItems:      1,
@@ -250,6 +256,7 @@ func resourceFlinkTableCreate(ctx context.Context, d *schema.ResourceData, m int
 	kafkaStartupMode := d.Get("kafka_startup_mode").(string)
 	likeOptions := d.Get("like_options").(string)
 	kafkaValueFieldsInclude := d.Get("kafka_value_fields_include").(string)
+	openSearchIndex := d.Get("opensearch_index").(string)
 
 	createRequest := aiven.CreateFlinkTableRequest{
 		Name:                    tableName,
@@ -264,6 +271,7 @@ func resourceFlinkTableCreate(ctx context.Context, d *schema.ResourceData, m int
 		KafkaStartupMode:        kafkaStartupMode,
 		LikeOptions:             likeOptions,
 		KafkaValueFieldsInclude: kafkaValueFieldsInclude,
+		OpenSearchIndex:         openSearchIndex,
 		UpsertKafka:             readUpsertKafkaFromSchema(d),
 	}
 
@@ -315,6 +323,7 @@ func resourceFlinkTableCustomizeDiff(_ context.Context, d *schema.ResourceDiff, 
 		KafkaStartupMode:        d.Get("kafka_startup_mode").(string),
 		LikeOptions:             d.Get("like_options").(string),
 		KafkaValueFieldsInclude: d.Get("kafka_value_fields_include").(string),
+		OpenSearchIndex:         d.Get("opensearch_index").(string),
 		UpsertKafka:             readUpsertKafkaFromSchema(d),
 	})
 

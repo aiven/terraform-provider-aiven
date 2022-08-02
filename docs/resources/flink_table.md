@@ -56,6 +56,7 @@ resource "aiven_flink_table" "table" {
 - `kafka_value_fields_include` (String) Controls how key columns are handled in the message value. Select ALL to include the physical columns of the table schema in the message value. Select EXCEPT_KEY to exclude the physical columns of the table schema from the message value. This is the default for upsert Kafka connectors. The possible values are `[ALL EXCEPT_KEY]`. This property cannot be changed, doing so forces recreation of the resource.
 - `kafka_value_format` (String) Kafka Value Format The possible values are `avro`, `avro-confluent`, `debezium-avro-confluent`, `debezium-json` and `json`. This property cannot be changed, doing so forces recreation of the resource.
 - `like_options` (String) [LIKE](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/sql/create/#like) statement for table creation. This property cannot be changed, doing so forces recreation of the resource.
+- `opensearch_index` (String) For an OpenSearch table, the OpenSearch index the table outputs to. This property cannot be changed, doing so forces recreation of the resource.
 - `upsert_kafka` (Block Set, Max: 1) Kafka upsert connector configuration. (see [below for nested schema](#nestedblock--upsert_kafka))
 
 ### Read-Only
