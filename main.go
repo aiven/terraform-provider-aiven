@@ -5,7 +5,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/provider"
 
-	plugin "github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 )
 
 //go:generate ./internal/schemautil/templates/gen.sh service service_user_config_schema.json

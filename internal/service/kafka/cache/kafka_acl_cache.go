@@ -5,7 +5,7 @@ import (
 	"log"
 	"sync"
 
-	aiven "github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client"
 )
 
 var (

@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/aiven/terraform-provider-aiven/internal/provider"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func TestProvider(t *testing.T) {
@@ -14,5 +13,5 @@ func TestProvider(t *testing.T) {
 }
 
 func TestProviderImpl(t *testing.T) {
-	var _ *schema.Provider = provider.Provider()
+	var _ = provider.Provider()
 }
