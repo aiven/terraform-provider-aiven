@@ -170,7 +170,7 @@ output "samplekafka_metrics_destination_service_name" {
   description = "Destination service for the integration."
 }
 
-# PostreSQL service
+# PostgreSQL service
 output "samplepg_id" {
   value       = aiven_pg.samplepg.id
   description = "Resource's Terraform identifier."
@@ -203,6 +203,11 @@ output "samplepg_service_port" {
   description = "The port of the service."
 }
 
+output "samplepg_service_port_pgbouncer" {
+  value       = aiven_pg.samplepg.components[2].port
+  description = "The port of the service (PgBouncer)."
+}
+
 output "samplepg_service_username" {
   value       = aiven_pg.samplepg.service_username
   description = "Username used for connecting to the service."
@@ -212,6 +217,11 @@ output "samplepg_service_password" {
   value       = aiven_pg.samplepg.service_password
   description = "Password used for connecting to the service."
   sensitive   = true
+}
+
+output "samplepg_max_connections" {
+  value       = aiven_pg.samplepg.pg[0].max_connections
+  description = "Connection limit."
 }
 
 # Send metrics from PostgreSQL to InfluxDB

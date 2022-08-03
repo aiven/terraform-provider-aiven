@@ -69,6 +69,11 @@ func aivenPGSchema() map[string]*schema.Schema {
 					Computed:    true,
 					Description: "PostgreSQL admin user name",
 				},
+				"max_connections": {
+					Type:        schema.TypeInt,
+					Computed:    true,
+					Description: "Connection limit",
+				},
 			},
 		},
 	}
