@@ -27,6 +27,7 @@ nav_order: 1
 - Add Dependency Review workflow
 - Update Changelog Enforcer workflow
 - Add CodeQL workflow
+- Add `opensearch_index` support to `aiven_flink_table`
 
 ## [3.4.0] - 2022-07-26
 
