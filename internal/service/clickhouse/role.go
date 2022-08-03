@@ -58,7 +58,7 @@ func createRoleStatement(roleName string) string {
 }
 
 func dropRoleStatement(roleName string) string {
-	return fmt.Sprintf("DROP ROLE IF EXISTS %s", escape((roleName)))
+	return fmt.Sprintf("DROP ROLE IF EXISTS %s", escape(roleName))
 }
 
 func showCreateRoleStatement(roleName string) string {
