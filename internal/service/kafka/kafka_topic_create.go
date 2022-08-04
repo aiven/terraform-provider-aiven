@@ -9,11 +9,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-// KafkaTopicCreateWaiter is used to create topics. Since topics are often
+// kafkaTopicCreateWaiter is used to create topics. Since topics are often
 // created right after Kafka service is created there may be temporary issues
 // that prevent creating the topics like all brokers not being online. This
 // allows retrying the operation until failing it.
-type KafkaTopicCreateWaiter struct {
+type kafkaTopicCreateWaiter struct {
 	Client        *aiven.Client
 	Project       string
 	ServiceName   string
@@ -21,7 +21,7 @@ type KafkaTopicCreateWaiter struct {
 }
 
 // RefreshFunc will call the Aiven client and refresh it's state.
-func (w *KafkaTopicCreateWaiter) RefreshFunc() resource.StateRefreshFunc {
+func (w *kafkaTopicCreateWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		err := w.Client.KafkaTopics.Create(
 			w.Project,
@@ -55,7 +55,7 @@ func (w *KafkaTopicCreateWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 // Conf sets up the configuration to refresh.
-func (w *KafkaTopicCreateWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
+func (w *kafkaTopicCreateWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
 	log.Printf("[DEBUG] Create waiter timeout %.0f minutes", timeout.Minutes())
 
 	return &resource.StateChangeConf{

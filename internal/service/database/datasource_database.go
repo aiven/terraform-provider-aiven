@@ -12,6 +12,7 @@ import (
 
 // DatasourceDatabase
 // Deprecated
+//goland:noinspection GoDeprecation
 func DatasourceDatabase() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceDatabaseRead,

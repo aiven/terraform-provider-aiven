@@ -83,6 +83,7 @@ var aivenVPCPeeringConnectionSchema = map[string]*schema.Schema{
 
 // ResourceVPCPeeringConnection
 // Deprecated
+//goland:noinspection GoDeprecation
 func ResourceVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The VPC Peering Connection resource allows the creation and management of Aiven VPC Peering Connections.",
@@ -104,6 +105,7 @@ func ResourceVPCPeeringConnection() *schema.Resource {
 }
 
 // Deprecated
+//goland:noinspection GoDeprecation
 func vpcCustomDiffPeeringConnectionExists() func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
 	return func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
 		client := m.(*aiven.Client)

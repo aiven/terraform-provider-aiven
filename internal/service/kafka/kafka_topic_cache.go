@@ -1,4 +1,4 @@
-package cache
+package kafka
 
 import (
 	"log"
@@ -9,22 +9,22 @@ import (
 
 var (
 	once       sync.Once
-	topicCache *TopicCache
+	topicCache *kafkaTopicCache
 )
 
-// TopicCache represents Kafka Topics cache based on Service and Project identifiers
-type TopicCache struct {
+// kafkaTopicCache represents Kafka Topics cache based on Service and Project identifiers
+type kafkaTopicCache struct {
 	sync.RWMutex
 	internal map[string]map[string]aiven.KafkaTopic
 	inQueue  map[string][]string
 }
 
 // NewTopicCache creates new global instance of Kafka Topic Cache
-func NewTopicCache() *TopicCache {
-	log.Print("[DEBUG] Creating an instance of TopicCache ...")
+func NewTopicCache() *kafkaTopicCache {
+	log.Print("[DEBUG] Creating an instance of kafkaTopicCache ...")
 
 	once.Do(func() {
-		topicCache = &TopicCache{
+		topicCache = &kafkaTopicCache{
 			internal: make(map[string]map[string]aiven.KafkaTopic),
 			inQueue:  make(map[string][]string),
 		}
@@ -34,14 +34,14 @@ func NewTopicCache() *TopicCache {
 }
 
 // GetTopicCache gets a global Kafka Topics Cache
-func GetTopicCache() *TopicCache {
+func GetTopicCache() *kafkaTopicCache {
 	return topicCache
 }
 
 // LoadByProjectAndServiceName returns a list of Kafka Topics stored in the cache for a given Project
 // and Service names, or nil if no value is present.
 // The ok result indicates whether value was found in the map.
-func (t *TopicCache) LoadByProjectAndServiceName(projectName, serviceName string) (map[string]aiven.KafkaTopic, bool) {
+func (t *kafkaTopicCache) LoadByProjectAndServiceName(projectName, serviceName string) (map[string]aiven.KafkaTopic, bool) {
 	t.RLock()
 	result, ok := t.internal[projectName+serviceName]
 	t.RUnlock()
@@ -52,7 +52,7 @@ func (t *TopicCache) LoadByProjectAndServiceName(projectName, serviceName string
 // LoadByTopicName returns a list of Kafka Topics stored in the cache for a given Project
 // and Service names, or nil if no value is present.
 // The ok result indicates whether value was found in the map.
-func (t *TopicCache) LoadByTopicName(projectName, serviceName, topicName string) (aiven.KafkaTopic, bool) {
+func (t *kafkaTopicCache) LoadByTopicName(projectName, serviceName, topicName string) (aiven.KafkaTopic, bool) {
 	t.RLock()
 	defer t.RUnlock()
 
@@ -73,14 +73,14 @@ func (t *TopicCache) LoadByTopicName(projectName, serviceName, topicName string)
 
 // DeleteByProjectAndServiceName deletes the cache value for a key which is a combination of Project
 // and Service names.
-func (t *TopicCache) DeleteByProjectAndServiceName(projectName, serviceName string) {
+func (t *kafkaTopicCache) DeleteByProjectAndServiceName(projectName, serviceName string) {
 	t.Lock()
 	delete(t.internal, projectName+serviceName)
 	t.Unlock()
 }
 
 // StoreByProjectAndServiceName sets the values for a Project name and Service name key.
-func (t *TopicCache) StoreByProjectAndServiceName(projectName, serviceName string, list []*aiven.KafkaTopic) {
+func (t *kafkaTopicCache) StoreByProjectAndServiceName(projectName, serviceName string, list []*aiven.KafkaTopic) {
 	if len(list) == 0 {
 		return
 	}
@@ -105,18 +105,8 @@ func (t *TopicCache) StoreByProjectAndServiceName(projectName, serviceName strin
 	}
 }
 
-// IsEmpty checks if cache is empty for particular common
-func (t *TopicCache) IsQueueEmpty(projectName, serviceName string) bool {
-	t.RLock()
-	defer t.RUnlock()
-
-	_, ok := t.inQueue[projectName+serviceName]
-
-	return !ok
-}
-
 // AddToQueue adds a topic name to a queue of topics to be found
-func (t *TopicCache) AddToQueue(projectName, serviceName, topicName string) {
+func (t *kafkaTopicCache) AddToQueue(projectName, serviceName, topicName string) {
 	var isFound bool
 
 	t.Lock()
@@ -136,7 +126,7 @@ func (t *TopicCache) AddToQueue(projectName, serviceName, topicName string) {
 }
 
 // GetQueue retrieves a topics queue, retrieves up to 100 first elements
-func (t *TopicCache) GetQueue(projectName, serviceName string) []string {
+func (t *kafkaTopicCache) GetQueue(projectName, serviceName string) []string {
 	t.RLock()
 	defer t.RUnlock()
 

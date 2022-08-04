@@ -92,7 +92,7 @@ func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.Re
 	}
 
 	// prepare a list of new transit gateway vpc attachment that needs to be added
-	add := []aiven.TransitGatewayVPCAttachment{}
+	var add []aiven.TransitGatewayVPCAttachment
 	for _, fresh := range cidrs {
 		var isNew = true
 
@@ -118,7 +118,7 @@ func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.Re
 	}
 
 	// prepare a list of old cirds for deletion
-	deleteCIDRs := []string{}
+	var deleteCIDRs []string
 	for _, old := range peeringConnection.UserPeerNetworkCIDRs {
 		var forDeletion = true
 

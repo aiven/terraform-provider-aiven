@@ -7,8 +7,6 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/service/kafka/cache"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -92,7 +90,7 @@ func resourceKafkaACLRead(_ context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 
-	acl, err := cache.ACLCache{}.Read(project, serviceName, aclID, client)
+	acl, err := kafkaACLCache{}.Read(project, serviceName, aclID, client)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}

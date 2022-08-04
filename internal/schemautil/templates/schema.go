@@ -4,11 +4,13 @@ import "log"
 
 const (
 	// User configuration options based on resource type
+
 	UserConfigSchemaEndpoint    = "endpoint"
 	UserConfigSchemaIntegration = "integration"
 	UserConfigSchemaService     = "service"
 
 	// JSON file names for user configuration options
+
 	EndpointFileName    = "integration_endpoints_user_config_schema.json"
 	IntegrationFileName = "integrations_user_config_schema.json"
 	ServiceFileName     = "service_user_config_schema.json"

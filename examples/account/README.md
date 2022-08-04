@@ -9,7 +9,7 @@ across `production`, `qa`, and `development` environments. See the
 following table for roles and privileges:
 
 |                 | Production Env. | QA Env.     | Development Env. |
-| --------------- | --------------- | ----------- | ---------------- |
+|-----------------|-----------------|-------------|------------------|
 | Admin Team      | `admin`         | `admin`     | `admin`          |
 | Operator Team   | `operator`      | `operator`  | `operator`       |
 | Developer Team  | `read_only`     | `developer` | `developer`      |

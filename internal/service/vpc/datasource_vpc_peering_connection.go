@@ -12,6 +12,7 @@ import (
 
 // DatasourceVPCPeeringConnection
 // Deprecated
+//goland:noinspection GoDeprecation
 func DatasourceVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceVPCPeeringConnectionRead,

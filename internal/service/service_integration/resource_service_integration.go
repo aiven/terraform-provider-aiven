@@ -386,7 +386,9 @@ func resourceServiceIntegrationCopyAPIResponseToTerraform(
 
 	userConfig := schemautil.ConvertAPIUserConfigToTerraformCompatibleFormat("integration", integrationType, integration.UserConfig)
 	if len(userConfig) > 0 {
-		d.Set(integrationType+"_user_config", userConfig)
+		if err := d.Set(integrationType+"_user_config", userConfig); err != nil {
+			return err
+		}
 	}
 
 	return nil

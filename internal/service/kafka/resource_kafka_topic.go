@@ -8,7 +8,6 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/service/kafka/cache"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -221,7 +220,7 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 }
 
 func ResourceKafkaTopic() *schema.Resource {
-	_ = cache.NewTopicCache()
+	_ = NewTopicCache()
 
 	return &schema.Resource{
 		Description:   "The Kafka Topic resource allows the creation and management of Aiven Kafka Topics.",
@@ -256,7 +255,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 		Tags:        getTags(d),
 	}
 
-	w := &KafkaTopicCreateWaiter{
+	w := &kafkaTopicCreateWaiter{
 		Client:        m.(*aiven.Client),
 		Project:       project,
 		ServiceName:   serviceName,
@@ -403,7 +402,7 @@ func getTopic(ctx context.Context, d *schema.ResourceData, m interface{}, ignore
 		return aiven.KafkaTopic{}, err
 	}
 
-	w := &KafkaTopicAvailabilityWaiter{
+	w := &kafkaTopicAvailabilityWaiter{
 		Client:      m.(*aiven.Client),
 		Project:     project,
 		ServiceName: serviceName,
@@ -459,7 +458,7 @@ func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m int
 		return diag.Errorf("cannot delete kafka topic when termination_protection is enabled")
 	}
 
-	waiter := KafkaTopicDeleteWaiter{
+	waiter := TopicDeleteWaiter{
 		Client:      client,
 		ProjectName: projectName,
 		ServiceName: serviceName,
@@ -506,8 +505,8 @@ func flattenKafkaTopicConfig(t aiven.KafkaTopic) []map[string]interface{} {
 	}
 }
 
-// KafkaTopicDeleteWaiter is used to wait for Kafka Topic to be deleted.
-type KafkaTopicDeleteWaiter struct {
+// TopicDeleteWaiter is used to wait for Kafka Topic to be deleted.
+type TopicDeleteWaiter struct {
 	Client      *aiven.Client
 	ProjectName string
 	ServiceName string
@@ -515,7 +514,7 @@ type KafkaTopicDeleteWaiter struct {
 }
 
 // RefreshFunc will call the Aiven client and refresh it's state.
-func (w *KafkaTopicDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
+func (w *TopicDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		err := w.Client.KafkaTopics.Delete(w.ProjectName, w.ServiceName, w.TopicName)
 		if err != nil {
@@ -529,7 +528,7 @@ func (w *KafkaTopicDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 // Conf sets up the configuration to refresh.
-func (w *KafkaTopicDeleteWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
+func (w *TopicDeleteWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
 	log.Printf("[DEBUG] Delete waiter timeout %.0f minutes", timeout.Minutes())
 
 	return &resource.StateChangeConf{
