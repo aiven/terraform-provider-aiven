@@ -18,6 +18,7 @@ func OptionalString(d *schema.ResourceData, key string) string {
 	if !ok {
 		return ""
 	}
+
 	return str
 }
 
@@ -28,10 +29,12 @@ func OptionalStringPointer(d *schema.ResourceData, key string) *string {
 	if !ok {
 		return nil
 	}
+
 	str, ok := val.(string)
 	if !ok {
 		return nil
 	}
+
 	return &str
 }
 
@@ -40,10 +43,12 @@ func OptionalIntPointer(d *schema.ResourceData, key string) *int {
 	if !ok {
 		return nil
 	}
+
 	intValue, ok := val.(int)
 	if !ok {
 		return nil
 	}
+
 	return &intValue
 }
 
@@ -150,6 +155,7 @@ func EmptyObjectDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) boo
 // and uses schemautil.EmptyObjectDiffSuppressFunc in all others cases
 func EmptyObjectDiffSuppressFuncSkipArrays(s map[string]*schema.Schema) schema.SchemaDiffSuppressFunc {
 	var skipKeys []string
+
 	for key, sh := range s {
 		if sh.Type == schema.TypeList {
 			skipKeys = append(skipKeys, key)
@@ -181,11 +187,11 @@ func EmptyObjectNoChangeDiffSuppressFunc(k, _, new string, d *schema.ResourceDat
 	return false
 }
 
-// IpFilterArrayDiffSuppressFunc Terraform does not allow default values for arrays but
+// IPFilterArrayDiffSuppressFunc Terraform does not allow default values for arrays but
 // the IP filter user config value has default. We don't want to force users to always
 // define explicit value just because of the Terraform restriction so suppress the
 // change from default to empty (which would be nonsensical operation anyway)
-func IpFilterArrayDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+func IPFilterArrayDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	if old == "1" && new == "0" && strings.HasSuffix(k, ".ip_filter.#") {
 		if list, ok := d.Get(strings.TrimSuffix(k, ".#")).([]interface{}); ok {
 			if len(list) == 1 {
@@ -197,7 +203,7 @@ func IpFilterArrayDiffSuppressFunc(k, old, new string, d *schema.ResourceData) b
 	return false
 }
 
-func IpFilterValueDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) bool {
+func IPFilterValueDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) bool {
 	return old == "0.0.0.0/0" && new == "" && strings.HasSuffix(k, ".ip_filter.0")
 }
 
@@ -207,6 +213,7 @@ func ValidateDurationString(v interface{}, k string) (ws []string, errors []erro
 	if _, err := time.ParseDuration(v.(string)); err != nil {
 		errors = append(errors, fmt.Errorf("%q: invalid duration", k))
 	}
+
 	return
 }
 
@@ -217,9 +224,11 @@ func ValidateHumanByteSizeString(v interface{}, k string) (ws []string, errors [
 	if ok, _ := regexp.MatchString("^[1-9][0-9]*(GiB|G)$", v.(string)); !ok {
 		return ws, append(errors, fmt.Errorf("%q: configured string must match ^[1-9][0-9]*(G|GiB)", k))
 	}
+
 	if _, err := units.RAMInBytes(v.(string)); err != nil {
 		return ws, append(errors, fmt.Errorf("%q: invalid human readable byte size", k))
 	}
+
 	return
 }
 
@@ -228,6 +237,7 @@ func BuildResourceID(parts ...string) string {
 	for idx, part := range parts {
 		finalParts[idx] = url.PathEscape(part)
 	}
+
 	return strings.Join(finalParts, "/")
 }
 
@@ -235,12 +245,13 @@ func SplitResourceID(resourceID string, n int) (parts []string, err error) {
 	parts = strings.SplitN(resourceID, "/", n)
 
 	for idx, part := range parts {
-		part, _ := url.PathUnescape(part)
+		part, _ = url.PathUnescape(part)
 		parts[idx] = part
 	}
 
 	if len(parts) != n {
 		err = fmt.Errorf("invalid resource id: %s", resourceID)
+
 		return nil, err
 	}
 
@@ -292,15 +303,19 @@ func CopyServiceUserPropertiesFromAPIResponseToTerraform(
 	if err := d.Set("project", projectName); err != nil {
 		return err
 	}
+
 	if err := d.Set("service_name", serviceName); err != nil {
 		return err
 	}
+
 	if err := d.Set("username", user.Username); err != nil {
 		return err
 	}
+
 	if err := d.Set("password", user.Password); err != nil {
 		return err
 	}
+
 	if err := d.Set("type", user.Type); err != nil {
 		return err
 	}
@@ -310,6 +325,7 @@ func CopyServiceUserPropertiesFromAPIResponseToTerraform(
 			return err
 		}
 	}
+
 	if len(user.AccessKey) > 0 {
 		if err := d.Set("access_key", user.AccessKey); err != nil {
 			return err

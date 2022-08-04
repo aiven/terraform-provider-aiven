@@ -35,7 +35,9 @@ var aivenMySQLUserSchema = map[string]*schema.Schema{
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 		ValidateFunc:     validation.StringInSlice([]string{"caching_sha2_password", "mysql_native_password"}, false),
-		Description:      schemautil.Complex("Authentication details.").PossibleValues("caching_sha2_password", "mysql_native_password").Build(),
+		Description: schemautil.Complex(
+			"Authentication details.",
+		).PossibleValues("caching_sha2_password", "mysql_native_password").Build(),
 	},
 
 	// computed fields
@@ -79,6 +81,7 @@ func resourceMySQLUserCreate(ctx context.Context, d *schema.ResourceData, m inte
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	username := d.Get("username").(string)
+
 	_, err := client.ServiceUsers.Create(
 		projectName,
 		serviceName,

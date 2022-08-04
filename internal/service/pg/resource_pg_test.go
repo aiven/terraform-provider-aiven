@@ -12,8 +12,11 @@ import (
 )
 
 func TestAccAivenPG_invalid_disc_size(t *testing.T) {
-	expectErrorRegexBadString := regexp.MustCompile(regexp.QuoteMeta("configured string must match ^[1-9][0-9]*(G|GiB)"))
+	expectErrorRegexBadString := regexp.MustCompile(
+		regexp.QuoteMeta("configured string must match ^[1-9][0-9]*(G|GiB)"),
+	)
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -78,6 +81,7 @@ func TestAccAivenPG_invalid_disc_size(t *testing.T) {
 func TestAccAivenPG_static_ips(t *testing.T) {
 	resourceName := "aiven_pg.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -144,6 +148,7 @@ func TestAccAivenPG_static_ips(t *testing.T) {
 func TestAccAivenPG_changing_plan(t *testing.T) {
 	resourceName := "aiven_pg.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -186,6 +191,7 @@ func TestAccAivenPG_changing_plan(t *testing.T) {
 func TestAccAivenPG_deleting_disc_size(t *testing.T) {
 	resourceName := "aiven_pg.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -230,6 +236,7 @@ func TestAccAivenPG_deleting_disc_size(t *testing.T) {
 func TestAccAivenPG_changing_disc_size(t *testing.T) {
 	resourceName := "aiven_pg.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,

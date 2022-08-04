@@ -31,6 +31,7 @@ func datasourceProjectRead(c context.Context, d *schema.ResourceData, m interfac
 	for _, project := range projects {
 		if project.Name == projectName {
 			d.SetId(projectName)
+
 			return resourceProjectRead(c, d, m)
 		}
 	}

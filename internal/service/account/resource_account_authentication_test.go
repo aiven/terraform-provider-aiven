@@ -1,6 +1,7 @@
 package account_test
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"testing"
@@ -51,7 +52,12 @@ func TestAccAivenAccountAuthentication_auto_join_team_id(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("test-acc-auth-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "type", "saml"),
-					resource.TestCheckResourceAttrPair(resourceName, "auto_join_team_id", "aiven_account_team.foo", "team_id"),
+					resource.TestCheckResourceAttrPair(
+						resourceName,
+						"auto_join_team_id",
+						"aiven_account_team.foo",
+						"team_id",
+					),
 				),
 			},
 		},
@@ -122,14 +128,16 @@ func testAccCheckAivenAccountAuthenticationResourceDestroy(s *terraform.State) e
 			continue
 		}
 
-		accountId, authId, err := schemautil.SplitResourceID2(rs.Primary.ID)
+		accountID, authID, err := schemautil.SplitResourceID2(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
 		r, err := c.Accounts.List()
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 				return err
 			}
 
@@ -137,10 +145,12 @@ func testAccCheckAivenAccountAuthenticationResourceDestroy(s *terraform.State) e
 		}
 
 		for _, ac := range r.Accounts {
-			if ac.Id == accountId {
-				ra, err := c.AccountAuthentications.List(accountId)
+			if ac.Id == accountID {
+				ra, err := c.AccountAuthentications.List(accountID)
 				if err != nil {
-					if err.(aiven.Error).Status != 404 {
+					var aivenError *aiven.Error
+
+					if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 						return err
 					}
 
@@ -148,7 +158,7 @@ func testAccCheckAivenAccountAuthenticationResourceDestroy(s *terraform.State) e
 				}
 
 				for _, a := range ra.AuthenticationMethods {
-					if a.Id == authId {
+					if a.Id == authID {
 						return fmt.Errorf("account authentication (%s) still exists", rs.Primary.ID)
 					}
 				}
@@ -177,7 +187,9 @@ func testAccCheckAivenAccountAuthenticationWithAutoJoinTeamIDResourceDestroy(s *
 
 		r, err := c.Accounts.List()
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 				return err
 			}
 
@@ -189,7 +201,9 @@ func testAccCheckAivenAccountAuthenticationWithAutoJoinTeamIDResourceDestroy(s *
 				if isTeam {
 					rl, err := c.AccountTeams.List(accountID)
 					if err != nil {
-						if err.(aiven.Error).Status != 404 {
+						var aivenError *aiven.Error
+
+						if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 							return err
 						}
 
@@ -204,7 +218,9 @@ func testAccCheckAivenAccountAuthenticationWithAutoJoinTeamIDResourceDestroy(s *
 				} else {
 					ra, err := c.AccountAuthentications.List(accountID)
 					if err != nil {
-						if err.(aiven.Error).Status != 404 {
+						var aivenError *aiven.Error
+
+						if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 							return err
 						}
 

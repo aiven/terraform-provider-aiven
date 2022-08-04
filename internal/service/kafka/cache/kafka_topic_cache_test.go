@@ -64,6 +64,7 @@ func TestTopicCache_LoadByProjectAndServiceName(t1 *testing.T) {
 		projectName string
 		serviceName string
 	}
+
 	tests := []struct {
 		name        string
 		doSomething func()
@@ -104,7 +105,9 @@ func TestTopicCache_LoadByProjectAndServiceName(t1 *testing.T) {
 			true,
 		},
 	}
+
 	t := GetTopicCache()
+
 	for _, tt := range tests {
 		tt.doSomething()
 
@@ -129,6 +132,7 @@ func TestTopicCache_LoadByTopicName(t1 *testing.T) {
 		serviceName string
 		topicName   string
 	}
+
 	tests := []struct {
 		name        string
 		doSomething func()
@@ -167,7 +171,9 @@ func TestTopicCache_LoadByTopicName(t1 *testing.T) {
 			true,
 		},
 	}
+
 	t := GetTopicCache()
+
 	for _, tt := range tests {
 		tt.doSomething()
 
@@ -191,6 +197,7 @@ func TestTopicCache_DeleteByProjectAndServiceName(t1 *testing.T) {
 		projectName string
 		serviceName string
 	}
+
 	tests := []struct {
 		name        string
 		doSomething func()
@@ -205,7 +212,9 @@ func TestTopicCache_DeleteByProjectAndServiceName(t1 *testing.T) {
 			},
 		},
 	}
+
 	t := GetTopicCache()
+
 	for _, tt := range tests {
 		tt.doSomething()
 

@@ -10,7 +10,7 @@ import (
 
 func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
 	kafkaMMSchema := schemautil.ServiceCommonSchema()
-	kafkaMMSchema[schemautil.ServiceTypeKafkaMirrormaker] = &schema.Schema{
+	kafkaMMSchema[schemautil.ServiceTypeKafkaMirrorMaker] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
 		Description: "Kafka MirrorMaker 2 server provided values",
@@ -18,20 +18,21 @@ func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	kafkaMMSchema[schemautil.ServiceTypeKafkaMirrormaker+"_user_config"] =
-		schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeKafkaMirrormaker)
+	kafkaMMSchema[schemautil.ServiceTypeKafkaMirrorMaker+"_user_config"] =
+		schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeKafkaMirrorMaker)
 
 	return kafkaMMSchema
 }
 func ResourceKafkaMirrormaker() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Kafka MirrorMaker resource allows the creation and management of Aiven Kafka MirrorMaker 2 services.",
-		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeKafkaMirrormaker),
+		Description: "The Kafka MirrorMaker resource allows the creation and management of " +
+			"Aiven Kafka MirrorMaker 2 services.",
+		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeKafkaMirrorMaker),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeKafkaMirrormaker),
+			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeKafkaMirrorMaker),
 			customdiff.IfValueChange("disk_space",
 				schemautil.DiskSpaceShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
@@ -42,7 +43,7 @@ func ResourceKafkaMirrormaker() *schema.Resource {
 			),
 			customdiff.Sequence(
 				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
-				schemautil.CustomizeDiffCheckStaticIpDisassociation,
+				schemautil.CustomizeDiffCheckStaticIPDisassociation,
 			),
 		),
 		Importer: &schema.ResourceImporter{

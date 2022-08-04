@@ -22,7 +22,9 @@ func escapeBytes(identifier []byte) string {
 			'`':  "\\`",
 		}
 	)
+
 	buf := new(bytes.Buffer)
+
 	buf.WriteByte('`')
 
 	for i := range identifier {
@@ -39,5 +41,6 @@ func escapeBytes(identifier []byte) string {
 	}
 
 	buf.WriteByte('`')
+
 	return buf.String()
 }

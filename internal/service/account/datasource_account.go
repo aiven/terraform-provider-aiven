@@ -31,6 +31,7 @@ func datasourceAccountRead(ctx context.Context, d *schema.ResourceData, m interf
 	for _, ac := range r.Accounts {
 		if ac.Name == name {
 			d.SetId(ac.Id)
+
 			return resourceAccountRead(ctx, d, m)
 		}
 	}

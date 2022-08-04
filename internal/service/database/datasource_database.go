@@ -10,16 +10,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+//nolint:revive
 // DatasourceDatabase
 // Deprecated
 //goland:noinspection GoDeprecation
 func DatasourceDatabase() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceDatabaseRead,
-		Description: `The Database data source provides information about the existing Aiven Database.
-
-~>**Deprecated** The Database data source is deprecated, please use service-specific data sources instead, for example: ` + "`aiven_pg_database`, `aiven_mysql_database` etc.",
-		DeprecationMessage: "`aiven_database` data source is deprecated. Please use service-specific data sources instead of this one, for example: `aiven_pg_database`, `aiven_mysql_database` etc.",
+		Description: "The Database data source provides information about the existing Aiven Database.\n\n" +
+			"~>**Deprecated** The Database data source is deprecated, please use service-specific data sources " +
+			"instead, for example: `aiven_pg_database`, `aiven_mysql_database` etc.",
+		DeprecationMessage: "`aiven_database` data source is deprecated. Please use service-specific data sources " +
+			"instead of this one, for example: `aiven_pg_database`, `aiven_mysql_database` etc.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenDatabaseSchema,
 			"project", "service_name", "database_name"),
 	}
@@ -40,6 +42,7 @@ func datasourceDatabaseRead(ctx context.Context, d *schema.ResourceData, m inter
 	for _, db := range databases {
 		if db.DatabaseName == databaseName {
 			d.SetId(schemautil.BuildResourceID(projectName, serviceName, databaseName))
+
 			return resourceDatabaseRead(ctx, d, m)
 		}
 	}

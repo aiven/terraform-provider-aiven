@@ -20,6 +20,7 @@ func ResourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m in
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	username := d.Get("username").(string)
+
 	_, err := client.ServiceUsers.Create(
 		projectName,
 		serviceName,
@@ -117,6 +118,7 @@ func DatasourceServiceUserRead(ctx context.Context, d *schema.ResourceData, m in
 	for _, u := range list {
 		if u.Username == userName {
 			d.SetId(BuildResourceID(projectName, serviceName, userName))
+
 			return ResourceServiceUserRead(ctx, d, m)
 		}
 	}

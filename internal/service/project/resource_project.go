@@ -2,6 +2,7 @@ package project
 
 import (
 	"context"
+	"errors"
 	"log"
 	"os"
 	"regexp"
@@ -16,21 +17,29 @@ import (
 
 var aivenProjectSchema = map[string]*schema.Schema{
 	"ca_cert": {
-		Type:        schema.TypeString,
-		Computed:    true,
-		Sensitive:   true,
-		Description: "The CA certificate of the project. This is required for configuring clients that connect to certain services like Kafka.",
+		Type:      schema.TypeString,
+		Computed:  true,
+		Sensitive: true,
+		Description: "The CA certificate of the project. " +
+			"This is required for configuring clients that connect to certain services like Kafka.",
 	},
 	"account_id": {
-		Type:        schema.TypeString,
-		Optional:    true,
-		Description: schemautil.Complex("An optional property to link a project to already an existing account by using account ID.").Referenced().Build(),
+		Type:     schema.TypeString,
+		Optional: true,
+		Description: schemautil.Complex(
+			"An optional property to link a project to already an existing account by using account ID.",
+		).Referenced().Build(),
 	},
 	"copy_from_project": {
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.CreateOnlyDiffSuppressFunc,
-		Description:      schemautil.Complex("is the name of another project used to copy billing information and some other project attributes like technical contacts from. This is mostly relevant when an existing project has billing type set to invoice and that needs to be copied over to a new project. (Setting billing is otherwise not allowed over the API.) This only has effect when the project is created.").Referenced().Build(),
+		Description: schemautil.Complex(
+			"Is the name of another project used to copy billing information and some other project attributes " +
+				"like technical contacts from. This is mostly relevant when an existing project has billing type set " +
+				"to invoice and that needs to be copied over to a new project. (Setting billing is otherwise not " +
+				"allowed over the API.) This only has effect when the project is created.",
+		).Referenced().Build(),
 	},
 	"use_source_project_billing_group": {
 		Type:             schema.TypeBool,
@@ -43,29 +52,37 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Optional:         true,
 		DiffSuppressFunc: schemautil.CreateOnlyDiffSuppressFunc,
 		Default:          true,
-		Description:      schemautil.Complex("If account_id is set, grant account owner team admin access to the new project.").DefaultValue(true).Build(),
+		Description: schemautil.Complex(
+			"If account_id is set, grant account owner team admin access to the new project.",
+		).DefaultValue(true).Build(),
 	},
 	"project": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Defines the name of the project. Name must be globally unique (between all Aiven customers) and cannot be changed later without destroying and re-creating the project, including all sub-resources.",
+		Type:     schema.TypeString,
+		Required: true,
+		Description: "Defines the name of the project. Name must be globally unique (between all Aiven customers) " +
+			"and cannot be changed later without destroying and re-creating the project, including all sub-resources.",
 	},
 	"technical_emails": {
-		Type:        schema.TypeSet,
-		Elem:        &schema.Schema{Type: schema.TypeString},
-		Optional:    true,
-		Description: "Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability. It is  good practice to keep this up-to-date to be aware of any potential issues with your project.",
+		Type:     schema.TypeSet,
+		Elem:     &schema.Schema{Type: schema.TypeString},
+		Optional: true,
+		Description: "Defines the email addresses that will receive alerts about upcoming maintenance updates " +
+			"or warnings about service instability. It is  good practice to keep this up-to-date to be aware of " +
+			"any potential issues with your project.",
 	},
 	"default_cloud": {
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		Description:      "Defines the default cloud provider and region where services are hosted. This can be changed freely after the project is created. This will not affect existing services.",
+		Description: "Defines the default cloud provider and region where services are hosted. " +
+			"This can be changed freely after the project is created. This will not affect existing services.",
 	},
 	"billing_group": {
-		Type:             schema.TypeString,
-		Optional:         true,
-		Description:      schemautil.Complex("The id of the billing group that is linked to this project.").Referenced().Build(),
+		Type:     schema.TypeString,
+		Optional: true,
+		Description: schemautil.Complex(
+			"The ID of the billing group that is linked to this project.",
+		).Referenced().Build(),
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 	},
 	"tag": {
@@ -95,10 +112,11 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Description: "The method of invoicing used for payments for this project, e.g. `card`.",
 	},
 	"available_credits": {
-		Type:        schema.TypeString,
-		Computed:    true,
-		Optional:    true,
-		Description: "The amount of platform credits available to the project. This could be your free trial or other promotional credits.",
+		Type:     schema.TypeString,
+		Computed: true,
+		Optional: true,
+		Description: "The amount of platform credits available to the project. " +
+			"This could be your free trial or other promotional credits.",
 	},
 	"estimated_balance": {
 		Type:        schema.TypeString,
@@ -130,6 +148,7 @@ func resourceProjectCreate(_ context.Context, d *schema.ResourceData, m interfac
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
+
 	_, err := client.Projects.Create(
 		aiven.CreateProjectRequest{
 			Cloud:                        schemautil.OptionalStringPointer(d, "default_cloud"),
@@ -178,28 +197,33 @@ func resourceProjectCopyBillingGroupFromProject(
 		for _, pr := range projects {
 			if pr == sourceProjectName {
 				log.Printf("[DEBUG] Source project `%s` has billing group `%s`", sourceProjectName, bg.Id)
+
 				return resourceProjectAssignToBillingGroup(sourceProjectName, bg.Id, client, d)
 			}
 		}
 	}
 
 	log.Printf("[DEBUG] Source project `%s` is not associated to any billing group", sourceProjectName)
+
 	return nil
 }
 
 func resourceProjectAssignToBillingGroup(
 	projectName, billingGroupID string, client *aiven.Client, d *schema.ResourceData) diag.Diagnostics {
 	log.Printf("[DEBUG] Assoviating project `%s` with the billing group `%s`", projectName, billingGroupID)
+
 	_, err := client.BillingGroup.Get(billingGroupID)
 	if err != nil {
 		return diag.Errorf("cannot get a billing group by id: %s", err)
 	}
 
 	var isAlreadyAssigned bool
+
 	assignedProjects, err := client.BillingGroup.GetProjects(billingGroupID)
 	if err != nil {
 		return diag.Errorf("cannot get a billing group assigned projects list: %s", err)
 	}
+
 	for _, p := range assignedProjects {
 		if p == projectName {
 			isAlreadyAssigned = true
@@ -234,8 +258,8 @@ func resourceProjectRead(_ context.Context, d *schema.ResourceData, m interface{
 func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	var project *aiven.Project
 	projectName := d.Get("project").(string)
+
 	project, err := client.Projects.Update(
 		d.Id(),
 		aiven.UpdateProjectRequest{
@@ -270,8 +294,11 @@ func resourceProjectDelete(_ context.Context, d *schema.ResourceData, m interfac
 	// Silence "Project with open balance cannot be deleted" error
 	// to make long acceptance tests pass which generate some balance
 	re := regexp.MustCompile("Project with open balance cannot be deleted")
+
 	if err != nil && os.Getenv("TF_ACC") != "" {
-		if re.MatchString(err.Error()) && err.(aiven.Error).Status == 403 {
+		var aivenError *aiven.Error
+
+		if ok := errors.As(err, &aivenError); ok && re.MatchString(err.Error()) && aivenError.Status == 403 {
 			return nil
 		}
 	}
@@ -307,9 +334,11 @@ func getLongCardID(client *aiven.Client, cardID string) (*string, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if card != nil {
 		return &card.CardID, nil
 	}
+
 	return &cardID, nil
 }
 
@@ -323,15 +352,18 @@ func contactEmailListForAPI(d *schema.ResourceData, field string, newResource bo
 	if _, ok := d.GetOk("copy_from_project"); ok || !newResource {
 		results = []*aiven.ContactEmail{}
 	}
+
 	valuesInterface, ok := d.GetOk(field)
 	if ok && valuesInterface != nil {
 		for _, emailInterface := range valuesInterface.(*schema.Set).List() {
 			results = append(results, &aiven.ContactEmail{Email: emailInterface.(string)})
 		}
 	}
+
 	if results == nil {
 		return nil
 	}
+
 	return &results
 }
 
@@ -353,34 +385,45 @@ func contactEmailListForTerraform(d *schema.ResourceData, field string, contactE
 	return nil
 }
 
-func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client, project *aiven.Project) diag.Diagnostics {
+func setProjectTerraformProperties(
+	d *schema.ResourceData, client *aiven.Client, project *aiven.Project,
+) diag.Diagnostics {
 	if err := d.Set("project", project.Name); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("account_id", project.AccountId); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := contactEmailListForTerraform(d, "technical_emails", project.TechnicalEmails); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if d := resourceProjectGetCACert(project.Name, client, d); d != nil {
 		return d
 	}
+
 	if err := d.Set("default_cloud", project.DefaultCloud); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("available_credits", project.AvailableCredits); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("estimated_balance", project.EstimatedBalance); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("payment_method", project.PaymentMethod); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("billing_group", project.BillingGroupId); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("tag", schemautil.SetTagsTerraformProperties(project.Tags)); err != nil {
 		return diag.FromErr(err)
 	}

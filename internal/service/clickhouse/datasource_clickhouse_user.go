@@ -34,6 +34,7 @@ func datasourceClickhouseUserRead(ctx context.Context, d *schema.ResourceData, m
 	for _, u := range list.Users {
 		if u.Name == userName {
 			d.SetId(schemautil.BuildResourceID(projectName, serviceName, u.UUID))
+
 			return resourceClickhouseUserRead(ctx, d, m)
 		}
 	}

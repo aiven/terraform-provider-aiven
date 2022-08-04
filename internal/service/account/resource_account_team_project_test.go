@@ -1,6 +1,7 @@
 package account_test
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"testing"
@@ -75,14 +76,16 @@ func testAccCheckAivenAccountTeamProjectResourceDestroy(s *terraform.State) erro
 			continue
 		}
 
-		accountId, teamId, projectName, err := schemautil.SplitResourceID3(rs.Primary.ID)
+		accountID, teamID, projectName, err := schemautil.SplitResourceID3(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
 		r, err := c.Accounts.List()
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 				return err
 			}
 
@@ -90,10 +93,12 @@ func testAccCheckAivenAccountTeamProjectResourceDestroy(s *terraform.State) erro
 		}
 
 		for _, a := range r.Accounts {
-			if a.Id == accountId {
-				rp, err := c.AccountTeamProjects.List(accountId, teamId)
+			if a.Id == accountID {
+				rp, err := c.AccountTeamProjects.List(accountID, teamID)
 				if err != nil {
-					if err.(aiven.Error).Status != 404 {
+					var aivenError *aiven.Error
+
+					if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 						return err
 					}
 

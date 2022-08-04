@@ -28,8 +28,8 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Required:         true,
 		ValidateFunc:     validation.StringIsJSON,
-		StateFunc:        normalizeJsonString,
-		DiffSuppressFunc: diffSuppressJsonObject,
+		StateFunc:        normalizeJSONString,
+		DiffSuppressFunc: diffSuppressJSONObject,
 		Description:      "Kafka Schema configuration should be a valid Avro Schema JSON format.",
 	},
 	"schema_type": {
@@ -54,17 +54,20 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 			// Allow ignoring those.
 			return new == ""
 		},
-		Description: schemautil.Complex("Kafka Schemas compatibility level.").PossibleValues(schemautil.StringSliceToInterfaceSlice(compatibilityLevels)...).Build(),
+		Description: schemautil.Complex(
+			"Kafka Schemas compatibility level.",
+		).PossibleValues(schemautil.StringSliceToInterfaceSlice(compatibilityLevels)...).Build(),
 	},
 }
 
-// diffSuppressJsonObject checks logical equivalences in JSON Kafka Schema values
-func diffSuppressJsonObject(_, old, new string, _ *schema.ResourceData) bool {
+// diffSuppressJSONObject checks logical equivalences in JSON Kafka Schema values
+func diffSuppressJSONObject(_, old, new string, _ *schema.ResourceData) bool {
 	var objOld, objNew interface{}
 
 	if err := json.Unmarshal([]byte(old), &objOld); err != nil {
 		return false
 	}
+
 	if err := json.Unmarshal([]byte(new), &objNew); err != nil {
 		return false
 	}
@@ -72,8 +75,8 @@ func diffSuppressJsonObject(_, old, new string, _ *schema.ResourceData) bool {
 	return reflect.DeepEqual(objNew, objOld)
 }
 
-// normalizeJsonString returns normalized JSON string
-func normalizeJsonString(v interface{}) string {
+// normalizeJSONString returns normalized JSON string
+func normalizeJSONString(v interface{}) string {
 	jsonString, _ := structure.NormalizeJsonString(v)
 
 	return jsonString
@@ -140,7 +143,7 @@ func resourceKafkaSchemaCreate(ctx context.Context, d *schema.ResourceData, m in
 
 	// set compatibility level if defined for a newly created Kafka Schema Subject
 	if compatibility, ok := d.GetOk("compatibility_level"); ok {
-		_, err := client.KafkaSubjectSchemas.UpdateConfiguration(
+		_, err = client.KafkaSubjectSchemas.UpdateConfiguration(
 			project,
 			serviceName,
 			subjectName,
@@ -223,19 +226,23 @@ func resourceKafkaSchemaRead(_ context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
-	if err := d.Set("project", project); err != nil {
+	if err = d.Set("project", project); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("service_name", serviceName); err != nil {
+
+	if err = d.Set("service_name", serviceName); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("subject_name", subjectName); err != nil {
+
+	if err = d.Set("subject_name", subjectName); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("version", version); err != nil {
+
+	if err = d.Set("version", version); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("schema", r.Version.Schema); err != nil {
+
+	if err = d.Set("schema", r.Version.Schema); err != nil {
 		return diag.FromErr(err)
 	}
 

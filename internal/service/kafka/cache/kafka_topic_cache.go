@@ -41,7 +41,9 @@ func GetTopicCache() *kafkaTopicCache {
 // LoadByProjectAndServiceName returns a list of Kafka Topics stored in the cache for a given Project
 // and Service names, or nil if no value is present.
 // The ok result indicates whether value was found in the map.
-func (t *kafkaTopicCache) LoadByProjectAndServiceName(projectName, serviceName string) (map[string]aiven.KafkaTopic, bool) {
+func (t *kafkaTopicCache) LoadByProjectAndServiceName(
+	projectName, serviceName string,
+) (map[string]aiven.KafkaTopic, bool) {
 	t.RLock()
 	result, ok := t.internal[projectName+serviceName]
 	t.RUnlock()
@@ -89,15 +91,19 @@ func (t *kafkaTopicCache) StoreByProjectAndServiceName(projectName, serviceName 
 
 	for _, topic := range list {
 		t.Lock()
+
 		if _, ok := t.internal[projectName+serviceName]; !ok {
 			t.internal[projectName+serviceName] = make(map[string]aiven.KafkaTopic)
 		}
+
 		t.internal[projectName+serviceName][topic.TopicName] = *topic
 
 		// when topic is added to cache, it need to be deleted from the queue
 		for i, name := range t.inQueue[projectName+serviceName] {
 			if name == topic.TopicName {
-				t.inQueue[projectName+serviceName] = append(t.inQueue[projectName+serviceName][:i], t.inQueue[projectName+serviceName][i+1:]...)
+				t.inQueue[projectName+serviceName] = append(
+					t.inQueue[projectName+serviceName][:i], t.inQueue[projectName+serviceName][i+1:]...,
+				)
 			}
 		}
 

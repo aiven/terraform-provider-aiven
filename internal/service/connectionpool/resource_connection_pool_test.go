@@ -1,6 +1,7 @@
-package connection_pool_test
+package connectionpool_test
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -41,7 +42,9 @@ func TestAccAivenConnectionPool_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName2)),
-					resource.TestCheckResourceAttr(resourceName, "database_name", fmt.Sprintf("test-acc-db-%s", rName2)),
+					resource.TestCheckResourceAttr(
+						resourceName, "database_name", fmt.Sprintf("test-acc-db-%s", rName2),
+					),
 					resource.TestCheckResourceAttr(resourceName, "pool_name", fmt.Sprintf("test-acc-pool-%s", rName2)),
 					resource.TestCheckResourceAttr(resourceName, "pool_size", "25"),
 					resource.TestCheckResourceAttr(resourceName, "pool_mode", "transaction"),
@@ -193,7 +196,9 @@ func testAccCheckAivenConnectionPoolResourceDestroy(s *terraform.State) error {
 
 		pool, err := c.ConnectionPools.Get(projectName, serviceName, databaseName)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 				return err
 			}
 		}

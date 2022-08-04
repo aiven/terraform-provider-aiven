@@ -1,6 +1,7 @@
 package opensearch_test
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -27,7 +28,9 @@ func TestAccAivenOpensearchACLRule_basic(t *testing.T) {
 				Config: testAccOpensearchACLRuleResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-aclrule-%s", rName)),
+					resource.TestCheckResourceAttr(
+						resourceName, "service_name", fmt.Sprintf("test-acc-sr-aclrule-%s", rName),
+					),
 					resource.TestCheckResourceAttr(resourceName, "index", "test-index"),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "permission", "readwrite"),
@@ -90,10 +93,13 @@ func testAccCheckAivenOpensearchACLRuleResourceDestroy(s *terraform.State) error
 
 		r, err := c.ElasticsearchACLs.Get(projectName, serviceName)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 				return err
 			}
 		}
+
 		if r == nil {
 			return nil
 		}
@@ -102,6 +108,7 @@ func testAccCheckAivenOpensearchACLRuleResourceDestroy(s *terraform.State) error
 			if acl.Username != username {
 				continue
 			}
+
 			for _, rule := range acl.Rules {
 				if rule.Index == index {
 					return fmt.Errorf("opensearch acl (%s) still exists", rs.Primary.ID)
@@ -109,5 +116,6 @@ func testAccCheckAivenOpensearchACLRuleResourceDestroy(s *terraform.State) error
 			}
 		}
 	}
+
 	return nil
 }

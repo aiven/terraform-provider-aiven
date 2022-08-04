@@ -18,7 +18,9 @@ func redisSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	s[schemautil.ServiceTypeRedis+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeRedis)
+	s[schemautil.ServiceTypeRedis+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(
+		schemautil.ServiceTypeRedis,
+	)
 
 	return s
 }
@@ -47,7 +49,7 @@ func ResourceRedis() *schema.Resource {
 				schemautil.CustomizeDiffServiceIntegrationAfterCreation,
 			),
 			customdiff.Sequence(
-				schemautil.CustomizeDiffCheckStaticIpDisassociation,
+				schemautil.CustomizeDiffCheckStaticIPDisassociation,
 				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
 			),
 		),

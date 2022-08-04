@@ -1,6 +1,7 @@
-package service_integration_test
+package serviceintegration_test
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -26,7 +27,9 @@ func TestAccAivenServiceIntegrationEndpoint_basic(t *testing.T) {
 			{
 				Config: testAccServiceIntegrationEndpointResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenServiceEndpointIntegrationAttributes("data.aiven_service_integration_endpoint.endpoint"),
+					testAccCheckAivenServiceEndpointIntegrationAttributes(
+						"data.aiven_service_integration_endpoint.endpoint",
+					),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "endpoint_name", fmt.Sprintf("test-acc-ie-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "endpoint_type", "external_elasticsearch_logs"),
@@ -99,14 +102,16 @@ func testAccCheckAivenServiceIntegraitonEndpointResourceDestroy(s *terraform.Sta
 			continue
 		}
 
-		projectName, endpointId, err := schemautil.SplitResourceID2(rs.Primary.ID)
+		projectName, endpointID, err := schemautil.SplitResourceID2(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		i, err := c.ServiceIntegrationEndpoints.Get(projectName, endpointId)
+		i, err := c.ServiceIntegrationEndpoints.Get(projectName, endpointID)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 				return err
 			}
 		}

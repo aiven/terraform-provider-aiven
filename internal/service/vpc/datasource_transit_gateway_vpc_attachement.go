@@ -8,7 +8,8 @@ import (
 func DatasourceTransitGatewayVPCAttachment() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceVPCPeeringConnectionRead,
-		Description: "The Transit Gateway VPC Attachment resource allows the creation and management Transit Gateway VPC Attachment VPC peering connection between Aiven and AWS.",
+		Description: "The Transit Gateway VPC Attachment resource allows the creation and management " +
+			"Transit Gateway VPC Attachment VPC peering connection between Aiven and AWS.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenTransitGatewayVPCAttachmentSchema,
 			"vpc_id", "peer_cloud_account", "peer_vpc"),
 	}

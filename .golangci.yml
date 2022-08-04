@@ -1,40 +1,76 @@
-issues:
-  exclude-rules:
-    # Exclude issues bypassing staticcheck.conf
-    - linters:
-        - staticcheck
-      text: "SA1019:"
-
-    - linters:
-        - unparam
-      text: "always receives"
-
-  max-per-linter: 0
-  max-same-issues: 0
-
 linters:
   disable-all: true
   enable:
     - deadcode
+    - durationcheck
     - errcheck
+    - errname
+    - errorlint
+    - forbidigo
+    # The linter below is supposed to be enabled, but there are too many issues at the moment, and we need to fix them.
+    #    - forcetypeassert
+    # The linter below is supposed to be enabled, but there are too many errors at the moment, and we need to fix them.
+    #    - funlen
+    - gocognit
+    # The linter below is supposed to be enabled, but there are too many errors at the moment, and we need to fix them.
+    #    - goconst
+    - gocyclo
     - gofmt
+    - goimports
+    # The linter below is supposed to be enabled, but there are too many errors at the moment, and we need to fix them.
+    #    - gomnd
+    - gosec
     - gosimple
+    - govet
+    - ifshort
+    - importas
     - ineffassign
+    - lll
     - makezero
     - misspell
     - nakedret
+    # The linter below is supposed to be enabled, but there are too many errors at the moment, and we need to fix them.
+    #    - nestif
     - nilerr
+    - nlreturn
+    # The linter below is supposed to be enabled, but there are too many errors at the moment, and we need to fix them.
+    #    - prealloc
+    - revive
     - staticcheck
     - structcheck
+    - typecheck
     - unconvert
     - unused
     - varcheck
-    - vet
-    - goimports
+    - whitespace
+    - wsl
 
 linters-settings:
-  errcheck:
-    ignore: github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema:ForceNew|Set,fmt:.*,io:Close
+  funlen:
+    lines: 160
+  gocognit:
+    min-complexity: 69 # This is bad, very bad, and has to be eventually reduced to 25.
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+  govet:
+    check-shadowing: true
+  lll:
+    line-length: 120
+    tab-width: 4
+
+issues:
+  exclude-use-default: false
+  exclude:
+    - G104
+    - G404
+    - exported .* should have comment
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - funlen
+        - gosec
+        - govet
 
 run:
-  timeout: 10m
+  go: '1.17' # See https://github.com/golangci/golangci-lint/issues/2649.

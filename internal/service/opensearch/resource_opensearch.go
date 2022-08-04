@@ -11,7 +11,7 @@ import (
 
 func opensearchSchema() map[string]*schema.Schema {
 	s := schemautil.ServiceCommonSchema()
-	s[schemautil.ServiceTypeOpensearch] = &schema.Schema{
+	s[schemautil.ServiceTypeOpenSearch] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
 		Description: "Opensearch server provided values",
@@ -26,7 +26,9 @@ func opensearchSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	s[schemautil.ServiceTypeOpensearch+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeOpensearch)
+	s[schemautil.ServiceTypeOpenSearch+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(
+		schemautil.ServiceTypeOpenSearch,
+	)
 
 	return s
 }
@@ -34,12 +36,12 @@ func opensearchSchema() map[string]*schema.Schema {
 func ResourceOpensearch() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Opensearch resource allows the creation and management of Aiven Opensearch services.",
-		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeOpensearch),
+		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeOpenSearch),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeOpensearch),
+			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeOpenSearch),
 			customdiff.IfValueChange("tag",
 				schemautil.TagsShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckUniqueTag,
@@ -54,7 +56,7 @@ func ResourceOpensearch() *schema.Resource {
 			),
 			customdiff.Sequence(
 				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
-				schemautil.CustomizeDiffCheckStaticIpDisassociation,
+				schemautil.CustomizeDiffCheckStaticIPDisassociation,
 			),
 		),
 		Importer: &schema.ResourceImporter{

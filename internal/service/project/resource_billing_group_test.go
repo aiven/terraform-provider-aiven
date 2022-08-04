@@ -1,6 +1,7 @@
 package project_test
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -36,7 +37,9 @@ func TestAccAivenBillingGroup_basic(t *testing.T) {
 			{
 				Config: testCopyBillingGroupFromExistingOne(rName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("aiven_billing_group.bar2", "name", fmt.Sprintf("copy-test-acc-bg-%s", rName)),
+					resource.TestCheckResourceAttr(
+						"aiven_billing_group.bar2", "name", fmt.Sprintf("copy-test-acc-bg-%s", rName),
+					),
 					resource.TestCheckResourceAttr("aiven_billing_group.bar", "billing_currency", "EUR"),
 					resource.TestCheckResourceAttr("aiven_billing_group.bar2", "billing_currency", "EUR"),
 					resource.TestCheckResourceAttr("aiven_billing_group.bar2", "city", "Helsinki"),
@@ -57,8 +60,10 @@ func testAccCheckAivenBillingGroupResourceDestroy(s *terraform.State) error {
 			continue
 		}
 
+		var aivenError *aiven.Error
+
 		db, err := c.BillingGroup.Get(rs.Primary.ID)
-		if err != nil && !aiven.IsNotFound(err) && err.(aiven.Error).Status != 500 {
+		if ok := errors.As(err, &aivenError); err != nil && !aiven.IsNotFound(err) && (ok && aivenError.Status != 500) {
 			return fmt.Errorf("error getting a billing group by id: %w", err)
 		}
 

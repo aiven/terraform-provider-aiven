@@ -2,6 +2,7 @@ package schemautil
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -19,14 +20,14 @@ const (
 	ServiceTypePG               = "pg"
 	ServiceTypeCassandra        = "cassandra"
 	ServiceTypeElasticsearch    = "elasticsearch"
-	ServiceTypeOpensearch       = "opensearch"
+	ServiceTypeOpenSearch       = "opensearch"
 	ServiceTypeGrafana          = "grafana"
 	ServiceTypeInfluxDB         = "influxdb"
 	ServiceTypeRedis            = "redis"
 	ServiceTypeMySQL            = "mysql"
 	ServiceTypeKafka            = "kafka"
 	ServiceTypeKafkaConnect     = "kafka_connect"
-	ServiceTypeKafkaMirrormaker = "kafka_mirrormaker"
+	ServiceTypeKafkaMirrorMaker = "kafka_mirrormaker"
 	ServiceTypeM3               = "m3db"
 	ServiceTypeM3Aggregator     = "m3aggregator"
 	ServiceTypeFlink            = "flink"
@@ -38,20 +39,35 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 		"project": CommonSchemaProjectReference,
 
 		"cloud_name": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: "Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).",
+			Type:     schema.TypeString,
+			Optional: true,
+			Description: "Defines where the cloud provider and region where the service is hosted in. " +
+				"This can be changed freely after service is created. Changing the value will trigger a potentially " +
+				"lengthy migration process for the service. Format is cloud provider name " +
+				"(`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region " +
+				"name. These are documented on each Cloud provider's own support articles, like " +
+				"[here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS]" +
+				"(https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).",
 		},
 		"plan": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: "Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).",
+			Type:     schema.TypeString,
+			Optional: true,
+			Description: "Defines what kind of computing resources are allocated for the service. " +
+				"It can be changed after creation, though there are some restrictions when going to a smaller plan " +
+				"such as the new plan must have sufficient amount of disk space to store all current data and " +
+				"switching to a plan with fewer nodes might not be supported. The basic plan names are " +
+				"`hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory " +
+				"on each node (also other attributes like number of CPUs and amount of disk space varies but naming " +
+				"is based on memory). The available options can be seem from the " +
+				"[Aiven pricing page](https://aiven.io/pricing).",
 		},
 		"service_name": {
-			Type:        schema.TypeString,
-			Required:    true,
-			ForceNew:    true,
-			Description: "Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.",
+			Type:     schema.TypeString,
+			Required: true,
+			ForceNew: true,
+			Description: "Specifies the actual name of the service. The name cannot be changed later without " +
+				"destroying and re-creating the service so name should be picked based on intended service usage " +
+				"rather than current attributes.",
 		},
 		"service_type": {
 			Type:        schema.TypeString,
@@ -59,14 +75,19 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Description: "Aiven internal service type code",
 		},
 		"project_vpc_id": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: "Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.",
+			Type:     schema.TypeString,
+			Optional: true,
+			Description: "Specifies the VPC the service should run in. If the value is not set the service is not " +
+				"run inside a VPC. When set, the value should be given as a reference to set up dependencies " +
+				"correctly and the VPC must be in the same cloud and region as the service itself. Project can be " +
+				"freely moved to and from VPC after creation but doing so triggers migration to new servers so the " +
+				"operation can take significant amount of time to complete if the service has a lot of data.",
 		},
 		"maintenance_window_dow": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: "Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.",
+			Type:     schema.TypeString,
+			Optional: true,
+			Description: "Day of week when maintenance operations should be performed. " +
+				"One monday, tuesday, wednesday, etc.",
 			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 				return new == ""
 			},
@@ -80,14 +101,18 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			},
 		},
 		"termination_protection": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Description: "Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.",
+			Type:     schema.TypeBool,
+			Optional: true,
+			Description: "Prevents the service from being deleted. It is recommended to set this to `true` for all " +
+				"production services to prevent unintentional service deletion. This does not shield against " +
+				"deleting databases or topics but for services with backups much of the content can at least be " +
+				"restored from backup in case accidental deletion is done.",
 		},
 		"disk_space": {
-			Type:         schema.TypeString,
-			Optional:     true,
-			Description:  "The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.",
+			Type:     schema.TypeString,
+			Optional: true,
+			Description: "The disk space of the service, possible values depend on the service type, the cloud " +
+				"provider and the project. Reducing will result in the service rebalancing.",
 			ValidateFunc: ValidateHumanByteSizeString,
 		},
 		"disk_space_used": {
@@ -96,19 +121,23 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Description: "Disk space that service is currently using",
 		},
 		"disk_space_default": {
-			Type:        schema.TypeString,
-			Computed:    true,
-			Description: "The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`",
+			Type:     schema.TypeString,
+			Computed: true,
+			Description: "The default disk space of the service, possible values depend on the service type, the " +
+				"cloud provider and the project. Its also the minimum value for `disk_space`",
 		},
 		"disk_space_step": {
-			Type:        schema.TypeString,
-			Computed:    true,
-			Description: "The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.",
+			Type:     schema.TypeString,
+			Computed: true,
+			Description: "The default disk space step of the service, possible values depend on the service type, " +
+				"the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by " +
+				"increments of this size.",
 		},
 		"disk_space_cap": {
-			Type:        schema.TypeString,
-			Computed:    true,
-			Description: "The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.",
+			Type:     schema.TypeString,
+			Computed: true,
+			Description: "The maximum disk space of the service, possible values depend on the service type, the " +
+				"cloud provider and the project.",
 		},
 		"service_uri": {
 			Type:        schema.TypeString,
@@ -143,9 +172,10 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Description: "Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`",
 		},
 		"service_integrations": {
-			Type:        schema.TypeList,
-			Optional:    true,
-			Description: "Service integrations to specify when creating a service. Not applied after initial service creation",
+			Type:     schema.TypeList,
+			Optional: true,
+			Description: "Service integrations to specify when creating a service. " +
+				"Not applied after initial service creation",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"source_service_name": {
@@ -154,18 +184,21 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 						Description: "Name of the source service",
 					},
 					"integration_type": {
-						Type:        schema.TypeString,
-						Required:    true,
-						Description: "Type of the service integration. The only supported value at the moment is `read_replica`",
+						Type:     schema.TypeString,
+						Required: true,
+						Description: "Type of the service integration. " +
+							"The only supported value at the moment is `read_replica`",
 					},
 				},
 			},
 		},
 		"static_ips": {
-			Type:        schema.TypeList,
-			Optional:    true,
-			Description: "Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again",
-			Elem:        &schema.Schema{Type: schema.TypeString},
+			Type:     schema.TypeList,
+			Optional: true,
+			Description: "Static IPs that are going to be associated with this service. Please assign a value using " +
+				"the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound " +
+				"from the node again",
+			Elem: &schema.Schema{Type: schema.TypeString},
 		},
 		"components": {
 			Type:        schema.TypeList,
@@ -184,10 +217,11 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 						Description: "DNS name for connecting to the service component",
 					},
 					"kafka_authentication_method": {
-						Type:        schema.TypeString,
-						Computed:    true,
-						Optional:    true,
-						Description: "Kafka authentication method. This is a value specific to the 'kafka' service component",
+						Type:     schema.TypeString,
+						Computed: true,
+						Optional: true,
+						Description: "Kafka authentication method. " +
+							"This is a value specific to the 'kafka' service component",
 					},
 					"port": {
 						Type:        schema.TypeInt,
@@ -202,9 +236,9 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 					"ssl": {
 						Type:     schema.TypeBool,
 						Computed: true,
-						Description: "Whether the endpoint is encrypted or accepts plaintext. By default endpoints are " +
-							"always encrypted and this property is only included for service components they may " +
-							"disable encryption",
+						Description: "Whether the endpoint is encrypted or accepts plaintext. " +
+							"By default endpoints are always encrypted and this property is only included for " +
+							"service components they may disable encryption",
 					},
 					"usage": {
 						Type:        schema.TypeString,
@@ -244,42 +278,55 @@ func ResourceServiceCreateWrapper(serviceType string) schema.CreateContextFunc {
 			if err := d.Set(ServiceTypeCassandra, []map[string]interface{}{}); err != nil {
 				return diag.FromErr(err)
 			}
+
 			if err := d.Set(ServiceTypeElasticsearch, []map[string]interface{}{}); err != nil {
 				return diag.FromErr(err)
 			}
+
 			if err := d.Set(ServiceTypeGrafana, []map[string]interface{}{}); err != nil {
 				return diag.FromErr(err)
 			}
+
 			if err := d.Set(ServiceTypeInfluxDB, []map[string]interface{}{}); err != nil {
 				return diag.FromErr(err)
 			}
+
 			if err := d.Set(ServiceTypeKafka, []map[string]interface{}{}); err != nil {
 				return diag.FromErr(err)
 			}
+
 			if err := d.Set(ServiceTypeKafkaConnect, []map[string]interface{}{}); err != nil {
 				return diag.FromErr(err)
 			}
-			if err := d.Set(ServiceTypeKafkaMirrormaker, []map[string]interface{}{}); err != nil {
+
+			if err := d.Set(ServiceTypeKafkaMirrorMaker, []map[string]interface{}{}); err != nil {
 				return diag.FromErr(err)
 			}
+
 			if err := d.Set(ServiceTypeMySQL, []map[string]interface{}{}); err != nil {
 				return diag.FromErr(err)
 			}
+
 			if err := d.Set(ServiceTypePG, []map[string]interface{}{}); err != nil {
 				return diag.FromErr(err)
 			}
+
 			if err := d.Set(ServiceTypeRedis, []map[string]interface{}{}); err != nil {
 				return diag.FromErr(err)
 			}
-			if err := d.Set(ServiceTypeOpensearch, []map[string]interface{}{}); err != nil {
+
+			if err := d.Set(ServiceTypeOpenSearch, []map[string]interface{}{}); err != nil {
 				return diag.FromErr(err)
 			}
+
 			if err := d.Set(ServiceTypeFlink, []map[string]interface{}{}); err != nil {
 				return diag.FromErr(err)
 			}
+
 			if err := d.Set(ServiceTypeClickhouse, []map[string]interface{}{}); err != nil {
 				return diag.FromErr(err)
 			}
+
 			return resourceServiceCreate(ctx, d, m)
 		}
 	}
@@ -288,6 +335,7 @@ func ResourceServiceCreateWrapper(serviceType string) schema.CreateContextFunc {
 		if err := d.Set("service_type", serviceType); err != nil {
 			return diag.FromErr(err)
 		}
+
 		if err := d.Set(serviceType, []map[string]interface{}{}); err != nil {
 			return diag.FromErr(err)
 		}
@@ -309,8 +357,10 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 		if err = ResourceReadHandleNotFound(err, d); err != nil {
 			return diag.Errorf("unable to GET service %s: %s", d.Id(), err)
 		}
+
 		return nil
 	}
+
 	servicePlanParams, err := GetServicePlanParametersFromServiceResponse(ctx, client, projectName, s)
 	if err != nil {
 		return diag.Errorf("unable to get service plan parameters: %s", err)
@@ -325,6 +375,7 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 	if err != nil {
 		return diag.Errorf("unable to currently allocated static ips: %s", err)
 	}
+
 	if err = d.Set("static_ips", allocatedStaticIps); err != nil {
 		return diag.Errorf("unable to set static ips field in schema: %s", err)
 	}
@@ -355,7 +406,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 		diskSpace = ConvertToDiskSpaceMB(ds.(string))
 	}
 
-	vpcId, err := GetProjectVPCIdPointer(d)
+	vpcID, err := GetProjectVPCIdPointer(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -365,15 +416,17 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 		aiven.CreateServiceRequest{
 			Cloud:                 d.Get("cloud_name").(string),
 			Plan:                  d.Get("plan").(string),
-			ProjectVPCID:          vpcId,
+			ProjectVPCID:          vpcID,
 			ServiceIntegrations:   GetAPIServiceIntegrations(d),
 			MaintenanceWindow:     GetMaintenanceWindow(d),
 			ServiceName:           d.Get("service_name").(string),
 			ServiceType:           serviceType,
 			TerminationProtection: d.Get("termination_protection").(bool),
 			DiskSpaceMB:           diskSpace,
-			UserConfig:            ConvertTerraformUserConfigToAPICompatibleFormat(templates.UserConfigSchemaService, serviceType, true, d),
-			StaticIPs:             FlattenToString(d.Get("static_ips").([]interface{})),
+			UserConfig: ConvertTerraformUserConfigToAPICompatibleFormat(
+				templates.UserConfigSchemaService, serviceType, true, d,
+			),
+			StaticIPs: FlattenToString(d.Get("static_ips").([]interface{})),
 		},
 	)
 	if err != nil {
@@ -403,6 +456,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	client := m.(*aiven.Client)
 
 	var karapace *bool
+
 	if v := d.Get("karapace"); d.HasChange("karapace") && v != nil {
 		if k, ok := v.(bool); ok && k {
 			karapace = &k
@@ -428,30 +482,33 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	// associate first, so that we can enable `static_ips` for a preexisting common
 	for _, aip := range ass {
-		if err := client.StaticIPs.Associate(projectName, aip, aiven.AssociateStaticIPRequest{ServiceName: serviceName}); err != nil {
+		if err = client.StaticIPs.Associate(
+			projectName, aip, aiven.AssociateStaticIPRequest{ServiceName: serviceName},
+		); err != nil {
 			return diag.FromErr(err)
 		}
 	}
 
-	var vpcId *string
-	vpcId, err = GetProjectVPCIdPointer(d)
+	vpcID, err := GetProjectVPCIdPointer(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if _, err := client.Services.Update(
+	if _, err = client.Services.Update(
 		projectName,
 		serviceName,
 		aiven.UpdateServiceRequest{
 			Cloud:                 d.Get("cloud_name").(string),
 			Plan:                  d.Get("plan").(string),
 			MaintenanceWindow:     GetMaintenanceWindow(d),
-			ProjectVPCID:          vpcId,
+			ProjectVPCID:          vpcID,
 			Powered:               true,
 			TerminationProtection: d.Get("termination_protection").(bool),
 			DiskSpaceMB:           diskSpace,
 			Karapace:              karapace,
-			UserConfig:            ConvertTerraformUserConfigToAPICompatibleFormat(templates.UserConfigSchemaService, d.Get("service_type").(string), false, d),
+			UserConfig: ConvertTerraformUserConfigToAPICompatibleFormat(
+				templates.UserConfigSchemaService, d.Get("service_type").(string), false, d,
+			),
 		},
 	); err != nil {
 		return diag.FromErr(err)
@@ -463,10 +520,11 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	if len(dis) > 0 {
 		for _, dip := range dis {
-			if err := client.StaticIPs.Dissociate(projectName, dip); err != nil {
+			if err = client.StaticIPs.Dissociate(projectName, dip); err != nil {
 				return diag.FromErr(err)
 			}
 		}
+
 		if err = WaitStaticIpsDissassociation(ctx, d, m); err != nil {
 			return diag.FromErr(err)
 		}
@@ -484,6 +542,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 func getDefaultDiskSpaceIfNotSet(ctx context.Context, d *schema.ResourceData, client *aiven.Client) (int, error) {
 	var diskSpace int
+
 	if ds, ok := d.GetOk("disk_space"); !ok {
 		// get service plan specific defaults
 		servicePlanParams, err := GetServicePlanParametersFromSchema(ctx, client, d)
@@ -516,10 +575,11 @@ func ResourceServiceDelete(ctx context.Context, d *schema.ResourceData, m interf
 	if err := WaitForDeletion(ctx, d, m); err != nil {
 		return diag.FromErr(err)
 	}
+
 	return nil
 }
 
-func copyServicePropertiesFromAPIResponseToTerraform(
+func copyServicePropertiesFromAPIResponseToTerraform( //nolint:gocyclo
 	d *schema.ResourceData,
 	s *aiven.Service,
 	servicePlanParams PlanParameters,
@@ -533,42 +593,57 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	if err := d.Set("cloud_name", s.CloudName); err != nil {
 		return err
 	}
+
 	if err := d.Set("service_name", s.Name); err != nil {
 		return err
 	}
+
 	if err := d.Set("state", s.State); err != nil {
 		return err
 	}
+
 	if err := d.Set("plan", s.Plan); err != nil {
 		return err
 	}
+
 	if err := d.Set("service_type", serviceType); err != nil {
 		return err
 	}
+
 	if err := d.Set("termination_protection", s.TerminationProtection); err != nil {
 		return err
 	}
+
 	if err := d.Set("maintenance_window_dow", s.MaintenanceWindow.DayOfWeek); err != nil {
 		return err
 	}
+
 	if err := d.Set("maintenance_window_time", s.MaintenanceWindow.TimeOfDay); err != nil {
 		return err
 	}
+
 	if err := d.Set("disk_space_used", HumanReadableByteSize(s.DiskSpaceMB*units.MiB)); err != nil {
 		return err
 	}
-	if err := d.Set("disk_space_default", HumanReadableByteSize(servicePlanParams.DiskSizeMBDefault*units.MiB)); err != nil {
+
+	if err := d.Set("disk_space_default", HumanReadableByteSize(
+		servicePlanParams.DiskSizeMBDefault*units.MiB),
+	); err != nil {
 		return err
 	}
+
 	if err := d.Set("disk_space_step", HumanReadableByteSize(servicePlanParams.DiskSizeMBStep*units.MiB)); err != nil {
 		return err
 	}
+
 	if err := d.Set("disk_space_cap", HumanReadableByteSize(servicePlanParams.DiskSizeMBMax*units.MiB)); err != nil {
 		return err
 	}
+
 	if err := d.Set("service_uri", s.URI); err != nil {
 		return err
 	}
+
 	if err := d.Set("project", project); err != nil {
 		return err
 	}
@@ -578,9 +653,18 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 			return err
 		}
 	}
-	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat(templates.UserConfigSchemaService, serviceType, s.UserConfig)
-	if err := d.Set(serviceType+"_user_config", NormalizeIpFilter(d.Get(serviceType+"_user_config"), userConfig)); err != nil {
-		return fmt.Errorf("cannot set `%s_user_config` : %s; Please make sure that all Aiven services have unique s names", serviceType, err)
+
+	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat(
+		templates.UserConfigSchemaService, serviceType, s.UserConfig,
+	)
+
+	if err := d.Set(serviceType+"_user_config", NormalizeIPFilter(
+		d.Get(serviceType+"_user_config"), userConfig),
+	); err != nil {
+		return fmt.Errorf(
+			"cannot set `%s_user_config` : %w; Please make sure that all Aiven services have unique s names",
+			serviceType, err,
+		)
 	}
 
 	params := s.URIParams
@@ -595,11 +679,13 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 
 	password, passwordOK := params["password"]
 	username, usernameOK := params["user"]
+
 	if passwordOK {
 		if err := d.Set("service_password", password); err != nil {
 			return err
 		}
 	}
+
 	if usernameOK {
 		if err := d.Set("service_username", username); err != nil {
 			return err
@@ -613,6 +699,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 				if err := d.Set("service_username", u.Username); err != nil {
 					return err
 				}
+
 				if err := d.Set("service_password", u.Password); err != nil {
 					return err
 				}
@@ -621,7 +708,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	}
 
 	if err := d.Set("components", FlattenServiceComponents(s)); err != nil {
-		return fmt.Errorf("cannot set `components` : %s", err)
+		return fmt.Errorf("cannot set `components` : %w", err)
 	}
 
 	return copyConnectionInfoFromAPIResponseToTerraform(d, serviceType, s.ConnectionInfo)
@@ -652,46 +739,50 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	props := make(map[string]interface{})
 
 	switch serviceType {
-	case "cassandra":
-	case "opensearch":
+	case ServiceTypeCassandra:
+	case ServiceTypeOpenSearch:
 		props["opensearch_dashboards_uri"] = connectionInfo.OpensearchDashboardsURI
-	case "elasticsearch":
+	case ServiceTypeElasticsearch:
 		props["kibana_uri"] = connectionInfo.KibanaURI
-	case "grafana":
-	case "influxdb":
+	case ServiceTypeGrafana:
+	case ServiceTypeInfluxDB:
 		props["database_name"] = connectionInfo.InfluxDBDatabaseName
-	case "kafka":
+	case ServiceTypeKafka:
 		props["access_cert"] = connectionInfo.KafkaAccessCert
 		props["access_key"] = connectionInfo.KafkaAccessKey
 		props["connect_uri"] = connectionInfo.KafkaConnectURI
 		props["rest_uri"] = connectionInfo.KafkaRestURI
 		props["schema_registry_uri"] = connectionInfo.SchemaRegistryURI
-	case "kafka_connect":
-	case "mysql":
-	case "pg":
+	case ServiceTypeKafkaConnect:
+	case ServiceTypeMySQL:
+	case ServiceTypePG:
 		if connectionInfo.PostgresURIs != nil && len(connectionInfo.PostgresURIs) > 0 {
 			props["uri"] = connectionInfo.PostgresURIs[0]
 		}
+
 		if connectionInfo.PostgresParams != nil && len(connectionInfo.PostgresParams) > 0 {
 			params := connectionInfo.PostgresParams[0]
 			props["dbname"] = params.DatabaseName
 			props["host"] = params.Host
 			props["password"] = params.Password
+
 			port, err := strconv.ParseInt(params.Port, 10, 32)
 			if err == nil {
 				props["port"] = int(port)
 			}
+
 			props["sslmode"] = params.SSLMode
 			props["user"] = params.User
 		}
+
 		props["replica_uri"] = connectionInfo.PostgresReplicaURI
-	case "clickhouse":
-	case "redis":
-	case "flink":
+	case ServiceTypeClickhouse:
+	case ServiceTypeRedis:
+	case ServiceTypeFlink:
 		props["host_ports"] = connectionInfo.FlinkHostPorts
-	case "kafka_mirrormaker":
-	case "m3db":
-	case "m3aggregator":
+	case ServiceTypeKafkaMirrorMaker:
+	case ServiceTypeM3:
+	case ServiceTypeM3Aggregator:
 	default:
 		panic(fmt.Sprintf("Unsupported service type %v", serviceType))
 	}
@@ -706,10 +797,12 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 // IsUnknownRole checks if the database returned an error because of an unknown role
 // to make deletions idempotent
 func IsUnknownRole(err error) bool {
-	aivenError, ok := err.(aiven.Error)
-	if !ok {
+	var aivenError *aiven.Error
+
+	if ok := errors.As(err, &aivenError); !ok {
 		return false
 	}
+
 	return strings.Contains(aivenError.Message, "Code: 511")
 }
 
@@ -721,8 +814,10 @@ func IsUnknownResource(err error) bool {
 func ResourceReadHandleNotFound(err error, d *schema.ResourceData) error {
 	if err != nil && IsUnknownResource(err) && !d.IsNewResource() {
 		d.SetId("")
+
 		return nil
 	}
+
 	return err
 }
 

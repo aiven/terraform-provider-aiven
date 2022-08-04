@@ -64,7 +64,9 @@ func TestAccAiven_grafana_user_config(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.alerting_enabled", "true"),
-					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.public_access.0.grafana", "true"),
+					resource.TestCheckResourceAttr(
+						resourceName, "grafana_user_config.0.public_access.0.grafana", "true",
+					),
 				),
 			},
 			{
@@ -105,7 +107,9 @@ data "aiven_grafana" "common" {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.alerting_enabled", "true"),
-					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.public_access.0.grafana", "false"),
+					resource.TestCheckResourceAttr(
+						resourceName, "grafana_user_config.0.public_access.0.grafana", "false",
+					),
 				),
 			},
 			{
@@ -141,7 +145,9 @@ data "aiven_grafana" "common" {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.alerting_enabled", "true"),
-					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.public_access.0.grafana", "false"),
+					resource.TestCheckResourceAttr(
+						resourceName, "grafana_user_config.0.public_access.0.grafana", "false",
+					),
 				),
 			},
 			{
@@ -173,7 +179,9 @@ data "aiven_grafana" "common" {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.alerting_enabled", "true"),
-					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.public_access.0.grafana", "false"),
+					resource.TestCheckResourceAttr(
+						resourceName, "grafana_user_config.0.public_access.0.grafana", "false",
+					),
 				),
 			},
 		},

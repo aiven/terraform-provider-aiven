@@ -1,6 +1,7 @@
 package kafka_test
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -26,9 +27,13 @@ func TestAccAivenMirrorMakerReplicationFlow_basic(t *testing.T) {
 			{
 				Config: testAccMirrorMakerReplicationFlowResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenMirrorMakerReplicationFlowAttributes("data.aiven_mirrormaker_replication_flow.flow"),
+					testAccCheckAivenMirrorMakerReplicationFlowAttributes(
+						"data.aiven_mirrormaker_replication_flow.flow",
+					),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-mm-%s", rName)),
+					resource.TestCheckResourceAttr(
+						resourceName, "service_name", fmt.Sprintf("test-acc-sr-mm-%s", rName),
+					),
 					resource.TestCheckResourceAttr(resourceName, "source_cluster", "source"),
 					resource.TestCheckResourceAttr(resourceName, "target_cluster", "target"),
 					resource.TestCheckResourceAttr(resourceName, "enable", "true"),
@@ -55,16 +60,21 @@ func testAccCheckAivenMirrorMakerReplicationFlowResourceDestroy(s *terraform.Sta
 
 		s, err := c.Services.Get(project, serviceName)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 				return err
 			}
+
 			return nil
 		}
 
 		if s.Type == "kafka_mirrormaker" {
 			f, err := c.KafkaMirrorMakerReplicationFlow.Get(project, serviceName, sourceCluster, targetCluster)
 			if err != nil {
-				if err.(aiven.Error).Status != 404 {
+				var aivenError *aiven.Error
+
+				if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 					return err
 				}
 			}

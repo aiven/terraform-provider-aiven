@@ -11,6 +11,7 @@ func Test_validateDurationString(t *testing.T) {
 		v interface{}
 		k string
 	}
+
 	tests := []struct {
 		name       string
 		args       args
@@ -36,6 +37,7 @@ func Test_validateDurationString(t *testing.T) {
 			true,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			gotWs, gotErrors := ValidateDurationString(tt.args.v, tt.args.k)
@@ -54,6 +56,7 @@ func Test_splitResourceID(t *testing.T) {
 		resourceID string
 		n          int
 	}
+
 	tests := []struct {
 		name      string
 		args      args
@@ -79,6 +82,7 @@ func Test_splitResourceID(t *testing.T) {
 			errors.New("invalid resource id: invalid"),
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, gotError := SplitResourceID(tt.args.resourceID, tt.args.n)

@@ -60,6 +60,7 @@ func resourceClickhouseUserCreate(ctx context.Context, d *schema.ResourceData, m
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	username := d.Get("username").(string)
+
 	u, err := client.ClickhouseUser.Create(
 		projectName,
 		serviceName,
@@ -94,15 +95,19 @@ func resourceClickhouseUserRead(_ context.Context, d *schema.ResourceData, m int
 	if err := d.Set("project", projectName); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("service_name", serviceName); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("username", user.Name); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("uuid", user.UUID); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("required", user.Required); err != nil {
 		return diag.FromErr(err)
 	}

@@ -45,7 +45,9 @@ func TestAccAivenMySQLDatabase_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project", projectName),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName2)),
-					resource.TestCheckResourceAttr(resourceName, "database_name", fmt.Sprintf("test-acc-db-%s", rName2)),
+					resource.TestCheckResourceAttr(
+						resourceName, "database_name", fmt.Sprintf("test-acc-db-%s", rName2),
+					),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "true"),
 				),
 			},
@@ -61,6 +63,7 @@ func TestAccAivenMySQLDatabase_basic(t *testing.T) {
 					if _, ok := rs.Primary.Attributes["database_name"]; !ok {
 						return "", fmt.Errorf("expected resource '%s' to have 'database_name' attribute", resourceName)
 					}
+
 					return rs.Primary.ID, nil
 				},
 				ImportStateCheck: func(s []*terraform.InstanceState) error {
@@ -69,16 +72,19 @@ func TestAccAivenMySQLDatabase_basic(t *testing.T) {
 					}
 					attributes := s[0].Attributes
 					if !strings.EqualFold(attributes["project"], projectName) {
-						return fmt.Errorf("expected project to match '%s', got: '%s'", projectName, attributes["project_name"])
+						return fmt.Errorf(
+							"expected project to match '%s', got: '%s'", projectName, attributes["project_name"],
+						)
 					}
 					databaseName, ok := attributes["database_name"]
 					if !ok {
 						return errors.New("expected 'database_name' field to be set")
 					}
-					expectedId := fmt.Sprintf("%s/test-acc-sr-%s/%s", projectName, rName, databaseName)
-					if !strings.EqualFold(s[0].ID, expectedId) {
-						return fmt.Errorf("expected ID to match '%s', but got: %s", expectedId, s[0].ID)
+					expectedID := fmt.Sprintf("%s/test-acc-sr-%s/%s", projectName, rName, databaseName)
+					if !strings.EqualFold(s[0].ID, expectedID) {
+						return fmt.Errorf("expected ID to match '%s', but got: %s", expectedID, s[0].ID)
 					}
+
 					return nil
 				},
 			},
@@ -102,7 +108,9 @@ func testAccCheckAivenMySQLDatabaseResourceDestroy(s *terraform.State) error {
 
 		db, err := c.Databases.Get(projectName, serviceName, databaseName)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 				return err
 			}
 		}

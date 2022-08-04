@@ -13,7 +13,8 @@ import (
 func DatasourceAccountAuthentication() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceAccountAuthenticationRead,
-		Description: "The Account Authentication data source provides information about the existing Aiven Account Authentication.",
+		Description: "The Account Authentication data source provides information about the existing " +
+			"Aiven Account Authentication.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenAccountAuthenticationSchema,
 			"account_id", "name"),
 	}
@@ -23,9 +24,9 @@ func datasourceAccountAuthenticationRead(ctx context.Context, d *schema.Resource
 	client := m.(*aiven.Client)
 
 	name := d.Get("name").(string)
-	accountId := d.Get("account_id").(string)
+	accountID := d.Get("account_id").(string)
 
-	r, err := client.AccountAuthentications.List(accountId)
+	r, err := client.AccountAuthentications.List(accountID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -33,6 +34,7 @@ func datasourceAccountAuthenticationRead(ctx context.Context, d *schema.Resource
 	for _, a := range r.AuthenticationMethods {
 		if a.Name == name {
 			d.SetId(schemautil.BuildResourceID(a.AccountId, a.Id))
+
 			return resourceAccountAuthenticationRead(ctx, d, m)
 		}
 	}

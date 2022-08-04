@@ -1,6 +1,7 @@
 package clickhouse_test
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -56,7 +57,9 @@ func testAccCheckAivenClickhouseUserResourceDestroy(s *terraform.State) error {
 
 		p, err := c.ClickhouseUser.Get(projectName, serviceName, uuid)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 				return err
 			}
 		}

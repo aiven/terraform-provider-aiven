@@ -1,6 +1,7 @@
 package account_test
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"testing"
@@ -26,7 +27,9 @@ func TestAccAivenAccountTeamMember_basic(t *testing.T) {
 				Config: testAccAccountTeamMemberResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenAccountTeamMemberAttributes("data.aiven_account_team_member.member"),
-					resource.TestCheckResourceAttr(resourceName, "user_email", fmt.Sprintf("ivan.savciuc+%s@aiven.fi", rName)),
+					resource.TestCheckResourceAttr(
+						resourceName, "user_email", fmt.Sprintf("ivan.savciuc+%s@aiven.fi", rName),
+					),
 					resource.TestCheckResourceAttr(resourceName, "accepted", "false"),
 				),
 			},
@@ -69,14 +72,16 @@ func testAccCheckAivenAccountTeamMemberResourceDestroy(s *terraform.State) error
 			continue
 		}
 
-		accountId, teamId, userEmail, err := schemautil.SplitResourceID3(rs.Primary.ID)
+		accountID, teamID, userEmail, err := schemautil.SplitResourceID3(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
 		r, err := c.Accounts.List()
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 				return err
 			}
 
@@ -84,10 +89,12 @@ func testAccCheckAivenAccountTeamMemberResourceDestroy(s *terraform.State) error
 		}
 
 		for _, a := range r.Accounts {
-			if a.Id == accountId {
-				ri, err := c.AccountTeamInvites.List(accountId, teamId)
+			if a.Id == accountID {
+				ri, err := c.AccountTeamInvites.List(accountID, teamID)
 				if err != nil {
-					if err.(aiven.Error).Status != 404 {
+					var aivenError *aiven.Error
+
+					if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 						return err
 					}
 

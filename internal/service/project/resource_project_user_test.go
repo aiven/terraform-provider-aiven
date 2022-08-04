@@ -1,6 +1,7 @@
 package project_test
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -26,7 +27,9 @@ func TestAccAivenProjectUser_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenProjectUserAttributes("data.aiven_project_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "email", fmt.Sprintf("ivan.savciuc+%s@aiven.fi", rName)),
+					resource.TestCheckResourceAttr(
+						resourceName, "email", fmt.Sprintf("ivan.savciuc+%s@aiven.fi", rName),
+					),
 					resource.TestCheckResourceAttr(resourceName, "member_type", "admin"),
 				),
 			},
@@ -35,7 +38,9 @@ func TestAccAivenProjectUser_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenProjectUserAttributes("data.aiven_project_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "email", fmt.Sprintf("ivan.savciuc+%s@aiven.fi", rName)),
+					resource.TestCheckResourceAttr(
+						resourceName, "email", fmt.Sprintf("ivan.savciuc+%s@aiven.fi", rName),
+					),
 					resource.TestCheckResourceAttr(resourceName, "member_type", "developer"),
 				),
 			},
@@ -59,8 +64,9 @@ func testAccCheckAivenProjectUserResourceDestroy(s *terraform.State) error {
 
 		p, i, err := c.ProjectUsers.Get(projectName, email)
 		if err != nil {
-			errStatus := err.(aiven.Error).Status
-			if errStatus != 404 && errStatus != 403 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || (aivenError.Status != 404 && aivenError.Status != 403) {
 				return err
 			}
 		}

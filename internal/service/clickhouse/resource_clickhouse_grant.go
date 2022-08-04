@@ -40,17 +40,24 @@ var aivenClickhouseGrantSchema = map[string]*schema.Schema{
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"privilege": {
-					Description:  schemautil.Complex("The privilege to grant, i.e. 'INSERT', 'SELECT', etc.").ForceNew().Build(),
-					Type:         schema.TypeString,
-					Optional:     true,
-					ForceNew:     true,
-					ValidateFunc: validation.StringMatch(regexp.MustCompile("^[A-Z ]+$"), "Must be a phrase of words that contain only uppercase letters."),
+					Description: schemautil.Complex(
+						"The privilege to grant, i.e. 'INSERT', 'SELECT', etc.",
+					).ForceNew().Build(),
+					Type:     schema.TypeString,
+					Optional: true,
+					ForceNew: true,
+					ValidateFunc: validation.StringMatch(
+						regexp.MustCompile("^[A-Z ]+$"),
+						"Must be a phrase of words that contain only uppercase letters.",
+					),
 				},
 				"database": {
-					Description: schemautil.Complex("The database that the grant refers to.").Referenced().ForceNew().Build(),
-					Type:        schema.TypeString,
-					Required:    true,
-					ForceNew:    true,
+					Description: schemautil.Complex(
+						"The database that the grant refers to.",
+					).Referenced().ForceNew().Build(),
+					Type:     schema.TypeString,
+					Required: true,
+					ForceNew: true,
 				},
 				"table": {
 					Description: schemautil.Complex("The table that the grant refers to.").ForceNew().Build(),
@@ -65,11 +72,13 @@ var aivenClickhouseGrantSchema = map[string]*schema.Schema{
 					ForceNew:    true,
 				},
 				"with_grant": {
-					Description: schemautil.Complex("If true then the grantee gets the ability to grant the privileges he received too").ForceNew().Build(),
-					Type:        schema.TypeBool,
-					Optional:    true,
-					ForceNew:    true,
-					Default:     false,
+					Description: schemautil.Complex(
+						"If true then the grantee gets the ability to grant the privileges he received too",
+					).ForceNew().Build(),
+					Type:     schema.TypeBool,
+					Optional: true,
+					ForceNew: true,
+					Default:  false,
 				},
 			},
 		},
@@ -94,12 +103,12 @@ var aivenClickhouseGrantSchema = map[string]*schema.Schema{
 
 func ResourceClickhouseGrant() *schema.Resource {
 	return &schema.Resource{
-		Description: `The Clickhouse Grant resource allows the creation and management of Grants in Aiven Clickhouse services.
-
-Notes:
-* Due to a ambiguity in the GRANT syntax in clickhouse you should not have users and roles with the same name. It is not clear if a grant refers to the user or the role.
-* Currently changes will first revoke all grants and then reissue the remaining grants for convergence.
-`,
+		Description: "The Clickhouse Grant resource allows the creation and management of Grants in " +
+			"Aiven Clickhouse services.\n\n" +
+			"Notes:\n\n" +
+			"* Due to a ambiguity in the GRANT syntax in clickhouse you should not have users and roles with the " +
+			"same name. It is not clear if a grant refers to the user or the role.\n\n" +
+			"* Currently changes will first revoke all grants and then reissue the remaining grants for convergence.",
 		DeprecationMessage: betaDeprecationMessage,
 		CreateContext:      resourceClickhouseGrantCreate,
 		ReadContext:        resourceClickhouseGrantRead,
@@ -119,6 +128,7 @@ func resourceClickhouseGrantCreate(ctx context.Context, d *schema.ResourceData, 
 			return diag.FromErr(err)
 		}
 	}
+
 	for _, grant := range readRoleGrantsFromSchema(d) {
 		if err := CreateRoleGrant(client, projectName, serviceName, grant); err != nil {
 			return diag.FromErr(err)
@@ -142,6 +152,7 @@ func idForUserOrRole(projectName, serviceName, userName, roleName string) string
 	if userName != "" {
 		return schemautil.BuildResourceID(projectName, serviceName, GranteeTypeUser, userName)
 	}
+
 	return schemautil.BuildResourceID(projectName, serviceName, GranteeTypeRole, roleName)
 }
 
@@ -152,6 +163,7 @@ func setUserOrRole(d *schema.ResourceData, granteeType, userOrRole string) error
 	case GranteeTypeRole:
 		return d.Set("role", userOrRole)
 	}
+
 	return nil
 }
 
@@ -163,13 +175,15 @@ func resourceClickhouseGrantRead(_ context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("project", projectName); err != nil {
+	if err = d.Set("project", projectName); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("service_name", serviceName); err != nil {
+
+	if err = d.Set("service_name", serviceName); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := setUserOrRole(d, granteeType, userOrRole); err != nil {
+
+	if err = setUserOrRole(d, granteeType, userOrRole); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -179,6 +193,7 @@ func resourceClickhouseGrantRead(_ context.Context, d *schema.ResourceData, m in
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err = setPrivilegeGrantsInSchema(d, privilegeGrants); err != nil {
 		return diag.FromErr(err)
 	}
@@ -187,9 +202,11 @@ func resourceClickhouseGrantRead(_ context.Context, d *schema.ResourceData, m in
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err = setRoleGrantsInSchema(d, roleGrants); err != nil {
 		return diag.FromErr(err)
 	}
+
 	return nil
 }
 
@@ -232,6 +249,7 @@ func readPrivilegeGrantsFromSchema(d *schema.ResourceData) (grants []PrivilegeGr
 			WithGrant: grantVal["with_grant"].(bool),
 		})
 	}
+
 	return grants
 }
 
@@ -240,9 +258,11 @@ func setPrivilegeGrantsInSchema(d *schema.ResourceData, grants []PrivilegeGrant)
 	for _, grant := range grants {
 		res = append(res, privilegeGrantToSchema(grant))
 	}
+
 	if err := d.Set("privilege_grant", res); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -270,6 +290,7 @@ func readRoleGrantsFromSchema(d *schema.ResourceData) (grants []RoleGrant) {
 			Role: grantVal["role"].(string),
 		})
 	}
+
 	return grants
 }
 
@@ -278,9 +299,11 @@ func setRoleGrantsInSchema(d *schema.ResourceData, grants []RoleGrant) error {
 	for _, grant := range grants {
 		res = append(res, roleGrantToSchema(grant))
 	}
+
 	if err := d.Set("role_grant", res); err != nil {
 		return err
 	}
+
 	return nil
 }
 

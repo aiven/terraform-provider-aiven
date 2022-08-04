@@ -18,7 +18,8 @@ func aivenKafkaConnectSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	kafkaConnectSchema[schemautil.ServiceTypeKafkaConnect+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeKafkaConnect)
+	kafkaConnectSchema[schemautil.ServiceTypeKafkaConnect+"_user_config"] =
+		schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeKafkaConnect)
 
 	return kafkaConnectSchema
 }
@@ -42,7 +43,7 @@ func ResourceKafkaConnect() *schema.Resource {
 			),
 			customdiff.Sequence(
 				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
-				schemautil.CustomizeDiffCheckStaticIpDisassociation,
+				schemautil.CustomizeDiffCheckStaticIPDisassociation,
 			),
 		),
 		Importer: &schema.ResourceImporter{

@@ -36,7 +36,8 @@ var aivenPrivatelinkConnectionApprovalSchema = map[string]*schema.Schema{
 
 func ResourceAzurePrivatelinkConnectionApproval() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Azure privatelink approve resource waits for an aiven privatelink connection on a service and approves it with associated endpoint IP",
+		Description: "The Azure privatelink approve resource waits for an aiven privatelink connection on a " +
+			"service and approves it with associated endpoint IP",
 		CreateContext: resourcePrivatelinkConnectionApprovalCreateUpdate,
 		ReadContext:   resourcePrivatelinkConnectionApprovalRead,
 		UpdateContext: resourcePrivatelinkConnectionApprovalCreateUpdate,
@@ -54,7 +55,15 @@ func ResourceAzurePrivatelinkConnectionApproval() *schema.Resource {
 	}
 }
 
-func waitForConnectionState(_ context.Context, client *aiven.Client, project string, service string, t time.Duration, pending []string, target []string) *resource.StateChangeConf {
+func waitForConnectionState(
+	_ context.Context,
+	client *aiven.Client,
+	project string,
+	service string,
+	t time.Duration,
+	pending []string,
+	target []string,
+) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending: pending,
 		Target:  target,
@@ -71,6 +80,7 @@ func waitForConnectionState(_ context.Context, client *aiven.Client, project str
 
 			if len(plConnections.Connections) == 0 {
 				log.Printf("[DEBUG] No azure privatelink connections yet, will refresh again")
+
 				return nil, "", nil
 			}
 
@@ -85,12 +95,14 @@ func waitForConnectionState(_ context.Context, client *aiven.Client, project str
 	}
 }
 
-func resourcePrivatelinkConnectionApprovalCreateUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePrivatelinkConnectionApprovalCreateUpdate(
+	ctx context.Context, d *schema.ResourceData, m interface{},
+) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	var project = d.Get("project").(string)
-	var serviceName = d.Get("service_name").(string)
-	var endpointIPAddress = d.Get("endpoint_ip_address").(string)
+	project := d.Get("project").(string)
+	serviceName := d.Get("service_name").(string)
+	endpointIPAddress := d.Get("endpoint_ip_address").(string)
 
 	err := client.AzurePrivatelink.Refresh(project, serviceName)
 	if err != nil {
@@ -100,7 +112,9 @@ func resourcePrivatelinkConnectionApprovalCreateUpdate(ctx context.Context, d *s
 	pending := []string{""}
 	target := []string{"pending-user-approval", "user-approved", "connected", "active"}
 
-	_, err = waitForConnectionState(ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target).WaitForStateContext(ctx)
+	_, err = waitForConnectionState(
+		ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target,
+	).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for privatelink connection after refresh: %s", err)
 	}
@@ -120,13 +134,18 @@ func resourcePrivatelinkConnectionApprovalCreateUpdate(ctx context.Context, d *s
 	if plConnection.State == "pending-user-approval" {
 		err = client.AzurePrivatelink.ConnectionApprove(project, serviceName, plConnectionID)
 		if err != nil {
-			return diag.Errorf("Error approving privatelink connection %s/%s/%s: %s", project, serviceName, plConnectionID, err)
+			return diag.Errorf(
+				"Error approving privatelink connection %s/%s/%s: %s", project, serviceName, plConnectionID, err,
+			)
 		}
 	}
 
 	pending = []string{"user-approved"}
 	target = []string{"connected"}
-	_, err = waitForConnectionState(ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target).WaitForStateContext(ctx)
+
+	_, err = waitForConnectionState(
+		ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target,
+	).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for privatelink connection after approval: %s", err)
 	}
@@ -134,14 +153,20 @@ func resourcePrivatelinkConnectionApprovalCreateUpdate(ctx context.Context, d *s
 	updateReq := aiven.AzurePrivatelinkConnectionUpdateRequest{
 		UserIPAddress: endpointIPAddress,
 	}
+
 	err = client.AzurePrivatelink.ConnectionUpdate(project, serviceName, plConnectionID, updateReq)
 	if err != nil {
-		return diag.Errorf("Error updating privatelink connection %s/%s/%s: %s", project, serviceName, plConnectionID, err)
+		return diag.Errorf(
+			"Error updating privatelink connection %s/%s/%s: %s", project, serviceName, plConnectionID, err,
+		)
 	}
 
 	pending = []string{"connected"}
 	target = []string{"active"}
-	_, err = waitForConnectionState(ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target).WaitForStateContext(ctx)
+
+	_, err = waitForConnectionState(
+		ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target,
+	).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for privatelink connection after update: %s", err)
 	}
@@ -153,21 +178,26 @@ func resourcePrivatelinkConnectionApprovalCreateUpdate(ctx context.Context, d *s
 	return resourcePrivatelinkConnectionApprovalRead(ctx, d, m)
 }
 
-func resourcePrivatelinkConnectionApprovalRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePrivatelinkConnectionApprovalRead(
+	_ context.Context, d *schema.ResourceData, m interface{},
+) diag.Diagnostics {
 	client := m.(*aiven.Client)
+
 	project, service, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	plConnectionID := d.Get("privatelink_connection_id").(string)
+
 	plConnection, err := client.AzurePrivatelink.ConnectionGet(project, service, plConnectionID)
 	if err != nil {
 		if aiven.IsNotFound(err) {
-			if err := d.Set("privatelink_connection_id", ""); err != nil {
+			if err = d.Set("privatelink_connection_id", ""); err != nil {
 				return diag.FromErr(err)
 			}
 		}
+
 		return diag.Errorf("Error getting Azure privatelink connection: %s", err)
 	}
 
@@ -186,7 +216,10 @@ func resourcePrivatelinkConnectionApprovalRead(_ context.Context, d *schema.Reso
 	return nil
 }
 
-func resourcePrivatelinkConnectionApprovalDelete(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
-	/// API only supports approve/list/update. approved connection is deleted with the associated azure_privatelink resource
+func resourcePrivatelinkConnectionApprovalDelete(
+	_ context.Context, _ *schema.ResourceData, _ interface{},
+) diag.Diagnostics {
+	// API only supports approve/list/update.
+	// Approved connection is deleted with the associated Azure PrivateLink resource.
 	return nil
 }

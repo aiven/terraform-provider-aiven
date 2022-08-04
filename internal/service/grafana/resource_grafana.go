@@ -18,7 +18,9 @@ func grafanaSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	s[schemautil.ServiceTypeGrafana+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeGrafana)
+	s[schemautil.ServiceTypeGrafana+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(
+		schemautil.ServiceTypeGrafana,
+	)
 
 	return s
 }
@@ -46,7 +48,7 @@ func ResourceGrafana() *schema.Resource {
 			),
 			customdiff.Sequence(
 				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
-				schemautil.CustomizeDiffCheckStaticIpDisassociation,
+				schemautil.CustomizeDiffCheckStaticIPDisassociation,
 			),
 		),
 		Importer: &schema.ResourceImporter{

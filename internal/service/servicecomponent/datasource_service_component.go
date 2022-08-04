@@ -1,4 +1,4 @@
-package service_component
+package servicecomponent
 
 import (
 	"context"
@@ -16,7 +16,8 @@ import (
 
 func DatasourceServiceComponent() *schema.Resource {
 	return &schema.Resource{
-		Description: "The Service Component data source provides information about the existing Aiven service Component.",
+		Description: "The Service Component data source provides information about the existing " +
+			"Aiven service Component.",
 		ReadContext: datasourceServiceComponentRead,
 		Schema: map[string]*schema.Schema{
 			"project": {
@@ -132,7 +133,10 @@ func datasourceServiceComponentRead(_ context.Context, d *schema.ResourceData, m
 			if err != nil {
 				return diag.FromErr(err)
 			}
-			filteredByKafkaAuthMethod, err := filterDatasourceServiceComponents(d, "kafka_authentication_method", filteredBySsl)
+
+			filteredByKafkaAuthMethod, err := filterDatasourceServiceComponents(
+				d, "kafka_authentication_method", filteredBySsl,
+			)
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -153,24 +157,31 @@ func datasourceServiceComponentRead(_ context.Context, d *schema.ResourceData, m
 	if err := d.Set("project", projectName); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("service_name", serviceName); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("component", componentName); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("route", route); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("host", c.Host); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("port", c.Port); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("usage", c.Usage); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("kafka_authentication_method", c.KafkaAuthenticationMethod); err != nil {
 		return diag.FromErr(err)
 	}
@@ -182,10 +193,11 @@ func datasourceServiceComponentRead(_ context.Context, d *schema.ResourceData, m
 	}
 
 	return nil
-
 }
 
-func filterDatasourceServiceComponents(d *schema.ResourceData, filter string, components []*aiven.ServiceComponents) ([]*aiven.ServiceComponents, error) {
+func filterDatasourceServiceComponents(
+	d *schema.ResourceData, filter string, components []*aiven.ServiceComponents,
+) ([]*aiven.ServiceComponents, error) {
 	filteredResult := make([]*aiven.ServiceComponents, 0)
 
 	switch filter {
@@ -218,6 +230,7 @@ func filterDatasourceServiceComponents(d *schema.ResourceData, filter string, co
 			} else {
 				errorMessage = "please try specifying 'ssl' to filter the results"
 			}
+
 			return nil, errors.New(errorMessage)
 		}
 
@@ -248,8 +261,10 @@ func filterDatasourceServiceComponents(d *schema.ResourceData, filter string, co
 			} else {
 				errorMessage = "please try specifying 'kafka_authentication_method' to filter the results"
 			}
+
 			return nil, errors.New(errorMessage)
 		}
+
 		return filteredResult, nil
 	default:
 		return nil, errors.New("no filtering criteria provided")

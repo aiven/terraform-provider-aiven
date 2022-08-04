@@ -44,7 +44,9 @@ var aivenVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return new == ""
 		},
-		Description: schemautil.Complex("AWS region of the peered VPC (if not in the same region as Aiven VPC).").ForceNew().Build(),
+		Description: schemautil.Complex(
+			"AWS region of the peered VPC (if not in the same region as Aiven VPC).",
+		).ForceNew().Build(),
 	},
 	"state": {
 		Computed:    true,
@@ -62,10 +64,12 @@ var aivenVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		Description: "Cloud provider identifier for the peering connection if available",
 	},
 	"peer_azure_app_id": {
-		Optional:    true,
-		ForceNew:    true,
-		Type:        schema.TypeString,
-		Description: schemautil.Complex("Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet").ForceNew().Build(),
+		Optional: true,
+		ForceNew: true,
+		Type:     schema.TypeString,
+		Description: schemautil.Complex(
+			"Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet",
+		).ForceNew().Build(),
 	},
 	"peer_azure_tenant_id": {
 		Optional:    true,
@@ -81,12 +85,14 @@ var aivenVPCPeeringConnectionSchema = map[string]*schema.Schema{
 	},
 }
 
+//nolint:revive
 // ResourceVPCPeeringConnection
 // Deprecated
 //goland:noinspection GoDeprecation
 func ResourceVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The VPC Peering Connection resource allows the creation and management of Aiven VPC Peering Connections.",
+		Description: "The VPC Peering Connection resource allows the creation and management of " +
+			"Aiven VPC Peering Connections.",
 		CreateContext: resourceVPCPeeringConnectionCreate,
 		ReadContext:   resourceVPCPeeringConnectionRead,
 		DeleteContext: resourceVPCPeeringConnectionDelete,
@@ -119,6 +125,7 @@ func vpcCustomDiffPeeringConnectionExists() func(ctx context.Context, d *schema.
 		peerVPC := d.Get("peer_vpc").(string)
 
 		var region *string
+
 		peerRegion := d.Get("peer_region").(string)
 		if peerRegion != "" {
 			region = &peerRegion
@@ -147,6 +154,7 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 	)
 
 	client := m.(*aiven.Client)
+
 	projectName, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -154,6 +162,7 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 
 	peerCloudAccount := d.Get("peer_cloud_account").(string)
 	peerVPC := d.Get("peer_vpc").(string)
+
 	peerRegion := d.Get("peer_region").(string)
 	if peerRegion != "" {
 		region = &peerRegion
@@ -167,12 +176,15 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 	// not for Transit Gateway VPC Attachment therefore ResourceData.Get retrieves nil
 	// for fields that are not present in the schema.
 	var peerAzureAppID, peerAzureTenantID, peerResourceGroup string
+
 	if v, ok := d.GetOk("peer_azure_app_id"); ok {
 		peerAzureAppID = v.(string)
 	}
+
 	if v, ok := d.GetOk("peer_azure_tenant_id"); ok {
 		peerAzureTenantID = v.(string)
 	}
+
 	if v, ok := d.GetOk("peer_resource_group"); ok {
 		peerResourceGroup = v.(string)
 	}
@@ -205,7 +217,7 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 			"DELETED_BY_PEER",
 		},
 		Refresh: func() (interface{}, string, error) {
-			pc, err := client.VPCPeeringConnections.GetVPCPeering(
+			pc, err = client.VPCPeeringConnections.GetVPCPeering(
 				projectName,
 				vpcID,
 				peerCloudAccount,
@@ -215,6 +227,7 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 			if err != nil {
 				return nil, "", err
 			}
+
 			return pc, pc.State, nil
 		},
 		Delay:      10 * time.Second,
@@ -251,9 +264,11 @@ func stateInfoToString(s *map[string]interface{}) string {
 	}
 
 	var str string
+
 	// Print message first
 	if m, ok := (*s)["message"]; ok {
 		str = fmt.Sprintf("%s", m)
+
 		delete(*s, "message")
 	}
 
@@ -276,6 +291,7 @@ func parsePeeringVPCId(resourceID string) (string, string, string, string, *stri
 	vpcID := parts[1]
 	peerCloudAccount := parts[2]
 	peerVPC := parts[3]
+
 	if len(parts) > 4 {
 		peerRegion = new(string)
 		*peerRegion = parts[4]
@@ -285,10 +301,12 @@ func parsePeeringVPCId(resourceID string) (string, string, string, string, *stri
 }
 
 func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var pc *aiven.VPCPeeringConnection
 	client := m.(*aiven.Client)
 
+	var pc *aiven.VPCPeeringConnection
+
 	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
+
 	isAzure, err := isAzureVPCPeeringConnection(d, client)
 	if err != nil {
 		return diag.Errorf("Error checking if it Azure VPC peering connection: %s", err)
@@ -345,6 +363,7 @@ func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceD
 			return diag.Errorf("cannot delete an Azure VPC peering connection without `peer_resource_group`")
 		}
 	}
+
 	if err = client.VPCPeeringConnections.DeleteVPCPeering(
 		projectName,
 		vpcID,
@@ -392,6 +411,7 @@ func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceD
 			if err != nil {
 				return nil, "", err
 			}
+
 			return pc, pc.State, nil
 		},
 		Delay:      10 * time.Second,
@@ -401,17 +421,23 @@ func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceD
 	if _, err := stateChangeConf.WaitForStateContext(ctx); err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("Error waiting for Aiven VPC Peering Connection to be DELETED: %s", err)
 	}
+
 	return nil
 }
 
-func resourceVPCPeeringConnectionImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceVPCPeeringConnectionImport(
+	ctx context.Context, d *schema.ResourceData, m interface{},
+) ([]*schema.ResourceData, error) {
 	if len(strings.Split(d.Id(), "/")) != 4 {
-		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<vpc_id>/<peer_cloud_account>/<peer_vpc>", d.Id())
+		return nil, fmt.Errorf(
+			"invalid identifier %v, expected <project_name>/<vpc_id>/<peer_cloud_account>/<peer_vpc>", d.Id(),
+		)
 	}
 
 	client := m.(*aiven.Client)
 
 	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
+
 	_, err := client.VPCPeeringConnections.GetVPCPeering(projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
 	if err != nil && schemautil.IsUnknownResource(err) {
 		return nil, errors.New("cannot find specified VPC peering connection")
@@ -438,6 +464,7 @@ func copyAzureSpecificVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 			Detail:   fmt.Sprintf("Unable to set peer_azure_app_id field for VPC peering connection: %s", err),
 		})
 	}
+
 	if err := d.Set("peer_azure_tenant_id", peeringConnection.PeerAzureTenantId); err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -445,6 +472,7 @@ func copyAzureSpecificVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 			Detail:   fmt.Sprintf("Unable to set peer_azure_tenant_id field for VPC peering connection: %s", err),
 		})
 	}
+
 	if err := d.Set("peer_resource_group", peeringConnection.PeerResourceGroup); err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -472,6 +500,7 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 			Detail:   fmt.Sprintf("Unable to set vpc_id field for VPC peering connection: %s", err),
 		})
 	}
+
 	if err := d.Set("peer_cloud_account", peeringConnection.PeerCloudAccount); err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -479,6 +508,7 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 			Detail:   fmt.Sprintf("Unable to set peer_cloud_account field for VPC peering connection: %s", err),
 		})
 	}
+
 	if err := d.Set("peer_vpc", peeringConnection.PeerVPC); err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -486,6 +516,7 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 			Detail:   fmt.Sprintf("Unable to set peer_vpc field for VPC peering connection: %s", err),
 		})
 	}
+
 	if peeringConnection.PeerRegion != nil {
 		if err := d.Set("peer_region", peeringConnection.PeerRegion); err != nil {
 			diags = append(diags, diag.Diagnostic{
@@ -495,6 +526,7 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 			})
 		}
 	}
+
 	if err := d.Set("state", peeringConnection.State); err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -510,7 +542,9 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 				diags = append(diags, diag.Diagnostic{
 					Severity: diag.Error,
 					Summary:  fmt.Sprintf("Unable to set peering_connection_id field: %s", err),
-					Detail:   fmt.Sprintf("Unable to set peering_connection_id field for VPC peering connection: %s", err),
+					Detail: fmt.Sprintf(
+						"Unable to set peering_connection_id field for VPC peering connection: %s", err,
+					),
 				})
 			}
 		}
@@ -536,7 +570,9 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
 				Summary:  fmt.Sprintf("Unable to set user_peer_network_cidrs field: %s", err),
-				Detail:   fmt.Sprintf("Unable to set user_peer_network_cidrs field for VPC peering connection: %s", err),
+				Detail: fmt.Sprintf(
+					"Unable to set user_peer_network_cidrs field for VPC peering connection: %s", err,
+				),
 			})
 		}
 	}
@@ -550,6 +586,7 @@ func ConvertStateInfoToMap(s *map[string]interface{}) map[string]string {
 	}
 
 	r := make(map[string]string)
+
 	for k, v := range *s {
 		if _, ok := v.(string); ok {
 			r[k] = v.(string)
@@ -616,6 +653,7 @@ func getDiagnosticsFromState(pc *aiven.VPCPeeringConnection) diag.Diagnostics {
 			return diag.Errorf("Unknown VPC peering connection state: %s", pc.State)
 		}
 	}
+
 	return nil
 }
 
@@ -623,11 +661,13 @@ func validateVPCID(i interface{}, k string) (warnings []string, errors []error) 
 	v, ok := i.(string)
 	if !ok {
 		errors = append(errors, fmt.Errorf("expected type of %s to be string", k))
+
 		return warnings, errors
 	}
 
 	if len(strings.Split(v, "/")) != 2 {
 		errors = append(errors, fmt.Errorf("invalid %v, expected <project_name>/<vpc_id>", k))
+
 		return warnings, errors
 	}
 

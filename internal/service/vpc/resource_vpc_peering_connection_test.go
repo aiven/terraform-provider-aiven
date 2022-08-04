@@ -11,6 +11,7 @@ func Test_validateVPCID(t *testing.T) {
 		i interface{}
 		k string
 	}
+
 	tests := []struct {
 		name         string
 		args         args
@@ -30,6 +31,7 @@ func Test_validateVPCID(t *testing.T) {
 			wantErrors:   []error{errors.New("invalid vpc_id, expected <project_name>/<vpc_id>")},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			gotWarnings, gotErrors := validateVPCID(tt.args.i, tt.args.k)

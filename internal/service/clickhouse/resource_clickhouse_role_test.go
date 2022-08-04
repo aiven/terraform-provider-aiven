@@ -71,10 +71,12 @@ func testAccCheckAivenClickhouseRoleResourceDestroy(s *terraform.State) error {
 			if aiven.IsNotFound(err) {
 				continue
 			}
+
 			return fmt.Errorf("unable to check if role '%s' still exists: %w", roleName, err)
 		} else if exists {
 			return fmt.Errorf("role '%s' still exists", roleName)
 		}
 	}
+
 	return nil
 }

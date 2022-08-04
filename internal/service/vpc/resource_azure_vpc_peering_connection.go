@@ -57,10 +57,12 @@ var aivenAzureVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		Description: "Cloud provider identifier for the peering connection if available",
 	},
 	"peer_azure_app_id": {
-		Required:    true,
-		ForceNew:    true,
-		Type:        schema.TypeString,
-		Description: schemautil.Complex("Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet.").ForceNew().Build(),
+		Required: true,
+		ForceNew: true,
+		Type:     schema.TypeString,
+		Description: schemautil.Complex(
+			"Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet.",
+		).ForceNew().Build(),
 	},
 	"peer_azure_tenant_id": {
 		Required:    true,
@@ -72,7 +74,8 @@ var aivenAzureVPCPeeringConnectionSchema = map[string]*schema.Schema{
 
 func ResourceAzureVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Azure VPC Peering Connection resource allows the creation and management of Aiven VPC Peering Connections.",
+		Description: "The Azure VPC Peering Connection resource allows the creation and management of " +
+			"Aiven VPC Peering Connections.",
 		CreateContext: resourceAzureVPCPeeringConnectionCreate,
 		ReadContext:   resourceAzureVPCPeeringConnectionRead,
 		DeleteContext: resourceAzureVPCPeeringConnectionDelete,
@@ -89,7 +92,9 @@ func ResourceAzureVPCPeeringConnection() *schema.Resource {
 	}
 }
 
-func vpcCustomDiffAzurePeeringConnectionExists() func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+func vpcCustomDiffAzurePeeringConnectionExists() func(
+	ctx context.Context, d *schema.ResourceDiff, m interface{},
+) error {
 	return func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
 		client := m.(*aiven.Client)
 
@@ -98,12 +103,12 @@ func vpcCustomDiffAzurePeeringConnectionExists() func(ctx context.Context, d *sc
 			return err
 		}
 
-		azureSubscriptionId := d.Get("azure_subscription_id").(string)
+		azureSubscriptionID := d.Get("azure_subscription_id").(string)
 		vnetName := d.Get("vnet_name").(string)
 		peerResourceGroup := d.Get("peer_resource_group").(string)
 
 		pc, err := client.VPCPeeringConnections.GetVPCPeering(
-			projectName, vpcID, azureSubscriptionId, vnetName, &peerResourceGroup)
+			projectName, vpcID, azureSubscriptionID, vnetName, &peerResourceGroup)
 		if err != nil && !aiven.IsNotFound(err) {
 			return err
 		}
@@ -116,14 +121,17 @@ func vpcCustomDiffAzurePeeringConnectionExists() func(ctx context.Context, d *sc
 	}
 }
 
-func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAzureVPCPeeringConnectionCreate(
+	ctx context.Context, d *schema.ResourceData, m interface{},
+) diag.Diagnostics {
 	client := m.(*aiven.Client)
+
 	projectName, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	azureSubscriptionId := d.Get("azure_subscription_id").(string)
+	azureSubscriptionID := d.Get("azure_subscription_id").(string)
 	vnetName := d.Get("vnet_name").(string)
 
 	// Azure related fields are only available for VPC Peering Connection resource but
@@ -133,18 +141,20 @@ func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.Reso
 	if v, ok := d.GetOk("peer_azure_app_id"); ok {
 		peerAzureAppID = v.(string)
 	}
+
 	if v, ok := d.GetOk("peer_azure_tenant_id"); ok {
 		peerAzureTenantID = v.(string)
 	}
+
 	if v, ok := d.GetOk("peer_resource_group"); ok {
 		peerResourceGroup = v.(string)
 	}
 
-	if _, err := client.VPCPeeringConnections.Create(
+	if _, err = client.VPCPeeringConnections.Create(
 		projectName,
 		vpcID,
 		aiven.CreateVPCPeeringConnectionRequest{
-			PeerCloudAccount:  azureSubscriptionId,
+			PeerCloudAccount:  azureSubscriptionID,
 			PeerVPC:           vnetName,
 			PeerAzureAppId:    peerAzureAppID,
 			PeerAzureTenantId: peerAzureTenantID,
@@ -166,16 +176,17 @@ func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.Reso
 			"DELETED_BY_PEER",
 		},
 		Refresh: func() (interface{}, string, error) {
-			pc, err := client.VPCPeeringConnections.GetVPCPeering(
+			pc, err := client.VPCPeeringConnections.GetVPCPeering( //nolint:govet
 				projectName,
 				vpcID,
-				azureSubscriptionId,
+				azureSubscriptionID,
 				vnetName,
 				nil,
 			)
 			if err != nil {
 				return nil, "", err
 			}
+
 			return pc, pc.State, nil
 		},
 		Delay:      10 * time.Second,
@@ -207,8 +218,10 @@ func resourceAzureVPCPeeringConnectionRead(_ context.Context, d *schema.Resource
 	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
 
 	peerResourceGroup := d.Get("peer_resource_group")
+
 	pc, err := client.VPCPeeringConnections.GetVPCPeeringWithResourceGroup(
-		projectName, vpcID, peerCloudAccount, peerVPC, peerRegion, peerResourceGroup.(string))
+		projectName, vpcID, peerCloudAccount, peerVPC, peerRegion, peerResourceGroup.(string),
+	)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -216,12 +229,15 @@ func resourceAzureVPCPeeringConnectionRead(_ context.Context, d *schema.Resource
 	return copyAzureVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, projectName, vpcID)
 }
 
-func resourceAzureVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAzureVPCPeeringConnectionDelete(
+	ctx context.Context, d *schema.ResourceData, m interface{},
+) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
 
 	peerResourceGroup := d.Get("peer_resource_group")
+
 	err := client.VPCPeeringConnections.DeleteVPCPeeringWithResourceGroup(
 		projectName,
 		vpcID,
@@ -260,6 +276,7 @@ func resourceAzureVPCPeeringConnectionDelete(ctx context.Context, d *schema.Reso
 			if err != nil {
 				return nil, "", err
 			}
+
 			return pc, pc.State, nil
 		},
 		Delay:      10 * time.Second,
@@ -269,6 +286,7 @@ func resourceAzureVPCPeeringConnectionDelete(ctx context.Context, d *schema.Reso
 	if _, err := stateChangeConf.WaitForStateContext(ctx); err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("Error waiting for Azure Aiven VPC Peering Connection to be DELETED: %s", err)
 	}
+
 	return nil
 }
 
@@ -281,12 +299,15 @@ func copyAzureVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 	if err := d.Set("vpc_id", schemautil.BuildResourceID(project, vpcID)); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("azure_subscription_id", peeringConnection.PeerCloudAccount); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("vnet_name", peeringConnection.PeerVPC); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("state", peeringConnection.State); err != nil {
 		return diag.FromErr(err)
 	}
@@ -298,9 +319,11 @@ func copyAzureVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 	if err := d.Set("peer_azure_app_id", peeringConnection.PeerAzureAppId); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("peer_azure_tenant_id", peeringConnection.PeerAzureTenantId); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("peer_resource_group", peeringConnection.PeerResourceGroup); err != nil {
 		return diag.FromErr(err)
 	}

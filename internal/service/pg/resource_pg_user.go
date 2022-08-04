@@ -81,6 +81,7 @@ func resourcePGUserCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	serviceName := d.Get("service_name").(string)
 	username := d.Get("username").(string)
 	allowReplication := d.Get("pg_allow_replication").(bool)
+
 	_, err := client.ServiceUsers.Create(
 		projectName,
 		serviceName,

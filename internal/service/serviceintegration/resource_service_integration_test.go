@@ -1,4 +1,4 @@
-package service_integration_test
+package serviceintegration_test
 
 import (
 	"fmt"
@@ -22,9 +22,11 @@ func TestAccAivenServiceIntegration_should_fail(t *testing.T) {
 		CheckDestroy:      testAccCheckAivenServiceIntegrationResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccServiceIntegrationShouldFailResource(),
-				PlanOnly:    true,
-				ExpectError: regexp.MustCompile("endpoint id should have the following format: project_name/endpoint_id"),
+				Config:   testAccServiceIntegrationShouldFailResource(),
+				PlanOnly: true,
+				ExpectError: regexp.MustCompile(
+					"endpoint id should have the following format: project_name/endpoint_id",
+				),
 			},
 		},
 	})
@@ -33,6 +35,7 @@ func TestAccAivenServiceIntegration_should_fail(t *testing.T) {
 func TestAccAivenServiceIntegration_preexisting_read_replica(t *testing.T) {
 	resourceName := "aiven_service_integration.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -44,8 +47,12 @@ func TestAccAivenServiceIntegration_preexisting_read_replica(t *testing.T) {
 					testAccCheckAivenServiceIntegrationAttributes("data.aiven_service_integration.int"),
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "read_replica"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-source-pg-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-sink-pg-%s", rName)),
+					resource.TestCheckResourceAttr(
+						resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-source-pg-%s", rName),
+					),
+					resource.TestCheckResourceAttr(
+						resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-sink-pg-%s", rName),
+					),
 				),
 			},
 		},
@@ -55,6 +62,7 @@ func TestAccAivenServiceIntegration_preexisting_read_replica(t *testing.T) {
 func TestAccAivenServiceIntegration_logs(t *testing.T) {
 	resourceName := "aiven_service_integration.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -66,8 +74,12 @@ func TestAccAivenServiceIntegration_logs(t *testing.T) {
 					testAccCheckAivenServiceIntegrationAttributes("data.aiven_service_integration.int"),
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "logs"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-source-pg-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-sink-os-%s", rName)),
+					resource.TestCheckResourceAttr(
+						resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-source-pg-%s", rName),
+					),
+					resource.TestCheckResourceAttr(
+						resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-sink-os-%s", rName),
+					),
 				),
 			},
 		},
@@ -77,6 +89,7 @@ func TestAccAivenServiceIntegration_logs(t *testing.T) {
 func TestAccAivenServiceIntegration_mm(t *testing.T) {
 	resourceName := "aiven_service_integration.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -87,8 +100,12 @@ func TestAccAivenServiceIntegration_mm(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "kafka_mirrormaker"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-source-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-mm-%s", rName)),
+					resource.TestCheckResourceAttr(
+						resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-source-%s", rName),
+					),
+					resource.TestCheckResourceAttr(
+						resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-mm-%s", rName),
+					),
 				),
 			},
 		},
@@ -98,6 +115,7 @@ func TestAccAivenServiceIntegration_mm(t *testing.T) {
 func TestAccAivenServiceIntegration_kafka_connect(t *testing.T) {
 	resourceName := "aiven_service_integration.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -109,8 +127,12 @@ func TestAccAivenServiceIntegration_kafka_connect(t *testing.T) {
 					testAccCheckAivenServiceIntegrationAttributes("data.aiven_service_integration.int"),
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "kafka_connect"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-kafka-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-kafka-con-%s", rName)),
+					resource.TestCheckResourceAttr(
+						resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-kafka-%s", rName),
+					),
+					resource.TestCheckResourceAttr(
+						resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-kafka-con-%s", rName),
+					),
 				),
 			},
 		},
@@ -120,6 +142,7 @@ func TestAccAivenServiceIntegration_kafka_connect(t *testing.T) {
 func TestAccAivenServiceIntegration_basic(t *testing.T) {
 	resourceName := "aiven_service_integration.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -131,8 +154,12 @@ func TestAccAivenServiceIntegration_basic(t *testing.T) {
 					testAccCheckAivenServiceIntegrationAttributes("data.aiven_service_integration.int"),
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "metrics"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-pg-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-influxdb-%s", rName)),
+					resource.TestCheckResourceAttr(
+						resourceName, "source_service_name", fmt.Sprintf("test-acc-sr-pg-%s", rName),
+					),
+					resource.TestCheckResourceAttr(
+						resourceName, "destination_service_name", fmt.Sprintf("test-acc-sr-influxdb-%s", rName),
+					),
 				),
 			},
 		},
@@ -454,7 +481,6 @@ resource "aiven_service_integration" "bar" {
     cluster_alias = "source"
   }
 }`
-
 }
 
 func testAccCheckAivenServiceIntegrationResourceDestroy(s *terraform.State) error {
@@ -475,6 +501,7 @@ func testAccCheckAivenServiceIntegrationResourceDestroy(s *terraform.State) erro
 		if err != nil && !aiven.IsNotFound(err) {
 			return err
 		}
+
 		if i != nil {
 			return fmt.Errorf("common integration (%s) still exists", rs.Primary.ID)
 		}

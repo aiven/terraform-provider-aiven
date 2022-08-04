@@ -1,6 +1,7 @@
 package kafka_test
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -30,7 +31,9 @@ func TestAccAivenKafkaConnector_basic(t *testing.T) {
 					testAccCheckAivenKafkaConnectorAttributes("data.aiven_kafka_connector.connector"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "connector_name", fmt.Sprintf("test-acc-con-%s", rName)),
+					resource.TestCheckResourceAttr(
+						resourceName, "connector_name", fmt.Sprintf("test-acc-con-%s", rName),
+					),
 				),
 			},
 			{
@@ -60,7 +63,9 @@ func TestAccAivenKafkaConnector_mogosink(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "connector_name", fmt.Sprintf("test-acc-con-mongo-sink-%s", rName)),
+					resource.TestCheckResourceAttr(
+						resourceName, "connector_name", fmt.Sprintf("test-acc-con-mongo-sink-%s", rName),
+					),
 				),
 			},
 		},
@@ -83,7 +88,9 @@ func testAccCheckAivenKafkaConnectorResourceDestroy(s *terraform.State) error {
 
 		_, err = c.Services.Get(projectName, serviceName)
 		if err != nil {
-			if err.(aiven.Error).Status == 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status == 404 {
 				return nil
 			}
 
@@ -92,7 +99,9 @@ func testAccCheckAivenKafkaConnectorResourceDestroy(s *terraform.State) error {
 
 		list, err := c.KafkaConnectors.List(projectName, serviceName)
 		if err != nil {
-			if err.(aiven.Error).Status == 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status == 404 {
 				return nil
 			}
 
@@ -102,7 +111,9 @@ func testAccCheckAivenKafkaConnectorResourceDestroy(s *terraform.State) error {
 		for _, connector := range list.Connectors {
 			res, err := c.KafkaConnectors.GetByName(projectName, serviceName, connector.Name)
 			if err != nil {
-				if err.(aiven.Error).Status == 404 {
+				var aivenError *aiven.Error
+
+				if ok := errors.As(err, &aivenError); !ok || aivenError.Status == 404 {
 					return nil
 				}
 
@@ -113,7 +124,6 @@ func testAccCheckAivenKafkaConnectorResourceDestroy(s *terraform.State) error {
 				return fmt.Errorf("kafka connector (%s) still exists", connector.Name)
 			}
 		}
-
 	}
 
 	return nil

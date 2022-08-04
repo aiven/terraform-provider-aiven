@@ -24,7 +24,8 @@ var aivenClickhouseRoleSchema = map[string]*schema.Schema{
 
 func ResourceClickhouseRole() *schema.Resource {
 	return &schema.Resource{
-		Description:        "The Clickhouse Role resource allows the creation and management of Roles in Aiven Clickhouse services",
+		Description: "The Clickhouse Role resource allows the creation and management of Roles in " +
+			"Aiven Clickhouse services",
 		DeprecationMessage: betaDeprecationMessage,
 		CreateContext:      resourceClickhouseRoleCreate,
 		ReadContext:        resourceClickhouseRoleRead,
@@ -70,12 +71,15 @@ func resourceClickhouseRoleRead(_ context.Context, d *schema.ResourceData, m int
 	if err := d.Set("project", projectName); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("service_name", serviceName); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("role", roleName); err != nil {
 		return diag.FromErr(err)
 	}
+
 	return nil
 }
 
@@ -90,5 +94,6 @@ func resourceClickhouseRoleDelete(_ context.Context, d *schema.ResourceData, m i
 	if err := DropRole(client, projectName, serviceName, roleName); err != nil {
 		return diag.FromErr(err)
 	}
+
 	return nil
 }

@@ -10,13 +10,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+//nolint:revive
 // DatasourceVPCPeeringConnection
 // Deprecated
 //goland:noinspection GoDeprecation
 func DatasourceVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceVPCPeeringConnectionRead,
-		Description: "The VPC Peering Connection data source provides information about the existing Aiven VPC Peering Connection.",
+		Description: "The VPC Peering Connection data source provides information about the existing " +
+			"Aiven VPC Peering Connection.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenVPCPeeringConnectionSchema,
 			"vpc_id", "peer_cloud_account", "peer_vpc"),
 	}
@@ -41,10 +43,13 @@ func datasourceVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceD
 	for _, peer := range vpc.PeeringConnections {
 		if peer.PeerCloudAccount == peerCloudAccount && peer.PeerVPC == peerVPC {
 			if peer.PeerRegion != nil && *peer.PeerRegion != "" {
-				d.SetId(schemautil.BuildResourceID(projectName, vpcID, peer.PeerCloudAccount, peer.PeerVPC, *peer.PeerRegion))
+				d.SetId(schemautil.BuildResourceID(
+					projectName, vpcID, peer.PeerCloudAccount, peer.PeerVPC, *peer.PeerRegion,
+				))
 			} else {
 				d.SetId(schemautil.BuildResourceID(projectName, vpcID, peer.PeerCloudAccount, peer.PeerVPC))
 			}
+
 			return resourceVPCPeeringConnectionRead(ctx, d, m)
 		}
 	}

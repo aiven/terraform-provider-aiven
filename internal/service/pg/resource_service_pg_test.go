@@ -18,6 +18,7 @@ import (
 func TestAccAivenServicePG_basic(t *testing.T) {
 	resourceName := "aiven_pg.bar-pg"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -44,6 +45,7 @@ func TestAccAivenServicePG_basic(t *testing.T) {
 func TestAccAivenServicePG_termination_protection(t *testing.T) {
 	resourceName := "aiven_pg.bar-pg"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -72,6 +74,7 @@ func TestAccAivenServicePG_termination_protection(t *testing.T) {
 func TestAccAivenServicePG_read_replica(t *testing.T) {
 	resourceName := "aiven_pg.bar-pg"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -99,6 +102,7 @@ func TestAccAivenServicePG_read_replica(t *testing.T) {
 func TestAccAivenServicePG_custom_timeouts(t *testing.T) {
 	resourceName := "aiven_pg.bar-pg"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -316,7 +320,7 @@ func testAccCheckAivenServiceTerminationProtection(n string) resource.TestCheckF
 
 		service, err := c.Services.Get(projectName, serviceName)
 		if err != nil {
-			return fmt.Errorf("cannot get service %s err: %s", serviceName, err)
+			return fmt.Errorf("cannot get service %s err: %w", serviceName, err)
 		}
 
 		if service.TerminationProtection == false {
@@ -327,7 +331,9 @@ func testAccCheckAivenServiceTerminationProtection(n string) resource.TestCheckF
 		// should be an error from Aiven API
 		err = c.Services.Delete(projectName, serviceName)
 		if err == nil {
-			return fmt.Errorf("termination_protection enabled should prevent from deletion of a service, deletion went OK")
+			return fmt.Errorf(
+				"termination_protection enabled should prevent from deletion of a service, deletion went OK",
+			)
 		}
 
 		// set service termination_protection to false to make Terraform Destroy plan work
@@ -342,7 +348,7 @@ func testAccCheckAivenServiceTerminationProtection(n string) resource.TestCheckF
 		})
 
 		if err != nil {
-			return fmt.Errorf("unable to update Aiven service to set termination_protection=false err: %s", err)
+			return fmt.Errorf("unable to update Aiven service to set termination_protection=false err: %w", err)
 		}
 
 		return nil

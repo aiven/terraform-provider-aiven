@@ -46,16 +46,19 @@ func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, m inter
 
 			if state != aivenTargetState {
 				log.Printf("[DEBUG] service reports as %s, still for it to be in state %s", state, aivenTargetState)
+
 				return service, state, nil
 			}
 
 			if rdy := backupsReady(service); !rdy {
 				log.Printf("[DEBUG] service reports as %s, still waiting for service backups", state)
+
 				return service, aivenServicesStartingState, nil
 			}
 
 			if rdy := grafanaReady(service); !rdy {
 				log.Printf("[DEBUG] service reports as %s, still waiting for grafana", state)
+
 				return service, aivenServicesStartingState, nil
 			}
 
@@ -63,6 +66,7 @@ func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, m inter
 				return nil, "", fmt.Errorf("unable to check if static ips are ready: %w", err)
 			} else if !rdy {
 				log.Printf("[DEBUG] service reports as %s, still waiting for static ips", state)
+
 				return service, aivenServicesStartingState, nil
 			}
 
@@ -74,6 +78,7 @@ func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, m inter
 	if err != nil {
 		return nil, fmt.Errorf("unable to wait for service state change: %w", err)
 	}
+
 	return aux.(*aiven.Service), nil
 }
 
@@ -102,11 +107,13 @@ func WaitForServiceUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 
 			if rdy := backupsReady(service); !rdy {
 				log.Printf("[DEBUG] service reports as %s, still waiting for service backups", state)
+
 				return service, "updating", nil
 			}
 
 			if rdy := grafanaReady(service); !rdy {
 				log.Printf("[DEBUG] service reports as %s, still waiting for grafana", state)
+
 				return service, "updating", nil
 			}
 
@@ -114,6 +121,7 @@ func WaitForServiceUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 				return nil, "", fmt.Errorf("unable to check if static ips are ready: %w", err)
 			} else if !rdy {
 				log.Printf("[DEBUG] service reports as %s, still waiting for static ips", state)
+
 				return service, "updating", nil
 			}
 
@@ -125,6 +133,7 @@ func WaitForServiceUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	if err != nil {
 		return nil, fmt.Errorf("unable to wait for service state change: %w", err)
 	}
+
 	return aux.(*aiven.Service), nil
 }
 
@@ -144,8 +153,10 @@ func WaitStaticIpsDissassociation(ctx context.Context, d *schema.ResourceData, m
 				return nil, "", fmt.Errorf("unable to check if static ips are disassociated: %w", err)
 			} else if !dis {
 				log.Printf("[DEBUG] still waiting for static ips to be disassociated")
+
 				return struct{}{}, "doing", nil
 			}
+
 			return struct{}{}, "done", nil
 		},
 	}
@@ -154,6 +165,7 @@ func WaitStaticIpsDissassociation(ctx context.Context, d *schema.ResourceData, m
 	if err != nil {
 		return fmt.Errorf("unable to wait for for static ips to be dissassociated: %w", err)
 	}
+
 	return nil
 }
 
@@ -193,6 +205,7 @@ func WaitForDeletion(ctx context.Context, d *schema.ResourceData, m interface{})
 	if _, err := conf.WaitForStateContext(ctx); err != nil {
 		return fmt.Errorf("unable to wait for service deletion: %w", err)
 	}
+
 	return nil
 }
 
@@ -206,14 +219,18 @@ func grafanaReady(service *aiven.Service) bool {
 	if ok {
 		f := ipFilters.([]interface{})
 		if len(f) > 1 {
-			log.Printf("[DEBUG] grafana serivce has `%+v` ip filters, and availability checks will be skipped", ipFilters)
+			log.Printf(
+				"[DEBUG] grafana serivce has `%+v` ip filters, and availability checks will be skipped", ipFilters,
+			)
 
 			return true
 		}
 
 		if len(f) == 1 {
 			if f[0] != "0.0.0.0/0" {
-				log.Printf("[DEBUG] grafana serivce has `%+v` ip filters, and availability checks will be skipped", ipFilters)
+				log.Printf(
+					"[DEBUG] grafana serivce has `%+v` ip filters, and availability checks will be skipped", ipFilters,
+				)
 
 				return true
 			}
@@ -226,6 +243,7 @@ func grafanaReady(service *aiven.Service) bool {
 	for _, component := range service.Components {
 		if component.Route == "public" && component.Usage == "primary" {
 			publicGrafana = component.Host + ":" + strconv.Itoa(component.Port)
+
 			continue
 		}
 	}
@@ -235,10 +253,12 @@ func grafanaReady(service *aiven.Service) bool {
 		_, err := net.DialTimeout("tcp", publicGrafana, 1*time.Second)
 		if err != nil {
 			log.Printf("[DEBUG] public grafana is not yet reachable")
+
 			return false
 		}
 
 		log.Printf("[DEBUG] public grafana is reachable")
+
 		return true
 	}
 
@@ -246,12 +266,12 @@ func grafanaReady(service *aiven.Service) bool {
 }
 
 func backupsReady(service *aiven.Service) bool {
-	if service.Type != "pg" && service.Type != "elasticsearch" &&
-		service.Type != "redis" && service.Type != "influxdb" {
+	if service.Type != ServiceTypePG && service.Type != ServiceTypeElasticsearch &&
+		service.Type != ServiceTypeRedis && service.Type != ServiceTypeInfluxDB {
 		return true
 	}
 
-	if service.Type == "redis" && service.UserConfig["redis_persistence"] == "off" {
+	if service.Type == ServiceTypeRedis && service.UserConfig["redis_persistence"] == "off" {
 		return true
 	}
 
@@ -284,14 +304,15 @@ func staticIpsReady(d *schema.ResourceData, m interface{}) (bool, error) {
 L:
 	for _, eip := range expectedStaticIps {
 		for _, sip := range staticIpsList.StaticIPs {
-			assignedOrAvailable := sip.State == StaticIpAssigned || sip.State == StaticIpAvailable
+			assignedOrAvailable := sip.State == StaticIPAssigned || sip.State == StaticIPAvailable
 			belongsToService := sip.ServiceName == serviceName
-			isExpectedIp := sip.StaticIPAddressID == eip
+			isExpectedIP := sip.StaticIPAddressID == eip
 
-			if isExpectedIp && belongsToService && assignedOrAvailable {
+			if isExpectedIP && belongsToService && assignedOrAvailable {
 				continue L
 			}
 		}
+
 		return false, nil
 	}
 
@@ -318,14 +339,15 @@ func staticIpsDisassociatedAfterServiceDeletion(d *schema.ResourceData, m interf
 		for _, sip := range staticIpsList.StaticIPs {
 			// no check for service name since after deletion the field is gone, but the
 			// static ip lingers in the assigned state for a while until it gets usable again
-			ipIsAssigned := sip.State == StaticIpAssigned
-			isExpectedIp := sip.StaticIPAddressID == eip
+			ipIsAssigned := sip.State == StaticIPAssigned
+			isExpectedIP := sip.StaticIPAddressID == eip
 
-			if isExpectedIp && ipIsAssigned {
+			if isExpectedIP && ipIsAssigned {
 				return false, nil
 			}
 		}
 	}
+
 	return true, nil
 }
 
@@ -340,6 +362,7 @@ func staticIpsAreDisassociated(d *schema.ResourceData, m interface{}) (bool, err
 	if err != nil {
 		return false, fmt.Errorf("unable to fetch static ips for project '%s': '%w", projectName, err)
 	}
+
 	currentStaticIps := staticIpsForServiceFromSchema(d)
 L:
 	for _, sip := range staticIpsList.StaticIPs {
@@ -352,8 +375,10 @@ L:
 				continue L
 			}
 		}
+
 		return false, nil
 	}
+
 	return true, nil
 }
 

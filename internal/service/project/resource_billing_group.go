@@ -100,7 +100,8 @@ var aivenBillingGroupSchema = map[string]*schema.Schema{
 
 func ResourceBillingGroup() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Billing Group resource allows the creation and management of Aiven Billing Groups and association with the Projects.",
+		Description: "The Billing Group resource allows the creation and management of " +
+			"Aiven Billing Groups and association with the Projects.",
 		CreateContext: resourceBillingGroupCreate,
 		ReadContext:   resourceBillingGroupRead,
 		UpdateContext: resourceBillingGroupUpdate,
@@ -164,39 +165,51 @@ func resourceBillingGroupRead(_ context.Context, d *schema.ResourceData, m inter
 	if err := d.Set("name", bg.BillingGroupName); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("account_id", bg.AccountId); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("card_id", bg.CardId); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("vat_id", bg.VatId); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("billing_currency", bg.BillingCurrency); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("billing_extra_text", bg.BillingExtraText); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := contactEmailListForTerraform(d, "billing_emails", bg.BillingEmails); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("company", bg.Company); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("address_lines", bg.AddressLines); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("country_code", bg.CountryCode); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("city", bg.City); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("zip_code", bg.ZipCode); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("state", bg.State); err != nil {
 		return diag.FromErr(err)
 	}

@@ -1,6 +1,7 @@
 package kafka_test
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -65,7 +66,9 @@ func TestAccAivenKafkaSchemaRegistryACL_basic(t *testing.T) {
 					testAccCheckAivenKafkaSchemaRegistryACLAttributes("data.aiven_kafka_schema_registry_acl.acl"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "resource", fmt.Sprintf("Subject:test-acc-topic-%s", rName)),
+					resource.TestCheckResourceAttr(
+						resourceName, "resource", fmt.Sprintf("Subject:test-acc-topic-%s", rName),
+					),
 					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "permission", "schema_registry_read"),
 					resource.TestCheckResourceAttrSet(resourceName, "acl_id"),
@@ -115,7 +118,6 @@ resource "aiven_kafka_schema_registry_acl" "foo" {
   username     = "user-1"
   permission   = "schema_registry_read"
 }`
-
 }
 
 func testAccKafkaSchemaRegistryACLWrongServiceNameResource(_ string) string {
@@ -127,7 +129,6 @@ resource "aiven_kafka_schema_registry_acl" "foo" {
   username     = "user-1"
   permission   = "schema_registry_read"
 }`
-
 }
 
 func testAccKafkaSchemaRegistryACLWrongPermissionResource(_ string) string {
@@ -139,7 +140,6 @@ resource "aiven_kafka_schema_registry_acl" "foo" {
   username     = "user-1"
   permission   = "wrong-permission"
 }`
-
 }
 
 func testAccKafkaSchemaRegistryACLWildcardResource(_ string) string {
@@ -151,7 +151,6 @@ resource "aiven_kafka_schema_registry_acl" "foo" {
   username     = "*"
   permission   = "schema_registry_read"
 }`
-
 }
 
 func testAccKafkaSchemaRegistryACLPrefixWildcardResource(_ string) string {
@@ -163,7 +162,6 @@ resource "aiven_kafka_schema_registry_acl" "foo" {
   username     = "group-user-*"
   permission   = "schema_registry_read"
 }`
-
 }
 
 func testAccKafkaSchemaRegistryACLWrongUsernameResource(_ string) string {
@@ -175,7 +173,6 @@ resource "aiven_kafka_schema_registry_acl" "foo" {
   username     = "#user"
   permission   = "schema_registry_read"
 }`
-
 }
 
 func testAccKafkaSchemaRegistryACLInvalidCharsResource(_ string) string {
@@ -187,7 +184,6 @@ resource "aiven_kafka_schema_registry_acl" "foo" {
   username     = "!./,£$^&*()_"
   permission   = "schema_registry_read"
 }`
-
 }
 
 func testAccKafkaSchemaRegistryACLResource(name string) string {
@@ -255,7 +251,9 @@ func testAccCheckAivenKafkaSchemaRegistryACLResourceDestroy(s *terraform.State) 
 
 		p, err := c.KafkaSchemaRegistryACLs.Get(project, serviceName, aclID)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 				return err
 			}
 		}

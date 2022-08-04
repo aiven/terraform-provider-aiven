@@ -64,7 +64,8 @@ var aivenTransitGatewayVPCAttachmentSchema = map[string]*schema.Schema{
 
 func ResourceTransitGatewayVPCAttachment() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Transit Gateway VPC Attachment resource allows the creation and management Transit Gateway VPC Attachment VPC peering connection between Aiven and AWS.",
+		Description: "The Transit Gateway VPC Attachment resource allows the creation and management " +
+			"Transit Gateway VPC Attachment VPC peering connection between Aiven and AWS.",
 		CreateContext: resourceVPCPeeringConnectionCreate,
 		ReadContext:   resourceVPCPeeringConnectionRead,
 		UpdateContext: resourceTransitGatewayVPCAttachmentUpdate,
@@ -80,7 +81,9 @@ func ResourceTransitGatewayVPCAttachment() *schema.Resource {
 	}
 }
 
-func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceTransitGatewayVPCAttachmentUpdate(
+	ctx context.Context, d *schema.ResourceData, m interface{},
+) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	cidrs := schemautil.FlattenToString(d.Get("user_peer_network_cidrs").([]interface{}))
@@ -93,12 +96,14 @@ func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.Re
 
 	// prepare a list of new transit gateway vpc attachment that needs to be added
 	var add []aiven.TransitGatewayVPCAttachment
+
 	for _, fresh := range cidrs {
 		var isNew = true
 
 		for _, old := range peeringConnection.UserPeerNetworkCIDRs {
 			if fresh == old {
 				isNew = false
+
 				break
 			}
 		}
@@ -108,6 +113,7 @@ func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.Re
 			if len(peeringConnection.PeerResourceGroup) > 0 {
 				peerResourceGroup = aiven.ToStringPointer(peeringConnection.PeerResourceGroup)
 			}
+
 			add = append(add, aiven.TransitGatewayVPCAttachment{
 				CIDR:              fresh,
 				PeerCloudAccount:  peerCloudAccount,
@@ -119,6 +125,7 @@ func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.Re
 
 	// prepare a list of old cirds for deletion
 	var deleteCIDRs []string
+
 	for _, old := range peeringConnection.UserPeerNetworkCIDRs {
 		var forDeletion = true
 

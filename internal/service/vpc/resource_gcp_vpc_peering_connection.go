@@ -49,7 +49,8 @@ var aivenGCPVPCPeeringConnectionSchema = map[string]*schema.Schema{
 
 func ResourceGCPVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The GCP VPC Peering Connection resource allows the creation and management of Aiven GCP VPC Peering Connections.",
+		Description: "The GCP VPC Peering Connection resource allows the creation and management of " +
+			"Aiven GCP VPC Peering Connections.",
 		CreateContext: resourceGCPVPCPeeringConnectionCreate,
 		ReadContext:   resourceGCPVPCPeeringConnectionRead,
 		DeleteContext: resourceGCPVPCPeeringConnectionDelete,
@@ -75,11 +76,11 @@ func vpcCustomDiffGCPPeeringConnectionExists() func(ctx context.Context, d *sche
 			return err
 		}
 
-		gcpProjectId := d.Get("gcp_project_id").(string)
+		gcpProjectID := d.Get("gcp_project_id").(string)
 		peerVPC := d.Get("peer_vpc").(string)
 
 		pc, err := client.VPCPeeringConnections.GetVPCPeering(
-			projectName, vpcID, gcpProjectId, peerVPC, nil)
+			projectName, vpcID, gcpProjectID, peerVPC, nil)
 		if err != nil && !aiven.IsNotFound(err) {
 			return err
 		}
@@ -92,26 +93,29 @@ func vpcCustomDiffGCPPeeringConnectionExists() func(ctx context.Context, d *sche
 	}
 }
 
-func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceGCPVPCPeeringConnectionCreate(
+	ctx context.Context, d *schema.ResourceData, m interface{},
+) diag.Diagnostics {
 	var (
 		pc  *aiven.VPCPeeringConnection
 		err error
 	)
 
 	client := m.(*aiven.Client)
+
 	projectName, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	gcpProjectId := d.Get("gcp_project_id").(string)
+	gcpProjectID := d.Get("gcp_project_id").(string)
 	peerVPC := d.Get("peer_vpc").(string)
 
 	if _, err = client.VPCPeeringConnections.Create(
 		projectName,
 		vpcID,
 		aiven.CreateVPCPeeringConnectionRequest{
-			PeerCloudAccount: gcpProjectId,
+			PeerCloudAccount: gcpProjectID,
 			PeerVPC:          peerVPC,
 		},
 	); err != nil {
@@ -130,16 +134,17 @@ func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 			"DELETED_BY_PEER",
 		},
 		Refresh: func() (interface{}, string, error) {
-			pc, err := client.VPCPeeringConnections.GetVPCPeering(
+			pc, err = client.VPCPeeringConnections.GetVPCPeering(
 				projectName,
 				vpcID,
-				gcpProjectId,
+				gcpProjectID,
 				peerVPC,
 				nil,
 			)
 			if err != nil {
 				return nil, "", err
 			}
+
 			return pc, pc.State, nil
 		},
 		Delay:      10 * time.Second,
@@ -167,9 +172,11 @@ func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 
 func resourceGCPVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var pc *aiven.VPCPeeringConnection
+
 	client := m.(*aiven.Client)
 
 	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
+
 	pc, err := client.VPCPeeringConnections.GetVPCPeering(
 		projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
 	if err != nil {
@@ -179,7 +186,9 @@ func resourceGCPVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceDa
 	return copyGCPVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, projectName, vpcID)
 }
 
-func resourceGCPVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceGCPVPCPeeringConnectionDelete(
+	ctx context.Context, d *schema.ResourceData, m interface{},
+) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
@@ -220,6 +229,7 @@ func resourceGCPVPCPeeringConnectionDelete(ctx context.Context, d *schema.Resour
 			if err != nil {
 				return nil, "", err
 			}
+
 			return pc, pc.State, nil
 		},
 		Delay:      10 * time.Second,
@@ -229,6 +239,7 @@ func resourceGCPVPCPeeringConnectionDelete(ctx context.Context, d *schema.Resour
 	if _, err := stateChangeConf.WaitForStateContext(ctx); err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("Error waiting for GCP Aiven VPC Peering Connection to be DELETED: %s", err)
 	}
+
 	return nil
 }
 
@@ -241,9 +252,11 @@ func copyGCPVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 	if err := d.Set("vpc_id", schemautil.BuildResourceID(project, vpcID)); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("gcp_project_id", peeringConnection.PeerCloudAccount); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("peer_vpc", peeringConnection.PeerVPC); err != nil {
 		return diag.FromErr(err)
 	}

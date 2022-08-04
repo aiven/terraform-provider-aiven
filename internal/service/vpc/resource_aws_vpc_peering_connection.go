@@ -42,7 +42,9 @@ var aivenAWSVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return new == ""
 		},
-		Description: schemautil.Complex("AWS region of the peered VPC (if not in the same region as Aiven VPC).").ForceNew().Build(),
+		Description: schemautil.Complex(
+			"AWS region of the peered VPC (if not in the same region as Aiven VPC).",
+		).ForceNew().Build(),
 	},
 	"state": {
 		Computed:    true,
@@ -63,7 +65,8 @@ var aivenAWSVPCPeeringConnectionSchema = map[string]*schema.Schema{
 
 func ResourceAWSVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The AWS VPC Peering Connection resource allows the creation and management of Aiven AWS VPC Peering Connections.",
+		Description: "The AWS VPC Peering Connection resource allows the creation and management of " +
+			"Aiven AWS VPC Peering Connections.",
 		CreateContext: resourceAWSVPCPeeringConnectionCreate,
 		ReadContext:   resourceAWSVPCPeeringConnectionRead,
 		DeleteContext: resourceAWSVPCPeeringConnectionDelete,
@@ -89,12 +92,12 @@ func vpcCustomDiffAWSPeeringConnectionExists() func(ctx context.Context, d *sche
 			return err
 		}
 
-		awsAccountId := d.Get("aws_account_id").(string)
+		awsAccountID := d.Get("aws_account_id").(string)
 		awsVPCId := d.Get("aws_vpc_id").(string)
 		awsVPCRegion := d.Get("aws_vpc_region").(string)
 
 		pc, err := client.VPCPeeringConnections.GetVPCPeering(
-			projectName, vpcID, awsAccountId, awsVPCId, &awsVPCRegion)
+			projectName, vpcID, awsAccountID, awsVPCId, &awsVPCRegion)
 		if err != nil && !aiven.IsNotFound(err) {
 			return err
 		}
@@ -107,7 +110,9 @@ func vpcCustomDiffAWSPeeringConnectionExists() func(ctx context.Context, d *sche
 	}
 }
 
-func resourceAWSVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAWSVPCPeeringConnectionCreate(
+	ctx context.Context, d *schema.ResourceData, m interface{},
+) diag.Diagnostics {
 	var (
 		pc     *aiven.VPCPeeringConnection
 		err    error
@@ -115,14 +120,16 @@ func resourceAWSVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 	)
 
 	client := m.(*aiven.Client)
+
 	projectName, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	awsAccountId := d.Get("aws_account_id").(string)
+	awsAccountID := d.Get("aws_account_id").(string)
 	awsVPCId := d.Get("aws_vpc_id").(string)
 	awsVPCRegion := d.Get("aws_vpc_region").(string)
+
 	if awsVPCRegion != "" {
 		region = &awsVPCRegion
 	}
@@ -131,7 +138,7 @@ func resourceAWSVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 		projectName,
 		vpcID,
 		aiven.CreateVPCPeeringConnectionRequest{
-			PeerCloudAccount: awsAccountId,
+			PeerCloudAccount: awsAccountID,
 			PeerVPC:          awsVPCId,
 			PeerRegion:       region,
 		},
@@ -151,16 +158,17 @@ func resourceAWSVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 			"DELETED_BY_PEER",
 		},
 		Refresh: func() (interface{}, string, error) {
-			pc, err := client.VPCPeeringConnections.GetVPCPeering(
+			pc, err = client.VPCPeeringConnections.GetVPCPeering(
 				projectName,
 				vpcID,
-				awsAccountId,
+				awsAccountID,
 				awsVPCId,
 				region,
 			)
 			if err != nil {
 				return nil, "", err
 			}
+
 			return pc, pc.State, nil
 		},
 		Delay:      10 * time.Second,
@@ -190,8 +198,10 @@ func resourceAWSVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceDa
 	client := m.(*aiven.Client)
 
 	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
+
 	pc, err := client.VPCPeeringConnections.GetVPCPeering(
-		projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
+		projectName, vpcID, peerCloudAccount, peerVPC, peerRegion,
+	)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -199,7 +209,9 @@ func resourceAWSVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceDa
 	return copyAWSVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, projectName, vpcID)
 }
 
-func resourceAWSVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAWSVPCPeeringConnectionDelete(
+	ctx context.Context, d *schema.ResourceData, m interface{},
+) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
@@ -240,6 +252,7 @@ func resourceAWSVPCPeeringConnectionDelete(ctx context.Context, d *schema.Resour
 			if err != nil {
 				return nil, "", err
 			}
+
 			return pc, pc.State, nil
 		},
 		Delay:      10 * time.Second,
@@ -249,6 +262,7 @@ func resourceAWSVPCPeeringConnectionDelete(ctx context.Context, d *schema.Resour
 	if _, err := stateChangeConf.WaitForStateContext(ctx); err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("Error waiting for AWS Aiven VPC Peering Connection to be DELETED: %s", err)
 	}
+
 	return nil
 }
 
@@ -261,12 +275,15 @@ func copyAWSVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 	if err := d.Set("vpc_id", schemautil.BuildResourceID(project, vpcID)); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("aws_account_id", peeringConnection.PeerCloudAccount); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("aws_vpc_id", peeringConnection.PeerVPC); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("state", peeringConnection.State); err != nil {
 		return diag.FromErr(err)
 	}

@@ -1,4 +1,4 @@
-package connection_pool
+package connectionpool
 
 import (
 	"context"
@@ -34,6 +34,7 @@ func datasourceConnectionPoolRead(ctx context.Context, d *schema.ResourceData, m
 	for _, pool := range pools {
 		if pool.PoolName == poolName {
 			d.SetId(schemautil.BuildResourceID(projectName, serviceName, poolName))
+
 			return resourceConnectionPoolRead(ctx, d, m)
 		}
 	}

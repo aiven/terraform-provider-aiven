@@ -1,4 +1,4 @@
-package service_integration
+package serviceintegration
 
 import (
 	"context"
@@ -13,7 +13,8 @@ import (
 func DatasourceServiceIntegration() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceServiceIntegrationRead,
-		Description: "The Service Integration data source provides information about the existing Aiven Service Integration.",
+		Description: "The Service Integration data source provides information about the existing " +
+			"Aiven Service Integration.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenServiceIntegrationSchema,
 			"project", "integration_type", "source_service_name", "destination_service_name"),
 	}
@@ -40,8 +41,8 @@ func datasourceServiceIntegrationRead(ctx context.Context, d *schema.ResourceDat
 		if i.IntegrationType == integrationType &&
 			*i.SourceService == sourceServiceName &&
 			*i.DestinationService == destinationServiceName {
-
 			d.SetId(schemautil.BuildResourceID(projectName, i.ServiceIntegrationID))
+
 			return resourceServiceIntegrationRead(ctx, d, m)
 		}
 	}

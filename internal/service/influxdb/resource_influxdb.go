@@ -24,7 +24,9 @@ func influxDBSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	s[schemautil.ServiceTypeInfluxDB+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeInfluxDB)
+	s[schemautil.ServiceTypeInfluxDB+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(
+		schemautil.ServiceTypeInfluxDB,
+	)
 
 	return s
 }
@@ -52,7 +54,7 @@ func ResourceInfluxDB() *schema.Resource {
 			),
 			customdiff.Sequence(
 				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
-				schemautil.CustomizeDiffCheckStaticIpDisassociation,
+				schemautil.CustomizeDiffCheckStaticIPDisassociation,
 			),
 		),
 		Importer: &schema.ResourceImporter{

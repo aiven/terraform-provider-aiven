@@ -15,10 +15,12 @@ func ResourceSchemaAsDatasourceSchema(d map[string]*schema.Schema, required ...s
 			Elem:        v.Elem,
 		}
 	}
+
 	for _, k := range required {
 		s[k].Required = true
 		s[k].Optional = false
 		s[k].Computed = false
 	}
+
 	return s
 }

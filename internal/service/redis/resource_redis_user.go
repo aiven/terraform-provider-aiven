@@ -34,7 +34,9 @@ var aivenRedisUserSchema = map[string]*schema.Schema{
 		Optional:     true,
 		ForceNew:     true,
 		RequiredWith: []string{"redis_acl_commands", "redis_acl_keys"},
-		Description:  schemautil.Complex("Defines command category rules.").RequiredWith("redis_acl_commands", "redis_acl_keys").ForceNew().Build(),
+		Description: schemautil.Complex(
+			"Defines command category rules.",
+		).RequiredWith("redis_acl_commands", "redis_acl_keys").ForceNew().Build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
@@ -44,7 +46,9 @@ var aivenRedisUserSchema = map[string]*schema.Schema{
 		Optional:     true,
 		ForceNew:     true,
 		RequiredWith: []string{"redis_acl_categories", "redis_acl_keys"},
-		Description:  schemautil.Complex("Defines rules for individual commands.").RequiredWith("redis_acl_categories", "redis_acl_keys").ForceNew().Build(),
+		Description: schemautil.Complex(
+			"Defines rules for individual commands.",
+		).RequiredWith("redis_acl_categories", "redis_acl_keys").ForceNew().Build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
@@ -54,7 +58,9 @@ var aivenRedisUserSchema = map[string]*schema.Schema{
 		Optional:     true,
 		ForceNew:     true,
 		RequiredWith: []string{"redis_acl_categories", "redis_acl_commands"},
-		Description:  schemautil.Complex("Defines key access rules.").RequiredWith("redis_acl_categories", "redis_acl_keys").ForceNew().Build(),
+		Description: schemautil.Complex(
+			"Defines key access rules.",
+		).RequiredWith("redis_acl_categories", "redis_acl_keys").ForceNew().Build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
@@ -98,6 +104,7 @@ func resourceRedisUserCreate(ctx context.Context, d *schema.ResourceData, m inte
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	username := d.Get("username").(string)
+
 	_, err := client.ServiceUsers.Create(
 		projectName,
 		serviceName,
@@ -170,12 +177,15 @@ func resourceRedisUserRead(_ context.Context, d *schema.ResourceData, m interfac
 	if err := d.Set("redis_acl_keys", user.AccessControl.RedisACLKeys); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("redis_acl_categories", user.AccessControl.RedisACLCategories); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("redis_acl_commands", user.AccessControl.RedisACLCommands); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("redis_acl_channels", user.AccessControl.RedisACLChannels); err != nil {
 		return diag.FromErr(err)
 	}

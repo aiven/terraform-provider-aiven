@@ -1,6 +1,7 @@
 package database_test
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -42,7 +43,9 @@ func TestAccAivenDatabase_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName2)),
-					resource.TestCheckResourceAttr(resourceName, "database_name", fmt.Sprintf("test-acc-db-%s", rName2)),
+					resource.TestCheckResourceAttr(
+						resourceName, "database_name", fmt.Sprintf("test-acc-db-%s", rName2),
+					),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "true"),
 				),
 			},
@@ -66,7 +69,9 @@ func testAccCheckAivenDatabaseResourceDestroy(s *terraform.State) error {
 
 		db, err := c.Databases.Get(projectName, serviceName, databaseName)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 				return err
 			}
 		}

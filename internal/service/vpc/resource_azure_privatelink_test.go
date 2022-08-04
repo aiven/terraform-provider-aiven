@@ -1,6 +1,7 @@
 package vpc_test
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -16,7 +17,10 @@ import (
 func TestAccAivenAzurePrivatelink_basic(t *testing.T) {
 	if os.Getenv("AIVEN_AZURE_PRIVATELINK_VPCID") == "" ||
 		os.Getenv("AIVEN_AZURE_PRIVATELINK_SUB_ID") == "" {
-		t.Skip("AIVEN_AZURE_PRIVATELINK_VPCID and AIVEN_AZURE_PRIVATELINK_SUB_ID env variables are required to run this test")
+		t.Skip(
+			"AIVEN_AZURE_PRIVATELINK_VPCID and AIVEN_AZURE_PRIVATELINK_SUB_ID env variables are required to " +
+				"run this test",
+		)
 	}
 
 	resourceName := "aiven_azure_privatelink.foo"
@@ -54,8 +58,10 @@ func testAccCheckAivenAzurePrivatelinkResourceDestroy(s *terraform.State) error 
 			return err
 		}
 
+		var aivenError *aiven.Error
+
 		pv, err := c.AzurePrivatelink.Get(project, serviceName)
-		if err != nil && !aiven.IsNotFound(err) && err.(aiven.Error).Status != 500 {
+		if ok := errors.As(err, &aivenError); err != nil && !aiven.IsNotFound(err) && (ok && aivenError.Status != 500) {
 			return fmt.Errorf("error getting a Azure Privatelink: %w", err)
 		}
 
@@ -68,8 +74,8 @@ func testAccCheckAivenAzurePrivatelinkResourceDestroy(s *terraform.State) error 
 }
 
 func testAccAzurePrivatelinkResource(name string) string {
-	var principal = os.Getenv("AIVEN_AZURE_PRIVATELINK_SUB_ID")
-	var vpcID = os.Getenv("AIVEN_AZURE_PRIVATELINK_VPCID")
+	principal := os.Getenv("AIVEN_AZURE_PRIVATELINK_SUB_ID")
+	vpcID := os.Getenv("AIVEN_AZURE_PRIVATELINK_VPCID")
 
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {

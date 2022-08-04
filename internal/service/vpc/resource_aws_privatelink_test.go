@@ -1,6 +1,7 @@
 package vpc_test
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -17,7 +18,10 @@ import (
 func TestAccAivenAWSPrivatelink_basic(t *testing.T) {
 	if os.Getenv("AIVEN_AWS_PRIVATELINK_VPCID") == "" ||
 		os.Getenv("AIVEN_AWS_PRIVATELINK_PRINCIPAL") == "" {
-		t.Skip("AIVEN_AWS_PRIVATELINK_VPCID and AIVEN_AWS_PRIVATELINK_PRINCIPAL env variables are required to run this test")
+		t.Skip(
+			"AIVEN_AWS_PRIVATELINK_VPCID and AIVEN_AWS_PRIVATELINK_PRINCIPAL env variables are required " +
+				"to run this test",
+		)
 	}
 
 	resourceName := "aiven_aws_privatelink.foo"
@@ -54,8 +58,10 @@ func testAccCheckAivenAWSPrivatelinkResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
+		var aivenError *aiven.Error
+
 		pv, err := c.AWSPrivatelink.Get(project, serviceName)
-		if err != nil && !aiven.IsNotFound(err) && err.(aiven.Error).Status != 500 {
+		if ok := errors.As(err, &aivenError); err != nil && !aiven.IsNotFound(err) && (ok && aivenError.Status != 500) {
 			return fmt.Errorf("error getting a AWS Privatelink: %w", err)
 		}
 
@@ -68,8 +74,8 @@ func testAccCheckAivenAWSPrivatelinkResourceDestroy(s *terraform.State) error {
 }
 
 func testAccAWSPrivatelinkResource(name string) string {
-	var principal = os.Getenv("AIVEN_AWS_PRIVATELINK_PRINCIPAL")
-	var vpcID = os.Getenv("AIVEN_AWS_PRIVATELINK_VPCID")
+	principal := os.Getenv("AIVEN_AWS_PRIVATELINK_PRINCIPAL")
+	vpcID := os.Getenv("AIVEN_AWS_PRIVATELINK_VPCID")
 
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {

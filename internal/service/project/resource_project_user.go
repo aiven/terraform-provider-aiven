@@ -2,6 +2,7 @@ package project
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
@@ -20,14 +21,18 @@ var aivenProjectUserSchema = map[string]*schema.Schema{
 		Description: schemautil.Complex("Email address of the user.").ForceNew().Build(),
 	},
 	"member_type": {
-		Required:    true,
-		Type:        schema.TypeString,
-		Description: schemautil.Complex("Project membership type.").PossibleValues("admin", "developer", "operator").Build(),
+		Required: true,
+		Type:     schema.TypeString,
+		Description: schemautil.Complex(
+			"Project membership type.",
+		).PossibleValues("admin", "developer", "operator").Build(),
 	},
 	"accepted": {
-		Computed:    true,
-		Type:        schema.TypeBool,
-		Description: "Whether the user has accepted the request to join the project; adding user to a project sends an invitation to the target user and the actual membership is only created once the user accepts the invitation.",
+		Computed: true,
+		Type:     schema.TypeBool,
+		Description: "Whether the user has accepted the request to join the project; adding user to a project sends " +
+			"an invitation to the target user and the actual membership is only created once the user accepts the " +
+			"invitation.",
 	},
 }
 
@@ -48,8 +53,10 @@ func ResourceProjectUser() *schema.Resource {
 
 func resourceProjectUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
+
 	projectName := d.Get("project").(string)
 	email := d.Get("email").(string)
+
 	err := client.ProjectUsers.Invite(
 		projectName,
 		aiven.CreateProjectInvitationRequest{
@@ -62,6 +69,7 @@ func resourceProjectUserCreate(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	d.SetId(schemautil.BuildResourceID(projectName, email))
+
 	if err := d.Set("accepted", false); err != nil {
 		return diag.FromErr(err)
 	}
@@ -82,19 +90,23 @@ func resourceProjectUserRead(ctx context.Context, d *schema.ResourceData, m inte
 		if aiven.IsNotFound(err) && !d.Get("accepted").(bool) {
 			return resourceProjectUserCreate(ctx, d, m)
 		}
+
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("project", projectName); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("email", email); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if user != nil {
 		if err := d.Set("member_type", user.MemberType); err != nil {
 			return diag.FromErr(err)
 		}
+
 		if err := d.Set("accepted", true); err != nil {
 			return diag.FromErr(err)
 		}
@@ -102,10 +114,12 @@ func resourceProjectUserRead(ctx context.Context, d *schema.ResourceData, m inte
 		if err := d.Set("member_type", invitation.MemberType); err != nil {
 			return diag.FromErr(err)
 		}
+
 		if err := d.Set("accepted", false); err != nil {
 			return diag.FromErr(err)
 		}
 	}
+
 	return nil
 }
 
@@ -118,6 +132,7 @@ func resourceProjectUserUpdate(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	memberType := d.Get("member_type").(string)
+
 	err = client.ProjectUsers.UpdateUserOrInvitation(
 		projectName,
 		email,
@@ -149,10 +164,11 @@ func resourceProjectUserDelete(_ context.Context, d *schema.ResourceData, m inte
 	if user != nil {
 		err := client.ProjectUsers.DeleteUser(projectName, email)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 ||
-				!strings.Contains(err.(aiven.Error).Message, "User does not exist") ||
-				!strings.Contains(err.(aiven.Error).Message, "User not found") {
+			var aivenError *aiven.Error
 
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 ||
+				!strings.Contains(aivenError.Message, "User does not exist") ||
+				!strings.Contains(aivenError.Message, "User not found") {
 				return diag.FromErr(err)
 			}
 		}

@@ -36,6 +36,7 @@ func userOrRole(g Grantee) string {
 	if g.User != "" {
 		return g.User
 	}
+
 	return g.Role
 }
 
@@ -44,6 +45,7 @@ func CreateRoleGrant(client *aiven.Client, projectName, serviceName string, gran
 
 	log.Println("[DEBUG] Clickhouse: create role grant query: ", query)
 	_, err := client.ClickHouseQuery.Query(projectName, serviceName, defaultDatabase, query)
+
 	return err
 }
 
@@ -52,6 +54,7 @@ func RevokeRoleGrant(client *aiven.Client, projectName, serviceName string, gran
 
 	log.Println("[DEBUG] privilege revocation query: ", query)
 	_, err := client.ClickHouseQuery.Query(projectName, serviceName, defaultDatabase, query)
+
 	return err
 }
 
@@ -59,6 +62,7 @@ func ReadRoleGrants(client *aiven.Client, projectName, serviceName string, grant
 	query := readRoleGrantsStatement()
 
 	log.Println("[DEBUG] Clickhouse: read role grant query: ", query)
+
 	r, err := client.ClickHouseQuery.Query(projectName, serviceName, defaultDatabase, query)
 	if err != nil {
 		return nil, err
@@ -70,12 +74,15 @@ func ReadRoleGrants(client *aiven.Client, projectName, serviceName string, grant
 	}
 
 	res := make([]RoleGrant, 0)
+
 	for _, grant := range roleGrants {
 		if !grant.Grantee.equals(grantee) {
 			continue
 		}
+
 		res = append(res, grant)
 	}
+
 	return res, err
 }
 
@@ -84,13 +91,17 @@ func CreatePrivilegeGrant(client *aiven.Client, projectName, serviceName string,
 
 	log.Println("[DEBUG] Clickhouse: create privilege grant query: ", query)
 	_, err := client.ClickHouseQuery.Query(projectName, serviceName, defaultDatabase, query)
+
 	return err
 }
 
-func ReadPrivilegeGrants(client *aiven.Client, projectName, serviceName string, grantee Grantee) ([]PrivilegeGrant, error) {
+func ReadPrivilegeGrants(
+	client *aiven.Client, projectName, serviceName string, grantee Grantee,
+) ([]PrivilegeGrant, error) {
 	query := readPrivilegeGrantsStatement()
 
 	log.Println("[DEBUG] Clickhouse: read privilege grant query: ", query)
+
 	r, err := client.ClickHouseQuery.Query(projectName, serviceName, defaultDatabase, query)
 	if err != nil {
 		return nil, err
@@ -100,13 +111,17 @@ func ReadPrivilegeGrants(client *aiven.Client, projectName, serviceName string, 
 	if err != nil {
 		return nil, err
 	}
+
 	res := make([]PrivilegeGrant, 0)
+
 	for _, grant := range privilegeGrants {
 		if !grant.Grantee.equals(grantee) {
 			continue
 		}
+
 		res = append(res, grant)
 	}
+
 	return res, err
 }
 
@@ -115,6 +130,7 @@ func RevokePrivilegeGrant(client *aiven.Client, projectName, serviceName string,
 
 	log.Println("[DEBUG] privilege revocation query: ", query)
 	_, err := client.ClickHouseQuery.Query(projectName, serviceName, defaultDatabase, query)
+
 	return err
 }
 
@@ -174,6 +190,7 @@ func revokePrivilegeGrantStatement(grant PrivilegeGrant) string {
 	}
 
 	b.WriteString(fmt.Sprintf(" FROM %s", escape(userOrRole(grant.Grantee))))
+
 	return b.String()
 }
 
@@ -186,9 +203,11 @@ func roleGrantsFromAPIResponse(r *aiven.ClickhouseQueryResponse) ([]RoleGrant, e
 	data := r.Data
 
 	columnNameMap := make(map[string]int)
+
 	for i, md := range meta {
 		columnNameMap[md.Name] = i
 	}
+
 	for _, columnName := range []string{
 		"user_name",
 		"role_name",
@@ -200,7 +219,9 @@ func roleGrantsFromAPIResponse(r *aiven.ClickhouseQueryResponse) ([]RoleGrant, e
 	}
 
 	var err error
+
 	grants := make([]RoleGrant, 0)
+
 	for i := range data {
 		column := data[i].([]interface{})
 
@@ -209,11 +230,14 @@ func roleGrantsFromAPIResponse(r *aiven.ClickhouseQueryResponse) ([]RoleGrant, e
 			if f == nil {
 				return ""
 			}
+
 			s, ok := f.(string)
 			if !ok {
 				err = fmt.Errorf("column name '%s' was expected to be a string", columnName)
+
 				return ""
 			}
+
 			return s
 		}
 
@@ -225,6 +249,7 @@ func roleGrantsFromAPIResponse(r *aiven.ClickhouseQueryResponse) ([]RoleGrant, e
 			Role: getMaybeString("granted_role_name"),
 		})
 	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -236,9 +261,11 @@ func privilegeGrantsFromAPIResponse(r *aiven.ClickhouseQueryResponse) ([]Privile
 	meta := r.Meta
 	data := r.Data
 	columnNameMap := make(map[string]int)
+
 	for i, md := range meta {
 		columnNameMap[md.Name] = i
 	}
+
 	for _, columnName := range []string{
 		"is_partial_revoke",
 		"user_name",
@@ -255,7 +282,9 @@ func privilegeGrantsFromAPIResponse(r *aiven.ClickhouseQueryResponse) ([]Privile
 	}
 
 	var err error
+
 	grants := make([]PrivilegeGrant, 0)
+
 	for i := range data {
 		column := data[i].([]interface{})
 
@@ -264,11 +293,14 @@ func privilegeGrantsFromAPIResponse(r *aiven.ClickhouseQueryResponse) ([]Privile
 			if f == nil {
 				return ""
 			}
+
 			s, ok := f.(string)
 			if !ok {
 				err = fmt.Errorf("column name '%s' was expected to be a string", columnName)
+
 				return ""
 			}
+
 			return s
 		}
 
@@ -276,8 +308,10 @@ func privilegeGrantsFromAPIResponse(r *aiven.ClickhouseQueryResponse) ([]Privile
 			s, ok := column[columnNameMap[columnName]].(json.Number)
 			if !ok {
 				err = fmt.Errorf("column name '%s' was expected to be a json number", columnName)
+
 				return false
 			}
+
 			return s.String() == "1"
 		}
 
@@ -298,6 +332,7 @@ func privilegeGrantsFromAPIResponse(r *aiven.ClickhouseQueryResponse) ([]Privile
 			WithGrant: getBoolean("grant_option"),
 		})
 	}
+
 	if err != nil {
 		return nil, err
 	}

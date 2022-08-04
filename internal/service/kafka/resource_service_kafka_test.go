@@ -145,5 +145,6 @@ func partitions(numPartitions int) (partitions []*aiven.Partition) {
 	for i := 0; i < numPartitions; i++ {
 		partitions = append(partitions, &aiven.Partition{})
 	}
+
 	return
 }

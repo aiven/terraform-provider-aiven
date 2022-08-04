@@ -66,13 +66,14 @@ func ResourceAccount() *schema.Resource {
 
 func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
+
 	name := d.Get("name").(string)
-	bgId := d.Get("primary_billing_group_id").(string)
+	bgID := d.Get("primary_billing_group_id").(string)
 
 	r, err := client.Accounts.Create(
 		aiven.Account{
 			Name:                  name,
-			PrimaryBillingGroupId: bgId,
+			PrimaryBillingGroupId: bgID,
 		},
 	)
 	if err != nil {
@@ -95,21 +96,27 @@ func resourceAccountRead(_ context.Context, d *schema.ResourceData, m interface{
 	if err := d.Set("account_id", r.Account.Id); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("name", r.Account.Name); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("primary_billing_group_id", r.Account.PrimaryBillingGroupId); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("owner_team_id", r.Account.OwnerTeamId); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("tenant_id", r.Account.TenantId); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("create_time", r.Account.CreateTime.String()); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("update_time", r.Account.UpdateTime.String()); err != nil {
 		return diag.FromErr(err)
 	}

@@ -34,6 +34,7 @@ func datasourceRedisUserRead(ctx context.Context, d *schema.ResourceData, m inte
 	for _, u := range list {
 		if u.Username == userName {
 			d.SetId(schemautil.BuildResourceID(projectName, serviceName, userName))
+
 			return resourceRedisUserRead(ctx, d, m)
 		}
 	}

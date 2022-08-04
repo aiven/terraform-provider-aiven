@@ -34,6 +34,7 @@ func datasourcePGUserRead(ctx context.Context, d *schema.ResourceData, m interfa
 	for _, u := range list {
 		if u.Username == userName {
 			d.SetId(schemautil.BuildResourceID(projectName, serviceName, userName))
+
 			return resourcePGUserRead(ctx, d, m)
 		}
 	}

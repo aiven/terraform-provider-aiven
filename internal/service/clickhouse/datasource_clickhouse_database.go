@@ -13,7 +13,8 @@ import (
 func DatasourceClickhouseDatabase() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceClickhouseDatabaseRead,
-		Description: "The Clickhouse database data source provides information about the existing Aiven Clickhouse Database.",
+		Description: "The Clickhouse database data source provides information about the existing " +
+			"Aiven Clickhouse Database.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenClickhouseDatabaseSchema,
 			"project", "service_name", "name"),
 	}
@@ -34,6 +35,7 @@ func datasourceClickhouseDatabaseRead(ctx context.Context, d *schema.ResourceDat
 	for _, db := range r.Databases {
 		if db.Name == databaseName {
 			d.SetId(schemautil.BuildResourceID(projectName, serviceName, databaseName))
+
 			return resourceClickhouseDatabaseRead(ctx, d, m)
 		}
 	}

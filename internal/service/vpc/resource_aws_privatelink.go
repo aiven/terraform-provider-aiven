@@ -36,7 +36,8 @@ var aivenAWSPrivatelinkSchema = map[string]*schema.Schema{
 
 func ResourceAWSPrivatelink() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The AWS Privatelink resource allows the creation and management of Aiven AWS Privatelink for a services.",
+		Description: "The AWS Privatelink resource allows the creation and management of " +
+			"Aiven AWS Privatelink for a services.",
 		CreateContext: resourceAWSPrivatelinkCreate,
 		ReadContext:   resourceAWSPrivatelinkRead,
 		UpdateContext: resourceAWSPrivatelinkUpdate,
@@ -57,8 +58,9 @@ func resourceAWSPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m
 	client := m.(*aiven.Client)
 
 	var principals []string
-	var project = d.Get("project").(string)
-	var serviceName = d.Get("service_name").(string)
+
+	project := d.Get("project").(string)
+	serviceName := d.Get("service_name").(string)
 
 	for _, p := range d.Get("principals").(*schema.Set).List() {
 		principals = append(principals, p.(string))
@@ -106,15 +108,19 @@ func resourceAWSPrivatelinkRead(_ context.Context, d *schema.ResourceData, m int
 	if err := d.Set("principals", p.Principals); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("aws_service_id", p.AWSServiceID); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("aws_service_name", p.AWSServiceName); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("project", project); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("service_name", serviceName); err != nil {
 		return diag.FromErr(err)
 	}

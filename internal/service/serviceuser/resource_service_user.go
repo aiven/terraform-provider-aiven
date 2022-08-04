@@ -1,4 +1,4 @@
-package service_user
+package serviceuser
 
 import (
 	"context"
@@ -36,7 +36,9 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 		Optional:     true,
 		ForceNew:     true,
 		RequiredWith: []string{"redis_acl_commands", "redis_acl_keys"},
-		Description:  schemautil.Complex("Redis specific field, defines command category rules.").RequiredWith("redis_acl_commands", "redis_acl_keys").ForceNew().Build(),
+		Description: schemautil.Complex(
+			"Redis specific field, defines command category rules.",
+		).RequiredWith("redis_acl_commands", "redis_acl_keys").ForceNew().Build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
@@ -46,7 +48,9 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 		Optional:     true,
 		ForceNew:     true,
 		RequiredWith: []string{"redis_acl_categories", "redis_acl_keys"},
-		Description:  schemautil.Complex("Redis specific field, defines rules for individual commands.").RequiredWith("redis_acl_categories", "redis_acl_keys").ForceNew().Build(),
+		Description: schemautil.Complex(
+			"Redis specific field, defines rules for individual commands.",
+		).RequiredWith("redis_acl_categories", "redis_acl_keys").ForceNew().Build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
@@ -56,25 +60,31 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 		Optional:     true,
 		ForceNew:     true,
 		RequiredWith: []string{"redis_acl_categories", "redis_acl_commands"},
-		Description:  schemautil.Complex("Redis specific field, defines key access rules.").RequiredWith("redis_acl_categories", "redis_acl_keys").ForceNew().Build(),
+		Description: schemautil.Complex(
+			"Redis specific field, defines key access rules.",
+		).RequiredWith("redis_acl_categories", "redis_acl_keys").ForceNew().Build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
 	},
 	"redis_acl_channels": {
-		Type:        schema.TypeList,
-		Optional:    true,
-		ForceNew:    true,
-		Description: schemautil.Complex("Redis specific field, defines the permitted pub/sub channel patterns.").ForceNew().Build(),
+		Type:     schema.TypeList,
+		Optional: true,
+		ForceNew: true,
+		Description: schemautil.Complex(
+			"Redis specific field, defines the permitted pub/sub channel patterns.",
+		).ForceNew().Build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
 	},
 	"pg_allow_replication": {
-		Type:        schema.TypeBool,
-		Optional:    true,
-		ForceNew:    true,
-		Description: schemautil.Complex("Postgres specific field, defines whether replication is allowed.").ForceNew().Build(),
+		Type:     schema.TypeBool,
+		Optional: true,
+		ForceNew: true,
+		Description: schemautil.Complex(
+			"Postgres specific field, defines whether replication is allowed.",
+		).ForceNew().Build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeBool,
 		},
@@ -83,8 +93,12 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		ValidateFunc:     validation.StringInSlice([]string{"caching_sha2_password", "mysql_native_password"}, false),
-		Description:      schemautil.Complex("Authentication details.").PossibleValues("caching_sha2_password", "mysql_native_password").Build(),
+		ValidateFunc: validation.StringInSlice(
+			[]string{"caching_sha2_password", "mysql_native_password"}, false,
+		),
+		Description: schemautil.Complex(
+			"Authentication details.",
+		).PossibleValues("caching_sha2_password", "mysql_native_password").Build(),
 	},
 	"type": {
 		Type:        schema.TypeString,
@@ -105,6 +119,7 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 	},
 }
 
+//nolint:revive
 // ResourceServiceUser
 // Deprecated
 //goland:noinspection GoDeprecation
@@ -119,8 +134,9 @@ func ResourceServiceUser() *schema.Resource {
 			StateContext: resourceServiceUserState,
 		},
 
-		Schema:             aivenServiceUserSchema,
-		DeprecationMessage: "Please use service-specific resources instead of this one, for example: aiven_kafka_user, aiven_pg_user etc.",
+		Schema: aivenServiceUserSchema,
+		DeprecationMessage: "Please use service-specific resources instead of this one, for example: " +
+			"aiven_kafka_user, aiven_pg_user etc.",
 	}
 }
 
@@ -131,6 +147,7 @@ func resourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m in
 	serviceName := d.Get("service_name").(string)
 	username := d.Get("username").(string)
 	allowReplication := d.Get("pg_allow_replication").(bool)
+
 	_, err := client.ServiceUsers.Create(
 		projectName,
 		serviceName,
@@ -194,36 +211,47 @@ func copyServiceUserPropertiesFromAPIResponseToTerraform(
 	if err := d.Set("project", projectName); err != nil {
 		return err
 	}
+
 	if err := d.Set("service_name", serviceName); err != nil {
 		return err
 	}
+
 	if err := d.Set("username", user.Username); err != nil {
 		return err
 	}
+
 	if err := d.Set("password", user.Password); err != nil {
 		return err
 	}
+
 	if err := d.Set("type", user.Type); err != nil {
 		return err
 	}
+
 	if err := d.Set("access_cert", user.AccessCert); err != nil {
 		return err
 	}
+
 	if err := d.Set("access_key", user.AccessKey); err != nil {
 		return err
 	}
+
 	if err := d.Set("redis_acl_keys", user.AccessControl.RedisACLKeys); err != nil {
 		return err
 	}
+
 	if err := d.Set("redis_acl_categories", user.AccessControl.RedisACLCategories); err != nil {
 		return err
 	}
+
 	if err := d.Set("redis_acl_commands", user.AccessControl.RedisACLCommands); err != nil {
 		return err
 	}
+
 	if err := d.Set("redis_acl_channels", user.AccessControl.RedisACLChannels); err != nil {
 		return err
 	}
+
 	if err := d.Set("pg_allow_replication", user.AccessControl.PostgresAllowReplication); err != nil {
 		return err
 	}
@@ -268,7 +296,9 @@ func resourceServiceUserDelete(_ context.Context, d *schema.ResourceData, m inte
 	return nil
 }
 
-func resourceServiceUserState(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceServiceUserState(
+	_ context.Context, d *schema.ResourceData, m interface{},
+) ([]*schema.ResourceData, error) {
 	client := m.(*aiven.Client)
 
 	if len(strings.Split(d.Id(), "/")) != 3 {

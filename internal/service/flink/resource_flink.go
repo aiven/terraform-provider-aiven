@@ -31,7 +31,9 @@ func aivenFlinkSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	aivenFlinkSchema[schemautil.ServiceTypeFlink+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeFlink)
+	aivenFlinkSchema[schemautil.ServiceTypeFlink+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(
+		schemautil.ServiceTypeFlink,
+	)
 
 	return aivenFlinkSchema
 }
@@ -59,7 +61,7 @@ func ResourceFlink() *schema.Resource {
 			),
 			customdiff.Sequence(
 				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
-				schemautil.CustomizeDiffCheckStaticIpDisassociation,
+				schemautil.CustomizeDiffCheckStaticIPDisassociation,
 			),
 		),
 		Importer: &schema.ResourceImporter{

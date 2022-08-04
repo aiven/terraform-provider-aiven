@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"time"
 
@@ -73,7 +74,9 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	aivenKafkaSchema[schemautil.ServiceTypeKafka+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeKafka)
+	aivenKafkaSchema[schemautil.ServiceTypeKafka+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(
+		schemautil.ServiceTypeKafka,
+	)
 
 	return aivenKafkaSchema
 }
@@ -113,7 +116,7 @@ func ResourceKafka() *schema.Resource {
 			),
 			customdiff.Sequence(
 				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
-				schemautil.CustomizeDiffCheckStaticIpDisassociation,
+				schemautil.CustomizeDiffCheckStaticIPDisassociation,
 			),
 
 			// if a kafka_version is >= 3.0 then this schema field is not applicable
@@ -154,7 +157,9 @@ func resourceKafkaCreate(ctx context.Context, d *schema.ResourceData, m interfac
 
 		list, err := client.KafkaACLs.List(project, serviceName)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 				return diag.Errorf("cannot get a list of kafka acl's: %s", err)
 			}
 		}
@@ -186,9 +191,10 @@ func resourceKafkaRead(ctx context.Context, d *schema.ResourceData, m interface{
 	}
 
 	var diags diag.Diagnostics
+
 	var kafkaVersion float64
-	var schemaRegistry bool
-	var kafkaRest bool
+
+	var schemaRegistry, kafkaRest bool
 
 	if v, ok := kafka.UserConfig["kafka_version"]; ok {
 		if version, err := strconv.ParseFloat(v.(string), 64); err == nil {

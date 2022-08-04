@@ -13,7 +13,8 @@ import (
 func DatasourceInfluxDBDatabase() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceDatabaseRead,
-		Description: "The InfluxDB Database data source provides information about the existing Aiven InfluxDB Database.",
+		Description: "The InfluxDB Database data source provides information about the existing " +
+			"Aiven InfluxDB Database.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenInfluxDBDatabaseSchema,
 			"project", "service_name", "database_name"),
 	}
@@ -34,6 +35,7 @@ func datasourceDatabaseRead(ctx context.Context, d *schema.ResourceData, m inter
 	for _, db := range databases {
 		if db.DatabaseName == databaseName {
 			d.SetId(schemautil.BuildResourceID(projectName, serviceName, databaseName))
+
 			return resourceInfluxDBDatabaseRead(ctx, d, m)
 		}
 	}

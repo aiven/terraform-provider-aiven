@@ -1,4 +1,4 @@
-package static_ip_test
+package staticip_test
 
 import (
 	"errors"
@@ -43,8 +43,11 @@ resource "aiven_static_ip" "foo" {
 					}
 					_, ok = rs.Primary.Attributes["static_ip_address_id"]
 					if !ok {
-						return "", fmt.Errorf("expected resource '%s' to have an 'static_ip_address_id' attribute", resourceName)
+						return "", fmt.Errorf(
+							"expected resource '%s' to have an 'static_ip_address_id' attribute", resourceName,
+						)
 					}
+
 					return rs.Primary.ID, nil
 				},
 				ImportStateCheck: func(s []*terraform.InstanceState) error {
@@ -53,10 +56,14 @@ resource "aiven_static_ip" "foo" {
 					}
 					attributes := s[0].Attributes
 					if !strings.EqualFold(attributes["project"], projectName) {
-						return fmt.Errorf("expected project to match '%s', got: '%s'", projectName, attributes["project_name"])
+						return fmt.Errorf(
+							"expected project to match '%s', got: '%s'", projectName, attributes["project_name"],
+						)
 					}
 					if !strings.EqualFold(attributes["cloud_name"], cloudName) {
-						return fmt.Errorf("expected cloud to match '%s', got: '%s'", cloudName, attributes["cloud_name"])
+						return fmt.Errorf(
+							"expected cloud to match '%s', got: '%s'", cloudName, attributes["cloud_name"],
+						)
 					}
 					if _, ok := attributes["static_ip_address_id"]; !ok {
 						return errors.New("expected 'static_ip_address_id' field to be set")
@@ -64,6 +71,7 @@ resource "aiven_static_ip" "foo" {
 					if _, ok := attributes["state"]; !ok {
 						return errors.New("expected 'state' field to be set")
 					}
+
 					return nil
 				},
 			},

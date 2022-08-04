@@ -1,6 +1,7 @@
 package vpc_test
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -52,7 +53,7 @@ func TestAccAivenProjectVPC_basic(t *testing.T) {
 				ExpectError: regexp.MustCompile("invalid resource id"),
 			},
 			{
-				Config: testAccProjectVPCResourceGetById(rName4),
+				Config: testAccProjectVPCResourceGetByID(rName4),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenProjectVPCAttributes("data.aiven_project_vpc.vpc"),
 					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName4)),
@@ -62,8 +63,10 @@ func TestAccAivenProjectVPC_basic(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccServiceProjectVPCResourceFail(rName5),
-				ExpectError: regexp.MustCompile("invalid project_vpc_id, should have the following format {project_name}/{project_vpc_id}"),
+				Config: testAccServiceProjectVPCResourceFail(rName5),
+				ExpectError: regexp.MustCompile(
+					"invalid project_vpc_id, should have the following format {project_name}/{project_vpc_id}",
+				),
 			},
 		},
 	})
@@ -148,15 +151,16 @@ func testAccCheckAivenProjectVPCResourceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		projectName, vpcId, err := schemautil.SplitResourceID2(rs.Primary.ID)
+		projectName, vpcID, err := schemautil.SplitResourceID2(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		vpc, err := c.VPCs.Get(projectName, vpcId)
+		vpc, err := c.VPCs.Get(projectName, vpcID)
 		if err != nil {
-			errStatus := err.(aiven.Error).Status
-			if errStatus != 404 && errStatus != 403 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); ok && aivenError.Status != 404 && aivenError.Status != 403 {
 				return err
 			}
 		}
@@ -206,7 +210,7 @@ data "aiven_project_vpc" "vpc" {
 }`, name)
 }
 
-func testAccProjectVPCResourceGetById(name string) string {
+func testAccProjectVPCResourceGetByID(name string) string {
 	return fmt.Sprintf(`
 resource "aiven_project" "foo" {
   project = "test-acc-pr-%s"

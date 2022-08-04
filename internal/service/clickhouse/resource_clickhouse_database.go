@@ -21,16 +21,21 @@ var aivenClickhouseDatabaseSchema = map[string]*schema.Schema{
 		Description: schemautil.Complex("The name of the Clickhouse database.").ForceNew().Build(),
 	},
 	"termination_protection": {
-		Type:        schema.TypeBool,
-		Optional:    true,
-		Default:     false,
-		Description: schemautil.Complex(`It is a Terraform client-side deletion protections, which prevents the Clickhouse database from being deleted by Terraform. It is recommended to enable this for any production Clickhouse databases containing critical data.`).DefaultValue(false).Build(),
+		Type:     schema.TypeBool,
+		Optional: true,
+		Default:  false,
+		Description: schemautil.Complex(
+			"It is a Terraform client-side deletion protections, which prevents the Clickhouse database from " +
+				"being deleted by Terraform. It is recommended to enable this for any production Clickhouse " +
+				"databases containing critical data.",
+		).DefaultValue(false).Build(),
 	},
 }
 
 func ResourceClickhouseDatabase() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Clickhouse Database resource allows the creation and management of Aiven Clickhouse Databases.",
+		Description: "The Clickhouse Database resource allows the creation and management of " +
+			"Aiven Clickhouse Databases.",
 		CreateContext: resourceClickhouseDatabaseCreate,
 		ReadContext:   resourceClickhouseDatabaseRead,
 		UpdateContext: resourceClickhouseDatabaseUpdate,

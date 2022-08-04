@@ -1,6 +1,7 @@
 package account_test
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"testing"
@@ -105,7 +106,9 @@ func testAccCheckAivenAccountResourceDestroy(s *terraform.State) error {
 
 		r, err := c.Accounts.List()
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 				return err
 			}
 

@@ -1,6 +1,7 @@
 package kafka
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -28,15 +29,21 @@ var kafkaTopicAvailabilitySem = semaphore.NewWeighted(1)
 func (w *kafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		if w.Project == "" {
-			return nil, "WRONG_INPUT", fmt.Errorf("project name of the kafka topic resource cannot be empty `%s`", w.Project)
+			return nil, "WRONG_INPUT", fmt.Errorf(
+				"project name of the kafka topic resource cannot be empty `%s`", w.Project,
+			)
 		}
 
 		if w.ServiceName == "" {
-			return nil, "WRONG_INPUT", fmt.Errorf("common name of the kafka topic resource cannot be empty `%s`", w.ServiceName)
+			return nil, "WRONG_INPUT", fmt.Errorf(
+				"common name of the kafka topic resource cannot be empty `%s`", w.ServiceName,
+			)
 		}
 
 		if w.TopicName == "" {
-			return nil, "WRONG_INPUT", fmt.Errorf("topic name of the kafka topic resource cannot be empty `%s`", w.TopicName)
+			return nil, "WRONG_INPUT", fmt.Errorf(
+				"topic name of the kafka topic resource cannot be empty `%s`", w.TopicName,
+			)
 		}
 
 		topicCache := cache.GetTopicCache()
@@ -46,8 +53,9 @@ func (w *kafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 			err := w.refresh()
 
 			if err != nil {
-				aivenError, ok := err.(aiven.Error)
-				if !ok {
+				var aivenError *aiven.Error
+
+				if ok = errors.As(err, &aivenError); !ok {
 					return nil, "CONFIGURING", err
 				}
 
@@ -55,7 +63,11 @@ func (w *kafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 					// Topic creation is asynchronous so it is possible for the creation call to
 					// have completed successfully yet fetcing topic info fails with 404.
 					if aivenError.Status == 404 {
-						log.Printf("[DEBUG] Got an error while waiting for a topic '%s' to be ACTIVE: %s.", w.TopicName, err)
+						log.Printf(
+							"[DEBUG] Got an error while waiting for a topic '%s' to be ACTIVE: %s.",
+							w.TopicName, err,
+						)
+
 						return nil, "CONFIGURING", nil
 					}
 				}
@@ -63,9 +75,13 @@ func (w *kafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 				// Getting topic info can sometimes temporarily fail with 501 and 502. Don't
 				// treat that as fatal error but keep on retrying instead.
 				if aivenError.Status == 501 || aivenError.Status == 502 {
-					log.Printf("[DEBUG] Got an error while waiting for a topic '%s' to be ACTIVE: %s.", w.TopicName, err)
+					log.Printf(
+						"[DEBUG] Got an error while waiting for a topic '%s' to be ACTIVE: %s.", w.TopicName, err,
+					)
+
 					return nil, "CONFIGURING", nil
 				}
+
 				return nil, "CONFIGURING", err
 			}
 
@@ -85,6 +101,7 @@ func (w *kafkaTopicAvailabilityWaiter) refresh() error {
 	if !kafkaTopicAvailabilitySem.TryAcquire(1) {
 		log.Printf("[TRACE] Kafka Topic Availability cache refresh already in progress ...")
 		cache.GetTopicCache().AddToQueue(w.Project, w.ServiceName, w.TopicName)
+
 		return nil
 	}
 	defer kafkaTopicAvailabilitySem.Release(1)
@@ -105,6 +122,7 @@ func (w *kafkaTopicAvailabilityWaiter) refresh() error {
 		}
 
 		log.Printf("[DEBUG] Kafka Topic queue: %+v", queue)
+
 		v2Topics, err := w.Client.KafkaTopics.V2List(w.Project, w.ServiceName, queue)
 		if err != nil {
 			if aiven.IsNotFound(err) {

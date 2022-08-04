@@ -34,13 +34,16 @@ var aivenKafkaSchemaConfigurationSchema = map[string]*schema.Schema{
 			// Allow ignoring those.
 			return new == ""
 		},
-		Description: schemautil.Complex("Kafka Schemas compatibility level.").PossibleValues(schemautil.StringSliceToInterfaceSlice(compatibilityLevels)...).Build(),
+		Description: schemautil.Complex(
+			"Kafka Schemas compatibility level.",
+		).PossibleValues(schemautil.StringSliceToInterfaceSlice(compatibilityLevels)...).Build(),
 	},
 }
 
 func ResourceKafkaSchemaConfiguration() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Kafka Schema Configuration resource allows the creation and management of Aiven Kafka Schema Configurations.",
+		Description: "The Kafka Schema Configuration resource allows the creation and management of " +
+			"Aiven Kafka Schema Configurations.",
 		CreateContext: resourceKafkaSchemaConfigurationCreate,
 		UpdateContext: resourceKafkaSchemaConfigurationUpdate,
 		ReadContext:   resourceKafkaSchemaConfigurationRead,
@@ -53,7 +56,9 @@ func ResourceKafkaSchemaConfiguration() *schema.Resource {
 	}
 }
 
-func resourceKafkaSchemaConfigurationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaSchemaConfigurationUpdate(
+	ctx context.Context, d *schema.ResourceData, m interface{},
+) diag.Diagnostics {
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
@@ -73,7 +78,9 @@ func resourceKafkaSchemaConfigurationUpdate(ctx context.Context, d *schema.Resou
 }
 
 // resourceKafkaSchemaConfigurationCreate Kafka Schemas global configuration cannot be created but only updated
-func resourceKafkaSchemaConfigurationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaSchemaConfigurationCreate(
+	ctx context.Context, d *schema.ResourceData, m interface{},
+) diag.Diagnostics {
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 
@@ -106,9 +113,11 @@ func resourceKafkaSchemaConfigurationRead(_ context.Context, d *schema.ResourceD
 	if err := d.Set("project", project); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("service_name", serviceName); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("compatibility_level", r.CompatibilityLevel); err != nil {
 		return diag.FromErr(err)
 	}

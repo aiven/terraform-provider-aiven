@@ -20,7 +20,7 @@ func DatasourcePGDatabase() *schema.Resource {
 }
 
 func datasourceDatabaseRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+	client := m.(*aiven.Client) //nolint:forcetypeassert
 
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
@@ -34,6 +34,7 @@ func datasourceDatabaseRead(ctx context.Context, d *schema.ResourceData, m inter
 	for _, db := range databases {
 		if db.DatabaseName == databaseName {
 			d.SetId(schemautil.BuildResourceID(projectName, serviceName, databaseName))
+
 			return resourcePGDatabaseRead(ctx, d, m)
 		}
 	}

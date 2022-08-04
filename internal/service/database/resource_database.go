@@ -39,7 +39,9 @@ var aivenDatabaseSchema = map[string]*schema.Schema{
 		Default:          defaultLC,
 		ForceNew:         true,
 		DiffSuppressFunc: handleLcDefaults,
-		Description:      schemautil.Complex("Default string sort order (`LC_COLLATE`) of the database.").DefaultValue(defaultLC).ForceNew().Build(),
+		Description: schemautil.Complex(
+			"Default string sort order (`LC_COLLATE`) of the database.",
+		).DefaultValue(defaultLC).ForceNew().Build(),
 	},
 	"lc_ctype": {
 		Type:             schema.TypeString,
@@ -47,27 +49,35 @@ var aivenDatabaseSchema = map[string]*schema.Schema{
 		Default:          defaultLC,
 		ForceNew:         true,
 		DiffSuppressFunc: handleLcDefaults,
-		Description:      schemautil.Complex("Default character classification (`LC_CTYPE`) of the database.").DefaultValue(defaultLC).ForceNew().Build(),
+		Description: schemautil.Complex(
+			"Default character classification (`LC_CTYPE`) of the database.",
+		).DefaultValue(defaultLC).ForceNew().Build(),
 	},
 	"termination_protection": {
-		Type:        schema.TypeBool,
-		Optional:    true,
-		Default:     false,
-		Description: schemautil.Complex(`It is a Terraform client-side deletion protections, which prevents the database from being deleted by Terraform. It is recommended to enable this for any production databases containing critical data.`).DefaultValue(false).Build(),
+		Type:     schema.TypeBool,
+		Optional: true,
+		Default:  false,
+		Description: schemautil.Complex(
+			"It is a Terraform client-side deletion protections, which prevents the database from being " +
+				"deleted by Terraform. It is recommended to enable this for any production databases containing " +
+				"critical data.",
+		).DefaultValue(false).Build(),
 	},
 }
 
+//nolint:revive
 // ResourceDatabase
 // Deprecated
 //goland:noinspection GoDeprecation
 func ResourceDatabase() *schema.Resource {
 	return &schema.Resource{
-		Description:        "The Database resource allows the creation and management of Aiven Databases.",
-		DeprecationMessage: "`aiven_database` resource is deprecated. Please use service-specific resources instead, for example: `aiven_pg_database` , `aiven_mysql_database` etc.",
-		CreateContext:      resourceDatabaseCreate,
-		ReadContext:        resourceDatabaseRead,
-		DeleteContext:      resourceDatabaseDelete,
-		UpdateContext:      resourceDatabaseUpdate,
+		Description: "The Database resource allows the creation and management of Aiven Databases.",
+		DeprecationMessage: "`aiven_database` resource is deprecated. Please use service-specific resources instead, " +
+			"for example: `aiven_pg_database` , `aiven_mysql_database` etc.",
+		CreateContext: resourceDatabaseCreate,
+		ReadContext:   resourceDatabaseRead,
+		DeleteContext: resourceDatabaseDelete,
+		UpdateContext: resourceDatabaseUpdate,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceDatabaseState,
 		},
@@ -86,6 +96,7 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, m inter
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	databaseName := d.Get("database_name").(string)
+
 	_, err := client.Databases.Create(
 		projectName,
 		serviceName,
@@ -124,18 +135,23 @@ func resourceDatabaseRead(_ context.Context, d *schema.ResourceData, m interface
 	if err := d.Set("database_name", database.DatabaseName); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("project", projectName); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("service_name", serviceName); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("lc_collate", database.LcCollate); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("lc_ctype", database.LcType); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("termination_protection", d.Get("termination_protection")); err != nil {
 		return diag.FromErr(err)
 	}
@@ -163,6 +179,7 @@ func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	timeout := d.Timeout(schema.TimeoutDelete)
+
 	_, err = waiter.Conf(timeout).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("error waiting for Aiven Database to be DELETED: %s", err)

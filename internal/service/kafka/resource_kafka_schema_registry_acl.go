@@ -20,7 +20,9 @@ var aivenKafkaSchemaRegistryACLSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringInSlice([]string{"schema_registry_read", "schema_registry_write"}, false),
-		Description:  schemautil.Complex("Kafka Schema Registry permission to grant.").ForceNew().PossibleValues("schema_registry_read", "schema_registry_write").Build(),
+		Description: schemautil.Complex(
+			"Kafka Schema Registry permission to grant.",
+		).ForceNew().PossibleValues("schema_registry_read", "schema_registry_write").Build(),
 	},
 	"resource": {
 		Type:        schema.TypeString,
@@ -47,7 +49,8 @@ var aivenKafkaSchemaRegistryACLSchema = map[string]*schema.Schema{
 
 func ResourceKafkaSchemaRegistryACL() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Resource Kafka Schema Registry ACL resource allows the creation and management of Schema Registry ACLs for an Aiven Kafka service.",
+		Description: "The Resource Kafka Schema Registry ACL resource allows the creation and management of " +
+			"Schema Registry ACLs for an Aiven Kafka service.",
 		CreateContext: resourceKafkaSchemaRegistryACLCreate,
 		ReadContext:   resourceKafkaSchemaRegistryACLRead,
 		DeleteContext: resourceKafkaSchemaRegistryACLDelete,
@@ -129,18 +132,23 @@ func copyKafkaSchemaRegistryACLPropertiesFromAPIResponseToTerraform(
 	if err := d.Set("project", project); err != nil {
 		return err
 	}
+
 	if err := d.Set("service_name", serviceName); err != nil {
 		return err
 	}
+
 	if err := d.Set("resource", acl.Resource); err != nil {
 		return err
 	}
+
 	if err := d.Set("permission", acl.Permission); err != nil {
 		return err
 	}
+
 	if err := d.Set("username", acl.Username); err != nil {
 		return err
 	}
+
 	if err := d.Set("acl_id", acl.ID); err != nil {
 		return err
 	}

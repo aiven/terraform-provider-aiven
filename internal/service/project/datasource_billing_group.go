@@ -29,5 +29,6 @@ func DatasourceBillingGroup() *schema.Resource {
 
 func datasourceBillingGroupRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	d.SetId(d.Get("billing_group_id").(string))
+
 	return resourceBillingGroupRead(ctx, d, m)
 }

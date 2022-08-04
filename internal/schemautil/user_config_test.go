@@ -13,6 +13,7 @@ func TestGenerateTerraformUserConfigSchema(t *testing.T) {
 	type args struct {
 		data map[string]interface{}
 	}
+
 	var tests = []struct {
 		name  string
 		args  args
@@ -120,6 +121,7 @@ func TestGenerateTerraformUserConfigSchema(t *testing.T) {
 			false,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var wantKeys []string
@@ -147,7 +149,9 @@ func TestGenerateTerraformUserConfigSchema(t *testing.T) {
 			}
 
 			if !reflect.DeepEqual(gotKeys, wantKeys) {
-				t.Errorf("GenerateTerraformUserConfigSchema() keys validation error = %+#v, want %+#v", gotKeys, wantKeys)
+				t.Errorf(
+					"GenerateTerraformUserConfigSchema() keys validation error = %+#v, want %+#v", gotKeys, wantKeys,
+				)
 			}
 
 			for k, shema := range got {
@@ -168,6 +172,7 @@ func Test_convertTerraformUserConfigToAPICompatibleFormat(t *testing.T) {
 		userConfig   map[string]interface{}
 		configSchema map[string]interface{}
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -234,9 +239,12 @@ func Test_convertTerraformUserConfigToAPICompatibleFormat(t *testing.T) {
 			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := convertTerraformUserConfigToAPICompatibleFormat(tt.args.serviceType, tt.args.newResource, tt.args.userConfig, tt.args.configSchema)
+			got := convertTerraformUserConfigToAPICompatibleFormat(
+				tt.args.serviceType, tt.args.newResource, tt.args.userConfig, tt.args.configSchema,
+			)
 			assert.Equal(t, got, tt.want)
 		})
 	}

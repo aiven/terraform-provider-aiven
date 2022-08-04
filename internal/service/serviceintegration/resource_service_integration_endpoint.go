@@ -1,4 +1,4 @@
-package service_integration
+package serviceintegration
 
 import (
 	"context"
@@ -151,7 +151,8 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 
 func ResourceServiceIntegrationEndpoint() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Service Integration Endpoint resource allows the creation and management of Aiven Service Integration Endpoints.",
+		Description: "The Service Integration Endpoint resource allows the creation and management of " +
+			"Aiven Service Integration Endpoints.",
 		CreateContext: resourceServiceIntegrationEndpointCreate,
 		ReadContext:   resourceServiceIntegrationEndpointRead,
 		UpdateContext: resourceServiceIntegrationEndpointUpdate,
@@ -164,7 +165,9 @@ func ResourceServiceIntegrationEndpoint() *schema.Resource {
 	}
 }
 
-func resourceServiceIntegrationEndpointCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceServiceIntegrationEndpointCreate(
+	ctx context.Context, d *schema.ResourceData, m interface{},
+) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	projectName := d.Get("project").(string)
 	endpointType := d.Get("endpoint_type").(string)
@@ -208,7 +211,9 @@ func resourceServiceIntegrationEndpointRead(_ context.Context, d *schema.Resourc
 	return nil
 }
 
-func resourceServiceIntegrationEndpointUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceServiceIntegrationEndpointUpdate(
+	ctx context.Context, d *schema.ResourceData, m interface{},
+) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, endpointID, err := schemautil.SplitResourceID2(d.Id())
@@ -233,7 +238,9 @@ func resourceServiceIntegrationEndpointUpdate(ctx context.Context, d *schema.Res
 	return resourceServiceIntegrationEndpointRead(ctx, d, m)
 }
 
-func resourceServiceIntegrationEndpointDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceServiceIntegrationEndpointDelete(
+	_ context.Context, d *schema.ResourceData, m interface{},
+) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, endpointID, err := schemautil.SplitResourceID2(d.Id())
@@ -254,22 +261,39 @@ func copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(
 	endpoint *aiven.ServiceIntegrationEndpoint,
 	project string,
 ) error {
-	_ = d.Set("project", project)
-	_ = d.Set("endpoint_name", endpoint.EndpointName)
+	if err := d.Set("project", project); err != nil {
+		return err
+	}
+
+	if err := d.Set("endpoint_name", endpoint.EndpointName); err != nil {
+		return err
+	}
+
 	endpointType := endpoint.EndpointType
-	_ = d.Set("endpoint_type", endpointType)
-	userConfig := schemautil.ConvertAPIUserConfigToTerraformCompatibleFormat("endpoint", endpointType, endpoint.UserConfig)
+
+	if err := d.Set("endpoint_type", endpointType); err != nil {
+		return err
+	}
+
+	userConfig := schemautil.ConvertAPIUserConfigToTerraformCompatibleFormat(
+		"endpoint", endpointType, endpoint.UserConfig,
+	)
 	if len(userConfig) > 0 {
 		_ = d.Set(endpointType+"_user_config", userConfig)
 	}
+
 	// Must coerse all values into strings
 	endpointConfig := map[string]string{}
+
 	if len(endpoint.EndpointConfig) > 0 {
 		for key, value := range endpoint.EndpointConfig {
 			endpointConfig[key] = fmt.Sprintf("%v", value)
 		}
 	}
-	_ = d.Set("endpoint_config", endpointConfig)
+
+	if err := d.Set("endpoint_config", endpointConfig); err != nil {
+		return err
+	}
 
 	return nil
 }

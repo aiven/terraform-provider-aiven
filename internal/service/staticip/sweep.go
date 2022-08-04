@@ -1,7 +1,7 @@
 //go:build sweep
 // +build sweep
 
-package static_ip
+package staticip
 
 import (
 	"fmt"
@@ -57,7 +57,7 @@ func sweepStaticIPs(region string) error {
 				StaticIPAddressID: ip.StaticIPAddressID,
 			})
 		if err != nil && !aiven.IsNotFound(err) {
-			return fmt.Errorf("error deleting static_ip: %w", err)
+			return fmt.Errorf("error deleting aiven_static_ip: %w", err)
 		}
 	}
 

@@ -40,7 +40,7 @@ func TestAccAivenService_grafana(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccGrafanaServiceCustomIpFiltersResource(rName2),
+				Config: testAccGrafanaServiceCustomIPFiltersResource(rName2),
 				Check: resource.ComposeTestCheckFunc(
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_grafana.common"),
 					testAccCheckAivenServiceGrafanaAttributes("data.aiven_grafana.common"),
@@ -91,7 +91,7 @@ data "aiven_grafana" "common" {
 }`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
-func testAccGrafanaServiceCustomIpFiltersResource(name string) string {
+func testAccGrafanaServiceCustomIPFiltersResource(name string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
   project = "%s"

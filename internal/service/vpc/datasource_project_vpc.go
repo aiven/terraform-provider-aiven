@@ -15,9 +15,10 @@ func DatasourceProjectVPC() *schema.Resource {
 	aivenProjectVPCDataSourceSchema := schemautil.ResourceSchemaAsDatasourceSchema(aivenProjectVPCSchema,
 		"project", "cloud_name")
 	aivenProjectVPCDataSourceSchema["id"] = &schema.Schema{
-		Type:        schema.TypeString,
-		Description: "ID of the VPC. This can be used to filter out the specific VPC if there are more than one datasource returned.",
-		Optional:    true,
+		Type: schema.TypeString,
+		Description: "ID of the VPC. This can be used to filter out the specific VPC if there are more than one " +
+			"datasource returned.",
+		Optional: true,
 	}
 
 	return &schema.Resource{
@@ -32,7 +33,7 @@ func datasourceProjectVPCRead(_ context.Context, d *schema.ResourceData, m inter
 
 	projectName := d.Get("project").(string)
 	cloudName := d.Get("cloud_name").(string)
-	vpcId, hasId := d.GetOk("id")
+	vpcID, hasID := d.GetOk("id")
 
 	vpcs, err := client.VPCs.List(projectName)
 	if err != nil {
@@ -45,13 +46,13 @@ func datasourceProjectVPCRead(_ context.Context, d *schema.ResourceData, m inter
 		condition := vpc.CloudName == cloudName
 
 		// We don't need to care about the cloud name if the ID is provided
-		if hasId {
-			splitId, err := schemautil.SplitResourceID(vpcId.(string), 2)
+		if hasID {
+			splitID, err := schemautil.SplitResourceID(vpcID.(string), 2) //nolint:govet
 			if err != nil {
 				return diag.FromErr(err)
 			}
 
-			id := splitId[1]
+			id := splitID[1]
 			condition = vpc.ProjectVPCID == id
 		}
 
@@ -68,16 +69,21 @@ func datasourceProjectVPCRead(_ context.Context, d *schema.ResourceData, m inter
 	if len(filteredVPCs) > 1 {
 		// List out the available options in the error message
 		var smg string
+
 		for _, vpc := range filteredVPCs {
 			id := schemautil.BuildResourceID(projectName, vpc.ProjectVPCID)
 			smg = smg + fmt.Sprintf("- ID=(%v), State=(%v), NetworkCIDR=(%v)\n", id, vpc.State, vpc.NetworkCIDR)
 		}
-		return diag.Errorf("project %s has multiple VPC defined for %s. Please add `id` to get the desired one. The available vpc ids are:\n%s",
-			projectName, cloudName, smg)
+
+		return diag.Errorf(
+			"project %s has multiple VPC defined for %s. Please add `id` to get the desired one. "+
+				"The available vpc ids are:\n%s", projectName, cloudName, smg,
+		)
 	}
 
 	vpc := filteredVPCs[0]
 	d.SetId(schemautil.BuildResourceID(projectName, vpc.ProjectVPCID))
+
 	err = copyVPCPropertiesFromAPIResponseToTerraform(d, vpc, projectName)
 	if err != nil {
 		return diag.FromErr(err)

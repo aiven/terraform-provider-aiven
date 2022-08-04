@@ -81,7 +81,8 @@ func testAccCheckAivenServiceMysqlAttributes(n string) resource.TestCheckFunc {
 		r := s.RootModule().Resources[n]
 		a := r.Primary.Attributes
 
-		if a["mysql_user_config.0.mysql.0.sql_mode"] != "ANSI,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE" {
+		if a["mysql_user_config.0.mysql.0.sql_mode"] !=
+			"ANSI,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE" {
 			return fmt.Errorf("expected to get a correct sql_mode from Aiven")
 		}
 

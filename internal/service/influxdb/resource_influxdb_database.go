@@ -20,10 +20,14 @@ var aivenInfluxDBDatabaseSchema = map[string]*schema.Schema{
 		Description: schemautil.Complex("The name of the service database.").ForceNew().Build(),
 	},
 	"termination_protection": {
-		Type:        schema.TypeBool,
-		Optional:    true,
-		Default:     false,
-		Description: schemautil.Complex(`It is a Terraform client-side deletion protections, which prevents the database from being deleted by Terraform. It is recommended to enable this for any production databases containing critical data.`).DefaultValue(false).Build(),
+		Type:     schema.TypeBool,
+		Optional: true,
+		Default:  false,
+		Description: schemautil.Complex(
+			"It is a Terraform client-side deletion protections, which prevents the database from being " +
+				"deleted by Terraform. It is recommended to enable this for any production databases containing " +
+				"critical data.",
+		).DefaultValue(false).Build(),
 	},
 }
 
@@ -51,6 +55,7 @@ func resourceInfluxDBDatabaseCreate(ctx context.Context, d *schema.ResourceData,
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	databaseName := d.Get("database_name").(string)
+
 	_, err := client.Databases.Create(
 		projectName,
 		serviceName,
@@ -89,9 +94,11 @@ func resourceInfluxDBDatabaseRead(_ context.Context, d *schema.ResourceData, m i
 	if err := d.Set("database_name", database.DatabaseName); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("project", projectName); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("service_name", serviceName); err != nil {
 		return diag.FromErr(err)
 	}
@@ -119,6 +126,7 @@ func resourceInfluxDBDatabaseDelete(ctx context.Context, d *schema.ResourceData,
 	}
 
 	timeout := d.Timeout(schema.TimeoutDelete)
+
 	_, err = waiter.Conf(timeout).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("error waiting for Aiven Database to be DELETED: %s", err)

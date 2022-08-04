@@ -29,9 +29,11 @@ func datasourceProjectUserRead(ctx context.Context, d *schema.ResourceData, m in
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
 	for _, user := range users {
 		if user.Email == email {
 			d.SetId(schemautil.BuildResourceID(projectName, email))
+
 			return resourceProjectUserRead(ctx, d, m)
 		}
 	}
@@ -39,6 +41,7 @@ func datasourceProjectUserRead(ctx context.Context, d *schema.ResourceData, m in
 	for _, invitation := range invitations {
 		if invitation.UserEmail == email {
 			d.SetId(schemautil.BuildResourceID(projectName, email))
+
 			return resourceProjectUserRead(ctx, d, m)
 		}
 	}

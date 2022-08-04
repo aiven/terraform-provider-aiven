@@ -80,13 +80,23 @@ resource "aiven_clickhouse_grant" "foo-user-grant" {
 				Config: manifest,
 				Check: resource.ComposeTestCheckFunc(
 					// privilege grant checks
-					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.privilege", "INSERT"),
-					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.database", "test-db"),
-					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.table", "test-table"),
-					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.column", "test-column"),
+					resource.TestCheckResourceAttr(
+						"aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.privilege", "INSERT",
+					),
+					resource.TestCheckResourceAttr(
+						"aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.database", "test-db",
+					),
+					resource.TestCheckResourceAttr(
+						"aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.table", "test-table",
+					),
+					resource.TestCheckResourceAttr(
+						"aiven_clickhouse_grant.foo-role-grant", "privilege_grant.0.column", "test-column",
+					),
 
 					// role grant checks
-					resource.TestCheckResourceAttr("aiven_clickhouse_grant.foo-user-grant", "role_grant.0.role", "foo-role"),
+					resource.TestCheckResourceAttr(
+						"aiven_clickhouse_grant.foo-user-grant", "role_grant.0.role", "foo-role",
+					),
 				),
 			},
 		},
@@ -108,6 +118,7 @@ func testAccCheckAivenClickhouseGrantResourceDestroy(s *terraform.State) error {
 		}
 
 		grantee := clickhouse.Grantee{}
+
 		switch granteeType {
 		case clickhouse.GranteeTypeRole:
 			grantee.Role = granteeName
@@ -119,6 +130,7 @@ func testAccCheckAivenClickhouseGrantResourceDestroy(s *terraform.State) error {
 			if aiven.IsNotFound(err) {
 				continue
 			}
+
 			return fmt.Errorf("unable to check if privilege grants for '%s' still exists: %w", granteeName, err)
 		} else if len(privilegeGrants) > 0 {
 			return fmt.Errorf("'%s' still has privilege grants exists", granteeName)
@@ -128,10 +140,12 @@ func testAccCheckAivenClickhouseGrantResourceDestroy(s *terraform.State) error {
 			if aiven.IsNotFound(err) {
 				continue
 			}
+
 			return fmt.Errorf("unable to check if privilege grants for '%s' still exists: %w", granteeName, err)
 		} else if len(roleGrants) > 0 {
 			return fmt.Errorf("'%s' still has privilege grants exists", granteeName)
 		}
 	}
+
 	return nil
 }

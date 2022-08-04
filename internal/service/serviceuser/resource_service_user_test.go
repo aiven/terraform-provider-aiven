@@ -1,6 +1,7 @@
-package service_user_test
+package serviceuser_test
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -123,7 +124,9 @@ func testAccCheckAivenServiceUserResourceDestroy(s *terraform.State) error {
 
 		p, err := c.ServiceUsers.Get(projectName, serviceName, username)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 				return err
 			}
 		}

@@ -67,9 +67,13 @@ var aivenAccountAuthenticationSchema = map[string]*schema.Schema{
 					Description: "Field name for user's first name",
 				},
 				"identity": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Description: "Field name for user's identity. This field must always exist in responses, and must be immutable and unique. Contents of this field are used to identify the user. Using user ID (such as unix user id) is highly recommended, as email address may change, requiring relinking user to Aiven user.",
+					Type:     schema.TypeString,
+					Optional: true,
+					Description: "Field name for user's identity. " +
+						"This field must always exist in responses, and must be immutable and unique. " +
+						"Contents of this field are used to identify the user. " +
+						"Using user ID (such as unix user id) is highly recommended, as email address may change, " +
+						"requiring relinking user to Aiven user.",
 				},
 				"last_name": {
 					Type:        schema.TypeString,
@@ -77,9 +81,10 @@ var aivenAccountAuthenticationSchema = map[string]*schema.Schema{
 					Description: "Field name for user's last name",
 				},
 				"real_name": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Description: "Field name for user's full name. If specified, first_name and last_name mappings are ignored",
+					Type:     schema.TypeString,
+					Optional: true,
+					Description: "Field name for user's full name. " +
+						"If specified, first_name and last_name mappings are ignored",
 				},
 			},
 		},
@@ -139,7 +144,8 @@ var aivenAccountAuthenticationSchema = map[string]*schema.Schema{
 
 func ResourceAccountAuthentication() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Account Authentication resource allows the creation and management of an Aiven Account Authentications.",
+		Description: "The Account Authentication resource allows the creation and management of an " +
+			"Aiven Account Authentications.",
 		CreateContext: resourceAccountAuthenticationCreate,
 		ReadContext:   resourceAccountAuthenticationRead,
 		UpdateContext: resourceAccountAuthenticationUpdate,
@@ -155,10 +161,10 @@ func ResourceAccountAuthentication() *schema.Resource {
 func resourceAccountAuthenticationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId := d.Get("account_id").(string)
+	accountID := d.Get("account_id").(string)
 
 	r, err := client.AccountAuthentications.Create(
-		accountId,
+		accountID,
 		aiven.AccountAuthenticationMethod{
 			Enabled:                d.Get("enabled").(bool),
 			Name:                   d.Get("name").(string),
@@ -188,12 +194,12 @@ func resourceAccountAuthenticationCreate(ctx context.Context, d *schema.Resource
 func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId, authId, err := schemautil.SplitResourceID2(d.Id())
+	accountID, authID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	r, err := client.AccountAuthentications.Get(accountId, authId)
+	r, err := client.AccountAuthentications.Get(accountID, authID)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -201,54 +207,71 @@ func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData
 	if err := d.Set("account_id", r.AuthenticationMethod.AccountId); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("name", r.AuthenticationMethod.Name); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("type", r.AuthenticationMethod.Type); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("enabled", r.AuthenticationMethod.Enabled); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("auto_join_team_id", r.AuthenticationMethod.AutoJoinTeamId); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("saml_certificate", r.AuthenticationMethod.SAMLCertificate); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("saml_digest_algorithm", r.AuthenticationMethod.SAMLDigestAlgorithm); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("saml_field_mapping", r.AuthenticationMethod.SAMLFieldMapping); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("saml_idp_login_allowed", r.AuthenticationMethod.SAMLIdpLoginAllowed); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("saml_idp_url", r.AuthenticationMethod.SAMLIdpUrl); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("saml_signature_algorithm", r.AuthenticationMethod.SAMLSignatureAlgorithm); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("saml_variant", r.AuthenticationMethod.SAMLVariant); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("saml_entity_id", r.AuthenticationMethod.SAMLEntity); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("authentication_id", r.AuthenticationMethod.Id); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("saml_acs_url", r.AuthenticationMethod.SAMLAcsUrl); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("saml_metadata_url", r.AuthenticationMethod.SAMLMetadataUrl); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("create_time", r.AuthenticationMethod.CreateTime.String()); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("update_time", r.AuthenticationMethod.UpdateTime.String()); err != nil {
 		return diag.FromErr(err)
 	}
@@ -258,13 +281,14 @@ func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData
 
 func resourceAccountAuthenticationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
-	accountId, authId, err := schemautil.SplitResourceID2(d.Id())
+
+	accountID, authID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	r, err := client.AccountAuthentications.Update(accountId, aiven.AccountAuthenticationMethod{
-		Id:                     authId,
+	r, err := client.AccountAuthentications.Update(accountID, aiven.AccountAuthenticationMethod{
+		Id:                     authID,
 		Enabled:                d.Get("enabled").(bool),
 		Name:                   d.Get("name").(string),
 		Type:                   d.Get("type").(string),
@@ -292,12 +316,12 @@ func resourceAccountAuthenticationUpdate(ctx context.Context, d *schema.Resource
 func resourceAccountAuthenticationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId, teamId, err := schemautil.SplitResourceID2(d.Id())
+	accountID, teamID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = client.AccountAuthentications.Delete(accountId, teamId)
+	err = client.AccountAuthentications.Delete(accountID, teamID)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
@@ -312,6 +336,7 @@ func readSAMLFieldMappingFromSchema(d *schema.ResourceData) *aiven.SAMLFieldMapp
 	}
 
 	r := aiven.SAMLFieldMapping{}
+
 	for _, v := range set {
 		cv := v.(map[string]interface{})
 

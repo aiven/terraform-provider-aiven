@@ -1,6 +1,7 @@
 package account_test
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"testing"
@@ -61,14 +62,16 @@ func testAccCheckAivenAccountTeamResourceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		accountId, teamId, err := schemautil.SplitResourceID2(rs.Primary.ID)
+		accountID, teamID, err := schemautil.SplitResourceID2(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
 		r, err := c.Accounts.List()
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 				return err
 			}
 
@@ -76,10 +79,12 @@ func testAccCheckAivenAccountTeamResourceDestroy(s *terraform.State) error {
 		}
 
 		for _, ac := range r.Accounts {
-			if ac.Id == accountId {
-				rl, err := c.AccountTeams.List(accountId)
+			if ac.Id == accountID {
+				rl, err := c.AccountTeams.List(accountID)
 				if err != nil {
-					if err.(aiven.Error).Status != 404 {
+					var aivenError *aiven.Error
+
+					if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 						return err
 					}
 
@@ -87,13 +92,12 @@ func testAccCheckAivenAccountTeamResourceDestroy(s *terraform.State) error {
 				}
 
 				for _, team := range rl.Teams {
-					if team.Id == teamId {
+					if team.Id == teamID {
 						return fmt.Errorf("account team (%s) still exists", rs.Primary.ID)
 					}
 				}
 			}
 		}
-
 	}
 
 	return nil

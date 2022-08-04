@@ -13,7 +13,8 @@ import (
 func DatasourceKafkaACL() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceKafkaACLRead,
-		Description: "The Data Source Kafka ACL data source provides information about the existing Aiven Kafka ACL for a Kafka service.",
+		Description: "The Data Source Kafka ACL data source provides information about the existing " +
+			"Aiven Kafka ACL for a Kafka service.",
 
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenKafkaACLSchema,
 			"project", "service_name", "topic", "username", "permission"),
@@ -37,6 +38,7 @@ func datasourceKafkaACLRead(ctx context.Context, d *schema.ResourceData, m inter
 	for _, acl := range acls {
 		if acl.Topic == topic && acl.Username == userName && acl.Permission == permission {
 			d.SetId(schemautil.BuildResourceID(projectName, serviceName, acl.ID))
+
 			return resourceKafkaACLRead(ctx, d, m)
 		}
 	}

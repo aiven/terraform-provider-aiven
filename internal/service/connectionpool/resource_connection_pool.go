@@ -1,4 +1,4 @@
-package connection_pool
+package connectionpool
 
 import (
 	"context"
@@ -15,17 +15,21 @@ var aivenConnectionPoolSchema = map[string]*schema.Schema{
 	"service_name": schemautil.CommonSchemaServiceNameReference,
 
 	"database_name": {
-		Type:        schema.TypeString,
-		Required:    true,
-		ForceNew:    true,
-		Description: schemautil.Complex("The name of the database the pool connects to.").Referenced().ForceNew().Build(),
+		Type:     schema.TypeString,
+		Required: true,
+		ForceNew: true,
+		Description: schemautil.Complex(
+			"The name of the database the pool connects to.",
+		).Referenced().ForceNew().Build(),
 	},
 	"pool_mode": {
 		Type:         schema.TypeString,
 		Optional:     true,
 		Default:      "transaction",
 		ValidateFunc: validation.StringInSlice([]string{"session", "transaction", "statement"}, false),
-		Description:  schemautil.Complex("The mode the pool operates in").DefaultValue("transaction").PossibleValues("session", "transaction", "statement").Build(),
+		Description: schemautil.Complex(
+			"The mode the pool operates in",
+		).DefaultValue("transaction").PossibleValues("session", "transaction", "statement").Build(),
 	},
 	"pool_name": {
 		Type:        schema.TypeString,
@@ -34,15 +38,20 @@ var aivenConnectionPoolSchema = map[string]*schema.Schema{
 		Description: schemautil.Complex("The name of the created pool.").ForceNew().Build(),
 	},
 	"pool_size": {
-		Type:        schema.TypeInt,
-		Optional:    true,
-		Default:     10,
-		Description: schemautil.Complex("The number of connections the pool may create towards the backend server. This does not affect the number of incoming connections, which is always a much larger number.").DefaultValue(10).Build(),
+		Type:     schema.TypeInt,
+		Optional: true,
+		Default:  10,
+		Description: schemautil.Complex(
+			"The number of connections the pool may create towards the backend server. " +
+				"This does not affect the number of incoming connections, which is always a much larger number.",
+		).DefaultValue(10).Build(),
 	},
 	"username": {
-		Type:        schema.TypeString,
-		Optional:    true,
-		Description: schemautil.Complex("The name of the service user used to connect to the database.").Referenced().Build(),
+		Type:     schema.TypeString,
+		Optional: true,
+		Description: schemautil.Complex(
+			"The name of the service user used to connect to the database.",
+		).Referenced().Build(),
 	},
 	"connection_uri": {
 		Type:        schema.TypeString,
@@ -73,6 +82,7 @@ func resourceConnectionPoolCreate(ctx context.Context, d *schema.ResourceData, m
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	poolName := d.Get("pool_name").(string)
+
 	_, err := client.ConnectionPools.Create(
 		project,
 		serviceName,
@@ -165,24 +175,31 @@ func copyConnectionPoolPropertiesFromAPIResponseToTerraform(
 	if err := d.Set("project", project); err != nil {
 		return err
 	}
+
 	if err := d.Set("service_name", serviceName); err != nil {
 		return err
 	}
+
 	if err := d.Set("connection_uri", pool.ConnectionURI); err != nil {
 		return err
 	}
+
 	if err := d.Set("database_name", pool.Database); err != nil {
 		return err
 	}
+
 	if err := d.Set("pool_mode", pool.PoolMode); err != nil {
 		return err
 	}
+
 	if err := d.Set("pool_name", pool.PoolName); err != nil {
 		return err
 	}
+
 	if err := d.Set("pool_size", pool.PoolSize); err != nil {
 		return err
 	}
+
 	if err := d.Set("username", pool.Username); err != nil {
 		return err
 	}

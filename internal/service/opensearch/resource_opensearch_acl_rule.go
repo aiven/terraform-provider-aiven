@@ -18,20 +18,28 @@ var aivenOpensearchACLRuleSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: schemautil.GetACLUserValidateFunc(),
-		Description:  schemautil.Complex("The username for the ACL entry").MaxLen(40).Referenced().ForceNew().Build(),
+		Description: schemautil.Complex(
+			"The username for the ACL entry",
+		).MaxLen(40).Referenced().ForceNew().Build(),
 	},
 	"index": {
 		Type:         schema.TypeString,
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringLenBetween(1, 249),
-		Description:  schemautil.Complex("The index pattern for this ACL entry.").MaxLen(249).ForceNew().Build(),
+		Description: schemautil.Complex(
+			"The index pattern for this ACL entry.",
+		).MaxLen(249).ForceNew().Build(),
 	},
 	"permission": {
-		Type:         schema.TypeString,
-		Required:     true,
-		ValidateFunc: validation.StringInSlice([]string{"deny", "admin", "read", "readwrite", "write"}, false),
-		Description:  schemautil.Complex("The permissions for this ACL entry").PossibleValues("deny", "admin", "read", "readwrite", "write").Build(),
+		Type:     schema.TypeString,
+		Required: true,
+		ValidateFunc: validation.StringInSlice(
+			[]string{"deny", "admin", "read", "readwrite", "write"}, false,
+		),
+		Description: schemautil.Complex(
+			"The permissions for this ACL entry",
+		).PossibleValues("deny", "admin", "read", "readwrite", "write").Build(),
 	},
 }
 
@@ -50,17 +58,21 @@ func ResourceOpensearchACLRule() *schema.Resource {
 	}
 }
 
-func resourceElasticsearchACLRuleGetPermissionFromACLResponse(cfg aiven.ElasticSearchACLConfig, username, index string) (string, bool) {
+func resourceElasticsearchACLRuleGetPermissionFromACLResponse(
+	cfg aiven.ElasticSearchACLConfig, username, index string,
+) (string, bool) {
 	for _, acl := range cfg.ACLs {
 		if acl.Username != username {
 			continue
 		}
+
 		for _, rule := range acl.Rules {
 			if rule.Index == index {
 				return rule.Permission, true
 			}
 		}
 	}
+
 	return "", false
 }
 
@@ -76,7 +88,10 @@ func resourceOpensearchACLRuleRead(_ context.Context, d *schema.ResourceData, m 
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
-	permission, found := resourceElasticsearchACLRuleGetPermissionFromACLResponse(r.ElasticSearchACLConfig, username, index)
+
+	permission, found := resourceElasticsearchACLRuleGetPermissionFromACLResponse(
+		r.ElasticSearchACLConfig, username, index,
+	)
 	if !found {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -84,15 +99,19 @@ func resourceOpensearchACLRuleRead(_ context.Context, d *schema.ResourceData, m 
 	if err := d.Set("project", project); err != nil {
 		return diag.Errorf("error setting ACL Rules `project` for resource %s: %s", d.Id(), err)
 	}
+
 	if err := d.Set("service_name", serviceName); err != nil {
 		return diag.Errorf("error setting ACL Rules `service_name` for resource %s: %s", d.Id(), err)
 	}
+
 	if err := d.Set("username", username); err != nil {
 		return diag.Errorf("error setting ACLs Rules `username` for resource %s: %s", d.Id(), err)
 	}
+
 	if err := d.Set("index", index); err != nil {
 		return diag.Errorf("error setting ACLs Rules `index` for resource %s: %s", d.Id(), err)
 	}
+
 	if err := d.Set("permission", permission); err != nil {
 		return diag.Errorf("error setting ACLs Rules `permission` for resource %s: %s", d.Id(), err)
 	}
@@ -122,6 +141,7 @@ func resourceOpensearchACLRuleUpdate(ctx context.Context, d *schema.ResourceData
 	permission := d.Get("permission").(string)
 
 	modifier := resourceElasticsearchACLModifierUpdateACLRule(username, index, permission)
+
 	err := resourceOpensearchACLModifyRemoteConfig(project, serviceName, client, modifier)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
@@ -142,9 +162,11 @@ func resourceOpensearchACLRuleDelete(_ context.Context, d *schema.ResourceData, 
 	permission := d.Get("permission").(string)
 
 	modifier := resourceElasticsearchACLModifierDeleteACLRule(username, index, permission)
+
 	err := resourceOpensearchACLModifyRemoteConfig(project, serviceName, client, modifier)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
+
 	return nil
 }

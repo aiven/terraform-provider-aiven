@@ -1,6 +1,7 @@
 package pg_test
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -17,6 +18,7 @@ import (
 func TestAccAivenPGUser_basic(t *testing.T) {
 	resourceName := "aiven_pg_user.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -98,7 +100,9 @@ func testAccCheckAivenPGUserResourceDestroy(s *terraform.State) error {
 
 		p, err := c.ServiceUsers.Get(projectName, serviceName, username)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 				return err
 			}
 		}

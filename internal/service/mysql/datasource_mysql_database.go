@@ -34,6 +34,7 @@ func datasourceDatabaseRead(ctx context.Context, d *schema.ResourceData, m inter
 	for _, db := range databases {
 		if db.DatabaseName == databaseName {
 			d.SetId(schemautil.BuildResourceID(projectName, serviceName, databaseName))
+
 			return resourceMySQLDatabaseRead(ctx, d, m)
 		}
 	}

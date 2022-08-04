@@ -1,4 +1,4 @@
-package service_component_test
+package servicecomponent_test
 
 import (
 	"fmt"
@@ -41,8 +41,10 @@ func TestAccAivenServiceComponentDataSource_basic(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccServiceComponentKafkaAuthMethodMissingErrorMessages(rName2),
-				ExpectError: regexp.MustCompile("please try specifying 'kafka_authentication_method' to filter the results"),
+				Config: testAccServiceComponentKafkaAuthMethodMissingErrorMessages(rName2),
+				ExpectError: regexp.MustCompile(
+					"please try specifying 'kafka_authentication_method' to filter the results",
+				),
 			},
 			{
 				Config:      testAccServiceComponentKafkaAuthMethodNotMatchErrorMessages(rName3),

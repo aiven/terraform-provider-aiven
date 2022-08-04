@@ -10,38 +10,43 @@ import (
 )
 
 const (
-	StaticIpCreating  = "creating"
-	StaticIpCreated   = "created"
-	StaticIpAvailable = "available"
-	StaticIpAssigned  = "assigned"
+	StaticIPCreating  = "creating"
+	StaticIPCreated   = "created"
+	StaticIPAvailable = "available"
+	StaticIPAssigned  = "assigned"
 )
 
 func CurrentlyAllocatedStaticIps(_ context.Context, projectName, serviceName string, m interface{}) ([]string, error) {
 	client := m.(*aiven.Client)
 
 	// special handling for static ips
-	staticIpListResponse, err := client.StaticIPs.List(projectName)
+	staticIPListResponse, err := client.StaticIPs.List(projectName)
 	if err != nil {
 		return nil, fmt.Errorf("unable to list static ips for project '%s': %w", projectName, err)
 	}
+
 	allocatedStaticIps := make([]string, 0)
-	for _, sip := range staticIpListResponse.StaticIPs {
+
+	for _, sip := range staticIPListResponse.StaticIPs {
 		if sip.ServiceName == serviceName {
 			allocatedStaticIps = append(allocatedStaticIps, sip.StaticIPAddressID)
 		}
 	}
+
 	return allocatedStaticIps, nil
 }
 
 // DiffStaticIps takes a service resource and computes which static ips to assign and which to disassign
 func DiffStaticIps(ctx context.Context, d *schema.ResourceData, m interface{}) (ass, dis []string, err error) {
 	ipsFromSchema := staticIpsFromSchema(d)
+
 	ipsFromAPI, err := staticIpsFromAPI(ctx, d, m)
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to get static ips from api: %w", err)
 	}
 
 	ass, diss := diffStaticIps(ipsFromSchema, ipsFromAPI)
+
 	return ass, diss, nil
 }
 
@@ -61,11 +66,13 @@ func staticIpsFromAPI(_ context.Context, d *schema.ResourceData, m interface{}) 
 	}
 
 	res := make([]string, 0)
+
 	for _, sip := range staticIpsForProject.StaticIPs {
 		if sip.ServiceName == serviceName {
 			res = append(res, sip.StaticIPAddressID)
 		}
 	}
+
 	return res, nil
 }
 
@@ -93,5 +100,6 @@ DEL:
 		// have[i] was not in want
 		del = append(del, have[i])
 	}
+
 	return add, del
 }

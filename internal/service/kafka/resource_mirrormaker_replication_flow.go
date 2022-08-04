@@ -64,7 +64,11 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 		Optional:     true,
 		Default:      defaultReplicationPolicy,
 		ValidateFunc: validation.StringInSlice(replicationPolicies, false),
-		Description:  schemautil.Complex("Replication policy class.").DefaultValue(defaultReplicationPolicy).PossibleValues(schemautil.StringSliceToInterfaceSlice(replicationPolicies)...).Build(),
+		Description: schemautil.Complex(
+			"Replication policy class.",
+		).DefaultValue(defaultReplicationPolicy).PossibleValues(
+			schemautil.StringSliceToInterfaceSlice(replicationPolicies)...,
+		).Build(),
 	},
 	"sync_group_offsets_enabled": {
 		Type:        schema.TypeBool,
@@ -89,7 +93,8 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 
 func ResourceMirrorMakerReplicationFlow() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The MirrorMaker 2 Replication Flow resource allows the creation and management of MirrorMaker 2 Replication Flows on Aiven Cloud.",
+		Description: "The MirrorMaker 2 Replication Flow resource allows the creation and management of " +
+			"MirrorMaker 2 Replication Flows on Aiven Cloud.",
 		CreateContext: resourceMirrorMakerReplicationFlowCreate,
 		ReadContext:   resourceMirrorMakerReplicationFlowRead,
 		UpdateContext: resourceMirrorMakerReplicationFlowUpdate,
@@ -102,7 +107,9 @@ func ResourceMirrorMakerReplicationFlow() *schema.Resource {
 	}
 }
 
-func resourceMirrorMakerReplicationFlowCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceMirrorMakerReplicationFlowCreate(
+	ctx context.Context, d *schema.ResourceData, m interface{},
+) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -141,7 +148,9 @@ func resourceMirrorMakerReplicationFlowRead(_ context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	replicationFlow, err := client.KafkaMirrorMakerReplicationFlow.Get(project, serviceName, sourceCluster, targetCluster)
+	replicationFlow, err := client.KafkaMirrorMakerReplicationFlow.Get(
+		project, serviceName, sourceCluster, targetCluster,
+	)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -149,33 +158,45 @@ func resourceMirrorMakerReplicationFlowRead(_ context.Context, d *schema.Resourc
 	if err := d.Set("project", project); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("service_name", serviceName); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("enable", replicationFlow.ReplicationFlow.Enabled); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("source_cluster", sourceCluster); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("target_cluster", targetCluster); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("topics", replicationFlow.ReplicationFlow.Topics); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("topics_blacklist", replicationFlow.ReplicationFlow.TopicsBlacklist); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("replication_policy_class", replicationFlow.ReplicationFlow.ReplicationPolicyClass); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("sync_group_offsets_enabled", replicationFlow.ReplicationFlow.SyncGroupOffsetsEnabled); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("sync_group_offsets_interval_seconds", replicationFlow.ReplicationFlow.SyncGroupOffsetsIntervalSeconds); err != nil {
+
+	if err := d.Set(
+		"sync_group_offsets_interval_seconds", replicationFlow.ReplicationFlow.SyncGroupOffsetsIntervalSeconds,
+	); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("emit_heartbeats_enabled", replicationFlow.ReplicationFlow.EmitHeartbeatsEnabled); err != nil {
 		return diag.FromErr(err)
 	}
@@ -183,7 +204,9 @@ func resourceMirrorMakerReplicationFlowRead(_ context.Context, d *schema.Resourc
 	return nil
 }
 
-func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceMirrorMakerReplicationFlowUpdate(
+	ctx context.Context, d *schema.ResourceData, m interface{},
+) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, sourceCluster, targetCluster, err := schemautil.SplitResourceID4(d.Id())
@@ -215,7 +238,9 @@ func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.Res
 	return resourceMirrorMakerReplicationFlowRead(ctx, d, m)
 }
 
-func resourceMirrorMakerReplicationFlowDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceMirrorMakerReplicationFlowDelete(
+	_ context.Context, d *schema.ResourceData, m interface{},
+) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, sourceCluster, targetCluster, err := schemautil.SplitResourceID4(d.Id())

@@ -1,6 +1,7 @@
 package kafka_test
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -115,7 +116,6 @@ resource "aiven_kafka_acl" "foo" {
   username     = "user-1"
   permission   = "admin"
 }`
-
 }
 
 func testAccKafkaACLWrongServiceNameResource(_ string) string {
@@ -127,7 +127,6 @@ resource "aiven_kafka_acl" "foo" {
   username     = "user-1"
   permission   = "admin"
 }`
-
 }
 
 func testAccKafkaACLWrongPermisionResource(_ string) string {
@@ -139,7 +138,6 @@ resource "aiven_kafka_acl" "foo" {
   username     = "user-1"
   permission   = "wrong-permission"
 }`
-
 }
 
 func testAccKafkaACLWildcardResource(_ string) string {
@@ -151,7 +149,6 @@ resource "aiven_kafka_acl" "foo" {
   username     = "*"
   permission   = "admin"
 }`
-
 }
 
 func testAccKafkaACLPrefixWildcardResource(_ string) string {
@@ -163,7 +160,6 @@ resource "aiven_kafka_acl" "foo" {
   username     = "group-user-*"
   permission   = "admin"
 }`
-
 }
 
 func testAccKafkaACLWrongUsernameResource(_ string) string {
@@ -175,7 +171,6 @@ resource "aiven_kafka_acl" "foo" {
   username     = "#-user"
   permission   = "admin"
 }`
-
 }
 
 func testAccKafkaACLInvalidCharsResource(_ string) string {
@@ -187,7 +182,6 @@ resource "aiven_kafka_acl" "foo" {
   username     = "!./,£$^&*()_"
   permission   = "admin"
 }`
-
 }
 
 func testAccKafkaACLResource(name string) string {
@@ -255,7 +249,9 @@ func testAccCheckAivenKafkaACLResourceDestroy(s *terraform.State) error {
 
 		p, err := c.KafkaACLs.Get(project, serviceName, aclID)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 				return err
 			}
 		}

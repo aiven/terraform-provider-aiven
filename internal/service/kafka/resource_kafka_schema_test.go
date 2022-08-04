@@ -1,6 +1,7 @@
 package kafka_test
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -93,7 +94,9 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 
 		_, err = c.Services.Get(projectName, serviceName)
 		if err != nil {
-			if err.(aiven.Error).Status == 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status == 404 {
 				return nil
 			}
 
@@ -102,7 +105,9 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 
 		schemaList, err := c.KafkaSubjectSchemas.List(projectName, serviceName)
 		if err != nil {
-			if err.(aiven.Error).Status == 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status == 404 {
 				return nil
 			}
 
@@ -112,7 +117,9 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 		for _, s := range schemaList.KafkaSchemaSubjects.Subjects {
 			versions, err := c.KafkaSubjectSchemas.GetVersions(projectName, serviceName, s)
 			if err != nil {
-				if err.(aiven.Error).Status == 404 {
+				var aivenError *aiven.Error
+
+				if ok := errors.As(err, &aivenError); !ok || aivenError.Status == 404 {
 					return nil
 				}
 
@@ -123,7 +130,6 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 				return fmt.Errorf("kafka schema (%s) still exists", s)
 			}
 		}
-
 	}
 
 	return nil

@@ -31,7 +31,7 @@ data "aiven_account_team_member" "foo" {
 
 ### Read-Only
 
-- `accepted` (Boolean) is a boolean flag that determines whether an invitation was accepted or not by the user. `false` value means that the invitation was sent to the user but not yet accepted. `true` means that the user accepted the invitation and now a member of an account team.
+- `accepted` (Boolean) Is a boolean flag that determines whether an invitation was accepted or not by the user. `false` value means that the invitation was sent to the user but not yet accepted. `true` means that the user accepted the invitation and now a member of an account team.
 - `create_time` (String) Time of creation
 - `id` (String) The ID of this resource.
 - `invited_by_user_email` (String) The email address that invited this user.

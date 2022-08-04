@@ -19,6 +19,7 @@ import (
 func TestAccAivenKafkaTopic_basic(t *testing.T) {
 	resourceName := "aiven_kafka_topic.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -43,6 +44,7 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 func TestAccAivenKafkaTopic_many_topics(t *testing.T) {
 	resourceName := "aiven_kafka_topic.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -66,6 +68,7 @@ func TestAccAivenKafkaTopic_many_topics(t *testing.T) {
 func TestAccAivenKafkaTopic_termination_protection(t *testing.T) {
 	resourceName := "aiven_kafka_topic.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -93,6 +96,7 @@ func TestAccAivenKafkaTopic_termination_protection(t *testing.T) {
 func TestAccAivenKafkaTopic_custom_timeouts(t *testing.T) {
 	resourceName := "aiven_kafka_topic.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -125,7 +129,6 @@ resource "aiven_kafka_topic" "more" {
   partitions   = 3
   replication  = 2
 }`
-
 }
 
 func testAccKafkaTopicResource(name string) string {
@@ -300,6 +303,7 @@ func testAccCheckAivenKafkaTopicResourceDestroy(s *terraform.State) error {
 			if aiven.IsNotFound(err) {
 				return nil
 			}
+
 			return err
 		}
 
@@ -308,6 +312,7 @@ func testAccCheckAivenKafkaTopicResourceDestroy(s *terraform.State) error {
 			if aiven.IsNotFound(err) {
 				return nil
 			}
+
 			return err
 		}
 
@@ -323,6 +328,7 @@ func TestPartitions(t *testing.T) {
 	type args struct {
 		numPartitions int
 	}
+
 	tests := []struct {
 		name           string
 		args           args
@@ -334,9 +340,12 @@ func TestPartitions(t *testing.T) {
 			[]*aiven.Partition{{}, {}, {}},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotPartitions := partitions(tt.args.numPartitions); !reflect.DeepEqual(gotPartitions, tt.wantPartitions) {
+			if gotPartitions := partitions(tt.args.numPartitions); !reflect.DeepEqual(
+				gotPartitions, tt.wantPartitions,
+			) {
 				t.Errorf("partitions() = %v, want %v", gotPartitions, tt.wantPartitions)
 			}
 		})

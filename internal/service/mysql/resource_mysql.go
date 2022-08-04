@@ -18,7 +18,9 @@ func aivenMySQLSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	schemaMySQL[schemautil.ServiceTypeMySQL+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeMySQL)
+	schemaMySQL[schemautil.ServiceTypeMySQL+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(
+		schemautil.ServiceTypeMySQL,
+	)
 
 	return schemaMySQL
 }
@@ -45,7 +47,7 @@ func ResourceMySQL() *schema.Resource {
 			),
 			customdiff.Sequence(
 				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
-				schemautil.CustomizeDiffCheckStaticIpDisassociation,
+				schemautil.CustomizeDiffCheckStaticIPDisassociation,
 			),
 		),
 		Importer: &schema.ResourceImporter{

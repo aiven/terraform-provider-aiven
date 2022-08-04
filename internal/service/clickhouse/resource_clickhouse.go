@@ -18,7 +18,9 @@ func clickhouseSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	s[schemautil.ServiceTypeClickhouse+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeClickhouse)
+	s[schemautil.ServiceTypeClickhouse+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(
+		schemautil.ServiceTypeClickhouse,
+	)
 
 	return s
 }
@@ -46,7 +48,7 @@ func ResourceClickhouse() *schema.Resource {
 			),
 			customdiff.Sequence(
 				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
-				schemautil.CustomizeDiffCheckStaticIpDisassociation,
+				schemautil.CustomizeDiffCheckStaticIPDisassociation,
 			),
 		),
 		Importer: &schema.ResourceImporter{

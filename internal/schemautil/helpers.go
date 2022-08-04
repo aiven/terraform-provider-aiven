@@ -24,6 +24,7 @@ type PlanParameters struct {
 
 func GetAPIServiceIntegrations(d ResourceStateOrResourceDiff) []aiven.NewServiceIntegration {
 	var apiServiceIntegrations []aiven.NewServiceIntegration
+
 	tfServiceIntegrations := d.Get("service_integrations")
 	if tfServiceIntegrations != nil {
 		tfServiceIntegrationList := tfServiceIntegrations.([]interface{})
@@ -38,6 +39,7 @@ func GetAPIServiceIntegrations(d ResourceStateOrResourceDiff) []aiven.NewService
 			apiServiceIntegrations = append(apiServiceIntegrations, apiIntegration)
 		}
 	}
+
 	return apiServiceIntegrations
 }
 
@@ -51,33 +53,43 @@ func GetProjectVPCIdPointer(d ResourceStateOrResourceDiff) (*string, error) {
 
 	parts := strings.SplitN(vpcID, "/", 2)
 	if len(parts) != 2 {
-		return nil, fmt.Errorf("invalid project_vpc_id, should have the following format {project_name}/{project_vpc_id}")
+		return nil, fmt.Errorf(
+			"invalid project_vpc_id, should have the following format {project_name}/{project_vpc_id}",
+		)
 	}
 
 	p1 := parts[1]
 	vpcIDPointer = &p1
+
 	return vpcIDPointer, nil
 }
 
 func GetMaintenanceWindow(d ResourceStateOrResourceDiff) *aiven.MaintenanceWindow {
 	dow := d.Get("maintenance_window_dow").(string)
 	t := d.Get("maintenance_window_time").(string)
+
 	if len(dow) > 0 && len(t) > 0 {
 		return &aiven.MaintenanceWindow{DayOfWeek: dow, TimeOfDay: t}
 	}
+
 	return nil
 }
 
 func ConvertToDiskSpaceMB(b string) int {
 	diskSizeMB, _ := units.RAMInBytes(b)
+
 	return int(diskSizeMB / units.MiB)
 }
 
-func GetServicePlanParametersFromServiceResponse(ctx context.Context, client *aiven.Client, project string, service *aiven.Service) (PlanParameters, error) {
+func GetServicePlanParametersFromServiceResponse(
+	ctx context.Context, client *aiven.Client, project string, service *aiven.Service,
+) (PlanParameters, error) {
 	return getServicePlanParametersInternal(ctx, client, project, service.Type, service.Plan)
 }
 
-func GetServicePlanParametersFromSchema(ctx context.Context, client *aiven.Client, d ResourceStateOrResourceDiff) (PlanParameters, error) {
+func GetServicePlanParametersFromSchema(
+	ctx context.Context, client *aiven.Client, d ResourceStateOrResourceDiff,
+) (PlanParameters, error) {
 	project := d.Get("project").(string)
 	serviceType := d.Get("service_type").(string)
 	servicePlan := d.Get("plan").(string)
@@ -85,11 +97,14 @@ func GetServicePlanParametersFromSchema(ctx context.Context, client *aiven.Clien
 	return getServicePlanParametersInternal(ctx, client, project, serviceType, servicePlan)
 }
 
-func getServicePlanParametersInternal(_ context.Context, client *aiven.Client, project, serviceType, servicePlan string) (PlanParameters, error) {
+func getServicePlanParametersInternal(
+	_ context.Context, client *aiven.Client, project, serviceType, servicePlan string,
+) (PlanParameters, error) {
 	servicePlanResponse, err := client.ServiceTypes.GetPlan(project, serviceType, servicePlan)
 	if err != nil {
 		return PlanParameters{}, fmt.Errorf("unable to get service plan from api: %w", err)
 	}
+
 	return PlanParameters{
 		DiskSizeMBDefault: servicePlanResponse.DiskSpaceMB,
 		DiskSizeMBMax:     servicePlanResponse.DiskSpaceCapMB,
@@ -97,10 +112,11 @@ func getServicePlanParametersInternal(_ context.Context, client *aiven.Client, p
 	}, nil
 }
 
-func dynamicDiskSpaceIsAllowedByPricing(_ context.Context, client *aiven.Client, d ResourceStateOrResourceDiff) (bool, error) {
+func dynamicDiskSpaceIsAllowedByPricing(
+	_ context.Context, client *aiven.Client, d ResourceStateOrResourceDiff,
+) (bool, error) {
 	// to check if dynamic disk space is allowed, we currently have to check
 	// the pricing api to see if the `extra_disk_price_per_gb_usd` field is set
-
 	project := d.Get("project").(string)
 	serviceType := d.Get("service_type").(string)
 	servicePlan := d.Get("plan").(string)
@@ -110,6 +126,7 @@ func dynamicDiskSpaceIsAllowedByPricing(_ context.Context, client *aiven.Client,
 	if err != nil {
 		return false, fmt.Errorf("unable to get service plan pricing from api: %w", err)
 	}
+
 	return len(servicePlanPricingResponse.ExtraDiskPricePerGBUSD) > 0, nil
 }
 

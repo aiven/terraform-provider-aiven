@@ -72,7 +72,9 @@ func aivenPGSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	schemaPG[schemautil.ServiceTypePG+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypePG)
+	schemaPG[schemautil.ServiceTypePG+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(
+		schemautil.ServiceTypePG,
+	)
 
 	return schemaPG
 }
@@ -101,7 +103,7 @@ func ResourcePG() *schema.Resource {
 				schemautil.CustomizeDiffServiceIntegrationAfterCreation,
 			),
 			customdiff.Sequence(
-				schemautil.CustomizeDiffCheckStaticIpDisassociation,
+				schemautil.CustomizeDiffCheckStaticIPDisassociation,
 				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
 			),
 		),
@@ -127,7 +129,9 @@ func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	userConfig := schemautil.ConvertTerraformUserConfigToAPICompatibleFormat(templates.UserConfigSchemaService, "pg", false, d)
+	userConfig := schemautil.ConvertTerraformUserConfigToAPICompatibleFormat(
+		templates.UserConfigSchemaService, "pg", false, d,
+	)
 
 	if userConfig["pg_version"] != nil {
 		s, err := client.Services.Get(projectName, serviceName)
@@ -148,7 +152,7 @@ func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				Client:      m.(*aiven.Client),
 				Project:     projectName,
 				ServiceName: serviceName,
-				TaskId:      t.Task.Id,
+				TaskID:      t.Task.Id,
 			}
 
 			taskI, err := w.Conf(d.Timeout(schema.TimeoutDefault)).WaitForStateContext(ctx)
@@ -176,7 +180,7 @@ type ServiceTaskWaiter struct {
 	Client      *aiven.Client
 	Project     string
 	ServiceName string
-	TaskId      string
+	TaskID      string
 }
 
 // RefreshFunc will call the Aiven client and refresh its state.
@@ -185,7 +189,7 @@ func (w *ServiceTaskWaiter) RefreshFunc() resource.StateRefreshFunc {
 		t, err := w.Client.ServiceTask.Get(
 			w.Project,
 			w.ServiceName,
-			w.TaskId,
+			w.TaskID,
 		)
 		if err != nil {
 			return nil, "", err

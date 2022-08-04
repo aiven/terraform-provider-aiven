@@ -30,9 +30,9 @@ data "aiven_project" "myproject" {
 - `account_id` (String) An optional property to link a project to already an existing account by using account ID. To set up proper dependencies please refer to this variable as a reference.
 - `add_account_owners_admin_access` (Boolean) If account_id is set, grant account owner team admin access to the new project. The default value is `true`.
 - `available_credits` (String) The amount of platform credits available to the project. This could be your free trial or other promotional credits.
-- `billing_group` (String) The id of the billing group that is linked to this project. To set up proper dependencies please refer to this variable as a reference.
+- `billing_group` (String) The ID of the billing group that is linked to this project. To set up proper dependencies please refer to this variable as a reference.
 - `ca_cert` (String, Sensitive) The CA certificate of the project. This is required for configuring clients that connect to certain services like Kafka.
-- `copy_from_project` (String) is the name of another project used to copy billing information and some other project attributes like technical contacts from. This is mostly relevant when an existing project has billing type set to invoice and that needs to be copied over to a new project. (Setting billing is otherwise not allowed over the API.) This only has effect when the project is created. To set up proper dependencies please refer to this variable as a reference.
+- `copy_from_project` (String) Is the name of another project used to copy billing information and some other project attributes like technical contacts from. This is mostly relevant when an existing project has billing type set to invoice and that needs to be copied over to a new project. (Setting billing is otherwise not allowed over the API.) This only has effect when the project is created. To set up proper dependencies please refer to this variable as a reference.
 - `default_cloud` (String) Defines the default cloud provider and region where services are hosted. This can be changed freely after the project is created. This will not affect existing services.
 - `estimated_balance` (String) The current accumulated bill for this project in the current billing period.
 - `id` (String) The ID of this resource.

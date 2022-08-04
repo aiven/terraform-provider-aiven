@@ -19,10 +19,12 @@ func GenerateServiceUserConfigurationSchema(t string) *schema.Schema {
 		templates.GetUserConfigSchema(templates.UserConfigSchemaService)[t].(map[string]interface{}))
 
 	return &schema.Schema{
-		Type:             schema.TypeList,
-		MaxItems:         1,
-		Optional:         true,
-		Description:      fmt.Sprintf("%s user configurable settings", cases.Title(language.Und, cases.NoLower).String(t)),
+		Type:     schema.TypeList,
+		MaxItems: 1,
+		Optional: true,
+		Description: fmt.Sprintf(
+			"%s user configurable settings", cases.Title(language.Und, cases.NoLower).String(t),
+		),
 		DiffSuppressFunc: EmptyObjectDiffSuppressFuncSkipArrays(s),
 		Elem:             &schema.Resource{Schema: s},
 	}
@@ -85,6 +87,7 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 		}
 	case "array":
 		var itemType schema.ValueType
+
 		itemDefinition := definition["items"].(map[string]interface{})
 		itemDefinition = selectFirstSchemaFromOneOf(itemDefinition)
 
@@ -97,20 +100,23 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 		default:
 			panic(fmt.Sprintf("Unexpected user config schema array item type: %T / %v", typeString, typeString))
 		}
+
 		maxItemsVal, maxItemsFound := definition["maxItems"]
 		maxItems := 0
+
 		if maxItemsFound {
 			maxItems = int(maxItemsVal.(float64))
 		}
-		var (
-			valueDiffFunc schema.SchemaDiffSuppressFunc
-		)
+
+		var valueDiffFunc schema.SchemaDiffSuppressFunc
 
 		if key == "ip_filter" {
-			diffFunc = IpFilterArrayDiffSuppressFunc
-			valueDiffFunc = IpFilterValueDiffSuppressFunc
+			diffFunc = IPFilterArrayDiffSuppressFunc
+			valueDiffFunc = IPFilterValueDiffSuppressFunc
 		}
+
 		var elem interface{}
+
 		if itemType == schema.TypeList {
 			elem = &schema.Resource{Schema: GenerateTerraformUserConfigSchema(itemDefinition)}
 		} else {
@@ -119,6 +125,7 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 				Type:             itemType,
 			}
 		}
+
 		return &schema.Schema{
 			Description:      title,
 			DiffSuppressFunc: diffFunc,
@@ -139,6 +146,7 @@ func getAivenSchemaType(value interface{}) string {
 		return res
 	case []interface{}:
 		typeString := ""
+
 		for _, typeOrNullRaw := range res {
 			typeOrNull := typeOrNullRaw.(string)
 			if typeOrNull == "null" {
@@ -146,6 +154,7 @@ func getAivenSchemaType(value interface{}) string {
 				typeString = typeOrNull
 			}
 		}
+
 		return typeString
 	default:
 		panic(fmt.Sprintf("Unexpected user config schema type: %T / %v", value, value))
@@ -182,6 +191,7 @@ func ConvertAPIUserConfigToTerraformCompatibleFormat(
 
 	entrySchema := templates.GetUserConfigSchema(configType)[entryType].(map[string]interface{})
 	entrySchemaProps := entrySchema["properties"].(map[string]interface{})
+
 	return []map[string]interface{}{convertAPIUserConfigToTerraformCompatibleFormat(userConfig, entrySchemaProps)}
 }
 
@@ -197,15 +207,17 @@ func convertAPIUserConfigToTerraformCompatibleFormat(
 		valueType := getAivenSchemaType(schemaDefinition["type"])
 
 		apiValue, ok := apiUserConfig[key]
-		key = encodeKeyName(key)
 		if !ok || apiValue == nil {
 			// To avoid undesired "changes" for values that are not explicitly defined return
 			// default values for anything that is not returned in the API response
 			apiValue = getAivenSchemaDefaultValue(schemaDefinition)
+
 			if valueType == "object" {
 				continue
 			}
 		}
+
+		key = encodeKeyName(key)
 
 		switch valueType {
 		case "object":
@@ -230,12 +242,15 @@ func convertAPIUserConfigToTerraformCompatibleFormat(
 			case []interface{}:
 				if hasNestedUserConfigurationOptionItems(apiValue, schemaDefinition) {
 					var list []interface{}
+
 					for _, v := range apiValue.([]interface{}) {
 						res := convertAPIUserConfigToTerraformCompatibleFormat(
-							v.(map[string]interface{}), schemaDefinition["items"].(map[string]interface{})["properties"].(map[string]interface{}),
+							v.(map[string]interface{}),
+							schemaDefinition["items"].(map[string]interface{})["properties"].(map[string]interface{}),
 						)
 						list = append(list, res)
 					}
+
 					terraformConfig[key] = list
 				} else {
 					var list []interface{}
@@ -286,14 +301,18 @@ func ConvertTerraformUserConfigToAPICompatibleFormat(
 	d *schema.ResourceData,
 ) map[string]interface{} {
 	mainKey := entryType + "_user_config"
+
 	userConfigsRaw, ok := d.GetOk(mainKey)
 	if !ok || userConfigsRaw == nil {
 		return nil
 	}
+
 	entrySchema := templates.GetUserConfigSchema(configType)[entryType].(map[string]interface{})
 	entrySchemaProps := entrySchema["properties"].(map[string]interface{})
+
 	return convertTerraformUserConfigToAPICompatibleFormat(
-		entryType, newResource, userConfigsRaw.([]interface{})[0].(map[string]interface{}), entrySchemaProps)
+		entryType, newResource, userConfigsRaw.([]interface{})[0].(map[string]interface{}), entrySchemaProps,
+	)
 }
 
 func convertTerraformUserConfigToAPICompatibleFormat(
@@ -306,20 +325,27 @@ func convertTerraformUserConfigToAPICompatibleFormat(
 
 	for key, value := range userConfig {
 		key = decodeKeyName(key)
+
 		definitionRaw, ok := configSchema[key]
 		if !ok {
 			panic(fmt.Sprintf("Unsupported %v user config key %v", serviceType, key))
 		}
+
 		if definitionRaw == nil {
 			continue
 		}
+
 		definition := definitionRaw.(map[string]interface{})
+
 		createOnly, ok := definition["createOnly"]
 		if ok && createOnly.(bool) && !newResource {
 			continue
 		}
+
 		convertedValue, omit := convertTerraformUserConfigValueToAPICompatibleFormat(
-			serviceType, newResource, key, value, definition)
+			serviceType, newResource, key, value, definition,
+		)
+
 		if !omit {
 			apiConfig[key] = convertedValue
 		}
@@ -336,8 +362,10 @@ func convertTerraformUserConfigValueToAPICompatibleFormat(
 	definition map[string]interface{},
 ) (interface{}, bool) {
 	var err error
+
 	var omit bool
-	var convertedValue = value
+
+	convertedValue := value
 
 	// get Aiven API value type
 	valueType := getAivenSchemaType(definition["type"])
@@ -406,6 +434,7 @@ func convertTerraformUserConfigValueToAPICompatibleFormatArray(value interface{}
 	key string,
 	definition map[string]interface{}) (interface{}, bool, error) {
 	var convertedValue interface{}
+
 	omit := true
 
 	var empty []interface{}
@@ -440,7 +469,9 @@ func convertTerraformUserConfigValueToAPICompatibleFormatArray(value interface{}
 		convertedValue = values
 		omit = false
 	default:
-		return nil, false, fmt.Errorf("invalid %v user config key type %T for %v, expected list", serviceType, value, key)
+		return nil, false, fmt.Errorf(
+			"invalid %v user config key type %T for %v, expected list", serviceType, value, key,
+		)
 	}
 
 	return convertedValue, omit, nil
@@ -452,6 +483,7 @@ func selectFirstSchemaFromOneOf(itemDefinition map[string]interface{}) map[strin
 			itemDefinition = types[0].(map[string]interface{})
 		}
 	}
+
 	return itemDefinition
 }
 
@@ -506,9 +538,10 @@ func convertTerraformUserConfigValueToAPICompatibleFormatInteger(value interface
 		convertedValue = value
 	case string:
 		var err error
+
 		convertedValue, err = strconv.Atoi(value)
 		if err != nil {
-			return 0, fmt.Errorf("impossible to convert int to a string: %s", err)
+			return 0, fmt.Errorf("impossible to convert int to a string: %w", err)
 		}
 	default:
 		return 0, fmt.Errorf("expected int or string but got %s", value)
@@ -525,9 +558,10 @@ func convertTerraformUserConfigValueToAPICompatibleFormatNumber(value interface{
 		convertedValue = res
 	case string:
 		var err error
+
 		convertedValue, err = strconv.ParseFloat(value.(string), 64)
 		if err != nil {
-			return 0, fmt.Errorf("impossible to convert float64 to a string: %s", err)
+			return 0, fmt.Errorf("impossible to convert float64 to a string: %w", err)
 		}
 	default:
 		return 0, fmt.Errorf("expected float64 or string but got %s", value)
@@ -542,6 +576,7 @@ func convertTerraformUserConfigValueToAPICompatibleFormatBoolean(value interface
 	switch value := value.(type) {
 	case string:
 		var err error
+
 		convertedValue, err = strconv.ParseBool(value)
 		if err != nil {
 			return false, err

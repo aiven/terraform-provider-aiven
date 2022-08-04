@@ -2,6 +2,7 @@ package vpc
 
 import (
 	"context"
+	"errors"
 	"log"
 	"time"
 
@@ -17,10 +18,13 @@ var aivenProjectVPCSchema = map[string]*schema.Schema{
 	"project": schemautil.CommonSchemaProjectReference,
 
 	"cloud_name": {
-		ForceNew:    true,
-		Required:    true,
-		Type:        schema.TypeString,
-		Description: schemautil.Complex("Defines where the cloud provider and region where the service is hosted in. See the Service resource for additional information.").ForceNew().Build(),
+		ForceNew: true,
+		Required: true,
+		Type:     schema.TypeString,
+		Description: schemautil.Complex(
+			"Defines where the cloud provider and region where the service is hosted in. " +
+				"See the Service resource for additional information.",
+		).ForceNew().Build(),
 	},
 	"network_cidr": {
 		ForceNew:    true,
@@ -29,9 +33,11 @@ var aivenProjectVPCSchema = map[string]*schema.Schema{
 		Description: "Network address range used by the VPC like 192.168.0.0/24",
 	},
 	"state": {
-		Computed:    true,
-		Type:        schema.TypeString,
-		Description: schemautil.Complex("State of the VPC.").PossibleValues("APPROVED", "ACTIVE", "DELETING", "DELETED").Build(),
+		Computed: true,
+		Type:     schema.TypeString,
+		Description: schemautil.Complex(
+			"State of the VPC.",
+		).PossibleValues("APPROVED", "ACTIVE", "DELETING", "DELETED").Build(),
 	},
 }
 
@@ -55,7 +61,9 @@ func ResourceProjectVPC() *schema.Resource {
 
 func resourceProjectVPCCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
+
 	projectName := d.Get("project").(string)
+
 	vpc, err := client.VPCs.Create(
 		projectName,
 		aiven.CreateVPCRequest{
@@ -121,6 +129,7 @@ func resourceProjectVPCDelete(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	timeout := d.Timeout(schema.TimeoutDelete)
+
 	_, err = waiter.Conf(timeout).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("error waiting for Aiven project VPC to be DELETED: %s", err)
@@ -133,12 +142,15 @@ func copyVPCPropertiesFromAPIResponseToTerraform(d *schema.ResourceData, vpc *ai
 	if err := d.Set("project", project); err != nil {
 		return err
 	}
+
 	if err := d.Set("cloud_name", vpc.CloudName); err != nil {
 		return err
 	}
+
 	if err := d.Set("network_cidr", vpc.NetworkCIDR); err != nil {
 		return err
 	}
+
 	if err := d.Set("state", vpc.State); err != nil {
 		return err
 	}
@@ -196,7 +208,9 @@ func (w *ProjectVPCDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 		vpc, err := w.Client.VPCs.Get(w.Project, w.VPCID)
 		if err != nil {
 			// might be already gone after deletion
-			if err.(aiven.Error).Status == 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status == 404 {
 				return &aiven.VPC{}, "DELETED", nil
 			}
 
@@ -212,7 +226,9 @@ func (w *ProjectVPCDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 
 				// VPC cannot be deleted while there are services migrating from
 				// it or service deletion is still in progress
-				if err.(aiven.Error).Status != 409 {
+				var aivenError *aiven.Error
+
+				if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 409 {
 					return nil, "", err
 				}
 			}

@@ -18,7 +18,9 @@ func aivenM3DBSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	schemaM3[schemautil.ServiceTypeM3+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeM3)
+	schemaM3[schemautil.ServiceTypeM3+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(
+		schemautil.ServiceTypeM3,
+	)
 
 	return schemaM3
 }
@@ -45,7 +47,7 @@ func ResourceM3DB() *schema.Resource {
 			),
 			customdiff.Sequence(
 				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
-				schemautil.CustomizeDiffCheckStaticIpDisassociation,
+				schemautil.CustomizeDiffCheckStaticIPDisassociation,
 			),
 		),
 		Importer: &schema.ResourceImporter{

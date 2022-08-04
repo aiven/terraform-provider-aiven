@@ -1,6 +1,7 @@
 package opensearch_test
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -26,7 +27,9 @@ func TestAccAivenOpensearchACLConfig_basic(t *testing.T) {
 				Config: testAccOpensearchACLConfigResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-es-aclconf-%s", rName)),
+					resource.TestCheckResourceAttr(
+						resourceName, "service_name", fmt.Sprintf("test-acc-sr-es-aclconf-%s", rName),
+					),
 					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "extended_acl", "false"),
 				),
@@ -80,13 +83,17 @@ func testAccCheckAivenOpensearchACLConfigResourceDestroy(s *terraform.State) err
 
 		r, err := c.ElasticsearchACLs.Get(projectName, serviceName)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var aivenError *aiven.Error
+
+			if ok := errors.As(err, &aivenError); !ok || aivenError.Status != 404 {
 				return err
 			}
 		}
+
 		if r == nil {
 			return nil
 		}
+
 		return fmt.Errorf("opencsearch acl config (%s) still exists", rs.Primary.ID)
 	}
 

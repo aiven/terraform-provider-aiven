@@ -99,6 +99,7 @@ data "aiven_flink" "service" {
 		serviceName,
 	)
 	resourceName := "aiven_flink.bar"
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -118,7 +119,9 @@ data "aiven_flink" "service" {
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
 					resource.TestCheckResourceAttr(resourceName, "flink_user_config.0.number_of_task_slots", "10"),
 					resource.TestCheckResourceAttr(resourceName, "flink_user_config.0.parallelism_default", "2"),
-					resource.TestCheckResourceAttr(resourceName, "flink_user_config.0.restart_strategy", "failure-rate"),
+					resource.TestCheckResourceAttr(
+						resourceName, "flink_user_config.0.restart_strategy", "failure-rate",
+					),
 				),
 			},
 			{
@@ -328,15 +331,17 @@ resource "aiven_flink_job" "testing" {
 						return fmt.Errorf("expected only one instance to be imported, state: %#v", is)
 					}
 
-					tableId, ok := is[0].Attributes["table_id"]
+					tableID, ok := is[0].Attributes["table_id"]
 					if !ok {
 						return errors.New("expected the imported flink table to have table_id to be set")
 					}
 
-					expectedId := fmt.Sprintf("%s/%s/%s", projectName, flinkServiceName, tableId)
+					expectedID := fmt.Sprintf("%s/%s/%s", projectName, flinkServiceName, tableID)
 
-					if !strings.EqualFold(is[0].ID, expectedId) {
-						return fmt.Errorf("expect the ID used in import statement to match '%s', but got: %s", expectedId, is[0].ID)
+					if !strings.EqualFold(is[0].ID, expectedID) {
+						return fmt.Errorf(
+							"expect the ID used in import statement to match '%s', but got: %s", expectedID, is[0].ID,
+						)
 					}
 
 					return nil
@@ -536,15 +541,17 @@ resource "aiven_flink_job" "testing" {
 						return fmt.Errorf("expected only one instance to be imported, state: %#v", is)
 					}
 
-					tableId, ok := is[0].Attributes["table_id"]
+					tableID, ok := is[0].Attributes["table_id"]
 					if !ok {
 						return errors.New("expected the imported flink table to have table_id to be set")
 					}
 
-					expectedId := fmt.Sprintf("%s/%s/%s", projectName, flinkServiceName, tableId)
+					expectedID := fmt.Sprintf("%s/%s/%s", projectName, flinkServiceName, tableID)
 
-					if !strings.EqualFold(is[0].ID, expectedId) {
-						return fmt.Errorf("expect the ID used in import statement to match '%s', but got: %s", expectedId, is[0].ID)
+					if !strings.EqualFold(is[0].ID, expectedID) {
+						return fmt.Errorf(
+							"expect the ID used in import statement to match '%s', but got: %s", expectedID, is[0].ID,
+						)
 					}
 
 					return nil
@@ -1376,7 +1383,7 @@ func testAccCheckAivenFlinkJobsAndTableResourcesDestroy(s *terraform.State) erro
 	for _, rs := range s.RootModule().Resources {
 		switch rs.Type {
 		case "aiven_flink_job":
-			project, serviceName, jobId, err := schemautil.SplitResourceID3(rs.Primary.ID)
+			project, serviceName, jobID, err := schemautil.SplitResourceID3(rs.Primary.ID)
 			if err != nil {
 				return err
 			}
@@ -1386,22 +1393,24 @@ func testAccCheckAivenFlinkJobsAndTableResourcesDestroy(s *terraform.State) erro
 				if aiven.IsNotFound(err) {
 					continue
 				}
+
 				return err
 			}
 
-			r, err := c.FlinkJobs.Get(project, serviceName, aiven.GetFlinkJobRequest{JobId: jobId})
+			r, err := c.FlinkJobs.Get(project, serviceName, aiven.GetFlinkJobRequest{JobId: jobID})
 			if err != nil {
 				if aiven.IsNotFound(err) {
 					continue
 				}
+
 				return err
 			}
 
 			if r != nil {
-				return fmt.Errorf("flink job (%s) still exists, id %s", jobId, rs.Primary.ID)
+				return fmt.Errorf("flink job (%s) still exists, id %s", jobID, rs.Primary.ID)
 			}
 		case "aiven_flink_table":
-			project, serviceName, tableId, err := schemautil.SplitResourceID3(rs.Primary.ID)
+			project, serviceName, tableID, err := schemautil.SplitResourceID3(rs.Primary.ID)
 			if err != nil {
 				return err
 			}
@@ -1411,19 +1420,21 @@ func testAccCheckAivenFlinkJobsAndTableResourcesDestroy(s *terraform.State) erro
 				if aiven.IsNotFound(err) {
 					continue
 				}
+
 				return err
 			}
 
-			r, err := c.FlinkTables.Get(project, serviceName, aiven.GetFlinkTableRequest{TableId: tableId})
+			r, err := c.FlinkTables.Get(project, serviceName, aiven.GetFlinkTableRequest{TableId: tableID})
 			if err != nil {
 				if aiven.IsNotFound(err) {
 					continue
 				}
+
 				return err
 			}
 
 			if r != nil {
-				return fmt.Errorf("flink table (%s) still exists, id %s", tableId, rs.Primary.ID)
+				return fmt.Errorf("flink table (%s) still exists, id %s", tableID, rs.Primary.ID)
 			}
 		default:
 			continue

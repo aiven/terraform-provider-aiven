@@ -25,7 +25,7 @@ jobs:
           account,
           cassandra,
           clickhouse,
-          connection_pool,
+          connectionpool,
           database,
           flink,
           pg,
@@ -36,10 +36,10 @@ jobs:
           opensearch,
           project,
           redis,
-          service_component,
-          service_user,
-          static_ip,
-          service_integration,
+          servicecomponent,
+          serviceuser,
+          staticip,
+          serviceintegration,
           vpc
         ]
 

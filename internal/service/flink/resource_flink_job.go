@@ -18,10 +18,12 @@ var aivenFlinkJobSchema = map[string]*schema.Schema{
 	"service_name": schemautil.CommonSchemaServiceNameReference,
 
 	"job_name": {
-		Type:        schema.TypeString,
-		Required:    true,
-		ForceNew:    true,
-		Description: schemautil.Complex("Specifies the name of the service that this job is submitted to.").ForceNew().Referenced().Build(),
+		Type:     schema.TypeString,
+		Required: true,
+		ForceNew: true,
+		Description: schemautil.Complex(
+			"Specifies the name of the service that this job is submitted to.",
+		).ForceNew().Referenced().Build(),
 	},
 	"statement": {
 		Type:        schema.TypeString,
@@ -30,10 +32,12 @@ var aivenFlinkJobSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 	},
 	"table_ids": {
-		Type:        schema.TypeList,
-		Description: schemautil.Complex("A list of table ids that are required in the job runtime.").ForceNew().Referenced().Build(),
-		Required:    true,
-		ForceNew:    true,
+		Type: schema.TypeList,
+		Description: schemautil.Complex(
+			"A list of table ids that are required in the job runtime.",
+		).ForceNew().Referenced().Build(),
+		Required: true,
+		ForceNew: true,
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
@@ -68,12 +72,12 @@ func ResourceFlinkJob() *schema.Resource {
 func resourceFlinkJobRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, jobId, err := schemautil.SplitResourceID3(d.Id())
+	project, serviceName, jobID, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	r, err := client.FlinkJobs.Get(project, serviceName, aiven.GetFlinkJobRequest{JobId: jobId})
+	r, err := client.FlinkJobs.Get(project, serviceName, aiven.GetFlinkJobRequest{JobId: jobID})
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -81,6 +85,7 @@ func resourceFlinkJobRead(_ context.Context, d *schema.ResourceData, m interface
 	// we model job deletion by canceling the job
 	if r.State == "CANCELED" {
 		d.SetId("")
+
 		return nil
 	}
 
@@ -88,15 +93,19 @@ func resourceFlinkJobRead(_ context.Context, d *schema.ResourceData, m interface
 	if err := d.Set("project", project); err != nil {
 		return diag.Errorf("error setting Flink Jobs `project` for resource %s: %s", d.Id(), err)
 	}
+
 	if err := d.Set("service_name", serviceName); err != nil {
 		return diag.Errorf("error setting Flink Jobs `project` for resource %s: %s", d.Id(), err)
 	}
+
 	if err := d.Set("job_id", r.JID); err != nil {
 		return diag.Errorf("error setting Flink Jobs `job_id` for resource %s: %s", d.Id(), err)
 	}
+
 	if err := d.Set("job_name", r.Name); err != nil {
 		return diag.Errorf("error setting Flink Jobs `job_name` for resource %s: %s", d.Id(), err)
 	}
+
 	if err := d.Set("state", r.State); err != nil {
 		return diag.Errorf("error setting Flink Jobs `state` for resource %s: %s", d.Id(), err)
 	}
@@ -124,7 +133,8 @@ func resourceFlinkJobCreate(ctx context.Context, d *schema.ResourceData, m inter
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	jobId := createResponse.JobId
+
+	jobID := createResponse.JobId
 
 	conf := &resource.StateChangeConf{
 		Pending: []string{
@@ -142,10 +152,11 @@ func resourceFlinkJobCreate(ctx context.Context, d *schema.ResourceData, m inter
 			"RUNNING",
 		},
 		Refresh: func() (interface{}, string, error) {
-			r, err := client.FlinkJobs.Get(project, serviceName, aiven.GetFlinkJobRequest{JobId: jobId})
+			r, err := client.FlinkJobs.Get(project, serviceName, aiven.GetFlinkJobRequest{JobId: jobID}) //nolint:govet
 			if err != nil {
 				return nil, "", err
 			}
+
 			return r, r.State, nil
 		},
 		Delay:      1 * time.Second,
@@ -166,7 +177,7 @@ func resourceFlinkJobCreate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceFlinkJobDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, jobId, err := schemautil.SplitResourceID3(d.Id())
+	project, serviceName, jobID, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -174,7 +185,7 @@ func resourceFlinkJobDelete(ctx context.Context, d *schema.ResourceData, m inter
 	err = client.FlinkJobs.Patch(
 		project,
 		serviceName,
-		aiven.PatchFlinkJobRequest{JobId: jobId},
+		aiven.PatchFlinkJobRequest{JobId: jobID},
 	)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("Error deleting flink job: %s", err)
@@ -199,10 +210,11 @@ func resourceFlinkJobDelete(ctx context.Context, d *schema.ResourceData, m inter
 			"FINISHED",
 		},
 		Refresh: func() (interface{}, string, error) {
-			r, err := client.FlinkJobs.Get(project, serviceName, aiven.GetFlinkJobRequest{JobId: jobId})
+			r, err := client.FlinkJobs.Get(project, serviceName, aiven.GetFlinkJobRequest{JobId: jobID}) //nolint:govet
 			if err != nil {
 				return nil, "", err
 			}
+
 			return r, r.State, nil
 		},
 		Delay:      1 * time.Second,
@@ -213,6 +225,7 @@ func resourceFlinkJobDelete(ctx context.Context, d *schema.ResourceData, m inter
 	if _, err = conf.WaitForStateContext(ctx); err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
+
 	return nil
 }
 

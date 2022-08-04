@@ -13,13 +13,22 @@ import (
 func DatasourceAzureVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceAzureVPCPeeringConnectionRead,
-		Description: "The Azure VPC Peering Connection data source provides information about the existing Aiven VPC Peering Connection.",
+		Description: "The Azure VPC Peering Connection data source provides information about the existing " +
+			"Aiven VPC Peering Connection.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenAzureVPCPeeringConnectionSchema,
-			"vpc_id", "azure_subscription_id", "peer_resource_group", "vnet_name", "peer_azure_app_id", "peer_azure_tenant_id"),
+			"vpc_id",
+			"azure_subscription_id",
+			"peer_resource_group",
+			"vnet_name",
+			"peer_azure_app_id",
+			"peer_azure_tenant_id",
+		),
 	}
 }
 
-func datasourceAzureVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func datasourceAzureVPCPeeringConnectionRead(
+	ctx context.Context, d *schema.ResourceData, m interface{},
+) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
@@ -27,10 +36,10 @@ func datasourceAzureVPCPeeringConnectionRead(ctx context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	subscriptionId := d.Get("azure_subscription_id").(string)
+	subscriptionID := d.Get("azure_subscription_id").(string)
 	vnetName := d.Get("vnet_name").(string)
-	appId := d.Get("peer_azure_app_id").(string)
-	tenantId := d.Get("peer_azure_tenant_id").(string)
+	appID := d.Get("peer_azure_app_id").(string)
+	tenantID := d.Get("peer_azure_tenant_id").(string)
 
 	vpc, err := client.VPCs.Get(projectName, vpcID)
 	if err != nil {
@@ -38,12 +47,14 @@ func datasourceAzureVPCPeeringConnectionRead(ctx context.Context, d *schema.Reso
 	}
 
 	for _, peer := range vpc.PeeringConnections {
-		if peer.PeerCloudAccount == subscriptionId && peer.PeerVPC == vnetName && peer.PeerAzureAppId == appId && peer.PeerAzureTenantId == tenantId {
+		if peer.PeerCloudAccount == subscriptionID && peer.PeerVPC == vnetName && peer.PeerAzureAppId == appID &&
+			peer.PeerAzureTenantId == tenantID {
 			d.SetId(schemautil.BuildResourceID(projectName, vpcID, peer.PeerCloudAccount, peer.PeerVPC))
+
 			return resourceAzureVPCPeeringConnectionRead(ctx, d, m)
 		}
 	}
 
 	return diag.Errorf("Azure peering connection %s/%s/%s/%s not found",
-		projectName, vpc.CloudName, subscriptionId, vnetName)
+		projectName, vpc.CloudName, subscriptionID, vnetName)
 }

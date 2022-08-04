@@ -1,9 +1,9 @@
 package schemautil
 
-// NormalizeIpFilter compares a list of IP filters set in TF and a sorted version coming
+// NormalizeIPFilter compares a list of IP filters set in TF and a sorted version coming
 // from Aiven and takes sort IP filters such that all matching entries will be in
 // the same order as defined in the TF manifest.
-func NormalizeIpFilter(tfUserConfig interface{}, userConfig []map[string]interface{}) []map[string]interface{} {
+func NormalizeIPFilter(tfUserConfig interface{}, userConfig []map[string]interface{}) []map[string]interface{} {
 	tfInt, ok := tfUserConfig.([]interface{})
 	if !ok || len(tfInt) == 0 {
 		return userConfig
@@ -24,21 +24,22 @@ func NormalizeIpFilter(tfUserConfig interface{}, userConfig []map[string]interfa
 	api := toStringSlice(userConfig[0]["ip_filter"].([]interface{}))
 	tf := toStringSlice(tfInt[0].(map[string]interface{})["ip_filter"].([]interface{}))
 
-	var newIpFilters []string
-	var diff []string
+	var newIPFilters, diff []string
 
 	// First, we take all the elements from TF and if they match with the data
 	// coming from API we preserve the same order as was defined in manifest
 	for _, t := range tf {
 		found := false
+
 		if t == "" {
 			continue
 		}
 
 		for _, a := range api {
 			if t == a {
-				newIpFilters = append(newIpFilters, t)
+				newIPFilters = append(newIPFilters, t)
 				found = true
+
 				break
 			}
 		}
@@ -53,9 +54,11 @@ func NormalizeIpFilter(tfUserConfig interface{}, userConfig []map[string]interfa
 	// difference with the TF version and update diff
 	for _, a := range api {
 		found := false
+
 		for _, t := range tf {
 			if a == t {
 				found = true
+
 				break
 			}
 		}
@@ -65,7 +68,8 @@ func NormalizeIpFilter(tfUserConfig interface{}, userConfig []map[string]interfa
 		}
 	}
 
-	userConfig[0]["ip_filter"] = trim(append(newIpFilters, diff...))
+	userConfig[0]["ip_filter"] = trim(append(newIPFilters, diff...))
+
 	return userConfig
 }
 

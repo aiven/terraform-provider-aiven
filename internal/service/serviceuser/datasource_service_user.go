@@ -1,4 +1,4 @@
-package service_user
+package serviceuser
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+//nolint:revive
 // DatasourceServiceUser
 // Deprecated
 //goland:noinspection GoDeprecation
@@ -19,7 +20,8 @@ func DatasourceServiceUser() *schema.Resource {
 		Description: "The Service User data source provides information about the existing Aiven Service User.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenServiceUserSchema,
 			"project", "service_name", "username"),
-		DeprecationMessage: "Please use service-specific data-sources instead of this one, for example: aiven_kafka_user, aiven_pg_user etc.",
+		DeprecationMessage: "Please use service-specific data-sources instead of this one, for example: " +
+			"aiven_kafka_user, aiven_pg_user etc.",
 	}
 }
 
@@ -38,6 +40,7 @@ func datasourceServiceUserRead(ctx context.Context, d *schema.ResourceData, m in
 	for _, u := range list {
 		if u.Username == userName {
 			d.SetId(schemautil.BuildResourceID(projectName, serviceName, userName))
+
 			return resourceServiceUserRead(ctx, d, m)
 		}
 	}

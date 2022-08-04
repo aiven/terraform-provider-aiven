@@ -1,7 +1,7 @@
 //go:build sweep
 // +build sweep
 
-package service_integration
+package serviceintegration
 
 import (
 	"fmt"

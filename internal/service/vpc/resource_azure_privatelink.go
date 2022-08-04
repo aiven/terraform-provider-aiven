@@ -48,7 +48,8 @@ var aivenAzurePrivatelinkSchema = map[string]*schema.Schema{
 
 func ResourceAzurePrivatelink() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Azure Privatelink resource allows the creation and management of Aiven Azure Privatelink for a services.",
+		Description: "The Azure Privatelink resource allows the creation and management of " +
+			"Aiven Azure Privatelink for a services.",
 		CreateContext: resourceAzurePrivatelinkCreate,
 		ReadContext:   resourceAzurePrivatelinkRead,
 		UpdateContext: resourceAzurePrivatelinkUpdate,
@@ -70,8 +71,9 @@ func resourceAzurePrivatelinkCreate(ctx context.Context, d *schema.ResourceData,
 	client := m.(*aiven.Client)
 
 	var subscriptionIDs []string
-	var project = d.Get("project").(string)
-	var serviceName = d.Get("service_name").(string)
+
+	project := d.Get("project").(string)
+	serviceName := d.Get("service_name").(string)
 
 	for _, s := range d.Get("user_subscription_ids").(*schema.Set).List() {
 		subscriptionIDs = append(subscriptionIDs, s.(string))
@@ -99,6 +101,7 @@ func resourceAzurePrivatelinkCreate(ctx context.Context, d *schema.ResourceData,
 
 func resourceAzurePrivatelinkRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
+
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
@@ -112,21 +115,27 @@ func resourceAzurePrivatelinkRead(_ context.Context, d *schema.ResourceData, m i
 	if err := d.Set("user_subscription_ids", pl.UserSubscriptionIDs); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("azure_service_id", pl.AzureServiceID); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("azure_service_alias", pl.AzureServiceAlias); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("project", project); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("service_name", serviceName); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("message", pl.Message); err != nil {
 		return diag.FromErr(err)
 	}
+
 	if err := d.Set("state", pl.State); err != nil {
 		return diag.FromErr(err)
 	}
@@ -137,6 +146,7 @@ func resourceAzurePrivatelinkUpdate(ctx context.Context, d *schema.ResourceData,
 	client := m.(*aiven.Client)
 
 	var subscriptionIDs []string
+
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
@@ -165,7 +175,9 @@ func resourceAzurePrivatelinkUpdate(ctx context.Context, d *schema.ResourceData,
 }
 
 // waitForAzurePrivatelinkToBeActive waits until the Azure privatelink is active
-func waitForAzurePrivatelinkToBeActive(client *aiven.Client, project string, serviceName string, t time.Duration) *resource.StateChangeConf {
+func waitForAzurePrivatelinkToBeActive(
+	client *aiven.Client, project string, serviceName string, t time.Duration,
+) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending: []string{"creating"},
 		Target:  []string{"active"},
@@ -187,6 +199,7 @@ func waitForAzurePrivatelinkToBeActive(client *aiven.Client, project string, ser
 
 func resourceAzurePrivatelinkDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
+
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
@@ -201,11 +214,12 @@ func resourceAzurePrivatelinkDelete(ctx context.Context, d *schema.ResourceData,
 		Pending: []string{"deleting"},
 		Target:  []string{"deleted"},
 		Refresh: func() (interface{}, string, error) {
-			pl, err := client.AzurePrivatelink.Get(project, serviceName)
+			pl, err := client.AzurePrivatelink.Get(project, serviceName) //nolint:govet
 			if err != nil {
 				if aiven.IsNotFound(err) {
 					return struct{}{}, "deleted", nil
 				}
+
 				return nil, "", err
 			}
 
@@ -217,6 +231,7 @@ func resourceAzurePrivatelinkDelete(ctx context.Context, d *schema.ResourceData,
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		MinTimeout: 2 * time.Second,
 	}
+
 	_, err = stateChangeConf.WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for Azure privatelink: %s", err)

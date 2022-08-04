@@ -13,13 +13,16 @@ import (
 func DatasourceKafkaSchemaConfiguration() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceKafkaSchemasConfigurationRead,
-		Description: "The Kafka Schema Configuration data source provides information about the existing Aiven Kafka Schema Configuration.",
+		Description: "The Kafka Schema Configuration data source provides information about the existing " +
+			"Aiven Kafka Schema Configuration.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenKafkaSchemaSchema,
 			"project", "service_name"),
 	}
 }
 
-func datasourceKafkaSchemasConfigurationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func datasourceKafkaSchemasConfigurationRead(
+	ctx context.Context, d *schema.ResourceData, m interface{},
+) diag.Diagnostics {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 

@@ -1,6 +1,7 @@
 package kafka
 
 import (
+	"errors"
 	"log"
 	"strings"
 	"time"
@@ -32,9 +33,13 @@ func (w *kafkaTopicCreateWaiter) RefreshFunc() resource.StateRefreshFunc {
 		if err != nil {
 			// If some brokers are offline while the request is being executed
 			// the operation may fail.
-			aivenError, ok := err.(aiven.Error)
-			if ok && aivenError.Status == 409 && !aiven.IsAlreadyExists(aivenError) {
+			var aivenError *aiven.Error
+
+			var ok bool
+
+			if ok = errors.As(err, &aivenError); ok && aivenError.Status == 409 && !aiven.IsAlreadyExists(aivenError) {
 				log.Printf("[DEBUG] Got error %v while waiting for topic to be created.", aivenError)
+
 				return nil, "CREATING", nil
 			}
 

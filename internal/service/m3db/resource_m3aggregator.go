@@ -18,7 +18,9 @@ func aivenM3AggregatorSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	schemaM3[schemautil.ServiceTypeM3Aggregator+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeM3Aggregator)
+	schemaM3[schemautil.ServiceTypeM3Aggregator+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(
+		schemautil.ServiceTypeM3Aggregator,
+	)
 
 	return schemaM3
 }
@@ -41,7 +43,7 @@ func ResourceM3Aggregator() *schema.Resource {
 			),
 			customdiff.Sequence(
 				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
-				schemautil.CustomizeDiffCheckStaticIpDisassociation,
+				schemautil.CustomizeDiffCheckStaticIPDisassociation,
 			),
 		),
 		Importer: &schema.ResourceImporter{

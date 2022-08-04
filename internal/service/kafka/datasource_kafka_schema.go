@@ -32,6 +32,7 @@ func datasourceKafkaSchemaRead(ctx context.Context, d *schema.ResourceData, m in
 	for _, subject := range subjects.Subjects {
 		if subject == subjectName {
 			d.SetId(schemautil.BuildResourceID(projectName, serviceName, subjectName))
+
 			return resourceKafkaSchemaRead(ctx, d, m)
 		}
 	}

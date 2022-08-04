@@ -18,7 +18,9 @@ func cassandraSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	s[schemautil.ServiceTypeCassandra+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeCassandra)
+	s[schemautil.ServiceTypeCassandra+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(
+		schemautil.ServiceTypeCassandra,
+	)
 
 	return s
 }
@@ -46,7 +48,7 @@ func ResourceCassandra() *schema.Resource {
 			),
 			customdiff.Sequence(
 				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
-				schemautil.CustomizeDiffCheckStaticIpDisassociation,
+				schemautil.CustomizeDiffCheckStaticIPDisassociation,
 			),
 		),
 		Importer: &schema.ResourceImporter{
