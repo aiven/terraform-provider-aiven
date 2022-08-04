@@ -1,11 +1,8 @@
 name: CodeQL
 
 on:
-  push:
-    branches:
-      - main
-      - v*
   pull_request:
+  push:
     branches:
       - main
       - v*

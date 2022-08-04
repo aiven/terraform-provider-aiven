@@ -1,10 +1,11 @@
 name: Unit tests
 
 on:
-  push:
-    branches: [ main, v* ]
   pull_request:
-    branches: [ main, v* ]
+  push:
+    branches:
+      - main
+      - v*
 
 permissions:
   contents: read
