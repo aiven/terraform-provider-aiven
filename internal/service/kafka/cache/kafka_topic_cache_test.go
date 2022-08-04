@@ -26,7 +26,7 @@ func TestGetTopicCache(t *testing.T) {
 	tests := []struct {
 		name string
 		init func()
-		want *TopicCache
+		want *kafkaTopicCache
 	}{
 		{
 			"not_initialized",
@@ -39,7 +39,7 @@ func TestGetTopicCache(t *testing.T) {
 			func() {
 				_ = NewTopicCache()
 			},
-			&TopicCache{
+			&kafkaTopicCache{
 				internal: make(map[string]map[string]aiven.KafkaTopic),
 				inQueue:  make(map[string][]string),
 			},

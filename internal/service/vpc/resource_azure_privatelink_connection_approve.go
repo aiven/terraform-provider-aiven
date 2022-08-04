@@ -146,7 +146,7 @@ func resourcePrivatelinkConnectionApprovalCreateUpdate(ctx context.Context, d *s
 		return diag.Errorf("Error waiting for privatelink connection after update: %s", err)
 	}
 
-	d.Set("privatelink_connection_id", plConnectionID)
+	_ = d.Set("privatelink_connection_id", plConnectionID)
 
 	d.SetId(schemautil.BuildResourceID(project, serviceName))
 

@@ -12,9 +12,9 @@ import (
 	"golang.org/x/sync/semaphore"
 )
 
-// KafkaTopicAvailabilityWaiter is used to refresh the Aiven Kafka Topic endpoints when
+// kafkaTopicAvailabilityWaiter is used to refresh the Aiven Kafka Topic endpoints when
 // provisioning.
-type KafkaTopicAvailabilityWaiter struct {
+type kafkaTopicAvailabilityWaiter struct {
 	Client      *aiven.Client
 	Project     string
 	ServiceName string
@@ -25,7 +25,7 @@ type KafkaTopicAvailabilityWaiter struct {
 var kafkaTopicAvailabilitySem = semaphore.NewWeighted(1)
 
 // RefreshFunc will call the Aiven client and refresh it's state.
-func (w *KafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
+func (w *kafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		if w.Project == "" {
 			return nil, "WRONG_INPUT", fmt.Errorf("project name of the kafka topic resource cannot be empty `%s`", w.Project)
@@ -81,7 +81,7 @@ func (w *KafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 	}
 }
 
-func (w *KafkaTopicAvailabilityWaiter) refresh() error {
+func (w *kafkaTopicAvailabilityWaiter) refresh() error {
 	if !kafkaTopicAvailabilitySem.TryAcquire(1) {
 		log.Printf("[TRACE] Kafka Topic Availability cache refresh already in progress ...")
 		cache.GetTopicCache().AddToQueue(w.Project, w.ServiceName, w.TopicName)
@@ -121,7 +121,7 @@ func (w *KafkaTopicAvailabilityWaiter) refresh() error {
 }
 
 // Conf sets up the configuration to refresh.
-func (w *KafkaTopicAvailabilityWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
+func (w *kafkaTopicAvailabilityWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
 	log.Printf("[DEBUG] Kafka Topic availability waiter timeout %.0f minutes", timeout.Minutes())
 
 	return &resource.StateChangeConf{

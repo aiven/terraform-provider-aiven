@@ -35,16 +35,6 @@ func OptionalStringPointer(d *schema.ResourceData, key string) *string {
 	return &str
 }
 
-// OptionalStringPointerForUndefined retrieves a string pointer to a field, empty
-// string remains a pointer to an empty string
-func OptionalStringPointerForUndefined(d *schema.ResourceData, key string) *string {
-	str, ok := d.Get(key).(string)
-	if !ok {
-		return nil
-	}
-	return &str
-}
-
 func OptionalIntPointer(d *schema.ResourceData, key string) *int {
 	val, ok := d.GetOk(key)
 	if !ok {
@@ -191,10 +181,10 @@ func EmptyObjectNoChangeDiffSuppressFunc(k, _, new string, d *schema.ResourceDat
 	return false
 }
 
-// Terraform does not allow default values for arrays but the IP filter user config value
-// has default. We don't want to force users to always define explicit value just because
-// of the Terraform restriction so suppress the change from default to empty (which would
-// be nonsensical operation anyway)
+// IpFilterArrayDiffSuppressFunc Terraform does not allow default values for arrays but
+// the IP filter user config value has default. We don't want to force users to always
+// define explicit value just because of the Terraform restriction so suppress the
+// change from default to empty (which would be nonsensical operation anyway)
 func IpFilterArrayDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	if old == "1" && new == "0" && strings.HasSuffix(k, ".ip_filter.#") {
 		if list, ok := d.Get(strings.TrimSuffix(k, ".#")).([]interface{}); ok {
@@ -220,7 +210,7 @@ func ValidateDurationString(v interface{}, k string) (ws []string, errors []erro
 	return
 }
 
-// schemautil.ValidateHumanByteSizeString is a ValidateFunc that ensures a string parses
+// ValidateHumanByteSizeString is a ValidateFunc that ensures a string parses
 // as units.Bytes format
 func ValidateHumanByteSizeString(v interface{}, k string) (ws []string, errors []error) {
 	// only allow `^[1-9][0-9]*(GiB|G)*` without fractions

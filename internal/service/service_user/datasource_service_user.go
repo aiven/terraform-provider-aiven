@@ -12,6 +12,7 @@ import (
 
 // DatasourceServiceUser
 // Deprecated
+//goland:noinspection GoDeprecation
 func DatasourceServiceUser() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceServiceUserRead,
