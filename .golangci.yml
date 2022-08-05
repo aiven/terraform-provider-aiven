@@ -12,6 +12,7 @@ linters:
     - misspell
     - nakedret
     - nilerr
+    - revive # TODO: Configure according to https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md.
     - staticcheck
     - structcheck
     - unconvert
@@ -19,7 +20,12 @@ linters:
     - varcheck
 
 issues:
-  exclude-use-default: false
+  exclude:
+    # TODO: We can have a whitelist for revive's var-naming rule.
+    - 'var-naming: .*'
+
+    # TODO: We probably should add comments to all exported functions and methods.
+    - 'exported: .*'
 
 run:
   go: '1.17' # See https://github.com/golangci/golangci-lint/issues/2649.
