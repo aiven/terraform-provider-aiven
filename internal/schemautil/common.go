@@ -10,14 +10,14 @@ import (
 )
 
 //goland:noinspection GoDeprecation
-func GetACLUserValidateFunc() schema.SchemaValidateFunc {
+func GetACLUserValidateFunc() schema.SchemaValidateFunc { //nolint:staticcheck
 	return validation.StringMatch(
 		regexp.MustCompile(`^[-._*?A-Za-z0-9]+$`),
 		"Must consist of alpha-numeric characters, underscores, dashes, dots and glob characters '*' and '?'")
 }
 
 //goland:noinspection GoDeprecation
-func GetServiceUserValidateFunc() schema.SchemaValidateFunc {
+func GetServiceUserValidateFunc() schema.SchemaValidateFunc { //nolint:staticcheck
 	return validation.StringMatch(
 		regexp.MustCompile(`^(\*$|[a-zA-Z0-9-_?][a-zA-Z0-9-_?*]+)$`),
 		"username should be alphanumeric, may not start with dash or dot, max 64 characters")
