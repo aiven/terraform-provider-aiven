@@ -1,14 +1,13 @@
 .PHONY: build build-dev test test-unit test-acc lint lint-go lint-test lint-docs fmt fmt-test docs clean clean-tools sweep
 
-GO := CGO_ENABLED=0 go
+#################################################
+# Global
+#################################################
 
-#################################################
-# Tools
-#################################################
+GO := CGO_ENABLED=0 go
 
 TOOLS_DIR ?= tools
 TOOLS_BIN_DIR ?= $(TOOLS_DIR)/bin
-
 
 $(TOOLS_BIN_DIR):
 	mkdir -p $(TOOLS_BIN_DIR)
@@ -31,18 +30,17 @@ GOLANGCILINT := $(TOOLS_BIN_DIR)/golangci-lint
 $(GOLANGCILINT): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
 	cd $(TOOLS_DIR) && $(GO) build -o bin/golangci-lint github.com/golangci/golangci-lint/cmd/golangci-lint
 
-#################################################
-# Build
-#################################################
 
 # See https://github.com/hashicorp/terraform/blob/main/tools/protobuf-compile/protobuf-compile.go#L215
 ARCH ?= $(shell $(GO) env GOOS GOARCH | tr '\n' '_' | sed '$$s/_$$//')
-BUILD_DEV_DIR ?= ~/.terraform.d/plugins/registry.terraform.io/aiven/aiven/0.0.0+dev/$(ARCH)
-
+BUILD_DEV_DIR ?= ~/.terraform.d/plugins/registry.terraform.io/aiven-dev/aiven/0.0.0+dev/$(ARCH)
 
 $(BUILD_DEV_DIR):
 	mkdir -p $(BUILD_DEV_DIR)
 
+#################################################
+# Build
+#################################################
 
 build:
 	$(GO) build
@@ -53,7 +51,7 @@ build:
 # terraform {
 #  required_providers {
 #    aiven = {
-#      source  = "aiven/aiven"
+#      source  = "aiven-dev/aiven"
 #      version = "0.0.0+dev"
 #    }
 #  }
@@ -120,13 +118,13 @@ docs: $(TFPLUGINDOCS)
 	$(TFPLUGINDOCS) generate
 
 #################################################
-# Misc
+# Clean
 #################################################
 
 clean: clean-tools sweep
 
 
-clean-tools:
+clean-tools: $(TOOLS_BIN_DIR)
 	rm -rf $(TOOLS_BIN_DIR)
 
 

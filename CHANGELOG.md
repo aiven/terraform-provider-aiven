@@ -29,6 +29,7 @@ nav_order: 1
 - Add CodeQL workflow
 - Add `opensearch_index` support to `aiven_flink_table`
 - Add not found checks to the Kafka availability waiter 
+- Add PostgreSQL max connections and PgBouncer outputs
 
 ## [3.4.0] - 2022-07-26
 

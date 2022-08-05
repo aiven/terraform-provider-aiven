@@ -76,6 +76,7 @@ Read-Only:
 
 - `dbname` (String)
 - `host` (String)
+- `max_connections` (Number)
 - `password` (String)
 - `port` (Number)
 - `replica_uri` (String)

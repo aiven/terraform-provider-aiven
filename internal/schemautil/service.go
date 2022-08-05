@@ -624,7 +624,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		return fmt.Errorf("cannot set `components` : %s", err)
 	}
 
-	return copyConnectionInfoFromAPIResponseToTerraform(d, serviceType, s.ConnectionInfo)
+	return copyConnectionInfoFromAPIResponseToTerraform(d, serviceType, s.ConnectionInfo, s.Metadata)
 }
 
 func FlattenServiceComponents(r *aiven.Service) []map[string]interface{} {
@@ -648,6 +648,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	d *schema.ResourceData,
 	serviceType string,
 	connectionInfo aiven.ConnectionInfo,
+	metadata interface{},
 ) error {
 	props := make(map[string]interface{})
 
@@ -685,6 +686,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 			props["user"] = params.User
 		}
 		props["replica_uri"] = connectionInfo.PostgresReplicaURI
+		props["max_connections"] = metadata.(map[string]interface{})["max_connections"]
 	case "clickhouse":
 	case "redis":
 	case "flink":

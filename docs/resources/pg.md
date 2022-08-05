@@ -101,6 +101,7 @@ Read-Only:
 
 - `dbname` (String) Primary PostgreSQL database name
 - `host` (String) PostgreSQL master node host IP or name
+- `max_connections` (Number) Connection limit
 - `password` (String, Sensitive) PostgreSQL admin user password
 - `port` (Number) PostgreSQL port
 - `replica_uri` (String, Sensitive) PostgreSQL replica URI for services with a replica
