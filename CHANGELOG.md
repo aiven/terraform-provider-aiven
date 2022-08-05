@@ -7,6 +7,10 @@ nav_order: 1
 
 # Changelog
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Change Flink version to 1.15
+
 ## [3.6.0] - 2022-08-31
 
 - Add additional disk space support

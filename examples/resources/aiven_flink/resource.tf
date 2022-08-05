@@ -7,6 +7,6 @@ resource "aiven_flink" "flink" {
   maintenance_window_time = "10:00:00"
 
   flink_user_config {
-    flink_version = 1.13
+    flink_version = 1.15
   }
 }

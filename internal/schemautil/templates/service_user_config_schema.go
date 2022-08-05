@@ -746,7 +746,7 @@ var (
       },
       "flink_version": {
         "enum": [
-          "1.13"
+          "1.15"
         ],
         "title": "Flink major version",
         "type": [
