@@ -7,7 +7,7 @@ nav_order: 1
 
 # Changelog
 
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+## [3.5.0] - 2022-07-26
 
 - Add custom diff for all types of VPC peering connections that check if a VPC connection already exists before creation
 - Add error handling for service `project_vpc_id` field
