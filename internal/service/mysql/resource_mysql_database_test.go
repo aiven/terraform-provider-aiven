@@ -71,11 +71,11 @@ func TestAccAivenMySQLDatabase_basic(t *testing.T) {
 					if !strings.EqualFold(attributes["project"], projectName) {
 						return fmt.Errorf("expected project to match '%s', got: '%s'", projectName, attributes["project_name"])
 					}
-					database_name, ok := attributes["database_name"]
+					databaseName, ok := attributes["database_name"]
 					if !ok {
 						return errors.New("expected 'database_name' field to be set")
 					}
-					expectedId := fmt.Sprintf("%s/test-acc-sr-%s/%s", projectName, rName, database_name)
+					expectedId := fmt.Sprintf("%s/test-acc-sr-%s/%s", projectName, rName, databaseName)
 					if !strings.EqualFold(s[0].ID, expectedId) {
 						return fmt.Errorf("expected ID to match '%s', but got: %s", expectedId, s[0].ID)
 					}

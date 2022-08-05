@@ -254,13 +254,21 @@ func copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(
 	endpoint *aiven.ServiceIntegrationEndpoint,
 	project string,
 ) error {
-	d.Set("project", project)
-	d.Set("endpoint_name", endpoint.EndpointName)
+	if err := d.Set("project", project); err != nil {
+		return err
+	}
+	if err := d.Set("endpoint_name", endpoint.EndpointName); err != nil {
+		return err
+	}
 	endpointType := endpoint.EndpointType
-	d.Set("endpoint_type", endpointType)
+	if err := d.Set("endpoint_type", endpointType); err != nil {
+		return err
+	}
 	userConfig := schemautil.ConvertAPIUserConfigToTerraformCompatibleFormat("endpoint", endpointType, endpoint.UserConfig)
 	if len(userConfig) > 0 {
-		d.Set(endpointType+"_user_config", userConfig)
+		if err := d.Set(endpointType+"_user_config", userConfig); err != nil {
+			return err
+		}
 	}
 	// Must coerse all values into strings
 	endpointConfig := map[string]string{}
@@ -269,7 +277,9 @@ func copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(
 			endpointConfig[key] = fmt.Sprintf("%v", value)
 		}
 	}
-	d.Set("endpoint_config", endpointConfig)
+	if err := d.Set("endpoint_config", endpointConfig); err != nil {
+		return err
+	}
 
 	return nil
 }

@@ -6,15 +6,13 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/service/kafka/cache"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"golang.org/x/sync/semaphore"
 )
 
-// KafkaTopicAvailabilityWaiter is used to refresh the Aiven Kafka Topic endpoints when
+// kafkaTopicAvailabilityWaiter is used to refresh the Aiven Kafka Topic endpoints when
 // provisioning.
-type KafkaTopicAvailabilityWaiter struct {
+type kafkaTopicAvailabilityWaiter struct {
 	Client      *aiven.Client
 	Project     string
 	ServiceName string
@@ -25,7 +23,7 @@ type KafkaTopicAvailabilityWaiter struct {
 var kafkaTopicAvailabilitySem = semaphore.NewWeighted(1)
 
 // RefreshFunc will call the Aiven client and refresh it's state.
-func (w *KafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
+func (w *kafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		if w.Project == "" {
 			return nil, "WRONG_INPUT", fmt.Errorf("project name of the kafka topic resource cannot be empty `%s`", w.Project)
@@ -39,7 +37,7 @@ func (w *KafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 			return nil, "WRONG_INPUT", fmt.Errorf("topic name of the kafka topic resource cannot be empty `%s`", w.TopicName)
 		}
 
-		topicCache := cache.GetTopicCache()
+		topicCache := GetTopicCache()
 		topic, ok := topicCache.LoadByTopicName(w.Project, w.ServiceName, w.TopicName)
 
 		if !ok {
@@ -81,15 +79,15 @@ func (w *KafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 	}
 }
 
-func (w *KafkaTopicAvailabilityWaiter) refresh() error {
+func (w *kafkaTopicAvailabilityWaiter) refresh() error {
 	if !kafkaTopicAvailabilitySem.TryAcquire(1) {
 		log.Printf("[TRACE] Kafka Topic Availability cache refresh already in progress ...")
-		cache.GetTopicCache().AddToQueue(w.Project, w.ServiceName, w.TopicName)
+		GetTopicCache().AddToQueue(w.Project, w.ServiceName, w.TopicName)
 		return nil
 	}
 	defer kafkaTopicAvailabilitySem.Release(1)
 
-	c := cache.GetTopicCache()
+	c := GetTopicCache()
 
 	// check if topic is already in cache
 	if _, ok := c.LoadByTopicName(w.Project, w.ServiceName, w.TopicName); ok {
@@ -114,14 +112,14 @@ func (w *KafkaTopicAvailabilityWaiter) refresh() error {
 			return err
 		}
 
-		cache.GetTopicCache().StoreByProjectAndServiceName(w.Project, w.ServiceName, v2Topics)
+		GetTopicCache().StoreByProjectAndServiceName(w.Project, w.ServiceName, v2Topics)
 	}
 
 	return nil
 }
 
 // Conf sets up the configuration to refresh.
-func (w *KafkaTopicAvailabilityWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
+func (w *kafkaTopicAvailabilityWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
 	log.Printf("[DEBUG] Kafka Topic availability waiter timeout %.0f minutes", timeout.Minutes())
 
 	return &resource.StateChangeConf{

@@ -703,7 +703,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	return nil
 }
 
-// utility to check if the database returned an error because of an unknown role
+// IsUnknownRole checks if the database returned an error because of an unknown role
 // to make deletions idempotent
 func IsUnknownRole(err error) bool {
 	aivenError, ok := err.(aiven.Error)
@@ -713,7 +713,7 @@ func IsUnknownRole(err error) bool {
 	return strings.Contains(aivenError.Message, "Code: 511")
 }
 
-// this function is a place to bundle errors that we want to treat as "not found"
+// IsUnknownResource is a function to handle errors that we want to treat as "Not Found"
 func IsUnknownResource(err error) bool {
 	return aiven.IsNotFound(err) || IsUnknownRole(err)
 }

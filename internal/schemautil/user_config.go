@@ -9,6 +9,8 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/templates"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // GenerateServiceUserConfigurationSchema generate service user_config
@@ -20,7 +22,7 @@ func GenerateServiceUserConfigurationSchema(t string) *schema.Schema {
 		Type:             schema.TypeList,
 		MaxItems:         1,
 		Optional:         true,
-		Description:      fmt.Sprintf("%s user configurable settings", strings.Title(t)),
+		Description:      fmt.Sprintf("%s user configurable settings", cases.Title(language.Und, cases.NoLower).String(t)),
 		DiffSuppressFunc: EmptyObjectDiffSuppressFuncSkipArrays(s),
 		Elem:             &schema.Resource{Schema: s},
 	}

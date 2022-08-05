@@ -59,6 +59,7 @@ var aivenDatabaseSchema = map[string]*schema.Schema{
 
 // ResourceDatabase
 // Deprecated
+//goland:noinspection GoDeprecation
 func ResourceDatabase() *schema.Resource {
 	return &schema.Resource{
 		Description:        "The Database resource allows the creation and management of Aiven Databases.",
@@ -154,7 +155,7 @@ func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.Errorf("cannot delete a database termination_protection is enabled")
 	}
 
-	waiter := DatabaseDeleteWaiter{
+	waiter := DeleteWaiter{
 		Client:      client,
 		ProjectName: projectName,
 		ServiceName: serviceName,
@@ -183,8 +184,8 @@ func resourceDatabaseState(ctx context.Context, d *schema.ResourceData, m interf
 	return []*schema.ResourceData{d}, nil
 }
 
-// DatabaseDeleteWaiter is used to wait for Database to be deleted.
-type DatabaseDeleteWaiter struct {
+// DeleteWaiter is used to wait for Database to be deleted.
+type DeleteWaiter struct {
 	Client      *aiven.Client
 	ProjectName string
 	ServiceName string
@@ -192,7 +193,7 @@ type DatabaseDeleteWaiter struct {
 }
 
 // RefreshFunc will call the Aiven client and refresh it's state.
-func (w *DatabaseDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
+func (w *DeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		err := w.Client.Databases.Delete(w.ProjectName, w.ServiceName, w.Database)
 		if err != nil && !aiven.IsNotFound(err) {
@@ -204,7 +205,7 @@ func (w *DatabaseDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 // Conf sets up the configuration to refresh.
-func (w *DatabaseDeleteWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
+func (w *DeleteWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{"REMOVING"},
 		Target:     []string{"DELETED"},

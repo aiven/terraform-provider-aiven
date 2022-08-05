@@ -37,9 +37,9 @@ var aivenPrivatelinkConnectionApprovalSchema = map[string]*schema.Schema{
 func ResourceAzurePrivatelinkConnectionApproval() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Azure privatelink approve resource waits for an aiven privatelink connection on a service and approves it with associated endpoint IP",
-		CreateContext: resourcePrivatelinkConnectionApprovalCreateUpdate,
+		CreateContext: resourcePrivatelinkConnectionApprovalUpdate,
 		ReadContext:   resourcePrivatelinkConnectionApprovalRead,
-		UpdateContext: resourcePrivatelinkConnectionApprovalCreateUpdate,
+		UpdateContext: resourcePrivatelinkConnectionApprovalUpdate,
 		DeleteContext: resourcePrivatelinkConnectionApprovalDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
@@ -85,7 +85,7 @@ func waitForConnectionState(_ context.Context, client *aiven.Client, project str
 	}
 }
 
-func resourcePrivatelinkConnectionApprovalCreateUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	var project = d.Get("project").(string)
@@ -146,7 +146,9 @@ func resourcePrivatelinkConnectionApprovalCreateUpdate(ctx context.Context, d *s
 		return diag.Errorf("Error waiting for privatelink connection after update: %s", err)
 	}
 
-	d.Set("privatelink_connection_id", plConnectionID)
+	if err := d.Set("privatelink_connection_id", plConnectionID); err != nil {
+		return diag.Errorf("Error updating privatelink connection: %s", err)
+	}
 
 	d.SetId(schemautil.BuildResourceID(project, serviceName))
 

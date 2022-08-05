@@ -2,7 +2,7 @@
 
 TYPE=$1
 FILE_NAME=$2
-BASEDIR=$(dirname $0)
+BASEDIR=$(dirname "$0")
 JSON=$(cat "$BASEDIR"/"$FILE_NAME")
 
 cat >"$BASEDIR"/"${TYPE}"_user_config_schema.go <<EOL
