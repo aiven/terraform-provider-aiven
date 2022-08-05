@@ -28,6 +28,7 @@ nav_order: 1
 - Update Changelog Enforcer workflow
 - Add CodeQL workflow
 - Add `opensearch_index` support to `aiven_flink_table`
+- Add not found checks to the Kafka availability waiter 
 
 ## [3.4.0] - 2022-07-26
 
