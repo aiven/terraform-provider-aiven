@@ -92,14 +92,6 @@ func testAccCheckAivenServiceKafkaAttributes(n string) resource.TestCheckFunc {
 		r := s.RootModule().Resources[n]
 		a := r.Primary.Attributes
 
-		if a["kafka_user_config.0.kafka_connect"] != "true" {
-			return fmt.Errorf("expected to get a correct kafka_connect from Aiven")
-		}
-
-		if a["kafka_user_config.0.kafka_rest"] != "true" {
-			return fmt.Errorf("expected to get a correct kafka_rest from Aiven")
-		}
-
 		if a["kafka_user_config.0.public_access.0.kafka_connect"] != "true" {
 			return fmt.Errorf("expected to get a correct public_access.kafka_connect from Aiven")
 		}
@@ -114,10 +106,6 @@ func testAccCheckAivenServiceKafkaAttributes(n string) resource.TestCheckFunc {
 
 		if a["kafka_user_config.0.public_access.0.prometheus"] != "" {
 			return fmt.Errorf("expected to get a correct public_access.prometheus from Aiven")
-		}
-
-		if a["kafka.0.connect_uri"] == "" {
-			return fmt.Errorf("expected to get a connect_uri from Aiven")
 		}
 
 		if a["kafka.0.rest_uri"] == "" {
