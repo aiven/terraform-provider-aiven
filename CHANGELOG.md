@@ -7,7 +7,7 @@ nav_order: 1
 
 # Changelog
 
-## [3.5.0] - 2022-07-26
+## [3.5.0] - 2022-08-10
 
 - Add custom diff for all types of VPC peering connections that check if a VPC connection already exists before creation
 - Add error handling for service `project_vpc_id` field
@@ -31,6 +31,7 @@ nav_order: 1
 - Add not found checks to the Kafka availability waiter 
 - Add PostgreSQL max connections and PgBouncer outputs
 - Perform general code clean-up and add `revive` linter
+- Add support for new user configuration options
 
 ## [3.4.0] - 2022-07-26
 

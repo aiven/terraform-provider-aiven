@@ -124,6 +124,7 @@ Optional:
 - `pg` (Block List, Max: 1) postgresql.conf configuration values (see [below for nested schema](#nestedblock--pg_user_config--pg))
 - `pg_read_replica` (String) Should the service which is being forked be a read replica (deprecated, use read_replica service integration instead).
 - `pg_service_to_fork_from` (String) Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created.
+- `pg_stat_monitor_enable` (String) Enable pg_stat_monitor extension if available for the current cluster
 - `pg_version` (String) PostgreSQL major version
 - `pgbouncer` (Block List, Max: 1) PGBouncer connection pooling settings (see [below for nested schema](#nestedblock--pg_user_config--pgbouncer))
 - `pglookout` (Block List, Max: 1) PGLookout settings (see [below for nested schema](#nestedblock--pg_user_config--pglookout))
@@ -181,6 +182,7 @@ Optional:
 - `log_error_verbosity` (String) log_error_verbosity
 - `log_line_prefix` (String) log_line_prefix
 - `log_min_duration_statement` (String) log_min_duration_statement
+- `log_temp_files` (String) log_temp_files
 - `max_files_per_process` (String) max_files_per_process
 - `max_locks_per_transaction` (String) max_locks_per_transaction
 - `max_logical_replication_workers` (String) max_logical_replication_workers

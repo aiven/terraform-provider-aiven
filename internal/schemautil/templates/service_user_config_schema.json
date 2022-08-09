@@ -180,6 +180,26 @@
       },
       "elasticsearch": {
         "additionalProperties": false,
+        "dependencies": {
+          "email_sender_name": {
+            "required": [
+              "email_sender_username",
+              "email_sender_password"
+            ]
+          },
+          "email_sender_password": {
+            "required": [
+              "email_sender_username",
+              "email_sender_name"
+            ]
+          },
+          "email_sender_username": {
+            "required": [
+              "email_sender_name",
+              "email_sender_password"
+            ]
+          }
+        },
         "properties": {
           "action_auto_create_index_enabled": {
             "description": "Explicitly allow or block automatic creation of indices. Defaults to true",
@@ -209,6 +229,37 @@
             "minimum": 2,
             "title": "Concurrent incoming/outgoing shard recoveries per node",
             "type": "integer"
+          },
+          "email_sender_name": {
+            "description": "This should be identical to the Sender name defined in Opensearch dashboards",
+            "example": "alert-sender",
+            "maxLength": 40,
+            "pattern": "^[a-zA-Z0-9-_]+$",
+            "title": "Sender email name placeholder to be used in Opensearch Dashboards and Opensearch keystore",
+            "type": [
+              "string"
+            ],
+            "user_error": "Must consist of lower-case alpha-numeric characters and dashes, max 40 characters"
+          },
+          "email_sender_password": {
+            "description": "Sender email password for Opensearch alerts to authenticate with SMTP server",
+            "example": "very-secure-mail-password",
+            "maxLength": 1024,
+            "pattern": "^[^\\x00-\\x1F]+$",
+            "title": "Sender email password for Opensearch alerts to authenticate with SMTP server",
+            "type": [
+              "string"
+            ]
+          },
+          "email_sender_username": {
+            "example": "jane@example.com",
+            "maxLength": 320,
+            "pattern": "^[A-Za-z0-9_\\-\\.+\\'&]+@(([\\da-zA-Z])([_\\w-]{,62})\\.){,127}(([\\da-zA-Z])[_\\w-]{,61})?([\\da-zA-Z]\\.((xn\\-\\-[a-zA-Z\\d]+)|([a-zA-Z\\d]{2,})))$",
+            "title": "Sender email address for Opensearch alerts",
+            "type": [
+              "string"
+            ],
+            "user_error": "Must be a valid email address"
           },
           "http_max_content_length": {
             "description": "Maximum content length for HTTP requests to the Elasticsearch HTTP API, in bytes.",
@@ -2210,7 +2261,8 @@
         "enum": [
           "2.8",
           "3.0",
-          "3.1"
+          "3.1",
+          "3.2"
         ],
         "title": "Kafka major version",
         "type": [
@@ -2666,7 +2718,8 @@
       "m3_version": {
         "enum": [
           "1.1",
-          "1.2"
+          "1.2",
+          "1.5"
         ],
         "example": "1.1",
         "title": "M3 major version (deprecated, use m3aggregator_version)",
@@ -2678,7 +2731,8 @@
       "m3aggregator_version": {
         "enum": [
           "1.1",
-          "1.2"
+          "1.2",
+          "1.5"
         ],
         "example": "1.1",
         "title": "M3 major version (the minimum compatible version)",
@@ -2728,6 +2782,13 @@
       "limits": {
         "additionalProperties": false,
         "properties": {
+          "query_docs": {
+            "example": 100000,
+            "maximum": 9223372036854775807,
+            "minimum": 0,
+            "title": "The maximum number of docs fetched in single query. Default=0(unlimited).",
+            "type": "integer"
+          },
           "query_require_exhaustive": {
             "description": "When query limits are exceeded, whether to return error (if True) or return partial results (False)",
             "example": true,
@@ -2738,7 +2799,7 @@
             "example": 100000,
             "maximum": 9223372036854775807,
             "minimum": 10000,
-            "title": "The maximum number of series fetched in single query",
+            "title": "The maximum number of series fetched in single query.",
             "type": "integer"
           }
         },
@@ -2748,7 +2809,8 @@
       "m3_version": {
         "enum": [
           "1.1",
-          "1.2"
+          "1.2",
+          "1.5"
         ],
         "example": "1.1",
         "title": "M3 major version (deprecated, use m3coordinator_version)",
@@ -2766,7 +2828,8 @@
       "m3coordinator_version": {
         "enum": [
           "1.1",
-          "1.2"
+          "1.2",
+          "1.5"
         ],
         "example": "1.1",
         "title": "M3 major version (the minimum compatible version)",
@@ -2840,6 +2903,13 @@
       "limits": {
         "additionalProperties": false,
         "properties": {
+          "query_docs": {
+            "example": 100000,
+            "maximum": 9223372036854775807,
+            "minimum": 0,
+            "title": "The maximum number of docs fetched in single query. Default=0(unlimited).",
+            "type": "integer"
+          },
           "query_require_exhaustive": {
             "description": "When query limits are exceeded, whether to return error (if True) or return partial results (False)",
             "example": true,
@@ -2850,7 +2920,7 @@
             "example": 100000,
             "maximum": 9223372036854775807,
             "minimum": 10000,
-            "title": "The maximum number of series fetched in single query",
+            "title": "The maximum number of series fetched in single query.",
             "type": "integer"
           }
         },
@@ -2860,7 +2930,8 @@
       "m3_version": {
         "enum": [
           "1.1",
-          "1.2"
+          "1.2",
+          "1.5"
         ],
         "example": "1.1",
         "title": "M3 major version (deprecated, use m3db_version)",
@@ -2878,7 +2949,8 @@
       "m3db_version": {
         "enum": [
           "1.1",
-          "1.2"
+          "1.2",
+          "1.5"
         ],
         "example": "1.1",
         "title": "M3 major version (the minimum compatible version)",
@@ -3379,8 +3451,24 @@
             "title": "information_schema_stats_expiry",
             "type": "integer"
           },
+          "innodb_change_buffer_max_size": {
+            "description": "Maximum size for the InnoDB change buffer, as a percentage of the total size of the buffer pool. Default is 25",
+            "example": 30,
+            "maximum": 50,
+            "minimum": 0,
+            "title": "innodb_change_buffer_max_size",
+            "type": "integer"
+          },
+          "innodb_flush_neighbors": {
+            "description": "Specifies whether flushing a page from the InnoDB buffer pool also flushes other dirty pages in the same extent (default is 1): 0 - dirty pages in the same extent are not flushed,  1 - flush contiguous dirty pages in the same extent,  2 - flush dirty pages in the same extent",
+            "example": 0,
+            "maximum": 2,
+            "minimum": 0,
+            "title": "innodb_flush_neighbors",
+            "type": "integer"
+          },
           "innodb_ft_min_token_size": {
-            "description": "Minimum length of words that are stored in an InnoDB FULLTEXT index.",
+            "description": "Minimum length of words that are stored in an InnoDB FULLTEXT index. Changing this parameter will lead to a restart of the MySQL service.",
             "example": 3,
             "maximum": 16,
             "minimum": 0,
@@ -3428,11 +3516,35 @@
             "title": "innodb_print_all_deadlocks",
             "type": "boolean"
           },
+          "innodb_read_io_threads": {
+            "description": "The number of I/O threads for read operations in InnoDB. Default is 4. Changing this parameter will lead to a restart of the MySQL service.",
+            "example": 10,
+            "maximum": 64,
+            "minimum": 1,
+            "title": "innodb_read_io_threads",
+            "type": "integer"
+          },
           "innodb_rollback_on_timeout": {
-            "description": "When enabled a transaction timeout causes InnoDB to abort and roll back the entire transaction.",
+            "description": "When enabled a transaction timeout causes InnoDB to abort and roll back the entire transaction. Changing this parameter will lead to a restart of the MySQL service.",
             "example": true,
             "title": "innodb_rollback_on_timeout",
             "type": "boolean"
+          },
+          "innodb_thread_concurrency": {
+            "description": "Defines the maximum number of threads permitted inside of InnoDB. Default is 0 (infinite concurrency - no limit)",
+            "example": 10,
+            "maximum": 1000,
+            "minimum": 0,
+            "title": "innodb_thread_concurrency",
+            "type": "integer"
+          },
+          "innodb_write_io_threads": {
+            "description": "The number of I/O threads for write operations in InnoDB. Default is 4. Changing this parameter will lead to a restart of the MySQL service.",
+            "example": 10,
+            "maximum": 64,
+            "minimum": 1,
+            "title": "innodb_write_io_threads",
+            "type": "integer"
           },
           "interactive_timeout": {
             "description": "The number of seconds the server waits for activity on an interactive connection before closing it.",
@@ -3474,6 +3586,14 @@
             "maximum": 1073741824,
             "minimum": 1048576,
             "title": "max_heap_table_size",
+            "type": "integer"
+          },
+          "net_buffer_length": {
+            "description": "Start sizes of connection buffer and result buffer. Default is 16384 (16K). Changing this parameter will lead to a restart of the MySQL service.",
+            "example": 16384,
+            "maximum": 1048576,
+            "minimum": 1024,
+            "title": "net_buffer_length",
             "type": "integer"
           },
           "net_read_timeout": {
@@ -3795,6 +3915,26 @@
       },
       "opensearch": {
         "additionalProperties": false,
+        "dependencies": {
+          "email_sender_name": {
+            "required": [
+              "email_sender_username",
+              "email_sender_password"
+            ]
+          },
+          "email_sender_password": {
+            "required": [
+              "email_sender_username",
+              "email_sender_name"
+            ]
+          },
+          "email_sender_username": {
+            "required": [
+              "email_sender_name",
+              "email_sender_password"
+            ]
+          }
+        },
         "properties": {
           "action_auto_create_index_enabled": {
             "description": "Explicitly allow or block automatic creation of indices. Defaults to true",
@@ -3824,6 +3964,37 @@
             "minimum": 2,
             "title": "Concurrent incoming/outgoing shard recoveries per node",
             "type": "integer"
+          },
+          "email_sender_name": {
+            "description": "This should be identical to the Sender name defined in Opensearch dashboards",
+            "example": "alert-sender",
+            "maxLength": 40,
+            "pattern": "^[a-zA-Z0-9-_]+$",
+            "title": "Sender email name placeholder to be used in Opensearch Dashboards and Opensearch keystore",
+            "type": [
+              "string"
+            ],
+            "user_error": "Must consist of lower-case alpha-numeric characters and dashes, max 40 characters"
+          },
+          "email_sender_password": {
+            "description": "Sender email password for Opensearch alerts to authenticate with SMTP server",
+            "example": "very-secure-mail-password",
+            "maxLength": 1024,
+            "pattern": "^[^\\x00-\\x1F]+$",
+            "title": "Sender email password for Opensearch alerts to authenticate with SMTP server",
+            "type": [
+              "string"
+            ]
+          },
+          "email_sender_username": {
+            "example": "jane@example.com",
+            "maxLength": 320,
+            "pattern": "^[A-Za-z0-9_\\-\\.+\\'&]+@(([\\da-zA-Z])([_\\w-]{,62})\\.){,127}(([\\da-zA-Z])[_\\w-]{,61})?([\\da-zA-Z]\\.((xn\\-\\-[a-zA-Z\\d]+)|([a-zA-Z\\d]{2,})))$",
+            "title": "Sender email address for Opensearch alerts",
+            "type": [
+              "string"
+            ],
+            "user_error": "Must be a valid email address"
           },
           "http_max_content_length": {
             "description": "Maximum content length for HTTP requests to the OpenSearch HTTP API, in bytes.",
@@ -4448,8 +4619,8 @@
             "description": "Choose from one of the available log-formats. These can support popular log analyzers like pgbadger, pganalyze etc.",
             "enum": [
               "'pid=%p,user=%u,db=%d,app=%a,client=%h '",
-              "'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '",
-              "'%m [%p] %q[user=%u,db=%d,app=%a] '"
+              "'%m [%p] %q[user=%u,db=%d,app=%a] '",
+              "'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '"
             ],
             "title": "log_line_prefix",
             "type": "string"
@@ -4459,6 +4630,13 @@
             "maximum": 86400000,
             "minimum": -1,
             "title": "log_min_duration_statement",
+            "type": "integer"
+          },
+          "log_temp_files": {
+            "description": "Log statements for each temporary file created larger than this number of kilobytes, -1 disables",
+            "maximum": 2147483647,
+            "minimum": -1,
+            "title": "log_temp_files",
             "type": "integer"
           },
           "max_files_per_process": {
@@ -4690,6 +4868,12 @@
           "string",
           "null"
         ]
+      },
+      "pg_stat_monitor_enable": {
+        "default": false,
+        "description": "Enable the pg_stat_monitor extension. Enabling this extension will cause the cluster to be restarted.When this extension is enabled, pg_stat_statements results for utility commands are unreliable",
+        "title": "Enable pg_stat_monitor extension if available for the current cluster",
+        "type": "boolean"
       },
       "pg_version": {
         "enum": [
