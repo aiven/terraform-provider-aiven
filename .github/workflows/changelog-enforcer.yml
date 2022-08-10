@@ -18,7 +18,7 @@ permissions:
 jobs:
   changelog-enforcer:
     runs-on: ubuntu-latest
-    if: github.actor != 'dependabot[bot]'
+    if: ((github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push') && github.actor != 'dependabot[bot]'
     steps:
       - uses: dangoslen/changelog-enforcer@v3
         with:

@@ -2,6 +2,15 @@ name: Unit tests
 
 on:
   pull_request:
+    branches:
+      - main
+      - v*
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
   push:
     branches:
       - main
@@ -12,11 +21,8 @@ permissions:
 
 jobs:
   go_test:
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-    runs-on: ${{ matrix.os }}
-
+    runs-on: ubuntu-latest
+    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
     steps:
     - uses: actions/setup-go@v2
       with:

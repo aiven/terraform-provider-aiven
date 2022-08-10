@@ -2,6 +2,15 @@ name: Lint
 
 on:
   pull_request:
+    branches:
+      - main
+      - v*
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
   push:
     branches:
       - main
@@ -13,12 +22,14 @@ permissions:
 jobs:
   semgrep:
     runs-on: ubuntu-latest
+    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
     steps:
     - uses: actions/checkout@v2
     - uses: returntocorp/semgrep-action@v1
 
   make_lint:
     runs-on: ubuntu-latest
+    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
@@ -29,6 +40,7 @@ jobs:
 
   check_docs_were_generated:
     runs-on: ubuntu-latest
+    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
