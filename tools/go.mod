@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/golangci/golangci-lint v1.48.0
 	github.com/hashicorp/terraform-plugin-docs v0.13.0
-	github.com/katbyte/terrafmt v0.4.0
+	github.com/katbyte/terrafmt v0.5.1
 )
 
 require (
@@ -86,7 +86,7 @@ require (
 	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/hashicorp/hc-install v0.4.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/hashicorp/hcl/v2 v2.11.1 // indirect
+	github.com/hashicorp/hcl/v2 v2.13.0 // indirect
 	github.com/hashicorp/terraform-exec v0.17.2 // indirect
 	github.com/hashicorp/terraform-json v0.14.0 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
@@ -157,7 +157,7 @@ require (
 	github.com/sivchari/tenv v1.7.0 // indirect
 	github.com/sonatard/noctx v0.0.1 // indirect
 	github.com/sourcegraph/go-diff v0.6.1 // indirect
-	github.com/spf13/afero v1.8.2 // indirect
+	github.com/spf13/afero v1.9.2 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/cobra v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
