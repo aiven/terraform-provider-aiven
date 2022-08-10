@@ -394,7 +394,7 @@ func testAccCheckAivenServicePGAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a correct PG password from Aiven")
 		}
 
-		if a["pg.0.port"] != "14609" {
+		if a["pg.0.port"] == "" {
 			return fmt.Errorf("expected to get a correct PG port from Aiven")
 		}
 

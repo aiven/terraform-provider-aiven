@@ -100,6 +100,7 @@ Read-Only:
 
 Read-Only:
 
+- `query_docs` (String)
 - `query_require_exhaustive` (String)
 - `query_series` (String)
 

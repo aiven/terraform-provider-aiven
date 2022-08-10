@@ -96,8 +96,9 @@ Optional:
 
 Optional:
 
+- `query_docs` (String) The maximum number of docs fetched in single query. Default=0(unlimited).
 - `query_require_exhaustive` (String) Require exhaustive result
-- `query_series` (String) The maximum number of series fetched in single query
+- `query_series` (String) The maximum number of series fetched in single query.
 
 
 <a id="nestedblock--m3db_user_config--namespaces"></a>

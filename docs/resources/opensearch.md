@@ -129,6 +129,9 @@ Optional:
 - `action_destructive_requires_name` (String) Require explicit index names when deleting
 - `cluster_max_shards_per_node` (String) cluster.max_shards_per_node
 - `cluster_routing_allocation_node_concurrent_recoveries` (String) Concurrent incoming/outgoing shard recoveries per node
+- `email_sender_name` (String) Sender email name placeholder to be used in Opensearch Dashboards and Opensearch keystore
+- `email_sender_password` (String, Sensitive) Sender email password for Opensearch alerts to authenticate with SMTP server
+- `email_sender_username` (String) Sender email address for Opensearch alerts
 - `http_max_content_length` (String) http.max_content_length
 - `http_max_header_size` (String) http.max_header_size
 - `http_max_initial_line_length` (String) http.max_initial_line_length
