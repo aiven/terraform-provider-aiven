@@ -92,6 +92,7 @@ func ResourcePG() *schema.Resource {
 		CustomizeDiff: customdiff.Sequence(
 			customdiff.Sequence(
 				schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypePG),
+				customdiff.If(schemautil.ResourceShouldNotExist, schemautil.CustomizeDiffCheckProjectExistence),
 				customdiff.IfValueChange("tag",
 					schemautil.TagsShouldNotBeEmpty,
 					schemautil.CustomizeDiffCheckUniqueTag,

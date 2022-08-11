@@ -7,6 +7,10 @@ nav_order: 1
 
 # Changelog
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Add custom diff for all services that validates project existence before creation of a service 
+
 ## [3.5.0] - 2022-08-10
 
 - Add custom diff for all types of VPC peering connections that check if a VPC connection already exists before creation

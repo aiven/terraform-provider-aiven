@@ -98,6 +98,7 @@ func ResourceKafka() *schema.Resource {
 		CustomizeDiff: customdiff.Sequence(
 			customdiff.Sequence(
 				schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeKafka),
+				customdiff.If(schemautil.ResourceShouldNotExist, schemautil.CustomizeDiffCheckProjectExistence),
 				customdiff.IfValueChange("tag",
 					schemautil.TagsShouldNotBeEmpty,
 					schemautil.CustomizeDiffCheckUniqueTag,

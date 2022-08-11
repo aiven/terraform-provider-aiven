@@ -115,6 +115,23 @@ func SetServiceTypeIfEmpty(t string) schema.CustomizeDiffFunc {
 	}
 }
 
+// CustomizeDiffCheckProjectExistence checks if a project exists, it is impossible to create a service
+// or check default values for properties like disc space if a project doesn't exist
+func CustomizeDiffCheckProjectExistence(_ context.Context, d *schema.ResourceDiff, m interface{}) error {
+	c := m.(*aiven.Client)
+	p := d.Get("project").(string)
+
+	_, err := c.Projects.Get(p)
+	if err != nil {
+		if aiven.IsNotFound(err) {
+			return fmt.Errorf("project '%s' does not exist, please make sure project is created before the service", p)
+		}
+		return fmt.Errorf("cannot check is project %s exists: %w", p, err)
+	}
+
+	return nil
+}
+
 // CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether checks that 'plan' and 'static_ips'
 // are not changed in the same plan, since that leads to undefined behaviour
 func CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
