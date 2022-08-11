@@ -311,6 +311,7 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 		}
 		return nil
 	}
+
 	servicePlanParams, err := GetServicePlanParametersFromServiceResponse(ctx, client, projectName, s)
 	if err != nil {
 		return diag.Errorf("unable to get service plan parameters: %s", err)
@@ -488,6 +489,9 @@ func getDefaultDiskSpaceIfNotSet(ctx context.Context, d *schema.ResourceData, cl
 		// get service plan specific defaults
 		servicePlanParams, err := GetServicePlanParametersFromSchema(ctx, client, d)
 		if err != nil {
+			if aiven.IsNotFound(err) {
+				return 0, nil
+			}
 			return 0, fmt.Errorf("unable to get service plan parameters: %w", err)
 		}
 

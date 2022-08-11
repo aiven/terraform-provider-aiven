@@ -11,6 +11,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
+func TestAccAivenPG_no_existing_project(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:             testAccPGProjectDoesntExist(),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
 func TestAccAivenPG_invalid_disc_size(t *testing.T) {
 	expectErrorRegexBadString := regexp.MustCompile(regexp.QuoteMeta("configured string must match ^[1-9][0-9]*(G|GiB)"))
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
@@ -463,4 +477,18 @@ data "aiven_pg" "common" {
 
   depends_on = [aiven_pg.bar]
 }`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}
+
+func testAccPGProjectDoesntExist() string {
+	return `
+resource "aiven_pg" "bar" {
+  project                 = "wrong-project-name"
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-1"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+  disk_space              = "100GiB"
+}
+`
 }
