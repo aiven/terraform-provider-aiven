@@ -5,6 +5,12 @@ on:
     branches:
       - main
       - v*
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
 
 # TODO: This is currently not supported, see https://github.com/actions/dependency-review-action/issues/30.
 #  push:
@@ -18,6 +24,7 @@ permissions:
 jobs:
   dependency-review:
     runs-on: ubuntu-latest
+    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
     steps:
       - uses: actions/checkout@v3
       - uses: actions/dependency-review-action@v2

@@ -2,6 +2,15 @@ name: CodeQL
 
 on:
   pull_request:
+    branches:
+      - main
+      - v*
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
   push:
     branches:
       - main
@@ -15,6 +24,7 @@ permissions:
 jobs:
   codeql:
     runs-on: ubuntu-latest
+    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
     strategy:
       fail-fast: false
       matrix:
