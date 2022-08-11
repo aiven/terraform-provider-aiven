@@ -59,6 +59,9 @@ func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m 
 
 	servicePlanParams, err := GetServicePlanParametersFromSchema(ctx, client, d)
 	if err != nil {
+		if aiven.IsNotFound(err) {
+			return nil
+		}
 		return fmt.Errorf("unable to get service plan parameters: %w", err)
 	}
 

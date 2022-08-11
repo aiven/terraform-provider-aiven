@@ -88,7 +88,7 @@ func GetServicePlanParametersFromSchema(ctx context.Context, client *aiven.Clien
 func getServicePlanParametersInternal(_ context.Context, client *aiven.Client, project, serviceType, servicePlan string) (PlanParameters, error) {
 	servicePlanResponse, err := client.ServiceTypes.GetPlan(project, serviceType, servicePlan)
 	if err != nil {
-		return PlanParameters{}, fmt.Errorf("unable to get service plan from api: %w", err)
+		return PlanParameters{}, err
 	}
 	return PlanParameters{
 		DiskSizeMBDefault: servicePlanResponse.DiskSpaceMB,

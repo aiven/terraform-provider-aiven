@@ -7,6 +7,10 @@ nav_order: 1
 
 # Changelog
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Add service disc space custom diff 404 error handling
+
 ## [3.5.0] - 2022-08-10
 
 - Add custom diff for all types of VPC peering connections that check if a VPC connection already exists before creation
