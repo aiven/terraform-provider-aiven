@@ -7,8 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -100,41 +98,6 @@ func ResourceVPCPeeringConnection() *schema.Resource {
 
 		Schema:             aivenVPCPeeringConnectionSchema,
 		DeprecationMessage: "Please use a cloud specific VPC peering connection resource",
-		CustomizeDiff:      customdiff.If(schemautil.ResourceShouldNotExist, vpcCustomDiffPeeringConnectionExists()),
-	}
-}
-
-// Deprecated
-//goland:noinspection GoDeprecation
-func vpcCustomDiffPeeringConnectionExists() func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-	return func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-		client := m.(*aiven.Client)
-
-		projectName, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
-		if err != nil {
-			return err
-		}
-
-		peerCloudAccount := d.Get("peer_cloud_account").(string)
-		peerVPC := d.Get("peer_vpc").(string)
-
-		var region *string
-		peerRegion := d.Get("peer_region").(string)
-		if peerRegion != "" {
-			region = &peerRegion
-		}
-
-		pc, err := client.VPCPeeringConnections.GetVPCPeering(
-			projectName, vpcID, peerCloudAccount, peerVPC, region)
-		if err != nil && !aiven.IsNotFound(err) {
-			return err
-		}
-
-		if pc != nil {
-			return fmt.Errorf("vpc peering connection already exists and cannot be created")
-		}
-
-		return nil
 	}
 }
 
@@ -190,7 +153,7 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 			PeerResourceGroup:    peerResourceGroup,
 		},
 	); err != nil {
-		return diag.Errorf("Error waiting for VPC peering connection creation: %s", err)
+		return diag.Errorf("error waiting for VPC peering connection creation: %s", err)
 	}
 
 	stateChangeConf := &resource.StateChangeConf{

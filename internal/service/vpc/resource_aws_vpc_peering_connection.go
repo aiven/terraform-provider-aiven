@@ -2,10 +2,7 @@ package vpc
 
 import (
 	"context"
-	"fmt"
 	"time"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -75,35 +72,7 @@ func ResourceAWSVPCPeeringConnection() *schema.Resource {
 			Delete: schema.DefaultTimeout(2 * time.Minute),
 		},
 
-		Schema:        aivenAWSVPCPeeringConnectionSchema,
-		CustomizeDiff: customdiff.If(schemautil.ResourceShouldNotExist, vpcCustomDiffAWSPeeringConnectionExists()),
-	}
-}
-
-func vpcCustomDiffAWSPeeringConnectionExists() func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-	return func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-		client := m.(*aiven.Client)
-
-		projectName, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
-		if err != nil {
-			return err
-		}
-
-		awsAccountId := d.Get("aws_account_id").(string)
-		awsVPCId := d.Get("aws_vpc_id").(string)
-		awsVPCRegion := d.Get("aws_vpc_region").(string)
-
-		pc, err := client.VPCPeeringConnections.GetVPCPeering(
-			projectName, vpcID, awsAccountId, awsVPCId, &awsVPCRegion)
-		if err != nil && !aiven.IsNotFound(err) {
-			return err
-		}
-
-		if pc != nil {
-			return fmt.Errorf("aws vpc peering connection already exists and cannot be created")
-		}
-
-		return nil
+		Schema: aivenAWSVPCPeeringConnectionSchema,
 	}
 }
 
@@ -125,6 +94,16 @@ func resourceAWSVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 	awsVPCRegion := d.Get("aws_vpc_region").(string)
 	if awsVPCRegion != "" {
 		region = &awsVPCRegion
+	}
+
+	pc, err = client.VPCPeeringConnections.GetVPCPeering(
+		projectName, vpcID, awsAccountId, awsVPCId, &awsVPCRegion)
+	if err != nil && !aiven.IsNotFound(err) {
+		return diag.Errorf("error checking aws peering connection: %s", err)
+	}
+
+	if pc != nil {
+		return diag.Errorf("aws vpc peering connection already exists and cannot be created")
 	}
 
 	if _, err = client.VPCPeeringConnections.Create(

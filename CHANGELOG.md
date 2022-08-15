@@ -10,6 +10,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Add service disc space custom diff 404 error handling
+- Fix VPC peering connection custom diff
 
 ## [3.5.0] - 2022-08-10
 
