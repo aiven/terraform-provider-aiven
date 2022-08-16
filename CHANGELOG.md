@@ -7,7 +7,7 @@ nav_order: 1
 
 # Changelog
 
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+## [3.5.1] - 2022-08-16
 
 - Add service disc space custom diff 404 error handling
 - Fix VPC peering connection custom diff
