@@ -85,10 +85,11 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Description: "Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.",
 		},
 		"disk_space": {
-			Type:         schema.TypeString,
-			Optional:     true,
-			Description:  "The disk space of the service, possible values depend on the service type, the cloud provider and the project. Reducing will result in the service rebalancing.",
-			ValidateFunc: ValidateHumanByteSizeString,
+			Type:          schema.TypeString,
+			Optional:      true,
+			Description:   "Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.",
+			ValidateFunc:  ValidateHumanByteSizeString,
+			ConflictsWith: []string{"additional_disk_space"},
 		},
 		"disk_space_used": {
 			Type:        schema.TypeString,
@@ -99,6 +100,13 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Computed:    true,
 			Description: "The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`",
+		},
+		"additional_disk_space": {
+			Type:          schema.TypeString,
+			Optional:      true,
+			Description:   "Additional disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.",
+			ValidateFunc:  ValidateHumanByteSizeString,
+			ConflictsWith: []string{"disk_space"},
 		},
 		"disk_space_step": {
 			Type:        schema.TypeString,
@@ -348,12 +356,24 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 	serviceType := d.Get("service_type").(string)
 	project := d.Get("project").(string)
 
-	// During the creation of service, if disc_space is not set by a TF user,
+	// During the creation of service, if disk_space is not set by a TF user,
 	// we transfer 0 values in API creation request, which makes Aiven provision
-	// a default disc space values for a common
+	// a default disk space values for a common
 	var diskSpace int
 	if ds, ok := d.GetOk("disk_space"); ok {
 		diskSpace = ConvertToDiskSpaceMB(ds.(string))
+	} else {
+		// get service plan specific defaults
+		servicePlanParams, err := GetServicePlanParametersFromSchema(ctx, client, d)
+		if err != nil {
+			return diag.Errorf("error getting service default plan parameters: %s", err)
+		}
+
+		diskSpace = servicePlanParams.DiskSizeMBDefault
+
+		if ads, ok := d.GetOk("additional_disk_space"); ok {
+			diskSpace = servicePlanParams.DiskSizeMBDefault + ConvertToDiskSpaceMB(ads.(string))
+		}
 	}
 
 	vpcId, err := GetProjectVPCIdPointer(d)
@@ -493,6 +513,11 @@ func getDefaultDiskSpaceIfNotSet(ctx context.Context, d *schema.ResourceData, cl
 				return 0, nil
 			}
 			return 0, fmt.Errorf("unable to get service plan parameters: %w", err)
+		}
+
+		if ads, ok := d.GetOk("additional_disk_space"); ok {
+			diskSpace = servicePlanParams.DiskSizeMBDefault + ConvertToDiskSpaceMB(ads.(string))
+			return diskSpace, nil
 		}
 
 		diskSpace = servicePlanParams.DiskSizeMBDefault

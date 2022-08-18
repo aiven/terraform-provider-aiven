@@ -54,7 +54,7 @@ func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m 
 	client := m.(*aiven.Client)
 
 	if d.Get("service_type").(string) == "" {
-		return fmt.Errorf("cannot check dynamic disc space because service_type is empty")
+		return fmt.Errorf("cannot check dynamic disk space because service_type is empty")
 	}
 
 	servicePlanParams, err := GetServicePlanParametersFromSchema(ctx, client, d)
