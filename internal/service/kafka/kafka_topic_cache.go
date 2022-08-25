@@ -19,8 +19,8 @@ type kafkaTopicCache struct {
 	inQueue  map[string][]string
 }
 
-// NewTopicCache creates new global instance of Kafka Topic Cache
-func NewTopicCache() *kafkaTopicCache {
+// newTopicCache creates new global instance of Kafka Topic Cache
+func newTopicCache() *kafkaTopicCache {
 	log.Print("[DEBUG] Creating an instance of kafkaTopicCache ...")
 
 	once.Do(func() {
@@ -33,8 +33,8 @@ func NewTopicCache() *kafkaTopicCache {
 	return topicCache
 }
 
-// GetTopicCache gets a global Kafka Topics Cache
-func GetTopicCache() *kafkaTopicCache {
+// getTopicCache gets a global Kafka Topics Cache
+func getTopicCache() *kafkaTopicCache {
 	return topicCache
 }
 

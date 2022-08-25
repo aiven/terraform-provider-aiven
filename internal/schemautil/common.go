@@ -41,8 +41,8 @@ var (
 	}
 )
 
-// descriptionBuilder is a helper to build complex descriptions in a consistent way.
-type descriptionBuilder struct {
+// DescriptionBuilder is a helper to build complex descriptions in a consistent way.
+type DescriptionBuilder struct {
 	base               string
 	withMaxLen         int
 	withForceNew       bool
@@ -53,46 +53,46 @@ type descriptionBuilder struct {
 	withPossibleValues []interface{}
 }
 
-func Complex(base string) *descriptionBuilder {
-	return &descriptionBuilder{base: base}
+func Complex(base string) *DescriptionBuilder {
+	return &DescriptionBuilder{base: base}
 }
 
-func (b *descriptionBuilder) ForceNew() *descriptionBuilder {
+func (b *DescriptionBuilder) ForceNew() *DescriptionBuilder {
 	b.withForceNew = true
 	return b
 }
 
-func (b *descriptionBuilder) Deprecate(msg string) *descriptionBuilder {
+func (b *DescriptionBuilder) Deprecate(msg string) *DescriptionBuilder {
 	b.withDeprecation = msg
 	return b
 }
 
-func (b *descriptionBuilder) Referenced() *descriptionBuilder {
+func (b *DescriptionBuilder) Referenced() *DescriptionBuilder {
 	b.withUseReference = true
 	return b
 }
 
-func (b *descriptionBuilder) RequiredWith(s ...string) *descriptionBuilder {
+func (b *DescriptionBuilder) RequiredWith(s ...string) *DescriptionBuilder {
 	b.withRequiredWith = s
 	return b
 }
 
-func (b *descriptionBuilder) MaxLen(i int) *descriptionBuilder {
+func (b *DescriptionBuilder) MaxLen(i int) *DescriptionBuilder {
 	b.withMaxLen = i
 	return b
 }
 
-func (b *descriptionBuilder) DefaultValue(i interface{}) *descriptionBuilder {
+func (b *DescriptionBuilder) DefaultValue(i interface{}) *DescriptionBuilder {
 	b.withDefaultValue = i
 	return b
 }
 
-func (b *descriptionBuilder) PossibleValues(is ...interface{}) *descriptionBuilder {
+func (b *DescriptionBuilder) PossibleValues(is ...interface{}) *DescriptionBuilder {
 	b.withPossibleValues = is
 	return b
 }
 
-func (b *descriptionBuilder) Build() string {
+func (b *DescriptionBuilder) Build() string {
 	builder := new(strings.Builder)
 
 	if b.withDeprecation != "" {

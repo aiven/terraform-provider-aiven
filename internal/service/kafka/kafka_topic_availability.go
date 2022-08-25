@@ -37,7 +37,7 @@ func (w *kafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 			return nil, "WRONG_INPUT", fmt.Errorf("topic name of the kafka topic resource cannot be empty `%s`", w.TopicName)
 		}
 
-		topicCache := GetTopicCache()
+		topicCache := getTopicCache()
 		topic, ok := topicCache.LoadByTopicName(w.Project, w.ServiceName, w.TopicName)
 
 		if !ok {
@@ -82,12 +82,12 @@ func (w *kafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 func (w *kafkaTopicAvailabilityWaiter) refresh() error {
 	if !kafkaTopicAvailabilitySem.TryAcquire(1) {
 		log.Printf("[TRACE] Kafka Topic Availability cache refresh already in progress ...")
-		GetTopicCache().AddToQueue(w.Project, w.ServiceName, w.TopicName)
+		getTopicCache().AddToQueue(w.Project, w.ServiceName, w.TopicName)
 		return nil
 	}
 	defer kafkaTopicAvailabilitySem.Release(1)
 
-	c := GetTopicCache()
+	c := getTopicCache()
 
 	// check if topic is already in cache
 	if _, ok := c.LoadByTopicName(w.Project, w.ServiceName, w.TopicName); ok {
@@ -112,7 +112,7 @@ func (w *kafkaTopicAvailabilityWaiter) refresh() error {
 			return err
 		}
 
-		GetTopicCache().StoreByProjectAndServiceName(w.Project, w.ServiceName, v2Topics)
+		getTopicCache().StoreByProjectAndServiceName(w.Project, w.ServiceName, v2Topics)
 	}
 
 	return nil

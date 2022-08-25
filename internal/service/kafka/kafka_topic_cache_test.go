@@ -10,8 +10,8 @@ import (
 func setupTopicCacheTestCase(t *testing.T) func(t *testing.T) {
 	t.Log("setup Kafka Topic Cache test case")
 
-	if GetTopicCache() == nil {
-		_ = NewTopicCache()
+	if getTopicCache() == nil {
+		_ = newTopicCache()
 	}
 
 	return func(t *testing.T) {
@@ -42,8 +42,8 @@ func TestGetTopicCache(t *testing.T) {
 		tt.init()
 
 		t.Run(tt.name, func(t *testing.T) {
-			if got := GetTopicCache(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetTopicCache() = %v, want %v", got, tt.want)
+			if got := getTopicCache(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("getTopicCache() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -97,7 +97,7 @@ func TestTopicCache_LoadByProjectAndServiceName(t1 *testing.T) {
 			true,
 		},
 	}
-	t := GetTopicCache()
+	t := getTopicCache()
 	for _, tt := range tests {
 		tt.doSomething()
 
@@ -160,7 +160,7 @@ func TestTopicCache_LoadByTopicName(t1 *testing.T) {
 			true,
 		},
 	}
-	t := GetTopicCache()
+	t := getTopicCache()
 	for _, tt := range tests {
 		tt.doSomething()
 
@@ -198,7 +198,7 @@ func TestTopicCache_DeleteByProjectAndServiceName(t1 *testing.T) {
 			},
 		},
 	}
-	t := GetTopicCache()
+	t := getTopicCache()
 	for _, tt := range tests {
 		tt.doSomething()
 
@@ -225,7 +225,7 @@ func TestTopicCache_DeleteByProjectAndServiceName(t1 *testing.T) {
 }
 
 func testAddTwoTopicsToCache() {
-	cache := GetTopicCache()
+	cache := getTopicCache()
 	cache.StoreByProjectAndServiceName(
 		"test-pr1",
 		"test-sr1",
