@@ -583,6 +583,17 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	if err := d.Set("maintenance_window_time", s.MaintenanceWindow.TimeOfDay); err != nil {
 		return err
 	}
+	if _, ok := d.GetOk("disk_space"); ok && s.DiskSpaceMB != 0 {
+		if err := d.Set("disk_space", HumanReadableByteSize(s.DiskSpaceMB*units.MiB)); err != nil {
+			return err
+		}
+	}
+	if _, ok := d.GetOk("additional_disk_space"); ok && s.DiskSpaceMB != 0 {
+		if err := d.Set("additional_disk_space", HumanReadableByteSize((s.DiskSpaceMB-servicePlanParams.DiskSizeMBDefault)*units.MiB)); err != nil {
+			return err
+		}
+	}
+
 	if err := d.Set("disk_space_used", HumanReadableByteSize(s.DiskSpaceMB*units.MiB)); err != nil {
 		return err
 	}
