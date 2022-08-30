@@ -83,7 +83,6 @@ func TestAccAivenKafkaTopic_termination_protection(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "partitions", "3"),
 					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "true"),
-					resource.TestCheckNoResourceAttr(resourceName, "retention_hours"),
 				),
 			},
 		},

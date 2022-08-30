@@ -360,19 +360,6 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	if _, ok := d.GetOk("retention_hours"); ok {
-		// it could be -1, which means infinite retention
-		if topic.Config.RetentionMs.Value != -1 {
-			if err := d.Set("retention_hours", topic.Config.RetentionMs.Value/(1000*60*60)); err != nil {
-				return diag.FromErr(err)
-			}
-		} else {
-			if err := d.Set("retention_hours", topic.Config.RetentionMs.Value); err != nil {
-				return diag.FromErr(err)
-			}
-		}
-	}
-
 	if err := d.Set("termination_protection", d.Get("termination_protection")); err != nil {
 		return diag.FromErr(err)
 	}
