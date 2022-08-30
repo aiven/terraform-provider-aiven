@@ -10,6 +10,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Add additional disk space support
+- Remove the `retention_hours` logic from the `aiven_kafka_topic` resource
 
 ## [3.5.1] - 2022-08-16
 
