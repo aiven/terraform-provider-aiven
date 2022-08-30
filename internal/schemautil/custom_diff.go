@@ -66,12 +66,18 @@ func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m 
 	}
 
 	var requestedDiskSpaceMB int
-	ds, okDiskSpace := d.GetOk("disk_space")
-	if !okDiskSpace {
-		return nil
+
+	if ds, ok := d.GetOk("disk_space"); ok {
+		requestedDiskSpaceMB = ConvertToDiskSpaceMB(ds.(string))
+	} else {
+		if ads, ok := d.GetOk("additional_disk_space"); ok {
+			requestedDiskSpaceMB = servicePlanParams.DiskSizeMBDefault + ConvertToDiskSpaceMB(ads.(string))
+		}
 	}
 
-	requestedDiskSpaceMB = ConvertToDiskSpaceMB(ds.(string))
+	if requestedDiskSpaceMB == 0 {
+		return nil
+	}
 
 	if servicePlanParams.DiskSizeMBDefault != requestedDiskSpaceMB {
 		// first check if the plan allows dynamic disk sizing
