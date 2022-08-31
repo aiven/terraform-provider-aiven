@@ -1,6 +1,6 @@
 # Aiven Project, Account, and Teams Example
 
-Please also read through our [help article](https://help.aiven.io/en/articles/3504926-account-management-in-console) that talks about setting up projects, accounts, and teams through the Aiven Console.
+Please also read through the [official docs](https://docs.aiven.io/docs/platform/concepts/projects_accounts_access.html) that talk about projects, accounts, and managing access permissions.
 
 ## Overview
 
@@ -20,7 +20,7 @@ More information about [Aiven user roles](https://help.aiven.io/en/articles/9237
 
 ## Setup
 
-### Install Aiven Terraform Provider
+### Install Aiven Provider for Terraform
 
 See [Installation Instructions](https://github.com/aiven/terraform-provider-aiven#installation).
 

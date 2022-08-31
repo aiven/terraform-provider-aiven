@@ -9,11 +9,11 @@ This setup includes a circular replication flow between three global regions.
 
 ## Setup
 
-### Install Aiven Terraform Provider
+### Install Aiven Provider for Terraform
 
 Update the `aiven` provider version in `main.tf`, e.g. `2.x.x => 2.1.0`.
 
-The Aiven Terraform provider is offered on the [Hashicorp Terraform Registry](https://registry.terraform.io/providers/aiven/aiven/latest).
+The Aiven Provider for Terraform is offered on the [Hashicorp Terraform Registry](https://registry.terraform.io/providers/aiven/aiven/latest).
 
 ### Variables
 
