@@ -7,7 +7,7 @@ nav_order: 1
 
 # Changelog
 
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+## [3.6.0] - 2022-08-31
 
 - Add additional disk space support
 - Update disk space on refresh
