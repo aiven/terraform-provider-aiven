@@ -7,7 +7,7 @@ nav_order: 1
 
 # Changelog
 
-## [X.X.X] - not yet released
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Update to the official name Aiven Provider for Terraform
 - Replaced older links from help.aiven.io to docs.aiven.io
