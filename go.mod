@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/aiven/aiven-go-client v1.7.1-0.20220801125045-c5c368d677d1
-	github.com/docker/go-units v0.4.0
+	github.com/docker/go-units v0.5.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.21.0
 	github.com/stretchr/testify v1.8.0
 	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e
