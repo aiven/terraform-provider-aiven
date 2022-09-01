@@ -5,9 +5,9 @@ page_title: "Using Terraform v0.12"
 # Using Terraform v0.12
 _If you can please upgrade your Terraform client to version 0.13 or above, in this case, there is no need to install the provider manually._
 
-Download the latest Aiven provider for your platform from the [release page](https://github.com/aiven/terraform-provider-aiven/releases).
+Download the latest Aiven Provider for Terraform for your platform from the [release page](https://github.com/aiven/terraform-provider-aiven/releases).
 
-Third-party provider plugins — locally installed providers, not on the registry — need to be assigned a source and placed in the appropriate subdirectory for Terraform to find and use them. Create the appropriate subdirectory within the user plugins directory for the Aiven provider and move the downloaded binary there.
+Third-party provider plugins — locally installed providers, not on the registry — need to be assigned a source and placed in the appropriate subdirectory for Terraform to find and use them. Create the appropriate subdirectory within the user plugins directory for the Aiven Provider for Terraform and move the downloaded binary there.
 
 ```bash
 export AIVEN_PROVIDER_VERSION=2.X.X
@@ -35,4 +35,4 @@ provider "aiven" {
 }
 ```
 
-Then, initialize your Terraform workspace by running `terraform init`. If your Aiven provider is located in the correct directory, it should successfully initialize.
+Then, initialize your Terraform workspace by running `terraform init`. If your Aiven Provider for Terraform is located in the correct directory, it should successfully initialize.

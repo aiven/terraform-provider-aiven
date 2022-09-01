@@ -7,6 +7,11 @@ nav_order: 1
 
 # Changelog
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Update to the official name Aiven Provider for Terraform
+- Replaced older links from help.aiven.io to docs.aiven.io
+
 ## [3.6.0] - 2022-08-31
 
 - Add additional disk space support
