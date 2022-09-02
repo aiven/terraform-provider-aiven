@@ -1,0 +1,4219 @@
+cassandra:
+  type: object
+  properties:
+    cassandra:
+      title: cassandra configuration values
+      type: object
+      properties:
+        batch_size_fail_threshold_in_kb:
+          title: batch_size_fail_threshold_in_kb
+          description: Fail any multiple-partition batch exceeding this value. 50kb (10x warn threshold) by default.
+          type: integer
+          minimum: 1
+          maximum: 1e+06
+          example: "50"
+        batch_size_warn_threshold_in_kb:
+          title: batch_size_warn_threshold_in_kb
+          description: Log a warning message on any multiple-partition batch size exceeding this value.5kb per batch by default.Caution should be taken on increasing the size of this thresholdas it can lead to node instability.
+          type: integer
+          minimum: 1
+          maximum: 1e+06
+          example: "5"
+    cassandra_version:
+      title: Cassandra major version
+      type:
+        - string
+        - "null"
+      enum:
+        - value: "3"
+        - value: "4"
+    ip_filter:
+      title: IP filter
+      description: Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+      type: array
+      default:
+        - 0.0.0.0/0
+      items:
+        title: CIDR address block, either as a string, or in a dict with an optional description field
+        type:
+          - string
+          - object
+        properties:
+          description:
+            title: Description for IP filter list entry
+            type: string
+            max_length: 1024
+            example: Production service IP range
+          network:
+            title: CIDR address block
+            type: string
+            max_length: 43
+            example: 10.20.0.0/16
+        max_length: 43
+        example: 10.20.0.0/16
+      maxItems: 1024
+    migrate_sstableloader:
+      title: Migration mode for the sstableloader utility
+      description: Sets the service into migration mode enabling the sstableloader utility to be used to upload Cassandra data files. Available only on service create.
+      type: boolean
+      example: true
+    private_access:
+      title: Allow access to selected service ports from private networks
+      type: object
+      properties:
+        prometheus:
+          title: Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+    project_to_fork_from:
+      title: Name of another project to fork a service from. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 63
+      example: anotherprojectname
+    public_access:
+      title: Allow access to selected service ports from the public Internet
+      type: object
+      properties:
+        prometheus:
+          title: Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+    service_to_fork_from:
+      title: Name of another service to fork from. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 64
+      example: anotherservicename
+    static_ips:
+      title: Static IP addresses
+      description: Use static public IP addresses
+      type: boolean
+      example: true
+clickhouse:
+  type: object
+  properties:
+    ip_filter:
+      title: IP filter
+      description: Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+      type: array
+      default:
+        - 0.0.0.0/0
+      items:
+        title: CIDR address block, either as a string, or in a dict with an optional description field
+        type:
+          - string
+          - object
+        properties:
+          description:
+            title: Description for IP filter list entry
+            type: string
+            max_length: 1024
+            example: Production service IP range
+          network:
+            title: CIDR address block
+            type: string
+            max_length: 43
+            example: 10.20.0.0/16
+        max_length: 43
+        example: 10.20.0.0/16
+      maxItems: 1024
+    project_to_fork_from:
+      title: Name of another project to fork a service from. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 63
+      example: anotherprojectname
+    service_to_fork_from:
+      title: Name of another service to fork from. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 64
+      example: anotherservicename
+elasticsearch:
+  type: object
+  properties:
+    custom_domain:
+      title: Custom domain
+      description: Serve the web frontend using a custom CNAME pointing to the Aiven DNS name
+      type:
+        - string
+        - "null"
+      max_length: 255
+      example: grafana.example.org
+    disable_replication_factor_adjustment:
+      title: Disable replication factor adjustment
+      description: 'DEPRECATED: Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can no longer be activated.'
+      type:
+        - boolean
+        - "null"
+      example: false
+    elasticsearch:
+      title: Elasticsearch settings
+      type: object
+      properties:
+        action_auto_create_index_enabled:
+          title: action.auto_create_index
+          description: Explicitly allow or block automatic creation of indices. Defaults to true
+          type: boolean
+          example: false
+        action_destructive_requires_name:
+          title: Require explicit index names when deleting
+          type:
+            - boolean
+            - "null"
+          example: true
+        cluster_max_shards_per_node:
+          title: cluster.max_shards_per_node
+          description: Controls the number of shards allowed in the cluster per data node
+          type: integer
+          minimum: 100
+          maximum: 10000
+          example: "1000"
+        cluster_routing_allocation_node_concurrent_recoveries:
+          title: Concurrent incoming/outgoing shard recoveries per node
+          description: How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to 2.
+          type: integer
+          minimum: 2
+          maximum: 16
+        email_sender_name:
+          title: Sender email name placeholder to be used in Opensearch Dashboards and Opensearch keystore
+          description: This should be identical to the Sender name defined in Opensearch dashboards
+          type:
+            - string
+          max_length: 40
+          pattern: ^[a-zA-Z0-9-_]+$
+          example: alert-sender
+          user_error: Must consist of lower-case alpha-numeric characters and dashes, max 40 characters
+        email_sender_password:
+          title: Sender email password for Opensearch alerts to authenticate with SMTP server
+          description: Sender email password for Opensearch alerts to authenticate with SMTP server
+          type:
+            - string
+          max_length: 1024
+          pattern: ^[^\x00-\x1F]+$
+          example: very-secure-mail-password
+        email_sender_username:
+          title: Sender email address for Opensearch alerts
+          type:
+            - string
+          max_length: 320
+          pattern: ^[A-Za-z0-9_\-\.+\'&]+@(([\da-zA-Z])([_\w-]{,62})\.){,127}(([\da-zA-Z])[_\w-]{,61})?([\da-zA-Z]\.((xn\-\-[a-zA-Z\d]+)|([a-zA-Z\d]{2,})))$
+          example: jane@example.com
+          user_error: Must be a valid email address
+        http_max_content_length:
+          title: http.max_content_length
+          description: Maximum content length for HTTP requests to the Elasticsearch HTTP API, in bytes.
+          type: integer
+          minimum: 1
+          maximum: 2.147483647e+09
+        http_max_header_size:
+          title: http.max_header_size
+          description: The max size of allowed headers, in bytes
+          type: integer
+          minimum: 1024
+          maximum: 262144
+          example: "8192"
+        http_max_initial_line_length:
+          title: http.max_initial_line_length
+          description: The max length of an HTTP URL, in bytes
+          type: integer
+          minimum: 1024
+          maximum: 65536
+          example: "4096"
+        indices_fielddata_cache_size:
+          title: indices.fielddata.cache.size
+          description: Relative amount. Maximum amount of heap memory used for field data cache. This is an expert setting; decreasing the value too much will increase overhead of loading field data; too much memory used for field data cache will decrease amount of heap available for other operations.
+          type:
+            - integer
+            - "null"
+          minimum: 3
+          maximum: 100
+        indices_memory_index_buffer_size:
+          title: indices.memory.index_buffer_size
+          description: Percentage value. Default is 10%. Total amount of heap used for indexing buffer, before writing segments to disk. This is an expert setting. Too low value will slow down indexing; too high value will increase indexing performance but causes performance issues for query performance.
+          type: integer
+          minimum: 3
+          maximum: 40
+        indices_queries_cache_size:
+          title: indices.queries.cache.size
+          description: Percentage value. Default is 10%. Maximum amount of heap used for query cache. This is an expert setting. Too low value will decrease query performance and increase performance for other operations; too high value will cause issues with other Elasticsearch functionality.
+          type: integer
+          minimum: 3
+          maximum: 40
+        indices_query_bool_max_clause_count:
+          title: indices.query.bool.max_clause_count
+          description: Maximum number of clauses Lucene BooleanQuery can have. The default value (1024) is relatively high, and increasing it may cause performance issues. Investigate other approaches first before increasing this value.
+          type: integer
+          minimum: 64
+          maximum: 4096
+        indices_recovery_max_bytes_per_sec:
+          title: indices.recovery.max_bytes_per_sec
+          description: Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb
+          type: integer
+          minimum: 40
+          maximum: 400
+        indices_recovery_max_concurrent_file_chunks:
+          title: indices.recovery.max_concurrent_file_chunks
+          description: Number of file chunks sent in parallel for each recovery. Defaults to 2.
+          type: integer
+          minimum: 2
+          maximum: 5
+        override_main_response_version:
+          title: compatibility.override_main_response_version
+          description: Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false
+          type: boolean
+          example: true
+        reindex_remote_whitelist:
+          title: reindex_remote_whitelist
+          description: Whitelisted addresses for reindexing. Changing this value will cause all Elasticsearch instances to restart.
+          type:
+            - array
+            - "null"
+          items:
+            title: Address (hostname:port or IP:port)
+            type:
+              - string
+              - "null"
+            max_length: 261
+            example: anotherservice.aivencloud.com:12398
+          maxItems: 32
+        script_max_compilations_rate:
+          title: Script max compilation rate - circuit breaker to prevent/minimize OOMs
+          description: Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context
+          type: string
+          max_length: 1024
+          example: 75/5m
+        search_max_buckets:
+          title: search.max_buckets
+          description: Maximum number of aggregation buckets allowed in a single response. Elasticsearch default value is used when this is not defined.
+          type:
+            - integer
+            - "null"
+          minimum: 1
+          maximum: 20000
+          example: "10000"
+        thread_pool_analyze_queue_size:
+          title: analyze thread pool queue size
+          description: Size for the thread pool queue. See documentation for exact details.
+          type: integer
+          minimum: 10
+          maximum: 2000
+        thread_pool_analyze_size:
+          title: analyze thread pool size
+          description: Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
+          type: integer
+          minimum: 1
+          maximum: 128
+        thread_pool_force_merge_size:
+          title: force_merge thread pool size
+          description: Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
+          type: integer
+          minimum: 1
+          maximum: 128
+        thread_pool_get_queue_size:
+          title: get thread pool queue size
+          description: Size for the thread pool queue. See documentation for exact details.
+          type: integer
+          minimum: 10
+          maximum: 2000
+        thread_pool_get_size:
+          title: get thread pool size
+          description: Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
+          type: integer
+          minimum: 1
+          maximum: 128
+        thread_pool_search_queue_size:
+          title: search thread pool queue size
+          description: Size for the thread pool queue. See documentation for exact details.
+          type: integer
+          minimum: 10
+          maximum: 2000
+        thread_pool_search_size:
+          title: search thread pool size
+          description: Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
+          type: integer
+          minimum: 1
+          maximum: 128
+        thread_pool_search_throttled_queue_size:
+          title: search_throttled thread pool queue size
+          description: Size for the thread pool queue. See documentation for exact details.
+          type: integer
+          minimum: 10
+          maximum: 2000
+        thread_pool_search_throttled_size:
+          title: search_throttled thread pool size
+          description: Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
+          type: integer
+          minimum: 1
+          maximum: 128
+        thread_pool_write_queue_size:
+          title: write thread pool queue size
+          description: Size for the thread pool queue. See documentation for exact details.
+          type: integer
+          minimum: 10
+          maximum: 2000
+        thread_pool_write_size:
+          title: write thread pool size
+          description: Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
+          type: integer
+          minimum: 1
+          maximum: 128
+    elasticsearch_version:
+      title: Elasticsearch major version
+      type:
+        - string
+        - "null"
+      enum:
+        - value: "7"
+        - value: "1"
+    index_patterns:
+      title: Index patterns
+      type: array
+      items:
+        title: Glob pattern and number of indexes matching that pattern to be kept
+        description: 'Allows you to create glob style patterns and set a max number of indexes matching this pattern you want to keep. Creating indexes exceeding this value will cause the oldest one to get deleted. You could for example create a pattern looking like ''logs.?'' and then create index logs.1, logs.2 etc, it will delete logs.1 once you create logs.6. Do note ''logs.?'' does not apply to logs.10. Note: Setting max_index_count to 0 will do nothing and the pattern gets ignored.'
+        type: object
+        properties:
+          max_index_count:
+            title: Maximum number of indexes to keep
+            type: integer
+            maximum: 9.223372036854776e+18
+            example: "3"
+          pattern:
+            title: fnmatch pattern
+            type: string
+            max_length: 1024
+            pattern: ^[A-Za-z0-9-_.*?]+$
+            example: logs_*_foo_*
+            user_error: Must consist of alpha-numeric characters, dashes, underscores, dots and glob characters (* and ?)
+          sorting_algorithm:
+            title: Deletion sorting algorithm
+            type: string
+            default: creation_date
+            enum:
+              - value: alphabetical
+              - value: creation_date
+      maxItems: 512
+    index_template:
+      title: Template settings for all new indexes
+      type: object
+      properties:
+        mapping_nested_objects_limit:
+          title: index.mapping.nested_objects.limit
+          description: The maximum number of nested JSON objects that a single document can contain across all nested types. This limit helps to prevent out of memory errors when a document contains too many nested objects. Default is 10000.
+          type:
+            - integer
+            - "null"
+          maximum: 100000
+          example: "10000"
+        number_of_replicas:
+          title: index.number_of_replicas
+          description: The number of replicas each primary shard has.
+          type:
+            - integer
+            - "null"
+          maximum: 29
+          example: "1"
+        number_of_shards:
+          title: index.number_of_shards
+          description: The number of primary shards that an index should have.
+          type:
+            - integer
+            - "null"
+          minimum: 1
+          maximum: 1024
+          example: "1"
+    ip_filter:
+      title: IP filter
+      description: Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+      type: array
+      default:
+        - 0.0.0.0/0
+      items:
+        title: CIDR address block, either as a string, or in a dict with an optional description field
+        type:
+          - string
+          - object
+        properties:
+          description:
+            title: Description for IP filter list entry
+            type: string
+            max_length: 1024
+            example: Production service IP range
+          network:
+            title: CIDR address block
+            type: string
+            max_length: 43
+            example: 10.20.0.0/16
+        max_length: 43
+        example: 10.20.0.0/16
+      maxItems: 1024
+    keep_index_refresh_interval:
+      title: Don't reset index.refresh_interval to the default value
+      description: Aiven automation resets index.refresh_interval to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.
+      type: boolean
+      example: true
+    kibana:
+      title: Kibana settings
+      type: object
+      properties:
+        elasticsearch_request_timeout:
+          title: Timeout in milliseconds for requests made by Kibana towards Elasticsearch
+          type: integer
+          default: "30000"
+          minimum: 5000
+          maximum: 120000
+        enabled:
+          title: Enable or disable Kibana
+          type: boolean
+          default: true
+        max_old_space_size:
+          title: max_old_space_size
+          description: 'Limits the maximum amount of memory (in MiB) the Kibana process can use. This sets the max_old_space_size option of the nodejs running the Kibana. Note: the memory reserved by Kibana is not available for Elasticsearch.'
+          type: integer
+          default: "128"
+          minimum: 64
+          maximum: 1024
+    max_index_count:
+      title: Maximum index count
+      description: Maximum number of indexes to keep before deleting the oldest one
+      type: integer
+      default: "0"
+      maximum: 9.223372036854776e+18
+    opensearch_version:
+      title: OpenSearch major version
+      type:
+        - string
+        - "null"
+      enum:
+        - value: "1"
+    private_access:
+      title: Allow access to selected service ports from private networks
+      type: object
+      properties:
+        elasticsearch:
+          title: Allow clients to connect to elasticsearch with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+        kibana:
+          title: Allow clients to connect to kibana with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+        prometheus:
+          title: Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+    privatelink_access:
+      title: Allow access to selected service components through Privatelink
+      type: object
+      properties:
+        elasticsearch:
+          title: Enable elasticsearch
+          type: boolean
+          example: true
+        kibana:
+          title: Enable kibana
+          type: boolean
+          example: true
+        prometheus:
+          title: Enable prometheus
+          type: boolean
+          example: true
+    project_to_fork_from:
+      title: Name of another project to fork a service from. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 63
+      example: anotherprojectname
+    public_access:
+      title: Allow access to selected service ports from the public Internet
+      type: object
+      properties:
+        elasticsearch:
+          title: Allow clients to connect to elasticsearch from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+        kibana:
+          title: Allow clients to connect to kibana from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+        prometheus:
+          title: Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+    recovery_basebackup_name:
+      title: Name of the basebackup to restore in forked service
+      type: string
+      max_length: 128
+      pattern: ^[a-zA-Z0-9-_:.]+$
+      example: backup-20191112t091354293891z
+    service_to_fork_from:
+      title: Name of another service to fork from. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 64
+      example: anotherservicename
+    static_ips:
+      title: Static IP addresses
+      description: Use static public IP addresses
+      type: boolean
+      example: true
+flink:
+  type: object
+  properties:
+    execution_checkpointing_interval_ms:
+      title: Flink execution.checkpointing.interval in milliseconds
+      description: Checkpointing is Flink’s primary fault-tolerance mechanism, wherein a snapshot of your job’s state persisted periodically to some durable location. In the case of failure, Flink will restart from the most recent checkpoint and resume processing. A jobs checkpoint interval configures how often Flink will take these snapshots.
+      type: integer
+      minimum: 100
+      maximum: 3.6e+06
+      example: "1000"
+    execution_checkpointing_timeout_ms:
+      title: Flink execution.checkpointing.timeout in milliseconds
+      description: The time after which a checkpoint-in-progress is aborted, if it did not complete by then.
+      type: integer
+      minimum: 100
+      maximum: 8.64e+07
+      example: "600000"
+    flink_version:
+      title: Flink major version
+      type:
+        - string
+        - "null"
+      enum:
+        - value: "1.15"
+    ip_filter:
+      title: IP filter
+      description: Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+      type: array
+      default:
+        - 0.0.0.0/0
+      items:
+        title: CIDR address block, either as a string, or in a dict with an optional description field
+        type:
+          - string
+          - object
+        properties:
+          description:
+            title: Description for IP filter list entry
+            type: string
+            max_length: 1024
+            example: Production service IP range
+          network:
+            title: CIDR address block
+            type: string
+            max_length: 43
+            example: 10.20.0.0/16
+        max_length: 43
+        example: 10.20.0.0/16
+      maxItems: 1024
+    number_of_task_slots:
+      title: Flink taskmanager.numberOfTaskSlots
+      description: Task slots per node. For a 3 node plan, total number of task slots is 3x this value
+      type: integer
+      minimum: 1
+      maximum: 1024
+      example: "1"
+    parallelism_default:
+      title: Flink parallelism.default
+      description: How many parallel task slots each new job is assigned. Unless you understand how Flink parallel dataflows work, please leave this at 1. Please do not set this value higher than (total number of nodes x number_of_task_slots), or every new job created will fail.
+      type: integer
+      minimum: 1
+      maximum: 128
+      example: "1"
+    privatelink_access:
+      title: Allow access to selected service components through Privatelink
+      type: object
+      properties:
+        flink:
+          title: Enable flink
+          type: boolean
+          example: true
+        prometheus:
+          title: Enable prometheus
+          type: boolean
+          example: true
+    restart_strategy:
+      title: Flink restart-strategy
+      description: 'failure-rate (default): Restarts the job after failure, but when failure rate (failures per time interval) is exceeded, the job eventually fails. Restart strategy waits a fixed amount of time between attempts.fixed-delay: Attempts to restart the job a given number of times before it fails. Restart strategy waits a fixed amount of time between attempts. exponential-delay: Attempts to restart the job infinitely, with increasing delay up to the maximum delay. The job never fails. none: The job fails directly and no restart is attempted.'
+      type: string
+      enum:
+        - value: default
+        - value: exponential-delay
+        - value: failure-rate
+        - value: fixed-delay
+        - value: none
+      example: failure-rate
+    restart_strategy_delay_sec:
+      title: Flink restart-strategy.failure-rate.delay in seconds
+      description: Delay between two consecutive restart attempts if restart-strategy has been set to fixed-delay or failure-rate. Delaying the retries can be helpful when the program interacts with external systems where for example connections or pending transactions should reach a timeout before re-execution is attempted.
+      type: integer
+      minimum: 1
+      maximum: 3600
+      example: "10"
+    restart_strategy_failure_rate_interval_min:
+      title: Flink restart-strategy.failure-rate.failure-rate-interval in minutes
+      description: Time interval for measuring failure rate if restart-strategy has been set to failure-rate. Specified in minutes.
+      type: integer
+      minimum: 1
+      maximum: 2880
+      example: "3"
+    restart_strategy_max_failures:
+      title: Flink restart-strategy.failure-rate.max-failures-per-interval
+      description: The number of times that Flink retries the execution before the job is declared as failed if restart-strategy has been set to fixed-delay or failure-rate.
+      type: integer
+      minimum: 1
+      maximum: 128
+      example: "5"
+grafana:
+  type: object
+  properties:
+    alerting_enabled:
+      title: Enable or disable Grafana alerting functionality
+      type: boolean
+      example: true
+    alerting_error_or_timeout:
+      title: Default error or timeout setting for new alerting rules
+      type: string
+      enum:
+        - value: alerting
+        - value: keep_state
+      example: alerting
+    alerting_max_annotations_to_keep:
+      title: Max number of alert annotations that Grafana stores. 0 (default) keeps all alert annotations.
+      type: integer
+      maximum: 1e+06
+      example: "0"
+    alerting_nodata_or_nullvalues:
+      title: Default value for 'no data or null values' for new alerting rules
+      type: string
+      enum:
+        - value: alerting
+        - value: no_data
+        - value: keep_state
+        - value: ok
+      example: ok
+    allow_embedding:
+      title: Allow embedding Grafana dashboards with iframe/frame/object/embed tags. Disabled by default to limit impact of clickjacking
+      type: boolean
+      example: false
+    auth_azuread:
+      title: Azure AD OAuth integration
+      type: object
+      properties:
+        allow_sign_up:
+          title: Automatically sign-up users on successful sign-in
+          type: boolean
+          example: false
+        allowed_domains:
+          title: Allowed domains
+          type: array
+          items:
+            title: Allowed domain
+            type: string
+            max_length: 255
+            example: mycompany.com
+          maxItems: 50
+        allowed_groups:
+          title: Require users to belong to one of given groups
+          type: array
+          items:
+            title: Group Object ID from Azure AD
+            type: string
+            max_length: 36
+            pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$
+            example: c0ffee15-c01d-0000-1111-012345abcdef
+            user_error: Must be a valid Azure ObjectID
+          maxItems: 50
+        auth_url:
+          title: Authorization URL
+          type: string
+          max_length: 2048
+          example: https://login.microsoftonline.com/<AZURE_TENANT_ID>/oauth2/v2.0/authorize
+        client_id:
+          title: Client ID from provider
+          type: string
+          max_length: 1024
+          pattern: ^[\040-\176]+$
+          example: b1ba0bf54a4c2c0a1c29
+          user_error: Must be a valid client ID string
+        client_secret:
+          title: Client secret from provider
+          type: string
+          max_length: 1024
+          pattern: ^[\040-\176]+$
+          example: bfa6gea4f129076761dcba8ce5e1e406bd83af7b
+          user_error: Must be a valid client secret string
+        token_url:
+          title: Token URL
+          type: string
+          max_length: 2048
+          example: https://login.microsoftonline.com/<AZURE_TENANT_ID>/oauth2/v2.0/token
+    auth_basic_enabled:
+      title: Enable or disable basic authentication form, used by Grafana built-in login
+      type: boolean
+      example: true
+    auth_generic_oauth:
+      title: Generic OAuth integration
+      type: object
+      properties:
+        allow_sign_up:
+          title: Automatically sign-up users on successful sign-in
+          type: boolean
+          example: false
+        allowed_domains:
+          title: Allowed domains
+          type: array
+          items:
+            title: Allowed domain
+            type: string
+            max_length: 255
+            example: mycompany.com
+          maxItems: 50
+        allowed_organizations:
+          title: Require user to be member of one of the listed organizations
+          type: array
+          items:
+            title: Allowed organization
+            type: string
+            max_length: 256
+            pattern: ^[\S]+$
+            example: myorg
+            user_error: Organization must be non-empty string without whitespace
+          maxItems: 50
+        api_url:
+          title: API URL
+          type: string
+          max_length: 2048
+          example: https://yourprovider.com/api
+        auth_url:
+          title: Authorization URL
+          type: string
+          max_length: 2048
+          example: https://yourprovider.com/oauth/authorize
+        client_id:
+          title: Client ID from provider
+          type: string
+          max_length: 1024
+          pattern: ^[\040-\176]+$
+          example: b1ba0bf54a4c2c0a1c29
+          user_error: Must be a valid client ID string
+        client_secret:
+          title: Client secret from provider
+          type: string
+          max_length: 1024
+          pattern: ^[\040-\176]+$
+          example: bfa6gea4f129076761dcba8ce5e1e406bd83af7b
+          user_error: Must be a valid client secret string
+        name:
+          title: Name of the OAuth integration
+          type: string
+          max_length: 128
+          pattern: ^[a-zA-Z0-9_\- ]+$
+          example: My authentication
+          user_error: Integration name must consist of alphanumeric ASCII characters, _, - and whitespace
+        scopes:
+          title: OAuth scopes
+          type: array
+          items:
+            title: OAuth scope
+            type: string
+            max_length: 256
+            pattern: ^[\S]+$
+            example: email
+            user_error: Scope must be non-empty string without whitespace
+          maxItems: 50
+        token_url:
+          title: Token URL
+          type: string
+          max_length: 2048
+          example: https://yourprovider.com/oauth/token
+    auth_github:
+      title: Github Auth integration
+      type: object
+      properties:
+        allow_sign_up:
+          title: Automatically sign-up users on successful sign-in
+          type: boolean
+          example: false
+        allowed_organizations:
+          title: Require users to belong to one of given organizations
+          type: array
+          items:
+            title: Organization name
+            type: string
+            max_length: 256
+            pattern: ^[A-Za-z0-9-]+$
+            example: aiven
+            user_error: Must consist of alpha-numeric characters and dashes
+          maxItems: 50
+        client_id:
+          title: Client ID from provider
+          type: string
+          max_length: 1024
+          pattern: ^[\040-\176]+$
+          example: b1ba0bf54a4c2c0a1c29
+          user_error: Must be a valid client ID string
+        client_secret:
+          title: Client secret from provider
+          type: string
+          max_length: 1024
+          pattern: ^[\040-\176]+$
+          example: bfa6gea4f129076761dcba8ce5e1e406bd83af7b
+          user_error: Must be a valid client secret string
+        team_ids:
+          title: Require users to belong to one of given team IDs
+          type: array
+          items:
+            title: Team ID
+            type: integer
+            minimum: 1
+            maximum: 9.223372036854776e+18
+            example: "150"
+          maxItems: 50
+    auth_gitlab:
+      title: GitLab Auth integration
+      type: object
+      properties:
+        allow_sign_up:
+          title: Automatically sign-up users on successful sign-in
+          type: boolean
+          example: false
+        allowed_groups:
+          title: Require users to belong to one of given groups
+          type: array
+          items:
+            title: Group or subgroup name
+            type: string
+            max_length: 256
+            pattern: ^[a-z0-9-_/]+$
+            example: aiven/developers
+            user_error: Must consist of alpha-numeric characters, dashes, underscores and slashes
+          maxItems: 50
+        api_url:
+          title: API URL. This only needs to be set when using self hosted GitLab
+          type: string
+          max_length: 2048
+          example: https://gitlab.com/api/v4
+        auth_url:
+          title: Authorization URL. This only needs to be set when using self hosted GitLab
+          type: string
+          max_length: 2048
+          example: https://gitlab.com/oauth/authorize
+        client_id:
+          title: Client ID from provider
+          type: string
+          max_length: 1024
+          pattern: ^[\040-\176]+$
+          example: b1ba0bf54a4c2c0a1c29
+          user_error: Must be a valid client ID string
+        client_secret:
+          title: Client secret from provider
+          type: string
+          max_length: 1024
+          pattern: ^[\040-\176]+$
+          example: bfa6gea4f129076761dcba8ce5e1e406bd83af7b
+          user_error: Must be a valid client secret string
+        token_url:
+          title: Token URL. This only needs to be set when using self hosted GitLab
+          type: string
+          max_length: 2048
+          example: https://gitlab.com/oauth/token
+    auth_google:
+      title: Google Auth integration
+      type: object
+      properties:
+        allow_sign_up:
+          title: Automatically sign-up users on successful sign-in
+          type: boolean
+          example: false
+        allowed_domains:
+          title: Domains allowed to sign-in to this Grafana
+          type: array
+          items:
+            title: Domain
+            type: string
+            max_length: 255
+            example: example.com
+          maxItems: 64
+        client_id:
+          title: Client ID from provider
+          type: string
+          max_length: 1024
+          pattern: ^[\040-\176]+$
+          example: b1ba0bf54a4c2c0a1c29
+          user_error: Must be a valid client ID string
+        client_secret:
+          title: Client secret from provider
+          type: string
+          max_length: 1024
+          pattern: ^[\040-\176]+$
+          example: bfa6gea4f129076761dcba8ce5e1e406bd83af7b
+          user_error: Must be a valid client secret string
+    cookie_samesite:
+      title: 'Cookie SameSite attribute: ''strict'' prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. ''lax'' is the default value.'
+      type: string
+      enum:
+        - value: lax
+        - value: strict
+        - value: none
+      example: lax
+    custom_domain:
+      title: Custom domain
+      description: Serve the web frontend using a custom CNAME pointing to the Aiven DNS name
+      type:
+        - string
+        - "null"
+      max_length: 255
+      example: grafana.example.org
+    dashboards_min_refresh_interval:
+      title: Minimum refresh interval
+      description: Signed sequence of decimal numbers, followed by a unit suffix (ms, s, m, h, d), e.g. 30s, 1h
+      type: string
+      max_length: 16
+      pattern: ^[0-9]+(ms|s|m|h|d)$
+      example: 5s
+    dashboards_versions_to_keep:
+      title: Dashboard versions to keep per dashboard
+      type: integer
+      minimum: 1
+      maximum: 100
+      example: "20"
+    dataproxy_send_user_header:
+      title: Send 'X-Grafana-User' header to data source
+      type: boolean
+      example: false
+    dataproxy_timeout:
+      title: Timeout for data proxy requests in seconds
+      type: integer
+      minimum: 15
+      maximum: 90
+      example: "30"
+    date_formats:
+      title: Grafana date format specifications
+      type: object
+      properties:
+        default_timezone:
+          title: Default time zone for user preferences. Value 'browser' uses browser local time zone.
+          type: string
+          max_length: 64
+          pattern: (?i)^([a-zA-Z_]+/){1,2}[a-zA-Z_-]+$|^(Etc/)?(UTC|GMT)([+-](\d){1,2})?$|^(Factory)$|^(browser)$
+          example: Europe/Helsinki
+          user_error: Value must be either 'browser' or timezone name in IANA timezone name format (Continent/City, e.g. Europe/Helsinki).
+        full_date:
+          title: Moment.js style format string for cases where full date is shown
+          type: string
+          max_length: 128
+          pattern: '^(([Hh]mm(ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Qo?|N{1,5}|YYYYYY|YYYYY|YYYY|YY|y{2,4}|yo?|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|kk?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|LTS|LT|LL?L?L?|l{1,4}|[-+/T,;.: ]?)*)$'
+          example: YYYY MM DD
+          user_error: 'Value must consist of moment.js style formatting tokens (see https://momentjs.com/docs/#/displaying/format/ for a complete list of formatting tokens) or the following delimiters: ''-'', ''+'', ''/'', ''T'', '',''(comma), '';'', ''.'', '':'' and '' ''(space) '
+        interval_day:
+          title: Moment.js style format string used when a time requiring day accuracy is shown
+          type: string
+          max_length: 128
+          pattern: '^(([Hh]mm(ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Qo?|N{1,5}|YYYYYY|YYYYY|YYYY|YY|y{2,4}|yo?|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|kk?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|LTS|LT|LL?L?L?|l{1,4}|[-+/T,;.: ]?)*)$'
+          example: MM/DD
+          user_error: 'Value must consist of moment.js style formatting tokens (see https://momentjs.com/docs/#/displaying/format/ for a complete list of formatting tokens) or the following delimiters: ''-'', ''+'', ''/'', ''T'', '',''(comma), '';'', ''.'', '':'' and '' ''(space) '
+        interval_hour:
+          title: Moment.js style format string used when a time requiring hour accuracy is shown
+          type: string
+          max_length: 128
+          pattern: '^(([Hh]mm(ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Qo?|N{1,5}|YYYYYY|YYYYY|YYYY|YY|y{2,4}|yo?|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|kk?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|LTS|LT|LL?L?L?|l{1,4}|[-+/T,;.: ]?)*)$'
+          example: MM/DD HH:mm
+          user_error: 'Value must consist of moment.js style formatting tokens (see https://momentjs.com/docs/#/displaying/format/ for a complete list of formatting tokens) or the following delimiters: ''-'', ''+'', ''/'', ''T'', '',''(comma), '';'', ''.'', '':'' and '' ''(space) '
+        interval_minute:
+          title: Moment.js style format string used when a time requiring minute accuracy is shown
+          type: string
+          max_length: 128
+          pattern: '^(([Hh]mm(ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Qo?|N{1,5}|YYYYYY|YYYYY|YYYY|YY|y{2,4}|yo?|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|kk?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|LTS|LT|LL?L?L?|l{1,4}|[-+/T,;.: ]?)*)$'
+          example: HH:mm
+          user_error: 'Value must consist of moment.js style formatting tokens (see https://momentjs.com/docs/#/displaying/format/ for a complete list of formatting tokens) or the following delimiters: ''-'', ''+'', ''/'', ''T'', '',''(comma), '';'', ''.'', '':'' and '' ''(space) '
+        interval_month:
+          title: Moment.js style format string used when a time requiring month accuracy is shown
+          type: string
+          max_length: 128
+          pattern: '^(([Hh]mm(ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Qo?|N{1,5}|YYYYYY|YYYYY|YYYY|YY|y{2,4}|yo?|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|kk?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|LTS|LT|LL?L?L?|l{1,4}|[-+/T,;.: ]?)*)$'
+          example: YYYY-MM
+          user_error: 'Value must consist of moment.js style formatting tokens (see https://momentjs.com/docs/#/displaying/format/ for a complete list of formatting tokens) or the following delimiters: ''-'', ''+'', ''/'', ''T'', '',''(comma), '';'', ''.'', '':'' and '' ''(space) '
+        interval_second:
+          title: Moment.js style format string used when a time requiring second accuracy is shown
+          type: string
+          max_length: 128
+          pattern: '^(([Hh]mm(ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Qo?|N{1,5}|YYYYYY|YYYYY|YYYY|YY|y{2,4}|yo?|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|kk?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|LTS|LT|LL?L?L?|l{1,4}|[-+/T,;.: ]?)*)$'
+          example: HH:mm:ss
+          user_error: 'Value must consist of moment.js style formatting tokens (see https://momentjs.com/docs/#/displaying/format/ for a complete list of formatting tokens) or the following delimiters: ''-'', ''+'', ''/'', ''T'', '',''(comma), '';'', ''.'', '':'' and '' ''(space) '
+        interval_year:
+          title: Moment.js style format string used when a time requiring year accuracy is shown
+          type: string
+          max_length: 128
+          pattern: '^(([Hh]mm(ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Qo?|N{1,5}|YYYYYY|YYYYY|YYYY|YY|y{2,4}|yo?|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|kk?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|LTS|LT|LL?L?L?|l{1,4}|[-+/T,;.: ]?)*)$'
+          example: YYYY
+          user_error: 'Value must consist of moment.js style formatting tokens (see https://momentjs.com/docs/#/displaying/format/ for a complete list of formatting tokens) or the following delimiters: ''-'', ''+'', ''/'', ''T'', '',''(comma), '';'', ''.'', '':'' and '' ''(space) '
+    disable_gravatar:
+      title: Set to true to disable gravatar. Defaults to false (gravatar is enabled)
+      type: boolean
+      example: false
+    editors_can_admin:
+      title: Editors can manage folders, teams and dashboards created by them
+      type: boolean
+      example: false
+    external_image_storage:
+      title: External image store settings
+      type: object
+      properties:
+        access_key:
+          title: S3 access key. Requires permissions to the S3 bucket for the s3:PutObject and s3:PutObjectAcl actions
+          type: string
+          max_length: 4096
+          pattern: ^[A-Z0-9]+$
+          example: AAAAAAAAAAAAAAAAAAA
+        bucket_url:
+          title: Bucket URL for S3
+          type: string
+          max_length: 2048
+          example: https://grafana.s3-ap-southeast-2.amazonaws.com/
+        provider:
+          title: Provider type
+          type: string
+          enum:
+            - value: s3
+        secret_key:
+          title: S3 secret key
+          type: string
+          max_length: 4096
+          pattern: ^[A-Za-z0-9/+=]+$
+          example: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    google_analytics_ua_id:
+      title: Google Analytics ID
+      type: string
+      max_length: 64
+      pattern: ^(G|UA|YT|MO)-[a-zA-Z0-9-]+$
+      example: UA-123456-4
+    ip_filter:
+      title: IP filter
+      description: Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+      type: array
+      default:
+        - 0.0.0.0/0
+      items:
+        title: CIDR address block, either as a string, or in a dict with an optional description field
+        type:
+          - string
+          - object
+        properties:
+          description:
+            title: Description for IP filter list entry
+            type: string
+            max_length: 1024
+            example: Production service IP range
+          network:
+            title: CIDR address block
+            type: string
+            max_length: 43
+            example: 10.20.0.0/16
+        max_length: 43
+        example: 10.20.0.0/16
+      maxItems: 1024
+    metrics_enabled:
+      title: Enable Grafana /metrics endpoint
+      type: boolean
+      example: true
+    private_access:
+      title: Allow access to selected service ports from private networks
+      type: object
+      properties:
+        grafana:
+          title: Allow clients to connect to grafana with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+    privatelink_access:
+      title: Allow access to selected service components through Privatelink
+      type: object
+      properties:
+        grafana:
+          title: Enable grafana
+          type: boolean
+          example: true
+    project_to_fork_from:
+      title: Name of another project to fork a service from. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 63
+      example: anotherprojectname
+    public_access:
+      title: Allow access to selected service ports from the public Internet
+      type: object
+      properties:
+        grafana:
+          title: Allow clients to connect to grafana from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+    recovery_basebackup_name:
+      title: Name of the basebackup to restore in forked service
+      type: string
+      max_length: 128
+      pattern: ^[a-zA-Z0-9-_:.]+$
+      example: backup-20191112t091354293891z
+    service_to_fork_from:
+      title: Name of another service to fork from. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 64
+      example: anotherservicename
+    smtp_server:
+      title: SMTP server settings
+      type: object
+      properties:
+        from_address:
+          title: Address used for sending emails
+          type: string
+          max_length: 319
+          pattern: ^[A-Za-z0-9_\-\.+\'&]+@(([\da-zA-Z])([_\w-]{,62})\.){,127}(([\da-zA-Z])[_\w-]{,61})?([\da-zA-Z]\.((xn\-\-[a-zA-Z\d]+)|([a-zA-Z\d]{2,})))$
+          example: yourgrafanauser@yourdomain.example.com
+          user_error: Must be a valid email address
+        from_name:
+          title: Name used in outgoing emails, defaults to Grafana
+          type:
+            - string
+            - "null"
+          max_length: 128
+          pattern: ^[^\x00-\x1F]+$
+          example: Company Grafana
+        host:
+          title: Server hostname or IP
+          type: string
+          max_length: 255
+          example: smtp.example.com
+        password:
+          title: Password for SMTP authentication
+          type:
+            - string
+            - "null"
+          max_length: 255
+          pattern: ^[^\x00-\x1F]+$
+          example: ein0eemeev5eeth3Ahfu
+        port:
+          title: SMTP server port
+          type: integer
+          minimum: 1
+          maximum: 65535
+          example: "25"
+        skip_verify:
+          title: Skip verifying server certificate. Defaults to false
+          type: boolean
+          example: "false"
+        starttls_policy:
+          title: Either OpportunisticStartTLS, MandatoryStartTLS or NoStartTLS. Default is OpportunisticStartTLS.
+          type: string
+          enum:
+            - value: OpportunisticStartTLS
+            - value: MandatoryStartTLS
+            - value: NoStartTLS
+          example: NoStartTLS
+        username:
+          title: Username for SMTP authentication
+          type:
+            - string
+            - "null"
+          max_length: 255
+          pattern: ^[^\x00-\x1F]+$
+          example: smtpuser
+    static_ips:
+      title: Static IP addresses
+      description: Use static public IP addresses
+      type: boolean
+      example: true
+    user_auto_assign_org:
+      title: Auto-assign new users on signup to main organization. Defaults to false
+      type: boolean
+      example: false
+    user_auto_assign_org_role:
+      title: Set role for new signups. Defaults to Viewer
+      type: string
+      enum:
+        - value: Viewer
+        - value: Admin
+        - value: Editor
+      example: Viewer
+    viewers_can_edit:
+      title: Users with view-only permission can edit but not save dashboards
+      type: boolean
+      example: false
+influxdb:
+  type: object
+  properties:
+    custom_domain:
+      title: Custom domain
+      description: Serve the web frontend using a custom CNAME pointing to the Aiven DNS name
+      type:
+        - string
+        - "null"
+      max_length: 255
+      example: grafana.example.org
+    influxdb:
+      title: influxdb.conf configuration values
+      type: object
+      properties:
+        log_queries_after:
+          title: The maximum duration in seconds before a query is logged as a slow query. Setting this to 0 (the default) will never log slow queries.
+          type: integer
+          maximum: 3600
+        max_connection_limit:
+          title: Maximum number of connections to InfluxDB. Setting this to 0 (default) means no limit. If using max_connection_limit, it is recommended to set the value to be large enough in order to not block clients unnecessarily.
+          type: integer
+          maximum: 1e+06
+        max_row_limit:
+          title: The maximum number of rows returned in a non-chunked query. Setting this to 0 (the default) allows an unlimited number to be returned.
+          type: integer
+          maximum: 1e+07
+        max_select_buckets:
+          title: The maximum number of `GROUP BY time()` buckets that can be processed in a query. Setting this to 0 (the default) allows an unlimited number to be processed.
+          type: integer
+          maximum: 100000
+        max_select_point:
+          title: The maximum number of points that can be processed in a SELECT statement. Setting this to 0 (the default) allows an unlimited number to be processed.
+          type: integer
+          maximum: 1e+07
+        query_timeout:
+          title: The maximum duration in seconds before a query is killed. Setting this to 0 (the default) will never kill slow queries.
+          type: integer
+          maximum: 3600
+    ip_filter:
+      title: IP filter
+      description: Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+      type: array
+      default:
+        - 0.0.0.0/0
+      items:
+        title: CIDR address block, either as a string, or in a dict with an optional description field
+        type:
+          - string
+          - object
+        properties:
+          description:
+            title: Description for IP filter list entry
+            type: string
+            max_length: 1024
+            example: Production service IP range
+          network:
+            title: CIDR address block
+            type: string
+            max_length: 43
+            example: 10.20.0.0/16
+        max_length: 43
+        example: 10.20.0.0/16
+      maxItems: 1024
+    private_access:
+      title: Allow access to selected service ports from private networks
+      type: object
+      properties:
+        influxdb:
+          title: Allow clients to connect to influxdb with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+    privatelink_access:
+      title: Allow access to selected service components through Privatelink
+      type: object
+      properties:
+        influxdb:
+          title: Enable influxdb
+          type: boolean
+          example: true
+    project_to_fork_from:
+      title: Name of another project to fork a service from. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 63
+      example: anotherprojectname
+    public_access:
+      title: Allow access to selected service ports from the public Internet
+      type: object
+      properties:
+        influxdb:
+          title: Allow clients to connect to influxdb from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+    recovery_basebackup_name:
+      title: Name of the basebackup to restore in forked service
+      type: string
+      max_length: 128
+      pattern: ^[a-zA-Z0-9-_:.]+$
+      example: backup-20191112t091354293891z
+    service_to_fork_from:
+      title: Name of another service to fork from. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 64
+      example: anotherservicename
+    static_ips:
+      title: Static IP addresses
+      description: Use static public IP addresses
+      type: boolean
+      example: true
+kafka:
+  type: object
+  properties:
+    custom_domain:
+      title: Custom domain
+      description: Serve the web frontend using a custom CNAME pointing to the Aiven DNS name
+      type:
+        - string
+        - "null"
+      max_length: 255
+      example: grafana.example.org
+    ip_filter:
+      title: IP filter
+      description: Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+      type: array
+      default:
+        - 0.0.0.0/0
+      items:
+        title: CIDR address block, either as a string, or in a dict with an optional description field
+        type:
+          - string
+          - object
+        properties:
+          description:
+            title: Description for IP filter list entry
+            type: string
+            max_length: 1024
+            example: Production service IP range
+          network:
+            title: CIDR address block
+            type: string
+            max_length: 43
+            example: 10.20.0.0/16
+        max_length: 43
+        example: 10.20.0.0/16
+      maxItems: 1024
+    kafka:
+      title: Kafka broker configuration values
+      type: object
+      default: {}
+      properties:
+        auto_create_topics_enable:
+          title: auto.create.topics.enable
+          description: Enable auto creation of topics
+          type: boolean
+          example: true
+        compression_type:
+          title: compression.type
+          description: Specify the final compression type for a given topic. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'uncompressed' which is equivalent to no compression; and 'producer' which means retain the original compression codec set by the producer.
+          type: string
+          enum:
+            - value: gzip
+            - value: snappy
+            - value: lz4
+            - value: zstd
+            - value: uncompressed
+            - value: producer
+        connections_max_idle_ms:
+          title: connections.max.idle.ms
+          description: 'Idle connections timeout: the server socket processor threads close the connections that idle for longer than this.'
+          type: integer
+          minimum: 1000
+          maximum: 3.6e+06
+          example: "540000"
+        default_replication_factor:
+          title: default.replication.factor
+          description: Replication factor for autocreated topics
+          type: integer
+          minimum: 1
+          maximum: 10
+        group_initial_rebalance_delay_ms:
+          title: group.initial.rebalance.delay.ms
+          description: The amount of time, in milliseconds, the group coordinator will wait for more consumers to join a new group before performing the first rebalance. A longer delay means potentially fewer rebalances, but increases the time until processing begins. The default value for this is 3 seconds. During development and testing it might be desirable to set this to 0 in order to not delay test execution time.
+          type: integer
+          maximum: 300000
+          example: "3000"
+        group_max_session_timeout_ms:
+          title: group.max.session.timeout.ms
+          description: The maximum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures.
+          type: integer
+          maximum: 1.8e+06
+          example: "1800000"
+        group_min_session_timeout_ms:
+          title: group.min.session.timeout.ms
+          description: The minimum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures.
+          type: integer
+          maximum: 60000
+          example: "6000"
+        log_cleaner_delete_retention_ms:
+          title: log.cleaner.delete.retention.ms
+          description: How long are delete records retained?
+          type: integer
+          maximum: 3.1556926e+11
+          example: "86400000"
+        log_cleaner_max_compaction_lag_ms:
+          title: log.cleaner.max.compaction.lag.ms
+          description: The maximum amount of time message will remain uncompacted. Only applicable for logs that are being compacted
+          type: integer
+          minimum: 30000
+          maximum: 9.223372036854776e+18
+        log_cleaner_min_cleanable_ratio:
+          title: log.cleaner.min.cleanable.ratio
+          description: Controls log compactor frequency. Larger value means more frequent compactions but also more space wasted for logs. Consider setting log.cleaner.max.compaction.lag.ms to enforce compactions sooner, instead of setting a very high value for this option.
+          type: number
+          minimum: 0.2
+          maximum: 0.9
+          example: "0.5"
+        log_cleaner_min_compaction_lag_ms:
+          title: log.cleaner.min.compaction.lag.ms
+          description: The minimum time a message will remain uncompacted in the log. Only applicable for logs that are being compacted.
+          type: integer
+          maximum: 9.223372036854776e+18
+        log_cleanup_policy:
+          title: log.cleanup.policy
+          description: The default cleanup policy for segments beyond the retention window
+          type: string
+          enum:
+            - value: delete
+            - value: compact
+            - value: compact,delete
+          example: delete
+        log_flush_interval_messages:
+          title: log.flush.interval.messages
+          description: The number of messages accumulated on a log partition before messages are flushed to disk
+          type: integer
+          minimum: 1
+          maximum: 9.223372036854776e+18
+          example: "9223372036854775807"
+        log_flush_interval_ms:
+          title: log.flush.interval.ms
+          description: The maximum time in ms that a message in any topic is kept in memory before flushed to disk. If not set, the value in log.flush.scheduler.interval.ms is used
+          type: integer
+          maximum: 9.223372036854776e+18
+        log_index_interval_bytes:
+          title: log.index.interval.bytes
+          description: The interval with which Kafka adds an entry to the offset index
+          type: integer
+          maximum: 1.048576e+08
+          example: "4096"
+        log_index_size_max_bytes:
+          title: log.index.size.max.bytes
+          description: The maximum size in bytes of the offset index
+          type: integer
+          minimum: 1.048576e+06
+          maximum: 1.048576e+08
+          example: "10485760"
+        log_message_downconversion_enable:
+          title: log.message.downconversion.enable
+          description: 'This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. '
+          type: boolean
+          example: true
+        log_message_timestamp_difference_max_ms:
+          title: log.message.timestamp.difference.max.ms
+          description: The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message
+          type: integer
+          maximum: 9.223372036854776e+18
+        log_message_timestamp_type:
+          title: log.message.timestamp.type
+          description: Define whether the timestamp in the message is message create time or log append time.
+          type: string
+          enum:
+            - value: CreateTime
+            - value: LogAppendTime
+        log_preallocate:
+          title: log.preallocate
+          description: Should pre allocate file when create new segment?
+          type: boolean
+          example: false
+        log_retention_bytes:
+          title: log.retention.bytes
+          description: The maximum size of the log before deleting messages
+          type: integer
+          minimum: -1
+          maximum: 9.223372036854776e+18
+        log_retention_hours:
+          title: log.retention.hours
+          description: The number of hours to keep a log file before deleting it
+          type: integer
+          minimum: -1
+          maximum: 2.147483647e+09
+        log_retention_ms:
+          title: log.retention.ms
+          description: The number of milliseconds to keep a log file before deleting it (in milliseconds), If not set, the value in log.retention.minutes is used. If set to -1, no time limit is applied.
+          type: integer
+          minimum: -1
+          maximum: 9.223372036854776e+18
+        log_roll_jitter_ms:
+          title: log.roll.jitter.ms
+          description: The maximum jitter to subtract from logRollTimeMillis (in milliseconds). If not set, the value in log.roll.jitter.hours is used
+          type: integer
+          maximum: 9.223372036854776e+18
+        log_roll_ms:
+          title: log.roll.ms
+          description: The maximum time before a new log segment is rolled out (in milliseconds).
+          type: integer
+          minimum: 1
+          maximum: 9.223372036854776e+18
+        log_segment_bytes:
+          title: log.segment.bytes
+          description: The maximum size of a single log file
+          type: integer
+          minimum: 1.048576e+07
+          maximum: 1.073741824e+09
+        log_segment_delete_delay_ms:
+          title: log.segment.delete.delay.ms
+          description: The amount of time to wait before deleting a file from the filesystem
+          type: integer
+          maximum: 3.6e+06
+          example: "60000"
+        max_connections_per_ip:
+          title: max.connections.per.ip
+          description: The maximum number of connections allowed from each ip address (defaults to 2147483647).
+          type: integer
+          minimum: 256
+          maximum: 2.147483647e+09
+        max_incremental_fetch_session_cache_slots:
+          title: max.incremental.fetch.session.cache.slots
+          description: The maximum number of incremental fetch sessions that the broker will maintain.
+          type: integer
+          minimum: 1000
+          maximum: 10000
+          example: "1000"
+        message_max_bytes:
+          title: message.max.bytes
+          description: The maximum size of message that the server can receive.
+          type: integer
+          maximum: 1.000012e+08
+          example: "1048588"
+        min_insync_replicas:
+          title: min.insync.replicas
+          description: When a producer sets acks to 'all' (or '-1'), min.insync.replicas specifies the minimum number of replicas that must acknowledge a write for the write to be considered successful.
+          type: integer
+          minimum: 1
+          maximum: 7
+          example: "1"
+        num_partitions:
+          title: num.partitions
+          description: Number of partitions for autocreated topics
+          type: integer
+          minimum: 1
+          maximum: 1000
+        offsets_retention_minutes:
+          title: offsets.retention.minutes
+          description: Log retention window in minutes for offsets topic
+          type: integer
+          minimum: 1
+          maximum: 2.147483647e+09
+          example: "10080"
+        producer_purgatory_purge_interval_requests:
+          title: producer.purgatory.purge.interval.requests
+          description: The purge interval (in number of requests) of the producer request purgatory(defaults to 1000).
+          type: integer
+          minimum: 10
+          maximum: 10000
+        replica_fetch_max_bytes:
+          title: replica.fetch.max.bytes
+          description: The number of bytes of messages to attempt to fetch for each partition (defaults to 1048576). This is not an absolute maximum, if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made.
+          type: integer
+          minimum: 1.048576e+06
+          maximum: 1.048576e+08
+        replica_fetch_response_max_bytes:
+          title: replica.fetch.response.max.bytes
+          description: Maximum bytes expected for the entire fetch response (defaults to 10485760). Records are fetched in batches, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made. As such, this is not an absolute maximum.
+          type: integer
+          minimum: 1.048576e+07
+          maximum: 1.048576e+09
+        socket_request_max_bytes:
+          title: socket.request.max.bytes
+          description: The maximum number of bytes in a socket request (defaults to 104857600).
+          type: integer
+          minimum: 1.048576e+07
+          maximum: 2.097152e+08
+        transaction_remove_expired_transaction_cleanup_interval_ms:
+          title: transaction.remove.expired.transaction.cleanup.interval.ms
+          description: The interval at which to remove transactions that have expired due to transactional.id.expiration.ms passing (defaults to 3600000 (1 hour)).
+          type: integer
+          minimum: 600000
+          maximum: 3.6e+06
+          example: "3600000"
+        transaction_state_log_segment_bytes:
+          title: transaction.state.log.segment.bytes
+          description: The transaction topic segment bytes should be kept relatively small in order to facilitate faster log compaction and cache loads (defaults to 104857600 (100 mebibytes)).
+          type: integer
+          minimum: 1.048576e+06
+          maximum: 2.147483647e+09
+          example: "104857600"
+    kafka_authentication_methods:
+      title: Kafka authentication methods
+      type: object
+      properties:
+        certificate:
+          title: Enable certificate/SSL authentication
+          type: boolean
+          default: true
+        sasl:
+          title: Enable SASL authentication
+          type: boolean
+          default: false
+    kafka_connect:
+      title: Enable Kafka Connect service
+      type: boolean
+      default: false
+    kafka_connect_config:
+      title: Kafka Connect configuration values
+      type: object
+      properties:
+        connector_client_config_override_policy:
+          title: Client config override policy
+          description: Defines what client configurations can be overridden by the connector. Default is None
+          type: string
+          enum:
+            - value: None
+            - value: All
+        consumer_auto_offset_reset:
+          title: Consumer auto offset reset
+          description: What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest
+          type: string
+          enum:
+            - value: earliest
+            - value: latest
+        consumer_fetch_max_bytes:
+          title: The maximum amount of data the server should return for a fetch request
+          description: Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum.
+          type: integer
+          minimum: 1.048576e+06
+          maximum: 1.048576e+08
+          example: "52428800"
+        consumer_isolation_level:
+          title: Consumer isolation level
+          description: Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.
+          type: string
+          enum:
+            - value: read_uncommitted
+            - value: read_committed
+        consumer_max_partition_fetch_bytes:
+          title: The maximum amount of data per-partition the server will return.
+          description: 'Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. '
+          type: integer
+          minimum: 1.048576e+06
+          maximum: 1.048576e+08
+          example: "1048576"
+        consumer_max_poll_interval_ms:
+          title: The maximum delay between polls when using consumer group management
+          description: The maximum delay in milliseconds between invocations of poll() when using consumer group management (defaults to 300000).
+          type: integer
+          minimum: 1
+          maximum: 2.147483647e+09
+          example: "300000"
+        consumer_max_poll_records:
+          title: The maximum number of records returned by a single poll
+          description: The maximum number of records returned in a single call to poll() (defaults to 500).
+          type: integer
+          minimum: 1
+          maximum: 10000
+          example: "500"
+        offset_flush_interval_ms:
+          title: The interval at which to try committing offsets for tasks
+          description: The interval at which to try committing offsets for tasks (defaults to 60000).
+          type: integer
+          minimum: 1
+          maximum: 1e+08
+          example: "60000"
+        offset_flush_timeout_ms:
+          title: Offset flush timeout
+          description: Maximum number of milliseconds to wait for records to flush and partition offset data to be committed to offset storage before cancelling the process and restoring the offset data to be committed in a future attempt (defaults to 5000).
+          type: integer
+          minimum: 1
+          maximum: 2.147483647e+09
+          example: "5000"
+        producer_compression_type:
+          title: The default compression type for producers
+          description: Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.
+          type: string
+          enum:
+            - value: gzip
+            - value: snappy
+            - value: lz4
+            - value: zstd
+            - value: none
+        producer_max_request_size:
+          title: The maximum size of a request in bytes
+          description: This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests.
+          type: integer
+          minimum: 131072
+          maximum: 1.048576e+07
+          example: "1048576"
+        session_timeout_ms:
+          title: The timeout used to detect failures when using Kafka’s group management facilities
+          description: The timeout in milliseconds used to detect failures when using Kafka’s group management facilities (defaults to 10000).
+          type: integer
+          minimum: 1
+          maximum: 2.147483647e+09
+          example: "10000"
+    kafka_rest:
+      title: Enable Kafka-REST service
+      type: boolean
+      default: false
+    kafka_rest_config:
+      title: Kafka REST configuration
+      type: object
+      properties:
+        consumer_enable_auto_commit:
+          title: consumer.enable.auto.commit
+          description: If true the consumer's offset will be periodically committed to Kafka in the background
+          type: boolean
+          default: true
+        consumer_request_max_bytes:
+          title: consumer.request.max.bytes
+          description: Maximum number of bytes in unencoded message keys and values by a single request
+          type: integer
+          default: "67108864"
+          maximum: 6.7108864e+08
+        consumer_request_timeout_ms:
+          title: consumer.request.timeout.ms
+          description: The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached
+          type: integer
+          default: "1000"
+          enum:
+            - value: "1000"
+            - value: "15000"
+            - value: "30000"
+          minimum: 1000
+          maximum: 30000
+        producer_acks:
+          title: producer.acks
+          description: The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to 'all' or '-1', the leader will wait for the full set of in-sync replicas to acknowledge the record.
+          type: string
+          default: "1"
+          enum:
+            - value: all
+            - value: "-1"
+            - value: "0"
+            - value: "1"
+        producer_linger_ms:
+          title: producer.linger.ms
+          description: Wait for up to the given delay to allow batching records together
+          type: integer
+          default: "0"
+          maximum: 5000
+        simpleconsumer_pool_size_max:
+          title: simpleconsumer.pool.size.max
+          description: Maximum number of SimpleConsumers that can be instantiated per broker
+          type: integer
+          default: "25"
+          minimum: 10
+          maximum: 250
+    kafka_version:
+      title: Kafka major version
+      type:
+        - string
+        - "null"
+      enum:
+        - value: "2.8"
+        - value: "3.0"
+        - value: "3.1"
+        - value: "3.2"
+    private_access:
+      title: Allow access to selected service ports from private networks
+      type: object
+      properties:
+        prometheus:
+          title: Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+    privatelink_access:
+      title: Allow access to selected service components through Privatelink
+      type: object
+      properties:
+        jolokia:
+          title: Enable jolokia
+          type: boolean
+          example: true
+        kafka:
+          title: Enable kafka
+          type: boolean
+          example: true
+        kafka_connect:
+          title: Enable kafka_connect
+          type: boolean
+          example: true
+        kafka_rest:
+          title: Enable kafka_rest
+          type: boolean
+          example: true
+        prometheus:
+          title: Enable prometheus
+          type: boolean
+          example: true
+        schema_registry:
+          title: Enable schema_registry
+          type: boolean
+          example: true
+    public_access:
+      title: Allow access to selected service ports from the public Internet
+      type: object
+      properties:
+        kafka:
+          title: Allow clients to connect to kafka from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+        kafka_connect:
+          title: Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+        kafka_rest:
+          title: Allow clients to connect to kafka_rest from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+        prometheus:
+          title: Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+        schema_registry:
+          title: Allow clients to connect to schema_registry from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+    schema_registry:
+      title: Enable Schema-Registry service
+      type: boolean
+      default: false
+    schema_registry_config:
+      title: Schema Registry configuration
+      type: object
+      properties:
+        leader_eligibility:
+          title: leader_eligibility
+          description: If true, Karapace / Schema Registry on the service nodes can participate in leader election. It might be needed to disable this when the schemas topic is replicated to a secondary cluster and Karapace / Schema Registry there must not participate in leader election. Defaults to `true`.
+          type: boolean
+          example: true
+        topic_name:
+          title: topic_name
+          description: The durable single partition topic that acts as the durable log for the data. This topic must be compacted to avoid losing data due to retention policy. Please note that changing this configuration in an existing Schema Registry / Karapace setup leads to previous schemas being inaccessible, data encoded with them potentially unreadable and schema ID sequence put out of order. It's only possible to do the switch while Schema Registry / Karapace is disabled. Defaults to `_schemas`.
+          type: string
+          min_length: 1
+          max_length: 249
+          pattern: ^(?!\.$|\.\.$)[-_.A-Za-z0-9]+$
+          example: _schemas
+          user_error: Must consist of alpha-numeric characters, underscores, dashes or dots, max 249 characters
+    static_ips:
+      title: Static IP addresses
+      description: Use static public IP addresses
+      type: boolean
+      example: true
+kafka_connect:
+  type: object
+  properties:
+    ip_filter:
+      title: IP filter
+      description: Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+      type: array
+      default:
+        - 0.0.0.0/0
+      items:
+        title: CIDR address block, either as a string, or in a dict with an optional description field
+        type:
+          - string
+          - object
+        properties:
+          description:
+            title: Description for IP filter list entry
+            type: string
+            max_length: 1024
+            example: Production service IP range
+          network:
+            title: CIDR address block
+            type: string
+            max_length: 43
+            example: 10.20.0.0/16
+        max_length: 43
+        example: 10.20.0.0/16
+      maxItems: 1024
+    kafka_connect:
+      title: Kafka Connect configuration values
+      type: object
+      properties:
+        connector_client_config_override_policy:
+          title: Client config override policy
+          description: Defines what client configurations can be overridden by the connector. Default is None
+          type: string
+          enum:
+            - value: None
+            - value: All
+        consumer_auto_offset_reset:
+          title: Consumer auto offset reset
+          description: What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest
+          type: string
+          enum:
+            - value: earliest
+            - value: latest
+        consumer_fetch_max_bytes:
+          title: The maximum amount of data the server should return for a fetch request
+          description: Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum.
+          type: integer
+          minimum: 1.048576e+06
+          maximum: 1.048576e+08
+          example: "52428800"
+        consumer_isolation_level:
+          title: Consumer isolation level
+          description: Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.
+          type: string
+          enum:
+            - value: read_uncommitted
+            - value: read_committed
+        consumer_max_partition_fetch_bytes:
+          title: The maximum amount of data per-partition the server will return.
+          description: 'Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. '
+          type: integer
+          minimum: 1.048576e+06
+          maximum: 1.048576e+08
+          example: "1048576"
+        consumer_max_poll_interval_ms:
+          title: The maximum delay between polls when using consumer group management
+          description: The maximum delay in milliseconds between invocations of poll() when using consumer group management (defaults to 300000).
+          type: integer
+          minimum: 1
+          maximum: 2.147483647e+09
+          example: "300000"
+        consumer_max_poll_records:
+          title: The maximum number of records returned by a single poll
+          description: The maximum number of records returned in a single call to poll() (defaults to 500).
+          type: integer
+          minimum: 1
+          maximum: 10000
+          example: "500"
+        offset_flush_interval_ms:
+          title: The interval at which to try committing offsets for tasks
+          description: The interval at which to try committing offsets for tasks (defaults to 60000).
+          type: integer
+          minimum: 1
+          maximum: 1e+08
+          example: "60000"
+        offset_flush_timeout_ms:
+          title: Offset flush timeout
+          description: Maximum number of milliseconds to wait for records to flush and partition offset data to be committed to offset storage before cancelling the process and restoring the offset data to be committed in a future attempt (defaults to 5000).
+          type: integer
+          minimum: 1
+          maximum: 2.147483647e+09
+          example: "5000"
+        producer_compression_type:
+          title: The default compression type for producers
+          description: Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.
+          type: string
+          enum:
+            - value: gzip
+            - value: snappy
+            - value: lz4
+            - value: zstd
+            - value: none
+        producer_max_request_size:
+          title: The maximum size of a request in bytes
+          description: This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests.
+          type: integer
+          minimum: 131072
+          maximum: 1.048576e+07
+          example: "1048576"
+        session_timeout_ms:
+          title: The timeout used to detect failures when using Kafka’s group management facilities
+          description: The timeout in milliseconds used to detect failures when using Kafka’s group management facilities (defaults to 10000).
+          type: integer
+          minimum: 1
+          maximum: 2.147483647e+09
+          example: "10000"
+    private_access:
+      title: Allow access to selected service ports from private networks
+      type: object
+      properties:
+        kafka_connect:
+          title: Allow clients to connect to kafka_connect with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+        prometheus:
+          title: Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+    privatelink_access:
+      title: Allow access to selected service components through Privatelink
+      type: object
+      properties:
+        jolokia:
+          title: Enable jolokia
+          type: boolean
+          example: true
+        kafka_connect:
+          title: Enable kafka_connect
+          type: boolean
+          example: true
+        prometheus:
+          title: Enable prometheus
+          type: boolean
+          example: true
+    public_access:
+      title: Allow access to selected service ports from the public Internet
+      type: object
+      properties:
+        kafka_connect:
+          title: Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+        prometheus:
+          title: Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+    static_ips:
+      title: Static IP addresses
+      description: Use static public IP addresses
+      type: boolean
+      example: true
+kafka_mirrormaker:
+  type: object
+  properties:
+    ip_filter:
+      title: IP filter
+      description: Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+      type: array
+      default:
+        - 0.0.0.0/0
+      items:
+        title: CIDR address block, either as a string, or in a dict with an optional description field
+        type:
+          - string
+          - object
+        properties:
+          description:
+            title: Description for IP filter list entry
+            type: string
+            max_length: 1024
+            example: Production service IP range
+          network:
+            title: CIDR address block
+            type: string
+            max_length: 43
+            example: 10.20.0.0/16
+        max_length: 43
+        example: 10.20.0.0/16
+      maxItems: 1024
+    kafka_mirrormaker:
+      title: Kafka MirrorMaker configuration values
+      type: object
+      properties:
+        emit_checkpoints_enabled:
+          title: Emit consumer group offset checkpoints
+          description: 'Whether to emit consumer group offset checkpoints to target cluster periodically (default: true)'
+          type: boolean
+          example: "true"
+        emit_checkpoints_interval_seconds:
+          title: Frequency of consumer group offset checkpoints
+          description: 'Frequency at which consumer group offset checkpoints are emitted (default: 60, every minute)'
+          type: integer
+          minimum: 1
+          maximum: 9.223372036854776e+18
+          example: "60"
+        refresh_groups_enabled:
+          title: Refresh consumer groups
+          description: Whether to periodically check for new consumer groups. Defaults to 'true'.
+          type: boolean
+          example: "true"
+        refresh_groups_interval_seconds:
+          title: Frequency of group refresh
+          description: Frequency of consumer group refresh in seconds. Defaults to 600 seconds (10 minutes).
+          type: integer
+          minimum: 1
+          maximum: 9.223372036854776e+18
+          example: "600"
+        refresh_topics_enabled:
+          title: Refresh topics and partitions
+          description: Whether to periodically check for new topics and partitions. Defaults to 'true'.
+          type: boolean
+          example: "true"
+        refresh_topics_interval_seconds:
+          title: Frequency of topic and partitions refresh
+          description: Frequency of topic and partitions refresh in seconds. Defaults to 600 seconds (10 minutes).
+          type: integer
+          minimum: 1
+          maximum: 9.223372036854776e+18
+          example: "600"
+        sync_group_offsets_enabled:
+          title: Sync consumer group offsets
+          description: Whether to periodically write the translated offsets of replicated consumer groups (in the source cluster) to __consumer_offsets topic in target cluster, as long as no active consumers in that group are connected to the target cluster
+          type: boolean
+          example: "true"
+        sync_group_offsets_interval_seconds:
+          title: Frequency of consumer group offset sync
+          description: 'Frequency at which consumer group offsets are synced (default: 60, every minute)'
+          type: integer
+          minimum: 1
+          maximum: 9.223372036854776e+18
+          example: "60"
+        sync_topic_configs_enabled:
+          title: Sync remote topics
+          description: Whether to periodically configure remote topics to match their corresponding upstream topics.
+          type: boolean
+          example: "true"
+        tasks_max_per_cpu:
+          title: Maximum number of MirrorMaker tasks (of each type) per service CPU
+          description: '''tasks.max'' is set to this multiplied by the number of CPUs in the service.'
+          type: integer
+          default: "1"
+          minimum: 1
+          maximum: 4
+          example: "2"
+    static_ips:
+      title: Static IP addresses
+      description: Use static public IP addresses
+      type: boolean
+      example: true
+m3aggregator:
+  type: object
+  properties:
+    custom_domain:
+      title: Custom domain
+      description: Serve the web frontend using a custom CNAME pointing to the Aiven DNS name
+      type:
+        - string
+        - "null"
+      max_length: 255
+      example: grafana.example.org
+    ip_filter:
+      title: IP filter
+      description: Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+      type: array
+      default:
+        - 0.0.0.0/0
+      items:
+        title: CIDR address block, either as a string, or in a dict with an optional description field
+        type:
+          - string
+          - object
+        properties:
+          description:
+            title: Description for IP filter list entry
+            type: string
+            max_length: 1024
+            example: Production service IP range
+          network:
+            title: CIDR address block
+            type: string
+            max_length: 43
+            example: 10.20.0.0/16
+        max_length: 43
+        example: 10.20.0.0/16
+      maxItems: 1024
+    m3aggregator_version:
+      title: M3 major version (the minimum compatible version)
+      type:
+        - string
+        - "null"
+      enum:
+        - value: "1.1"
+        - value: "1.2"
+        - value: "1.5"
+      example: "1.1"
+    m3_version:
+      title: M3 major version (deprecated, use m3aggregator_version)
+      type:
+        - string
+        - "null"
+      enum:
+        - value: "1.1"
+        - value: "1.2"
+        - value: "1.5"
+      example: "1.1"
+    static_ips:
+      title: Static IP addresses
+      description: Use static public IP addresses
+      type: boolean
+      example: true
+m3db:
+  type: object
+  properties:
+    custom_domain:
+      title: Custom domain
+      description: Serve the web frontend using a custom CNAME pointing to the Aiven DNS name
+      type:
+        - string
+        - "null"
+      max_length: 255
+      example: grafana.example.org
+    ip_filter:
+      title: IP filter
+      description: Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+      type: array
+      default:
+        - 0.0.0.0/0
+      items:
+        title: CIDR address block, either as a string, or in a dict with an optional description field
+        type:
+          - string
+          - object
+        properties:
+          description:
+            title: Description for IP filter list entry
+            type: string
+            max_length: 1024
+            example: Production service IP range
+          network:
+            title: CIDR address block
+            type: string
+            max_length: 43
+            example: 10.20.0.0/16
+        max_length: 43
+        example: 10.20.0.0/16
+      maxItems: 1024
+    limits:
+      title: M3 limits
+      type: object
+      properties:
+        max_recently_queried_series_blocks:
+          title: The maximum number of blocks that can be read in a given lookback period.
+          type: integer
+          maximum: 9.223372036854776e+18
+          example: "20000"
+        max_recently_queried_series_disk_bytes_read:
+          title: The maximum number of disk bytes that can be read in a given lookback period.
+          type: integer
+          maximum: 9.223372036854776e+18
+          example: "104857600"
+        max_recently_queried_series_lookback:
+          title: The lookback period for 'max_recently_queried_series_blocks' and 'max_recently_queried_series_disk_bytes_read'.
+          type: string
+          max_length: 16
+          pattern: ^[0-9]+[smhd]$
+          example: 15s
+        query_docs:
+          title: The maximum number of docs fetched in single query.
+          type: integer
+          maximum: 9.223372036854776e+18
+          example: "100000"
+        query_require_exhaustive:
+          title: Require exhaustive result
+          description: When query limits are exceeded, whether to return error or return partial results.
+          type: boolean
+          example: true
+        query_series:
+          title: The maximum number of series fetched in single query.
+          type: integer
+          minimum: 10000
+          maximum: 9.223372036854776e+18
+          example: "100000"
+    m3coordinator_enable_graphite_carbon_ingest:
+      title: Enable Graphite ingestion using Carbon plaintext protocol
+      description: Enables access to Graphite Carbon plaintext metrics ingestion. It can be enabled only for services inside VPCs. The metrics are written to aggregated namespaces only.
+      type: boolean
+      example: true
+    m3db_version:
+      title: M3 major version (the minimum compatible version)
+      type:
+        - string
+        - "null"
+      enum:
+        - value: "1.1"
+        - value: "1.2"
+        - value: "1.5"
+      example: "1.1"
+    m3_version:
+      title: M3 major version (deprecated, use m3db_version)
+      type:
+        - string
+        - "null"
+      enum:
+        - value: "1.1"
+        - value: "1.2"
+        - value: "1.5"
+      example: "1.1"
+    namespaces:
+      title: List of M3 namespaces
+      type: array
+      default:
+        - name: default
+          type: unaggregated
+      items:
+        title: M3 Namespace
+        type: object
+        properties:
+          name:
+            title: The name of the namespace
+            type: string
+            max_length: 256
+            pattern: ^[a-zA-Z_0-9]+$
+            example: default
+          options:
+            title: Namespace options
+            type: object
+            properties:
+              retention_options:
+                title: Retention options
+                type: object
+                properties:
+                  block_data_expiry_duration:
+                    title: Controls how long we wait before expiring stale data
+                    type: string
+                    max_length: 16
+                    pattern: ^[0-9]+[smhd]$
+                    example: 5m
+                  blocksize_duration:
+                    title: Controls how long to keep a block in memory before flushing to a fileset on disk
+                    type: string
+                    max_length: 16
+                    pattern: ^[0-9]+[smhd]$
+                    example: 2h
+                  buffer_future_duration:
+                    title: Controls how far into the future writes to the namespace will be accepted
+                    type: string
+                    max_length: 16
+                    pattern: ^[0-9]+[smhd]$
+                    example: 10m
+                  buffer_past_duration:
+                    title: Controls how far into the past writes to the namespace will be accepted
+                    type: string
+                    max_length: 16
+                    pattern: ^[0-9]+[smhd]$
+                    example: 10m
+                  retention_period_duration:
+                    title: Controls the duration of time that M3DB will retain data for the namespace
+                    type: string
+                    max_length: 16
+                    pattern: ^[0-9]+[smhd]$
+                    example: 48h
+              snapshot_enabled:
+                title: Controls whether M3DB will create snapshot files for this namespace
+                type: boolean
+                example: true
+              writes_to_commitlog:
+                title: Controls whether M3DB will include writes to this namespace in the commitlog
+                type: boolean
+                example: true
+          resolution:
+            title: The resolution for an aggregated namespace
+            type: string
+            max_length: 16
+            pattern: ^[0-9]+[smhd]$
+            example: 30s
+          type:
+            title: The type of aggregation (aggregated/unaggregated)
+            type: string
+            enum:
+              - value: aggregated
+              - value: unaggregated
+            example: unaggregated
+      maxItems: 2147483647
+    private_access:
+      title: Allow access to selected service ports from private networks
+      type: object
+      properties:
+        m3coordinator:
+          title: Allow clients to connect to m3coordinator with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+    project_to_fork_from:
+      title: Name of another project to fork a service from. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 63
+      example: anotherprojectname
+    public_access:
+      title: Allow access to selected service ports from the public Internet
+      type: object
+      properties:
+        m3coordinator:
+          title: Allow clients to connect to m3coordinator from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+    rules:
+      title: M3 rules
+      type: object
+      properties:
+        mapping:
+          title: List of M3 mapping rules
+          type: array
+          items:
+            title: M3 Mapping rule
+            description: Mapping rules allow more granular use of aggregation, not simply sending everything to a namespace. If mapping rules exist that target a namespace, only data matching mapping rules will be sent to it and nothing else.
+            type: object
+            properties:
+              aggregations:
+                title: List of aggregations to be applied
+                type: array
+                items:
+                  title: Aggregation to be applied
+                  type: string
+                  enum:
+                    - value: Count
+                    - value: Last
+                    - value: Max
+                    - value: Mean
+                    - value: Median
+                    - value: Min
+                    - value: P10
+                    - value: P20
+                    - value: P30
+                    - value: P40
+                    - value: P50
+                    - value: P60
+                    - value: P70
+                    - value: P80
+                    - value: P90
+                    - value: P95
+                    - value: P99
+                    - value: P999
+                    - value: P9999
+                    - value: Stdev
+                    - value: Sum
+                    - value: SumSq
+                  example: Max
+                maxItems: 10
+                example:
+                  - Max
+              drop:
+                title: Drop the matching metric
+                description: Only store the derived metric (as specified in the roll-up rules), if any
+                type: boolean
+                example: true
+              filter:
+                title: The metrics to be used with this particular rule
+                description: Matching metric names with wildcards (using __name__:wildcard) or matching tags and their (optionally wildcarded) values. For value, ! can be used at start of value for negation, and multiple filters can be supplied using space as separator.
+                type: string
+                max_length: 256
+                pattern: ^(__name__:\*?[a-zA-Z_:][a-zA-Z0-9_:]*\*?|[a-zA-Z_][a-zA-Z0-9_]*:[^\\\s]+)(\s+(__name__:\*?[a-zA-Z_:][a-zA-Z0-9_:]*\*?|[a-zA-Z_][a-zA-Z0-9_]*:[^\\\s]+))*$
+                example: __name__:disk_* host:important-42 mount:!*/sda
+              name:
+                title: The (optional) name of the rule
+                type: string
+                max_length: 256
+                pattern: "^[^\n\r]+$"
+                example: important disk metrics
+              namespaces:
+                title: Namespace filters for this particular rule
+                description: This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error.
+                type: array
+                items:
+                  one_of:
+                    - title: Namespaces matched by this glob
+                      description: Filter the namespace by glob (=wildcards)
+                      type: string
+                      max_length: 256
+                      pattern: ^[a-zA-Z_0-9*]+$
+                      example: aggregated_*
+                    - title: Namespaces matching this storage policy
+                      description: Filter the namespace by exact match of retention period and resolution
+                      type: object
+                      properties:
+                        resolution:
+                          title: The resolution for the matching namespace
+                          type: string
+                          max_length: 16
+                          pattern: ^[0-9]+[smhd]$
+                          example: 30s
+                        retention:
+                          title: The retention period of the matching namespace
+                          type: string
+                          max_length: 16
+                          pattern: ^[0-9]+[smhd]$
+                          example: 48h
+                maxItems: 10
+              tags:
+                title: List of tags to be appended to matching metrics
+                type: array
+                items:
+                  title: Tag to be added
+                  type: object
+                  properties:
+                    name:
+                      title: Name of the tag
+                      type: string
+                      max_length: 256
+                      pattern: ^[a-zA-Z_][a-zA-Z0-9_]*$
+                      example: my_tag
+                    value:
+                      title: Value of the tag
+                      type: string
+                      max_length: 256
+                      pattern: ^[^\\\s]+$
+                      example: my_value
+                maxItems: 10
+          maxItems: 10
+    service_to_fork_from:
+      title: Name of another service to fork from. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 64
+      example: anotherservicename
+    static_ips:
+      title: Static IP addresses
+      description: Use static public IP addresses
+      type: boolean
+      example: true
+mysql:
+  type: object
+  properties:
+    admin_password:
+      title: Custom password for admin user. Defaults to random string. This must be set only when a new service is being created.
+      type:
+        - string
+        - "null"
+      min_length: 8
+      max_length: 256
+      pattern: ^[a-zA-Z0-9-_]+$
+      example: z66o9QXqKM
+      user_error: Must consist of alpha-numeric characters, underscores or dashes
+    admin_username:
+      title: Custom username for admin user. This must be set only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 64
+      pattern: ^[_A-Za-z0-9][-._A-Za-z0-9]{0,63}$
+      example: avnadmin
+      user_error: Must consist of alpha-numeric characters, dots, underscores or dashes, may not start with dash or dot, max 64 characters
+    backup_hour:
+      title: The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.
+      type:
+        - integer
+        - "null"
+      maximum: 23
+      example: "3"
+    backup_minute:
+      title: The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.
+      type:
+        - integer
+        - "null"
+      maximum: 59
+      example: "30"
+    binlog_retention_period:
+      title: The minimum amount of time in seconds to keep binlog entries before deletion. This may be extended for services that require binlog entries for longer than the default for example if using the MySQL Debezium Kafka connector.
+      type: integer
+      minimum: 600
+      maximum: 86400
+      example: "600"
+    ip_filter:
+      title: IP filter
+      description: Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+      type: array
+      default:
+        - 0.0.0.0/0
+      items:
+        title: CIDR address block, either as a string, or in a dict with an optional description field
+        type:
+          - string
+          - object
+        properties:
+          description:
+            title: Description for IP filter list entry
+            type: string
+            max_length: 1024
+            example: Production service IP range
+          network:
+            title: CIDR address block
+            type: string
+            max_length: 43
+            example: 10.20.0.0/16
+        max_length: 43
+        example: 10.20.0.0/16
+      maxItems: 1024
+    migration:
+      title: Migrate data from existing server
+      type:
+        - object
+        - "null"
+      properties:
+        dbname:
+          title: Database name for bootstrapping the initial connection
+          type: string
+          max_length: 63
+          example: defaultdb
+        host:
+          title: Hostname or IP address of the server where to migrate data from
+          type: string
+          max_length: 255
+          example: my.server.com
+        ignore_dbs:
+          title: Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)
+          type: string
+          max_length: 2048
+          example: db1,db2
+        method:
+          title: The migration method to be used (currently supported only by Redis and MySQL service types)
+          type: string
+          enum:
+            - value: dump
+            - value: replication
+          example: dump
+        password:
+          title: Password for authentication with the server where to migrate data from
+          type: string
+          max_length: 256
+          example: jjKk45Nnd
+        port:
+          title: Port number of the server where to migrate data from
+          type: integer
+          minimum: 1
+          maximum: 65535
+          example: "1234"
+        ssl:
+          title: The server where to migrate data from is secured with SSL
+          type: boolean
+          default: true
+        username:
+          title: User name for authentication with the server where to migrate data from
+          type: string
+          max_length: 256
+          example: myname
+    mysql:
+      title: mysql.conf configuration values
+      type: object
+      properties:
+        connect_timeout:
+          title: connect_timeout
+          description: The number of seconds that the mysqld server waits for a connect packet before responding with Bad handshake
+          type: integer
+          minimum: 2
+          maximum: 3600
+          example: "10"
+        default_time_zone:
+          title: default_time_zone
+          description: Default server time zone as an offset from UTC (from -12:00 to +12:00), a time zone name, or 'SYSTEM' to use the MySQL server default.
+          type: string
+          min_length: 2
+          max_length: 100
+          example: "+03:00"
+        group_concat_max_len:
+          title: group_concat_max_len
+          description: The maximum permitted result length in bytes for the GROUP_CONCAT() function.
+          type: integer
+          minimum: 4
+          maximum: 1.8446744073709552e+19
+          example: "1024"
+        information_schema_stats_expiry:
+          title: information_schema_stats_expiry
+          description: The time, in seconds, before cached statistics expire
+          type: integer
+          minimum: 900
+          maximum: 3.1536e+07
+          example: "86400"
+        innodb_change_buffer_max_size:
+          title: innodb_change_buffer_max_size
+          description: Maximum size for the InnoDB change buffer, as a percentage of the total size of the buffer pool. Default is 25
+          type: integer
+          maximum: 50
+          example: "30"
+        innodb_flush_neighbors:
+          title: innodb_flush_neighbors
+          description: 'Specifies whether flushing a page from the InnoDB buffer pool also flushes other dirty pages in the same extent (default is 1): 0 - dirty pages in the same extent are not flushed,  1 - flush contiguous dirty pages in the same extent,  2 - flush dirty pages in the same extent'
+          type: integer
+          maximum: 2
+          example: "0"
+        innodb_ft_min_token_size:
+          title: innodb_ft_min_token_size
+          description: Minimum length of words that are stored in an InnoDB FULLTEXT index. Changing this parameter will lead to a restart of the MySQL service.
+          type: integer
+          maximum: 16
+          example: "3"
+        innodb_ft_server_stopword_table:
+          title: innodb_ft_server_stopword_table
+          description: This option is used to specify your own InnoDB FULLTEXT index stopword list for all InnoDB tables.
+          type:
+            - "null"
+            - string
+          max_length: 1024
+          pattern: ^.+/.+$
+          example: db_name/table_name
+        innodb_lock_wait_timeout:
+          title: innodb_lock_wait_timeout
+          description: The length of time in seconds an InnoDB transaction waits for a row lock before giving up.
+          type: integer
+          minimum: 1
+          maximum: 3600
+          example: "50"
+        innodb_log_buffer_size:
+          title: innodb_log_buffer_size
+          description: The size in bytes of the buffer that InnoDB uses to write to the log files on disk.
+          type: integer
+          minimum: 1.048576e+06
+          maximum: 4.294967295e+09
+          example: "16777216"
+        innodb_online_alter_log_max_size:
+          title: innodb_online_alter_log_max_size
+          description: The upper limit in bytes on the size of the temporary log files used during online DDL operations for InnoDB tables.
+          type: integer
+          minimum: 65536
+          maximum: 1.099511627776e+12
+          example: "134217728"
+        innodb_print_all_deadlocks:
+          title: innodb_print_all_deadlocks
+          description: When enabled, information about all deadlocks in InnoDB user transactions is recorded in the error log. Disabled by default.
+          type: boolean
+          example: true
+        innodb_read_io_threads:
+          title: innodb_read_io_threads
+          description: The number of I/O threads for read operations in InnoDB. Default is 4. Changing this parameter will lead to a restart of the MySQL service.
+          type: integer
+          minimum: 1
+          maximum: 64
+          example: "10"
+        innodb_rollback_on_timeout:
+          title: innodb_rollback_on_timeout
+          description: When enabled a transaction timeout causes InnoDB to abort and roll back the entire transaction. Changing this parameter will lead to a restart of the MySQL service.
+          type: boolean
+          example: true
+        innodb_thread_concurrency:
+          title: innodb_thread_concurrency
+          description: Defines the maximum number of threads permitted inside of InnoDB. Default is 0 (infinite concurrency - no limit)
+          type: integer
+          maximum: 1000
+          example: "10"
+        innodb_write_io_threads:
+          title: innodb_write_io_threads
+          description: The number of I/O threads for write operations in InnoDB. Default is 4. Changing this parameter will lead to a restart of the MySQL service.
+          type: integer
+          minimum: 1
+          maximum: 64
+          example: "10"
+        interactive_timeout:
+          title: interactive_timeout
+          description: The number of seconds the server waits for activity on an interactive connection before closing it.
+          type: integer
+          minimum: 30
+          maximum: 604800
+          example: "3600"
+        internal_tmp_mem_storage_engine:
+          title: internal_tmp_mem_storage_engine
+          description: The storage engine for in-memory internal temporary tables.
+          type: string
+          enum:
+            - value: TempTable
+            - value: MEMORY
+          example: TempTable
+        long_query_time:
+          title: long_query_time
+          description: The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Default is 10s
+          type: number
+          maximum: 3600
+          example: "10"
+        max_allowed_packet:
+          title: max_allowed_packet
+          description: Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M)
+          type: integer
+          minimum: 102400
+          maximum: 1.073741824e+09
+          example: "67108864"
+        max_heap_table_size:
+          title: max_heap_table_size
+          description: Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M)
+          type: integer
+          minimum: 1.048576e+06
+          maximum: 1.073741824e+09
+          example: "16777216"
+        net_buffer_length:
+          title: net_buffer_length
+          description: Start sizes of connection buffer and result buffer. Default is 16384 (16K). Changing this parameter will lead to a restart of the MySQL service.
+          type: integer
+          minimum: 1024
+          maximum: 1.048576e+06
+          example: "16384"
+        net_read_timeout:
+          title: net_read_timeout
+          description: The number of seconds to wait for more data from a connection before aborting the read.
+          type: integer
+          minimum: 1
+          maximum: 3600
+          example: "30"
+        net_write_timeout:
+          title: net_write_timeout
+          description: The number of seconds to wait for a block to be written to a connection before aborting the write.
+          type: integer
+          minimum: 1
+          maximum: 3600
+          example: "30"
+        slow_query_log:
+          title: slow_query_log
+          description: Slow query log enables capturing of slow queries. Setting slow_query_log to false also truncates the mysql.slow_log table. Default is off
+          type: boolean
+          example: true
+        sort_buffer_size:
+          title: sort_buffer_size
+          description: Sort buffer size in bytes for ORDER BY optimization. Default is 262144 (256K)
+          type: integer
+          minimum: 32768
+          maximum: 1.073741824e+09
+          example: "262144"
+        sql_mode:
+          title: sql_mode
+          description: Global SQL mode. Set to empty to use MySQL server defaults. When creating a new service and not setting this field Aiven default SQL mode (strict, SQL standard compliant) will be assigned.
+          type: string
+          max_length: 1024
+          pattern: ^[A-Z_]*(,[A-Z_]+)*$
+          example: ANSI,TRADITIONAL
+          user_error: Must be uppercase alphabetic characters, underscores and commas
+        sql_require_primary_key:
+          title: sql_require_primary_key
+          description: Require primary key to be defined for new tables or old tables modified with ALTER TABLE and fail if missing. It is recommended to always have primary keys because various functionality may break if any large table is missing them.
+          type: boolean
+          example: true
+        tmp_table_size:
+          title: tmp_table_size
+          description: Limits the size of internal in-memory tables. Also set max_heap_table_size. Default is 16777216 (16M)
+          type: integer
+          minimum: 1.048576e+06
+          maximum: 1.073741824e+09
+          example: "16777216"
+        wait_timeout:
+          title: wait_timeout
+          description: The number of seconds the server waits for activity on a noninteractive connection before closing it.
+          type: integer
+          minimum: 1
+          maximum: 2.147483e+06
+          example: "28800"
+    mysql_version:
+      title: MySQL major version
+      type:
+        - string
+        - "null"
+      enum:
+        - value: "8"
+    private_access:
+      title: Allow access to selected service ports from private networks
+      type: object
+      properties:
+        mysql:
+          title: Allow clients to connect to mysql with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+        mysqlx:
+          title: Allow clients to connect to mysqlx with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+        prometheus:
+          title: Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+    privatelink_access:
+      title: Allow access to selected service components through Privatelink
+      type: object
+      properties:
+        mysql:
+          title: Enable mysql
+          type: boolean
+          example: true
+        mysqlx:
+          title: Enable mysqlx
+          type: boolean
+          example: true
+        prometheus:
+          title: Enable prometheus
+          type: boolean
+          example: true
+    project_to_fork_from:
+      title: Name of another project to fork a service from. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 63
+      example: anotherprojectname
+    public_access:
+      title: Allow access to selected service ports from the public Internet
+      type: object
+      properties:
+        mysql:
+          title: Allow clients to connect to mysql from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+        mysqlx:
+          title: Allow clients to connect to mysqlx from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+        prometheus:
+          title: Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+    recovery_target_time:
+      title: Recovery target time when forking a service. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 32
+      example: "2019-01-01 23:34:45"
+    service_to_fork_from:
+      title: Name of another service to fork from. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 64
+      example: anotherservicename
+    static_ips:
+      title: Static IP addresses
+      description: Use static public IP addresses
+      type: boolean
+      example: true
+opensearch:
+  type: object
+  properties:
+    custom_domain:
+      title: Custom domain
+      description: Serve the web frontend using a custom CNAME pointing to the Aiven DNS name
+      type:
+        - string
+        - "null"
+      max_length: 255
+      example: grafana.example.org
+    disable_replication_factor_adjustment:
+      title: Disable replication factor adjustment
+      description: 'DEPRECATED: Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can no longer be activated.'
+      type:
+        - boolean
+        - "null"
+      example: false
+    index_patterns:
+      title: Index patterns
+      type: array
+      items:
+        title: Glob pattern and number of indexes matching that pattern to be kept
+        description: 'Allows you to create glob style patterns and set a max number of indexes matching this pattern you want to keep. Creating indexes exceeding this value will cause the oldest one to get deleted. You could for example create a pattern looking like ''logs.?'' and then create index logs.1, logs.2 etc, it will delete logs.1 once you create logs.6. Do note ''logs.?'' does not apply to logs.10. Note: Setting max_index_count to 0 will do nothing and the pattern gets ignored.'
+        type: object
+        properties:
+          max_index_count:
+            title: Maximum number of indexes to keep
+            type: integer
+            maximum: 9.223372036854776e+18
+            example: "3"
+          pattern:
+            title: fnmatch pattern
+            type: string
+            max_length: 1024
+            pattern: ^[A-Za-z0-9-_.*?]+$
+            example: logs_*_foo_*
+            user_error: Must consist of alpha-numeric characters, dashes, underscores, dots and glob characters (* and ?)
+          sorting_algorithm:
+            title: Deletion sorting algorithm
+            type: string
+            default: creation_date
+            enum:
+              - value: alphabetical
+              - value: creation_date
+      maxItems: 512
+    index_template:
+      title: Template settings for all new indexes
+      type: object
+      properties:
+        mapping_nested_objects_limit:
+          title: index.mapping.nested_objects.limit
+          description: The maximum number of nested JSON objects that a single document can contain across all nested types. This limit helps to prevent out of memory errors when a document contains too many nested objects. Default is 10000.
+          type:
+            - integer
+            - "null"
+          maximum: 100000
+          example: "10000"
+        number_of_replicas:
+          title: index.number_of_replicas
+          description: The number of replicas each primary shard has.
+          type:
+            - integer
+            - "null"
+          maximum: 29
+          example: "1"
+        number_of_shards:
+          title: index.number_of_shards
+          description: The number of primary shards that an index should have.
+          type:
+            - integer
+            - "null"
+          minimum: 1
+          maximum: 1024
+          example: "1"
+    ip_filter:
+      title: IP filter
+      description: Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+      type: array
+      default:
+        - 0.0.0.0/0
+      items:
+        title: CIDR address block, either as a string, or in a dict with an optional description field
+        type:
+          - string
+          - object
+        properties:
+          description:
+            title: Description for IP filter list entry
+            type: string
+            max_length: 1024
+            example: Production service IP range
+          network:
+            title: CIDR address block
+            type: string
+            max_length: 43
+            example: 10.20.0.0/16
+        max_length: 43
+        example: 10.20.0.0/16
+      maxItems: 1024
+    keep_index_refresh_interval:
+      title: Don't reset index.refresh_interval to the default value
+      description: Aiven automation resets index.refresh_interval to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.
+      type: boolean
+      example: true
+    max_index_count:
+      title: Maximum index count
+      description: Maximum number of indexes to keep before deleting the oldest one
+      type: integer
+      default: "0"
+      maximum: 9.223372036854776e+18
+    opensearch:
+      title: OpenSearch settings
+      type: object
+      properties:
+        action_auto_create_index_enabled:
+          title: action.auto_create_index
+          description: Explicitly allow or block automatic creation of indices. Defaults to true
+          type: boolean
+          example: false
+        action_destructive_requires_name:
+          title: Require explicit index names when deleting
+          type:
+            - boolean
+            - "null"
+          example: true
+        cluster_max_shards_per_node:
+          title: cluster.max_shards_per_node
+          description: Controls the number of shards allowed in the cluster per data node
+          type: integer
+          minimum: 100
+          maximum: 10000
+          example: "1000"
+        cluster_routing_allocation_node_concurrent_recoveries:
+          title: Concurrent incoming/outgoing shard recoveries per node
+          description: How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to 2.
+          type: integer
+          minimum: 2
+          maximum: 16
+        email_sender_name:
+          title: Sender email name placeholder to be used in Opensearch Dashboards and Opensearch keystore
+          description: This should be identical to the Sender name defined in Opensearch dashboards
+          type:
+            - string
+          max_length: 40
+          pattern: ^[a-zA-Z0-9-_]+$
+          example: alert-sender
+          user_error: Must consist of lower-case alpha-numeric characters and dashes, max 40 characters
+        email_sender_password:
+          title: Sender email password for Opensearch alerts to authenticate with SMTP server
+          description: Sender email password for Opensearch alerts to authenticate with SMTP server
+          type:
+            - string
+          max_length: 1024
+          pattern: ^[^\x00-\x1F]+$
+          example: very-secure-mail-password
+        email_sender_username:
+          title: Sender email address for Opensearch alerts
+          type:
+            - string
+          max_length: 320
+          pattern: ^[A-Za-z0-9_\-\.+\'&]+@(([\da-zA-Z])([_\w-]{,62})\.){,127}(([\da-zA-Z])[_\w-]{,61})?([\da-zA-Z]\.((xn\-\-[a-zA-Z\d]+)|([a-zA-Z\d]{2,})))$
+          example: jane@example.com
+          user_error: Must be a valid email address
+        http_max_content_length:
+          title: http.max_content_length
+          description: Maximum content length for HTTP requests to the OpenSearch HTTP API, in bytes.
+          type: integer
+          minimum: 1
+          maximum: 2.147483647e+09
+        http_max_header_size:
+          title: http.max_header_size
+          description: The max size of allowed headers, in bytes
+          type: integer
+          minimum: 1024
+          maximum: 262144
+          example: "8192"
+        http_max_initial_line_length:
+          title: http.max_initial_line_length
+          description: The max length of an HTTP URL, in bytes
+          type: integer
+          minimum: 1024
+          maximum: 65536
+          example: "4096"
+        indices_fielddata_cache_size:
+          title: indices.fielddata.cache.size
+          description: Relative amount. Maximum amount of heap memory used for field data cache. This is an expert setting; decreasing the value too much will increase overhead of loading field data; too much memory used for field data cache will decrease amount of heap available for other operations.
+          type:
+            - integer
+            - "null"
+          minimum: 3
+          maximum: 100
+        indices_memory_index_buffer_size:
+          title: indices.memory.index_buffer_size
+          description: Percentage value. Default is 10%. Total amount of heap used for indexing buffer, before writing segments to disk. This is an expert setting. Too low value will slow down indexing; too high value will increase indexing performance but causes performance issues for query performance.
+          type: integer
+          minimum: 3
+          maximum: 40
+        indices_queries_cache_size:
+          title: indices.queries.cache.size
+          description: Percentage value. Default is 10%. Maximum amount of heap used for query cache. This is an expert setting. Too low value will decrease query performance and increase performance for other operations; too high value will cause issues with other OpenSearch functionality.
+          type: integer
+          minimum: 3
+          maximum: 40
+        indices_query_bool_max_clause_count:
+          title: indices.query.bool.max_clause_count
+          description: Maximum number of clauses Lucene BooleanQuery can have. The default value (1024) is relatively high, and increasing it may cause performance issues. Investigate other approaches first before increasing this value.
+          type: integer
+          minimum: 64
+          maximum: 4096
+        indices_recovery_max_bytes_per_sec:
+          title: indices.recovery.max_bytes_per_sec
+          description: Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb
+          type: integer
+          minimum: 40
+          maximum: 400
+        indices_recovery_max_concurrent_file_chunks:
+          title: indices.recovery.max_concurrent_file_chunks
+          description: Number of file chunks sent in parallel for each recovery. Defaults to 2.
+          type: integer
+          minimum: 2
+          maximum: 5
+        override_main_response_version:
+          title: compatibility.override_main_response_version
+          description: Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false
+          type: boolean
+          example: true
+        reindex_remote_whitelist:
+          title: reindex_remote_whitelist
+          description: Whitelisted addresses for reindexing. Changing this value will cause all OpenSearch instances to restart.
+          type:
+            - array
+            - "null"
+          items:
+            title: Address (hostname:port or IP:port)
+            type:
+              - string
+              - "null"
+            max_length: 261
+            example: anotherservice.aivencloud.com:12398
+          maxItems: 32
+        script_max_compilations_rate:
+          title: Script max compilation rate - circuit breaker to prevent/minimize OOMs
+          description: Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context
+          type: string
+          max_length: 1024
+          example: 75/5m
+        search_max_buckets:
+          title: search.max_buckets
+          description: Maximum number of aggregation buckets allowed in a single response. OpenSearch default value is used when this is not defined.
+          type:
+            - integer
+            - "null"
+          minimum: 1
+          maximum: 20000
+          example: "10000"
+        thread_pool_analyze_queue_size:
+          title: analyze thread pool queue size
+          description: Size for the thread pool queue. See documentation for exact details.
+          type: integer
+          minimum: 10
+          maximum: 2000
+        thread_pool_analyze_size:
+          title: analyze thread pool size
+          description: Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
+          type: integer
+          minimum: 1
+          maximum: 128
+        thread_pool_force_merge_size:
+          title: force_merge thread pool size
+          description: Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
+          type: integer
+          minimum: 1
+          maximum: 128
+        thread_pool_get_queue_size:
+          title: get thread pool queue size
+          description: Size for the thread pool queue. See documentation for exact details.
+          type: integer
+          minimum: 10
+          maximum: 2000
+        thread_pool_get_size:
+          title: get thread pool size
+          description: Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
+          type: integer
+          minimum: 1
+          maximum: 128
+        thread_pool_search_queue_size:
+          title: search thread pool queue size
+          description: Size for the thread pool queue. See documentation for exact details.
+          type: integer
+          minimum: 10
+          maximum: 2000
+        thread_pool_search_size:
+          title: search thread pool size
+          description: Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
+          type: integer
+          minimum: 1
+          maximum: 128
+        thread_pool_search_throttled_queue_size:
+          title: search_throttled thread pool queue size
+          description: Size for the thread pool queue. See documentation for exact details.
+          type: integer
+          minimum: 10
+          maximum: 2000
+        thread_pool_search_throttled_size:
+          title: search_throttled thread pool size
+          description: Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
+          type: integer
+          minimum: 1
+          maximum: 128
+        thread_pool_write_queue_size:
+          title: write thread pool queue size
+          description: Size for the thread pool queue. See documentation for exact details.
+          type: integer
+          minimum: 10
+          maximum: 2000
+        thread_pool_write_size:
+          title: write thread pool size
+          description: Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
+          type: integer
+          minimum: 1
+          maximum: 128
+    opensearch_dashboards:
+      title: OpenSearch Dashboards settings
+      type: object
+      properties:
+        enabled:
+          title: Enable or disable OpenSearch Dashboards
+          type: boolean
+          default: true
+        max_old_space_size:
+          title: max_old_space_size
+          description: 'Limits the maximum amount of memory (in MiB) the OpenSearch Dashboards process can use. This sets the max_old_space_size option of the nodejs running the OpenSearch Dashboards. Note: the memory reserved by OpenSearch Dashboards is not available for OpenSearch.'
+          type: integer
+          default: "128"
+          minimum: 64
+          maximum: 1024
+        opensearch_request_timeout:
+          title: Timeout in milliseconds for requests made by OpenSearch Dashboards towards OpenSearch
+          type: integer
+          default: "30000"
+          minimum: 5000
+          maximum: 120000
+    opensearch_version:
+      title: OpenSearch major version
+      type:
+        - string
+        - "null"
+      enum:
+        - value: "1"
+    private_access:
+      title: Allow access to selected service ports from private networks
+      type: object
+      properties:
+        opensearch:
+          title: Allow clients to connect to opensearch with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+        opensearch_dashboards:
+          title: Allow clients to connect to opensearch_dashboards with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+        prometheus:
+          title: Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+    privatelink_access:
+      title: Allow access to selected service components through Privatelink
+      type: object
+      properties:
+        opensearch:
+          title: Enable opensearch
+          type: boolean
+          example: true
+        opensearch_dashboards:
+          title: Enable opensearch_dashboards
+          type: boolean
+          example: true
+        prometheus:
+          title: Enable prometheus
+          type: boolean
+          example: true
+    project_to_fork_from:
+      title: Name of another project to fork a service from. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 63
+      example: anotherprojectname
+    public_access:
+      title: Allow access to selected service ports from the public Internet
+      type: object
+      properties:
+        opensearch:
+          title: Allow clients to connect to opensearch from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+        opensearch_dashboards:
+          title: Allow clients to connect to opensearch_dashboards from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+        prometheus:
+          title: Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+    recovery_basebackup_name:
+      title: Name of the basebackup to restore in forked service
+      type: string
+      max_length: 128
+      pattern: ^[a-zA-Z0-9-_:.]+$
+      example: backup-20191112t091354293891z
+    service_to_fork_from:
+      title: Name of another service to fork from. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 64
+      example: anotherservicename
+    static_ips:
+      title: Static IP addresses
+      description: Use static public IP addresses
+      type: boolean
+      example: true
+pg:
+  type: object
+  properties:
+    admin_password:
+      title: Custom password for admin user. Defaults to random string. This must be set only when a new service is being created.
+      type:
+        - string
+        - "null"
+      min_length: 8
+      max_length: 256
+      pattern: ^[a-zA-Z0-9-_]+$
+      example: z66o9QXqKM
+      user_error: Must consist of alpha-numeric characters, underscores or dashes
+    admin_username:
+      title: Custom username for admin user. This must be set only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 64
+      pattern: ^[_A-Za-z0-9][-._A-Za-z0-9]{0,63}$
+      example: avnadmin
+      user_error: Must consist of alpha-numeric characters, dots, underscores or dashes, may not start with dash or dot, max 64 characters
+    backup_hour:
+      title: The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.
+      type:
+        - integer
+        - "null"
+      maximum: 23
+      example: "3"
+    backup_minute:
+      title: The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.
+      type:
+        - integer
+        - "null"
+      maximum: 59
+      example: "30"
+    enable_ipv6:
+      title: Enable IPv6
+      description: Register AAAA DNS records for the service, and allow IPv6 packets to service ports
+      type: boolean
+      example: true
+    ip_filter:
+      title: IP filter
+      description: Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+      type: array
+      default:
+        - 0.0.0.0/0
+      items:
+        title: CIDR address block, either as a string, or in a dict with an optional description field
+        type:
+          - string
+          - object
+        properties:
+          description:
+            title: Description for IP filter list entry
+            type: string
+            max_length: 1024
+            example: Production service IP range
+          network:
+            title: CIDR address block
+            type: string
+            max_length: 43
+            example: 10.20.0.0/16
+        max_length: 43
+        example: 10.20.0.0/16
+      maxItems: 1024
+    migration:
+      title: Migrate data from existing server
+      type:
+        - object
+        - "null"
+      properties:
+        dbname:
+          title: Database name for bootstrapping the initial connection
+          type: string
+          max_length: 63
+          example: defaultdb
+        host:
+          title: Hostname or IP address of the server where to migrate data from
+          type: string
+          max_length: 255
+          example: my.server.com
+        ignore_dbs:
+          title: Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)
+          type: string
+          max_length: 2048
+          example: db1,db2
+        method:
+          title: The migration method to be used (currently supported only by Redis and MySQL service types)
+          type: string
+          enum:
+            - value: dump
+            - value: replication
+          example: dump
+        password:
+          title: Password for authentication with the server where to migrate data from
+          type: string
+          max_length: 256
+          example: jjKk45Nnd
+        port:
+          title: Port number of the server where to migrate data from
+          type: integer
+          minimum: 1
+          maximum: 65535
+          example: "1234"
+        ssl:
+          title: The server where to migrate data from is secured with SSL
+          type: boolean
+          default: true
+        username:
+          title: User name for authentication with the server where to migrate data from
+          type: string
+          max_length: 256
+          example: myname
+    pg:
+      title: postgresql.conf configuration values
+      type: object
+      properties:
+        autovacuum_analyze_scale_factor:
+          title: autovacuum_analyze_scale_factor
+          description: Specifies a fraction of the table size to add to autovacuum_analyze_threshold when deciding whether to trigger an ANALYZE. The default is 0.2 (20% of table size)
+          type: number
+          maximum: 1
+        autovacuum_analyze_threshold:
+          title: autovacuum_analyze_threshold
+          description: Specifies the minimum number of inserted, updated or deleted tuples needed to trigger an  ANALYZE in any one table. The default is 50 tuples.
+          type: integer
+          maximum: 2.147483647e+09
+        autovacuum_freeze_max_age:
+          title: autovacuum_freeze_max_age
+          description: Specifies the maximum age (in transactions) that a table's pg_class.relfrozenxid field can attain before a VACUUM operation is forced to prevent transaction ID wraparound within the table. Note that the system will launch autovacuum processes to prevent wraparound even when autovacuum is otherwise disabled. This parameter will cause the server to be restarted.
+          type: integer
+          minimum: 2e+08
+          maximum: 1.5e+09
+          example: "200000000"
+        autovacuum_max_workers:
+          title: autovacuum_max_workers
+          description: Specifies the maximum number of autovacuum processes (other than the autovacuum launcher) that may be running at any one time. The default is three. This parameter can only be set at server start.
+          type: integer
+          minimum: 1
+          maximum: 20
+        autovacuum_naptime:
+          title: autovacuum_naptime
+          description: Specifies the minimum delay between autovacuum runs on any given database. The delay is measured in seconds, and the default is one minute
+          type: integer
+          minimum: 1
+          maximum: 86400
+        autovacuum_vacuum_cost_delay:
+          title: autovacuum_vacuum_cost_delay
+          description: Specifies the cost delay value that will be used in automatic VACUUM operations. If -1 is specified, the regular vacuum_cost_delay value will be used. The default value is 20 milliseconds
+          type: integer
+          minimum: -1
+          maximum: 100
+        autovacuum_vacuum_cost_limit:
+          title: autovacuum_vacuum_cost_limit
+          description: Specifies the cost limit value that will be used in automatic VACUUM operations. If -1 is specified (which is the default), the regular vacuum_cost_limit value will be used.
+          type: integer
+          minimum: -1
+          maximum: 10000
+        autovacuum_vacuum_scale_factor:
+          title: autovacuum_vacuum_scale_factor
+          description: Specifies a fraction of the table size to add to autovacuum_vacuum_threshold when deciding whether to trigger a VACUUM. The default is 0.2 (20% of table size)
+          type: number
+          maximum: 1
+        autovacuum_vacuum_threshold:
+          title: autovacuum_vacuum_threshold
+          description: Specifies the minimum number of updated or deleted tuples needed to trigger a VACUUM in any one table. The default is 50 tuples
+          type: integer
+          maximum: 2.147483647e+09
+        bgwriter_delay:
+          title: bgwriter_delay
+          description: Specifies the delay between activity rounds for the background writer in milliseconds. Default is 200.
+          type: integer
+          minimum: 10
+          maximum: 10000
+          example: "200"
+        bgwriter_flush_after:
+          title: bgwriter_flush_after
+          description: Whenever more than bgwriter_flush_after bytes have been written by the background writer, attempt to force the OS to issue these writes to the underlying storage. Specified in kilobytes, default is 512. Setting of 0 disables forced writeback.
+          type: integer
+          maximum: 2048
+          example: "512"
+        bgwriter_lru_maxpages:
+          title: bgwriter_lru_maxpages
+          description: In each round, no more than this many buffers will be written by the background writer. Setting this to zero disables background writing. Default is 100.
+          type: integer
+          maximum: 1.073741823e+09
+          example: "100"
+        bgwriter_lru_multiplier:
+          title: bgwriter_lru_multiplier
+          description: The average recent need for new buffers is multiplied by bgwriter_lru_multiplier to arrive at an estimate of the number that will be needed during the next round, (up to bgwriter_lru_maxpages). 1.0 represents a “just in time” policy of writing exactly the number of buffers predicted to be needed. Larger values provide some cushion against spikes in demand, while smaller values intentionally leave writes to be done by server processes. The default is 2.0.
+          type: number
+          maximum: 10
+          example: "2.0"
+        deadlock_timeout:
+          title: deadlock_timeout
+          description: This is the amount of time, in milliseconds, to wait on a lock before checking to see if there is a deadlock condition.
+          type: integer
+          minimum: 500
+          maximum: 1.8e+06
+          example: "1000"
+        default_toast_compression:
+          title: default_toast_compression
+          description: Specifies the default TOAST compression method for values of compressible columns (the default is lz4).
+          type: string
+          enum:
+            - value: lz4
+            - value: pglz
+          example: lz4
+        idle_in_transaction_session_timeout:
+          title: idle_in_transaction_session_timeout
+          description: Time out sessions with open transactions after this number of milliseconds
+          type: integer
+          maximum: 6.048e+08
+        jit:
+          title: jit
+          description: Controls system-wide use of Just-in-Time Compilation (JIT).
+          type: boolean
+          example: true
+        log_autovacuum_min_duration:
+          title: log_autovacuum_min_duration
+          description: Causes each action executed by autovacuum to be logged if it ran for at least the specified number of milliseconds. Setting this to zero logs all autovacuum actions. Minus-one (the default) disables logging autovacuum actions.
+          type: integer
+          minimum: -1
+          maximum: 2.147483647e+09
+        log_error_verbosity:
+          title: log_error_verbosity
+          description: Controls the amount of detail written in the server log for each message that is logged.
+          type: string
+          enum:
+            - value: TERSE
+            - value: DEFAULT
+            - value: VERBOSE
+        log_line_prefix:
+          title: log_line_prefix
+          description: Choose from one of the available log-formats. These can support popular log analyzers like pgbadger, pganalyze etc.
+          type: string
+          enum:
+            - value: '''pid=%p,user=%u,db=%d,app=%a,client=%h '''
+            - value: '''%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '''
+            - value: '''%m [%p] %q[user=%u,db=%d,app=%a] '''
+        log_min_duration_statement:
+          title: log_min_duration_statement
+          description: Log statements that take more than this number of milliseconds to run, -1 disables
+          type: integer
+          minimum: -1
+          maximum: 8.64e+07
+        log_temp_files:
+          title: log_temp_files
+          description: Log statements for each temporary file created larger than this number of kilobytes, -1 disables
+          type: integer
+          minimum: -1
+          maximum: 2.147483647e+09
+        max_files_per_process:
+          title: max_files_per_process
+          description: PostgreSQL maximum number of files that can be open per process
+          type: integer
+          minimum: 1000
+          maximum: 4096
+        max_locks_per_transaction:
+          title: max_locks_per_transaction
+          description: PostgreSQL maximum locks per transaction
+          type: integer
+          minimum: 64
+          maximum: 6400
+        max_logical_replication_workers:
+          title: max_logical_replication_workers
+          description: PostgreSQL maximum logical replication workers (taken from the pool of max_parallel_workers)
+          type: integer
+          minimum: 4
+          maximum: 64
+        max_parallel_workers:
+          title: max_parallel_workers
+          description: Sets the maximum number of workers that the system can support for parallel queries
+          type: integer
+          maximum: 96
+        max_parallel_workers_per_gather:
+          title: max_parallel_workers_per_gather
+          description: Sets the maximum number of workers that can be started by a single Gather or Gather Merge node
+          type: integer
+          maximum: 96
+        max_pred_locks_per_transaction:
+          title: max_pred_locks_per_transaction
+          description: PostgreSQL maximum predicate locks per transaction
+          type: integer
+          minimum: 64
+          maximum: 5120
+        max_prepared_transactions:
+          title: max_prepared_transactions
+          description: PostgreSQL maximum prepared transactions
+          type: integer
+          maximum: 10000
+        max_replication_slots:
+          title: max_replication_slots
+          description: PostgreSQL maximum replication slots
+          type: integer
+          minimum: 8
+          maximum: 64
+        max_slot_wal_keep_size:
+          title: max_slot_wal_keep_size
+          description: PostgreSQL maximum WAL size (MB) reserved for replication slots. Default is -1 (unlimited). wal_keep_size minimum WAL size setting takes precedence over this.
+          type: integer
+          minimum: -1
+          maximum: 2.147483647e+09
+        max_stack_depth:
+          title: max_stack_depth
+          description: Maximum depth of the stack in bytes
+          type: integer
+          minimum: 2.097152e+06
+          maximum: 6.291456e+06
+        max_standby_archive_delay:
+          title: max_standby_archive_delay
+          description: Max standby archive delay in milliseconds
+          type: integer
+          minimum: 1
+          maximum: 4.32e+07
+        max_standby_streaming_delay:
+          title: max_standby_streaming_delay
+          description: Max standby streaming delay in milliseconds
+          type: integer
+          minimum: 1
+          maximum: 4.32e+07
+        max_wal_senders:
+          title: max_wal_senders
+          description: PostgreSQL maximum WAL senders
+          type: integer
+          minimum: 20
+          maximum: 64
+        max_worker_processes:
+          title: max_worker_processes
+          description: Sets the maximum number of background processes that the system can support
+          type: integer
+          minimum: 8
+          maximum: 96
+        pg_partman_bgw.interval:
+          title: pg_partman_bgw.interval
+          description: Sets the time interval to run pg_partman's scheduled tasks
+          type: integer
+          minimum: 3600
+          maximum: 604800
+          example: "3600"
+        pg_partman_bgw.role:
+          title: pg_partman_bgw.role
+          description: Controls which role to use for pg_partman's scheduled background tasks.
+          type: string
+          max_length: 64
+          pattern: ^[_A-Za-z0-9][-._A-Za-z0-9]{0,63}$
+          example: myrolename
+          user_error: Must consist of alpha-numeric characters, dots, underscores or dashes, may not start with dash or dot, max 64 characters
+        pg_stat_statements.track:
+          title: pg_stat_statements.track
+          description: Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default value is top.
+          type:
+            - string
+          enum:
+            - value: all
+            - value: top
+            - value: none
+        temp_file_limit:
+          title: temp_file_limit
+          description: PostgreSQL temporary file limit in KiB, -1 for unlimited
+          type: integer
+          minimum: -1
+          maximum: 2.147483647e+09
+          example: "5000000"
+        timezone:
+          title: timezone
+          description: PostgreSQL service timezone
+          type: string
+          max_length: 64
+          example: Europe/Helsinki
+        track_activity_query_size:
+          title: track_activity_query_size
+          description: Specifies the number of bytes reserved to track the currently executing command for each active session.
+          type: integer
+          minimum: 1024
+          maximum: 10240
+          example: "1024"
+        track_commit_timestamp:
+          title: track_commit_timestamp
+          description: Record commit time of transactions.
+          type: string
+          enum:
+            - value: "off"
+            - value: "on"
+          example: "off"
+        track_functions:
+          title: track_functions
+          description: Enables tracking of function call counts and time used.
+          type: string
+          enum:
+            - value: all
+            - value: pl
+            - value: none
+        track_io_timing:
+          title: track_io_timing
+          description: Enables timing of database I/O calls. This parameter is off by default, because it will repeatedly query the operating system for the current time, which may cause significant overhead on some platforms.
+          type: string
+          enum:
+            - value: "off"
+            - value: "on"
+          example: "off"
+        wal_sender_timeout:
+          title: wal_sender_timeout
+          description: Terminate replication connections that are inactive for longer than this amount of time, in milliseconds. Setting this value to zero disables the timeout.
+          type: integer
+          example: "60000"
+          user_error: Must be either 0 or between 5000 and 10800000.
+        wal_writer_delay:
+          title: wal_writer_delay
+          description: WAL flush interval in milliseconds. Note that setting this value to lower than the default 200ms may negatively impact performance
+          type: integer
+          minimum: 10
+          maximum: 200
+          example: "50"
+    pg_read_replica:
+      title: Should the service which is being forked be a read replica (deprecated, use read_replica service integration instead).
+      description: This setting is deprecated. Use read_replica service integration instead.
+      type:
+        - boolean
+        - "null"
+      example: true
+    pg_service_to_fork_from:
+      title: Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 64
+      example: anotherservicename
+    pg_stat_monitor_enable:
+      title: Enable pg_stat_monitor extension if available for the current cluster
+      description: Enable the pg_stat_monitor extension. Enabling this extension will cause the cluster to be restarted.When this extension is enabled, pg_stat_statements results for utility commands are unreliable
+      type: boolean
+      default: false
+    pg_version:
+      title: PostgreSQL major version
+      type:
+        - string
+        - "null"
+      enum:
+        - value: "10"
+        - value: "11"
+        - value: "12"
+        - value: "13"
+        - value: "14"
+    pgbouncer:
+      title: PGBouncer connection pooling settings
+      type: object
+      properties:
+        autodb_idle_timeout:
+          title: If the automatically created database pools have been unused this many seconds, they are freed. If 0 then timeout is disabled. [seconds]
+          type: integer
+          maximum: 86400
+          example: "3600"
+        autodb_max_db_connections:
+          title: Do not allow more than this many server connections per database (regardless of user). Setting it to 0 means unlimited.
+          type: integer
+          maximum: 2.147483647e+09
+          example: "0"
+        autodb_pool_mode:
+          title: PGBouncer pool mode
+          type: string
+          enum:
+            - value: session
+            - value: transaction
+            - value: statement
+          example: session
+        autodb_pool_size:
+          title: If non-zero then create automatically a pool of that size per user when a pool doesn't exist.
+          type: integer
+          maximum: 10000
+          example: "0"
+        ignore_startup_parameters:
+          title: List of parameters to ignore when given in startup packet
+          type: array
+          items:
+            title: Enum of parameters to ignore when given in startup packet
+            type: string
+            enum:
+              - value: extra_float_digits
+              - value: search_path
+          maxItems: 32
+          example:
+            - extra_float_digits
+            - search_path
+        min_pool_size:
+          title: Add more server connections to pool if below this number. Improves behavior when usual load comes suddenly back after period of total inactivity. The value is effectively capped at the pool size.
+          type: integer
+          maximum: 10000
+          example: "0"
+        server_idle_timeout:
+          title: If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. [seconds]
+          type: integer
+          maximum: 86400
+          example: "600"
+        server_lifetime:
+          title: The pooler will close an unused server connection that has been connected longer than this. [seconds]
+          type: integer
+          minimum: 60
+          maximum: 86400
+          example: "3600"
+        server_reset_query_always:
+          title: Run server_reset_query (DISCARD ALL) in all pooling modes
+          type: boolean
+          example: false
+    pglookout:
+      title: PGLookout settings
+      type: object
+      default:
+        max_failover_replication_time_lag: "60"
+      properties:
+        max_failover_replication_time_lag:
+          title: max_failover_replication_time_lag
+          description: Number of seconds of master unavailability before triggering database failover to standby
+          type: integer
+          default: "60"
+          minimum: 10
+          maximum: 9.223372036854776e+18
+    private_access:
+      title: Allow access to selected service ports from private networks
+      type: object
+      properties:
+        pg:
+          title: Allow clients to connect to pg with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+        pgbouncer:
+          title: Allow clients to connect to pgbouncer with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+        prometheus:
+          title: Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+    privatelink_access:
+      title: Allow access to selected service components through Privatelink
+      type: object
+      properties:
+        pg:
+          title: Enable pg
+          type: boolean
+          example: true
+        pgbouncer:
+          title: Enable pgbouncer
+          type: boolean
+          example: true
+        prometheus:
+          title: Enable prometheus
+          type: boolean
+          example: true
+    project_to_fork_from:
+      title: Name of another project to fork a service from. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 63
+      example: anotherprojectname
+    public_access:
+      title: Allow access to selected service ports from the public Internet
+      type: object
+      properties:
+        pg:
+          title: Allow clients to connect to pg from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+        pgbouncer:
+          title: Allow clients to connect to pgbouncer from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+        prometheus:
+          title: Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+    recovery_target_time:
+      title: Recovery target time when forking a service. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 32
+      example: "2019-01-01 23:34:45"
+    service_to_fork_from:
+      title: Name of another service to fork from. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 64
+      example: anotherservicename
+    shared_buffers_percentage:
+      title: shared_buffers_percentage
+      description: Percentage of total RAM that the database server uses for shared memory buffers. Valid range is 20-60 (float), which corresponds to 20% - 60%. This setting adjusts the shared_buffers configuration value.
+      type: number
+      minimum: 20
+      maximum: 60
+      example: "41.5"
+    static_ips:
+      title: Static IP addresses
+      description: Use static public IP addresses
+      type: boolean
+      example: true
+    synchronous_replication:
+      title: Synchronous replication type. Note that the service plan also needs to support synchronous replication.
+      type: string
+      enum:
+        - value: quorum
+        - value: "off"
+      example: "off"
+    timescaledb:
+      title: TimescaleDB extension configuration values
+      type: object
+      properties:
+        max_background_workers:
+          title: timescaledb.max_background_workers
+          description: The number of background workers for timescaledb operations. You should configure this setting to the sum of your number of databases and the total number of concurrent background workers you want running at any given point in time.
+          type: integer
+          minimum: 1
+          maximum: 4096
+          example: "8"
+    variant:
+      title: Variant of the PostgreSQL service, may affect the features that are exposed by default
+      type:
+        - string
+        - "null"
+      enum:
+        - value: aiven
+        - value: timescale
+      example: aiven
+    work_mem:
+      title: work_mem
+      description: Sets the maximum amount of memory to be used by a query operation (such as a sort or hash table) before writing to temporary disk files, in MB. Default is 1MB + 0.075% of total RAM (up to 32MB).
+      type: integer
+      minimum: 1
+      maximum: 1024
+      example: "4"
+redis:
+  type: object
+  properties:
+    ip_filter:
+      title: IP filter
+      description: Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+      type: array
+      default:
+        - 0.0.0.0/0
+      items:
+        title: CIDR address block, either as a string, or in a dict with an optional description field
+        type:
+          - string
+          - object
+        properties:
+          description:
+            title: Description for IP filter list entry
+            type: string
+            max_length: 1024
+            example: Production service IP range
+          network:
+            title: CIDR address block
+            type: string
+            max_length: 43
+            example: 10.20.0.0/16
+        max_length: 43
+        example: 10.20.0.0/16
+      maxItems: 1024
+    migration:
+      title: Migrate data from existing server
+      type:
+        - object
+        - "null"
+      properties:
+        dbname:
+          title: Database name for bootstrapping the initial connection
+          type: string
+          max_length: 63
+          example: defaultdb
+        host:
+          title: Hostname or IP address of the server where to migrate data from
+          type: string
+          max_length: 255
+          example: my.server.com
+        ignore_dbs:
+          title: Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)
+          type: string
+          max_length: 2048
+          example: db1,db2
+        method:
+          title: The migration method to be used (currently supported only by Redis and MySQL service types)
+          type: string
+          enum:
+            - value: dump
+            - value: replication
+          example: dump
+        password:
+          title: Password for authentication with the server where to migrate data from
+          type: string
+          max_length: 256
+          example: jjKk45Nnd
+        port:
+          title: Port number of the server where to migrate data from
+          type: integer
+          minimum: 1
+          maximum: 65535
+          example: "1234"
+        ssl:
+          title: The server where to migrate data from is secured with SSL
+          type: boolean
+          default: true
+        username:
+          title: User name for authentication with the server where to migrate data from
+          type: string
+          max_length: 256
+          example: myname
+    private_access:
+      title: Allow access to selected service ports from private networks
+      type: object
+      properties:
+        prometheus:
+          title: Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+        redis:
+          title: Allow clients to connect to redis with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+          type: boolean
+          example: true
+    privatelink_access:
+      title: Allow access to selected service components through Privatelink
+      type: object
+      properties:
+        prometheus:
+          title: Enable prometheus
+          type: boolean
+          example: true
+        redis:
+          title: Enable redis
+          type: boolean
+          example: true
+    project_to_fork_from:
+      title: Name of another project to fork a service from. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 63
+      example: anotherprojectname
+    public_access:
+      title: Allow access to selected service ports from the public Internet
+      type: object
+      properties:
+        prometheus:
+          title: Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+        redis:
+          title: Allow clients to connect to redis from the public internet for service nodes that are in a project VPC or another type of private network
+          type: boolean
+          example: true
+    recovery_basebackup_name:
+      title: Name of the basebackup to restore in forked service
+      type: string
+      max_length: 128
+      pattern: ^[a-zA-Z0-9-_:.]+$
+      example: backup-20191112t091354293891z
+    redis_acl_channels_default:
+      title: Default ACL for pub/sub channels used when Redis user is created
+      description: Determines default pub/sub channels' ACL for new users if ACL is not supplied. When this option is not defined, all_channels is assumed to keep backward compatibility. This option doesn't affect Redis configuration acl-pubsub-default.
+      type: string
+      enum:
+        - value: allchannels
+        - value: resetchannels
+    redis_io_threads:
+      title: Redis IO thread count
+      type: integer
+      minimum: 1
+      maximum: 32
+      example: "1"
+    redis_lfu_decay_time:
+      title: LFU maxmemory-policy counter decay time in minutes
+      type: integer
+      default: "1"
+      minimum: 1
+      maximum: 120
+    redis_lfu_log_factor:
+      title: Counter logarithm factor for volatile-lfu and allkeys-lfu maxmemory-policies
+      type: integer
+      default: "10"
+      maximum: 100
+    redis_maxmemory_policy:
+      title: Redis maxmemory-policy
+      type:
+        - string
+        - "null"
+      default: noeviction
+      enum:
+        - value: noeviction
+        - value: allkeys-lru
+        - value: volatile-lru
+        - value: allkeys-random
+        - value: volatile-random
+        - value: volatile-ttl
+        - value: volatile-lfu
+        - value: allkeys-lfu
+    redis_notify_keyspace_events:
+      title: Set notify-keyspace-events option
+      type: string
+      default: ""
+      max_length: 32
+      pattern: ^[KEg\$lshzxeA]*$
+    redis_number_of_databases:
+      title: Number of redis databases
+      description: Set number of redis databases. Changing this will cause a restart of redis service.
+      type: integer
+      minimum: 1
+      maximum: 128
+      example: "16"
+    redis_persistence:
+      title: Redis persistence
+      description: When persistence is 'rdb', Redis does RDB dumps each 10 minutes if any key is changed. Also RDB dumps are done according to backup schedule for backup purposes. When persistence is 'off', no RDB dumps and backups are done, so data can be lost at any moment if service is restarted for any reason, or if service is powered off. Also service can't be forked.
+      type: string
+      enum:
+        - value: "off"
+        - value: rdb
+    redis_pubsub_client_output_buffer_limit:
+      title: Pub/sub client output buffer hard limit in MB
+      description: Set output buffer limit for pub / sub clients in MB. The value is the hard limit, the soft limit is 1/4 of the hard limit. When setting the limit, be mindful of the available memory in the selected service plan.
+      type: integer
+      minimum: 32
+      maximum: 512
+      example: "64"
+    redis_ssl:
+      title: Require SSL to access Redis
+      type: boolean
+      default: true
+    redis_timeout:
+      title: Redis idle connection timeout in seconds
+      type: integer
+      default: "300"
+      maximum: 3.1536e+07
+    service_to_fork_from:
+      title: Name of another service to fork from. This has effect only when a new service is being created.
+      type:
+        - string
+        - "null"
+      max_length: 64
+      example: anotherservicename
+    static_ips:
+      title: Static IP addresses
+      description: Use static public IP addresses
+      type: boolean
+      example: true

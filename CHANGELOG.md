@@ -12,6 +12,7 @@ nav_order: 1
 - Update to the official name Aiven Provider for Terraform
 - Replaced older links from help.aiven.io to docs.aiven.io
 - Change Flink version to 1.15
+- Extract exp tool output via jsongo
 
 ## [3.6.1] - 2022-09-05
 

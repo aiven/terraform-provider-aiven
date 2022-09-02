@@ -13,6 +13,18 @@ $(TOOLS_BIN_DIR):
 	mkdir -p $(TOOLS_BIN_DIR)
 
 
+GOJSON := $(TOOLS_BIN_DIR)/gojson
+
+$(GOJSON): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
+	cd $(TOOLS_DIR) && $(GO) build -o bin/gojson github.com/ChimeraCoder/gojson/gojson
+
+
+GOLANGCILINT := $(TOOLS_BIN_DIR)/golangci-lint
+
+$(GOLANGCILINT): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
+	cd $(TOOLS_DIR) && $(GO) build -o bin/golangci-lint github.com/golangci/golangci-lint/cmd/golangci-lint
+
+
 TFPLUGINDOCS := $(TOOLS_BIN_DIR)/tfplugindocs
 
 $(TFPLUGINDOCS): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
@@ -23,12 +35,6 @@ TERRAFMT := $(TOOLS_BIN_DIR)/terrafmt
 
 $(TERRAFMT): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
 	cd $(TOOLS_DIR) && $(GO) build -o bin/terrafmt github.com/katbyte/terrafmt
-
-
-GOLANGCILINT := $(TOOLS_BIN_DIR)/golangci-lint
-
-$(GOLANGCILINT): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
-	cd $(TOOLS_DIR) && $(GO) build -o bin/golangci-lint github.com/golangci/golangci-lint/cmd/golangci-lint
 
 
 # See https://github.com/hashicorp/terraform/blob/main/tools/protobuf-compile/protobuf-compile.go#L215

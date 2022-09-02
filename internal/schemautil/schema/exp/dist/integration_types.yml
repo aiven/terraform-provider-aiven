@@ -1,0 +1,551 @@
+clickhouse_kafka:
+  title: Integration user config
+  type: object
+  properties:
+    tables:
+      title: Tables to create
+      type: array
+      default: []
+      items:
+        title: Table to create
+        type: object
+        properties:
+          columns:
+            title: Table columns
+            type: array
+            default: []
+            items:
+              title: Table column
+              type: object
+              properties:
+                name:
+                  title: Column name
+                  type: string
+                  min_length: 1
+                  max_length: 40
+                  example: key
+                type:
+                  title: Column type
+                  type: string
+                  min_length: 1
+                  max_length: 200
+                  example: UInt64
+            maxItems: 100
+          data_format:
+            title: Message data format
+            type: string
+            default: JSONEachRow
+            enum:
+              - value: CSV
+              - value: JSONCompactEachRow
+              - value: JSONCompactStringsEachRow
+              - value: JSONEachRow
+              - value: JSONStringsEachRow
+              - value: MsgPack
+              - value: TSKV
+              - value: TSV
+              - value: TabSeparated
+            example: JSONEachRow
+          group_name:
+            title: Kafka consumers group
+            type: string
+            default: clickhouse
+            min_length: 1
+            max_length: 249
+            example: clickhouse
+          name:
+            title: Name of the table
+            type: string
+            min_length: 1
+            max_length: 40
+            example: events
+          topics:
+            title: Kafka topics
+            type: array
+            items:
+              title: Kafka topic
+              type: object
+              properties:
+                name:
+                  title: Name of the topic
+                  type: string
+                  min_length: 1
+                  max_length: 249
+                  example: topic_name
+            maxItems: 100
+      maxItems: 100
+clickhouse_postgresql:
+  title: Integration user config
+  type: object
+  properties:
+    databases:
+      title: Databases to expose
+      type: array
+      default:
+        - database: defaultdb
+          schema: public
+      items:
+        title: Database to expose
+        type: object
+        properties:
+          database:
+            title: PostgreSQL database to expose
+            type: string
+            default: defaultdb
+            min_length: 1
+            max_length: 63
+            example: defaultdb
+          schema:
+            title: PostgreSQL schema to expose
+            type: string
+            default: public
+            min_length: 1
+            max_length: 63
+            example: public
+      maxItems: 10
+dashboard:
+  title: Integration user config
+  type: object
+datadog:
+  type: object
+  properties:
+    datadog_tags:
+      title: Custom tags provided by user
+      type: array
+      items:
+        title: Datadog tag defined by user
+        type: object
+        properties:
+          comment:
+            title: Optional tag explanation
+            type: string
+            max_length: 1024
+            example: Used to tag primary replica metrics
+          tag:
+            title: Tag value
+            description: 'Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix ''aiven-'' are reserved for Aiven.'
+            type: string
+            min_length: 1
+            max_length: 200
+            pattern: ^(?!aiven-)[^\W\d_](?:[:\w./-]*[\w./-])?$
+            example: replica:primary
+            user_error: |
+              Tags must start with a letter and after that may contain the characters listed below:
+              alphanumerics, underscores, minuses, colons, periods, slashes.
+              A tag cannot end with a colon.
+              Tags can be up to 200 characters long and support Unicode.
+              Tags with prefix 'aiven-' are reserved for Aiven.
+              More info: https://docs.datadoghq.com/getting_started/tagging.
+      maxItems: 32
+      example:
+        - tag: foo
+        - comment: Useful tag
+          tag: bar:buzz
+    exclude_consumer_groups:
+      title: List of custom metrics
+      type: array
+      items:
+        title: Consumer groups to exclude
+        type: string
+        max_length: 1024
+        example: '[ group_a, group_b ]'
+      maxItems: 1024
+    exclude_topics:
+      title: List of topics to exclude
+      type: array
+      items:
+        title: Topics to exclude
+        type: string
+        max_length: 1024
+        example: '[ topic_x, topic_y ]'
+      maxItems: 1024
+    include_consumer_groups:
+      title: List of custom metrics
+      type: array
+      items:
+        title: Consumer groups to include
+        type: string
+        max_length: 1024
+        example: '[ group_a, group_b ]'
+      maxItems: 1024
+    include_topics:
+      title: List of topics to include
+      type: array
+      items:
+        title: Topics to include
+        type: string
+        max_length: 1024
+        example: '[ topic_x, topic_y ]'
+      maxItems: 1024
+    kafka_custom_metrics:
+      title: List of custom metrics
+      type: array
+      items:
+        title: Metric name
+        type: string
+        max_length: 1024
+        example: kafka.log.log_size
+      maxItems: 1024
+    max_jmx_metrics:
+      title: Maximum number of JMX metrics to send
+      type: integer
+      minimum: 10
+      maximum: 100000
+      example: "2000"
+datasource:
+  title: Integration user config
+  type: object
+external_aws_cloudwatch_logs:
+  title: Integration user config
+  type: object
+external_aws_cloudwatch_metrics:
+  title: External AWS CloudWatch Metrics integration user config
+  type: object
+  properties:
+    dropped_metrics:
+      title: Metrics to not send to AWS CloudWatch (takes precedence over extra_metrics)
+      type: array
+      items:
+        title: Metric name and subfield
+        type: object
+        properties:
+          field:
+            title: Identifier of a value in the metric
+            type: string
+            max_length: 1000
+            example: used
+          metric:
+            title: Identifier of the metric
+            type: string
+            max_length: 1000
+            example: java.lang:Memory
+      maxItems: 1024
+      example:
+        - field: evicted_keys
+          metric: redis
+    extra_metrics:
+      title: Metrics to allow through to AWS CloudWatch (in addition to default metrics)
+      type: array
+      items:
+        title: Metric name and subfield
+        type: object
+        properties:
+          field:
+            title: Identifier of a value in the metric
+            type: string
+            max_length: 1000
+            example: used
+          metric:
+            title: Identifier of the metric
+            type: string
+            max_length: 1000
+            example: java.lang:Memory
+      maxItems: 1024
+      example:
+        - field: evicted_keys
+          metric: redis
+external_elasticsearch_logs:
+  title: Integration user config
+  type: object
+external_google_cloud_logging:
+  title: Integration user config
+  type: object
+external_opensearch_logs:
+  title: Integration user config
+  type: object
+flink:
+  title: Integration user config
+  type: object
+jolokia:
+  title: Integration user config
+  type: object
+kafka_connect:
+  title: Integration user config
+  type: object
+  properties:
+    kafka_connect:
+      title: Kafka Connect service configuration values
+      type: object
+      properties:
+        config_storage_topic:
+          title: The name of the topic where connector and task configuration data are stored.This must be the same for all workers with the same group_id.
+          type: string
+          max_length: 249
+          example: __connect_configs
+        group_id:
+          title: A unique string that identifies the Connect cluster group this worker belongs to.
+          type: string
+          max_length: 249
+          example: connect
+        offset_storage_topic:
+          title: The name of the topic where connector and task configuration offsets are stored.This must be the same for all workers with the same group_id.
+          type: string
+          max_length: 249
+          example: __connect_offsets
+        status_storage_topic:
+          title: The name of the topic where connector and task configuration status updates are stored.This must be the same for all workers with the same group_id.
+          type: string
+          max_length: 249
+          example: __connect_status
+kafka_logs:
+  type: object
+  properties:
+    kafka_topic:
+      title: Topic name
+      type: string
+      min_length: 1
+      max_length: 249
+      pattern: ^(?!\.$|\.\.$)[-_.A-Za-z0-9]+$
+      example: mytopic
+      user_error: Must consist of alpha-numeric characters, underscores, dashes or dots, max 249 characters
+kafka_mirrormaker:
+  title: Integration user config
+  type: object
+  properties:
+    cluster_alias:
+      title: Kafka cluster alias
+      description: 'The alias under which the Kafka cluster is known to MirrorMaker. Can contain the following symbols: ASCII alphanumerics, ''.'', ''_'', and ''-''.'
+      type: string
+      max_length: 128
+      pattern: ^[a-zA-Z0-9_.-]+$
+      example: kafka-abc
+      user_error: Must consist of alpha-numeric ASCII characters, dashes, underscores, and dots.
+    kafka_mirrormaker:
+      title: Kafka MirrorMaker configuration values
+      type: object
+      properties:
+        consumer_fetch_min_bytes:
+          title: consumer.fetch.min.bytes
+          description: The minimum amount of data the server should return for a fetch request
+          type: integer
+          minimum: 1
+          maximum: 1.048576e+06
+          example: "1024"
+        producer_batch_size:
+          title: producer.batch.size
+          description: The batch size in bytes producer will attempt to collect before publishing to broker.
+          type: integer
+          maximum: 1.048576e+06
+          example: "1024"
+        producer_buffer_memory:
+          title: producer.buffer.memory
+          description: The amount of bytes producer can use for buffering data before publishing to broker.
+          type: integer
+          minimum: 5.24288e+06
+          maximum: 1.34217728e+08
+          example: "8388608"
+        producer_linger_ms:
+          title: producer.linger.ms
+          description: The linger time (ms) for waiting new data to arrive for publishing.
+          type: integer
+          maximum: 5000
+          example: "100"
+        producer_max_request_size:
+          title: producer.max.request.size
+          description: The maximum request size in bytes.
+          type: integer
+          maximum: 1.048576e+07
+          example: "1048576"
+logs:
+  type: object
+  properties:
+    elasticsearch_index_days_max:
+      title: Elasticsearch index retention limit
+      type: integer
+      default: "3"
+      minimum: 1
+      maximum: 10000
+      example: "5"
+    elasticsearch_index_prefix:
+      title: Elasticsearch index prefix
+      type: string
+      default: logs
+      min_length: 1
+      max_length: 1024
+      example: logs
+m3aggregator:
+  title: Integration user config
+  type: object
+m3coordinator:
+  title: Integration user config
+  type: object
+metrics:
+  title: Integration user config
+  type: object
+  properties:
+    database:
+      title: Name of the database where to store metric datapoints. Only affects PostgreSQL destinations. Defaults to 'metrics'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
+      type: string
+      max_length: 40
+      pattern: ^[_A-Za-z0-9][-_A-Za-z0-9]{0,39}$
+      example: metrics
+      user_error: Must consist of alpha-numeric characters, underscores or dashes, may not start with dash, max 40 characters
+    retention_days:
+      title: Number of days to keep old metrics. Only affects PostgreSQL destinations. Set to 0 for no automatic cleanup. Defaults to 30 days.
+      type: integer
+      maximum: 10000
+      example: "30"
+    ro_username:
+      title: Name of a user that can be used to read metrics. This will be used for Grafana integration (if enabled) to prevent Grafana users from making undesired changes. Only affects PostgreSQL destinations. Defaults to 'metrics_reader'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
+      type: string
+      max_length: 40
+      pattern: ^[_A-Za-z0-9][-._A-Za-z0-9]{0,39}$
+      example: metrics_reader
+      user_error: Must consist of alpha-numeric characters, dots, underscores or dashes, may not start with dash or dot, max 40 characters
+    source_mysql:
+      title: Configuration options for metrics where source service is MySQL
+      type: object
+      properties:
+        telegraf:
+          title: Configuration options for Telegraf MySQL input plugin
+          type: object
+          properties:
+            gather_event_waits:
+              title: Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS
+              type: boolean
+              example: false
+            gather_file_events_stats:
+              title: gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME
+              type: boolean
+              example: false
+            gather_index_io_waits:
+              title: Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE
+              type: boolean
+              example: false
+            gather_info_schema_auto_inc:
+              title: Gather auto_increment columns and max values from information schema
+              type: boolean
+              example: false
+            gather_innodb_metrics:
+              title: Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS
+              type: boolean
+              example: true
+            gather_perf_events_statements:
+              title: Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST
+              type: boolean
+              example: false
+            gather_process_list:
+              title: Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST
+              type: boolean
+              example: true
+            gather_slave_status:
+              title: Gather metrics from SHOW SLAVE STATUS command output
+              type: boolean
+              example: true
+            gather_table_io_waits:
+              title: Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE
+              type: boolean
+              example: false
+            gather_table_lock_waits:
+              title: Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS
+              type: boolean
+              example: false
+            gather_table_schema:
+              title: Gather metrics from INFORMATION_SCHEMA.TABLES
+              type: boolean
+              example: true
+            perf_events_statements_digest_text_limit:
+              title: Truncates digest text from perf_events_statements into this many characters
+              type: integer
+              minimum: 1
+              maximum: 2048
+              example: "120"
+            perf_events_statements_limit:
+              title: Limits metrics from perf_events_statements
+              type: integer
+              minimum: 1
+              maximum: 4000
+              example: "250"
+            perf_events_statements_time_limit:
+              title: Only include perf_events_statements whose last seen is less than this many seconds
+              type: integer
+              minimum: 1
+              maximum: 2.592e+06
+              example: "86400"
+    username:
+      title: Name of the user used to write metrics. Only affects PostgreSQL destinations. Defaults to 'metrics_writer'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
+      type: string
+      max_length: 40
+      pattern: ^[_A-Za-z0-9][-._A-Za-z0-9]{0,39}$
+      example: metrics_writer
+      user_error: Must consist of alpha-numeric characters, dots, underscores or dashes, may not start with dash or dot, max 40 characters
+prometheus:
+  title: Integration user config
+  type: object
+  properties:
+    source_mysql:
+      title: Configuration options for metrics where source service is MySQL
+      type: object
+      properties:
+        telegraf:
+          title: Configuration options for Telegraf MySQL input plugin
+          type: object
+          properties:
+            gather_event_waits:
+              title: Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS
+              type: boolean
+              example: false
+            gather_file_events_stats:
+              title: gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME
+              type: boolean
+              example: false
+            gather_index_io_waits:
+              title: Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE
+              type: boolean
+              example: false
+            gather_info_schema_auto_inc:
+              title: Gather auto_increment columns and max values from information schema
+              type: boolean
+              example: false
+            gather_innodb_metrics:
+              title: Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS
+              type: boolean
+              example: true
+            gather_perf_events_statements:
+              title: Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST
+              type: boolean
+              example: false
+            gather_process_list:
+              title: Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST
+              type: boolean
+              example: true
+            gather_slave_status:
+              title: Gather metrics from SHOW SLAVE STATUS command output
+              type: boolean
+              example: true
+            gather_table_io_waits:
+              title: Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE
+              type: boolean
+              example: false
+            gather_table_lock_waits:
+              title: Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS
+              type: boolean
+              example: false
+            gather_table_schema:
+              title: Gather metrics from INFORMATION_SCHEMA.TABLES
+              type: boolean
+              example: true
+            perf_events_statements_digest_text_limit:
+              title: Truncates digest text from perf_events_statements into this many characters
+              type: integer
+              minimum: 1
+              maximum: 2048
+              example: "120"
+            perf_events_statements_limit:
+              title: Limits metrics from perf_events_statements
+              type: integer
+              minimum: 1
+              maximum: 4000
+              example: "250"
+            perf_events_statements_time_limit:
+              title: Only include perf_events_statements whose last seen is less than this many seconds
+              type: integer
+              minimum: 1
+              maximum: 2.592e+06
+              example: "86400"
+rsyslog:
+  title: Integration user config
+  type: object
+signalfx:
+  title: Integration user config
+  type: object
