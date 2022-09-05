@@ -27,6 +27,7 @@ func TestAccAivenAccountDataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(datasourceName, "tenant_id", resourceName, "tenant_id"),
 					resource.TestCheckResourceAttrPair(datasourceName, "create_time", resourceName, "create_time"),
 					resource.TestCheckResourceAttrPair(datasourceName, "update_time", resourceName, "update_time"),
+					resource.TestCheckResourceAttrPair(datasourceName, "is_account_owner", resourceName, "is_account_owner"),
 				),
 			},
 		},
