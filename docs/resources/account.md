@@ -34,6 +34,7 @@ resource "aiven_account" "account1" {
 - `account_id` (String) Account id
 - `create_time` (String) Time of creation
 - `id` (String) The ID of this resource.
+- `is_account_owner` (Boolean) If true, user is part of the owners team for this account
 - `owner_team_id` (String) Owner team id
 - `tenant_id` (String) Tenant id
 - `update_time` (String) Time of last update

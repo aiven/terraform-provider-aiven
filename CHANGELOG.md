@@ -13,6 +13,10 @@ nav_order: 1
 - Replaced older links from help.aiven.io to docs.aiven.io
 - Change Flink version to 1.15
 
+## [3.6.1] - 2022-09-05
+
+- Add support `is_account_owner` [field](https://api.aiven.io/doc/#operation/AccountList)
+
 ## [3.6.0] - 2022-08-31
 
 - Add additional disk space support

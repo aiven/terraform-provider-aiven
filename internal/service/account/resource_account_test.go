@@ -149,6 +149,10 @@ func testAccCheckAivenAccountAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a update_time from Aiven")
 		}
 
+		if a["is_account_owner"] == "" {
+			return fmt.Errorf("expected to get a is_account_owner from Aiven")
+		}
+
 		return nil
 	}
 }
