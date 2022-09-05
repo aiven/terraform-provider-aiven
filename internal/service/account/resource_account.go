@@ -47,6 +47,11 @@ var aivenAccountSchema = map[string]*schema.Schema{
 		Computed:    true,
 		Description: "Time of last update",
 	},
+	"is_account_owner": {
+		Type:        schema.TypeBool,
+		Computed:    true,
+		Description: "If true, user is part of the owners team for this account",
+	},
 }
 
 func ResourceAccount() *schema.Resource {
@@ -111,6 +116,9 @@ func resourceAccountRead(_ context.Context, d *schema.ResourceData, m interface{
 		return diag.FromErr(err)
 	}
 	if err := d.Set("update_time", r.Account.UpdateTime.String()); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("is_account_owner", r.Account.IsAccountOwner); err != nil {
 		return diag.FromErr(err)
 	}
 
