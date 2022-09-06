@@ -17,6 +17,10 @@ func NormalizeIpFilter(tfUserConfig interface{}, userConfig []map[string]interfa
 		return userConfig
 	}
 
+	if tfInt[0] == nil {
+		return userConfig
+	}
+
 	if _, ok := tfInt[0].(map[string]interface{})["ip_filter"]; !ok {
 		return userConfig
 	}
