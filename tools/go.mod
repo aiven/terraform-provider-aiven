@@ -1,4 +1,4 @@
-module github.com/aiven/terraform-provider-aiven/hack/tools
+module github.com/aiven/terraform-provider-aiven/tools
 
 go 1.18
 
