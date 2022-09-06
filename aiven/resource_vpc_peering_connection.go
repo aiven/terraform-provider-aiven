@@ -137,33 +137,26 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 		peerResourceGroup = v.(string)
 	}
 
-	isAzure, err := isAzureVPCPeeringConnection(d, client)
-	if err != nil {
-		return diag.Errorf("Error checking if it Azure VPC peering connection: %s", err)
-	}
-
-	if isAzure {
-		if peerResourceGroup != "" {
-			pc, err = client.VPCPeeringConnections.GetVPCPeeringWithResourceGroup(
-				projectName, vpcID, peerCloudAccount, peerVPC, region, peerResourceGroup)
-			if err != nil {
-				return diag.FromErr(resourceReadHandleNotFound(err, d))
-			}
-
-			if pc != nil {
-				return diag.Errorf("azure vpc peering connection already exists and cannot be created")
-			}
+	if peerResourceGroup != "" {
+		pc, err = client.VPCPeeringConnections.GetVPCPeering(
+			projectName, vpcID, peerCloudAccount, peerVPC, &peerResourceGroup)
+		if err != nil && !aiven.IsNotFound(err) {
+			return diag.Errorf("error checking aws peering connection: %s", err)
 		}
-	}
 
-	pc, err = client.VPCPeeringConnections.GetVPCPeering(
-		projectName, vpcID, peerCloudAccount, peerVPC, region)
-	if err != nil && !aiven.IsNotFound(err) {
-		return diag.Errorf("error checking aws peering connection: %s", err)
-	}
+		if pc != nil {
+			return diag.Errorf("azure vpc peering connection already exists and cannot be created")
+		}
+	} else {
+		pc, err = client.VPCPeeringConnections.GetVPCPeering(
+			projectName, vpcID, peerCloudAccount, peerVPC, region)
+		if err != nil && !aiven.IsNotFound(err) {
+			return diag.Errorf("error checking aws peering connection: %s", err)
+		}
 
-	if pc != nil {
-		return diag.Errorf("vpc peering connection already exists and cannot be created")
+		if pc != nil {
+			return diag.Errorf("vpc peering connection already exists and cannot be created")
+		}
 	}
 
 	if _, err = client.VPCPeeringConnections.Create(
