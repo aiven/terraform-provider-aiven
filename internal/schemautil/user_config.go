@@ -292,6 +292,11 @@ func ConvertTerraformUserConfigToAPICompatibleFormat(
 	}
 	entrySchema := templates.GetUserConfigSchema(configType)[entryType].(map[string]interface{})
 	entrySchemaProps := entrySchema["properties"].(map[string]interface{})
+
+	// If the user_config is nil, there is nothing to convert
+	if userConfigsRaw.([]interface{})[0] == nil {
+		return nil
+	}
 	return convertTerraformUserConfigToAPICompatibleFormat(
 		entryType, newResource, userConfigsRaw.([]interface{})[0].(map[string]interface{}), entrySchemaProps)
 }
