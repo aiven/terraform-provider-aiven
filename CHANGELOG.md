@@ -13,6 +13,7 @@ nav_order: 1
 - Replaced older links from help.aiven.io to docs.aiven.io
 - Change Flink version to 1.15
 - Fix empty `user_config` and empty `ip_filters`
+- Fix `tools/` consistency
 
 ## [3.6.1] - 2022-09-05
 
