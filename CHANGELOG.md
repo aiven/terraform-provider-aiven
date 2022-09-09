@@ -9,15 +9,15 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [3.6.1] - 2022-09-05
+
 - Update to the official name Aiven Provider for Terraform
 - Replaced older links from help.aiven.io to docs.aiven.io
 - Change Flink version to 1.15
 - Fix empty `user_config` and empty `ip_filters`
 - Fix `tools/` consistency
-
-## [3.6.1] - 2022-09-05
-
 - Add support `is_account_owner` [field](https://api.aiven.io/doc/#operation/AccountList)
+- Use v3 for examples
 
 ## [3.6.0] - 2022-08-31
 
