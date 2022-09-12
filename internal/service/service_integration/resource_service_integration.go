@@ -105,6 +105,16 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		Optional: true,
 		Type:     schema.TypeList,
 	},
+	"datadog_user_config": {
+		Description: "Datadog specific user configurable settings",
+		Elem: &schema.Resource{
+			Schema: schemautil.GenerateTerraformUserConfigSchema(
+				templates.GetUserConfigSchema("integration")["datadog"].(map[string]interface{})),
+		},
+		MaxItems: 1,
+		Optional: true,
+		Type:     schema.TypeList,
+	},
 	"project": {
 		Description: "Project the integration belongs to",
 		ForceNew:    true,
@@ -229,11 +239,17 @@ func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
+	userConfig := resourceServiceIntegrationUserConfigFromSchemaToAPI(d)
+	if userConfig == nil {
+		// Required by API
+		userConfig = make(map[string]interface{})
+	}
+
 	_, err = client.ServiceIntegrations.Update(
 		projectName,
 		integrationID,
 		aiven.UpdateServiceIntegrationRequest{
-			UserConfig: resourceServiceIntegrationUserConfigFromSchemaToAPI(d),
+			UserConfig: userConfig,
 		},
 	)
 	if err != nil {

@@ -26,6 +26,7 @@ Elasticsearch, etc.
 
 ### Optional
 
+- `datadog_user_config` (Block List, Max: 1) Datadog specific user configurable settings (see [below for nested schema](#nestedblock--datadog_user_config))
 - `destination_endpoint_id` (String) Destination endpoint for the integration (if any)
 - `destination_service_name` (String) Destination service for the integration (if any)
 - `kafka_connect_user_config` (Block List, Max: 1) Kafka Connect specific user configurable settings (see [below for nested schema](#nestedblock--kafka_connect_user_config))
@@ -42,6 +43,29 @@ Elasticsearch, etc.
 
 - `id` (String) The ID of this resource.
 - `integration_id` (String) Service Integration Id at aiven
+
+<a id="nestedblock--datadog_user_config"></a>
+### Nested Schema for `datadog_user_config`
+
+Optional:
+
+- `datadog_tags` (Block List, Max: 32) Custom tags provided by user (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))
+- `exclude_consumer_groups` (List of String) List of custom metrics
+- `exclude_topics` (List of String) List of topics to exclude
+- `include_consumer_groups` (List of String) List of custom metrics
+- `include_topics` (List of String) List of topics to include
+- `kafka_custom_metrics` (List of String) List of custom metrics
+- `max_jmx_metrics` (String) Maximum number of JMX metrics to send
+
+<a id="nestedblock--datadog_user_config--datadog_tags"></a>
+### Nested Schema for `datadog_user_config.datadog_tags`
+
+Optional:
+
+- `comment` (String) Optional tag explanation
+- `tag` (String) Tag value
+
+
 
 <a id="nestedblock--kafka_connect_user_config"></a>
 ### Nested Schema for `kafka_connect_user_config`
