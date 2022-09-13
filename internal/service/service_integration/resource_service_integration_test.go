@@ -507,3 +507,68 @@ func testAccCheckAivenServiceIntegrationAttributes(n string) resource.TestCheckF
 		return nil
 	}
 }
+
+func testAccServiceIntegrationDatadogWithUserConfig(name string) string {
+	return fmt.Sprintf(`
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_pg" "postgres" {
+  project      = data.aiven_project.foo.project
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = "test-acc-postgres-%s"
+}
+
+resource "aiven_service_integration_endpoint" "datadog" {
+  project       = data.aiven_project.foo.project
+  endpoint_name = "postgres-datadog-%s"
+  endpoint_type = "datadog"
+
+  datadog_user_config {
+    datadog_api_key = "11111111222233334444555555555555"
+
+    datadog_tags {
+      tag = "bar:foo"
+    }
+  }
+}
+
+resource "aiven_service_integration" "postgres-datadog" {
+  project                 = data.aiven_project.foo.project
+  integration_type        = "datadog"
+  source_service_name     = aiven_pg.postgres.service_name
+  destination_endpoint_id = aiven_service_integration_endpoint.datadog.id
+
+  datadog_user_config {
+    datadog_tags {
+      tag     = "lol:bar"
+      comment = "my custom config"
+    }
+  }
+}
+`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}
+
+func TestAccAivenServiceIntegration_datadog_with_user_config_creates(t *testing.T) {
+	resourceName := "aiven_service_integration.postgres-datadog"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenServiceIntegrationResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccServiceIntegrationDatadogWithUserConfig(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "integration_type", "datadog"),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-postgres-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "datadog_user_config.0.datadog_tags.0.tag", "lol:bar"),
+					resource.TestCheckResourceAttr(resourceName, "datadog_user_config.0.datadog_tags.0.comment", "my custom config"),
+				),
+			},
+		},
+	})
+}

@@ -23,6 +23,7 @@ Service Integration defines an integration between two Aiven services or between
 
 ### Read-Only
 
+- `datadog_user_config` (List of Object) Datadog specific user configurable settings (see [below for nested schema](#nestedatt--datadog_user_config))
 - `destination_endpoint_id` (String) Destination endpoint for the integration (if any)
 - `id` (String) The ID of this resource.
 - `integration_id` (String) Service Integration Id at aiven
@@ -33,6 +34,29 @@ Service Integration defines an integration between two Aiven services or between
 - `metrics_user_config` (List of Object) Metrics specific user configurable settings (see [below for nested schema](#nestedatt--metrics_user_config))
 - `mirrormaker_user_config` (List of Object) Mirrormaker 1 integration specific user configurable settings (see [below for nested schema](#nestedatt--mirrormaker_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration (if any)
+
+<a id="nestedatt--datadog_user_config"></a>
+### Nested Schema for `datadog_user_config`
+
+Read-Only:
+
+- `datadog_tags` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--datadog_tags))
+- `exclude_consumer_groups` (List of String)
+- `exclude_topics` (List of String)
+- `include_consumer_groups` (List of String)
+- `include_topics` (List of String)
+- `kafka_custom_metrics` (List of String)
+- `max_jmx_metrics` (String)
+
+<a id="nestedobjatt--datadog_user_config--datadog_tags"></a>
+### Nested Schema for `datadog_user_config.datadog_tags`
+
+Read-Only:
+
+- `comment` (String)
+- `tag` (String)
+
+
 
 <a id="nestedatt--kafka_connect_user_config"></a>
 ### Nested Schema for `kafka_connect_user_config`
