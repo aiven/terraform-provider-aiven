@@ -34,7 +34,6 @@ Elasticsearch, etc.
 - `kafka_mirrormaker_user_config` (Block List, Max: 1) Mirrormaker 2 integration specific user configurable settings (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config))
 - `logs_user_config` (Block List, Max: 1) Log integration specific user configurable settings (see [below for nested schema](#nestedblock--logs_user_config))
 - `metrics_user_config` (Block List, Max: 1) Metrics specific user configurable settings (see [below for nested schema](#nestedblock--metrics_user_config))
-- `mirrormaker_user_config` (Block List, Max: 1) Mirrormaker 1 integration specific user configurable settings (see [below for nested schema](#nestedblock--mirrormaker_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration (if any)
 - `source_service_name` (String) Source service for the integration (if any)
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
@@ -49,6 +48,7 @@ Elasticsearch, etc.
 
 Optional:
 
+- `datadog_dbm_enabled` (String) Enable Datadog Database Monitoring
 - `datadog_tags` (Block List, Max: 32) Custom tags provided by user (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))
 - `exclude_consumer_groups` (List of String) List of custom metrics
 - `exclude_topics` (List of String) List of topics to exclude
@@ -163,14 +163,6 @@ Optional:
 - `perf_events_statements_time_limit` (String) Only include perf_events_statements whose last seen is less than this many seconds
 
 
-
-
-<a id="nestedblock--mirrormaker_user_config"></a>
-### Nested Schema for `mirrormaker_user_config`
-
-Optional:
-
-- `mirrormaker_whitelist` (String) Mirrormaker topic whitelist
 
 
 <a id="nestedblock--timeouts"></a>

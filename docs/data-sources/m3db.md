@@ -101,6 +101,9 @@ Read-Only:
 
 Read-Only:
 
+- `max_recently_queried_series_blocks` (String)
+- `max_recently_queried_series_disk_bytes_read` (String)
+- `max_recently_queried_series_lookback` (String)
 - `query_docs` (String)
 - `query_require_exhaustive` (String)
 - `query_series` (String)

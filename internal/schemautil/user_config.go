@@ -55,7 +55,7 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 	}
 
 	var diffFunc schema.SchemaDiffSuppressFunc
-	if createOnly, ok := definition["createOnly"]; ok && createOnly.(bool) {
+	if createOnly, ok := definition["create_only"]; ok && createOnly.(bool) {
 		diffFunc = CreateOnlyDiffSuppressFunc
 	} else if valueType == "object" {
 		diffFunc = EmptyObjectDiffSuppressFuncSkipArrays(GenerateTerraformUserConfigSchema(definition))
@@ -97,11 +97,7 @@ func generateTerraformUserConfigSchema(key string, definition map[string]interfa
 		default:
 			panic(fmt.Sprintf("Unexpected user config schema array item type: %T / %v", typeString, typeString))
 		}
-		maxItemsVal, maxItemsFound := definition["maxItems"]
-		maxItems := 0
-		if maxItemsFound {
-			maxItems = int(maxItemsVal.(float64))
-		}
+		maxItems := definition["max_items"].(int)
 		var (
 			valueDiffFunc schema.SchemaDiffSuppressFunc
 		)
@@ -141,9 +137,9 @@ func getAivenSchemaType(value interface{}) string {
 		typeString := ""
 		for _, typeOrNullRaw := range res {
 			typeOrNull := typeOrNullRaw.(string)
-			if typeOrNull == "null" {
-			} else {
+			if typeOrNull != "null" {
 				typeString = typeOrNull
+				break
 			}
 		}
 		return typeString
@@ -319,7 +315,7 @@ func convertTerraformUserConfigToAPICompatibleFormat(
 			continue
 		}
 		definition := definitionRaw.(map[string]interface{})
-		createOnly, ok := definition["createOnly"]
+		createOnly, ok := definition["create_only"]
 		if ok && createOnly.(bool) && !newResource {
 			continue
 		}
@@ -392,8 +388,15 @@ func canOmit(value interface{}, definition map[string]interface{}) bool {
 
 	// if minimum values can be lower then zero do not omit -1
 	if minimum, ok := definition["minimum"]; ok {
-		if math.Signbit(minimum.(float64)) && value == "-1" {
-			return false
+		minimumFloat64, ok := minimum.(float64)
+		if ok {
+			if math.Signbit(minimumFloat64) && value == "-1" {
+				return false
+			}
+		} else {
+			if minimum.(int) < 0 && value == "-1" {
+				return false
+			}
 		}
 	}
 
@@ -452,7 +455,7 @@ func convertTerraformUserConfigValueToAPICompatibleFormatArray(value interface{}
 }
 
 func selectFirstSchemaFromOneOf(itemDefinition map[string]interface{}) map[string]interface{} {
-	if oneOf, ok := itemDefinition["oneOf"]; ok {
+	if oneOf, ok := itemDefinition["one_of"]; ok {
 		if types, ok := oneOf.([]interface{}); ok && len(types) > 0 {
 			itemDefinition = types[0].(map[string]interface{})
 		}
