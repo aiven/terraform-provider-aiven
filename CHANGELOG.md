@@ -10,12 +10,14 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Update to the official name Aiven Provider for Terraform
-- Replaced older links from help.aiven.io to docs.aiven.io
+- Replace older links from help.aiven.io to docs.aiven.io
 - Change Flink version to 1.15
 - Fix empty `user_config` and empty `ip_filters`
 - Fix `tools/` consistency
-- Add support `is_account_owner` [field](https://api.aiven.io/doc/#operation/AccountList)
-- send force user_config on service integration update, add `datadog_user_config`, resolves #888
+- Add support for `is_account_owner` field
+- Forcefully send user_config on service integration update, add `datadog_user_config`
+- Add user config options schema generation
+- Drop Kafka Mirrormaker 1 support as it is no longer supported by the API and was broken
 
 ## [3.6.0] - 2022-08-31
 

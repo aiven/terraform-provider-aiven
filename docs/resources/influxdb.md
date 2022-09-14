@@ -94,7 +94,7 @@ Optional:
 - `log_queries_after` (String) The maximum duration in seconds before a query is logged as a slow query. Setting this to 0 (the default) will never log slow queries.
 - `max_connection_limit` (String) Maximum number of connections to InfluxDB. Setting this to 0 (default) means no limit. If using max_connection_limit, it is recommended to set the value to be large enough in order to not block clients unnecessarily.
 - `max_row_limit` (String) The maximum number of rows returned in a non-chunked query. Setting this to 0 (the default) allows an unlimited number to be returned.
-- `max_select_buckets` (String) The maximum number of 'GROUP BY time()' buckets that can be processed in a query. Setting this to 0 (the default) allows an unlimited number to be processed.
+- `max_select_buckets` (String) The maximum number of `GROUP BY time()` buckets that can be processed in a query. Setting this to 0 (the default) allows an unlimited number to be processed.
 - `max_select_point` (String) The maximum number of points that can be processed in a SELECT statement. Setting this to 0 (the default) allows an unlimited number to be processed.
 - `query_timeout` (String) The maximum duration in seconds before a query is killed. Setting this to 0 (the default) will never kill slow queries.
 

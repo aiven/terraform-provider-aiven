@@ -8,21 +8,15 @@ const (
 	UserConfigSchemaEndpoint    = "endpoint"
 	UserConfigSchemaIntegration = "integration"
 	UserConfigSchemaService     = "service"
-
-	// JSON file names for user configuration options
-
-	EndpointFileName    = "integration_endpoints_user_config_schema.json"
-	IntegrationFileName = "integrations_user_config_schema.json"
-	ServiceFileName     = "service_user_config_schema.json"
 )
 
 // getUserConfigurationOptionsSchemaFilenames gets a list of user configuration
 // options filenames based on resource type
-func getUserConfigurationOptionsSchemaFilenames() map[string]string {
-	return map[string]string{
-		UserConfigSchemaEndpoint:    EndpointFileName,
-		UserConfigSchemaIntegration: IntegrationFileName,
-		UserConfigSchemaService:     ServiceFileName,
+func getUserConfigurationOptionsSchemaFilenames() map[string]struct{} {
+	return map[string]struct{}{
+		UserConfigSchemaEndpoint:    {},
+		UserConfigSchemaIntegration: {},
+		UserConfigSchemaService:     {},
 	}
 }
 

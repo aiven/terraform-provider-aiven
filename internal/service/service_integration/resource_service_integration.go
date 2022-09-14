@@ -55,16 +55,6 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		Optional: true,
 		Type:     schema.TypeList,
 	},
-	"mirrormaker_user_config": {
-		Description: "Mirrormaker 1 integration specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: schemautil.GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["mirrormaker"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
 	"kafka_mirrormaker_user_config": {
 		Description: "Mirrormaker 2 integration specific user configurable settings",
 		Elem: &schema.Resource{

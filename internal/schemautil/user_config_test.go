@@ -25,13 +25,13 @@ func TestGenerateTerraformUserConfigSchema(t *testing.T) {
 				data: map[string]interface{}{
 					"properties": map[string]interface{}{
 						"admin_password": map[string]interface{}{
-							"createOnly": true,
-							"example":    "z66o9QXqKM",
-							"maxLength":  256,
-							"minLength":  8,
-							"testFloat":  9.9,
-							"pattern":    "^[a-zA-Z0-9-_]+$",
-							"title":      "Custom password for admin user",
+							"create_only": true,
+							"example":     "z66o9QXqKM",
+							"max_length":  256,
+							"min_length":  8,
+							"test_float":  9.9,
+							"pattern":     "^[a-zA-Z0-9-_]+$",
+							"title":       "Custom password for admin user",
 							"type": []interface{}{
 								"string",
 								"null",
@@ -61,13 +61,13 @@ func TestGenerateTerraformUserConfigSchema(t *testing.T) {
 				data: map[string]interface{}{
 					"properties": map[string]interface{}{
 						"admin_password": map[string]interface{}{
-							"createOnly": true,
-							"example":    "z66o9QXqKM",
-							"maxLength":  256,
-							"minLength":  8,
-							"pattern":    "^[a-zA-Z0-9-_]+$",
-							"title":      "Custom password for admin user",
-							"user_error": "Must consist of alpha-numeric characters, underscores or dashes",
+							"create_only": true,
+							"example":     "z66o9QXqKM",
+							"max_length":  256,
+							"min_length":  8,
+							"pattern":     "^[a-zA-Z0-9-_]+$",
+							"title":       "Custom password for admin user",
+							"user_error":  "Must consist of alpha-numeric characters, underscores or dashes",
 						},
 					},
 				},
@@ -82,14 +82,14 @@ func TestGenerateTerraformUserConfigSchema(t *testing.T) {
 				data: map[string]interface{}{
 					"properties": map[string]interface{}{
 						"admin_password": map[string]interface{}{
-							"createOnly": true,
-							"example":    "z66o9QXqKM",
-							"maxLength":  256,
-							"minLength":  8,
-							"pattern":    "^[a-zA-Z0-9-_]+$",
-							"title":      "Custom password for admin user",
-							"type":       123,
-							"user_error": "Must consist of alpha-numeric characters, underscores or dashes",
+							"create_only": true,
+							"example":     "z66o9QXqKM",
+							"max_length":  256,
+							"min_length":  8,
+							"pattern":     "^[a-zA-Z0-9-_]+$",
+							"title":       "Custom password for admin user",
+							"type":        123,
+							"user_error":  "Must consist of alpha-numeric characters, underscores or dashes",
 						},
 					},
 				},
@@ -102,12 +102,12 @@ func TestGenerateTerraformUserConfigSchema(t *testing.T) {
 			args{
 				data: map[string]interface{}{
 					"admin_password": map[string]interface{}{
-						"createOnly": true,
-						"example":    "z66o9QXqKM",
-						"maxLength":  256,
-						"minLength":  8,
-						"pattern":    "^[a-zA-Z0-9-_]+$",
-						"title":      "Custom password for admin user",
+						"create_only": true,
+						"example":     "z66o9QXqKM",
+						"max_length":  256,
+						"min_length":  8,
+						"pattern":     "^[a-zA-Z0-9-_]+$",
+						"title":       "Custom password for admin user",
 						"type": []interface{}{
 							"string",
 							"null",
