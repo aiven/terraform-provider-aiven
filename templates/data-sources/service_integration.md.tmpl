@@ -11,7 +11,7 @@ Service Integration defines an integration between two Aiven services or between
 
 {{ if .HasExample -}}
 ## Example Usage
-{{ printf "{{tffile %q}}" .ExampleFile }}
+{{ tffile .ExampleFile }}
 {{- end }}
 {{ .SchemaMarkdown | trimspace }}
 {{ if .HasImport -}}

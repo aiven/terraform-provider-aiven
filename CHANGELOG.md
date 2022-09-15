@@ -18,6 +18,7 @@ nav_order: 1
 - Forcefully send user_config on service integration update, add `datadog_user_config`
 - Add user config options schema generation
 - Drop Kafka Mirrormaker 1 support as it is no longer supported by the API and was broken
+- Add missing examples
 
 ## [3.6.0] - 2022-08-31
 

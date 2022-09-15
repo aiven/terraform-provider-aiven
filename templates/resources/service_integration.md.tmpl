@@ -16,7 +16,7 @@ Elasticsearch, etc.
 
 {{ if .HasExample -}}
 ## Example Usage
-{{ printf "{{tffile %q}}" .ExampleFile }}
+{{ tffile .ExampleFile }}
 {{- end }}
 {{ .SchemaMarkdown | trimspace }}
 {{ if .HasImport -}}
