@@ -39,7 +39,7 @@ there. `state_info` field contains more details about the particular issue.
 
 {{ if .HasExample -}}
 ## Example Usage
-{{ printf "{{tffile %q}}" .ExampleFile }}
+{{ tffile .ExampleFile }}
 {{- end }}
 {{ .SchemaMarkdown | trimspace }}
 {{ if .HasImport -}}
