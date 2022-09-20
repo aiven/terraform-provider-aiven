@@ -33,7 +33,7 @@ func CurrentlyAllocatedStaticIps(_ context.Context, projectName, serviceName str
 	return allocatedStaticIps, nil
 }
 
-// DiffStaticIps takes a service resource and computes which static ips to assign and which to disassign
+// DiffStaticIps takes a service resource and computes which static ips to assign and which to disassociate
 func DiffStaticIps(ctx context.Context, d *schema.ResourceData, m interface{}) (ass, dis []string, err error) {
 	ipsFromSchema := staticIpsFromSchema(d)
 	ipsFromAPI, err := staticIpsFromAPI(ctx, d, m)
@@ -41,12 +41,12 @@ func DiffStaticIps(ctx context.Context, d *schema.ResourceData, m interface{}) (
 		return nil, nil, fmt.Errorf("unable to get static ips from api: %w", err)
 	}
 
-	ass, diss := diffStaticIps(ipsFromSchema, ipsFromAPI)
-	return ass, diss, nil
+	ass, dis = diffStaticIps(ipsFromSchema, ipsFromAPI)
+	return ass, dis, nil
 }
 
 func staticIpsFromSchema(d *schema.ResourceData) []string {
-	return FlattenToString(d.Get("static_ips").([]interface{}))
+	return FlattenToString(d.Get("static_ips").(*schema.Set).List())
 }
 
 func staticIpsFromAPI(_ context.Context, d *schema.ResourceData, m interface{}) ([]string, error) {

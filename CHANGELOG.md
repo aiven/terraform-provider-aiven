@@ -19,6 +19,7 @@ nav_order: 1
 - Add user config options schema generation
 - Drop Kafka Mirrormaker 1 support as it is no longer supported by the API and was broken
 - Add missing examples
+- `static_ips` schema type change from list to set
 
 ## [3.6.0] - 2022-08-31
 

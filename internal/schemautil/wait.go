@@ -358,5 +358,5 @@ L:
 }
 
 func staticIpsForServiceFromSchema(d *schema.ResourceData) []string {
-	return FlattenToString(d.Get("static_ips").([]interface{}))
+	return FlattenToString(d.Get("static_ips").(*schema.Set).List())
 }
