@@ -1,4 +1,4 @@
-.PHONY: build build-dev test test-unit test-acc lint lint-go lint-test lint-docs fmt fmt-test docs clean clean-tools sweep
+.PHONY: build build-dev test test-unit test-acc test-examples lint lint-go lint-test lint-docs fmt fmt-test docs clean clean-tools sweep
 
 #################################################
 # Global
@@ -83,6 +83,13 @@ test-acc:
 	TF_ACC=1 $(GO) test ./$(PKG_PATH)/... \
 	-v -count $(TEST_COUNT) -parallel $(ACC_TEST_PARALLELISM) $(RUNARGS) $(TESTARGS) -timeout $(ACC_TEST_TIMEOUT)
 
+clean-examples:
+	find ./examples -type f -name '*.tfstate*' -delete
+
+test-examples: build-dev clean-examples
+	AIVEN_PROVIDER_PATH=$(BUILD_DEV_DIR) $(GO) test --tags=examples ./examples_tests/... \
+	-v -count $(TEST_COUNT) -parallel $(ACC_TEST_PARALLELISM) $(RUNARGS) $(TESTARGS) -timeout $(ACC_TEST_TIMEOUT)
+
 #################################################
 # Lint
 #################################################
@@ -91,7 +98,7 @@ lint: lint-go lint-test lint-docs
 
 
 lint-go: $(GOLANGCILINT)
-	$(GOLANGCILINT) run --timeout=30m ./...
+	$(GOLANGCILINT) run --build-tags all --timeout=30m ./...
 
 
 lint-test: $(TERRAFMT)

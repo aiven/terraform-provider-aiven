@@ -20,6 +20,8 @@ nav_order: 1
 - Drop Kafka Mirrormaker 1 support as it is no longer supported by the API and was broken
 - Add missing examples
 - `static_ips` schema type change from list to set
+- Add postgres example test
+- Add cron job to run examples tests
 
 ## [3.6.0] - 2022-08-31
 

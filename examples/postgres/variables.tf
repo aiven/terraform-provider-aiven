@@ -1,3 +1,5 @@
-variable "avn_project_id" {}
-variable "avn_api_token" {}
-variable "avn_card_id" {}
+variable "avn_token" {}
+variable "avn_project" {}
+variable "postgres_eu_name" {}
+variable "postgres_us_name" {}
+variable "postgres_as_name" {}
