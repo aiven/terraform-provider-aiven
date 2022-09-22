@@ -152,7 +152,10 @@ func CustomizeDiffCheckStaticIpDisassociation(_ context.Context, d *schema.Resou
 	client := m.(*aiven.Client)
 
 	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
-	plannedStaticIps := FlattenToString(d.Get("static_ips").([]interface{}))
+	var plannedStaticIps []string
+	if staticIps, ok := d.GetOk("static_ips"); ok {
+		plannedStaticIps = FlattenToString(staticIps.(*schema.Set).List())
+	}
 
 	resp, err := client.StaticIPs.List(projectName)
 	if err != nil {

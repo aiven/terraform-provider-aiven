@@ -61,12 +61,13 @@ func resourceStaticIPRead(_ context.Context, d *schema.ResourceData, m interface
 
 	project, staticIPAddressId, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("error splitting static IP ID: %s", err)
 	}
 
 	r, err := client.StaticIPs.List(project)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.Errorf("error getting a list of static IPs for a project: %s",
+			schemautil.ResourceReadHandleNotFound(err, d))
 	}
 	for _, sip := range r.StaticIPs {
 		if sip.StaticIPAddressID == staticIPAddressId {
@@ -88,13 +89,13 @@ func resourceStaticIPCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	r, err := client.StaticIPs.Create(project, aiven.CreateStaticIPRequest{CloudName: cloudName})
 	if err != nil {
-		return diag.Errorf("unable to create static ip: %s", err)
+		return diag.Errorf("error creating static ip: %s", err)
 	}
 
 	d.SetId(schemautil.BuildResourceID(project, r.StaticIPAddressID))
 
 	if err := resourceStaticIPWait(ctx, d, m); err != nil {
-		return diag.Errorf("unable to wait for static ip to become active: %s", err)
+		return diag.Errorf("error waiting for static ip to become active: %s", err)
 	}
 
 	return resourceStaticIPRead(ctx, d, m)
@@ -105,7 +106,7 @@ func resourceStaticIPDelete(_ context.Context, d *schema.ResourceData, m interfa
 
 	project, staticIPAddressId, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("error spliting static IP ID: %s:", err)
 	}
 
 	staticIP, err := client.StaticIPs.Get(project, staticIPAddressId)
@@ -114,12 +115,12 @@ func resourceStaticIPDelete(_ context.Context, d *schema.ResourceData, m interfa
 			return nil
 		}
 
-		return diag.FromErr(err)
+		return diag.Errorf("error getting static IP (%s): %s", staticIPAddressId, err)
 	}
 
 	if staticIP.State == schemautil.StaticIpAvailable {
 		if err := client.StaticIPs.Dissociate(project, staticIPAddressId); err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("error dissociating static IP (%s): %s", staticIPAddressId, err)
 		}
 	}
 
@@ -129,7 +130,7 @@ func resourceStaticIPDelete(_ context.Context, d *schema.ResourceData, m interfa
 			StaticIPAddressID: staticIPAddressId,
 		})
 	if err != nil && !aiven.IsNotFound(err) {
-		return diag.FromErr(err)
+		return diag.Errorf("error deleting static IP (%s): %s", staticIPAddressId, err)
 	}
 
 	return nil
