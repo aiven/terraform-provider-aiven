@@ -1,3 +1,0 @@
-#!/bin/sh
-
-terraform destroy --var-file="${1:-secrets.tfvars}"

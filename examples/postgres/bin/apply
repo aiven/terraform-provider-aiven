@@ -1,3 +1,0 @@
-#!/bin/sh
-
-terraform apply --var-file="${1:-secrets.tfvars}"

@@ -1,5 +1,0 @@
-#!/bin/sh
-
-terraform --version
-
-terraform init

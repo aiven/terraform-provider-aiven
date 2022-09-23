@@ -38,15 +38,27 @@ export AIVEN_TOKEN="your-token"
 export AIVEN_PROJECT_NAME="your-project-name"
 
 # run all acceptance tests
-make testacc
+make test-acc
 
 # or run a specific acceptance test
-make testacc TESTARGS="-run=TestAccAiven_kafka"
+make test-acc TESTARGS="-run=TestAccAiven_kafka"
 ```
 
 > _**N.B.** Acceptance tests create real resources, and often cost money to run._
 
 For information about writing acceptance tests, see the main [Terraform contributing guide](https://www.terraform.io/docs/extend/testing/acceptance-tests/index.html).
+
+#### Testing examples
+
+Run example tests with the following commands:
+
+```bash
+export AIVEN_TOKEN="your-token"
+export AIVEN_PROJECT_NAME="your-project-name"
+
+make test-examples
+```
+
 
 ### Static checking and linting
 
