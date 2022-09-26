@@ -6,6 +6,7 @@ require (
 	github.com/aiven/aiven-go-client v1.7.1-0.20221108145444-aa8b10f12d8f
 	github.com/aiven/aiven-go-client/tools/exp v0.0.0-20221102122203-4f39deb34b6a
 	github.com/docker/go-units v0.5.0
+	github.com/ettle/strcase v0.1.1
 	github.com/gruntwork-io/terratest v0.40.22
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.22.0
