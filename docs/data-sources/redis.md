@@ -84,6 +84,7 @@ Read-Only:
 
 - `additional_backup_regions` (List of String)
 - `ip_filter` (List of String)
+- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--redis_user_config--ip_filter_object))
 - `migration` (List of Object) (see [below for nested schema](#nestedobjatt--redis_user_config--migration))
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--redis_user_config--private_access))
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--redis_user_config--privatelink_access))
@@ -103,6 +104,15 @@ Read-Only:
 - `redis_timeout` (String)
 - `service_to_fork_from` (String)
 - `static_ips` (String)
+
+<a id="nestedobjatt--redis_user_config--ip_filter_object"></a>
+### Nested Schema for `redis_user_config.ip_filter_object`
+
+Read-Only:
+
+- `description` (String)
+- `network` (String)
+
 
 <a id="nestedobjatt--redis_user_config--migration"></a>
 ### Nested Schema for `redis_user_config.migration`

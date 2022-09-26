@@ -92,6 +92,7 @@ Read-Only:
 - `additional_backup_regions` (List of String)
 - `custom_domain` (String)
 - `ip_filter` (List of String)
+- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--ip_filter_object))
 - `kafka` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka))
 - `kafka_authentication_methods` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_authentication_methods))
 - `kafka_connect` (String)
@@ -105,6 +106,15 @@ Read-Only:
 - `schema_registry` (String)
 - `schema_registry_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--schema_registry_config))
 - `static_ips` (String)
+
+<a id="nestedobjatt--kafka_user_config--ip_filter_object"></a>
+### Nested Schema for `kafka_user_config.ip_filter_object`
+
+Read-Only:
+
+- `description` (String)
+- `network` (String)
+
 
 <a id="nestedobjatt--kafka_user_config--kafka"></a>
 ### Nested Schema for `kafka_user_config.kafka`

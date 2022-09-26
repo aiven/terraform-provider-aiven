@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -18,7 +19,7 @@ func aivenM3DBSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	schemaM3[schemautil.ServiceTypeM3+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeM3)
+	schemaM3[schemautil.ServiceTypeM3+"_user_config"] = dist.ServiceTypeM3db()
 
 	return schemaM3
 }

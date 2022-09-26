@@ -33,15 +33,15 @@ resource "aiven_service_integration" "my_integration_metrics" {
 
 ### Optional
 
-- `datadog_user_config` (Block List, Max: 1) Datadog specific user configurable settings (see [below for nested schema](#nestedblock--datadog_user_config))
+- `datadog_user_config` (Block List, Max: 1) Datadog user configurable settings (see [below for nested schema](#nestedblock--datadog_user_config))
 - `destination_endpoint_id` (String) Destination endpoint for the integration (if any)
 - `destination_service_name` (String) Destination service for the integration (if any)
-- `kafka_connect_user_config` (Block List, Max: 1) Kafka Connect specific user configurable settings (see [below for nested schema](#nestedblock--kafka_connect_user_config))
-- `kafka_logs_user_config` (Block List, Max: 1) Kafka Logs specific user configurable settings (see [below for nested schema](#nestedblock--kafka_logs_user_config))
-- `kafka_mirrormaker_user_config` (Block List, Max: 1) Mirrormaker 2 integration specific user configurable settings (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config))
-- `logs_user_config` (Block List, Max: 1) Log integration specific user configurable settings (see [below for nested schema](#nestedblock--logs_user_config))
-- `metrics_user_config` (Block List, Max: 1) Metrics specific user configurable settings (see [below for nested schema](#nestedblock--metrics_user_config))
-- `mirrormaker_user_config` (Block List, Max: 1) Mirrormaker 1 integration specific user configurable settings (see [below for nested schema](#nestedblock--mirrormaker_user_config))
+- `kafka_connect_user_config` (Block List, Max: 1) KafkaConnect user configurable settings (see [below for nested schema](#nestedblock--kafka_connect_user_config))
+- `kafka_logs_user_config` (Block List, Max: 1) KafkaLogs user configurable settings (see [below for nested schema](#nestedblock--kafka_logs_user_config))
+- `kafka_mirrormaker_user_config` (Block List, Max: 1) KafkaMirrormaker user configurable settings (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config))
+- `logs_user_config` (Block List, Max: 1) Logs user configurable settings (see [below for nested schema](#nestedblock--logs_user_config))
+- `metrics_user_config` (Block List, Max: 1) Metrics user configurable settings (see [below for nested schema](#nestedblock--metrics_user_config))
+- `mirrormaker_user_config` (Block List, Max: 1) Mirrormaker user configurable settings (see [below for nested schema](#nestedblock--mirrormaker_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration (if any)
 - `source_service_name` (String) Source service for the integration (if any)
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
@@ -71,7 +71,7 @@ Optional:
 Optional:
 
 - `comment` (String) Optional tag explanation
-- `tag` (String) Tag value
+- `tag` (String) Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix 'aiven-' are reserved for Aiven.
 
 
 
@@ -107,7 +107,7 @@ Optional:
 
 Optional:
 
-- `cluster_alias` (String) Kafka cluster alias
+- `cluster_alias` (String) The alias under which the Kafka cluster is known to MirrorMaker. Can contain the following symbols: ASCII alphanumerics, '.', '_', and '-'.
 - `kafka_mirrormaker` (Block List, Max: 1) Kafka MirrorMaker configuration values (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker))
 
 <a id="nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker"></a>
@@ -115,11 +115,11 @@ Optional:
 
 Optional:
 
-- `consumer_fetch_min_bytes` (String) consumer.fetch.min.bytes
-- `producer_batch_size` (String) producer.batch.size
-- `producer_buffer_memory` (String) producer.buffer.memory
-- `producer_linger_ms` (String) producer.linger.ms
-- `producer_max_request_size` (String) producer.max.request.size
+- `consumer_fetch_min_bytes` (String) The minimum amount of data the server should return for a fetch request
+- `producer_batch_size` (String) The batch size in bytes producer will attempt to collect before publishing to broker.
+- `producer_buffer_memory` (String) The amount of bytes producer can use for buffering data before publishing to broker.
+- `producer_linger_ms` (String) The linger time (ms) for waiting new data to arrive for publishing.
+- `producer_max_request_size` (String) The maximum request size in bytes.
 
 
 

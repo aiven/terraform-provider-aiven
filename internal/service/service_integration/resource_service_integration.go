@@ -9,7 +9,9 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/templates"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -45,76 +47,6 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		Required:    true,
 		Type:        schema.TypeString,
 	},
-	"logs_user_config": {
-		Description: "Log integration specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: schemautil.GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["logs"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
-	"mirrormaker_user_config": { // TODO: Deprecated, remove in the next major release.
-		Description: "Mirrormaker 1 integration specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: schemautil.GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["mirrormaker"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
-	"kafka_mirrormaker_user_config": {
-		Description: "Mirrormaker 2 integration specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: schemautil.GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["kafka_mirrormaker"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
-	"kafka_connect_user_config": {
-		Description: "Kafka Connect specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: schemautil.GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["kafka_connect"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
-	"kafka_logs_user_config": {
-		Description: "Kafka Logs specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: schemautil.GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["kafka_logs"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
-	"metrics_user_config": {
-		Description: "Metrics specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: schemautil.GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["metrics"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
-	"datadog_user_config": {
-		Description: "Datadog specific user configurable settings",
-		Elem: &schema.Resource{
-			Schema: schemautil.GenerateTerraformUserConfigSchema(
-				templates.GetUserConfigSchema("integration")["datadog"].(map[string]interface{})),
-		},
-		MaxItems: 1,
-		Optional: true,
-		Type:     schema.TypeList,
-	},
 	"project": {
 		Description: "Project the integration belongs to",
 		ForceNew:    true,
@@ -135,6 +67,13 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Type:        schema.TypeString,
 	},
+	"logs_user_config":              dist.IntegrationTypeLogs(),
+	"mirrormaker_user_config":       dist.IntegrationTypeMirrormaker(),
+	"kafka_mirrormaker_user_config": dist.IntegrationTypeKafkaMirrormaker(),
+	"kafka_connect_user_config":     dist.IntegrationTypeKafkaConnect(),
+	"kafka_logs_user_config":        dist.IntegrationTypeKafkaLogs(),
+	"metrics_user_config":           dist.IntegrationTypeMetrics(),
+	"datadog_user_config":           dist.IntegrationTypeDatadog(),
 }
 
 func ResourceServiceIntegration() *schema.Resource {
@@ -358,11 +297,8 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 }
 
 func resourceServiceIntegrationUserConfigFromSchemaToAPI(d *schema.ResourceData) map[string]interface{} {
-	const (
-		userConfigTypeIntegrations = "integration"
-	)
 	integrationType := d.Get("integration_type").(string)
-	return schemautil.ConvertTerraformUserConfigToAPICompatibleFormat(userConfigTypeIntegrations, integrationType, true, d)
+	return apiconvert.ToAPI(userconfig.IntegrationTypes, integrationType, d)
 }
 
 func resourceServiceIntegrationCopyAPIResponseToTerraform(
@@ -400,7 +336,7 @@ func resourceServiceIntegrationCopyAPIResponseToTerraform(
 		return err
 	}
 
-	userConfig := schemautil.ConvertAPIUserConfigToTerraformCompatibleFormat("integration", integrationType, integration.UserConfig)
+	userConfig := apiconvert.FromAPI(userconfig.IntegrationTypes, integrationType, integration.UserConfig)
 	if len(userConfig) > 0 {
 		if err := d.Set(integrationType+"_user_config", userConfig); err != nil {
 			return err

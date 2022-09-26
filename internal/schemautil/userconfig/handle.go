@@ -1,4 +1,4 @@
-package user_config
+package userconfig
 
 import (
 	"fmt"
@@ -91,9 +91,9 @@ func handleArrayProperty(n string, p map[string]interface{}, t string) map[strin
 			ct = append(ct, va["type"].(string))
 		}
 
-		tn, atn = terraformTypes(ct)
+		tn, atn = TerraformTypes(ct)
 	} else {
-		tn, atn = terraformTypes(slicedString(ia["type"]))
+		tn, atn = TerraformTypes(SlicedString(ia["type"]))
 	}
 
 	r := make(map[string]*jen.Statement)

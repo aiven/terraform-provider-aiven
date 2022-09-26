@@ -85,6 +85,7 @@ Read-Only:
 - `additional_backup_regions` (List of String)
 - `custom_domain` (String)
 - `ip_filter` (List of String)
+- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--ip_filter_object))
 - `limits` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--limits))
 - `m3_version` (String)
 - `m3coordinator_enable_graphite_carbon_ingest` (String)
@@ -96,6 +97,15 @@ Read-Only:
 - `rules` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--rules))
 - `service_to_fork_from` (String)
 - `static_ips` (String)
+
+<a id="nestedobjatt--m3db_user_config--ip_filter_object"></a>
+### Nested Schema for `m3db_user_config.ip_filter_object`
+
+Read-Only:
+
+- `description` (String)
+- `network` (String)
+
 
 <a id="nestedobjatt--m3db_user_config--limits"></a>
 ### Nested Schema for `m3db_user_config.limits`
@@ -176,7 +186,17 @@ Read-Only:
 - `filter` (String)
 - `name` (String)
 - `namespaces` (List of String)
+- `namespaces_object` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--rules--mapping--namespaces_object))
 - `tags` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--rules--mapping--tags))
+
+<a id="nestedobjatt--m3db_user_config--rules--mapping--namespaces_object"></a>
+### Nested Schema for `m3db_user_config.rules.mapping.tags`
+
+Read-Only:
+
+- `resolution` (String)
+- `retention` (String)
+
 
 <a id="nestedobjatt--m3db_user_config--rules--mapping--tags"></a>
 ### Nested Schema for `m3db_user_config.rules.mapping.tags`

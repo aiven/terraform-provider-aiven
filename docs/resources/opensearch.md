@@ -84,13 +84,14 @@ resource "aiven_opensearch" "os1" {
 Optional:
 
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
-- `custom_domain` (String) Custom domain
-- `disable_replication_factor_adjustment` (String) Disable replication factor adjustment
+- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name
+- `disable_replication_factor_adjustment` (String, Deprecated)
 - `index_patterns` (Block List, Max: 512) Index patterns (see [below for nested schema](#nestedblock--opensearch_user_config--index_patterns))
 - `index_template` (Block List, Max: 1) Template settings for all new indexes (see [below for nested schema](#nestedblock--opensearch_user_config--index_template))
-- `ip_filter` (List of String) IP filter
-- `keep_index_refresh_interval` (String) Don't reset index.refresh_interval to the default value
-- `max_index_count` (String) Maximum index count
+- `ip_filter` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--opensearch_user_config--ip_filter_object))
+- `keep_index_refresh_interval` (String) Aiven automation resets index.refresh_interval to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.
+- `max_index_count` (String, Deprecated)
 - `opensearch` (Block List, Max: 1) OpenSearch settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch))
 - `opensearch_dashboards` (Block List, Max: 1) OpenSearch Dashboards settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch_dashboards))
 - `opensearch_version` (String) OpenSearch major version
@@ -100,7 +101,7 @@ Optional:
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--opensearch_user_config--public_access))
 - `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
-- `static_ips` (String) Static IP addresses
+- `static_ips` (String) Use static public IP addresses
 
 <a id="nestedblock--opensearch_user_config--index_patterns"></a>
 ### Nested Schema for `opensearch_user_config.index_patterns`
@@ -117,9 +118,18 @@ Optional:
 
 Optional:
 
-- `mapping_nested_objects_limit` (String) index.mapping.nested_objects.limit
-- `number_of_replicas` (String) index.number_of_replicas
-- `number_of_shards` (String) index.number_of_shards
+- `mapping_nested_objects_limit` (String) The maximum number of nested JSON objects that a single document can contain across all nested types. This limit helps to prevent out of memory errors when a document contains too many nested objects. Default is 10000.
+- `number_of_replicas` (String) The number of replicas each primary shard has.
+- `number_of_shards` (String) The number of primary shards that an index should have.
+
+
+<a id="nestedblock--opensearch_user_config--ip_filter_object"></a>
+### Nested Schema for `opensearch_user_config.ip_filter_object`
+
+Optional:
+
+- `description` (String) Description for IP filter list entry
+- `network` (String) CIDR address block
 
 
 <a id="nestedblock--opensearch_user_config--opensearch"></a>
@@ -127,37 +137,37 @@ Optional:
 
 Optional:
 
-- `action_auto_create_index_enabled` (String) action.auto_create_index
+- `action_auto_create_index_enabled` (String) Explicitly allow or block automatic creation of indices. Defaults to true
 - `action_destructive_requires_name` (String) Require explicit index names when deleting
-- `cluster_max_shards_per_node` (String) cluster.max_shards_per_node
-- `cluster_routing_allocation_node_concurrent_recoveries` (String) Concurrent incoming/outgoing shard recoveries per node
-- `email_sender_name` (String) Sender email name placeholder to be used in Opensearch Dashboards and Opensearch keystore
+- `cluster_max_shards_per_node` (String) Controls the number of shards allowed in the cluster per data node
+- `cluster_routing_allocation_node_concurrent_recoveries` (String) How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to 2.
+- `email_sender_name` (String) This should be identical to the Sender name defined in Opensearch dashboards
 - `email_sender_password` (String, Sensitive) Sender email password for Opensearch alerts to authenticate with SMTP server
 - `email_sender_username` (String) Sender email address for Opensearch alerts
-- `http_max_content_length` (String) http.max_content_length
-- `http_max_header_size` (String) http.max_header_size
-- `http_max_initial_line_length` (String) http.max_initial_line_length
-- `indices_fielddata_cache_size` (String) indices.fielddata.cache.size
-- `indices_memory_index_buffer_size` (String) indices.memory.index_buffer_size
-- `indices_queries_cache_size` (String) indices.queries.cache.size
-- `indices_query_bool_max_clause_count` (String) indices.query.bool.max_clause_count
-- `indices_recovery_max_bytes_per_sec` (String) indices.recovery.max_bytes_per_sec
-- `indices_recovery_max_concurrent_file_chunks` (String) indices.recovery.max_concurrent_file_chunks
-- `override_main_response_version` (String) compatibility.override_main_response_version
-- `reindex_remote_whitelist` (List of String) reindex_remote_whitelist
-- `script_max_compilations_rate` (String) Script max compilation rate - circuit breaker to prevent/minimize OOMs
-- `search_max_buckets` (String) search.max_buckets
-- `thread_pool_analyze_queue_size` (String) analyze thread pool queue size
-- `thread_pool_analyze_size` (String) analyze thread pool size
-- `thread_pool_force_merge_size` (String) force_merge thread pool size
-- `thread_pool_get_queue_size` (String) get thread pool queue size
-- `thread_pool_get_size` (String) get thread pool size
-- `thread_pool_search_queue_size` (String) search thread pool queue size
-- `thread_pool_search_size` (String) search thread pool size
-- `thread_pool_search_throttled_queue_size` (String) search_throttled thread pool queue size
-- `thread_pool_search_throttled_size` (String) search_throttled thread pool size
-- `thread_pool_write_queue_size` (String) write thread pool queue size
-- `thread_pool_write_size` (String) write thread pool size
+- `http_max_content_length` (String) Maximum content length for HTTP requests to the OpenSearch HTTP API, in bytes.
+- `http_max_header_size` (String) The max size of allowed headers, in bytes
+- `http_max_initial_line_length` (String) The max length of an HTTP URL, in bytes
+- `indices_fielddata_cache_size` (String) Relative amount. Maximum amount of heap memory used for field data cache. This is an expert setting; decreasing the value too much will increase overhead of loading field data; too much memory used for field data cache will decrease amount of heap available for other operations.
+- `indices_memory_index_buffer_size` (String) Percentage value. Default is 10%. Total amount of heap used for indexing buffer, before writing segments to disk. This is an expert setting. Too low value will slow down indexing; too high value will increase indexing performance but causes performance issues for query performance.
+- `indices_queries_cache_size` (String) Percentage value. Default is 10%. Maximum amount of heap used for query cache. This is an expert setting. Too low value will decrease query performance and increase performance for other operations; too high value will cause issues with other OpenSearch functionality.
+- `indices_query_bool_max_clause_count` (String) Maximum number of clauses Lucene BooleanQuery can have. The default value (1024) is relatively high, and increasing it may cause performance issues. Investigate other approaches first before increasing this value.
+- `indices_recovery_max_bytes_per_sec` (String) Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb
+- `indices_recovery_max_concurrent_file_chunks` (String) Number of file chunks sent in parallel for each recovery. Defaults to 2.
+- `override_main_response_version` (String) Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false
+- `reindex_remote_whitelist` (List of String) Whitelisted addresses for reindexing. Changing this value will cause all OpenSearch instances to restart.
+- `script_max_compilations_rate` (String) Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context
+- `search_max_buckets` (String) Maximum number of aggregation buckets allowed in a single response. OpenSearch default value is used when this is not defined.
+- `thread_pool_analyze_queue_size` (String) Size for the thread pool queue. See documentation for exact details.
+- `thread_pool_analyze_size` (String) Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
+- `thread_pool_force_merge_size` (String) Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
+- `thread_pool_get_queue_size` (String) Size for the thread pool queue. See documentation for exact details.
+- `thread_pool_get_size` (String) Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
+- `thread_pool_search_queue_size` (String) Size for the thread pool queue. See documentation for exact details.
+- `thread_pool_search_size` (String) Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
+- `thread_pool_search_throttled_queue_size` (String) Size for the thread pool queue. See documentation for exact details.
+- `thread_pool_search_throttled_size` (String) Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
+- `thread_pool_write_queue_size` (String) Size for the thread pool queue. See documentation for exact details.
+- `thread_pool_write_size` (String) Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
 
 
 <a id="nestedblock--opensearch_user_config--opensearch_dashboards"></a>
@@ -166,7 +176,7 @@ Optional:
 Optional:
 
 - `enabled` (String) Enable or disable OpenSearch Dashboards
-- `max_old_space_size` (String) max_old_space_size
+- `max_old_space_size` (String) Limits the maximum amount of memory (in MiB) the OpenSearch Dashboards process can use. This sets the max_old_space_size option of the nodejs running the OpenSearch Dashboards. Note: the memory reserved by OpenSearch Dashboards is not available for OpenSearch.
 - `opensearch_request_timeout` (String) Timeout in milliseconds for requests made by OpenSearch Dashboards towards OpenSearch
 
 
