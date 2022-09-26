@@ -8,9 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 )
 
-//go:generate ./internal/schemautil/templates/gen.sh service service_user_config_schema.json
-//go:generate ./internal/schemautil/templates/gen.sh integration integrations_user_config_schema.json
-//go:generate ./internal/schemautil/templates/gen.sh endpoint integration_endpoints_user_config_schema.json
+//go:generate go test -tags user_config ./internal/schemautil/user_config
 
 func main() {
 	var (
