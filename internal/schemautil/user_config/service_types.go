@@ -38,17 +38,12 @@ func ServiceTypeCassandra() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"cassandra_version": {
 			Description: "Cassandra major version",
 			Optional:    true,
 			Type:        schema.TypeString,
-		},
-		"ip_filter": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			Optional:    true,
-			Type:        schema.TypeSet,
 		},
 		"migrate_sstableloader": {
 			Description: "Sets the service into migration mode enabling the sstableloader utility to be used to upload Cassandra data files. Available only on service create.",
@@ -69,7 +64,7 @@ func ServiceTypeCassandra() *schema.Schema {
 			}}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"project_to_fork_from": {
 			Description:      "Name of another project to fork a service from. This has effect only when a new service is being created.",
@@ -91,7 +86,7 @@ func ServiceTypeCassandra() *schema.Schema {
 			}}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"service_to_fork_from": {
 			Description:      "Name of another service to fork from. This has effect only when a new service is being created.",
@@ -119,11 +114,6 @@ func ServiceTypeCassandra() *schema.Schema {
 // ServiceTypeClickhouse is a generated function returning the schema of the clickhouse ServiceType.
 func ServiceTypeClickhouse() *schema.Schema {
 	s := map[string]*schema.Schema{
-		"ip_filter": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			Optional:    true,
-			Type:        schema.TypeSet,
-		},
 		"project_to_fork_from": {
 			Description:      "Name of another project to fork a service from. This has effect only when a new service is being created.",
 			DiffSuppressFunc: schemautil.CreateOnlyDiffSuppressFunc,
@@ -252,8 +242,10 @@ func ServiceTypeElasticsearch() *schema.Schema {
 				},
 				"reindex_remote_whitelist": {
 					Description: "Whitelisted addresses for reindexing. Changing this value will cause all Elasticsearch instances to restart.",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    32,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"script_max_compilations_rate": {
 					Description: "Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context",
@@ -410,8 +402,10 @@ func ServiceTypeElasticsearch() *schema.Schema {
 				},
 				"reindex_remote_whitelist": {
 					Description: "Whitelisted addresses for reindexing. Changing this value will cause all Elasticsearch instances to restart.",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    32,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"script_max_compilations_rate": {
 					Description: "Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context",
@@ -481,7 +475,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"elasticsearch_version": {
 			Description: "Elasticsearch major version",
@@ -490,8 +484,26 @@ func ServiceTypeElasticsearch() *schema.Schema {
 		},
 		"index_patterns": {
 			Description: "Index patterns",
-			Optional:    true,
-			Type:        schema.TypeSet,
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"max_index_count": {
+					Description: "Maximum number of indexes to keep",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"pattern": {
+					Description: "fnmatch pattern",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"sorting_algorithm": {
+					Description: "Deletion sorting algorithm",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 512,
+			Optional: true,
+			Type:     schema.TypeList,
 		},
 		"index_template": {
 			Description: "Template settings for all new indexes",
@@ -531,12 +543,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
-		},
-		"ip_filter": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			Optional:    true,
-			Type:        schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"keep_index_refresh_interval": {
 			Description: "Aiven automation resets index.refresh_interval to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.",
@@ -581,7 +588,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"max_index_count": {
 			Deprecated: "DEPRECATED: use index_patterns instead",
@@ -631,7 +638,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"privatelink_access": {
 			Description: "Allow access to selected service components through Privatelink",
@@ -671,7 +678,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"project_to_fork_from": {
 			Description:      "Name of another project to fork a service from. This has effect only when a new service is being created.",
@@ -717,7 +724,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"recovery_basebackup_name": {
 			Description: "Name of the basebackup to restore in forked service",
@@ -765,11 +772,6 @@ func ServiceTypeFlink() *schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
-		"ip_filter": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			Optional:    true,
-			Type:        schema.TypeSet,
-		},
 		"number_of_task_slots": {
 			Description: "Task slots per node. For a 3 node plan, total number of task slots is 3x this value",
 			Optional:    true,
@@ -808,7 +810,7 @@ func ServiceTypeFlink() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"restart_strategy": {
 			Description: "failure-rate (default): Restarts the job after failure, but when failure rate (failures per time interval) is exceeded, the job eventually fails. Restart strategy waits a fixed amount of time between attempts.fixed-delay: Attempts to restart the job a given number of times before it fails. Restart strategy waits a fixed amount of time between attempts. exponential-delay: Attempts to restart the job infinitely, with increasing delay up to the maximum delay. The job never fails. none: The job fails directly and no restart is attempted.",
@@ -880,13 +882,17 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"allowed_domains": {
 					Description: "Allowed domains",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    50,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"allowed_groups": {
 					Description: "Require users to belong to one of given groups",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    50,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"auth_url": {
 					Description: "Authorization URL",
@@ -917,13 +923,17 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"allowed_domains": {
 					Description: "Allowed domains",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    50,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"allowed_groups": {
 					Description: "Require users to belong to one of given groups",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    50,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"auth_url": {
 					Description: "Authorization URL",
@@ -948,7 +958,7 @@ func ServiceTypeGrafana() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"auth_basic_enabled": {
 			Description: "Enable or disable basic authentication form, used by Grafana built-in login",
@@ -965,13 +975,17 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"allowed_domains": {
 					Description: "Allowed domains",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    50,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"allowed_organizations": {
 					Description: "Require user to be member of one of the listed organizations",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    50,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"api_url": {
 					Description: "API URL",
@@ -1000,8 +1014,10 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"scopes": {
 					Description: "OAuth scopes",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    50,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"token_url": {
 					Description: "Token URL",
@@ -1017,13 +1033,17 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"allowed_domains": {
 					Description: "Allowed domains",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    50,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"allowed_organizations": {
 					Description: "Require user to be member of one of the listed organizations",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    50,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"api_url": {
 					Description: "API URL",
@@ -1052,8 +1072,10 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"scopes": {
 					Description: "OAuth scopes",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    50,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"token_url": {
 					Description: "Token URL",
@@ -1063,7 +1085,7 @@ func ServiceTypeGrafana() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"auth_github": {
 			Description: "Github Auth integration",
@@ -1075,8 +1097,10 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"allowed_organizations": {
 					Description: "Require users to belong to one of given organizations",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    50,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"client_id": {
 					Description: "Client ID from provider",
@@ -1090,8 +1114,10 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"team_ids": {
 					Description: "Require users to belong to one of given team IDs",
+					Elem:        &schema.Schema{Type: schema.TypeInt},
+					MaxItems:    50,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
@@ -1102,8 +1128,10 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"allowed_organizations": {
 					Description: "Require users to belong to one of given organizations",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    50,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"client_id": {
 					Description: "Client ID from provider",
@@ -1117,13 +1145,15 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"team_ids": {
 					Description: "Require users to belong to one of given team IDs",
+					Elem:        &schema.Schema{Type: schema.TypeInt},
+					MaxItems:    50,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"auth_gitlab": {
 			Description: "GitLab Auth integration",
@@ -1135,8 +1165,10 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"allowed_groups": {
 					Description: "Require users to belong to one of given groups",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    50,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"api_url": {
 					Description: "API URL. This only needs to be set when using self hosted GitLab",
@@ -1172,8 +1204,10 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"allowed_groups": {
 					Description: "Require users to belong to one of given groups",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    50,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"api_url": {
 					Description: "API URL. This only needs to be set when using self hosted GitLab",
@@ -1203,7 +1237,7 @@ func ServiceTypeGrafana() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"auth_google": {
 			Description: "Google Auth integration",
@@ -1215,8 +1249,10 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"allowed_domains": {
 					Description: "Domains allowed to sign-in to this Grafana",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    64,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"client_id": {
 					Description: "Client ID from provider",
@@ -1237,8 +1273,10 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"allowed_domains": {
 					Description: "Domains allowed to sign-in to this Grafana",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    64,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"client_id": {
 					Description: "Client ID from provider",
@@ -1253,7 +1291,7 @@ func ServiceTypeGrafana() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"cookie_samesite": {
 			Description: "Cookie SameSite attribute: 'strict' prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. 'lax' is the default value.",
@@ -1373,7 +1411,7 @@ func ServiceTypeGrafana() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"disable_gravatar": {
 			Description: "Set to true to disable gravatar. Defaults to false (gravatar is enabled)",
@@ -1433,17 +1471,12 @@ func ServiceTypeGrafana() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"google_analytics_ua_id": {
 			Description: "Google Analytics ID",
 			Optional:    true,
 			Type:        schema.TypeString,
-		},
-		"ip_filter": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			Optional:    true,
-			Type:        schema.TypeSet,
 		},
 		"metrics_enabled": {
 			Description: "Enable Grafana /metrics endpoint",
@@ -1464,7 +1497,7 @@ func ServiceTypeGrafana() *schema.Schema {
 			}}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"privatelink_access": {
 			Description: "Allow access to selected service components through Privatelink",
@@ -1480,7 +1513,7 @@ func ServiceTypeGrafana() *schema.Schema {
 			}}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"project_to_fork_from": {
 			Description:      "Name of another project to fork a service from. This has effect only when a new service is being created.",
@@ -1502,7 +1535,7 @@ func ServiceTypeGrafana() *schema.Schema {
 			}}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"recovery_basebackup_name": {
 			Description: "Name of the basebackup to restore in forked service",
@@ -1605,7 +1638,7 @@ func ServiceTypeGrafana() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"static_ips": {
 			Description: "Use static public IP addresses",
@@ -1715,12 +1748,7 @@ func ServiceTypeInfluxdb() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
-		},
-		"ip_filter": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			Optional:    true,
-			Type:        schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"private_access": {
 			Description: "Allow access to selected service ports from private networks",
@@ -1736,7 +1764,7 @@ func ServiceTypeInfluxdb() *schema.Schema {
 			}}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"privatelink_access": {
 			Description: "Allow access to selected service components through Privatelink",
@@ -1752,7 +1780,7 @@ func ServiceTypeInfluxdb() *schema.Schema {
 			}}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"project_to_fork_from": {
 			Description:      "Name of another project to fork a service from. This has effect only when a new service is being created.",
@@ -1774,7 +1802,7 @@ func ServiceTypeInfluxdb() *schema.Schema {
 			}}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"recovery_basebackup_name": {
 			Description: "Name of the basebackup to restore in forked service",
@@ -1811,11 +1839,6 @@ func ServiceTypeKafka() *schema.Schema {
 			Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
 			Optional:    true,
 			Type:        schema.TypeString,
-		},
-		"ip_filter": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			Optional:    true,
-			Type:        schema.TypeSet,
 		},
 		"kafka": {
 			Description: "Kafka broker configuration values",
@@ -2215,7 +2238,7 @@ func ServiceTypeKafka() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"kafka_authentication_methods": {
 			Description: "Kafka authentication methods",
@@ -2245,7 +2268,7 @@ func ServiceTypeKafka() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"kafka_connect": {
 			Description: "Enable Kafka Connect service",
@@ -2380,7 +2403,7 @@ func ServiceTypeKafka() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"kafka_rest": {
 			Description: "Enable Kafka-REST service",
@@ -2455,7 +2478,7 @@ func ServiceTypeKafka() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"kafka_version": {
 			Description: "Kafka major version",
@@ -2476,7 +2499,7 @@ func ServiceTypeKafka() *schema.Schema {
 			}}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"privatelink_access": {
 			Description: "Allow access to selected service components through Privatelink",
@@ -2546,7 +2569,7 @@ func ServiceTypeKafka() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"public_access": {
 			Description: "Allow access to selected service ports from the public Internet",
@@ -2606,7 +2629,7 @@ func ServiceTypeKafka() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"schema_registry": {
 			Description: "Enable Schema-Registry service",
@@ -2641,7 +2664,7 @@ func ServiceTypeKafka() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"static_ips": {
 			Description: "Use static public IP addresses",
@@ -2663,11 +2686,6 @@ func ServiceTypeKafka() *schema.Schema {
 // ServiceTypeKafkaConnect is a generated function returning the schema of the kafka_connect ServiceType.
 func ServiceTypeKafkaConnect() *schema.Schema {
 	s := map[string]*schema.Schema{
-		"ip_filter": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			Optional:    true,
-			Type:        schema.TypeSet,
-		},
 		"kafka_connect": {
 			Description: "Kafka Connect configuration values",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
@@ -2796,7 +2814,7 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"private_access": {
 			Description: "Allow access to selected service ports from private networks",
@@ -2826,7 +2844,7 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"privatelink_access": {
 			Description: "Allow access to selected service components through Privatelink",
@@ -2866,7 +2884,7 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"public_access": {
 			Description: "Allow access to selected service ports from the public Internet",
@@ -2896,7 +2914,7 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"static_ips": {
 			Description: "Use static public IP addresses",
@@ -2918,11 +2936,6 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 // ServiceTypeKafkaMirrormaker is a generated function returning the schema of the kafka_mirrormaker ServiceType.
 func ServiceTypeKafkaMirrormaker() *schema.Schema {
 	s := map[string]*schema.Schema{
-		"ip_filter": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			Optional:    true,
-			Type:        schema.TypeSet,
-		},
 		"kafka_mirrormaker": {
 			Description: "Kafka MirrorMaker configuration values",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
@@ -3031,7 +3044,7 @@ func ServiceTypeKafkaMirrormaker() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"static_ips": {
 			Description: "Use static public IP addresses",
@@ -3057,11 +3070,6 @@ func ServiceTypeM3aggregator() *schema.Schema {
 			Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
 			Optional:    true,
 			Type:        schema.TypeString,
-		},
-		"ip_filter": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			Optional:    true,
-			Type:        schema.TypeSet,
 		},
 		"m3_version": {
 			Description: "M3 major version (deprecated, use m3aggregator_version)",
@@ -3097,11 +3105,6 @@ func ServiceTypeM3db() *schema.Schema {
 			Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
 			Optional:    true,
 			Type:        schema.TypeString,
-		},
-		"ip_filter": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			Optional:    true,
-			Type:        schema.TypeSet,
 		},
 		"limits": {
 			Description: "M3 limits",
@@ -3171,7 +3174,7 @@ func ServiceTypeM3db() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"m3_version": {
 			Description: "M3 major version (deprecated, use m3db_version)",
@@ -3190,8 +3193,176 @@ func ServiceTypeM3db() *schema.Schema {
 		},
 		"namespaces": {
 			Description: "List of M3 namespaces",
-			Optional:    true,
-			Type:        schema.TypeSet,
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"name": {
+					Description: "The name of the namespace",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"options": {
+					Description: "Namespace options",
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+						"retention_options": {
+							Description: "Retention options",
+							DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+								"block_data_expiry_duration": {
+									Description: "Controls how long we wait before expiring stale data",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"blocksize_duration": {
+									Description: "Controls how long to keep a block in memory before flushing to a fileset on disk",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"buffer_future_duration": {
+									Description: "Controls how far into the future writes to the namespace will be accepted",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"buffer_past_duration": {
+									Description: "Controls how far into the past writes to the namespace will be accepted",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"retention_period_duration": {
+									Description: "Controls the duration of time that M3DB will retain data for the namespace",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+							}),
+							Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+								"block_data_expiry_duration": {
+									Description: "Controls how long we wait before expiring stale data",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"blocksize_duration": {
+									Description: "Controls how long to keep a block in memory before flushing to a fileset on disk",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"buffer_future_duration": {
+									Description: "Controls how far into the future writes to the namespace will be accepted",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"buffer_past_duration": {
+									Description: "Controls how far into the past writes to the namespace will be accepted",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"retention_period_duration": {
+									Description: "Controls the duration of time that M3DB will retain data for the namespace",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+							}},
+							MaxItems: 1,
+							Optional: true,
+							Type:     schema.TypeList,
+						},
+						"snapshot_enabled": {
+							Description: "Controls whether M3DB will create snapshot files for this namespace",
+							Optional:    true,
+							Type:        schema.TypeBool,
+						},
+						"writes_to_commitlog": {
+							Description: "Controls whether M3DB will include writes to this namespace in the commitlog",
+							Optional:    true,
+							Type:        schema.TypeBool,
+						},
+					}),
+					Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+						"retention_options": {
+							Description: "Retention options",
+							DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+								"block_data_expiry_duration": {
+									Description: "Controls how long we wait before expiring stale data",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"blocksize_duration": {
+									Description: "Controls how long to keep a block in memory before flushing to a fileset on disk",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"buffer_future_duration": {
+									Description: "Controls how far into the future writes to the namespace will be accepted",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"buffer_past_duration": {
+									Description: "Controls how far into the past writes to the namespace will be accepted",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"retention_period_duration": {
+									Description: "Controls the duration of time that M3DB will retain data for the namespace",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+							}),
+							Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+								"block_data_expiry_duration": {
+									Description: "Controls how long we wait before expiring stale data",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"blocksize_duration": {
+									Description: "Controls how long to keep a block in memory before flushing to a fileset on disk",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"buffer_future_duration": {
+									Description: "Controls how far into the future writes to the namespace will be accepted",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"buffer_past_duration": {
+									Description: "Controls how far into the past writes to the namespace will be accepted",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"retention_period_duration": {
+									Description: "Controls the duration of time that M3DB will retain data for the namespace",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+							}},
+							MaxItems: 1,
+							Optional: true,
+							Type:     schema.TypeList,
+						},
+						"snapshot_enabled": {
+							Description: "Controls whether M3DB will create snapshot files for this namespace",
+							Optional:    true,
+							Type:        schema.TypeBool,
+						},
+						"writes_to_commitlog": {
+							Description: "Controls whether M3DB will include writes to this namespace in the commitlog",
+							Optional:    true,
+							Type:        schema.TypeBool,
+						},
+					}},
+					MaxItems: 1,
+					Optional: true,
+					Type:     schema.TypeList,
+				},
+				"resolution": {
+					Description: "The resolution for an aggregated namespace",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"type": {
+					Description: "The type of aggregation (aggregated/unaggregated)",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 2147483647,
+			Optional: true,
+			Type:     schema.TypeList,
 		},
 		"private_access": {
 			Description: "Allow access to selected service ports from private networks",
@@ -3207,7 +3378,7 @@ func ServiceTypeM3db() *schema.Schema {
 			}}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"project_to_fork_from": {
 			Description:      "Name of another project to fork a service from. This has effect only when a new service is being created.",
@@ -3229,23 +3400,109 @@ func ServiceTypeM3db() *schema.Schema {
 			}}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"rules": {
 			Description: "M3 rules",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"mapping": {
 				Description: "List of M3 mapping rules",
-				Optional:    true,
-				Type:        schema.TypeSet,
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"aggregations": {
+						Description: "List of aggregations to be applied",
+						Elem:        &schema.Schema{Type: schema.TypeString},
+						MaxItems:    10,
+						Optional:    true,
+						Type:        schema.TypeList,
+					},
+					"drop": {
+						Description: "Only store the derived metric (as specified in the roll-up rules), if any",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"filter": {
+						Description: "Matching metric names with wildcards (using __name__:wildcard) or matching tags and their (optionally wildcarded) values. For value, ! can be used at start of value for negation, and multiple filters can be supplied using space as separator.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"name": {
+						Description: "The (optional) name of the rule",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"tags": {
+						Description: "List of tags to be appended to matching metrics",
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+							"name": {
+								Description: "Name of the tag",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
+							"value": {
+								Description: "Value of the tag",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
+						}},
+						MaxItems: 10,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+				}},
+				MaxItems: 10,
+				Optional: true,
+				Type:     schema.TypeList,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"mapping": {
 				Description: "List of M3 mapping rules",
-				Optional:    true,
-				Type:        schema.TypeSet,
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"aggregations": {
+						Description: "List of aggregations to be applied",
+						Elem:        &schema.Schema{Type: schema.TypeString},
+						MaxItems:    10,
+						Optional:    true,
+						Type:        schema.TypeList,
+					},
+					"drop": {
+						Description: "Only store the derived metric (as specified in the roll-up rules), if any",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"filter": {
+						Description: "Matching metric names with wildcards (using __name__:wildcard) or matching tags and their (optionally wildcarded) values. For value, ! can be used at start of value for negation, and multiple filters can be supplied using space as separator.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"name": {
+						Description: "The (optional) name of the rule",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"tags": {
+						Description: "List of tags to be appended to matching metrics",
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+							"name": {
+								Description: "Name of the tag",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
+							"value": {
+								Description: "Value of the tag",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
+						}},
+						MaxItems: 10,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+				}},
+				MaxItems: 10,
+				Optional: true,
+				Type:     schema.TypeList,
 			}}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"service_to_fork_from": {
 			Description:      "Name of another service to fork from. This has effect only when a new service is being created.",
@@ -3300,11 +3557,6 @@ func ServiceTypeMysql() *schema.Schema {
 			Description: "The minimum amount of time in seconds to keep binlog entries before deletion. This may be extended for services that require binlog entries for longer than the default for example if using the MySQL Debezium Kafka connector.",
 			Optional:    true,
 			Type:        schema.TypeInt,
-		},
-		"ip_filter": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			Optional:    true,
-			Type:        schema.TypeSet,
 		},
 		"migration": {
 			Description: "Migrate data from existing server",
@@ -3396,7 +3648,7 @@ func ServiceTypeMysql() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"mysql": {
 			Description: "mysql.conf configuration values",
@@ -3706,7 +3958,7 @@ func ServiceTypeMysql() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"mysql_version": {
 			Description: "MySQL major version",
@@ -3751,7 +4003,7 @@ func ServiceTypeMysql() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"privatelink_access": {
 			Description: "Allow access to selected service components through Privatelink",
@@ -3791,7 +4043,7 @@ func ServiceTypeMysql() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"project_to_fork_from": {
 			Description:      "Name of another project to fork a service from. This has effect only when a new service is being created.",
@@ -3837,7 +4089,7 @@ func ServiceTypeMysql() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"recovery_target_time": {
 			Description:      "Recovery target time when forking a service. This has effect only when a new service is being created.",
@@ -3883,8 +4135,26 @@ func ServiceTypeOpensearch() *schema.Schema {
 		},
 		"index_patterns": {
 			Description: "Index patterns",
-			Optional:    true,
-			Type:        schema.TypeSet,
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"max_index_count": {
+					Description: "Maximum number of indexes to keep",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"pattern": {
+					Description: "fnmatch pattern",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"sorting_algorithm": {
+					Description: "Deletion sorting algorithm",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 512,
+			Optional: true,
+			Type:     schema.TypeList,
 		},
 		"index_template": {
 			Description: "Template settings for all new indexes",
@@ -3924,12 +4194,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
-		},
-		"ip_filter": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			Optional:    true,
-			Type:        schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"keep_index_refresh_interval": {
 			Description: "Aiven automation resets index.refresh_interval to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.",
@@ -4032,8 +4297,10 @@ func ServiceTypeOpensearch() *schema.Schema {
 				},
 				"reindex_remote_whitelist": {
 					Description: "Whitelisted addresses for reindexing. Changing this value will cause all OpenSearch instances to restart.",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    32,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"script_max_compilations_rate": {
 					Description: "Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context",
@@ -4190,8 +4457,10 @@ func ServiceTypeOpensearch() *schema.Schema {
 				},
 				"reindex_remote_whitelist": {
 					Description: "Whitelisted addresses for reindexing. Changing this value will cause all OpenSearch instances to restart.",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    32,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"script_max_compilations_rate": {
 					Description: "Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context",
@@ -4261,7 +4530,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"opensearch_dashboards": {
 			Description: "OpenSearch Dashboards settings",
@@ -4301,7 +4570,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"opensearch_version": {
 			Description: "OpenSearch major version",
@@ -4346,7 +4615,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"privatelink_access": {
 			Description: "Allow access to selected service components through Privatelink",
@@ -4386,7 +4655,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"project_to_fork_from": {
 			Description:      "Name of another project to fork a service from. This has effect only when a new service is being created.",
@@ -4432,7 +4701,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"recovery_basebackup_name": {
 			Description: "Name of the basebackup to restore in forked service",
@@ -4492,11 +4761,6 @@ func ServiceTypePg() *schema.Schema {
 			Description: "Register AAAA DNS records for the service, and allow IPv6 packets to service ports",
 			Optional:    true,
 			Type:        schema.TypeBool,
-		},
-		"ip_filter": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			Optional:    true,
-			Type:        schema.TypeSet,
 		},
 		"migration": {
 			Description: "Migrate data from existing server",
@@ -4588,7 +4852,7 @@ func ServiceTypePg() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"pg": {
 			Description: "postgresql.conf configuration values",
@@ -5068,7 +5332,7 @@ func ServiceTypePg() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"pg_read_replica": {
 			Deprecated: "This setting is deprecated. Use read_replica service integration instead.",
@@ -5116,8 +5380,10 @@ func ServiceTypePg() *schema.Schema {
 				},
 				"ignore_startup_parameters": {
 					Description: "List of parameters to ignore when given in startup packet",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    32,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"min_pool_size": {
 					Description: "Add more server connections to pool if below this number. Improves behavior when usual load comes suddenly back after period of total inactivity. The value is effectively capped at the pool size.",
@@ -5163,8 +5429,10 @@ func ServiceTypePg() *schema.Schema {
 				},
 				"ignore_startup_parameters": {
 					Description: "List of parameters to ignore when given in startup packet",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					MaxItems:    32,
 					Optional:    true,
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 				},
 				"min_pool_size": {
 					Description: "Add more server connections to pool if below this number. Improves behavior when usual load comes suddenly back after period of total inactivity. The value is effectively capped at the pool size.",
@@ -5189,7 +5457,7 @@ func ServiceTypePg() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"pglookout": {
 			Description: "PGLookout settings",
@@ -5205,7 +5473,7 @@ func ServiceTypePg() *schema.Schema {
 			}}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"private_access": {
 			Description: "Allow access to selected service ports from private networks",
@@ -5245,7 +5513,7 @@ func ServiceTypePg() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"privatelink_access": {
 			Description: "Allow access to selected service components through Privatelink",
@@ -5285,7 +5553,7 @@ func ServiceTypePg() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"project_to_fork_from": {
 			Description:      "Name of another project to fork a service from. This has effect only when a new service is being created.",
@@ -5331,7 +5599,7 @@ func ServiceTypePg() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"recovery_target_time": {
 			Description:      "Recovery target time when forking a service. This has effect only when a new service is being created.",
@@ -5374,7 +5642,7 @@ func ServiceTypePg() *schema.Schema {
 			}}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"variant": {
 			Description: "Variant of the PostgreSQL service, may affect the features that are exposed by default",
@@ -5401,11 +5669,6 @@ func ServiceTypePg() *schema.Schema {
 // ServiceTypeRedis is a generated function returning the schema of the redis ServiceType.
 func ServiceTypeRedis() *schema.Schema {
 	s := map[string]*schema.Schema{
-		"ip_filter": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			Optional:    true,
-			Type:        schema.TypeSet,
-		},
 		"migration": {
 			Description: "Migrate data from existing server",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
@@ -5496,7 +5759,7 @@ func ServiceTypeRedis() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"private_access": {
 			Description: "Allow access to selected service ports from private networks",
@@ -5526,7 +5789,7 @@ func ServiceTypeRedis() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"privatelink_access": {
 			Description: "Allow access to selected service components through Privatelink",
@@ -5556,7 +5819,7 @@ func ServiceTypeRedis() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"project_to_fork_from": {
 			Description:      "Name of another project to fork a service from. This has effect only when a new service is being created.",
@@ -5592,7 +5855,7 @@ func ServiceTypeRedis() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"recovery_basebackup_name": {
 			Description: "Name of the basebackup to restore in forked service",
