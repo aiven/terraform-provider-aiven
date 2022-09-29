@@ -35,7 +35,7 @@ func convertPropertyToSchema(n string, p map[string]interface{}, t string) jen.D
 		r[jen.Id("Sensitive")] = jen.Lit(true)
 	}
 
-	// TODO: Generate validation rules for generated schema properties.
+	// TODO: Generate validation rules for generated schema properties, also validate that value is within enum values.
 
 	return r
 }

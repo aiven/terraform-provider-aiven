@@ -18,8 +18,21 @@ func IntegrationEndpointTypeDatadog() *schema.Schema {
 		},
 		"datadog_tags": {
 			Description: "Custom tags provided by user",
-			Optional:    true,
-			Type:        schema.TypeSet,
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"comment": {
+					Description: "Optional tag explanation",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"tag": {
+					Description: "Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix 'aiven-' are reserved for Aiven.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 32,
+			Optional: true,
+			Type:     schema.TypeList,
 		},
 		"disable_consumer_stats": {
 			Description: "Disable consumer group metrics",
@@ -498,8 +511,10 @@ func IntegrationEndpointTypeSignalfx() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"enabled_metrics": {
 			Description: "list of metrics to send",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			MaxItems:    256,
 			Optional:    true,
-			Type:        schema.TypeSet,
+			Type:        schema.TypeList,
 		},
 		"signalfx_api_key": {
 			Description: "SignalFX API key",
