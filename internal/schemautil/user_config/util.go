@@ -22,7 +22,7 @@ func terraformTypes(t []string) ([]string, []string) {
 		case "string":
 			r = append(r, "TypeString")
 		case "array", "object":
-			r = append(r, "TypeSet")
+			r = append(r, "TypeList")
 		default:
 			panic(fmt.Sprintf("unknown type: %s", v))
 		}
