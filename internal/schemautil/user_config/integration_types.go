@@ -11,8 +11,55 @@ import (
 func IntegrationTypeClickhouseKafka() *schema.Schema {
 	s := map[string]*schema.Schema{"tables": {
 		Description: "Tables to create",
-		Optional:    true,
-		Type:        schema.TypeSet,
+		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+			"columns": {
+				Description: "Table columns",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"name": {
+						Description: "Column name",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"type": {
+						Description: "Column type",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+				}},
+				MaxItems: 100,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
+			"data_format": {
+				Description: "Message data format",
+				Optional:    true,
+				Type:        schema.TypeString,
+			},
+			"group_name": {
+				Description: "Kafka consumers group",
+				Optional:    true,
+				Type:        schema.TypeString,
+			},
+			"name": {
+				Description: "Name of the table",
+				Optional:    true,
+				Type:        schema.TypeString,
+			},
+			"topics": {
+				Description: "Kafka topics",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"name": {
+					Description: "Name of the topic",
+					Optional:    true,
+					Type:        schema.TypeString,
+				}}},
+				MaxItems: 100,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
+		}},
+		MaxItems: 100,
+		Optional: true,
+		Type:     schema.TypeList,
 	}}
 
 	return &schema.Schema{
@@ -29,8 +76,21 @@ func IntegrationTypeClickhouseKafka() *schema.Schema {
 func IntegrationTypeClickhousePostgresql() *schema.Schema {
 	s := map[string]*schema.Schema{"databases": {
 		Description: "Databases to expose",
-		Optional:    true,
-		Type:        schema.TypeSet,
+		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+			"database": {
+				Description: "PostgreSQL database to expose",
+				Optional:    true,
+				Type:        schema.TypeString,
+			},
+			"schema": {
+				Description: "PostgreSQL schema to expose",
+				Optional:    true,
+				Type:        schema.TypeString,
+			},
+		}},
+		MaxItems: 10,
+		Optional: true,
+		Type:     schema.TypeList,
 	}}
 
 	return &schema.Schema{
@@ -53,33 +113,56 @@ func IntegrationTypeDatadog() *schema.Schema {
 		},
 		"datadog_tags": {
 			Description: "Custom tags provided by user",
-			Optional:    true,
-			Type:        schema.TypeSet,
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"comment": {
+					Description: "Optional tag explanation",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"tag": {
+					Description: "Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix 'aiven-' are reserved for Aiven.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 32,
+			Optional: true,
+			Type:     schema.TypeList,
 		},
 		"exclude_consumer_groups": {
 			Description: "List of custom metrics",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			MaxItems:    1024,
 			Optional:    true,
-			Type:        schema.TypeSet,
+			Type:        schema.TypeList,
 		},
 		"exclude_topics": {
 			Description: "List of topics to exclude",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			MaxItems:    1024,
 			Optional:    true,
-			Type:        schema.TypeSet,
+			Type:        schema.TypeList,
 		},
 		"include_consumer_groups": {
 			Description: "List of custom metrics",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			MaxItems:    1024,
 			Optional:    true,
-			Type:        schema.TypeSet,
+			Type:        schema.TypeList,
 		},
 		"include_topics": {
 			Description: "List of topics to include",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			MaxItems:    1024,
 			Optional:    true,
-			Type:        schema.TypeSet,
+			Type:        schema.TypeList,
 		},
 		"kafka_custom_metrics": {
 			Description: "List of custom metrics",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			MaxItems:    1024,
 			Optional:    true,
-			Type:        schema.TypeSet,
+			Type:        schema.TypeList,
 		},
 		"max_jmx_metrics": {
 			Description: "Maximum number of JMX metrics to send",
@@ -103,13 +186,39 @@ func IntegrationTypeExternalAwsCloudwatchMetrics() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"dropped_metrics": {
 			Description: "Metrics to not send to AWS CloudWatch (takes precedence over extra_metrics)",
-			Optional:    true,
-			Type:        schema.TypeSet,
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"field": {
+					Description: "Identifier of a value in the metric",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"metric": {
+					Description: "Identifier of the metric",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
 		},
 		"extra_metrics": {
 			Description: "Metrics to allow through to AWS CloudWatch (in addition to default metrics)",
-			Optional:    true,
-			Type:        schema.TypeSet,
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"field": {
+					Description: "Identifier of a value in the metric",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"metric": {
+					Description: "Identifier of the metric",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
 		},
 	}
 
@@ -173,7 +282,7 @@ func IntegrationTypeKafkaConnect() *schema.Schema {
 		}},
 		MaxItems: 1,
 		Optional: true,
-		Type:     schema.TypeSet,
+		Type:     schema.TypeList,
 	}}
 
 	return &schema.Schema{
@@ -270,7 +379,7 @@ func IntegrationTypeKafkaMirrormaker() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 	}
 
@@ -477,7 +586,7 @@ func IntegrationTypeMetrics() *schema.Schema {
 				}},
 				MaxItems: 1,
 				Optional: true,
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"telegraf": {
 				Description: "Configuration options for Telegraf MySQL input plugin",
@@ -627,11 +736,11 @@ func IntegrationTypeMetrics() *schema.Schema {
 				}},
 				MaxItems: 1,
 				Optional: true,
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 			}}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"username": {
 			Description: "Name of the user used to write metrics. Only affects PostgreSQL destinations. Defaults to 'metrics_writer'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.",
@@ -802,7 +911,7 @@ func IntegrationTypePrometheus() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		}}),
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{"telegraf": {
 			Description: "Configuration options for Telegraf MySQL input plugin",
@@ -952,11 +1061,11 @@ func IntegrationTypePrometheus() *schema.Schema {
 			}},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		}}},
 		MaxItems: 1,
 		Optional: true,
-		Type:     schema.TypeSet,
+		Type:     schema.TypeList,
 	}}
 
 	return &schema.Schema{
