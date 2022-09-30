@@ -1,5 +1,4 @@
 ---
-
 title: Changelog
 parent: README
 nav_order: 1
@@ -8,6 +7,8 @@ nav_order: 1
 # Changelog
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+## [3.7.0] - 2022-09-30
 
 - Update to the official name Aiven Provider for Terraform
 - Replace older links from help.aiven.io to docs.aiven.io
