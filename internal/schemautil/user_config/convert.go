@@ -8,24 +8,15 @@ import (
 )
 
 // convertPropertyToSchema is a function that converts a property to a Terraform schema.
-func convertPropertyToSchema(n string, p map[string]interface{}, t string) jen.Dict {
+func convertPropertyToSchema(n string, p map[string]interface{}, t string, ad bool) jen.Dict {
 	r := jen.Dict{
 		jen.Id("Type"):     jen.Qual(SchemaPackage, t),
 		jen.Id("Optional"): jen.Lit(true),
 	}
 
-	if d, ok := p["description"]; ok {
-		k := "Description"
-
-		if strings.Contains(strings.ToLower(d.(string)), "deprecated") {
-			k = "Deprecated"
-		}
-
-		r[jen.Id(k)] = jen.Lit(d)
-	} else {
-		if title, ok := p["title"]; ok {
-			r[jen.Id("Description")] = jen.Lit(title)
-		}
+	if ad {
+		dk, dv := descriptionForProperty(p)
+		r[jen.Id(dk)] = jen.Lit(dv)
 	}
 
 	if co, ok := p["create_only"]; ok && co.(bool) {
