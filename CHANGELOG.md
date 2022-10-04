@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `aiven_gcp_vpc_peering_connection` creation
+
 ## [3.7.0] - 2022-09-30
 
 - Update to the official name Aiven Provider for Terraform
