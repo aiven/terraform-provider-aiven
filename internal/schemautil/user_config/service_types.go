@@ -3748,6 +3748,31 @@ func ServiceTypeM3db() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
+					"namespaces": {
+						Description: "This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by glob (=wildcards)",
+						Elem:        &schema.Schema{Type: schema.TypeString},
+						MaxItems:    10,
+						Optional:    true,
+						Type:        schema.TypeList,
+					},
+					"namespaces_object": {
+						Description: "This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by exact match of retention period and resolution",
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+							"resolution": {
+								Description: "The resolution for the matching namespace",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
+							"retention": {
+								Description: "The retention period of the matching namespace",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
+						}},
+						MaxItems: 10,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
 					"tags": {
 						Description: "List of tags to be appended to matching metrics",
 						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
@@ -3795,6 +3820,31 @@ func ServiceTypeM3db() *schema.Schema {
 						Description: "The (optional) name of the rule",
 						Optional:    true,
 						Type:        schema.TypeString,
+					},
+					"namespaces": {
+						Description: "This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by glob (=wildcards)",
+						Elem:        &schema.Schema{Type: schema.TypeString},
+						MaxItems:    10,
+						Optional:    true,
+						Type:        schema.TypeList,
+					},
+					"namespaces_object": {
+						Description: "This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by exact match of retention period and resolution",
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+							"resolution": {
+								Description: "The resolution for the matching namespace",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
+							"retention": {
+								Description: "The retention period of the matching namespace",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
+						}},
+						MaxItems: 10,
+						Optional: true,
+						Type:     schema.TypeList,
 					},
 					"tags": {
 						Description: "List of tags to be appended to matching metrics",
