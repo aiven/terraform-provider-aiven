@@ -1,6 +1,9 @@
 package user_config
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // terraformTypes is a function that converts schema representation types to Terraform types.
 func terraformTypes(t []string) ([]string, []string) {
@@ -77,4 +80,19 @@ func slicedString(v interface{}) []string {
 	}
 
 	return []string{vsa}
+}
+
+// descriptionForProperty is a function that returns the description for a property.
+func descriptionForProperty(p map[string]interface{}) (string, string) {
+	k := "Description"
+
+	if d, ok := p["description"].(string); ok {
+		if strings.Contains(strings.ToLower(d), "deprecated") {
+			k = "Deprecated"
+		}
+
+		return k, d
+	}
+
+	return k, p["title"].(string)
 }
