@@ -45,6 +45,35 @@ func ServiceTypeCassandra() *schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
+		"ip_filter": {
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			Elem: &schema.Schema{
+				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				Type:             schema.TypeString,
+			},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"ip_filter_object": {
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"description": {
+					Description: "Description for IP filter list entry",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"network": {
+					Description: "CIDR address block",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
 		"migrate_sstableloader": {
 			Description: "Sets the service into migration mode enabling the sstableloader utility to be used to upload Cassandra data files. Available only on service create.",
 			Optional:    true,
@@ -114,6 +143,35 @@ func ServiceTypeCassandra() *schema.Schema {
 // ServiceTypeClickhouse is a generated function returning the schema of the clickhouse ServiceType.
 func ServiceTypeClickhouse() *schema.Schema {
 	s := map[string]*schema.Schema{
+		"ip_filter": {
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			Elem: &schema.Schema{
+				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				Type:             schema.TypeString,
+			},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"ip_filter_object": {
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"description": {
+					Description: "Description for IP filter list entry",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"network": {
+					Description: "CIDR address block",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
 		"project_to_fork_from": {
 			Description:      "Name of another project to fork a service from. This has effect only when a new service is being created.",
 			DiffSuppressFunc: schemautil.CreateOnlyDiffSuppressFunc,
@@ -545,6 +603,35 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			Optional: true,
 			Type:     schema.TypeList,
 		},
+		"ip_filter": {
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			Elem: &schema.Schema{
+				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				Type:             schema.TypeString,
+			},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"ip_filter_object": {
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"description": {
+					Description: "Description for IP filter list entry",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"network": {
+					Description: "CIDR address block",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
 		"keep_index_refresh_interval": {
 			Description: "Aiven automation resets index.refresh_interval to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.",
 			Optional:    true,
@@ -771,6 +858,35 @@ func ServiceTypeFlink() *schema.Schema {
 			Description: "Flink major version",
 			Optional:    true,
 			Type:        schema.TypeString,
+		},
+		"ip_filter": {
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			Elem: &schema.Schema{
+				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				Type:             schema.TypeString,
+			},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"ip_filter_object": {
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"description": {
+					Description: "Description for IP filter list entry",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"network": {
+					Description: "CIDR address block",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
 		},
 		"number_of_task_slots": {
 			Description: "Task slots per node. For a 3 node plan, total number of task slots is 3x this value",
@@ -1478,6 +1594,35 @@ func ServiceTypeGrafana() *schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
+		"ip_filter": {
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			Elem: &schema.Schema{
+				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				Type:             schema.TypeString,
+			},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"ip_filter_object": {
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"description": {
+					Description: "Description for IP filter list entry",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"network": {
+					Description: "CIDR address block",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
 		"metrics_enabled": {
 			Description: "Enable Grafana /metrics endpoint",
 			Optional:    true,
@@ -1750,6 +1895,35 @@ func ServiceTypeInfluxdb() *schema.Schema {
 			Optional: true,
 			Type:     schema.TypeList,
 		},
+		"ip_filter": {
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			Elem: &schema.Schema{
+				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				Type:             schema.TypeString,
+			},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"ip_filter_object": {
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"description": {
+					Description: "Description for IP filter list entry",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"network": {
+					Description: "CIDR address block",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
 		"private_access": {
 			Description: "Allow access to selected service ports from private networks",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"influxdb": {
@@ -1839,6 +2013,35 @@ func ServiceTypeKafka() *schema.Schema {
 			Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
 			Optional:    true,
 			Type:        schema.TypeString,
+		},
+		"ip_filter": {
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			Elem: &schema.Schema{
+				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				Type:             schema.TypeString,
+			},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"ip_filter_object": {
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"description": {
+					Description: "Description for IP filter list entry",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"network": {
+					Description: "CIDR address block",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
 		},
 		"kafka": {
 			Description: "Kafka broker configuration values",
@@ -2686,6 +2889,35 @@ func ServiceTypeKafka() *schema.Schema {
 // ServiceTypeKafkaConnect is a generated function returning the schema of the kafka_connect ServiceType.
 func ServiceTypeKafkaConnect() *schema.Schema {
 	s := map[string]*schema.Schema{
+		"ip_filter": {
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			Elem: &schema.Schema{
+				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				Type:             schema.TypeString,
+			},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"ip_filter_object": {
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"description": {
+					Description: "Description for IP filter list entry",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"network": {
+					Description: "CIDR address block",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
 		"kafka_connect": {
 			Description: "Kafka Connect configuration values",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
@@ -2936,6 +3168,35 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 // ServiceTypeKafkaMirrormaker is a generated function returning the schema of the kafka_mirrormaker ServiceType.
 func ServiceTypeKafkaMirrormaker() *schema.Schema {
 	s := map[string]*schema.Schema{
+		"ip_filter": {
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			Elem: &schema.Schema{
+				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				Type:             schema.TypeString,
+			},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"ip_filter_object": {
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"description": {
+					Description: "Description for IP filter list entry",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"network": {
+					Description: "CIDR address block",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
 		"kafka_mirrormaker": {
 			Description: "Kafka MirrorMaker configuration values",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
@@ -3071,6 +3332,35 @@ func ServiceTypeM3aggregator() *schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
+		"ip_filter": {
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			Elem: &schema.Schema{
+				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				Type:             schema.TypeString,
+			},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"ip_filter_object": {
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"description": {
+					Description: "Description for IP filter list entry",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"network": {
+					Description: "CIDR address block",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
 		"m3_version": {
 			Description: "M3 major version (deprecated, use m3aggregator_version)",
 			Optional:    true,
@@ -3105,6 +3395,35 @@ func ServiceTypeM3db() *schema.Schema {
 			Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
 			Optional:    true,
 			Type:        schema.TypeString,
+		},
+		"ip_filter": {
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			Elem: &schema.Schema{
+				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				Type:             schema.TypeString,
+			},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"ip_filter_object": {
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"description": {
+					Description: "Description for IP filter list entry",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"network": {
+					Description: "CIDR address block",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
 		},
 		"limits": {
 			Description: "M3 limits",
@@ -3557,6 +3876,35 @@ func ServiceTypeMysql() *schema.Schema {
 			Description: "The minimum amount of time in seconds to keep binlog entries before deletion. This may be extended for services that require binlog entries for longer than the default for example if using the MySQL Debezium Kafka connector.",
 			Optional:    true,
 			Type:        schema.TypeInt,
+		},
+		"ip_filter": {
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			Elem: &schema.Schema{
+				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				Type:             schema.TypeString,
+			},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"ip_filter_object": {
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"description": {
+					Description: "Description for IP filter list entry",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"network": {
+					Description: "CIDR address block",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
 		},
 		"migration": {
 			Description: "Migrate data from existing server",
@@ -4196,6 +4544,35 @@ func ServiceTypeOpensearch() *schema.Schema {
 			Optional: true,
 			Type:     schema.TypeList,
 		},
+		"ip_filter": {
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			Elem: &schema.Schema{
+				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				Type:             schema.TypeString,
+			},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"ip_filter_object": {
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"description": {
+					Description: "Description for IP filter list entry",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"network": {
+					Description: "CIDR address block",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
 		"keep_index_refresh_interval": {
 			Description: "Aiven automation resets index.refresh_interval to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.",
 			Optional:    true,
@@ -4761,6 +5138,35 @@ func ServiceTypePg() *schema.Schema {
 			Description: "Register AAAA DNS records for the service, and allow IPv6 packets to service ports",
 			Optional:    true,
 			Type:        schema.TypeBool,
+		},
+		"ip_filter": {
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			Elem: &schema.Schema{
+				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				Type:             schema.TypeString,
+			},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"ip_filter_object": {
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"description": {
+					Description: "Description for IP filter list entry",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"network": {
+					Description: "CIDR address block",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
 		},
 		"migration": {
 			Description: "Migrate data from existing server",
@@ -5669,6 +6075,35 @@ func ServiceTypePg() *schema.Schema {
 // ServiceTypeRedis is a generated function returning the schema of the redis ServiceType.
 func ServiceTypeRedis() *schema.Schema {
 	s := map[string]*schema.Schema{
+		"ip_filter": {
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			Elem: &schema.Schema{
+				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				Type:             schema.TypeString,
+			},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"ip_filter_object": {
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"description": {
+					Description: "Description for IP filter list entry",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"network": {
+					Description: "CIDR address block",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 1024,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
 		"migration": {
 			Description: "Migrate data from existing server",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{

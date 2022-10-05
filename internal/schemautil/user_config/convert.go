@@ -1,6 +1,7 @@
 package user_config
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
@@ -50,23 +51,27 @@ func convertPropertiesToSchemaMap(p map[string]interface{}) jen.Dict {
 			continue
 		}
 
-		t, at := terraformTypes(slicedString(va["type"]))
+		ts, ats := terraformTypes(slicedString(va["type"]))
+		if len(ts) > 1 {
+			panic(fmt.Sprintf("multiple types for %s", k))
+		}
 
-		for kn, vn := range t {
-			var s *jen.Statement
+		t, at := ts[0], ats[0]
 
-			switch vn {
-			case "TypeBool", "TypeInt", "TypeFloat", "TypeString":
-				s = handlePrimitiveTypeProperty(k, va, vn)
-			default:
-				s = handleAggregateTypeProperty(k, va, vn, at[kn])
-			}
+		var s map[string]*jen.Statement
 
-			if s == nil {
-				continue
-			}
+		if isTerraformTypePrimitive(t) {
+			s = handlePrimitiveTypeProperty(k, va, t)
+		} else {
+			s = handleAggregateTypeProperty(k, va, t, at)
+		}
 
-			r[jen.Lit(k)] = s
+		if s == nil {
+			continue
+		}
+
+		for kn, vn := range s {
+			r[jen.Lit(kn)] = vn
 		}
 	}
 
