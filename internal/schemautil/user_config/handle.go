@@ -9,23 +9,24 @@ import (
 
 // handlePrimitiveTypeProperty is a function that converts a primitive type property to a Terraform schema.
 func handlePrimitiveTypeProperty(n string, p map[string]interface{}, t string) map[string]*jen.Statement {
-	return map[string]*jen.Statement{n: jen.Values(convertPropertyToSchema(n, p, t))}
+	return map[string]*jen.Statement{n: jen.Values(convertPropertyToSchema(n, p, t, true))}
 }
 
 // handleObjectProperty is a function that converts an object type property to a Terraform schema.
 func handleObjectProperty(n string, p map[string]interface{}, t string) map[string]*jen.Statement {
 	pa, ok := p["properties"].(map[string]interface{})
 	if !ok {
-		if it, ok := p["items"].(map[string]interface{}); ok {
-			if pa, ok = it["properties"].(map[string]interface{}); !ok {
-				return nil
-			}
-		} else {
-			return nil
+		it, ok := p["items"].(map[string]interface{})
+		if ok {
+			pa, ok = it["properties"].(map[string]interface{})
+		}
+
+		if !ok {
+			panic(fmt.Sprintf("unable to get properties field: %#v", p))
 		}
 	}
 
-	r := convertPropertyToSchema(n, p, t)
+	r := convertPropertyToSchema(n, p, t, true)
 
 	s := jen.Map(jen.String()).Op("*").Qual(SchemaPackage, "Schema").Values(convertPropertiesToSchemaMap(pa))
 
@@ -70,17 +71,30 @@ func handleArrayOfAggregateTypeProperty(ip map[string]interface{}) *jen.Statemen
 func handleArrayProperty(n string, p map[string]interface{}, t string) map[string]*jen.Statement {
 	ia, ok := p["items"].(map[string]interface{})
 	if !ok {
-		return nil
-	}
-
-	// TODO: Handle this case separately.
-	if _, ok := ia["one_of"]; ok {
-		return nil
+		panic(fmt.Sprintf("items is not a map[string]interface{}: %#v", p))
 	}
 
 	var e *jen.Statement
 
-	tn, atn := terraformTypes(slicedString(ia["type"]))
+	var tn, atn []string
+
+	oos, iof := ia["one_of"].([]interface{})
+	if iof {
+		ct := []string{}
+
+		for _, v := range oos {
+			va, ok := v.(map[string]interface{})
+			if !ok {
+				panic(fmt.Sprintf("one_of element is not a map[string]interface{}: %#v", v))
+			}
+
+			ct = append(ct, va["type"].(string))
+		}
+
+		tn, atn = terraformTypes(ct)
+	} else {
+		tn, atn = terraformTypes(slicedString(ia["type"]))
+	}
 
 	r := make(map[string]*jen.Statement)
 
@@ -93,19 +107,50 @@ func handleArrayProperty(n string, p map[string]interface{}, t string) map[strin
 			if an == "ip_filter_string" {
 				an = "ip_filter"
 			}
+
+			// TODO: Remove with the next major version.
+			if an == "namespaces_string" {
+				an = "namespaces"
+			}
+		}
+
+		var ooia map[string]interface{}
+
+		if iof {
+			ooia, ok = oos[k].(map[string]interface{})
+			if !ok {
+				panic(fmt.Sprintf("unable to convert one_of item to map[string]interface{}: %#v", oos[k]))
+			}
 		}
 
 		if isTerraformTypePrimitive(v) {
 			e = handleArrayOfPrimitiveTypeProperty(an, v)
 		} else {
-			if ipa, ok := ia["properties"].(map[string]interface{}); ok {
-				e = handleArrayOfAggregateTypeProperty(ipa)
+			var ipa map[string]interface{}
+
+			if iof {
+				ipa, ok = ooia["properties"].(map[string]interface{})
+				if !ok {
+					panic(fmt.Sprintf("unable to convert one_of item properties to map[string]interface{}: %#v", ooia))
+				}
 			} else {
-				panic(fmt.Sprintf("could not find properties in an array of aggregate type: %#v", p))
+				ipa, ok = ia["properties"].(map[string]interface{})
+				if !ok {
+					panic(fmt.Sprintf("could not find properties in an array of aggregate type: %#v", p))
+				}
 			}
+
+			e = handleArrayOfAggregateTypeProperty(ipa)
 		}
 
-		s := convertPropertyToSchema(n, p, t)
+		s := convertPropertyToSchema(n, p, t, !iof)
+
+		if iof {
+			_, dpv := descriptionForProperty(p)
+			dooik, dooiv := descriptionForProperty(ooia)
+
+			s[jen.Id(dooik)] = jen.Lit(fmt.Sprintf("%s %s", dpv, dooiv))
+		}
 
 		s[jen.Id("Elem")] = e
 
