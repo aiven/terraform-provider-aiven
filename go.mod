@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/aiven/aiven-go-client v1.7.1-0.20221108145444-aa8b10f12d8f
 	github.com/aiven/aiven-go-client/tools/exp v0.0.0-20221102122203-4f39deb34b6a
+	github.com/dave/jennifer v1.5.1
 	github.com/docker/go-units v0.5.0
 	github.com/ettle/strcase v0.1.1
 	github.com/gruntwork-io/terratest v0.40.22
