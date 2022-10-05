@@ -33,6 +33,16 @@ func terraformTypes(t []string) ([]string, []string) {
 	return r, ar
 }
 
+// isTerraformTypePrimitive is a function that checks if a Terraform type is a primitive type.
+func isTerraformTypePrimitive(t string) bool {
+	switch t {
+	case "TypeBool", "TypeInt", "TypeFloat", "TypeString":
+		return true
+	default:
+		return false
+	}
+}
+
 // mustStringSlice is a function that converts an interface to a slice of strings.
 func mustStringSlice(v interface{}) []string {
 	va, ok := v.([]interface{})

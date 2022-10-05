@@ -186,6 +186,7 @@ func EmptyObjectNoChangeDiffSuppressFunc(k, _, new string, d *schema.ResourceDat
 // define explicit value just because of the Terraform restriction so suppress the
 // change from default to empty (which would be nonsensical operation anyway)
 func IpFilterArrayDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	// TODO: Add support for ip_filter_object.
 	if old == "1" && new == "0" && strings.HasSuffix(k, ".ip_filter.#") {
 		if list, ok := d.Get(strings.TrimSuffix(k, ".#")).([]interface{}); ok {
 			if len(list) == 1 {
@@ -198,6 +199,7 @@ func IpFilterArrayDiffSuppressFunc(k, old, new string, d *schema.ResourceData) b
 }
 
 func IpFilterValueDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) bool {
+	// TODO: Add support for ip_filter_object.
 	return old == "0.0.0.0/0" && new == "" && strings.HasSuffix(k, ".ip_filter.0")
 }
 
