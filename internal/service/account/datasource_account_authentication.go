@@ -4,10 +4,11 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func DatasourceAccountAuthentication() *schema.Resource {
@@ -31,8 +32,8 @@ func datasourceAccountAuthenticationRead(ctx context.Context, d *schema.Resource
 	}
 
 	for _, a := range r.AuthenticationMethods {
-		if a.Name == name {
-			d.SetId(schemautil.BuildResourceID(a.AccountId, a.Id))
+		if a.AuthenticationMethodName == name {
+			d.SetId(schemautil.BuildResourceID(a.AccountID, a.AuthenticationMethodID))
 			return resourceAccountAuthenticationRead(ctx, d, m)
 		}
 	}

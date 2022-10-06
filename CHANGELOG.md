@@ -9,6 +9,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Improve static IP error handling end messaging 
+- Fix `aiven_account_authentication` resource update, add tests
 
 ## [3.7.0] - 2022-09-30
 

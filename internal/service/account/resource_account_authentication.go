@@ -2,12 +2,14 @@ package account
 
 import (
 	"context"
+	"strings"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 var aivenAccountAuthenticationSchema = map[string]*schema.Schema{
@@ -39,9 +41,10 @@ var aivenAccountAuthenticationSchema = map[string]*schema.Schema{
 		Description: "Team ID",
 	},
 	"saml_certificate": {
-		Type:        schema.TypeString,
-		Optional:    true,
-		Description: "SAML Certificate",
+		Type:             schema.TypeString,
+		Optional:         true,
+		Description:      "SAML Certificate",
+		DiffSuppressFunc: schemautil.TrimSpaceDiffSuppressFunc,
 	},
 	"saml_digest_algorithm": {
 		Type:        schema.TypeString,
@@ -156,22 +159,20 @@ func resourceAccountAuthenticationCreate(ctx context.Context, d *schema.Resource
 	client := m.(*aiven.Client)
 
 	accountId := d.Get("account_id").(string)
-
 	r, err := client.AccountAuthentications.Create(
 		accountId,
-		aiven.AccountAuthenticationMethod{
-			Enabled:                d.Get("enabled").(bool),
-			Name:                   d.Get("name").(string),
-			Type:                   d.Get("type").(string),
-			AutoJoinTeamId:         d.Get("auto_join_team_id").(string),
-			SAMLCertificate:        d.Get("saml_certificate").(string),
-			SAMLDigestAlgorithm:    d.Get("saml_digest_algorithm").(string),
-			SAMLFieldMapping:       readSAMLFieldMappingFromSchema(d),
-			SAMLIdpLoginAllowed:    d.Get("saml_idp_login_allowed").(bool),
-			SAMLIdpUrl:             d.Get("saml_idp_url").(string),
-			SAMLSignatureAlgorithm: d.Get("saml_signature_algorithm").(string),
-			SAMLVariant:            d.Get("saml_variant").(string),
-			SAMLEntity:             d.Get("saml_entity_id").(string),
+		aiven.AccountAuthenticationMethodCreate{
+			AuthenticationMethodName: d.Get("name").(string),
+			AuthenticationMethodType: d.Get("type").(string),
+			AutoJoinTeamID:           d.Get("auto_join_team_id").(string),
+			SAMLCertificate:          strings.TrimSpace(d.Get("saml_certificate").(string)),
+			SAMLDigestAlgorithm:      d.Get("saml_digest_algorithm").(string),
+			SAMLEntityID:             d.Get("saml_entity_id").(string),
+			SAMLFieldMapping:         readSAMLFieldMappingFromSchema(d),
+			SAMLIdpLoginAllowed:      d.Get("saml_idp_login_allowed").(bool),
+			SAMLIdpURL:               d.Get("saml_idp_url").(string),
+			SAMLSignatureAlgorithm:   d.Get("saml_signature_algorithm").(string),
+			SAMLVariant:              d.Get("saml_variant").(string),
 		},
 	)
 	if err != nil {
@@ -179,8 +180,8 @@ func resourceAccountAuthenticationCreate(ctx context.Context, d *schema.Resource
 	}
 
 	d.SetId(schemautil.BuildResourceID(
-		r.AuthenticationMethod.AccountId,
-		r.AuthenticationMethod.Id))
+		accountId,
+		r.AuthenticationMethod.AuthenticationMethodID))
 
 	return resourceAccountAuthenticationRead(ctx, d, m)
 }
@@ -198,19 +199,19 @@ func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
-	if err := d.Set("account_id", r.AuthenticationMethod.AccountId); err != nil {
+	if err := d.Set("account_id", r.AuthenticationMethod.AccountID); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("name", r.AuthenticationMethod.Name); err != nil {
+	if err := d.Set("name", r.AuthenticationMethod.AuthenticationMethodName); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("type", r.AuthenticationMethod.Type); err != nil {
+	if err := d.Set("type", r.AuthenticationMethod.AuthenticationMethodType); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("enabled", r.AuthenticationMethod.Enabled); err != nil {
+	if err := d.Set("enabled", r.AuthenticationMethod.AuthenticationMethodEnabled); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("auto_join_team_id", r.AuthenticationMethod.AutoJoinTeamId); err != nil {
+	if err := d.Set("auto_join_team_id", r.AuthenticationMethod.AutoJoinTeamID); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("saml_certificate", r.AuthenticationMethod.SAMLCertificate); err != nil {
@@ -225,7 +226,7 @@ func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData
 	if err := d.Set("saml_idp_login_allowed", r.AuthenticationMethod.SAMLIdpLoginAllowed); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("saml_idp_url", r.AuthenticationMethod.SAMLIdpUrl); err != nil {
+	if err := d.Set("saml_idp_url", r.AuthenticationMethod.SAMLIdpURL); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("saml_signature_algorithm", r.AuthenticationMethod.SAMLSignatureAlgorithm); err != nil {
@@ -234,16 +235,16 @@ func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData
 	if err := d.Set("saml_variant", r.AuthenticationMethod.SAMLVariant); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("saml_entity_id", r.AuthenticationMethod.SAMLEntity); err != nil {
+	if err := d.Set("saml_entity_id", r.AuthenticationMethod.SAMLEntityID); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("authentication_id", r.AuthenticationMethod.Id); err != nil {
+	if err := d.Set("authentication_id", r.AuthenticationMethod.AuthenticationMethodID); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("saml_acs_url", r.AuthenticationMethod.SAMLAcsUrl); err != nil {
+	if err := d.Set("saml_acs_url", r.AuthenticationMethod.SAMLAcsURL); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("saml_metadata_url", r.AuthenticationMethod.SAMLMetadataUrl); err != nil {
+	if err := d.Set("saml_metadata_url", r.AuthenticationMethod.SAMLMetadataURL); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("create_time", r.AuthenticationMethod.CreateTime.String()); err != nil {
@@ -263,29 +264,26 @@ func resourceAccountAuthenticationUpdate(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	r, err := client.AccountAuthentications.Update(accountId, aiven.AccountAuthenticationMethod{
-		Id:                     authId,
-		Enabled:                d.Get("enabled").(bool),
-		Name:                   d.Get("name").(string),
-		Type:                   d.Get("type").(string),
-		AutoJoinTeamId:         d.Get("auto_join_team_id").(string),
-		SAMLCertificate:        d.Get("saml_certificate").(string),
-		SAMLDigestAlgorithm:    d.Get("saml_digest_algorithm").(string),
-		SAMLFieldMapping:       readSAMLFieldMappingFromSchema(d),
-		SAMLIdpLoginAllowed:    d.Get("saml_idp_login_allowed").(bool),
-		SAMLIdpUrl:             d.Get("saml_idp_url").(string),
-		SAMLSignatureAlgorithm: d.Get("saml_signature_algorithm").(string),
-		SAMLVariant:            d.Get("saml_variant").(string),
-		SAMLEntity:             d.Get("saml_entity_id").(string),
-	})
+	r := aiven.AccountAuthenticationMethodUpdate{
+		AuthenticationMethodEnabled: d.Get("enabled").(bool),
+		AuthenticationMethodName:    d.Get("name").(string),
+		AutoJoinTeamID:              d.Get("auto_join_team_id").(string),
+		SAMLCertificate:             strings.TrimSpace(d.Get("saml_certificate").(string)),
+		SAMLDigestAlgorithm:         d.Get("saml_digest_algorithm").(string),
+		SAMLFieldMapping:            readSAMLFieldMappingFromSchema(d),
+		SAMLIdpLoginAllowed:         d.Get("saml_idp_login_allowed").(bool),
+		SAMLIdpURL:                  d.Get("saml_idp_url").(string),
+		SAMLSignatureAlgorithm:      d.Get("saml_signature_algorithm").(string),
+		SAMLVariant:                 d.Get("saml_variant").(string),
+		SAMLEntity:                  d.Get("saml_entity_id").(string),
+	}
+
+	_, err = client.AccountAuthentications.Update(accountId, authId, r)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(schemautil.BuildResourceID(
-		r.AuthenticationMethod.AccountId,
-		r.AuthenticationMethod.Id))
-
+	d.SetId(schemautil.BuildResourceID(accountId, authId))
 	return resourceAccountAuthenticationRead(ctx, d, m)
 }
 
