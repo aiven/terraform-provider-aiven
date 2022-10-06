@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Improve static IP error handling end messaging 
+
 ## [3.7.0] - 2022-09-30
 
 - Update to the official name Aiven Provider for Terraform
