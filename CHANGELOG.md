@@ -8,6 +8,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `aiven_gcp_vpc_peering_connection` creation
 - Improve static IP error handling end messaging 
 
 ## [3.7.0] - 2022-09-30
