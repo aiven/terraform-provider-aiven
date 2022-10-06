@@ -66,8 +66,10 @@ func resourceStaticIPRead(_ context.Context, d *schema.ResourceData, m interface
 
 	r, err := client.StaticIPs.List(project)
 	if err != nil {
-		return diag.Errorf("error getting a list of static IPs for a project: %s",
-			schemautil.ResourceReadHandleNotFound(err, d))
+		if schemautil.ResourceReadHandleNotFound(err, d) == nil {
+			return nil
+		}
+		return diag.Errorf("error getting a list of static IPs for a project: %s", err)
 	}
 	for _, sip := range r.StaticIPs {
 		if sip.StaticIPAddressID == staticIPAddressId {
@@ -78,6 +80,8 @@ func resourceStaticIPRead(_ context.Context, d *schema.ResourceData, m interface
 			return nil
 		}
 	}
+
+	d.SetId("")
 
 	return nil
 }
