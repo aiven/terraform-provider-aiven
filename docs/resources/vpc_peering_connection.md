@@ -83,4 +83,6 @@ Optional:
 - `delete` (String)
 ## Import
 Import is supported using the following syntax:
-{{codefile "shell" "examples/resources/aiven_vpc_peering_connection/import.sh"}}
+```shell
+terraform import aiven_vpc_peering_connection.mypeeringconnection project/vpc_id/peer_cloud_account/peer_vpc/peer_region
+```
