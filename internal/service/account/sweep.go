@@ -8,8 +8,9 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
+	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
 
 func init() {
@@ -61,7 +62,7 @@ func sweepAccountAuthentications(region string) error {
 		}
 
 		for _, m := range rr.AuthenticationMethods {
-			err := conn.AccountAuthentications.Delete(m.AccountId, m.Id)
+			err := conn.AccountAuthentications.Delete(a.Id, m.AuthenticationMethodID)
 			if err != nil {
 				if strings.Contains(err.Error(), "Internal authentication methods cannot be deleted") {
 					continue
