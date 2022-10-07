@@ -2,10 +2,7 @@ package vpc
 
 import (
 	"context"
-	"fmt"
 	"time"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -61,34 +58,7 @@ func ResourceGCPVPCPeeringConnection() *schema.Resource {
 			Delete: schema.DefaultTimeout(2 * time.Minute),
 		},
 
-		Schema:        aivenGCPVPCPeeringConnectionSchema,
-		CustomizeDiff: customdiff.If(schemautil.ResourceShouldNotExist, vpcCustomDiffGCPPeeringConnectionExists()),
-	}
-}
-
-func vpcCustomDiffGCPPeeringConnectionExists() func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-	return func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-		client := m.(*aiven.Client)
-
-		projectName, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
-		if err != nil {
-			return err
-		}
-
-		gcpProjectId := d.Get("gcp_project_id").(string)
-		peerVPC := d.Get("peer_vpc").(string)
-
-		pc, err := client.VPCPeeringConnections.GetVPCPeering(
-			projectName, vpcID, gcpProjectId, peerVPC, nil)
-		if err != nil && !aiven.IsNotFound(err) {
-			return err
-		}
-
-		if pc != nil {
-			return fmt.Errorf("gcp peering connection already exists and cannot be created")
-		}
-
-		return nil
+		Schema: aivenGCPVPCPeeringConnectionSchema,
 	}
 }
 
@@ -106,6 +76,16 @@ func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 
 	gcpProjectId := d.Get("gcp_project_id").(string)
 	peerVPC := d.Get("peer_vpc").(string)
+
+	pc, err = client.VPCPeeringConnections.GetVPCPeering(
+		projectName, vpcID, gcpProjectId, peerVPC, nil)
+	if err != nil && !aiven.IsNotFound(err) {
+		return diag.Errorf("error checking gcp peering connection: %s", err)
+	}
+
+	if pc != nil {
+		return diag.Errorf("gcp vpc peering connection already exists and cannot be created")
+	}
 
 	if _, err = client.VPCPeeringConnections.Create(
 		projectName,
