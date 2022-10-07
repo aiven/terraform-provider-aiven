@@ -1,16 +1,27 @@
 package account_test
 
 import (
+	"bytes"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
 	"fmt"
 	"log"
+	"math/big"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/aiven/aiven-go-client"
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/stretchr/testify/assert"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func TestAccAivenAccountAuthentication_basic(t *testing.T) {
@@ -31,6 +42,83 @@ func TestAccAivenAccountAuthentication_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "type", "saml"),
 				),
 			},
+		},
+	})
+}
+
+func testAccAccountAuthenticationResourceSAMLCertificate(rName, certificate string) string {
+	return fmt.Sprintf(`
+resource "aiven_account" "user" {
+  name = "test-acc-account-%[1]s"
+}
+
+resource "aiven_account_authentication" "method" {
+  account_id       = aiven_account.user.account_id
+  type             = "saml"
+  name             = "test-acc-auth-method-%[1]s"
+  saml_certificate = <<-EOT
+  %[2]s
+  EOT
+}
+`, rName, certificate)
+}
+
+func TestAccAivenAccountAuthentication_saml_valid_certificate_create_update(t *testing.T) {
+	certCreate, err := genX509Certificate(time.Now())
+	assert.NoError(t, err)
+
+	certUpdate, err := genX509Certificate(time.Now())
+	assert.NoError(t, err)
+
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	resourceName := "aiven_account_authentication.method"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenAccountAuthenticationResourceDestroy,
+		Steps: []resource.TestStep{
+			// Creates
+			{
+				Config: testAccAccountAuthenticationResourceSAMLCertificate(rName, certCreate),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenAccountAuthenticationAttributes(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "test-acc-auth-method-"+rName),
+					resource.TestCheckResourceAttr(resourceName, "saml_certificate", certCreate),
+				),
+			},
+			// Updates
+			{
+				Config: testAccAccountAuthenticationResourceSAMLCertificate(rName, certUpdate),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenAccountAuthenticationAttributes(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "test-acc-auth-method-"+rName),
+					resource.TestCheckResourceAttr(resourceName, "saml_certificate", certUpdate),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAivenAccountAuthentication_saml_invalid_certificate(t *testing.T) {
+	certCreate, err := genX509Certificate(time.Now().AddDate(-30, 0, 0))
+	assert.NoError(t, err)
+
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenAccountAuthenticationResourceDestroy,
+		Steps: []resource.TestStep{
+			// Creates
+			{
+				Config: testAccAccountAuthenticationResourceSAMLCertificate(rName, certCreate),
+			},
+		},
+		ErrorCheck: func(err error) error {
+			assert.ErrorContains(t, err, "Certificate is no longer valid")
+			return nil
 		},
 	})
 }
@@ -148,7 +236,7 @@ func testAccCheckAivenAccountAuthenticationResourceDestroy(s *terraform.State) e
 				}
 
 				for _, a := range ra.AuthenticationMethods {
-					if a.Id == authId {
+					if a.AuthenticationMethodID == authId {
 						return fmt.Errorf("account authentication (%s) still exists", rs.Primary.ID)
 					}
 				}
@@ -212,7 +300,7 @@ func testAccCheckAivenAccountAuthenticationWithAutoJoinTeamIDResourceDestroy(s *
 					}
 
 					for _, a := range ra.AuthenticationMethods {
-						if a.Id == secondaryID {
+						if a.AuthenticationMethodID == secondaryID {
 							return fmt.Errorf("account authentication (%s) still exists", rs.Primary.ID)
 						}
 					}
@@ -227,8 +315,11 @@ func testAccCheckAivenAccountAuthenticationWithAutoJoinTeamIDResourceDestroy(s *
 func testAccCheckAivenAccountAuthenticationAttributes(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		r := s.RootModule().Resources[n]
-		a := r.Primary.Attributes
+		if r.Primary == nil {
+			return fmt.Errorf("resource %s not found", n)
+		}
 
+		a := r.Primary.Attributes
 		log.Printf("[DEBUG] account team attributes %v", a)
 
 		if a["enabled"] != "false" {
@@ -265,4 +356,39 @@ func testAccCheckAivenAccountAuthenticationAttributes(n string) resource.TestChe
 
 		return nil
 	}
+}
+
+func genX509Certificate(now time.Time) (string, error) {
+	ca := &x509.Certificate{
+		SerialNumber: big.NewInt(2022),
+		NotBefore:    now,
+		NotAfter:     now.Add(time.Hour),
+		Subject: pkix.Name{
+			Organization: []string{"aiven"},
+		},
+		IsCA:                  true,
+		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+	}
+	key, err := rsa.GenerateKey(rand.Reader, 4096)
+	if err != nil {
+		return "", err
+	}
+
+	caBytes, err := x509.CreateCertificate(rand.Reader, ca, ca, &key.PublicKey, key)
+	if err != nil {
+		return "", err
+	}
+
+	p := new(bytes.Buffer)
+	err = pem.Encode(p, &pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: caBytes,
+	})
+
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(p.String()), nil
 }

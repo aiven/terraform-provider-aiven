@@ -201,6 +201,10 @@ func IpFilterValueDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) b
 	return old == "0.0.0.0/0" && new == "" && strings.HasSuffix(k, ".ip_filter.0")
 }
 
+func TrimSpaceDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) bool {
+	return strings.TrimSpace(old) == strings.TrimSpace(new)
+}
+
 // ValidateDurationString is a ValidateFunc that ensures a string parses
 // as time.Duration format
 func ValidateDurationString(v interface{}, k string) (ws []string, errors []error) {
