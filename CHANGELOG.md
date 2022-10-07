@@ -11,7 +11,7 @@ nav_order: 1
 - Fix `aiven_gcp_vpc_peering_connection` creation
 - Improve static IP error handling end messaging 
 - Fix `aiven_account_authentication` resource update, add tests
-
+- Change `aiven_project_vpc` datasource behaviour
 ## [3.7.0] - 2022-09-30
 
 - Update to the official name Aiven Provider for Terraform
