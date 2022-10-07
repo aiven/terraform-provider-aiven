@@ -34,7 +34,7 @@ Look at the [Sample Project Guide](guides/sample-project.md) and the [Examples G
 ## Resource options
 The list of options in this document is not comprehensive, for most part they map directly to the [Aiven REST API](https://api.aiven.io/doc/) properties.
 
-For various objects called `x_user_config`, the exact configuration options are available in [Service User Config](https://github.com/aiven/terraform-provider-aiven/tree/master/aiven/templates/service_user_config_schema.json), [Integration User Config](https://github.com/aiven/terraform-provider-aiven/tree/master/aiven/templates/integrations_user_config_schema.json) and in [Integration Endpoint User Config](https://github.com/aiven/terraform-provider-aiven/tree/master/aiven/templates/integration_endpoints_user_config_schema.json) schema files.
+For various objects called `x_user_config`, the exact configuration options are available in [Service User Config](https://github.com/aiven/aiven-go-client/blob/master/tools/exp/dist/service_types.yml), [Integration User Config](https://github.com/aiven/aiven-go-client/blob/master/tools/exp/dist/integration_types.yml) and in [Integration Endpoint User Config](https://github.com/aiven/aiven-go-client/blob/master/tools/exp/dist/integration_endpoint_types.yml) schema files.
 
 ## A word of caution
 Recreating stateful services with Terraform will possibly **delete** the service and all its data before creating it again. Whenever the Terraform plan indicates that a service will be **deleted** or **replaced**, a catastrophic action is possibly about to happen.

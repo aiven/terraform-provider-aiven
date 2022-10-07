@@ -17,7 +17,7 @@ Then, we define the `aiven_service_integration_endpoint`.
 
 The important things here are:
 - `endpoint_type` - The type of integration (e.g. `rsyslog`, `prometheus`, `Datadog`)
-- `{type}_user_config` - The user config contains the connection info for your endpoint, such as: URL, port, Certificates (as strings) and login info. {type} here is the endpoint_type you specified above. The documentation for these configs is [here](https://github.com/aiven/terraform-provider-aiven/tree/master/aiven/templates/integration_endpoints_user_config_schema.json) but generated documentation for this is coming soon.
+- `{type}_user_config` - The user config contains the connection info for your endpoint, such as: URL, port, Certificates (as strings) and login info. {type} here is the endpoint_type you specified above. The documentation for these configs is [here](https://github.com/aiven/aiven-go-client/blob/master/tools/exp/dist/integration_endpoint_types.yml) but generated documentation for this is coming soon.
 
 A sample script is below:
 
