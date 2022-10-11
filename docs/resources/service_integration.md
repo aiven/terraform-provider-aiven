@@ -180,4 +180,6 @@ Optional:
 - `create` (String)
 ## Import
 Import is supported using the following syntax:
-{{codefile "shell" "examples/resources/aiven_service_integration/import.sh"}}
+```shell
+terraform import aiven_service_integration.myintegration project/integration_id
+```
