@@ -10,6 +10,8 @@ description: |-
 
 The Service User resource allows the creation and management of Aiven Service Users.
 
+~> **Note:** This resource is deprecated. Please use service-specific resources instead of this one, for example: aiven_kafka_user, aiven_pg_user etc.
+
 ## Example Usage
 
 ```terraform
