@@ -2,8 +2,6 @@ package service_component
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"strconv"
 
 	"github.com/aiven/aiven-go-client"
@@ -128,16 +126,15 @@ func datasourceServiceComponentRead(_ context.Context, d *schema.ResourceData, m
 
 	for _, c := range service.Components {
 		if c.Component == componentName && c.Route == route && c.Usage == usage {
-			filteredBySsl, err := filterDatasourceServiceComponents(d, "ssl", service.Components)
-			if err != nil {
-				return diag.FromErr(err)
-			}
-			filteredByKafkaAuthMethod, err := filterDatasourceServiceComponents(d, "kafka_authentication_method", filteredBySsl)
-			if err != nil {
-				return diag.FromErr(err)
+			if ssl, ok := d.GetOk("ssl"); ok && *c.Ssl != ssl {
+				continue
 			}
 
-			filteredResult = filteredByKafkaAuthMethod
+			if m, ok := d.GetOk("kafka_authentication_method"); ok && c.KafkaAuthenticationMethod != m {
+				continue
+			}
+
+			filteredResult = append(filteredResult, c)
 		}
 	}
 
@@ -183,75 +180,4 @@ func datasourceServiceComponentRead(_ context.Context, d *schema.ResourceData, m
 
 	return nil
 
-}
-
-func filterDatasourceServiceComponents(d *schema.ResourceData, filter string, components []*aiven.ServiceComponents) ([]*aiven.ServiceComponents, error) {
-	filteredResult := make([]*aiven.ServiceComponents, 0)
-
-	switch filter {
-	case "ssl":
-		// check optional ssl search criteria, if not set by a user match entries
-		// without ssl or ssl=true
-		ssl, ok := d.GetOk("ssl")
-		for _, c := range components {
-			if ok {
-				if c.Ssl == nil {
-					continue
-				}
-
-				if *c.Ssl != ssl.(bool) {
-					continue
-				}
-			} else {
-				if !(c.Ssl == nil || *c.Ssl) {
-					continue
-				}
-			}
-
-			filteredResult = append(filteredResult, c)
-		}
-
-		if len(filteredResult) == 0 {
-			var errorMessage string
-			if ok {
-				errorMessage = "cannot match the components with the given SSL criteria"
-			} else {
-				errorMessage = "please try specifying 'ssl' to filter the results"
-			}
-			return nil, errors.New(errorMessage)
-		}
-
-		return filteredResult, nil
-
-	case "kafka_authentication_method":
-		// check optional kafka_authentication_method search criteria, if not set by a
-		// user match entries without kafka_authentication_method
-		method, ok := d.GetOk("kafka_authentication_method")
-		for _, c := range components {
-			if ok {
-				if c.KafkaAuthenticationMethod != method {
-					continue
-				}
-			} else {
-				if c.KafkaAuthenticationMethod != "" {
-					continue
-				}
-			}
-
-			filteredResult = append(filteredResult, c)
-		}
-
-		if len(filteredResult) == 0 {
-			var errorMessage string
-			if ok {
-				errorMessage = fmt.Sprintf("no result matches (kafka_authentication_method=%s)", method.(string))
-			} else {
-				errorMessage = "please try specifying 'kafka_authentication_method' to filter the results"
-			}
-			return nil, errors.New(errorMessage)
-		}
-		return filteredResult, nil
-	default:
-		return nil, errors.New("no filtering criteria provided")
-	}
 }
