@@ -12,6 +12,9 @@ nav_order: 1
 - Improve static IP error handling end messaging 
 - Fix `aiven_account_authentication` resource update, add tests
 - Change `aiven_project_vpc` datasource behaviour
+- Return mirrormaker user config option
+- Update user config options
+
 ## [3.7.0] - 2022-09-30
 
 - Update to the official name Aiven Provider for Terraform

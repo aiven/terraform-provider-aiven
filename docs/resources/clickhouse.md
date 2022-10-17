@@ -69,6 +69,7 @@ resource "aiven_clickhouse" "clickhouse" {
 
 Optional:
 
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
 - `ip_filter` (List of String) IP filter
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.

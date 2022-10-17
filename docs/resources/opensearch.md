@@ -83,6 +83,7 @@ resource "aiven_opensearch" "os1" {
 
 Optional:
 
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
 - `custom_domain` (String) Custom domain
 - `disable_replication_factor_adjustment` (String) Disable replication factor adjustment
 - `index_patterns` (Block List, Max: 512) Index patterns (see [below for nested schema](#nestedblock--opensearch_user_config--index_patterns))

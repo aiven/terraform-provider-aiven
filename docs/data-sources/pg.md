@@ -91,6 +91,7 @@ Read-Only:
 
 Read-Only:
 
+- `additional_backup_regions` (List of String)
 - `admin_password` (String)
 - `admin_username` (String)
 - `backup_hour` (String)

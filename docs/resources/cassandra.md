@@ -77,6 +77,7 @@ resource "aiven_cassandra" "bar" {
 
 Optional:
 
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
 - `cassandra` (Block List, Max: 1) cassandra configuration values (see [below for nested schema](#nestedblock--cassandra_user_config--cassandra))
 - `cassandra_version` (String) Cassandra major version
 - `ip_filter` (List of String) IP filter
@@ -85,6 +86,7 @@ Optional:
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--cassandra_user_config--public_access))
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
+- `service_to_join_with` (String) Name of the service to form a bigger cluster with
 - `static_ips` (String) Static IP addresses
 
 <a id="nestedblock--cassandra_user_config--cassandra"></a>
@@ -94,6 +96,7 @@ Optional:
 
 - `batch_size_fail_threshold_in_kb` (String) batch_size_fail_threshold_in_kb
 - `batch_size_warn_threshold_in_kb` (String) batch_size_warn_threshold_in_kb
+- `datacenter` (String) Cassandra datacenter name
 
 
 <a id="nestedblock--cassandra_user_config--private_access"></a>

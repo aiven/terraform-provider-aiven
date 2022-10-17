@@ -82,6 +82,7 @@ Read-Only:
 
 Read-Only:
 
+- `additional_backup_regions` (List of String)
 - `alerting_enabled` (String)
 - `alerting_error_or_timeout` (String)
 - `alerting_max_annotations_to_keep` (String)

@@ -68,6 +68,7 @@ Read-Only:
 
 Read-Only:
 
+- `additional_backup_regions` (List of String)
 - `ip_filter` (List of String)
 - `project_to_fork_from` (String)
 - `service_to_fork_from` (String)

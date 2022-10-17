@@ -81,6 +81,7 @@ Optional:
 
 Optional:
 
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
 - `execution_checkpointing_interval_ms` (String) Flink execution.checkpointing.interval in milliseconds
 - `execution_checkpointing_timeout_ms` (String) Flink execution.checkpointing.timeout in milliseconds
 - `flink_version` (String) Flink major version
