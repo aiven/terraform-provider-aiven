@@ -83,6 +83,7 @@ Read-Only:
 
 Read-Only:
 
+- `additional_backup_regions` (List of String)
 - `execution_checkpointing_interval_ms` (String)
 - `execution_checkpointing_timeout_ms` (String)
 - `flink_version` (String)

@@ -82,6 +82,7 @@ Read-Only:
 
 Read-Only:
 
+- `additional_backup_regions` (List of String)
 - `ip_filter` (List of String)
 - `migration` (List of Object) (see [below for nested schema](#nestedobjatt--redis_user_config--migration))
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--redis_user_config--private_access))

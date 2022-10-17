@@ -75,6 +75,7 @@ resource "aiven_influxdb" "inf1" {
 
 Optional:
 
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
 - `custom_domain` (String) Custom domain
 - `influxdb` (Block List, Max: 1) influxdb.conf configuration values (see [below for nested schema](#nestedblock--influxdb_user_config--influxdb))
 - `ip_filter` (List of String) IP filter

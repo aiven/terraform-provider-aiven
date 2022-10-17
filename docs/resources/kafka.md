@@ -100,6 +100,7 @@ Optional:
 
 Optional:
 
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
 - `custom_domain` (String) Custom domain
 - `ip_filter` (List of String) IP filter
 - `kafka` (Block List, Max: 1) Kafka broker configuration values (see [below for nested schema](#nestedblock--kafka_user_config--kafka))

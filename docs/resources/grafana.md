@@ -77,6 +77,7 @@ resource "aiven_grafana" "gr1" {
 
 Optional:
 
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
 - `alerting_enabled` (String) Enable or disable Grafana alerting functionality
 - `alerting_error_or_timeout` (String) Default error or timeout setting for new alerting rules
 - `alerting_max_annotations_to_keep` (String) Max number of alert annotations that Grafana stores. 0 (default) keeps all alert annotations.

@@ -82,6 +82,7 @@ Read-Only:
 
 Read-Only:
 
+- `additional_backup_regions` (List of String)
 - `ip_filter` (List of String)
 - `kafka_mirrormaker` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_mirrormaker_user_config--kafka_mirrormaker))
 - `static_ips` (String)

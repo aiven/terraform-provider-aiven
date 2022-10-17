@@ -83,6 +83,7 @@ Read-Only:
 
 Read-Only:
 
+- `additional_backup_regions` (List of String)
 - `custom_domain` (String)
 - `disable_replication_factor_adjustment` (String)
 - `index_patterns` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--index_patterns))

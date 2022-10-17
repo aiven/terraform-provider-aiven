@@ -83,6 +83,7 @@ Read-Only:
 
 Read-Only:
 
+- `additional_backup_regions` (List of String)
 - `custom_domain` (String)
 - `influxdb` (List of Object) (see [below for nested schema](#nestedobjatt--influxdb_user_config--influxdb))
 - `ip_filter` (List of String)

@@ -82,6 +82,7 @@ Read-Only:
 
 Read-Only:
 
+- `additional_backup_regions` (List of String)
 - `ip_filter` (List of String)
 - `kafka_connect` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--kafka_connect))
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--private_access))
