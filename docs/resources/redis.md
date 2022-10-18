@@ -77,6 +77,7 @@ resource "aiven_redis" "redis1" {
 
 Optional:
 
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
 - `ip_filter` (List of String) IP filter
 - `migration` (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--redis_user_config--migration))
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--redis_user_config--private_access))

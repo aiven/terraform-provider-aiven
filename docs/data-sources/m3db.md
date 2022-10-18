@@ -82,6 +82,7 @@ Read-Only:
 
 Read-Only:
 
+- `additional_backup_regions` (List of String)
 - `custom_domain` (String)
 - `ip_filter` (List of String)
 - `limits` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--limits))

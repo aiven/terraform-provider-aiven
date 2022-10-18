@@ -78,6 +78,7 @@ resource "aiven_m3db" "m3" {
 
 Optional:
 
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
 - `custom_domain` (String) Custom domain
 - `ip_filter` (List of String) IP filter
 - `limits` (Block List, Max: 1) M3 limits (see [below for nested schema](#nestedblock--m3db_user_config--limits))

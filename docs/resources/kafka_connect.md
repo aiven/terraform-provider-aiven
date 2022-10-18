@@ -79,6 +79,7 @@ resource "aiven_kafka_connect" "kc1" {
 
 Optional:
 
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
 - `ip_filter` (List of String) IP filter
 - `kafka_connect` (Block List, Max: 1) Kafka Connect configuration values (see [below for nested schema](#nestedblock--kafka_connect_user_config--kafka_connect))
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--kafka_connect_user_config--private_access))

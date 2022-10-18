@@ -77,6 +77,7 @@ resource "aiven_kafka_mirrormaker" "mm1" {
 
 Optional:
 
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
 - `ip_filter` (List of String) IP filter
 - `kafka_mirrormaker` (Block List, Max: 1) Kafka MirrorMaker configuration values (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker))
 - `static_ips` (String) Static IP addresses

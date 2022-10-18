@@ -68,6 +68,7 @@ Read-Only:
 
 Read-Only:
 
+- `additional_backup_regions` (List of String)
 - `cassandra` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--cassandra))
 - `cassandra_version` (String)
 - `ip_filter` (List of String)
@@ -76,6 +77,7 @@ Read-Only:
 - `project_to_fork_from` (String)
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--public_access))
 - `service_to_fork_from` (String)
+- `service_to_join_with` (String)
 - `static_ips` (String)
 
 <a id="nestedobjatt--cassandra_user_config--cassandra"></a>
@@ -85,6 +87,7 @@ Read-Only:
 
 - `batch_size_fail_threshold_in_kb` (String)
 - `batch_size_warn_threshold_in_kb` (String)
+- `datacenter` (String)
 
 
 <a id="nestedobjatt--cassandra_user_config--private_access"></a>
