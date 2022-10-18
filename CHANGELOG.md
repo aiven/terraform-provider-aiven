@@ -15,6 +15,7 @@ nav_order: 1
 - Fix `aiven_service_component` optional parameters filters
 - Return mirrormaker user config option
 - Update user config options
+- Add a converter for the service user configuration options `ip_filter` object format
 
 ## [3.7.0] - 2022-09-30
 
