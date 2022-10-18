@@ -1,5 +1,9 @@
 package schemautil
 
+import (
+	"log"
+)
+
 // NormalizeIpFilter compares a list of IP filters set in TF and a sorted version coming
 // from Aiven and takes sort IP filters such that all matching entries will be in
 // the same order as defined in the TF manifest.
@@ -81,7 +85,16 @@ func toStringSlice(s []interface{}) []string {
 
 	r := make([]string, len(s))
 	for i, e := range s {
-		r[i] = e.(string)
+		switch t := e.(type) {
+		case string:
+			r[i] = e.(string)
+		case map[string]interface{}: // ip filter may have an object type
+			// ip_filter object type has two fields: network and description
+			// to convert the object to a string slice, we can only take the network values
+			r[i] = e.(map[string]interface{})["network"].(string)
+		default:
+			log.Panicf("unsupported ip_filter type: %s", t)
+		}
 	}
 
 	return r
