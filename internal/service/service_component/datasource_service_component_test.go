@@ -19,13 +19,19 @@ func TestAccAivenServiceComponentDataSource_basic(t *testing.T) {
 	datasourceKafkaRest := "data.aiven_service_component.kafka_rest"
 	datasourceKafkaRegistry := "data.aiven_service_component.schema_registry"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	rName2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	rName3 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
 		Steps: []resource.TestStep{
+			//{
+			//	Config:      testAccServiceComponentKafkaAuthMethodMissingErrorMessages(rName),
+			//	ExpectError: regexp.MustCompile("please try specifying 'kafka_authentication_method' to filter the results"),
+			//},
+			{
+				Config:      testAccServiceComponentKafkaAuthMethodNotMatchErrorMessages(rName),
+				ExpectError: regexp.MustCompile("cannot find component"),
+			},
 			{
 				Config: testAccServiceComponentDataSource(rName),
 				Check: resource.ComposeTestCheckFunc(
@@ -39,14 +45,6 @@ func TestAccAivenServiceComponentDataSource_basic(t *testing.T) {
 					// Kafka Registry
 					testAccServiceComponentAttributes(datasourceKafkaRegistry, "schema_registry", "dynamic"),
 				),
-			},
-			{
-				Config:      testAccServiceComponentKafkaAuthMethodMissingErrorMessages(rName2),
-				ExpectError: regexp.MustCompile("please try specifying 'kafka_authentication_method' to filter the results"),
-			},
-			{
-				Config:      testAccServiceComponentKafkaAuthMethodNotMatchErrorMessages(rName3),
-				ExpectError: regexp.MustCompile("no result matches"),
 			},
 		},
 	})
@@ -164,35 +162,6 @@ data "aiven_service_component" "schema_registry" {
   route        = "dynamic"
 
   depends_on = [aiven_kafka.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
-}
-
-func testAccServiceComponentKafkaAuthMethodMissingErrorMessages(name string) string {
-	return fmt.Sprintf(`
-data "aiven_project" "foo" {
-  project = "%s"
-}
-
-resource "aiven_kafka" "kafka" {
-  project      = data.aiven_project.foo.project
-  service_name = "test-acc-sr-%s"
-  cloud_name   = "google-europe-west3"
-  plan         = "startup-2"
-
-  kafka_user_config {
-    public_access {
-      kafka = true
-    }
-  }
-}
-
-data "aiven_service_component" "kafka" {
-  project      = aiven_kafka.kafka.project
-  service_name = aiven_kafka.kafka.service_name
-  component    = "kafka"
-  route        = "dynamic"
-
-  depends_on = [aiven_kafka.kafka]
 }`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 

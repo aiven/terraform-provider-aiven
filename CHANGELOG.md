@@ -12,6 +12,7 @@ nav_order: 1
 - Improve static IP error handling end messaging 
 - Fix `aiven_account_authentication` resource update, add tests
 - Change `aiven_project_vpc` datasource behaviour
+- Fix `aiven_service_component` optional parameters filters
 - Return mirrormaker user config option
 - Update user config options
 - Add a converter for the service user configuration options `ip_filter` object format
