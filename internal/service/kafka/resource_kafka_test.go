@@ -6,6 +6,9 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -22,6 +25,12 @@ func TestAccAiven_kafka(t *testing.T) {
 		ProviderFactories: acc.TestAccProviderFactories,
 		CheckDestroy:      acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
+			{
+				Config:             testAccKafkaDoubleTagResource(rName),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ExpectError:        regexp.MustCompile("tag keys should be unique"),
+			},
 			{
 				Config: testAccKafkaResource(rName),
 				Check: resource.ComposeTestCheckFunc(
@@ -64,13 +73,29 @@ func TestAccAiven_kafka(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "service_host"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_port"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_uri"),
+					func(state *terraform.State) error {
+						c := acc.TestAccProvider.Meta().(*aiven.Client)
+						a, err := c.KafkaACLs.List(os.Getenv("AIVEN_PROJECT_NAME"), rName2)
+						if err != nil && !aiven.IsNotFound(err) {
+							return fmt.Errorf("cannot get a list of kafka ACLs: %s", err)
+						}
+
+						if len(a) > 0 {
+							return fmt.Errorf("list of ACLs should be empty")
+						}
+
+						s, err := c.KafkaSchemaRegistryACLs.List(os.Getenv("AIVEN_PROJECT_NAME"), rName2)
+						if err != nil && !aiven.IsNotFound(err) {
+							return fmt.Errorf("cannot get a list of Kafka Schema ACLs: %s", err)
+						}
+
+						if len(s) > 0 {
+							return fmt.Errorf("list of Kafka Schema ACLs should be empty")
+						}
+
+						return nil
+					},
 				),
-			},
-			{
-				Config:             testAccKafkaDoubleTagResource(rName),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: true,
-				ExpectError:        regexp.MustCompile("tag keys should be unique"),
 			},
 		},
 	})
