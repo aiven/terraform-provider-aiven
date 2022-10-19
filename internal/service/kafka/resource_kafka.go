@@ -148,25 +148,29 @@ func resourceKafkaCreate(ctx context.Context, d *schema.ResourceData, m interfac
 		return di
 	}
 
-	// if default_acl=false delete default wildcard Kafka ACL that is automatically created
+	// if default_acl=false delete default wildcard Kafka ACL and ACLs for Schema Registry that are automatically created
 	if !d.Get("default_acl").(bool) {
 		client := m.(*aiven.Client)
 		project := d.Get("project").(string)
 		serviceName := d.Get("service_name").(string)
 
-		list, err := client.KafkaACLs.List(project, serviceName)
-		if err != nil {
-			if err.(aiven.Error).Status != 404 {
-				return diag.Errorf("cannot get a list of kafka acl's: %s", err)
-			}
+		const (
+			defaultACLId                    = "default"
+			defaultSchemaRegistryACLConfig  = "default-sr-admin-config"
+			defaultSchemaRegistryACLSubject = "default-sr-admin-subject"
+		)
+
+		if err := client.KafkaACLs.Delete(project, serviceName, defaultACLId); err != nil && !aiven.IsNotFound(err) {
+			return diag.Errorf("cannot delete default wildcard kafka acl: %s", err)
 		}
 
-		for _, acl := range list {
-			if acl.Username == "*" && acl.Topic == "*" && acl.Permission == "admin" {
-				err := client.KafkaACLs.Delete(project, serviceName, acl.ID)
-				if err != nil {
-					return diag.Errorf("cannot delete default wildcard kafka acl: %s", err)
-				}
+		var defaultSchemaACLLs = []string{
+			defaultSchemaRegistryACLConfig,
+			defaultSchemaRegistryACLSubject,
+		}
+		for _, acl := range defaultSchemaACLLs {
+			if err := client.KafkaSchemaRegistryACLs.Delete(project, serviceName, acl); err != nil && !aiven.IsNotFound(err) {
+				return diag.Errorf("cannot delete `%s` kafka ACL for Schema Registry: %s", acl, err)
 			}
 		}
 	}

@@ -16,6 +16,8 @@ nav_order: 1
 - Return mirrormaker user config option
 - Update user config options
 - Add a converter for the service user configuration options `ip_filter` object format
+- Fix the Kafka service `default_acl` criteria for the deletion of default ACLs
+
 
 ## [3.7.0] - 2022-09-30
 
