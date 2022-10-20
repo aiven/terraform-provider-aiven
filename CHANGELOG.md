@@ -18,6 +18,7 @@ nav_order: 1
 - Add a converter for the service user configuration options `ip_filter` object format
 - Fix the Kafka service `default_acl` criteria for the deletion of default ACLs
 - Don't send empty `additional_backup_regions` to the API
+- Update available ClickHouse service integrations
 
 ## [3.7.0] - 2022-09-30
 

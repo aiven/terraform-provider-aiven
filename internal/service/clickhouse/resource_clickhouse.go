@@ -19,6 +19,25 @@ func clickhouseSchema() map[string]*schema.Schema {
 		},
 	}
 	s[schemautil.ServiceTypeClickhouse+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeClickhouse)
+	s["service_integrations"] = &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		Description: "Service integrations to specify when creating a service. Not applied after initial service creation",
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"source_service_name": {
+					Type:        schema.TypeString,
+					Required:    true,
+					Description: "Name of the source service",
+				},
+				"integration_type": {
+					Type:        schema.TypeString,
+					Required:    true,
+					Description: "Type of the service integration. The only supported values at the moment are `clickhouse_kafka` and `clickhouse_postgresql`.",
+				},
+			},
+		},
+	}
 
 	return s
 }
