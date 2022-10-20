@@ -371,6 +371,11 @@ func convertTerraformUserConfigValueToAPICompatibleFormat(
 			serviceType, value, key, err))
 	}
 
+	// TODO: Remove when this is fixed on backend.
+	if key == "additional_backup_regions" {
+		omit = true
+	}
+
 	return convertedValue, omit
 }
 

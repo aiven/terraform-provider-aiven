@@ -6,7 +6,7 @@ nav_order: 1
 
 # Changelog
 
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+## [3.8.0] - 2022-09-30
 
 - Fix `aiven_gcp_vpc_peering_connection` creation
 - Improve static IP error handling end messaging 
@@ -17,7 +17,7 @@ nav_order: 1
 - Update user config options
 - Add a converter for the service user configuration options `ip_filter` object format
 - Fix the Kafka service `default_acl` criteria for the deletion of default ACLs
-
+- Don't send empty `additional_backup_regions` to the API
 
 ## [3.7.0] - 2022-09-30
 
