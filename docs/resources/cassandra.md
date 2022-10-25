@@ -3,12 +3,12 @@
 page_title: "aiven_cassandra Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Cassandra resource allows the creation and management of Aiven Cassandra services.
+  The Cassandra resource allows the creation and management of Aiven Cassandra https://docs.aiven.io/docs/products/cassandra services.
 ---
 
 # aiven_cassandra (Resource)
 
-The Cassandra resource allows the creation and management of Aiven Cassandra services.
+The Cassandra resource allows the creation and management of [Aiven Cassandra](https://docs.aiven.io/docs/products/cassandra) services.
 
 ## Example Usage
 

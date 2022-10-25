@@ -3,9 +3,10 @@ package cassandra
 import (
 	"time"
 
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func cassandraSchema() map[string]*schema.Schema {
@@ -25,7 +26,7 @@ func cassandraSchema() map[string]*schema.Schema {
 
 func ResourceCassandra() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Cassandra resource allows the creation and management of Aiven Cassandra services.",
+		Description:   "The Cassandra resource allows the creation and management of [Aiven Cassandra](https://docs.aiven.io/docs/products/cassandra) services.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeCassandra),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
