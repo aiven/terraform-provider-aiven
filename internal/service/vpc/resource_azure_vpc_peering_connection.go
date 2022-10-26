@@ -5,11 +5,11 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 var aivenAzureVPCPeeringConnectionSchema = map[string]*schema.Schema{
@@ -183,31 +183,36 @@ func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.Reso
 func resourceAzureVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
+	p, err := parsePeerVPCID(d.Id())
+	if err != nil {
+		return diag.Errorf("error parsing Azure peering VPC ID: %s", err)
+	}
 
 	peerResourceGroup := d.Get("peer_resource_group")
 	pc, err := client.VPCPeeringConnections.GetVPCPeeringWithResourceGroup(
-		projectName, vpcID, peerCloudAccount, peerVPC, peerRegion, peerResourceGroup.(string))
+		p.projectName, p.vpcID, p.peerCloudAccount, p.peerVPC, p.peerRegion, peerResourceGroup.(string))
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
-	return copyAzureVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, projectName, vpcID)
+	return copyAzureVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, p.projectName, p.vpcID)
 }
 
 func resourceAzureVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
-
+	p, err := parsePeerVPCID(d.Id())
+	if err != nil {
+		return diag.Errorf("error parsing Azure peering VPC ID: %s", err)
+	}
 	peerResourceGroup := d.Get("peer_resource_group")
-	err := client.VPCPeeringConnections.DeleteVPCPeeringWithResourceGroup(
-		projectName,
-		vpcID,
-		peerCloudAccount,
-		peerVPC,
+	err = client.VPCPeeringConnections.DeleteVPCPeeringWithResourceGroup(
+		p.projectName,
+		p.vpcID,
+		p.peerCloudAccount,
+		p.peerVPC,
 		peerResourceGroup.(string),
-		peerRegion,
+		p.peerRegion,
 	)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("Error deleting VPC peering connection with resource group: %s", err)
@@ -229,11 +234,11 @@ func resourceAzureVPCPeeringConnectionDelete(ctx context.Context, d *schema.Reso
 		},
 		Refresh: func() (interface{}, string, error) {
 			pc, err := client.VPCPeeringConnections.GetVPCPeeringWithResourceGroup(
-				projectName,
-				vpcID,
-				peerCloudAccount,
-				peerVPC,
-				peerRegion,
+				p.projectName,
+				p.vpcID,
+				p.peerCloudAccount,
+				p.peerVPC,
+				p.peerRegion,
 				d.Get("peer_resource_group").(string), // was already checked
 			)
 			if err != nil {

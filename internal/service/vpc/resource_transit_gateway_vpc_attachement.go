@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 var aivenTransitGatewayVPCAttachmentSchema = map[string]*schema.Schema{
@@ -84,9 +84,12 @@ func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.Re
 	client := m.(*aiven.Client)
 
 	cidrs := schemautil.FlattenToString(d.Get("user_peer_network_cidrs").([]interface{}))
-	projectName, vpcID, peerCloudAccount, peerVPC, _ := parsePeeringVPCId(d.Id())
+	p, err := parsePeerVPCID(d.Id())
+	if err != nil {
+		return diag.Errorf("error parsing peering VPC ID: %s", err)
+	}
 
-	peeringConnection, err := client.VPCPeeringConnections.Get(projectName, vpcID, peerCloudAccount, peerVPC)
+	peeringConnection, err := client.VPCPeeringConnections.Get(p.projectName, p.vpcID, p.peerCloudAccount, p.peerVPC)
 	if err != nil {
 		return diag.Errorf("cannot get transit gateway vpc attachment by id %s: %s", d.Id(), err)
 	}
@@ -110,9 +113,9 @@ func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.Re
 			}
 			add = append(add, aiven.TransitGatewayVPCAttachment{
 				CIDR:              fresh,
-				PeerCloudAccount:  peerCloudAccount,
+				PeerCloudAccount:  p.peerCloudAccount,
 				PeerResourceGroup: peerResourceGroup,
-				PeerVPC:           peerVPC,
+				PeerVPC:           p.peerVPC,
 			})
 		}
 	}
@@ -137,7 +140,7 @@ func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.Re
 		return resourceVPCPeeringConnectionRead(ctx, d, m)
 	}
 
-	_, err = client.TransitGatewayVPCAttachment.Update(projectName, vpcID, aiven.TransitGatewayVPCAttachmentRequest{
+	_, err = client.TransitGatewayVPCAttachment.Update(p.projectName, p.vpcID, aiven.TransitGatewayVPCAttachmentRequest{
 		Add:    add,
 		Delete: deleteCIDRs,
 	})
