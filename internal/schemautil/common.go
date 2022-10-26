@@ -19,7 +19,7 @@ func GetACLUserValidateFunc() schema.SchemaValidateFunc { //nolint:staticcheck
 //goland:noinspection GoDeprecation
 func GetServiceUserValidateFunc() schema.SchemaValidateFunc { //nolint:staticcheck
 	return validation.StringMatch(
-		regexp.MustCompile(`^(\*$|[a-zA-Z0-9-_?][a-zA-Z0-9-_?*]+)$`),
+		regexp.MustCompile(`^(\*$|[a-zA-Z0-9_?][a-zA-Z0-9-_?*\.].{0,62})$`),
 		"username should be alphanumeric, may not start with dash or dot, max 64 characters")
 }
 

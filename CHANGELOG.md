@@ -6,6 +6,10 @@ nav_order: 1
 
 # Changelog
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Fix `GetServiceUserValidateFunc`
+
 ## [3.8.0] - 2022-09-30
 
 - Fix `aiven_gcp_vpc_peering_connection` creation
