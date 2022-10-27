@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 var aivenVPCPeeringConnectionSchema = map[string]*schema.Schema{
@@ -231,27 +231,56 @@ func stateInfoToString(s *map[string]interface{}) string {
 	return str
 }
 
-func parsePeeringVPCId(resourceID string) (string, string, string, string, *string) {
-	var peerRegion *string
+type peeringVPCIDSizeType int
 
-	parts := strings.Split(resourceID, "/")
-	projectName := parts[0]
-	vpcID := parts[1]
-	peerCloudAccount := parts[2]
-	peerVPC := parts[3]
-	if len(parts) > 4 {
-		peerRegion = new(string)
-		*peerRegion = parts[4]
+const (
+	peeringVPCIDSize           peeringVPCIDSizeType = 4
+	peeringVPCIDSizeWithRegion peeringVPCIDSizeType = 5
+)
+
+type peeringVPCID struct {
+	projectName      string
+	vpcID            string
+	peerCloudAccount string
+	peerVPC          string
+	peerRegion       *string
+}
+
+// parsePeerVPCIDSized splits string id like "my-project/id/id/my-vpc" + optional "/region"
+func parsePeerVPCIDSized(src string, size peeringVPCIDSizeType) (*peeringVPCID, error) {
+	chunks := strings.Split(src, "/") // don't use SplitN to validate the size
+	if len(chunks) != int(size) {
+		return nil, fmt.Errorf("expected unix path-like string with %d chunks", size)
 	}
 
-	return projectName, vpcID, peerCloudAccount, peerVPC, peerRegion
+	pID := &peeringVPCID{
+		projectName:      chunks[0],
+		vpcID:            chunks[1],
+		peerCloudAccount: chunks[2],
+		peerVPC:          chunks[3],
+	}
+
+	if size == peeringVPCIDSizeWithRegion {
+		pID.peerRegion = &chunks[4]
+	}
+	return pID, nil
+}
+
+func parsePeerVPCID(src string) (*peeringVPCID, error) {
+	return parsePeerVPCIDSized(src, peeringVPCIDSize)
+}
+func parsePeerVPCIDWithRegion(src string) (*peeringVPCID, error) {
+	return parsePeerVPCIDSized(src, peeringVPCIDSizeWithRegion)
 }
 
 func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var pc *aiven.VPCPeeringConnection
 	client := m.(*aiven.Client)
 
-	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
+	p, err := parsePeerVPCID(d.Id())
+	if err != nil {
+		return diag.Errorf("error parsing peering VPC ID: %s", err)
+	}
 	isAzure, err := isAzureVPCPeeringConnection(d, client)
 	if err != nil {
 		return diag.Errorf("Error checking if it Azure VPC peering connection: %s", err)
@@ -260,7 +289,7 @@ func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData,
 	if isAzure {
 		if peerResourceGroup, ok := d.GetOk("peer_resource_group"); ok {
 			pc, err = client.VPCPeeringConnections.GetVPCPeeringWithResourceGroup(
-				projectName, vpcID, peerCloudAccount, peerVPC, peerRegion, peerResourceGroup.(string))
+				p.projectName, p.vpcID, p.peerCloudAccount, p.peerVPC, p.peerRegion, peerResourceGroup.(string))
 			if err != nil {
 				return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 			}
@@ -269,23 +298,26 @@ func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData,
 		}
 
 		return append(
-			copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, projectName, vpcID),
+			copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, p.projectName, p.vpcID),
 			copyAzureSpecificVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc)...)
 	}
 
 	pc, err = client.VPCPeeringConnections.GetVPCPeering(
-		projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
+		p.projectName, p.vpcID, p.peerCloudAccount, p.peerVPC, p.peerRegion)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
-	return copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, projectName, vpcID)
+	return copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, p.projectName, p.vpcID)
 }
 
 func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
+	p, err := parsePeerVPCID(d.Id())
+	if err != nil {
+		return diag.Errorf("error parsing peering VPC ID: %s", err)
+	}
 
 	isAzure, err := isAzureVPCPeeringConnection(d, client)
 	if err != nil {
@@ -295,12 +327,12 @@ func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceD
 	if isAzure {
 		if peerResourceGroup, ok := d.GetOk("peer_resource_group"); ok {
 			if err = client.VPCPeeringConnections.DeleteVPCPeeringWithResourceGroup(
-				projectName,
-				vpcID,
-				peerCloudAccount,
-				peerVPC,
+				p.projectName,
+				p.vpcID,
+				p.peerCloudAccount,
+				p.peerVPC,
 				peerResourceGroup.(string),
-				peerRegion,
+				p.peerRegion,
 			); err != nil && !aiven.IsNotFound(err) {
 				return diag.Errorf("Error deleting VPC peering connection with resource group: %s", err)
 			}
@@ -309,11 +341,11 @@ func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceD
 		}
 	}
 	if err = client.VPCPeeringConnections.DeleteVPCPeering(
-		projectName,
-		vpcID,
-		peerCloudAccount,
-		peerVPC,
-		peerRegion,
+		p.projectName,
+		p.vpcID,
+		p.peerCloudAccount,
+		p.peerVPC,
+		p.peerRegion,
 	); err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("Error deleting VPC peering connection: %s", err)
 	}
@@ -336,20 +368,20 @@ func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceD
 			var pc *aiven.VPCPeeringConnection
 			if isAzure {
 				pc, err = client.VPCPeeringConnections.GetVPCPeeringWithResourceGroup(
-					projectName,
-					vpcID,
-					peerCloudAccount,
-					peerVPC,
-					peerRegion,
+					p.projectName,
+					p.vpcID,
+					p.peerCloudAccount,
+					p.peerVPC,
+					p.peerRegion,
 					d.Get("peer_resource_group").(string), // was already checked
 				)
 			} else {
 				pc, err = client.VPCPeeringConnections.GetVPCPeering(
-					projectName,
-					vpcID,
-					peerCloudAccount,
-					peerVPC,
-					peerRegion,
+					p.projectName,
+					p.vpcID,
+					p.peerCloudAccount,
+					p.peerVPC,
+					p.peerRegion,
 				)
 			}
 			if err != nil {
@@ -374,8 +406,11 @@ func resourceVPCPeeringConnectionImport(ctx context.Context, d *schema.ResourceD
 
 	client := m.(*aiven.Client)
 
-	projectName, vpcID, peerCloudAccount, peerVPC, peerRegion := parsePeeringVPCId(d.Id())
-	_, err := client.VPCPeeringConnections.GetVPCPeering(projectName, vpcID, peerCloudAccount, peerVPC, peerRegion)
+	p, err := parsePeerVPCID(d.Id())
+	if err != nil {
+		return nil, fmt.Errorf("error parsing peering VPC ID: %s", err)
+	}
+	_, err = client.VPCPeeringConnections.GetVPCPeering(p.projectName, p.vpcID, p.peerCloudAccount, p.peerVPC, p.peerRegion)
 	if err != nil && schemautil.IsUnknownResource(err) {
 		return nil, errors.New("cannot find specified VPC peering connection")
 	}
@@ -526,12 +561,15 @@ func ConvertStateInfoToMap(s *map[string]interface{}) map[string]string {
 
 // isAzureVPCPeeringConnection checking if peered VPC is in the Azure cloud
 func isAzureVPCPeeringConnection(d *schema.ResourceData, c *aiven.Client) (bool, error) {
-	projectName, vpcID, _, _, peerRegion := parsePeeringVPCId(d.Id())
+	p, err := parsePeerVPCID(d.Id())
+	if err != nil {
+		return false, fmt.Errorf("error parsing Azure peering VPC ID: %s", err)
+	}
 
 	// If peerRegion is nil the peered VPC is assumed to be in the same region and
 	// cloud as the project VPC
-	if peerRegion == nil {
-		vpc, err := c.VPCs.Get(projectName, vpcID)
+	if p.peerRegion == nil {
+		vpc, err := c.VPCs.Get(p.projectName, p.vpcID)
 		if err != nil {
 			return false, err
 		}
@@ -544,7 +582,7 @@ func isAzureVPCPeeringConnection(d *schema.ResourceData, c *aiven.Client) (bool,
 		return false, nil
 	}
 
-	if strings.Contains(*peerRegion, "azure") {
+	if strings.Contains(*p.peerRegion, "azure") {
 		return true, nil
 	}
 
