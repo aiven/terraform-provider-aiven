@@ -108,8 +108,8 @@ func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.Re
 
 		if isNew {
 			var peerResourceGroup *string
-			if len(peeringConnection.PeerResourceGroup) > 0 {
-				peerResourceGroup = aiven.ToStringPointer(peeringConnection.PeerResourceGroup)
+			if peeringConnection.PeerResourceGroup != nil {
+				peerResourceGroup = peeringConnection.PeerResourceGroup
 			}
 			add = append(add, aiven.TransitGatewayVPCAttachment{
 				CIDR:              fresh,

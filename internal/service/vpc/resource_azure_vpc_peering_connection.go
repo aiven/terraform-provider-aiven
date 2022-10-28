@@ -77,8 +77,8 @@ func ResourceAzureVPCPeeringConnection() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(2 * time.Minute),
-			Delete: schema.DefaultTimeout(2 * time.Minute),
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
 		Schema: aivenAzureVPCPeeringConnectionSchema,
@@ -188,9 +188,8 @@ func resourceAzureVPCPeeringConnectionRead(_ context.Context, d *schema.Resource
 		return diag.Errorf("error parsing Azure peering VPC ID: %s", err)
 	}
 
-	peerResourceGroup := d.Get("peer_resource_group")
 	pc, err := client.VPCPeeringConnections.GetVPCPeeringWithResourceGroup(
-		p.projectName, p.vpcID, p.peerCloudAccount, p.peerVPC, p.peerRegion, peerResourceGroup.(string))
+		p.projectName, p.vpcID, p.peerCloudAccount, p.peerVPC, p.peerRegion, schemautil.OptionalStringPointer(d, "peer_resource_group"))
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -205,13 +204,13 @@ func resourceAzureVPCPeeringConnectionDelete(ctx context.Context, d *schema.Reso
 	if err != nil {
 		return diag.Errorf("error parsing Azure peering VPC ID: %s", err)
 	}
-	peerResourceGroup := d.Get("peer_resource_group")
+	peerResourceGroup := d.Get("peer_resource_group").(string)
 	err = client.VPCPeeringConnections.DeleteVPCPeeringWithResourceGroup(
 		p.projectName,
 		p.vpcID,
 		p.peerCloudAccount,
 		p.peerVPC,
-		peerResourceGroup.(string),
+		peerResourceGroup,
 		p.peerRegion,
 	)
 	if err != nil && !aiven.IsNotFound(err) {
@@ -239,7 +238,7 @@ func resourceAzureVPCPeeringConnectionDelete(ctx context.Context, d *schema.Reso
 				p.peerCloudAccount,
 				p.peerVPC,
 				p.peerRegion,
-				d.Get("peer_resource_group").(string), // was already checked
+				schemautil.OptionalStringPointer(d, "peer_resource_group"), // was already checked
 			)
 			if err != nil {
 				return nil, "", err

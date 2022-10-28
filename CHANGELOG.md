@@ -10,6 +10,7 @@ nav_order: 1
 
 - Fix `GetServiceUserValidateFunc`
 - Fix provider panics on `terraform import` with invalid vpc peering id
+- Fix Azure vpc peering connection import
 
 ## [3.8.0] - 2022-09-30
 
