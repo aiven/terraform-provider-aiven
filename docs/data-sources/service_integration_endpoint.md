@@ -37,6 +37,7 @@ data "aiven_service_integration_endpoint" "myendpoint" {
 - `external_elasticsearch_logs_user_config` (List of Object) external elasticsearch specific user configurable settings (see [below for nested schema](#nestedatt--external_elasticsearch_logs_user_config))
 - `external_google_cloud_logging_user_config` (List of Object) external Google Cloud Logginig specific user configurable settings (see [below for nested schema](#nestedatt--external_google_cloud_logging_user_config))
 - `external_kafka_user_config` (List of Object) external Kafka specific user configurable settings (see [below for nested schema](#nestedatt--external_kafka_user_config))
+- `external_opensearch_logs_user_config` (List of Object) external opensearch specific user configurable settings (see [below for nested schema](#nestedatt--external_opensearch_logs_user_config))
 - `external_schema_registry_user_config` (List of Object) External schema registry specific user configurable settings (see [below for nested schema](#nestedatt--external_schema_registry_user_config))
 - `id` (String) The ID of this resource.
 - `jolokia_user_config` (List of Object) Jolokia specific user configurable settings (see [below for nested schema](#nestedatt--jolokia_user_config))
@@ -125,6 +126,18 @@ Read-Only:
 - `ssl_client_cert` (String)
 - `ssl_client_key` (String)
 - `ssl_endpoint_identification_algorithm` (String)
+
+
+<a id="nestedatt--external_opensearch_logs_user_config"></a>
+### Nested Schema for `external_opensearch_logs_user_config`
+
+Read-Only:
+
+- `ca` (String)
+- `index_days_max` (String)
+- `index_prefix` (String)
+- `timeout` (String)
+- `url` (String)
 
 
 <a id="nestedatt--external_schema_registry_user_config"></a>
