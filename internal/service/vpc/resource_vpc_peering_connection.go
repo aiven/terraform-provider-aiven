@@ -287,9 +287,10 @@ func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData,
 	}
 
 	if isAzure {
-		if peerResourceGroup, ok := d.GetOk("peer_resource_group"); ok {
+		peerResourceGroup := schemautil.OptionalStringPointer(d, "peer_resource_group")
+		if peerResourceGroup != nil {
 			pc, err = client.VPCPeeringConnections.GetVPCPeeringWithResourceGroup(
-				p.projectName, p.vpcID, p.peerCloudAccount, p.peerVPC, p.peerRegion, peerResourceGroup.(string))
+				p.projectName, p.vpcID, p.peerCloudAccount, p.peerVPC, p.peerRegion, peerResourceGroup)
 			if err != nil {
 				return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 			}
@@ -373,7 +374,7 @@ func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceD
 					p.peerCloudAccount,
 					p.peerVPC,
 					p.peerRegion,
-					d.Get("peer_resource_group").(string), // was already checked
+					schemautil.OptionalStringPointer(d, "peer_resource_group"), // was already checked
 				)
 			} else {
 				pc, err = client.VPCPeeringConnections.GetVPCPeering(
