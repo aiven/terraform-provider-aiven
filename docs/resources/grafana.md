@@ -91,6 +91,7 @@ Optional:
 - `auth_google` (Block List, Max: 1) Google Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_google))
 - `cookie_samesite` (String) Cookie SameSite attribute: 'strict' prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. 'lax' is the default value.
 - `custom_domain` (String) Custom domain
+- `dashboard_previews_enabled` (String) Enable browsing of dashboards in grid (pictures) mode
 - `dashboards_min_refresh_interval` (String) Minimum refresh interval
 - `dashboards_versions_to_keep` (String) Dashboard versions to keep per dashboard
 - `dataproxy_send_user_header` (String) Send 'X-Grafana-User' header to data source
