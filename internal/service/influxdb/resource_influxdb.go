@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -24,7 +25,7 @@ func influxDBSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	s[schemautil.ServiceTypeInfluxDB+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeInfluxDB)
+	s[schemautil.ServiceTypeInfluxDB+"_user_config"] = dist.ServiceTypeInfluxdb()
 
 	return s
 }

@@ -90,9 +90,8 @@ Optional:
 - `auth_gitlab` (Block List, Max: 1) GitLab Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_gitlab))
 - `auth_google` (Block List, Max: 1) Google Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_google))
 - `cookie_samesite` (String) Cookie SameSite attribute: 'strict' prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. 'lax' is the default value.
-- `custom_domain` (String) Custom domain
-- `dashboard_previews_enabled` (String) Enable browsing of dashboards in grid (pictures) mode
-- `dashboards_min_refresh_interval` (String) Minimum refresh interval
+- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name
+- `dashboards_min_refresh_interval` (String) Signed sequence of decimal numbers, followed by a unit suffix (ms, s, m, h, d), e.g. 30s, 1h
 - `dashboards_versions_to_keep` (String) Dashboard versions to keep per dashboard
 - `dataproxy_send_user_header` (String) Send 'X-Grafana-User' header to data source
 - `dataproxy_timeout` (String) Timeout for data proxy requests in seconds
@@ -101,7 +100,8 @@ Optional:
 - `editors_can_admin` (String) Editors can manage folders, teams and dashboards created by them
 - `external_image_storage` (Block List, Max: 1) External image store settings (see [below for nested schema](#nestedblock--grafana_user_config--external_image_storage))
 - `google_analytics_ua_id` (String) Google Analytics ID
-- `ip_filter` (List of String) IP filter
+- `ip_filter` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--grafana_user_config--ip_filter_object))
 - `metrics_enabled` (String) Enable Grafana /metrics endpoint
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--grafana_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--grafana_user_config--privatelink_access))
@@ -110,7 +110,7 @@ Optional:
 - `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
 - `smtp_server` (Block List, Max: 1) SMTP server settings (see [below for nested schema](#nestedblock--grafana_user_config--smtp_server))
-- `static_ips` (String) Static IP addresses
+- `static_ips` (String) Use static public IP addresses
 - `user_auto_assign_org` (String) Auto-assign new users on signup to main organization. Defaults to false
 - `user_auto_assign_org_role` (String) Set role for new signups. Defaults to Viewer
 - `viewers_can_edit` (String) Users with view-only permission can edit but not save dashboards
@@ -207,6 +207,15 @@ Optional:
 - `bucket_url` (String) Bucket URL for S3
 - `provider` (String) Provider type
 - `secret_key` (String) S3 secret key
+
+
+<a id="nestedblock--grafana_user_config--ip_filter_object"></a>
+### Nested Schema for `grafana_user_config.ip_filter_object`
+
+Optional:
+
+- `description` (String) Description for IP filter list entry
+- `network` (String) CIDR address block
 
 
 <a id="nestedblock--grafana_user_config--private_access"></a>

@@ -1,4 +1,4 @@
-package user_config
+package userconfig
 
 const (
 	// SchemaPackage is the fully-qualified package name of the schema package.
@@ -6,4 +6,7 @@ const (
 
 	// SchemaUtilPackage is the fully-qualified package name of the schemautil package.
 	SchemaUtilPackage = "github.com/aiven/terraform-provider-aiven/internal/schemautil"
+
+	// UserConfigPackage is the fully-qualified package name of the userconfig package.
+	UserConfigPackage = "github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )

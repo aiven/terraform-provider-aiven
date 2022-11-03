@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -26,7 +27,7 @@ func opensearchSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	s[schemautil.ServiceTypeOpensearch+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeOpensearch)
+	s[schemautil.ServiceTypeOpensearch+"_user_config"] = dist.ServiceTypeOpensearch()
 
 	return s
 }
