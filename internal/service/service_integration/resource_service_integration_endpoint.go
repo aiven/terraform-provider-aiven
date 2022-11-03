@@ -77,6 +77,17 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 		Optional: true,
 		Type:     schema.TypeList,
 	},
+	"external_opensearch_logs_user_config": {
+		Description: "external opensearch specific user configurable settings",
+		Elem: &schema.Resource{
+			Schema: schemautil.GenerateTerraformUserConfigSchema(
+				templates.GetUserConfigSchema("endpoint")["external_opensearch_logs"].(map[string]interface{}),
+			),
+		},
+		MaxItems: 1,
+		Optional: true,
+		Type:     schema.TypeList,
+	},
 	"external_aws_cloudwatch_logs_user_config": {
 		Description: "external AWS CloudWatch Logs specific user configurable settings",
 		Elem: &schema.Resource{
