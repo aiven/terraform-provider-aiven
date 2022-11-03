@@ -119,12 +119,12 @@ func ParseOptionalStringToBool(val interface{}) *bool {
 }
 
 func CreateOnlyDiffSuppressFunc(_, _, _ string, d *schema.ResourceData) bool {
-	return len(d.Id()) > 0
+	return d.IsNewResource()
 }
 
 // EmptyObjectDiffSuppressFunc suppresses a diff for service user configuration options when
 // fields are not set by the user but have default or previously defined values.
-func EmptyObjectDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) bool {
+func EmptyObjectDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	// When a map inside a list contains only default values without explicit values set by
 	// the user Terraform interprets the map as not being present and the array length being
 	// zero, resulting in bogus update that does nothing. Allow ignoring those.
@@ -132,8 +132,10 @@ func EmptyObjectDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) boo
 		return true
 	}
 
-	// When a field is not set to any value and consequently is null (empty string) but had
-	// a non-empty parameter before. Allow ignoring those.
+	// Ignore the field when it is not set to any value, but had a non-empty parameter before. This also accounts
+	// for the case when the field is not set to any value, but has a default value returned by the API.
+	// TODO: Uncomment this when we use actual types for the schema.
+	// if !d.HasChange(k) && (new == "" && old != "" || new == "0" && old != "0" || new == "false" && old == "true") {
 	if new == "" && old != "" {
 		return true
 	}
@@ -187,6 +189,7 @@ func EmptyObjectNoChangeDiffSuppressFunc(k, _, new string, d *schema.ResourceDat
 // change from default to empty (which would be nonsensical operation anyway)
 func IpFilterArrayDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	// TODO: Add support for ip_filter_object.
+
 	if old == "1" && new == "0" && strings.HasSuffix(k, ".ip_filter.#") {
 		if list, ok := d.Get(strings.TrimSuffix(k, ".#")).([]interface{}); ok {
 			if len(list) == 1 {
@@ -200,10 +203,11 @@ func IpFilterArrayDiffSuppressFunc(k, old, new string, d *schema.ResourceData) b
 
 func IpFilterValueDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) bool {
 	// TODO: Add support for ip_filter_object.
+
 	return old == "0.0.0.0/0" && new == "" && strings.HasSuffix(k, ".ip_filter.0")
 }
 
-func TrimSpaceDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) bool {
+func TrimSpaceDiffSuppressFunc(_, old, new string, _ *schema.ResourceData) bool {
 	return strings.TrimSpace(old) == strings.TrimSpace(new)
 }
 

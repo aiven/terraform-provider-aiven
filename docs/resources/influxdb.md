@@ -76,16 +76,17 @@ resource "aiven_influxdb" "inf1" {
 Optional:
 
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
-- `custom_domain` (String) Custom domain
+- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name
 - `influxdb` (Block List, Max: 1) influxdb.conf configuration values (see [below for nested schema](#nestedblock--influxdb_user_config--influxdb))
-- `ip_filter` (List of String) IP filter
+- `ip_filter` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--influxdb_user_config--ip_filter_object))
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--influxdb_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--influxdb_user_config--privatelink_access))
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--influxdb_user_config--public_access))
 - `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
-- `static_ips` (String) Static IP addresses
+- `static_ips` (String) Use static public IP addresses
 
 <a id="nestedblock--influxdb_user_config--influxdb"></a>
 ### Nested Schema for `influxdb_user_config.influxdb`
@@ -98,6 +99,15 @@ Optional:
 - `max_select_buckets` (String) The maximum number of `GROUP BY time()` buckets that can be processed in a query. Setting this to 0 (the default) allows an unlimited number to be processed.
 - `max_select_point` (String) The maximum number of points that can be processed in a SELECT statement. Setting this to 0 (the default) allows an unlimited number to be processed.
 - `query_timeout` (String) The maximum duration in seconds before a query is killed. Setting this to 0 (the default) will never kill slow queries.
+
+
+<a id="nestedblock--influxdb_user_config--ip_filter_object"></a>
+### Nested Schema for `influxdb_user_config.ip_filter_object`
+
+Optional:
+
+- `description` (String) Description for IP filter list entry
+- `network` (String) CIDR address block
 
 
 <a id="nestedblock--influxdb_user_config--private_access"></a>

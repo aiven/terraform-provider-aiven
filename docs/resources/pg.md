@@ -120,13 +120,14 @@ Optional:
 - `admin_username` (String) Custom username for admin user. This must be set only when a new service is being created.
 - `backup_hour` (String) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.
 - `backup_minute` (String) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.
-- `enable_ipv6` (String) Enable IPv6
-- `ip_filter` (List of String) IP filter
+- `enable_ipv6` (String) Register AAAA DNS records for the service, and allow IPv6 packets to service ports
+- `ip_filter` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--pg_user_config--ip_filter_object))
 - `migration` (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--pg_user_config--migration))
 - `pg` (Block List, Max: 1) postgresql.conf configuration values (see [below for nested schema](#nestedblock--pg_user_config--pg))
-- `pg_read_replica` (String) Should the service which is being forked be a read replica (deprecated, use read_replica service integration instead).
+- `pg_read_replica` (String, Deprecated)
 - `pg_service_to_fork_from` (String) Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created.
-- `pg_stat_monitor_enable` (String) Enable pg_stat_monitor extension if available for the current cluster
+- `pg_stat_monitor_enable` (String) Enable the pg_stat_monitor extension. Enabling this extension will cause the cluster to be restarted.When this extension is enabled, pg_stat_statements results for utility commands are unreliable
 - `pg_version` (String) PostgreSQL major version
 - `pgbouncer` (Block List, Max: 1) PGBouncer connection pooling settings (see [below for nested schema](#nestedblock--pg_user_config--pgbouncer))
 - `pglookout` (Block List, Max: 1) PGLookout settings (see [below for nested schema](#nestedblock--pg_user_config--pglookout))
@@ -136,12 +137,21 @@ Optional:
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--pg_user_config--public_access))
 - `recovery_target_time` (String) Recovery target time when forking a service. This has effect only when a new service is being created.
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
-- `shared_buffers_percentage` (String) shared_buffers_percentage
-- `static_ips` (String) Static IP addresses
+- `shared_buffers_percentage` (String) Percentage of total RAM that the database server uses for shared memory buffers. Valid range is 20-60 (float), which corresponds to 20% - 60%. This setting adjusts the shared_buffers configuration value.
+- `static_ips` (String) Use static public IP addresses
 - `synchronous_replication` (String) Synchronous replication type. Note that the service plan also needs to support synchronous replication.
 - `timescaledb` (Block List, Max: 1) TimescaleDB extension configuration values (see [below for nested schema](#nestedblock--pg_user_config--timescaledb))
 - `variant` (String) Variant of the PostgreSQL service, may affect the features that are exposed by default
-- `work_mem` (String) work_mem
+- `work_mem` (String) Sets the maximum amount of memory to be used by a query operation (such as a sort or hash table) before writing to temporary disk files, in MB. Default is 1MB + 0.075% of total RAM (up to 32MB).
+
+<a id="nestedblock--pg_user_config--ip_filter_object"></a>
+### Nested Schema for `pg_user_config.ip_filter_object`
+
+Optional:
+
+- `description` (String) Description for IP filter list entry
+- `network` (String) CIDR address block
+
 
 <a id="nestedblock--pg_user_config--migration"></a>
 ### Nested Schema for `pg_user_config.migration`
@@ -163,53 +173,53 @@ Optional:
 
 Optional:
 
-- `autovacuum_analyze_scale_factor` (String) autovacuum_analyze_scale_factor
-- `autovacuum_analyze_threshold` (String) autovacuum_analyze_threshold
-- `autovacuum_freeze_max_age` (String) autovacuum_freeze_max_age
-- `autovacuum_max_workers` (String) autovacuum_max_workers
-- `autovacuum_naptime` (String) autovacuum_naptime
-- `autovacuum_vacuum_cost_delay` (String) autovacuum_vacuum_cost_delay
-- `autovacuum_vacuum_cost_limit` (String) autovacuum_vacuum_cost_limit
-- `autovacuum_vacuum_scale_factor` (String) autovacuum_vacuum_scale_factor
-- `autovacuum_vacuum_threshold` (String) autovacuum_vacuum_threshold
-- `bgwriter_delay` (String) bgwriter_delay
-- `bgwriter_flush_after` (String) bgwriter_flush_after
-- `bgwriter_lru_maxpages` (String) bgwriter_lru_maxpages
-- `bgwriter_lru_multiplier` (String) bgwriter_lru_multiplier
-- `deadlock_timeout` (String) deadlock_timeout
-- `default_toast_compression` (String) default_toast_compression
-- `idle_in_transaction_session_timeout` (String) idle_in_transaction_session_timeout
-- `jit` (String) jit
-- `log_autovacuum_min_duration` (String) log_autovacuum_min_duration
-- `log_error_verbosity` (String) log_error_verbosity
-- `log_line_prefix` (String) log_line_prefix
-- `log_min_duration_statement` (String) log_min_duration_statement
-- `log_temp_files` (String) log_temp_files
-- `max_files_per_process` (String) max_files_per_process
-- `max_locks_per_transaction` (String) max_locks_per_transaction
-- `max_logical_replication_workers` (String) max_logical_replication_workers
-- `max_parallel_workers` (String) max_parallel_workers
-- `max_parallel_workers_per_gather` (String) max_parallel_workers_per_gather
-- `max_pred_locks_per_transaction` (String) max_pred_locks_per_transaction
-- `max_prepared_transactions` (String) max_prepared_transactions
-- `max_replication_slots` (String) max_replication_slots
-- `max_slot_wal_keep_size` (String) max_slot_wal_keep_size
-- `max_stack_depth` (String) max_stack_depth
-- `max_standby_archive_delay` (String) max_standby_archive_delay
-- `max_standby_streaming_delay` (String) max_standby_streaming_delay
-- `max_wal_senders` (String) max_wal_senders
-- `max_worker_processes` (String) max_worker_processes
-- `pg_partman_bgw__dot__interval` (String) pg_partman_bgw.interval
-- `pg_partman_bgw__dot__role` (String) pg_partman_bgw.role
-- `pg_stat_statements__dot__track` (String) pg_stat_statements.track
-- `temp_file_limit` (String) temp_file_limit
-- `timezone` (String) timezone
-- `track_activity_query_size` (String) track_activity_query_size
-- `track_commit_timestamp` (String) track_commit_timestamp
-- `track_functions` (String) track_functions
-- `track_io_timing` (String) track_io_timing
-- `wal_sender_timeout` (String) wal_sender_timeout
-- `wal_writer_delay` (String) wal_writer_delay
+- `autovacuum_analyze_scale_factor` (String) Specifies a fraction of the table size to add to autovacuum_analyze_threshold when deciding whether to trigger an ANALYZE. The default is 0.2 (20% of table size)
+- `autovacuum_analyze_threshold` (String) Specifies the minimum number of inserted, updated or deleted tuples needed to trigger an  ANALYZE in any one table. The default is 50 tuples.
+- `autovacuum_freeze_max_age` (String) Specifies the maximum age (in transactions) that a table's pg_class.relfrozenxid field can attain before a VACUUM operation is forced to prevent transaction ID wraparound within the table. Note that the system will launch autovacuum processes to prevent wraparound even when autovacuum is otherwise disabled. This parameter will cause the server to be restarted.
+- `autovacuum_max_workers` (String) Specifies the maximum number of autovacuum processes (other than the autovacuum launcher) that may be running at any one time. The default is three. This parameter can only be set at server start.
+- `autovacuum_naptime` (String) Specifies the minimum delay between autovacuum runs on any given database. The delay is measured in seconds, and the default is one minute
+- `autovacuum_vacuum_cost_delay` (String) Specifies the cost delay value that will be used in automatic VACUUM operations. If -1 is specified, the regular vacuum_cost_delay value will be used. The default value is 20 milliseconds
+- `autovacuum_vacuum_cost_limit` (String) Specifies the cost limit value that will be used in automatic VACUUM operations. If -1 is specified (which is the default), the regular vacuum_cost_limit value will be used.
+- `autovacuum_vacuum_scale_factor` (String) Specifies a fraction of the table size to add to autovacuum_vacuum_threshold when deciding whether to trigger a VACUUM. The default is 0.2 (20% of table size)
+- `autovacuum_vacuum_threshold` (String) Specifies the minimum number of updated or deleted tuples needed to trigger a VACUUM in any one table. The default is 50 tuples
+- `bgwriter_delay` (String) Specifies the delay between activity rounds for the background writer in milliseconds. Default is 200.
+- `bgwriter_flush_after` (String) Whenever more than bgwriter_flush_after bytes have been written by the background writer, attempt to force the OS to issue these writes to the underlying storage. Specified in kilobytes, default is 512. Setting of 0 disables forced writeback.
+- `bgwriter_lru_maxpages` (String) In each round, no more than this many buffers will be written by the background writer. Setting this to zero disables background writing. Default is 100.
+- `bgwriter_lru_multiplier` (String) The average recent need for new buffers is multiplied by bgwriter_lru_multiplier to arrive at an estimate of the number that will be needed during the next round, (up to bgwriter_lru_maxpages). 1.0 represents a “just in time” policy of writing exactly the number of buffers predicted to be needed. Larger values provide some cushion against spikes in demand, while smaller values intentionally leave writes to be done by server processes. The default is 2.0.
+- `deadlock_timeout` (String) This is the amount of time, in milliseconds, to wait on a lock before checking to see if there is a deadlock condition.
+- `default_toast_compression` (String) Specifies the default TOAST compression method for values of compressible columns (the default is lz4).
+- `idle_in_transaction_session_timeout` (String) Time out sessions with open transactions after this number of milliseconds
+- `jit` (String) Controls system-wide use of Just-in-Time Compilation (JIT).
+- `log_autovacuum_min_duration` (String) Causes each action executed by autovacuum to be logged if it ran for at least the specified number of milliseconds. Setting this to zero logs all autovacuum actions. Minus-one (the default) disables logging autovacuum actions.
+- `log_error_verbosity` (String) Controls the amount of detail written in the server log for each message that is logged.
+- `log_line_prefix` (String) Choose from one of the available log-formats. These can support popular log analyzers like pgbadger, pganalyze etc.
+- `log_min_duration_statement` (String) Log statements that take more than this number of milliseconds to run, -1 disables
+- `log_temp_files` (String) Log statements for each temporary file created larger than this number of kilobytes, -1 disables
+- `max_files_per_process` (String) PostgreSQL maximum number of files that can be open per process
+- `max_locks_per_transaction` (String) PostgreSQL maximum locks per transaction
+- `max_logical_replication_workers` (String) PostgreSQL maximum logical replication workers (taken from the pool of max_parallel_workers)
+- `max_parallel_workers` (String) Sets the maximum number of workers that the system can support for parallel queries
+- `max_parallel_workers_per_gather` (String) Sets the maximum number of workers that can be started by a single Gather or Gather Merge node
+- `max_pred_locks_per_transaction` (String) PostgreSQL maximum predicate locks per transaction
+- `max_prepared_transactions` (String) PostgreSQL maximum prepared transactions
+- `max_replication_slots` (String) PostgreSQL maximum replication slots
+- `max_slot_wal_keep_size` (String) PostgreSQL maximum WAL size (MB) reserved for replication slots. Default is -1 (unlimited). wal_keep_size minimum WAL size setting takes precedence over this.
+- `max_stack_depth` (String) Maximum depth of the stack in bytes
+- `max_standby_archive_delay` (String) Max standby archive delay in milliseconds
+- `max_standby_streaming_delay` (String) Max standby streaming delay in milliseconds
+- `max_wal_senders` (String) PostgreSQL maximum WAL senders
+- `max_worker_processes` (String) Sets the maximum number of background processes that the system can support
+- `pg_partman_bgw__dot__interval` (String) Sets the time interval to run pg_partman's scheduled tasks
+- `pg_partman_bgw__dot__role` (String) Controls which role to use for pg_partman's scheduled background tasks.
+- `pg_stat_statements__dot__track` (String) Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default value is top.
+- `temp_file_limit` (String) PostgreSQL temporary file limit in KiB, -1 for unlimited
+- `timezone` (String) PostgreSQL service timezone
+- `track_activity_query_size` (String) Specifies the number of bytes reserved to track the currently executing command for each active session.
+- `track_commit_timestamp` (String) Record commit time of transactions.
+- `track_functions` (String) Enables tracking of function call counts and time used.
+- `track_io_timing` (String) Enables timing of database I/O calls. This parameter is off by default, because it will repeatedly query the operating system for the current time, which may cause significant overhead on some platforms.
+- `wal_sender_timeout` (String) Terminate replication connections that are inactive for longer than this amount of time, in milliseconds. Setting this value to zero disables the timeout.
+- `wal_writer_delay` (String) WAL flush interval in milliseconds. Note that setting this value to lower than the default 200ms may negatively impact performance
 
 
 <a id="nestedblock--pg_user_config--pgbouncer"></a>
@@ -233,7 +243,7 @@ Optional:
 
 Optional:
 
-- `max_failover_replication_time_lag` (String) max_failover_replication_time_lag
+- `max_failover_replication_time_lag` (String) Number of seconds of master unavailability before triggering database failover to standby
 
 
 <a id="nestedblock--pg_user_config--private_access"></a>
@@ -271,7 +281,7 @@ Optional:
 
 Optional:
 
-- `max_background_workers` (String) timescaledb.max_background_workers
+- `max_background_workers` (String) The number of background workers for timescaledb operations. You should configure this setting to the sum of your number of databases and the total number of concurrent background workers you want running at any given point in time.
 
 
 

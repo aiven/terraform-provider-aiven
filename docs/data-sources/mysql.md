@@ -89,6 +89,7 @@ Read-Only:
 - `backup_minute` (String)
 - `binlog_retention_period` (String)
 - `ip_filter` (List of String)
+- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--ip_filter_object))
 - `migration` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--migration))
 - `mysql` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--mysql))
 - `mysql_version` (String)
@@ -99,6 +100,15 @@ Read-Only:
 - `recovery_target_time` (String)
 - `service_to_fork_from` (String)
 - `static_ips` (String)
+
+<a id="nestedobjatt--mysql_user_config--ip_filter_object"></a>
+### Nested Schema for `mysql_user_config.ip_filter_object`
+
+Read-Only:
+
+- `description` (String)
+- `network` (String)
+
 
 <a id="nestedobjatt--mysql_user_config--migration"></a>
 ### Nested Schema for `mysql_user_config.migration`

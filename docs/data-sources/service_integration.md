@@ -30,16 +30,16 @@ data "aiven_service_integration" "myintegration" {
 
 ### Read-Only
 
-- `datadog_user_config` (List of Object) Datadog specific user configurable settings (see [below for nested schema](#nestedatt--datadog_user_config))
+- `datadog_user_config` (List of Object) Datadog user configurable settings (see [below for nested schema](#nestedatt--datadog_user_config))
 - `destination_endpoint_id` (String) Destination endpoint for the integration (if any)
 - `id` (String) The ID of this resource.
 - `integration_id` (String) Service Integration Id at aiven
-- `kafka_connect_user_config` (List of Object) Kafka Connect specific user configurable settings (see [below for nested schema](#nestedatt--kafka_connect_user_config))
-- `kafka_logs_user_config` (List of Object) Kafka Logs specific user configurable settings (see [below for nested schema](#nestedatt--kafka_logs_user_config))
-- `kafka_mirrormaker_user_config` (List of Object) Mirrormaker 2 integration specific user configurable settings (see [below for nested schema](#nestedatt--kafka_mirrormaker_user_config))
-- `logs_user_config` (List of Object) Log integration specific user configurable settings (see [below for nested schema](#nestedatt--logs_user_config))
-- `metrics_user_config` (List of Object) Metrics specific user configurable settings (see [below for nested schema](#nestedatt--metrics_user_config))
-- `mirrormaker_user_config` (List of Object) Mirrormaker 1 integration specific user configurable settings (see [below for nested schema](#nestedatt--mirrormaker_user_config))
+- `kafka_connect_user_config` (List of Object) KafkaConnect user configurable settings (see [below for nested schema](#nestedatt--kafka_connect_user_config))
+- `kafka_logs_user_config` (List of Object) KafkaLogs user configurable settings (see [below for nested schema](#nestedatt--kafka_logs_user_config))
+- `kafka_mirrormaker_user_config` (List of Object) KafkaMirrormaker user configurable settings (see [below for nested schema](#nestedatt--kafka_mirrormaker_user_config))
+- `logs_user_config` (List of Object) Logs user configurable settings (see [below for nested schema](#nestedatt--logs_user_config))
+- `metrics_user_config` (List of Object) Metrics user configurable settings (see [below for nested schema](#nestedatt--metrics_user_config))
+- `mirrormaker_user_config` (List of Object) Mirrormaker user configurable settings (see [below for nested schema](#nestedatt--mirrormaker_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration (if any)
 
 <a id="nestedatt--datadog_user_config"></a>
