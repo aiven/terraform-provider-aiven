@@ -82,17 +82,27 @@ Optional:
 Optional:
 
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
-- `execution_checkpointing_interval_ms` (String) Flink execution.checkpointing.interval in milliseconds
-- `execution_checkpointing_timeout_ms` (String) Flink execution.checkpointing.timeout in milliseconds
+- `execution_checkpointing_interval_ms` (String) Checkpointing is Flink’s primary fault-tolerance mechanism, wherein a snapshot of your job’s state persisted periodically to some durable location. In the case of failure, Flink will restart from the most recent checkpoint and resume processing. A jobs checkpoint interval configures how often Flink will take these snapshots.
+- `execution_checkpointing_timeout_ms` (String) The time after which a checkpoint-in-progress is aborted, if it did not complete by then.
 - `flink_version` (String) Flink major version
-- `ip_filter` (List of String) IP filter
-- `number_of_task_slots` (String) Flink taskmanager.numberOfTaskSlots
-- `parallelism_default` (String) Flink parallelism.default
+- `ip_filter` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--flink_user_config--ip_filter_object))
+- `number_of_task_slots` (String) Task slots per node. For a 3 node plan, total number of task slots is 3x this value
+- `parallelism_default` (String) How many parallel task slots each new job is assigned. Unless you understand how Flink parallel dataflows work, please leave this at 1. Please do not set this value higher than (total number of nodes x number_of_task_slots), or every new job created will fail.
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--flink_user_config--privatelink_access))
-- `restart_strategy` (String) Flink restart-strategy
-- `restart_strategy_delay_sec` (String) Flink restart-strategy.failure-rate.delay in seconds
-- `restart_strategy_failure_rate_interval_min` (String) Flink restart-strategy.failure-rate.failure-rate-interval in minutes
-- `restart_strategy_max_failures` (String) Flink restart-strategy.failure-rate.max-failures-per-interval
+- `restart_strategy` (String) failure-rate (default): Restarts the job after failure, but when failure rate (failures per time interval) is exceeded, the job eventually fails. Restart strategy waits a fixed amount of time between attempts.fixed-delay: Attempts to restart the job a given number of times before it fails. Restart strategy waits a fixed amount of time between attempts. exponential-delay: Attempts to restart the job infinitely, with increasing delay up to the maximum delay. The job never fails. none: The job fails directly and no restart is attempted.
+- `restart_strategy_delay_sec` (String) Delay between two consecutive restart attempts if restart-strategy has been set to fixed-delay or failure-rate. Delaying the retries can be helpful when the program interacts with external systems where for example connections or pending transactions should reach a timeout before re-execution is attempted.
+- `restart_strategy_failure_rate_interval_min` (String) Time interval for measuring failure rate if restart-strategy has been set to failure-rate. Specified in minutes.
+- `restart_strategy_max_failures` (String) The number of times that Flink retries the execution before the job is declared as failed if restart-strategy has been set to fixed-delay or failure-rate.
+
+<a id="nestedblock--flink_user_config--ip_filter_object"></a>
+### Nested Schema for `flink_user_config.ip_filter_object`
+
+Optional:
+
+- `description` (String) Description for IP filter list entry
+- `network` (String) CIDR address block
+
 
 <a id="nestedblock--flink_user_config--privatelink_access"></a>
 ### Nested Schema for `flink_user_config.privatelink_access`

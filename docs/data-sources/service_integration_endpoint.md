@@ -29,21 +29,21 @@ data "aiven_service_integration_endpoint" "myendpoint" {
 
 ### Read-Only
 
-- `datadog_user_config` (List of Object) Datadog specific user configurable settings (see [below for nested schema](#nestedatt--datadog_user_config))
+- `datadog_user_config` (List of Object) Datadog user configurable settings (see [below for nested schema](#nestedatt--datadog_user_config))
 - `endpoint_config` (Map of String) Integration endpoint specific backend configuration
 - `endpoint_type` (String) Type of the service integration endpoint
-- `external_aws_cloudwatch_logs_user_config` (List of Object) external AWS CloudWatch Logs specific user configurable settings (see [below for nested schema](#nestedatt--external_aws_cloudwatch_logs_user_config))
-- `external_aws_cloudwatch_metrics_user_config` (List of Object) External AWS cloudwatch mertrics specific user configurable settings (see [below for nested schema](#nestedatt--external_aws_cloudwatch_metrics_user_config))
-- `external_elasticsearch_logs_user_config` (List of Object) external elasticsearch specific user configurable settings (see [below for nested schema](#nestedatt--external_elasticsearch_logs_user_config))
-- `external_google_cloud_logging_user_config` (List of Object) external Google Cloud Logginig specific user configurable settings (see [below for nested schema](#nestedatt--external_google_cloud_logging_user_config))
-- `external_kafka_user_config` (List of Object) external Kafka specific user configurable settings (see [below for nested schema](#nestedatt--external_kafka_user_config))
-- `external_opensearch_logs_user_config` (List of Object) external opensearch specific user configurable settings (see [below for nested schema](#nestedatt--external_opensearch_logs_user_config))
-- `external_schema_registry_user_config` (List of Object) External schema registry specific user configurable settings (see [below for nested schema](#nestedatt--external_schema_registry_user_config))
+- `external_aws_cloudwatch_logs_user_config` (List of Object) ExternalAwsCloudwatchLogs user configurable settings (see [below for nested schema](#nestedatt--external_aws_cloudwatch_logs_user_config))
+- `external_aws_cloudwatch_metrics_user_config` (List of Object) ExternalAwsCloudwatchMetrics user configurable settings (see [below for nested schema](#nestedatt--external_aws_cloudwatch_metrics_user_config))
+- `external_elasticsearch_logs_user_config` (List of Object) ExternalElasticsearchLogs user configurable settings (see [below for nested schema](#nestedatt--external_elasticsearch_logs_user_config))
+- `external_google_cloud_logging_user_config` (List of Object) ExternalGoogleCloudLogging user configurable settings (see [below for nested schema](#nestedatt--external_google_cloud_logging_user_config))
+- `external_kafka_user_config` (List of Object) ExternalKafka user configurable settings (see [below for nested schema](#nestedatt--external_kafka_user_config))
+- `external_opensearch_logs_user_config` (List of Object) ExternalOpensearchLogs user configurable settings (see [below for nested schema](#nestedatt--external_opensearch_logs_user_config))
+- `external_schema_registry_user_config` (List of Object) ExternalSchemaRegistry user configurable settings (see [below for nested schema](#nestedatt--external_schema_registry_user_config))
 - `id` (String) The ID of this resource.
-- `jolokia_user_config` (List of Object) Jolokia specific user configurable settings (see [below for nested schema](#nestedatt--jolokia_user_config))
-- `prometheus_user_config` (List of Object) Prometheus specific user configurable settings (see [below for nested schema](#nestedatt--prometheus_user_config))
-- `rsyslog_user_config` (List of Object) rsyslog specific user configurable settings (see [below for nested schema](#nestedatt--rsyslog_user_config))
-- `signalfx_user_config` (List of Object) Signalfx specific user configurable settings (see [below for nested schema](#nestedatt--signalfx_user_config))
+- `jolokia_user_config` (List of Object) Jolokia user configurable settings (see [below for nested schema](#nestedatt--jolokia_user_config))
+- `prometheus_user_config` (List of Object) Prometheus user configurable settings (see [below for nested schema](#nestedatt--prometheus_user_config))
+- `rsyslog_user_config` (List of Object) Rsyslog user configurable settings (see [below for nested schema](#nestedatt--rsyslog_user_config))
+- `signalfx_user_config` (List of Object) Signalfx user configurable settings (see [below for nested schema](#nestedatt--signalfx_user_config))
 
 <a id="nestedatt--datadog_user_config"></a>
 ### Nested Schema for `datadog_user_config`

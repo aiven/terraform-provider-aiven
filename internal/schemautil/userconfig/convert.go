@@ -1,4 +1,4 @@
-package user_config
+package userconfig
 
 import (
 	"fmt"
@@ -19,8 +19,12 @@ func convertPropertyToSchema(n string, p map[string]interface{}, t string, ad bo
 		r[jen.Id(dk)] = jen.Lit(dv)
 	}
 
+	if d, ok := p["default"]; ok && isTerraformTypePrimitive(t) {
+		r[jen.Id("Default")] = jen.Lit(d)
+	}
+
 	if co, ok := p["create_only"]; ok && co.(bool) {
-		r[jen.Id("DiffSuppressFunc")] = jen.Qual(SchemaUtilPackage, "CreateOnlyDiffSuppressFunc")
+		r[jen.Id("ForceNew")] = jen.Lit(true)
 	}
 
 	if strings.Contains(n, "api_key") || strings.Contains(n, "password") {
@@ -42,7 +46,7 @@ func convertPropertiesToSchemaMap(p map[string]interface{}) jen.Dict {
 			continue
 		}
 
-		ts, ats := terraformTypes(slicedString(va["type"]))
+		ts, ats := TerraformTypes(SlicedString(va["type"]))
 		if len(ts) > 1 {
 			panic(fmt.Sprintf("multiple types for %s", k))
 		}
@@ -62,7 +66,7 @@ func convertPropertiesToSchemaMap(p map[string]interface{}) jen.Dict {
 		}
 
 		for kn, vn := range s {
-			r[jen.Lit(kn)] = vn
+			r[jen.Lit(EncodeKey(kn))] = vn
 		}
 	}
 

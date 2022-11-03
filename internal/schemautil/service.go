@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/templates"
-
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
 	"github.com/docker/go-units"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -245,7 +245,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 }
 
 func ResourceServiceCreateWrapper(serviceType string) schema.CreateContextFunc {
-	if serviceType == templates.UserConfigSchemaService {
+	if serviceType == "service" {
 		return func(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 			// Need to set empty value for all services or all Terraform keeps on showing there's
 			// a change in the computed values that don't match actual service type
@@ -393,7 +393,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 			ServiceType:           serviceType,
 			TerminationProtection: d.Get("termination_protection").(bool),
 			DiskSpaceMB:           diskSpace,
-			UserConfig:            ConvertTerraformUserConfigToAPICompatibleFormat(templates.UserConfigSchemaService, serviceType, true, d),
+			UserConfig:            apiconvert.ToAPI(userconfig.ServiceTypes, serviceType, d),
 			StaticIPs:             FlattenToString(d.Get("static_ips").(*schema.Set).List()),
 		},
 	)
@@ -472,7 +472,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 			TerminationProtection: d.Get("termination_protection").(bool),
 			DiskSpaceMB:           diskSpace,
 			Karapace:              karapace,
-			UserConfig:            ConvertTerraformUserConfigToAPICompatibleFormat(templates.UserConfigSchemaService, d.Get("service_type").(string), false, d),
+			UserConfig:            apiconvert.ToAPI(userconfig.ServiceTypes, d.Get("service_type").(string), d),
 		},
 	); err != nil {
 		return diag.Errorf("error updating (%s) service: %s", serviceName, err)
@@ -618,7 +618,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 			return err
 		}
 	}
-	userConfig := ConvertAPIUserConfigToTerraformCompatibleFormat(templates.UserConfigSchemaService, serviceType, s.UserConfig)
+	userConfig := apiconvert.FromAPI(userconfig.ServiceTypes, serviceType, s.UserConfig)
 	if err := d.Set(serviceType+"_user_config", NormalizeIpFilter(d.Get(serviceType+"_user_config"), userConfig)); err != nil {
 		return fmt.Errorf("cannot set `%s_user_config` : %s; Please make sure that all Aiven services have unique s names", serviceType, err)
 	}
