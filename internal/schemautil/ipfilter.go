@@ -9,17 +9,18 @@ import (
 // the same order as defined in the TF manifest.
 func NormalizeIpFilter(tfUserConfig interface{}, userConfig []map[string]interface{}) []map[string]interface{} {
 	tfInt, ok := tfUserConfig.([]interface{})
-	userConfig[0]["ip_filter"] = toStringSlice(userConfig[0]["ip_filter"].([]interface{}))
-
-	if !ok || len(tfInt) == 0 {
-		return userConfig
-	}
 
 	if len(userConfig) == 0 {
 		return userConfig
 	}
 
 	if _, ok := userConfig[0]["ip_filter"]; !ok {
+		return userConfig
+	}
+
+	userConfig[0]["ip_filter"] = toStringSlice(userConfig[0]["ip_filter"].([]interface{}))
+
+	if !ok || len(tfInt) == 0 {
 		return userConfig
 	}
 
