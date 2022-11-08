@@ -3,8 +3,8 @@ module github.com/aiven/terraform-provider-aiven
 go 1.18
 
 require (
-	github.com/aiven/aiven-go-client v1.7.1-0.20221026113217-a95eea5bc930
-	github.com/aiven/aiven-go-client/tools/exp v0.0.0-20221026123647-c6884e17f117
+	github.com/aiven/aiven-go-client v1.7.1-0.20221102112614-02e040acfe91
+	github.com/aiven/aiven-go-client/tools/exp v0.0.0-20221102122203-4f39deb34b6a
 	github.com/docker/go-units v0.5.0
 	github.com/gruntwork-io/terratest v0.40.22
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320

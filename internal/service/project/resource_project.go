@@ -7,11 +7,11 @@ import (
 	"regexp"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 var aivenProjectSchema = map[string]*schema.Schema{
@@ -39,11 +39,9 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Description:      "Use the same billing group that is used in source project.",
 	},
 	"add_account_owners_admin_access": {
-		Type:             schema.TypeBool,
-		Optional:         true,
-		DiffSuppressFunc: schemautil.CreateOnlyDiffSuppressFunc,
-		Default:          true,
-		Description:      schemautil.Complex("If account_id is set, grant account owner team admin access to the new project.").DefaultValue(true).Build(),
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Description: schemautil.Complex("If account_id is set, grant account owner team admin access to the new project.").DefaultValue(true).Build(),
 	},
 	"project": {
 		Type:        schema.TypeString,
@@ -139,6 +137,7 @@ func resourceProjectCreate(_ context.Context, d *schema.ResourceData, m interfac
 			AccountId:                    schemautil.OptionalStringPointer(d, "account_id"),
 			UseSourceProjectBillingGroup: d.Get("use_source_project_billing_group").(bool),
 			BillingGroupId:               d.Get("billing_group").(string),
+			AddAccountOwnersAdminAccess:  schemautil.ParseOptionalStringToBool(d.Get("add_account_owners_admin_access")),
 			Tags:                         schemautil.GetTagsFromSchema(d),
 		},
 	)
@@ -239,11 +238,12 @@ func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interfac
 	project, err := client.Projects.Update(
 		d.Id(),
 		aiven.UpdateProjectRequest{
-			Name:            projectName,
-			Cloud:           schemautil.OptionalStringPointer(d, "default_cloud"),
-			TechnicalEmails: contactEmailListForAPI(d, "technical_emails", false),
-			AccountId:       d.Get("account_id").(string),
-			Tags:            schemautil.GetTagsFromSchema(d),
+			Name:                        projectName,
+			Cloud:                       schemautil.OptionalStringPointer(d, "default_cloud"),
+			TechnicalEmails:             contactEmailListForAPI(d, "technical_emails", false),
+			AccountId:                   d.Get("account_id").(string),
+			Tags:                        schemautil.GetTagsFromSchema(d),
+			AddAccountOwnersAdminAccess: schemautil.ParseOptionalStringToBool(d.Get("add_account_owners_admin_access")),
 		},
 	)
 	if err != nil {

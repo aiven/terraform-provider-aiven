@@ -96,6 +96,7 @@ Read-Only:
 - `auth_google` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--auth_google))
 - `cookie_samesite` (String)
 - `custom_domain` (String)
+- `dashboard_previews_enabled` (String)
 - `dashboards_min_refresh_interval` (String)
 - `dashboards_versions_to_keep` (String)
 - `dataproxy_send_user_header` (String)

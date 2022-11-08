@@ -6,12 +6,12 @@ import (
 	"regexp"
 	"testing"
 
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
 func TestAccAivenProject_basic(t *testing.T) {
@@ -31,6 +31,7 @@ func TestAccAivenProject_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "default_cloud"),
 					resource.TestCheckResourceAttrSet(resourceName, "ca_cert"),
+					resource.TestCheckResourceAttr(resourceName, "add_account_owners_admin_access", "true"),
 				),
 			},
 			{
@@ -41,6 +42,7 @@ func TestAccAivenProject_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "default_cloud"),
 					resource.TestCheckResourceAttrSet(resourceName, "ca_cert"),
 					resource.TestCheckResourceAttrSet(resourceName, "billing_group"),
+					resource.TestCheckResourceAttr(resourceName, "add_account_owners_admin_access", "false"),
 				),
 			},
 			{
@@ -126,8 +128,9 @@ data "aiven_project" "project" {
 func testAccProjectResource(name string) string {
 	return fmt.Sprintf(`
 resource "aiven_project" "foo" {
-  project       = "test-acc-pr-%s"
-  default_cloud = "aws-eu-west-2"
+  project                         = "test-acc-pr-%s"
+  default_cloud                   = "aws-eu-west-2"
+  add_account_owners_admin_access = true
   tag {
     key   = "test"
     value = "val"
@@ -160,7 +163,7 @@ resource "aiven_project" "source" {
 resource "aiven_project" "foo" {
   project                          = "test-acc-pr-%s"
   copy_from_project                = aiven_project.source.project
-  use_source_project_billing_group = true
+  use_source_project_billing_group = false
 }
 
 data "aiven_project" "project" {
