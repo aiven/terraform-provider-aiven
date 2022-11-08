@@ -12,6 +12,8 @@ nav_order: 1
 - Fix provider panics on `terraform import` with invalid vpc peering id
 - Fix Azure vpc peering connection import
 - Fix project create/update with `add_account_owners_admin_access` field
+- Add OpenSearch external integration endpoint
+- Add `aiven_pg_user` import example to docs
 
 ## [3.8.0] - 2022-09-30
 

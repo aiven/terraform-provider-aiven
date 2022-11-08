@@ -42,4 +42,10 @@ resource "aiven_pg_user" "foo" {
 - `id` (String) The ID of this resource.
 - `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_pg_user.user project/service_name/username
+```

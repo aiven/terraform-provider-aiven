@@ -29,6 +29,7 @@ The Service Integration Endpoint resource allows the creation and management of 
 - `external_elasticsearch_logs_user_config` (Block List, Max: 1) external elasticsearch specific user configurable settings (see [below for nested schema](#nestedblock--external_elasticsearch_logs_user_config))
 - `external_google_cloud_logging_user_config` (Block List, Max: 1) external Google Cloud Logginig specific user configurable settings (see [below for nested schema](#nestedblock--external_google_cloud_logging_user_config))
 - `external_kafka_user_config` (Block List, Max: 1) external Kafka specific user configurable settings (see [below for nested schema](#nestedblock--external_kafka_user_config))
+- `external_opensearch_logs_user_config` (Block List, Max: 1) external opensearch specific user configurable settings (see [below for nested schema](#nestedblock--external_opensearch_logs_user_config))
 - `external_schema_registry_user_config` (Block List, Max: 1) External schema registry specific user configurable settings (see [below for nested schema](#nestedblock--external_schema_registry_user_config))
 - `jolokia_user_config` (Block List, Max: 1) Jolokia specific user configurable settings (see [below for nested schema](#nestedblock--jolokia_user_config))
 - `prometheus_user_config` (Block List, Max: 1) Prometheus specific user configurable settings (see [below for nested schema](#nestedblock--prometheus_user_config))
@@ -121,6 +122,18 @@ Optional:
 - `ssl_client_cert` (String) PEM-encoded client certificate
 - `ssl_client_key` (String) PEM-encoded client key
 - `ssl_endpoint_identification_algorithm` (String) The endpoint identification algorithm to validate server hostname using server certificate.
+
+
+<a id="nestedblock--external_opensearch_logs_user_config"></a>
+### Nested Schema for `external_opensearch_logs_user_config`
+
+Optional:
+
+- `ca` (String) PEM encoded CA certificate
+- `index_days_max` (String) Maximum number of days of logs to keep
+- `index_prefix` (String) OpenSearch index prefix
+- `timeout` (String) OpenSearch request timeout limit
+- `url` (String) OpenSearch connection URL
 
 
 <a id="nestedblock--external_schema_registry_user_config"></a>
