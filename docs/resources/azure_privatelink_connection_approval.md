@@ -64,7 +64,7 @@ resource "azurerm_private_endpoint" "endpoint" {
 
 resource "aiven_azure_privatelink_connection_approval" "approval" {
   project             = var.aiven_project_id
-  service_name        = aiven_pg.default
+  service_name        = aiven_pg.default.service_name
   endpoint_ip_address = azurerm_private_endpoint.endpoint.private_service_connection[0].private_ip_address
 }
 ```

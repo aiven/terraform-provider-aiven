@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 var aivenPrivatelinkConnectionApprovalSchema = map[string]*schema.Schema{
@@ -162,7 +162,7 @@ func resourcePrivatelinkConnectionApprovalRead(_ context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	plConnectionID := d.Get("privatelink_connection_id").(string)
+	plConnectionID := schemautil.OptionalStringPointer(d, "privatelink_connection_id")
 	plConnection, err := client.AzurePrivatelink.ConnectionGet(project, service, plConnectionID)
 	if err != nil {
 		if aiven.IsNotFound(err) {
