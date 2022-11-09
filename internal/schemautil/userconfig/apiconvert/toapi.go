@@ -128,7 +128,7 @@ func objectItemToAPI(
 		panic(fmt.Sprintf("%s (item): properties key not found", fks))
 	}
 
-	if !regexp.MustCompile(".+\\.[0-9]$").MatchString(fks) {
+	if !regexp.MustCompile(`.+\.[0-9]$`).MatchString(fks) {
 		fk = append(fk, "0")
 	}
 
@@ -198,13 +198,13 @@ func itemToAPI(
 
 		if t == "array" {
 			return arrayItemToAPI(n, fk, k, va, i, d)
-		} else {
-			if len(va) == 0 {
-				return nil, true
-			}
-
-			return objectItemToAPI(n, fk, va, i, d)
 		}
+
+		if len(va) == 0 {
+			return nil, true
+		}
+
+		return objectItemToAPI(n, fk, va, i, d)
 	default:
 		panic(fmt.Sprintf("%s: unsupported type %s", fks, t))
 	}
