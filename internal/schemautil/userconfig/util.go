@@ -59,7 +59,7 @@ func representationToMap(st SchemaType, r []byte) map[string]interface{} {
 
 // TerraformTypes is a function that converts schema representation types to Terraform types.
 func TerraformTypes(t []string) ([]string, []string) {
-	r, ar := []string{}, []string{}
+	var r, ar []string
 
 	for _, v := range t {
 		switch v {
@@ -161,9 +161,4 @@ func EncodeKey(k string) string {
 // DecodeKey is a function that decodes a key for a Terraform schema.
 func DecodeKey(k string) string {
 	return strings.ReplaceAll(k, "__dot__", ".")
-}
-
-// UnhashedSchemaSet is a SchemaSetFunc that does not hash its elements.
-func UnhashedSchemaSet(_ interface{}) int {
-	return 0
 }

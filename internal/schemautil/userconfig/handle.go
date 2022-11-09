@@ -80,7 +80,7 @@ func handleArrayProperty(n string, p map[string]interface{}, t string) map[strin
 
 	oos, iof := ia["one_of"].([]interface{})
 	if iof {
-		ct := []string{}
+		var ct []string
 
 		for _, v := range oos {
 			va, ok := v.(map[string]interface{})

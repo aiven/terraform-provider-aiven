@@ -7,10 +7,18 @@ import (
 	"strings"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// typedKeyRegexp is a regular expression that matches keys that have a type suffix.
 var typedKeyRegexp = regexp.MustCompile(`^.*_(boolean|integer|number|string|array|object)$`)
+
+// resourceDatable is an interface that allows to get the resource data from the schema.
+// This is needed to be able to test the conversion functions. See schema.ResourceData for more.
+type resourceDatable interface {
+	GetOk(string) (interface{}, bool)
+	HasChange(string) bool
+	IsNewResource() bool
+}
 
 // arrayItemToAPI is a function that converts array property of Terraform user configuration schema to API
 // compatible format.
@@ -20,9 +28,9 @@ func arrayItemToAPI(
 	k string,
 	v []interface{},
 	i map[string]interface{},
-	d *schema.ResourceData,
+	d resourceDatable,
 ) (interface{}, bool) {
-	var res = make([]interface{}, len(v))
+	var res []interface{}
 
 	fks := strings.Join(fk, ".")
 
@@ -88,7 +96,7 @@ func arrayItemToAPI(
 		vnc, o := itemToAPI(n, iit, append(fk, fmt.Sprintf("%d", i)), fmt.Sprintf("%s.%d", k, i), vn, ii, d)
 
 		if !o {
-			res[i] = vnc
+			res = append(res, vnc)
 		}
 	}
 
@@ -102,7 +110,7 @@ func objectItemToAPI(
 	fk []string,
 	v []interface{},
 	i map[string]interface{},
-	d *schema.ResourceData,
+	d resourceDatable,
 ) (interface{}, bool) {
 	var res interface{}
 
@@ -137,7 +145,7 @@ func itemToAPI(
 	k string,
 	v interface{},
 	i map[string]interface{},
-	d *schema.ResourceData,
+	d resourceDatable,
 ) (interface{}, bool) {
 	// TODO: Remove this variable when we use actual types in the schema.
 	var err error
@@ -210,7 +218,7 @@ func propsToAPI(
 	fk []string,
 	tp map[string]interface{},
 	p map[string]interface{},
-	d *schema.ResourceData,
+	d resourceDatable,
 ) map[string]interface{} {
 	res := make(map[string]interface{}, len(tp))
 
@@ -263,7 +271,7 @@ func propsToAPI(
 }
 
 // ToAPI is a function that converts filled Terraform user configuration schema to API compatible format.
-func ToAPI(st userconfig.SchemaType, n string, d *schema.ResourceData) map[string]interface{} {
+func ToAPI(st userconfig.SchemaType, n string, d resourceDatable) map[string]interface{} {
 	var res map[string]interface{}
 
 	// fk is a full key slice. We use it to get the full key path to the property in the Terraform user configuration.
