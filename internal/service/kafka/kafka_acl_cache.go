@@ -13,12 +13,12 @@ var (
 	aclCacheLock sync.Mutex
 )
 
-//kafkaACLCache type
+// kafkaACLCache type
 type kafkaACLCache struct {
 }
 
-//Read populates the cache if it doesn't exist, and reads the required acl. An aiven.Error with status
-//404 is returned upon cache miss
+// Read populates the cache if it doesn't exist, and reads the required acl. An aiven.Error with status
+// 404 is returned upon cache miss
 func (a kafkaACLCache) Read(project, service, aclID string, client *aiven.Client) (acl aiven.KafkaACL, err error) {
 	aclCacheLock.Lock()
 	defer aclCacheLock.Unlock()
@@ -48,7 +48,7 @@ func (a kafkaACLCache) Read(project, service, aclID string, client *aiven.Client
 	return
 }
 
-//write writes the specified ACL to the cache
+// write writes the specified ACL to the cache
 func (a kafkaACLCache) write(project, service string, acl *aiven.KafkaACL) (err error) {
 	var cachedService map[string]aiven.KafkaACL
 	var ok bool
@@ -61,14 +61,14 @@ func (a kafkaACLCache) write(project, service string, acl *aiven.KafkaACL) (err 
 	return
 }
 
-//Refresh refreshes the ACL cache
+// Refresh refreshes the ACL cache
 func (a kafkaACLCache) Refresh(project, service string, client *aiven.Client) error {
 	aclCacheLock.Lock()
 	defer aclCacheLock.Unlock()
 	return a.populateACLCache(project, service, client)
 }
 
-//populateACLCache makes a call to Aiven to list kafka ACLs, and upserts into the cache
+// populateACLCache makes a call to Aiven to list kafka ACLs, and upserts into the cache
 func (a kafkaACLCache) populateACLCache(project, service string, client *aiven.Client) (err error) {
 	var acls []*aiven.KafkaACL
 	if acls, err = client.KafkaACLs.List(project, service); err == nil {

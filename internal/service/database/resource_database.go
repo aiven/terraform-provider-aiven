@@ -59,6 +59,7 @@ var aivenDatabaseSchema = map[string]*schema.Schema{
 
 // ResourceDatabase
 // Deprecated
+//
 //goland:noinspection GoDeprecation
 func ResourceDatabase() *schema.Resource {
 	return &schema.Resource{

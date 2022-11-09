@@ -36,6 +36,7 @@ var (
 )
 
 // Provider returns terraform.ResourceProvider.
+//
 //goland:noinspection GoDeprecation
 func Provider() *schema.Provider {
 	p := &schema.Provider{
