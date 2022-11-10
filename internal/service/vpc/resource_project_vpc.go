@@ -196,7 +196,7 @@ func (w *ProjectVPCDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 		vpc, err := w.Client.VPCs.Get(w.Project, w.VPCID)
 		if err != nil {
 			// might be already gone after deletion
-			if err.(aiven.Error).Status == 404 {
+			if aiven.IsNotFound(err) {
 				return &aiven.VPC{}, "DELETED", nil
 			}
 
