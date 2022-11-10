@@ -32,7 +32,7 @@ func NormalizeIpFilter(tfUserConfig interface{}, userConfig []map[string]interfa
 		return userConfig
 	}
 
-	api := toStringSlice(userConfig[0]["ip_filter"].([]interface{}))
+	api := userConfig[0]["ip_filter"].([]string)
 	tf := toStringSlice(tfInt[0].(map[string]interface{})["ip_filter"].([]interface{}))
 
 	var newIpFilters []string
