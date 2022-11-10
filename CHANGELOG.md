@@ -6,7 +6,7 @@ nav_order: 1
 
 # Changelog
 
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+## [3.8.1] - 2022-11-10
 
 - Fix `GetServiceUserValidateFunc`
 - Fix provider panics on `terraform import` with invalid vpc peering id

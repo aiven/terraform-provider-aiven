@@ -77,7 +77,7 @@ endif
 
 TEST_COUNT ?= 1
 ACC_TEST_TIMEOUT ?= 180m
-ACC_TEST_PARALLELISM ?= 20
+ACC_TEST_PARALLELISM ?= 10
 
 test-acc:
 	TF_ACC=1 $(GO) test ./$(PKG_PATH)/... \
