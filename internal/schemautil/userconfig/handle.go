@@ -101,6 +101,7 @@ func handleArrayProperty(n string, p map[string]interface{}, t string) map[strin
 
 	for k, v := range tn {
 		an := n
+
 		if len(tn) > 1 {
 			an = fmt.Sprintf("%s_%s", n, atn[k])
 

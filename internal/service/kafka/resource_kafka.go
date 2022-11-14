@@ -98,6 +98,7 @@ func ResourceKafka() *schema.Resource {
 		Schema: aivenKafkaSchema(),
 		CustomizeDiff: customdiff.Sequence(
 			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeKafka),
+			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
 			customdiff.IfValueChange("tag",
 				schemautil.TagsShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckUniqueTag,

@@ -32,6 +32,7 @@ func ResourceKafkaMirrormaker() *schema.Resource {
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
 			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeKafkaMirrormaker),
+			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
 			customdiff.IfValueChange("disk_space",
 				schemautil.DiskSpaceShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,

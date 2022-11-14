@@ -33,6 +33,7 @@ func ResourceRedis() *schema.Resource {
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
 			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeRedis),
+			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
 			customdiff.IfValueChange("tag",
 				schemautil.TagsShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckUniqueTag,

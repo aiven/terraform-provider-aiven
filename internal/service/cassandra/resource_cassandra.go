@@ -33,6 +33,7 @@ func ResourceCassandra() *schema.Resource {
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
 			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeCassandra),
+			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
 			customdiff.IfValueChange("tag",
 				schemautil.TagsShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckUniqueTag,

@@ -3,6 +3,7 @@ package userconfig
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/aiven/aiven-go-client/tools/exp/dist"
@@ -162,4 +163,9 @@ func EncodeKey(k string) string {
 // DecodeKey is a function that decodes a key for a Terraform schema.
 func DecodeKey(k string) string {
 	return strings.ReplaceAll(k, "__dot__", ".")
+}
+
+// IsKeyTyped is a function that checks if a key is typed, i.e. has a type suffix in it.
+func IsKeyTyped(k string) bool {
+	return regexp.MustCompile(`^.*_(boolean|integer|number|string|array|object)$`).MatchString(k)
 }

@@ -9,9 +9,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
-// typedKeyRegexp is a regular expression that matches keys that have a type suffix.
-var typedKeyRegexp = regexp.MustCompile(`^.*_(boolean|integer|number|string|array|object)$`)
-
 // resourceDatable is an interface that allows to get the resource data from the schema.
 // This is needed to be able to test the conversion functions. See schema.ResourceData for more.
 type resourceDatable interface {
@@ -47,7 +44,7 @@ func arrayItemToAPI(
 	var iit string
 
 	// If the key has a type suffix, we use it to determine the type of the value.
-	if typedKeyRegexp.MatchString(k) {
+	if userconfig.IsKeyTyped(k) {
 		iit = k[strings.LastIndexByte(k, '_')+1:]
 
 		// Find the one_of item that matches the type.
@@ -230,7 +227,7 @@ func propsToAPI(
 		rk := k
 
 		// If the key has a suffix, we need to strip it to be able to find the corresponding property in the schema.
-		if typedKeyRegexp.MatchString(k) {
+		if userconfig.IsKeyTyped(k) {
 			rk = k[:strings.LastIndexByte(k, '_')]
 		}
 

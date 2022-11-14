@@ -32,6 +32,7 @@ func ResourceM3Aggregator() *schema.Resource {
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
 			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeM3Aggregator),
+			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
 			customdiff.IfValueChange("disk_space",
 				schemautil.DiskSpaceShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
