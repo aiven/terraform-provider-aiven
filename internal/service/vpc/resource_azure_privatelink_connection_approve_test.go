@@ -12,23 +12,22 @@ import (
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
-// azurePLCASecrets AzurePrivateLinkConnectionApproval secrets
-type azurePLCASecrets struct {
+// azureSecrets AzurePrivateLinkConnectionApproval secrets
+type azureSecrets struct {
 	Project        string `envconfig:"AIVEN_PROJECT_NAME" required:"true"`
-	ClientID       string `envconfig:"AZURE_CLIENT_ID" required:"true"`
-	ClientSecret   string `envconfig:"AZURE_CLIENT_SECRET" required:"true"`
+	AivenAppID     string `envconfig:"AIVEN_AZURE_APP_ID" required:"true"`
 	TenantID       string `envconfig:"AZURE_TENANT_ID" required:"true"`
 	SubscriptionID string `envconfig:"AZURE_SUBSCRIPTION_ID" required:"true"`
 }
 
 func TestAccAivenAzurePrivateLinkConnectionApproval_basic(t *testing.T) {
-	var s azurePLCASecrets
+	var s azureSecrets
 	err := envconfig.Process("", &s)
 	if err != nil {
 		t.Skipf("Not all values has been provided: %s", err)
 	}
 
-	prefix := "test-tf-acc-" + acctest.RandString(7)
+	prefix := "test-tf-acc-plapproval-" + acctest.RandString(7)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -69,7 +68,7 @@ func TestAccAivenAzurePrivateLinkConnectionApproval_basic(t *testing.T) {
 	})
 }
 
-func testAccAzurePrivateLinkConnectionApprovalResource(prefix string, s *azurePLCASecrets) string {
+func testAccAzurePrivateLinkConnectionApprovalResource(prefix string, s *azureSecrets) string {
 	return fmt.Sprintf(`
 data "aiven_project" "project" {
   project = %[2]q
@@ -77,10 +76,8 @@ data "aiven_project" "project" {
 
 provider "azurerm" {
   features {}
-  client_id       = %[3]q
-  client_secret   = %[4]q
-  tenant_id       = %[5]q
-  subscription_id = %[6]q
+  tenant_id       = %[3]q
+  subscription_id = %[4]q
 }
 
 resource "aiven_project_vpc" "project_vpc" {
@@ -122,7 +119,7 @@ resource "aiven_azure_privatelink" "private_link" {
   service_name = aiven_pg.pg.service_name
 
   user_subscription_ids = [
-    %[6]q,
+    %[4]q,
   ]
 }
 
@@ -167,7 +164,7 @@ resource "aiven_azure_privatelink_connection_approval" "approval" {
   project             = data.aiven_project.project.project
   service_name        = aiven_pg.pg.service_name
   endpoint_ip_address = azurerm_private_endpoint.private_endpoint.private_service_connection[0].private_ip_address
-}`, prefix, s.Project, s.ClientID, s.ClientSecret, s.TenantID, s.SubscriptionID)
+}`, prefix, s.Project, s.TenantID, s.SubscriptionID)
 }
 
 func importStateByName(name string) resource.TestStep {
