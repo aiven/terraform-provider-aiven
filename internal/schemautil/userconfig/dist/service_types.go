@@ -1477,6 +1477,11 @@ func ServiceTypeGrafana() *schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
+		"dashboard_previews_enabled": {
+			Description: "This feature is new in Grafana 9 and is quite resource intensive. It may cause low-end plans to work more slowly while the dashboard previews are rendering.",
+			Optional:    true,
+			Type:        schema.TypeString,
+		},
 		"dashboards_min_refresh_interval": {
 			Description: "Signed sequence of decimal numbers, followed by a unit suffix (ms, s, m, h, d), e.g. 30s, 1h",
 			Optional:    true,
