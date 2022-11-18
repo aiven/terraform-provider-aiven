@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/hashicorp/go-cty/cty"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func DatasourceProjectVPC() *schema.Resource {
@@ -23,14 +22,12 @@ func DatasourceProjectVPC() *schema.Resource {
 			Description:   "Identifies the project this resource belongs to.",
 			Optional:      true,
 			ConflictsWith: []string{"vpc_id"},
-			Deprecated:    "Use vpc_id instead of project/cloud_name. Only vpc_id can correctly retrieve a project VPC.",
 		},
 		"cloud_name": {
 			Type:          schema.TypeString,
 			Description:   "Defines where the cloud provider and region where the service is hosted in. See the Service resource for additional information.",
 			Optional:      true,
 			ConflictsWith: []string{"vpc_id"},
-			Deprecated:    "Use vpc_id instead of project/cloud_name. Only vpc_id can correctly retrieve a project VPC.",
 		},
 		"vpc_id": {
 			Type:          schema.TypeString,
@@ -65,51 +62,35 @@ func DatasourceProjectVPC() *schema.Resource {
 }
 
 func datasourceProjectVPCRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var splitId []string
-	var vpcId string
 	client := m.(*aiven.Client)
-	projectName := d.Get("project").(string)
-	cloudName := d.Get("cloud_name").(string)
-	if id, hasId := d.GetOk("vpc_id"); hasId {
-		var err error
-		splitId, err = schemautil.SplitResourceID(id.(string), 2)
+
+	var vpcID, projectName, cloudName string
+
+	// This two branches are isolated by tf validation
+	if s, hasId := d.GetOk("vpc_id"); hasId {
+		chunks, err := schemautil.SplitResourceID(s.(string), 2)
 		if err != nil {
 			return diag.Errorf("error splitting vpc_id: %s:", err)
 		}
-
-		projectName = splitId[0]
-		vpcId = splitId[1]
+		projectName = chunks[0]
+		vpcID = chunks[1]
+	} else {
+		projectName = d.Get("project").(string)
+		cloudName = d.Get("cloud_name").(string)
 	}
 
-	vpcs, err := client.VPCs.List(projectName)
+	vpcList, err := client.VPCs.List(projectName)
 	if err != nil {
-		return diag.Errorf("error getting a list of project VPCs: %s", err)
+		return diag.Errorf("error getting a list of project %q VPCs: %s", projectName, err)
 	}
 
-	filteredVPCs := make([]*aiven.VPC, 0)
-	for _, vpc := range vpcs {
-		if vpc.CloudName == cloudName || (vpcId != "" && vpc.ProjectVPCID == vpcId) {
-			filteredVPCs = append(filteredVPCs, vpc)
-		}
+	// At this point we have strictly either vpcID OR cloudName
+	// Because of ConflictsWith: []string{"project", "cloud_name"},
+	vpc, err := getVPC(vpcList, vpcID, cloudName)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
-	if len(filteredVPCs) == 0 {
-		return diag.Errorf("project %s has no VPC defined for %s",
-			projectName, cloudName)
-	}
-
-	if len(filteredVPCs) > 1 {
-		// List out the available options in the error message
-		var smg string
-		for _, vpc := range filteredVPCs {
-			id := schemautil.BuildResourceID(projectName, vpc.ProjectVPCID)
-			smg = smg + fmt.Sprintf("- ID=(%v), State=(%v), NetworkCIDR=(%v)\n", id, vpc.State, vpc.NetworkCIDR)
-		}
-		return diag.Errorf("project %s has multiple VPC defined for %s. Please add `id` to get the desired one. The available vpc ids are:\n%s",
-			projectName, cloudName, smg)
-	}
-
-	vpc := filteredVPCs[0]
 	d.SetId(schemautil.BuildResourceID(projectName, vpc.ProjectVPCID))
 	err = copyVPCPropertiesFromAPIResponseToTerraform(d, vpc, projectName)
 	if err != nil {
@@ -117,4 +98,43 @@ func datasourceProjectVPCRead(_ context.Context, d *schema.ResourceData, m inter
 	}
 
 	return nil
+}
+
+// getVPC gets VPC by id or cloud name
+func getVPC(vpcList []*aiven.VPC, vpcID, cloudName string) (vpc *aiven.VPC, err error) {
+	//   A  xnor  B   | A | B | Out
+	// ---------------|---|---|----
+	// "foo" == ""    | 0 | 1 | 0
+	//    "" == "foo" | 1 | 0 | 0
+	//    "" == ""    | 1 | 1 | 1
+	// "foo" == "foo" | 0 | 0 | 1
+	if (vpcID == "") == (cloudName == "") {
+		return nil, fmt.Errorf("provide exactly one: vpc_id or cloud_name")
+	}
+
+	for _, v := range vpcList {
+		// Exact match
+		if v.ProjectVPCID == vpcID {
+			return v, nil
+		}
+
+		// cloudName can't be empty by this time
+		if v.CloudName != cloudName {
+			continue
+		}
+
+		// Cases:
+		// 1. multiple active with same cloudName
+		// 2. one is deleting and another one is creating (APPROVED)
+		if vpc != nil {
+			return nil, fmt.Errorf("multiple project VPC with cloud_name %q, use vpc_id instead", cloudName)
+		}
+		vpc = v
+	}
+
+	if vpc == nil {
+		err = fmt.Errorf("not found project VPC with cloud_name %q", cloudName)
+	}
+
+	return vpc, err
 }
