@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -18,8 +19,7 @@ func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	kafkaMMSchema[schemautil.ServiceTypeKafkaMirrormaker+"_user_config"] =
-		schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeKafkaMirrormaker)
+	kafkaMMSchema[schemautil.ServiceTypeKafkaMirrormaker+"_user_config"] = dist.ServiceTypeKafkaMirrormaker()
 
 	return kafkaMMSchema
 }
@@ -32,6 +32,7 @@ func ResourceKafkaMirrormaker() *schema.Resource {
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
 			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeKafkaMirrormaker),
+			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
 			customdiff.IfValueChange("disk_space",
 				schemautil.DiskSpaceShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,

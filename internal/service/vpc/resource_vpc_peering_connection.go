@@ -81,6 +81,7 @@ var aivenVPCPeeringConnectionSchema = map[string]*schema.Schema{
 
 // ResourceVPCPeeringConnection
 // Deprecated
+//
 //goland:noinspection GoDeprecation
 func ResourceVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{

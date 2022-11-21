@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -31,7 +32,7 @@ func aivenFlinkSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	aivenFlinkSchema[schemautil.ServiceTypeFlink+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeFlink)
+	aivenFlinkSchema[schemautil.ServiceTypeFlink+"_user_config"] = dist.ServiceTypeFlink()
 
 	return aivenFlinkSchema
 }
@@ -45,6 +46,7 @@ func ResourceFlink() *schema.Resource {
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
 			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeFlink),
+			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
 			customdiff.IfValueChange("tag",
 				schemautil.TagsShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckUniqueTag,

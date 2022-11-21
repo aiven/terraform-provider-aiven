@@ -5,7 +5,9 @@ go 1.18
 require (
 	github.com/aiven/aiven-go-client v1.7.1-0.20221108145444-aa8b10f12d8f
 	github.com/aiven/aiven-go-client/tools/exp v0.0.0-20221102122203-4f39deb34b6a
+	github.com/dave/jennifer v1.5.1
 	github.com/docker/go-units v0.5.0
+	github.com/ettle/strcase v0.1.1
 	github.com/gruntwork-io/terratest v0.40.22
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.22.0
@@ -13,7 +15,6 @@ require (
 	github.com/stretchr/testify v1.8.0
 	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
-	golang.org/x/text v0.3.7
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -81,6 +82,7 @@ require (
 	golang.org/x/net v0.0.0-20220812174116-3211cb980234 // indirect
 	golang.org/x/oauth2 v0.0.0-20210514164344-f6687ab2804c // indirect
 	golang.org/x/sys v0.0.0-20220817070843-5a390386f1f2 // indirect
+	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.10 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/api v0.47.0 // indirect

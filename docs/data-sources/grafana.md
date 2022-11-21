@@ -107,6 +107,7 @@ Read-Only:
 - `external_image_storage` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--external_image_storage))
 - `google_analytics_ua_id` (String)
 - `ip_filter` (List of String)
+- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--ip_filter_object))
 - `metrics_enabled` (String)
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--private_access))
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--privatelink_access))
@@ -212,6 +213,15 @@ Read-Only:
 - `bucket_url` (String)
 - `provider` (String)
 - `secret_key` (String)
+
+
+<a id="nestedobjatt--grafana_user_config--ip_filter_object"></a>
+### Nested Schema for `grafana_user_config.ip_filter_object`
+
+Read-Only:
+
+- `description` (String)
+- `network` (String)
 
 
 <a id="nestedobjatt--grafana_user_config--private_access"></a>

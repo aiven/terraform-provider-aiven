@@ -16,6 +16,8 @@ nav_order: 1
 - Add `aiven_pg_user` import example to docs
 - Extend converter for the service user configuration options `ip_filter` object format
 - Fix `aiven_azure_privatelink_connection_approval` import
+- Add static schema generator for user config options
+- Add `ip_filter_object` and `namespaces_object` user config options which are meant to extend the existing `ip_filter` and `namespaces` ones
 
 ## [3.8.0] - 2022-09-30
 

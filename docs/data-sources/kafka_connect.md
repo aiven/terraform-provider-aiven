@@ -39,7 +39,7 @@ data "aiven_kafka_connect" "kc1" {
 - `disk_space_used` (String) Disk space that service is currently using
 - `id` (String) The ID of this resource.
 - `kafka_connect` (List of Object) Kafka Connect server provided values (see [below for nested schema](#nestedatt--kafka_connect))
-- `kafka_connect_user_config` (List of Object) Kafka_connect user configurable settings (see [below for nested schema](#nestedatt--kafka_connect_user_config))
+- `kafka_connect_user_config` (List of Object) KafkaConnect user configurable settings (see [below for nested schema](#nestedatt--kafka_connect_user_config))
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
 - `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
@@ -84,11 +84,21 @@ Read-Only:
 
 - `additional_backup_regions` (List of String)
 - `ip_filter` (List of String)
+- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--ip_filter_object))
 - `kafka_connect` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--kafka_connect))
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--private_access))
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--privatelink_access))
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--public_access))
 - `static_ips` (String)
+
+<a id="nestedobjatt--kafka_connect_user_config--ip_filter_object"></a>
+### Nested Schema for `kafka_connect_user_config.ip_filter_object`
+
+Read-Only:
+
+- `description` (String)
+- `network` (String)
+
 
 <a id="nestedobjatt--kafka_connect_user_config--kafka_connect"></a>
 ### Nested Schema for `kafka_connect_user_config.kafka_connect`

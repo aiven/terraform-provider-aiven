@@ -3,9 +3,12 @@ package schemautil
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/docker/go-units"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -171,5 +174,117 @@ func CustomizeDiffCheckStaticIpDisassociation(_ context.Context, d *schema.Resou
 
 	}
 	// TODO: Check that we block deletions that will result in too few static ips for the plan
+	return nil
+}
+
+// typedKeys is a helper function that returns a list of typed keys from cty.Value map.
+func typedKeys(m map[string]cty.Value) map[string]struct{} {
+	tks := map[string]struct{}{}
+
+	for k, v := range m {
+		if v.IsNull() {
+			continue
+		}
+
+		if v.CanIterateElements() {
+			vs := v.AsValueSlice()
+
+			if len(vs) == 0 {
+				continue
+			}
+
+			vsf := vs[0]
+
+			if vsf.CanIterateElements() {
+				vsfm := vsf.AsValueMap()
+
+				if len(vsfm) != 0 {
+					ntks := typedKeys(vsfm)
+
+					if len(ntks) != 0 {
+						for nk := range ntks {
+							tks[nk] = struct{}{}
+						}
+					}
+				}
+			}
+		}
+
+		ak := k
+
+		// TODO: Remove this in the next major version.
+		if k == "ip_filter" || k == "namespaces" {
+			ak = fmt.Sprintf("%s_string", k)
+		}
+
+		if userconfig.IsKeyTyped(ak) {
+			tks[ak] = struct{}{}
+		}
+	}
+
+	return tks
+}
+
+// CustomizeDiffDisallowMultipleManyToOneKeys checks that we don't have multiple keys that are going to be converted to
+// a single key in the API request, e.g. 'ip_filter' and 'ip_filter_object' in the same diff.
+func CustomizeDiffDisallowMultipleManyToOneKeys(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	ks := d.GetRawConfig().AsValueMap()
+
+	tks := map[string]struct{}{}
+
+	for k, v := range ks {
+		if !strings.Contains(k, "_user_config") {
+			continue
+		}
+
+		va := v.AsValueSlice()
+
+		if len(va) == 0 {
+			continue
+		}
+
+		tks = typedKeys(va[0].AsValueMap())
+	}
+
+	if len(tks) == 0 {
+		return nil
+	}
+
+	em := map[string]string{}
+
+	for k := range tks {
+		ak := k[:strings.LastIndexByte(k, '_')]
+
+		if sv, ok := em[ak]; ok {
+			asv := sv
+
+			aak := k
+
+			// TODO: Remove this in the next major version.
+			if sv == "ip_filter_string" {
+				asv = "ip_filter"
+			}
+
+			// TODO: Remove this in the next major version.
+			if k == "ip_filter_string" {
+				aak = "ip_filter"
+			}
+
+			// TODO: Remove this in the next major version.
+			if sv == "namespaces_string" {
+				asv = "namespaces"
+			}
+
+			// TODO: Remove this in the next major version.
+			if k == "namespaces_string" {
+				aak = "namespaces"
+			}
+
+			return fmt.Errorf("cannot set both '%s' and '%s'", asv, aak)
+		}
+
+		em[ak] = k
+	}
+
 	return nil
 }

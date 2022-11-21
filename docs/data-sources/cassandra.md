@@ -72,6 +72,7 @@ Read-Only:
 - `cassandra` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--cassandra))
 - `cassandra_version` (String)
 - `ip_filter` (List of String)
+- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--ip_filter_object))
 - `migrate_sstableloader` (String)
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--private_access))
 - `project_to_fork_from` (String)
@@ -88,6 +89,15 @@ Read-Only:
 - `batch_size_fail_threshold_in_kb` (String)
 - `batch_size_warn_threshold_in_kb` (String)
 - `datacenter` (String)
+
+
+<a id="nestedobjatt--cassandra_user_config--ip_filter_object"></a>
+### Nested Schema for `cassandra_user_config.ip_filter_object`
+
+Read-Only:
+
+- `description` (String)
+- `network` (String)
 
 
 <a id="nestedobjatt--cassandra_user_config--private_access"></a>

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -18,7 +19,7 @@ func aivenM3AggregatorSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	schemaM3[schemautil.ServiceTypeM3Aggregator+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypeM3Aggregator)
+	schemaM3[schemautil.ServiceTypeM3Aggregator+"_user_config"] = dist.ServiceTypeM3aggregator()
 
 	return schemaM3
 }
@@ -31,6 +32,7 @@ func ResourceM3Aggregator() *schema.Resource {
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
 			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeM3Aggregator),
+			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
 			customdiff.IfValueChange("disk_space",
 				schemautil.DiskSpaceShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,

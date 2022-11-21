@@ -107,6 +107,7 @@ var aivenServiceUserSchema = map[string]*schema.Schema{
 
 // ResourceServiceUser
 // Deprecated
+//
 //goland:noinspection GoDeprecation
 func ResourceServiceUser() *schema.Resource {
 	return &schema.Resource{

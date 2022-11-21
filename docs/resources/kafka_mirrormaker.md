@@ -44,7 +44,7 @@ resource "aiven_kafka_mirrormaker" "mm1" {
 - `additional_disk_space` (String) Additional disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 - `disk_space` (String) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
-- `kafka_mirrormaker_user_config` (Block List, Max: 1) Kafka_mirrormaker user configurable settings (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config))
+- `kafka_mirrormaker_user_config` (Block List, Max: 1) KafkaMirrormaker user configurable settings (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config))
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
 - `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
@@ -78,25 +78,35 @@ resource "aiven_kafka_mirrormaker" "mm1" {
 Optional:
 
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
-- `ip_filter` (List of String) IP filter
+- `ip_filter` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--ip_filter_object))
 - `kafka_mirrormaker` (Block List, Max: 1) Kafka MirrorMaker configuration values (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker))
-- `static_ips` (String) Static IP addresses
+- `static_ips` (String) Use static public IP addresses
+
+<a id="nestedblock--kafka_mirrormaker_user_config--ip_filter_object"></a>
+### Nested Schema for `kafka_mirrormaker_user_config.ip_filter_object`
+
+Optional:
+
+- `description` (String) Description for IP filter list entry
+- `network` (String) CIDR address block
+
 
 <a id="nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker"></a>
 ### Nested Schema for `kafka_mirrormaker_user_config.kafka_mirrormaker`
 
 Optional:
 
-- `emit_checkpoints_enabled` (String) Emit consumer group offset checkpoints
-- `emit_checkpoints_interval_seconds` (String) Frequency of consumer group offset checkpoints
-- `refresh_groups_enabled` (String) Refresh consumer groups
-- `refresh_groups_interval_seconds` (String) Frequency of group refresh
-- `refresh_topics_enabled` (String) Refresh topics and partitions
-- `refresh_topics_interval_seconds` (String) Frequency of topic and partitions refresh
-- `sync_group_offsets_enabled` (String) Sync consumer group offsets
-- `sync_group_offsets_interval_seconds` (String) Frequency of consumer group offset sync
-- `sync_topic_configs_enabled` (String) Sync remote topics
-- `tasks_max_per_cpu` (String) Maximum number of MirrorMaker tasks (of each type) per service CPU
+- `emit_checkpoints_enabled` (String) Whether to emit consumer group offset checkpoints to target cluster periodically (default: true)
+- `emit_checkpoints_interval_seconds` (String) Frequency at which consumer group offset checkpoints are emitted (default: 60, every minute)
+- `refresh_groups_enabled` (String) Whether to periodically check for new consumer groups. Defaults to 'true'.
+- `refresh_groups_interval_seconds` (String) Frequency of consumer group refresh in seconds. Defaults to 600 seconds (10 minutes).
+- `refresh_topics_enabled` (String) Whether to periodically check for new topics and partitions. Defaults to 'true'.
+- `refresh_topics_interval_seconds` (String) Frequency of topic and partitions refresh in seconds. Defaults to 600 seconds (10 minutes).
+- `sync_group_offsets_enabled` (String) Whether to periodically write the translated offsets of replicated consumer groups (in the source cluster) to __consumer_offsets topic in target cluster, as long as no active consumers in that group are connected to the target cluster
+- `sync_group_offsets_interval_seconds` (String) Frequency at which consumer group offsets are synced (default: 60, every minute)
+- `sync_topic_configs_enabled` (String) Whether to periodically configure remote topics to match their corresponding upstream topics.
+- `tasks_max_per_cpu` (String) 'tasks.max' is set to this multiplied by the number of CPUs in the service.
 
 
 

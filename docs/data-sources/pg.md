@@ -98,6 +98,7 @@ Read-Only:
 - `backup_minute` (String)
 - `enable_ipv6` (String)
 - `ip_filter` (List of String)
+- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--ip_filter_object))
 - `migration` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--migration))
 - `pg` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pg))
 - `pg_read_replica` (String)
@@ -118,6 +119,15 @@ Read-Only:
 - `timescaledb` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--timescaledb))
 - `variant` (String)
 - `work_mem` (String)
+
+<a id="nestedobjatt--pg_user_config--ip_filter_object"></a>
+### Nested Schema for `pg_user_config.ip_filter_object`
+
+Read-Only:
+
+- `description` (String)
+- `network` (String)
+
 
 <a id="nestedobjatt--pg_user_config--migration"></a>
 ### Nested Schema for `pg_user_config.migration`

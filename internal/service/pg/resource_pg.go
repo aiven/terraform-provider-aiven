@@ -5,7 +5,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/templates"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -77,7 +79,7 @@ func aivenPGSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	schemaPG[schemautil.ServiceTypePG+"_user_config"] = schemautil.GenerateServiceUserConfigurationSchema(schemautil.ServiceTypePG)
+	schemaPG[schemautil.ServiceTypePG+"_user_config"] = dist.ServiceTypePg()
 
 	return schemaPG
 }
@@ -91,6 +93,7 @@ func ResourcePG() *schema.Resource {
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
 			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypePG),
+			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
 			customdiff.IfValueChange("tag",
 				schemautil.TagsShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckUniqueTag,
@@ -134,7 +137,7 @@ func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	userConfig := schemautil.ConvertTerraformUserConfigToAPICompatibleFormat(templates.UserConfigSchemaService, "pg", false, d)
+	userConfig := apiconvert.ToAPI(userconfig.ServiceTypes, "pg", d)
 
 	if userConfig["pg_version"] != nil {
 		s, err := client.Services.Get(projectName, serviceName)

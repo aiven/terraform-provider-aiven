@@ -87,6 +87,7 @@ Read-Only:
 - `custom_domain` (String)
 - `influxdb` (List of Object) (see [below for nested schema](#nestedobjatt--influxdb_user_config--influxdb))
 - `ip_filter` (List of String)
+- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--influxdb_user_config--ip_filter_object))
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--influxdb_user_config--private_access))
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--influxdb_user_config--privatelink_access))
 - `project_to_fork_from` (String)
@@ -106,6 +107,15 @@ Read-Only:
 - `max_select_buckets` (String)
 - `max_select_point` (String)
 - `query_timeout` (String)
+
+
+<a id="nestedobjatt--influxdb_user_config--ip_filter_object"></a>
+### Nested Schema for `influxdb_user_config.ip_filter_object`
+
+Read-Only:
+
+- `description` (String)
+- `network` (String)
 
 
 <a id="nestedobjatt--influxdb_user_config--private_access"></a>
