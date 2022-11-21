@@ -19,10 +19,8 @@ data "aiven_project_vpc" "myvpc" {
 }
 
 # Or
-data "aiven_project_vpc" "myvpc" {
-  project    = aiven_project.myproject.project
-  cloud_name = "google-europe-west1"
-  id         = aiven_project_vpc.vpc.id
+data "aiven_project_vpc" "myvpc_id" {
+  vpc_id = aiven_project_vpc.vpc.id
 }
 ```
 
@@ -31,8 +29,8 @@ data "aiven_project_vpc" "myvpc" {
 
 ### Optional
 
-- `cloud_name` (String, Deprecated) Defines where the cloud provider and region where the service is hosted in. See the Service resource for additional information.
-- `project` (String, Deprecated) Identifies the project this resource belongs to.
+- `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. See the Service resource for additional information.
+- `project` (String) Identifies the project this resource belongs to.
 - `vpc_id` (String) ID of the VPC. This can be used to filter out the specific VPC if there are more than one datasource returned.
 
 ### Read-Only
