@@ -55,7 +55,7 @@ func SweepServices(region, t string) error {
 			continue
 		}
 
-		if !strings.Contains(s.Name, "test-acc-") {
+		if !hasPrefixAny(s.Name, "test-acc", "test-examples", "k8s-") {
 			continue
 		}
 
@@ -94,4 +94,13 @@ func AddServiceSweeper(t string) {
 		},
 		Dependencies: []string{"aiven_service_integration"},
 	})
+}
+
+func hasPrefixAny(s, prefix ...string) bool {
+	for _, ss := range prefix {
+		if strings.HasPrefix(s, ss) {
+			return true
+		}
+	}
+	return false
 }

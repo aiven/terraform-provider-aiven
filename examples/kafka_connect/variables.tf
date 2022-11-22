@@ -1,2 +1,4 @@
-variable "aiven_api_token" {}
-variable "aiven_card_id" {}
+variable "avn_token" {}
+variable "avn_project" {}
+variable "kafka_service_name" {}
+variable "kafka_connect_name" {}

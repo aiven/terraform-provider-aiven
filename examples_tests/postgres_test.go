@@ -9,15 +9,15 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type PostgresExamplesTestSuite struct {
+type PostgresTestSuite struct {
 	BaseTestSuite
 }
 
-func TestPostgresExamplesTestSuite(t *testing.T) {
-	suite.Run(t, new(PostgresExamplesTestSuite))
+func TestPostgresTestSuite(t *testing.T) {
+	suite.Run(t, new(PostgresTestSuite))
 }
 
-func (s *PostgresExamplesTestSuite) TestExamplesPostgres() {
+func (s *PostgresTestSuite) TestPostgres() {
 	s.T().Parallel()
 
 	// Given

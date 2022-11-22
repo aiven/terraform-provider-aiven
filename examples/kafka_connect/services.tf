@@ -1,23 +1,19 @@
 # Kafka service
-resource "aiven_kafka" "kafka-service" {
-  project                 = aiven_project.kafka-con-project1.project
+resource "aiven_kafka" "kafka_service" {
+  project                 = var.avn_project
+  service_name            = var.kafka_service_name
   cloud_name              = "google-europe-west1"
-  plan                    = "business-4"
-  service_name            = "kafka-service1"
+  plan                    = "startup-2"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
-
-  kafka_user_config {
-    kafka_version = "2.4"
-  }
 }
 
 # Kafka connect service
 resource "aiven_kafka_connect" "kafka_connect" {
-  project                 = aiven_project.kafka-con-project1.project
+  project                 = var.avn_project
+  service_name            = var.kafka_connect_name
   cloud_name              = "google-europe-west1"
   plan                    = "startup-4"
-  service_name            = "kafka-connect1"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 
@@ -32,11 +28,11 @@ resource "aiven_kafka_connect" "kafka_connect" {
   }
 }
 
-// Kafka connect service integration
-resource "aiven_service_integration" "i1" {
-  project                  = aiven_project.kafka-con-project1.project
+# Kafka connect service integration
+resource "aiven_service_integration" "kafka_integration" {
+  project                  = var.avn_project
   integration_type         = "kafka_connect"
-  source_service_name      = aiven_kafka.kafka-service.service_name
+  source_service_name      = aiven_kafka.kafka_service.service_name
   destination_service_name = aiven_kafka_connect.kafka_connect.service_name
 
   kafka_connect_user_config {

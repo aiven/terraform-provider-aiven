@@ -9,6 +9,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Revert `datasource_project_vpc` `cloud_name` and `project` deprecations
+- Add extra timeout for `kafka_connect` service integration create
 
 ## [3.8.1] - 2022-11-10
 
