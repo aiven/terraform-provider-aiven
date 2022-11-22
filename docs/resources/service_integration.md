@@ -33,6 +33,7 @@ resource "aiven_service_integration" "my_integration_metrics" {
 
 ### Optional
 
+- `clickhouse_kafka_user_config` (Block List, Max: 1) ClickhouseKafka user configurable settings (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config))
 - `datadog_user_config` (Block List, Max: 1) Datadog user configurable settings (see [below for nested schema](#nestedblock--datadog_user_config))
 - `destination_endpoint_id` (String) Destination endpoint for the integration (if any)
 - `destination_service_name` (String) Destination service for the integration (if any)
@@ -50,6 +51,43 @@ resource "aiven_service_integration" "my_integration_metrics" {
 
 - `id` (String) The ID of this resource.
 - `integration_id` (String) Service Integration Id at aiven
+
+<a id="nestedblock--clickhouse_kafka_user_config"></a>
+### Nested Schema for `clickhouse_kafka_user_config`
+
+Optional:
+
+- `tables` (Block List, Max: 100) Tables to create (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables))
+
+<a id="nestedblock--clickhouse_kafka_user_config--tables"></a>
+### Nested Schema for `clickhouse_kafka_user_config.tables`
+
+Optional:
+
+- `columns` (Block List, Max: 100) Table columns (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--columns))
+- `data_format` (String) Message data format
+- `group_name` (String) Kafka consumers group
+- `name` (String) Name of the table
+- `topics` (Block List, Max: 100) Kafka topics (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--topics))
+
+<a id="nestedblock--clickhouse_kafka_user_config--tables--columns"></a>
+### Nested Schema for `clickhouse_kafka_user_config.tables.columns`
+
+Optional:
+
+- `name` (String) Column name
+- `type` (String) Column type
+
+
+<a id="nestedblock--clickhouse_kafka_user_config--tables--topics"></a>
+### Nested Schema for `clickhouse_kafka_user_config.tables.topics`
+
+Optional:
+
+- `name` (String) Name of the topic
+
+
+
 
 <a id="nestedblock--datadog_user_config"></a>
 ### Nested Schema for `datadog_user_config`

@@ -30,6 +30,7 @@ data "aiven_service_integration" "myintegration" {
 
 ### Read-Only
 
+- `clickhouse_kafka_user_config` (List of Object) ClickhouseKafka user configurable settings (see [below for nested schema](#nestedatt--clickhouse_kafka_user_config))
 - `datadog_user_config` (List of Object) Datadog user configurable settings (see [below for nested schema](#nestedatt--datadog_user_config))
 - `destination_endpoint_id` (String) Destination endpoint for the integration (if any)
 - `id` (String) The ID of this resource.
@@ -41,6 +42,43 @@ data "aiven_service_integration" "myintegration" {
 - `metrics_user_config` (List of Object) Metrics user configurable settings (see [below for nested schema](#nestedatt--metrics_user_config))
 - `mirrormaker_user_config` (List of Object) Mirrormaker user configurable settings (see [below for nested schema](#nestedatt--mirrormaker_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration (if any)
+
+<a id="nestedatt--clickhouse_kafka_user_config"></a>
+### Nested Schema for `clickhouse_kafka_user_config`
+
+Read-Only:
+
+- `tables` (List of Object) (see [below for nested schema](#nestedobjatt--clickhouse_kafka_user_config--tables))
+
+<a id="nestedobjatt--clickhouse_kafka_user_config--tables"></a>
+### Nested Schema for `clickhouse_kafka_user_config.tables`
+
+Read-Only:
+
+- `columns` (List of Object) (see [below for nested schema](#nestedobjatt--clickhouse_kafka_user_config--tables--columns))
+- `data_format` (String)
+- `group_name` (String)
+- `name` (String)
+- `topics` (List of Object) (see [below for nested schema](#nestedobjatt--clickhouse_kafka_user_config--tables--topics))
+
+<a id="nestedobjatt--clickhouse_kafka_user_config--tables--columns"></a>
+### Nested Schema for `clickhouse_kafka_user_config.tables.columns`
+
+Read-Only:
+
+- `name` (String)
+- `type` (String)
+
+
+<a id="nestedobjatt--clickhouse_kafka_user_config--tables--topics"></a>
+### Nested Schema for `clickhouse_kafka_user_config.tables.topics`
+
+Read-Only:
+
+- `name` (String)
+
+
+
 
 <a id="nestedatt--datadog_user_config"></a>
 ### Nested Schema for `datadog_user_config`
