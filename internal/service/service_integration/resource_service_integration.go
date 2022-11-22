@@ -74,6 +74,7 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 	"kafka_logs_user_config":        dist.IntegrationTypeKafkaLogs(),
 	"metrics_user_config":           dist.IntegrationTypeMetrics(),
 	"datadog_user_config":           dist.IntegrationTypeDatadog(),
+	"clickhouse_kafka_user_config":  dist.IntegrationTypeClickhouseKafka(),
 }
 
 func ResourceServiceIntegration() *schema.Resource {

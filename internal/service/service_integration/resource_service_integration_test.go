@@ -7,12 +7,12 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func TestAccAivenServiceIntegration_should_fail(t *testing.T) {
@@ -567,6 +567,61 @@ func TestAccAivenServiceIntegration_datadog_with_user_config_creates(t *testing.
 					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("test-acc-postgres-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "datadog_user_config.0.datadog_tags.0.tag", "lol:bar"),
 					resource.TestCheckResourceAttr(resourceName, "datadog_user_config.0.datadog_tags.0.comment", "my custom config"),
+				),
+			},
+		},
+	})
+}
+
+func testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, project string) string {
+	return fmt.Sprintf(`
+data "aiven_project" "project" {
+  project = %[2]q
+}
+
+resource "aiven_kafka" "kafka" {
+  project                 = data.aiven_project.project.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-2"
+  service_name            = "%[1]s-kafka"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_clickhouse" "clickhouse" {
+  project                 = data.aiven_project.project.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-beta-8"
+  service_name            = "%[1]s-clickhouse"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_service_integration" "clickhouse_kafka_source" {
+  project                  = data.aiven_project.project.project
+  integration_type         = "clickhouse_kafka"
+  source_service_name      = aiven_kafka.kafka.service_name
+  destination_service_name = aiven_clickhouse.clickhouse.service_name
+}
+`, prefix, project)
+}
+
+func TestAccAivenServiceIntegration_clickhouse_kafka_user_config_creates(t *testing.T) {
+	project := os.Getenv("AIVEN_PROJECT_NAME")
+	prefix := "test-tf-acc-" + acctest.RandString(7)
+	resourceName := "aiven_service_integration.clickhouse_kafka_source"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenServiceIntegrationResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccServiceIntegrationClickhouseKafkaUserConfig(prefix, project),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "integration_type", "clickhouse_kafka"),
+					resource.TestCheckResourceAttr(resourceName, "project", project),
+					resource.TestCheckResourceAttr(resourceName, "source_service_name", prefix+"-kafka"),
+					resource.TestCheckResourceAttr(resourceName, "destination_service_name", prefix+"-clickhouse"),
 				),
 			},
 		},
