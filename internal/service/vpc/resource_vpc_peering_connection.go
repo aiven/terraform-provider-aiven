@@ -275,18 +275,18 @@ func parsePeerVPCIDWithRegion(src string) (*peeringVPCID, error) {
 }
 
 func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var pc *aiven.VPCPeeringConnection
-	client := m.(*aiven.Client)
-
-	p, err := parsePeerVPCID(d.Id())
+	p, err := parsePeerVPCIDWithRegion(d.Id())
 	if err != nil {
 		return diag.Errorf("error parsing peering VPC ID: %s", err)
 	}
+
+	client := m.(*aiven.Client)
 	isAzure, err := isAzureVPCPeeringConnection(d, client)
 	if err != nil {
 		return diag.Errorf("Error checking if it Azure VPC peering connection: %s", err)
 	}
 
+	var pc *aiven.VPCPeeringConnection
 	if isAzure {
 		peerResourceGroup := schemautil.OptionalStringPointer(d, "peer_resource_group")
 		if peerResourceGroup != nil {
@@ -316,7 +316,7 @@ func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData,
 func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	p, err := parsePeerVPCID(d.Id())
+	p, err := parsePeerVPCIDWithRegion(d.Id())
 	if err != nil {
 		return diag.Errorf("error parsing peering VPC ID: %s", err)
 	}
@@ -402,13 +402,9 @@ func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceD
 }
 
 func resourceVPCPeeringConnectionImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	if len(strings.Split(d.Id(), "/")) != 4 {
-		return nil, fmt.Errorf("invalid identifier %v, expected <project_name>/<vpc_id>/<peer_cloud_account>/<peer_vpc>", d.Id())
-	}
-
 	client := m.(*aiven.Client)
 
-	p, err := parsePeerVPCID(d.Id())
+	p, err := parsePeerVPCIDWithRegion(d.Id())
 	if err != nil {
 		return nil, fmt.Errorf("error parsing peering VPC ID: %s", err)
 	}
@@ -563,7 +559,7 @@ func ConvertStateInfoToMap(s *map[string]interface{}) map[string]string {
 
 // isAzureVPCPeeringConnection checking if peered VPC is in the Azure cloud
 func isAzureVPCPeeringConnection(d *schema.ResourceData, c *aiven.Client) (bool, error) {
-	p, err := parsePeerVPCID(d.Id())
+	p, err := parsePeerVPCIDWithRegion(d.Id())
 	if err != nil {
 		return false, fmt.Errorf("error parsing Azure peering VPC ID: %s", err)
 	}
