@@ -38,7 +38,7 @@ func convertPropertyToSchema(n string, p map[string]interface{}, t string, ad bo
 }
 
 // convertPropertiesToSchemaMap is a function that converts a map of properties to a map of Terraform schemas.
-func convertPropertiesToSchemaMap(p map[string]interface{}) jen.Dict {
+func convertPropertiesToSchemaMap(p map[string]interface{}) (jen.Dict, error) {
 	r := make(jen.Dict, len(p))
 
 	for k, v := range p {
@@ -47,9 +47,13 @@ func convertPropertiesToSchemaMap(p map[string]interface{}) jen.Dict {
 			continue
 		}
 
-		ts, ats := TerraformTypes(SlicedString(va["type"]))
+		ts, ats, err := TerraformTypes(SlicedString(va["type"]))
+		if err != nil {
+			return nil, err
+		}
+
 		if len(ts) > 1 {
-			panic(fmt.Sprintf("multiple types for %s", k))
+			return nil, fmt.Errorf("multiple types for %s", k)
 		}
 
 		t, at := ts[0], ats[0]
@@ -59,7 +63,10 @@ func convertPropertiesToSchemaMap(p map[string]interface{}) jen.Dict {
 		if isTerraformTypePrimitive(t) {
 			s = handlePrimitiveTypeProperty(k, va, t)
 		} else {
-			s = handleAggregateTypeProperty(k, va, t, at)
+			s, err = handleAggregateTypeProperty(k, va, t, at)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		if s == nil {
@@ -71,5 +78,5 @@ func convertPropertiesToSchemaMap(p map[string]interface{}) jen.Dict {
 		}
 	}
 
-	return r
+	return r, nil
 }

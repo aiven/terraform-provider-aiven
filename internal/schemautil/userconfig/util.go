@@ -23,44 +23,44 @@ const (
 var cachedRepresentationMaps = make(map[SchemaType]map[string]interface{}, 3)
 
 // CachedRepresentationMap is a function that returns a cached representation map.
-func CachedRepresentationMap(st SchemaType) map[string]interface{} {
+func CachedRepresentationMap(st SchemaType) (map[string]interface{}, error) {
 	if _, ok := map[SchemaType]struct{}{
 		ServiceTypes:             {},
 		IntegrationTypes:         {},
 		IntegrationEndpointTypes: {},
 	}[st]; !ok {
-		panic(fmt.Sprintf("unknown schema type: %d", st))
+		return nil, fmt.Errorf("unknown schema type: %d", st)
 	}
 
 	if _, ok := cachedRepresentationMaps[st]; !ok {
 		switch st {
 		case ServiceTypes:
-			representationToMap(st, dist.ServiceTypes)
+			_, _ = representationToMap(st, dist.ServiceTypes)
 		case IntegrationTypes:
-			representationToMap(st, dist.IntegrationTypes)
+			_, _ = representationToMap(st, dist.IntegrationTypes)
 		case IntegrationEndpointTypes:
-			representationToMap(st, dist.IntegrationEndpointTypes)
+			_, _ = representationToMap(st, dist.IntegrationEndpointTypes)
 		}
 	}
 
-	return cachedRepresentationMaps[st]
+	return cachedRepresentationMaps[st], nil
 }
 
 // representationToMap converts a YAML representation of a Terraform schema to a map.
-func representationToMap(st SchemaType, r []byte) map[string]interface{} {
+func representationToMap(st SchemaType, r []byte) (map[string]interface{}, error) {
 	var m map[string]interface{}
 
 	if err := yaml.Unmarshal(r, &m); err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	cachedRepresentationMaps[st] = m
 
-	return m
+	return m, nil
 }
 
 // TerraformTypes is a function that converts schema representation types to Terraform types.
-func TerraformTypes(t []string) ([]string, []string) {
+func TerraformTypes(t []string) ([]string, []string, error) {
 	var r, ar []string
 
 	for _, v := range t {
@@ -85,13 +85,13 @@ func TerraformTypes(t []string) ([]string, []string) {
 		case "array", "object":
 			r = append(r, "TypeList")
 		default:
-			panic(fmt.Sprintf("unknown type: %s", v))
+			return nil, nil, fmt.Errorf("unknown type: %s", v)
 		}
 
 		ar = append(ar, v)
 	}
 
-	return r, ar
+	return r, ar, nil
 }
 
 // isTerraformTypePrimitive is a function that checks if a Terraform type is a primitive type.
@@ -105,10 +105,10 @@ func isTerraformTypePrimitive(t string) bool {
 }
 
 // mustStringSlice is a function that converts an interface to a slice of strings.
-func mustStringSlice(v interface{}) []string {
+func mustStringSlice(v interface{}) ([]string, error) {
 	va, ok := v.([]interface{})
 	if !ok {
-		panic(fmt.Sprintf("not a slice: %#v", v))
+		return nil, fmt.Errorf("not a slice: %#v", v)
 	}
 
 	r := make([]string, len(va))
@@ -116,20 +116,25 @@ func mustStringSlice(v interface{}) []string {
 	for k, v := range va {
 		va, ok := v.(string)
 		if !ok {
-			panic(fmt.Sprintf("value is not a string: %#v", v))
+			return nil, fmt.Errorf("value is not a string: %#v", v)
 		}
 
 		r[k] = va
 	}
 
-	return r
+	return r, nil
 }
 
 // SlicedString is a function that accepts a string or a slice of strings and returns a slice of strings.
 func SlicedString(v interface{}) []string {
 	va, ok := v.([]interface{})
 	if ok {
-		return mustStringSlice(va)
+		vas, err := mustStringSlice(va)
+		if err != nil {
+			panic(err)
+		}
+
+		return vas
 	}
 
 	vsa, ok := v.(string)

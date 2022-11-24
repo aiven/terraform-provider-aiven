@@ -125,6 +125,11 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 		}
 	}
 
+	uc, err := resourceServiceIntegrationUserConfigFromSchemaToAPI(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	integration, err := client.ServiceIntegrations.Create(
 		projectName,
 		aiven.CreateServiceIntegrationRequest{
@@ -133,7 +138,7 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 			IntegrationType:       integrationType,
 			SourceEndpointID:      plainEndpointID(schemautil.OptionalStringPointer(d, "source_endpoint_id")),
 			SourceService:         schemautil.OptionalStringPointer(d, "source_service_name"),
-			UserConfig:            resourceServiceIntegrationUserConfigFromSchemaToAPI(d),
+			UserConfig:            uc,
 		},
 	)
 	if err != nil {
@@ -179,7 +184,11 @@ func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	userConfig := resourceServiceIntegrationUserConfigFromSchemaToAPI(d)
+	userConfig, err := resourceServiceIntegrationUserConfigFromSchemaToAPI(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	if userConfig == nil {
 		// Required by API
 		userConfig = make(map[string]interface{})
@@ -298,7 +307,7 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 	return nil
 }
 
-func resourceServiceIntegrationUserConfigFromSchemaToAPI(d *schema.ResourceData) map[string]interface{} {
+func resourceServiceIntegrationUserConfigFromSchemaToAPI(d *schema.ResourceData) (map[string]interface{}, error) {
 	integrationType := d.Get("integration_type").(string)
 	return apiconvert.ToAPI(userconfig.IntegrationTypes, integrationType, d)
 }
@@ -338,7 +347,11 @@ func resourceServiceIntegrationCopyAPIResponseToTerraform(
 		return err
 	}
 
-	userConfig := apiconvert.FromAPI(userconfig.IntegrationTypes, integrationType, integration.UserConfig)
+	userConfig, err := apiconvert.FromAPI(userconfig.IntegrationTypes, integrationType, integration.UserConfig)
+	if err != nil {
+		return err
+	}
+
 	if len(userConfig) > 0 {
 		if err := d.Set(integrationType+"_user_config", userConfig); err != nil {
 			return err

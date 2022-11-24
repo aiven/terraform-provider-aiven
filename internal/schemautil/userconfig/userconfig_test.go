@@ -15,7 +15,7 @@ import (
 )
 
 // generateSchema is a function that generates Terraform schema via its map representation.
-func generateSchema(n string, m map[string]interface{}) {
+func generateSchema(n string, m map[string]interface{}) error {
 	np := fmt.Sprintf("%ss", n)
 
 	f := jen.NewFile("dist")
@@ -44,15 +44,18 @@ func generateSchema(n string, m map[string]interface{}) {
 
 		f.Commentf("%s is a generated function returning the schema of the %s %s.", fn, k, n)
 
+		pm, err := convertPropertiesToSchemaMap(pa)
+		if err != nil {
+			return err
+		}
+
 		f.
 			Func().
 			Id(fn).
 			Params().
 			Id("*schema.Schema").
 			Block(
-				jen.Id("s").Op(":=").Map(jen.String()).Op("*").Qual(SchemaPackage, "Schema").Values(
-					convertPropertiesToSchemaMap(pa),
-				),
+				jen.Id("s").Op(":=").Map(jen.String()).Op("*").Qual(SchemaPackage, "Schema").Values(pm),
 
 				jen.Line(),
 
@@ -74,17 +77,41 @@ func generateSchema(n string, m map[string]interface{}) {
 	}
 
 	if err := f.Save(fmt.Sprintf("dist/%s.go", strcase.ToSnake(np))); err != nil {
-		panic(err)
+		return err
 	}
+
+	return nil
 }
 
 // TestMain is the entry point for the user config schema generator.
 func TestMain(m *testing.M) {
-	generateSchema("ServiceType", representationToMap(ServiceTypes, dist.ServiceTypes))
+	stm, err := representationToMap(ServiceTypes, dist.ServiceTypes)
+	if err != nil {
+		panic(err)
+	}
 
-	generateSchema("IntegrationType", representationToMap(IntegrationTypes, dist.IntegrationTypes))
+	err = generateSchema("ServiceType", stm)
+	if err != nil {
+		panic(err)
+	}
 
-	generateSchema(
-		"IntegrationEndpointType", representationToMap(IntegrationEndpointTypes, dist.IntegrationEndpointTypes),
-	)
+	itm, err := representationToMap(IntegrationTypes, dist.IntegrationTypes)
+	if err != nil {
+		panic(err)
+	}
+
+	err = generateSchema("IntegrationType", itm)
+	if err != nil {
+		panic(err)
+	}
+
+	ietm, err := representationToMap(IntegrationEndpointTypes, dist.IntegrationEndpointTypes)
+	if err != nil {
+		panic(err)
+	}
+
+	err = generateSchema("IntegrationEndpointType", ietm)
+	if err != nil {
+		panic(err)
+	}
 }

@@ -14,7 +14,7 @@ func handlePrimitiveTypeProperty(n string, p map[string]interface{}, t string) m
 }
 
 // handleObjectProperty is a function that converts an object type property to a Terraform schema.
-func handleObjectProperty(n string, p map[string]interface{}, t string) map[string]*jen.Statement {
+func handleObjectProperty(n string, p map[string]interface{}, t string) (map[string]*jen.Statement, error) {
 	pa, ok := p["properties"].(map[string]interface{})
 	if !ok {
 		it, ok := p["items"].(map[string]interface{})
@@ -23,13 +23,18 @@ func handleObjectProperty(n string, p map[string]interface{}, t string) map[stri
 		}
 
 		if !ok {
-			panic(fmt.Sprintf("unable to get properties field: %#v", p))
+			return nil, fmt.Errorf("unable to get properties field: %#v", p)
 		}
 	}
 
 	r := convertPropertyToSchema(n, p, t, true)
 
-	s := jen.Map(jen.String()).Op("*").Qual(SchemaPackage, "Schema").Values(convertPropertiesToSchemaMap(pa))
+	pc, err := convertPropertiesToSchemaMap(pa)
+	if err != nil {
+		return nil, err
+	}
+
+	s := jen.Map(jen.String()).Op("*").Qual(SchemaPackage, "Schema").Values(pc)
 
 	r[jen.Id("Elem")] = jen.Op("&").Qual(SchemaPackage, "Resource").Values(jen.Dict{
 		jen.Id("Schema"): s,
@@ -40,7 +45,7 @@ func handleObjectProperty(n string, p map[string]interface{}, t string) map[stri
 
 	r[jen.Id("MaxItems")] = jen.Lit(1)
 
-	return map[string]*jen.Statement{n: jen.Values(r)}
+	return map[string]*jen.Statement{n: jen.Values(r)}, nil
 }
 
 // handleArrayOfPrimitiveTypeProperty is a function that converts an array of primitive type property to a Terraform
@@ -60,24 +65,29 @@ func handleArrayOfPrimitiveTypeProperty(n string, t string) *jen.Statement {
 
 // handleArrayOfAggregateTypeProperty is a function that converts an array of aggregate type property to a Terraform
 // schema.
-func handleArrayOfAggregateTypeProperty(ip map[string]interface{}) *jen.Statement {
+func handleArrayOfAggregateTypeProperty(ip map[string]interface{}) (*jen.Statement, error) {
+	pc, err := convertPropertiesToSchemaMap(ip)
+	if err != nil {
+		return nil, err
+	}
+
 	return jen.Op("&").Qual(SchemaPackage, "Resource").Values(jen.Dict{
-		jen.Id("Schema"): jen.Map(jen.String()).Op("*").Qual(SchemaPackage, "Schema").Values(
-			convertPropertiesToSchemaMap(ip),
-		),
-	})
+		jen.Id("Schema"): jen.Map(jen.String()).Op("*").Qual(SchemaPackage, "Schema").Values(pc),
+	}), nil
 }
 
 // handleArrayProperty is a function that converts an array type property to a Terraform schema.
-func handleArrayProperty(n string, p map[string]interface{}, t string) map[string]*jen.Statement {
+func handleArrayProperty(n string, p map[string]interface{}, t string) (map[string]*jen.Statement, error) {
 	ia, ok := p["items"].(map[string]interface{})
 	if !ok {
-		panic(fmt.Sprintf("items is not a map[string]interface{}: %#v", p))
+		return nil, fmt.Errorf("items is not a map[string]interface{}: %#v", p)
 	}
 
 	var e *jen.Statement
 
 	var tn, atn []string
+
+	var err error
 
 	oos, iof := ia["one_of"].([]interface{})
 	if iof {
@@ -86,15 +96,21 @@ func handleArrayProperty(n string, p map[string]interface{}, t string) map[strin
 		for _, v := range oos {
 			va, ok := v.(map[string]interface{})
 			if !ok {
-				panic(fmt.Sprintf("one_of element is not a map[string]interface{}: %#v", v))
+				return nil, fmt.Errorf("one_of element is not a map[string]interface{}: %#v", v)
 			}
 
 			ct = append(ct, va["type"].(string))
 		}
 
-		tn, atn = TerraformTypes(ct)
+		tn, atn, err = TerraformTypes(ct)
+		if err != nil {
+			return nil, err
+		}
 	} else {
-		tn, atn = TerraformTypes(SlicedString(ia["type"]))
+		tn, atn, err = TerraformTypes(SlicedString(ia["type"]))
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	r := make(map[string]*jen.Statement)
@@ -121,7 +137,7 @@ func handleArrayProperty(n string, p map[string]interface{}, t string) map[strin
 		if iof {
 			ooia, ok = oos[k].(map[string]interface{})
 			if !ok {
-				panic(fmt.Sprintf("unable to convert one_of item to map[string]interface{}: %#v", oos[k]))
+				return nil, fmt.Errorf("unable to convert one_of item to map[string]interface{}: %#v", oos[k])
 			}
 		}
 
@@ -133,16 +149,22 @@ func handleArrayProperty(n string, p map[string]interface{}, t string) map[strin
 			if iof {
 				ipa, ok = ooia["properties"].(map[string]interface{})
 				if !ok {
-					panic(fmt.Sprintf("unable to convert one_of item properties to map[string]interface{}: %#v", ooia))
+					return nil, fmt.Errorf(
+						"unable to convert one_of item properties to map[string]interface{}: %#v",
+						ooia,
+					)
 				}
 			} else {
 				ipa, ok = ia["properties"].(map[string]interface{})
 				if !ok {
-					panic(fmt.Sprintf("could not find properties in an array of aggregate type: %#v", p))
+					return nil, fmt.Errorf("could not find properties in an array of aggregate type: %#v", p)
 				}
 			}
 
-			e = handleArrayOfAggregateTypeProperty(ipa)
+			e, err = handleArrayOfAggregateTypeProperty(ipa)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		s := convertPropertyToSchema(n, p, t, !iof)
@@ -168,21 +190,36 @@ func handleArrayProperty(n string, p map[string]interface{}, t string) map[strin
 		r[an] = jen.Values(s)
 	}
 
-	return r
+	return r, nil
 }
 
 // handleAggregateTypeProperty is a function that converts an aggregate type property to a Terraform schema.
-func handleAggregateTypeProperty(n string, p map[string]interface{}, t string, at string) map[string]*jen.Statement {
+func handleAggregateTypeProperty(
+	n string,
+	p map[string]interface{},
+	t string,
+	at string,
+) (map[string]*jen.Statement, error) {
 	r := make(map[string]*jen.Statement)
 
 	switch at {
 	case "object":
-		maps.Copy(r, handleObjectProperty(n, p, t))
+		v, err := handleObjectProperty(n, p, t)
+		if err != nil {
+			return nil, err
+		}
+
+		maps.Copy(r, v)
 	case "array":
-		maps.Copy(r, handleArrayProperty(n, p, t))
+		v, err := handleArrayProperty(n, p, t)
+		if err != nil {
+			return nil, err
+		}
+
+		maps.Copy(r, v)
 	default:
-		panic(fmt.Sprintf("unknown aggregate type: %s", at))
+		return nil, fmt.Errorf("unknown aggregate type: %s", at)
 	}
 
-	return r
+	return r, nil
 }
