@@ -72,7 +72,12 @@ func resourceServiceIntegrationEndpointCreate(ctx context.Context, d *schema.Res
 	client := m.(*aiven.Client)
 	projectName := d.Get("project").(string)
 	endpointType := d.Get("endpoint_type").(string)
-	userConfig := apiconvert.ToAPI(userconfig.IntegrationEndpointTypes, endpointType, d)
+
+	userConfig, err := apiconvert.ToAPI(userconfig.IntegrationEndpointTypes, endpointType, d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	endpoint, err := client.ServiceIntegrationEndpoints.Create(
 		projectName,
 		aiven.CreateServiceIntegrationEndpointRequest{
@@ -121,7 +126,11 @@ func resourceServiceIntegrationEndpointUpdate(ctx context.Context, d *schema.Res
 	}
 
 	endpointType := d.Get("endpoint_type").(string)
-	userConfig := apiconvert.ToAPI(userconfig.IntegrationEndpointTypes, endpointType, d)
+
+	userConfig, err := apiconvert.ToAPI(userconfig.IntegrationEndpointTypes, endpointType, d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	_, err = client.ServiceIntegrationEndpoints.Update(
 		projectName,
@@ -168,7 +177,12 @@ func copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(
 	if err := d.Set("endpoint_type", endpointType); err != nil {
 		return err
 	}
-	userConfig := apiconvert.FromAPI(userconfig.IntegrationEndpointTypes, endpointType, endpoint.UserConfig)
+
+	userConfig, err := apiconvert.FromAPI(userconfig.IntegrationEndpointTypes, endpointType, endpoint.UserConfig)
+	if err != nil {
+		return err
+	}
+
 	if len(userConfig) > 0 {
 		if err := d.Set(endpointType+"_user_config", userConfig); err != nil {
 			return err

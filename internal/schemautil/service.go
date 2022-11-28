@@ -381,6 +381,13 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.Errorf("error getting project VPC ID: %s", err)
 	}
 
+	cuc, err := apiconvert.ToAPI(userconfig.ServiceTypes, serviceType, d)
+	if err != nil {
+		return diag.Errorf(
+			"error converting user config options for service type %s to API format: %s", serviceType, err,
+		)
+	}
+
 	_, err = client.Services.Create(
 		project,
 		aiven.CreateServiceRequest{
@@ -393,7 +400,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 			ServiceType:           serviceType,
 			TerminationProtection: d.Get("termination_protection").(bool),
 			DiskSpaceMB:           diskSpace,
-			UserConfig:            apiconvert.ToAPI(userconfig.ServiceTypes, serviceType, d),
+			UserConfig:            cuc,
 			StaticIPs:             FlattenToString(d.Get("static_ips").(*schema.Set).List()),
 		},
 	)
@@ -460,6 +467,15 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.Errorf("error getting project VPC ID: %s", err)
 	}
 
+	st := d.Get("service_type").(string)
+
+	cuc, err := apiconvert.ToAPI(userconfig.ServiceTypes, st, d)
+	if err != nil {
+		return diag.Errorf(
+			"error converting user config options for service type %s to API format: %s", st, err,
+		)
+	}
+
 	if _, err := client.Services.Update(
 		projectName,
 		serviceName,
@@ -472,7 +488,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 			TerminationProtection: d.Get("termination_protection").(bool),
 			DiskSpaceMB:           diskSpace,
 			Karapace:              karapace,
-			UserConfig:            apiconvert.ToAPI(userconfig.ServiceTypes, d.Get("service_type").(string), d),
+			UserConfig:            cuc,
 		},
 	); err != nil {
 		return diag.Errorf("error updating (%s) service: %s", serviceName, err)
@@ -618,7 +634,12 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 			return err
 		}
 	}
-	userConfig := apiconvert.FromAPI(userconfig.ServiceTypes, serviceType, s.UserConfig)
+
+	userConfig, err := apiconvert.FromAPI(userconfig.ServiceTypes, serviceType, s.UserConfig)
+	if err != nil {
+		return err
+	}
+
 	if err := d.Set(serviceType+"_user_config", NormalizeIpFilter(d.Get(serviceType+"_user_config"), userConfig)); err != nil {
 		return fmt.Errorf("cannot set `%s_user_config` : %s; Please make sure that all Aiven services have unique s names", serviceType, err)
 	}

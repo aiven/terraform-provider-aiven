@@ -137,7 +137,10 @@ func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	userConfig := apiconvert.ToAPI(userconfig.ServiceTypes, "pg", d)
+	userConfig, err := apiconvert.ToAPI(userconfig.ServiceTypes, "pg", d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if userConfig["pg_version"] != nil {
 		s, err := client.Services.Get(projectName, serviceName)

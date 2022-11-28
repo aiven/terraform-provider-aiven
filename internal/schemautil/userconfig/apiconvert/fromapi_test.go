@@ -342,7 +342,7 @@ func TestFromAPI(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := FromAPI(tt.args.st, tt.args.n, tt.args.r)
+			got, _ := FromAPI(tt.args.st, tt.args.n, tt.args.r)
 
 			if !cmp.Equal(got, tt.want) {
 				t.Errorf(cmp.Diff(tt.want, got))

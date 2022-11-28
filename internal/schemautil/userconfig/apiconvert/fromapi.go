@@ -65,19 +65,22 @@ func unsettedAPIValue(t string) interface{} {
 }
 
 // propsFromAPI is a function that converts filled API response properties to Terraform user configuration schema.
-func propsFromAPI(n string, r map[string]interface{}, p map[string]interface{}) map[string]interface{} {
+func propsFromAPI(n string, r map[string]interface{}, p map[string]interface{}) (map[string]interface{}, error) {
 	res := make(map[string]interface{}, len(p))
 
 	for k, v := range p {
 		va, ok := v.(map[string]interface{})
 		if !ok {
-			panic(fmt.Sprintf("%s...%s: property is not a map", n, k))
+			return nil, fmt.Errorf("%s...%s: property is not a map", n, k)
 		}
 
-		_, ats := userconfig.TerraformTypes(userconfig.SlicedString(va["type"]))
+		_, ats, err := userconfig.TerraformTypes(userconfig.SlicedString(va["type"]))
+		if err != nil {
+			return nil, err
+		}
 
 		if len(ats) > 1 {
-			panic(fmt.Sprintf("%s...%s: multiple types", n, k))
+			return nil, fmt.Errorf("%s...%s: multiple types", n, k)
 		}
 
 		t := ats[0]
@@ -106,10 +109,15 @@ func propsFromAPI(n string, r map[string]interface{}, p map[string]interface{}) 
 					for kn, vn := range vra {
 						vna, ok := vn.(map[string]interface{})
 						if !ok {
-							panic(fmt.Sprintf("%s...%s.%d: slice item is not a map", n, k, kn))
+							return nil, fmt.Errorf("%s...%s.%d: slice item is not a map", n, k, kn)
 						}
 
-						l = append(l, propsFromAPI(n, vna, vanp))
+						p, err := propsFromAPI(n, vna, vanp)
+						if err != nil {
+							return nil, err
+						}
+
+						l = append(l, p)
 					}
 				} else {
 					l = append(l, vra...)
@@ -128,7 +136,10 @@ func propsFromAPI(n string, r map[string]interface{}, p map[string]interface{}) 
 							}
 						}
 					} else {
-						_, nts = userconfig.TerraformTypes(userconfig.SlicedString(i["type"]))
+						_, nts, err = userconfig.TerraformTypes(userconfig.SlicedString(i["type"]))
+						if err != nil {
+							return nil, err
+						}
 					}
 				}
 
@@ -150,7 +161,7 @@ func propsFromAPI(n string, r map[string]interface{}, p map[string]interface{}) 
 						case map[string]interface{}:
 							k = fmt.Sprintf("%s_object", k)
 						default:
-							panic(fmt.Sprintf("%s...%s: no suffix for given type", n, k))
+							return nil, fmt.Errorf("%s...%s: no suffix for given type", n, k)
 						}
 
 						// TODO: Remove with the next major version.
@@ -189,37 +200,52 @@ func propsFromAPI(n string, r map[string]interface{}, p map[string]interface{}) 
 		case "object":
 			vra, ok := vr.(map[string]interface{})
 			if !ok {
-				panic(fmt.Sprintf("%s...%s: representation value is not a map", n, k))
+				return nil, fmt.Errorf("%s...%s: representation value is not a map", n, k)
 			}
 
 			nv, ok := va["properties"]
 			if !ok {
-				panic(fmt.Sprintf("%s...%s: properties key not found", n, k))
+				return nil, fmt.Errorf("%s...%s: properties key not found", n, k)
 			}
 
 			nva, ok := nv.(map[string]interface{})
 			if !ok {
-				panic(fmt.Sprintf("%s...%s: properties value is not a map", n, k))
+				return nil, fmt.Errorf("%s...%s: properties value is not a map", n, k)
 			}
 
-			vrs = []map[string]interface{}{propsFromAPI(n, vra, nva)}
+			p, err := propsFromAPI(n, vra, nva)
+			if err != nil {
+				return nil, err
+			}
+
+			vrs = []map[string]interface{}{p}
 		}
 
 		res[userconfig.EncodeKey(k)] = vrs
 	}
 
-	return res
+	return res, nil
 }
 
 // FromAPI is a function that converts filled API response to Terraform user configuration schema.
-func FromAPI(st userconfig.SchemaType, n string, r map[string]interface{}) []map[string]interface{} {
+func FromAPI(st userconfig.SchemaType, n string, r map[string]interface{}) ([]map[string]interface{}, error) {
 	var res []map[string]interface{}
 
 	if len(r) == 0 {
-		return res
+		return res, nil
 	}
 
-	res = append(res, propsFromAPI(n, r, props(st, n)))
+	p, err := props(st, n)
+	if err != nil {
+		return nil, err
+	}
 
-	return res
+	pa, err := propsFromAPI(n, r, p)
+	if err != nil {
+		return nil, err
+	}
+
+	res = append(res, pa)
+
+	return res, nil
 }

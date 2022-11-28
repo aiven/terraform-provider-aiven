@@ -42,7 +42,7 @@ func TestProps(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := props(tt.args.st, tt.args.n)
+			got, _ := props(tt.args.st, tt.args.n)
 
 			if !cmp.Equal(got, tt.want) {
 				t.Errorf(cmp.Diff(tt.want, got))

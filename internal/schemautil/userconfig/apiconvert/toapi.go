@@ -26,25 +26,25 @@ func arrayItemToAPI(
 	v []interface{},
 	i map[string]interface{},
 	d resourceDatable,
-) (interface{}, bool) {
+) (interface{}, bool, error) {
 	var res []interface{}
 
 	if len(v) == 0 {
 		res = []interface{}{}
 
-		return res, false
+		return res, false, nil
 	}
 
 	fks := strings.Join(fk, ".")
 
 	// TODO: Remove when this is fixed on backend.
 	if k == "additional_backup_regions" {
-		return res, true
+		return res, true, nil
 	}
 
 	ii, ok := i["items"].(map[string]interface{})
 	if !ok {
-		panic(fmt.Sprintf("%s (item): items key not found", fks))
+		return nil, false, fmt.Errorf("%s (item): items key not found", fks)
 	}
 
 	var iit string
@@ -57,13 +57,13 @@ func arrayItemToAPI(
 		if oo, ok := ii["one_of"]; ok {
 			ooa, ok := oo.([]interface{})
 			if !ok {
-				panic(fmt.Sprintf("%s (items.one_of): not a slice", fks))
+				return nil, false, fmt.Errorf("%s (items.one_of): not a slice", fks)
 			}
 
 			for i, vn := range ooa {
 				vna, ok := vn.(map[string]interface{})
 				if !ok {
-					panic(fmt.Sprintf("%s (items.one_of.%d): not a map", fks, i))
+					return nil, false, fmt.Errorf("%s (items.one_of.%d): not a map", fks, i)
 				}
 
 				if ot, ok := vna["type"]; ok && ot == iit {
@@ -80,10 +80,13 @@ func arrayItemToAPI(
 		if k == "ip_filter" || (ok && k == "namespaces") {
 			iit = "string"
 		} else {
-			_, aiits := userconfig.TerraformTypes(userconfig.SlicedString(ii["type"]))
+			_, aiits, err := userconfig.TerraformTypes(userconfig.SlicedString(ii["type"]))
+			if err != nil {
+				return nil, false, err
+			}
 
 			if len(aiits) > 1 {
-				panic(fmt.Sprintf("%s (type): multiple types", fks))
+				return nil, false, fmt.Errorf("%s (type): multiple types", fks)
 			}
 
 			iit = aiits[0]
@@ -96,14 +99,17 @@ func arrayItemToAPI(
 			vn = []interface{}{vn}
 		}
 
-		vnc, o := itemToAPI(n, iit, append(fk, fmt.Sprintf("%d", i)), fmt.Sprintf("%s.%d", k, i), vn, ii, d)
+		vnc, o, err := itemToAPI(n, iit, append(fk, fmt.Sprintf("%d", i)), fmt.Sprintf("%s.%d", k, i), vn, ii, d)
+		if err != nil {
+			return nil, false, err
+		}
 
 		if !o {
 			res = append(res, vnc)
 		}
 	}
 
-	return res, false
+	return res, false, nil
 }
 
 // objectItemToAPI is a function that converts object property of Terraform user configuration schema to API
@@ -114,7 +120,7 @@ func objectItemToAPI(
 	v []interface{},
 	i map[string]interface{},
 	d resourceDatable,
-) (interface{}, bool) {
+) (interface{}, bool, error) {
 	var res interface{}
 
 	fks := strings.Join(fk, ".")
@@ -123,21 +129,24 @@ func objectItemToAPI(
 
 	fva, ok := fv.(map[string]interface{})
 	if !ok {
-		panic(fmt.Sprintf("%s: not a map", fks))
+		return nil, false, fmt.Errorf("%s: not a map", fks)
 	}
 
 	ip, ok := i["properties"].(map[string]interface{})
 	if !ok {
-		panic(fmt.Sprintf("%s (item): properties key not found", fks))
+		return nil, false, fmt.Errorf("%s (item): properties key not found", fks)
 	}
 
 	if !regexp.MustCompile(`.+\.[0-9]$`).MatchString(fks) {
 		fk = append(fk, "0")
 	}
 
-	res = propsToAPI(n, fk, fva, ip, d)
+	res, err := propsToAPI(n, fk, fva, ip, d)
+	if err != nil {
+		return nil, false, err
+	}
 
-	return res, false
+	return res, false, nil
 }
 
 // itemToAPI is a function that converts property of Terraform user configuration schema to API compatible format.
@@ -149,7 +158,7 @@ func itemToAPI(
 	v interface{},
 	i map[string]interface{},
 	d resourceDatable,
-) (interface{}, bool) {
+) (interface{}, bool, error) {
 	// TODO: Remove this variable when we use actual types in the schema.
 	var err error
 
@@ -162,7 +171,7 @@ func itemToAPI(
 
 	// TODO: Remove this statement and the branch below it when we use actual types in the schema.
 	if va, ok := v.(string); ok && va == "" {
-		return res, o
+		return res, o, nil
 	}
 
 	// Assert the type of the value to match.
@@ -171,32 +180,32 @@ func itemToAPI(
 		// TODO: Uncomment this, and the same below, when we use actual types in the schema.
 		// if _, ok := v.(bool); !ok {
 		if res, err = strconv.ParseBool(v.(string)); err != nil {
-			panic(fmt.Sprintf("%s: not a boolean", fks))
+			return nil, false, fmt.Errorf("%s: not a boolean", fks)
 		}
 	case "integer":
 		// if _, ok := v.(int); !ok {
 		if res, err = strconv.Atoi(v.(string)); err != nil {
-			panic(fmt.Sprintf("%s: not an integer", fks))
+			return nil, false, fmt.Errorf("%s: not an integer", fks)
 		}
 	case "number":
 		// if _, ok := v.(float64); !ok {
 		if res, err = strconv.ParseFloat(v.(string), 64); err != nil {
-			panic(fmt.Sprintf("%s: not a number", fks))
+			return nil, false, fmt.Errorf("%s: not a number", fks)
 		}
 	case "string":
 		if _, ok := v.(string); !ok {
-			panic(fmt.Sprintf("%s: not a string", fks))
+			return nil, false, fmt.Errorf("%s: not a string", fks)
 		}
 	case "array", "object":
 		// Arrays and objects are handled separately.
 
 		va, ok := v.([]interface{})
 		if !ok {
-			panic(fmt.Sprintf("%s: not a slice", fks))
+			return nil, false, fmt.Errorf("%s: not a slice", fks)
 		}
 
 		if va == nil || o {
-			return nil, true
+			return nil, true, nil
 		}
 
 		if t == "array" {
@@ -204,15 +213,15 @@ func itemToAPI(
 		}
 
 		if len(va) == 0 {
-			return nil, true
+			return nil, true, nil
 		}
 
 		return objectItemToAPI(n, fk, va, i, d)
 	default:
-		panic(fmt.Sprintf("%s: unsupported type %s", fks, t))
+		return nil, false, fmt.Errorf("%s: unsupported type %s", fks, t)
 	}
 
-	return res, o
+	return res, o, nil
 }
 
 // propsToAPI is a function that converts properties of Terraform user configuration schema to API compatible format.
@@ -222,7 +231,7 @@ func propsToAPI(
 	tp map[string]interface{},
 	p map[string]interface{},
 	d resourceDatable,
-) map[string]interface{} {
+) (map[string]interface{}, error) {
 	res := make(map[string]interface{}, len(tp))
 
 	fks := strings.Join(fk, ".")
@@ -239,7 +248,7 @@ func propsToAPI(
 
 		i, ok := p[rk]
 		if !ok {
-			panic(fmt.Sprintf("%s.%s: key not found", fks, k))
+			return nil, fmt.Errorf("%s.%s: key not found", fks, k)
 		}
 
 		if i == nil {
@@ -248,7 +257,7 @@ func propsToAPI(
 
 		ia, ok := i.(map[string]interface{})
 		if !ok {
-			panic(fmt.Sprintf("%s.%s: not a map", fks, k))
+			return nil, fmt.Errorf("%s.%s: not a map", fks, k)
 		}
 
 		// If the property is supposed to be present only during resource's creation,
@@ -257,24 +266,32 @@ func propsToAPI(
 			continue
 		}
 
-		_, ats := userconfig.TerraformTypes(userconfig.SlicedString(ia["type"]))
+		_, ats, err := userconfig.TerraformTypes(userconfig.SlicedString(ia["type"]))
+		if err != nil {
+			return nil, err
+		}
 
 		if len(ats) > 1 {
-			panic(fmt.Sprintf("%s.%s.type: multiple types", fks, k))
+			return nil, fmt.Errorf("%s.%s.type: multiple types", fks, k)
 		}
 
 		t := ats[0]
 
-		if cv, o := itemToAPI(n, t, append(fk, k), k, v, ia, d); !o {
+		cv, o, err := itemToAPI(n, t, append(fk, k), k, v, ia, d)
+		if err != nil {
+			return nil, err
+		}
+
+		if !o {
 			res[rk] = cv
 		}
 	}
 
-	return res
+	return res, nil
 }
 
 // ToAPI is a function that converts filled Terraform user configuration schema to API compatible format.
-func ToAPI(st userconfig.SchemaType, n string, d resourceDatable) map[string]interface{} {
+func ToAPI(st userconfig.SchemaType, n string, d resourceDatable) (map[string]interface{}, error) {
 	var res map[string]interface{}
 
 	// fk is a full key slice. We use it to get the full key path to the property in the Terraform user configuration.
@@ -282,25 +299,33 @@ func ToAPI(st userconfig.SchemaType, n string, d resourceDatable) map[string]int
 
 	tp, ok := d.GetOk(fk[0])
 	if !ok || tp == nil {
-		return res
+		return res, nil
 	}
 
 	tpa, ok := tp.([]interface{})
 	if !ok {
-		panic(fmt.Sprintf("%s (%d): not a slice", n, st))
+		return nil, fmt.Errorf("%s (%d): not a slice", n, st)
 	}
 
 	ftp := tpa[0]
 	if ftp == nil {
-		return res
+		return res, nil
 	}
 
 	ftpa, ok := ftp.(map[string]interface{})
 	if !ok {
-		panic(fmt.Sprintf("%s.0 (%d): not a map", n, st))
+		return nil, fmt.Errorf("%s.0 (%d): not a map", n, st)
 	}
 
-	res = propsToAPI(n, append(fk, "0"), ftpa, props(st, n), d)
+	p, err := props(st, n)
+	if err != nil {
+		return nil, err
+	}
 
-	return res
+	res, err = propsToAPI(n, append(fk, "0"), ftpa, p, d)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
