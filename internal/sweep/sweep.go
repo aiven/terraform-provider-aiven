@@ -96,7 +96,7 @@ func AddServiceSweeper(t string) {
 	})
 }
 
-func hasPrefixAny(s, prefix ...string) bool {
+func hasPrefixAny(s string, prefix ...string) bool {
 	for _, ss := range prefix {
 		if strings.HasPrefix(s, ss) {
 			return true
