@@ -2,68 +2,99 @@ package vpc_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/kelseyhightower/envconfig"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
-func TestAccAivenAWSVPCPeeringConnection_basic(t *testing.T) {
-	if os.Getenv("AWS_REGION") == "" ||
-		os.Getenv("AWS_VPC_ID") == "" ||
-		os.Getenv("AWS_ACCOUNT_ID") == "" {
-		t.Skip("env variables AWS_REGION, AWS_VPC_ID and AWS_ACCOUNT_ID required to run this test")
-	}
+type awsSecrets struct {
+	Project   string `envconfig:"AIVEN_PROJECT_NAME" required:"true"`
+	AccountID string `envconfig:"AWS_ACCOUNT_ID" required:"true"`
+	Region    string `envconfig:"AWS_REGION" required:"true"`
 
-	resourceName := "aiven_vpc_peering_connection.foo"
+	// Don't need to pass to tf file, this must be in env
+	AccessKeyID     string `envconfig:"AWS_ACCESS_KEY_ID" required:"true"`
+	SecretAccessKey string `envconfig:"AWS_SECRET_ACCESS_KEY" required:"true"`
+	SessionToken    string `envconfig:"AWS_SESSION_TOKEN"`
+}
+
+func TestAccAivenAWSVPCPeeringConnection_e2e(t *testing.T) {
+	var s awsSecrets
+	err := envconfig.Process("", &s)
+	if err != nil {
+		t.Skipf("Not all values has been provided: %s", err)
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"aws": {
+				Source:            "hashicorp/aws",
+				VersionConstraint: "=4.40.0",
+			},
+		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVPCPeeringConnectionAWSResource(),
+				Config: testAccAivenAWSVPCPeeringConnectionTF(&s),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "peer_cloud_account", os.Getenv("AWS_ACCOUNT_ID")),
-					resource.TestCheckResourceAttr(resourceName, "peer_vpc", os.Getenv("AWS_VPC_ID")),
-					resource.TestCheckResourceAttr(resourceName, "peer_region", os.Getenv("AWS_REGION")),
-					resource.TestCheckResourceAttrSet(resourceName, "state"),
+					// Aiven resources
+					resource.TestCheckResourceAttr("aiven_project_vpc.aiven_vpc", "state", "ACTIVE"),
+					resource.TestCheckResourceAttr("aiven_project_vpc.aiven_vpc", "network_cidr", "10.0.1.0/24"),
+
+					// We can't check peering_connection state, because it's updated async and gets ACTIVE any time later
+					resource.TestCheckResourceAttrSet("aiven_aws_vpc_peering_connection.peering_connection", "id"),
+					resource.TestCheckResourceAttr("aiven_aws_vpc_peering_connection.peering_connection", "aws_account_id", s.AccountID),
+					resource.TestCheckResourceAttr("aiven_aws_vpc_peering_connection.peering_connection", "aws_vpc_region", s.Region),
+
+					// Azure resources
+					resource.TestCheckResourceAttrSet("aws_vpc.aws_vpc", "id"),
+					resource.TestCheckResourceAttr("aws_vpc.aws_vpc", "cidr_block", "10.0.0.0/24"),
 				),
 			},
+			importStateByName("aiven_project_vpc.aiven_vpc"),
+			importStateByName("aiven_aws_vpc_peering_connection.peering_connection"),
+			importStateByName("aws_vpc.aws_vpc"),
 		},
 	})
 }
 
-func testAccVPCPeeringConnectionAWSResource() string {
+func testAccAivenAWSVPCPeeringConnectionTF(s *awsSecrets) string {
 	return fmt.Sprintf(`
-data "aiven_project" "foo" {
-  project = "%s"
+data "aiven_project" "project" {
+  project = %[1]q
 }
 
-resource "aiven_project_vpc" "bar" {
-  project      = data.aiven_project.foo.project
-  cloud_name   = "aws-%s"
-  network_cidr = "10.0.0.0/24"
+provider "aws" {
+  region = %[2]q
+}
+
+resource "aiven_project_vpc" "aiven_vpc" {
+  project      = data.aiven_project.project.project
+  cloud_name   = "aws-eu-west-1"
+  network_cidr = "10.0.1.0/24"
 
   timeouts {
-    create = "5m"
+    create = "15m"
   }
 }
 
-resource "aiven_aws_vpc_peering_connection" "foo" {
-  vpc_id         = aiven_project_vpc.bar.id
-  aws_account_id = "%s"
-  aws_vps_id     = "%s"
-  aws_vpc_region = "%s"
+resource "aws_vpc" "aws_vpc" {
+  cidr_block = "10.0.0.0/24"
 
-  timeouts {
-    create = "10m"
+  tags = {
+    Name = "test-acc-tf-vpc-peering"
   }
-}`, os.Getenv("AIVEN_PROJECT_NAME"),
-		os.Getenv("AWS_REGION"),
-		os.Getenv("AWS_ACCOUNT_ID"),
-		os.Getenv("AWS_VPC_ID"),
-		os.Getenv("AWS_REGION"))
+}
+
+resource "aiven_aws_vpc_peering_connection" "peering_connection" {
+  vpc_id         = aiven_project_vpc.aiven_vpc.id
+  aws_account_id = %[3]q
+  aws_vpc_region = %[2]q
+  aws_vpc_id     = aws_vpc.aws_vpc.id
+}
+`, s.Project, s.Region, s.AccountID)
 }

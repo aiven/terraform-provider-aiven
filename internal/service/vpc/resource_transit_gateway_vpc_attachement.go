@@ -83,12 +83,12 @@ func ResourceTransitGatewayVPCAttachment() *schema.Resource {
 func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	cidrs := schemautil.FlattenToString(d.Get("user_peer_network_cidrs").([]interface{}))
-	p, err := parsePeerVPCID(d.Id())
+	p, err := parsePeerVPCIDWithRegion(d.Id())
 	if err != nil {
 		return diag.Errorf("error parsing peering VPC ID: %s", err)
 	}
 
+	cidrs := schemautil.FlattenToString(d.Get("user_peer_network_cidrs").([]interface{}))
 	peeringConnection, err := client.VPCPeeringConnections.Get(p.projectName, p.vpcID, p.peerCloudAccount, p.peerVPC)
 	if err != nil {
 		return diag.Errorf("cannot get transit gateway vpc attachment by id %s: %s", d.Id(), err)

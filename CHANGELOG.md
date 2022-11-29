@@ -10,7 +10,8 @@ nav_order: 1
 
 - Revert `datasource_project_vpc` `cloud_name` and `project` deprecations
 - Add extra timeout for `kafka_connect` service integration create
-- Support `clickhouse_kafka` integration type in `aiven_service_integration`
+- Support `clickhouse_kafka` integration type in `aiven_service_integration` 
+- Fix `aiven_transit_gateway_vpc_attachment` fails to parse ID
 
 ## [3.8.1] - 2022-11-10
 

@@ -12,7 +12,6 @@ import (
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
-// azureSecrets AzurePrivateLinkConnectionApproval secrets
 type azureSecrets struct {
 	Project        string `envconfig:"AIVEN_PROJECT_NAME" required:"true"`
 	AivenAppID     string `envconfig:"AIVEN_AZURE_APP_ID" required:"true"`
