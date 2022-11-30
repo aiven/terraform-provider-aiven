@@ -12,6 +12,7 @@ nav_order: 1
 - Add extra timeout for `kafka_connect` service integration create
 - Support `clickhouse_kafka` integration type in `aiven_service_integration` 
 - Fix `aiven_transit_gateway_vpc_attachment` fails to parse ID
+- Add `self_link` field to `aiven_gcp_vpc_peering_connection` resource
 
 ## [3.8.1] - 2022-11-10
 

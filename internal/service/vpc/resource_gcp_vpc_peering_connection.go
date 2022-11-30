@@ -13,6 +13,8 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
+const _gcpAPI = "https://www.googleapis.com/compute/v1"
+
 var aivenGCPVPCPeeringConnectionSchema = map[string]*schema.Schema{
 	"vpc_id": {
 		ForceNew:     true,
@@ -250,19 +252,22 @@ func copyGCPVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 	var toProjectId string
 	var toVPCNetwork string
 
-	if peeringConnection.StateInfo != nil && len(*peeringConnection.StateInfo) > 0 {
-		if v, ok := (*peeringConnection.StateInfo)["to_project_id"]; ok {
-			toProjectId = v.(string)
-		}
-		if v, ok := (*peeringConnection.StateInfo)["to_vpc_network"]; ok {
-			toVPCNetwork = v.(string)
-		}
+	if peeringConnection.StateInfo != nil {
+		si := *peeringConnection.StateInfo
+		if len(si) > 0 {
+			if v, ok := si["to_project_id"]; ok {
+				toProjectId = v.(string)
+			}
+			if v, ok := si["to_vpc_network"]; ok {
+				toVPCNetwork = v.(string)
+			}
 
-		if toProjectId != "" && toVPCNetwork != "" {
-			if err := d.Set("self_link",
-				fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
-					toProjectId, toVPCNetwork)); err != nil {
-				return diag.FromErr(err)
+			if toProjectId != "" && toVPCNetwork != "" {
+				if err := d.Set("self_link",
+					fmt.Sprintf(_gcpAPI+"/projects/%s/global/networks/%s",
+						toProjectId, toVPCNetwork)); err != nil {
+					return diag.FromErr(err)
+				}
 			}
 		}
 	}
