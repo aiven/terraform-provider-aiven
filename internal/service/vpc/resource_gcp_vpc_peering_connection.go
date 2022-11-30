@@ -2,6 +2,7 @@ package vpc
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/aiven/aiven-go-client"
@@ -41,6 +42,11 @@ var aivenGCPVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		Computed:    true,
 		Type:        schema.TypeMap,
 		Description: "State-specific help or error information",
+	},
+	"self_link": {
+		Computed:    true,
+		Type:        schema.TypeString,
+		Description: "Computed GCP network peering link",
 	},
 }
 
@@ -239,6 +245,26 @@ func copyGCPVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 
 	if err := d.Set("state_info", ConvertStateInfoToMap(peeringConnection.StateInfo)); err != nil {
 		return diag.FromErr(err)
+	}
+
+	var toProjectId string
+	var toVPCNetwork string
+
+	if peeringConnection.StateInfo != nil && len(*peeringConnection.StateInfo) > 0 {
+		if v, ok := (*peeringConnection.StateInfo)["to_project_id"]; ok {
+			toProjectId = v.(string)
+		}
+		if v, ok := (*peeringConnection.StateInfo)["to_vpc_network"]; ok {
+			toVPCNetwork = v.(string)
+		}
+
+		if toProjectId != "" && toVPCNetwork != "" {
+			if err := d.Set("self_link",
+				fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
+					toProjectId, toVPCNetwork)); err != nil {
+				return diag.FromErr(err)
+			}
+		}
 	}
 
 	return nil
