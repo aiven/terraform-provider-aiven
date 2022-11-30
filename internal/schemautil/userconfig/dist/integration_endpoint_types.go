@@ -150,19 +150,16 @@ func IntegrationEndpointTypeExternalElasticsearchLogs() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"index_days_max": {
-			Default:     "3",
 			Description: "Maximum number of days of logs to keep",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"index_prefix": {
-			Default:     "logs",
 			Description: "Elasticsearch index prefix",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"timeout": {
-			Default:     "10.0",
 			Description: "Elasticsearch request timeout limit",
 			Optional:    true,
 			Type:        schema.TypeString,
@@ -284,19 +281,16 @@ func IntegrationEndpointTypeExternalOpensearchLogs() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"index_days_max": {
-			Default:     "3",
 			Description: "Maximum number of days of logs to keep",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"index_prefix": {
-			Default:     "logs",
 			Description: "OpenSearch index prefix",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"timeout": {
-			Default:     "10.0",
 			Description: "OpenSearch request timeout limit",
 			Optional:    true,
 			Type:        schema.TypeString,
@@ -338,13 +332,11 @@ func IntegrationEndpointTypeExternalPostgresql() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"ssl_mode": {
-			Default:     "verify-full",
 			Description: "SSL Mode",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"ssl_root_cert": {
-			Default:     "",
 			Description: "SSL Root Cert",
 			Optional:    true,
 			Type:        schema.TypeString,
@@ -468,7 +460,6 @@ func IntegrationEndpointTypeRsyslog() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"format": {
-			Default:     "rfc5424",
 			Description: "message format",
 			Optional:    true,
 			Type:        schema.TypeString,
@@ -484,7 +475,6 @@ func IntegrationEndpointTypeRsyslog() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"port": {
-			Default:     "514",
 			Description: "rsyslog server port",
 			Optional:    true,
 			Type:        schema.TypeString,
@@ -500,7 +490,6 @@ func IntegrationEndpointTypeRsyslog() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"tls": {
-			Default:     true,
 			Description: "Require TLS",
 			Optional:    true,
 			Type:        schema.TypeString,
@@ -534,7 +523,6 @@ func IntegrationEndpointTypeSignalfx() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"signalfx_realm": {
-			Default:     "us0",
 			Description: "SignalFX realm",
 			Optional:    true,
 			Type:        schema.TypeString,

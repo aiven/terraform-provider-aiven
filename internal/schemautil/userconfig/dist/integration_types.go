@@ -31,13 +31,11 @@ func IntegrationTypeClickhouseKafka() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"data_format": {
-				Default:     "JSONEachRow",
 				Description: "Message data format",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"group_name": {
-				Default:     "clickhouse",
 				Description: "Kafka consumers group",
 				Optional:    true,
 				Type:        schema.TypeString,
@@ -80,13 +78,11 @@ func IntegrationTypeClickhousePostgresql() *schema.Schema {
 		Description: "Databases to expose",
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"database": {
-				Default:     "defaultdb",
 				Description: "PostgreSQL database to expose",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"schema": {
-				Default:     "public",
 				Description: "PostgreSQL schema to expose",
 				Optional:    true,
 				Type:        schema.TypeString,
@@ -401,13 +397,11 @@ func IntegrationTypeKafkaMirrormaker() *schema.Schema {
 func IntegrationTypeLogs() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"elasticsearch_index_days_max": {
-			Default:     "3",
 			Description: "Elasticsearch index retention limit",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"elasticsearch_index_prefix": {
-			Default:     "logs",
 			Description: "Elasticsearch index prefix",
 			Optional:    true,
 			Type:        schema.TypeString,
@@ -768,7 +762,6 @@ func IntegrationTypeMetrics() *schema.Schema {
 // IntegrationTypeMirrormaker is a generated function returning the schema of the mirrormaker IntegrationType.
 func IntegrationTypeMirrormaker() *schema.Schema {
 	s := map[string]*schema.Schema{"mirrormaker_whitelist": {
-		Default:     ".*",
 		Description: "Mirrormaker topic whitelist",
 		Optional:    true,
 		Type:        schema.TypeString,
