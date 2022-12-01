@@ -22,12 +22,6 @@ func TestAccAivenBillingGroup_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckAivenBillingGroupResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCopyFromProjectBillingGroupResource(rName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("aiven_project.pr02", "billing_group"),
-				),
-			},
-			{
 				Config: testAccBillingGroupResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("test-acc-bg-%s", rName)),
@@ -87,28 +81,6 @@ resource "aiven_project" "pr1" {
 
   depends_on = [aiven_billing_group.foo]
 }`, name, name)
-}
-
-func testAccCopyFromProjectBillingGroupResource(name string) string {
-	return fmt.Sprintf(`
-resource "aiven_billing_group" "foo" {
-  name             = "test-acc-bg-%s"
-  billing_currency = "USD"
-  vat_id           = "abc"
-}
-
-resource "aiven_project" "pr01" {
-  project       = "test-acc-pr01-%s"
-  billing_group = aiven_billing_group.foo.id
-  depends_on    = [aiven_billing_group.foo]
-}
-
-resource "aiven_project" "pr02" {
-  project           = "test-acc-p02-%s"
-  copy_from_project = aiven_project.pr01.project
-
-  depends_on = [aiven_project.pr01]
-}`, name, name, name)
 }
 
 func testCopyBillingGroupFromExistingOne(name string) string {
