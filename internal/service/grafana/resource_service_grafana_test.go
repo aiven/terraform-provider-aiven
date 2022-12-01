@@ -145,6 +145,8 @@ func testAccCheckAivenServiceGrafanaAttributes(n string) resource.TestCheckFunc 
 }
 
 func TestAccAivenService_grafana_with_ip_filter_objects(t *testing.T) {
+	t.Skip(`activate when provider can manage default object values`)
+
 	project := os.Getenv("AIVEN_PROJECT_NAME")
 	prefix := "test-acc-" + acctest.RandString(7)
 	resourceName := "aiven_grafana.grafana"
@@ -172,6 +174,7 @@ func TestAccAivenService_grafana_with_ip_filter_objects(t *testing.T) {
 	})
 }
 
+//nolint:unused
 func testAccGrafanaServiceResourceWithIpFilterObjects(prefix, project string, addIpFilterObjs bool) string {
 	ipFilterObjs := `ip_filter_object {
       description = "test"
