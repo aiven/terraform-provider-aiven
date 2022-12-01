@@ -143,3 +143,72 @@ func testAccCheckAivenServiceGrafanaAttributes(n string) resource.TestCheckFunc 
 		return nil
 	}
 }
+
+func TestAccAivenService_grafana_with_ip_filter_objects(t *testing.T) {
+	project := os.Getenv("AIVEN_PROJECT_NAME")
+	prefix := "test-acc-" + acctest.RandString(7)
+	resourceName := "aiven_grafana.grafana"
+
+	// This checks prove that deleting ip_filter_objects does not change the state
+	checks := resource.ComposeTestCheckFunc(
+		resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+		resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter_object.#", "1"),
+	)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      acc.TestAccCheckAivenServiceResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccGrafanaServiceResourceWithIpFilterObjects(prefix, project, true),
+				Check:  checks,
+			},
+			{
+				Config: testAccGrafanaServiceResourceWithIpFilterObjects(prefix, project, false),
+				Check:  checks,
+			},
+		},
+	})
+}
+
+func testAccGrafanaServiceResourceWithIpFilterObjects(prefix, project string, addIpFilterObjs bool) string {
+	ipFilterObjs := `ip_filter_object {
+      description = "test"
+      network     = "1.3.3.7/32"
+    }`
+
+	if !addIpFilterObjs {
+		ipFilterObjs = ``
+	}
+
+	return fmt.Sprintf(`
+data "aiven_project" "project" {
+  project = %[2]q
+}
+
+resource "aiven_grafana" "grafana" {
+  project                 = data.aiven_project.project.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-1"
+  service_name            = "%[1]s-grafana"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  tag {
+    key   = "test"
+    value = "val"
+  }
+
+  grafana_user_config {
+    alerting_enabled = true
+    %[3]s
+
+    public_access {
+      grafana = false
+    }
+  }
+}
+
+`, prefix, project, ipFilterObjs)
+}
