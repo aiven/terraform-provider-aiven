@@ -12,6 +12,7 @@ Other examples can be found in the [examples](https://github.com/aiven/terraform
 - [Standalone Kafka connect deployment with custom config](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_connect)
 - [Deploying a ClickHouse service](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/clickhouse)
 - [Deploying ClickHouse with a Kafka source integration](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/clickhouse_integrations/kafka_source)
+- [Deploying ClickHouse with a PostgreSQL source integration](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/clickhouse_integrations/postgres_source)
 - [Deploying Kafka with a Prometheus Service Integration](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_prometheus)
 - [Deploying Kafka and Elasticsearch with a Kafka Connect Elasticsearch Sink connector](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_connectors/es_sink)
 - [Deploying Kafka and Elasticsearch with a Kafka Connect Mongo Sink connector](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_connectors/mongo_sink)

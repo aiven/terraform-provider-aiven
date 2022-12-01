@@ -10,6 +10,7 @@ nav_order: 1
 - Add ClickHouse examples:
   - Standalone service
   - Integration with Kafka source
+  - Integration with PostgreSQL source
 
 ## [3.9.0] - 2022-12-01
 
