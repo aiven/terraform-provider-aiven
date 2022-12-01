@@ -124,7 +124,7 @@ func ResourceProject() *schema.Resource {
 	}
 }
 
-func resourceProjectCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -158,7 +158,7 @@ func resourceProjectCreate(_ context.Context, d *schema.ResourceData, m interfac
 
 	d.SetId(projectName)
 
-	return resourceProjectGetCACert(projectName, client, d)
+	return resourceProjectRead(ctx, d, m)
 }
 
 func resourceProjectCopyBillingGroupFromProject(

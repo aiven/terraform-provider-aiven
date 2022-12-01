@@ -13,6 +13,7 @@ nav_order: 1
 - Support `clickhouse_kafka` integration type in `aiven_service_integration` 
 - Fix `aiven_transit_gateway_vpc_attachment` fails to parse ID
 - Prevent generation of `Default` field in static schema generator
+- Add `self_link` field to `aiven_gcp_vpc_peering_connection` resource
 
 ## [3.8.1] - 2022-11-10
 
