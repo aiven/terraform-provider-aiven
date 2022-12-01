@@ -7,6 +7,8 @@ nav_order: 1
 # Changelog
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+- Add ClickHouse examples:
+  - Standalone service
 
 ## [3.9.0] - 2022-12-01
 
