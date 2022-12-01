@@ -31,6 +31,7 @@ data "aiven_service_integration" "myintegration" {
 ### Read-Only
 
 - `clickhouse_kafka_user_config` (List of Object) ClickhouseKafka user configurable settings (see [below for nested schema](#nestedatt--clickhouse_kafka_user_config))
+- `clickhouse_postgresql_user_config` (List of Object) ClickhousePostgresql user configurable settings (see [below for nested schema](#nestedatt--clickhouse_postgresql_user_config))
 - `datadog_user_config` (List of Object) Datadog user configurable settings (see [below for nested schema](#nestedatt--datadog_user_config))
 - `destination_endpoint_id` (String) Destination endpoint for the integration (if any)
 - `id` (String) The ID of this resource.
@@ -77,6 +78,23 @@ Read-Only:
 
 - `name` (String)
 
+
+
+
+<a id="nestedatt--clickhouse_postgresql_user_config"></a>
+### Nested Schema for `clickhouse_postgresql_user_config`
+
+Read-Only:
+
+- `databases` (List of Object) (see [below for nested schema](#nestedobjatt--clickhouse_postgresql_user_config--databases))
+
+<a id="nestedobjatt--clickhouse_postgresql_user_config--databases"></a>
+### Nested Schema for `clickhouse_postgresql_user_config.databases`
+
+Read-Only:
+
+- `database` (String)
+- `schema` (String)
 
 
 
