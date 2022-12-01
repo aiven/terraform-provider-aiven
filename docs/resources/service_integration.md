@@ -34,6 +34,7 @@ resource "aiven_service_integration" "my_integration_metrics" {
 ### Optional
 
 - `clickhouse_kafka_user_config` (Block List, Max: 1) ClickhouseKafka user configurable settings (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config))
+- `clickhouse_postgresql_user_config` (Block List, Max: 1) ClickhousePostgresql user configurable settings (see [below for nested schema](#nestedblock--clickhouse_postgresql_user_config))
 - `datadog_user_config` (Block List, Max: 1) Datadog user configurable settings (see [below for nested schema](#nestedblock--datadog_user_config))
 - `destination_endpoint_id` (String) Destination endpoint for the integration (if any)
 - `destination_service_name` (String) Destination service for the integration (if any)
@@ -86,6 +87,23 @@ Optional:
 
 - `name` (String) Name of the topic
 
+
+
+
+<a id="nestedblock--clickhouse_postgresql_user_config"></a>
+### Nested Schema for `clickhouse_postgresql_user_config`
+
+Optional:
+
+- `databases` (Block List, Max: 10) Databases to expose (see [below for nested schema](#nestedblock--clickhouse_postgresql_user_config--databases))
+
+<a id="nestedblock--clickhouse_postgresql_user_config--databases"></a>
+### Nested Schema for `clickhouse_postgresql_user_config.databases`
+
+Optional:
+
+- `database` (String) PostgreSQL database to expose
+- `schema` (String) PostgreSQL schema to expose
 
 
 

@@ -67,14 +67,15 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Type:        schema.TypeString,
 	},
-	"logs_user_config":              dist.IntegrationTypeLogs(),
-	"mirrormaker_user_config":       dist.IntegrationTypeMirrormaker(),
-	"kafka_mirrormaker_user_config": dist.IntegrationTypeKafkaMirrormaker(),
-	"kafka_connect_user_config":     dist.IntegrationTypeKafkaConnect(),
-	"kafka_logs_user_config":        dist.IntegrationTypeKafkaLogs(),
-	"metrics_user_config":           dist.IntegrationTypeMetrics(),
-	"datadog_user_config":           dist.IntegrationTypeDatadog(),
-	"clickhouse_kafka_user_config":  dist.IntegrationTypeClickhouseKafka(),
+	"logs_user_config":                  dist.IntegrationTypeLogs(),
+	"mirrormaker_user_config":           dist.IntegrationTypeMirrormaker(),
+	"kafka_mirrormaker_user_config":     dist.IntegrationTypeKafkaMirrormaker(),
+	"kafka_connect_user_config":         dist.IntegrationTypeKafkaConnect(),
+	"kafka_logs_user_config":            dist.IntegrationTypeKafkaLogs(),
+	"metrics_user_config":               dist.IntegrationTypeMetrics(),
+	"datadog_user_config":               dist.IntegrationTypeDatadog(),
+	"clickhouse_kafka_user_config":      dist.IntegrationTypeClickhouseKafka(),
+	"clickhouse_postgresql_user_config": dist.IntegrationTypeClickhousePostgresql(),
 }
 
 func ResourceServiceIntegration() *schema.Resource {

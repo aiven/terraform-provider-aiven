@@ -608,7 +608,7 @@ resource "aiven_service_integration" "clickhouse_kafka_source" {
 
 func TestAccAivenServiceIntegration_clickhouse_kafka_user_config_creates(t *testing.T) {
 	project := os.Getenv("AIVEN_PROJECT_NAME")
-	prefix := "test-tf-acc-" + acctest.RandString(7)
+	prefix := "test-acc-" + acctest.RandString(7)
 	resourceName := "aiven_service_integration.clickhouse_kafka_source"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
@@ -621,6 +621,66 @@ func TestAccAivenServiceIntegration_clickhouse_kafka_user_config_creates(t *test
 					resource.TestCheckResourceAttr(resourceName, "integration_type", "clickhouse_kafka"),
 					resource.TestCheckResourceAttr(resourceName, "project", project),
 					resource.TestCheckResourceAttr(resourceName, "source_service_name", prefix+"-kafka"),
+					resource.TestCheckResourceAttr(resourceName, "destination_service_name", prefix+"-clickhouse"),
+				),
+			},
+		},
+	})
+}
+
+func testAccServiceIntegrationClickhousePostgresUserConfig(prefix, project string) string {
+	return fmt.Sprintf(`
+data "aiven_project" "project" {
+  project = %[2]q
+}
+
+resource "aiven_pg" "pg" {
+  project      = data.aiven_project.project.project
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = "%[1]s-pg"
+}
+
+resource "aiven_clickhouse" "clickhouse" {
+  project                 = data.aiven_project.project.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-beta-8"
+  service_name            = "%[1]s-clickhouse"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_service_integration" "clickhouse_pg_source" {
+  project                  = data.aiven_project.project.project
+  integration_type         = "clickhouse_postgresql"
+  source_service_name      = aiven_pg.pg.service_name
+  destination_service_name = aiven_clickhouse.clickhouse.service_name
+
+  clickhouse_postgresql_user_config {
+    databases {
+      database = "defaultdb"
+      schema   = "public"
+    }
+  }
+}
+`, prefix, project)
+}
+
+func TestAccAivenServiceIntegration_clickhouse_postgres_user_config_creates(t *testing.T) {
+	project := os.Getenv("AIVEN_PROJECT_NAME")
+	prefix := "test-acc-" + acctest.RandString(7)
+	resourceName := "aiven_service_integration.clickhouse_pg_source"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenServiceIntegrationResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccServiceIntegrationClickhousePostgresUserConfig(prefix, project),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "integration_type", "clickhouse_postgresql"),
+					resource.TestCheckResourceAttr(resourceName, "project", project),
+					resource.TestCheckResourceAttr(resourceName, "source_service_name", prefix+"-pg"),
 					resource.TestCheckResourceAttr(resourceName, "destination_service_name", prefix+"-clickhouse"),
 				),
 			},
