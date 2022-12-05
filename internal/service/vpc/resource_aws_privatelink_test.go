@@ -2,132 +2,109 @@ package vpc_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
-
-	"github.com/aiven/aiven-go-client"
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/kelseyhightower/envconfig"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
-func TestAccAivenAWSPrivatelink_basic(t *testing.T) {
-	if os.Getenv("AIVEN_AWS_PRIVATELINK_VPCID") == "" ||
-		os.Getenv("AIVEN_AWS_PRIVATELINK_PRINCIPAL") == "" {
-		t.Skip("AIVEN_AWS_PRIVATELINK_VPCID and AIVEN_AWS_PRIVATELINK_PRINCIPAL env variables are required to run this test")
+func TestAccAivenAWSPrivateLink_basic(t *testing.T) {
+	var s awsSecrets
+	err := envconfig.Process("", &s)
+	if err != nil {
+		t.Skipf("Not all values has been provided: %s", err)
 	}
 
-	resourceName := "aiven_aws_privatelink.foo"
-	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-
+	prefix := "test-tf-acc-" + acctest.RandString(7)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenAWSPrivatelinkResourceDestroy,
+		CheckDestroy:      acc.TestAccCheckAivenServiceResourceDestroy,
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"aws": {
+				Source:            "hashicorp/aws",
+				VersionConstraint: "=4.40.0",
+			},
+		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAWSPrivatelinkResource(rName),
+				Config: testAccAWSPrivateLinkResource(prefix, &s),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenAWSPrivatelinkAttributes("data.aiven_aws_privatelink.pr"),
-					resource.TestCheckResourceAttrSet(resourceName, "aws_service_name"),
-					resource.TestCheckResourceAttrSet(resourceName, "aws_service_id"),
+					// Aiven resources
+					resource.TestCheckResourceAttr("aiven_project_vpc.aiven_vpc", "state", "ACTIVE"),
+					resource.TestCheckResourceAttr("aiven_project_vpc.aiven_vpc", "network_cidr", "10.0.1.0/24"),
+					resource.TestCheckResourceAttr("aiven_pg.pg", "state", "RUNNING"),
+					resource.TestCheckResourceAttr("aiven_aws_privatelink.privatelink", "service_name", prefix+"-pg"),
+					resource.TestCheckResourceAttrSet("aiven_aws_privatelink.privatelink", "aws_service_name"),
+					resource.TestCheckResourceAttrSet("aiven_aws_privatelink.privatelink", "aws_service_id"),
+
+					// Aws resources
+					resource.TestCheckResourceAttrSet("aws_vpc.aws_vpc", "id"),
+					resource.TestCheckResourceAttrSet("aws_vpc_endpoint.endpoint", "id"),
+					resource.TestCheckResourceAttr("aws_vpc_endpoint.endpoint", "state", "available"),
 				),
 			},
+			importStateByName("aiven_project_vpc.aiven_vpc"),
+			importStateByName("aiven_pg.pg"),
+			importStateByName("aiven_aws_privatelink.privatelink"),
+			importStateByName("aws_vpc.aws_vpc"),
+			importStateByName("aws_vpc_endpoint.endpoint"),
 		},
 	})
 }
 
-func testAccCheckAivenAWSPrivatelinkResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
-
-	// loop through the resources in state, verifying each AWS privatelink is destroyed
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "aiven_aws_privatelink" {
-			continue
-		}
-
-		project, serviceName, err := schemautil.SplitResourceID2(rs.Primary.ID)
-		if err != nil {
-			return err
-		}
-
-		pv, err := c.AWSPrivatelink.Get(project, serviceName)
-		if err != nil && !aiven.IsNotFound(err) && err.(aiven.Error).Status != 500 {
-			return fmt.Errorf("error getting a AWS Privatelink: %w", err)
-		}
-
-		if pv != nil {
-			return fmt.Errorf("AWS privatelink (%s) still exists", rs.Primary.ID)
-		}
-	}
-
-	return nil
-}
-
-func testAccAWSPrivatelinkResource(name string) string {
-	var principal = os.Getenv("AIVEN_AWS_PRIVATELINK_PRINCIPAL")
-	var vpcID = os.Getenv("AIVEN_AWS_PRIVATELINK_VPCID")
-
+func testAccAWSPrivateLinkResource(prefix string, s *awsSecrets) string {
 	return fmt.Sprintf(`
-data "aiven_project" "foo" {
-  project = "%s"
+data "aiven_project" "project" {
+  project = %[2]q
 }
 
-resource "aiven_kafka" "bar" {
-  project                 = data.aiven_project.foo.project
-  cloud_name              = "aws-eu-west-1"
-  plan                    = "startup-2"
-  service_name            = "test-acc-sr-%s"
-  maintenance_window_dow  = "monday"
-  maintenance_window_time = "10:00:00"
-  project_vpc_id          = "%s"
+provider "aws" {
+  region = "eu-west-3"
+}
 
-  kafka_user_config {
-    kafka {
-      group_max_session_timeout_ms = 70000
-      log_retention_bytes          = 1000000000
-    }
+resource "aiven_project_vpc" "aiven_vpc" {
+  project      = data.aiven_project.project.project
+  cloud_name   = "aws-eu-west-3"
+  network_cidr = "10.0.1.0/24"
+
+  timeouts {
+    create = "15m"
   }
 }
 
-resource "aiven_aws_privatelink" "foo" {
-  project      = data.aiven_project.foo.project
-  service_name = aiven_kafka.bar.service_name
-  principals   = ["%s"]
+resource "aiven_pg" "pg" {
+  project        = aiven_project_vpc.aiven_vpc.project
+  cloud_name     = aiven_project_vpc.aiven_vpc.cloud_name
+  project_vpc_id = aiven_project_vpc.aiven_vpc.id
+  plan           = "startup-4"
+  service_name   = "%[1]s-pg"
 }
 
-data "aiven_aws_privatelink" "pr" {
-  project      = data.aiven_project.foo.project
-  service_name = aiven_kafka.bar.service_name
+resource "aiven_aws_privatelink" "privatelink" {
+  project      = data.aiven_project.project.project
+  service_name = aiven_pg.pg.service_name
 
-  depends_on = [aiven_aws_privatelink.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, vpcID, principal)
+  principals = [
+    %[3]q
+  ]
 }
 
-func testAccCheckAivenAWSPrivatelinkAttributes(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		r := s.RootModule().Resources[n]
-		a := r.Primary.Attributes
+resource "aws_vpc" "aws_vpc" {
+  cidr_block = "10.0.0.0/24"
 
-		if a["project"] == "" {
-			return fmt.Errorf("expected to get a project name from Aiven")
-		}
+  tags = {
+    Name = "%[1]s-privatelink"
+  }
+}
 
-		if a["service_name"] == "" {
-			return fmt.Errorf("expected to get a service_name from Aiven")
-		}
-
-		if a["aws_service_name"] == "" {
-			return fmt.Errorf("expected to get aws_service_name from Aiven")
-		}
-
-		if a["aws_service_id"] == "" {
-			return fmt.Errorf("expected to get aws_service_id from Aiven")
-		}
-
-		return nil
-	}
+resource "aws_vpc_endpoint" "endpoint" {
+  vpc_id            = aws_vpc.aws_vpc.id
+  service_name      = aiven_aws_privatelink.privatelink.aws_service_name
+  vpc_endpoint_type = "Interface"
+}
+`, prefix, s.Project, s.Principal)
 }
