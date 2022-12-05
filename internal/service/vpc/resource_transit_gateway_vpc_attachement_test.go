@@ -4,19 +4,21 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/kelseyhightower/envconfig"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
-func TestAccAivenTransitGatewayVPCAttachment_e2e(t *testing.T) {
+func TestAccAivenAWSTransitGatewayVPCAttachment_basic(t *testing.T) {
 	var s awsSecrets
 	err := envconfig.Process("", &s)
 	if err != nil {
 		t.Skipf("Not all values has been provided: %s", err)
 	}
 
+	prefix := "test-tf-acc-" + acctest.RandString(7)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
@@ -28,7 +30,7 @@ func TestAccAivenTransitGatewayVPCAttachment_e2e(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAivenTransitGatewayVPCAttachment(&s),
+				Config: testAccAivenAWSTransitGatewayVPCAttachment(prefix, &s),
 				Check: resource.ComposeTestCheckFunc(
 					// Aiven resources
 					resource.TestCheckResourceAttr("aiven_project_vpc.aiven_vpc", "state", "ACTIVE"),
@@ -50,14 +52,14 @@ func TestAccAivenTransitGatewayVPCAttachment_e2e(t *testing.T) {
 	})
 }
 
-func testAccAivenTransitGatewayVPCAttachment(s *awsSecrets) string {
+func testAccAivenAWSTransitGatewayVPCAttachment(prefix string, s *awsSecrets) string {
 	return fmt.Sprintf(`
 data "aiven_project" "project" {
-  project = %[1]q
+  project = %[2]q
 }
 
 provider "aws" {
-  region = %[2]q
+  region = %[3]q
 }
 
 resource "aiven_project_vpc" "aiven_vpc" {
@@ -74,14 +76,14 @@ resource "aws_vpc" "aws_vpc" {
   cidr_block = "10.0.0.0/24"
 
   tags = {
-    Name = "test-acc-tf-transit-gateway"
+    Name = "%[1]s-transit-gateway"
   }
 }
 
 resource "aiven_transit_gateway_vpc_attachment" "attachment" {
   vpc_id             = aiven_project_vpc.aiven_vpc.id
-  peer_cloud_account = %[3]q
-  peer_region        = %[2]q
+  peer_cloud_account = %[4]q
+  peer_region        = %[3]q
   peer_vpc           = aws_vpc.aws_vpc.id
 
   user_peer_network_cidrs = [
@@ -91,5 +93,5 @@ resource "aiven_transit_gateway_vpc_attachment" "attachment" {
     create = "10m"
   }
 }
-`, s.Project, s.Region, s.AccountID)
+`, prefix, s.Project, s.Region, s.AccountID)
 }
