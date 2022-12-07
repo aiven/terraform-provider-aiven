@@ -80,13 +80,13 @@ Optional:
 
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name
-- `ip_filter` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+- `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
 - `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--m3db_user_config--ip_filter_object))
 - `limits` (Block List, Max: 1) M3 limits (see [below for nested schema](#nestedblock--m3db_user_config--limits))
 - `m3_version` (String) M3 major version (deprecated, use m3db_version)
 - `m3coordinator_enable_graphite_carbon_ingest` (String) Enables access to Graphite Carbon plaintext metrics ingestion. It can be enabled only for services inside VPCs. The metrics are written to aggregated namespaces only.
 - `m3db_version` (String) M3 major version (the minimum compatible version)
-- `namespaces` (Block List, Max: 2147483647) List of M3 namespaces (see [below for nested schema](#nestedblock--m3db_user_config--namespaces))
+- `namespaces` (Block List, Max: 2147483647, Deprecated) List of M3 namespaces (see [below for nested schema](#nestedblock--m3db_user_config--namespaces))
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--m3db_user_config--private_access))
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--m3db_user_config--public_access))
@@ -181,7 +181,7 @@ Optional:
 - `drop` (String) Only store the derived metric (as specified in the roll-up rules), if any
 - `filter` (String) Matching metric names with wildcards (using __name__:wildcard) or matching tags and their (optionally wildcarded) values. For value, ! can be used at start of value for negation, and multiple filters can be supplied using space as separator.
 - `name` (String) The (optional) name of the rule
-- `namespaces` (List of String) This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by glob (=wildcards)
+- `namespaces` (List of String, Deprecated) This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by glob (=wildcards)
 - `namespaces_object` (Block List, Max: 10) This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by exact match of retention period and resolution (see [below for nested schema](#nestedblock--m3db_user_config--rules--mapping--namespaces_object))
 - `tags` (Block List, Max: 10) List of tags to be appended to matching metrics (see [below for nested schema](#nestedblock--m3db_user_config--rules--mapping--tags))
 

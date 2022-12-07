@@ -121,7 +121,7 @@ Optional:
 - `backup_hour` (String) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.
 - `backup_minute` (String) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.
 - `enable_ipv6` (String) Register AAAA DNS records for the service, and allow IPv6 packets to service ports
-- `ip_filter` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+- `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
 - `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--pg_user_config--ip_filter_object))
 - `migration` (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--pg_user_config--migration))
 - `pg` (Block List, Max: 1) postgresql.conf configuration values (see [below for nested schema](#nestedblock--pg_user_config--pg))
