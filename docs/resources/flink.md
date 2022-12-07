@@ -85,7 +85,7 @@ Optional:
 - `execution_checkpointing_interval_ms` (String) Checkpointing is Flink’s primary fault-tolerance mechanism, wherein a snapshot of your job’s state persisted periodically to some durable location. In the case of failure, Flink will restart from the most recent checkpoint and resume processing. A jobs checkpoint interval configures how often Flink will take these snapshots.
 - `execution_checkpointing_timeout_ms` (String) The time after which a checkpoint-in-progress is aborted, if it did not complete by then.
 - `flink_version` (String) Flink major version
-- `ip_filter` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
+- `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
 - `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--flink_user_config--ip_filter_object))
 - `number_of_task_slots` (String) Task slots per node. For a 3 node plan, total number of task slots is 3x this value
 - `parallelism_default` (String) How many parallel task slots each new job is assigned. Unless you understand how Flink parallel dataflows work, please leave this at 1. Please do not set this value higher than (total number of nodes x number_of_task_slots), or every new job created will fail.
