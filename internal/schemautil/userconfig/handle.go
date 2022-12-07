@@ -187,6 +187,13 @@ func handleArrayProperty(n string, p map[string]interface{}, t string) (map[stri
 			s[jen.Id("MaxItems")] = jen.Lit(mi)
 		}
 
+		// TODO: Remove with the next major version.
+		if an == "ip_filter" || an == "namespaces" {
+			s[jen.Id("Deprecated")] = jen.Lit(
+				fmt.Sprintf("This will be removed in v5.0.0 and replaced with %s_string instead.", an),
+			)
+		}
+
 		r[an] = jen.Values(s)
 	}
 
