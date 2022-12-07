@@ -11,6 +11,7 @@ nav_order: 1
   - Standalone service
   - Integration with Kafka source
   - Integration with PostgreSQL source
+- Fix vpc peering id parser
 
 ## [3.9.0] - 2022-12-01
 

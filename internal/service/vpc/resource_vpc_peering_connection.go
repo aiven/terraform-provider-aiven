@@ -232,13 +232,6 @@ func stateInfoToString(s *map[string]interface{}) string {
 	return str
 }
 
-type peeringVPCIDSizeType int
-
-const (
-	peeringVPCIDSize           peeringVPCIDSizeType = 4
-	peeringVPCIDSizeWithRegion peeringVPCIDSizeType = 5
-)
-
 type peeringVPCID struct {
 	projectName      string
 	vpcID            string
@@ -247,11 +240,12 @@ type peeringVPCID struct {
 	peerRegion       *string
 }
 
-// parsePeerVPCIDSized splits string id like "my-project/id/id/my-vpc" + optional "/region"
-func parsePeerVPCIDSized(src string, size peeringVPCIDSizeType) (*peeringVPCID, error) {
-	chunks := strings.Split(src, "/") // don't use SplitN to validate the size
-	if len(chunks) != int(size) {
-		return nil, fmt.Errorf("expected unix path-like string with %d chunks", size)
+/// parsePeerVPCID splits string id like "my-project/id/id/my-vpc" + optional "/region"
+func parsePeerVPCID(src string) (*peeringVPCID, error) {
+	chunks := strings.Split(src, "/")
+	length := len(chunks)
+	if length < 4 || 5 < length {
+		return nil, fmt.Errorf("expected unix path-like string with 4-5 chunks, got %d", length)
 	}
 
 	pID := &peeringVPCID{
@@ -261,21 +255,14 @@ func parsePeerVPCIDSized(src string, size peeringVPCIDSizeType) (*peeringVPCID, 
 		peerVPC:          chunks[3],
 	}
 
-	if size == peeringVPCIDSizeWithRegion {
+	if len(chunks) == 5 {
 		pID.peerRegion = &chunks[4]
 	}
 	return pID, nil
 }
 
-func parsePeerVPCID(src string) (*peeringVPCID, error) {
-	return parsePeerVPCIDSized(src, peeringVPCIDSize)
-}
-func parsePeerVPCIDWithRegion(src string) (*peeringVPCID, error) {
-	return parsePeerVPCIDSized(src, peeringVPCIDSizeWithRegion)
-}
-
 func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	p, err := parsePeerVPCIDWithRegion(d.Id())
+	p, err := parsePeerVPCID(d.Id())
 	if err != nil {
 		return diag.Errorf("error parsing peering VPC ID: %s", err)
 	}
@@ -316,7 +303,7 @@ func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData,
 func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	p, err := parsePeerVPCIDWithRegion(d.Id())
+	p, err := parsePeerVPCID(d.Id())
 	if err != nil {
 		return diag.Errorf("error parsing peering VPC ID: %s", err)
 	}
@@ -404,7 +391,7 @@ func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceD
 func resourceVPCPeeringConnectionImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	client := m.(*aiven.Client)
 
-	p, err := parsePeerVPCIDWithRegion(d.Id())
+	p, err := parsePeerVPCID(d.Id())
 	if err != nil {
 		return nil, fmt.Errorf("error parsing peering VPC ID: %s", err)
 	}
@@ -559,7 +546,7 @@ func ConvertStateInfoToMap(s *map[string]interface{}) map[string]string {
 
 // isAzureVPCPeeringConnection checking if peered VPC is in the Azure cloud
 func isAzureVPCPeeringConnection(d *schema.ResourceData, c *aiven.Client) (bool, error) {
-	p, err := parsePeerVPCIDWithRegion(d.Id())
+	p, err := parsePeerVPCID(d.Id())
 	if err != nil {
 		return false, fmt.Errorf("error parsing Azure peering VPC ID: %s", err)
 	}
