@@ -15,7 +15,7 @@ The PG Database data source provides information about the existing Aiven Postgr
 ```terraform
 data "aiven_pg_database" "mydatabase" {
   project       = aiven_project.myproject.project
-  service_name  = aiven_service.myservice.service_name
+  service_name  = aiven_pg.mypg.service_name
   database_name = "<DATABASE_NAME>"
 }
 ```
