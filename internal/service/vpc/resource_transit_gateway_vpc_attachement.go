@@ -83,7 +83,7 @@ func ResourceTransitGatewayVPCAttachment() *schema.Resource {
 func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	p, err := parsePeerVPCIDWithRegion(d.Id())
+	p, err := parsePeerVPCID(d.Id())
 	if err != nil {
 		return diag.Errorf("error parsing peering VPC ID: %s", err)
 	}
