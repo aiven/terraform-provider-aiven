@@ -12,6 +12,7 @@ nav_order: 1
   - Integration with Kafka source
   - Integration with PostgreSQL source
 - Fix vpc peering id parser
+- Add `offset_syncs_topic_location` support for `aiven_mirrormaker_replication_flow` resource 
 
 ## [3.9.0] - 2022-12-01
 
