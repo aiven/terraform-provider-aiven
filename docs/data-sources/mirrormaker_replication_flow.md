@@ -36,6 +36,7 @@ data "aiven_mirrormaker_replication_flow" "f1" {
 - `emit_heartbeats_enabled` (Boolean) Emit heartbeats enabled. The default value is `false`.
 - `enable` (Boolean) Enable of disable replication flows for a service.
 - `id` (String) The ID of this resource.
+- `offset_syncs_topic_location` (String) Offset syncs topic location.
 - `replication_policy_class` (String) Replication policy class. The possible values are `org.apache.kafka.connect.mirror.DefaultReplicationPolicy` and `org.apache.kafka.connect.mirror.IdentityReplicationPolicy`. The default value is `org.apache.kafka.connect.mirror.DefaultReplicationPolicy`.
 - `sync_group_offsets_enabled` (Boolean) Sync consumer group offsets. The default value is `false`.
 - `sync_group_offsets_interval_seconds` (Number) Frequency of consumer group offset sync. The default value is `1`.

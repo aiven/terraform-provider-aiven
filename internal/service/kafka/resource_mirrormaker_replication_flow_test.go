@@ -3,15 +3,16 @@ package kafka_test
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func TestAccAivenMirrorMakerReplicationFlow_basic(t *testing.T) {
@@ -32,6 +33,7 @@ func TestAccAivenMirrorMakerReplicationFlow_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "source_cluster", "source"),
 					resource.TestCheckResourceAttr(resourceName, "target_cluster", "target"),
 					resource.TestCheckResourceAttr(resourceName, "enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "offset_syncs_topic_location", "source"),
 				),
 			},
 		},
@@ -181,6 +183,7 @@ resource "aiven_mirrormaker_replication_flow" "foo" {
   sync_group_offsets_enabled          = true
   sync_group_offsets_interval_seconds = 10
   emit_heartbeats_enabled             = true
+  offset_syncs_topic_location         = "source"
 
   topics = [
     ".*",
@@ -230,4 +233,31 @@ func testAccCheckAivenMirrorMakerReplicationFlowAttributes(n string) resource.Te
 
 		return nil
 	}
+}
+
+func TestAccAivenMirrorMakerReplicationFlow_invalid_offset_syncs_topic_location(t *testing.T) {
+	config := `
+resource "aiven_mirrormaker_replication_flow" "foo" {
+  project                             = "foo"
+  service_name                        = "foo"
+  source_cluster                      = "source"
+  target_cluster                      = "target"
+  enable                              = true
+  replication_policy_class            = "org.apache.kafka.connect.mirror.IdentityReplicationPolicy"
+  sync_group_offsets_enabled          = true
+  sync_group_offsets_interval_seconds = 10
+  emit_heartbeats_enabled             = true
+  offset_syncs_topic_location         = "lol_offset"
+}
+`
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:      config,
+				ExpectError: regexp.MustCompile(`"lol_offset" is not one of: "source", "target"`),
+			},
+		},
+	})
 }

@@ -4,11 +4,11 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 var (
@@ -85,6 +85,12 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 		Default:     false,
 		Description: schemautil.Complex("Emit heartbeats enabled.").DefaultValue(false).Build(),
 	},
+	"offset_syncs_topic_location": {
+		Type:             schema.TypeString,
+		Optional:         true,
+		Description:      "Offset syncs topic location.",
+		ValidateDiagFunc: schemautil.ValidateEnum("source", "target"),
+	},
 }
 
 func ResourceMirrorMakerReplicationFlow() *schema.Resource {
@@ -122,6 +128,7 @@ func resourceMirrorMakerReplicationFlowCreate(ctx context.Context, d *schema.Res
 			SyncGroupOffsetsEnabled:         d.Get("sync_group_offsets_enabled").(bool),
 			SyncGroupOffsetsIntervalSeconds: d.Get("sync_group_offsets_interval_seconds").(int),
 			EmitHeartbeatsEnabled:           d.Get("emit_heartbeats_enabled").(bool),
+			OffsetSyncsTopicLocation:        d.Get("offset_syncs_topic_location").(string),
 		},
 	})
 	if err != nil {
@@ -205,6 +212,7 @@ func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.Res
 				SyncGroupOffsetsEnabled:         d.Get("sync_group_offsets_enabled").(bool),
 				SyncGroupOffsetsIntervalSeconds: d.Get("sync_group_offsets_interval_seconds").(int),
 				EmitHeartbeatsEnabled:           d.Get("emit_heartbeats_enabled").(bool),
+				OffsetSyncsTopicLocation:        d.Get("offset_syncs_topic_location").(string),
 			},
 		},
 	)
