@@ -693,11 +693,12 @@ func FlattenServiceComponents(r *aiven.Service) []map[string]interface{} {
 
 	for _, c := range r.Components {
 		component := map[string]interface{}{
-			"component": c.Component,
-			"host":      c.Host,
-			"port":      c.Port,
-			"route":     c.Route,
-			"usage":     c.Usage,
+			"component":                   c.Component,
+			"host":                        c.Host,
+			"port":                        c.Port,
+			"route":                       c.Route,
+			"usage":                       c.Usage,
+			"kafka_authentication_method": c.KafkaAuthenticationMethod,
 		}
 		components = append(components, component)
 	}
