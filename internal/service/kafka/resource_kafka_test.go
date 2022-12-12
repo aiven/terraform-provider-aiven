@@ -7,12 +7,11 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAiven_kafka(t *testing.T) {
@@ -68,6 +67,9 @@ func TestAccAiven_kafka(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
 					resource.TestCheckResourceAttr(resourceName, "default_acl", "false"),
+					resource.TestCheckResourceAttr(resourceName, "components.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "components.0.ssl", "true"),
+					resource.TestCheckResourceAttr(resourceName, "components.0.kafka_authentication_method", "certificate"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_username"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_password"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_host"),

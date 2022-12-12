@@ -13,7 +13,7 @@ nav_order: 1
   - Integration with PostgreSQL source
 - Fix vpc peering id parser
 - Add `offset_syncs_topic_location` support for `aiven_mirrormaker_replication_flow` resource 
-- Add `kafka_authentication_method` output support in `aiven.kafka.components[]`
+- Add `ssl` and `kafka_authentication_method` output support in service components
 
 ## [3.9.0] - 2022-12-01
 

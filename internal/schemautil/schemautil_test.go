@@ -4,6 +4,8 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_validateDurationString(t *testing.T) {
@@ -91,4 +93,11 @@ func Test_splitResourceID(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_PointerValueOrDefault(t *testing.T) {
+	var foo *string
+	bar := "bar"
+	assert.Equal(t, PointerValueOrDefault(foo, "default"), "default")
+	assert.Equal(t, PointerValueOrDefault(&bar, "default"), "bar")
 }

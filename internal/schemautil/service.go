@@ -7,9 +7,10 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/docker/go-units"
+
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
-	"github.com/docker/go-units"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -699,6 +700,9 @@ func FlattenServiceComponents(r *aiven.Service) []map[string]interface{} {
 			"route":                       c.Route,
 			"usage":                       c.Usage,
 			"kafka_authentication_method": c.KafkaAuthenticationMethod,
+			// By default, endpoints are always encrypted and
+			// this property is only included for service components that may disable encryption.
+			"ssl": PointerValueOrDefault(c.Ssl, true),
 		}
 		components = append(components, component)
 	}
