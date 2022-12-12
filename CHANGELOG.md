@@ -11,8 +11,9 @@ nav_order: 1
   - Standalone service
   - Integration with Kafka source
   - Integration with PostgreSQL source
-- Fix vpc peering id parser
+- Fix VPC peering ID parser
 - Add `offset_syncs_topic_location` support for `aiven_mirrormaker_replication_flow` resource 
+- Fix changes being incorrectly picked up by the `ip_filter` field after changing it in frontend
 
 ## [3.9.0] - 2022-12-01
 

@@ -221,6 +221,49 @@ func propsFromAPI(n string, r map[string]interface{}, p map[string]interface{}) 
 			vrs = []map[string]interface{}{p}
 		}
 
+		// TODO: Remove when this is fixed in front end.
+		if vrs != nil && k == "ip_filter_object" {
+			vrsa, ok := vrs.([]interface{})
+			if !ok {
+				return nil, fmt.Errorf("%s...%s: ip_filter_object value is not []interface{}", n, k)
+			}
+
+			var cif []interface{}
+
+			nde := false
+
+			for _, v := range vrsa {
+				va, ok := v.(map[string]interface{})
+				if !ok {
+					return nil, fmt.Errorf(
+						"%s...%s: ip_filter_object value is not []map[string]interface{}", n, k,
+					)
+				}
+
+				vda, ok := va["description"].(string)
+				if !ok {
+					return nil, fmt.Errorf("%s...%s: description value is not a string", n, k)
+				}
+
+				if vda != "" {
+					nde = true
+				}
+
+				vna, ok := va["network"].(string)
+				if !ok {
+					return nil, fmt.Errorf("%s...%s: network value is not a string", n, k)
+				}
+
+				cif = append(cif, vna)
+			}
+
+			if !nde {
+				k = "ip_filter"
+
+				vrs = cif
+			}
+		}
+
 		res[userconfig.EncodeKey(k)] = vrs
 	}
 
