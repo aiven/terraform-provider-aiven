@@ -52,10 +52,10 @@ Read-Only:
 
 - `datadog_api_key` (String)
 - `datadog_tags` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--datadog_tags))
-- `disable_consumer_stats` (String)
-- `kafka_consumer_check_instances` (String)
-- `kafka_consumer_stats_timeout` (String)
-- `max_partition_contexts` (String)
+- `disable_consumer_stats` (Boolean)
+- `kafka_consumer_check_instances` (Number)
+- `kafka_consumer_stats_timeout` (Number)
+- `max_partition_contexts` (Number)
 - `site` (String)
 
 <a id="nestedobjatt--datadog_user_config--datadog_tags"></a>
@@ -96,9 +96,9 @@ Read-Only:
 Read-Only:
 
 - `ca` (String)
-- `index_days_max` (String)
+- `index_days_max` (Number)
 - `index_prefix` (String)
-- `timeout` (String)
+- `timeout` (Number)
 - `url` (String)
 
 
@@ -134,9 +134,9 @@ Read-Only:
 Read-Only:
 
 - `ca` (String)
-- `index_days_max` (String)
+- `index_days_max` (Number)
 - `index_prefix` (String)
-- `timeout` (String)
+- `timeout` (Number)
 - `url` (String)
 
 
@@ -179,10 +179,10 @@ Read-Only:
 - `format` (String)
 - `key` (String)
 - `logline` (String)
-- `port` (String)
+- `port` (Number)
 - `sd` (String)
 - `server` (String)
-- `tls` (String)
+- `tls` (Boolean)
 
 
 <a id="nestedatt--signalfx_user_config"></a>

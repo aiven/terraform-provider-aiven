@@ -88,7 +88,7 @@ Read-Only:
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--ip_filter_object))
 - `limits` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--limits))
 - `m3_version` (String)
-- `m3coordinator_enable_graphite_carbon_ingest` (String)
+- `m3coordinator_enable_graphite_carbon_ingest` (Boolean)
 - `m3db_version` (String)
 - `namespaces` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--namespaces))
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--private_access))
@@ -96,7 +96,7 @@ Read-Only:
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--public_access))
 - `rules` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--rules))
 - `service_to_fork_from` (String)
-- `static_ips` (String)
+- `static_ips` (Boolean)
 
 <a id="nestedobjatt--m3db_user_config--ip_filter_object"></a>
 ### Nested Schema for `m3db_user_config.ip_filter_object`
@@ -112,12 +112,12 @@ Read-Only:
 
 Read-Only:
 
-- `max_recently_queried_series_blocks` (String)
-- `max_recently_queried_series_disk_bytes_read` (String)
+- `max_recently_queried_series_blocks` (Number)
+- `max_recently_queried_series_disk_bytes_read` (Number)
 - `max_recently_queried_series_lookback` (String)
-- `query_docs` (String)
-- `query_require_exhaustive` (String)
-- `query_series` (String)
+- `query_docs` (Number)
+- `query_require_exhaustive` (Boolean)
+- `query_series` (Number)
 
 
 <a id="nestedobjatt--m3db_user_config--namespaces"></a>
@@ -136,8 +136,8 @@ Read-Only:
 Read-Only:
 
 - `retention_options` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--namespaces--options--retention_options))
-- `snapshot_enabled` (String)
-- `writes_to_commitlog` (String)
+- `snapshot_enabled` (Boolean)
+- `writes_to_commitlog` (Boolean)
 
 <a id="nestedobjatt--m3db_user_config--namespaces--options--retention_options"></a>
 ### Nested Schema for `m3db_user_config.namespaces.options.writes_to_commitlog`
@@ -158,7 +158,7 @@ Read-Only:
 
 Read-Only:
 
-- `m3coordinator` (String)
+- `m3coordinator` (Boolean)
 
 
 <a id="nestedobjatt--m3db_user_config--public_access"></a>
@@ -166,7 +166,7 @@ Read-Only:
 
 Read-Only:
 
-- `m3coordinator` (String)
+- `m3coordinator` (Boolean)
 
 
 <a id="nestedobjatt--m3db_user_config--rules"></a>
@@ -182,7 +182,7 @@ Read-Only:
 Read-Only:
 
 - `aggregations` (List of String)
-- `drop` (String)
+- `drop` (Boolean)
 - `filter` (String)
 - `name` (String)
 - `namespaces` (List of String)
