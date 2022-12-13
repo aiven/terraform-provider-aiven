@@ -87,18 +87,18 @@ Optional:
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--redis_user_config--public_access))
 - `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service
 - `redis_acl_channels_default` (String) Determines default pub/sub channels' ACL for new users if ACL is not supplied. When this option is not defined, all_channels is assumed to keep backward compatibility. This option doesn't affect Redis configuration acl-pubsub-default.
-- `redis_io_threads` (String) Redis IO thread count
-- `redis_lfu_decay_time` (String) LFU maxmemory-policy counter decay time in minutes
-- `redis_lfu_log_factor` (String) Counter logarithm factor for volatile-lfu and allkeys-lfu maxmemory-policies
+- `redis_io_threads` (Number) Redis IO thread count
+- `redis_lfu_decay_time` (Number) LFU maxmemory-policy counter decay time in minutes
+- `redis_lfu_log_factor` (Number) Counter logarithm factor for volatile-lfu and allkeys-lfu maxmemory-policies
 - `redis_maxmemory_policy` (String) Redis maxmemory-policy
 - `redis_notify_keyspace_events` (String) Set notify-keyspace-events option
-- `redis_number_of_databases` (String) Set number of redis databases. Changing this will cause a restart of redis service.
+- `redis_number_of_databases` (Number) Set number of redis databases. Changing this will cause a restart of redis service.
 - `redis_persistence` (String) When persistence is 'rdb', Redis does RDB dumps each 10 minutes if any key is changed. Also RDB dumps are done according to backup schedule for backup purposes. When persistence is 'off', no RDB dumps and backups are done, so data can be lost at any moment if service is restarted for any reason, or if service is powered off. Also service can't be forked.
-- `redis_pubsub_client_output_buffer_limit` (String) Set output buffer limit for pub / sub clients in MB. The value is the hard limit, the soft limit is 1/4 of the hard limit. When setting the limit, be mindful of the available memory in the selected service plan.
-- `redis_ssl` (String) Require SSL to access Redis
-- `redis_timeout` (String) Redis idle connection timeout in seconds
+- `redis_pubsub_client_output_buffer_limit` (Number) Set output buffer limit for pub / sub clients in MB. The value is the hard limit, the soft limit is 1/4 of the hard limit. When setting the limit, be mindful of the available memory in the selected service plan.
+- `redis_ssl` (Boolean) Require SSL to access Redis
+- `redis_timeout` (Number) Redis idle connection timeout in seconds
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
-- `static_ips` (String) Use static public IP addresses
+- `static_ips` (Boolean) Use static public IP addresses
 
 <a id="nestedblock--redis_user_config--ip_filter_object"></a>
 ### Nested Schema for `redis_user_config.ip_filter_object`
@@ -119,8 +119,8 @@ Optional:
 - `ignore_dbs` (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)
 - `method` (String) The migration method to be used (currently supported only by Redis and MySQL service types)
 - `password` (String, Sensitive) Password for authentication with the server where to migrate data from
-- `port` (String) Port number of the server where to migrate data from
-- `ssl` (String) The server where to migrate data from is secured with SSL
+- `port` (Number) Port number of the server where to migrate data from
+- `ssl` (Boolean) The server where to migrate data from is secured with SSL
 - `username` (String) User name for authentication with the server where to migrate data from
 
 
@@ -129,8 +129,8 @@ Optional:
 
 Optional:
 
-- `prometheus` (String) Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
-- `redis` (String) Allow clients to connect to redis with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+- `prometheus` (Boolean) Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+- `redis` (Boolean) Allow clients to connect to redis with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
 
 
 <a id="nestedblock--redis_user_config--privatelink_access"></a>
@@ -138,8 +138,8 @@ Optional:
 
 Optional:
 
-- `prometheus` (String) Enable prometheus
-- `redis` (String) Enable redis
+- `prometheus` (Boolean) Enable prometheus
+- `redis` (Boolean) Enable redis
 
 
 <a id="nestedblock--redis_user_config--public_access"></a>
@@ -147,8 +147,8 @@ Optional:
 
 Optional:
 
-- `prometheus` (String) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network
-- `redis` (String) Allow clients to connect to redis from the public internet for service nodes that are in a project VPC or another type of private network
+- `prometheus` (Boolean) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network
+- `redis` (Boolean) Allow clients to connect to redis from the public internet for service nodes that are in a project VPC or another type of private network
 
 
 

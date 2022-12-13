@@ -89,7 +89,7 @@ Read-Only:
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--private_access))
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--privatelink_access))
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--public_access))
-- `static_ips` (String)
+- `static_ips` (Boolean)
 
 <a id="nestedobjatt--kafka_connect_user_config--ip_filter_object"></a>
 ### Nested Schema for `kafka_connect_user_config.ip_filter_object`
@@ -107,16 +107,16 @@ Read-Only:
 
 - `connector_client_config_override_policy` (String)
 - `consumer_auto_offset_reset` (String)
-- `consumer_fetch_max_bytes` (String)
+- `consumer_fetch_max_bytes` (Number)
 - `consumer_isolation_level` (String)
-- `consumer_max_partition_fetch_bytes` (String)
-- `consumer_max_poll_interval_ms` (String)
-- `consumer_max_poll_records` (String)
-- `offset_flush_interval_ms` (String)
-- `offset_flush_timeout_ms` (String)
+- `consumer_max_partition_fetch_bytes` (Number)
+- `consumer_max_poll_interval_ms` (Number)
+- `consumer_max_poll_records` (Number)
+- `offset_flush_interval_ms` (Number)
+- `offset_flush_timeout_ms` (Number)
 - `producer_compression_type` (String)
-- `producer_max_request_size` (String)
-- `session_timeout_ms` (String)
+- `producer_max_request_size` (Number)
+- `session_timeout_ms` (Number)
 
 
 <a id="nestedobjatt--kafka_connect_user_config--private_access"></a>
@@ -124,8 +124,8 @@ Read-Only:
 
 Read-Only:
 
-- `kafka_connect` (String)
-- `prometheus` (String)
+- `kafka_connect` (Boolean)
+- `prometheus` (Boolean)
 
 
 <a id="nestedobjatt--kafka_connect_user_config--privatelink_access"></a>
@@ -133,9 +133,9 @@ Read-Only:
 
 Read-Only:
 
-- `jolokia` (String)
-- `kafka_connect` (String)
-- `prometheus` (String)
+- `jolokia` (Boolean)
+- `kafka_connect` (Boolean)
+- `prometheus` (Boolean)
 
 
 <a id="nestedobjatt--kafka_connect_user_config--public_access"></a>
@@ -143,8 +143,8 @@ Read-Only:
 
 Read-Only:
 
-- `kafka_connect` (String)
-- `prometheus` (String)
+- `kafka_connect` (Boolean)
+- `prometheus` (Boolean)
 
 
 

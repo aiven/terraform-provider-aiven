@@ -78,32 +78,32 @@ resource "aiven_grafana" "gr1" {
 Optional:
 
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
-- `alerting_enabled` (String) Enable or disable Grafana alerting functionality
+- `alerting_enabled` (Boolean) Enable or disable Grafana alerting functionality
 - `alerting_error_or_timeout` (String) Default error or timeout setting for new alerting rules
-- `alerting_max_annotations_to_keep` (String) Max number of alert annotations that Grafana stores. 0 (default) keeps all alert annotations.
+- `alerting_max_annotations_to_keep` (Number) Max number of alert annotations that Grafana stores. 0 (default) keeps all alert annotations.
 - `alerting_nodata_or_nullvalues` (String) Default value for 'no data or null values' for new alerting rules
-- `allow_embedding` (String) Allow embedding Grafana dashboards with iframe/frame/object/embed tags. Disabled by default to limit impact of clickjacking
+- `allow_embedding` (Boolean) Allow embedding Grafana dashboards with iframe/frame/object/embed tags. Disabled by default to limit impact of clickjacking
 - `auth_azuread` (Block List, Max: 1) Azure AD OAuth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_azuread))
-- `auth_basic_enabled` (String) Enable or disable basic authentication form, used by Grafana built-in login
+- `auth_basic_enabled` (Boolean) Enable or disable basic authentication form, used by Grafana built-in login
 - `auth_generic_oauth` (Block List, Max: 1) Generic OAuth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_generic_oauth))
 - `auth_github` (Block List, Max: 1) Github Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_github))
 - `auth_gitlab` (Block List, Max: 1) GitLab Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_gitlab))
 - `auth_google` (Block List, Max: 1) Google Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_google))
 - `cookie_samesite` (String) Cookie SameSite attribute: 'strict' prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. 'lax' is the default value.
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name
-- `dashboard_previews_enabled` (String) This feature is new in Grafana 9 and is quite resource intensive. It may cause low-end plans to work more slowly while the dashboard previews are rendering.
+- `dashboard_previews_enabled` (Boolean) This feature is new in Grafana 9 and is quite resource intensive. It may cause low-end plans to work more slowly while the dashboard previews are rendering.
 - `dashboards_min_refresh_interval` (String) Signed sequence of decimal numbers, followed by a unit suffix (ms, s, m, h, d), e.g. 30s, 1h
-- `dashboards_versions_to_keep` (String) Dashboard versions to keep per dashboard
-- `dataproxy_send_user_header` (String) Send 'X-Grafana-User' header to data source
-- `dataproxy_timeout` (String) Timeout for data proxy requests in seconds
+- `dashboards_versions_to_keep` (Number) Dashboard versions to keep per dashboard
+- `dataproxy_send_user_header` (Boolean) Send 'X-Grafana-User' header to data source
+- `dataproxy_timeout` (Number) Timeout for data proxy requests in seconds
 - `date_formats` (Block List, Max: 1) Grafana date format specifications (see [below for nested schema](#nestedblock--grafana_user_config--date_formats))
-- `disable_gravatar` (String) Set to true to disable gravatar. Defaults to false (gravatar is enabled)
-- `editors_can_admin` (String) Editors can manage folders, teams and dashboards created by them
+- `disable_gravatar` (Boolean) Set to true to disable gravatar. Defaults to false (gravatar is enabled)
+- `editors_can_admin` (Boolean) Editors can manage folders, teams and dashboards created by them
 - `external_image_storage` (Block List, Max: 1) External image store settings (see [below for nested schema](#nestedblock--grafana_user_config--external_image_storage))
 - `google_analytics_ua_id` (String) Google Analytics ID
 - `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
 - `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--grafana_user_config--ip_filter_object))
-- `metrics_enabled` (String) Enable Grafana /metrics endpoint
+- `metrics_enabled` (Boolean) Enable Grafana /metrics endpoint
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--grafana_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--grafana_user_config--privatelink_access))
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
@@ -111,17 +111,17 @@ Optional:
 - `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
 - `smtp_server` (Block List, Max: 1) SMTP server settings (see [below for nested schema](#nestedblock--grafana_user_config--smtp_server))
-- `static_ips` (String) Use static public IP addresses
-- `user_auto_assign_org` (String) Auto-assign new users on signup to main organization. Defaults to false
+- `static_ips` (Boolean) Use static public IP addresses
+- `user_auto_assign_org` (Boolean) Auto-assign new users on signup to main organization. Defaults to false
 - `user_auto_assign_org_role` (String) Set role for new signups. Defaults to Viewer
-- `viewers_can_edit` (String) Users with view-only permission can edit but not save dashboards
+- `viewers_can_edit` (Boolean) Users with view-only permission can edit but not save dashboards
 
 <a id="nestedblock--grafana_user_config--auth_azuread"></a>
 ### Nested Schema for `grafana_user_config.auth_azuread`
 
 Optional:
 
-- `allow_sign_up` (String) Automatically sign-up users on successful sign-in
+- `allow_sign_up` (Boolean) Automatically sign-up users on successful sign-in
 - `allowed_domains` (List of String) Allowed domains
 - `allowed_groups` (List of String) Require users to belong to one of given groups
 - `auth_url` (String) Authorization URL
@@ -135,7 +135,7 @@ Optional:
 
 Optional:
 
-- `allow_sign_up` (String) Automatically sign-up users on successful sign-in
+- `allow_sign_up` (Boolean) Automatically sign-up users on successful sign-in
 - `allowed_domains` (List of String) Allowed domains
 - `allowed_organizations` (List of String) Require user to be member of one of the listed organizations
 - `api_url` (String) API URL
@@ -152,11 +152,11 @@ Optional:
 
 Optional:
 
-- `allow_sign_up` (String) Automatically sign-up users on successful sign-in
+- `allow_sign_up` (Boolean) Automatically sign-up users on successful sign-in
 - `allowed_organizations` (List of String) Require users to belong to one of given organizations
 - `client_id` (String) Client ID from provider
 - `client_secret` (String) Client secret from provider
-- `team_ids` (List of String) Require users to belong to one of given team IDs
+- `team_ids` (List of Number) Require users to belong to one of given team IDs
 
 
 <a id="nestedblock--grafana_user_config--auth_gitlab"></a>
@@ -164,7 +164,7 @@ Optional:
 
 Optional:
 
-- `allow_sign_up` (String) Automatically sign-up users on successful sign-in
+- `allow_sign_up` (Boolean) Automatically sign-up users on successful sign-in
 - `allowed_groups` (List of String) Require users to belong to one of given groups
 - `api_url` (String) API URL. This only needs to be set when using self hosted GitLab
 - `auth_url` (String) Authorization URL. This only needs to be set when using self hosted GitLab
@@ -178,7 +178,7 @@ Optional:
 
 Optional:
 
-- `allow_sign_up` (String) Automatically sign-up users on successful sign-in
+- `allow_sign_up` (Boolean) Automatically sign-up users on successful sign-in
 - `allowed_domains` (List of String) Domains allowed to sign-in to this Grafana
 - `client_id` (String) Client ID from provider
 - `client_secret` (String) Client secret from provider
@@ -224,7 +224,7 @@ Optional:
 
 Optional:
 
-- `grafana` (String) Allow clients to connect to grafana with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+- `grafana` (Boolean) Allow clients to connect to grafana with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
 
 
 <a id="nestedblock--grafana_user_config--privatelink_access"></a>
@@ -232,7 +232,7 @@ Optional:
 
 Optional:
 
-- `grafana` (String) Enable grafana
+- `grafana` (Boolean) Enable grafana
 
 
 <a id="nestedblock--grafana_user_config--public_access"></a>
@@ -240,7 +240,7 @@ Optional:
 
 Optional:
 
-- `grafana` (String) Allow clients to connect to grafana from the public internet for service nodes that are in a project VPC or another type of private network
+- `grafana` (Boolean) Allow clients to connect to grafana from the public internet for service nodes that are in a project VPC or another type of private network
 
 
 <a id="nestedblock--grafana_user_config--smtp_server"></a>
@@ -252,8 +252,8 @@ Optional:
 - `from_name` (String) Name used in outgoing emails, defaults to Grafana
 - `host` (String) Server hostname or IP
 - `password` (String, Sensitive) Password for SMTP authentication
-- `port` (String) SMTP server port
-- `skip_verify` (String) Skip verifying server certificate. Defaults to false
+- `port` (Number) SMTP server port
+- `skip_verify` (Boolean) Skip verifying server certificate. Defaults to false
 - `starttls_policy` (String) Either OpportunisticStartTLS, MandatoryStartTLS or NoStartTLS. Default is OpportunisticStartTLS.
 - `username` (String) Username for SMTP authentication
 

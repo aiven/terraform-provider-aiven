@@ -78,7 +78,7 @@ Optional:
 - `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--m3aggregator_user_config--ip_filter_object))
 - `m3_version` (String) M3 major version (deprecated, use m3aggregator_version)
 - `m3aggregator_version` (String) M3 major version (the minimum compatible version)
-- `static_ips` (String) Use static public IP addresses
+- `static_ips` (Boolean) Use static public IP addresses
 
 <a id="nestedblock--m3aggregator_user_config--ip_filter_object"></a>
 ### Nested Schema for `m3aggregator_user_config.ip_filter_object`

@@ -3,7 +3,6 @@ package apiconvert
 import (
 	"fmt"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
@@ -165,9 +164,6 @@ func itemToAPI(
 	i map[string]interface{},
 	d resourceDatable,
 ) (interface{}, bool, error) {
-	// TODO: Remove this variable when we use actual types in the schema.
-	var err error
-
 	res := v
 
 	fks := strings.Join(fk, ".")
@@ -194,19 +190,15 @@ func itemToAPI(
 	// Assert the type of the value to match.
 	switch t {
 	case "boolean":
-		// TODO: Uncomment this, and the same below, when we use actual types in the schema.
-		// if _, ok := v.(bool); !ok {
-		if res, err = strconv.ParseBool(v.(string)); err != nil {
+		if _, ok := v.(bool); !ok {
 			return nil, false, fmt.Errorf("%s: not a boolean", fks)
 		}
 	case "integer":
-		// if _, ok := v.(int); !ok {
-		if res, err = strconv.Atoi(v.(string)); err != nil {
+		if _, ok := v.(int); !ok {
 			return nil, false, fmt.Errorf("%s: not an integer", fks)
 		}
 	case "number":
-		// if _, ok := v.(float64); !ok {
-		if res, err = strconv.ParseFloat(v.(string), 64); err != nil {
+		if _, ok := v.(float64); !ok {
 			return nil, false, fmt.Errorf("%s: not a number", fks)
 		}
 	case "string":
