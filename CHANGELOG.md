@@ -10,6 +10,7 @@ nav_order: 1
 
 - Mark `ip_filter` and `namespaces` deprecated
 - Make schema fields use strict types instead of string
+- Add support for strict types in diff functions
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 - Add ClickHouse examples:

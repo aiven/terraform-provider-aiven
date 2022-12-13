@@ -165,11 +165,6 @@ func itemToAPI(
 	// We omit the value if has no changes in the Terraform user configuration.
 	o := !d.HasChange(fks)
 
-	// TODO: Remove this statement and the branch below it when we use actual types in the schema.
-	if va, ok := v.(string); ok && va == "" {
-		return res, o, nil
-	}
-
 	// Assert the type of the value to match.
 	switch t {
 	case "boolean":

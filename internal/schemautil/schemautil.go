@@ -134,9 +134,7 @@ func EmptyObjectDiffSuppressFunc(k, old, new string, d *schema.ResourceData) boo
 
 	// Ignore the field when it is not set to any value, but had a non-empty parameter before. This also accounts
 	// for the case when the field is not set to any value, but has a default value returned by the API.
-	// TODO: Uncomment this when we use actual types for the schema.
-	// if !d.HasChange(k) && (new == "" && old != "" || new == "0" && old != "0" || new == "false" && old == "true") {
-	if new == "" && old != "" {
+	if !d.HasChange(k) && (new == "" && old != "" || new == "0" && old != "0" || new == "false" && old == "true") {
 		return true
 	}
 
