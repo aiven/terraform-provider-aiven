@@ -44,16 +44,13 @@ func unsettedAPIValue(t string) interface{} {
 	var res interface{}
 
 	switch t {
-	// TODO: Uncomment when we use the actual types in the schema.
-	//case "boolean":
-	//	res = false
-	//case "integer":
-	//	res = 0
-	//case "number":
-	//	res = float64(0)
-	//case "string":
-	//	res = ""
-	default:
+	case "boolean":
+		res = false
+	case "integer":
+		res = 0
+	case "number":
+		res = float64(0)
+	case "string":
 		res = ""
 	case "array":
 		res = []interface{}{}
