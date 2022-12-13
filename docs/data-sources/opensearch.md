@@ -85,13 +85,13 @@ Read-Only:
 
 - `additional_backup_regions` (List of String)
 - `custom_domain` (String)
-- `disable_replication_factor_adjustment` (String)
+- `disable_replication_factor_adjustment` (Boolean)
 - `index_patterns` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--index_patterns))
 - `index_template` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--index_template))
 - `ip_filter` (List of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--ip_filter_object))
-- `keep_index_refresh_interval` (String)
-- `max_index_count` (String)
+- `keep_index_refresh_interval` (Boolean)
+- `max_index_count` (Number)
 - `opensearch` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch))
 - `opensearch_dashboards` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch_dashboards))
 - `opensearch_version` (String)
@@ -101,14 +101,14 @@ Read-Only:
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--public_access))
 - `recovery_basebackup_name` (String)
 - `service_to_fork_from` (String)
-- `static_ips` (String)
+- `static_ips` (Boolean)
 
 <a id="nestedobjatt--opensearch_user_config--index_patterns"></a>
 ### Nested Schema for `opensearch_user_config.index_patterns`
 
 Read-Only:
 
-- `max_index_count` (String)
+- `max_index_count` (Number)
 - `pattern` (String)
 - `sorting_algorithm` (String)
 
@@ -118,9 +118,9 @@ Read-Only:
 
 Read-Only:
 
-- `mapping_nested_objects_limit` (String)
-- `number_of_replicas` (String)
-- `number_of_shards` (String)
+- `mapping_nested_objects_limit` (Number)
+- `number_of_replicas` (Number)
+- `number_of_shards` (Number)
 
 
 <a id="nestedobjatt--opensearch_user_config--ip_filter_object"></a>
@@ -137,37 +137,37 @@ Read-Only:
 
 Read-Only:
 
-- `action_auto_create_index_enabled` (String)
-- `action_destructive_requires_name` (String)
-- `cluster_max_shards_per_node` (String)
-- `cluster_routing_allocation_node_concurrent_recoveries` (String)
+- `action_auto_create_index_enabled` (Boolean)
+- `action_destructive_requires_name` (Boolean)
+- `cluster_max_shards_per_node` (Number)
+- `cluster_routing_allocation_node_concurrent_recoveries` (Number)
 - `email_sender_name` (String)
 - `email_sender_password` (String)
 - `email_sender_username` (String)
-- `http_max_content_length` (String)
-- `http_max_header_size` (String)
-- `http_max_initial_line_length` (String)
-- `indices_fielddata_cache_size` (String)
-- `indices_memory_index_buffer_size` (String)
-- `indices_queries_cache_size` (String)
-- `indices_query_bool_max_clause_count` (String)
-- `indices_recovery_max_bytes_per_sec` (String)
-- `indices_recovery_max_concurrent_file_chunks` (String)
-- `override_main_response_version` (String)
+- `http_max_content_length` (Number)
+- `http_max_header_size` (Number)
+- `http_max_initial_line_length` (Number)
+- `indices_fielddata_cache_size` (Number)
+- `indices_memory_index_buffer_size` (Number)
+- `indices_queries_cache_size` (Number)
+- `indices_query_bool_max_clause_count` (Number)
+- `indices_recovery_max_bytes_per_sec` (Number)
+- `indices_recovery_max_concurrent_file_chunks` (Number)
+- `override_main_response_version` (Boolean)
 - `reindex_remote_whitelist` (List of String)
 - `script_max_compilations_rate` (String)
-- `search_max_buckets` (String)
-- `thread_pool_analyze_queue_size` (String)
-- `thread_pool_analyze_size` (String)
-- `thread_pool_force_merge_size` (String)
-- `thread_pool_get_queue_size` (String)
-- `thread_pool_get_size` (String)
-- `thread_pool_search_queue_size` (String)
-- `thread_pool_search_size` (String)
-- `thread_pool_search_throttled_queue_size` (String)
-- `thread_pool_search_throttled_size` (String)
-- `thread_pool_write_queue_size` (String)
-- `thread_pool_write_size` (String)
+- `search_max_buckets` (Number)
+- `thread_pool_analyze_queue_size` (Number)
+- `thread_pool_analyze_size` (Number)
+- `thread_pool_force_merge_size` (Number)
+- `thread_pool_get_queue_size` (Number)
+- `thread_pool_get_size` (Number)
+- `thread_pool_search_queue_size` (Number)
+- `thread_pool_search_size` (Number)
+- `thread_pool_search_throttled_queue_size` (Number)
+- `thread_pool_search_throttled_size` (Number)
+- `thread_pool_write_queue_size` (Number)
+- `thread_pool_write_size` (Number)
 
 
 <a id="nestedobjatt--opensearch_user_config--opensearch_dashboards"></a>
@@ -175,9 +175,9 @@ Read-Only:
 
 Read-Only:
 
-- `enabled` (String)
-- `max_old_space_size` (String)
-- `opensearch_request_timeout` (String)
+- `enabled` (Boolean)
+- `max_old_space_size` (Number)
+- `opensearch_request_timeout` (Number)
 
 
 <a id="nestedobjatt--opensearch_user_config--private_access"></a>
@@ -185,9 +185,9 @@ Read-Only:
 
 Read-Only:
 
-- `opensearch` (String)
-- `opensearch_dashboards` (String)
-- `prometheus` (String)
+- `opensearch` (Boolean)
+- `opensearch_dashboards` (Boolean)
+- `prometheus` (Boolean)
 
 
 <a id="nestedobjatt--opensearch_user_config--privatelink_access"></a>
@@ -195,9 +195,9 @@ Read-Only:
 
 Read-Only:
 
-- `opensearch` (String)
-- `opensearch_dashboards` (String)
-- `prometheus` (String)
+- `opensearch` (Boolean)
+- `opensearch_dashboards` (Boolean)
+- `prometheus` (Boolean)
 
 
 <a id="nestedobjatt--opensearch_user_config--public_access"></a>
@@ -205,9 +205,9 @@ Read-Only:
 
 Read-Only:
 
-- `opensearch` (String)
-- `opensearch_dashboards` (String)
-- `prometheus` (String)
+- `opensearch` (Boolean)
+- `opensearch_dashboards` (Boolean)
+- `prometheus` (Boolean)
 
 
 
