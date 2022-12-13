@@ -198,3 +198,11 @@ func ValidateEnum[T string | int](enum ...T) schema.SchemaValidateDiagFunc {
 		return nil
 	}
 }
+
+// PointerValueOrDefault returns pointer's value or default
+func PointerValueOrDefault[T comparable](v *T, d T) T {
+	if v == nil {
+		return d
+	}
+	return *v
+}
