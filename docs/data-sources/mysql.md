@@ -85,9 +85,9 @@ Read-Only:
 - `additional_backup_regions` (List of String)
 - `admin_password` (String)
 - `admin_username` (String)
-- `backup_hour` (String)
-- `backup_minute` (String)
-- `binlog_retention_period` (String)
+- `backup_hour` (Number)
+- `backup_minute` (Number)
+- `binlog_retention_period` (Number)
 - `ip_filter` (List of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--ip_filter_object))
 - `migration` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--migration))
@@ -99,7 +99,7 @@ Read-Only:
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--public_access))
 - `recovery_target_time` (String)
 - `service_to_fork_from` (String)
-- `static_ips` (String)
+- `static_ips` (Boolean)
 
 <a id="nestedobjatt--mysql_user_config--ip_filter_object"></a>
 ### Nested Schema for `mysql_user_config.ip_filter_object`
@@ -120,8 +120,8 @@ Read-Only:
 - `ignore_dbs` (String)
 - `method` (String)
 - `password` (String)
-- `port` (String)
-- `ssl` (String)
+- `port` (Number)
+- `ssl` (Boolean)
 - `username` (String)
 
 
@@ -130,36 +130,36 @@ Read-Only:
 
 Read-Only:
 
-- `connect_timeout` (String)
+- `connect_timeout` (Number)
 - `default_time_zone` (String)
-- `group_concat_max_len` (String)
-- `information_schema_stats_expiry` (String)
-- `innodb_change_buffer_max_size` (String)
-- `innodb_flush_neighbors` (String)
-- `innodb_ft_min_token_size` (String)
+- `group_concat_max_len` (Number)
+- `information_schema_stats_expiry` (Number)
+- `innodb_change_buffer_max_size` (Number)
+- `innodb_flush_neighbors` (Number)
+- `innodb_ft_min_token_size` (Number)
 - `innodb_ft_server_stopword_table` (String)
-- `innodb_lock_wait_timeout` (String)
-- `innodb_log_buffer_size` (String)
-- `innodb_online_alter_log_max_size` (String)
-- `innodb_print_all_deadlocks` (String)
-- `innodb_read_io_threads` (String)
-- `innodb_rollback_on_timeout` (String)
-- `innodb_thread_concurrency` (String)
-- `innodb_write_io_threads` (String)
-- `interactive_timeout` (String)
+- `innodb_lock_wait_timeout` (Number)
+- `innodb_log_buffer_size` (Number)
+- `innodb_online_alter_log_max_size` (Number)
+- `innodb_print_all_deadlocks` (Boolean)
+- `innodb_read_io_threads` (Number)
+- `innodb_rollback_on_timeout` (Boolean)
+- `innodb_thread_concurrency` (Number)
+- `innodb_write_io_threads` (Number)
+- `interactive_timeout` (Number)
 - `internal_tmp_mem_storage_engine` (String)
-- `long_query_time` (String)
-- `max_allowed_packet` (String)
-- `max_heap_table_size` (String)
-- `net_buffer_length` (String)
-- `net_read_timeout` (String)
-- `net_write_timeout` (String)
-- `slow_query_log` (String)
-- `sort_buffer_size` (String)
+- `long_query_time` (Number)
+- `max_allowed_packet` (Number)
+- `max_heap_table_size` (Number)
+- `net_buffer_length` (Number)
+- `net_read_timeout` (Number)
+- `net_write_timeout` (Number)
+- `slow_query_log` (Boolean)
+- `sort_buffer_size` (Number)
 - `sql_mode` (String)
-- `sql_require_primary_key` (String)
-- `tmp_table_size` (String)
-- `wait_timeout` (String)
+- `sql_require_primary_key` (Boolean)
+- `tmp_table_size` (Number)
+- `wait_timeout` (Number)
 
 
 <a id="nestedobjatt--mysql_user_config--private_access"></a>
@@ -167,9 +167,9 @@ Read-Only:
 
 Read-Only:
 
-- `mysql` (String)
-- `mysqlx` (String)
-- `prometheus` (String)
+- `mysql` (Boolean)
+- `mysqlx` (Boolean)
+- `prometheus` (Boolean)
 
 
 <a id="nestedobjatt--mysql_user_config--privatelink_access"></a>
@@ -177,9 +177,9 @@ Read-Only:
 
 Read-Only:
 
-- `mysql` (String)
-- `mysqlx` (String)
-- `prometheus` (String)
+- `mysql` (Boolean)
+- `mysqlx` (Boolean)
+- `prometheus` (Boolean)
 
 
 <a id="nestedobjatt--mysql_user_config--public_access"></a>
@@ -187,9 +187,9 @@ Read-Only:
 
 Read-Only:
 
-- `mysql` (String)
-- `mysqlx` (String)
-- `prometheus` (String)
+- `mysql` (Boolean)
+- `mysqlx` (Boolean)
+- `prometheus` (Boolean)
 
 
 
