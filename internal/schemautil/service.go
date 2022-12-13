@@ -636,12 +636,17 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		}
 	}
 
-	userConfig, err := apiconvert.FromAPI(userconfig.ServiceTypes, serviceType, s.UserConfig)
+	newUserConfig, err := apiconvert.FromAPI(userconfig.ServiceTypes, serviceType, s.UserConfig)
 	if err != nil {
 		return err
 	}
 
-	if err := d.Set(serviceType+"_user_config", NormalizeIpFilter(d.Get(serviceType+"_user_config"), userConfig)); err != nil {
+	// Mutates user config inplace
+	oldUserConfig := d.Get(serviceType + "_user_config")
+	copySensitiveFields(oldUserConfig, newUserConfig)
+	NormalizeIpFilter(oldUserConfig, newUserConfig)
+
+	if err := d.Set(serviceType+"_user_config", newUserConfig); err != nil {
 		return fmt.Errorf("cannot set `%s_user_config` : %s; Please make sure that all Aiven services have unique s names", serviceType, err)
 	}
 

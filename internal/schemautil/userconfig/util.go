@@ -174,3 +174,11 @@ func DecodeKey(k string) string {
 func IsKeyTyped(k string) bool {
 	return regexp.MustCompile(`^.*_(boolean|integer|number|string|array|object)$`).MatchString(k)
 }
+
+func UnmarshalUserConfig(src interface{}) map[string]interface{} {
+	configList, ok := src.([]interface{})
+	if !ok || len(configList) == 0 {
+		return nil
+	}
+	return configList[0].(map[string]interface{})
+}
