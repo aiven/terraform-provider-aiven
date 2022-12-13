@@ -86,7 +86,7 @@ Read-Only:
 - `ip_filter` (List of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_mirrormaker_user_config--ip_filter_object))
 - `kafka_mirrormaker` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_mirrormaker_user_config--kafka_mirrormaker))
-- `static_ips` (String)
+- `static_ips` (Boolean)
 
 <a id="nestedobjatt--kafka_mirrormaker_user_config--ip_filter_object"></a>
 ### Nested Schema for `kafka_mirrormaker_user_config.ip_filter_object`
@@ -102,16 +102,16 @@ Read-Only:
 
 Read-Only:
 
-- `emit_checkpoints_enabled` (String)
-- `emit_checkpoints_interval_seconds` (String)
-- `refresh_groups_enabled` (String)
-- `refresh_groups_interval_seconds` (String)
-- `refresh_topics_enabled` (String)
-- `refresh_topics_interval_seconds` (String)
-- `sync_group_offsets_enabled` (String)
-- `sync_group_offsets_interval_seconds` (String)
-- `sync_topic_configs_enabled` (String)
-- `tasks_max_per_cpu` (String)
+- `emit_checkpoints_enabled` (Boolean)
+- `emit_checkpoints_interval_seconds` (Number)
+- `refresh_groups_enabled` (Boolean)
+- `refresh_groups_interval_seconds` (Number)
+- `refresh_topics_enabled` (Boolean)
+- `refresh_topics_interval_seconds` (Number)
+- `sync_group_offsets_enabled` (Boolean)
+- `sync_group_offsets_interval_seconds` (Number)
+- `sync_topic_configs_enabled` (Boolean)
+- `tasks_max_per_cpu` (Number)
 
 
 

@@ -113,14 +113,14 @@ Optional:
 
 Optional:
 
-- `datadog_dbm_enabled` (String) Enable Datadog Database Monitoring
+- `datadog_dbm_enabled` (Boolean) Enable Datadog Database Monitoring
 - `datadog_tags` (Block List, Max: 32) Custom tags provided by user (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))
 - `exclude_consumer_groups` (List of String) List of custom metrics
 - `exclude_topics` (List of String) List of topics to exclude
 - `include_consumer_groups` (List of String) List of custom metrics
 - `include_topics` (List of String) List of topics to include
 - `kafka_custom_metrics` (List of String) List of custom metrics
-- `max_jmx_metrics` (String) Maximum number of JMX metrics to send
+- `max_jmx_metrics` (Number) Maximum number of JMX metrics to send
 
 <a id="nestedblock--datadog_user_config--datadog_tags"></a>
 ### Nested Schema for `datadog_user_config.datadog_tags`
@@ -199,11 +199,11 @@ Optional:
 
 Optional:
 
-- `consumer_fetch_min_bytes` (String) The minimum amount of data the server should return for a fetch request
-- `producer_batch_size` (String) The batch size in bytes producer will attempt to collect before publishing to broker.
-- `producer_buffer_memory` (String) The amount of bytes producer can use for buffering data before publishing to broker.
-- `producer_linger_ms` (String) The linger time (ms) for waiting new data to arrive for publishing.
-- `producer_max_request_size` (String) The maximum request size in bytes.
+- `consumer_fetch_min_bytes` (Number) The minimum amount of data the server should return for a fetch request
+- `producer_batch_size` (Number) The batch size in bytes producer will attempt to collect before publishing to broker.
+- `producer_buffer_memory` (Number) The amount of bytes producer can use for buffering data before publishing to broker.
+- `producer_linger_ms` (Number) The linger time (ms) for waiting new data to arrive for publishing.
+- `producer_max_request_size` (Number) The maximum request size in bytes.
 
 
 
@@ -212,7 +212,7 @@ Optional:
 
 Optional:
 
-- `elasticsearch_index_days_max` (String) Elasticsearch index retention limit
+- `elasticsearch_index_days_max` (Number) Elasticsearch index retention limit
 - `elasticsearch_index_prefix` (String) Elasticsearch index prefix
 
 
@@ -222,7 +222,7 @@ Optional:
 Optional:
 
 - `database` (String) Name of the database where to store metric datapoints. Only affects PostgreSQL destinations. Defaults to 'metrics'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
-- `retention_days` (String) Number of days to keep old metrics. Only affects PostgreSQL destinations. Set to 0 for no automatic cleanup. Defaults to 30 days.
+- `retention_days` (Number) Number of days to keep old metrics. Only affects PostgreSQL destinations. Set to 0 for no automatic cleanup. Defaults to 30 days.
 - `ro_username` (String) Name of a user that can be used to read metrics. This will be used for Grafana integration (if enabled) to prevent Grafana users from making undesired changes. Only affects PostgreSQL destinations. Defaults to 'metrics_reader'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
 - `source_mysql` (Block List, Max: 1) Configuration options for metrics where source service is MySQL (see [below for nested schema](#nestedblock--metrics_user_config--source_mysql))
 - `username` (String) Name of the user used to write metrics. Only affects PostgreSQL destinations. Defaults to 'metrics_writer'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
@@ -239,20 +239,20 @@ Optional:
 
 Optional:
 
-- `gather_event_waits` (String) Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS
-- `gather_file_events_stats` (String) gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME
-- `gather_index_io_waits` (String) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE
-- `gather_info_schema_auto_inc` (String) Gather auto_increment columns and max values from information schema
-- `gather_innodb_metrics` (String) Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS
-- `gather_perf_events_statements` (String) Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST
-- `gather_process_list` (String) Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST
-- `gather_slave_status` (String) Gather metrics from SHOW SLAVE STATUS command output
-- `gather_table_io_waits` (String) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE
-- `gather_table_lock_waits` (String) Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS
-- `gather_table_schema` (String) Gather metrics from INFORMATION_SCHEMA.TABLES
-- `perf_events_statements_digest_text_limit` (String) Truncates digest text from perf_events_statements into this many characters
-- `perf_events_statements_limit` (String) Limits metrics from perf_events_statements
-- `perf_events_statements_time_limit` (String) Only include perf_events_statements whose last seen is less than this many seconds
+- `gather_event_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS
+- `gather_file_events_stats` (Boolean) gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME
+- `gather_index_io_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE
+- `gather_info_schema_auto_inc` (Boolean) Gather auto_increment columns and max values from information schema
+- `gather_innodb_metrics` (Boolean) Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS
+- `gather_perf_events_statements` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST
+- `gather_process_list` (Boolean) Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST
+- `gather_slave_status` (Boolean) Gather metrics from SHOW SLAVE STATUS command output
+- `gather_table_io_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE
+- `gather_table_lock_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS
+- `gather_table_schema` (Boolean) Gather metrics from INFORMATION_SCHEMA.TABLES
+- `perf_events_statements_digest_text_limit` (Number) Truncates digest text from perf_events_statements into this many characters
+- `perf_events_statements_limit` (Number) Limits metrics from perf_events_statements
+- `perf_events_statements_time_limit` (Number) Only include perf_events_statements whose last seen is less than this many seconds
 
 
 
