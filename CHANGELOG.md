@@ -6,6 +6,11 @@ nav_order: 1
 
 # Changelog
 
+## [4.0.0] - YYYY-MM-DD
+
+- Mark `ip_filter` and `namespaces` deprecated
+- Make schema fields use strict types instead of string
+
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 ## [3.11.0] - 2023-01-09
