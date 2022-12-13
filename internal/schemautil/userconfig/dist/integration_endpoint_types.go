@@ -37,22 +37,22 @@ func IntegrationEndpointTypeDatadog() *schema.Schema {
 		"disable_consumer_stats": {
 			Description: "Disable consumer group metrics",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"kafka_consumer_check_instances": {
 			Description: "Number of separate instances to fetch kafka consumer statistics with",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"kafka_consumer_stats_timeout": {
 			Description: "Number of seconds that datadog will wait to get consumer statistics from brokers",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"max_partition_contexts": {
 			Description: "Maximum number of partition contexts to send",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"site": {
 			Description: "Datadog intake site. Defaults to datadoghq.com",
@@ -152,7 +152,7 @@ func IntegrationEndpointTypeExternalElasticsearchLogs() *schema.Schema {
 		"index_days_max": {
 			Description: "Maximum number of days of logs to keep",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"index_prefix": {
 			Description: "Elasticsearch index prefix",
@@ -162,7 +162,7 @@ func IntegrationEndpointTypeExternalElasticsearchLogs() *schema.Schema {
 		"timeout": {
 			Description: "Elasticsearch request timeout limit",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeFloat,
 		},
 		"url": {
 			Description: "Elasticsearch connection URL",
@@ -283,7 +283,7 @@ func IntegrationEndpointTypeExternalOpensearchLogs() *schema.Schema {
 		"index_days_max": {
 			Description: "Maximum number of days of logs to keep",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"index_prefix": {
 			Description: "OpenSearch index prefix",
@@ -293,7 +293,7 @@ func IntegrationEndpointTypeExternalOpensearchLogs() *schema.Schema {
 		"timeout": {
 			Description: "OpenSearch request timeout limit",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeFloat,
 		},
 		"url": {
 			Description: "OpenSearch connection URL",
@@ -329,7 +329,7 @@ func IntegrationEndpointTypeExternalPostgresql() *schema.Schema {
 		"port": {
 			Description: "Port number of the server",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"ssl_mode": {
 			Description: "SSL Mode",
@@ -477,7 +477,7 @@ func IntegrationEndpointTypeRsyslog() *schema.Schema {
 		"port": {
 			Description: "rsyslog server port",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"sd": {
 			Description: "Structured data block for log message",
@@ -492,7 +492,7 @@ func IntegrationEndpointTypeRsyslog() *schema.Schema {
 		"tls": {
 			Description: "Require TLS",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 	}
 
