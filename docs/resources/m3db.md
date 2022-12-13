@@ -84,7 +84,7 @@ Optional:
 - `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--m3db_user_config--ip_filter_object))
 - `limits` (Block List, Max: 1) M3 limits (see [below for nested schema](#nestedblock--m3db_user_config--limits))
 - `m3_version` (String) M3 major version (deprecated, use m3db_version)
-- `m3coordinator_enable_graphite_carbon_ingest` (String) Enables access to Graphite Carbon plaintext metrics ingestion. It can be enabled only for services inside VPCs. The metrics are written to aggregated namespaces only.
+- `m3coordinator_enable_graphite_carbon_ingest` (Boolean) Enables access to Graphite Carbon plaintext metrics ingestion. It can be enabled only for services inside VPCs. The metrics are written to aggregated namespaces only.
 - `m3db_version` (String) M3 major version (the minimum compatible version)
 - `namespaces` (Block List, Max: 2147483647, Deprecated) List of M3 namespaces (see [below for nested schema](#nestedblock--m3db_user_config--namespaces))
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--m3db_user_config--private_access))
@@ -92,7 +92,7 @@ Optional:
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--m3db_user_config--public_access))
 - `rules` (Block List, Max: 1) M3 rules (see [below for nested schema](#nestedblock--m3db_user_config--rules))
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
-- `static_ips` (String) Use static public IP addresses
+- `static_ips` (Boolean) Use static public IP addresses
 
 <a id="nestedblock--m3db_user_config--ip_filter_object"></a>
 ### Nested Schema for `m3db_user_config.ip_filter_object`
@@ -108,12 +108,12 @@ Optional:
 
 Optional:
 
-- `max_recently_queried_series_blocks` (String) The maximum number of blocks that can be read in a given lookback period.
-- `max_recently_queried_series_disk_bytes_read` (String) The maximum number of disk bytes that can be read in a given lookback period.
+- `max_recently_queried_series_blocks` (Number) The maximum number of blocks that can be read in a given lookback period.
+- `max_recently_queried_series_disk_bytes_read` (Number) The maximum number of disk bytes that can be read in a given lookback period.
 - `max_recently_queried_series_lookback` (String) The lookback period for 'max_recently_queried_series_blocks' and 'max_recently_queried_series_disk_bytes_read'.
-- `query_docs` (String) The maximum number of docs fetched in single query.
-- `query_require_exhaustive` (String) When query limits are exceeded, whether to return error or return partial results.
-- `query_series` (String) The maximum number of series fetched in single query.
+- `query_docs` (Number) The maximum number of docs fetched in single query.
+- `query_require_exhaustive` (Boolean) When query limits are exceeded, whether to return error or return partial results.
+- `query_series` (Number) The maximum number of series fetched in single query.
 
 
 <a id="nestedblock--m3db_user_config--namespaces"></a>
@@ -132,8 +132,8 @@ Optional:
 Optional:
 
 - `retention_options` (Block List, Max: 1) Retention options (see [below for nested schema](#nestedblock--m3db_user_config--namespaces--options--retention_options))
-- `snapshot_enabled` (String) Controls whether M3DB will create snapshot files for this namespace
-- `writes_to_commitlog` (String) Controls whether M3DB will include writes to this namespace in the commitlog
+- `snapshot_enabled` (Boolean) Controls whether M3DB will create snapshot files for this namespace
+- `writes_to_commitlog` (Boolean) Controls whether M3DB will include writes to this namespace in the commitlog
 
 <a id="nestedblock--m3db_user_config--namespaces--options--retention_options"></a>
 ### Nested Schema for `m3db_user_config.namespaces.options.retention_options`
@@ -154,7 +154,7 @@ Optional:
 
 Optional:
 
-- `m3coordinator` (String) Allow clients to connect to m3coordinator with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+- `m3coordinator` (Boolean) Allow clients to connect to m3coordinator with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
 
 
 <a id="nestedblock--m3db_user_config--public_access"></a>
@@ -162,7 +162,7 @@ Optional:
 
 Optional:
 
-- `m3coordinator` (String) Allow clients to connect to m3coordinator from the public internet for service nodes that are in a project VPC or another type of private network
+- `m3coordinator` (Boolean) Allow clients to connect to m3coordinator from the public internet for service nodes that are in a project VPC or another type of private network
 
 
 <a id="nestedblock--m3db_user_config--rules"></a>
@@ -178,7 +178,7 @@ Optional:
 Optional:
 
 - `aggregations` (List of String) List of aggregations to be applied
-- `drop` (String) Only store the derived metric (as specified in the roll-up rules), if any
+- `drop` (Boolean) Only store the derived metric (as specified in the roll-up rules), if any
 - `filter` (String) Matching metric names with wildcards (using __name__:wildcard) or matching tags and their (optionally wildcarded) values. For value, ! can be used at start of value for negation, and multiple filters can be supplied using space as separator.
 - `name` (String) The (optional) name of the rule
 - `namespaces` (List of String, Deprecated) This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by glob (=wildcards)

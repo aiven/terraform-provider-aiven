@@ -23,12 +23,12 @@ func ServiceTypeCassandra() *schema.Schema {
 				"batch_size_fail_threshold_in_kb": {
 					Description: "Fail any multiple-partition batch exceeding this value. 50kb (10x warn threshold) by default.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"batch_size_warn_threshold_in_kb": {
 					Description: "Log a warning message on any multiple-partition batch size exceeding this value.5kb per batch by default.Caution should be taken on increasing the size of this thresholdas it can lead to node instability.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"datacenter": {
 					Description: "Name of the datacenter to which nodes of this service belong. Can be set only when creating the service.",
@@ -40,12 +40,12 @@ func ServiceTypeCassandra() *schema.Schema {
 				"batch_size_fail_threshold_in_kb": {
 					Description: "Fail any multiple-partition batch exceeding this value. 50kb (10x warn threshold) by default.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"batch_size_warn_threshold_in_kb": {
 					Description: "Log a warning message on any multiple-partition batch size exceeding this value.5kb per batch by default.Caution should be taken on increasing the size of this thresholdas it can lead to node instability.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"datacenter": {
 					Description: "Name of the datacenter to which nodes of this service belong. Can be set only when creating the service.",
@@ -95,19 +95,19 @@ func ServiceTypeCassandra() *schema.Schema {
 		"migrate_sstableloader": {
 			Description: "Sets the service into migration mode enabling the sstableloader utility to be used to upload Cassandra data files. Available only on service create.",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"private_access": {
 			Description: "Allow access to selected service ports from private networks",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"prometheus": {
 				Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"prometheus": {
 				Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}},
 			MaxItems: 1,
 			Optional: true,
@@ -124,12 +124,12 @@ func ServiceTypeCassandra() *schema.Schema {
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"prometheus": {
 				Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"prometheus": {
 				Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}},
 			MaxItems: 1,
 			Optional: true,
@@ -149,7 +149,7 @@ func ServiceTypeCassandra() *schema.Schema {
 		"static_ips": {
 			Description: "Use static public IP addresses",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 	}
 
@@ -245,7 +245,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 		"disable_replication_factor_adjustment": {
 			Deprecated: "DEPRECATED: Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can no longer be activated.",
 			Optional:   true,
-			Type:       schema.TypeString,
+			Type:       schema.TypeBool,
 		},
 		"elasticsearch": {
 			Description: "Elasticsearch settings",
@@ -253,22 +253,22 @@ func ServiceTypeElasticsearch() *schema.Schema {
 				"action_auto_create_index_enabled": {
 					Description: "Explicitly allow or block automatic creation of indices. Defaults to true",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"action_destructive_requires_name": {
 					Description: "Require explicit index names when deleting",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"cluster_max_shards_per_node": {
 					Description: "Controls the number of shards allowed in the cluster per data node",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"cluster_routing_allocation_node_concurrent_recoveries": {
 					Description: "How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to 2.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"email_sender_name": {
 					Description: "This should be identical to the Sender name defined in Opensearch dashboards",
@@ -289,52 +289,52 @@ func ServiceTypeElasticsearch() *schema.Schema {
 				"http_max_content_length": {
 					Description: "Maximum content length for HTTP requests to the Elasticsearch HTTP API, in bytes.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"http_max_header_size": {
 					Description: "The max size of allowed headers, in bytes",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"http_max_initial_line_length": {
 					Description: "The max length of an HTTP URL, in bytes",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_fielddata_cache_size": {
 					Description: "Relative amount. Maximum amount of heap memory used for field data cache. This is an expert setting; decreasing the value too much will increase overhead of loading field data; too much memory used for field data cache will decrease amount of heap available for other operations.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_memory_index_buffer_size": {
 					Description: "Percentage value. Default is 10%. Total amount of heap used for indexing buffer, before writing segments to disk. This is an expert setting. Too low value will slow down indexing; too high value will increase indexing performance but causes performance issues for query performance.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_queries_cache_size": {
 					Description: "Percentage value. Default is 10%. Maximum amount of heap used for query cache. This is an expert setting. Too low value will decrease query performance and increase performance for other operations; too high value will cause issues with other Elasticsearch functionality.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_query_bool_max_clause_count": {
 					Description: "Maximum number of clauses Lucene BooleanQuery can have. The default value (1024) is relatively high, and increasing it may cause performance issues. Investigate other approaches first before increasing this value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_recovery_max_bytes_per_sec": {
 					Description: "Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_recovery_max_concurrent_file_chunks": {
 					Description: "Number of file chunks sent in parallel for each recovery. Defaults to 2.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"override_main_response_version": {
 					Description: "Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"reindex_remote_whitelist": {
 					Description: "Whitelisted addresses for reindexing. Changing this value will cause all Elasticsearch instances to restart.",
@@ -351,84 +351,84 @@ func ServiceTypeElasticsearch() *schema.Schema {
 				"search_max_buckets": {
 					Description: "Maximum number of aggregation buckets allowed in a single response. Elasticsearch default value is used when this is not defined.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_analyze_queue_size": {
 					Description: "Size for the thread pool queue. See documentation for exact details.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_analyze_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_force_merge_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_get_queue_size": {
 					Description: "Size for the thread pool queue. See documentation for exact details.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_get_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_search_queue_size": {
 					Description: "Size for the thread pool queue. See documentation for exact details.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_search_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_search_throttled_queue_size": {
 					Description: "Size for the thread pool queue. See documentation for exact details.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_search_throttled_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_write_queue_size": {
 					Description: "Size for the thread pool queue. See documentation for exact details.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_write_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"action_auto_create_index_enabled": {
 					Description: "Explicitly allow or block automatic creation of indices. Defaults to true",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"action_destructive_requires_name": {
 					Description: "Require explicit index names when deleting",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"cluster_max_shards_per_node": {
 					Description: "Controls the number of shards allowed in the cluster per data node",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"cluster_routing_allocation_node_concurrent_recoveries": {
 					Description: "How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to 2.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"email_sender_name": {
 					Description: "This should be identical to the Sender name defined in Opensearch dashboards",
@@ -449,52 +449,52 @@ func ServiceTypeElasticsearch() *schema.Schema {
 				"http_max_content_length": {
 					Description: "Maximum content length for HTTP requests to the Elasticsearch HTTP API, in bytes.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"http_max_header_size": {
 					Description: "The max size of allowed headers, in bytes",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"http_max_initial_line_length": {
 					Description: "The max length of an HTTP URL, in bytes",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_fielddata_cache_size": {
 					Description: "Relative amount. Maximum amount of heap memory used for field data cache. This is an expert setting; decreasing the value too much will increase overhead of loading field data; too much memory used for field data cache will decrease amount of heap available for other operations.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_memory_index_buffer_size": {
 					Description: "Percentage value. Default is 10%. Total amount of heap used for indexing buffer, before writing segments to disk. This is an expert setting. Too low value will slow down indexing; too high value will increase indexing performance but causes performance issues for query performance.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_queries_cache_size": {
 					Description: "Percentage value. Default is 10%. Maximum amount of heap used for query cache. This is an expert setting. Too low value will decrease query performance and increase performance for other operations; too high value will cause issues with other Elasticsearch functionality.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_query_bool_max_clause_count": {
 					Description: "Maximum number of clauses Lucene BooleanQuery can have. The default value (1024) is relatively high, and increasing it may cause performance issues. Investigate other approaches first before increasing this value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_recovery_max_bytes_per_sec": {
 					Description: "Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_recovery_max_concurrent_file_chunks": {
 					Description: "Number of file chunks sent in parallel for each recovery. Defaults to 2.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"override_main_response_version": {
 					Description: "Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"reindex_remote_whitelist": {
 					Description: "Whitelisted addresses for reindexing. Changing this value will cause all Elasticsearch instances to restart.",
@@ -511,62 +511,62 @@ func ServiceTypeElasticsearch() *schema.Schema {
 				"search_max_buckets": {
 					Description: "Maximum number of aggregation buckets allowed in a single response. Elasticsearch default value is used when this is not defined.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_analyze_queue_size": {
 					Description: "Size for the thread pool queue. See documentation for exact details.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_analyze_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_force_merge_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_get_queue_size": {
 					Description: "Size for the thread pool queue. See documentation for exact details.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_get_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_search_queue_size": {
 					Description: "Size for the thread pool queue. See documentation for exact details.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_search_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_search_throttled_queue_size": {
 					Description: "Size for the thread pool queue. See documentation for exact details.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_search_throttled_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_write_queue_size": {
 					Description: "Size for the thread pool queue. See documentation for exact details.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_write_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}},
 			MaxItems: 1,
@@ -584,7 +584,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 				"max_index_count": {
 					Description: "Maximum number of indexes to keep",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"pattern": {
 					Description: "fnmatch pattern",
@@ -607,34 +607,34 @@ func ServiceTypeElasticsearch() *schema.Schema {
 				"mapping_nested_objects_limit": {
 					Description: "The maximum number of nested JSON objects that a single document can contain across all nested types. This limit helps to prevent out of memory errors when a document contains too many nested objects. Default is 10000.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"number_of_replicas": {
 					Description: "The number of replicas each primary shard has.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"number_of_shards": {
 					Description: "The number of primary shards that an index should have.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"mapping_nested_objects_limit": {
 					Description: "The maximum number of nested JSON objects that a single document can contain across all nested types. This limit helps to prevent out of memory errors when a document contains too many nested objects. Default is 10000.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"number_of_replicas": {
 					Description: "The number of replicas each primary shard has.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"number_of_shards": {
 					Description: "The number of primary shards that an index should have.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}},
 			MaxItems: 1,
@@ -674,7 +674,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 		"keep_index_refresh_interval": {
 			Description: "Aiven automation resets index.refresh_interval to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"kibana": {
 			Description: "Kibana settings",
@@ -682,34 +682,34 @@ func ServiceTypeElasticsearch() *schema.Schema {
 				"elasticsearch_request_timeout": {
 					Description: "Timeout in milliseconds for requests made by Kibana towards Elasticsearch",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"enabled": {
 					Description: "Enable or disable Kibana",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"max_old_space_size": {
 					Description: "Limits the maximum amount of memory (in MiB) the Kibana process can use. This sets the max_old_space_size option of the nodejs running the Kibana. Note: the memory reserved by Kibana is not available for Elasticsearch.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"elasticsearch_request_timeout": {
 					Description: "Timeout in milliseconds for requests made by Kibana towards Elasticsearch",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"enabled": {
 					Description: "Enable or disable Kibana",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"max_old_space_size": {
 					Description: "Limits the maximum amount of memory (in MiB) the Kibana process can use. This sets the max_old_space_size option of the nodejs running the Kibana. Note: the memory reserved by Kibana is not available for Elasticsearch.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}},
 			MaxItems: 1,
@@ -719,7 +719,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 		"max_index_count": {
 			Deprecated: "DEPRECATED: use index_patterns instead",
 			Optional:   true,
-			Type:       schema.TypeString,
+			Type:       schema.TypeInt,
 		},
 		"opensearch_version": {
 			Description: "OpenSearch major version",
@@ -732,34 +732,34 @@ func ServiceTypeElasticsearch() *schema.Schema {
 				"elasticsearch": {
 					Description: "Allow clients to connect to elasticsearch with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"kibana": {
 					Description: "Allow clients to connect to kibana with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"elasticsearch": {
 					Description: "Allow clients to connect to elasticsearch with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"kibana": {
 					Description: "Allow clients to connect to kibana with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -772,34 +772,34 @@ func ServiceTypeElasticsearch() *schema.Schema {
 				"elasticsearch": {
 					Description: "Enable elasticsearch",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"kibana": {
 					Description: "Enable kibana",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Enable prometheus",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"elasticsearch": {
 					Description: "Enable elasticsearch",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"kibana": {
 					Description: "Enable kibana",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Enable prometheus",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -818,34 +818,34 @@ func ServiceTypeElasticsearch() *schema.Schema {
 				"elasticsearch": {
 					Description: "Allow clients to connect to elasticsearch from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"kibana": {
 					Description: "Allow clients to connect to kibana from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"elasticsearch": {
 					Description: "Allow clients to connect to elasticsearch from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"kibana": {
 					Description: "Allow clients to connect to kibana from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -866,7 +866,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 		"static_ips": {
 			Description: "Use static public IP addresses",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 	}
 
@@ -893,12 +893,12 @@ func ServiceTypeFlink() *schema.Schema {
 		"execution_checkpointing_interval_ms": {
 			Description: "Checkpointing is Flink’s primary fault-tolerance mechanism, wherein a snapshot of your job’s state persisted periodically to some durable location. In the case of failure, Flink will restart from the most recent checkpoint and resume processing. A jobs checkpoint interval configures how often Flink will take these snapshots.",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"execution_checkpointing_timeout_ms": {
 			Description: "The time after which a checkpoint-in-progress is aborted, if it did not complete by then.",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"flink_version": {
 			Description: "Flink major version",
@@ -938,12 +938,12 @@ func ServiceTypeFlink() *schema.Schema {
 		"number_of_task_slots": {
 			Description: "Task slots per node. For a 3 node plan, total number of task slots is 3x this value",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"parallelism_default": {
 			Description: "How many parallel task slots each new job is assigned. Unless you understand how Flink parallel dataflows work, please leave this at 1. Please do not set this value higher than (total number of nodes x number_of_task_slots), or every new job created will fail.",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"privatelink_access": {
 			Description: "Allow access to selected service components through Privatelink",
@@ -951,24 +951,24 @@ func ServiceTypeFlink() *schema.Schema {
 				"flink": {
 					Description: "Enable flink",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Enable prometheus",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"flink": {
 					Description: "Enable flink",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Enable prometheus",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -983,17 +983,17 @@ func ServiceTypeFlink() *schema.Schema {
 		"restart_strategy_delay_sec": {
 			Description: "Delay between two consecutive restart attempts if restart-strategy has been set to fixed-delay or failure-rate. Delaying the retries can be helpful when the program interacts with external systems where for example connections or pending transactions should reach a timeout before re-execution is attempted.",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"restart_strategy_failure_rate_interval_min": {
 			Description: "Time interval for measuring failure rate if restart-strategy has been set to failure-rate. Specified in minutes.",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"restart_strategy_max_failures": {
 			Description: "The number of times that Flink retries the execution before the job is declared as failed if restart-strategy has been set to fixed-delay or failure-rate.",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 	}
 
@@ -1020,7 +1020,7 @@ func ServiceTypeGrafana() *schema.Schema {
 		"alerting_enabled": {
 			Description: "Enable or disable Grafana alerting functionality",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"alerting_error_or_timeout": {
 			Description: "Default error or timeout setting for new alerting rules",
@@ -1030,7 +1030,7 @@ func ServiceTypeGrafana() *schema.Schema {
 		"alerting_max_annotations_to_keep": {
 			Description: "Max number of alert annotations that Grafana stores. 0 (default) keeps all alert annotations.",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"alerting_nodata_or_nullvalues": {
 			Description: "Default value for 'no data or null values' for new alerting rules",
@@ -1040,7 +1040,7 @@ func ServiceTypeGrafana() *schema.Schema {
 		"allow_embedding": {
 			Description: "Allow embedding Grafana dashboards with iframe/frame/object/embed tags. Disabled by default to limit impact of clickjacking",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"auth_azuread": {
 			Description: "Azure AD OAuth integration",
@@ -1048,7 +1048,7 @@ func ServiceTypeGrafana() *schema.Schema {
 				"allow_sign_up": {
 					Description: "Automatically sign-up users on successful sign-in",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"allowed_domains": {
 					Description: "Allowed domains",
@@ -1089,7 +1089,7 @@ func ServiceTypeGrafana() *schema.Schema {
 				"allow_sign_up": {
 					Description: "Automatically sign-up users on successful sign-in",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"allowed_domains": {
 					Description: "Allowed domains",
@@ -1133,7 +1133,7 @@ func ServiceTypeGrafana() *schema.Schema {
 		"auth_basic_enabled": {
 			Description: "Enable or disable basic authentication form, used by Grafana built-in login",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"auth_generic_oauth": {
 			Description: "Generic OAuth integration",
@@ -1141,7 +1141,7 @@ func ServiceTypeGrafana() *schema.Schema {
 				"allow_sign_up": {
 					Description: "Automatically sign-up users on successful sign-in",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"allowed_domains": {
 					Description: "Allowed domains",
@@ -1199,7 +1199,7 @@ func ServiceTypeGrafana() *schema.Schema {
 				"allow_sign_up": {
 					Description: "Automatically sign-up users on successful sign-in",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"allowed_domains": {
 					Description: "Allowed domains",
@@ -1263,7 +1263,7 @@ func ServiceTypeGrafana() *schema.Schema {
 				"allow_sign_up": {
 					Description: "Automatically sign-up users on successful sign-in",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"allowed_organizations": {
 					Description: "Require users to belong to one of given organizations",
@@ -1284,7 +1284,7 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"team_ids": {
 					Description: "Require users to belong to one of given team IDs",
-					Elem:        &schema.Schema{Type: schema.TypeString},
+					Elem:        &schema.Schema{Type: schema.TypeInt},
 					MaxItems:    50,
 					Optional:    true,
 					Type:        schema.TypeList,
@@ -1294,7 +1294,7 @@ func ServiceTypeGrafana() *schema.Schema {
 				"allow_sign_up": {
 					Description: "Automatically sign-up users on successful sign-in",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"allowed_organizations": {
 					Description: "Require users to belong to one of given organizations",
@@ -1315,7 +1315,7 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"team_ids": {
 					Description: "Require users to belong to one of given team IDs",
-					Elem:        &schema.Schema{Type: schema.TypeString},
+					Elem:        &schema.Schema{Type: schema.TypeInt},
 					MaxItems:    50,
 					Optional:    true,
 					Type:        schema.TypeList,
@@ -1331,7 +1331,7 @@ func ServiceTypeGrafana() *schema.Schema {
 				"allow_sign_up": {
 					Description: "Automatically sign-up users on successful sign-in",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"allowed_groups": {
 					Description: "Require users to belong to one of given groups",
@@ -1370,7 +1370,7 @@ func ServiceTypeGrafana() *schema.Schema {
 				"allow_sign_up": {
 					Description: "Automatically sign-up users on successful sign-in",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"allowed_groups": {
 					Description: "Require users to belong to one of given groups",
@@ -1415,7 +1415,7 @@ func ServiceTypeGrafana() *schema.Schema {
 				"allow_sign_up": {
 					Description: "Automatically sign-up users on successful sign-in",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"allowed_domains": {
 					Description: "Domains allowed to sign-in to this Grafana",
@@ -1439,7 +1439,7 @@ func ServiceTypeGrafana() *schema.Schema {
 				"allow_sign_up": {
 					Description: "Automatically sign-up users on successful sign-in",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"allowed_domains": {
 					Description: "Domains allowed to sign-in to this Grafana",
@@ -1476,7 +1476,7 @@ func ServiceTypeGrafana() *schema.Schema {
 		"dashboard_previews_enabled": {
 			Description: "This feature is new in Grafana 9 and is quite resource intensive. It may cause low-end plans to work more slowly while the dashboard previews are rendering.",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"dashboards_min_refresh_interval": {
 			Description: "Signed sequence of decimal numbers, followed by a unit suffix (ms, s, m, h, d), e.g. 30s, 1h",
@@ -1486,17 +1486,17 @@ func ServiceTypeGrafana() *schema.Schema {
 		"dashboards_versions_to_keep": {
 			Description: "Dashboard versions to keep per dashboard",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"dataproxy_send_user_header": {
 			Description: "Send 'X-Grafana-User' header to data source",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"dataproxy_timeout": {
 			Description: "Timeout for data proxy requests in seconds",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"date_formats": {
 			Description: "Grafana date format specifications",
@@ -1591,12 +1591,12 @@ func ServiceTypeGrafana() *schema.Schema {
 		"disable_gravatar": {
 			Description: "Set to true to disable gravatar. Defaults to false (gravatar is enabled)",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"editors_can_admin": {
 			Description: "Editors can manage folders, teams and dashboards created by them",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"external_image_storage": {
 			Description: "External image store settings",
@@ -1686,19 +1686,19 @@ func ServiceTypeGrafana() *schema.Schema {
 		"metrics_enabled": {
 			Description: "Enable Grafana /metrics endpoint",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"private_access": {
 			Description: "Allow access to selected service ports from private networks",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"grafana": {
 				Description: "Allow clients to connect to grafana with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"grafana": {
 				Description: "Allow clients to connect to grafana with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}},
 			MaxItems: 1,
 			Optional: true,
@@ -1709,12 +1709,12 @@ func ServiceTypeGrafana() *schema.Schema {
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"grafana": {
 				Description: "Enable grafana",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"grafana": {
 				Description: "Enable grafana",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}},
 			MaxItems: 1,
 			Optional: true,
@@ -1731,12 +1731,12 @@ func ServiceTypeGrafana() *schema.Schema {
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"grafana": {
 				Description: "Allow clients to connect to grafana from the public internet for service nodes that are in a project VPC or another type of private network",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"grafana": {
 				Description: "Allow clients to connect to grafana from the public internet for service nodes that are in a project VPC or another type of private network",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}},
 			MaxItems: 1,
 			Optional: true,
@@ -1780,12 +1780,12 @@ func ServiceTypeGrafana() *schema.Schema {
 				"port": {
 					Description: "SMTP server port",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"skip_verify": {
 					Description: "Skip verifying server certificate. Defaults to false",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"starttls_policy": {
 					Description: "Either OpportunisticStartTLS, MandatoryStartTLS or NoStartTLS. Default is OpportunisticStartTLS.",
@@ -1823,12 +1823,12 @@ func ServiceTypeGrafana() *schema.Schema {
 				"port": {
 					Description: "SMTP server port",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"skip_verify": {
 					Description: "Skip verifying server certificate. Defaults to false",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"starttls_policy": {
 					Description: "Either OpportunisticStartTLS, MandatoryStartTLS or NoStartTLS. Default is OpportunisticStartTLS.",
@@ -1848,12 +1848,12 @@ func ServiceTypeGrafana() *schema.Schema {
 		"static_ips": {
 			Description: "Use static public IP addresses",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"user_auto_assign_org": {
 			Description: "Auto-assign new users on signup to main organization. Defaults to false",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"user_auto_assign_org_role": {
 			Description: "Set role for new signups. Defaults to Viewer",
@@ -1863,7 +1863,7 @@ func ServiceTypeGrafana() *schema.Schema {
 		"viewers_can_edit": {
 			Description: "Users with view-only permission can edit but not save dashboards",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 	}
 
@@ -1898,64 +1898,64 @@ func ServiceTypeInfluxdb() *schema.Schema {
 				"log_queries_after": {
 					Description: "The maximum duration in seconds before a query is logged as a slow query. Setting this to 0 (the default) will never log slow queries.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_connection_limit": {
 					Description: "Maximum number of connections to InfluxDB. Setting this to 0 (default) means no limit. If using max_connection_limit, it is recommended to set the value to be large enough in order to not block clients unnecessarily.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_row_limit": {
 					Description: "The maximum number of rows returned in a non-chunked query. Setting this to 0 (the default) allows an unlimited number to be returned.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_select_buckets": {
 					Description: "The maximum number of `GROUP BY time()` buckets that can be processed in a query. Setting this to 0 (the default) allows an unlimited number to be processed.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_select_point": {
 					Description: "The maximum number of points that can be processed in a SELECT statement. Setting this to 0 (the default) allows an unlimited number to be processed.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"query_timeout": {
 					Description: "The maximum duration in seconds before a query is killed. Setting this to 0 (the default) will never kill slow queries.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"log_queries_after": {
 					Description: "The maximum duration in seconds before a query is logged as a slow query. Setting this to 0 (the default) will never log slow queries.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_connection_limit": {
 					Description: "Maximum number of connections to InfluxDB. Setting this to 0 (default) means no limit. If using max_connection_limit, it is recommended to set the value to be large enough in order to not block clients unnecessarily.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_row_limit": {
 					Description: "The maximum number of rows returned in a non-chunked query. Setting this to 0 (the default) allows an unlimited number to be returned.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_select_buckets": {
 					Description: "The maximum number of `GROUP BY time()` buckets that can be processed in a query. Setting this to 0 (the default) allows an unlimited number to be processed.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_select_point": {
 					Description: "The maximum number of points that can be processed in a SELECT statement. Setting this to 0 (the default) allows an unlimited number to be processed.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"query_timeout": {
 					Description: "The maximum duration in seconds before a query is killed. Setting this to 0 (the default) will never kill slow queries.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}},
 			MaxItems: 1,
@@ -1997,12 +1997,12 @@ func ServiceTypeInfluxdb() *schema.Schema {
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"influxdb": {
 				Description: "Allow clients to connect to influxdb with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"influxdb": {
 				Description: "Allow clients to connect to influxdb with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}},
 			MaxItems: 1,
 			Optional: true,
@@ -2013,12 +2013,12 @@ func ServiceTypeInfluxdb() *schema.Schema {
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"influxdb": {
 				Description: "Enable influxdb",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"influxdb": {
 				Description: "Enable influxdb",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}},
 			MaxItems: 1,
 			Optional: true,
@@ -2035,12 +2035,12 @@ func ServiceTypeInfluxdb() *schema.Schema {
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"influxdb": {
 				Description: "Allow clients to connect to influxdb from the public internet for service nodes that are in a project VPC or another type of private network",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"influxdb": {
 				Description: "Allow clients to connect to influxdb from the public internet for service nodes that are in a project VPC or another type of private network",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}},
 			MaxItems: 1,
 			Optional: true,
@@ -2060,7 +2060,7 @@ func ServiceTypeInfluxdb() *schema.Schema {
 		"static_ips": {
 			Description: "Use static public IP addresses",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 	}
 
@@ -2125,7 +2125,7 @@ func ServiceTypeKafka() *schema.Schema {
 				"auto_create_topics_enable": {
 					Description: "Enable auto creation of topics",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"compression_type": {
 					Description: "Specify the final compression type for a given topic. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'uncompressed' which is equivalent to no compression; and 'producer' which means retain the original compression codec set by the producer.",
@@ -2135,47 +2135,47 @@ func ServiceTypeKafka() *schema.Schema {
 				"connections_max_idle_ms": {
 					Description: "Idle connections timeout: the server socket processor threads close the connections that idle for longer than this.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"default_replication_factor": {
 					Description: "Replication factor for autocreated topics",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"group_initial_rebalance_delay_ms": {
 					Description: "The amount of time, in milliseconds, the group coordinator will wait for more consumers to join a new group before performing the first rebalance. A longer delay means potentially fewer rebalances, but increases the time until processing begins. The default value for this is 3 seconds. During development and testing it might be desirable to set this to 0 in order to not delay test execution time.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"group_max_session_timeout_ms": {
 					Description: "The maximum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"group_min_session_timeout_ms": {
 					Description: "The minimum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_cleaner_delete_retention_ms": {
 					Description: "How long are delete records retained?",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_cleaner_max_compaction_lag_ms": {
 					Description: "The maximum amount of time message will remain uncompacted. Only applicable for logs that are being compacted",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_cleaner_min_cleanable_ratio": {
 					Description: "Controls log compactor frequency. Larger value means more frequent compactions but also more space wasted for logs. Consider setting log.cleaner.max.compaction.lag.ms to enforce compactions sooner, instead of setting a very high value for this option.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeFloat,
 				},
 				"log_cleaner_min_compaction_lag_ms": {
 					Description: "The minimum time a message will remain uncompacted in the log. Only applicable for logs that are being compacted.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_cleanup_policy": {
 					Description: "The default cleanup policy for segments beyond the retention window",
@@ -2185,32 +2185,32 @@ func ServiceTypeKafka() *schema.Schema {
 				"log_flush_interval_messages": {
 					Description: "The number of messages accumulated on a log partition before messages are flushed to disk",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_flush_interval_ms": {
 					Description: "The maximum time in ms that a message in any topic is kept in memory before flushed to disk. If not set, the value in log.flush.scheduler.interval.ms is used",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_index_interval_bytes": {
 					Description: "The interval with which Kafka adds an entry to the offset index",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_index_size_max_bytes": {
 					Description: "The maximum size in bytes of the offset index",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_message_downconversion_enable": {
 					Description: "This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. ",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"log_message_timestamp_difference_max_ms": {
 					Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_message_timestamp_type": {
 					Description: "Define whether the timestamp in the message is message create time or log append time.",
@@ -2220,109 +2220,109 @@ func ServiceTypeKafka() *schema.Schema {
 				"log_preallocate": {
 					Description: "Should pre allocate file when create new segment?",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"log_retention_bytes": {
 					Description: "The maximum size of the log before deleting messages",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_retention_hours": {
 					Description: "The number of hours to keep a log file before deleting it",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_retention_ms": {
 					Description: "The number of milliseconds to keep a log file before deleting it (in milliseconds), If not set, the value in log.retention.minutes is used. If set to -1, no time limit is applied.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_roll_jitter_ms": {
 					Description: "The maximum jitter to subtract from logRollTimeMillis (in milliseconds). If not set, the value in log.roll.jitter.hours is used",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_roll_ms": {
 					Description: "The maximum time before a new log segment is rolled out (in milliseconds).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_segment_bytes": {
 					Description: "The maximum size of a single log file",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_segment_delete_delay_ms": {
 					Description: "The amount of time to wait before deleting a file from the filesystem",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_connections_per_ip": {
 					Description: "The maximum number of connections allowed from each ip address (defaults to 2147483647).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_incremental_fetch_session_cache_slots": {
 					Description: "The maximum number of incremental fetch sessions that the broker will maintain.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"message_max_bytes": {
 					Description: "The maximum size of message that the server can receive.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"min_insync_replicas": {
 					Description: "When a producer sets acks to 'all' (or '-1'), min.insync.replicas specifies the minimum number of replicas that must acknowledge a write for the write to be considered successful.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"num_partitions": {
 					Description: "Number of partitions for autocreated topics",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"offsets_retention_minutes": {
 					Description: "Log retention window in minutes for offsets topic",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"producer_purgatory_purge_interval_requests": {
 					Description: "The purge interval (in number of requests) of the producer request purgatory(defaults to 1000).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"replica_fetch_max_bytes": {
 					Description: "The number of bytes of messages to attempt to fetch for each partition (defaults to 1048576). This is not an absolute maximum, if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"replica_fetch_response_max_bytes": {
 					Description: "Maximum bytes expected for the entire fetch response (defaults to 10485760). Records are fetched in batches, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made. As such, this is not an absolute maximum.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"socket_request_max_bytes": {
 					Description: "The maximum number of bytes in a socket request (defaults to 104857600).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"transaction_remove_expired_transaction_cleanup_interval_ms": {
 					Description: "The interval at which to remove transactions that have expired due to transactional.id.expiration.ms passing (defaults to 3600000 (1 hour)).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"transaction_state_log_segment_bytes": {
 					Description: "The transaction topic segment bytes should be kept relatively small in order to facilitate faster log compaction and cache loads (defaults to 104857600 (100 mebibytes)).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"auto_create_topics_enable": {
 					Description: "Enable auto creation of topics",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"compression_type": {
 					Description: "Specify the final compression type for a given topic. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'uncompressed' which is equivalent to no compression; and 'producer' which means retain the original compression codec set by the producer.",
@@ -2332,47 +2332,47 @@ func ServiceTypeKafka() *schema.Schema {
 				"connections_max_idle_ms": {
 					Description: "Idle connections timeout: the server socket processor threads close the connections that idle for longer than this.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"default_replication_factor": {
 					Description: "Replication factor for autocreated topics",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"group_initial_rebalance_delay_ms": {
 					Description: "The amount of time, in milliseconds, the group coordinator will wait for more consumers to join a new group before performing the first rebalance. A longer delay means potentially fewer rebalances, but increases the time until processing begins. The default value for this is 3 seconds. During development and testing it might be desirable to set this to 0 in order to not delay test execution time.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"group_max_session_timeout_ms": {
 					Description: "The maximum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"group_min_session_timeout_ms": {
 					Description: "The minimum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_cleaner_delete_retention_ms": {
 					Description: "How long are delete records retained?",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_cleaner_max_compaction_lag_ms": {
 					Description: "The maximum amount of time message will remain uncompacted. Only applicable for logs that are being compacted",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_cleaner_min_cleanable_ratio": {
 					Description: "Controls log compactor frequency. Larger value means more frequent compactions but also more space wasted for logs. Consider setting log.cleaner.max.compaction.lag.ms to enforce compactions sooner, instead of setting a very high value for this option.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeFloat,
 				},
 				"log_cleaner_min_compaction_lag_ms": {
 					Description: "The minimum time a message will remain uncompacted in the log. Only applicable for logs that are being compacted.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_cleanup_policy": {
 					Description: "The default cleanup policy for segments beyond the retention window",
@@ -2382,32 +2382,32 @@ func ServiceTypeKafka() *schema.Schema {
 				"log_flush_interval_messages": {
 					Description: "The number of messages accumulated on a log partition before messages are flushed to disk",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_flush_interval_ms": {
 					Description: "The maximum time in ms that a message in any topic is kept in memory before flushed to disk. If not set, the value in log.flush.scheduler.interval.ms is used",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_index_interval_bytes": {
 					Description: "The interval with which Kafka adds an entry to the offset index",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_index_size_max_bytes": {
 					Description: "The maximum size in bytes of the offset index",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_message_downconversion_enable": {
 					Description: "This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. ",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"log_message_timestamp_difference_max_ms": {
 					Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_message_timestamp_type": {
 					Description: "Define whether the timestamp in the message is message create time or log append time.",
@@ -2417,102 +2417,102 @@ func ServiceTypeKafka() *schema.Schema {
 				"log_preallocate": {
 					Description: "Should pre allocate file when create new segment?",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"log_retention_bytes": {
 					Description: "The maximum size of the log before deleting messages",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_retention_hours": {
 					Description: "The number of hours to keep a log file before deleting it",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_retention_ms": {
 					Description: "The number of milliseconds to keep a log file before deleting it (in milliseconds), If not set, the value in log.retention.minutes is used. If set to -1, no time limit is applied.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_roll_jitter_ms": {
 					Description: "The maximum jitter to subtract from logRollTimeMillis (in milliseconds). If not set, the value in log.roll.jitter.hours is used",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_roll_ms": {
 					Description: "The maximum time before a new log segment is rolled out (in milliseconds).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_segment_bytes": {
 					Description: "The maximum size of a single log file",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_segment_delete_delay_ms": {
 					Description: "The amount of time to wait before deleting a file from the filesystem",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_connections_per_ip": {
 					Description: "The maximum number of connections allowed from each ip address (defaults to 2147483647).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_incremental_fetch_session_cache_slots": {
 					Description: "The maximum number of incremental fetch sessions that the broker will maintain.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"message_max_bytes": {
 					Description: "The maximum size of message that the server can receive.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"min_insync_replicas": {
 					Description: "When a producer sets acks to 'all' (or '-1'), min.insync.replicas specifies the minimum number of replicas that must acknowledge a write for the write to be considered successful.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"num_partitions": {
 					Description: "Number of partitions for autocreated topics",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"offsets_retention_minutes": {
 					Description: "Log retention window in minutes for offsets topic",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"producer_purgatory_purge_interval_requests": {
 					Description: "The purge interval (in number of requests) of the producer request purgatory(defaults to 1000).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"replica_fetch_max_bytes": {
 					Description: "The number of bytes of messages to attempt to fetch for each partition (defaults to 1048576). This is not an absolute maximum, if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"replica_fetch_response_max_bytes": {
 					Description: "Maximum bytes expected for the entire fetch response (defaults to 10485760). Records are fetched in batches, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made. As such, this is not an absolute maximum.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"socket_request_max_bytes": {
 					Description: "The maximum number of bytes in a socket request (defaults to 104857600).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"transaction_remove_expired_transaction_cleanup_interval_ms": {
 					Description: "The interval at which to remove transactions that have expired due to transactional.id.expiration.ms passing (defaults to 3600000 (1 hour)).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"transaction_state_log_segment_bytes": {
 					Description: "The transaction topic segment bytes should be kept relatively small in order to facilitate faster log compaction and cache loads (defaults to 104857600 (100 mebibytes)).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}},
 			MaxItems: 1,
@@ -2525,24 +2525,24 @@ func ServiceTypeKafka() *schema.Schema {
 				"certificate": {
 					Description: "Enable certificate/SSL authentication",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"sasl": {
 					Description: "Enable SASL authentication",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"certificate": {
 					Description: "Enable certificate/SSL authentication",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"sasl": {
 					Description: "Enable SASL authentication",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -2552,7 +2552,7 @@ func ServiceTypeKafka() *schema.Schema {
 		"kafka_connect": {
 			Description: "Enable Kafka Connect service",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"kafka_connect_config": {
 			Description: "Kafka Connect configuration values",
@@ -2570,7 +2570,7 @@ func ServiceTypeKafka() *schema.Schema {
 				"consumer_fetch_max_bytes": {
 					Description: "Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"consumer_isolation_level": {
 					Description: "Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
@@ -2580,27 +2580,27 @@ func ServiceTypeKafka() *schema.Schema {
 				"consumer_max_partition_fetch_bytes": {
 					Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. ",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"consumer_max_poll_interval_ms": {
 					Description: "The maximum delay in milliseconds between invocations of poll() when using consumer group management (defaults to 300000).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"consumer_max_poll_records": {
 					Description: "The maximum number of records returned in a single call to poll() (defaults to 500).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"offset_flush_interval_ms": {
 					Description: "The interval at which to try committing offsets for tasks (defaults to 60000).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"offset_flush_timeout_ms": {
 					Description: "Maximum number of milliseconds to wait for records to flush and partition offset data to be committed to offset storage before cancelling the process and restoring the offset data to be committed in a future attempt (defaults to 5000).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"producer_compression_type": {
 					Description: "Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.",
@@ -2610,12 +2610,12 @@ func ServiceTypeKafka() *schema.Schema {
 				"producer_max_request_size": {
 					Description: "This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"session_timeout_ms": {
 					Description: "The timeout in milliseconds used to detect failures when using Kafka’s group management facilities (defaults to 10000).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
@@ -2632,7 +2632,7 @@ func ServiceTypeKafka() *schema.Schema {
 				"consumer_fetch_max_bytes": {
 					Description: "Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"consumer_isolation_level": {
 					Description: "Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
@@ -2642,27 +2642,27 @@ func ServiceTypeKafka() *schema.Schema {
 				"consumer_max_partition_fetch_bytes": {
 					Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. ",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"consumer_max_poll_interval_ms": {
 					Description: "The maximum delay in milliseconds between invocations of poll() when using consumer group management (defaults to 300000).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"consumer_max_poll_records": {
 					Description: "The maximum number of records returned in a single call to poll() (defaults to 500).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"offset_flush_interval_ms": {
 					Description: "The interval at which to try committing offsets for tasks (defaults to 60000).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"offset_flush_timeout_ms": {
 					Description: "Maximum number of milliseconds to wait for records to flush and partition offset data to be committed to offset storage before cancelling the process and restoring the offset data to be committed in a future attempt (defaults to 5000).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"producer_compression_type": {
 					Description: "Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.",
@@ -2672,12 +2672,12 @@ func ServiceTypeKafka() *schema.Schema {
 				"producer_max_request_size": {
 					Description: "This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"session_timeout_ms": {
 					Description: "The timeout in milliseconds used to detect failures when using Kafka’s group management facilities (defaults to 10000).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}},
 			MaxItems: 1,
@@ -2687,7 +2687,7 @@ func ServiceTypeKafka() *schema.Schema {
 		"kafka_rest": {
 			Description: "Enable Kafka-REST service",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"kafka_rest_config": {
 			Description: "Kafka REST configuration",
@@ -2695,17 +2695,17 @@ func ServiceTypeKafka() *schema.Schema {
 				"consumer_enable_auto_commit": {
 					Description: "If true the consumer's offset will be periodically committed to Kafka in the background",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"consumer_request_max_bytes": {
 					Description: "Maximum number of bytes in unencoded message keys and values by a single request",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"consumer_request_timeout_ms": {
 					Description: "The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"producer_acks": {
 					Description: "The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to 'all' or '-1', the leader will wait for the full set of in-sync replicas to acknowledge the record.",
@@ -2715,29 +2715,29 @@ func ServiceTypeKafka() *schema.Schema {
 				"producer_linger_ms": {
 					Description: "Wait for up to the given delay to allow batching records together",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"simpleconsumer_pool_size_max": {
 					Description: "Maximum number of SimpleConsumers that can be instantiated per broker",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"consumer_enable_auto_commit": {
 					Description: "If true the consumer's offset will be periodically committed to Kafka in the background",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"consumer_request_max_bytes": {
 					Description: "Maximum number of bytes in unencoded message keys and values by a single request",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"consumer_request_timeout_ms": {
 					Description: "The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"producer_acks": {
 					Description: "The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to 'all' or '-1', the leader will wait for the full set of in-sync replicas to acknowledge the record.",
@@ -2747,12 +2747,12 @@ func ServiceTypeKafka() *schema.Schema {
 				"producer_linger_ms": {
 					Description: "Wait for up to the given delay to allow batching records together",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"simpleconsumer_pool_size_max": {
 					Description: "Maximum number of SimpleConsumers that can be instantiated per broker",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}},
 			MaxItems: 1,
@@ -2769,12 +2769,12 @@ func ServiceTypeKafka() *schema.Schema {
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"prometheus": {
 				Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"prometheus": {
 				Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}},
 			MaxItems: 1,
 			Optional: true,
@@ -2786,64 +2786,64 @@ func ServiceTypeKafka() *schema.Schema {
 				"jolokia": {
 					Description: "Enable jolokia",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"kafka": {
 					Description: "Enable kafka",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"kafka_connect": {
 					Description: "Enable kafka_connect",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"kafka_rest": {
 					Description: "Enable kafka_rest",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Enable prometheus",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"schema_registry": {
 					Description: "Enable schema_registry",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"jolokia": {
 					Description: "Enable jolokia",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"kafka": {
 					Description: "Enable kafka",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"kafka_connect": {
 					Description: "Enable kafka_connect",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"kafka_rest": {
 					Description: "Enable kafka_rest",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Enable prometheus",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"schema_registry": {
 					Description: "Enable schema_registry",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -2856,54 +2856,54 @@ func ServiceTypeKafka() *schema.Schema {
 				"kafka": {
 					Description: "Allow clients to connect to kafka from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"kafka_connect": {
 					Description: "Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"kafka_rest": {
 					Description: "Allow clients to connect to kafka_rest from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"schema_registry": {
 					Description: "Allow clients to connect to schema_registry from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"kafka": {
 					Description: "Allow clients to connect to kafka from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"kafka_connect": {
 					Description: "Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"kafka_rest": {
 					Description: "Allow clients to connect to kafka_rest from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"schema_registry": {
 					Description: "Allow clients to connect to schema_registry from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -2913,7 +2913,7 @@ func ServiceTypeKafka() *schema.Schema {
 		"schema_registry": {
 			Description: "Enable Schema-Registry service",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"schema_registry_config": {
 			Description: "Schema Registry configuration",
@@ -2921,7 +2921,7 @@ func ServiceTypeKafka() *schema.Schema {
 				"leader_eligibility": {
 					Description: "If true, Karapace / Schema Registry on the service nodes can participate in leader election. It might be needed to disable this when the schemas topic is replicated to a secondary cluster and Karapace / Schema Registry there must not participate in leader election. Defaults to `true`.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"topic_name": {
 					Description: "The durable single partition topic that acts as the durable log for the data. This topic must be compacted to avoid losing data due to retention policy. Please note that changing this configuration in an existing Schema Registry / Karapace setup leads to previous schemas being inaccessible, data encoded with them potentially unreadable and schema ID sequence put out of order. It's only possible to do the switch while Schema Registry / Karapace is disabled. Defaults to `_schemas`.",
@@ -2933,7 +2933,7 @@ func ServiceTypeKafka() *schema.Schema {
 				"leader_eligibility": {
 					Description: "If true, Karapace / Schema Registry on the service nodes can participate in leader election. It might be needed to disable this when the schemas topic is replicated to a secondary cluster and Karapace / Schema Registry there must not participate in leader election. Defaults to `true`.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"topic_name": {
 					Description: "The durable single partition topic that acts as the durable log for the data. This topic must be compacted to avoid losing data due to retention policy. Please note that changing this configuration in an existing Schema Registry / Karapace setup leads to previous schemas being inaccessible, data encoded with them potentially unreadable and schema ID sequence put out of order. It's only possible to do the switch while Schema Registry / Karapace is disabled. Defaults to `_schemas`.",
@@ -2948,7 +2948,7 @@ func ServiceTypeKafka() *schema.Schema {
 		"static_ips": {
 			Description: "Use static public IP addresses",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 	}
 
@@ -3018,7 +3018,7 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 				"consumer_fetch_max_bytes": {
 					Description: "Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"consumer_isolation_level": {
 					Description: "Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
@@ -3028,27 +3028,27 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 				"consumer_max_partition_fetch_bytes": {
 					Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. ",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"consumer_max_poll_interval_ms": {
 					Description: "The maximum delay in milliseconds between invocations of poll() when using consumer group management (defaults to 300000).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"consumer_max_poll_records": {
 					Description: "The maximum number of records returned in a single call to poll() (defaults to 500).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"offset_flush_interval_ms": {
 					Description: "The interval at which to try committing offsets for tasks (defaults to 60000).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"offset_flush_timeout_ms": {
 					Description: "Maximum number of milliseconds to wait for records to flush and partition offset data to be committed to offset storage before cancelling the process and restoring the offset data to be committed in a future attempt (defaults to 5000).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"producer_compression_type": {
 					Description: "Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.",
@@ -3058,12 +3058,12 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 				"producer_max_request_size": {
 					Description: "This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"session_timeout_ms": {
 					Description: "The timeout in milliseconds used to detect failures when using Kafka’s group management facilities (defaults to 10000).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
@@ -3080,7 +3080,7 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 				"consumer_fetch_max_bytes": {
 					Description: "Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"consumer_isolation_level": {
 					Description: "Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
@@ -3090,27 +3090,27 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 				"consumer_max_partition_fetch_bytes": {
 					Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. ",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"consumer_max_poll_interval_ms": {
 					Description: "The maximum delay in milliseconds between invocations of poll() when using consumer group management (defaults to 300000).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"consumer_max_poll_records": {
 					Description: "The maximum number of records returned in a single call to poll() (defaults to 500).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"offset_flush_interval_ms": {
 					Description: "The interval at which to try committing offsets for tasks (defaults to 60000).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"offset_flush_timeout_ms": {
 					Description: "Maximum number of milliseconds to wait for records to flush and partition offset data to be committed to offset storage before cancelling the process and restoring the offset data to be committed in a future attempt (defaults to 5000).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"producer_compression_type": {
 					Description: "Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.",
@@ -3120,12 +3120,12 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 				"producer_max_request_size": {
 					Description: "This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"session_timeout_ms": {
 					Description: "The timeout in milliseconds used to detect failures when using Kafka’s group management facilities (defaults to 10000).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}},
 			MaxItems: 1,
@@ -3138,24 +3138,24 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 				"kafka_connect": {
 					Description: "Allow clients to connect to kafka_connect with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"kafka_connect": {
 					Description: "Allow clients to connect to kafka_connect with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -3168,34 +3168,34 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 				"jolokia": {
 					Description: "Enable jolokia",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"kafka_connect": {
 					Description: "Enable kafka_connect",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Enable prometheus",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"jolokia": {
 					Description: "Enable jolokia",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"kafka_connect": {
 					Description: "Enable kafka_connect",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Enable prometheus",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -3208,24 +3208,24 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 				"kafka_connect": {
 					Description: "Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"kafka_connect": {
 					Description: "Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -3235,7 +3235,7 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 		"static_ips": {
 			Description: "Use static public IP addresses",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 	}
 
@@ -3295,104 +3295,104 @@ func ServiceTypeKafkaMirrormaker() *schema.Schema {
 				"emit_checkpoints_enabled": {
 					Description: "Whether to emit consumer group offset checkpoints to target cluster periodically (default: true)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"emit_checkpoints_interval_seconds": {
 					Description: "Frequency at which consumer group offset checkpoints are emitted (default: 60, every minute)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"refresh_groups_enabled": {
 					Description: "Whether to periodically check for new consumer groups. Defaults to 'true'.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"refresh_groups_interval_seconds": {
 					Description: "Frequency of consumer group refresh in seconds. Defaults to 600 seconds (10 minutes).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"refresh_topics_enabled": {
 					Description: "Whether to periodically check for new topics and partitions. Defaults to 'true'.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"refresh_topics_interval_seconds": {
 					Description: "Frequency of topic and partitions refresh in seconds. Defaults to 600 seconds (10 minutes).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"sync_group_offsets_enabled": {
 					Description: "Whether to periodically write the translated offsets of replicated consumer groups (in the source cluster) to __consumer_offsets topic in target cluster, as long as no active consumers in that group are connected to the target cluster",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"sync_group_offsets_interval_seconds": {
 					Description: "Frequency at which consumer group offsets are synced (default: 60, every minute)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"sync_topic_configs_enabled": {
 					Description: "Whether to periodically configure remote topics to match their corresponding upstream topics.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"tasks_max_per_cpu": {
 					Description: "'tasks.max' is set to this multiplied by the number of CPUs in the service.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"emit_checkpoints_enabled": {
 					Description: "Whether to emit consumer group offset checkpoints to target cluster periodically (default: true)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"emit_checkpoints_interval_seconds": {
 					Description: "Frequency at which consumer group offset checkpoints are emitted (default: 60, every minute)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"refresh_groups_enabled": {
 					Description: "Whether to periodically check for new consumer groups. Defaults to 'true'.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"refresh_groups_interval_seconds": {
 					Description: "Frequency of consumer group refresh in seconds. Defaults to 600 seconds (10 minutes).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"refresh_topics_enabled": {
 					Description: "Whether to periodically check for new topics and partitions. Defaults to 'true'.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"refresh_topics_interval_seconds": {
 					Description: "Frequency of topic and partitions refresh in seconds. Defaults to 600 seconds (10 minutes).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"sync_group_offsets_enabled": {
 					Description: "Whether to periodically write the translated offsets of replicated consumer groups (in the source cluster) to __consumer_offsets topic in target cluster, as long as no active consumers in that group are connected to the target cluster",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"sync_group_offsets_interval_seconds": {
 					Description: "Frequency at which consumer group offsets are synced (default: 60, every minute)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"sync_topic_configs_enabled": {
 					Description: "Whether to periodically configure remote topics to match their corresponding upstream topics.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"tasks_max_per_cpu": {
 					Description: "'tasks.max' is set to this multiplied by the number of CPUs in the service.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}},
 			MaxItems: 1,
@@ -3402,7 +3402,7 @@ func ServiceTypeKafkaMirrormaker() *schema.Schema {
 		"static_ips": {
 			Description: "Use static public IP addresses",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 	}
 
@@ -3467,7 +3467,7 @@ func ServiceTypeM3aggregator() *schema.Schema {
 		"static_ips": {
 			Description: "Use static public IP addresses",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 	}
 
@@ -3532,12 +3532,12 @@ func ServiceTypeM3db() *schema.Schema {
 				"max_recently_queried_series_blocks": {
 					Description: "The maximum number of blocks that can be read in a given lookback period.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_recently_queried_series_disk_bytes_read": {
 					Description: "The maximum number of disk bytes that can be read in a given lookback period.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_recently_queried_series_lookback": {
 					Description: "The lookback period for 'max_recently_queried_series_blocks' and 'max_recently_queried_series_disk_bytes_read'.",
@@ -3547,29 +3547,29 @@ func ServiceTypeM3db() *schema.Schema {
 				"query_docs": {
 					Description: "The maximum number of docs fetched in single query.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"query_require_exhaustive": {
 					Description: "When query limits are exceeded, whether to return error or return partial results.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"query_series": {
 					Description: "The maximum number of series fetched in single query.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"max_recently_queried_series_blocks": {
 					Description: "The maximum number of blocks that can be read in a given lookback period.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_recently_queried_series_disk_bytes_read": {
 					Description: "The maximum number of disk bytes that can be read in a given lookback period.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_recently_queried_series_lookback": {
 					Description: "The lookback period for 'max_recently_queried_series_blocks' and 'max_recently_queried_series_disk_bytes_read'.",
@@ -3579,17 +3579,17 @@ func ServiceTypeM3db() *schema.Schema {
 				"query_docs": {
 					Description: "The maximum number of docs fetched in single query.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"query_require_exhaustive": {
 					Description: "When query limits are exceeded, whether to return error or return partial results.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"query_series": {
 					Description: "The maximum number of series fetched in single query.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}},
 			MaxItems: 1,
@@ -3604,7 +3604,7 @@ func ServiceTypeM3db() *schema.Schema {
 		"m3coordinator_enable_graphite_carbon_ingest": {
 			Description: "Enables access to Graphite Carbon plaintext metrics ingestion. It can be enabled only for services inside VPCs. The metrics are written to aggregated namespaces only.",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"m3db_version": {
 			Description: "M3 major version (the minimum compatible version)",
@@ -3686,12 +3686,12 @@ func ServiceTypeM3db() *schema.Schema {
 						"snapshot_enabled": {
 							Description: "Controls whether M3DB will create snapshot files for this namespace",
 							Optional:    true,
-							Type:        schema.TypeString,
+							Type:        schema.TypeBool,
 						},
 						"writes_to_commitlog": {
 							Description: "Controls whether M3DB will include writes to this namespace in the commitlog",
 							Optional:    true,
-							Type:        schema.TypeString,
+							Type:        schema.TypeBool,
 						},
 					}),
 					Elem: &schema.Resource{Schema: map[string]*schema.Schema{
@@ -3758,12 +3758,12 @@ func ServiceTypeM3db() *schema.Schema {
 						"snapshot_enabled": {
 							Description: "Controls whether M3DB will create snapshot files for this namespace",
 							Optional:    true,
-							Type:        schema.TypeString,
+							Type:        schema.TypeBool,
 						},
 						"writes_to_commitlog": {
 							Description: "Controls whether M3DB will include writes to this namespace in the commitlog",
 							Optional:    true,
-							Type:        schema.TypeString,
+							Type:        schema.TypeBool,
 						},
 					}},
 					MaxItems: 1,
@@ -3790,12 +3790,12 @@ func ServiceTypeM3db() *schema.Schema {
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"m3coordinator": {
 				Description: "Allow clients to connect to m3coordinator with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"m3coordinator": {
 				Description: "Allow clients to connect to m3coordinator with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}},
 			MaxItems: 1,
 			Optional: true,
@@ -3812,12 +3812,12 @@ func ServiceTypeM3db() *schema.Schema {
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"m3coordinator": {
 				Description: "Allow clients to connect to m3coordinator from the public internet for service nodes that are in a project VPC or another type of private network",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"m3coordinator": {
 				Description: "Allow clients to connect to m3coordinator from the public internet for service nodes that are in a project VPC or another type of private network",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 			}}},
 			MaxItems: 1,
 			Optional: true,
@@ -3838,7 +3838,7 @@ func ServiceTypeM3db() *schema.Schema {
 					"drop": {
 						Description: "Only store the derived metric (as specified in the roll-up rules), if any",
 						Optional:    true,
-						Type:        schema.TypeString,
+						Type:        schema.TypeBool,
 					},
 					"filter": {
 						Description: "Matching metric names with wildcards (using __name__:wildcard) or matching tags and their (optionally wildcarded) values. For value, ! can be used at start of value for negation, and multiple filters can be supplied using space as separator.",
@@ -3912,7 +3912,7 @@ func ServiceTypeM3db() *schema.Schema {
 					"drop": {
 						Description: "Only store the derived metric (as specified in the roll-up rules), if any",
 						Optional:    true,
-						Type:        schema.TypeString,
+						Type:        schema.TypeBool,
 					},
 					"filter": {
 						Description: "Matching metric names with wildcards (using __name__:wildcard) or matching tags and their (optionally wildcarded) values. For value, ! can be used at start of value for negation, and multiple filters can be supplied using space as separator.",
@@ -3986,7 +3986,7 @@ func ServiceTypeM3db() *schema.Schema {
 		"static_ips": {
 			Description: "Use static public IP addresses",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 	}
 
@@ -4026,17 +4026,17 @@ func ServiceTypeMysql() *schema.Schema {
 		"backup_hour": {
 			Description: "The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"backup_minute": {
 			Description: "The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"binlog_retention_period": {
 			Description: "The minimum amount of time in seconds to keep binlog entries before deletion. This may be extended for services that require binlog entries for longer than the default for example if using the MySQL Debezium Kafka connector.",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"ip_filter": {
 			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
@@ -4100,12 +4100,12 @@ func ServiceTypeMysql() *schema.Schema {
 				"port": {
 					Description: "Port number of the server where to migrate data from",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"ssl": {
 					Description: "The server where to migrate data from is secured with SSL",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"username": {
 					Description: "User name for authentication with the server where to migrate data from",
@@ -4143,12 +4143,12 @@ func ServiceTypeMysql() *schema.Schema {
 				"port": {
 					Description: "Port number of the server where to migrate data from",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"ssl": {
 					Description: "The server where to migrate data from is secured with SSL",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"username": {
 					Description: "User name for authentication with the server where to migrate data from",
@@ -4166,7 +4166,7 @@ func ServiceTypeMysql() *schema.Schema {
 				"connect_timeout": {
 					Description: "The number of seconds that the mysqld server waits for a connect packet before responding with Bad handshake",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"default_time_zone": {
 					Description: "Default server time zone as an offset from UTC (from -12:00 to +12:00), a time zone name, or 'SYSTEM' to use the MySQL server default.",
@@ -4176,27 +4176,27 @@ func ServiceTypeMysql() *schema.Schema {
 				"group_concat_max_len": {
 					Description: "The maximum permitted result length in bytes for the GROUP_CONCAT() function.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"information_schema_stats_expiry": {
 					Description: "The time, in seconds, before cached statistics expire",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"innodb_change_buffer_max_size": {
 					Description: "Maximum size for the InnoDB change buffer, as a percentage of the total size of the buffer pool. Default is 25",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"innodb_flush_neighbors": {
 					Description: "Specifies whether flushing a page from the InnoDB buffer pool also flushes other dirty pages in the same extent (default is 1): 0 - dirty pages in the same extent are not flushed,  1 - flush contiguous dirty pages in the same extent,  2 - flush dirty pages in the same extent",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"innodb_ft_min_token_size": {
 					Description: "Minimum length of words that are stored in an InnoDB FULLTEXT index. Changing this parameter will lead to a restart of the MySQL service.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"innodb_ft_server_stopword_table": {
 					Description: "This option is used to specify your own InnoDB FULLTEXT index stopword list for all InnoDB tables.",
@@ -4206,47 +4206,47 @@ func ServiceTypeMysql() *schema.Schema {
 				"innodb_lock_wait_timeout": {
 					Description: "The length of time in seconds an InnoDB transaction waits for a row lock before giving up.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"innodb_log_buffer_size": {
 					Description: "The size in bytes of the buffer that InnoDB uses to write to the log files on disk.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"innodb_online_alter_log_max_size": {
 					Description: "The upper limit in bytes on the size of the temporary log files used during online DDL operations for InnoDB tables.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"innodb_print_all_deadlocks": {
 					Description: "When enabled, information about all deadlocks in InnoDB user transactions is recorded in the error log. Disabled by default.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"innodb_read_io_threads": {
 					Description: "The number of I/O threads for read operations in InnoDB. Default is 4. Changing this parameter will lead to a restart of the MySQL service.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"innodb_rollback_on_timeout": {
 					Description: "When enabled a transaction timeout causes InnoDB to abort and roll back the entire transaction. Changing this parameter will lead to a restart of the MySQL service.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"innodb_thread_concurrency": {
 					Description: "Defines the maximum number of threads permitted inside of InnoDB. Default is 0 (infinite concurrency - no limit)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"innodb_write_io_threads": {
 					Description: "The number of I/O threads for write operations in InnoDB. Default is 4. Changing this parameter will lead to a restart of the MySQL service.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"interactive_timeout": {
 					Description: "The number of seconds the server waits for activity on an interactive connection before closing it.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"internal_tmp_mem_storage_engine": {
 					Description: "The storage engine for in-memory internal temporary tables.",
@@ -4256,42 +4256,42 @@ func ServiceTypeMysql() *schema.Schema {
 				"long_query_time": {
 					Description: "The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Default is 10s",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeFloat,
 				},
 				"max_allowed_packet": {
 					Description: "Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_heap_table_size": {
 					Description: "Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"net_buffer_length": {
 					Description: "Start sizes of connection buffer and result buffer. Default is 16384 (16K). Changing this parameter will lead to a restart of the MySQL service.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"net_read_timeout": {
 					Description: "The number of seconds to wait for more data from a connection before aborting the read.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"net_write_timeout": {
 					Description: "The number of seconds to wait for a block to be written to a connection before aborting the write.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"slow_query_log": {
 					Description: "Slow query log enables capturing of slow queries. Setting slow_query_log to false also truncates the mysql.slow_log table. Default is off",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"sort_buffer_size": {
 					Description: "Sort buffer size in bytes for ORDER BY optimization. Default is 262144 (256K)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"sql_mode": {
 					Description: "Global SQL mode. Set to empty to use MySQL server defaults. When creating a new service and not setting this field Aiven default SQL mode (strict, SQL standard compliant) will be assigned.",
@@ -4301,24 +4301,24 @@ func ServiceTypeMysql() *schema.Schema {
 				"sql_require_primary_key": {
 					Description: "Require primary key to be defined for new tables or old tables modified with ALTER TABLE and fail if missing. It is recommended to always have primary keys because various functionality may break if any large table is missing them.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"tmp_table_size": {
 					Description: "Limits the size of internal in-memory tables. Also set max_heap_table_size. Default is 16777216 (16M)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"wait_timeout": {
 					Description: "The number of seconds the server waits for activity on a noninteractive connection before closing it.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"connect_timeout": {
 					Description: "The number of seconds that the mysqld server waits for a connect packet before responding with Bad handshake",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"default_time_zone": {
 					Description: "Default server time zone as an offset from UTC (from -12:00 to +12:00), a time zone name, or 'SYSTEM' to use the MySQL server default.",
@@ -4328,27 +4328,27 @@ func ServiceTypeMysql() *schema.Schema {
 				"group_concat_max_len": {
 					Description: "The maximum permitted result length in bytes for the GROUP_CONCAT() function.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"information_schema_stats_expiry": {
 					Description: "The time, in seconds, before cached statistics expire",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"innodb_change_buffer_max_size": {
 					Description: "Maximum size for the InnoDB change buffer, as a percentage of the total size of the buffer pool. Default is 25",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"innodb_flush_neighbors": {
 					Description: "Specifies whether flushing a page from the InnoDB buffer pool also flushes other dirty pages in the same extent (default is 1): 0 - dirty pages in the same extent are not flushed,  1 - flush contiguous dirty pages in the same extent,  2 - flush dirty pages in the same extent",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"innodb_ft_min_token_size": {
 					Description: "Minimum length of words that are stored in an InnoDB FULLTEXT index. Changing this parameter will lead to a restart of the MySQL service.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"innodb_ft_server_stopword_table": {
 					Description: "This option is used to specify your own InnoDB FULLTEXT index stopword list for all InnoDB tables.",
@@ -4358,47 +4358,47 @@ func ServiceTypeMysql() *schema.Schema {
 				"innodb_lock_wait_timeout": {
 					Description: "The length of time in seconds an InnoDB transaction waits for a row lock before giving up.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"innodb_log_buffer_size": {
 					Description: "The size in bytes of the buffer that InnoDB uses to write to the log files on disk.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"innodb_online_alter_log_max_size": {
 					Description: "The upper limit in bytes on the size of the temporary log files used during online DDL operations for InnoDB tables.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"innodb_print_all_deadlocks": {
 					Description: "When enabled, information about all deadlocks in InnoDB user transactions is recorded in the error log. Disabled by default.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"innodb_read_io_threads": {
 					Description: "The number of I/O threads for read operations in InnoDB. Default is 4. Changing this parameter will lead to a restart of the MySQL service.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"innodb_rollback_on_timeout": {
 					Description: "When enabled a transaction timeout causes InnoDB to abort and roll back the entire transaction. Changing this parameter will lead to a restart of the MySQL service.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"innodb_thread_concurrency": {
 					Description: "Defines the maximum number of threads permitted inside of InnoDB. Default is 0 (infinite concurrency - no limit)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"innodb_write_io_threads": {
 					Description: "The number of I/O threads for write operations in InnoDB. Default is 4. Changing this parameter will lead to a restart of the MySQL service.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"interactive_timeout": {
 					Description: "The number of seconds the server waits for activity on an interactive connection before closing it.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"internal_tmp_mem_storage_engine": {
 					Description: "The storage engine for in-memory internal temporary tables.",
@@ -4408,42 +4408,42 @@ func ServiceTypeMysql() *schema.Schema {
 				"long_query_time": {
 					Description: "The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Default is 10s",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeFloat,
 				},
 				"max_allowed_packet": {
 					Description: "Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_heap_table_size": {
 					Description: "Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"net_buffer_length": {
 					Description: "Start sizes of connection buffer and result buffer. Default is 16384 (16K). Changing this parameter will lead to a restart of the MySQL service.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"net_read_timeout": {
 					Description: "The number of seconds to wait for more data from a connection before aborting the read.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"net_write_timeout": {
 					Description: "The number of seconds to wait for a block to be written to a connection before aborting the write.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"slow_query_log": {
 					Description: "Slow query log enables capturing of slow queries. Setting slow_query_log to false also truncates the mysql.slow_log table. Default is off",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"sort_buffer_size": {
 					Description: "Sort buffer size in bytes for ORDER BY optimization. Default is 262144 (256K)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"sql_mode": {
 					Description: "Global SQL mode. Set to empty to use MySQL server defaults. When creating a new service and not setting this field Aiven default SQL mode (strict, SQL standard compliant) will be assigned.",
@@ -4453,17 +4453,17 @@ func ServiceTypeMysql() *schema.Schema {
 				"sql_require_primary_key": {
 					Description: "Require primary key to be defined for new tables or old tables modified with ALTER TABLE and fail if missing. It is recommended to always have primary keys because various functionality may break if any large table is missing them.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"tmp_table_size": {
 					Description: "Limits the size of internal in-memory tables. Also set max_heap_table_size. Default is 16777216 (16M)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"wait_timeout": {
 					Description: "The number of seconds the server waits for activity on a noninteractive connection before closing it.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}},
 			MaxItems: 1,
@@ -4481,34 +4481,34 @@ func ServiceTypeMysql() *schema.Schema {
 				"mysql": {
 					Description: "Allow clients to connect to mysql with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"mysqlx": {
 					Description: "Allow clients to connect to mysqlx with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"mysql": {
 					Description: "Allow clients to connect to mysql with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"mysqlx": {
 					Description: "Allow clients to connect to mysqlx with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -4521,34 +4521,34 @@ func ServiceTypeMysql() *schema.Schema {
 				"mysql": {
 					Description: "Enable mysql",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"mysqlx": {
 					Description: "Enable mysqlx",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Enable prometheus",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"mysql": {
 					Description: "Enable mysql",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"mysqlx": {
 					Description: "Enable mysqlx",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Enable prometheus",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -4567,34 +4567,34 @@ func ServiceTypeMysql() *schema.Schema {
 				"mysql": {
 					Description: "Allow clients to connect to mysql from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"mysqlx": {
 					Description: "Allow clients to connect to mysqlx from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"mysql": {
 					Description: "Allow clients to connect to mysql from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"mysqlx": {
 					Description: "Allow clients to connect to mysqlx from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -4616,7 +4616,7 @@ func ServiceTypeMysql() *schema.Schema {
 		"static_ips": {
 			Description: "Use static public IP addresses",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 	}
 
@@ -4648,7 +4648,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 		"disable_replication_factor_adjustment": {
 			Deprecated: "DEPRECATED: Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can no longer be activated.",
 			Optional:   true,
-			Type:       schema.TypeString,
+			Type:       schema.TypeBool,
 		},
 		"index_patterns": {
 			Description: "Index patterns",
@@ -4656,7 +4656,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 				"max_index_count": {
 					Description: "Maximum number of indexes to keep",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"pattern": {
 					Description: "fnmatch pattern",
@@ -4679,34 +4679,34 @@ func ServiceTypeOpensearch() *schema.Schema {
 				"mapping_nested_objects_limit": {
 					Description: "The maximum number of nested JSON objects that a single document can contain across all nested types. This limit helps to prevent out of memory errors when a document contains too many nested objects. Default is 10000.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"number_of_replicas": {
 					Description: "The number of replicas each primary shard has.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"number_of_shards": {
 					Description: "The number of primary shards that an index should have.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"mapping_nested_objects_limit": {
 					Description: "The maximum number of nested JSON objects that a single document can contain across all nested types. This limit helps to prevent out of memory errors when a document contains too many nested objects. Default is 10000.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"number_of_replicas": {
 					Description: "The number of replicas each primary shard has.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"number_of_shards": {
 					Description: "The number of primary shards that an index should have.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}},
 			MaxItems: 1,
@@ -4746,12 +4746,12 @@ func ServiceTypeOpensearch() *schema.Schema {
 		"keep_index_refresh_interval": {
 			Description: "Aiven automation resets index.refresh_interval to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"max_index_count": {
 			Deprecated: "DEPRECATED: use index_patterns instead",
 			Optional:   true,
-			Type:       schema.TypeString,
+			Type:       schema.TypeInt,
 		},
 		"opensearch": {
 			Description: "OpenSearch settings",
@@ -4759,22 +4759,22 @@ func ServiceTypeOpensearch() *schema.Schema {
 				"action_auto_create_index_enabled": {
 					Description: "Explicitly allow or block automatic creation of indices. Defaults to true",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"action_destructive_requires_name": {
 					Description: "Require explicit index names when deleting",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"cluster_max_shards_per_node": {
 					Description: "Controls the number of shards allowed in the cluster per data node",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"cluster_routing_allocation_node_concurrent_recoveries": {
 					Description: "How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to 2.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"email_sender_name": {
 					Description: "This should be identical to the Sender name defined in Opensearch dashboards",
@@ -4795,52 +4795,52 @@ func ServiceTypeOpensearch() *schema.Schema {
 				"http_max_content_length": {
 					Description: "Maximum content length for HTTP requests to the OpenSearch HTTP API, in bytes.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"http_max_header_size": {
 					Description: "The max size of allowed headers, in bytes",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"http_max_initial_line_length": {
 					Description: "The max length of an HTTP URL, in bytes",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_fielddata_cache_size": {
 					Description: "Relative amount. Maximum amount of heap memory used for field data cache. This is an expert setting; decreasing the value too much will increase overhead of loading field data; too much memory used for field data cache will decrease amount of heap available for other operations.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_memory_index_buffer_size": {
 					Description: "Percentage value. Default is 10%. Total amount of heap used for indexing buffer, before writing segments to disk. This is an expert setting. Too low value will slow down indexing; too high value will increase indexing performance but causes performance issues for query performance.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_queries_cache_size": {
 					Description: "Percentage value. Default is 10%. Maximum amount of heap used for query cache. This is an expert setting. Too low value will decrease query performance and increase performance for other operations; too high value will cause issues with other OpenSearch functionality.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_query_bool_max_clause_count": {
 					Description: "Maximum number of clauses Lucene BooleanQuery can have. The default value (1024) is relatively high, and increasing it may cause performance issues. Investigate other approaches first before increasing this value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_recovery_max_bytes_per_sec": {
 					Description: "Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_recovery_max_concurrent_file_chunks": {
 					Description: "Number of file chunks sent in parallel for each recovery. Defaults to 2.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"override_main_response_version": {
 					Description: "Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"reindex_remote_whitelist": {
 					Description: "Whitelisted addresses for reindexing. Changing this value will cause all OpenSearch instances to restart.",
@@ -4857,84 +4857,84 @@ func ServiceTypeOpensearch() *schema.Schema {
 				"search_max_buckets": {
 					Description: "Maximum number of aggregation buckets allowed in a single response. OpenSearch default value is used when this is not defined.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_analyze_queue_size": {
 					Description: "Size for the thread pool queue. See documentation for exact details.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_analyze_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_force_merge_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_get_queue_size": {
 					Description: "Size for the thread pool queue. See documentation for exact details.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_get_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_search_queue_size": {
 					Description: "Size for the thread pool queue. See documentation for exact details.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_search_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_search_throttled_queue_size": {
 					Description: "Size for the thread pool queue. See documentation for exact details.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_search_throttled_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_write_queue_size": {
 					Description: "Size for the thread pool queue. See documentation for exact details.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_write_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"action_auto_create_index_enabled": {
 					Description: "Explicitly allow or block automatic creation of indices. Defaults to true",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"action_destructive_requires_name": {
 					Description: "Require explicit index names when deleting",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"cluster_max_shards_per_node": {
 					Description: "Controls the number of shards allowed in the cluster per data node",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"cluster_routing_allocation_node_concurrent_recoveries": {
 					Description: "How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to 2.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"email_sender_name": {
 					Description: "This should be identical to the Sender name defined in Opensearch dashboards",
@@ -4955,52 +4955,52 @@ func ServiceTypeOpensearch() *schema.Schema {
 				"http_max_content_length": {
 					Description: "Maximum content length for HTTP requests to the OpenSearch HTTP API, in bytes.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"http_max_header_size": {
 					Description: "The max size of allowed headers, in bytes",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"http_max_initial_line_length": {
 					Description: "The max length of an HTTP URL, in bytes",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_fielddata_cache_size": {
 					Description: "Relative amount. Maximum amount of heap memory used for field data cache. This is an expert setting; decreasing the value too much will increase overhead of loading field data; too much memory used for field data cache will decrease amount of heap available for other operations.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_memory_index_buffer_size": {
 					Description: "Percentage value. Default is 10%. Total amount of heap used for indexing buffer, before writing segments to disk. This is an expert setting. Too low value will slow down indexing; too high value will increase indexing performance but causes performance issues for query performance.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_queries_cache_size": {
 					Description: "Percentage value. Default is 10%. Maximum amount of heap used for query cache. This is an expert setting. Too low value will decrease query performance and increase performance for other operations; too high value will cause issues with other OpenSearch functionality.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_query_bool_max_clause_count": {
 					Description: "Maximum number of clauses Lucene BooleanQuery can have. The default value (1024) is relatively high, and increasing it may cause performance issues. Investigate other approaches first before increasing this value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_recovery_max_bytes_per_sec": {
 					Description: "Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"indices_recovery_max_concurrent_file_chunks": {
 					Description: "Number of file chunks sent in parallel for each recovery. Defaults to 2.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"override_main_response_version": {
 					Description: "Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"reindex_remote_whitelist": {
 					Description: "Whitelisted addresses for reindexing. Changing this value will cause all OpenSearch instances to restart.",
@@ -5017,62 +5017,62 @@ func ServiceTypeOpensearch() *schema.Schema {
 				"search_max_buckets": {
 					Description: "Maximum number of aggregation buckets allowed in a single response. OpenSearch default value is used when this is not defined.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_analyze_queue_size": {
 					Description: "Size for the thread pool queue. See documentation for exact details.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_analyze_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_force_merge_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_get_queue_size": {
 					Description: "Size for the thread pool queue. See documentation for exact details.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_get_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_search_queue_size": {
 					Description: "Size for the thread pool queue. See documentation for exact details.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_search_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_search_throttled_queue_size": {
 					Description: "Size for the thread pool queue. See documentation for exact details.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_search_throttled_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_write_queue_size": {
 					Description: "Size for the thread pool queue. See documentation for exact details.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"thread_pool_write_size": {
 					Description: "Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}},
 			MaxItems: 1,
@@ -5085,34 +5085,34 @@ func ServiceTypeOpensearch() *schema.Schema {
 				"enabled": {
 					Description: "Enable or disable OpenSearch Dashboards",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"max_old_space_size": {
 					Description: "Limits the maximum amount of memory (in MiB) the OpenSearch Dashboards process can use. This sets the max_old_space_size option of the nodejs running the OpenSearch Dashboards. Note: the memory reserved by OpenSearch Dashboards is not available for OpenSearch.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"opensearch_request_timeout": {
 					Description: "Timeout in milliseconds for requests made by OpenSearch Dashboards towards OpenSearch",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"enabled": {
 					Description: "Enable or disable OpenSearch Dashboards",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"max_old_space_size": {
 					Description: "Limits the maximum amount of memory (in MiB) the OpenSearch Dashboards process can use. This sets the max_old_space_size option of the nodejs running the OpenSearch Dashboards. Note: the memory reserved by OpenSearch Dashboards is not available for OpenSearch.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"opensearch_request_timeout": {
 					Description: "Timeout in milliseconds for requests made by OpenSearch Dashboards towards OpenSearch",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}},
 			MaxItems: 1,
@@ -5130,34 +5130,34 @@ func ServiceTypeOpensearch() *schema.Schema {
 				"opensearch": {
 					Description: "Allow clients to connect to opensearch with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"opensearch_dashboards": {
 					Description: "Allow clients to connect to opensearch_dashboards with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"opensearch": {
 					Description: "Allow clients to connect to opensearch with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"opensearch_dashboards": {
 					Description: "Allow clients to connect to opensearch_dashboards with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -5170,34 +5170,34 @@ func ServiceTypeOpensearch() *schema.Schema {
 				"opensearch": {
 					Description: "Enable opensearch",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"opensearch_dashboards": {
 					Description: "Enable opensearch_dashboards",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Enable prometheus",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"opensearch": {
 					Description: "Enable opensearch",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"opensearch_dashboards": {
 					Description: "Enable opensearch_dashboards",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Enable prometheus",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -5216,34 +5216,34 @@ func ServiceTypeOpensearch() *schema.Schema {
 				"opensearch": {
 					Description: "Allow clients to connect to opensearch from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"opensearch_dashboards": {
 					Description: "Allow clients to connect to opensearch_dashboards from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"opensearch": {
 					Description: "Allow clients to connect to opensearch from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"opensearch_dashboards": {
 					Description: "Allow clients to connect to opensearch_dashboards from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -5264,7 +5264,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 		"static_ips": {
 			Description: "Use static public IP addresses",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 	}
 
@@ -5304,17 +5304,17 @@ func ServiceTypePg() *schema.Schema {
 		"backup_hour": {
 			Description: "The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"backup_minute": {
 			Description: "The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"enable_ipv6": {
 			Description: "Register AAAA DNS records for the service, and allow IPv6 packets to service ports",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"ip_filter": {
 			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
@@ -5378,12 +5378,12 @@ func ServiceTypePg() *schema.Schema {
 				"port": {
 					Description: "Port number of the server where to migrate data from",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"ssl": {
 					Description: "The server where to migrate data from is secured with SSL",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"username": {
 					Description: "User name for authentication with the server where to migrate data from",
@@ -5421,12 +5421,12 @@ func ServiceTypePg() *schema.Schema {
 				"port": {
 					Description: "Port number of the server where to migrate data from",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"ssl": {
 					Description: "The server where to migrate data from is secured with SSL",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"username": {
 					Description: "User name for authentication with the server where to migrate data from",
@@ -5444,72 +5444,72 @@ func ServiceTypePg() *schema.Schema {
 				"autovacuum_analyze_scale_factor": {
 					Description: "Specifies a fraction of the table size to add to autovacuum_analyze_threshold when deciding whether to trigger an ANALYZE. The default is 0.2 (20% of table size)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeFloat,
 				},
 				"autovacuum_analyze_threshold": {
 					Description: "Specifies the minimum number of inserted, updated or deleted tuples needed to trigger an  ANALYZE in any one table. The default is 50 tuples.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"autovacuum_freeze_max_age": {
 					Description: "Specifies the maximum age (in transactions) that a table's pg_class.relfrozenxid field can attain before a VACUUM operation is forced to prevent transaction ID wraparound within the table. Note that the system will launch autovacuum processes to prevent wraparound even when autovacuum is otherwise disabled. This parameter will cause the server to be restarted.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"autovacuum_max_workers": {
 					Description: "Specifies the maximum number of autovacuum processes (other than the autovacuum launcher) that may be running at any one time. The default is three. This parameter can only be set at server start.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"autovacuum_naptime": {
 					Description: "Specifies the minimum delay between autovacuum runs on any given database. The delay is measured in seconds, and the default is one minute",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"autovacuum_vacuum_cost_delay": {
 					Description: "Specifies the cost delay value that will be used in automatic VACUUM operations. If -1 is specified, the regular vacuum_cost_delay value will be used. The default value is 20 milliseconds",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"autovacuum_vacuum_cost_limit": {
 					Description: "Specifies the cost limit value that will be used in automatic VACUUM operations. If -1 is specified (which is the default), the regular vacuum_cost_limit value will be used.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"autovacuum_vacuum_scale_factor": {
 					Description: "Specifies a fraction of the table size to add to autovacuum_vacuum_threshold when deciding whether to trigger a VACUUM. The default is 0.2 (20% of table size)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeFloat,
 				},
 				"autovacuum_vacuum_threshold": {
 					Description: "Specifies the minimum number of updated or deleted tuples needed to trigger a VACUUM in any one table. The default is 50 tuples",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"bgwriter_delay": {
 					Description: "Specifies the delay between activity rounds for the background writer in milliseconds. Default is 200.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"bgwriter_flush_after": {
 					Description: "Whenever more than bgwriter_flush_after bytes have been written by the background writer, attempt to force the OS to issue these writes to the underlying storage. Specified in kilobytes, default is 512. Setting of 0 disables forced writeback.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"bgwriter_lru_maxpages": {
 					Description: "In each round, no more than this many buffers will be written by the background writer. Setting this to zero disables background writing. Default is 100.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"bgwriter_lru_multiplier": {
 					Description: "The average recent need for new buffers is multiplied by bgwriter_lru_multiplier to arrive at an estimate of the number that will be needed during the next round, (up to bgwriter_lru_maxpages). 1.0 represents a “just in time” policy of writing exactly the number of buffers predicted to be needed. Larger values provide some cushion against spikes in demand, while smaller values intentionally leave writes to be done by server processes. The default is 2.0.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeFloat,
 				},
 				"deadlock_timeout": {
 					Description: "This is the amount of time, in milliseconds, to wait on a lock before checking to see if there is a deadlock condition.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"default_toast_compression": {
 					Description: "Specifies the default TOAST compression method for values of compressible columns (the default is lz4).",
@@ -5519,17 +5519,17 @@ func ServiceTypePg() *schema.Schema {
 				"idle_in_transaction_session_timeout": {
 					Description: "Time out sessions with open transactions after this number of milliseconds",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"jit": {
 					Description: "Controls system-wide use of Just-in-Time Compilation (JIT).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"log_autovacuum_min_duration": {
 					Description: "Causes each action executed by autovacuum to be logged if it ran for at least the specified number of milliseconds. Setting this to zero logs all autovacuum actions. Minus-one (the default) disables logging autovacuum actions.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_error_verbosity": {
 					Description: "Controls the amount of detail written in the server log for each message that is logged.",
@@ -5544,87 +5544,87 @@ func ServiceTypePg() *schema.Schema {
 				"log_min_duration_statement": {
 					Description: "Log statements that take more than this number of milliseconds to run, -1 disables",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_temp_files": {
 					Description: "Log statements for each temporary file created larger than this number of kilobytes, -1 disables",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_files_per_process": {
 					Description: "PostgreSQL maximum number of files that can be open per process",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_locks_per_transaction": {
 					Description: "PostgreSQL maximum locks per transaction",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_logical_replication_workers": {
 					Description: "PostgreSQL maximum logical replication workers (taken from the pool of max_parallel_workers)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_parallel_workers": {
 					Description: "Sets the maximum number of workers that the system can support for parallel queries",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_parallel_workers_per_gather": {
 					Description: "Sets the maximum number of workers that can be started by a single Gather or Gather Merge node",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_pred_locks_per_transaction": {
 					Description: "PostgreSQL maximum predicate locks per transaction",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_prepared_transactions": {
 					Description: "PostgreSQL maximum prepared transactions",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_replication_slots": {
 					Description: "PostgreSQL maximum replication slots",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_slot_wal_keep_size": {
 					Description: "PostgreSQL maximum WAL size (MB) reserved for replication slots. Default is -1 (unlimited). wal_keep_size minimum WAL size setting takes precedence over this.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_stack_depth": {
 					Description: "Maximum depth of the stack in bytes",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_standby_archive_delay": {
 					Description: "Max standby archive delay in milliseconds",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_standby_streaming_delay": {
 					Description: "Max standby streaming delay in milliseconds",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_wal_senders": {
 					Description: "PostgreSQL maximum WAL senders",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_worker_processes": {
 					Description: "Sets the maximum number of background processes that the system can support",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"pg_partman_bgw__dot__interval": {
 					Description: "Sets the time interval to run pg_partman's scheduled tasks",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"pg_partman_bgw__dot__role": {
 					Description: "Controls which role to use for pg_partman's scheduled background tasks.",
@@ -5639,7 +5639,7 @@ func ServiceTypePg() *schema.Schema {
 				"temp_file_limit": {
 					Description: "PostgreSQL temporary file limit in KiB, -1 for unlimited",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"timezone": {
 					Description: "PostgreSQL service timezone",
@@ -5649,7 +5649,7 @@ func ServiceTypePg() *schema.Schema {
 				"track_activity_query_size": {
 					Description: "Specifies the number of bytes reserved to track the currently executing command for each active session.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"track_commit_timestamp": {
 					Description: "Record commit time of transactions.",
@@ -5669,84 +5669,84 @@ func ServiceTypePg() *schema.Schema {
 				"wal_sender_timeout": {
 					Description: "Terminate replication connections that are inactive for longer than this amount of time, in milliseconds. Setting this value to zero disables the timeout.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"wal_writer_delay": {
 					Description: "WAL flush interval in milliseconds. Note that setting this value to lower than the default 200ms may negatively impact performance",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"autovacuum_analyze_scale_factor": {
 					Description: "Specifies a fraction of the table size to add to autovacuum_analyze_threshold when deciding whether to trigger an ANALYZE. The default is 0.2 (20% of table size)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeFloat,
 				},
 				"autovacuum_analyze_threshold": {
 					Description: "Specifies the minimum number of inserted, updated or deleted tuples needed to trigger an  ANALYZE in any one table. The default is 50 tuples.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"autovacuum_freeze_max_age": {
 					Description: "Specifies the maximum age (in transactions) that a table's pg_class.relfrozenxid field can attain before a VACUUM operation is forced to prevent transaction ID wraparound within the table. Note that the system will launch autovacuum processes to prevent wraparound even when autovacuum is otherwise disabled. This parameter will cause the server to be restarted.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"autovacuum_max_workers": {
 					Description: "Specifies the maximum number of autovacuum processes (other than the autovacuum launcher) that may be running at any one time. The default is three. This parameter can only be set at server start.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"autovacuum_naptime": {
 					Description: "Specifies the minimum delay between autovacuum runs on any given database. The delay is measured in seconds, and the default is one minute",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"autovacuum_vacuum_cost_delay": {
 					Description: "Specifies the cost delay value that will be used in automatic VACUUM operations. If -1 is specified, the regular vacuum_cost_delay value will be used. The default value is 20 milliseconds",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"autovacuum_vacuum_cost_limit": {
 					Description: "Specifies the cost limit value that will be used in automatic VACUUM operations. If -1 is specified (which is the default), the regular vacuum_cost_limit value will be used.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"autovacuum_vacuum_scale_factor": {
 					Description: "Specifies a fraction of the table size to add to autovacuum_vacuum_threshold when deciding whether to trigger a VACUUM. The default is 0.2 (20% of table size)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeFloat,
 				},
 				"autovacuum_vacuum_threshold": {
 					Description: "Specifies the minimum number of updated or deleted tuples needed to trigger a VACUUM in any one table. The default is 50 tuples",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"bgwriter_delay": {
 					Description: "Specifies the delay between activity rounds for the background writer in milliseconds. Default is 200.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"bgwriter_flush_after": {
 					Description: "Whenever more than bgwriter_flush_after bytes have been written by the background writer, attempt to force the OS to issue these writes to the underlying storage. Specified in kilobytes, default is 512. Setting of 0 disables forced writeback.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"bgwriter_lru_maxpages": {
 					Description: "In each round, no more than this many buffers will be written by the background writer. Setting this to zero disables background writing. Default is 100.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"bgwriter_lru_multiplier": {
 					Description: "The average recent need for new buffers is multiplied by bgwriter_lru_multiplier to arrive at an estimate of the number that will be needed during the next round, (up to bgwriter_lru_maxpages). 1.0 represents a “just in time” policy of writing exactly the number of buffers predicted to be needed. Larger values provide some cushion against spikes in demand, while smaller values intentionally leave writes to be done by server processes. The default is 2.0.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeFloat,
 				},
 				"deadlock_timeout": {
 					Description: "This is the amount of time, in milliseconds, to wait on a lock before checking to see if there is a deadlock condition.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"default_toast_compression": {
 					Description: "Specifies the default TOAST compression method for values of compressible columns (the default is lz4).",
@@ -5756,17 +5756,17 @@ func ServiceTypePg() *schema.Schema {
 				"idle_in_transaction_session_timeout": {
 					Description: "Time out sessions with open transactions after this number of milliseconds",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"jit": {
 					Description: "Controls system-wide use of Just-in-Time Compilation (JIT).",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"log_autovacuum_min_duration": {
 					Description: "Causes each action executed by autovacuum to be logged if it ran for at least the specified number of milliseconds. Setting this to zero logs all autovacuum actions. Minus-one (the default) disables logging autovacuum actions.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_error_verbosity": {
 					Description: "Controls the amount of detail written in the server log for each message that is logged.",
@@ -5781,87 +5781,87 @@ func ServiceTypePg() *schema.Schema {
 				"log_min_duration_statement": {
 					Description: "Log statements that take more than this number of milliseconds to run, -1 disables",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"log_temp_files": {
 					Description: "Log statements for each temporary file created larger than this number of kilobytes, -1 disables",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_files_per_process": {
 					Description: "PostgreSQL maximum number of files that can be open per process",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_locks_per_transaction": {
 					Description: "PostgreSQL maximum locks per transaction",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_logical_replication_workers": {
 					Description: "PostgreSQL maximum logical replication workers (taken from the pool of max_parallel_workers)",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_parallel_workers": {
 					Description: "Sets the maximum number of workers that the system can support for parallel queries",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_parallel_workers_per_gather": {
 					Description: "Sets the maximum number of workers that can be started by a single Gather or Gather Merge node",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_pred_locks_per_transaction": {
 					Description: "PostgreSQL maximum predicate locks per transaction",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_prepared_transactions": {
 					Description: "PostgreSQL maximum prepared transactions",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_replication_slots": {
 					Description: "PostgreSQL maximum replication slots",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_slot_wal_keep_size": {
 					Description: "PostgreSQL maximum WAL size (MB) reserved for replication slots. Default is -1 (unlimited). wal_keep_size minimum WAL size setting takes precedence over this.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_stack_depth": {
 					Description: "Maximum depth of the stack in bytes",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_standby_archive_delay": {
 					Description: "Max standby archive delay in milliseconds",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_standby_streaming_delay": {
 					Description: "Max standby streaming delay in milliseconds",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_wal_senders": {
 					Description: "PostgreSQL maximum WAL senders",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"max_worker_processes": {
 					Description: "Sets the maximum number of background processes that the system can support",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"pg_partman_bgw__dot__interval": {
 					Description: "Sets the time interval to run pg_partman's scheduled tasks",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"pg_partman_bgw__dot__role": {
 					Description: "Controls which role to use for pg_partman's scheduled background tasks.",
@@ -5876,7 +5876,7 @@ func ServiceTypePg() *schema.Schema {
 				"temp_file_limit": {
 					Description: "PostgreSQL temporary file limit in KiB, -1 for unlimited",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"timezone": {
 					Description: "PostgreSQL service timezone",
@@ -5886,7 +5886,7 @@ func ServiceTypePg() *schema.Schema {
 				"track_activity_query_size": {
 					Description: "Specifies the number of bytes reserved to track the currently executing command for each active session.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"track_commit_timestamp": {
 					Description: "Record commit time of transactions.",
@@ -5906,12 +5906,12 @@ func ServiceTypePg() *schema.Schema {
 				"wal_sender_timeout": {
 					Description: "Terminate replication connections that are inactive for longer than this amount of time, in milliseconds. Setting this value to zero disables the timeout.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"wal_writer_delay": {
 					Description: "WAL flush interval in milliseconds. Note that setting this value to lower than the default 200ms may negatively impact performance",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 			}},
 			MaxItems: 1,
@@ -5921,7 +5921,7 @@ func ServiceTypePg() *schema.Schema {
 		"pg_read_replica": {
 			Deprecated: "This setting is deprecated. Use read_replica service integration instead.",
 			Optional:   true,
-			Type:       schema.TypeString,
+			Type:       schema.TypeBool,
 		},
 		"pg_service_to_fork_from": {
 			Description: "Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created.",
@@ -5932,7 +5932,7 @@ func ServiceTypePg() *schema.Schema {
 		"pg_stat_monitor_enable": {
 			Description: "Enable the pg_stat_monitor extension. Enabling this extension will cause the cluster to be restarted.When this extension is enabled, pg_stat_statements results for utility commands are unreliable",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"pg_version": {
 			Description: "PostgreSQL major version",
@@ -5945,12 +5945,12 @@ func ServiceTypePg() *schema.Schema {
 				"autodb_idle_timeout": {
 					Description: "If the automatically created database pools have been unused this many seconds, they are freed. If 0 then timeout is disabled. [seconds]",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"autodb_max_db_connections": {
 					Description: "Do not allow more than this many server connections per database (regardless of user). Setting it to 0 means unlimited.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"autodb_pool_mode": {
 					Description: "PGBouncer pool mode",
@@ -5960,7 +5960,7 @@ func ServiceTypePg() *schema.Schema {
 				"autodb_pool_size": {
 					Description: "If non-zero then create automatically a pool of that size per user when a pool doesn't exist.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"ignore_startup_parameters": {
 					Description: "List of parameters to ignore when given in startup packet",
@@ -5972,34 +5972,34 @@ func ServiceTypePg() *schema.Schema {
 				"min_pool_size": {
 					Description: "Add more server connections to pool if below this number. Improves behavior when usual load comes suddenly back after period of total inactivity. The value is effectively capped at the pool size.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"server_idle_timeout": {
 					Description: "If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. [seconds]",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"server_lifetime": {
 					Description: "The pooler will close an unused server connection that has been connected longer than this. [seconds]",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"server_reset_query_always": {
 					Description: "Run server_reset_query (DISCARD ALL) in all pooling modes",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"autodb_idle_timeout": {
 					Description: "If the automatically created database pools have been unused this many seconds, they are freed. If 0 then timeout is disabled. [seconds]",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"autodb_max_db_connections": {
 					Description: "Do not allow more than this many server connections per database (regardless of user). Setting it to 0 means unlimited.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"autodb_pool_mode": {
 					Description: "PGBouncer pool mode",
@@ -6009,7 +6009,7 @@ func ServiceTypePg() *schema.Schema {
 				"autodb_pool_size": {
 					Description: "If non-zero then create automatically a pool of that size per user when a pool doesn't exist.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"ignore_startup_parameters": {
 					Description: "List of parameters to ignore when given in startup packet",
@@ -6021,22 +6021,22 @@ func ServiceTypePg() *schema.Schema {
 				"min_pool_size": {
 					Description: "Add more server connections to pool if below this number. Improves behavior when usual load comes suddenly back after period of total inactivity. The value is effectively capped at the pool size.",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"server_idle_timeout": {
 					Description: "If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. [seconds]",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"server_lifetime": {
 					Description: "The pooler will close an unused server connection that has been connected longer than this. [seconds]",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"server_reset_query_always": {
 					Description: "Run server_reset_query (DISCARD ALL) in all pooling modes",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -6048,12 +6048,12 @@ func ServiceTypePg() *schema.Schema {
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"max_failover_replication_time_lag": {
 				Description: "Number of seconds of master unavailability before triggering database failover to standby",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeInt,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"max_failover_replication_time_lag": {
 				Description: "Number of seconds of master unavailability before triggering database failover to standby",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeInt,
 			}}},
 			MaxItems: 1,
 			Optional: true,
@@ -6065,34 +6065,34 @@ func ServiceTypePg() *schema.Schema {
 				"pg": {
 					Description: "Allow clients to connect to pg with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"pgbouncer": {
 					Description: "Allow clients to connect to pgbouncer with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"pg": {
 					Description: "Allow clients to connect to pg with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"pgbouncer": {
 					Description: "Allow clients to connect to pgbouncer with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -6105,34 +6105,34 @@ func ServiceTypePg() *schema.Schema {
 				"pg": {
 					Description: "Enable pg",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"pgbouncer": {
 					Description: "Enable pgbouncer",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Enable prometheus",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"pg": {
 					Description: "Enable pg",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"pgbouncer": {
 					Description: "Enable pgbouncer",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Enable prometheus",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -6151,34 +6151,34 @@ func ServiceTypePg() *schema.Schema {
 				"pg": {
 					Description: "Allow clients to connect to pg from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"pgbouncer": {
 					Description: "Allow clients to connect to pgbouncer from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"pg": {
 					Description: "Allow clients to connect to pg from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"pgbouncer": {
 					Description: "Allow clients to connect to pgbouncer from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -6200,12 +6200,12 @@ func ServiceTypePg() *schema.Schema {
 		"shared_buffers_percentage": {
 			Description: "Percentage of total RAM that the database server uses for shared memory buffers. Valid range is 20-60 (float), which corresponds to 20% - 60%. This setting adjusts the shared_buffers configuration value.",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeFloat,
 		},
 		"static_ips": {
 			Description: "Use static public IP addresses",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"synchronous_replication": {
 			Description: "Synchronous replication type. Note that the service plan also needs to support synchronous replication.",
@@ -6217,12 +6217,12 @@ func ServiceTypePg() *schema.Schema {
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"max_background_workers": {
 				Description: "The number of background workers for timescaledb operations. You should configure this setting to the sum of your number of databases and the total number of concurrent background workers you want running at any given point in time.",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeInt,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"max_background_workers": {
 				Description: "The number of background workers for timescaledb operations. You should configure this setting to the sum of your number of databases and the total number of concurrent background workers you want running at any given point in time.",
 				Optional:    true,
-				Type:        schema.TypeString,
+				Type:        schema.TypeInt,
 			}}},
 			MaxItems: 1,
 			Optional: true,
@@ -6236,7 +6236,7 @@ func ServiceTypePg() *schema.Schema {
 		"work_mem": {
 			Description: "Sets the maximum amount of memory to be used by a query operation (such as a sort or hash table) before writing to temporary disk files, in MB. Default is 1MB + 0.075% of total RAM (up to 32MB).",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 	}
 
@@ -6322,12 +6322,12 @@ func ServiceTypeRedis() *schema.Schema {
 				"port": {
 					Description: "Port number of the server where to migrate data from",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"ssl": {
 					Description: "The server where to migrate data from is secured with SSL",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"username": {
 					Description: "User name for authentication with the server where to migrate data from",
@@ -6365,12 +6365,12 @@ func ServiceTypeRedis() *schema.Schema {
 				"port": {
 					Description: "Port number of the server where to migrate data from",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 				},
 				"ssl": {
 					Description: "The server where to migrate data from is secured with SSL",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"username": {
 					Description: "User name for authentication with the server where to migrate data from",
@@ -6388,24 +6388,24 @@ func ServiceTypeRedis() *schema.Schema {
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"redis": {
 					Description: "Allow clients to connect to redis with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"redis": {
 					Description: "Allow clients to connect to redis with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -6418,24 +6418,24 @@ func ServiceTypeRedis() *schema.Schema {
 				"prometheus": {
 					Description: "Enable prometheus",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"redis": {
 					Description: "Enable redis",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"prometheus": {
 					Description: "Enable prometheus",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"redis": {
 					Description: "Enable redis",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -6454,24 +6454,24 @@ func ServiceTypeRedis() *schema.Schema {
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"redis": {
 					Description: "Allow clients to connect to redis from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 				"redis": {
 					Description: "Allow clients to connect to redis from the public internet for service nodes that are in a project VPC or another type of private network",
 					Optional:    true,
-					Type:        schema.TypeString,
+					Type:        schema.TypeBool,
 				},
 			}},
 			MaxItems: 1,
@@ -6491,17 +6491,17 @@ func ServiceTypeRedis() *schema.Schema {
 		"redis_io_threads": {
 			Description: "Redis IO thread count",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"redis_lfu_decay_time": {
 			Description: "LFU maxmemory-policy counter decay time in minutes",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"redis_lfu_log_factor": {
 			Description: "Counter logarithm factor for volatile-lfu and allkeys-lfu maxmemory-policies",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"redis_maxmemory_policy": {
 			Description: "Redis maxmemory-policy",
@@ -6516,7 +6516,7 @@ func ServiceTypeRedis() *schema.Schema {
 		"redis_number_of_databases": {
 			Description: "Set number of redis databases. Changing this will cause a restart of redis service.",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"redis_persistence": {
 			Description: "When persistence is 'rdb', Redis does RDB dumps each 10 minutes if any key is changed. Also RDB dumps are done according to backup schedule for backup purposes. When persistence is 'off', no RDB dumps and backups are done, so data can be lost at any moment if service is restarted for any reason, or if service is powered off. Also service can't be forked.",
@@ -6526,17 +6526,17 @@ func ServiceTypeRedis() *schema.Schema {
 		"redis_pubsub_client_output_buffer_limit": {
 			Description: "Set output buffer limit for pub / sub clients in MB. The value is the hard limit, the soft limit is 1/4 of the hard limit. When setting the limit, be mindful of the available memory in the selected service plan.",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"redis_ssl": {
 			Description: "Require SSL to access Redis",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 		"redis_timeout": {
 			Description: "Redis idle connection timeout in seconds",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeInt,
 		},
 		"service_to_fork_from": {
 			Description: "Name of another service to fork from. This has effect only when a new service is being created.",
@@ -6547,7 +6547,7 @@ func ServiceTypeRedis() *schema.Schema {
 		"static_ips": {
 			Description: "Use static public IP addresses",
 			Optional:    true,
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 		},
 	}
 
