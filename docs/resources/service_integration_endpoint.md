@@ -48,10 +48,10 @@ Optional:
 
 - `datadog_api_key` (String, Sensitive) Datadog API key
 - `datadog_tags` (Block List, Max: 32) Custom tags provided by user (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))
-- `disable_consumer_stats` (String) Disable consumer group metrics
-- `kafka_consumer_check_instances` (String) Number of separate instances to fetch kafka consumer statistics with
-- `kafka_consumer_stats_timeout` (String) Number of seconds that datadog will wait to get consumer statistics from brokers
-- `max_partition_contexts` (String) Maximum number of partition contexts to send
+- `disable_consumer_stats` (Boolean) Disable consumer group metrics
+- `kafka_consumer_check_instances` (Number) Number of separate instances to fetch kafka consumer statistics with
+- `kafka_consumer_stats_timeout` (Number) Number of seconds that datadog will wait to get consumer statistics from brokers
+- `max_partition_contexts` (Number) Maximum number of partition contexts to send
 - `site` (String) Datadog intake site. Defaults to datadoghq.com
 
 <a id="nestedblock--datadog_user_config--datadog_tags"></a>
@@ -92,9 +92,9 @@ Optional:
 Optional:
 
 - `ca` (String) PEM encoded CA certificate
-- `index_days_max` (String) Maximum number of days of logs to keep
+- `index_days_max` (Number) Maximum number of days of logs to keep
 - `index_prefix` (String) Elasticsearch index prefix
-- `timeout` (String) Elasticsearch request timeout limit
+- `timeout` (Number) Elasticsearch request timeout limit
 - `url` (String) Elasticsearch connection URL
 
 
@@ -130,9 +130,9 @@ Optional:
 Optional:
 
 - `ca` (String) PEM encoded CA certificate
-- `index_days_max` (String) Maximum number of days of logs to keep
+- `index_days_max` (Number) Maximum number of days of logs to keep
 - `index_prefix` (String) OpenSearch index prefix
-- `timeout` (String) OpenSearch request timeout limit
+- `timeout` (Number) OpenSearch request timeout limit
 - `url` (String) OpenSearch connection URL
 
 
@@ -175,10 +175,10 @@ Optional:
 - `format` (String) message format
 - `key` (String) PEM encoded client key
 - `logline` (String) custom syslog message format
-- `port` (String) rsyslog server port
+- `port` (Number) rsyslog server port
 - `sd` (String) Structured data block for log message
 - `server` (String) rsyslog server IP address or hostname
-- `tls` (String) Require TLS
+- `tls` (Boolean) Require TLS
 
 
 <a id="nestedblock--signalfx_user_config"></a>

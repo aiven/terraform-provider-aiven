@@ -78,15 +78,11 @@ func TerraformTypes(t []string) ([]string, []string, error) {
 			//  There should be a default value set for this case.
 			continue
 		case "boolean":
-			// TODO: Make those types be actual types instead of strings.
-			// r = append(r, "TypeBool")
-			r = append(r, "TypeString")
+			r = append(r, "TypeBool")
 		case "integer":
-			// r = append(r, "TypeInt")
-			r = append(r, "TypeString")
+			r = append(r, "TypeInt")
 		case "number":
-			// r = append(r, "TypeFloat")
-			r = append(r, "TypeString")
+			r = append(r, "TypeFloat")
 		case "string":
 			r = append(r, "TypeString")
 		case "array", "object":

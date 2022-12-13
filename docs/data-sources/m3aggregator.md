@@ -87,7 +87,7 @@ Read-Only:
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--m3aggregator_user_config--ip_filter_object))
 - `m3_version` (String)
 - `m3aggregator_version` (String)
-- `static_ips` (String)
+- `static_ips` (Boolean)
 
 <a id="nestedobjatt--m3aggregator_user_config--ip_filter_object"></a>
 ### Nested Schema for `m3aggregator_user_config.ip_filter_object`
