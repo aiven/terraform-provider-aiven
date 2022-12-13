@@ -92,18 +92,18 @@ Read-Only:
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--redis_user_config--public_access))
 - `recovery_basebackup_name` (String)
 - `redis_acl_channels_default` (String)
-- `redis_io_threads` (String)
-- `redis_lfu_decay_time` (String)
-- `redis_lfu_log_factor` (String)
+- `redis_io_threads` (Number)
+- `redis_lfu_decay_time` (Number)
+- `redis_lfu_log_factor` (Number)
 - `redis_maxmemory_policy` (String)
 - `redis_notify_keyspace_events` (String)
-- `redis_number_of_databases` (String)
+- `redis_number_of_databases` (Number)
 - `redis_persistence` (String)
-- `redis_pubsub_client_output_buffer_limit` (String)
-- `redis_ssl` (String)
-- `redis_timeout` (String)
+- `redis_pubsub_client_output_buffer_limit` (Number)
+- `redis_ssl` (Boolean)
+- `redis_timeout` (Number)
 - `service_to_fork_from` (String)
-- `static_ips` (String)
+- `static_ips` (Boolean)
 
 <a id="nestedobjatt--redis_user_config--ip_filter_object"></a>
 ### Nested Schema for `redis_user_config.ip_filter_object`
@@ -124,8 +124,8 @@ Read-Only:
 - `ignore_dbs` (String)
 - `method` (String)
 - `password` (String)
-- `port` (String)
-- `ssl` (String)
+- `port` (Number)
+- `ssl` (Boolean)
 - `username` (String)
 
 
@@ -134,8 +134,8 @@ Read-Only:
 
 Read-Only:
 
-- `prometheus` (String)
-- `redis` (String)
+- `prometheus` (Boolean)
+- `redis` (Boolean)
 
 
 <a id="nestedobjatt--redis_user_config--privatelink_access"></a>
@@ -143,8 +143,8 @@ Read-Only:
 
 Read-Only:
 
-- `prometheus` (String)
-- `redis` (String)
+- `prometheus` (Boolean)
+- `redis` (Boolean)
 
 
 <a id="nestedobjatt--redis_user_config--public_access"></a>
@@ -152,8 +152,8 @@ Read-Only:
 
 Read-Only:
 
-- `prometheus` (String)
-- `redis` (String)
+- `prometheus` (Boolean)
+- `redis` (Boolean)
 
 
 
