@@ -54,8 +54,6 @@ func unsettedAPIValue(t string) interface{} {
 		res = ""
 	case "array":
 		res = []interface{}{}
-	case "object":
-		res = map[string]interface{}{}
 	}
 
 	return res
@@ -97,8 +95,7 @@ func propsFromAPI(n string, r map[string]interface{}, p map[string]interface{}) 
 		default:
 			switch vra := vr.(type) {
 			default:
-				// TODO: Drop this when we will be using actual types.
-				vrs = fmt.Sprintf("%v", vr)
+				vrs = vr
 			case []interface{}:
 				var l []interface{}
 
