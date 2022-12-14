@@ -355,59 +355,59 @@ func testAccCheckAivenServicePGAttributes(n string) resource.TestCheckFunc {
 		a := r.Primary.Attributes
 
 		if !strings.Contains(a["service_type"], "pg") {
-			return fmt.Errorf("expected to get a correct service type from Aiven, got :%s", a["service_type"])
+			return fmt.Errorf("expected to get a correct service_type from Aiven, got :%s", a["service_type"])
 		}
 
 		if a["pg_user_config.0.pg.0.idle_in_transaction_session_timeout"] != "900" {
-			return fmt.Errorf("expected to get a correct PG idle_in_transaction_session_timeout from Aiven")
+			return fmt.Errorf("expected to get a correct idle_in_transaction_session_timeout from Aiven")
 		}
 
 		if a["pg_user_config.0.public_access.0.pg"] != "true" {
-			return fmt.Errorf("expected to get a correct PG public_access from Aiven")
+			return fmt.Errorf("expected to get a correct public_access.pg from Aiven")
 		}
 
-		if a["pg_user_config.0.public_access.0.pgbouncer"] != "" {
-			return fmt.Errorf("expected to get a correct PG public_access from Aiven")
+		if a["pg_user_config.0.public_access.0.pgbouncer"] != "false" {
+			return fmt.Errorf("expected to get a correct public_access.pgbouncer from Aiven")
 		}
 
 		if a["pg_user_config.0.public_access.0.prometheus"] != "false" {
-			return fmt.Errorf("expected to get a correct PG public_access from Aiven")
+			return fmt.Errorf("expected to get a correct public_access.prometheus from Aiven")
 		}
 
 		if a["pg_user_config.0.service_to_fork_from"] != "" {
-			return fmt.Errorf("expected to get a PG service_to_fork_from not set to any value")
+			return fmt.Errorf("expected to get a correct service_to_fork_from from Aiven")
 		}
 
 		if a["pg.0.uri"] == "" {
-			return fmt.Errorf("expected to get a correct PG uri from Aiven")
+			return fmt.Errorf("expected to get a correct uri from Aiven")
 		}
 
 		if a["pg.0.dbname"] != "defaultdb" {
-			return fmt.Errorf("expected to get a correct PG dbname from Aiven")
+			return fmt.Errorf("expected to get a correct dbname from Aiven")
 		}
 
 		if a["pg.0.host"] == "" {
-			return fmt.Errorf("expected to get a correct PG host from Aiven")
+			return fmt.Errorf("expected to get a correct host from Aiven")
 		}
 
 		if a["pg.0.password"] == "" {
-			return fmt.Errorf("expected to get a correct PG password from Aiven")
+			return fmt.Errorf("expected to get a correct password from Aiven")
 		}
 
 		if a["pg.0.port"] == "" {
-			return fmt.Errorf("expected to get a correct PG port from Aiven")
+			return fmt.Errorf("expected to get a correct port from Aiven")
 		}
 
 		if a["pg.0.sslmode"] != "require" {
-			return fmt.Errorf("expected to get a correct PG sslmode from Aiven")
+			return fmt.Errorf("expected to get a correct sslmode from Aiven")
 		}
 
 		if a["pg.0.user"] != "avnadmin" {
-			return fmt.Errorf("expected to get a correct PG user from Aiven")
+			return fmt.Errorf("expected to get a correct user from Aiven")
 		}
 
 		if a["pg.0.max_connections"] != "100" && a["pg.0.max_connections"] != "200" {
-			return fmt.Errorf("expected to get a correct PG max_connections from Aiven")
+			return fmt.Errorf("expected to get a correct max_connections from Aiven")
 		}
 
 		return nil
