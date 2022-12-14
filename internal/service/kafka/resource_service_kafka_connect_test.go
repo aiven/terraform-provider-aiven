@@ -82,11 +82,11 @@ func testAccCheckAivenServiceKafkaConnectAttributes(n string) resource.TestCheck
 			return fmt.Errorf("expected to get a correct consumer_isolation_level from Aiven")
 		}
 
-		if a["kafka_connect_user_config.0.kafka_connect.0.consumer_max_poll_records"] != "" {
+		if a["kafka_connect_user_config.0.kafka_connect.0.consumer_max_poll_records"] != "0" {
 			return fmt.Errorf("expected to get a correct consumer_max_poll_records from Aiven")
 		}
 
-		if a["kafka_connect_user_config.0.kafka_connect.0.offset_flush_interval_ms"] != "" {
+		if a["kafka_connect_user_config.0.kafka_connect.0.offset_flush_interval_ms"] != "0" {
 			return fmt.Errorf("expected to get a correct offset_flush_interval_ms from Aiven")
 		}
 
@@ -94,7 +94,7 @@ func testAccCheckAivenServiceKafkaConnectAttributes(n string) resource.TestCheck
 			return fmt.Errorf("expected to get a correct public_access.kafka_connect from Aiven")
 		}
 
-		if a["kafka_connect_user_config.0.public_access.0.prometheus"] != "" {
+		if a["kafka_connect_user_config.0.public_access.0.prometheus"] != "false" {
 			return fmt.Errorf("expected to get a correct public_access.prometheus from Aiven")
 		}
 
