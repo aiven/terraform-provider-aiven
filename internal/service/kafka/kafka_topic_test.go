@@ -274,7 +274,7 @@ func testAccCheckAivenKafkaTopicAttributes(n string) resource.TestCheckFunc {
 		}
 
 		if a["partitions"] == "" {
-			return fmt.Errorf("expected to get partitions from Aiven")
+			return fmt.Errorf("expected to get a partitions from Aiven")
 		}
 
 		if a["replication"] == "" {
