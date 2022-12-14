@@ -121,15 +121,15 @@ func testAccCheckAivenAzurePrivatelinkAttributes(n string) resource.TestCheckFun
 		}
 
 		if a["azure_service_id"] == "" {
-			return fmt.Errorf("expected to get azure_service_id from Aiven")
+			return fmt.Errorf("expected to get an azure_service_id from Aiven")
 		}
 
 		if a["azure_service_alias"] == "" {
-			return fmt.Errorf("expected to get azure_service_alias from Aiven")
+			return fmt.Errorf("expected to get an azure_service_alias from Aiven")
 		}
 
 		if a["state"] == "" {
-			return fmt.Errorf("expected to get state from Aiven")
+			return fmt.Errorf("expected to get a state from Aiven")
 		}
 
 		return nil

@@ -97,7 +97,7 @@ func testAccCheckAivenProjectVPCAttributes(n string) resource.TestCheckFunc {
 		}
 
 		if a["id"] == "" {
-			return fmt.Errorf("expected to get an ID from Aiven")
+			return fmt.Errorf("expected to get an id from Aiven")
 		}
 
 		return nil
