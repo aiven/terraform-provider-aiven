@@ -68,7 +68,7 @@ func TestToAPI(t *testing.T) {
 					map[string]interface{}{
 						"m3db_user_config": []interface{}{
 							map[string]interface{}{
-								"m3coordinator_enable_graphite_carbon_ingest": "true",
+								"m3coordinator_enable_graphite_carbon_ingest": true,
 							},
 						},
 					},
@@ -94,7 +94,7 @@ func TestToAPI(t *testing.T) {
 					map[string]interface{}{
 						"m3db_user_config": []interface{}{
 							map[string]interface{}{
-								"m3coordinator_enable_graphite_carbon_ingest": "true",
+								"m3coordinator_enable_graphite_carbon_ingest": true,
 							},
 						},
 					},
@@ -118,7 +118,7 @@ func TestToAPI(t *testing.T) {
 							map[string]interface{}{
 								"limits": []interface{}{
 									map[string]interface{}{
-										"max_recently_queried_series_blocks": "20000",
+										"max_recently_queried_series_blocks": 20000,
 									},
 								},
 							},
@@ -151,7 +151,7 @@ func TestToAPI(t *testing.T) {
 							map[string]interface{}{
 								"limits": []interface{}{
 									map[string]interface{}{
-										"max_recently_queried_series_blocks": "20000",
+										"max_recently_queried_series_blocks": 20000,
 									},
 								},
 							},
@@ -177,7 +177,7 @@ func TestToAPI(t *testing.T) {
 							map[string]interface{}{
 								"kafka": []interface{}{
 									map[string]interface{}{
-										"log_cleaner_min_cleanable_ratio": "0.5",
+										"log_cleaner_min_cleanable_ratio": 0.5,
 									},
 								},
 							},
@@ -210,7 +210,7 @@ func TestToAPI(t *testing.T) {
 							map[string]interface{}{
 								"kafka": []interface{}{
 									map[string]interface{}{
-										"log_cleaner_min_cleanable_ratio": "0.5",
+										"log_cleaner_min_cleanable_ratio": 0.5,
 									},
 								},
 							},
