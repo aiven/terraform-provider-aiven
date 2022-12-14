@@ -224,7 +224,7 @@ func testAccCheckAivenMirrorMakerReplicationFlowAttributes(n string) resource.Te
 		}
 
 		if a["target_cluster"] != "target" {
-			return fmt.Errorf("expected to get target_cluster from Aiven")
+			return fmt.Errorf("expected to get a target_cluster from Aiven")
 		}
 
 		if a["enable"] != "true" {

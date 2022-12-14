@@ -11,9 +11,10 @@ import (
 	"github.com/aiven/aiven-go-client"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
+
+// errInvalidStateType is an error that is returned when an invalid state type is encountered.
+var errInvalidStateType = fmt.Errorf("invalid terraform state type")
 
 func OptionalString(d *schema.ResourceData, key string) string {
 	str, ok := d.Get(key).(string)
@@ -126,7 +127,7 @@ func CreateOnlyDiffSuppressFunc(_, _, _ string, d *schema.ResourceData) bool {
 
 // EmptyObjectDiffSuppressFunc suppresses a diff for service user configuration options when
 // fields are not set by the user but have default or previously defined values.
-func EmptyObjectDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) bool {
+func EmptyObjectDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	// When a map inside a list contains only default values without explicit values set by
 	// the user Terraform interprets the map as not being present and the array length being
 	// zero, resulting in bogus update that does nothing. Allow ignoring those.
@@ -136,9 +137,7 @@ func EmptyObjectDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) boo
 
 	// Ignore the field when it is not set to any value, but had a non-empty parameter before. This also accounts
 	// for the case when the field is not set to any value, but has a default value returned by the API.
-	// TODO: Uncomment this when we use actual types for the schema.
-	// if !d.HasChange(k) && (new == "" && old != "" || new == "0" && old != "0" || new == "false" && old == "true") {
-	if new == "" && old != "" {
+	if !d.HasChange(k) && (new == "" && old != "" || new == "0" && old != "0" || new == "false" && old == "true") {
 		return true
 	}
 
@@ -335,7 +334,7 @@ func CopyServiceUserPropertiesFromAPIResponseToTerraform(
 func unmarshalUserConfig(src interface{}) ([]map[string]interface{}, error) {
 	configList, ok := src.([]interface{})
 	if !ok {
-		return nil, fmt.Errorf("%w: expected []interface{}", userconfig.ErrInvalidStateType)
+		return nil, fmt.Errorf("%w: expected []interface{}", errInvalidStateType)
 	}
 
 	if len(configList) == 0 {
@@ -344,7 +343,7 @@ func unmarshalUserConfig(src interface{}) ([]map[string]interface{}, error) {
 
 	config, ok := configList[0].(map[string]interface{})
 	if !ok {
-		return nil, fmt.Errorf("%w: expected map[string]interface{}", userconfig.ErrInvalidStateType)
+		return nil, fmt.Errorf("%w: expected map[string]interface{}", errInvalidStateType)
 	}
 
 	return []map[string]interface{}{config}, nil

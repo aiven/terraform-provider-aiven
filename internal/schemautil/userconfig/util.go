@@ -11,19 +11,24 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var ErrInvalidStateType = fmt.Errorf("invalid terraform state type")
-
 // SchemaType is a custom type that represents a Terraform schema type.
 type SchemaType int
 
 const (
+	// ServiceTypes is a constant that represents service schema type.
 	ServiceTypes SchemaType = iota
+
+	// IntegrationTypes is a constant that represents integration schema type.
 	IntegrationTypes
+
+	// IntegrationEndpointTypes is a constant that represents integration endpoint schema type.
 	IntegrationEndpointTypes
 )
 
 // cachedRepresentationMaps is a map of cached representation maps.
 var cachedRepresentationMaps = make(map[SchemaType]map[string]interface{}, 3)
+
+// cachedRepresentationMapsMutex is a mutex for the cached representation maps.
 var cachedRepresentationMapsMutex = sync.Mutex{}
 
 // CachedRepresentationMap is a function that returns a cached representation map.
