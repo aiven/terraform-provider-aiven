@@ -7,11 +7,13 @@ nav_order: 1
 # Changelog
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+## [3.10.0] - 2022-12-14
 - Add ClickHouse examples:
   - Standalone service
   - Integration with Kafka source
   - Integration with PostgreSQL source
-- Fix vpc peering id parser
+- Fix VPC peering ID parser
 - Add `offset_syncs_topic_location` support for `aiven_mirrormaker_replication_flow` resource 
 - Add `ssl` and `kafka_authentication_method` output support in service components
 - Fix `admin_username` and `admin_password` fields diff

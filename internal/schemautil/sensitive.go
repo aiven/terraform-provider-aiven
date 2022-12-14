@@ -1,9 +1,5 @@
 package schemautil
 
-import (
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
-)
-
 // Those fields are not returned by API,
 // but should be in the state to make terraform work correctly
 var sensitiveFields = []string{
@@ -13,10 +9,14 @@ var sensitiveFields = []string{
 
 // copySensitiveFields copies sensitive fields to the state which not returned by API,
 // but exist in the manifest
-func copySensitiveFields(oldSrc interface{}, new []map[string]interface{}) {
-	old := userconfig.UnmarshalUserConfig(oldSrc)
+func copySensitiveFields(oldSrc interface{}, new []map[string]interface{}) error {
+	old, err := unmarshalUserConfig(oldSrc)
+	if err != nil {
+		return err
+	}
+
 	if len(old)*len(new) == 0 {
-		return
+		return nil
 	}
 
 	for _, k := range sensitiveFields {
@@ -24,4 +24,5 @@ func copySensitiveFields(oldSrc interface{}, new []map[string]interface{}) {
 			new[0][k] = v
 		}
 	}
+	return nil
 }

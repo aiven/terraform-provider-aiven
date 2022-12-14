@@ -10,6 +10,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var ErrInvalidStateType = fmt.Errorf("invalid terraform state type")
+
 // SchemaType is a custom type that represents a Terraform schema type.
 type SchemaType int
 
@@ -173,12 +175,4 @@ func DecodeKey(k string) string {
 // IsKeyTyped is a function that checks if a key is typed, i.e. has a type suffix in it.
 func IsKeyTyped(k string) bool {
 	return regexp.MustCompile(`^.*_(boolean|integer|number|string|array|object)$`).MatchString(k)
-}
-
-func UnmarshalUserConfig(src interface{}) map[string]interface{} {
-	configList, ok := src.([]interface{})
-	if !ok || len(configList) == 0 {
-		return nil
-	}
-	return configList[0].(map[string]interface{})
 }

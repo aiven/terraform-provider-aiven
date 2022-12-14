@@ -641,9 +641,13 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		return err
 	}
 
-	// Mutates user config inplace
+	// Mutates user config in place
 	oldUserConfig := d.Get(serviceType + "_user_config")
-	copySensitiveFields(oldUserConfig, newUserConfig)
+	err = copySensitiveFields(oldUserConfig, newUserConfig)
+	if err != nil {
+		return err
+	}
+
 	NormalizeIpFilter(oldUserConfig, newUserConfig)
 
 	if err := d.Set(serviceType+"_user_config", newUserConfig); err != nil {
