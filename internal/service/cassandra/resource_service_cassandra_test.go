@@ -87,7 +87,7 @@ func testAccCheckAivenServiceCassandraAttributes(n string) resource.TestCheckFun
 		}
 
 		if a["cassandra_user_config.0.service_to_fork_from"] != "" {
-			return fmt.Errorf("expected to get a correct public_access.service_to_fork_from from Aiven")
+			return fmt.Errorf("expected to get a correct service_to_fork_from from Aiven")
 		}
 
 		if a["cassandra_user_config.0.migrate_sstableloader"] != "true" {
