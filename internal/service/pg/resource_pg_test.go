@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 	"testing"
 
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
 func TestAccAivenPG_no_existing_project(t *testing.T) {
@@ -597,4 +599,49 @@ resource "aiven_pg" "bar" {
   disk_space              = "100GiB"
 }
 `
+}
+
+// TestAccAivenPG_admin_creds tests admin creds in user_config
+func TestAccAivenPG_admin_creds(t *testing.T) {
+	resourceName := "aiven_pg.pg"
+	prefix := "test-tf-acc-" + acctest.RandString(7)
+	project := os.Getenv("AIVEN_PROJECT_NAME")
+	expectedURLPrefix := fmt.Sprintf("postgres://root:%s-password", prefix)
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      acc.TestAccCheckAivenServiceResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPGResourceAdminCreds(prefix, project),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrWith(resourceName, "service_uri", func(value string) error {
+						if !strings.HasPrefix(value, expectedURLPrefix) {
+							return fmt.Errorf("invalid service_uri, doesn't contain admin_username: %q", value)
+						}
+						return nil
+					}),
+					resource.TestCheckResourceAttr(resourceName, "pg_user_config.0.admin_username", "root"),
+					resource.TestCheckResourceAttr(resourceName, "pg_user_config.0.admin_password", prefix+"-password"),
+				),
+			},
+		},
+	})
+}
+
+// testAccPGResourceAdminCreds returns config TestAccAivenPG_admin_creds
+func testAccPGResourceAdminCreds(prefix, project string) string {
+	return fmt.Sprintf(`
+resource "aiven_pg" "pg" {
+  project      = %[2]q
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = "%[1]s-pg"
+
+  pg_user_config {
+    admin_username = "root"
+    admin_password = "%[1]s-password"
+  }
+}
+	`, prefix, project)
 }

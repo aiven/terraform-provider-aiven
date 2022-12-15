@@ -10,6 +10,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var ErrInvalidStateType = fmt.Errorf("invalid terraform state type")
+
 // SchemaType is a custom type that represents a Terraform schema type.
 type SchemaType int
 

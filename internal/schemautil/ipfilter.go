@@ -7,29 +7,29 @@ import (
 // NormalizeIpFilter compares a list of IP filters set in TF and a sorted version coming
 // from Aiven and takes sort IP filters such that all matching entries will be in
 // the same order as defined in the TF manifest.
-func NormalizeIpFilter(tfUserConfig interface{}, userConfig []map[string]interface{}) []map[string]interface{} {
+func NormalizeIpFilter(tfUserConfig interface{}, userConfig []map[string]interface{}) {
 	tfInt, ok := tfUserConfig.([]interface{})
 
 	if len(userConfig) == 0 {
-		return userConfig
+		return
 	}
 
 	if _, ok := userConfig[0]["ip_filter"]; !ok {
-		return userConfig
+		return
 	}
 
 	userConfig[0]["ip_filter"] = toStringSlice(userConfig[0]["ip_filter"].([]interface{}))
 
 	if !ok || len(tfInt) == 0 {
-		return userConfig
+		return
 	}
 
 	if tfInt[0] == nil {
-		return userConfig
+		return
 	}
 
 	if _, ok := tfInt[0].(map[string]interface{})["ip_filter"]; !ok {
-		return userConfig
+		return
 	}
 
 	api := userConfig[0]["ip_filter"].([]string)
@@ -77,7 +77,6 @@ func NormalizeIpFilter(tfUserConfig interface{}, userConfig []map[string]interfa
 	}
 
 	userConfig[0]["ip_filter"] = trim(append(newIpFilters, diff...))
-	return userConfig
 }
 
 // toStringSlice converts []interface to a []string

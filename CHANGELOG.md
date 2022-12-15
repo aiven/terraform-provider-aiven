@@ -16,6 +16,7 @@ nav_order: 1
 - Fix VPC peering ID parser
 - Add `offset_syncs_topic_location` support for `aiven_mirrormaker_replication_flow` resource 
 - Add `ssl` and `kafka_authentication_method` output support in service components
+- Fix `admin_username` and `admin_password` fields diff
 
 ## [3.9.0] - 2022-12-01
 

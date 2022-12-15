@@ -11,6 +11,8 @@ import (
 	"github.com/aiven/aiven-go-client"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 func OptionalString(d *schema.ResourceData, key string) string {
@@ -327,4 +329,21 @@ func CopyServiceUserPropertiesFromAPIResponseToTerraform(
 	}
 
 	return nil
+}
+
+func unmarshalUserConfig(src interface{}) (map[string]interface{}, error) {
+	configList, ok := src.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("%w: expected []interface{}", userconfig.ErrInvalidStateType)
+	}
+
+	if len(configList) == 0 {
+		return nil, nil
+	}
+
+	config, ok := configList[0].(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("%w: expected map[string]interface{}", userconfig.ErrInvalidStateType)
+	}
+	return config, nil
 }
