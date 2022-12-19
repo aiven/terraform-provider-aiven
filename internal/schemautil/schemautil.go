@@ -126,7 +126,7 @@ func CreateOnlyDiffSuppressFunc(_, _, _ string, d *schema.ResourceData) bool {
 
 // EmptyObjectDiffSuppressFunc suppresses a diff for service user configuration options when
 // fields are not set by the user but have default or previously defined values.
-func EmptyObjectDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+func EmptyObjectDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) bool {
 	// When a map inside a list contains only default values without explicit values set by
 	// the user Terraform interprets the map as not being present and the array length being
 	// zero, resulting in bogus update that does nothing. Allow ignoring those.
@@ -331,7 +331,8 @@ func CopyServiceUserPropertiesFromAPIResponseToTerraform(
 	return nil
 }
 
-func unmarshalUserConfig(src interface{}) (map[string]interface{}, error) {
+// unmarshalUserConfig unmarshals the user config from the state to []map[string]interface{} format.
+func unmarshalUserConfig(src interface{}) ([]map[string]interface{}, error) {
 	configList, ok := src.([]interface{})
 	if !ok {
 		return nil, fmt.Errorf("%w: expected []interface{}", userconfig.ErrInvalidStateType)
@@ -345,5 +346,6 @@ func unmarshalUserConfig(src interface{}) (map[string]interface{}, error) {
 	if !ok {
 		return nil, fmt.Errorf("%w: expected map[string]interface{}", userconfig.ErrInvalidStateType)
 	}
-	return config, nil
+
+	return []map[string]interface{}{config}, nil
 }

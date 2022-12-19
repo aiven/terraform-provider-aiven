@@ -636,19 +636,27 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		}
 	}
 
+	oldUserConfig, err := unmarshalUserConfig(d.Get(serviceType + "_user_config"))
+	if err != nil {
+		return err
+	}
+
 	newUserConfig, err := apiconvert.FromAPI(userconfig.ServiceTypes, serviceType, s.UserConfig)
 	if err != nil {
 		return err
 	}
 
-	// Mutates user config in place
-	oldUserConfig := d.Get(serviceType + "_user_config")
-	err = copySensitiveFields(oldUserConfig, newUserConfig)
-	if err != nil {
-		return err
-	}
+	// Apply in-place user config mutations.
+	if len(oldUserConfig)*len(newUserConfig) != 0 {
+		oldUserConfigFirst := oldUserConfig[0]
 
-	NormalizeIpFilter(oldUserConfig, newUserConfig)
+		newUserConfigFirst := newUserConfig[0]
+
+		// TODO: Remove when the remote schema in Aiven begins to contain information about sensitive fields.
+		copySensitiveFields(oldUserConfigFirst, newUserConfigFirst)
+
+		normalizeIpFilter(oldUserConfigFirst, newUserConfigFirst)
+	}
 
 	if err := d.Set(serviceType+"_user_config", newUserConfig); err != nil {
 		return fmt.Errorf("cannot set `%s_user_config` : %s; Please make sure that all Aiven services have unique s names", serviceType, err)
