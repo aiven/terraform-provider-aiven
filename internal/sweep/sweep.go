@@ -11,15 +11,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/aiven/aiven-go-client"
+
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
 var sharedClient *aiven.Client
 
 // sharedClient returns a common Aiven Client setup needed for the sweeper
 func SharedClient(region string) (interface{}, error) {
-	if os.Getenv("AIVEN_TOKEN") == "" {
-		return nil, fmt.Errorf("must provide environment variable AIVEN_TOKEN ")
-	}
 	if os.Getenv("AIVEN_PROJECT_NAME") == "" {
 		return nil, fmt.Errorf("must provide environment variable AIVEN_PROJECT_NAME ")
 	}
@@ -27,7 +26,7 @@ func SharedClient(region string) (interface{}, error) {
 	if sharedClient == nil {
 		// configures a default client, using the above env var
 		var err error
-		sharedClient, err = aiven.NewTokenClient(os.Getenv("AIVEN_TOKEN"), "terraform-provider-aiven-acc/")
+		sharedClient, err = common.NewAivenClient()
 		if err != nil {
 			return nil, fmt.Errorf("error getting Aiven client")
 		}

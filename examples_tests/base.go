@@ -10,6 +10,8 @@ import (
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/stretchr/testify/suite"
+
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
 type envConfig struct {
@@ -107,7 +109,7 @@ func examplesRandPrefix() func(string) string {
 }
 
 func newClient(token string) (*aiven.Client, error) {
-	client, err := aiven.NewTokenClient(token, "terraform-provider-aiven/0.11+compatible/dev")
+	client, err := common.NewAivenClientWithToken(token)
 	if err != nil {
 		return nil, err
 	}

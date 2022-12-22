@@ -7,12 +7,12 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 var aivenKafkaTopicSchema = map[string]*schema.Schema{
@@ -225,7 +225,7 @@ func ResourceKafkaTopic() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Kafka Topic resource allows the creation and management of Aiven Kafka Topics.",
 		CreateContext: resourceKafkaTopicCreate,
-		ReadContext:   resourceKafkaTopicRead,
+		ReadContext:   resourceKafkaTopicReadResource,
 		UpdateContext: resourceKafkaTopicUpdate,
 		DeleteContext: resourceKafkaTopicDelete,
 		Importer: &schema.ResourceImporter{
@@ -330,14 +330,27 @@ func getKafkaTopicConfig(d *schema.ResourceData) aiven.KafkaTopicConfig {
 	}
 }
 
-func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m interface{}, isResource bool) diag.Diagnostics {
 	project, serviceName, topicName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	topic, err := getTopic(ctx, d, m, false)
+	topic, err := getTopic(ctx, d, m)
+
+	// Topics are destroyed when kafka is off
+	// https://docs.aiven.io/docs/platform/concepts/service-power-cycle
+	// So it's better to recreate them, than make user to clear the state manually
+	// Recreates missing topics:
+	// 1. if server returns 404
+	// 2. is resource (not datasource)
+	// 3. only for resources with existing state, not imports
 	if err != nil {
+		if !isResource {
+			return diag.FromErr(err)
+		}
+
+		// Datasource sets id to find, this might drop id to empty
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
@@ -371,6 +384,14 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 	return nil
 }
 
+func resourceKafkaTopicReadResource(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	return resourceKafkaTopicRead(ctx, d, m, true)
+}
+
+func resourceKafkaTopicReadDatasource(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	return resourceKafkaTopicRead(ctx, d, m, false)
+}
+
 func flattenKafkaTopicTags(list []aiven.KafkaTopicTag) []map[string]interface{} {
 	var tags []map[string]interface{}
 	for _, tagS := range list {
@@ -383,27 +404,33 @@ func flattenKafkaTopicTags(list []aiven.KafkaTopicTag) []map[string]interface{} 
 	return tags
 }
 
-func getTopic(ctx context.Context, d *schema.ResourceData, m interface{}, ignore404 bool) (aiven.KafkaTopic, error) {
+func getTopic(ctx context.Context, d *schema.ResourceData, m interface{}) (*aiven.KafkaTopic, error) {
 	project, serviceName, topicName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
-		return aiven.KafkaTopic{}, err
+		return nil, err
 	}
 
-	w := &kafkaTopicAvailabilityWaiter{
-		Client:      m.(*aiven.Client),
-		Project:     project,
-		ServiceName: serviceName,
-		TopicName:   topicName,
-		Ignore404:   ignore404,
+	client, ok := m.(*aiven.Client)
+	if !ok {
+		return nil, fmt.Errorf("invalid Aiven client")
+	}
+
+	w, err := newKafkaTopicAvailabilityWaiter(client, project, serviceName, topicName)
+	if err != nil {
+		return nil, err
 	}
 
 	timeout := d.Timeout(schema.TimeoutRead)
 	topic, err := w.Conf(timeout).WaitForStateContext(ctx)
 	if err != nil {
-		return aiven.KafkaTopic{}, fmt.Errorf("error waiting for Aiven Kafka topic to be ACTIVE: %s", err)
+		return nil, err
 	}
 
-	return topic.(aiven.KafkaTopic), nil
+	kt, ok := topic.(aiven.KafkaTopic)
+	if !ok {
+		return nil, fmt.Errorf("can't cast value to aiven.KafkaTopic")
+	}
+	return &kt, nil
 }
 
 func resourceKafkaTopicUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -461,7 +488,7 @@ func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m int
 	return nil
 }
 
-func flattenKafkaTopicConfig(t aiven.KafkaTopic) []map[string]interface{} {
+func flattenKafkaTopicConfig(t *aiven.KafkaTopic) []map[string]interface{} {
 	return []map[string]interface{}{
 		{
 			"cleanup_policy":                      schemautil.ToOptionalString(t.Config.CleanupPolicy.Value),
