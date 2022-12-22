@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/aiven/aiven-go-client/tools/exp/dist"
 	"gopkg.in/yaml.v3"
@@ -23,6 +24,7 @@ const (
 
 // cachedRepresentationMaps is a map of cached representation maps.
 var cachedRepresentationMaps = make(map[SchemaType]map[string]interface{}, 3)
+var cachedRepresentationMapsMutex = sync.Mutex{}
 
 // CachedRepresentationMap is a function that returns a cached representation map.
 func CachedRepresentationMap(st SchemaType) (map[string]interface{}, error) {
@@ -34,30 +36,33 @@ func CachedRepresentationMap(st SchemaType) (map[string]interface{}, error) {
 		return nil, fmt.Errorf("unknown schema type: %d", st)
 	}
 
-	if _, ok := cachedRepresentationMaps[st]; !ok {
-		switch st {
-		case ServiceTypes:
-			_, _ = representationToMap(st, dist.ServiceTypes)
-		case IntegrationTypes:
-			_, _ = representationToMap(st, dist.IntegrationTypes)
-		case IntegrationEndpointTypes:
-			_, _ = representationToMap(st, dist.IntegrationEndpointTypes)
-		}
+	switch st {
+	case ServiceTypes:
+		return representationToMap(st, dist.ServiceTypes)
+	case IntegrationTypes:
+		return representationToMap(st, dist.IntegrationTypes)
+	case IntegrationEndpointTypes:
+		return representationToMap(st, dist.IntegrationEndpointTypes)
+	default:
+		return nil, fmt.Errorf("unknown schema type %d", st)
 	}
-
-	return cachedRepresentationMaps[st], nil
 }
 
 // representationToMap converts a YAML representation of a Terraform schema to a map.
 func representationToMap(st SchemaType, r []byte) (map[string]interface{}, error) {
-	var m map[string]interface{}
+	cachedRepresentationMapsMutex.Lock()
+	defer cachedRepresentationMapsMutex.Unlock()
 
+	if v, ok := cachedRepresentationMaps[st]; ok {
+		return v, nil
+	}
+
+	var m map[string]interface{}
 	if err := yaml.Unmarshal(r, &m); err != nil {
 		return nil, err
 	}
 
 	cachedRepresentationMaps[st] = m
-
 	return m, nil
 }
 
