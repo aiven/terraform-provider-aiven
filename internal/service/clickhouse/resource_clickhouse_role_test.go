@@ -6,13 +6,13 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/service/clickhouse"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/service/clickhouse"
 )
 
 func TestAccAivenClickhouseRole(t *testing.T) {
@@ -24,7 +24,7 @@ func TestAccAivenClickhouseRole(t *testing.T) {
 resource "aiven_clickhouse" "bar" {
   project                 = "%s"
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-beta-8"
+  plan                    = "startup-16"
   service_name            = "%s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
