@@ -9,6 +9,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Fix races in tests
+- Add support for normalization of `ip_filter_object` user config options
 
 ## [3.10.0] - 2022-12-14
 - Add ClickHouse examples:

@@ -308,6 +308,7 @@ func TestToAPI(t *testing.T) {
 			want: map[string]any{
 				"namespaces": []interface{}{
 					map[string]any{
+						"name": "default",
 						"type": "unaggregated",
 					},
 				},
@@ -470,6 +471,10 @@ func TestToAPI(t *testing.T) {
 			},
 			want: map[string]any{
 				"ip_filter": []interface{}{
+					map[string]interface{}{
+						"description": "test",
+						"network":     "0.0.0.0/0",
+					},
 					map[string]interface{}{
 						"description": "",
 						"network":     "10.20.0.0/16",
@@ -678,7 +683,8 @@ func TestToAPI(t *testing.T) {
 						map[string]interface{}{
 							"namespaces": []interface{}{
 								map[string]interface{}{
-									"retention": "48h",
+									"resolution": "30s",
+									"retention":  "48h",
 								},
 							},
 						},

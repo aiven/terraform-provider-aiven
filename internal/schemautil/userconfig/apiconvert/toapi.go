@@ -169,6 +169,15 @@ func itemToAPI(
 	// We omit the value if has no changes in the Terraform user configuration.
 	o := !d.HasChange(fks)
 
+	// We need to make sure that if there were any changes to the parent object, we also send the value, even if it
+	// was not changed.
+	//
+	// We check that there are more than three elements in the fk slice, because we don't want to send the value if
+	// the parent object is the root object.
+	if o && len(fk) > 3 && d.HasChange(fks[:strings.LastIndex(fks, ".0")]) {
+		o = false
+	}
+
 	// TODO: Remove this statement and the branch below it when we use actual types in the schema.
 	if va, ok := v.(string); ok && va == "" {
 		return res, o, nil
