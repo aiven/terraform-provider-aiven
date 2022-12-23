@@ -591,7 +591,7 @@ resource "aiven_kafka" "kafka" {
 resource "aiven_clickhouse" "clickhouse" {
   project                 = data.aiven_project.project.project
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-beta-8"
+  plan                    = "startup-16"
   service_name            = "%[1]s-clickhouse"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -644,7 +644,7 @@ resource "aiven_pg" "pg" {
 resource "aiven_clickhouse" "clickhouse" {
   project                 = data.aiven_project.project.project
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-beta-8"
+  plan                    = "startup-16"
   service_name            = "%[1]s-clickhouse"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
