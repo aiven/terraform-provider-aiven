@@ -27,14 +27,14 @@ resource "aiven_project" "project" {
 resource "aiven_static_ip" "ips" {
   count = 6
 
-  project = aiven_project.project.project
+  project    = aiven_project.project.project
   cloud_name = "google-europe-west1"
 }
 
 resource "aiven_pg" "pg" {
-  project = aiven_project.project.project
-  cloud_name = "google-europe-west1"
-  plan = "startup-4"
+  project      = aiven_project.project.project
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
   service_name = "pg-with-static-ips"
 
   static_ips = toset([
@@ -48,5 +48,5 @@ resource "aiven_pg" "pg" {
 
   pg_user_config {
     static_ips = true
-  } 
+  }
 }

@@ -16,7 +16,7 @@ The Opensearch resource allows the creation and management of Aiven Opensearch s
 data "aiven_project" "foo" {
 		  project = "example_project"
 }
-		
+
 resource "aiven_opensearch" "bar" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"

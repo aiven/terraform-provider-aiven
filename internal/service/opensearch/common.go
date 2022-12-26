@@ -8,7 +8,7 @@ import (
 
 var (
 	// this mutex is needed to serialize calls to modify the remote config
-	// since its an abstraction that first GETs, modifies and then PUTs again
+	// since it`s an abstraction that first GETs, modifies and then PUTs again
 	resourceOpensearchACLModifierMutex sync.Mutex
 )
 

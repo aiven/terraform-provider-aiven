@@ -13,7 +13,8 @@ This setup includes a circular replication flow between three global regions.
 
 Update the `aiven` provider version in `main.tf`, e.g. `2.x.x => 2.1.0`.
 
-The Aiven Provider for Terraform is offered on the [Hashicorp Terraform Registry](https://registry.terraform.io/providers/aiven/aiven/latest).
+The Aiven Provider for Terraform is offered on
+the [Hashicorp Terraform Registry](https://registry.terraform.io/providers/aiven/aiven/latest).
 
 ### Variables
 
@@ -50,7 +51,9 @@ commands will detect it and remind you to do so if necessary.
 
 # Apply
 
-In a real-world deployment, you likely want to perform a `terraform plan` first. See [Hashicorp's Best Practices](https://www.terraform.io/docs/cloud/guides/recommended-practices/index.html) documentation for more information.
+In a real-world deployment, you likely want to perform a `terraform plan` first.
+See [Hashicorp's Best Practices](https://www.terraform.io/docs/cloud/guides/recommended-practices/index.html)
+documentation for more information.
 
 Deploy your changes
 

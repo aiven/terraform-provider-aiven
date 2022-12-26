@@ -7,7 +7,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/service/account"
 	"github.com/aiven/terraform-provider-aiven/internal/service/cassandra"
 	"github.com/aiven/terraform-provider-aiven/internal/service/clickhouse"
-	"github.com/aiven/terraform-provider-aiven/internal/service/connection_pool"
+	"github.com/aiven/terraform-provider-aiven/internal/service/connectionpool"
 	"github.com/aiven/terraform-provider-aiven/internal/service/database"
 	"github.com/aiven/terraform-provider-aiven/internal/service/flink"
 	"github.com/aiven/terraform-provider-aiven/internal/service/grafana"
@@ -19,10 +19,10 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/service/pg"
 	"github.com/aiven/terraform-provider-aiven/internal/service/project"
 	"github.com/aiven/terraform-provider-aiven/internal/service/redis"
-	"github.com/aiven/terraform-provider-aiven/internal/service/service_component"
-	"github.com/aiven/terraform-provider-aiven/internal/service/service_integration"
-	"github.com/aiven/terraform-provider-aiven/internal/service/service_user"
-	"github.com/aiven/terraform-provider-aiven/internal/service/static_ip"
+	"github.com/aiven/terraform-provider-aiven/internal/service/servicecomponent"
+	"github.com/aiven/terraform-provider-aiven/internal/service/serviceintegration"
+	"github.com/aiven/terraform-provider-aiven/internal/service/serviceuser"
+	"github.com/aiven/terraform-provider-aiven/internal/service/staticip"
 	"github.com/aiven/terraform-provider-aiven/internal/service/vpc"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -49,10 +49,10 @@ func Provider() *schema.Provider {
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"aiven_connection_pool":   connection_pool.DatasourceConnectionPool(),
-			"aiven_database":          database.DatasourceDatabase(),        // Deprecated
-			"aiven_service_user":      service_user.DatasourceServiceUser(), // Deprecated
-			"aiven_service_component": service_component.DatasourceServiceComponent(),
+			"aiven_connection_pool":   connectionpool.DatasourceConnectionPool(),
+			"aiven_database":          database.DatasourceDatabase(),       // Deprecated
+			"aiven_service_user":      serviceuser.DatasourceServiceUser(), // Deprecated
+			"aiven_service_component": servicecomponent.DatasourceServiceComponent(),
 
 			// influxdb
 			"aiven_influxdb":          influxdb.DatasourceInfluxDB(),
@@ -103,8 +103,8 @@ func Provider() *schema.Provider {
 			"aiven_vpc_peering_connection":         vpc.DatasourceVPCPeeringConnection(), // Deprecated
 
 			// service integrations
-			"aiven_service_integration":          service_integration.DatasourceServiceIntegration(),
-			"aiven_service_integration_endpoint": service_integration.DatasourceServiceIntegrationEndpoint(),
+			"aiven_service_integration":          serviceintegration.DatasourceServiceIntegration(),
+			"aiven_service_integration_endpoint": serviceintegration.DatasourceServiceIntegrationEndpoint(),
 
 			// m3db
 			"aiven_m3db":         m3db.DatasourceM3DB(),
@@ -140,10 +140,10 @@ func Provider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"aiven_connection_pool": connection_pool.ResourceConnectionPool(),
-			"aiven_database":        database.ResourceDatabase(),        // Deprecated
-			"aiven_service_user":    service_user.ResourceServiceUser(), // Deprecated
-			"aiven_static_ip":       static_ip.ResourceStaticIP(),
+			"aiven_connection_pool": connectionpool.ResourceConnectionPool(),
+			"aiven_database":        database.ResourceDatabase(),       // Deprecated
+			"aiven_service_user":    serviceuser.ResourceServiceUser(), // Deprecated
+			"aiven_static_ip":       staticip.ResourceStaticIP(),
 
 			// influxdb
 			"aiven_influxdb":          influxdb.ResourceInfluxDB(),
@@ -195,8 +195,8 @@ func Provider() *schema.Provider {
 			"aiven_vpc_peering_connection":                vpc.ResourceVPCPeeringConnection(), // Deprecated
 
 			// service integrations
-			"aiven_service_integration":          service_integration.ResourceServiceIntegration(),
-			"aiven_service_integration_endpoint": service_integration.ResourceServiceIntegrationEndpoint(),
+			"aiven_service_integration":          serviceintegration.ResourceServiceIntegration(),
+			"aiven_service_integration_endpoint": serviceintegration.ResourceServiceIntegrationEndpoint(),
 
 			// m3db
 			"aiven_m3db":         m3db.ResourceM3DB(),

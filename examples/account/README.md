@@ -1,6 +1,7 @@
 # Aiven Project, Account, and Teams Example
 
-Please also read through the [official docs](https://docs.aiven.io/docs/platform/concepts/projects_accounts_access.html) that talk about projects, accounts, and managing access permissions.
+Please also read through the [official docs](https://docs.aiven.io/docs/platform/concepts/projects_accounts_access.html)
+that talk about projects, accounts, and managing access permissions.
 
 ## Overview
 
@@ -16,7 +17,8 @@ following table for roles and privileges:
 | Operator Team   | `read_only`     | `read_only` | `read_only`      |
 | Unassigned Team | N/A             | N/A         | N/A              |
 
-More information about [Aiven user roles](https://help.aiven.io/en/articles/923754-project-member-privileges) is available in our help center. The `unassigned` team is the default role for SSO registrations.
+More information about [Aiven user roles](https://help.aiven.io/en/articles/923754-project-member-privileges) is
+available in our help center. The `unassigned` team is the default role for SSO registrations.
 
 ## Setup
 
@@ -58,7 +60,9 @@ commands will detect it and remind you to do so if necessary.
 
 # Apply
 
-In a real-world deployment, you likely want to perform a `terraform apply` first. See [Hashicorp's Best Practices](https://www.terraform.io/docs/cloud/guides/recommended-practices/index.html) documentation for more information.
+In a real-world deployment, you likely want to perform a `terraform apply` first.
+See [Hashicorp's Best Practices](https://www.terraform.io/docs/cloud/guides/recommended-practices/index.html)
+documentation for more information.
 
 Deploy your changes
 

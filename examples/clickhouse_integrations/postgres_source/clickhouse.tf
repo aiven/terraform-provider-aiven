@@ -19,15 +19,15 @@ resource "aiven_service_integration" "clickhouse_postgres_source" {
   clickhouse_postgresql_user_config {
     databases {
       database = aiven_pg_database.suppliers_dims.database_name
-      schema = "public"
+      schema   = "public"
     }
     databases {
       database = aiven_pg_database.inventory_facts.database_name
-      schema = "public"
+      schema   = "public"
     }
     databases {
       database = aiven_pg_database.order_events.database_name
-      schema = "public"
+      schema   = "public"
     }
   }
 }

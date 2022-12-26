@@ -18,8 +18,8 @@ import (
 	_ "github.com/aiven/terraform-provider-aiven/internal/service/pg"
 	_ "github.com/aiven/terraform-provider-aiven/internal/service/project"
 	_ "github.com/aiven/terraform-provider-aiven/internal/service/redis"
-	_ "github.com/aiven/terraform-provider-aiven/internal/service/service_integration"
-	_ "github.com/aiven/terraform-provider-aiven/internal/service/static_ip"
+	_ "github.com/aiven/terraform-provider-aiven/internal/service/serviceintegration"
+	_ "github.com/aiven/terraform-provider-aiven/internal/service/staticip"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
