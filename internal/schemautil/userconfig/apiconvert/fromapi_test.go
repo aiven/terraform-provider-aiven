@@ -346,8 +346,7 @@ func TestFromAPI(t *testing.T) {
 			got, _ := FromAPI(tt.args.st, tt.args.n, tt.args.r)
 
 			if !cmp.Equal(got, tt.want) {
-				t.Errorf(fmt.Sprintf("%#v", got))
-				//t.Errorf(cmp.Diff(tt.want, got))
+				t.Errorf(cmp.Diff(tt.want, got))
 			}
 		})
 	}
