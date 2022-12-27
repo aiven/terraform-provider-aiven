@@ -13,9 +13,9 @@ import (
 )
 
 type envConfig struct {
-	Token        string `envconfig:"AIVEN_TOKEN"`
-	Project      string `envconfig:"AIVEN_PROJECT_NAME"`
-	ProviderPath string `envconfig:"AIVEN_PROVIDER_PATH"`
+	Token        string `envconfig:"AIVEN_TOKEN" required:"true"`
+	Project      string `envconfig:"AIVEN_PROJECT_NAME" required:"true"`
+	ProviderPath string `envconfig:"AIVEN_PROVIDER_PATH" required:"true"`
 }
 
 // BaseTestSuite use for example tests
@@ -27,20 +27,33 @@ type BaseTestSuite struct {
 }
 
 func (s *BaseTestSuite) SetupSuite() {
+	err := s.setupSuite()
+	if err != nil {
+		s.Fail(err.Error())
+	}
+}
+
+func (s *BaseTestSuite) setupSuite() error {
 	s.config = new(envConfig)
 	err := envconfig.Process("", s.config)
-	s.NoError(err)
+	if err != nil {
+		return err
+	}
 
 	// Writes terraform config which forces to use dev provider
 	tfConfigPath, err := newTFConfig(s.config.ProviderPath)
-	s.NoError(err)
-	s.NotEmpty(tfConfigPath)
+	if err != nil {
+		return err
+	}
 	s.tfConfigPath = tfConfigPath
 
 	// Uses client to validates resources
 	client, err := newClient(s.config.Token)
-	s.NoError(err)
+	if err != nil {
+		return err
+	}
 	s.client = client
+	return nil
 }
 
 func (s *BaseTestSuite) TearDownSuite() {

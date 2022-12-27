@@ -28,7 +28,7 @@ func (s *KafkaConnectTestSuite) TestKafkaConnect() {
 		Vars: map[string]interface{}{
 			"avn_token":          s.config.Token,
 			"avn_project":        s.config.Project,
-			"kafka_service_name": kafkaServiceName,
+			"kafka_name":         kafkaServiceName,
 			"kafka_connect_name": kafkaConnectName,
 		},
 	})

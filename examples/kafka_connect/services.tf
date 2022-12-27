@@ -1,7 +1,7 @@
 # Kafka service
 resource "aiven_kafka" "kafka_service" {
   project                 = var.avn_project
-  service_name            = var.kafka_service_name
+  service_name            = var.kafka_name
   cloud_name              = "google-europe-west1"
   plan                    = "startup-2"
   maintenance_window_dow  = "monday"
