@@ -1,18 +1,6 @@
-
-variable "aiven_api_token" {
-  type = string
-}
-
-variable "project" {
-  type = string
-}
-
-variable "kafka_svc" {
-  type    = string
-  default = "tf-kafka"
-}
-
-variable "prom_name" {
-  type    = string
-  default = "Prometheus TF Example"
-}
+variable "avn_token" {}
+variable "avn_project" {}
+variable "kafka_name" {}
+variable "prometheus_endpoint_name" {}
+variable "prometheus_username" {}
+variable "prometheus_password" {}
