@@ -11,6 +11,7 @@ nav_order: 1
 - Mark `ip_filter` and `namespaces` deprecated
 - Make schema fields use strict types instead of string
 - Add support for strict types in diff functions
+- Add `stateupgrader` package which aims to assist with upgrading from v3.x to v4.0.0
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
