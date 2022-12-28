@@ -21,10 +21,10 @@ func (s *PostgresTestSuite) TestPostgres() {
 	s.T().Parallel()
 
 	// Given
-	genName := randNameGen("test-examples-postgres-%s")
-	pgNameEU := genName()
-	pgNameUS := genName()
-	pgNameAS := genName()
+	withPrefix := examplesRandPrefix()
+	pgNameEU := withPrefix("pg-eu")
+	pgNameUS := withPrefix("pg-us")
+	pgNameAS := withPrefix("pg-as")
 	opts := s.withDefaults(&terraform.Options{
 		TerraformDir: "../examples/postgres",
 		Vars: map[string]interface{}{

@@ -2,11 +2,11 @@ package examples
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
-	"strings"
+	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/stretchr/testify/suite"
@@ -74,14 +74,35 @@ func (s *BaseTestSuite) withDefaults(opts *terraform.Options) *terraform.Options
 	return terraform.WithDefaultRetryableErrors(s.T(), opts)
 }
 
-// randName Returns randomized name for a given format specifier randName("foo-%s")
-func randName(format string) string {
-	return fmt.Sprintf(format, strings.ToLower(random.UniqueId()))
+// uniqueIDChars Aiven allowed chars for "names"
+const uniqueIDChars = "0123456789abcdefghijklmnopqrstuvwxyz"
+
+// uniqueID generates Aiven compatible random id
+func uniqueID() string {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	b := make([]byte, 7)
+	for i := range b {
+		b[i] = uniqueIDChars[r.Intn(len(uniqueIDChars))]
+	}
+	return string(b)
 }
 
-func randNameGen(format string) func() string {
-	return func() string {
-		return randName(format)
+// randPrefix Returns name formatter with fixed random prefix (seed).
+// Each formatted string will have same random prefix to track all resources of the same test
+func randPrefix() func(string) string {
+	seed := uniqueID()
+	return func(s string) string {
+		return fmt.Sprintf("%s-%s", seed, s)
+	}
+}
+
+const exampleTestsPrefix = "test-examples-"
+
+// examplesRandPrefix same as randPrefix but adds examples test prefix so "make sweep" command can delete them
+func examplesRandPrefix() func(string) string {
+	format := randPrefix()
+	return func(s string) string {
+		return exampleTestsPrefix + format(s)
 	}
 }
 

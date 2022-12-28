@@ -22,8 +22,9 @@ func (s *KafkaPrometheusTestSuite) TestKafkaPrometheus() {
 	s.T().Parallel()
 
 	// Given
-	kafkaServiceName := randName("test-examples-kafka-%s")
-	prometheusEndpointName := randName("test-prometheus-endpoint-%s")
+	withPrefix := examplesRandPrefix()
+	kafkaServiceName := withPrefix("kafka")
+	prometheusEndpointName := withPrefix("prom-endpoint")
 	opts := s.withDefaults(&terraform.Options{
 		TerraformDir: "../examples/kafka_prometheus",
 		Vars: map[string]interface{}{
@@ -31,8 +32,8 @@ func (s *KafkaPrometheusTestSuite) TestKafkaPrometheus() {
 			"avn_project":              s.config.Project,
 			"kafka_name":               kafkaServiceName,
 			"prometheus_endpoint_name": prometheusEndpointName,
-			"prometheus_username":      randName("username%s"),
-			"prometheus_password":      randName("password%s"),
+			"prometheus_username":      "username" + uniqueID(),
+			"prometheus_password":      "password" + uniqueID(),
 		},
 	})
 
