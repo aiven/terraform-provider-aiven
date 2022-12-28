@@ -174,7 +174,9 @@ func itemToAPI(
 	//
 	// We check that there are more than three elements in the fk slice, because we don't want to send the value if
 	// the parent object is the root object.
-	if o && len(fk) > 3 && d.HasChange(fks[:strings.LastIndex(fks, ".0")]) {
+	_, e := d.GetOk(fks)
+
+	if o && e && len(fk) > 3 && d.HasChange(fks[:strings.LastIndex(fks, ".0")]) {
 		o = false
 	}
 
