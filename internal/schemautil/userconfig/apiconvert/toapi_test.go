@@ -10,20 +10,28 @@ import (
 // testResourceData is a resourceDatable compatible struct for testing.
 type testResourceData struct {
 	d map[string]interface{}
+	e map[string]struct{}
 	c map[string]struct{}
 	n bool
 }
 
 // newTestResourceData is a constructor for testResourceData.
-func newTestResourceData(d map[string]interface{}, c map[string]struct{}, n bool) *testResourceData {
-	return &testResourceData{d: d, c: c, n: n}
+func newTestResourceData(
+	d map[string]interface{},
+	e map[string]struct{},
+	c map[string]struct{},
+	n bool,
+) *testResourceData {
+	return &testResourceData{d: d, e: e, c: c, n: n}
 }
 
 // GetOk is a test implementation of resourceDatable.GetOk.
 func (t *testResourceData) GetOk(k string) (interface{}, bool) {
-	v, ok := t.d[k]
+	v := t.d[k]
 
-	return v, ok
+	_, e := t.e[k]
+
+	return v, e
 }
 
 // HasChange is a test implementation of resourceDatable.HasChange.
@@ -65,6 +73,9 @@ func TestToAPI(t *testing.T) {
 						},
 					},
 					map[string]struct{}{
+						"m3db_user_config": {},
+					},
+					map[string]struct{}{
 						"m3db_user_config.0.m3coordinator_enable_graphite_carbon_ingest": {},
 					},
 					false,
@@ -86,6 +97,9 @@ func TestToAPI(t *testing.T) {
 								"m3coordinator_enable_graphite_carbon_ingest": "true",
 							},
 						},
+					},
+					map[string]struct{}{
+						"m3db_user_config": {},
 					},
 					map[string]struct{}{},
 					false,
@@ -109,6 +123,9 @@ func TestToAPI(t *testing.T) {
 								},
 							},
 						},
+					},
+					map[string]struct{}{
+						"m3db_user_config": {},
 					},
 					map[string]struct{}{
 						"m3db_user_config.0.limits":                                      {},
@@ -140,6 +157,9 @@ func TestToAPI(t *testing.T) {
 							},
 						},
 					},
+					map[string]struct{}{
+						"m3db_user_config": {},
+					},
 					map[string]struct{}{},
 					false,
 				),
@@ -162,6 +182,9 @@ func TestToAPI(t *testing.T) {
 								},
 							},
 						},
+					},
+					map[string]struct{}{
+						"kafka_user_config": {},
 					},
 					map[string]struct{}{
 						"kafka_user_config.0.kafka":                                   {},
@@ -193,6 +216,9 @@ func TestToAPI(t *testing.T) {
 							},
 						},
 					},
+					map[string]struct{}{
+						"kafka_user_config": {},
+					},
 					map[string]struct{}{},
 					false,
 				),
@@ -211,6 +237,9 @@ func TestToAPI(t *testing.T) {
 								"project_to_fork_from": "anotherprojectname",
 							},
 						},
+					},
+					map[string]struct{}{
+						"m3db_user_config": {},
 					},
 					map[string]struct{}{
 						"m3db_user_config.0.project_to_fork_from": {},
@@ -234,6 +263,9 @@ func TestToAPI(t *testing.T) {
 								"project_to_fork_from": "anotherprojectname",
 							},
 						},
+					},
+					map[string]struct{}{
+						"m3db_user_config": {},
 					},
 					map[string]struct{}{
 						"m3db_user_config.0.project_to_fork_from": {},
@@ -260,6 +292,9 @@ func TestToAPI(t *testing.T) {
 								},
 							},
 						},
+					},
+					map[string]struct{}{
+						"m3db_user_config": {},
 					},
 					map[string]struct{}{
 						"m3db_user_config.0.namespaces":        {},
@@ -298,6 +333,10 @@ func TestToAPI(t *testing.T) {
 						},
 					},
 					map[string]struct{}{
+						"m3db_user_config":                     {},
+						"m3db_user_config.0.namespaces.0.name": {},
+					},
+					map[string]struct{}{
 						"m3db_user_config.0.namespaces":        {},
 						"m3db_user_config.0.namespaces.0":      {},
 						"m3db_user_config.0.namespaces.0.type": {},
@@ -332,6 +371,9 @@ func TestToAPI(t *testing.T) {
 							},
 						},
 					},
+					map[string]struct{}{
+						"m3db_user_config": {},
+					},
 					map[string]struct{}{},
 					false,
 				),
@@ -353,6 +395,9 @@ func TestToAPI(t *testing.T) {
 								},
 							},
 						},
+					},
+					map[string]struct{}{
+						"m3db_user_config": {},
 					},
 					map[string]struct{}{
 						"m3db_user_config.0.ip_filter":   {},
@@ -385,6 +430,9 @@ func TestToAPI(t *testing.T) {
 							},
 						},
 					},
+					map[string]struct{}{
+						"m3db_user_config": {},
+					},
 					map[string]struct{}{},
 					false,
 				),
@@ -412,6 +460,9 @@ func TestToAPI(t *testing.T) {
 								},
 							},
 						},
+					},
+					map[string]struct{}{
+						"m3db_user_config": {},
 					},
 					map[string]struct{}{
 						"m3db_user_config.0.ip_filter_object":               {},
@@ -461,6 +512,12 @@ func TestToAPI(t *testing.T) {
 						},
 					},
 					map[string]struct{}{
+						"m3db_user_config":                                  {},
+						"m3db_user_config.0.ip_filter_object.0":             {},
+						"m3db_user_config.0.ip_filter_object.0.description": {},
+						"m3db_user_config.0.ip_filter_object.0.network":     {},
+					},
+					map[string]struct{}{
 						"m3db_user_config.0.ip_filter_object":               {},
 						"m3db_user_config.0.ip_filter_object.1":             {},
 						"m3db_user_config.0.ip_filter_object.1.description": {},
@@ -504,6 +561,9 @@ func TestToAPI(t *testing.T) {
 							},
 						},
 					},
+					map[string]struct{}{
+						"m3db_user_config": {},
+					},
 					map[string]struct{}{},
 					false,
 				),
@@ -532,6 +592,9 @@ func TestToAPI(t *testing.T) {
 								},
 							},
 						},
+					},
+					map[string]struct{}{
+						"m3db_user_config": {},
 					},
 					map[string]struct{}{
 						"m3db_user_config.0.rules":                          {},
@@ -579,6 +642,9 @@ func TestToAPI(t *testing.T) {
 							},
 						},
 					},
+					map[string]struct{}{
+						"m3db_user_config": {},
+					},
 					map[string]struct{}{},
 					false,
 				),
@@ -610,6 +676,9 @@ func TestToAPI(t *testing.T) {
 								},
 							},
 						},
+					},
+					map[string]struct{}{
+						"m3db_user_config": {},
 					},
 					map[string]struct{}{
 						"m3db_user_config.0.rules":                                            {},
@@ -666,6 +735,10 @@ func TestToAPI(t *testing.T) {
 						},
 					},
 					map[string]struct{}{
+						"m3db_user_config": {},
+						"m3db_user_config.0.rules.0.mapping.0.namespaces_object.0.resolution": {},
+					},
+					map[string]struct{}{
 						"m3db_user_config.0.rules":                                           {},
 						"m3db_user_config.0.rules.0":                                         {},
 						"m3db_user_config.0.rules.0.mapping":                                 {},
@@ -717,6 +790,9 @@ func TestToAPI(t *testing.T) {
 								},
 							},
 						},
+					},
+					map[string]struct{}{
+						"m3db_user_config": {},
 					},
 					map[string]struct{}{},
 					false,
