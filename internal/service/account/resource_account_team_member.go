@@ -5,10 +5,10 @@ import (
 	"log"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 var aivenAccountTeamMemberSchema = map[string]*schema.Schema{
@@ -191,14 +191,25 @@ func resourceAccountTeamMemberDelete(_ context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
+	if len(r.Members) == 0 {
+		return nil
+	}
+
 	// delete account team member
+	found := false
 	for _, m := range r.Members {
 		if m.UserEmail == userEmail {
 			err = client.AccountTeamMembers.Delete(accountId, teamId, m.UserId)
 			if err != nil && !aiven.IsNotFound(err) {
 				return diag.FromErr(err)
 			}
+			found = true
+			break
 		}
+	}
+
+	if !found {
+		return diag.Errorf("user with email %q is not a part of the team %q", userEmail, teamId)
 	}
 
 	return nil
