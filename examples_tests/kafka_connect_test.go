@@ -21,8 +21,9 @@ func (s *KafkaConnectTestSuite) TestKafkaConnect() {
 	s.T().Parallel()
 
 	// Given
-	kafkaServiceName := randName("test-examples-kafka-%s")
-	kafkaConnectName := randName("test-examples-kafka-connect-%s")
+	withPrefix := examplesRandPrefix()
+	kafkaServiceName := withPrefix("kafka")
+	kafkaConnectName := withPrefix("kafka-connect")
 	opts := s.withDefaults(&terraform.Options{
 		TerraformDir: "../examples/kafka_connect",
 		Vars: map[string]interface{}{

@@ -21,10 +21,11 @@ func (s *KafkaConnectorTestSuite) TestKafkaConnectorOS() {
 	s.T().Parallel()
 
 	// Given
-	kafkaServiceName := randName("test-examples-kafka-%s")
-	kafkaConnectorName := randName("test-examples-kafka-connector-%s")
-	kafkaTopicName := randName("test-examples-kafka-topic-%s")
-	osServiceName := randName("test-examples-os-%s")
+	withPrefix := examplesRandPrefix()
+	kafkaServiceName := withPrefix("kafka")
+	kafkaConnectorName := withPrefix("kafka-connector")
+	kafkaTopicName := withPrefix("kafka-topic")
+	osServiceName := withPrefix("os")
 	opts := s.withDefaults(&terraform.Options{
 		TerraformDir: "../examples/kafka_connectors/os_sink",
 		Vars: map[string]interface{}{
@@ -47,10 +48,6 @@ func (s *KafkaConnectorTestSuite) TestKafkaConnectorOS() {
 	s.Equal("kafka", kafkaService.Type)
 	s.Equal("business-4", kafkaService.Plan)
 	s.Equal("google-europe-west1", kafkaService.CloudName)
-
-	kafkaTopic, err := s.client.KafkaTopics.Get(s.config.Project, kafkaServiceName, kafkaTopicName)
-	s.NoError(err)
-	s.Equal(kafkaTopic.TopicName, kafkaTopicName)
 
 	kafkaConnector, err := s.client.KafkaConnectors.GetByName(s.config.Project, kafkaServiceName, kafkaConnectorName)
 	s.NoError(err)

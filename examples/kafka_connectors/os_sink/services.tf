@@ -27,7 +27,7 @@ resource "aiven_kafka_topic" "kafka-topic" {
 }
 
 resource "aiven_opensearch" "os" {
-  project                 = aiven_kafka.kafka.project
+  project                 = var.avn_project
   service_name            = var.os_name
   cloud_name              = "google-europe-west1"
   plan                    = "startup-4"
