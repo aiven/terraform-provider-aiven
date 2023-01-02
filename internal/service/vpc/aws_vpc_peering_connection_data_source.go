@@ -27,8 +27,8 @@ func datasourceAWSVPCPeeringConnectionRead(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	awsAccountId := d.Get("aws_account_id").(string)
-	awsVPCId := d.Get("aws_vpc_id").(string)
+	awsAccountID := d.Get("aws_account_id").(string)
+	awsVPCID := d.Get("aws_vpc_id").(string)
 	awsVPCRegion := d.Get("aws_vpc_region").(string)
 
 	vpc, err := client.VPCs.Get(projectName, vpcID)
@@ -37,12 +37,12 @@ func datasourceAWSVPCPeeringConnectionRead(ctx context.Context, d *schema.Resour
 	}
 
 	for _, peer := range vpc.PeeringConnections {
-		if peer.PeerCloudAccount == awsAccountId && peer.PeerVPC == awsVPCId && *peer.PeerRegion == awsVPCRegion {
+		if peer.PeerCloudAccount == awsAccountID && peer.PeerVPC == awsVPCID && *peer.PeerRegion == awsVPCRegion {
 			d.SetId(schemautil.BuildResourceID(projectName, vpcID, peer.PeerCloudAccount, peer.PeerVPC, awsVPCRegion))
 			return resourceAWSVPCPeeringConnectionRead(ctx, d, m)
 		}
 	}
 
 	return diag.Errorf("AWS peering connection %s/%s/%s/%s not found",
-		projectName, vpc.CloudName, awsAccountId, awsVPCId)
+		projectName, vpc.CloudName, awsAccountID, awsVPCID)
 }

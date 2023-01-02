@@ -82,11 +82,11 @@ func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	gcpProjectId := d.Get("gcp_project_id").(string)
+	gcpProjectID := d.Get("gcp_project_id").(string)
 	peerVPC := d.Get("peer_vpc").(string)
 
 	pc, err = client.VPCPeeringConnections.GetVPCPeering(
-		projectName, vpcID, gcpProjectId, peerVPC, nil)
+		projectName, vpcID, gcpProjectID, peerVPC, nil)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("error checking gcp peering connection: %s", err)
 	}
@@ -99,7 +99,7 @@ func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 		projectName,
 		vpcID,
 		aiven.CreateVPCPeeringConnectionRequest{
-			PeerCloudAccount: gcpProjectId,
+			PeerCloudAccount: gcpProjectID,
 			PeerVPC:          peerVPC,
 		},
 	); err != nil {
@@ -121,7 +121,7 @@ func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 			pc, err := client.VPCPeeringConnections.GetVPCPeering(
 				projectName,
 				vpcID,
-				gcpProjectId,
+				gcpProjectID,
 				peerVPC,
 				nil,
 			)
@@ -249,23 +249,23 @@ func copyGCPVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 		return diag.FromErr(err)
 	}
 
-	var toProjectId string
+	var toProjectID string
 	var toVPCNetwork string
 
 	if peeringConnection.StateInfo != nil {
 		si := *peeringConnection.StateInfo
 		if len(si) > 0 {
 			if v, ok := si["to_project_id"]; ok {
-				toProjectId = v.(string)
+				toProjectID = v.(string)
 			}
 			if v, ok := si["to_vpc_network"]; ok {
 				toVPCNetwork = v.(string)
 			}
 
-			if toProjectId != "" && toVPCNetwork != "" {
+			if toProjectID != "" && toVPCNetwork != "" {
 				if err := d.Set("self_link",
 					fmt.Sprintf(_gcpAPI+"/projects/%s/global/networks/%s",
-						toProjectId, toVPCNetwork)); err != nil {
+						toProjectID, toVPCNetwork)); err != nil {
 					return diag.FromErr(err)
 				}
 			}

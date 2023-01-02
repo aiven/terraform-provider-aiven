@@ -28,8 +28,8 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Required:         true,
 		ValidateFunc:     validation.StringIsJSON,
-		StateFunc:        normalizeJsonString,
-		DiffSuppressFunc: diffSuppressJsonObject,
+		StateFunc:        normalizeJSONString,
+		DiffSuppressFunc: diffSuppressJSONObject,
 		Description:      "Kafka Schema configuration should be a valid Avro Schema JSON format.",
 	},
 	"schema_type": {
@@ -58,8 +58,8 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 	},
 }
 
-// diffSuppressJsonObject checks logical equivalences in JSON Kafka Schema values
-func diffSuppressJsonObject(_, old, new string, _ *schema.ResourceData) bool {
+// diffSuppressJSONObject checks logical equivalences in JSON Kafka Schema values
+func diffSuppressJSONObject(_, old, new string, _ *schema.ResourceData) bool {
 	var objOld, objNew interface{}
 
 	if err := json.Unmarshal([]byte(old), &objOld); err != nil {
@@ -72,8 +72,8 @@ func diffSuppressJsonObject(_, old, new string, _ *schema.ResourceData) bool {
 	return reflect.DeepEqual(objNew, objOld)
 }
 
-// normalizeJsonString returns normalized JSON string
-func normalizeJsonString(v interface{}) string {
+// normalizeJSONString returns normalized JSON string
+func normalizeJSONString(v interface{}) string {
 	jsonString, _ := structure.NormalizeJsonString(v)
 
 	return jsonString

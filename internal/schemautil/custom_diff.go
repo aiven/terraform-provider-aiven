@@ -136,9 +136,9 @@ func CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether(_ context.Contex
 	return nil
 }
 
-// CustomizeDiffCheckStaticIpDisassociation checks that we dont disassociate ips we should not
+// CustomizeDiffCheckStaticIPDisassociation checks that we dont disassociate ips we should not
 // and are not assigning ips that are not 'created'
-func CustomizeDiffCheckStaticIpDisassociation(_ context.Context, d *schema.ResourceDiff, m interface{}) error {
+func CustomizeDiffCheckStaticIPDisassociation(_ context.Context, d *schema.ResourceDiff, m interface{}) error {
 	contains := func(l []string, e string) bool {
 		for i := range l {
 			if l[i] == e {

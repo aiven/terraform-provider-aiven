@@ -67,7 +67,7 @@ func datasourceProjectVPCRead(_ context.Context, d *schema.ResourceData, m inter
 	var vpcID, projectName, cloudName string
 
 	// This two branches are isolated by tf validation
-	if s, hasId := d.GetOk("vpc_id"); hasId {
+	if s, hasID := d.GetOk("vpc_id"); hasID {
 		chunks, err := schemautil.SplitResourceID(s.(string), 2)
 		if err != nil {
 			return diag.Errorf("error splitting vpc_id: %s:", err)

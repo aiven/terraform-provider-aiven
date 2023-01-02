@@ -16,25 +16,23 @@ func copySensitiveFields(old, new map[string]interface{}) {
 	}
 }
 
-// normalizeIpFilter compares a list of IP filters set in the old user config and a sorted version coming from the new
+// normalizeIPFilter compares a list of IP filters set in the old user config and a sorted version coming from the new
 // user config and returns the re-sorted IP filters, such that all matching entries will be in the same order as
 // defined in the old user config.
-func normalizeIpFilter(old, new map[string]interface{}) {
-	oldIpFilters, _ := old["ip_filter"].([]interface{})
-
-	newIpFilters, _ := new["ip_filter"].([]interface{})
-
+func normalizeIPFilter(old, new map[string]interface{}) {
+	oldIPFilters, _ := old["ip_filter"].([]interface{})
+	newIPFilters, _ := new["ip_filter"].([]interface{})
 	fieldToWrite := "ip_filter"
 
-	if oldIpFilters == nil || newIpFilters == nil {
+	if oldIPFilters == nil || newIPFilters == nil {
 		var ok bool
 
-		oldIpFilters, ok = old["ip_filter_object"].([]interface{})
+		oldIPFilters, ok = old["ip_filter_object"].([]interface{})
 		if !ok {
 			return
 		}
 
-		newIpFilters, ok = new["ip_filter_object"].([]interface{})
+		newIPFilters, ok = new["ip_filter_object"].([]interface{})
 		if !ok {
 			return
 		}
@@ -42,16 +40,15 @@ func normalizeIpFilter(old, new map[string]interface{}) {
 		fieldToWrite = "ip_filter_object"
 	}
 
-	var normalizedIpFilters []interface{}
-
-	var nonexistentIpFilters []interface{}
+	var normalizedIPFilters []interface{}
+	var nonexistentIPFilters []interface{}
 
 	// First, we take all the elements from old and if they match with the elements in new,
 	// we preserve them in the same order as they were defined in old.
-	for _, o := range oldIpFilters {
+	for _, o := range oldIPFilters {
 		found := false
 
-		for _, n := range newIpFilters {
+		for _, n := range newIPFilters {
 			// Define two comparison variables to avoid code duplication in the loop.
 			var comparableO interface{}
 
@@ -70,7 +67,7 @@ func normalizeIpFilter(old, new map[string]interface{}) {
 			}
 
 			if comparableO == comparableN {
-				normalizedIpFilters = append(normalizedIpFilters, o)
+				normalizedIPFilters = append(normalizedIPFilters, o)
 
 				found = true
 
@@ -78,18 +75,18 @@ func normalizeIpFilter(old, new map[string]interface{}) {
 			}
 		}
 
-		// We append old elements that are missing in new to nonexistentIpFilters.
+		// We append old elements that are missing in new to nonexistentIPFilters.
 		if !found {
-			nonexistentIpFilters = append(nonexistentIpFilters, o)
+			nonexistentIPFilters = append(nonexistentIPFilters, o)
 		}
 	}
 
 	// Second, we take the new and check whether there are any differences with the old, and
-	// append those to nonexistentIpFilters.
-	for _, n := range newIpFilters {
+	// append those to nonexistentIPFilters.
+	for _, n := range newIPFilters {
 		found := false
 
-		for _, o := range oldIpFilters {
+		for _, o := range oldIPFilters {
 			var comparableO interface{}
 
 			var comparableN interface{}
@@ -112,9 +109,9 @@ func normalizeIpFilter(old, new map[string]interface{}) {
 		}
 
 		if !found {
-			nonexistentIpFilters = append(nonexistentIpFilters, n)
+			nonexistentIPFilters = append(nonexistentIPFilters, n)
 		}
 	}
 
-	new[fieldToWrite] = append(normalizedIpFilters, nonexistentIpFilters...)
+	new[fieldToWrite] = append(normalizedIPFilters, nonexistentIPFilters...)
 }

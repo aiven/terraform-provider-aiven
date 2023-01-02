@@ -24,9 +24,9 @@ func datasourceAccountAuthenticationRead(ctx context.Context, d *schema.Resource
 	client := m.(*aiven.Client)
 
 	name := d.Get("name").(string)
-	accountId := d.Get("account_id").(string)
+	accountID := d.Get("account_id").(string)
 
-	r, err := client.AccountAuthentications.List(accountId)
+	r, err := client.AccountAuthentications.List(accountID)
 	if err != nil {
 		return diag.FromErr(err)
 	}

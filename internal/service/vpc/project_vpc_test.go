@@ -44,7 +44,7 @@ func TestAccAivenProjectVPC_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccProjectVPCResourceGetById(rName),
+				Config: testAccProjectVPCResourceGetByID(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenProjectVPCAttributes("data.aiven_project_vpc.vpc2"),
 					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
@@ -113,12 +113,12 @@ func testAccCheckAivenProjectVPCResourceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		projectName, vpcId, err := schemautil.SplitResourceID2(rs.Primary.ID)
+		projectName, vpcID, err := schemautil.SplitResourceID2(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		vpc, err := c.VPCs.Get(projectName, vpcId)
+		vpc, err := c.VPCs.Get(projectName, vpcID)
 		if err != nil {
 			errStatus := err.(aiven.Error).Status
 			if errStatus != 404 && errStatus != 403 {
@@ -167,7 +167,7 @@ data "aiven_project_vpc" "vpc" {
 }`, name)
 }
 
-func testAccProjectVPCResourceGetById(name string) string {
+func testAccProjectVPCResourceGetByID(name string) string {
 	return fmt.Sprintf(`
 resource "aiven_project" "foo" {
   project = "test-acc-pr-%s"

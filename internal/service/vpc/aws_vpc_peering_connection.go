@@ -89,7 +89,7 @@ func resourceAWSVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	awsAccountId := d.Get("aws_account_id").(string)
+	awsAccountID := d.Get("aws_account_id").(string)
 	awsVPCId := d.Get("aws_vpc_id").(string)
 	awsVPCRegion := d.Get("aws_vpc_region").(string)
 	if awsVPCRegion != "" {
@@ -97,7 +97,7 @@ func resourceAWSVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 	}
 
 	pc, err = client.VPCPeeringConnections.GetVPCPeering(
-		projectName, vpcID, awsAccountId, awsVPCId, &awsVPCRegion)
+		projectName, vpcID, awsAccountID, awsVPCId, &awsVPCRegion)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("error checking aws peering connection: %s", err)
 	}
@@ -110,7 +110,7 @@ func resourceAWSVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 		projectName,
 		vpcID,
 		aiven.CreateVPCPeeringConnectionRequest{
-			PeerCloudAccount: awsAccountId,
+			PeerCloudAccount: awsAccountID,
 			PeerVPC:          awsVPCId,
 			PeerRegion:       region,
 		},
@@ -133,7 +133,7 @@ func resourceAWSVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 			pc, err := client.VPCPeeringConnections.GetVPCPeering(
 				projectName,
 				vpcID,
-				awsAccountId,
+				awsAccountID,
 				awsVPCId,
 				region,
 			)

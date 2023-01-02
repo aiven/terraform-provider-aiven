@@ -71,19 +71,19 @@ eliminate an account team member if one has accepted an invitation previously.
 
 func resourceAccountTeamMemberCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
-	accountId := d.Get("account_id").(string)
-	teamId := d.Get("team_id").(string)
+	accountID := d.Get("account_id").(string)
+	teamID := d.Get("team_id").(string)
 	userEmail := d.Get("user_email").(string)
 
 	err := client.AccountTeamMembers.Invite(
-		accountId,
-		teamId,
+		accountID,
+		teamID,
 		userEmail)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(schemautil.BuildResourceID(accountId, teamId, userEmail))
+	d.SetId(schemautil.BuildResourceID(accountID, teamID, userEmail))
 
 	return resourceAccountTeamMemberRead(ctx, d, m)
 }
@@ -92,12 +92,12 @@ func resourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, 
 	var found bool
 	client := m.(*aiven.Client)
 
-	accountId, teamId, userEmail, err := schemautil.SplitResourceID3(d.Id())
+	accountID, teamID, userEmail, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	r, err := client.AccountTeamInvites.List(accountId, teamId)
+	r, err := client.AccountTeamInvites.List(accountID, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -130,7 +130,7 @@ func resourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	if !found {
-		rm, err := client.AccountTeamMembers.List(accountId, teamId)
+		rm, err := client.AccountTeamMembers.List(accountID, teamID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -139,7 +139,7 @@ func resourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, 
 			if member.UserEmail == userEmail {
 				found = true
 
-				if err := d.Set("account_id", accountId); err != nil {
+				if err := d.Set("account_id", accountID); err != nil {
 					return diag.FromErr(err)
 				}
 				if err := d.Set("team_id", member.TeamId); err != nil {
@@ -175,18 +175,18 @@ func resourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, 
 func resourceAccountTeamMemberDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId, teamId, userEmail, err := schemautil.SplitResourceID3(d.Id())
+	accountID, teamID, userEmail, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// delete account team user invitation
-	err = client.AccountTeamInvites.Delete(accountId, teamId, userEmail)
+	err = client.AccountTeamInvites.Delete(accountID, teamID, userEmail)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
 
-	r, err := client.AccountTeamMembers.List(accountId, teamId)
+	r, err := client.AccountTeamMembers.List(accountID, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -199,7 +199,7 @@ func resourceAccountTeamMemberDelete(_ context.Context, d *schema.ResourceData, 
 	found := false
 	for _, m := range r.Members {
 		if m.UserEmail == userEmail {
-			err = client.AccountTeamMembers.Delete(accountId, teamId, m.UserId)
+			err = client.AccountTeamMembers.Delete(accountID, teamID, m.UserId)
 			if err != nil && !aiven.IsNotFound(err) {
 				return diag.FromErr(err)
 			}
@@ -209,7 +209,7 @@ func resourceAccountTeamMemberDelete(_ context.Context, d *schema.ResourceData, 
 	}
 
 	if !found {
-		return diag.Errorf("user with email %q is not a part of the team %q", userEmail, teamId)
+		return diag.Errorf("user with email %q is not a part of the team %q", userEmail, teamID)
 	}
 
 	return nil

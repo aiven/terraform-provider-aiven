@@ -27,7 +27,7 @@ func datasourceGCPVPCPeeringConnectionRead(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	gcpProjectId := d.Get("gcp_project_id").(string)
+	gcpProjectID := d.Get("gcp_project_id").(string)
 	peerVPC := d.Get("peer_vpc").(string)
 
 	vpc, err := client.VPCs.Get(projectName, vpcID)
@@ -36,12 +36,12 @@ func datasourceGCPVPCPeeringConnectionRead(ctx context.Context, d *schema.Resour
 	}
 
 	for _, peer := range vpc.PeeringConnections {
-		if peer.PeerCloudAccount == gcpProjectId && peer.PeerVPC == peerVPC {
+		if peer.PeerCloudAccount == gcpProjectID && peer.PeerVPC == peerVPC {
 			d.SetId(schemautil.BuildResourceID(projectName, vpcID, peer.PeerCloudAccount, peer.PeerVPC))
 			return resourceGCPVPCPeeringConnectionRead(ctx, d, m)
 		}
 	}
 
 	return diag.Errorf("gcp peering connection %s/%s/%s/%s not found",
-		projectName, vpc.CloudName, gcpProjectId, peerVPC)
+		projectName, vpc.CloudName, gcpProjectID, peerVPC)
 }

@@ -51,7 +51,7 @@ func ResourceRedis() *schema.Resource {
 				schemautil.CustomizeDiffServiceIntegrationAfterCreation,
 			),
 			customdiff.Sequence(
-				schemautil.CustomizeDiffCheckStaticIpDisassociation,
+				schemautil.CustomizeDiffCheckStaticIPDisassociation,
 				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
 			),
 		),

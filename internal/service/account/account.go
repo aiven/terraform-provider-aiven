@@ -72,12 +72,12 @@ func ResourceAccount() *schema.Resource {
 func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	name := d.Get("name").(string)
-	bgId := d.Get("primary_billing_group_id").(string)
+	bgID := d.Get("primary_billing_group_id").(string)
 
 	r, err := client.Accounts.Create(
 		aiven.Account{
 			Name:                  name,
-			PrimaryBillingGroupId: bgId,
+			PrimaryBillingGroupId: bgID,
 		},
 	)
 	if err != nil {

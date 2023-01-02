@@ -19,11 +19,11 @@ func DatasourceAccountTeamMember() *schema.Resource {
 }
 
 func datasourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	accountId := d.Get("account_id").(string)
-	teamId := d.Get("team_id").(string)
+	accountID := d.Get("account_id").(string)
+	teamID := d.Get("team_id").(string)
 	userEmail := d.Get("user_email").(string)
 
-	d.SetId(schemautil.BuildResourceID(accountId, teamId, userEmail))
+	d.SetId(schemautil.BuildResourceID(accountID, teamID, userEmail))
 
 	return resourceAccountTeamMemberRead(ctx, d, m)
 }

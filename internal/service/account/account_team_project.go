@@ -58,14 +58,14 @@ account team you are trying to link to this project.
 func resourceAccountTeamProjectCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId := d.Get("account_id").(string)
-	teamId := d.Get("team_id").(string)
+	accountID := d.Get("account_id").(string)
+	teamID := d.Get("team_id").(string)
 	projectName := d.Get("project_name").(string)
 	teamType := d.Get("team_type").(string)
 
 	err := client.AccountTeamProjects.Create(
-		accountId,
-		teamId,
+		accountID,
+		teamID,
 		aiven.AccountTeamProject{
 			ProjectName: projectName,
 			TeamType:    teamType,
@@ -75,7 +75,7 @@ func resourceAccountTeamProjectCreate(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	d.SetId(schemautil.BuildResourceID(accountId, teamId, projectName))
+	d.SetId(schemautil.BuildResourceID(accountID, teamID, projectName))
 
 	return resourceAccountTeamProjectRead(ctx, d, m)
 }
@@ -83,12 +83,12 @@ func resourceAccountTeamProjectCreate(ctx context.Context, d *schema.ResourceDat
 func resourceAccountTeamProjectRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId, teamId, projectName, err := schemautil.SplitResourceID3(d.Id())
+	accountID, teamID, projectName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	r, err := client.AccountTeamProjects.List(accountId, teamId)
+	r, err := client.AccountTeamProjects.List(accountID, teamID)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -104,10 +104,10 @@ func resourceAccountTeamProjectRead(_ context.Context, d *schema.ResourceData, m
 		return diag.Errorf("account team project %s not found", d.Id())
 	}
 
-	if err := d.Set("account_id", accountId); err != nil {
+	if err := d.Set("account_id", accountID); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("team_id", teamId); err != nil {
+	if err := d.Set("team_id", teamID); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("project_name", project.ProjectName); err != nil {
@@ -123,7 +123,7 @@ func resourceAccountTeamProjectRead(_ context.Context, d *schema.ResourceData, m
 func resourceAccountTeamProjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId, teamId, _, err := schemautil.SplitResourceID3(d.Id())
+	accountID, teamID, _, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -131,7 +131,7 @@ func resourceAccountTeamProjectUpdate(ctx context.Context, d *schema.ResourceDat
 	newProjectName := d.Get("project_name").(string)
 	teamType := d.Get("team_type").(string)
 
-	err = client.AccountTeamProjects.Update(accountId, teamId, aiven.AccountTeamProject{
+	err = client.AccountTeamProjects.Update(accountID, teamID, aiven.AccountTeamProject{
 		TeamType:    teamType,
 		ProjectName: newProjectName,
 	})
@@ -139,7 +139,7 @@ func resourceAccountTeamProjectUpdate(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	d.SetId(schemautil.BuildResourceID(accountId, teamId, newProjectName))
+	d.SetId(schemautil.BuildResourceID(accountID, teamID, newProjectName))
 
 	return resourceAccountTeamProjectRead(ctx, d, m)
 }
@@ -147,12 +147,12 @@ func resourceAccountTeamProjectUpdate(ctx context.Context, d *schema.ResourceDat
 func resourceAccountTeamProjectDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId, teamId, projectName, err := schemautil.SplitResourceID3(d.Id())
+	accountID, teamID, projectName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = client.AccountTeamProjects.Delete(accountId, teamId, projectName)
+	err = client.AccountTeamProjects.Delete(accountID, teamID, projectName)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}

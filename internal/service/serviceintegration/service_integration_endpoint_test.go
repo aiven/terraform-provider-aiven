@@ -99,12 +99,12 @@ func testAccCheckAivenServiceIntegraitonEndpointResourceDestroy(s *terraform.Sta
 			continue
 		}
 
-		projectName, endpointId, err := schemautil.SplitResourceID2(rs.Primary.ID)
+		projectName, endpointID, err := schemautil.SplitResourceID2(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		i, err := c.ServiceIntegrationEndpoints.Get(projectName, endpointId)
+		i, err := c.ServiceIntegrationEndpoints.Get(projectName, endpointID)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {
 				return err

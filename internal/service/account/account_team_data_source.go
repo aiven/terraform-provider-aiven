@@ -23,9 +23,9 @@ func datasourceAccountTeamRead(ctx context.Context, d *schema.ResourceData, m in
 	client := m.(*aiven.Client)
 
 	name := d.Get("name").(string)
-	accountId := d.Get("account_id").(string)
+	accountID := d.Get("account_id").(string)
 
-	r, err := client.AccountTeams.List(accountId)
+	r, err := client.AccountTeams.List(accountID)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -158,9 +158,9 @@ func ResourceAccountAuthentication() *schema.Resource {
 func resourceAccountAuthenticationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId := d.Get("account_id").(string)
+	accountID := d.Get("account_id").(string)
 	r, err := client.AccountAuthentications.Create(
-		accountId,
+		accountID,
 		aiven.AccountAuthenticationMethodCreate{
 			AuthenticationMethodName: d.Get("name").(string),
 			AuthenticationMethodType: d.Get("type").(string),
@@ -180,7 +180,7 @@ func resourceAccountAuthenticationCreate(ctx context.Context, d *schema.Resource
 	}
 
 	d.SetId(schemautil.BuildResourceID(
-		accountId,
+		accountID,
 		r.AuthenticationMethod.AuthenticationMethodID))
 
 	return resourceAccountAuthenticationRead(ctx, d, m)
@@ -189,12 +189,12 @@ func resourceAccountAuthenticationCreate(ctx context.Context, d *schema.Resource
 func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId, authId, err := schemautil.SplitResourceID2(d.Id())
+	accountID, authID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	r, err := client.AccountAuthentications.Get(accountId, authId)
+	r, err := client.AccountAuthentications.Get(accountID, authID)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -259,7 +259,7 @@ func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData
 
 func resourceAccountAuthenticationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
-	accountId, authId, err := schemautil.SplitResourceID2(d.Id())
+	accountID, authID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -278,24 +278,24 @@ func resourceAccountAuthenticationUpdate(ctx context.Context, d *schema.Resource
 		SAMLEntity:                  d.Get("saml_entity_id").(string),
 	}
 
-	_, err = client.AccountAuthentications.Update(accountId, authId, r)
+	_, err = client.AccountAuthentications.Update(accountID, authID, r)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(schemautil.BuildResourceID(accountId, authId))
+	d.SetId(schemautil.BuildResourceID(accountID, authID))
 	return resourceAccountAuthenticationRead(ctx, d, m)
 }
 
 func resourceAccountAuthenticationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	accountId, teamId, err := schemautil.SplitResourceID2(d.Id())
+	accountID, teamID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = client.AccountAuthentications.Delete(accountId, teamId)
+	err = client.AccountAuthentications.Delete(accountID, teamID)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}

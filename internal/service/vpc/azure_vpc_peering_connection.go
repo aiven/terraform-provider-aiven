@@ -92,7 +92,7 @@ func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	azureSubscriptionId := d.Get("azure_subscription_id").(string)
+	azureSubscriptionID := d.Get("azure_subscription_id").(string)
 	vnetName := d.Get("vnet_name").(string)
 
 	// Azure related fields are only available for VPC Peering Connection resource but
@@ -110,7 +110,7 @@ func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.Reso
 	}
 
 	pc, err := client.VPCPeeringConnections.GetVPCPeering(
-		projectName, vpcID, azureSubscriptionId, vnetName, &peerResourceGroup)
+		projectName, vpcID, azureSubscriptionID, vnetName, &peerResourceGroup)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("error checking azure connection: %s", err)
 	}
@@ -123,7 +123,7 @@ func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.Reso
 		projectName,
 		vpcID,
 		aiven.CreateVPCPeeringConnectionRequest{
-			PeerCloudAccount:  azureSubscriptionId,
+			PeerCloudAccount:  azureSubscriptionID,
 			PeerVPC:           vnetName,
 			PeerAzureAppId:    peerAzureAppID,
 			PeerAzureTenantId: peerAzureTenantID,
@@ -148,7 +148,7 @@ func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.Reso
 			pc, err := client.VPCPeeringConnections.GetVPCPeering(
 				projectName,
 				vpcID,
-				azureSubscriptionId,
+				azureSubscriptionID,
 				vnetName,
 				nil,
 			)

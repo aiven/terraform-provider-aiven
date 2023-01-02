@@ -45,7 +45,7 @@ var aivenStaticIPSchema = map[string]*schema.Schema{
 
 func ResourceStaticIP() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The aiven staticip resource allows the creation and deletion of static ips. Please not that once a static ip is in the 'assigned' state it it is bound to the node it is assigned to and cannot be deleted or disassociated until the node is recycled. Plans that would delete static ips that are in the assigned state will be blocked.",
+		Description:   "The aiven_static_ip resource allows the creation and deletion of static ips. Please not that once a static ip is in the 'assigned' state it is bound to the node it is assigned to and cannot be deleted or disassociated until the node is recycled. Plans that would delete static ips that are in the assigned state will be blocked.",
 		CreateContext: resourceStaticIPCreate,
 		ReadContext:   resourceStaticIPRead,
 		DeleteContext: resourceStaticIPDelete,
@@ -59,7 +59,7 @@ func ResourceStaticIP() *schema.Resource {
 func resourceStaticIPRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, staticIPAddressId, err := schemautil.SplitResourceID2(d.Id())
+	project, staticIPAddressID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.Errorf("error splitting static IP ID: %s", err)
 	}
@@ -72,7 +72,7 @@ func resourceStaticIPRead(_ context.Context, d *schema.ResourceData, m interface
 		return diag.Errorf("error getting a list of static IPs for a project: %s", err)
 	}
 	for _, sip := range r.StaticIPs {
-		if sip.StaticIPAddressID == staticIPAddressId {
+		if sip.StaticIPAddressID == staticIPAddressID {
 			err = setStaticIPState(d, project, &sip)
 			if err != nil {
 				return diag.Errorf("error setting static ip for resource %s: %s", d.Id(), err)
@@ -108,33 +108,33 @@ func resourceStaticIPCreate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceStaticIPDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, staticIPAddressId, err := schemautil.SplitResourceID2(d.Id())
+	project, staticIPAddressID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.Errorf("error spliting static IP ID: %s:", err)
 	}
 
-	staticIP, err := client.StaticIPs.Get(project, staticIPAddressId)
+	staticIP, err := client.StaticIPs.Get(project, staticIPAddressID)
 	if err != nil {
 		if aiven.IsNotFound(err) {
 			return nil
 		}
 
-		return diag.Errorf("error getting static IP (%s): %s", staticIPAddressId, err)
+		return diag.Errorf("error getting static IP (%s): %s", staticIPAddressID, err)
 	}
 
-	if staticIP.State == schemautil.StaticIpAvailable {
-		if err := client.StaticIPs.Dissociate(project, staticIPAddressId); err != nil {
-			return diag.Errorf("error dissociating static IP (%s): %s", staticIPAddressId, err)
+	if staticIP.State == schemautil.StaticIPAvailable {
+		if err := client.StaticIPs.Dissociate(project, staticIPAddressID); err != nil {
+			return diag.Errorf("error dissociating static IP (%s): %s", staticIPAddressID, err)
 		}
 	}
 
 	err = client.StaticIPs.Delete(
 		project,
 		aiven.DeleteStaticIPRequest{
-			StaticIPAddressID: staticIPAddressId,
+			StaticIPAddressID: staticIPAddressID,
 		})
 	if err != nil && !aiven.IsNotFound(err) {
-		return diag.Errorf("error deleting static IP (%s): %s", staticIPAddressId, err)
+		return diag.Errorf("error deleting static IP (%s): %s", staticIPAddressID, err)
 	}
 
 	return nil
@@ -143,28 +143,28 @@ func resourceStaticIPDelete(_ context.Context, d *schema.ResourceData, m interfa
 func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
-	project, staticIPAddressId, err := schemautil.SplitResourceID2(d.Id())
+	project, staticIPAddressID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
 		return err
 	}
 
 	conf := resource.StateChangeConf{
-		Target:  []string{schemautil.StaticIpCreated},
-		Pending: []string{"waiting", schemautil.StaticIpCreating},
+		Target:  []string{schemautil.StaticIPCreated},
+		Pending: []string{"waiting", schemautil.StaticIPCreating},
 		Timeout: d.Timeout(schema.TimeoutCreate),
 		Refresh: func() (result interface{}, state string, err error) {
-			log.Println("[DEBUG] checking if static ip", staticIPAddressId, "is in 'created' state")
+			log.Println("[DEBUG] checking if static ip", staticIPAddressID, "is in 'created' state")
 			r, err := client.StaticIPs.List(project)
 			if err != nil {
 				return nil, "", fmt.Errorf("unable to fetch static ips: %w", err)
 			}
 			for _, sip := range r.StaticIPs {
-				if sip.StaticIPAddressID == staticIPAddressId {
-					log.Println("[DEBUG] static ip", staticIPAddressId, "is in state", sip.State)
+				if sip.StaticIPAddressID == staticIPAddressID {
+					log.Println("[DEBUG] static ip", staticIPAddressID, "is in state", sip.State)
 					return struct{}{}, sip.State, nil
 				}
 			}
-			log.Println("[DEBUG] static ip", staticIPAddressId, "not found in project")
+			log.Println("[DEBUG] static ip", staticIPAddressID, "not found in project")
 			return struct{}{}, "waiting", nil
 		},
 	}

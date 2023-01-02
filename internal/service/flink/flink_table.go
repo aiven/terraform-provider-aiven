@@ -205,12 +205,12 @@ func ResourceFlinkTable() *schema.Resource {
 func resourceFlinkTableRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, tableId, err := schemautil.SplitResourceID3(d.Id())
+	project, serviceName, tableID, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	r, err := client.FlinkTables.Get(project, serviceName, aiven.GetFlinkTableRequest{TableId: tableId})
+	r, err := client.FlinkTables.Get(project, serviceName, aiven.GetFlinkTableRequest{TableId: tableID})
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -244,7 +244,7 @@ func resourceFlinkTableCreate(ctx context.Context, d *schema.ResourceData, m int
 	serviceName := d.Get("service_name").(string)
 	tableName := d.Get("table_name").(string)
 	schemaSQL := d.Get("schema_sql").(string)
-	integrationId := d.Get("integration_id").(string)
+	integrationID := d.Get("integration_id").(string)
 
 	// connector options
 	jdbcTable := d.Get("jdbc_table").(string)
@@ -261,7 +261,7 @@ func resourceFlinkTableCreate(ctx context.Context, d *schema.ResourceData, m int
 	createRequest := aiven.CreateFlinkTableRequest{
 		Name:                    tableName,
 		SchemaSQL:               schemaSQL,
-		IntegrationId:           integrationId,
+		IntegrationId:           integrationID,
 		JDBCTable:               jdbcTable,
 		KafkaConnectorType:      kafkaConnectorType,
 		KafkaTopic:              kafkaTopic,
@@ -288,7 +288,7 @@ func resourceFlinkTableCreate(ctx context.Context, d *schema.ResourceData, m int
 func resourceFlinkTableDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, serviceName, tableId, err := schemautil.SplitResourceID3(d.Id())
+	project, serviceName, tableID, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -297,7 +297,7 @@ func resourceFlinkTableDelete(_ context.Context, d *schema.ResourceData, m inter
 		project,
 		serviceName,
 		aiven.DeleteFlinkTableRequest{
-			TableId: tableId,
+			TableId: tableID,
 		})
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
@@ -374,10 +374,10 @@ func getFlinkTableKafkaKeyValueFormats() []string {
 		formatAvro                  = "avro"
 		formatAvroConfluent         = "avro-confluent"
 		formatDebeziumAvroConfluent = "debezium-avro-confluent"
-		formatDebeziumJson          = "debezium-json"
-		formatJson                  = "json"
+		formatDebeziumJSON          = "debezium-json"
+		formatJSON                  = "json"
 	)
-	return []string{formatAvro, formatAvroConfluent, formatDebeziumAvroConfluent, formatDebeziumJson, formatJson}
+	return []string{formatAvro, formatAvroConfluent, formatDebeziumAvroConfluent, formatDebeziumJSON, formatJSON}
 }
 
 func getFlinkTableKafkaValueFieldsInclude() []string {

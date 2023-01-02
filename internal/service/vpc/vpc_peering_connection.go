@@ -240,7 +240,7 @@ type peeringVPCID struct {
 	peerRegion       *string
 }
 
-// / parsePeerVPCID splits string id like "my-project/id/id/my-vpc" + optional "/region"
+// parsePeerVPCID splits string id like "my-project/id/id/my-vpc" + optional "/region"
 func parsePeerVPCID(src string) (*peeringVPCID, error) {
 	chunks := strings.Split(src, "/")
 	length := len(chunks)

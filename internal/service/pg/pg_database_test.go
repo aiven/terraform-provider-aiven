@@ -83,9 +83,9 @@ func TestAccAivenPGDatabase_basic(t *testing.T) {
 					if _, ok := attributes["lc_collate"]; !ok {
 						return errors.New("expected 'lc_collate' field to be set")
 					}
-					expectedId := fmt.Sprintf("%s/test-acc-sr-%s/%s", projectName, rName, databaseName)
-					if !strings.EqualFold(s[0].ID, expectedId) {
-						return fmt.Errorf("expected ID to match '%s', but got: %s", expectedId, s[0].ID)
+					expectedID := fmt.Sprintf("%s/test-acc-sr-%s/%s", projectName, rName, databaseName)
+					if !strings.EqualFold(s[0].ID, expectedID) {
+						return fmt.Errorf("expected ID to match '%s', but got: %s", expectedID, s[0].ID)
 					}
 					return nil
 				},

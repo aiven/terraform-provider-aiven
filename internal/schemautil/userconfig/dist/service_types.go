@@ -64,9 +64,9 @@ func ServiceTypeCassandra() *schema.Schema {
 		},
 		"ip_filter": {
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
-				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
 				Type:             schema.TypeString,
 			},
 			MaxItems: 1024,
@@ -174,9 +174,9 @@ func ServiceTypeClickhouse() *schema.Schema {
 		},
 		"ip_filter": {
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
-				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
 				Type:             schema.TypeString,
 			},
 			MaxItems: 1024,
@@ -641,9 +641,9 @@ func ServiceTypeElasticsearch() *schema.Schema {
 		},
 		"ip_filter": {
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
-				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
 				Type:             schema.TypeString,
 			},
 			MaxItems: 1024,
@@ -904,9 +904,9 @@ func ServiceTypeFlink() *schema.Schema {
 		},
 		"ip_filter": {
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
-				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
 				Type:             schema.TypeString,
 			},
 			MaxItems: 1024,
@@ -1651,9 +1651,9 @@ func ServiceTypeGrafana() *schema.Schema {
 		},
 		"ip_filter": {
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
-				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
 				Type:             schema.TypeString,
 			},
 			MaxItems: 1024,
@@ -1959,9 +1959,9 @@ func ServiceTypeInfluxdb() *schema.Schema {
 		},
 		"ip_filter": {
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
-				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
 				Type:             schema.TypeString,
 			},
 			MaxItems: 1024,
@@ -2085,9 +2085,9 @@ func ServiceTypeKafka() *schema.Schema {
 		},
 		"ip_filter": {
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
-				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
 				Type:             schema.TypeString,
 			},
 			MaxItems: 1024,
@@ -2967,9 +2967,9 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 		},
 		"ip_filter": {
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
-				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
 				Type:             schema.TypeString,
 			},
 			MaxItems: 1024,
@@ -3253,9 +3253,9 @@ func ServiceTypeKafkaMirrormaker() *schema.Schema {
 		},
 		"ip_filter": {
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
-				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
 				Type:             schema.TypeString,
 			},
 			MaxItems: 1024,
@@ -3417,9 +3417,9 @@ func ServiceTypeM3aggregator() *schema.Schema {
 		},
 		"ip_filter": {
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
-				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
 				Type:             schema.TypeString,
 			},
 			MaxItems: 1024,
@@ -3488,9 +3488,9 @@ func ServiceTypeM3db() *schema.Schema {
 		},
 		"ip_filter": {
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
-				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
 				Type:             schema.TypeString,
 			},
 			MaxItems: 1024,
@@ -4026,9 +4026,9 @@ func ServiceTypeMysql() *schema.Schema {
 		},
 		"ip_filter": {
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
-				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
 				Type:             schema.TypeString,
 			},
 			MaxItems: 1024,
@@ -4700,9 +4700,9 @@ func ServiceTypeOpensearch() *schema.Schema {
 		},
 		"ip_filter": {
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
-				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
 				Type:             schema.TypeString,
 			},
 			MaxItems: 1024,
@@ -5302,9 +5302,9 @@ func ServiceTypePg() *schema.Schema {
 		},
 		"ip_filter": {
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
-				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
 				Type:             schema.TypeString,
 			},
 			MaxItems: 1024,
@@ -6245,9 +6245,9 @@ func ServiceTypeRedis() *schema.Schema {
 		},
 		"ip_filter": {
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
-			DiffSuppressFunc: schemautil.IpFilterArrayDiffSuppressFunc,
+			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
-				DiffSuppressFunc: schemautil.IpFilterValueDiffSuppressFunc,
+				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
 				Type:             schema.TypeString,
 			},
 			MaxItems: 1024,

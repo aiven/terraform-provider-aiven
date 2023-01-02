@@ -210,7 +210,7 @@ func testAccCheckAivenAccountAuthenticationResourceDestroy(s *terraform.State) e
 			continue
 		}
 
-		accountId, authId, err := schemautil.SplitResourceID2(rs.Primary.ID)
+		accountID, authID, err := schemautil.SplitResourceID2(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -225,8 +225,8 @@ func testAccCheckAivenAccountAuthenticationResourceDestroy(s *terraform.State) e
 		}
 
 		for _, ac := range r.Accounts {
-			if ac.Id == accountId {
-				ra, err := c.AccountAuthentications.List(accountId)
+			if ac.Id == accountID {
+				ra, err := c.AccountAuthentications.List(accountID)
 				if err != nil {
 					if err.(aiven.Error).Status != 404 {
 						return err
@@ -236,7 +236,7 @@ func testAccCheckAivenAccountAuthenticationResourceDestroy(s *terraform.State) e
 				}
 
 				for _, a := range ra.AuthenticationMethods {
-					if a.AuthenticationMethodID == authId {
+					if a.AuthenticationMethodID == authID {
 						return fmt.Errorf("account authentication (%s) still exists", rs.Primary.ID)
 					}
 				}

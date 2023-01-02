@@ -124,7 +124,7 @@ func TestAccAivenGCPPeeringConnection_basic(t *testing.T) {
 					}
 
 					attributes := s[0].Attributes
-					vpcId, ok := attributes["vpc_id"]
+					vpcID, ok := attributes["vpc_id"]
 					if !ok {
 						return errors.New("expected 'vpc_id' field to be set")
 					}
@@ -139,9 +139,9 @@ func TestAccAivenGCPPeeringConnection_basic(t *testing.T) {
 						return errors.New("expected 'gcp_project_id' field to be set")
 					}
 
-					expectedId := fmt.Sprintf("%s/%s/%s", vpcId, gcpProjectID, peerVPC)
-					if !strings.EqualFold(s[0].ID, expectedId) {
-						return fmt.Errorf("expected ID to match '%s', but got: %s", expectedId, s[0].ID)
+					expectedID := fmt.Sprintf("%s/%s/%s", vpcID, gcpProjectID, peerVPC)
+					if !strings.EqualFold(s[0].ID, expectedID) {
+						return fmt.Errorf("expected ID to match '%s', but got: %s", expectedID, s[0].ID)
 					}
 
 					if _, ok := attributes["self_link"]; !ok {

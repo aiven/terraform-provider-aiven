@@ -70,7 +70,7 @@ func testAccCheckAivenAccountTeamMemberResourceDestroy(s *terraform.State) error
 			continue
 		}
 
-		accountId, teamId, userEmail, err := schemautil.SplitResourceID3(rs.Primary.ID)
+		accountID, teamID, userEmail, err := schemautil.SplitResourceID3(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -85,8 +85,8 @@ func testAccCheckAivenAccountTeamMemberResourceDestroy(s *terraform.State) error
 		}
 
 		for _, a := range r.Accounts {
-			if a.Id == accountId {
-				ri, err := c.AccountTeamInvites.List(accountId, teamId)
+			if a.Id == accountID {
+				ri, err := c.AccountTeamInvites.List(accountID, teamID)
 				if err != nil {
 					if err.(aiven.Error).Status != 404 {
 						return err

@@ -325,7 +325,7 @@ func TestAccAivenService_grafana(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccGrafanaServiceCustomIpFiltersResource(rName2),
+				Config: testAccGrafanaServiceCustomIPFiltersResource(rName2),
 				Check: resource.ComposeTestCheckFunc(
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_grafana.common"),
 					testAccCheckAivenServiceGrafanaAttributes("data.aiven_grafana.common"),
@@ -376,7 +376,7 @@ data "aiven_grafana" "common" {
 }`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
-func testAccGrafanaServiceCustomIpFiltersResource(name string) string {
+func testAccGrafanaServiceCustomIPFiltersResource(name string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
   project = "%s"
@@ -448,11 +448,11 @@ func TestAccAivenService_grafana_with_ip_filter_objects(t *testing.T) {
 		CheckDestroy:      acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccGrafanaServiceResourceWithIpFilterObjects(prefix, project, true),
+				Config: testAccGrafanaServiceResourceWithIPFilterObjects(prefix, project, true),
 				Check:  checks,
 			},
 			{
-				Config: testAccGrafanaServiceResourceWithIpFilterObjects(prefix, project, false),
+				Config: testAccGrafanaServiceResourceWithIPFilterObjects(prefix, project, false),
 				Check:  checks,
 			},
 		},
@@ -460,13 +460,13 @@ func TestAccAivenService_grafana_with_ip_filter_objects(t *testing.T) {
 }
 
 //nolint:unused
-func testAccGrafanaServiceResourceWithIpFilterObjects(prefix, project string, addIpFilterObjs bool) string {
+func testAccGrafanaServiceResourceWithIPFilterObjects(prefix, project string, addIPFilterObjs bool) string {
 	ipFilterObjs := `ip_filter_object {
       description = "test"
       network     = "1.3.3.7/32"
     }`
 
-	if !addIpFilterObjs {
+	if !addIPFilterObjs {
 		ipFilterObjs = ``
 	}
 

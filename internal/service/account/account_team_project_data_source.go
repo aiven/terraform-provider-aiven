@@ -19,11 +19,11 @@ func DatasourceAccountTeamProject() *schema.Resource {
 }
 
 func datasourceAccountTeamProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	accountId := d.Get("account_id").(string)
-	teamId := d.Get("team_id").(string)
+	accountID := d.Get("account_id").(string)
+	teamID := d.Get("team_id").(string)
 	projectName := d.Get("project_name").(string)
 
-	d.SetId(schemautil.BuildResourceID(accountId, teamId, projectName))
+	d.SetId(schemautil.BuildResourceID(accountID, teamID, projectName))
 
 	return resourceAccountTeamProjectRead(ctx, d, m)
 }
