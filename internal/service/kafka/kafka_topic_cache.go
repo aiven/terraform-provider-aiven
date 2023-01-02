@@ -136,3 +136,13 @@ func (t *kafkaTopicCache) GetQueue(projectName, serviceName string) []string {
 
 	return t.inQueue[projectName+serviceName]
 }
+
+// FlushTopicCache for tests only!
+func FlushTopicCache() {
+	c := getTopicCache()
+	c.Lock()
+	for k := range c.internal {
+		delete(c.internal, k)
+	}
+	c.Unlock()
+}

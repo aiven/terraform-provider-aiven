@@ -11,6 +11,7 @@ nav_order: 1
 - Fix races in tests
 - Add support for normalization of `ip_filter_object` user config options
 - Improve team member deletion
+- Recreate missing kafka topics
 
 ## [3.10.0] - 2022-12-14
 - Add ClickHouse examples:

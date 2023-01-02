@@ -2,10 +2,8 @@ package provider
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/aiven/aiven-go-client"
-
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/service/account"
 	"github.com/aiven/terraform-provider-aiven/internal/service/cassandra"
 	"github.com/aiven/terraform-provider-aiven/internal/service/clickhouse"
@@ -239,16 +237,7 @@ func Provider() *schema.Provider {
 	}
 
 	p.ConfigureContextFunc = func(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-		terraformVersion := p.TerraformVersion
-		if terraformVersion == "" {
-			// Terraform 0.12 introduced this field to the protocol
-			// We can therefore assume that if it's missing it's 0.10 or 0.11
-			terraformVersion = "0.11+compatible"
-		}
-
-		client, err := aiven.NewTokenClient(
-			d.Get("api_token").(string),
-			fmt.Sprintf("terraform-provider-aiven/%s/%s", terraformVersion, version))
+		client, err := common.NewCustomAivenClient(d.Get("api_token").(string), p.TerraformVersion, version)
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}

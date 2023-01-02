@@ -24,6 +24,5 @@ func datasourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m int
 	topicName := d.Get("topic_name").(string)
 
 	d.SetId(schemautil.BuildResourceID(projectName, serviceName, topicName))
-
-	return resourceKafkaTopicRead(ctx, d, m)
+	return resourceKafkaTopicReadDatasource(ctx, d, m)
 }

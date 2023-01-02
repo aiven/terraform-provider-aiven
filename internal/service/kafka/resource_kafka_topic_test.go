@@ -5,15 +5,20 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"regexp"
 	"testing"
+	"time"
 
 	"github.com/aiven/aiven-go-client"
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-
+	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/stretchr/testify/assert"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/service/kafka"
 )
 
 func TestAccAivenKafkaTopic_basic(t *testing.T) {
@@ -340,4 +345,149 @@ func TestPartitions(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestAccAivenKafkaTopic_recreate validates that topic is recreated if it is missing
+// Kafka looses all topics on turn off/on, then TF recreates topics. This test imitates the case.
+func TestAccAivenKafkaTopic_recreate_missing(t *testing.T) {
+	project := os.Getenv("AIVEN_PROJECT_NAME")
+
+	prefix := "test-tf-acc-" + acctest.RandString(7)
+	kafkaResource := "aiven_kafka.kafka"
+	topicResource := "aiven_kafka_topic.topic"
+	kafkaName := prefix + "-kafka"
+	topicName := "topic"
+	kafkaID := fmt.Sprintf("%s/%s", project, kafkaName)
+	topicID := kafkaID + "/topic"
+
+	config := testAccAivenKafkaTopicResourceRecreateMissing(prefix, project)
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				// Step 1: setups resources, creates the state
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(kafkaResource, "id", kafkaID),
+					resource.TestCheckResourceAttr(topicResource, "id", topicID),
+				),
+			},
+			{
+				// Step 2: deletes topic, then runs apply, same config & checks
+				PreConfig: func() {
+					client, ok := acc.TestAccProvider.Meta().(*aiven.Client)
+					assert.True(t, ok, "invalid aiven client")
+
+					// deletes
+					err := client.KafkaTopics.Delete(project, kafkaName, topicName)
+					assert.NoError(t, err)
+
+					// Makes sure topic does not exist
+					tc, err := client.KafkaTopics.Get(project, kafkaName, topicName)
+					assert.Nil(t, tc)
+					assert.True(t, aiven.IsNotFound(err))
+
+					// We use cache for topics
+					kafka.FlushTopicCache()
+				},
+				// Everything should be fine
+				Config: config, // terraform apply
+				Check: resource.ComposeTestCheckFunc(
+					// Saved in state
+					resource.TestCheckResourceAttr(kafkaResource, "id", kafkaID),
+					resource.TestCheckResourceAttr(topicResource, "id", topicID),
+					func(state *terraform.State) error {
+						// Topic exists and active
+						client, ok := acc.TestAccProvider.Meta().(*aiven.Client)
+						assert.True(t, ok, "invalid aiven client")
+
+						// Sometimes it gets 501
+						return retry.Do(func() error {
+							tc, err := client.KafkaTopics.Get(project, kafkaName, topicName)
+							if err != nil {
+								return err
+							}
+							assert.Equal(t, tc.State, "ACTIVE")
+							return nil
+						}, retry.Attempts(5), retry.Delay(time.Second*5))
+					},
+				),
+			},
+		},
+	})
+}
+
+func testAccAivenKafkaTopicResourceRecreateMissing(prefix, project string) string {
+	return fmt.Sprintf(`
+data "aiven_project" "project" {
+  project = %[2]q
+}
+
+resource "aiven_kafka" "kafka" {
+  project                 = data.aiven_project.project.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-2"
+  service_name            = "%[1]s-kafka"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_kafka_topic" "topic" {
+  project      = aiven_kafka.kafka.project
+  service_name = aiven_kafka.kafka.service_name
+  topic_name   = "topic"
+  partitions   = 5
+  replication  = 3
+}`, prefix, project)
+}
+
+// TestAccAivenKafkaTopic_import_missing tests that simple import doesn't create a new topic
+func TestAccAivenKafkaTopic_import_missing(t *testing.T) {
+	project := os.Getenv("AIVEN_PROJECT_NAME")
+	prefix := "test-tf-acc-" + acctest.RandString(7)
+	kafkaName := prefix + "-kafka"
+	topicName := "topic"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				// Tries to import non-existing topic
+				// Must fail not create
+				Config:        testAccAivenKafkaTopicResourceImportMissing(prefix, project),
+				ResourceName:  "aiven_kafka_topic.topic",
+				ImportState:   true,
+				ImportStateId: fmt.Sprintf("%s/%s/%s", project, kafkaName, topicName),
+				ExpectError:   regexp.MustCompile(`While attempting to import an existing object to "aiven_kafka_topic.topic"`),
+			},
+		},
+	})
+}
+
+func testAccAivenKafkaTopicResourceImportMissing(prefix, project string) string {
+	result := fmt.Sprintf(`data "aiven_project" "project" {
+  project = %[2]q
+}
+
+resource "aiven_kafka" "kafka" {
+  project                 = data.aiven_project.project.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-2"
+  service_name            = "%[1]s-kafka"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_kafka_topic" "topic" {
+  project      = aiven_kafka.kafka.project
+  service_name = aiven_kafka.kafka.service_name
+  topic_name   = "topic"
+  partitions   = 5
+  replication  = 3
+}
+`, prefix, project)
+	return result
 }
