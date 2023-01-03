@@ -1,11 +1,12 @@
-package influxdb
+package v0
 
 import (
+	"context"
 	"time"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/typeupgrader"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/dist"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -31,7 +32,7 @@ func influxDBSchema() map[string]*schema.Schema {
 	return s
 }
 
-func ResourceInfluxDB() *schema.Resource {
+func ResourceInfluxDBResourceV0() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The InfluxDB resource allows the creation and management of Aiven InfluxDB services.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeInfluxDB),
@@ -71,8 +72,88 @@ func ResourceInfluxDB() *schema.Resource {
 			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
-		Schema:         influxDBSchema(),
-		SchemaVersion:  1,
-		StateUpgraders: stateupgrader.InfluxDB(),
+		Schema: influxDBSchema(),
 	}
+}
+
+func ResourceInfluxDBStateUpgradeV0(
+	_ context.Context,
+	rawState map[string]interface{},
+	_ interface{},
+) (map[string]interface{}, error) {
+	userConfigSlice, ok := rawState["influxdb_user_config"].([]interface{})
+	if !ok {
+		return rawState, nil
+	}
+
+	userConfig, ok := userConfigSlice[0].(map[string]interface{})
+	if !ok {
+		return rawState, nil
+	}
+
+	err := typeupgrader.Map(userConfig, map[string]string{
+		"static_ips": "bool",
+	})
+	if err != nil {
+		return rawState, err
+	}
+
+	influxDBSlice, ok := userConfig["influxdb"].([]interface{})
+	if ok && len(influxDBSlice) > 0 {
+		influxDB, ok := influxDBSlice[0].(map[string]interface{})
+		if ok {
+			err := typeupgrader.Map(influxDB, map[string]string{
+				"log_queries_after":    "int",
+				"max_connection_limit": "int",
+				"max_row_limit":        "int",
+				"max_select_buckets":   "int",
+				"max_select_point":     "int",
+				"query_timeout":        "int",
+			})
+			if err != nil {
+				return rawState, err
+			}
+		}
+	}
+
+	privateAccessSlice, ok := userConfig["private_access"].([]interface{})
+	if ok && len(privateAccessSlice) > 0 {
+		privateAccess, ok := privateAccessSlice[0].(map[string]interface{})
+		if ok {
+			err = typeupgrader.Map(privateAccess, map[string]string{
+				"influxdb": "bool",
+			})
+			if err != nil {
+				return rawState, err
+			}
+		}
+	}
+
+	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]interface{})
+	if ok && len(privateLinkAccessSlice) > 0 {
+		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]interface{})
+		if ok {
+			err := typeupgrader.Map(privateLinkAccess, map[string]string{
+				"influxdb": "bool",
+			})
+			if err != nil {
+				return rawState, err
+			}
+		}
+	}
+
+	publicAccessSlice, ok := userConfig["public_access"].([]interface{})
+	if ok && len(publicAccessSlice) > 0 {
+		publicAccess, ok := publicAccessSlice[0].(map[string]interface{})
+		if ok {
+			err := typeupgrader.Map(publicAccess, map[string]string{
+				"influxdb": "bool",
+			})
+			if err != nil {
+				return rawState, err
+			}
+		}
+	}
+
+	return rawState, nil
 }

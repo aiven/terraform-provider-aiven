@@ -15,6 +15,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [3.11.0] - 2023-01-09
 - Fix races in tests
 - Add support for normalization of `ip_filter_object` user config options
 - Improve team member deletion
