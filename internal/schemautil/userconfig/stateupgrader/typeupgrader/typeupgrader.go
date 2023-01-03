@@ -1,6 +1,7 @@
 package typeupgrader
 
 import (
+	"fmt"
 	"strconv"
 )
 
@@ -12,25 +13,9 @@ func Map(m map[string]interface{}, rules map[string]string) (err error) {
 			continue
 		}
 
-		switch t {
-		case "bool":
-			if va == "" {
-				va = "false"
-			}
-
-			m[k], err = strconv.ParseBool(va)
-			if err != nil {
-				return err
-			}
-		case "int":
-			if va == "" {
-				va = "0"
-			}
-
-			m[k], err = strconv.Atoi(va)
-			if err != nil {
-				return err
-			}
+		m[k], err = convert(va, t)
+		if err != nil {
+			return err
 		}
 	}
 
@@ -45,18 +30,31 @@ func Slice(s []interface{}, t string) (err error) {
 			continue
 		}
 
-		switch t {
-		case "int":
-			if va == "" {
-				va = "0"
-			}
-
-			s[i], err = strconv.Atoi(va)
-			if err != nil {
-				return err
-			}
+		s[i], err = convert(va, t)
+		if err != nil {
+			return err
 		}
 	}
 
 	return nil
+}
+
+// convert converts a value to the specified type.
+func convert(v string, t string) (res interface{}, err error) {
+	switch t {
+	case "bool":
+		if v == "" {
+			v = "false"
+		}
+
+		return strconv.ParseBool(v)
+	case "int":
+		if v == "" {
+			v = "0"
+		}
+
+		return strconv.Atoi(v)
+	default:
+		return nil, fmt.Errorf("unsupported type %q", t)
+	}
 }
