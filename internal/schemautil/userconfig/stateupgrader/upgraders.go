@@ -104,3 +104,13 @@ func MySQL() []schema.StateUpgrader {
 		},
 	}
 }
+
+func Opensearch() []schema.StateUpgrader {
+	return []schema.StateUpgrader{
+		{
+			Type:    v0.ResourceOpensearchResourceV0().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceOpensearchStateUpgradeV0,
+			Version: 0,
+		},
+	}
+}
