@@ -125,6 +125,20 @@ func TestMap(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "unknown type",
+			args: args{
+				m: map[string]interface{}{
+					"bool": "true",
+					"int":  "1",
+				},
+				rules: map[string]string{
+					"bool": "bool",
+					"int":  "foo",
+				},
+			},
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -169,6 +183,14 @@ func TestSlice(t *testing.T) {
 			args: args{
 				s: []interface{}{"1", "foo", "3", "7"},
 				t: "int",
+			},
+			wantErr: true,
+		},
+		{
+			name: "unknown type",
+			args: args{
+				s: []interface{}{"1", "foo", "3", "7"},
+				t: "foo",
 			},
 			wantErr: true,
 		},
