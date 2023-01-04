@@ -144,3 +144,13 @@ func ServiceIntegration() []schema.StateUpgrader {
 		},
 	}
 }
+
+func ServiceIntegrationEndpoint() []schema.StateUpgrader {
+	return []schema.StateUpgrader{
+		{
+			Type:    v0.ResourceServiceIntegrationEndpointResourceV0().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceServiceIntegrationEndpointStateUpgradeV0,
+			Version: 0,
+		},
+	}
+}
