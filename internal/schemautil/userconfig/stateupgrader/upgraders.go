@@ -74,3 +74,23 @@ func InfluxDB() []schema.StateUpgrader {
 		},
 	}
 }
+
+func M3Aggregator() []schema.StateUpgrader {
+	return []schema.StateUpgrader{
+		{
+			Type:    v0.ResourceM3AggregatorResourceV0().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceM3AggregatorStateUpgradeV0,
+			Version: 0,
+		},
+	}
+}
+
+func M3DB() []schema.StateUpgrader {
+	return []schema.StateUpgrader{
+		{
+			Type:    v0.ResourceM3DBResourceV0().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceM3DBStateUpgradeV0,
+			Version: 0,
+		},
+	}
+}
