@@ -1,5 +1,4 @@
 //go:build sweep
-// +build sweep
 
 package project
 
@@ -9,8 +8,9 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
+	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
 
 func init() {

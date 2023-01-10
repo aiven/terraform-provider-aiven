@@ -1,5 +1,4 @@
 //go:build sweep
-// +build sweep
 
 package service_integration
 
@@ -8,8 +7,9 @@ import (
 	"os"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
+	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
 
 func init() {
@@ -17,12 +17,17 @@ func init() {
 		Name: "aiven_service_integration",
 		F:    sweepServiceIntegrations,
 	})
+
+	resource.AddTestSweepers("aiven_service_integration_endpoint", &resource.Sweeper{
+		Name: "aiven_service_integration_endpoint",
+		F:    sweepServiceIntegrationEndpoints,
+	})
 }
 
 func sweepServiceIntegrations(region string) error {
 	client, err := sweep.SharedClient(region)
 	if err != nil {
-		return fmt.Errorf("error getting client: %s", err)
+		return err
 	}
 
 	conn := client.(*aiven.Client)
@@ -48,6 +53,30 @@ func sweepServiceIntegrations(region string) error {
 					return fmt.Errorf("unable to delete service integration `%s`: %s", serviceIntegration.ServiceIntegrationID, err)
 				}
 			}
+		}
+	}
+
+	return nil
+}
+
+func sweepServiceIntegrationEndpoints(region string) error {
+	client, err := sweep.SharedClient(region)
+	if err != nil {
+		return err
+	}
+
+	conn := client.(*aiven.Client)
+
+	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	endpoints, err := conn.ServiceIntegrationEndpoints.List(projectName)
+	if err != nil {
+		return err
+	}
+
+	for _, endpoint := range endpoints {
+		err = conn.ServiceIntegrationEndpoints.Delete(projectName, endpoint.EndpointID)
+		if err != nil && !aiven.IsNotFound(err) {
+			return err
 		}
 	}
 
