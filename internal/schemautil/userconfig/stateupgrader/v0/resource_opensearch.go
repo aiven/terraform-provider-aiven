@@ -33,7 +33,7 @@ func opensearchSchema() map[string]*schema.Schema {
 	return s
 }
 
-func ResourceOpensearchResourceV0() *schema.Resource {
+func ResourceOpensearch() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Opensearch resource allows the creation and management of Aiven Opensearch services.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeOpensearch),
@@ -77,7 +77,7 @@ func ResourceOpensearchResourceV0() *schema.Resource {
 	}
 }
 
-func ResourceOpensearchStateUpgradeV0(
+func ResourceOpensearchStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},
