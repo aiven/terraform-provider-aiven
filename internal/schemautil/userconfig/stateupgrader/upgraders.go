@@ -64,3 +64,13 @@ func KafkaMirrormaker() []schema.StateUpgrader {
 		},
 	}
 }
+
+func InfluxDB() []schema.StateUpgrader {
+	return []schema.StateUpgrader{
+		{
+			Type:    v0.ResourceInfluxDBResourceV0().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceInfluxDBStateUpgradeV0,
+			Version: 0,
+		},
+	}
+}
