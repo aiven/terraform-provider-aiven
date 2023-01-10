@@ -78,7 +78,7 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 	return aivenKafkaSchema
 }
 
-func ResourceKafkaResourceV0() *schema.Resource {
+func ResourceKafka() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Kafka resource allows the creation and management of Aiven Kafka services.",
 		UpdateContext: schemautil.ResourceServiceUpdate,
@@ -142,7 +142,7 @@ func ResourceKafkaResourceV0() *schema.Resource {
 	}
 }
 
-func ResourceKafkaStateUpgradeV0(
+func ResourceKafkaStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},

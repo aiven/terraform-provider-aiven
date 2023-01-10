@@ -25,7 +25,7 @@ func aivenM3AggregatorSchema() map[string]*schema.Schema {
 
 	return schemaM3
 }
-func ResourceM3AggregatorResourceV0() *schema.Resource {
+func ResourceM3Aggregator() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The M3 Aggregator resource allows the creation and management of Aiven M3 Aggregator services.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeM3Aggregator),
@@ -65,7 +65,7 @@ func ResourceM3AggregatorResourceV0() *schema.Resource {
 	}
 }
 
-func ResourceM3AggregatorStateUpgradeV0(
+func ResourceM3AggregatorStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},

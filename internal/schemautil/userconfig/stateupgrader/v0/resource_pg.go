@@ -78,7 +78,7 @@ func aivenPGSchema() map[string]*schema.Schema {
 	return schemaPG
 }
 
-func ResourcePGResourceV0() *schema.Resource {
+func ResourcePG() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The PG resource allows the creation and management of Aiven PostgreSQL services.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypePG),
@@ -122,7 +122,7 @@ func ResourcePGResourceV0() *schema.Resource {
 	}
 }
 
-func ResourcePGStateUpgradeV0(
+func ResourcePGStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},

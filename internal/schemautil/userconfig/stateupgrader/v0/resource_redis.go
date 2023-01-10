@@ -26,7 +26,7 @@ func redisSchema() map[string]*schema.Schema {
 	return s
 }
 
-func ResourceRedisResourceV0() *schema.Resource {
+func ResourceRedis() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Redis resource allows the creation and management of Aiven Redis services.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeRedis),
@@ -70,7 +70,7 @@ func ResourceRedisResourceV0() *schema.Resource {
 	}
 }
 
-func ResourceRedisStateUpgradeV0(
+func ResourceRedisStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},
