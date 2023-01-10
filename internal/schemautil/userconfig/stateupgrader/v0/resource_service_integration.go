@@ -70,7 +70,7 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 	"clickhouse_postgresql_user_config": dist.IntegrationTypeClickhousePostgresql(),
 }
 
-func ResourceServiceIntegrationResourceV0() *schema.Resource {
+func ResourceServiceIntegration() *schema.Resource {
 	return &schema.Resource{
 		Description: "The Service Integration resource allows the creation and management of Aiven Service Integrations.",
 		Importer: &schema.ResourceImporter{
@@ -84,27 +84,27 @@ func ResourceServiceIntegrationResourceV0() *schema.Resource {
 	}
 }
 
-func ResourceServiceIntegrationStateUpgradeV0(
+func ResourceServiceIntegrationStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},
 ) (map[string]interface{}, error) {
-	err := logsStateUpgradeV0(rawState)
+	err := logsStateUpgrade(rawState)
 	if err != nil {
 		return rawState, err
 	}
 
-	err = kafkaMirrormakerStateUpgradeV0(rawState)
+	err = kafkaMirrormakerStateUpgrade(rawState)
 	if err != nil {
 		return rawState, err
 	}
 
-	err = metricsStateUpgradeV0(rawState)
+	err = metricsStateUpgrade(rawState)
 	if err != nil {
 		return rawState, err
 	}
 
-	err = datadogStateUpgradeV0(rawState)
+	err = serviceIntegrationDatadogStateUpgrade(rawState)
 	if err != nil {
 		return rawState, err
 	}
@@ -112,7 +112,7 @@ func ResourceServiceIntegrationStateUpgradeV0(
 	return rawState, nil
 }
 
-func logsStateUpgradeV0(rawState map[string]interface{}) error {
+func logsStateUpgrade(rawState map[string]interface{}) error {
 	userConfigSlice, ok := rawState["logs_user_config"].([]interface{})
 	if !ok {
 		return nil
@@ -133,7 +133,7 @@ func logsStateUpgradeV0(rawState map[string]interface{}) error {
 	return nil
 }
 
-func kafkaMirrormakerStateUpgradeV0(rawState map[string]interface{}) error {
+func kafkaMirrormakerStateUpgrade(rawState map[string]interface{}) error {
 	userConfigSlice, ok := rawState["kafka_mirrormaker_user_config"].([]interface{})
 	if !ok {
 		return nil
@@ -166,7 +166,7 @@ func kafkaMirrormakerStateUpgradeV0(rawState map[string]interface{}) error {
 	return nil
 }
 
-func metricsStateUpgradeV0(rawState map[string]interface{}) error {
+func metricsStateUpgrade(rawState map[string]interface{}) error {
 	userConfigSlice, ok := rawState["metrics_user_config"].([]interface{})
 	if !ok {
 		return nil
@@ -219,7 +219,7 @@ func metricsStateUpgradeV0(rawState map[string]interface{}) error {
 	return nil
 }
 
-func datadogStateUpgradeV0(rawState map[string]interface{}) error {
+func serviceIntegrationDatadogStateUpgrade(rawState map[string]interface{}) error {
 	userConfigSlice, ok := rawState["datadog_user_config"].([]interface{})
 	if !ok {
 		return nil
