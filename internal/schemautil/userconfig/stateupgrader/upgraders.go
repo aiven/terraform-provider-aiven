@@ -94,3 +94,13 @@ func M3DB() []schema.StateUpgrader {
 		},
 	}
 }
+
+func MySQL() []schema.StateUpgrader {
+	return []schema.StateUpgrader{
+		{
+			Type:    v0.ResourceMySQLResourceV0().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceMySQLStateUpgradeV0,
+			Version: 0,
+		},
+	}
+}
