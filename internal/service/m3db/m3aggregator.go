@@ -5,6 +5,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -59,6 +60,8 @@ func ResourceM3Aggregator() *schema.Resource {
 			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
-		Schema: aivenM3AggregatorSchema(),
+		Schema:         aivenM3AggregatorSchema(),
+		SchemaVersion:  1,
+		StateUpgraders: stateupgrader.M3Aggregator(),
 	}
 }
