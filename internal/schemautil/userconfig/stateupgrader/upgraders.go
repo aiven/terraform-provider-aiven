@@ -134,3 +134,13 @@ func Redis() []schema.StateUpgrader {
 		},
 	}
 }
+
+func ServiceIntegration() []schema.StateUpgrader {
+	return []schema.StateUpgrader{
+		{
+			Type:    v0.ResourceServiceIntegrationResourceV0().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceServiceIntegrationStateUpgradeV0,
+			Version: 0,
+		},
+	}
+}
