@@ -8,6 +8,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -125,7 +126,9 @@ func ResourcePG() *schema.Resource {
 			Default: schema.DefaultTimeout(5 * time.Minute),
 		},
 
-		Schema: aivenPGSchema(),
+		Schema:         aivenPGSchema(),
+		SchemaVersion:  1,
+		StateUpgraders: stateupgrader.PG(),
 	}
 }
 
