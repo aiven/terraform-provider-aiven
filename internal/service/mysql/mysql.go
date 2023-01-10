@@ -3,6 +3,7 @@ package mysql
 import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -57,6 +58,8 @@ func ResourceMySQL() *schema.Resource {
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema: aivenMySQLSchema(),
+		Schema:         aivenMySQLSchema(),
+		SchemaVersion:  1,
+		StateUpgraders: stateupgrader.MySQL(),
 	}
 }
