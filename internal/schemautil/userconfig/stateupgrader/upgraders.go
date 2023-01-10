@@ -15,6 +15,16 @@ func Cassandra() []schema.StateUpgrader {
 	}
 }
 
+func Flink() []schema.StateUpgrader {
+	return []schema.StateUpgrader{
+		{
+			Type:    v0.ResourceFlinkResourceV0().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceFlinkStateUpgradeV0,
+			Version: 0,
+		},
+	}
+}
+
 func Grafana() []schema.StateUpgrader {
 	return []schema.StateUpgrader{
 		{
