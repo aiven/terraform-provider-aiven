@@ -26,7 +26,7 @@ func aivenMySQLSchema() map[string]*schema.Schema {
 	return schemaMySQL
 }
 
-func ResourceMySQLResourceV0() *schema.Resource {
+func ResourceMySQLResource() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The MySQL resource allows the creation and management of Aiven MySQL services.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeMySQL),
@@ -70,7 +70,7 @@ func ResourceMySQLResourceV0() *schema.Resource {
 	}
 }
 
-func ResourceMySQLStateUpgradeV0(
+func ResourceMySQLStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},
