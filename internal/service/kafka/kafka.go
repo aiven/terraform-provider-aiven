@@ -8,6 +8,7 @@ import (
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
@@ -144,6 +145,8 @@ func ResourceKafka() *schema.Resource {
 				return false
 			}),
 		),
+		SchemaVersion:  1,
+		StateUpgraders: stateupgrader.Kafka(),
 	}
 }
 
