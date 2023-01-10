@@ -32,7 +32,7 @@ func influxDBSchema() map[string]*schema.Schema {
 	return s
 }
 
-func ResourceInfluxDBResourceV0() *schema.Resource {
+func ResourceInfluxDB() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The InfluxDB resource allows the creation and management of Aiven InfluxDB services.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeInfluxDB),
@@ -76,7 +76,7 @@ func ResourceInfluxDBResourceV0() *schema.Resource {
 	}
 }
 
-func ResourceInfluxDBStateUpgradeV0(
+func ResourceInfluxDBStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},

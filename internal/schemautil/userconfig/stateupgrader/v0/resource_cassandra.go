@@ -26,7 +26,7 @@ func cassandraSchema() map[string]*schema.Schema {
 	return s
 }
 
-func ResourceCassandraResourceV0() *schema.Resource {
+func ResourceCassandra() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Cassandra resource allows the creation and management of Aiven Cassandra services.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeCassandra),
@@ -70,7 +70,7 @@ func ResourceCassandraResourceV0() *schema.Resource {
 	}
 }
 
-func ResourceCassandraStateUpgradeV0(
+func ResourceCassandraStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},

@@ -26,7 +26,7 @@ func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
 	return kafkaMMSchema
 }
 
-func ResourceKafkaMirrormakerResourceV0() *schema.Resource {
+func ResourceKafkaMirrormaker() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Kafka MirrorMaker resource allows the creation and management of Aiven Kafka MirrorMaker 2 services.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeKafkaMirrormaker),
@@ -66,7 +66,7 @@ func ResourceKafkaMirrormakerResourceV0() *schema.Resource {
 	}
 }
 
-func ResourceKafkaMirrormakerStateUpgradeV0(
+func ResourceKafkaMirrormakerStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},

@@ -38,7 +38,7 @@ func aivenFlinkSchema() map[string]*schema.Schema {
 	return aivenFlinkSchema
 }
 
-func ResourceFlinkResourceV0() *schema.Resource {
+func ResourceFlink() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Flink resource allows the creation and management of Aiven Flink services.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeFlink),
@@ -82,7 +82,7 @@ func ResourceFlinkResourceV0() *schema.Resource {
 	}
 }
 
-func ResourceFlinkStateUpgradeV0(
+func ResourceFlinkStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},
