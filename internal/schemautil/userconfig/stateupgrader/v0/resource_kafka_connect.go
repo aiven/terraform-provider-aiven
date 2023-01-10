@@ -26,7 +26,7 @@ func aivenKafkaConnectSchema() map[string]*schema.Schema {
 	return kafkaConnectSchema
 }
 
-func ResourceKafkaConnectResourceV0() *schema.Resource {
+func ResourceKafkaConnect() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Kafka Connect resource allows the creation and management of Aiven Kafka Connect services.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeKafkaConnect),
@@ -66,7 +66,7 @@ func ResourceKafkaConnectResourceV0() *schema.Resource {
 	}
 }
 
-func ResourceKafkaConnectStateUpgradeV0(
+func ResourceKafkaConnectStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},
