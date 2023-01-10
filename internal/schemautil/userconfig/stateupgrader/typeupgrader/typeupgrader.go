@@ -54,6 +54,12 @@ func convert(v string, t string) (res interface{}, err error) {
 		}
 
 		return strconv.Atoi(v)
+	case "float":
+		if v == "" {
+			v = "0"
+		}
+
+		return strconv.ParseFloat(v, 64)
 	default:
 		return nil, fmt.Errorf("unsupported type %q", t)
 	}

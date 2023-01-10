@@ -3,6 +3,7 @@ package kafka
 import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -54,6 +55,8 @@ func ResourceKafkaConnect() *schema.Resource {
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema: aivenKafkaConnectSchema(),
+		Schema:         aivenKafkaConnectSchema(),
+		SchemaVersion:  1,
+		StateUpgraders: stateupgrader.KafkaConnect(),
 	}
 }
