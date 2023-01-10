@@ -25,7 +25,7 @@ func grafanaSchema() map[string]*schema.Schema {
 	return s
 }
 
-func ResourceGrafanaResourceV0() *schema.Resource {
+func ResourceGrafana() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Grafana resource allows the creation and management of Aiven Grafana services.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeGrafana),
@@ -68,7 +68,7 @@ func ResourceGrafanaResourceV0() *schema.Resource {
 	}
 }
 
-func ResourceGrafanaStateUpgradeV0(
+func ResourceGrafanaStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},

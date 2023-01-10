@@ -26,7 +26,7 @@ func aivenM3DBSchema() map[string]*schema.Schema {
 	return schemaM3
 }
 
-func ResourceM3DBResourceV0() *schema.Resource {
+func ResourceM3DBResource() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The M3 DB resource allows the creation and management of Aiven M3 services.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeM3),
@@ -70,7 +70,7 @@ func ResourceM3DBResourceV0() *schema.Resource {
 	}
 }
 
-func ResourceM3DBStateUpgradeV0(
+func ResourceM3DBStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},
