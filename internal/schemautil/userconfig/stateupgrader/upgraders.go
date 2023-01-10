@@ -35,6 +35,16 @@ func Grafana() []schema.StateUpgrader {
 	}
 }
 
+func InfluxDB() []schema.StateUpgrader {
+	return []schema.StateUpgrader{
+		{
+			Type:    v0.ResourceInfluxDBResourceV0().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceInfluxDBStateUpgradeV0,
+			Version: 0,
+		},
+	}
+}
+
 func Kafka() []schema.StateUpgrader {
 	return []schema.StateUpgrader{
 		{
@@ -60,16 +70,6 @@ func KafkaMirrormaker() []schema.StateUpgrader {
 		{
 			Type:    v0.ResourceKafkaMirrormakerResourceV0().CoreConfigSchema().ImpliedType(),
 			Upgrade: v0.ResourceKafkaMirrormakerStateUpgradeV0,
-			Version: 0,
-		},
-	}
-}
-
-func InfluxDB() []schema.StateUpgrader {
-	return []schema.StateUpgrader{
-		{
-			Type:    v0.ResourceInfluxDBResourceV0().CoreConfigSchema().ImpliedType(),
-			Upgrade: v0.ResourceInfluxDBStateUpgradeV0,
 			Version: 0,
 		},
 	}
@@ -120,6 +120,16 @@ func PG() []schema.StateUpgrader {
 		{
 			Type:    v0.ResourcePGResourceV0().CoreConfigSchema().ImpliedType(),
 			Upgrade: v0.ResourcePGStateUpgradeV0,
+			Version: 0,
+		},
+	}
+}
+
+func Redis() []schema.StateUpgrader {
+	return []schema.StateUpgrader{
+		{
+			Type:    v0.ResourceRedisResourceV0().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceRedisStateUpgradeV0,
 			Version: 0,
 		},
 	}
