@@ -1,5 +1,4 @@
 //go:build sweep
-// +build sweep
 
 package m3db
 

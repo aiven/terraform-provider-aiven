@@ -1,5 +1,4 @@
 //go:build sweep
-// +build sweep
 
 package static_ip
 
@@ -8,8 +7,9 @@ import (
 	"os"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
+	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
 
 func init() {
