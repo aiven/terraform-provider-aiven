@@ -1,11 +1,12 @@
-package kafka
+package v0
 
 import (
+	"context"
 	"time"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/typeupgrader"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/dist"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -24,7 +25,8 @@ func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
 
 	return kafkaMMSchema
 }
-func ResourceKafkaMirrormaker() *schema.Resource {
+
+func ResourceKafkaMirrormakerResourceV0() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Kafka MirrorMaker resource allows the creation and management of Aiven Kafka MirrorMaker 2 services.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeKafkaMirrormaker),
@@ -48,7 +50,7 @@ func ResourceKafkaMirrormaker() *schema.Resource {
 			),
 			customdiff.Sequence(
 				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
-				schemautil.CustomizeDiffCheckStaticIPDisassociation,
+				schemautil.CustomizeDiffCheckStaticIpDisassociation,
 			),
 		),
 		Importer: &schema.ResourceImporter{
@@ -60,8 +62,53 @@ func ResourceKafkaMirrormaker() *schema.Resource {
 			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
-		Schema:         aivenKafkaMirrormakerSchema(),
-		SchemaVersion:  1,
-		StateUpgraders: stateupgrader.KafkaMirrormaker(),
+		Schema: aivenKafkaMirrormakerSchema(),
 	}
+}
+
+func ResourceKafkaMirrormakerStateUpgradeV0(
+	_ context.Context,
+	rawState map[string]interface{},
+	_ interface{},
+) (map[string]interface{}, error) {
+	userConfigSlice, ok := rawState["kafka_mirrormaker_user_config"].([]interface{})
+	if !ok {
+		return rawState, nil
+	}
+
+	userConfig, ok := userConfigSlice[0].(map[string]interface{})
+	if !ok {
+		return rawState, nil
+	}
+
+	err := typeupgrader.Map(userConfig, map[string]string{
+		"static_ips": "bool",
+	})
+	if err != nil {
+		return rawState, err
+	}
+
+	kafkaMirrormakerSlice, ok := userConfig["kafka_mirrormaker"].([]interface{})
+	if ok && len(kafkaMirrormakerSlice) > 0 {
+		kafkaMirrormaker, ok := kafkaMirrormakerSlice[0].(map[string]interface{})
+		if ok {
+			err = typeupgrader.Map(kafkaMirrormaker, map[string]string{
+				"emit_checkpoints_enabled":            "bool",
+				"emit_checkpoints_interval_seconds":   "int",
+				"refresh_groups_enabled":              "bool",
+				"refresh_groups_interval_seconds":     "int",
+				"refresh_topics_enabled":              "bool",
+				"refresh_topics_interval_seconds":     "int",
+				"sync_group_offsets_enabled":          "bool",
+				"sync_group_offsets_interval_seconds": "int",
+				"sync_topic_configs_enabled":          "bool",
+				"tasks_max_per_cpu":                   "int",
+			})
+			if err != nil {
+				return rawState, err
+			}
+		}
+	}
+
+	return rawState, nil
 }

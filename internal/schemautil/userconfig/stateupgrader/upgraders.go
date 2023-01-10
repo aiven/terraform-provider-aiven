@@ -34,3 +34,33 @@ func Grafana() []schema.StateUpgrader {
 		},
 	}
 }
+
+func Kafka() []schema.StateUpgrader {
+	return []schema.StateUpgrader{
+		{
+			Type:    v0.ResourceKafkaResourceV0().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceKafkaStateUpgradeV0,
+			Version: 0,
+		},
+	}
+}
+
+func KafkaConnect() []schema.StateUpgrader {
+	return []schema.StateUpgrader{
+		{
+			Type:    v0.ResourceKafkaConnectResourceV0().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceKafkaConnectStateUpgradeV0,
+			Version: 0,
+		},
+	}
+}
+
+func KafkaMirrormaker() []schema.StateUpgrader {
+	return []schema.StateUpgrader{
+		{
+			Type:    v0.ResourceKafkaMirrormakerResourceV0().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceKafkaMirrormakerStateUpgradeV0,
+			Version: 0,
+		},
+	}
+}
