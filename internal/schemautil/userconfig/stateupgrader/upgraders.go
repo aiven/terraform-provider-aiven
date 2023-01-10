@@ -8,8 +8,8 @@ import (
 func Cassandra() []schema.StateUpgrader {
 	return []schema.StateUpgrader{
 		{
-			Type:    v0.ResourceCassandraResourceV0().CoreConfigSchema().ImpliedType(),
-			Upgrade: v0.ResourceCassandraStateUpgradeV0,
+			Type:    v0.ResourceCassandra().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceCassandraStateUpgrade,
 			Version: 0,
 		},
 	}
@@ -18,8 +18,8 @@ func Cassandra() []schema.StateUpgrader {
 func Flink() []schema.StateUpgrader {
 	return []schema.StateUpgrader{
 		{
-			Type:    v0.ResourceFlinkResourceV0().CoreConfigSchema().ImpliedType(),
-			Upgrade: v0.ResourceFlinkStateUpgradeV0,
+			Type:    v0.ResourceFlink().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceFlinkStateUpgrade,
 			Version: 0,
 		},
 	}
@@ -28,8 +28,8 @@ func Flink() []schema.StateUpgrader {
 func Grafana() []schema.StateUpgrader {
 	return []schema.StateUpgrader{
 		{
-			Type:    v0.ResourceGrafanaResourceV0().CoreConfigSchema().ImpliedType(),
-			Upgrade: v0.ResourceGrafanaStateUpgradeV0,
+			Type:    v0.ResourceGrafana().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceGrafanaStateUpgrade,
 			Version: 0,
 		},
 	}
@@ -38,8 +38,8 @@ func Grafana() []schema.StateUpgrader {
 func InfluxDB() []schema.StateUpgrader {
 	return []schema.StateUpgrader{
 		{
-			Type:    v0.ResourceInfluxDBResourceV0().CoreConfigSchema().ImpliedType(),
-			Upgrade: v0.ResourceInfluxDBStateUpgradeV0,
+			Type:    v0.ResourceInfluxDB().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceInfluxDBStateUpgrade,
 			Version: 0,
 		},
 	}
@@ -48,8 +48,8 @@ func InfluxDB() []schema.StateUpgrader {
 func Kafka() []schema.StateUpgrader {
 	return []schema.StateUpgrader{
 		{
-			Type:    v0.ResourceKafkaResourceV0().CoreConfigSchema().ImpliedType(),
-			Upgrade: v0.ResourceKafkaStateUpgradeV0,
+			Type:    v0.ResourceKafka().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceKafkaStateUpgrade,
 			Version: 0,
 		},
 	}
@@ -58,8 +58,8 @@ func Kafka() []schema.StateUpgrader {
 func KafkaConnect() []schema.StateUpgrader {
 	return []schema.StateUpgrader{
 		{
-			Type:    v0.ResourceKafkaConnectResourceV0().CoreConfigSchema().ImpliedType(),
-			Upgrade: v0.ResourceKafkaConnectStateUpgradeV0,
+			Type:    v0.ResourceKafkaConnect().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceKafkaConnectStateUpgrade,
 			Version: 0,
 		},
 	}
@@ -68,8 +68,8 @@ func KafkaConnect() []schema.StateUpgrader {
 func KafkaMirrormaker() []schema.StateUpgrader {
 	return []schema.StateUpgrader{
 		{
-			Type:    v0.ResourceKafkaMirrormakerResourceV0().CoreConfigSchema().ImpliedType(),
-			Upgrade: v0.ResourceKafkaMirrormakerStateUpgradeV0,
+			Type:    v0.ResourceKafkaMirrormaker().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceKafkaMirrormakerStateUpgrade,
 			Version: 0,
 		},
 	}
@@ -78,8 +78,8 @@ func KafkaMirrormaker() []schema.StateUpgrader {
 func M3Aggregator() []schema.StateUpgrader {
 	return []schema.StateUpgrader{
 		{
-			Type:    v0.ResourceM3AggregatorResourceV0().CoreConfigSchema().ImpliedType(),
-			Upgrade: v0.ResourceM3AggregatorStateUpgradeV0,
+			Type:    v0.ResourceM3Aggregator().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceM3AggregatorStateUpgrade,
 			Version: 0,
 		},
 	}
@@ -88,8 +88,8 @@ func M3Aggregator() []schema.StateUpgrader {
 func M3DB() []schema.StateUpgrader {
 	return []schema.StateUpgrader{
 		{
-			Type:    v0.ResourceM3DBResourceV0().CoreConfigSchema().ImpliedType(),
-			Upgrade: v0.ResourceM3DBStateUpgradeV0,
+			Type:    v0.ResourceM3DBResource().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceM3DBStateUpgrade,
 			Version: 0,
 		},
 	}
@@ -98,8 +98,8 @@ func M3DB() []schema.StateUpgrader {
 func MySQL() []schema.StateUpgrader {
 	return []schema.StateUpgrader{
 		{
-			Type:    v0.ResourceMySQLResourceV0().CoreConfigSchema().ImpliedType(),
-			Upgrade: v0.ResourceMySQLStateUpgradeV0,
+			Type:    v0.ResourceMySQLResource().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceMySQLStateUpgrade,
 			Version: 0,
 		},
 	}
@@ -108,8 +108,8 @@ func MySQL() []schema.StateUpgrader {
 func Opensearch() []schema.StateUpgrader {
 	return []schema.StateUpgrader{
 		{
-			Type:    v0.ResourceOpensearchResourceV0().CoreConfigSchema().ImpliedType(),
-			Upgrade: v0.ResourceOpensearchStateUpgradeV0,
+			Type:    v0.ResourceOpensearch().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceOpensearchStateUpgrade,
 			Version: 0,
 		},
 	}
@@ -118,8 +118,8 @@ func Opensearch() []schema.StateUpgrader {
 func PG() []schema.StateUpgrader {
 	return []schema.StateUpgrader{
 		{
-			Type:    v0.ResourcePGResourceV0().CoreConfigSchema().ImpliedType(),
-			Upgrade: v0.ResourcePGStateUpgradeV0,
+			Type:    v0.ResourcePG().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourcePGStateUpgrade,
 			Version: 0,
 		},
 	}
@@ -128,8 +128,8 @@ func PG() []schema.StateUpgrader {
 func Redis() []schema.StateUpgrader {
 	return []schema.StateUpgrader{
 		{
-			Type:    v0.ResourceRedisResourceV0().CoreConfigSchema().ImpliedType(),
-			Upgrade: v0.ResourceRedisStateUpgradeV0,
+			Type:    v0.ResourceRedis().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceRedisStateUpgrade,
 			Version: 0,
 		},
 	}
@@ -138,8 +138,18 @@ func Redis() []schema.StateUpgrader {
 func ServiceIntegration() []schema.StateUpgrader {
 	return []schema.StateUpgrader{
 		{
-			Type:    v0.ResourceServiceIntegrationResourceV0().CoreConfigSchema().ImpliedType(),
-			Upgrade: v0.ResourceServiceIntegrationStateUpgradeV0,
+			Type:    v0.ResourceServiceIntegration().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceServiceIntegrationStateUpgrade,
+			Version: 0,
+		},
+	}
+}
+
+func ServiceIntegrationEndpoint() []schema.StateUpgrader {
+	return []schema.StateUpgrader{
+		{
+			Type:    v0.ResourceServiceIntegrationEndpoint().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourceServiceIntegrationEndpointStateUpgrade,
 			Version: 0,
 		},
 	}
