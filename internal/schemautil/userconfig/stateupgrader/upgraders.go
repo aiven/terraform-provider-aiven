@@ -114,3 +114,13 @@ func Opensearch() []schema.StateUpgrader {
 		},
 	}
 }
+
+func PG() []schema.StateUpgrader {
+	return []schema.StateUpgrader{
+		{
+			Type:    v0.ResourcePGResourceV0().CoreConfigSchema().ImpliedType(),
+			Upgrade: v0.ResourcePGStateUpgradeV0,
+			Version: 0,
+		},
+	}
+}
