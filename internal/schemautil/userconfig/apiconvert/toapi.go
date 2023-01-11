@@ -127,6 +127,12 @@ func objectItemToAPI(
 
 	fv := v[0]
 
+	// Object with only "null" fields becomes nil
+	// Which can't be cast into a map
+	if fv == nil {
+		return res, true, nil
+	}
+
 	fva, ok := fv.(map[string]interface{})
 	if !ok {
 		return nil, false, fmt.Errorf("%s: not a map", fks)
