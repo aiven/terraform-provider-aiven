@@ -4,11 +4,12 @@ import (
 	"context"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/typeupgrader"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/dist"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func aivenKafkaConnectSchema() map[string]*schema.Schema {
@@ -50,7 +51,7 @@ func ResourceKafkaConnect() *schema.Resource {
 			),
 			customdiff.Sequence(
 				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
-				schemautil.CustomizeDiffCheckStaticIpDisassociation,
+				schemautil.CustomizeDiffCheckStaticIPDisassociation,
 			),
 		),
 		Importer: &schema.ResourceImporter{
@@ -73,6 +74,10 @@ func ResourceKafkaConnectStateUpgrade(
 ) (map[string]interface{}, error) {
 	userConfigSlice, ok := rawState["kafka_connect_user_config"].([]interface{})
 	if !ok {
+		return rawState, nil
+	}
+
+	if len(userConfigSlice) == 0 {
 		return rawState, nil
 	}
 
