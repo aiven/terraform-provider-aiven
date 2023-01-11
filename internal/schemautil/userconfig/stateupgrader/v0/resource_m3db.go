@@ -4,11 +4,12 @@ import (
 	"context"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/typeupgrader"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/dist"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func aivenM3DBSchema() map[string]*schema.Schema {
@@ -54,7 +55,7 @@ func ResourceM3DBResource() *schema.Resource {
 			),
 			customdiff.Sequence(
 				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
-				schemautil.CustomizeDiffCheckStaticIpDisassociation,
+				schemautil.CustomizeDiffCheckStaticIPDisassociation,
 			),
 		),
 		Importer: &schema.ResourceImporter{
@@ -77,6 +78,10 @@ func ResourceM3DBStateUpgrade(
 ) (map[string]interface{}, error) {
 	userConfigSlice, ok := rawState["m3db_user_config"].([]interface{})
 	if !ok {
+		return rawState, nil
+	}
+
+	if len(userConfigSlice) == 0 {
 		return rawState, nil
 	}
 
