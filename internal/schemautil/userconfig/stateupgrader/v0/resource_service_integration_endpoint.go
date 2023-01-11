@@ -3,9 +3,10 @@ package v0
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/typeupgrader"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/dist"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
@@ -92,6 +93,10 @@ func serviceIntegrationEndpointDatadogStateUpgrade(rawState map[string]interface
 		return nil
 	}
 
+	if len(userConfigSlice) == 0 {
+		return nil
+	}
+
 	userConfig, ok := userConfigSlice[0].(map[string]interface{})
 	if !ok {
 		return nil
@@ -113,6 +118,10 @@ func serviceIntegrationEndpointDatadogStateUpgrade(rawState map[string]interface
 func rsyslogStateUpgrade(rawState map[string]interface{}) error {
 	userConfigSlice, ok := rawState["rsyslog_user_config"].([]interface{})
 	if !ok {
+		return nil
+	}
+
+	if len(userConfigSlice) == 0 {
 		return nil
 	}
 
@@ -138,6 +147,10 @@ func externalElasticsearchLogsStateUpgrade(rawState map[string]interface{}) erro
 		return nil
 	}
 
+	if len(userConfigSlice) == 0 {
+		return nil
+	}
+
 	userConfig, ok := userConfigSlice[0].(map[string]interface{})
 	if !ok {
 		return nil
@@ -157,6 +170,10 @@ func externalElasticsearchLogsStateUpgrade(rawState map[string]interface{}) erro
 func externalOpensearchLogsStateUpgrade(rawState map[string]interface{}) error {
 	userConfigSlice, ok := rawState["external_opensearch_logs_user_config"].([]interface{})
 	if !ok {
+		return nil
+	}
+
+	if len(userConfigSlice) == 0 {
 		return nil
 	}
 
