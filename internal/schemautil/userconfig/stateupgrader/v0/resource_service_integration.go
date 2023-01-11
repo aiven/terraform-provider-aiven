@@ -5,10 +5,11 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/typeupgrader"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/dist"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/typeupgrader"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/dist"
 )
 
 const serviceIntegrationEndpointRegExp = "^[a-zA-Z0-9_-]*\\/{1}[a-zA-Z0-9_-]*$"
@@ -118,6 +119,10 @@ func logsStateUpgrade(rawState map[string]interface{}) error {
 		return nil
 	}
 
+	if len(userConfigSlice) == 0 {
+		return nil
+	}
+
 	userConfig, ok := userConfigSlice[0].(map[string]interface{})
 	if !ok {
 		return nil
@@ -136,6 +141,10 @@ func logsStateUpgrade(rawState map[string]interface{}) error {
 func kafkaMirrormakerStateUpgrade(rawState map[string]interface{}) error {
 	userConfigSlice, ok := rawState["kafka_mirrormaker_user_config"].([]interface{})
 	if !ok {
+		return nil
+	}
+
+	if len(userConfigSlice) == 0 {
 		return nil
 	}
 
@@ -169,6 +178,10 @@ func kafkaMirrormakerStateUpgrade(rawState map[string]interface{}) error {
 func metricsStateUpgrade(rawState map[string]interface{}) error {
 	userConfigSlice, ok := rawState["metrics_user_config"].([]interface{})
 	if !ok {
+		return nil
+	}
+
+	if len(userConfigSlice) == 0 {
 		return nil
 	}
 
@@ -222,6 +235,10 @@ func metricsStateUpgrade(rawState map[string]interface{}) error {
 func serviceIntegrationDatadogStateUpgrade(rawState map[string]interface{}) error {
 	userConfigSlice, ok := rawState["datadog_user_config"].([]interface{})
 	if !ok {
+		return nil
+	}
+
+	if len(userConfigSlice) == 0 {
 		return nil
 	}
 
