@@ -18,7 +18,8 @@ resource "aiven_aws_privatelink" "foo" {
   service_name = aiven_kafka.bar.service_name
 
   principals = [
-  "arn:aws:iam::012345678901:user/mwf"]
+    "arn:aws:iam::012345678901:user/mwf"
+  ]
 }
 ```
 

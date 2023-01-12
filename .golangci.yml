@@ -18,6 +18,9 @@ linters:
     - unconvert
     - unused
     - varcheck
+    - stylecheck
+
+
 
 issues:
   exclude:

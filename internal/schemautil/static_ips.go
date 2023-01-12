@@ -10,22 +10,22 @@ import (
 )
 
 const (
-	StaticIpCreating  = "creating"
-	StaticIpCreated   = "created"
-	StaticIpAvailable = "available"
-	StaticIpAssigned  = "assigned"
+	StaticIPCreating  = "creating"
+	StaticIPCreated   = "created"
+	StaticIPAvailable = "available"
+	StaticIPAssigned  = "assigned"
 )
 
 func CurrentlyAllocatedStaticIps(_ context.Context, projectName, serviceName string, m interface{}) ([]string, error) {
 	client := m.(*aiven.Client)
 
 	// special handling for static ips
-	staticIpListResponse, err := client.StaticIPs.List(projectName)
+	staticIPListResponse, err := client.StaticIPs.List(projectName)
 	if err != nil {
 		return nil, fmt.Errorf("unable to list static ips for project '%s': %w", projectName, err)
 	}
 	allocatedStaticIps := make([]string, 0)
-	for _, sip := range staticIpListResponse.StaticIPs {
+	for _, sip := range staticIPListResponse.StaticIPs {
 		if sip.ServiceName == serviceName {
 			allocatedStaticIps = append(allocatedStaticIps, sip.StaticIPAddressID)
 		}

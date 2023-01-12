@@ -8,7 +8,7 @@ import (
 
 var (
 	// this mutex is needed to serialize calls to modify the remote config
-	// since its an abstraction that first GETs, modifies and then PUTs again
+	// since it's an abstraction that first GETs, modifies and then PUTs again
 	resourceOpensearchACLModifierMutex sync.Mutex
 )
 
@@ -44,7 +44,7 @@ func resourceElasticsearchACLModifierUpdateACLRule(username, index, permission s
 	return func(cfg *aiven.ElasticSearchACLConfig) {
 		cfg.Add(resourceOpensearchACLRuleMkAivenACL(username, index, permission))
 
-		// delete the old acl if its there
+		// delete the old acl if it's there
 		if prevPerm, ok := resourceElasticsearchACLRuleGetPermissionFromACLResponse(*cfg, username, index); ok && prevPerm != permission {
 			cfg.Delete(resourceOpensearchACLRuleMkAivenACL(username, index, prevPerm))
 		}
@@ -57,9 +57,9 @@ func resourceElasticsearchACLModifierDeleteACLRule(username, index, permission s
 	}
 }
 
-func resourceElasticsearchACLModifierToggleConfigFields(enabled, extednedAcl bool) func(*aiven.ElasticSearchACLConfig) {
+func resourceElasticsearchACLModifierToggleConfigFields(enabled, extednedACL bool) func(*aiven.ElasticSearchACLConfig) {
 	return func(cfg *aiven.ElasticSearchACLConfig) {
 		cfg.Enabled = enabled
-		cfg.ExtendedAcl = extednedAcl
+		cfg.ExtendedAcl = extednedACL
 	}
 }

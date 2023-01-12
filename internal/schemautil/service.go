@@ -377,7 +377,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 		}
 	}
 
-	vpcId, err := GetProjectVPCIdPointer(d)
+	vpcID, err := GetProjectVPCIdPointer(d)
 	if err != nil {
 		return diag.Errorf("error getting project VPC ID: %s", err)
 	}
@@ -394,7 +394,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 		aiven.CreateServiceRequest{
 			Cloud:                 d.Get("cloud_name").(string),
 			Plan:                  d.Get("plan").(string),
-			ProjectVPCID:          vpcId,
+			ProjectVPCID:          vpcID,
 			ServiceIntegrations:   GetAPIServiceIntegrations(d),
 			MaintenanceWindow:     GetMaintenanceWindow(d),
 			ServiceName:           d.Get("service_name").(string),
@@ -462,8 +462,8 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		}
 	}
 
-	var vpcId *string
-	vpcId, err = GetProjectVPCIdPointer(d)
+	var vpcID *string
+	vpcID, err = GetProjectVPCIdPointer(d)
 	if err != nil {
 		return diag.Errorf("error getting project VPC ID: %s", err)
 	}
@@ -484,7 +484,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 			Cloud:                 d.Get("cloud_name").(string),
 			Plan:                  d.Get("plan").(string),
 			MaintenanceWindow:     GetMaintenanceWindow(d),
-			ProjectVPCID:          vpcId,
+			ProjectVPCID:          vpcID,
 			Powered:               true,
 			TerminationProtection: d.Get("termination_protection").(bool),
 			DiskSpaceMB:           diskSpace,
@@ -655,7 +655,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		// TODO: Remove when the remote schema in Aiven begins to contain information about sensitive fields.
 		copySensitiveFields(oldUserConfigFirst, newUserConfigFirst)
 
-		normalizeIpFilter(oldUserConfigFirst, newUserConfigFirst)
+		normalizeIPFilter(oldUserConfigFirst, newUserConfigFirst)
 	}
 
 	if err := d.Set(serviceType+"_user_config", newUserConfig); err != nil {

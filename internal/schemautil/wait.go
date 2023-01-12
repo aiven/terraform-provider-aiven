@@ -284,11 +284,11 @@ func staticIpsReady(d *schema.ResourceData, m interface{}) (bool, error) {
 L:
 	for _, eip := range expectedStaticIps {
 		for _, sip := range staticIpsList.StaticIPs {
-			assignedOrAvailable := sip.State == StaticIpAssigned || sip.State == StaticIpAvailable
+			assignedOrAvailable := sip.State == StaticIPAssigned || sip.State == StaticIPAvailable
 			belongsToService := sip.ServiceName == serviceName
-			isExpectedIp := sip.StaticIPAddressID == eip
+			isExpectedIP := sip.StaticIPAddressID == eip
 
-			if isExpectedIp && belongsToService && assignedOrAvailable {
+			if isExpectedIP && belongsToService && assignedOrAvailable {
 				continue L
 			}
 		}
@@ -318,10 +318,10 @@ func staticIpsDisassociatedAfterServiceDeletion(d *schema.ResourceData, m interf
 		for _, sip := range staticIpsList.StaticIPs {
 			// no check for service name since after deletion the field is gone, but the
 			// static ip lingers in the assigned state for a while until it gets usable again
-			ipIsAssigned := sip.State == StaticIpAssigned
-			isExpectedIp := sip.StaticIPAddressID == eip
+			ipIsAssigned := sip.State == StaticIPAssigned
+			isExpectedIP := sip.StaticIPAddressID == eip
 
-			if isExpectedIp && ipIsAssigned {
+			if isExpectedIP && ipIsAssigned {
 				return false, nil
 			}
 		}

@@ -34,7 +34,7 @@ resource "aiven_opensearch_acl_config" "os_acls_config" {
 }
 
 resource "aiven_opensearch_acl_rule" "os_acl_rule" {
-  for_each = { for i, v in local.acl_rules : i => v }
+  for_each = {for i, v in local.acl_rules : i => v}
 
   project      = aiven_opensearch_acl_config.os_acls_config.project
   service_name = aiven_opensearch_acl_config.os_acls_config.service_name

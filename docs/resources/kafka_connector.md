@@ -19,11 +19,11 @@ resource "aiven_kafka_connector" "kafka-os-con1" {
   connector_name = "kafka-os-con1"
 
   config = {
-    "topics" = aiven_kafka_topic.kafka-topic1.topic_name
+    "topics"              = aiven_kafka_topic.kafka-topic1.topic_name
     "connector.class" : "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
-    "type.name"      = "os-connector"
-    "name"           = "kafka-os-con1"
-    "connection.url" = aiven_elasticsearch.os-service1.service_uri
+    "type.name"           = "os-connector"
+    "name"                = "kafka-os-con1"
+    "connection.url"      = aiven_elasticsearch.os-service1.service_uri
     "connection.username" = aiven_opensearch.os-service1.service_username
     "connection.password" = aiven_opensearch.os-service1.service_password
   }

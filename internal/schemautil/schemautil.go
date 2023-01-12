@@ -185,11 +185,11 @@ func EmptyObjectNoChangeDiffSuppressFunc(k, _, new string, d *schema.ResourceDat
 	return false
 }
 
-// IpFilterArrayDiffSuppressFunc Terraform does not allow default values for arrays but
+// IPFilterArrayDiffSuppressFunc Terraform does not allow default values for arrays but
 // the IP filter user config value has default. We don't want to force users to always
 // define explicit value just because of the Terraform restriction so suppress the
 // change from default to empty (which would be nonsensical operation anyway)
-func IpFilterArrayDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+func IPFilterArrayDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	// TODO: Add support for ip_filter_object.
 
 	if old == "1" && new == "0" && strings.HasSuffix(k, ".ip_filter.#") {
@@ -203,7 +203,7 @@ func IpFilterArrayDiffSuppressFunc(k, old, new string, d *schema.ResourceData) b
 	return false
 }
 
-func IpFilterValueDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) bool {
+func IPFilterValueDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) bool {
 	// TODO: Add support for ip_filter_object.
 
 	return old == "0.0.0.0/0" && new == "" && strings.HasSuffix(k, ".ip_filter.0")

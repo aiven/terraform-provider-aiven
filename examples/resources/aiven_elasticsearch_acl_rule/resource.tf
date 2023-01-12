@@ -48,7 +48,7 @@ locals {
 }
 
 resource "aiven_elasticsearch_acl_rule" "es_acl_rule" {
-  for_each = { for i, v in local.acl_rules : i => v }
+  for_each = {for i, v in local.acl_rules : i => v}
 
   project      = aiven_elasticsearch_acl_config.es_acls_config.project
   service_name = aiven_elasticsearch_acl_config.es_acls_config.service_name

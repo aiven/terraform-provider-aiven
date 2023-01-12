@@ -24,8 +24,8 @@ resource "aiven_pg" "default" {
 }
 
 resource "aiven_azure_privatelink" "privatelink" {
-  project      = var.aiven_project_id
-  service_name = aiven_pg.default.name
+  project               = var.aiven_project_id
+  service_name          = aiven_pg.default.name
   user_subscription_ids = [
     var.azure_subscription_id
   ]

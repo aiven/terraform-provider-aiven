@@ -69,7 +69,7 @@ func TestCopySensitiveFields(t *testing.T) {
 	}
 }
 
-// TestNormalizeIpFilter tests the normalizeIpFilter function.
+// TestNormalizeIpFilter tests the normalizeIPFilter function.
 func TestNormalizeIpFilter(t *testing.T) {
 	type args struct {
 		old map[string]interface{}
@@ -255,7 +255,7 @@ func TestNormalizeIpFilter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			normalizeIpFilter(tt.args.old, tt.args.new)
+			normalizeIPFilter(tt.args.old, tt.args.new)
 
 			if !cmp.Equal(tt.args.new, tt.want) {
 				t.Errorf(cmp.Diff(tt.want, tt.args.new))
