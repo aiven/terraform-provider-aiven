@@ -6,11 +6,12 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func TestAccAivenConnectionPool_basic(t *testing.T) {
@@ -66,7 +67,7 @@ resource "aiven_pg" "bar" {
   maintenance_window_time = "10:00:00"
 }
 
-resource "aiven_database" "foo" {
+resource "aiven_pg_database" "foo" {
   project       = aiven_pg.bar.project
   service_name  = aiven_pg.bar.service_name
   database_name = "test-acc-db-%s"
@@ -75,12 +76,12 @@ resource "aiven_database" "foo" {
 resource "aiven_connection_pool" "foo" {
   service_name  = aiven_pg.bar.service_name
   project       = data.aiven_project.foo.project
-  database_name = aiven_database.foo.database_name
+  database_name = aiven_pg_database.foo.database_name
   pool_name     = "test-acc-pool-%s"
   pool_size     = 25
   pool_mode     = "transaction"
 
-  depends_on = [aiven_database.foo]
+  depends_on = [aiven_pg_database.foo]
 }
 
 data "aiven_connection_pool" "pool" {
@@ -107,13 +108,13 @@ resource "aiven_pg" "bar" {
   maintenance_window_time = "10:00:00"
 }
 
-resource "aiven_service_user" "foo" {
+resource "aiven_opensearch_user" "foo" {
   service_name = aiven_pg.bar.service_name
   project      = data.aiven_project.foo.project
   username     = "user-%s"
 }
 
-resource "aiven_database" "foo" {
+resource "aiven_pg_database" "foo" {
   project       = aiven_pg.bar.project
   service_name  = aiven_pg.bar.service_name
   database_name = "test-acc-db-%s"
@@ -122,13 +123,13 @@ resource "aiven_database" "foo" {
 resource "aiven_connection_pool" "foo" {
   service_name  = aiven_pg.bar.service_name
   project       = data.aiven_project.foo.project
-  database_name = aiven_database.foo.database_name
-  username      = aiven_service_user.foo.username
+  database_name = aiven_pg_database.foo.database_name
+  username      = aiven_opensearch_user.foo.username
   pool_name     = "test-acc-pool-%s"
   pool_size     = 25
   pool_mode     = "transaction"
 
-  depends_on = [aiven_database.foo]
+  depends_on = [aiven_pg_database.foo]
 }
 
 data "aiven_connection_pool" "pool" {

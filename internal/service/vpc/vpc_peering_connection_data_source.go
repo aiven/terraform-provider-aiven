@@ -4,24 +4,11 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
 
-// DatasourceVPCPeeringConnection
-// Deprecated
-//
-//goland:noinspection GoDeprecation
-func DatasourceVPCPeeringConnection() *schema.Resource {
-	return &schema.Resource{
-		ReadContext: datasourceVPCPeeringConnectionRead,
-		Description: "The VPC Peering Connection data source provides information about the existing Aiven VPC Peering Connection.",
-		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenVPCPeeringConnectionSchema,
-			"vpc_id", "peer_cloud_account", "peer_vpc"),
-	}
-}
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+)
 
 func datasourceVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)

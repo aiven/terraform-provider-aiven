@@ -13,13 +13,13 @@ The Opensearch ACL Rule resource models a single ACL Rule for an Aiven Opensearc
 ## Example Usage
 
 ```terraform
-resource "aiven_service_user" "os_user" {
+resource "aiven_opensearch_user" "os_user" {
   project      = var.aiven_project_name
   service_name = aiven_opensearch.os_test.service_name
   username     = "documentation-user-1"
 }
 
-resource "aiven_service_user" "os_user_2" {
+resource "aiven_opensearch_user" "os_user_2" {
   project      = var.aiven_project_name
   service_name = aiven_opensearch.os_test.service_name
   username     = "documentation-user-2"
@@ -35,27 +35,27 @@ resource "aiven_opensearch_acl_config" "os_acls_config" {
 locals {
   acl_rules = [
     {
-      username   = aiven_service_user.os_user.username
+      username   = aiven_opensearch_user.os_user.username
       index      = "index2"
       permission = "readwrite"
     },
     {
-      username   = aiven_service_user.os_user.username
+      username   = aiven_opensearch_user.os_user.username
       index      = "index3"
       permission = "read"
     },
     {
-      username   = aiven_service_user.os_user.username
+      username   = aiven_opensearch_user.os_user.username
       index      = "index5"
       permission = "deny"
     },
     {
-      username   = aiven_service_user.os_user_2.username
+      username   = aiven_opensearch_user.os_user_2.username
       index      = "index3"
       permission = "write"
     },
     {
-      username   = aiven_service_user.os_user_2.username
+      username   = aiven_opensearch_user.os_user_2.username
       index      = "index7"
       permission = "readwrite"
     }

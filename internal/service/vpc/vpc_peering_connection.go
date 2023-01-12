@@ -2,7 +2,6 @@ package vpc
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -14,93 +13,6 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
-
-var aivenVPCPeeringConnectionSchema = map[string]*schema.Schema{
-	"vpc_id": {
-		ForceNew:     true,
-		Required:     true,
-		Type:         schema.TypeString,
-		Description:  schemautil.Complex("The VPC the peering connection belongs to.").ForceNew().Build(),
-		ValidateFunc: validateVPCID,
-	},
-	"peer_cloud_account": {
-		ForceNew:    true,
-		Required:    true,
-		Type:        schema.TypeString,
-		Description: schemautil.Complex("AWS account ID or GCP project ID of the peered VPC.").ForceNew().Build(),
-	},
-	"peer_vpc": {
-		ForceNew:    true,
-		Required:    true,
-		Type:        schema.TypeString,
-		Description: schemautil.Complex("AWS VPC ID or GCP VPC network name of the peered VPC.").ForceNew().Build(),
-	},
-	"peer_region": {
-		ForceNew: true,
-		Optional: true,
-		Type:     schema.TypeString,
-		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-			return new == ""
-		},
-		Description: schemautil.Complex("AWS region of the peered VPC (if not in the same region as Aiven VPC).").ForceNew().Build(),
-	},
-	"state": {
-		Computed:    true,
-		Type:        schema.TypeString,
-		Description: "State of the peering connection",
-	},
-	"state_info": {
-		Computed:    true,
-		Type:        schema.TypeMap,
-		Description: "State-specific help or error information",
-	},
-	"peering_connection_id": {
-		Computed:    true,
-		Type:        schema.TypeString,
-		Description: "Cloud provider identifier for the peering connection if available",
-	},
-	"peer_azure_app_id": {
-		Optional:    true,
-		ForceNew:    true,
-		Type:        schema.TypeString,
-		Description: schemautil.Complex("Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet").ForceNew().Build(),
-	},
-	"peer_azure_tenant_id": {
-		Optional:    true,
-		ForceNew:    true,
-		Type:        schema.TypeString,
-		Description: schemautil.Complex("Azure tenant id in UUID4 form.").ForceNew().Build(),
-	},
-	"peer_resource_group": {
-		Optional:    true,
-		ForceNew:    true,
-		Type:        schema.TypeString,
-		Description: schemautil.Complex("Azure resource group name of the peered VPC").ForceNew().Build(),
-	},
-}
-
-// ResourceVPCPeeringConnection
-// Deprecated
-//
-//goland:noinspection GoDeprecation
-func ResourceVPCPeeringConnection() *schema.Resource {
-	return &schema.Resource{
-		Description:   "The VPC Peering Connection resource allows the creation and management of Aiven VPC Peering Connections.",
-		CreateContext: resourceVPCPeeringConnectionCreate,
-		ReadContext:   resourceVPCPeeringConnectionRead,
-		DeleteContext: resourceVPCPeeringConnectionDelete,
-		Importer: &schema.ResourceImporter{
-			StateContext: resourceVPCPeeringConnectionImport,
-		},
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(2 * time.Minute),
-			Delete: schema.DefaultTimeout(2 * time.Minute),
-		},
-
-		Schema:             aivenVPCPeeringConnectionSchema,
-		DeprecationMessage: "Please use a cloud specific VPC peering connection resource",
-	}
-}
 
 func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var (
@@ -386,26 +298,6 @@ func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceD
 		return diag.Errorf("Error waiting for Aiven VPC Peering Connection to be DELETED: %s", err)
 	}
 	return nil
-}
-
-func resourceVPCPeeringConnectionImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	client := m.(*aiven.Client)
-
-	p, err := parsePeerVPCID(d.Id())
-	if err != nil {
-		return nil, fmt.Errorf("error parsing peering VPC ID: %s", err)
-	}
-	_, err = client.VPCPeeringConnections.GetVPCPeering(p.projectName, p.vpcID, p.peerCloudAccount, p.peerVPC, p.peerRegion)
-	if err != nil && schemautil.IsUnknownResource(err) {
-		return nil, errors.New("cannot find specified VPC peering connection")
-	}
-
-	dig := resourceVPCPeeringConnectionRead(ctx, d, m)
-	if dig.HasError() {
-		return nil, errors.New("cannot get VPC peering connection")
-	}
-
-	return []*schema.ResourceData{d}, nil
 }
 
 func copyAzureSpecificVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
