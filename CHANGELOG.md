@@ -12,6 +12,7 @@ nav_order: 1
 - Make schema fields use strict types instead of string
 - Add support for strict types in diff functions
 - Add `stateupgrader` package which aims to assist with upgrading from v3.x to v4.0.0
+- Remove deprecated resources (with data sources): `aiven_database`, `aiven_service_user`, `aiven_vpc_peering_connection`
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 - Fix user config serialization with null values only
