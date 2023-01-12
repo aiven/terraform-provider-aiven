@@ -11,7 +11,7 @@ resource "aiven_opensearch" "bar" {
   maintenance_window_time = "10:00:00"
 }
 
-resource "aiven_service_user" "foo" {
+resource "aiven_opensearch_user" "foo" {
   service_name = aiven_opensearch.bar.service_name
   project      = data.aiven_project.foo.project
   username     = "user-example"
