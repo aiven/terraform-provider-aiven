@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
+
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -52,7 +53,7 @@ resource "aiven_opensearch" "bar" {
   maintenance_window_time = "10:00:00"
 }
 
-resource "aiven_service_user" "foo" {
+resource "aiven_opensearch_user" "foo" {
   service_name = aiven_opensearch.bar.service_name
   project      = data.aiven_project.foo.project
   username     = "user-%s"
@@ -68,7 +69,7 @@ resource "aiven_opensearch_acl_config" "foo" {
 resource "aiven_opensearch_acl_rule" "foo" {
   project      = data.aiven_project.foo.project
   service_name = aiven_opensearch.bar.service_name
-  username     = aiven_service_user.foo.username
+  username     = aiven_opensearch_user.foo.username
   index        = "test-index"
   permission   = "readwrite"
 }`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)

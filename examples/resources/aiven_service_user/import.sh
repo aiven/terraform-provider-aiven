@@ -1,1 +1,0 @@
-terraform import aiven_service_user.myserviceuser project/service_name/username
