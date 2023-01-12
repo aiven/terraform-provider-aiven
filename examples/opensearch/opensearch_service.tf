@@ -9,7 +9,7 @@ resource "aiven_opensearch" "os" {
 }
 
 # Opensearch user
-resource "aiven_service_user" "os-user" {
+resource "aiven_opensearch_user" "os-user" {
   project      = aiven_project.os-project.project
   service_name = aiven_opensearch.os.service_name
   username     = "test-user1"

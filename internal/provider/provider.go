@@ -3,12 +3,14 @@ package provider
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/service/account"
 	"github.com/aiven/terraform-provider-aiven/internal/service/cassandra"
 	"github.com/aiven/terraform-provider-aiven/internal/service/clickhouse"
 	"github.com/aiven/terraform-provider-aiven/internal/service/connectionpool"
-	"github.com/aiven/terraform-provider-aiven/internal/service/database"
 	"github.com/aiven/terraform-provider-aiven/internal/service/flink"
 	"github.com/aiven/terraform-provider-aiven/internal/service/grafana"
 	"github.com/aiven/terraform-provider-aiven/internal/service/influxdb"
@@ -21,12 +23,8 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/service/redis"
 	"github.com/aiven/terraform-provider-aiven/internal/service/servicecomponent"
 	"github.com/aiven/terraform-provider-aiven/internal/service/serviceintegration"
-	"github.com/aiven/terraform-provider-aiven/internal/service/serviceuser"
 	"github.com/aiven/terraform-provider-aiven/internal/service/staticip"
 	"github.com/aiven/terraform-provider-aiven/internal/service/vpc"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 var (
@@ -50,8 +48,6 @@ func Provider() *schema.Provider {
 
 		DataSourcesMap: map[string]*schema.Resource{
 			"aiven_connection_pool":   connectionpool.DatasourceConnectionPool(),
-			"aiven_database":          database.DatasourceDatabase(),       // Deprecated
-			"aiven_service_user":      serviceuser.DatasourceServiceUser(), // Deprecated
 			"aiven_service_component": servicecomponent.DatasourceServiceComponent(),
 
 			// influxdb
@@ -100,7 +96,6 @@ func Provider() *schema.Provider {
 			"aiven_gcp_vpc_peering_connection":     vpc.DatasourceGCPVPCPeeringConnection(),
 			"aiven_project_vpc":                    vpc.DatasourceProjectVPC(),
 			"aiven_transit_gateway_vpc_attachment": vpc.DatasourceTransitGatewayVPCAttachment(),
-			"aiven_vpc_peering_connection":         vpc.DatasourceVPCPeeringConnection(), // Deprecated
 
 			// service integrations
 			"aiven_service_integration":          serviceintegration.DatasourceServiceIntegration(),
@@ -143,8 +138,6 @@ func Provider() *schema.Provider {
 
 		ResourcesMap: map[string]*schema.Resource{
 			"aiven_connection_pool": connectionpool.ResourceConnectionPool(),
-			"aiven_database":        database.ResourceDatabase(),       // Deprecated
-			"aiven_service_user":    serviceuser.ResourceServiceUser(), // Deprecated
 			"aiven_static_ip":       staticip.ResourceStaticIP(),
 
 			// influxdb
@@ -194,7 +187,6 @@ func Provider() *schema.Provider {
 			"aiven_gcp_vpc_peering_connection":            vpc.ResourceGCPVPCPeeringConnection(),
 			"aiven_project_vpc":                           vpc.ResourceProjectVPC(),
 			"aiven_transit_gateway_vpc_attachment":        vpc.ResourceTransitGatewayVPCAttachment(),
-			"aiven_vpc_peering_connection":                vpc.ResourceVPCPeeringConnection(), // Deprecated
 
 			// service integrations
 			"aiven_service_integration":          serviceintegration.ResourceServiceIntegration(),
