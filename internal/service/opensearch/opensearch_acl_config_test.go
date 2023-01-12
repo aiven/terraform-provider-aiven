@@ -6,11 +6,12 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func TestAccAivenOpensearchACLConfig_basic(t *testing.T) {
@@ -50,7 +51,7 @@ resource "aiven_opensearch" "bar" {
   maintenance_window_time = "10:00:00"
 }
 
-resource "aiven_service_user" "foo" {
+resource "aiven_opensearch_user" "foo" {
   service_name = aiven_opensearch.bar.service_name
   project      = data.aiven_project.foo.project
   username     = "user-%s"
