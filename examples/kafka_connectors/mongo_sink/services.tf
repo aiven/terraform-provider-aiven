@@ -32,7 +32,7 @@ resource "aiven_kafka_topic" "kafka-topic1" {
   replication  = 2
 }
 
-data "aiven_service_user" "kafka_admin" {
+data "aiven_kafka_user" "kafka_admin" {
   project      = aiven_project.kafka-con-project1.project
   service_name = aiven_kafka.kafka-service1.service_name
 
