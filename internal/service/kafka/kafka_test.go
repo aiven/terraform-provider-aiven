@@ -345,3 +345,49 @@ func partitions(numPartitions int) (partitions []*aiven.Partition) {
 	}
 	return
 }
+
+func testAccKafkaResourceUserConfigKafkaNullFieldsOnly(project, prefix string) string {
+	return fmt.Sprintf(`
+resource "aiven_kafka" "kafka" {
+  project                 = "%s"
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-2"
+  service_name            = "%s-kafka"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+  kafka_user_config {
+    kafka {
+      group_max_session_timeout_ms = null
+      log_retention_bytes          = null
+    }
+    public_access {
+      kafka_rest    = true
+      kafka_connect = true
+    }
+  }
+}
+`, project, prefix)
+}
+
+func TestAccAiven_kafka_userconfig_kafka_null_fields_only(t *testing.T) {
+	project := os.Getenv("AIVEN_PROJECT_NAME")
+	prefix := "test-tf-acc-" + acctest.RandString(7)
+	resourceName := "aiven_kafka.kafka"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      acc.TestAccCheckAivenServiceResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKafkaResourceUserConfigKafkaNullFieldsOnly(project, prefix),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka.0.group_max_session_timeout_ms", ""),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka.0.log_retention_bytes", ""),
+				),
+			},
+		},
+	})
+}

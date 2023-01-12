@@ -7,6 +7,7 @@ nav_order: 1
 # Changelog
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+- Fix user config serialization with null values only
 
 ## [3.11.0] - 2023-01-09
 - Fix races in tests
