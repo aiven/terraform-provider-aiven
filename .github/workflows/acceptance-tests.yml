@@ -26,7 +26,6 @@ jobs:
           cassandra,
           clickhouse,
           connectionpool,
-          database,
           flink,
           pg,
           grafana,
@@ -37,7 +36,6 @@ jobs:
           project,
           redis,
           servicecomponent,
-          serviceuser,
           staticip,
           serviceintegration,
           vpc
