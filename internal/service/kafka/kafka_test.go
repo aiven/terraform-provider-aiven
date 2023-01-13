@@ -311,11 +311,11 @@ func testAccCheckAivenServiceKafkaAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a correct public_access.kafka_rest from Aiven")
 		}
 
-		if a["kafka_user_config.0.public_access.0.kafka"] != "" {
+		if a["kafka_user_config.0.public_access.0.kafka"] != "false" {
 			return fmt.Errorf("expected to get a correct public_access.kafka from Aiven")
 		}
 
-		if a["kafka_user_config.0.public_access.0.prometheus"] != "" {
+		if a["kafka_user_config.0.public_access.0.prometheus"] != "false" {
 			return fmt.Errorf("expected to get a correct public_access.prometheus from Aiven")
 		}
 
@@ -385,8 +385,8 @@ func TestAccAiven_kafka_userconfig_kafka_null_fields_only(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka.0.group_max_session_timeout_ms", ""),
-					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka.0.log_retention_bytes", ""),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka.0.group_max_session_timeout_ms", "0"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka.0.log_retention_bytes", "0"),
 				),
 			},
 		},
