@@ -8,6 +8,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 - Fix user config serialization with null values only
+- Fix incorrect state name spelling in Flink resource
 
 ## [3.11.0] - 2023-01-09
 - Fix races in tests

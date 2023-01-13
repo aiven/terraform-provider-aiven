@@ -129,7 +129,7 @@ func resourceFlinkJobCreate(ctx context.Context, d *schema.ResourceData, m inter
 	conf := &resource.StateChangeConf{
 		Pending: []string{
 			"CANCELED",
-			"CANCELING",
+			"CANCELLING",
 			"CREATED",
 			"DEPLOYING",
 			"FAILED",
@@ -182,7 +182,7 @@ func resourceFlinkJobDelete(ctx context.Context, d *schema.ResourceData, m inter
 
 	conf := &resource.StateChangeConf{
 		Pending: []string{
-			"CANCELING",
+			"CANCELLING",
 			"CREATED",
 			"DEPLOYING",
 			"INITIALIZING",
