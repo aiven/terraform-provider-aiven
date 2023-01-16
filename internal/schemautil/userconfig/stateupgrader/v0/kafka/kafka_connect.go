@@ -1,4 +1,4 @@
-package v0
+package kafka
 
 import (
 	"context"
@@ -12,35 +12,31 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/dist"
 )
 
-func cassandraSchema() map[string]*schema.Schema {
-	s := schemautil.ServiceCommonSchema()
-	s[schemautil.ServiceTypeCassandra] = &schema.Schema{
+func aivenKafkaConnectSchema() map[string]*schema.Schema {
+	kafkaConnectSchema := schemautil.ServiceCommonSchema()
+	kafkaConnectSchema[schemautil.ServiceTypeKafkaConnect] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
-		Description: "Cassandra server provided values",
+		Description: "Kafka Connect server provided values",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	s[schemautil.ServiceTypeCassandra+"_user_config"] = dist.ServiceTypeCassandra()
+	kafkaConnectSchema[schemautil.ServiceTypeKafkaConnect+"_user_config"] = dist.ServiceTypeKafkaConnect()
 
-	return s
+	return kafkaConnectSchema
 }
 
-func ResourceCassandra() *schema.Resource {
+func ResourceKafkaConnect() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Cassandra resource allows the creation and management of Aiven Cassandra services.",
-		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeCassandra),
+		Description:   "The Kafka Connect resource allows the creation and management of Aiven Kafka Connect services.",
+		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeKafkaConnect),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeCassandra),
+			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeKafkaConnect),
 			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
-			customdiff.IfValueChange("tag",
-				schemautil.TagsShouldNotBeEmpty,
-				schemautil.CustomizeDiffCheckUniqueTag,
-			),
 			customdiff.IfValueChange("disk_space",
 				schemautil.DiskSpaceShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
@@ -67,16 +63,16 @@ func ResourceCassandra() *schema.Resource {
 			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
-		Schema: cassandraSchema(),
+		Schema: aivenKafkaConnectSchema(),
 	}
 }
 
-func ResourceCassandraStateUpgrade(
+func ResourceKafkaConnectStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},
 ) (map[string]interface{}, error) {
-	userConfigSlice, ok := rawState["cassandra_user_config"].([]interface{})
+	userConfigSlice, ok := rawState["kafka_connect_user_config"].([]interface{})
 	if !ok {
 		return rawState, nil
 	}
@@ -91,20 +87,25 @@ func ResourceCassandraStateUpgrade(
 	}
 
 	err := typeupgrader.Map(userConfig, map[string]string{
-		"migrate_sstableloader": "bool",
-		"static_ips":            "bool",
+		"static_ips": "bool",
 	})
 	if err != nil {
 		return rawState, err
 	}
 
-	cassandraSlice, ok := userConfig["cassandra"].([]interface{})
-	if ok && len(cassandraSlice) > 0 {
-		cassandra, ok := cassandraSlice[0].(map[string]interface{})
+	kafkaConnectSlice, ok := userConfig["kafka_connect"].([]interface{})
+	if ok && len(kafkaConnectSlice) > 0 {
+		kafkaConnect, ok := kafkaConnectSlice[0].(map[string]interface{})
 		if ok {
-			err := typeupgrader.Map(cassandra, map[string]string{
-				"batch_size_fail_threshold_in_kb": "int",
-				"batch_size_warn_threshold_in_kb": "int",
+			err = typeupgrader.Map(kafkaConnect, map[string]string{
+				"consumer_fetch_max_bytes":           "int",
+				"consumer_max_partition_fetch_bytes": "int",
+				"consumer_max_poll_interval_ms":      "int",
+				"consumer_max_poll_records":          "int",
+				"offset_flush_interval_ms":           "int",
+				"offset_flush_timeout_ms":            "int",
+				"producer_max_request_size":          "int",
+				"session_timeout_ms":                 "int",
 			})
 			if err != nil {
 				return rawState, err
@@ -117,7 +118,23 @@ func ResourceCassandraStateUpgrade(
 		privateAccess, ok := privateAccessSlice[0].(map[string]interface{})
 		if ok {
 			err = typeupgrader.Map(privateAccess, map[string]string{
-				"prometheus": "bool",
+				"kafka_connect": "bool",
+				"prometheus":    "bool",
+			})
+			if err != nil {
+				return rawState, err
+			}
+		}
+	}
+
+	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]interface{})
+	if ok && len(privateLinkAccessSlice) > 0 {
+		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]interface{})
+		if ok {
+			err := typeupgrader.Map(privateLinkAccess, map[string]string{
+				"jolokia":       "bool",
+				"kafka_connect": "bool",
+				"prometheus":    "bool",
 			})
 			if err != nil {
 				return rawState, err
@@ -130,7 +147,8 @@ func ResourceCassandraStateUpgrade(
 		publicAccess, ok := publicAccessSlice[0].(map[string]interface{})
 		if ok {
 			err := typeupgrader.Map(publicAccess, map[string]string{
-				"prometheus": "bool",
+				"kafka_connect": "bool",
+				"prometheus":    "bool",
 			})
 			if err != nil {
 				return rawState, err
