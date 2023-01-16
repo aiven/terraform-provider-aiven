@@ -1,4 +1,4 @@
-package v0
+package m3
 
 import (
 	"context"
@@ -12,30 +12,30 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/dist"
 )
 
-func redisSchema() map[string]*schema.Schema {
-	s := schemautil.ServiceCommonSchema()
-	s[schemautil.ServiceTypeRedis] = &schema.Schema{
+func aivenM3DBSchema() map[string]*schema.Schema {
+	schemaM3 := schemautil.ServiceCommonSchema()
+	schemaM3[schemautil.ServiceTypeM3] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
-		Description: "Redis server provided values",
+		Description: "M3 specific server provided values",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	s[schemautil.ServiceTypeRedis+"_user_config"] = dist.ServiceTypeRedis()
+	schemaM3[schemautil.ServiceTypeM3+"_user_config"] = dist.ServiceTypeM3db()
 
-	return s
+	return schemaM3
 }
 
-func ResourceRedis() *schema.Resource {
+func ResourceM3DBResource() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Redis resource allows the creation and management of Aiven Redis services.",
-		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeRedis),
+		Description:   "The M3 DB resource allows the creation and management of Aiven M3 services.",
+		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeM3),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeRedis),
+			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeM3),
 			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
 			customdiff.IfValueChange("tag",
 				schemautil.TagsShouldNotBeEmpty,
@@ -54,8 +54,8 @@ func ResourceRedis() *schema.Resource {
 				schemautil.CustomizeDiffServiceIntegrationAfterCreation,
 			),
 			customdiff.Sequence(
-				schemautil.CustomizeDiffCheckStaticIPDisassociation,
 				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
+				schemautil.CustomizeDiffCheckStaticIPDisassociation,
 			),
 		),
 		Importer: &schema.ResourceImporter{
@@ -67,16 +67,16 @@ func ResourceRedis() *schema.Resource {
 			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
-		Schema: redisSchema(),
+		Schema: aivenM3DBSchema(),
 	}
 }
 
-func ResourceRedisStateUpgrade(
+func ResourceM3DBStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},
 ) (map[string]interface{}, error) {
-	userConfigSlice, ok := rawState["redis_user_config"].([]interface{})
+	userConfigSlice, ok := rawState["m3db_user_config"].([]interface{})
 	if !ok {
 		return rawState, nil
 	}
@@ -91,29 +91,50 @@ func ResourceRedisStateUpgrade(
 	}
 
 	err := typeupgrader.Map(userConfig, map[string]string{
-		"redis_io_threads":                        "int",
-		"redis_lfu_decay_time":                    "int",
-		"redis_lfu_log_factor":                    "int",
-		"redis_number_of_databases":               "int",
-		"redis_pubsub_client_output_buffer_limit": "int",
-		"redis_ssl":                               "bool",
-		"redis_timeout":                           "int",
-		"static_ips":                              "bool",
+		"m3coordinator_enable_graphite_carbon_ingest": "bool",
+		"static_ips": "bool",
 	})
 	if err != nil {
 		return rawState, err
 	}
 
-	migrationSlice, ok := userConfig["migration"].([]interface{})
-	if ok && len(migrationSlice) > 0 {
-		migration, ok := migrationSlice[0].(map[string]interface{})
+	limitsSlice, ok := userConfig["limits"].([]interface{})
+	if ok && len(limitsSlice) > 0 {
+		limits, ok := limitsSlice[0].(map[string]interface{})
 		if ok {
-			err := typeupgrader.Map(migration, map[string]string{
-				"port": "int",
-				"ssl":  "bool",
+			err := typeupgrader.Map(limits, map[string]string{
+				"max_recently_queried_series_blocks":          "int",
+				"max_recently_queried_series_disk_bytes_read": "int",
+				"query_docs":               "int",
+				"query_require_exhaustive": "bool",
+				"query_series":             "int",
 			})
 			if err != nil {
 				return rawState, err
+			}
+		}
+	}
+
+	namespacesSlice, ok := userConfig["namespaces"].([]interface{})
+	if ok && len(namespacesSlice) > 0 {
+		for _, v := range namespacesSlice {
+			namespace, ok := v.(map[string]interface{})
+			if !ok {
+				continue
+			}
+
+			optionsSlice, ok := namespace["options"].([]interface{})
+			if ok && len(optionsSlice) > 0 {
+				options, ok := optionsSlice[0].(map[string]interface{})
+				if ok {
+					err := typeupgrader.Map(options, map[string]string{
+						"snapshot_enabled":    "bool",
+						"writes_to_commitlog": "bool",
+					})
+					if err != nil {
+						return rawState, err
+					}
+				}
 			}
 		}
 	}
@@ -123,22 +144,7 @@ func ResourceRedisStateUpgrade(
 		privateAccess, ok := privateAccessSlice[0].(map[string]interface{})
 		if ok {
 			err = typeupgrader.Map(privateAccess, map[string]string{
-				"prometheus": "bool",
-				"redis":      "bool",
-			})
-			if err != nil {
-				return rawState, err
-			}
-		}
-	}
-
-	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]interface{})
-	if ok && len(privateLinkAccessSlice) > 0 {
-		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]interface{})
-		if ok {
-			err := typeupgrader.Map(privateLinkAccess, map[string]string{
-				"prometheus": "bool",
-				"redis":      "bool",
+				"m3coordinator": "bool",
 			})
 			if err != nil {
 				return rawState, err
@@ -151,11 +157,33 @@ func ResourceRedisStateUpgrade(
 		publicAccess, ok := publicAccessSlice[0].(map[string]interface{})
 		if ok {
 			err := typeupgrader.Map(publicAccess, map[string]string{
-				"prometheus": "bool",
-				"redis":      "bool",
+				"m3coordinator": "bool",
 			})
 			if err != nil {
 				return rawState, err
+			}
+		}
+	}
+
+	rulesSlice, ok := userConfig["rules"].([]interface{})
+	if ok && len(rulesSlice) > 0 {
+		rules, ok := rulesSlice[0].(map[string]interface{})
+		if ok {
+			mappingSlice, ok := rules["mapping"].([]interface{})
+			if ok && len(mappingSlice) > 0 {
+				for _, v := range mappingSlice {
+					mapping, ok := v.(map[string]interface{})
+					if !ok {
+						continue
+					}
+
+					err := typeupgrader.Map(mapping, map[string]string{
+						"drop": "bool",
+					})
+					if err != nil {
+						return rawState, err
+					}
+				}
 			}
 		}
 	}
