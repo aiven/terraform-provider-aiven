@@ -1,4 +1,4 @@
-package v0
+package flink
 
 import (
 	"context"
@@ -12,31 +12,47 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/dist"
 )
 
-func aivenKafkaConnectSchema() map[string]*schema.Schema {
-	kafkaConnectSchema := schemautil.ServiceCommonSchema()
-	kafkaConnectSchema[schemautil.ServiceTypeKafkaConnect] = &schema.Schema{
+func aivenFlinkSchema() map[string]*schema.Schema {
+	aivenFlinkSchema := schemautil.ServiceCommonSchema()
+	aivenFlinkSchema[schemautil.ServiceTypeFlink] = &schema.Schema{
 		Type:        schema.TypeList,
+		MaxItems:    1,
 		Computed:    true,
-		Description: "Kafka Connect server provided values",
+		Description: "Flink server provided values",
+		Optional:    true,
 		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{},
+			Schema: map[string]*schema.Schema{
+				"host_ports": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "Host and Port of a Flink server",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+			},
 		},
 	}
-	kafkaConnectSchema[schemautil.ServiceTypeKafkaConnect+"_user_config"] = dist.ServiceTypeKafkaConnect()
+	aivenFlinkSchema[schemautil.ServiceTypeFlink+"_user_config"] = dist.ServiceTypeFlink()
 
-	return kafkaConnectSchema
+	return aivenFlinkSchema
 }
 
-func ResourceKafkaConnect() *schema.Resource {
+func ResourceFlink() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Kafka Connect resource allows the creation and management of Aiven Kafka Connect services.",
-		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeKafkaConnect),
+		Description:   "The Flink resource allows the creation and management of Aiven Flink services.",
+		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeFlink),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeKafkaConnect),
+			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeFlink),
 			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
+			customdiff.IfValueChange("tag",
+				schemautil.TagsShouldNotBeEmpty,
+				schemautil.CustomizeDiffCheckUniqueTag,
+			),
 			customdiff.IfValueChange("disk_space",
 				schemautil.DiskSpaceShouldNotBeEmpty,
 				schemautil.CustomizeDiffCheckDiskSpace,
@@ -63,16 +79,16 @@ func ResourceKafkaConnect() *schema.Resource {
 			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
-		Schema: aivenKafkaConnectSchema(),
+		Schema: aivenFlinkSchema(),
 	}
 }
 
-func ResourceKafkaConnectStateUpgrade(
+func ResourceFlinkStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},
 ) (map[string]interface{}, error) {
-	userConfigSlice, ok := rawState["kafka_connect_user_config"].([]interface{})
+	userConfigSlice, ok := rawState["flink_user_config"].([]interface{})
 	if !ok {
 		return rawState, nil
 	}
@@ -87,44 +103,16 @@ func ResourceKafkaConnectStateUpgrade(
 	}
 
 	err := typeupgrader.Map(userConfig, map[string]string{
-		"static_ips": "bool",
+		"execution_checkpointing_interval_ms":        "int",
+		"execution_checkpointing_timeout_ms":         "int",
+		"number_of_task_slots":                       "int",
+		"parallelism_default":                        "int",
+		"restart_strategy_delay_sec":                 "int",
+		"restart_strategy_failure_rate_interval_min": "int",
+		"restart_strategy_max_failures":              "int",
 	})
 	if err != nil {
 		return rawState, err
-	}
-
-	kafkaConnectSlice, ok := userConfig["kafka_connect"].([]interface{})
-	if ok && len(kafkaConnectSlice) > 0 {
-		kafkaConnect, ok := kafkaConnectSlice[0].(map[string]interface{})
-		if ok {
-			err = typeupgrader.Map(kafkaConnect, map[string]string{
-				"consumer_fetch_max_bytes":           "int",
-				"consumer_max_partition_fetch_bytes": "int",
-				"consumer_max_poll_interval_ms":      "int",
-				"consumer_max_poll_records":          "int",
-				"offset_flush_interval_ms":           "int",
-				"offset_flush_timeout_ms":            "int",
-				"producer_max_request_size":          "int",
-				"session_timeout_ms":                 "int",
-			})
-			if err != nil {
-				return rawState, err
-			}
-		}
-	}
-
-	privateAccessSlice, ok := userConfig["private_access"].([]interface{})
-	if ok && len(privateAccessSlice) > 0 {
-		privateAccess, ok := privateAccessSlice[0].(map[string]interface{})
-		if ok {
-			err = typeupgrader.Map(privateAccess, map[string]string{
-				"kafka_connect": "bool",
-				"prometheus":    "bool",
-			})
-			if err != nil {
-				return rawState, err
-			}
-		}
 	}
 
 	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]interface{})
@@ -132,23 +120,8 @@ func ResourceKafkaConnectStateUpgrade(
 		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]interface{})
 		if ok {
 			err := typeupgrader.Map(privateLinkAccess, map[string]string{
-				"jolokia":       "bool",
-				"kafka_connect": "bool",
-				"prometheus":    "bool",
-			})
-			if err != nil {
-				return rawState, err
-			}
-		}
-	}
-
-	publicAccessSlice, ok := userConfig["public_access"].([]interface{})
-	if ok && len(publicAccessSlice) > 0 {
-		publicAccess, ok := publicAccessSlice[0].(map[string]interface{})
-		if ok {
-			err := typeupgrader.Map(publicAccess, map[string]string{
-				"kafka_connect": "bool",
-				"prometheus":    "bool",
+				"flink":      "bool",
+				"prometheus": "bool",
 			})
 			if err != nil {
 				return rawState, err

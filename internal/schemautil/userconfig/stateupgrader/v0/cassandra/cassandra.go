@@ -1,4 +1,4 @@
-package v0
+package cassandra
 
 import (
 	"context"
@@ -12,42 +12,30 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/dist"
 )
 
-func aivenFlinkSchema() map[string]*schema.Schema {
-	aivenFlinkSchema := schemautil.ServiceCommonSchema()
-	aivenFlinkSchema[schemautil.ServiceTypeFlink] = &schema.Schema{
+func cassandraSchema() map[string]*schema.Schema {
+	s := schemautil.ServiceCommonSchema()
+	s[schemautil.ServiceTypeCassandra] = &schema.Schema{
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
-		Description: "Flink server provided values",
-		Optional:    true,
+		Description: "Cassandra server provided values",
 		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"host_ports": {
-					Type:        schema.TypeList,
-					Computed:    true,
-					Description: "Host and Port of a Flink server",
-					Optional:    true,
-					Elem: &schema.Schema{
-						Type: schema.TypeString,
-					},
-				},
-			},
+			Schema: map[string]*schema.Schema{},
 		},
 	}
-	aivenFlinkSchema[schemautil.ServiceTypeFlink+"_user_config"] = dist.ServiceTypeFlink()
+	s[schemautil.ServiceTypeCassandra+"_user_config"] = dist.ServiceTypeCassandra()
 
-	return aivenFlinkSchema
+	return s
 }
 
-func ResourceFlink() *schema.Resource {
+func ResourceCassandra() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Flink resource allows the creation and management of Aiven Flink services.",
-		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeFlink),
+		Description:   "The Cassandra resource allows the creation and management of Aiven Cassandra services.",
+		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeCassandra),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeFlink),
+			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeCassandra),
 			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
 			customdiff.IfValueChange("tag",
 				schemautil.TagsShouldNotBeEmpty,
@@ -79,16 +67,16 @@ func ResourceFlink() *schema.Resource {
 			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
-		Schema: aivenFlinkSchema(),
+		Schema: cassandraSchema(),
 	}
 }
 
-func ResourceFlinkStateUpgrade(
+func ResourceCassandraStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},
 ) (map[string]interface{}, error) {
-	userConfigSlice, ok := rawState["flink_user_config"].([]interface{})
+	userConfigSlice, ok := rawState["cassandra_user_config"].([]interface{})
 	if !ok {
 		return rawState, nil
 	}
@@ -103,24 +91,45 @@ func ResourceFlinkStateUpgrade(
 	}
 
 	err := typeupgrader.Map(userConfig, map[string]string{
-		"execution_checkpointing_interval_ms":        "int",
-		"execution_checkpointing_timeout_ms":         "int",
-		"number_of_task_slots":                       "int",
-		"parallelism_default":                        "int",
-		"restart_strategy_delay_sec":                 "int",
-		"restart_strategy_failure_rate_interval_min": "int",
-		"restart_strategy_max_failures":              "int",
+		"migrate_sstableloader": "bool",
+		"static_ips":            "bool",
 	})
 	if err != nil {
 		return rawState, err
 	}
 
-	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]interface{})
-	if ok && len(privateLinkAccessSlice) > 0 {
-		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]interface{})
+	cassandraSlice, ok := userConfig["cassandra"].([]interface{})
+	if ok && len(cassandraSlice) > 0 {
+		cassandra, ok := cassandraSlice[0].(map[string]interface{})
 		if ok {
-			err := typeupgrader.Map(privateLinkAccess, map[string]string{
-				"flink":      "bool",
+			err := typeupgrader.Map(cassandra, map[string]string{
+				"batch_size_fail_threshold_in_kb": "int",
+				"batch_size_warn_threshold_in_kb": "int",
+			})
+			if err != nil {
+				return rawState, err
+			}
+		}
+	}
+
+	privateAccessSlice, ok := userConfig["private_access"].([]interface{})
+	if ok && len(privateAccessSlice) > 0 {
+		privateAccess, ok := privateAccessSlice[0].(map[string]interface{})
+		if ok {
+			err = typeupgrader.Map(privateAccess, map[string]string{
+				"prometheus": "bool",
+			})
+			if err != nil {
+				return rawState, err
+			}
+		}
+	}
+
+	publicAccessSlice, ok := userConfig["public_access"].([]interface{})
+	if ok && len(publicAccessSlice) > 0 {
+		publicAccess, ok := publicAccessSlice[0].(map[string]interface{})
+		if ok {
+			err := typeupgrader.Map(publicAccess, map[string]string{
 				"prometheus": "bool",
 			})
 			if err != nil {

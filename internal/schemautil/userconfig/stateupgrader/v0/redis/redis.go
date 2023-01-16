@@ -1,4 +1,4 @@
-package v0
+package redis
 
 import (
 	"context"
@@ -12,30 +12,30 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/dist"
 )
 
-func aivenMySQLSchema() map[string]*schema.Schema {
-	schemaMySQL := schemautil.ServiceCommonSchema()
-	schemaMySQL[schemautil.ServiceTypeMySQL] = &schema.Schema{
+func redisSchema() map[string]*schema.Schema {
+	s := schemautil.ServiceCommonSchema()
+	s[schemautil.ServiceTypeRedis] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
-		Description: "MySQL specific server provided values",
+		Description: "Redis server provided values",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	schemaMySQL[schemautil.ServiceTypeMySQL+"_user_config"] = dist.ServiceTypeMysql()
+	s[schemautil.ServiceTypeRedis+"_user_config"] = dist.ServiceTypeRedis()
 
-	return schemaMySQL
+	return s
 }
 
-func ResourceMySQLResource() *schema.Resource {
+func ResourceRedis() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The MySQL resource allows the creation and management of Aiven MySQL services.",
-		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeMySQL),
+		Description:   "The Redis resource allows the creation and management of Aiven Redis services.",
+		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeRedis),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeMySQL),
+			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeRedis),
 			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
 			customdiff.IfValueChange("tag",
 				schemautil.TagsShouldNotBeEmpty,
@@ -54,8 +54,8 @@ func ResourceMySQLResource() *schema.Resource {
 				schemautil.CustomizeDiffServiceIntegrationAfterCreation,
 			),
 			customdiff.Sequence(
-				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
 				schemautil.CustomizeDiffCheckStaticIPDisassociation,
+				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
 			),
 		),
 		Importer: &schema.ResourceImporter{
@@ -67,16 +67,16 @@ func ResourceMySQLResource() *schema.Resource {
 			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
-		Schema: aivenMySQLSchema(),
+		Schema: redisSchema(),
 	}
 }
 
-func ResourceMySQLStateUpgrade(
+func ResourceRedisStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},
 ) (map[string]interface{}, error) {
-	userConfigSlice, ok := rawState["mysql_user_config"].([]interface{})
+	userConfigSlice, ok := rawState["redis_user_config"].([]interface{})
 	if !ok {
 		return rawState, nil
 	}
@@ -91,10 +91,14 @@ func ResourceMySQLStateUpgrade(
 	}
 
 	err := typeupgrader.Map(userConfig, map[string]string{
-		"backup_hour":             "int",
-		"backup_minute":           "int",
-		"binlog_retention_period": "int",
-		"static_ips":              "bool",
+		"redis_io_threads":                        "int",
+		"redis_lfu_decay_time":                    "int",
+		"redis_lfu_log_factor":                    "int",
+		"redis_number_of_databases":               "int",
+		"redis_pubsub_client_output_buffer_limit": "int",
+		"redis_ssl":                               "bool",
+		"redis_timeout":                           "int",
+		"static_ips":                              "bool",
 	})
 	if err != nil {
 		return rawState, err
@@ -104,47 +108,9 @@ func ResourceMySQLStateUpgrade(
 	if ok && len(migrationSlice) > 0 {
 		migration, ok := migrationSlice[0].(map[string]interface{})
 		if ok {
-			err = typeupgrader.Map(migration, map[string]string{
+			err := typeupgrader.Map(migration, map[string]string{
 				"port": "int",
 				"ssl":  "bool",
-			})
-			if err != nil {
-				return rawState, err
-			}
-		}
-	}
-
-	mysqlSlice, ok := userConfig["mysql"].([]interface{})
-	if ok && len(mysqlSlice) > 0 {
-		mysql, ok := mysqlSlice[0].(map[string]interface{})
-		if ok {
-			err = typeupgrader.Map(mysql, map[string]string{
-				"connect_timeout":                  "int",
-				"group_concat_max_len":             "int",
-				"information_schema_stats_expiry":  "int",
-				"innodb_change_buffer_max_size":    "int",
-				"innodb_flush_neighbors":           "int",
-				"innodb_ft_min_token_size":         "int",
-				"innodb_lock_wait_timeout":         "int",
-				"innodb_log_buffer_size":           "int",
-				"innodb_online_alter_log_max_size": "int",
-				"innodb_print_all_deadlocks":       "bool",
-				"innodb_read_io_threads":           "int",
-				"innodb_rollback_on_timeout":       "bool",
-				"innodb_thread_concurrency":        "int",
-				"innodb_write_io_threads":          "int",
-				"interactive_timeout":              "int",
-				"long_query_time":                  "float",
-				"max_allowed_packet":               "int",
-				"max_heap_table_size":              "int",
-				"net_buffer_length":                "int",
-				"net_read_timeout":                 "int",
-				"net_write_timeout":                "int",
-				"slow_query_log":                   "bool",
-				"sort_buffer_size":                 "int",
-				"sql_require_primary_key":          "bool",
-				"tmp_table_size":                   "int",
-				"wait_timeout":                     "int",
 			})
 			if err != nil {
 				return rawState, err
@@ -157,9 +123,8 @@ func ResourceMySQLStateUpgrade(
 		privateAccess, ok := privateAccessSlice[0].(map[string]interface{})
 		if ok {
 			err = typeupgrader.Map(privateAccess, map[string]string{
-				"mysql":      "bool",
-				"mysqlx":     "bool",
 				"prometheus": "bool",
+				"redis":      "bool",
 			})
 			if err != nil {
 				return rawState, err
@@ -172,9 +137,8 @@ func ResourceMySQLStateUpgrade(
 		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]interface{})
 		if ok {
 			err := typeupgrader.Map(privateLinkAccess, map[string]string{
-				"mysql":      "bool",
-				"mysqlx":     "bool",
 				"prometheus": "bool",
+				"redis":      "bool",
 			})
 			if err != nil {
 				return rawState, err
@@ -187,9 +151,8 @@ func ResourceMySQLStateUpgrade(
 		publicAccess, ok := publicAccessSlice[0].(map[string]interface{})
 		if ok {
 			err := typeupgrader.Map(publicAccess, map[string]string{
-				"mysql":      "bool",
-				"mysqlx":     "bool",
 				"prometheus": "bool",
+				"redis":      "bool",
 			})
 			if err != nil {
 				return rawState, err

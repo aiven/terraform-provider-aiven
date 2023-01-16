@@ -1,4 +1,4 @@
-package v0
+package m3
 
 import (
 	"context"
@@ -12,30 +12,29 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/dist"
 )
 
-func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
-	kafkaMMSchema := schemautil.ServiceCommonSchema()
-	kafkaMMSchema[schemautil.ServiceTypeKafkaMirrormaker] = &schema.Schema{
+func aivenM3AggregatorSchema() map[string]*schema.Schema {
+	schemaM3 := schemautil.ServiceCommonSchema()
+	schemaM3[schemautil.ServiceTypeM3Aggregator] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
-		Description: "Kafka MirrorMaker 2 server provided values",
+		Description: "M3 aggregator specific server provided values",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	kafkaMMSchema[schemautil.ServiceTypeKafkaMirrormaker+"_user_config"] = dist.ServiceTypeKafkaMirrormaker()
+	schemaM3[schemautil.ServiceTypeM3Aggregator+"_user_config"] = dist.ServiceTypeM3aggregator()
 
-	return kafkaMMSchema
+	return schemaM3
 }
-
-func ResourceKafkaMirrormaker() *schema.Resource {
+func ResourceM3Aggregator() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Kafka MirrorMaker resource allows the creation and management of Aiven Kafka MirrorMaker 2 services.",
-		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeKafkaMirrormaker),
+		Description:   "The M3 Aggregator resource allows the creation and management of Aiven M3 Aggregator services.",
+		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeM3Aggregator),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeKafkaMirrormaker),
+			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeM3Aggregator),
 			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
 			customdiff.IfValueChange("disk_space",
 				schemautil.DiskSpaceShouldNotBeEmpty,
@@ -63,16 +62,16 @@ func ResourceKafkaMirrormaker() *schema.Resource {
 			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
-		Schema: aivenKafkaMirrormakerSchema(),
+		Schema: aivenM3AggregatorSchema(),
 	}
 }
 
-func ResourceKafkaMirrormakerStateUpgrade(
+func ResourceM3AggregatorStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},
 ) (map[string]interface{}, error) {
-	userConfigSlice, ok := rawState["kafka_mirrormaker_user_config"].([]interface{})
+	userConfigSlice, ok := rawState["m3aggregator_user_config"].([]interface{})
 	if !ok {
 		return rawState, nil
 	}
@@ -91,28 +90,6 @@ func ResourceKafkaMirrormakerStateUpgrade(
 	})
 	if err != nil {
 		return rawState, err
-	}
-
-	kafkaMirrormakerSlice, ok := userConfig["kafka_mirrormaker"].([]interface{})
-	if ok && len(kafkaMirrormakerSlice) > 0 {
-		kafkaMirrormaker, ok := kafkaMirrormakerSlice[0].(map[string]interface{})
-		if ok {
-			err = typeupgrader.Map(kafkaMirrormaker, map[string]string{
-				"emit_checkpoints_enabled":            "bool",
-				"emit_checkpoints_interval_seconds":   "int",
-				"refresh_groups_enabled":              "bool",
-				"refresh_groups_interval_seconds":     "int",
-				"refresh_topics_enabled":              "bool",
-				"refresh_topics_interval_seconds":     "int",
-				"sync_group_offsets_enabled":          "bool",
-				"sync_group_offsets_interval_seconds": "int",
-				"sync_topic_configs_enabled":          "bool",
-				"tasks_max_per_cpu":                   "int",
-			})
-			if err != nil {
-				return rawState, err
-			}
-		}
 	}
 
 	return rawState, nil
