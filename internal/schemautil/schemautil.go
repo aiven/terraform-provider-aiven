@@ -38,6 +38,7 @@ func OptionalStringPointer(d *schema.ResourceData, key string) *string {
 	return &str
 }
 
+// OptionalIntPointer retrieves an int pointer to a field, if the field is not set, returns nil.
 func OptionalIntPointer(d *schema.ResourceData, key string) *int {
 	val, ok := d.GetOk(key)
 	if !ok {
@@ -48,6 +49,36 @@ func OptionalIntPointer(d *schema.ResourceData, key string) *int {
 		return nil
 	}
 	return &intValue
+}
+
+// OptionalFloatPointer retrieves a float pointer to a field, if the field is not set, returns nil.
+func OptionalFloatPointer(d *schema.ResourceData, key string) *float64 {
+	val, ok := d.GetOk(key)
+	if !ok {
+		return nil
+	}
+
+	floatValue, ok := val.(float64)
+	if !ok {
+		return nil
+	}
+
+	return &floatValue
+}
+
+// OptionalBoolPointer retrieves a bool pointer to a field, if the field is not set, returns nil.
+func OptionalBoolPointer(d *schema.ResourceData, key string) *bool {
+	val, ok := d.GetOk(key)
+	if !ok {
+		return nil
+	}
+
+	boolValue, ok := val.(bool)
+	if !ok {
+		return nil
+	}
+
+	return &boolValue
 }
 
 func ToOptionalString(val interface{}) string {
