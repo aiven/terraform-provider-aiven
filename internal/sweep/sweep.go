@@ -52,7 +52,7 @@ func SweepServices(region, t string) error {
 			continue
 		}
 
-		if !hasPrefixAny(s.Name, "test-acc", "test-examples", "k8s-") {
+		if !hasPrefixAny(s.Name, "test-tf", "test-acc", "test-examples", "k8s-") {
 			continue
 		}
 
