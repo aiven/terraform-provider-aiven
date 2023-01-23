@@ -20,10 +20,9 @@ func convertPropertyToSchema(n string, p map[string]interface{}, t string, ad bo
 		r[jen.Id(dk)] = jen.Lit(dv)
 	}
 
-	// TODO: Discuss if we want this behavior.
-	//if d, ok := p["default"]; ok && isTerraformTypePrimitive(t) {
-	//	r[jen.Id("Default")] = jen.Lit(d)
-	//}
+	if d, ok := p["default"]; ok && isTerraformTypePrimitive(t) {
+		r[jen.Id("Default")] = jen.Lit(d)
+	}
 
 	if co, ok := p["create_only"]; ok && co.(bool) {
 		r[jen.Id("ForceNew")] = jen.Lit(true)
