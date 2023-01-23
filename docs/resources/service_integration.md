@@ -66,8 +66,8 @@ Optional:
 Optional:
 
 - `columns` (Block List, Max: 100) Table columns (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--columns))
-- `data_format` (String) Message data format
-- `group_name` (String) Kafka consumers group
+- `data_format` (String) Message data format The default value is `JSONEachRow`.
+- `group_name` (String) Kafka consumers group The default value is `clickhouse`.
 - `name` (String) Name of the table
 - `topics` (Block List, Max: 100) Kafka topics (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--topics))
 
@@ -102,8 +102,8 @@ Optional:
 
 Optional:
 
-- `database` (String) PostgreSQL database to expose
-- `schema` (String) PostgreSQL schema to expose
+- `database` (String) PostgreSQL database to expose The default value is `defaultdb`.
+- `schema` (String) PostgreSQL schema to expose The default value is `public`.
 
 
 
@@ -184,8 +184,8 @@ Optional:
 
 Optional:
 
-- `elasticsearch_index_days_max` (Number) Elasticsearch index retention limit
-- `elasticsearch_index_prefix` (String) Elasticsearch index prefix
+- `elasticsearch_index_days_max` (Number) Elasticsearch index retention limit The default value is `3`.
+- `elasticsearch_index_prefix` (String) Elasticsearch index prefix The default value is `logs`.
 
 
 <a id="nestedblock--metrics_user_config"></a>
@@ -234,7 +234,7 @@ Optional:
 
 Optional:
 
-- `mirrormaker_whitelist` (String) Mirrormaker topic whitelist
+- `mirrormaker_whitelist` (String) Mirrormaker topic whitelist The default value is `.*`.
 
 
 <a id="nestedblock--timeouts"></a>

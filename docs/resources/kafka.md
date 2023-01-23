@@ -106,15 +106,15 @@ Optional:
 - `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--kafka_user_config--ip_filter_object))
 - `kafka` (Block List, Max: 1) Kafka broker configuration values (see [below for nested schema](#nestedblock--kafka_user_config--kafka))
 - `kafka_authentication_methods` (Block List, Max: 1) Kafka authentication methods (see [below for nested schema](#nestedblock--kafka_user_config--kafka_authentication_methods))
-- `kafka_connect` (Boolean) Enable Kafka Connect service
+- `kafka_connect` (Boolean) Enable Kafka Connect service The default value is `false`.
 - `kafka_connect_config` (Block List, Max: 1) Kafka Connect configuration values (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_config))
-- `kafka_rest` (Boolean) Enable Kafka-REST service
+- `kafka_rest` (Boolean) Enable Kafka-REST service The default value is `false`.
 - `kafka_rest_config` (Block List, Max: 1) Kafka REST configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_rest_config))
 - `kafka_version` (String) Kafka major version
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--kafka_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--kafka_user_config--privatelink_access))
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--kafka_user_config--public_access))
-- `schema_registry` (Boolean) Enable Schema-Registry service
+- `schema_registry` (Boolean) Enable Schema-Registry service The default value is `false`.
 - `schema_registry_config` (Block List, Max: 1) Schema Registry configuration (see [below for nested schema](#nestedblock--kafka_user_config--schema_registry_config))
 - `static_ips` (Boolean) Use static public IP addresses
 
@@ -178,8 +178,8 @@ Optional:
 
 Optional:
 
-- `certificate` (Boolean) Enable certificate/SSL authentication
-- `sasl` (Boolean) Enable SASL authentication
+- `certificate` (Boolean) Enable certificate/SSL authentication The default value is `true`.
+- `sasl` (Boolean) Enable SASL authentication The default value is `false`.
 
 
 <a id="nestedblock--kafka_user_config--kafka_connect_config"></a>
@@ -206,12 +206,12 @@ Optional:
 
 Optional:
 
-- `consumer_enable_auto_commit` (Boolean) If true the consumer's offset will be periodically committed to Kafka in the background
-- `consumer_request_max_bytes` (Number) Maximum number of bytes in unencoded message keys and values by a single request
-- `consumer_request_timeout_ms` (Number) The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached
-- `producer_acks` (String) The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to 'all' or '-1', the leader will wait for the full set of in-sync replicas to acknowledge the record.
-- `producer_linger_ms` (Number) Wait for up to the given delay to allow batching records together
-- `simpleconsumer_pool_size_max` (Number) Maximum number of SimpleConsumers that can be instantiated per broker
+- `consumer_enable_auto_commit` (Boolean) If true the consumer's offset will be periodically committed to Kafka in the background The default value is `true`.
+- `consumer_request_max_bytes` (Number) Maximum number of bytes in unencoded message keys and values by a single request The default value is `67108864`.
+- `consumer_request_timeout_ms` (Number) The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached The default value is `1000`.
+- `producer_acks` (String) The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to 'all' or '-1', the leader will wait for the full set of in-sync replicas to acknowledge the record. The default value is `1`.
+- `producer_linger_ms` (Number) Wait for up to the given delay to allow batching records together The default value is `0`.
+- `simpleconsumer_pool_size_max` (Number) Maximum number of SimpleConsumers that can be instantiated per broker The default value is `25`.
 
 
 <a id="nestedblock--kafka_user_config--private_access"></a>

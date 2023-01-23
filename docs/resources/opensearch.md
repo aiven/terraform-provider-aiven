@@ -85,13 +85,13 @@ Optional:
 
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name
-- `disable_replication_factor_adjustment` (Boolean, Deprecated)
+- `disable_replication_factor_adjustment` (Boolean, Deprecated) Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can no longer be activated.
 - `index_patterns` (Block List, Max: 512) Index patterns (see [below for nested schema](#nestedblock--opensearch_user_config--index_patterns))
 - `index_template` (Block List, Max: 1) Template settings for all new indexes (see [below for nested schema](#nestedblock--opensearch_user_config--index_template))
 - `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
 - `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--opensearch_user_config--ip_filter_object))
 - `keep_index_refresh_interval` (Boolean) Aiven automation resets index.refresh_interval to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.
-- `max_index_count` (Number, Deprecated)
+- `max_index_count` (Number, Deprecated) use index_patterns instead The default value is `0`.
 - `opensearch` (Block List, Max: 1) OpenSearch settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch))
 - `opensearch_dashboards` (Block List, Max: 1) OpenSearch Dashboards settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch_dashboards))
 - `opensearch_version` (String) OpenSearch major version
@@ -110,7 +110,7 @@ Optional:
 
 - `max_index_count` (Number) Maximum number of indexes to keep
 - `pattern` (String) fnmatch pattern
-- `sorting_algorithm` (String) Deletion sorting algorithm
+- `sorting_algorithm` (String) Deletion sorting algorithm The default value is `creation_date`.
 
 
 <a id="nestedblock--opensearch_user_config--index_template"></a>
@@ -175,9 +175,9 @@ Optional:
 
 Optional:
 
-- `enabled` (Boolean) Enable or disable OpenSearch Dashboards
-- `max_old_space_size` (Number) Limits the maximum amount of memory (in MiB) the OpenSearch Dashboards process can use. This sets the max_old_space_size option of the nodejs running the OpenSearch Dashboards. Note: the memory reserved by OpenSearch Dashboards is not available for OpenSearch.
-- `opensearch_request_timeout` (Number) Timeout in milliseconds for requests made by OpenSearch Dashboards towards OpenSearch
+- `enabled` (Boolean) Enable or disable OpenSearch Dashboards The default value is `true`.
+- `max_old_space_size` (Number) Limits the maximum amount of memory (in MiB) the OpenSearch Dashboards process can use. This sets the max_old_space_size option of the nodejs running the OpenSearch Dashboards. Note: the memory reserved by OpenSearch Dashboards is not available for OpenSearch. The default value is `128`.
+- `opensearch_request_timeout` (Number) Timeout in milliseconds for requests made by OpenSearch Dashboards towards OpenSearch The default value is `30000`.
 
 
 <a id="nestedblock--opensearch_user_config--private_access"></a>

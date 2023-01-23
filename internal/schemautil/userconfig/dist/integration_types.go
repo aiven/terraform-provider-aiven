@@ -32,13 +32,13 @@ func IntegrationTypeClickhouseKafka() *schema.Schema {
 			},
 			"data_format": {
 				Default:     "JSONEachRow",
-				Description: "Message data format",
+				Description: "Message data format The default value is `JSONEachRow`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"group_name": {
 				Default:     "clickhouse",
-				Description: "Kafka consumers group",
+				Description: "Kafka consumers group The default value is `clickhouse`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -81,13 +81,13 @@ func IntegrationTypeClickhousePostgresql() *schema.Schema {
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"database": {
 				Default:     "defaultdb",
-				Description: "PostgreSQL database to expose",
+				Description: "PostgreSQL database to expose The default value is `defaultdb`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"schema": {
 				Default:     "public",
-				Description: "PostgreSQL schema to expose",
+				Description: "PostgreSQL schema to expose The default value is `public`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -402,13 +402,13 @@ func IntegrationTypeLogs() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"elasticsearch_index_days_max": {
 			Default:     "3",
-			Description: "Elasticsearch index retention limit",
+			Description: "Elasticsearch index retention limit The default value is `3`.",
 			Optional:    true,
 			Type:        schema.TypeInt,
 		},
 		"elasticsearch_index_prefix": {
 			Default:     "logs",
-			Description: "Elasticsearch index prefix",
+			Description: "Elasticsearch index prefix The default value is `logs`.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
@@ -769,7 +769,7 @@ func IntegrationTypeMetrics() *schema.Schema {
 func IntegrationTypeMirrormaker() *schema.Schema {
 	s := map[string]*schema.Schema{"mirrormaker_whitelist": {
 		Default:     ".*",
-		Description: "Mirrormaker topic whitelist",
+		Description: "Mirrormaker topic whitelist The default value is `.*`.",
 		Optional:    true,
 		Type:        schema.TypeString,
 	}}

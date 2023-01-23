@@ -16,8 +16,13 @@ func convertPropertyToSchema(n string, p map[string]interface{}, t string, ad bo
 	}
 
 	if ad {
-		dk, dv := descriptionForProperty(p)
-		r[jen.Id(dk)] = jen.Lit(dv)
+		id, d := descriptionForProperty(p, t)
+
+		r[jen.Id("Description")] = jen.Lit(d)
+
+		if id {
+			r[jen.Id("Deprecated")] = jen.Lit("Usage of this field is discouraged.")
+		}
 	}
 
 	if d, ok := p["default"]; ok && isTerraformTypePrimitive(t) {

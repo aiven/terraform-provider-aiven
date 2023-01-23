@@ -170,10 +170,20 @@ func handleArrayProperty(n string, p map[string]interface{}, t string) (map[stri
 		s := convertPropertyToSchema(n, p, t, !iof)
 
 		if iof {
-			_, dpv := descriptionForProperty(p)
-			dooik, dooiv := descriptionForProperty(ooia)
+			ooiat, ok := ooia["type"].(string)
+			if !ok {
+				return nil, fmt.Errorf("one_of item type is not a string: %#v", ooia)
+			}
 
-			s[jen.Id(dooik)] = jen.Lit(fmt.Sprintf("%s %s", dpv, dooiv))
+			_, dpv := descriptionForProperty(p, t)
+
+			dooiid, dooid := descriptionForProperty(ooia, ooiat)
+
+			s[jen.Id("Description")] = jen.Lit(fmt.Sprintf("%s %s", dpv, dooid))
+
+			if dooiid {
+				s[jen.Id("Deprecated")] = jen.Lit("Usage of this field is discouraged.")
+			}
 		}
 
 		s[jen.Id("Elem")] = e
