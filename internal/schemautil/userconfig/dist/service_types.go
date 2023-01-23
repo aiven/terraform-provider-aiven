@@ -592,6 +592,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"sorting_algorithm": {
+					Default:     "creation_date",
 					Description: "Deletion sorting algorithm",
 					Optional:    true,
 					Type:        schema.TypeString,
@@ -680,16 +681,19 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			Description: "Kibana settings",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"elasticsearch_request_timeout": {
+					Default:     "30000",
 					Description: "Timeout in milliseconds for requests made by Kibana towards Elasticsearch",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"enabled": {
+					Default:     true,
 					Description: "Enable or disable Kibana",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"max_old_space_size": {
+					Default:     "128",
 					Description: "Limits the maximum amount of memory (in MiB) the Kibana process can use. This sets the max_old_space_size option of the nodejs running the Kibana. Note: the memory reserved by Kibana is not available for Elasticsearch.",
 					Optional:    true,
 					Type:        schema.TypeInt,
@@ -697,16 +701,19 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"elasticsearch_request_timeout": {
+					Default:     "30000",
 					Description: "Timeout in milliseconds for requests made by Kibana towards Elasticsearch",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"enabled": {
+					Default:     true,
 					Description: "Enable or disable Kibana",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"max_old_space_size": {
+					Default:     "128",
 					Description: "Limits the maximum amount of memory (in MiB) the Kibana process can use. This sets the max_old_space_size option of the nodejs running the Kibana. Note: the memory reserved by Kibana is not available for Elasticsearch.",
 					Optional:    true,
 					Type:        schema.TypeInt,
@@ -717,6 +724,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"max_index_count": {
+			Default:    "0",
 			Deprecated: "DEPRECATED: use index_patterns instead",
 			Optional:   true,
 			Type:       schema.TypeInt,
@@ -2523,11 +2531,13 @@ func ServiceTypeKafka() *schema.Schema {
 			Description: "Kafka authentication methods",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"certificate": {
+					Default:     true,
 					Description: "Enable certificate/SSL authentication",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"sasl": {
+					Default:     false,
 					Description: "Enable SASL authentication",
 					Optional:    true,
 					Type:        schema.TypeBool,
@@ -2535,11 +2545,13 @@ func ServiceTypeKafka() *schema.Schema {
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"certificate": {
+					Default:     true,
 					Description: "Enable certificate/SSL authentication",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"sasl": {
+					Default:     false,
 					Description: "Enable SASL authentication",
 					Optional:    true,
 					Type:        schema.TypeBool,
@@ -2550,6 +2562,7 @@ func ServiceTypeKafka() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"kafka_connect": {
+			Default:     false,
 			Description: "Enable Kafka Connect service",
 			Optional:    true,
 			Type:        schema.TypeBool,
@@ -2685,6 +2698,7 @@ func ServiceTypeKafka() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"kafka_rest": {
+			Default:     false,
 			Description: "Enable Kafka-REST service",
 			Optional:    true,
 			Type:        schema.TypeBool,
@@ -2693,31 +2707,37 @@ func ServiceTypeKafka() *schema.Schema {
 			Description: "Kafka REST configuration",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"consumer_enable_auto_commit": {
+					Default:     true,
 					Description: "If true the consumer's offset will be periodically committed to Kafka in the background",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"consumer_request_max_bytes": {
+					Default:     "67108864",
 					Description: "Maximum number of bytes in unencoded message keys and values by a single request",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"consumer_request_timeout_ms": {
+					Default:     "1000",
 					Description: "The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"producer_acks": {
+					Default:     "1",
 					Description: "The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to 'all' or '-1', the leader will wait for the full set of in-sync replicas to acknowledge the record.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"producer_linger_ms": {
+					Default:     "0",
 					Description: "Wait for up to the given delay to allow batching records together",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"simpleconsumer_pool_size_max": {
+					Default:     "25",
 					Description: "Maximum number of SimpleConsumers that can be instantiated per broker",
 					Optional:    true,
 					Type:        schema.TypeInt,
@@ -2725,31 +2745,37 @@ func ServiceTypeKafka() *schema.Schema {
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"consumer_enable_auto_commit": {
+					Default:     true,
 					Description: "If true the consumer's offset will be periodically committed to Kafka in the background",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"consumer_request_max_bytes": {
+					Default:     "67108864",
 					Description: "Maximum number of bytes in unencoded message keys and values by a single request",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"consumer_request_timeout_ms": {
+					Default:     "1000",
 					Description: "The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"producer_acks": {
+					Default:     "1",
 					Description: "The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to 'all' or '-1', the leader will wait for the full set of in-sync replicas to acknowledge the record.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"producer_linger_ms": {
+					Default:     "0",
 					Description: "Wait for up to the given delay to allow batching records together",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"simpleconsumer_pool_size_max": {
+					Default:     "25",
 					Description: "Maximum number of SimpleConsumers that can be instantiated per broker",
 					Optional:    true,
 					Type:        schema.TypeInt,
@@ -2911,6 +2937,7 @@ func ServiceTypeKafka() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"schema_registry": {
+			Default:     false,
 			Description: "Enable Schema-Registry service",
 			Optional:    true,
 			Type:        schema.TypeBool,
@@ -3338,6 +3365,7 @@ func ServiceTypeKafkaMirrormaker() *schema.Schema {
 					Type:        schema.TypeBool,
 				},
 				"tasks_max_per_cpu": {
+					Default:     "1",
 					Description: "'tasks.max' is set to this multiplied by the number of CPUs in the service.",
 					Optional:    true,
 					Type:        schema.TypeInt,
@@ -3390,6 +3418,7 @@ func ServiceTypeKafkaMirrormaker() *schema.Schema {
 					Type:        schema.TypeBool,
 				},
 				"tasks_max_per_cpu": {
+					Default:     "1",
 					Description: "'tasks.max' is set to this multiplied by the number of CPUs in the service.",
 					Optional:    true,
 					Type:        schema.TypeInt,
@@ -4103,6 +4132,7 @@ func ServiceTypeMysql() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"ssl": {
+					Default:     true,
 					Description: "The server where to migrate data from is secured with SSL",
 					Optional:    true,
 					Type:        schema.TypeBool,
@@ -4146,6 +4176,7 @@ func ServiceTypeMysql() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"ssl": {
+					Default:     true,
 					Description: "The server where to migrate data from is secured with SSL",
 					Optional:    true,
 					Type:        schema.TypeBool,
@@ -4664,6 +4695,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"sorting_algorithm": {
+					Default:     "creation_date",
 					Description: "Deletion sorting algorithm",
 					Optional:    true,
 					Type:        schema.TypeString,
@@ -4749,6 +4781,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 			Type:        schema.TypeBool,
 		},
 		"max_index_count": {
+			Default:    "0",
 			Deprecated: "DEPRECATED: use index_patterns instead",
 			Optional:   true,
 			Type:       schema.TypeInt,
@@ -5083,16 +5116,19 @@ func ServiceTypeOpensearch() *schema.Schema {
 			Description: "OpenSearch Dashboards settings",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"enabled": {
+					Default:     true,
 					Description: "Enable or disable OpenSearch Dashboards",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"max_old_space_size": {
+					Default:     "128",
 					Description: "Limits the maximum amount of memory (in MiB) the OpenSearch Dashboards process can use. This sets the max_old_space_size option of the nodejs running the OpenSearch Dashboards. Note: the memory reserved by OpenSearch Dashboards is not available for OpenSearch.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"opensearch_request_timeout": {
+					Default:     "30000",
 					Description: "Timeout in milliseconds for requests made by OpenSearch Dashboards towards OpenSearch",
 					Optional:    true,
 					Type:        schema.TypeInt,
@@ -5100,16 +5136,19 @@ func ServiceTypeOpensearch() *schema.Schema {
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"enabled": {
+					Default:     true,
 					Description: "Enable or disable OpenSearch Dashboards",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"max_old_space_size": {
+					Default:     "128",
 					Description: "Limits the maximum amount of memory (in MiB) the OpenSearch Dashboards process can use. This sets the max_old_space_size option of the nodejs running the OpenSearch Dashboards. Note: the memory reserved by OpenSearch Dashboards is not available for OpenSearch.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"opensearch_request_timeout": {
+					Default:     "30000",
 					Description: "Timeout in milliseconds for requests made by OpenSearch Dashboards towards OpenSearch",
 					Optional:    true,
 					Type:        schema.TypeInt,
@@ -5381,6 +5420,7 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"ssl": {
+					Default:     true,
 					Description: "The server where to migrate data from is secured with SSL",
 					Optional:    true,
 					Type:        schema.TypeBool,
@@ -5424,6 +5464,7 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"ssl": {
+					Default:     true,
 					Description: "The server where to migrate data from is secured with SSL",
 					Optional:    true,
 					Type:        schema.TypeBool,
@@ -5930,6 +5971,7 @@ func ServiceTypePg() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"pg_stat_monitor_enable": {
+			Default:     false,
 			Description: "Enable the pg_stat_monitor extension. Enabling this extension will cause the cluster to be restarted.When this extension is enabled, pg_stat_statements results for utility commands are unreliable",
 			Optional:    true,
 			Type:        schema.TypeBool,
@@ -6046,11 +6088,13 @@ func ServiceTypePg() *schema.Schema {
 		"pglookout": {
 			Description: "PGLookout settings",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"max_failover_replication_time_lag": {
+				Default:     "60",
 				Description: "Number of seconds of master unavailability before triggering database failover to standby",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"max_failover_replication_time_lag": {
+				Default:     "60",
 				Description: "Number of seconds of master unavailability before triggering database failover to standby",
 				Optional:    true,
 				Type:        schema.TypeInt,
@@ -6325,6 +6369,7 @@ func ServiceTypeRedis() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"ssl": {
+					Default:     true,
 					Description: "The server where to migrate data from is secured with SSL",
 					Optional:    true,
 					Type:        schema.TypeBool,
@@ -6368,6 +6413,7 @@ func ServiceTypeRedis() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"ssl": {
+					Default:     true,
 					Description: "The server where to migrate data from is secured with SSL",
 					Optional:    true,
 					Type:        schema.TypeBool,
@@ -6494,21 +6540,25 @@ func ServiceTypeRedis() *schema.Schema {
 			Type:        schema.TypeInt,
 		},
 		"redis_lfu_decay_time": {
+			Default:     "1",
 			Description: "LFU maxmemory-policy counter decay time in minutes",
 			Optional:    true,
 			Type:        schema.TypeInt,
 		},
 		"redis_lfu_log_factor": {
+			Default:     "10",
 			Description: "Counter logarithm factor for volatile-lfu and allkeys-lfu maxmemory-policies",
 			Optional:    true,
 			Type:        schema.TypeInt,
 		},
 		"redis_maxmemory_policy": {
+			Default:     "noeviction",
 			Description: "Redis maxmemory-policy",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"redis_notify_keyspace_events": {
+			Default:     "",
 			Description: "Set notify-keyspace-events option",
 			Optional:    true,
 			Type:        schema.TypeString,
@@ -6529,11 +6579,13 @@ func ServiceTypeRedis() *schema.Schema {
 			Type:        schema.TypeInt,
 		},
 		"redis_ssl": {
+			Default:     true,
 			Description: "Require SSL to access Redis",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
 		"redis_timeout": {
+			Default:     "300",
 			Description: "Redis idle connection timeout in seconds",
 			Optional:    true,
 			Type:        schema.TypeInt,
