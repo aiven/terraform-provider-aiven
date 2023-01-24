@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -15,19 +16,19 @@ var aivenTransitGatewayVPCAttachmentSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: schemautil.Complex("The VPC the peering connection belongs to.").ForceNew().Referenced().Build(),
+		Description: userconfig.Desc("The VPC the peering connection belongs to.").ForceNew().Referenced().Build(),
 	},
 	"peer_cloud_account": {
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: schemautil.Complex("AWS account ID or GCP project ID of the peered VPC").ForceNew().Build(),
+		Description: userconfig.Desc("AWS account ID or GCP project ID of the peered VPC").ForceNew().Build(),
 	},
 	"peer_vpc": {
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: schemautil.Complex("Transit gateway ID").ForceNew().Build(),
+		Description: userconfig.Desc("Transit gateway ID").ForceNew().Build(),
 	},
 	"user_peer_network_cidrs": {
 		Required:    true,

@@ -3,6 +3,7 @@ package flink
 import (
 	"context"
 
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -22,33 +23,33 @@ var aivenFlinkTableSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringLenBetween(0, 256),
-		Description:  schemautil.Complex("Specifies the name of the table.").ForceNew().Build(),
+		Description:  userconfig.Desc("Specifies the name of the table.").ForceNew().Build(),
 	},
 	"schema_sql": {
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: schemautil.Complex("The SQL statement to create the table.").ForceNew().Build(),
+		Description: userconfig.Desc("The SQL statement to create the table.").ForceNew().Build(),
 	},
 	"integration_id": {
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: schemautil.Complex("The id of the service integration that is used with this table. It must have the service integration type `flink`.").Referenced().ForceNew().Build(),
+		Description: userconfig.Desc("The id of the service integration that is used with this table. It must have the service integration type `flink`.").Referenced().ForceNew().Build(),
 	},
 	"jdbc_table": {
 		Type:          schema.TypeString,
 		Optional:      true,
 		ForceNew:      true,
 		ValidateFunc:  validation.StringLenBetween(0, 128),
-		Description:   schemautil.Complex("Name of the jdbc table that is to be connected to this table. Valid if the service integration id refers to a mysql or postgres service.").ForceNew().Build(),
+		Description:   userconfig.Desc("Name of the jdbc table that is to be connected to this table. Valid if the service integration id refers to a mysql or postgres service.").ForceNew().Build(),
 		ConflictsWith: []string{"kafka_connector_type", "kafka_topic", "kafka_key_format", "kafka_value_format", "kafka_key_fields", "kafka_value_fields_include"},
 	},
 	"kafka_connector_type": {
 		Type:     schema.TypeString,
 		Optional: true,
 		ForceNew: true,
-		Description: schemautil.Complex("When used as a source, upsert Kafka connectors update values that use an existing key and " +
+		Description: userconfig.Desc("When used as a source, upsert Kafka connectors update values that use an existing key and " +
 			"delete values that are null. For sinks, the connector correspondingly writes update or delete " +
 			"messages in a compacted topic. If no matching key is found, the values are added as new " +
 			"entries. For more information, see the Apache Flink documentation").ForceNew().PossibleValues(schemautil.StringSliceToInterfaceSlice(getFlinkTableKafkaConnectorTypes())...).Build(),
@@ -60,7 +61,7 @@ var aivenFlinkTableSchema = map[string]*schema.Schema{
 		Optional:      true,
 		ForceNew:      true,
 		ValidateFunc:  validation.StringLenBetween(1, 249),
-		Description:   schemautil.Complex("Name of the kafka topic that is to be connected to this table. Valid if the service integration id refers to a kafka service.").ForceNew().Build(),
+		Description:   userconfig.Desc("Name of the kafka topic that is to be connected to this table. Valid if the service integration id refers to a kafka service.").ForceNew().Build(),
 		ConflictsWith: []string{"jdbc_table"},
 	},
 	"kafka_key_fields": {
@@ -68,7 +69,7 @@ var aivenFlinkTableSchema = map[string]*schema.Schema{
 		Optional:    true,
 		ForceNew:    true,
 		MaxItems:    64,
-		Description: schemautil.Complex("Defines an explicit list of physical columns from the table schema that configure the data type for the key format.").ForceNew().Build(),
+		Description: userconfig.Desc("Defines an explicit list of physical columns from the table schema that configure the data type for the key format.").ForceNew().Build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeString},
 		ConflictsWith: []string{"jdbc_table", "upsert_kafka"},
@@ -77,7 +78,7 @@ var aivenFlinkTableSchema = map[string]*schema.Schema{
 		Type:          schema.TypeString,
 		Optional:      true,
 		ForceNew:      true,
-		Description:   schemautil.Complex("Kafka Key Format").ForceNew().PossibleValues(schemautil.StringSliceToInterfaceSlice(getFlinkTableKafkaKeyValueFormats())...).Build(),
+		Description:   userconfig.Desc("Kafka Key Format").ForceNew().PossibleValues(schemautil.StringSliceToInterfaceSlice(getFlinkTableKafkaKeyValueFormats())...).Build(),
 		ValidateFunc:  validation.StringInSlice(getFlinkTableKafkaKeyValueFormats(), false),
 		ConflictsWith: []string{"jdbc_table", "upsert_kafka"},
 	},
@@ -85,7 +86,7 @@ var aivenFlinkTableSchema = map[string]*schema.Schema{
 		Type:          schema.TypeString,
 		Optional:      true,
 		ForceNew:      true,
-		Description:   schemautil.Complex("Kafka Value Format").ForceNew().PossibleValues(schemautil.StringSliceToInterfaceSlice(getFlinkTableKafkaKeyValueFormats())...).Build(),
+		Description:   userconfig.Desc("Kafka Value Format").ForceNew().PossibleValues(schemautil.StringSliceToInterfaceSlice(getFlinkTableKafkaKeyValueFormats())...).Build(),
 		ValidateFunc:  validation.StringInSlice(getFlinkTableKafkaKeyValueFormats(), false),
 		ConflictsWith: []string{"jdbc_table", "upsert_kafka"},
 	},
@@ -93,7 +94,7 @@ var aivenFlinkTableSchema = map[string]*schema.Schema{
 		Type:          schema.TypeString,
 		Optional:      true,
 		ForceNew:      true,
-		Description:   schemautil.Complex("Startup mode").ForceNew().PossibleValues(schemautil.StringSliceToInterfaceSlice(getFlinkTableKafkaStartupModes())...).Build(),
+		Description:   userconfig.Desc("Startup mode").ForceNew().PossibleValues(schemautil.StringSliceToInterfaceSlice(getFlinkTableKafkaStartupModes())...).Build(),
 		ValidateFunc:  validation.StringInSlice(getFlinkTableKafkaStartupModes(), false),
 		ConflictsWith: []string{"jdbc_table", "upsert_kafka"},
 	},
@@ -101,14 +102,14 @@ var aivenFlinkTableSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 		ForceNew:    true,
-		Description: schemautil.Complex("[LIKE](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/sql/create/#like) statement for table creation.").ForceNew().Build(),
+		Description: userconfig.Desc("[LIKE](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/sql/create/#like) statement for table creation.").ForceNew().Build(),
 	},
 	"kafka_value_fields_include": {
 		Type:         schema.TypeString,
 		Optional:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringInSlice(getFlinkTableKafkaValueFieldsInclude(), false),
-		Description: schemautil.Complex("Controls how key columns are handled in the message value. " +
+		Description: userconfig.Desc("Controls how key columns are handled in the message value. " +
 			"Select ALL to include the physical columns of the table schema in the message value. " +
 			"Select EXCEPT_KEY to exclude the physical columns of the table schema from the message value. " +
 			"This is the default for upsert Kafka connectors.").PossibleValues(schemautil.StringSliceToInterfaceSlice(getFlinkTableKafkaValueFieldsInclude())).ForceNew().Build(),
@@ -118,7 +119,7 @@ var aivenFlinkTableSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 		ForceNew:    true,
-		Description: schemautil.Complex("For an OpenSearch table, the OpenSearch index the table outputs to.").ForceNew().Build(),
+		Description: userconfig.Desc("For an OpenSearch table, the OpenSearch index the table outputs to.").ForceNew().Build(),
 	},
 	"upsert_kafka": {
 		Type:          schema.TypeSet,
@@ -134,7 +135,7 @@ var aivenFlinkTableSchema = map[string]*schema.Schema{
 					Optional:    true,
 					ForceNew:    true,
 					MaxItems:    64,
-					Description: schemautil.Complex("Defines the columns from the SQL schema of the data table that are considered keys in the Kafka messages.").ForceNew().Build(),
+					Description: userconfig.Desc("Defines the columns from the SQL schema of the data table that are considered keys in the Kafka messages.").ForceNew().Build(),
 					Elem: &schema.Schema{
 						Type: schema.TypeString},
 				},
@@ -142,14 +143,14 @@ var aivenFlinkTableSchema = map[string]*schema.Schema{
 					Type:         schema.TypeString,
 					Optional:     true,
 					ForceNew:     true,
-					Description:  schemautil.Complex("Sets the format that is used to convert the key part of Kafka messages.").ForceNew().PossibleValues(schemautil.StringSliceToInterfaceSlice(getFlinkTableKafkaKeyValueFormats())...).Build(),
+					Description:  userconfig.Desc("Sets the format that is used to convert the key part of Kafka messages.").ForceNew().PossibleValues(schemautil.StringSliceToInterfaceSlice(getFlinkTableKafkaKeyValueFormats())...).Build(),
 					ValidateFunc: validation.StringInSlice(getFlinkTableKafkaKeyValueFormats(), false),
 				},
 				"scan_startup_mode": {
 					Type:         schema.TypeString,
 					Optional:     true,
 					ForceNew:     true,
-					Description:  schemautil.Complex("Controls the startup method for the Kafka consumer that Aiven for Apache Flink is using.").ForceNew().PossibleValues(schemautil.StringSliceToInterfaceSlice(getFlinkTableKafkaStartupModes())...).Build(),
+					Description:  userconfig.Desc("Controls the startup method for the Kafka consumer that Aiven for Apache Flink is using.").ForceNew().PossibleValues(schemautil.StringSliceToInterfaceSlice(getFlinkTableKafkaStartupModes())...).Build(),
 					ValidateFunc: validation.StringInSlice(getFlinkTableKafkaScanStartupModes(), false),
 				},
 				"topic": {
@@ -157,14 +158,14 @@ var aivenFlinkTableSchema = map[string]*schema.Schema{
 					Optional:     true,
 					ForceNew:     true,
 					ValidateFunc: validation.StringLenBetween(1, 249),
-					Description:  schemautil.Complex("Topic name").ForceNew().Build(),
+					Description:  userconfig.Desc("Topic name").ForceNew().Build(),
 				},
 				"value_fields_include": {
 					Type:         schema.TypeString,
 					Optional:     true,
 					ForceNew:     true,
 					ValidateFunc: validation.StringInSlice(getFlinkTableKafkaValueFieldsInclude(), false),
-					Description: schemautil.Complex("Controls how key columns are handled in the message value. " +
+					Description: userconfig.Desc("Controls how key columns are handled in the message value. " +
 						"Select ALL to include the physical columns of the table schema in the message value. " +
 						"Select EXCEPT_KEY to exclude the physical columns of the table schema from the message value. " +
 						"This is the default for upsert Kafka connectors.").PossibleValues(schemautil.StringSliceToInterfaceSlice(getFlinkTableKafkaValueFieldsInclude())).ForceNew().Build(),
@@ -173,7 +174,7 @@ var aivenFlinkTableSchema = map[string]*schema.Schema{
 					Type:         schema.TypeString,
 					Optional:     true,
 					ForceNew:     true,
-					Description:  schemautil.Complex("Sets the format that is used to convert the value part of Kafka messages.").ForceNew().PossibleValues(schemautil.StringSliceToInterfaceSlice(getFlinkTableKafkaKeyValueFormats())...).Build(),
+					Description:  userconfig.Desc("Sets the format that is used to convert the value part of Kafka messages.").ForceNew().PossibleValues(schemautil.StringSliceToInterfaceSlice(getFlinkTableKafkaKeyValueFormats())...).Build(),
 					ValidateFunc: validation.StringInSlice(getFlinkTableKafkaKeyValueFormats(), false),
 				},
 			},

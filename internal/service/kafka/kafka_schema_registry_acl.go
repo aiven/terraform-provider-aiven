@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -20,20 +21,20 @@ var aivenKafkaSchemaRegistryACLSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringInSlice([]string{"schema_registry_read", "schema_registry_write"}, false),
-		Description:  schemautil.Complex("Kafka Schema Registry permission to grant.").ForceNew().PossibleValues("schema_registry_read", "schema_registry_write").Build(),
+		Description:  userconfig.Desc("Kafka Schema Registry permission to grant.").ForceNew().PossibleValues("schema_registry_read", "schema_registry_write").Build(),
 	},
 	"resource": {
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: schemautil.Complex("Resource name pattern for the Schema Registry ACL entry.").ForceNew().Build(),
+		Description: userconfig.Desc("Resource name pattern for the Schema Registry ACL entry.").ForceNew().Build(),
 	},
 	"username": {
 		Type:         schema.TypeString,
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: schemautil.GetACLUserValidateFunc(),
-		Description:  schemautil.Complex("Username pattern for the ACL entry.").ForceNew().Build(),
+		Description:  userconfig.Desc("Username pattern for the ACL entry.").ForceNew().Build(),
 	},
 
 	// computed

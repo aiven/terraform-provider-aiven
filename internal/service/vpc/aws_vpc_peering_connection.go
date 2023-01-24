@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -17,20 +18,20 @@ var aivenAWSVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		ForceNew:     true,
 		Required:     true,
 		Type:         schema.TypeString,
-		Description:  schemautil.Complex("The VPC the peering connection belongs to.").ForceNew().Build(),
+		Description:  userconfig.Desc("The VPC the peering connection belongs to.").ForceNew().Build(),
 		ValidateFunc: validateVPCID,
 	},
 	"aws_account_id": {
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: schemautil.Complex("AWS account ID.").ForceNew().Build(),
+		Description: userconfig.Desc("AWS account ID.").ForceNew().Build(),
 	},
 	"aws_vpc_id": {
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: schemautil.Complex("AWS VPC ID.").ForceNew().Build(),
+		Description: userconfig.Desc("AWS VPC ID.").ForceNew().Build(),
 	},
 	"aws_vpc_region": {
 		ForceNew: true,
@@ -39,7 +40,7 @@ var aivenAWSVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return new == ""
 		},
-		Description: schemautil.Complex("AWS region of the peered VPC (if not in the same region as Aiven VPC).").ForceNew().Build(),
+		Description: userconfig.Desc("AWS region of the peered VPC (if not in the same region as Aiven VPC).").ForceNew().Build(),
 	},
 	"state": {
 		Computed:    true,

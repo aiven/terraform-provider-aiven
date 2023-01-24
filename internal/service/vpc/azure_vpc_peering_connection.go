@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -17,26 +18,26 @@ var aivenAzureVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		ForceNew:     true,
 		Required:     true,
 		Type:         schema.TypeString,
-		Description:  schemautil.Complex("The VPC the peering connection belongs to.").ForceNew().Build(),
+		Description:  userconfig.Desc("The VPC the peering connection belongs to.").ForceNew().Build(),
 		ValidateFunc: validateVPCID,
 	},
 	"azure_subscription_id": {
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: schemautil.Complex("Azure Subscription ID.").ForceNew().Build(),
+		Description: userconfig.Desc("Azure Subscription ID.").ForceNew().Build(),
 	},
 	"vnet_name": {
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: schemautil.Complex("Azure Network name.").ForceNew().Build(),
+		Description: userconfig.Desc("Azure Network name.").ForceNew().Build(),
 	},
 	"peer_resource_group": {
 		Required:    true,
 		ForceNew:    true,
 		Type:        schema.TypeString,
-		Description: schemautil.Complex("Azure resource group name of the peered VPC.").ForceNew().Build(),
+		Description: userconfig.Desc("Azure resource group name of the peered VPC.").ForceNew().Build(),
 	},
 	"state": {
 		Computed:    true,
@@ -57,13 +58,13 @@ var aivenAzureVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		Required:    true,
 		ForceNew:    true,
 		Type:        schema.TypeString,
-		Description: schemautil.Complex("Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet.").ForceNew().Build(),
+		Description: userconfig.Desc("Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet.").ForceNew().Build(),
 	},
 	"peer_azure_tenant_id": {
 		Required:    true,
 		ForceNew:    true,
 		Type:        schema.TypeString,
-		Description: schemautil.Complex("Azure tenant id in UUID4 form.").ForceNew().Build(),
+		Description: userconfig.Desc("Azure tenant id in UUID4 form.").ForceNew().Build(),
 	},
 }
 

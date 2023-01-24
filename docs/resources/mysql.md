@@ -121,7 +121,7 @@ Optional:
 - `method` (String) The migration method to be used (currently supported only by Redis and MySQL service types)
 - `password` (String, Sensitive) Password for authentication with the server where to migrate data from
 - `port` (Number) Port number of the server where to migrate data from
-- `ssl` (Boolean) The server where to migrate data from is secured with SSL
+- `ssl` (Boolean) The server where to migrate data from is secured with SSL The default value is `true`.
 - `username` (String) User name for authentication with the server where to migrate data from
 
 

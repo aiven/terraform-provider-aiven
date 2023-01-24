@@ -8,6 +8,7 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -22,7 +23,7 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: schemautil.Complex("The Kafka Schema Subject name.").ForceNew().Build(),
+		Description: userconfig.Desc("The Kafka Schema Subject name.").ForceNew().Build(),
 	},
 	"schema": {
 		Type:             schema.TypeString,
@@ -54,7 +55,7 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 			// Allow ignoring those.
 			return new == ""
 		},
-		Description: schemautil.Complex("Kafka Schemas compatibility level.").PossibleValues(schemautil.StringSliceToInterfaceSlice(compatibilityLevels)...).Build(),
+		Description: userconfig.Desc("Kafka Schemas compatibility level.").PossibleValues(schemautil.StringSliceToInterfaceSlice(compatibilityLevels)...).Build(),
 	},
 }
 

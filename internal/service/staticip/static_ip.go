@@ -7,6 +7,7 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -19,27 +20,27 @@ var aivenStaticIPSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: schemautil.Complex("Specifies the cloud that the static ip belongs to.").ForceNew().Build(),
+		Description: userconfig.Desc("Specifies the cloud that the static ip belongs to.").ForceNew().Build(),
 	},
 	"ip_address": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: schemautil.Complex("The address of the static ip").Build(),
+		Description: userconfig.Desc("The address of the static ip").Build(),
 	},
 	"service_name": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: schemautil.Complex("The service name the static ip is associated with.").Build(),
+		Description: userconfig.Desc("The service name the static ip is associated with.").Build(),
 	},
 	"state": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: schemautil.Complex("The state the static ip is in.").Build(),
+		Description: userconfig.Desc("The state the static ip is in.").Build(),
 	},
 	"static_ip_address_id": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: schemautil.Complex("The static ip id of the resource. Should be used as a reference elsewhere.").Build(),
+		Description: userconfig.Desc("The static ip id of the resource. Should be used as a reference elsewhere.").Build(),
 	},
 }
 

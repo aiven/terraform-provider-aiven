@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -14,7 +15,7 @@ var aivenKafkaUserSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: schemautil.GetServiceUserValidateFunc(),
-		Description:  schemautil.Complex("The actual name of the Kafka User.").ForceNew().Referenced().Build(),
+		Description:  userconfig.Desc("The actual name of the Kafka User.").ForceNew().Referenced().Build(),
 	},
 	"password": {
 		Type:             schema.TypeString,

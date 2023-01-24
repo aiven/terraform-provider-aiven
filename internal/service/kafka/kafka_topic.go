@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -24,7 +25,7 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: schemautil.Complex("The name of the topic.").ForceNew().Build(),
+		Description: userconfig.Desc("The name of the topic.").ForceNew().Build(),
 	},
 	"partitions": {
 		Type:        schema.TypeInt,
@@ -52,13 +53,13 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 					Type:         schema.TypeString,
 					Required:     true,
 					ValidateFunc: validation.StringLenBetween(1, 64),
-					Description:  schemautil.Complex("Topic tag key.").MaxLen(64).Build(),
+					Description:  userconfig.Desc("Topic tag key.").MaxLen(64).Build(),
 				},
 				"value": {
 					Type:         schema.TypeString,
 					Optional:     true,
 					ValidateFunc: validation.StringLenBetween(0, 256),
-					Description:  schemautil.Complex("Topic tag value.").MaxLen(256).Build(),
+					Description:  userconfig.Desc("Topic tag value.").MaxLen(256).Build(),
 				},
 			},
 		},
