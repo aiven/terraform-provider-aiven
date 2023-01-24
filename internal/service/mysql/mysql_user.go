@@ -5,6 +5,7 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -20,7 +21,7 @@ var aivenMySQLUserSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: schemautil.GetServiceUserValidateFunc(),
-		Description:  schemautil.Complex("The actual name of the MySQL User.").ForceNew().Referenced().Build(),
+		Description:  userconfig.Desc("The actual name of the MySQL User.").ForceNew().Referenced().Build(),
 	},
 	"password": {
 		Type:             schema.TypeString,
@@ -35,7 +36,7 @@ var aivenMySQLUserSchema = map[string]*schema.Schema{
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 		ValidateFunc:     validation.StringInSlice([]string{"caching_sha2_password", "mysql_native_password"}, false),
-		Description:      schemautil.Complex("Authentication details.").PossibleValues("caching_sha2_password", "mysql_native_password").Build(),
+		Description:      userconfig.Desc("Authentication details.").PossibleValues("caching_sha2_password", "mysql_native_password").Build(),
 	},
 
 	// computed fields

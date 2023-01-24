@@ -7,6 +7,7 @@ import (
 	"regexp"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -24,13 +25,13 @@ var aivenProjectSchema = map[string]*schema.Schema{
 	"account_id": {
 		Type:        schema.TypeString,
 		Optional:    true,
-		Description: schemautil.Complex("An optional property to link a project to already an existing account by using account ID.").Referenced().Build(),
+		Description: userconfig.Desc("An optional property to link a project to already an existing account by using account ID.").Referenced().Build(),
 	},
 	"copy_from_project": {
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.CreateOnlyDiffSuppressFunc,
-		Description:      schemautil.Complex("is the name of another project used to copy billing information and some other project attributes like technical contacts from. This is mostly relevant when an existing project has billing type set to invoice and that needs to be copied over to a new project. (Setting billing is otherwise not allowed over the API.) This only has effect when the project is created.").Referenced().Build(),
+		Description:      userconfig.Desc("is the name of another project used to copy billing information and some other project attributes like technical contacts from. This is mostly relevant when an existing project has billing type set to invoice and that needs to be copied over to a new project. (Setting billing is otherwise not allowed over the API.) This only has effect when the project is created.").Referenced().Build(),
 	},
 	"use_source_project_billing_group": {
 		Type:             schema.TypeBool,
@@ -41,7 +42,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 	"add_account_owners_admin_access": {
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Description: schemautil.Complex("If account_id is set, grant account owner team admin access to the new project.").DefaultValue(true).Build(),
+		Description: userconfig.Desc("If account_id is set, grant account owner team admin access to the new project.").DefaultValue(true).Build(),
 	},
 	"project": {
 		Type:        schema.TypeString,
@@ -63,7 +64,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 	"billing_group": {
 		Type:             schema.TypeString,
 		Optional:         true,
-		Description:      schemautil.Complex("The id of the billing group that is linked to this project.").Referenced().Build(),
+		Description:      userconfig.Desc("The id of the billing group that is linked to this project.").Referenced().Build(),
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 	},
 	"tag": {

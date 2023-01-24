@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -16,7 +17,7 @@ func DatasourceBillingGroup() *schema.Resource {
 		"billing_group_id": {
 			Type:        schema.TypeString,
 			Required:    true,
-			Description: schemautil.Complex("The id of the billing group.").Referenced().Build(),
+			Description: userconfig.Desc("The id of the billing group.").Referenced().Build(),
 		},
 	})
 

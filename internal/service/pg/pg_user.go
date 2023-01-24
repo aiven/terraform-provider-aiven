@@ -5,6 +5,7 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -19,7 +20,7 @@ var aivenPGUserSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: schemautil.GetServiceUserValidateFunc(),
-		Description:  schemautil.Complex("The actual name of the PG User.").ForceNew().Referenced().Build(),
+		Description:  userconfig.Desc("The actual name of the PG User.").ForceNew().Referenced().Build(),
 	},
 	"password": {
 		Type:             schema.TypeString,
@@ -33,7 +34,7 @@ var aivenPGUserSchema = map[string]*schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    true,
 		ForceNew:    true,
-		Description: schemautil.Complex("Defines whether replication is allowed.").ForceNew().Build(),
+		Description: userconfig.Desc("Defines whether replication is allowed.").ForceNew().Build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeBool,
 		},

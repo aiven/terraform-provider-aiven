@@ -3,6 +3,7 @@ package kafka
 import (
 	"context"
 
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/aiven-go-client"
@@ -19,20 +20,20 @@ var aivenKafkaACLSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringInSlice([]string{"admin", "read", "readwrite", "write"}, false),
-		Description:  schemautil.Complex("Kafka permission to grant.").ForceNew().PossibleValues("admin", "read", "readwrite", "write").Build(),
+		Description:  userconfig.Desc("Kafka permission to grant.").ForceNew().PossibleValues("admin", "read", "readwrite", "write").Build(),
 	},
 	"topic": {
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: schemautil.Complex("Topic name pattern for the ACL entry.").ForceNew().Build(),
+		Description: userconfig.Desc("Topic name pattern for the ACL entry.").ForceNew().Build(),
 	},
 	"username": {
 		Type:         schema.TypeString,
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: schemautil.GetACLUserValidateFunc(),
-		Description:  schemautil.Complex("Username pattern for the ACL entry.").ForceNew().Build(),
+		Description:  userconfig.Desc("Username pattern for the ACL entry.").ForceNew().Build(),
 	},
 
 	// computed
