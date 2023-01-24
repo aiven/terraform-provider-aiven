@@ -29,9 +29,9 @@ resource "aiven_transit_gateway_vpc_attachment" "attachment" {
 
 ### Required
 
-- `peer_cloud_account` (String) AWS account ID or GCP project ID of the peered VPC This property cannot be changed, doing so forces recreation of the resource.
+- `peer_cloud_account` (String) AWS account ID or GCP project ID of the peered VPC. This property cannot be changed, doing so forces recreation of the resource.
 - `peer_region` (String) AWS region of the peered VPC (if not in the same region as Aiven VPC)
-- `peer_vpc` (String) Transit gateway ID This property cannot be changed, doing so forces recreation of the resource.
+- `peer_vpc` (String) Transit gateway ID. This property cannot be changed, doing so forces recreation of the resource.
 - `user_peer_network_cidrs` (List of String) List of private IPv4 ranges to route through the peering connection
 - `vpc_id` (String) The VPC the peering connection belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 
