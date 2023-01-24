@@ -17,12 +17,12 @@ func IntegrationTypeClickhouseKafka() *schema.Schema {
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"name": {
 						Description: "Column name.",
-						Optional:    true,
+						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"type": {
 						Description: "Column type.",
-						Optional:    true,
+						Required:    true,
 						Type:        schema.TypeString,
 					},
 				}},
@@ -33,25 +33,25 @@ func IntegrationTypeClickhouseKafka() *schema.Schema {
 			"data_format": {
 				Default:     "JSONEachRow",
 				Description: "Message data format. The default value is `JSONEachRow`.",
-				Optional:    true,
+				Required:    true,
 				Type:        schema.TypeString,
 			},
 			"group_name": {
 				Default:     "clickhouse",
 				Description: "Kafka consumers group. The default value is `clickhouse`.",
-				Optional:    true,
+				Required:    true,
 				Type:        schema.TypeString,
 			},
 			"name": {
 				Description: "Name of the table.",
-				Optional:    true,
+				Required:    true,
 				Type:        schema.TypeString,
 			},
 			"topics": {
 				Description: "Kafka topics.",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"name": {
 					Description: "Name of the topic.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				}}},
 				MaxItems: 100,
@@ -125,7 +125,7 @@ func IntegrationTypeDatadog() *schema.Schema {
 				},
 				"tag": {
 					Description: "Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix 'aiven-' are reserved for Aiven.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -233,12 +233,12 @@ func IntegrationTypeExternalAwsCloudwatchMetrics() *schema.Schema {
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"field": {
 					Description: "Identifier of a value in the metric.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"metric": {
 					Description: "Identifier of the metric.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -251,12 +251,12 @@ func IntegrationTypeExternalAwsCloudwatchMetrics() *schema.Schema {
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"field": {
 					Description: "Identifier of a value in the metric.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"metric": {
 					Description: "Identifier of the metric.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},

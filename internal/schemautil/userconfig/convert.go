@@ -9,10 +9,9 @@ import (
 )
 
 // convertPropertyToSchema is a function that converts a property to a Terraform schema.
-func convertPropertyToSchema(n string, p map[string]interface{}, t string, ad bool) jen.Dict {
+func convertPropertyToSchema(n string, p map[string]interface{}, t string, ad bool, ireq bool) jen.Dict {
 	r := jen.Dict{
-		jen.Id("Type"):     jen.Qual(SchemaPackage, t),
-		jen.Id("Optional"): jen.Lit(true),
+		jen.Id("Type"): jen.Qual(SchemaPackage, t),
 	}
 
 	if ad {
@@ -23,6 +22,12 @@ func convertPropertyToSchema(n string, p map[string]interface{}, t string, ad bo
 		if id {
 			r[jen.Id("Deprecated")] = jen.Lit("Usage of this field is discouraged.")
 		}
+	}
+
+	if ireq {
+		r[jen.Id("Required")] = jen.Lit(true)
+	} else {
+		r[jen.Id("Optional")] = jen.Lit(true)
 	}
 
 	if d, ok := p["default"]; ok && isTerraformTypePrimitive(t) {
@@ -43,7 +48,7 @@ func convertPropertyToSchema(n string, p map[string]interface{}, t string, ad bo
 }
 
 // convertPropertiesToSchemaMap is a function that converts a map of properties to a map of Terraform schemas.
-func convertPropertiesToSchemaMap(p map[string]interface{}) (jen.Dict, error) {
+func convertPropertiesToSchemaMap(p map[string]interface{}, req map[string]struct{}) (jen.Dict, error) {
 	r := make(jen.Dict, len(p))
 
 	for k, v := range p {
@@ -63,10 +68,12 @@ func convertPropertiesToSchemaMap(p map[string]interface{}) (jen.Dict, error) {
 
 		t, at := ts[0], ats[0]
 
+		_, ireq := req[k]
+
 		var s map[string]*jen.Statement
 
 		if isTerraformTypePrimitive(t) {
-			s = handlePrimitiveTypeProperty(k, va, t)
+			s = handlePrimitiveTypeProperty(k, va, t, ireq)
 		} else {
 			s, err = handleAggregateTypeProperty(k, va, t, at)
 			if err != nil {
