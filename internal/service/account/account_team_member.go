@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -16,19 +17,19 @@ var aivenAccountTeamMemberSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: schemautil.Complex("The unique account id").ForceNew().Build(),
+		Description: userconfig.Desc("The unique account id").ForceNew().Build(),
 	},
 	"team_id": {
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: schemautil.Complex("An account team id").ForceNew().Build(),
+		Description: userconfig.Desc("An account team id").ForceNew().Build(),
 	},
 	"user_email": {
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: schemautil.Complex("Is a user email address that first will be invited, and after accepting an invitation, he or she becomes a member of a team.").ForceNew().Build(),
+		Description: userconfig.Desc("Is a user email address that first will be invited, and after accepting an invitation, he or she becomes a member of a team.").ForceNew().Build(),
 	},
 	"invited_by_user_email": {
 		Type:        schema.TypeString,

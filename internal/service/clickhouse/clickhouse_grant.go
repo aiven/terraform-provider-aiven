@@ -6,6 +6,7 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -19,53 +20,53 @@ var aivenClickhouseGrantSchema = map[string]*schema.Schema{
 	"service_name": schemautil.CommonSchemaServiceNameReference,
 
 	"user": {
-		Description:   schemautil.Complex("The user to grant privileges or roles to.").Referenced().ForceNew().Build(),
+		Description:   userconfig.Desc("The user to grant privileges or roles to.").Referenced().ForceNew().Build(),
 		Type:          schema.TypeString,
 		Optional:      true,
 		ForceNew:      true,
 		ConflictsWith: []string{"role"},
 	},
 	"role": {
-		Description:   schemautil.Complex("The role to grant privileges or roles to.").Referenced().ForceNew().Build(),
+		Description:   userconfig.Desc("The role to grant privileges or roles to.").Referenced().ForceNew().Build(),
 		Type:          schema.TypeString,
 		Optional:      true,
 		ForceNew:      true,
 		ConflictsWith: []string{"user"},
 	},
 	"privilege_grant": {
-		Description: schemautil.Complex("Configuration to grant a privilege.").ForceNew().Build(),
+		Description: userconfig.Desc("Configuration to grant a privilege.").ForceNew().Build(),
 		Type:        schema.TypeSet,
 		Optional:    true,
 		ForceNew:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"privilege": {
-					Description:  schemautil.Complex("The privilege to grant, i.e. 'INSERT', 'SELECT', etc.").ForceNew().Build(),
+					Description:  userconfig.Desc("The privilege to grant, i.e. 'INSERT', 'SELECT', etc.").ForceNew().Build(),
 					Type:         schema.TypeString,
 					Optional:     true,
 					ForceNew:     true,
 					ValidateFunc: validation.StringMatch(regexp.MustCompile("^[A-Z ]+$"), "Must be a phrase of words that contain only uppercase letters."),
 				},
 				"database": {
-					Description: schemautil.Complex("The database that the grant refers to.").Referenced().ForceNew().Build(),
+					Description: userconfig.Desc("The database that the grant refers to.").Referenced().ForceNew().Build(),
 					Type:        schema.TypeString,
 					Required:    true,
 					ForceNew:    true,
 				},
 				"table": {
-					Description: schemautil.Complex("The table that the grant refers to.").ForceNew().Build(),
+					Description: userconfig.Desc("The table that the grant refers to.").ForceNew().Build(),
 					Type:        schema.TypeString,
 					Optional:    true,
 					ForceNew:    true,
 				},
 				"column": {
-					Description: schemautil.Complex("The column that the grant refers to.").ForceNew().Build(),
+					Description: userconfig.Desc("The column that the grant refers to.").ForceNew().Build(),
 					Type:        schema.TypeString,
 					Optional:    true,
 					ForceNew:    true,
 				},
 				"with_grant": {
-					Description: schemautil.Complex("If true then the grantee gets the ability to grant the privileges he received too").ForceNew().Build(),
+					Description: userconfig.Desc("If true then the grantee gets the ability to grant the privileges he received too").ForceNew().Build(),
 					Type:        schema.TypeBool,
 					Optional:    true,
 					ForceNew:    true,
@@ -75,14 +76,14 @@ var aivenClickhouseGrantSchema = map[string]*schema.Schema{
 		},
 	},
 	"role_grant": {
-		Description: schemautil.Complex("Configuration to grant a role.").ForceNew().Build(),
+		Description: userconfig.Desc("Configuration to grant a role.").ForceNew().Build(),
 		Type:        schema.TypeSet,
 		Optional:    true,
 		ForceNew:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"role": {
-					Description: schemautil.Complex("The role that is to be granted.").Referenced().ForceNew().Build(),
+					Description: userconfig.Desc("The role that is to be granted.").Referenced().ForceNew().Build(),
 					Type:        schema.TypeString,
 					Optional:    true,
 					ForceNew:    true,

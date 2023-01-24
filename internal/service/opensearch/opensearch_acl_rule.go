@@ -5,6 +5,7 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -18,20 +19,20 @@ var aivenOpensearchACLRuleSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: schemautil.GetACLUserValidateFunc(),
-		Description:  schemautil.Complex("The username for the ACL entry").MaxLen(40).Referenced().ForceNew().Build(),
+		Description:  userconfig.Desc("The username for the ACL entry").MaxLen(40).Referenced().ForceNew().Build(),
 	},
 	"index": {
 		Type:         schema.TypeString,
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringLenBetween(1, 249),
-		Description:  schemautil.Complex("The index pattern for this ACL entry.").MaxLen(249).ForceNew().Build(),
+		Description:  userconfig.Desc("The index pattern for this ACL entry.").MaxLen(249).ForceNew().Build(),
 	},
 	"permission": {
 		Type:         schema.TypeString,
 		Required:     true,
 		ValidateFunc: validation.StringInSlice([]string{"deny", "admin", "read", "readwrite", "write"}, false),
-		Description:  schemautil.Complex("The permissions for this ACL entry").PossibleValues("deny", "admin", "read", "readwrite", "write").Build(),
+		Description:  userconfig.Desc("The permissions for this ACL entry").PossibleValues("deny", "admin", "read", "readwrite", "write").Build(),
 	},
 }
 

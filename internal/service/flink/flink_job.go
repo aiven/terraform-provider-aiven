@@ -6,6 +6,7 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -21,17 +22,17 @@ var aivenFlinkJobSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: schemautil.Complex("Specifies the name of the service that this job is submitted to.").ForceNew().Referenced().Build(),
+		Description: userconfig.Desc("Specifies the name of the service that this job is submitted to.").ForceNew().Referenced().Build(),
 	},
 	"statement": {
 		Type:        schema.TypeString,
-		Description: schemautil.Complex("The SQL statement to define the job.").ForceNew().Build(),
+		Description: userconfig.Desc("The SQL statement to define the job.").ForceNew().Build(),
 		Required:    true,
 		ForceNew:    true,
 	},
 	"table_ids": {
 		Type:        schema.TypeList,
-		Description: schemautil.Complex("A list of table ids that are required in the job runtime.").ForceNew().Referenced().Build(),
+		Description: userconfig.Desc("A list of table ids that are required in the job runtime.").ForceNew().Referenced().Build(),
 		Required:    true,
 		ForceNew:    true,
 		Elem: &schema.Schema{

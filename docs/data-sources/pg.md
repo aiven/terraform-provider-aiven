@@ -187,6 +187,8 @@ Read-Only:
 - `max_worker_processes` (Number)
 - `pg_partman_bgw__dot__interval` (Number)
 - `pg_partman_bgw__dot__role` (String)
+- `pg_stat_monitor__dot__pgsm_enable_query_plan` (Boolean)
+- `pg_stat_monitor__dot__pgsm_max_buckets` (Number)
 - `pg_stat_statements__dot__track` (String)
 - `temp_file_limit` (Number)
 - `timezone` (String)

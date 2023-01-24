@@ -5,6 +5,7 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -31,7 +32,7 @@ var aivenAccountTeamProjectSchema = map[string]*schema.Schema{
 		Type:         schema.TypeString,
 		Optional:     true,
 		ValidateFunc: validation.StringInSlice([]string{"admin", "developer", "operator", "read_only"}, false),
-		Description:  schemautil.Complex("The Account team project type").PossibleValues("admin", "developer", "operator", "read_only").Build(),
+		Description:  userconfig.Desc("The Account team project type").PossibleValues("admin", "developer", "operator", "read_only").Build(),
 	},
 }
 
