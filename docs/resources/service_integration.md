@@ -67,8 +67,8 @@ Optional:
 Optional:
 
 - `columns` (Block List, Max: 100) Table columns (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--columns))
-- `data_format` (String) Message data format
-- `group_name` (String) Kafka consumers group
+- `data_format` (String) Message data format The default value is `JSONEachRow`.
+- `group_name` (String) Kafka consumers group The default value is `clickhouse`.
 - `name` (String) Name of the table
 - `topics` (Block List, Max: 100) Kafka topics (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--topics))
 
@@ -103,8 +103,8 @@ Optional:
 
 Optional:
 
-- `database` (String) PostgreSQL database to expose
-- `schema` (String) PostgreSQL schema to expose
+- `database` (String) PostgreSQL database to expose The default value is `defaultdb`.
+- `schema` (String) PostgreSQL schema to expose The default value is `public`.
 
 
 
@@ -121,6 +121,7 @@ Optional:
 - `include_topics` (List of String) List of topics to include
 - `kafka_custom_metrics` (List of String) List of custom metrics
 - `max_jmx_metrics` (Number) Maximum number of JMX metrics to send
+- `opensearch` (Block List, Max: 1) Datadog Opensearch Options (see [below for nested schema](#nestedblock--datadog_user_config--opensearch))
 
 <a id="nestedblock--datadog_user_config--datadog_tags"></a>
 ### Nested Schema for `datadog_user_config.datadog_tags`
@@ -129,6 +130,16 @@ Optional:
 
 - `comment` (String) Optional tag explanation
 - `tag` (String) Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix 'aiven-' are reserved for Aiven.
+
+
+<a id="nestedblock--datadog_user_config--opensearch"></a>
+### Nested Schema for `datadog_user_config.opensearch`
+
+Optional:
+
+- `index_stats_enabled` (Boolean) Enable Datadog Opensearch Index Monitoring
+- `pending_task_stats_enabled` (Boolean) Enable Datadog Opensearch Pending Task Monitoring
+- `pshard_stats_enabled` (Boolean) Enable Datadog Opensearch Primary Shard Monitoring
 
 
 
@@ -212,8 +223,8 @@ Optional:
 
 Optional:
 
-- `elasticsearch_index_days_max` (Number) Elasticsearch index retention limit
-- `elasticsearch_index_prefix` (String) Elasticsearch index prefix
+- `elasticsearch_index_days_max` (Number) Elasticsearch index retention limit The default value is `3`.
+- `elasticsearch_index_prefix` (String) Elasticsearch index prefix The default value is `logs`.
 
 
 <a id="nestedblock--metrics_user_config"></a>
@@ -262,7 +273,7 @@ Optional:
 
 Optional:
 
-- `mirrormaker_whitelist` (String) Mirrormaker topic whitelist
+- `mirrormaker_whitelist` (String) Mirrormaker topic whitelist The default value is `.*`.
 
 
 <a id="nestedblock--timeouts"></a>

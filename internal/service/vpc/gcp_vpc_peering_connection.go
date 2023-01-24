@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -20,20 +21,20 @@ var aivenGCPVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		ForceNew:     true,
 		Required:     true,
 		Type:         schema.TypeString,
-		Description:  schemautil.Complex("The VPC the peering connection belongs to.").ForceNew().Build(),
+		Description:  userconfig.Desc("The VPC the peering connection belongs to.").ForceNew().Build(),
 		ValidateFunc: validateVPCID,
 	},
 	"gcp_project_id": {
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: schemautil.Complex("GCP project ID.").ForceNew().Build(),
+		Description: userconfig.Desc("GCP project ID.").ForceNew().Build(),
 	},
 	"peer_vpc": {
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: schemautil.Complex("GCP VPC network name.").ForceNew().Build(),
+		Description: userconfig.Desc("GCP VPC network name.").ForceNew().Build(),
 	},
 	"state": {
 		Computed:    true,

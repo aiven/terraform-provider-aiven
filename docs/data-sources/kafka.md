@@ -98,6 +98,7 @@ Read-Only:
 - `kafka_connect` (Boolean)
 - `kafka_connect_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_config))
 - `kafka_rest` (Boolean)
+- `kafka_rest_authorization` (Boolean)
 - `kafka_rest_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_rest_config))
 - `kafka_version` (String)
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--private_access))
@@ -185,7 +186,10 @@ Read-Only:
 - `consumer_max_poll_records` (Number)
 - `offset_flush_interval_ms` (Number)
 - `offset_flush_timeout_ms` (Number)
+- `producer_batch_size` (Number)
+- `producer_buffer_memory` (Number)
 - `producer_compression_type` (String)
+- `producer_linger_ms` (Number)
 - `producer_max_request_size` (Number)
 - `session_timeout_ms` (Number)
 
@@ -199,6 +203,7 @@ Read-Only:
 - `consumer_request_max_bytes` (Number)
 - `consumer_request_timeout_ms` (Number)
 - `producer_acks` (String)
+- `producer_compression_type` (String)
 - `producer_linger_ms` (Number)
 - `simpleconsumer_pool_size_max` (Number)
 
@@ -208,7 +213,11 @@ Read-Only:
 
 Read-Only:
 
+- `kafka` (Boolean)
+- `kafka_connect` (Boolean)
+- `kafka_rest` (Boolean)
 - `prometheus` (Boolean)
+- `schema_registry` (Boolean)
 
 
 <a id="nestedobjatt--kafka_user_config--privatelink_access"></a>

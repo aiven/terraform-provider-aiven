@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -27,13 +28,13 @@ var aivenAccountAuthenticationSchema = map[string]*schema.Schema{
 		Type:         schema.TypeString,
 		Required:     true,
 		ValidateFunc: validation.StringInSlice([]string{"internal", "saml"}, false),
-		Description:  schemautil.Complex("The account authentication type.").PossibleValues("internal", "saml").Build(),
+		Description:  userconfig.Desc("The account authentication type.").PossibleValues("internal", "saml").Build(),
 	},
 	"enabled": {
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     false,
-		Description: schemautil.Complex("Status of account authentication method.").DefaultValue(false).Build(),
+		Description: userconfig.Desc("Status of account authentication method.").DefaultValue(false).Build(),
 	},
 	"auto_join_team_id": {
 		Type:        schema.TypeString,

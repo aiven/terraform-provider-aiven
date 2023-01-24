@@ -6,6 +6,7 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -28,7 +29,7 @@ var aivenPGDatabaseSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: schemautil.Complex("The name of the service database.").ForceNew().Build(),
+		Description: userconfig.Desc("The name of the service database.").ForceNew().Build(),
 	},
 	"lc_collate": {
 		Type:             schema.TypeString,
@@ -36,7 +37,7 @@ var aivenPGDatabaseSchema = map[string]*schema.Schema{
 		Default:          defaultLC,
 		ForceNew:         true,
 		DiffSuppressFunc: handleLcDefaults,
-		Description:      schemautil.Complex("Default string sort order (`LC_COLLATE`) of the database.").DefaultValue(defaultLC).ForceNew().Build(),
+		Description:      userconfig.Desc("Default string sort order (`LC_COLLATE`) of the database.").DefaultValue(defaultLC).ForceNew().Build(),
 	},
 	"lc_ctype": {
 		Type:             schema.TypeString,
@@ -44,13 +45,13 @@ var aivenPGDatabaseSchema = map[string]*schema.Schema{
 		Default:          defaultLC,
 		ForceNew:         true,
 		DiffSuppressFunc: handleLcDefaults,
-		Description:      schemautil.Complex("Default character classification (`LC_CTYPE`) of the database.").DefaultValue(defaultLC).ForceNew().Build(),
+		Description:      userconfig.Desc("Default character classification (`LC_CTYPE`) of the database.").DefaultValue(defaultLC).ForceNew().Build(),
 	},
 	"termination_protection": {
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     false,
-		Description: schemautil.Complex(`It is a Terraform client-side deletion protections, which prevents the database from being deleted by Terraform. It is recommended to enable this for any production databases containing critical data.`).DefaultValue(false).Build(),
+		Description: userconfig.Desc(`It is a Terraform client-side deletion protections, which prevents the database from being deleted by Terraform. It is recommended to enable this for any production databases containing critical data.`).DefaultValue(false).Build(),
 	},
 }
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -17,12 +18,12 @@ var aivenProjectUserSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: schemautil.Complex("Email address of the user.").ForceNew().Build(),
+		Description: userconfig.Desc("Email address of the user.").ForceNew().Build(),
 	},
 	"member_type": {
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: schemautil.Complex("Project membership type.").PossibleValues("admin", "developer", "operator").Build(),
+		Description: userconfig.Desc("Project membership type.").PossibleValues("admin", "developer", "operator").Build(),
 	},
 	"accepted": {
 		Computed:    true,
