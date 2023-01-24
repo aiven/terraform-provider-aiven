@@ -7,6 +7,7 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -22,7 +23,7 @@ var aivenAzurePrivatelinkSchema = map[string]*schema.Schema{
 		Required:    true,
 		Elem:        &schema.Schema{Type: schema.TypeString},
 		MaxItems:    16,
-		Description: schemautil.Complex("A List of allowed Subscription IDs").MaxLen(16).Build(),
+		Description: userconfig.Desc("A List of allowed Subscription IDs").MaxLen(16).Build(),
 	},
 	"azure_service_id": {
 		Type:        schema.TypeString,

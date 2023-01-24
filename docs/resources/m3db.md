@@ -83,7 +83,7 @@ Optional:
 - `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
 - `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--m3db_user_config--ip_filter_object))
 - `limits` (Block List, Max: 1) M3 limits (see [below for nested schema](#nestedblock--m3db_user_config--limits))
-- `m3_version` (String) M3 major version (deprecated, use m3db_version)
+- `m3_version` (String, Deprecated) M3 major version (deprecated, use m3db_version)
 - `m3coordinator_enable_graphite_carbon_ingest` (Boolean) Enables access to Graphite Carbon plaintext metrics ingestion. It can be enabled only for services inside VPCs. The metrics are written to aggregated namespaces only.
 - `m3db_version` (String) M3 major version (the minimum compatible version)
 - `namespaces` (Block List, Max: 2147483647, Deprecated) List of M3 namespaces (see [below for nested schema](#nestedblock--m3db_user_config--namespaces))

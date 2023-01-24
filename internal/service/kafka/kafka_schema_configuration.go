@@ -5,6 +5,7 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -34,7 +35,7 @@ var aivenKafkaSchemaConfigurationSchema = map[string]*schema.Schema{
 			// Allow ignoring those.
 			return new == ""
 		},
-		Description: schemautil.Complex("Kafka Schemas compatibility level.").PossibleValues(schemautil.StringSliceToInterfaceSlice(compatibilityLevels)...).Build(),
+		Description: userconfig.Desc("Kafka Schemas compatibility level.").PossibleValues(schemautil.StringSliceToInterfaceSlice(compatibilityLevels)...).Build(),
 	},
 }
 

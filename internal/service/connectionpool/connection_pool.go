@@ -5,6 +5,7 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -18,31 +19,31 @@ var aivenConnectionPoolSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: schemautil.Complex("The name of the database the pool connects to.").Referenced().ForceNew().Build(),
+		Description: userconfig.Desc("The name of the database the pool connects to.").Referenced().ForceNew().Build(),
 	},
 	"pool_mode": {
 		Type:         schema.TypeString,
 		Optional:     true,
 		Default:      "transaction",
 		ValidateFunc: validation.StringInSlice([]string{"session", "transaction", "statement"}, false),
-		Description:  schemautil.Complex("The mode the pool operates in").DefaultValue("transaction").PossibleValues("session", "transaction", "statement").Build(),
+		Description:  userconfig.Desc("The mode the pool operates in").DefaultValue("transaction").PossibleValues("session", "transaction", "statement").Build(),
 	},
 	"pool_name": {
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: schemautil.Complex("The name of the created pool.").ForceNew().Build(),
+		Description: userconfig.Desc("The name of the created pool.").ForceNew().Build(),
 	},
 	"pool_size": {
 		Type:        schema.TypeInt,
 		Optional:    true,
 		Default:     10,
-		Description: schemautil.Complex("The number of connections the pool may create towards the backend server. This does not affect the number of incoming connections, which is always a much larger number.").DefaultValue(10).Build(),
+		Description: userconfig.Desc("The number of connections the pool may create towards the backend server. This does not affect the number of incoming connections, which is always a much larger number.").DefaultValue(10).Build(),
 	},
 	"username": {
 		Type:        schema.TypeString,
 		Optional:    true,
-		Description: schemautil.Complex("The name of the service user used to connect to the database.").Referenced().Build(),
+		Description: userconfig.Desc("The name of the service user used to connect to the database.").Referenced().Build(),
 	},
 	"connection_uri": {
 		Type:        schema.TypeString,

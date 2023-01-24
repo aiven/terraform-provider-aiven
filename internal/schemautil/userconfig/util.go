@@ -153,19 +153,50 @@ func SlicedString(v interface{}) []string {
 	return []string{vsa}
 }
 
+// constDescriptionReplaceables is a slice of strings that are replaced in descriptions.
+var constDescriptionReplaceables = map[string]string{
+	"DEPRECATED: ":                 "",
+	"This setting is deprecated. ": "",
+	// TODO: Introduce in a separate PR.
+	//"[seconds]":                    "seconds",
+}
+
 // descriptionForProperty is a function that returns the description for a property.
-func descriptionForProperty(p map[string]interface{}) (string, string) {
-	k := "Description"
-
-	if d, ok := p["description"].(string); ok {
-		if strings.Contains(strings.ToLower(d), "deprecated") {
-			k = "Deprecated"
-		}
-
-		return k, d
+func descriptionForProperty(p map[string]interface{}, t string) (id bool, d string) {
+	if da, ok := p["description"].(string); ok {
+		d = da
+	} else {
+		d = p["title"].(string)
 	}
 
-	return k, p["title"].(string)
+	if strings.Contains(strings.ToLower(d), "deprecated") {
+		id = true
+	}
+
+	// Some descriptions have a built-in deprecation notice, so we need to remove it.
+	for k, v := range constDescriptionReplaceables {
+		d = strings.ReplaceAll(d, k, v)
+	}
+
+	b := Desc(d)
+
+	if def, ok := p["default"]; ok && isTerraformTypePrimitive(t) {
+		skip := false
+
+		if adef, ok := def.(string); ok {
+			if adef == "" {
+				skip = true
+			}
+		}
+
+		if !skip {
+			b = b.DefaultValue(def)
+		}
+	}
+
+	d = b.Build()
+
+	return id, d
 }
 
 // EncodeKey is a function that encodes a key for a Terraform schema.

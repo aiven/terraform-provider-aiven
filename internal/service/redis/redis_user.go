@@ -5,6 +5,7 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -19,7 +20,7 @@ var aivenRedisUserSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: schemautil.GetServiceUserValidateFunc(),
-		Description:  schemautil.Complex("The actual name of the Redis User.").ForceNew().Referenced().Build(),
+		Description:  userconfig.Desc("The actual name of the Redis User.").ForceNew().Referenced().Build(),
 	},
 	"password": {
 		Type:             schema.TypeString,
@@ -34,7 +35,7 @@ var aivenRedisUserSchema = map[string]*schema.Schema{
 		Optional:     true,
 		ForceNew:     true,
 		RequiredWith: []string{"redis_acl_commands", "redis_acl_keys"},
-		Description:  schemautil.Complex("Defines command category rules.").RequiredWith("redis_acl_commands", "redis_acl_keys").ForceNew().Build(),
+		Description:  userconfig.Desc("Defines command category rules.").RequiredWith("redis_acl_commands", "redis_acl_keys").ForceNew().Build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
@@ -44,7 +45,7 @@ var aivenRedisUserSchema = map[string]*schema.Schema{
 		Optional:     true,
 		ForceNew:     true,
 		RequiredWith: []string{"redis_acl_categories", "redis_acl_keys"},
-		Description:  schemautil.Complex("Defines rules for individual commands.").RequiredWith("redis_acl_categories", "redis_acl_keys").ForceNew().Build(),
+		Description:  userconfig.Desc("Defines rules for individual commands.").RequiredWith("redis_acl_categories", "redis_acl_keys").ForceNew().Build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
@@ -54,7 +55,7 @@ var aivenRedisUserSchema = map[string]*schema.Schema{
 		Optional:     true,
 		ForceNew:     true,
 		RequiredWith: []string{"redis_acl_categories", "redis_acl_commands"},
-		Description:  schemautil.Complex("Defines key access rules.").RequiredWith("redis_acl_categories", "redis_acl_keys").ForceNew().Build(),
+		Description:  userconfig.Desc("Defines key access rules.").RequiredWith("redis_acl_categories", "redis_acl_keys").ForceNew().Build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
@@ -63,7 +64,7 @@ var aivenRedisUserSchema = map[string]*schema.Schema{
 		Type:        schema.TypeList,
 		Optional:    true,
 		ForceNew:    true,
-		Description: schemautil.Complex("Defines the permitted pub/sub channel patterns.").ForceNew().Build(),
+		Description: userconfig.Desc("Defines the permitted pub/sub channel patterns.").ForceNew().Build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},

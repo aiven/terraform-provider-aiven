@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -33,13 +34,13 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 		Type:         schema.TypeString,
 		Required:     true,
 		ValidateFunc: validation.StringLenBetween(1, 128),
-		Description:  schemautil.Complex("Source cluster alias.").MaxLen(128).Build(),
+		Description:  userconfig.Desc("Source cluster alias.").MaxLen(128).Build(),
 	},
 	"target_cluster": {
 		Type:         schema.TypeString,
 		Required:     true,
 		ValidateFunc: validation.StringLenBetween(1, 128),
-		Description:  schemautil.Complex("Target cluster alias.").MaxLen(128).Build(),
+		Description:  userconfig.Desc("Target cluster alias.").MaxLen(128).Build(),
 	},
 	"topics": {
 		Type:        schema.TypeList,
@@ -64,26 +65,26 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 		Optional:     true,
 		Default:      defaultReplicationPolicy,
 		ValidateFunc: validation.StringInSlice(replicationPolicies, false),
-		Description:  schemautil.Complex("Replication policy class.").DefaultValue(defaultReplicationPolicy).PossibleValues(schemautil.StringSliceToInterfaceSlice(replicationPolicies)...).Build(),
+		Description:  userconfig.Desc("Replication policy class.").DefaultValue(defaultReplicationPolicy).PossibleValues(schemautil.StringSliceToInterfaceSlice(replicationPolicies)...).Build(),
 	},
 	"sync_group_offsets_enabled": {
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     false,
-		Description: schemautil.Complex("Sync consumer group offsets.").DefaultValue(false).Build(),
+		Description: userconfig.Desc("Sync consumer group offsets.").DefaultValue(false).Build(),
 	},
 	"sync_group_offsets_interval_seconds": {
 		Type:         schema.TypeInt,
 		Optional:     true,
 		ValidateFunc: validation.IntAtLeast(1),
 		Default:      1,
-		Description:  schemautil.Complex("Frequency of consumer group offset sync.").DefaultValue(1).Build(),
+		Description:  userconfig.Desc("Frequency of consumer group offset sync.").DefaultValue(1).Build(),
 	},
 	"emit_heartbeats_enabled": {
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     false,
-		Description: schemautil.Complex("Emit heartbeats enabled.").DefaultValue(false).Build(),
+		Description: userconfig.Desc("Emit heartbeats enabled.").DefaultValue(false).Build(),
 	},
 	"offset_syncs_topic_location": {
 		Type:             schema.TypeString,

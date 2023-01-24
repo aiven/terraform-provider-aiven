@@ -93,9 +93,9 @@ Optional:
 Optional:
 
 - `ca` (String) PEM encoded CA certificate
-- `index_days_max` (Number) Maximum number of days of logs to keep
-- `index_prefix` (String) Elasticsearch index prefix
-- `timeout` (Number) Elasticsearch request timeout limit
+- `index_days_max` (Number) Maximum number of days of logs to keep The default value is `3`.
+- `index_prefix` (String) Elasticsearch index prefix The default value is `logs`.
+- `timeout` (Number) Elasticsearch request timeout limit The default value is `10.0`.
 - `url` (String) Elasticsearch connection URL
 
 
@@ -131,9 +131,9 @@ Optional:
 Optional:
 
 - `ca` (String) PEM encoded CA certificate
-- `index_days_max` (Number) Maximum number of days of logs to keep
-- `index_prefix` (String) OpenSearch index prefix
-- `timeout` (Number) OpenSearch request timeout limit
+- `index_days_max` (Number) Maximum number of days of logs to keep The default value is `3`.
+- `index_prefix` (String) OpenSearch index prefix The default value is `logs`.
+- `timeout` (Number) OpenSearch request timeout limit The default value is `10.0`.
 - `url` (String) OpenSearch connection URL
 
 
@@ -173,13 +173,13 @@ Optional:
 
 - `ca` (String) PEM encoded CA certificate
 - `cert` (String) PEM encoded client certificate
-- `format` (String) message format
+- `format` (String) message format The default value is `rfc5424`.
 - `key` (String) PEM encoded client key
 - `logline` (String) custom syslog message format
-- `port` (Number) rsyslog server port
+- `port` (Number) rsyslog server port The default value is `514`.
 - `sd` (String) Structured data block for log message
 - `server` (String) rsyslog server IP address or hostname
-- `tls` (Boolean) Require TLS
+- `tls` (Boolean) Require TLS The default value is `true`.
 
 
 <a id="nestedblock--signalfx_user_config"></a>
@@ -189,7 +189,7 @@ Optional:
 
 - `enabled_metrics` (List of String) list of metrics to send
 - `signalfx_api_key` (String, Sensitive) SignalFX API key
-- `signalfx_realm` (String) SignalFX realm
+- `signalfx_realm` (String) SignalFX realm The default value is `us0`.
 
 
 <a id="nestedblock--timeouts"></a>
