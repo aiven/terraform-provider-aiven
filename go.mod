@@ -3,8 +3,9 @@ module github.com/aiven/terraform-provider-aiven
 go 1.18
 
 require (
-	github.com/aiven/aiven-go-client v1.7.1-0.20221108145444-aa8b10f12d8f
-	github.com/aiven/aiven-go-client/tools/exp v0.0.0-20221102122203-4f39deb34b6a
+	github.com/aiven/aiven-go-client v1.7.1-0.20230117113325-db93f9a11cac
+	github.com/aiven/aiven-go-client/tools/exp v0.0.0-20230117113325-db93f9a11cac
+	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/dave/jennifer v1.5.1
 	github.com/docker/go-units v0.5.0
 	github.com/ettle/strcase v0.1.1
@@ -25,7 +26,6 @@ require (
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
-	github.com/avast/retry-go v3.0.0+incompatible // indirect
 	github.com/aws/aws-sdk-go v1.40.56 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

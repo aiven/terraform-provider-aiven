@@ -5,6 +5,7 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -17,13 +18,13 @@ var aivenOpensearchACLConfigSchema = map[string]*schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     true,
-		Description: schemautil.Complex("Enable Opensearch ACLs. When disabled authenticated service users have unrestricted access.").DefaultValue(true).Build(),
+		Description: userconfig.Desc("Enable Opensearch ACLs. When disabled authenticated service users have unrestricted access.").DefaultValue(true).Build(),
 	},
 	"extended_acl": {
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     true,
-		Description: schemautil.Complex("Index rules can be applied in a limited fashion to the _mget, _msearch and _bulk APIs (and only those) by enabling the ExtendedAcl option for the service. When it is enabled, users can use these APIs as long as all operations only target indexes they have been granted access to.").DefaultValue(true).Build(),
+		Description: userconfig.Desc("Index rules can be applied in a limited fashion to the _mget, _msearch and _bulk APIs (and only those) by enabling the ExtendedAcl option for the service. When it is enabled, users can use these APIs as long as all operations only target indexes they have been granted access to.").DefaultValue(true).Build(),
 	},
 }
 

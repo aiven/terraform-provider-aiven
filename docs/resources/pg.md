@@ -125,9 +125,9 @@ Optional:
 - `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--pg_user_config--ip_filter_object))
 - `migration` (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--pg_user_config--migration))
 - `pg` (Block List, Max: 1) postgresql.conf configuration values (see [below for nested schema](#nestedblock--pg_user_config--pg))
-- `pg_read_replica` (Boolean, Deprecated)
-- `pg_service_to_fork_from` (String) Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created.
-- `pg_stat_monitor_enable` (Boolean) Enable the pg_stat_monitor extension. Enabling this extension will cause the cluster to be restarted.When this extension is enabled, pg_stat_statements results for utility commands are unreliable
+- `pg_read_replica` (Boolean, Deprecated) Use read_replica service integration instead.
+- `pg_service_to_fork_from` (String, Deprecated) Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created.
+- `pg_stat_monitor_enable` (Boolean) Enable the pg_stat_monitor extension. Enabling this extension will cause the cluster to be restarted.When this extension is enabled, pg_stat_statements results for utility commands are unreliable The default value is `false`.
 - `pg_version` (String) PostgreSQL major version
 - `pgbouncer` (Block List, Max: 1) PGBouncer connection pooling settings (see [below for nested schema](#nestedblock--pg_user_config--pgbouncer))
 - `pglookout` (Block List, Max: 1) PGLookout settings (see [below for nested schema](#nestedblock--pg_user_config--pglookout))
@@ -164,7 +164,7 @@ Optional:
 - `method` (String) The migration method to be used (currently supported only by Redis and MySQL service types)
 - `password` (String, Sensitive) Password for authentication with the server where to migrate data from
 - `port` (Number) Port number of the server where to migrate data from
-- `ssl` (Boolean) The server where to migrate data from is secured with SSL
+- `ssl` (Boolean) The server where to migrate data from is secured with SSL The default value is `true`.
 - `username` (String) User name for authentication with the server where to migrate data from
 
 
@@ -211,6 +211,8 @@ Optional:
 - `max_worker_processes` (Number) Sets the maximum number of background processes that the system can support
 - `pg_partman_bgw__dot__interval` (Number) Sets the time interval to run pg_partman's scheduled tasks
 - `pg_partman_bgw__dot__role` (String) Controls which role to use for pg_partman's scheduled background tasks.
+- `pg_stat_monitor__dot__pgsm_enable_query_plan` (Boolean) Enables or disables query plan monitoring
+- `pg_stat_monitor__dot__pgsm_max_buckets` (Number) Sets the maximum number of buckets
 - `pg_stat_statements__dot__track` (String) Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default value is top.
 - `temp_file_limit` (Number) PostgreSQL temporary file limit in KiB, -1 for unlimited
 - `timezone` (String) PostgreSQL service timezone
@@ -243,7 +245,7 @@ Optional:
 
 Optional:
 
-- `max_failover_replication_time_lag` (Number) Number of seconds of master unavailability before triggering database failover to standby
+- `max_failover_replication_time_lag` (Number) Number of seconds of master unavailability before triggering database failover to standby The default value is `60`.
 
 
 <a id="nestedblock--pg_user_config--private_access"></a>
