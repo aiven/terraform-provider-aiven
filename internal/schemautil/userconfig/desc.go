@@ -10,23 +10,26 @@ type DescriptionBuilder struct {
 	// base is the base description.
 	base string
 
-	// withMaxLen is a flag that indicates if the max length should be included in the description.
-	withMaxLen int
+	// withForcedFirstLetterCapitalization is a flag that indicates if the first letter should be capitalized.
+	withForcedFirstLetterCapitalization bool
 
-	// withForceNew is a flag that indicates if the force new should be included in the description.
-	withForceNew bool
+	// withPossibleValues is a flag that indicates if the possible values should be included in the description.
+	withPossibleValues []interface{}
 
 	// withRequiredWith is a flag that indicates if the required with should be included in the description.
 	withRequiredWith []string
 
-	// withUseReference is a flag that indicates if the use reference should be included in the description.
-	withUseReference bool
+	// withMaxLen is a flag that indicates if the max length should be included in the description.
+	withMaxLen int
 
 	// withDefaultValue is a flag that indicates if the default value should be included in the description.
 	withDefaultValue interface{}
 
-	// withPossibleValues is a flag that indicates if the possible values should be included in the description.
-	withPossibleValues []interface{}
+	// withUseReference is a flag that indicates if the use reference should be included in the description.
+	withUseReference bool
+
+	// withForceNew is a flag that indicates if the force new should be included in the description.
+	withForceNew bool
 }
 
 // Desc is a function that creates a new DescriptionBuilder.
@@ -34,121 +37,129 @@ func Desc(base string) *DescriptionBuilder {
 	return &DescriptionBuilder{base: base}
 }
 
-// ForceNew is a function that sets the withForceNew flag.
-func (b *DescriptionBuilder) ForceNew() *DescriptionBuilder {
-	b.withForceNew = true
-	return b
-}
-
-// Referenced is a function that sets the withUseReference flag.
-func (b *DescriptionBuilder) Referenced() *DescriptionBuilder {
-	b.withUseReference = true
-	return b
-}
-
-// RequiredWith is a function that sets the withRequiredWith flag.
-func (b *DescriptionBuilder) RequiredWith(sv ...string) *DescriptionBuilder {
-	b.withRequiredWith = sv
-	return b
-}
-
-// MaxLen is a function that sets the withMaxLen flag.
-func (b *DescriptionBuilder) MaxLen(i int) *DescriptionBuilder {
-	b.withMaxLen = i
-	return b
-}
-
-// DefaultValue is a function that sets the withDefaultValue flag.
-func (b *DescriptionBuilder) DefaultValue(v interface{}) *DescriptionBuilder {
-	b.withDefaultValue = v
-	return b
+// ForceFirstLetterCapitalization is a function that sets the withForcedFirstLetterCapitalization flag.
+func (db *DescriptionBuilder) ForceFirstLetterCapitalization() *DescriptionBuilder {
+	db.withForcedFirstLetterCapitalization = true
+	return db
 }
 
 // PossibleValues is a function that sets the withPossibleValues flag.
-func (b *DescriptionBuilder) PossibleValues(vv ...interface{}) *DescriptionBuilder {
-	b.withPossibleValues = vv
-	return b
+func (db *DescriptionBuilder) PossibleValues(vv ...interface{}) *DescriptionBuilder {
+	db.withPossibleValues = vv
+	return db
+}
+
+// RequiredWith is a function that sets the withRequiredWith flag.
+func (db *DescriptionBuilder) RequiredWith(sv ...string) *DescriptionBuilder {
+	db.withRequiredWith = sv
+	return db
+}
+
+// MaxLen is a function that sets the withMaxLen flag.
+func (db *DescriptionBuilder) MaxLen(i int) *DescriptionBuilder {
+	db.withMaxLen = i
+	return db
+}
+
+// DefaultValue is a function that sets the withDefaultValue flag.
+func (db *DescriptionBuilder) DefaultValue(v interface{}) *DescriptionBuilder {
+	db.withDefaultValue = v
+	return db
+}
+
+// Referenced is a function that sets the withUseReference flag.
+func (db *DescriptionBuilder) Referenced() *DescriptionBuilder {
+	db.withUseReference = true
+	return db
+}
+
+// ForceNew is a function that sets the withForceNew flag.
+func (db *DescriptionBuilder) ForceNew() *DescriptionBuilder {
+	db.withForceNew = true
+	return db
 }
 
 // Build is a function that builds the description.
-func (b *DescriptionBuilder) Build() string {
-	builder := new(strings.Builder)
+func (db *DescriptionBuilder) Build() string {
+	b := new(strings.Builder)
 
-	builder.WriteString(b.base)
-	// TODO: Uncomment in a separate PR.
-	//// Capitalize the first letter.
-	//builder.WriteRune(rune(strings.ToUpper(string(b.base[0]))[0]))
-	//builder.WriteString(b.base[1:])
-	//
-	//// Add a trailing dot if it's missing.
-	//if !strings.HasSuffix(b.base, ".") {
-	//	builder.WriteString(".")
-	//}
+	// Capitalize the first letter, if needed.
+	if db.withForcedFirstLetterCapitalization {
+		b.WriteRune(rune(strings.ToUpper(string(db.base[0]))[0]))
 
-	if b.withPossibleValues != nil {
-		builder.WriteRune(' ')
+		b.WriteString(db.base[1:])
+	} else {
+		b.WriteString(db.base)
+	}
 
-		builder.WriteString("The possible values are ")
+	// Add a trailing dot if it's missing.
+	if !strings.HasSuffix(db.base, ".") {
+		b.WriteString(".")
+	}
 
-		for i := range b.withPossibleValues {
+	if db.withPossibleValues != nil {
+		b.WriteRune(' ')
+
+		b.WriteString("The possible values are ")
+
+		for i := range db.withPossibleValues {
 			if i > 0 {
-				if i == len(b.withPossibleValues)-1 {
-					builder.WriteString(" and ")
+				if i == len(db.withPossibleValues)-1 {
+					b.WriteString(" and ")
 				} else {
-					builder.WriteString(", ")
+					b.WriteString(", ")
 				}
 			}
 
-			builder.WriteString(fmt.Sprintf("`%v`", b.withPossibleValues[i]))
+			b.WriteString(fmt.Sprintf("`%v`", db.withPossibleValues[i]))
 		}
 
-		builder.WriteRune('.')
+		b.WriteRune('.')
 	}
 
-	if b.withRequiredWith != nil {
-		builder.WriteRune(' ')
+	if db.withRequiredWith != nil {
+		b.WriteRune(' ')
 
-		builder.WriteString("The field is required with")
+		b.WriteString("The field is required with")
 
-		for i := range b.withRequiredWith {
+		for i := range db.withRequiredWith {
 			if i > 0 {
-				if i == len(b.withRequiredWith)-1 {
-					builder.WriteString(" and ")
+				if i == len(db.withRequiredWith)-1 {
+					b.WriteString(" and ")
 				} else {
-					builder.WriteString(", ")
+					b.WriteString(", ")
 				}
 			}
 
-			builder.WriteString(fmt.Sprintf("`%v`", b.withRequiredWith[i]))
+			b.WriteString(fmt.Sprintf("`%v`", db.withRequiredWith[i]))
 		}
 
-		builder.WriteRune('.')
+		b.WriteRune('.')
 	}
 
-	if b.withMaxLen > 0 {
-		builder.WriteRune(' ')
+	if db.withMaxLen > 0 {
+		b.WriteRune(' ')
 
-		// TODO: Change to lowercase `l` in a separate PR.
-		builder.WriteString(fmt.Sprintf("Maximum Length: `%v`.", b.withMaxLen))
+		b.WriteString(fmt.Sprintf("Maximum length: `%v`.", db.withMaxLen))
 	}
 
-	if b.withDefaultValue != nil {
-		builder.WriteRune(' ')
+	if db.withDefaultValue != nil {
+		b.WriteRune(' ')
 
-		builder.WriteString(fmt.Sprintf("The default value is `%v`.", b.withDefaultValue))
+		b.WriteString(fmt.Sprintf("The default value is `%v`.", db.withDefaultValue))
 	}
 
-	if b.withUseReference {
-		builder.WriteRune(' ')
+	if db.withUseReference {
+		b.WriteRune(' ')
 
-		builder.WriteString("To set up proper dependencies please refer to this variable as a reference.")
+		b.WriteString("To set up proper dependencies please refer to this variable as a reference.")
 	}
 
-	if b.withForceNew {
-		builder.WriteRune(' ')
+	if db.withForceNew {
+		b.WriteRune(' ')
 
-		builder.WriteString("This property cannot be changed, doing so forces recreation of the resource.")
+		b.WriteString("This property cannot be changed, doing so forces recreation of the resource.")
 	}
 
-	return builder.String()
+	return b.String()
 }

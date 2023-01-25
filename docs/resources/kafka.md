@@ -100,32 +100,32 @@ Optional:
 
 Optional:
 
-- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
-- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name
-- `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
-- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--kafka_user_config--ip_filter_object))
-- `kafka` (Block List, Max: 1) Kafka broker configuration values (see [below for nested schema](#nestedblock--kafka_user_config--kafka))
-- `kafka_authentication_methods` (Block List, Max: 1) Kafka authentication methods (see [below for nested schema](#nestedblock--kafka_user_config--kafka_authentication_methods))
-- `kafka_connect` (Boolean) Enable Kafka Connect service The default value is `false`.
-- `kafka_connect_config` (Block List, Max: 1) Kafka Connect configuration values (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_config))
-- `kafka_rest` (Boolean) Enable Kafka-REST service The default value is `false`.
-- `kafka_rest_authorization` (Boolean) Enable authorization in Kafka-REST service
-- `kafka_rest_config` (Block List, Max: 1) Kafka REST configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_rest_config))
-- `kafka_version` (String) Kafka major version
-- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--kafka_user_config--private_access))
-- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--kafka_user_config--privatelink_access))
-- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--kafka_user_config--public_access))
-- `schema_registry` (Boolean) Enable Schema-Registry service The default value is `false`.
-- `schema_registry_config` (Block List, Max: 1) Schema Registry configuration (see [below for nested schema](#nestedblock--kafka_user_config--schema_registry_config))
-- `static_ips` (Boolean) Use static public IP addresses
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
+- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
+- `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'. (see [below for nested schema](#nestedblock--kafka_user_config--ip_filter_object))
+- `kafka` (Block List, Max: 1) Kafka broker configuration values. (see [below for nested schema](#nestedblock--kafka_user_config--kafka))
+- `kafka_authentication_methods` (Block List, Max: 1) Kafka authentication methods. (see [below for nested schema](#nestedblock--kafka_user_config--kafka_authentication_methods))
+- `kafka_connect` (Boolean) Enable Kafka Connect service. The default value is `false`.
+- `kafka_connect_config` (Block List, Max: 1) Kafka Connect configuration values. (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_config))
+- `kafka_rest` (Boolean) Enable Kafka-REST service. The default value is `false`.
+- `kafka_rest_authorization` (Boolean) Enable authorization in Kafka-REST service.
+- `kafka_rest_config` (Block List, Max: 1) Kafka REST configuration. (see [below for nested schema](#nestedblock--kafka_user_config--kafka_rest_config))
+- `kafka_version` (String) Kafka major version.
+- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks. (see [below for nested schema](#nestedblock--kafka_user_config--private_access))
+- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink. (see [below for nested schema](#nestedblock--kafka_user_config--privatelink_access))
+- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet. (see [below for nested schema](#nestedblock--kafka_user_config--public_access))
+- `schema_registry` (Boolean) Enable Schema-Registry service. The default value is `false`.
+- `schema_registry_config` (Block List, Max: 1) Schema Registry configuration. (see [below for nested schema](#nestedblock--kafka_user_config--schema_registry_config))
+- `static_ips` (Boolean) Use static public IP addresses.
 
 <a id="nestedblock--kafka_user_config--ip_filter_object"></a>
 ### Nested Schema for `kafka_user_config.ip_filter_object`
 
 Optional:
 
-- `description` (String) Description for IP filter list entry
-- `network` (String) CIDR address block
+- `description` (String) Description for IP filter list entry.
+- `network` (String) CIDR address block.
 
 
 <a id="nestedblock--kafka_user_config--kafka"></a>
@@ -133,39 +133,39 @@ Optional:
 
 Optional:
 
-- `auto_create_topics_enable` (Boolean) Enable auto creation of topics
+- `auto_create_topics_enable` (Boolean) Enable auto creation of topics.
 - `compression_type` (String) Specify the final compression type for a given topic. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'uncompressed' which is equivalent to no compression; and 'producer' which means retain the original compression codec set by the producer.
 - `connections_max_idle_ms` (Number) Idle connections timeout: the server socket processor threads close the connections that idle for longer than this.
-- `default_replication_factor` (Number) Replication factor for autocreated topics
+- `default_replication_factor` (Number) Replication factor for autocreated topics.
 - `group_initial_rebalance_delay_ms` (Number) The amount of time, in milliseconds, the group coordinator will wait for more consumers to join a new group before performing the first rebalance. A longer delay means potentially fewer rebalances, but increases the time until processing begins. The default value for this is 3 seconds. During development and testing it might be desirable to set this to 0 in order to not delay test execution time.
 - `group_max_session_timeout_ms` (Number) The maximum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures.
 - `group_min_session_timeout_ms` (Number) The minimum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures.
-- `log_cleaner_delete_retention_ms` (Number) How long are delete records retained?
-- `log_cleaner_max_compaction_lag_ms` (Number) The maximum amount of time message will remain uncompacted. Only applicable for logs that are being compacted
+- `log_cleaner_delete_retention_ms` (Number) How long are delete records retained?.
+- `log_cleaner_max_compaction_lag_ms` (Number) The maximum amount of time message will remain uncompacted. Only applicable for logs that are being compacted.
 - `log_cleaner_min_cleanable_ratio` (Number) Controls log compactor frequency. Larger value means more frequent compactions but also more space wasted for logs. Consider setting log.cleaner.max.compaction.lag.ms to enforce compactions sooner, instead of setting a very high value for this option.
 - `log_cleaner_min_compaction_lag_ms` (Number) The minimum time a message will remain uncompacted in the log. Only applicable for logs that are being compacted.
-- `log_cleanup_policy` (String) The default cleanup policy for segments beyond the retention window
-- `log_flush_interval_messages` (Number) The number of messages accumulated on a log partition before messages are flushed to disk
-- `log_flush_interval_ms` (Number) The maximum time in ms that a message in any topic is kept in memory before flushed to disk. If not set, the value in log.flush.scheduler.interval.ms is used
-- `log_index_interval_bytes` (Number) The interval with which Kafka adds an entry to the offset index
-- `log_index_size_max_bytes` (Number) The maximum size in bytes of the offset index
-- `log_message_downconversion_enable` (Boolean) This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests.
-- `log_message_timestamp_difference_max_ms` (Number) The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message
+- `log_cleanup_policy` (String) The default cleanup policy for segments beyond the retention window.
+- `log_flush_interval_messages` (Number) The number of messages accumulated on a log partition before messages are flushed to disk.
+- `log_flush_interval_ms` (Number) The maximum time in ms that a message in any topic is kept in memory before flushed to disk. If not set, the value in log.flush.scheduler.interval.ms is used.
+- `log_index_interval_bytes` (Number) The interval with which Kafka adds an entry to the offset index.
+- `log_index_size_max_bytes` (Number) The maximum size in bytes of the offset index.
+- `log_message_downconversion_enable` (Boolean) This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. .
+- `log_message_timestamp_difference_max_ms` (Number) The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message.
 - `log_message_timestamp_type` (String) Define whether the timestamp in the message is message create time or log append time.
-- `log_preallocate` (Boolean) Should pre allocate file when create new segment?
-- `log_retention_bytes` (Number) The maximum size of the log before deleting messages
-- `log_retention_hours` (Number) The number of hours to keep a log file before deleting it
+- `log_preallocate` (Boolean) Should pre allocate file when create new segment?.
+- `log_retention_bytes` (Number) The maximum size of the log before deleting messages.
+- `log_retention_hours` (Number) The number of hours to keep a log file before deleting it.
 - `log_retention_ms` (Number) The number of milliseconds to keep a log file before deleting it (in milliseconds), If not set, the value in log.retention.minutes is used. If set to -1, no time limit is applied.
-- `log_roll_jitter_ms` (Number) The maximum jitter to subtract from logRollTimeMillis (in milliseconds). If not set, the value in log.roll.jitter.hours is used
+- `log_roll_jitter_ms` (Number) The maximum jitter to subtract from logRollTimeMillis (in milliseconds). If not set, the value in log.roll.jitter.hours is used.
 - `log_roll_ms` (Number) The maximum time before a new log segment is rolled out (in milliseconds).
-- `log_segment_bytes` (Number) The maximum size of a single log file
-- `log_segment_delete_delay_ms` (Number) The amount of time to wait before deleting a file from the filesystem
+- `log_segment_bytes` (Number) The maximum size of a single log file.
+- `log_segment_delete_delay_ms` (Number) The amount of time to wait before deleting a file from the filesystem.
 - `max_connections_per_ip` (Number) The maximum number of connections allowed from each ip address (defaults to 2147483647).
 - `max_incremental_fetch_session_cache_slots` (Number) The maximum number of incremental fetch sessions that the broker will maintain.
 - `message_max_bytes` (Number) The maximum size of message that the server can receive.
 - `min_insync_replicas` (Number) When a producer sets acks to 'all' (or '-1'), min.insync.replicas specifies the minimum number of replicas that must acknowledge a write for the write to be considered successful.
-- `num_partitions` (Number) Number of partitions for autocreated topics
-- `offsets_retention_minutes` (Number) Log retention window in minutes for offsets topic
+- `num_partitions` (Number) Number of partitions for autocreated topics.
+- `offsets_retention_minutes` (Number) Log retention window in minutes for offsets topic.
 - `producer_purgatory_purge_interval_requests` (Number) The purge interval (in number of requests) of the producer request purgatory(defaults to 1000).
 - `replica_fetch_max_bytes` (Number) The number of bytes of messages to attempt to fetch for each partition (defaults to 1048576). This is not an absolute maximum, if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made.
 - `replica_fetch_response_max_bytes` (Number) Maximum bytes expected for the entire fetch response (defaults to 10485760). Records are fetched in batches, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made. As such, this is not an absolute maximum.
@@ -179,8 +179,8 @@ Optional:
 
 Optional:
 
-- `certificate` (Boolean) Enable certificate/SSL authentication The default value is `true`.
-- `sasl` (Boolean) Enable SASL authentication The default value is `false`.
+- `certificate` (Boolean) Enable certificate/SSL authentication. The default value is `true`.
+- `sasl` (Boolean) Enable SASL authentication. The default value is `false`.
 
 
 <a id="nestedblock--kafka_user_config--kafka_connect_config"></a>
@@ -188,11 +188,11 @@ Optional:
 
 Optional:
 
-- `connector_client_config_override_policy` (String) Defines what client configurations can be overridden by the connector. Default is None
-- `consumer_auto_offset_reset` (String) What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest
+- `connector_client_config_override_policy` (String) Defines what client configurations can be overridden by the connector. Default is None.
+- `consumer_auto_offset_reset` (String) What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest.
 - `consumer_fetch_max_bytes` (Number) Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum.
 - `consumer_isolation_level` (String) Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.
-- `consumer_max_partition_fetch_bytes` (Number) Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress.
+- `consumer_max_partition_fetch_bytes` (Number) Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. .
 - `consumer_max_poll_interval_ms` (Number) The maximum delay in milliseconds between invocations of poll() when using consumer group management (defaults to 300000).
 - `consumer_max_poll_records` (Number) The maximum number of records returned in a single call to poll() (defaults to 500).
 - `offset_flush_interval_ms` (Number) The interval at which to try committing offsets for tasks (defaults to 60000).
@@ -210,13 +210,13 @@ Optional:
 
 Optional:
 
-- `consumer_enable_auto_commit` (Boolean) If true the consumer's offset will be periodically committed to Kafka in the background The default value is `true`.
-- `consumer_request_max_bytes` (Number) Maximum number of bytes in unencoded message keys and values by a single request The default value is `67108864`.
-- `consumer_request_timeout_ms` (Number) The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached The default value is `1000`.
+- `consumer_enable_auto_commit` (Boolean) If true the consumer's offset will be periodically committed to Kafka in the background. The default value is `true`.
+- `consumer_request_max_bytes` (Number) Maximum number of bytes in unencoded message keys and values by a single request. The default value is `67108864`.
+- `consumer_request_timeout_ms` (Number) The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached. The default value is `1000`.
 - `producer_acks` (String) The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to 'all' or '-1', the leader will wait for the full set of in-sync replicas to acknowledge the record. The default value is `1`.
 - `producer_compression_type` (String) Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.
-- `producer_linger_ms` (Number) Wait for up to the given delay to allow batching records together The default value is `0`.
-- `simpleconsumer_pool_size_max` (Number) Maximum number of SimpleConsumers that can be instantiated per broker The default value is `25`.
+- `producer_linger_ms` (Number) Wait for up to the given delay to allow batching records together. The default value is `0`.
+- `simpleconsumer_pool_size_max` (Number) Maximum number of SimpleConsumers that can be instantiated per broker. The default value is `25`.
 
 
 <a id="nestedblock--kafka_user_config--private_access"></a>
@@ -224,11 +224,11 @@ Optional:
 
 Optional:
 
-- `kafka` (Boolean) Allow clients to connect to kafka with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
-- `kafka_connect` (Boolean) Allow clients to connect to kafka_connect with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
-- `kafka_rest` (Boolean) Allow clients to connect to kafka_rest with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
-- `prometheus` (Boolean) Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
-- `schema_registry` (Boolean) Allow clients to connect to schema_registry with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+- `kafka` (Boolean) Allow clients to connect to kafka with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
+- `kafka_connect` (Boolean) Allow clients to connect to kafka_connect with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
+- `kafka_rest` (Boolean) Allow clients to connect to kafka_rest with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
+- `prometheus` (Boolean) Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
+- `schema_registry` (Boolean) Allow clients to connect to schema_registry with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
 
 
 <a id="nestedblock--kafka_user_config--privatelink_access"></a>
@@ -236,12 +236,12 @@ Optional:
 
 Optional:
 
-- `jolokia` (Boolean) Enable jolokia
-- `kafka` (Boolean) Enable kafka
-- `kafka_connect` (Boolean) Enable kafka_connect
-- `kafka_rest` (Boolean) Enable kafka_rest
-- `prometheus` (Boolean) Enable prometheus
-- `schema_registry` (Boolean) Enable schema_registry
+- `jolokia` (Boolean) Enable jolokia.
+- `kafka` (Boolean) Enable kafka.
+- `kafka_connect` (Boolean) Enable kafka_connect.
+- `kafka_rest` (Boolean) Enable kafka_rest.
+- `prometheus` (Boolean) Enable prometheus.
+- `schema_registry` (Boolean) Enable schema_registry.
 
 
 <a id="nestedblock--kafka_user_config--public_access"></a>
@@ -249,11 +249,11 @@ Optional:
 
 Optional:
 
-- `kafka` (Boolean) Allow clients to connect to kafka from the public internet for service nodes that are in a project VPC or another type of private network
-- `kafka_connect` (Boolean) Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network
-- `kafka_rest` (Boolean) Allow clients to connect to kafka_rest from the public internet for service nodes that are in a project VPC or another type of private network
-- `prometheus` (Boolean) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network
-- `schema_registry` (Boolean) Allow clients to connect to schema_registry from the public internet for service nodes that are in a project VPC or another type of private network
+- `kafka` (Boolean) Allow clients to connect to kafka from the public internet for service nodes that are in a project VPC or another type of private network.
+- `kafka_connect` (Boolean) Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network.
+- `kafka_rest` (Boolean) Allow clients to connect to kafka_rest from the public internet for service nodes that are in a project VPC or another type of private network.
+- `prometheus` (Boolean) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.
+- `schema_registry` (Boolean) Allow clients to connect to schema_registry from the public internet for service nodes that are in a project VPC or another type of private network.
 
 
 <a id="nestedblock--kafka_user_config--schema_registry_config"></a>

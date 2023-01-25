@@ -105,7 +105,7 @@ Optional:
 - `column` (String) The column that the grant refers to. This property cannot be changed, doing so forces recreation of the resource.
 - `privilege` (String) The privilege to grant, i.e. 'INSERT', 'SELECT', etc. This property cannot be changed, doing so forces recreation of the resource.
 - `table` (String) The table that the grant refers to. This property cannot be changed, doing so forces recreation of the resource.
-- `with_grant` (Boolean) If true then the grantee gets the ability to grant the privileges he received too This property cannot be changed, doing so forces recreation of the resource.
+- `with_grant` (Boolean) If true then the grantee gets the ability to grant the privileges he received too. This property cannot be changed, doing so forces recreation of the resource.
 
 
 <a id="nestedblock--role_grant"></a>
