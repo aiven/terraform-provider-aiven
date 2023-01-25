@@ -47,20 +47,20 @@ The Service Integration Endpoint resource allows the creation and management of 
 
 Optional:
 
-- `datadog_api_key` (String, Sensitive) Datadog API key
-- `datadog_tags` (Block List, Max: 32) Custom tags provided by user (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))
-- `disable_consumer_stats` (Boolean) Disable consumer group metrics
-- `kafka_consumer_check_instances` (Number) Number of separate instances to fetch kafka consumer statistics with
-- `kafka_consumer_stats_timeout` (Number) Number of seconds that datadog will wait to get consumer statistics from brokers
-- `max_partition_contexts` (Number) Maximum number of partition contexts to send
-- `site` (String) Datadog intake site. Defaults to datadoghq.com
+- `datadog_api_key` (String, Sensitive) Datadog API key.
+- `datadog_tags` (Block List, Max: 32) Custom tags provided by user. (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))
+- `disable_consumer_stats` (Boolean) Disable consumer group metrics.
+- `kafka_consumer_check_instances` (Number) Number of separate instances to fetch kafka consumer statistics with.
+- `kafka_consumer_stats_timeout` (Number) Number of seconds that datadog will wait to get consumer statistics from brokers.
+- `max_partition_contexts` (Number) Maximum number of partition contexts to send.
+- `site` (String) Datadog intake site. Defaults to datadoghq.com.
 
 <a id="nestedblock--datadog_user_config--datadog_tags"></a>
 ### Nested Schema for `datadog_user_config.datadog_tags`
 
 Optional:
 
-- `comment` (String) Optional tag explanation
+- `comment` (String) Optional tag explanation.
 - `tag` (String) Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix 'aiven-' are reserved for Aiven.
 
 
@@ -70,10 +70,10 @@ Optional:
 
 Optional:
 
-- `access_key` (String) AWS access key. Required permissions are logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents and logs:DescribeLogStreams
-- `log_group_name` (String) AWS CloudWatch log group name
-- `region` (String) AWS region
-- `secret_key` (String) AWS secret key
+- `access_key` (String) AWS access key. Required permissions are logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents and logs:DescribeLogStreams.
+- `log_group_name` (String) AWS CloudWatch log group name.
+- `region` (String) AWS region.
+- `secret_key` (String) AWS secret key.
 
 
 <a id="nestedblock--external_aws_cloudwatch_metrics_user_config"></a>
@@ -81,10 +81,10 @@ Optional:
 
 Optional:
 
-- `access_key` (String) AWS access key. Required permissions are cloudwatch:PutMetricData
-- `namespace` (String) AWS CloudWatch Metrics Namespace
-- `region` (String) AWS region
-- `secret_key` (String) AWS secret key
+- `access_key` (String) AWS access key. Required permissions are cloudwatch:PutMetricData.
+- `namespace` (String) AWS CloudWatch Metrics Namespace.
+- `region` (String) AWS region.
+- `secret_key` (String) AWS secret key.
 
 
 <a id="nestedblock--external_elasticsearch_logs_user_config"></a>
@@ -92,11 +92,11 @@ Optional:
 
 Optional:
 
-- `ca` (String) PEM encoded CA certificate
-- `index_days_max` (Number) Maximum number of days of logs to keep The default value is `3`.
-- `index_prefix` (String) Elasticsearch index prefix The default value is `logs`.
-- `timeout` (Number) Elasticsearch request timeout limit The default value is `10.0`.
-- `url` (String) Elasticsearch connection URL
+- `ca` (String) PEM encoded CA certificate.
+- `index_days_max` (Number) Maximum number of days of logs to keep. The default value is `3`.
+- `index_prefix` (String) Elasticsearch index prefix. The default value is `logs`.
+- `timeout` (Number) Elasticsearch request timeout limit. The default value is `10.0`.
+- `url` (String) Elasticsearch connection URL.
 
 
 <a id="nestedblock--external_google_cloud_logging_user_config"></a>
@@ -104,7 +104,7 @@ Optional:
 
 Optional:
 
-- `log_id` (String) Google Cloud Logging log id
+- `log_id` (String) Google Cloud Logging log id.
 - `project_id` (String) GCP project id.
 - `service_account_credentials` (String) This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys .
 
@@ -114,14 +114,14 @@ Optional:
 
 Optional:
 
-- `bootstrap_servers` (String) Bootstrap servers
+- `bootstrap_servers` (String) Bootstrap servers.
 - `sasl_mechanism` (String) The list of SASL mechanisms enabled in the Kafka server.
 - `sasl_plain_password` (String, Sensitive) Password for SASL PLAIN mechanism in the Kafka server.
 - `sasl_plain_username` (String) Username for SASL PLAIN mechanism in the Kafka server.
-- `security_protocol` (String) Security protocol
-- `ssl_ca_cert` (String) PEM-encoded CA certificate
-- `ssl_client_cert` (String) PEM-encoded client certificate
-- `ssl_client_key` (String) PEM-encoded client key
+- `security_protocol` (String) Security protocol.
+- `ssl_ca_cert` (String) PEM-encoded CA certificate.
+- `ssl_client_cert` (String) PEM-encoded client certificate.
+- `ssl_client_key` (String) PEM-encoded client key.
 - `ssl_endpoint_identification_algorithm` (String) The endpoint identification algorithm to validate server hostname using server certificate.
 
 
@@ -130,11 +130,11 @@ Optional:
 
 Optional:
 
-- `ca` (String) PEM encoded CA certificate
-- `index_days_max` (Number) Maximum number of days of logs to keep The default value is `3`.
-- `index_prefix` (String) OpenSearch index prefix The default value is `logs`.
-- `timeout` (Number) OpenSearch request timeout limit The default value is `10.0`.
-- `url` (String) OpenSearch connection URL
+- `ca` (String) PEM encoded CA certificate.
+- `index_days_max` (Number) Maximum number of days of logs to keep. The default value is `3`.
+- `index_prefix` (String) OpenSearch index prefix. The default value is `logs`.
+- `timeout` (Number) OpenSearch request timeout limit. The default value is `10.0`.
+- `url` (String) OpenSearch connection URL.
 
 
 <a id="nestedblock--external_schema_registry_user_config"></a>
@@ -142,10 +142,10 @@ Optional:
 
 Optional:
 
-- `authentication` (String) Authentication method
-- `basic_auth_password` (String, Sensitive) Basic authentication password
-- `basic_auth_username` (String) Basic authentication user name
-- `url` (String) Schema Registry URL
+- `authentication` (String) Authentication method.
+- `basic_auth_password` (String, Sensitive) Basic authentication password.
+- `basic_auth_username` (String) Basic authentication user name.
+- `url` (String) Schema Registry URL.
 
 
 <a id="nestedblock--jolokia_user_config"></a>
@@ -153,8 +153,8 @@ Optional:
 
 Optional:
 
-- `basic_auth_password` (String, Sensitive) Jolokia basic authentication password
-- `basic_auth_username` (String) Jolokia basic authentication username
+- `basic_auth_password` (String, Sensitive) Jolokia basic authentication password.
+- `basic_auth_username` (String) Jolokia basic authentication username.
 
 
 <a id="nestedblock--prometheus_user_config"></a>
@@ -162,8 +162,8 @@ Optional:
 
 Optional:
 
-- `basic_auth_password` (String, Sensitive) Prometheus basic authentication password
-- `basic_auth_username` (String) Prometheus basic authentication username
+- `basic_auth_password` (String, Sensitive) Prometheus basic authentication password.
+- `basic_auth_username` (String) Prometheus basic authentication username.
 
 
 <a id="nestedblock--rsyslog_user_config"></a>
@@ -171,15 +171,15 @@ Optional:
 
 Optional:
 
-- `ca` (String) PEM encoded CA certificate
-- `cert` (String) PEM encoded client certificate
-- `format` (String) message format The default value is `rfc5424`.
-- `key` (String) PEM encoded client key
-- `logline` (String) custom syslog message format
-- `port` (Number) rsyslog server port The default value is `514`.
-- `sd` (String) Structured data block for log message
-- `server` (String) rsyslog server IP address or hostname
-- `tls` (Boolean) Require TLS The default value is `true`.
+- `ca` (String) PEM encoded CA certificate.
+- `cert` (String) PEM encoded client certificate.
+- `format` (String) message format. The default value is `rfc5424`.
+- `key` (String) PEM encoded client key.
+- `logline` (String) custom syslog message format.
+- `port` (Number) rsyslog server port. The default value is `514`.
+- `sd` (String) Structured data block for log message.
+- `server` (String) rsyslog server IP address or hostname.
+- `tls` (Boolean) Require TLS. The default value is `true`.
 
 
 <a id="nestedblock--signalfx_user_config"></a>
@@ -187,9 +187,9 @@ Optional:
 
 Optional:
 
-- `enabled_metrics` (List of String) list of metrics to send
-- `signalfx_api_key` (String, Sensitive) SignalFX API key
-- `signalfx_realm` (String) SignalFX realm The default value is `us0`.
+- `enabled_metrics` (List of String) list of metrics to send.
+- `signalfx_api_key` (String, Sensitive) SignalFX API key.
+- `signalfx_realm` (String) SignalFX realm. The default value is `us0`.
 
 
 <a id="nestedblock--timeouts"></a>

@@ -93,11 +93,11 @@ Optional:
 
 Required:
 
-- `key` (String) Topic tag key. Maximum Length: `64`.
+- `key` (String) Topic tag key. Maximum length: `64`.
 
 Optional:
 
-- `value` (String) Topic tag value. Maximum Length: `256`.
+- `value` (String) Topic tag value. Maximum length: `256`.
 
 
 <a id="nestedblock--timeouts"></a>
