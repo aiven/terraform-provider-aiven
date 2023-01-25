@@ -60,8 +60,9 @@ func ResourceFlinkJob() *schema.Resource {
 			Read:   schema.DefaultTimeout(1 * time.Minute),
 			Delete: schema.DefaultTimeout(1 * time.Minute),
 		},
-		Schema:        aivenFlinkJobSchema,
-		CustomizeDiff: customdiff.If(schemautil.ResourceShouldExist, resourceFlinkJobCustomizeDiff),
+		Schema:             aivenFlinkJobSchema,
+		CustomizeDiff:      customdiff.If(schemautil.ResourceShouldExist, resourceFlinkJobCustomizeDiff),
+		DeprecationMessage: schemautil.DeprecationMessage,
 	}
 }
 
