@@ -83,34 +83,34 @@ resource "aiven_opensearch" "os1" {
 
 Optional:
 
-- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
-- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
+- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
 - `disable_replication_factor_adjustment` (Boolean, Deprecated) Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can no longer be activated.
-- `index_patterns` (Block List, Max: 512) Index patterns (see [below for nested schema](#nestedblock--opensearch_user_config--index_patterns))
-- `index_template` (Block List, Max: 1) Template settings for all new indexes (see [below for nested schema](#nestedblock--opensearch_user_config--index_template))
-- `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
-- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--opensearch_user_config--ip_filter_object))
+- `index_patterns` (Block List, Max: 512) Index patterns. (see [below for nested schema](#nestedblock--opensearch_user_config--index_patterns))
+- `index_template` (Block List, Max: 1) Template settings for all new indexes. (see [below for nested schema](#nestedblock--opensearch_user_config--index_template))
+- `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'. (see [below for nested schema](#nestedblock--opensearch_user_config--ip_filter_object))
 - `keep_index_refresh_interval` (Boolean) Aiven automation resets index.refresh_interval to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.
-- `max_index_count` (Number, Deprecated) use index_patterns instead The default value is `0`.
-- `opensearch` (Block List, Max: 1) OpenSearch settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch))
-- `opensearch_dashboards` (Block List, Max: 1) OpenSearch Dashboards settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch_dashboards))
-- `opensearch_version` (String) OpenSearch major version
-- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--opensearch_user_config--private_access))
-- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--opensearch_user_config--privatelink_access))
+- `max_index_count` (Number, Deprecated) Use index_patterns instead. The default value is `0`.
+- `opensearch` (Block List, Max: 1) OpenSearch settings. (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch))
+- `opensearch_dashboards` (Block List, Max: 1) OpenSearch Dashboards settings. (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch_dashboards))
+- `opensearch_version` (String) OpenSearch major version.
+- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks. (see [below for nested schema](#nestedblock--opensearch_user_config--private_access))
+- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink. (see [below for nested schema](#nestedblock--opensearch_user_config--privatelink_access))
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
-- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--opensearch_user_config--public_access))
-- `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service
+- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet. (see [below for nested schema](#nestedblock--opensearch_user_config--public_access))
+- `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service.
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
-- `static_ips` (Boolean) Use static public IP addresses
+- `static_ips` (Boolean) Use static public IP addresses.
 
 <a id="nestedblock--opensearch_user_config--index_patterns"></a>
 ### Nested Schema for `opensearch_user_config.index_patterns`
 
 Optional:
 
-- `max_index_count` (Number) Maximum number of indexes to keep
-- `pattern` (String) fnmatch pattern
-- `sorting_algorithm` (String) Deletion sorting algorithm The default value is `creation_date`.
+- `max_index_count` (Number) Maximum number of indexes to keep.
+- `pattern` (String) fnmatch pattern.
+- `sorting_algorithm` (String) Deletion sorting algorithm. The default value is `creation_date`.
 
 
 <a id="nestedblock--opensearch_user_config--index_template"></a>
@@ -128,8 +128,8 @@ Optional:
 
 Optional:
 
-- `description` (String) Description for IP filter list entry
-- `network` (String) CIDR address block
+- `description` (String) Description for IP filter list entry.
+- `network` (String) CIDR address block.
 
 
 <a id="nestedblock--opensearch_user_config--opensearch"></a>
@@ -137,25 +137,25 @@ Optional:
 
 Optional:
 
-- `action_auto_create_index_enabled` (Boolean) Explicitly allow or block automatic creation of indices. Defaults to true
-- `action_destructive_requires_name` (Boolean) Require explicit index names when deleting
-- `cluster_max_shards_per_node` (Number) Controls the number of shards allowed in the cluster per data node
+- `action_auto_create_index_enabled` (Boolean) Explicitly allow or block automatic creation of indices. Defaults to true.
+- `action_destructive_requires_name` (Boolean) Require explicit index names when deleting.
+- `cluster_max_shards_per_node` (Number) Controls the number of shards allowed in the cluster per data node.
 - `cluster_routing_allocation_node_concurrent_recoveries` (Number) How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to 2.
-- `email_sender_name` (String) This should be identical to the Sender name defined in Opensearch dashboards
-- `email_sender_password` (String, Sensitive) Sender email password for Opensearch alerts to authenticate with SMTP server
-- `email_sender_username` (String) Sender email address for Opensearch alerts
+- `email_sender_name` (String) This should be identical to the Sender name defined in Opensearch dashboards.
+- `email_sender_password` (String, Sensitive) Sender email password for Opensearch alerts to authenticate with SMTP server.
+- `email_sender_username` (String) Sender email address for Opensearch alerts.
 - `http_max_content_length` (Number) Maximum content length for HTTP requests to the OpenSearch HTTP API, in bytes.
-- `http_max_header_size` (Number) The max size of allowed headers, in bytes
-- `http_max_initial_line_length` (Number) The max length of an HTTP URL, in bytes
+- `http_max_header_size` (Number) The max size of allowed headers, in bytes.
+- `http_max_initial_line_length` (Number) The max length of an HTTP URL, in bytes.
 - `indices_fielddata_cache_size` (Number) Relative amount. Maximum amount of heap memory used for field data cache. This is an expert setting; decreasing the value too much will increase overhead of loading field data; too much memory used for field data cache will decrease amount of heap available for other operations.
 - `indices_memory_index_buffer_size` (Number) Percentage value. Default is 10%. Total amount of heap used for indexing buffer, before writing segments to disk. This is an expert setting. Too low value will slow down indexing; too high value will increase indexing performance but causes performance issues for query performance.
 - `indices_queries_cache_size` (Number) Percentage value. Default is 10%. Maximum amount of heap used for query cache. This is an expert setting. Too low value will decrease query performance and increase performance for other operations; too high value will cause issues with other OpenSearch functionality.
 - `indices_query_bool_max_clause_count` (Number) Maximum number of clauses Lucene BooleanQuery can have. The default value (1024) is relatively high, and increasing it may cause performance issues. Investigate other approaches first before increasing this value.
-- `indices_recovery_max_bytes_per_sec` (Number) Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb
+- `indices_recovery_max_bytes_per_sec` (Number) Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb.
 - `indices_recovery_max_concurrent_file_chunks` (Number) Number of file chunks sent in parallel for each recovery. Defaults to 2.
-- `override_main_response_version` (Boolean) Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false
+- `override_main_response_version` (Boolean) Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false.
 - `reindex_remote_whitelist` (List of String) Whitelisted addresses for reindexing. Changing this value will cause all OpenSearch instances to restart.
-- `script_max_compilations_rate` (String) Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context
+- `script_max_compilations_rate` (String) Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context.
 - `search_max_buckets` (Number) Maximum number of aggregation buckets allowed in a single response. OpenSearch default value is used when this is not defined.
 - `thread_pool_analyze_queue_size` (Number) Size for the thread pool queue. See documentation for exact details.
 - `thread_pool_analyze_size` (Number) Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
@@ -175,9 +175,9 @@ Optional:
 
 Optional:
 
-- `enabled` (Boolean) Enable or disable OpenSearch Dashboards The default value is `true`.
+- `enabled` (Boolean) Enable or disable OpenSearch Dashboards. The default value is `true`.
 - `max_old_space_size` (Number) Limits the maximum amount of memory (in MiB) the OpenSearch Dashboards process can use. This sets the max_old_space_size option of the nodejs running the OpenSearch Dashboards. Note: the memory reserved by OpenSearch Dashboards is not available for OpenSearch. The default value is `128`.
-- `opensearch_request_timeout` (Number) Timeout in milliseconds for requests made by OpenSearch Dashboards towards OpenSearch The default value is `30000`.
+- `opensearch_request_timeout` (Number) Timeout in milliseconds for requests made by OpenSearch Dashboards towards OpenSearch. The default value is `30000`.
 
 
 <a id="nestedblock--opensearch_user_config--private_access"></a>
@@ -185,9 +185,9 @@ Optional:
 
 Optional:
 
-- `opensearch` (Boolean) Allow clients to connect to opensearch with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
-- `opensearch_dashboards` (Boolean) Allow clients to connect to opensearch_dashboards with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
-- `prometheus` (Boolean) Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+- `opensearch` (Boolean) Allow clients to connect to opensearch with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
+- `opensearch_dashboards` (Boolean) Allow clients to connect to opensearch_dashboards with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
+- `prometheus` (Boolean) Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
 
 
 <a id="nestedblock--opensearch_user_config--privatelink_access"></a>
@@ -195,9 +195,9 @@ Optional:
 
 Optional:
 
-- `opensearch` (Boolean) Enable opensearch
-- `opensearch_dashboards` (Boolean) Enable opensearch_dashboards
-- `prometheus` (Boolean) Enable prometheus
+- `opensearch` (Boolean) Enable opensearch.
+- `opensearch_dashboards` (Boolean) Enable opensearch_dashboards.
+- `prometheus` (Boolean) Enable prometheus.
 
 
 <a id="nestedblock--opensearch_user_config--public_access"></a>
@@ -205,9 +205,9 @@ Optional:
 
 Optional:
 
-- `opensearch` (Boolean) Allow clients to connect to opensearch from the public internet for service nodes that are in a project VPC or another type of private network
-- `opensearch_dashboards` (Boolean) Allow clients to connect to opensearch_dashboards from the public internet for service nodes that are in a project VPC or another type of private network
-- `prometheus` (Boolean) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network
+- `opensearch` (Boolean) Allow clients to connect to opensearch from the public internet for service nodes that are in a project VPC or another type of private network.
+- `opensearch_dashboards` (Boolean) Allow clients to connect to opensearch_dashboards from the public internet for service nodes that are in a project VPC or another type of private network.
+- `prometheus` (Boolean) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.
 
 
 

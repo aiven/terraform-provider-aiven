@@ -30,7 +30,7 @@ resource "aiven_azure_privatelink" "foo" {
 
 - `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 - `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `user_subscription_ids` (Set of String) A List of allowed Subscription IDs Maximum Length: `16`.
+- `user_subscription_ids` (Set of String) A List of allowed Subscription IDs. Maximum length: `16`.
 
 ### Optional
 
