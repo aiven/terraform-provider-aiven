@@ -12,6 +12,8 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+const DeprecationMessage = "This resource is deprecated and will be removed in the next major release."
+
 //goland:noinspection GoDeprecation
 func GetACLUserValidateFunc() schema.SchemaValidateFunc { //nolint:staticcheck
 	return validation.StringMatch(
