@@ -34,7 +34,7 @@ data "aiven_connection_pool" "mytestpool" {
 - `connection_uri` (String, Sensitive) The URI for connecting to the pool
 - `database_name` (String) The name of the database the pool connects to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 - `id` (String) The ID of this resource.
-- `pool_mode` (String) The mode the pool operates in The possible values are `session`, `transaction` and `statement`. The default value is `transaction`.
+- `pool_mode` (String) The mode the pool operates in. The possible values are `session`, `transaction` and `statement`. The default value is `transaction`.
 - `pool_size` (Number) The number of connections the pool may create towards the backend server. This does not affect the number of incoming connections, which is always a much larger number. The default value is `10`.
 - `username` (String) The name of the service user used to connect to the database. To set up proper dependencies please refer to this variable as a reference.
 

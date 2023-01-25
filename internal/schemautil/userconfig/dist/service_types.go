@@ -11,14 +11,14 @@ import (
 func ServiceTypeCassandra() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"additional_backup_regions": {
-			Description: "Additional Cloud Regions for Backup Replication",
+			Description: "Additional Cloud Regions for Backup Replication.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			MaxItems:    1,
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
 		"cassandra": {
-			Description: "cassandra configuration values",
+			Description: "cassandra configuration values.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"batch_size_fail_threshold_in_kb": {
 					Description: "Fail any multiple-partition batch exceeding this value. 50kb (10x warn threshold) by default.",
@@ -58,13 +58,13 @@ func ServiceTypeCassandra() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"cassandra_version": {
-			Description: "Cassandra major version",
+			Description: "Cassandra major version.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"ip_filter": {
 			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
-			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
 				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
@@ -75,15 +75,15 @@ func ServiceTypeCassandra() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"ip_filter_object": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"description": {
-					Description: "Description for IP filter list entry",
+					Description: "Description for IP filter list entry.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"network": {
-					Description: "CIDR address block",
+					Description: "CIDR address block.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -98,14 +98,14 @@ func ServiceTypeCassandra() *schema.Schema {
 			Type:        schema.TypeBool,
 		},
 		"private_access": {
-			Description: "Allow access to selected service ports from private networks",
+			Description: "Allow access to selected service ports from private networks.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"prometheus": {
-				Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+				Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"prometheus": {
-				Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+				Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			}}},
@@ -120,14 +120,14 @@ func ServiceTypeCassandra() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"public_access": {
-			Description: "Allow access to selected service ports from the public Internet",
+			Description: "Allow access to selected service ports from the public Internet.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"prometheus": {
-				Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
+				Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"prometheus": {
-				Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
+				Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			}}},
@@ -147,7 +147,7 @@ func ServiceTypeCassandra() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"static_ips": {
-			Description: "Use static public IP addresses",
+			Description: "Use static public IP addresses.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
@@ -167,7 +167,7 @@ func ServiceTypeCassandra() *schema.Schema {
 func ServiceTypeClickhouse() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"additional_backup_regions": {
-			Description: "Additional Cloud Regions for Backup Replication",
+			Description: "Additional Cloud Regions for Backup Replication.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			MaxItems:    1,
 			Optional:    true,
@@ -175,7 +175,7 @@ func ServiceTypeClickhouse() *schema.Schema {
 		},
 		"ip_filter": {
 			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
-			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
 				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
@@ -186,15 +186,15 @@ func ServiceTypeClickhouse() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"ip_filter_object": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"description": {
-					Description: "Description for IP filter list entry",
+					Description: "Description for IP filter list entry.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"network": {
-					Description: "CIDR address block",
+					Description: "CIDR address block.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -231,14 +231,14 @@ func ServiceTypeClickhouse() *schema.Schema {
 func ServiceTypeElasticsearch() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"additional_backup_regions": {
-			Description: "Additional Cloud Regions for Backup Replication",
+			Description: "Additional Cloud Regions for Backup Replication.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			MaxItems:    1,
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
 		"custom_domain": {
-			Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
+			Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
@@ -249,20 +249,20 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			Type:        schema.TypeBool,
 		},
 		"elasticsearch": {
-			Description: "Elasticsearch settings",
+			Description: "Elasticsearch settings.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"action_auto_create_index_enabled": {
-					Description: "Explicitly allow or block automatic creation of indices. Defaults to true",
+					Description: "Explicitly allow or block automatic creation of indices. Defaults to true.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"action_destructive_requires_name": {
-					Description: "Require explicit index names when deleting",
+					Description: "Require explicit index names when deleting.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"cluster_max_shards_per_node": {
-					Description: "Controls the number of shards allowed in the cluster per data node",
+					Description: "Controls the number of shards allowed in the cluster per data node.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -272,18 +272,18 @@ func ServiceTypeElasticsearch() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"email_sender_name": {
-					Description: "This should be identical to the Sender name defined in Opensearch dashboards",
+					Description: "This should be identical to the Sender name defined in Opensearch dashboards.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"email_sender_password": {
-					Description: "Sender email password for Opensearch alerts to authenticate with SMTP server",
+					Description: "Sender email password for Opensearch alerts to authenticate with SMTP server.",
 					Optional:    true,
 					Sensitive:   true,
 					Type:        schema.TypeString,
 				},
 				"email_sender_username": {
-					Description: "Sender email address for Opensearch alerts",
+					Description: "Sender email address for Opensearch alerts.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -293,12 +293,12 @@ func ServiceTypeElasticsearch() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"http_max_header_size": {
-					Description: "The max size of allowed headers, in bytes",
+					Description: "The max size of allowed headers, in bytes.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"http_max_initial_line_length": {
-					Description: "The max length of an HTTP URL, in bytes",
+					Description: "The max length of an HTTP URL, in bytes.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -323,7 +323,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"indices_recovery_max_bytes_per_sec": {
-					Description: "Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb",
+					Description: "Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -333,7 +333,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"override_main_response_version": {
-					Description: "Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false",
+					Description: "Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -345,7 +345,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 					Type:        schema.TypeList,
 				},
 				"script_max_compilations_rate": {
-					Description: "Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context",
+					Description: "Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -412,17 +412,17 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"action_auto_create_index_enabled": {
-					Description: "Explicitly allow or block automatic creation of indices. Defaults to true",
+					Description: "Explicitly allow or block automatic creation of indices. Defaults to true.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"action_destructive_requires_name": {
-					Description: "Require explicit index names when deleting",
+					Description: "Require explicit index names when deleting.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"cluster_max_shards_per_node": {
-					Description: "Controls the number of shards allowed in the cluster per data node",
+					Description: "Controls the number of shards allowed in the cluster per data node.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -432,18 +432,18 @@ func ServiceTypeElasticsearch() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"email_sender_name": {
-					Description: "This should be identical to the Sender name defined in Opensearch dashboards",
+					Description: "This should be identical to the Sender name defined in Opensearch dashboards.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"email_sender_password": {
-					Description: "Sender email password for Opensearch alerts to authenticate with SMTP server",
+					Description: "Sender email password for Opensearch alerts to authenticate with SMTP server.",
 					Optional:    true,
 					Sensitive:   true,
 					Type:        schema.TypeString,
 				},
 				"email_sender_username": {
-					Description: "Sender email address for Opensearch alerts",
+					Description: "Sender email address for Opensearch alerts.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -453,12 +453,12 @@ func ServiceTypeElasticsearch() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"http_max_header_size": {
-					Description: "The max size of allowed headers, in bytes",
+					Description: "The max size of allowed headers, in bytes.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"http_max_initial_line_length": {
-					Description: "The max length of an HTTP URL, in bytes",
+					Description: "The max length of an HTTP URL, in bytes.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -483,7 +483,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"indices_recovery_max_bytes_per_sec": {
-					Description: "Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb",
+					Description: "Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -493,7 +493,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"override_main_response_version": {
-					Description: "Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false",
+					Description: "Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -505,7 +505,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 					Type:        schema.TypeList,
 				},
 				"script_max_compilations_rate": {
-					Description: "Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context",
+					Description: "Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -575,26 +575,26 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"elasticsearch_version": {
-			Description: "Elasticsearch major version",
+			Description: "Elasticsearch major version.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"index_patterns": {
-			Description: "Index patterns",
+			Description: "Index patterns.",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"max_index_count": {
-					Description: "Maximum number of indexes to keep",
+					Description: "Maximum number of indexes to keep.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"pattern": {
-					Description: "fnmatch pattern",
+					Description: "fnmatch pattern.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"sorting_algorithm": {
 					Default:     "creation_date",
-					Description: "Deletion sorting algorithm The default value is `creation_date`.",
+					Description: "Deletion sorting algorithm. The default value is `creation_date`.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -604,7 +604,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"index_template": {
-			Description: "Template settings for all new indexes",
+			Description: "Template settings for all new indexes.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"mapping_nested_objects_limit": {
 					Description: "The maximum number of nested JSON objects that a single document can contain across all nested types. This limit helps to prevent out of memory errors when a document contains too many nested objects. Default is 10000.",
@@ -645,7 +645,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 		},
 		"ip_filter": {
 			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
-			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
 				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
@@ -656,15 +656,15 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"ip_filter_object": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"description": {
-					Description: "Description for IP filter list entry",
+					Description: "Description for IP filter list entry.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"network": {
-					Description: "CIDR address block",
+					Description: "CIDR address block.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -679,17 +679,17 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			Type:        schema.TypeBool,
 		},
 		"kibana": {
-			Description: "Kibana settings",
+			Description: "Kibana settings.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"elasticsearch_request_timeout": {
 					Default:     "30000",
-					Description: "Timeout in milliseconds for requests made by Kibana towards Elasticsearch The default value is `30000`.",
+					Description: "Timeout in milliseconds for requests made by Kibana towards Elasticsearch. The default value is `30000`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"enabled": {
 					Default:     true,
-					Description: "Enable or disable Kibana The default value is `true`.",
+					Description: "Enable or disable Kibana. The default value is `true`.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -703,13 +703,13 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"elasticsearch_request_timeout": {
 					Default:     "30000",
-					Description: "Timeout in milliseconds for requests made by Kibana towards Elasticsearch The default value is `30000`.",
+					Description: "Timeout in milliseconds for requests made by Kibana towards Elasticsearch. The default value is `30000`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"enabled": {
 					Default:     true,
-					Description: "Enable or disable Kibana The default value is `true`.",
+					Description: "Enable or disable Kibana. The default value is `true`.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -727,47 +727,47 @@ func ServiceTypeElasticsearch() *schema.Schema {
 		"max_index_count": {
 			Default:     "0",
 			Deprecated:  "Usage of this field is discouraged.",
-			Description: "use index_patterns instead The default value is `0`.",
+			Description: "Use index_patterns instead. The default value is `0`.",
 			Optional:    true,
 			Type:        schema.TypeInt,
 		},
 		"opensearch_version": {
-			Description: "OpenSearch major version",
+			Description: "OpenSearch major version.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"private_access": {
-			Description: "Allow access to selected service ports from private networks",
+			Description: "Allow access to selected service ports from private networks.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"elasticsearch": {
-					Description: "Allow clients to connect to elasticsearch with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to elasticsearch with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kibana": {
-					Description: "Allow clients to connect to kibana with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to kibana with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"elasticsearch": {
-					Description: "Allow clients to connect to elasticsearch with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to elasticsearch with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kibana": {
-					Description: "Allow clients to connect to kibana with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to kibana with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -777,37 +777,37 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"privatelink_access": {
-			Description: "Allow access to selected service components through Privatelink",
+			Description: "Allow access to selected service components through Privatelink.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"elasticsearch": {
-					Description: "Enable elasticsearch",
+					Description: "Enable elasticsearch.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kibana": {
-					Description: "Enable kibana",
+					Description: "Enable kibana.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Enable prometheus",
+					Description: "Enable prometheus.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"elasticsearch": {
-					Description: "Enable elasticsearch",
+					Description: "Enable elasticsearch.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kibana": {
-					Description: "Enable kibana",
+					Description: "Enable kibana.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Enable prometheus",
+					Description: "Enable prometheus.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -823,37 +823,37 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"public_access": {
-			Description: "Allow access to selected service ports from the public Internet",
+			Description: "Allow access to selected service ports from the public Internet.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"elasticsearch": {
-					Description: "Allow clients to connect to elasticsearch from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to elasticsearch from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kibana": {
-					Description: "Allow clients to connect to kibana from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to kibana from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"elasticsearch": {
-					Description: "Allow clients to connect to elasticsearch from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to elasticsearch from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kibana": {
-					Description: "Allow clients to connect to kibana from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to kibana from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -863,7 +863,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"recovery_basebackup_name": {
-			Description: "Name of the basebackup to restore in forked service",
+			Description: "Name of the basebackup to restore in forked service.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
@@ -874,7 +874,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"static_ips": {
-			Description: "Use static public IP addresses",
+			Description: "Use static public IP addresses.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
@@ -894,7 +894,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 func ServiceTypeFlink() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"additional_backup_regions": {
-			Description: "Additional Cloud Regions for Backup Replication",
+			Description: "Additional Cloud Regions for Backup Replication.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			MaxItems:    1,
 			Optional:    true,
@@ -911,13 +911,13 @@ func ServiceTypeFlink() *schema.Schema {
 			Type:        schema.TypeInt,
 		},
 		"flink_version": {
-			Description: "Flink major version",
+			Description: "Flink major version.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"ip_filter": {
 			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
-			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
 				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
@@ -928,15 +928,15 @@ func ServiceTypeFlink() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"ip_filter_object": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"description": {
-					Description: "Description for IP filter list entry",
+					Description: "Description for IP filter list entry.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"network": {
-					Description: "CIDR address block",
+					Description: "CIDR address block.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -946,7 +946,7 @@ func ServiceTypeFlink() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"number_of_task_slots": {
-			Description: "Task slots per node. For a 3 node plan, total number of task slots is 3x this value",
+			Description: "Task slots per node. For a 3 node plan, total number of task slots is 3x this value.",
 			Optional:    true,
 			Type:        schema.TypeInt,
 		},
@@ -956,27 +956,27 @@ func ServiceTypeFlink() *schema.Schema {
 			Type:        schema.TypeInt,
 		},
 		"privatelink_access": {
-			Description: "Allow access to selected service components through Privatelink",
+			Description: "Allow access to selected service components through Privatelink.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"flink": {
-					Description: "Enable flink",
+					Description: "Enable flink.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Enable prometheus",
+					Description: "Enable prometheus.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"flink": {
-					Description: "Enable flink",
+					Description: "Enable flink.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Enable prometheus",
+					Description: "Enable prometheus.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -1021,19 +1021,19 @@ func ServiceTypeFlink() *schema.Schema {
 func ServiceTypeGrafana() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"additional_backup_regions": {
-			Description: "Additional Cloud Regions for Backup Replication",
+			Description: "Additional Cloud Regions for Backup Replication.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			MaxItems:    1,
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
 		"alerting_enabled": {
-			Description: "Enable or disable Grafana alerting functionality",
+			Description: "Enable or disable Grafana alerting functionality.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
 		"alerting_error_or_timeout": {
-			Description: "Default error or timeout setting for new alerting rules",
+			Description: "Default error or timeout setting for new alerting rules.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
@@ -1043,95 +1043,95 @@ func ServiceTypeGrafana() *schema.Schema {
 			Type:        schema.TypeInt,
 		},
 		"alerting_nodata_or_nullvalues": {
-			Description: "Default value for 'no data or null values' for new alerting rules",
+			Description: "Default value for 'no data or null values' for new alerting rules.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"allow_embedding": {
-			Description: "Allow embedding Grafana dashboards with iframe/frame/object/embed tags. Disabled by default to limit impact of clickjacking",
+			Description: "Allow embedding Grafana dashboards with iframe/frame/object/embed tags. Disabled by default to limit impact of clickjacking.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
 		"auth_azuread": {
-			Description: "Azure AD OAuth integration",
+			Description: "Azure AD OAuth integration.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"allow_sign_up": {
-					Description: "Automatically sign-up users on successful sign-in",
+					Description: "Automatically sign-up users on successful sign-in.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"allowed_domains": {
-					Description: "Allowed domains",
+					Description: "Allowed domains.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					MaxItems:    50,
 					Optional:    true,
 					Type:        schema.TypeList,
 				},
 				"allowed_groups": {
-					Description: "Require users to belong to one of given groups",
+					Description: "Require users to belong to one of given groups.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					MaxItems:    50,
 					Optional:    true,
 					Type:        schema.TypeList,
 				},
 				"auth_url": {
-					Description: "Authorization URL",
+					Description: "Authorization URL.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"client_id": {
-					Description: "Client ID from provider",
+					Description: "Client ID from provider.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"client_secret": {
-					Description: "Client secret from provider",
+					Description: "Client secret from provider.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"token_url": {
-					Description: "Token URL",
+					Description: "Token URL.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"allow_sign_up": {
-					Description: "Automatically sign-up users on successful sign-in",
+					Description: "Automatically sign-up users on successful sign-in.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"allowed_domains": {
-					Description: "Allowed domains",
+					Description: "Allowed domains.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					MaxItems:    50,
 					Optional:    true,
 					Type:        schema.TypeList,
 				},
 				"allowed_groups": {
-					Description: "Require users to belong to one of given groups",
+					Description: "Require users to belong to one of given groups.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					MaxItems:    50,
 					Optional:    true,
 					Type:        schema.TypeList,
 				},
 				"auth_url": {
-					Description: "Authorization URL",
+					Description: "Authorization URL.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"client_id": {
-					Description: "Client ID from provider",
+					Description: "Client ID from provider.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"client_secret": {
-					Description: "Client secret from provider",
+					Description: "Client secret from provider.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"token_url": {
-					Description: "Token URL",
+					Description: "Token URL.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -1141,124 +1141,124 @@ func ServiceTypeGrafana() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"auth_basic_enabled": {
-			Description: "Enable or disable basic authentication form, used by Grafana built-in login",
+			Description: "Enable or disable basic authentication form, used by Grafana built-in login.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
 		"auth_generic_oauth": {
-			Description: "Generic OAuth integration",
+			Description: "Generic OAuth integration.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"allow_sign_up": {
-					Description: "Automatically sign-up users on successful sign-in",
+					Description: "Automatically sign-up users on successful sign-in.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"allowed_domains": {
-					Description: "Allowed domains",
+					Description: "Allowed domains.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					MaxItems:    50,
 					Optional:    true,
 					Type:        schema.TypeList,
 				},
 				"allowed_organizations": {
-					Description: "Require user to be member of one of the listed organizations",
+					Description: "Require user to be member of one of the listed organizations.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					MaxItems:    50,
 					Optional:    true,
 					Type:        schema.TypeList,
 				},
 				"api_url": {
-					Description: "API URL",
+					Description: "API URL.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"auth_url": {
-					Description: "Authorization URL",
+					Description: "Authorization URL.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"client_id": {
-					Description: "Client ID from provider",
+					Description: "Client ID from provider.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"client_secret": {
-					Description: "Client secret from provider",
+					Description: "Client secret from provider.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"name": {
-					Description: "Name of the OAuth integration",
+					Description: "Name of the OAuth integration.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"scopes": {
-					Description: "OAuth scopes",
+					Description: "OAuth scopes.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					MaxItems:    50,
 					Optional:    true,
 					Type:        schema.TypeList,
 				},
 				"token_url": {
-					Description: "Token URL",
+					Description: "Token URL.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"allow_sign_up": {
-					Description: "Automatically sign-up users on successful sign-in",
+					Description: "Automatically sign-up users on successful sign-in.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"allowed_domains": {
-					Description: "Allowed domains",
+					Description: "Allowed domains.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					MaxItems:    50,
 					Optional:    true,
 					Type:        schema.TypeList,
 				},
 				"allowed_organizations": {
-					Description: "Require user to be member of one of the listed organizations",
+					Description: "Require user to be member of one of the listed organizations.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					MaxItems:    50,
 					Optional:    true,
 					Type:        schema.TypeList,
 				},
 				"api_url": {
-					Description: "API URL",
+					Description: "API URL.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"auth_url": {
-					Description: "Authorization URL",
+					Description: "Authorization URL.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"client_id": {
-					Description: "Client ID from provider",
+					Description: "Client ID from provider.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"client_secret": {
-					Description: "Client secret from provider",
+					Description: "Client secret from provider.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"name": {
-					Description: "Name of the OAuth integration",
+					Description: "Name of the OAuth integration.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"scopes": {
-					Description: "OAuth scopes",
+					Description: "OAuth scopes.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					MaxItems:    50,
 					Optional:    true,
 					Type:        schema.TypeList,
 				},
 				"token_url": {
-					Description: "Token URL",
+					Description: "Token URL.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -1268,32 +1268,32 @@ func ServiceTypeGrafana() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"auth_github": {
-			Description: "Github Auth integration",
+			Description: "Github Auth integration.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"allow_sign_up": {
-					Description: "Automatically sign-up users on successful sign-in",
+					Description: "Automatically sign-up users on successful sign-in.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"allowed_organizations": {
-					Description: "Require users to belong to one of given organizations",
+					Description: "Require users to belong to one of given organizations.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					MaxItems:    50,
 					Optional:    true,
 					Type:        schema.TypeList,
 				},
 				"client_id": {
-					Description: "Client ID from provider",
+					Description: "Client ID from provider.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"client_secret": {
-					Description: "Client secret from provider",
+					Description: "Client secret from provider.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"team_ids": {
-					Description: "Require users to belong to one of given team IDs",
+					Description: "Require users to belong to one of given team IDs.",
 					Elem:        &schema.Schema{Type: schema.TypeInt},
 					MaxItems:    50,
 					Optional:    true,
@@ -1302,29 +1302,29 @@ func ServiceTypeGrafana() *schema.Schema {
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"allow_sign_up": {
-					Description: "Automatically sign-up users on successful sign-in",
+					Description: "Automatically sign-up users on successful sign-in.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"allowed_organizations": {
-					Description: "Require users to belong to one of given organizations",
+					Description: "Require users to belong to one of given organizations.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					MaxItems:    50,
 					Optional:    true,
 					Type:        schema.TypeList,
 				},
 				"client_id": {
-					Description: "Client ID from provider",
+					Description: "Client ID from provider.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"client_secret": {
-					Description: "Client secret from provider",
+					Description: "Client secret from provider.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"team_ids": {
-					Description: "Require users to belong to one of given team IDs",
+					Description: "Require users to belong to one of given team IDs.",
 					Elem:        &schema.Schema{Type: schema.TypeInt},
 					MaxItems:    50,
 					Optional:    true,
@@ -1336,81 +1336,81 @@ func ServiceTypeGrafana() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"auth_gitlab": {
-			Description: "GitLab Auth integration",
+			Description: "GitLab Auth integration.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"allow_sign_up": {
-					Description: "Automatically sign-up users on successful sign-in",
+					Description: "Automatically sign-up users on successful sign-in.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"allowed_groups": {
-					Description: "Require users to belong to one of given groups",
+					Description: "Require users to belong to one of given groups.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					MaxItems:    50,
 					Optional:    true,
 					Type:        schema.TypeList,
 				},
 				"api_url": {
-					Description: "API URL. This only needs to be set when using self hosted GitLab",
+					Description: "API URL. This only needs to be set when using self hosted GitLab.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"auth_url": {
-					Description: "Authorization URL. This only needs to be set when using self hosted GitLab",
+					Description: "Authorization URL. This only needs to be set when using self hosted GitLab.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"client_id": {
-					Description: "Client ID from provider",
+					Description: "Client ID from provider.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"client_secret": {
-					Description: "Client secret from provider",
+					Description: "Client secret from provider.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"token_url": {
-					Description: "Token URL. This only needs to be set when using self hosted GitLab",
+					Description: "Token URL. This only needs to be set when using self hosted GitLab.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"allow_sign_up": {
-					Description: "Automatically sign-up users on successful sign-in",
+					Description: "Automatically sign-up users on successful sign-in.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"allowed_groups": {
-					Description: "Require users to belong to one of given groups",
+					Description: "Require users to belong to one of given groups.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					MaxItems:    50,
 					Optional:    true,
 					Type:        schema.TypeList,
 				},
 				"api_url": {
-					Description: "API URL. This only needs to be set when using self hosted GitLab",
+					Description: "API URL. This only needs to be set when using self hosted GitLab.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"auth_url": {
-					Description: "Authorization URL. This only needs to be set when using self hosted GitLab",
+					Description: "Authorization URL. This only needs to be set when using self hosted GitLab.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"client_id": {
-					Description: "Client ID from provider",
+					Description: "Client ID from provider.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"client_secret": {
-					Description: "Client secret from provider",
+					Description: "Client secret from provider.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"token_url": {
-					Description: "Token URL. This only needs to be set when using self hosted GitLab",
+					Description: "Token URL. This only needs to be set when using self hosted GitLab.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -1420,51 +1420,51 @@ func ServiceTypeGrafana() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"auth_google": {
-			Description: "Google Auth integration",
+			Description: "Google Auth integration.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"allow_sign_up": {
-					Description: "Automatically sign-up users on successful sign-in",
+					Description: "Automatically sign-up users on successful sign-in.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"allowed_domains": {
-					Description: "Domains allowed to sign-in to this Grafana",
+					Description: "Domains allowed to sign-in to this Grafana.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					MaxItems:    64,
 					Optional:    true,
 					Type:        schema.TypeList,
 				},
 				"client_id": {
-					Description: "Client ID from provider",
+					Description: "Client ID from provider.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"client_secret": {
-					Description: "Client secret from provider",
+					Description: "Client secret from provider.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"allow_sign_up": {
-					Description: "Automatically sign-up users on successful sign-in",
+					Description: "Automatically sign-up users on successful sign-in.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"allowed_domains": {
-					Description: "Domains allowed to sign-in to this Grafana",
+					Description: "Domains allowed to sign-in to this Grafana.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					MaxItems:    64,
 					Optional:    true,
 					Type:        schema.TypeList,
 				},
 				"client_id": {
-					Description: "Client ID from provider",
+					Description: "Client ID from provider.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"client_secret": {
-					Description: "Client secret from provider",
+					Description: "Client secret from provider.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -1479,7 +1479,7 @@ func ServiceTypeGrafana() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"custom_domain": {
-			Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
+			Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
@@ -1489,27 +1489,27 @@ func ServiceTypeGrafana() *schema.Schema {
 			Type:        schema.TypeBool,
 		},
 		"dashboards_min_refresh_interval": {
-			Description: "Signed sequence of decimal numbers, followed by a unit suffix (ms, s, m, h, d), e.g. 30s, 1h",
+			Description: "Signed sequence of decimal numbers, followed by a unit suffix (ms, s, m, h, d), e.g. 30s, 1h.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"dashboards_versions_to_keep": {
-			Description: "Dashboard versions to keep per dashboard",
+			Description: "Dashboard versions to keep per dashboard.",
 			Optional:    true,
 			Type:        schema.TypeInt,
 		},
 		"dataproxy_send_user_header": {
-			Description: "Send 'X-Grafana-User' header to data source",
+			Description: "Send 'X-Grafana-User' header to data source.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
 		"dataproxy_timeout": {
-			Description: "Timeout for data proxy requests in seconds",
+			Description: "Timeout for data proxy requests in seconds.",
 			Optional:    true,
 			Type:        schema.TypeInt,
 		},
 		"date_formats": {
-			Description: "Grafana date format specifications",
+			Description: "Grafana date format specifications.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"default_timezone": {
 					Description: "Default time zone for user preferences. Value 'browser' uses browser local time zone.",
@@ -1517,37 +1517,37 @@ func ServiceTypeGrafana() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"full_date": {
-					Description: "Moment.js style format string for cases where full date is shown",
+					Description: "Moment.js style format string for cases where full date is shown.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"interval_day": {
-					Description: "Moment.js style format string used when a time requiring day accuracy is shown",
+					Description: "Moment.js style format string used when a time requiring day accuracy is shown.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"interval_hour": {
-					Description: "Moment.js style format string used when a time requiring hour accuracy is shown",
+					Description: "Moment.js style format string used when a time requiring hour accuracy is shown.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"interval_minute": {
-					Description: "Moment.js style format string used when a time requiring minute accuracy is shown",
+					Description: "Moment.js style format string used when a time requiring minute accuracy is shown.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"interval_month": {
-					Description: "Moment.js style format string used when a time requiring month accuracy is shown",
+					Description: "Moment.js style format string used when a time requiring month accuracy is shown.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"interval_second": {
-					Description: "Moment.js style format string used when a time requiring second accuracy is shown",
+					Description: "Moment.js style format string used when a time requiring second accuracy is shown.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"interval_year": {
-					Description: "Moment.js style format string used when a time requiring year accuracy is shown",
+					Description: "Moment.js style format string used when a time requiring year accuracy is shown.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -1559,37 +1559,37 @@ func ServiceTypeGrafana() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"full_date": {
-					Description: "Moment.js style format string for cases where full date is shown",
+					Description: "Moment.js style format string for cases where full date is shown.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"interval_day": {
-					Description: "Moment.js style format string used when a time requiring day accuracy is shown",
+					Description: "Moment.js style format string used when a time requiring day accuracy is shown.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"interval_hour": {
-					Description: "Moment.js style format string used when a time requiring hour accuracy is shown",
+					Description: "Moment.js style format string used when a time requiring hour accuracy is shown.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"interval_minute": {
-					Description: "Moment.js style format string used when a time requiring minute accuracy is shown",
+					Description: "Moment.js style format string used when a time requiring minute accuracy is shown.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"interval_month": {
-					Description: "Moment.js style format string used when a time requiring month accuracy is shown",
+					Description: "Moment.js style format string used when a time requiring month accuracy is shown.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"interval_second": {
-					Description: "Moment.js style format string used when a time requiring second accuracy is shown",
+					Description: "Moment.js style format string used when a time requiring second accuracy is shown.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"interval_year": {
-					Description: "Moment.js style format string used when a time requiring year accuracy is shown",
+					Description: "Moment.js style format string used when a time requiring year accuracy is shown.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -1599,57 +1599,57 @@ func ServiceTypeGrafana() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"disable_gravatar": {
-			Description: "Set to true to disable gravatar. Defaults to false (gravatar is enabled)",
+			Description: "Set to true to disable gravatar. Defaults to false (gravatar is enabled).",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
 		"editors_can_admin": {
-			Description: "Editors can manage folders, teams and dashboards created by them",
+			Description: "Editors can manage folders, teams and dashboards created by them.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
 		"external_image_storage": {
-			Description: "External image store settings",
+			Description: "External image store settings.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"access_key": {
-					Description: "S3 access key. Requires permissions to the S3 bucket for the s3:PutObject and s3:PutObjectAcl actions",
+					Description: "S3 access key. Requires permissions to the S3 bucket for the s3:PutObject and s3:PutObjectAcl actions.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"bucket_url": {
-					Description: "Bucket URL for S3",
+					Description: "Bucket URL for S3.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"provider": {
-					Description: "Provider type",
+					Description: "Provider type.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"secret_key": {
-					Description: "S3 secret key",
+					Description: "S3 secret key.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"access_key": {
-					Description: "S3 access key. Requires permissions to the S3 bucket for the s3:PutObject and s3:PutObjectAcl actions",
+					Description: "S3 access key. Requires permissions to the S3 bucket for the s3:PutObject and s3:PutObjectAcl actions.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"bucket_url": {
-					Description: "Bucket URL for S3",
+					Description: "Bucket URL for S3.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"provider": {
-					Description: "Provider type",
+					Description: "Provider type.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"secret_key": {
-					Description: "S3 secret key",
+					Description: "S3 secret key.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -1659,13 +1659,13 @@ func ServiceTypeGrafana() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"google_analytics_ua_id": {
-			Description: "Google Analytics ID",
+			Description: "Google Analytics ID.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"ip_filter": {
 			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
-			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
 				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
@@ -1676,15 +1676,15 @@ func ServiceTypeGrafana() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"ip_filter_object": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"description": {
-					Description: "Description for IP filter list entry",
+					Description: "Description for IP filter list entry.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"network": {
-					Description: "CIDR address block",
+					Description: "CIDR address block.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -1694,19 +1694,19 @@ func ServiceTypeGrafana() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"metrics_enabled": {
-			Description: "Enable Grafana /metrics endpoint",
+			Description: "Enable Grafana /metrics endpoint.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
 		"private_access": {
-			Description: "Allow access to selected service ports from private networks",
+			Description: "Allow access to selected service ports from private networks.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"grafana": {
-				Description: "Allow clients to connect to grafana with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+				Description: "Allow clients to connect to grafana with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"grafana": {
-				Description: "Allow clients to connect to grafana with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+				Description: "Allow clients to connect to grafana with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			}}},
@@ -1715,14 +1715,14 @@ func ServiceTypeGrafana() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"privatelink_access": {
-			Description: "Allow access to selected service components through Privatelink",
+			Description: "Allow access to selected service components through Privatelink.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"grafana": {
-				Description: "Enable grafana",
+				Description: "Enable grafana.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"grafana": {
-				Description: "Enable grafana",
+				Description: "Enable grafana.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			}}},
@@ -1737,14 +1737,14 @@ func ServiceTypeGrafana() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"public_access": {
-			Description: "Allow access to selected service ports from the public Internet",
+			Description: "Allow access to selected service ports from the public Internet.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"grafana": {
-				Description: "Allow clients to connect to grafana from the public internet for service nodes that are in a project VPC or another type of private network",
+				Description: "Allow clients to connect to grafana from the public internet for service nodes that are in a project VPC or another type of private network.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"grafana": {
-				Description: "Allow clients to connect to grafana from the public internet for service nodes that are in a project VPC or another type of private network",
+				Description: "Allow clients to connect to grafana from the public internet for service nodes that are in a project VPC or another type of private network.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			}}},
@@ -1753,7 +1753,7 @@ func ServiceTypeGrafana() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"recovery_basebackup_name": {
-			Description: "Name of the basebackup to restore in forked service",
+			Description: "Name of the basebackup to restore in forked service.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
@@ -1764,36 +1764,36 @@ func ServiceTypeGrafana() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"smtp_server": {
-			Description: "SMTP server settings",
+			Description: "SMTP server settings.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"from_address": {
-					Description: "Address used for sending emails",
+					Description: "Address used for sending emails.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"from_name": {
-					Description: "Name used in outgoing emails, defaults to Grafana",
+					Description: "Name used in outgoing emails, defaults to Grafana.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"host": {
-					Description: "Server hostname or IP",
+					Description: "Server hostname or IP.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"password": {
-					Description: "Password for SMTP authentication",
+					Description: "Password for SMTP authentication.",
 					Optional:    true,
 					Sensitive:   true,
 					Type:        schema.TypeString,
 				},
 				"port": {
-					Description: "SMTP server port",
+					Description: "SMTP server port.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"skip_verify": {
-					Description: "Skip verifying server certificate. Defaults to false",
+					Description: "Skip verifying server certificate. Defaults to false.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -1803,40 +1803,40 @@ func ServiceTypeGrafana() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"username": {
-					Description: "Username for SMTP authentication",
+					Description: "Username for SMTP authentication.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"from_address": {
-					Description: "Address used for sending emails",
+					Description: "Address used for sending emails.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"from_name": {
-					Description: "Name used in outgoing emails, defaults to Grafana",
+					Description: "Name used in outgoing emails, defaults to Grafana.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"host": {
-					Description: "Server hostname or IP",
+					Description: "Server hostname or IP.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"password": {
-					Description: "Password for SMTP authentication",
+					Description: "Password for SMTP authentication.",
 					Optional:    true,
 					Sensitive:   true,
 					Type:        schema.TypeString,
 				},
 				"port": {
-					Description: "SMTP server port",
+					Description: "SMTP server port.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"skip_verify": {
-					Description: "Skip verifying server certificate. Defaults to false",
+					Description: "Skip verifying server certificate. Defaults to false.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -1846,7 +1846,7 @@ func ServiceTypeGrafana() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"username": {
-					Description: "Username for SMTP authentication",
+					Description: "Username for SMTP authentication.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -1856,22 +1856,22 @@ func ServiceTypeGrafana() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"static_ips": {
-			Description: "Use static public IP addresses",
+			Description: "Use static public IP addresses.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
 		"user_auto_assign_org": {
-			Description: "Auto-assign new users on signup to main organization. Defaults to false",
+			Description: "Auto-assign new users on signup to main organization. Defaults to false.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
 		"user_auto_assign_org_role": {
-			Description: "Set role for new signups. Defaults to Viewer",
+			Description: "Set role for new signups. Defaults to Viewer.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"viewers_can_edit": {
-			Description: "Users with view-only permission can edit but not save dashboards",
+			Description: "Users with view-only permission can edit but not save dashboards.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
@@ -1891,19 +1891,19 @@ func ServiceTypeGrafana() *schema.Schema {
 func ServiceTypeInfluxdb() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"additional_backup_regions": {
-			Description: "Additional Cloud Regions for Backup Replication",
+			Description: "Additional Cloud Regions for Backup Replication.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			MaxItems:    1,
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
 		"custom_domain": {
-			Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
+			Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"influxdb": {
-			Description: "influxdb.conf configuration values",
+			Description: "influxdb.conf configuration values.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"log_queries_after": {
 					Description: "The maximum duration in seconds before a query is logged as a slow query. Setting this to 0 (the default) will never log slow queries.",
@@ -1974,7 +1974,7 @@ func ServiceTypeInfluxdb() *schema.Schema {
 		},
 		"ip_filter": {
 			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
-			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
 				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
@@ -1985,15 +1985,15 @@ func ServiceTypeInfluxdb() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"ip_filter_object": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"description": {
-					Description: "Description for IP filter list entry",
+					Description: "Description for IP filter list entry.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"network": {
-					Description: "CIDR address block",
+					Description: "CIDR address block.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -2003,14 +2003,14 @@ func ServiceTypeInfluxdb() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"private_access": {
-			Description: "Allow access to selected service ports from private networks",
+			Description: "Allow access to selected service ports from private networks.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"influxdb": {
-				Description: "Allow clients to connect to influxdb with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+				Description: "Allow clients to connect to influxdb with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"influxdb": {
-				Description: "Allow clients to connect to influxdb with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+				Description: "Allow clients to connect to influxdb with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			}}},
@@ -2019,14 +2019,14 @@ func ServiceTypeInfluxdb() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"privatelink_access": {
-			Description: "Allow access to selected service components through Privatelink",
+			Description: "Allow access to selected service components through Privatelink.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"influxdb": {
-				Description: "Enable influxdb",
+				Description: "Enable influxdb.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"influxdb": {
-				Description: "Enable influxdb",
+				Description: "Enable influxdb.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			}}},
@@ -2041,14 +2041,14 @@ func ServiceTypeInfluxdb() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"public_access": {
-			Description: "Allow access to selected service ports from the public Internet",
+			Description: "Allow access to selected service ports from the public Internet.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"influxdb": {
-				Description: "Allow clients to connect to influxdb from the public internet for service nodes that are in a project VPC or another type of private network",
+				Description: "Allow clients to connect to influxdb from the public internet for service nodes that are in a project VPC or another type of private network.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"influxdb": {
-				Description: "Allow clients to connect to influxdb from the public internet for service nodes that are in a project VPC or another type of private network",
+				Description: "Allow clients to connect to influxdb from the public internet for service nodes that are in a project VPC or another type of private network.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			}}},
@@ -2057,7 +2057,7 @@ func ServiceTypeInfluxdb() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"recovery_basebackup_name": {
-			Description: "Name of the basebackup to restore in forked service",
+			Description: "Name of the basebackup to restore in forked service.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
@@ -2068,7 +2068,7 @@ func ServiceTypeInfluxdb() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"static_ips": {
-			Description: "Use static public IP addresses",
+			Description: "Use static public IP addresses.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
@@ -2088,20 +2088,20 @@ func ServiceTypeInfluxdb() *schema.Schema {
 func ServiceTypeKafka() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"additional_backup_regions": {
-			Description: "Additional Cloud Regions for Backup Replication",
+			Description: "Additional Cloud Regions for Backup Replication.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			MaxItems:    1,
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
 		"custom_domain": {
-			Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
+			Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"ip_filter": {
 			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
-			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
 				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
@@ -2112,15 +2112,15 @@ func ServiceTypeKafka() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"ip_filter_object": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"description": {
-					Description: "Description for IP filter list entry",
+					Description: "Description for IP filter list entry.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"network": {
-					Description: "CIDR address block",
+					Description: "CIDR address block.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -2130,10 +2130,10 @@ func ServiceTypeKafka() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"kafka": {
-			Description: "Kafka broker configuration values",
+			Description: "Kafka broker configuration values.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"auto_create_topics_enable": {
-					Description: "Enable auto creation of topics",
+					Description: "Enable auto creation of topics.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -2148,7 +2148,7 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"default_replication_factor": {
-					Description: "Replication factor for autocreated topics",
+					Description: "Replication factor for autocreated topics.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -2168,12 +2168,12 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"log_cleaner_delete_retention_ms": {
-					Description: "How long are delete records retained?",
+					Description: "How long are delete records retained?.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"log_cleaner_max_compaction_lag_ms": {
-					Description: "The maximum amount of time message will remain uncompacted. Only applicable for logs that are being compacted",
+					Description: "The maximum amount of time message will remain uncompacted. Only applicable for logs that are being compacted.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -2188,37 +2188,37 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"log_cleanup_policy": {
-					Description: "The default cleanup policy for segments beyond the retention window",
+					Description: "The default cleanup policy for segments beyond the retention window.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"log_flush_interval_messages": {
-					Description: "The number of messages accumulated on a log partition before messages are flushed to disk",
+					Description: "The number of messages accumulated on a log partition before messages are flushed to disk.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"log_flush_interval_ms": {
-					Description: "The maximum time in ms that a message in any topic is kept in memory before flushed to disk. If not set, the value in log.flush.scheduler.interval.ms is used",
+					Description: "The maximum time in ms that a message in any topic is kept in memory before flushed to disk. If not set, the value in log.flush.scheduler.interval.ms is used.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"log_index_interval_bytes": {
-					Description: "The interval with which Kafka adds an entry to the offset index",
+					Description: "The interval with which Kafka adds an entry to the offset index.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"log_index_size_max_bytes": {
-					Description: "The maximum size in bytes of the offset index",
+					Description: "The maximum size in bytes of the offset index.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"log_message_downconversion_enable": {
-					Description: "This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. ",
+					Description: "This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. .",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"log_message_timestamp_difference_max_ms": {
-					Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message",
+					Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -2228,17 +2228,17 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"log_preallocate": {
-					Description: "Should pre allocate file when create new segment?",
+					Description: "Should pre allocate file when create new segment?.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"log_retention_bytes": {
-					Description: "The maximum size of the log before deleting messages",
+					Description: "The maximum size of the log before deleting messages.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"log_retention_hours": {
-					Description: "The number of hours to keep a log file before deleting it",
+					Description: "The number of hours to keep a log file before deleting it.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -2248,7 +2248,7 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"log_roll_jitter_ms": {
-					Description: "The maximum jitter to subtract from logRollTimeMillis (in milliseconds). If not set, the value in log.roll.jitter.hours is used",
+					Description: "The maximum jitter to subtract from logRollTimeMillis (in milliseconds). If not set, the value in log.roll.jitter.hours is used.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -2258,12 +2258,12 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"log_segment_bytes": {
-					Description: "The maximum size of a single log file",
+					Description: "The maximum size of a single log file.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"log_segment_delete_delay_ms": {
-					Description: "The amount of time to wait before deleting a file from the filesystem",
+					Description: "The amount of time to wait before deleting a file from the filesystem.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -2288,12 +2288,12 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"num_partitions": {
-					Description: "Number of partitions for autocreated topics",
+					Description: "Number of partitions for autocreated topics.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"offsets_retention_minutes": {
-					Description: "Log retention window in minutes for offsets topic",
+					Description: "Log retention window in minutes for offsets topic.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -2330,7 +2330,7 @@ func ServiceTypeKafka() *schema.Schema {
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"auto_create_topics_enable": {
-					Description: "Enable auto creation of topics",
+					Description: "Enable auto creation of topics.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -2345,7 +2345,7 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"default_replication_factor": {
-					Description: "Replication factor for autocreated topics",
+					Description: "Replication factor for autocreated topics.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -2365,12 +2365,12 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"log_cleaner_delete_retention_ms": {
-					Description: "How long are delete records retained?",
+					Description: "How long are delete records retained?.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"log_cleaner_max_compaction_lag_ms": {
-					Description: "The maximum amount of time message will remain uncompacted. Only applicable for logs that are being compacted",
+					Description: "The maximum amount of time message will remain uncompacted. Only applicable for logs that are being compacted.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -2385,37 +2385,37 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"log_cleanup_policy": {
-					Description: "The default cleanup policy for segments beyond the retention window",
+					Description: "The default cleanup policy for segments beyond the retention window.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"log_flush_interval_messages": {
-					Description: "The number of messages accumulated on a log partition before messages are flushed to disk",
+					Description: "The number of messages accumulated on a log partition before messages are flushed to disk.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"log_flush_interval_ms": {
-					Description: "The maximum time in ms that a message in any topic is kept in memory before flushed to disk. If not set, the value in log.flush.scheduler.interval.ms is used",
+					Description: "The maximum time in ms that a message in any topic is kept in memory before flushed to disk. If not set, the value in log.flush.scheduler.interval.ms is used.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"log_index_interval_bytes": {
-					Description: "The interval with which Kafka adds an entry to the offset index",
+					Description: "The interval with which Kafka adds an entry to the offset index.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"log_index_size_max_bytes": {
-					Description: "The maximum size in bytes of the offset index",
+					Description: "The maximum size in bytes of the offset index.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"log_message_downconversion_enable": {
-					Description: "This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. ",
+					Description: "This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. .",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"log_message_timestamp_difference_max_ms": {
-					Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message",
+					Description: "The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -2425,17 +2425,17 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"log_preallocate": {
-					Description: "Should pre allocate file when create new segment?",
+					Description: "Should pre allocate file when create new segment?.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"log_retention_bytes": {
-					Description: "The maximum size of the log before deleting messages",
+					Description: "The maximum size of the log before deleting messages.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"log_retention_hours": {
-					Description: "The number of hours to keep a log file before deleting it",
+					Description: "The number of hours to keep a log file before deleting it.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -2445,7 +2445,7 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"log_roll_jitter_ms": {
-					Description: "The maximum jitter to subtract from logRollTimeMillis (in milliseconds). If not set, the value in log.roll.jitter.hours is used",
+					Description: "The maximum jitter to subtract from logRollTimeMillis (in milliseconds). If not set, the value in log.roll.jitter.hours is used.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -2455,12 +2455,12 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"log_segment_bytes": {
-					Description: "The maximum size of a single log file",
+					Description: "The maximum size of a single log file.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"log_segment_delete_delay_ms": {
-					Description: "The amount of time to wait before deleting a file from the filesystem",
+					Description: "The amount of time to wait before deleting a file from the filesystem.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -2485,12 +2485,12 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"num_partitions": {
-					Description: "Number of partitions for autocreated topics",
+					Description: "Number of partitions for autocreated topics.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"offsets_retention_minutes": {
-					Description: "Log retention window in minutes for offsets topic",
+					Description: "Log retention window in minutes for offsets topic.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -2530,17 +2530,17 @@ func ServiceTypeKafka() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"kafka_authentication_methods": {
-			Description: "Kafka authentication methods",
+			Description: "Kafka authentication methods.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"certificate": {
 					Default:     true,
-					Description: "Enable certificate/SSL authentication The default value is `true`.",
+					Description: "Enable certificate/SSL authentication. The default value is `true`.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"sasl": {
 					Default:     false,
-					Description: "Enable SASL authentication The default value is `false`.",
+					Description: "Enable SASL authentication. The default value is `false`.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -2548,13 +2548,13 @@ func ServiceTypeKafka() *schema.Schema {
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"certificate": {
 					Default:     true,
-					Description: "Enable certificate/SSL authentication The default value is `true`.",
+					Description: "Enable certificate/SSL authentication. The default value is `true`.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"sasl": {
 					Default:     false,
-					Description: "Enable SASL authentication The default value is `false`.",
+					Description: "Enable SASL authentication. The default value is `false`.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -2565,20 +2565,20 @@ func ServiceTypeKafka() *schema.Schema {
 		},
 		"kafka_connect": {
 			Default:     false,
-			Description: "Enable Kafka Connect service The default value is `false`.",
+			Description: "Enable Kafka Connect service. The default value is `false`.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
 		"kafka_connect_config": {
-			Description: "Kafka Connect configuration values",
+			Description: "Kafka Connect configuration values.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"connector_client_config_override_policy": {
-					Description: "Defines what client configurations can be overridden by the connector. Default is None",
+					Description: "Defines what client configurations can be overridden by the connector. Default is None.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"consumer_auto_offset_reset": {
-					Description: "What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest",
+					Description: "What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -2593,7 +2593,7 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"consumer_max_partition_fetch_bytes": {
-					Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. ",
+					Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. .",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -2650,12 +2650,12 @@ func ServiceTypeKafka() *schema.Schema {
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"connector_client_config_override_policy": {
-					Description: "Defines what client configurations can be overridden by the connector. Default is None",
+					Description: "Defines what client configurations can be overridden by the connector. Default is None.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"consumer_auto_offset_reset": {
-					Description: "What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest",
+					Description: "What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -2670,7 +2670,7 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"consumer_max_partition_fetch_bytes": {
-					Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. ",
+					Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. .",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -2731,33 +2731,33 @@ func ServiceTypeKafka() *schema.Schema {
 		},
 		"kafka_rest": {
 			Default:     false,
-			Description: "Enable Kafka-REST service The default value is `false`.",
+			Description: "Enable Kafka-REST service. The default value is `false`.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
 		"kafka_rest_authorization": {
-			Description: "Enable authorization in Kafka-REST service",
+			Description: "Enable authorization in Kafka-REST service.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
 		"kafka_rest_config": {
-			Description: "Kafka REST configuration",
+			Description: "Kafka REST configuration.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"consumer_enable_auto_commit": {
 					Default:     true,
-					Description: "If true the consumer's offset will be periodically committed to Kafka in the background The default value is `true`.",
+					Description: "If true the consumer's offset will be periodically committed to Kafka in the background. The default value is `true`.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"consumer_request_max_bytes": {
 					Default:     "67108864",
-					Description: "Maximum number of bytes in unencoded message keys and values by a single request The default value is `67108864`.",
+					Description: "Maximum number of bytes in unencoded message keys and values by a single request. The default value is `67108864`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"consumer_request_timeout_ms": {
 					Default:     "1000",
-					Description: "The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached The default value is `1000`.",
+					Description: "The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached. The default value is `1000`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -2774,13 +2774,13 @@ func ServiceTypeKafka() *schema.Schema {
 				},
 				"producer_linger_ms": {
 					Default:     "0",
-					Description: "Wait for up to the given delay to allow batching records together The default value is `0`.",
+					Description: "Wait for up to the given delay to allow batching records together. The default value is `0`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"simpleconsumer_pool_size_max": {
 					Default:     "25",
-					Description: "Maximum number of SimpleConsumers that can be instantiated per broker The default value is `25`.",
+					Description: "Maximum number of SimpleConsumers that can be instantiated per broker. The default value is `25`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -2788,19 +2788,19 @@ func ServiceTypeKafka() *schema.Schema {
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"consumer_enable_auto_commit": {
 					Default:     true,
-					Description: "If true the consumer's offset will be periodically committed to Kafka in the background The default value is `true`.",
+					Description: "If true the consumer's offset will be periodically committed to Kafka in the background. The default value is `true`.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"consumer_request_max_bytes": {
 					Default:     "67108864",
-					Description: "Maximum number of bytes in unencoded message keys and values by a single request The default value is `67108864`.",
+					Description: "Maximum number of bytes in unencoded message keys and values by a single request. The default value is `67108864`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"consumer_request_timeout_ms": {
 					Default:     "1000",
-					Description: "The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached The default value is `1000`.",
+					Description: "The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached. The default value is `1000`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -2817,13 +2817,13 @@ func ServiceTypeKafka() *schema.Schema {
 				},
 				"producer_linger_ms": {
 					Default:     "0",
-					Description: "Wait for up to the given delay to allow batching records together The default value is `0`.",
+					Description: "Wait for up to the given delay to allow batching records together. The default value is `0`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"simpleconsumer_pool_size_max": {
 					Default:     "25",
-					Description: "Maximum number of SimpleConsumers that can be instantiated per broker The default value is `25`.",
+					Description: "Maximum number of SimpleConsumers that can be instantiated per broker. The default value is `25`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -2833,62 +2833,62 @@ func ServiceTypeKafka() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"kafka_version": {
-			Description: "Kafka major version",
+			Description: "Kafka major version.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"private_access": {
-			Description: "Allow access to selected service ports from private networks",
+			Description: "Allow access to selected service ports from private networks.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"kafka": {
-					Description: "Allow clients to connect to kafka with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to kafka with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kafka_connect": {
-					Description: "Allow clients to connect to kafka_connect with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to kafka_connect with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kafka_rest": {
-					Description: "Allow clients to connect to kafka_rest with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to kafka_rest with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"schema_registry": {
-					Description: "Allow clients to connect to schema_registry with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to schema_registry with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"kafka": {
-					Description: "Allow clients to connect to kafka with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to kafka with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kafka_connect": {
-					Description: "Allow clients to connect to kafka_connect with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to kafka_connect with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kafka_rest": {
-					Description: "Allow clients to connect to kafka_rest with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to kafka_rest with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"schema_registry": {
-					Description: "Allow clients to connect to schema_registry with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to schema_registry with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -2898,67 +2898,67 @@ func ServiceTypeKafka() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"privatelink_access": {
-			Description: "Allow access to selected service components through Privatelink",
+			Description: "Allow access to selected service components through Privatelink.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"jolokia": {
-					Description: "Enable jolokia",
+					Description: "Enable jolokia.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kafka": {
-					Description: "Enable kafka",
+					Description: "Enable kafka.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kafka_connect": {
-					Description: "Enable kafka_connect",
+					Description: "Enable kafka_connect.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kafka_rest": {
-					Description: "Enable kafka_rest",
+					Description: "Enable kafka_rest.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Enable prometheus",
+					Description: "Enable prometheus.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"schema_registry": {
-					Description: "Enable schema_registry",
+					Description: "Enable schema_registry.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"jolokia": {
-					Description: "Enable jolokia",
+					Description: "Enable jolokia.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kafka": {
-					Description: "Enable kafka",
+					Description: "Enable kafka.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kafka_connect": {
-					Description: "Enable kafka_connect",
+					Description: "Enable kafka_connect.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kafka_rest": {
-					Description: "Enable kafka_rest",
+					Description: "Enable kafka_rest.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Enable prometheus",
+					Description: "Enable prometheus.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"schema_registry": {
-					Description: "Enable schema_registry",
+					Description: "Enable schema_registry.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -2968,57 +2968,57 @@ func ServiceTypeKafka() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"public_access": {
-			Description: "Allow access to selected service ports from the public Internet",
+			Description: "Allow access to selected service ports from the public Internet.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"kafka": {
-					Description: "Allow clients to connect to kafka from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to kafka from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kafka_connect": {
-					Description: "Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kafka_rest": {
-					Description: "Allow clients to connect to kafka_rest from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to kafka_rest from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"schema_registry": {
-					Description: "Allow clients to connect to schema_registry from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to schema_registry from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"kafka": {
-					Description: "Allow clients to connect to kafka from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to kafka from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kafka_connect": {
-					Description: "Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kafka_rest": {
-					Description: "Allow clients to connect to kafka_rest from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to kafka_rest from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"schema_registry": {
-					Description: "Allow clients to connect to schema_registry from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to schema_registry from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -3029,12 +3029,12 @@ func ServiceTypeKafka() *schema.Schema {
 		},
 		"schema_registry": {
 			Default:     false,
-			Description: "Enable Schema-Registry service The default value is `false`.",
+			Description: "Enable Schema-Registry service. The default value is `false`.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
 		"schema_registry_config": {
-			Description: "Schema Registry configuration",
+			Description: "Schema Registry configuration.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"leader_eligibility": {
 					Description: "If true, Karapace / Schema Registry on the service nodes can participate in leader election. It might be needed to disable this when the schemas topic is replicated to a secondary cluster and Karapace / Schema Registry there must not participate in leader election. Defaults to `true`.",
@@ -3064,7 +3064,7 @@ func ServiceTypeKafka() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"static_ips": {
-			Description: "Use static public IP addresses",
+			Description: "Use static public IP addresses.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
@@ -3084,7 +3084,7 @@ func ServiceTypeKafka() *schema.Schema {
 func ServiceTypeKafkaConnect() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"additional_backup_regions": {
-			Description: "Additional Cloud Regions for Backup Replication",
+			Description: "Additional Cloud Regions for Backup Replication.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			MaxItems:    1,
 			Optional:    true,
@@ -3092,7 +3092,7 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 		},
 		"ip_filter": {
 			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
-			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
 				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
@@ -3103,15 +3103,15 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"ip_filter_object": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"description": {
-					Description: "Description for IP filter list entry",
+					Description: "Description for IP filter list entry.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"network": {
-					Description: "CIDR address block",
+					Description: "CIDR address block.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -3121,15 +3121,15 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"kafka_connect": {
-			Description: "Kafka Connect configuration values",
+			Description: "Kafka Connect configuration values.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"connector_client_config_override_policy": {
-					Description: "Defines what client configurations can be overridden by the connector. Default is None",
+					Description: "Defines what client configurations can be overridden by the connector. Default is None.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"consumer_auto_offset_reset": {
-					Description: "What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest",
+					Description: "What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -3144,7 +3144,7 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"consumer_max_partition_fetch_bytes": {
-					Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. ",
+					Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. .",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -3201,12 +3201,12 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"connector_client_config_override_policy": {
-					Description: "Defines what client configurations can be overridden by the connector. Default is None",
+					Description: "Defines what client configurations can be overridden by the connector. Default is None.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"consumer_auto_offset_reset": {
-					Description: "What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest",
+					Description: "What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -3221,7 +3221,7 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"consumer_max_partition_fetch_bytes": {
-					Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. ",
+					Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. .",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -3281,27 +3281,27 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"private_access": {
-			Description: "Allow access to selected service ports from private networks",
+			Description: "Allow access to selected service ports from private networks.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"kafka_connect": {
-					Description: "Allow clients to connect to kafka_connect with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to kafka_connect with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"kafka_connect": {
-					Description: "Allow clients to connect to kafka_connect with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to kafka_connect with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -3311,37 +3311,37 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"privatelink_access": {
-			Description: "Allow access to selected service components through Privatelink",
+			Description: "Allow access to selected service components through Privatelink.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"jolokia": {
-					Description: "Enable jolokia",
+					Description: "Enable jolokia.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kafka_connect": {
-					Description: "Enable kafka_connect",
+					Description: "Enable kafka_connect.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Enable prometheus",
+					Description: "Enable prometheus.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"jolokia": {
-					Description: "Enable jolokia",
+					Description: "Enable jolokia.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"kafka_connect": {
-					Description: "Enable kafka_connect",
+					Description: "Enable kafka_connect.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Enable prometheus",
+					Description: "Enable prometheus.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -3351,27 +3351,27 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"public_access": {
-			Description: "Allow access to selected service ports from the public Internet",
+			Description: "Allow access to selected service ports from the public Internet.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"kafka_connect": {
-					Description: "Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"kafka_connect": {
-					Description: "Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -3381,7 +3381,7 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"static_ips": {
-			Description: "Use static public IP addresses",
+			Description: "Use static public IP addresses.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
@@ -3401,7 +3401,7 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 func ServiceTypeKafkaMirrormaker() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"additional_backup_regions": {
-			Description: "Additional Cloud Regions for Backup Replication",
+			Description: "Additional Cloud Regions for Backup Replication.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			MaxItems:    1,
 			Optional:    true,
@@ -3409,7 +3409,7 @@ func ServiceTypeKafkaMirrormaker() *schema.Schema {
 		},
 		"ip_filter": {
 			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
-			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
 				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
@@ -3420,15 +3420,15 @@ func ServiceTypeKafkaMirrormaker() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"ip_filter_object": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"description": {
-					Description: "Description for IP filter list entry",
+					Description: "Description for IP filter list entry.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"network": {
-					Description: "CIDR address block",
+					Description: "CIDR address block.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -3438,15 +3438,15 @@ func ServiceTypeKafkaMirrormaker() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"kafka_mirrormaker": {
-			Description: "Kafka MirrorMaker configuration values",
+			Description: "Kafka MirrorMaker configuration values.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"emit_checkpoints_enabled": {
-					Description: "Whether to emit consumer group offset checkpoints to target cluster periodically (default: true)",
+					Description: "Whether to emit consumer group offset checkpoints to target cluster periodically (default: true).",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"emit_checkpoints_interval_seconds": {
-					Description: "Frequency at which consumer group offset checkpoints are emitted (default: 60, every minute)",
+					Description: "Frequency at which consumer group offset checkpoints are emitted (default: 60, every minute).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -3471,12 +3471,12 @@ func ServiceTypeKafkaMirrormaker() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"sync_group_offsets_enabled": {
-					Description: "Whether to periodically write the translated offsets of replicated consumer groups (in the source cluster) to __consumer_offsets topic in target cluster, as long as no active consumers in that group are connected to the target cluster",
+					Description: "Whether to periodically write the translated offsets of replicated consumer groups (in the source cluster) to __consumer_offsets topic in target cluster, as long as no active consumers in that group are connected to the target cluster.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"sync_group_offsets_interval_seconds": {
-					Description: "Frequency at which consumer group offsets are synced (default: 60, every minute)",
+					Description: "Frequency at which consumer group offsets are synced (default: 60, every minute).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -3494,12 +3494,12 @@ func ServiceTypeKafkaMirrormaker() *schema.Schema {
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"emit_checkpoints_enabled": {
-					Description: "Whether to emit consumer group offset checkpoints to target cluster periodically (default: true)",
+					Description: "Whether to emit consumer group offset checkpoints to target cluster periodically (default: true).",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"emit_checkpoints_interval_seconds": {
-					Description: "Frequency at which consumer group offset checkpoints are emitted (default: 60, every minute)",
+					Description: "Frequency at which consumer group offset checkpoints are emitted (default: 60, every minute).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -3524,12 +3524,12 @@ func ServiceTypeKafkaMirrormaker() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"sync_group_offsets_enabled": {
-					Description: "Whether to periodically write the translated offsets of replicated consumer groups (in the source cluster) to __consumer_offsets topic in target cluster, as long as no active consumers in that group are connected to the target cluster",
+					Description: "Whether to periodically write the translated offsets of replicated consumer groups (in the source cluster) to __consumer_offsets topic in target cluster, as long as no active consumers in that group are connected to the target cluster.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"sync_group_offsets_interval_seconds": {
-					Description: "Frequency at which consumer group offsets are synced (default: 60, every minute)",
+					Description: "Frequency at which consumer group offsets are synced (default: 60, every minute).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -3550,7 +3550,7 @@ func ServiceTypeKafkaMirrormaker() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"static_ips": {
-			Description: "Use static public IP addresses",
+			Description: "Use static public IP addresses.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
@@ -3570,13 +3570,13 @@ func ServiceTypeKafkaMirrormaker() *schema.Schema {
 func ServiceTypeM3aggregator() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"custom_domain": {
-			Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
+			Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"ip_filter": {
 			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
-			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
 				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
@@ -3587,15 +3587,15 @@ func ServiceTypeM3aggregator() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"ip_filter_object": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"description": {
-					Description: "Description for IP filter list entry",
+					Description: "Description for IP filter list entry.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"network": {
-					Description: "CIDR address block",
+					Description: "CIDR address block.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -3606,17 +3606,17 @@ func ServiceTypeM3aggregator() *schema.Schema {
 		},
 		"m3_version": {
 			Deprecated:  "Usage of this field is discouraged.",
-			Description: "M3 major version (deprecated, use m3aggregator_version)",
+			Description: "M3 major version (deprecated, use m3aggregator_version).",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"m3aggregator_version": {
-			Description: "M3 major version (the minimum compatible version)",
+			Description: "M3 major version (the minimum compatible version).",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"static_ips": {
-			Description: "Use static public IP addresses",
+			Description: "Use static public IP addresses.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
@@ -3636,20 +3636,20 @@ func ServiceTypeM3aggregator() *schema.Schema {
 func ServiceTypeM3db() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"additional_backup_regions": {
-			Description: "Additional Cloud Regions for Backup Replication",
+			Description: "Additional Cloud Regions for Backup Replication.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			MaxItems:    1,
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
 		"custom_domain": {
-			Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
+			Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"ip_filter": {
 			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
-			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
 				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
@@ -3660,15 +3660,15 @@ func ServiceTypeM3db() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"ip_filter_object": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"description": {
-					Description: "Description for IP filter list entry",
+					Description: "Description for IP filter list entry.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"network": {
-					Description: "CIDR address block",
+					Description: "CIDR address block.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -3678,7 +3678,7 @@ func ServiceTypeM3db() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"limits": {
-			Description: "M3 limits",
+			Description: "M3 limits.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"max_recently_queried_series_blocks": {
 					Description: "The maximum number of blocks that can be read in a given lookback period.",
@@ -3749,7 +3749,7 @@ func ServiceTypeM3db() *schema.Schema {
 		},
 		"m3_version": {
 			Deprecated:  "Usage of this field is discouraged.",
-			Description: "M3 major version (deprecated, use m3db_version)",
+			Description: "M3 major version (deprecated, use m3db_version).",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
@@ -3759,74 +3759,74 @@ func ServiceTypeM3db() *schema.Schema {
 			Type:        schema.TypeBool,
 		},
 		"m3db_version": {
-			Description: "M3 major version (the minimum compatible version)",
+			Description: "M3 major version (the minimum compatible version).",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"namespaces": {
 			Deprecated:  "This will be removed in v5.0.0 and replaced with namespaces_string instead.",
-			Description: "List of M3 namespaces",
+			Description: "List of M3 namespaces.",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"name": {
-					Description: "The name of the namespace",
+					Description: "The name of the namespace.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"options": {
-					Description: "Namespace options",
+					Description: "Namespace options.",
 					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 						"retention_options": {
-							Description: "Retention options",
+							Description: "Retention options.",
 							DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 								"block_data_expiry_duration": {
-									Description: "Controls how long we wait before expiring stale data",
+									Description: "Controls how long we wait before expiring stale data.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
 								"blocksize_duration": {
-									Description: "Controls how long to keep a block in memory before flushing to a fileset on disk",
+									Description: "Controls how long to keep a block in memory before flushing to a fileset on disk.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
 								"buffer_future_duration": {
-									Description: "Controls how far into the future writes to the namespace will be accepted",
+									Description: "Controls how far into the future writes to the namespace will be accepted.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
 								"buffer_past_duration": {
-									Description: "Controls how far into the past writes to the namespace will be accepted",
+									Description: "Controls how far into the past writes to the namespace will be accepted.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
 								"retention_period_duration": {
-									Description: "Controls the duration of time that M3DB will retain data for the namespace",
+									Description: "Controls the duration of time that M3DB will retain data for the namespace.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
 							}),
 							Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 								"block_data_expiry_duration": {
-									Description: "Controls how long we wait before expiring stale data",
+									Description: "Controls how long we wait before expiring stale data.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
 								"blocksize_duration": {
-									Description: "Controls how long to keep a block in memory before flushing to a fileset on disk",
+									Description: "Controls how long to keep a block in memory before flushing to a fileset on disk.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
 								"buffer_future_duration": {
-									Description: "Controls how far into the future writes to the namespace will be accepted",
+									Description: "Controls how far into the future writes to the namespace will be accepted.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
 								"buffer_past_duration": {
-									Description: "Controls how far into the past writes to the namespace will be accepted",
+									Description: "Controls how far into the past writes to the namespace will be accepted.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
 								"retention_period_duration": {
-									Description: "Controls the duration of time that M3DB will retain data for the namespace",
+									Description: "Controls the duration of time that M3DB will retain data for the namespace.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
@@ -3836,69 +3836,69 @@ func ServiceTypeM3db() *schema.Schema {
 							Type:     schema.TypeList,
 						},
 						"snapshot_enabled": {
-							Description: "Controls whether M3DB will create snapshot files for this namespace",
+							Description: "Controls whether M3DB will create snapshot files for this namespace.",
 							Optional:    true,
 							Type:        schema.TypeBool,
 						},
 						"writes_to_commitlog": {
-							Description: "Controls whether M3DB will include writes to this namespace in the commitlog",
+							Description: "Controls whether M3DB will include writes to this namespace in the commitlog.",
 							Optional:    true,
 							Type:        schema.TypeBool,
 						},
 					}),
 					Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 						"retention_options": {
-							Description: "Retention options",
+							Description: "Retention options.",
 							DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 								"block_data_expiry_duration": {
-									Description: "Controls how long we wait before expiring stale data",
+									Description: "Controls how long we wait before expiring stale data.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
 								"blocksize_duration": {
-									Description: "Controls how long to keep a block in memory before flushing to a fileset on disk",
+									Description: "Controls how long to keep a block in memory before flushing to a fileset on disk.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
 								"buffer_future_duration": {
-									Description: "Controls how far into the future writes to the namespace will be accepted",
+									Description: "Controls how far into the future writes to the namespace will be accepted.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
 								"buffer_past_duration": {
-									Description: "Controls how far into the past writes to the namespace will be accepted",
+									Description: "Controls how far into the past writes to the namespace will be accepted.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
 								"retention_period_duration": {
-									Description: "Controls the duration of time that M3DB will retain data for the namespace",
+									Description: "Controls the duration of time that M3DB will retain data for the namespace.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
 							}),
 							Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 								"block_data_expiry_duration": {
-									Description: "Controls how long we wait before expiring stale data",
+									Description: "Controls how long we wait before expiring stale data.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
 								"blocksize_duration": {
-									Description: "Controls how long to keep a block in memory before flushing to a fileset on disk",
+									Description: "Controls how long to keep a block in memory before flushing to a fileset on disk.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
 								"buffer_future_duration": {
-									Description: "Controls how far into the future writes to the namespace will be accepted",
+									Description: "Controls how far into the future writes to the namespace will be accepted.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
 								"buffer_past_duration": {
-									Description: "Controls how far into the past writes to the namespace will be accepted",
+									Description: "Controls how far into the past writes to the namespace will be accepted.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
 								"retention_period_duration": {
-									Description: "Controls the duration of time that M3DB will retain data for the namespace",
+									Description: "Controls the duration of time that M3DB will retain data for the namespace.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
@@ -3908,12 +3908,12 @@ func ServiceTypeM3db() *schema.Schema {
 							Type:     schema.TypeList,
 						},
 						"snapshot_enabled": {
-							Description: "Controls whether M3DB will create snapshot files for this namespace",
+							Description: "Controls whether M3DB will create snapshot files for this namespace.",
 							Optional:    true,
 							Type:        schema.TypeBool,
 						},
 						"writes_to_commitlog": {
-							Description: "Controls whether M3DB will include writes to this namespace in the commitlog",
+							Description: "Controls whether M3DB will include writes to this namespace in the commitlog.",
 							Optional:    true,
 							Type:        schema.TypeBool,
 						},
@@ -3923,12 +3923,12 @@ func ServiceTypeM3db() *schema.Schema {
 					Type:     schema.TypeList,
 				},
 				"resolution": {
-					Description: "The resolution for an aggregated namespace",
+					Description: "The resolution for an aggregated namespace.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"type": {
-					Description: "The type of aggregation (aggregated/unaggregated)",
+					Description: "The type of aggregation (aggregated/unaggregated).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -3938,14 +3938,14 @@ func ServiceTypeM3db() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"private_access": {
-			Description: "Allow access to selected service ports from private networks",
+			Description: "Allow access to selected service ports from private networks.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"m3coordinator": {
-				Description: "Allow clients to connect to m3coordinator with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+				Description: "Allow clients to connect to m3coordinator with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"m3coordinator": {
-				Description: "Allow clients to connect to m3coordinator with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+				Description: "Allow clients to connect to m3coordinator with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			}}},
@@ -3960,14 +3960,14 @@ func ServiceTypeM3db() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"public_access": {
-			Description: "Allow access to selected service ports from the public Internet",
+			Description: "Allow access to selected service ports from the public Internet.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"m3coordinator": {
-				Description: "Allow clients to connect to m3coordinator from the public internet for service nodes that are in a project VPC or another type of private network",
+				Description: "Allow clients to connect to m3coordinator from the public internet for service nodes that are in a project VPC or another type of private network.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"m3coordinator": {
-				Description: "Allow clients to connect to m3coordinator from the public internet for service nodes that are in a project VPC or another type of private network",
+				Description: "Allow clients to connect to m3coordinator from the public internet for service nodes that are in a project VPC or another type of private network.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			}}},
@@ -3976,19 +3976,19 @@ func ServiceTypeM3db() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"rules": {
-			Description: "M3 rules",
+			Description: "M3 rules.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"mapping": {
-				Description: "List of M3 mapping rules",
+				Description: "List of M3 mapping rules.",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"aggregations": {
-						Description: "List of aggregations to be applied",
+						Description: "List of aggregations to be applied.",
 						Elem:        &schema.Schema{Type: schema.TypeString},
 						MaxItems:    10,
 						Optional:    true,
 						Type:        schema.TypeList,
 					},
 					"drop": {
-						Description: "Only store the derived metric (as specified in the roll-up rules), if any",
+						Description: "Only store the derived metric (as specified in the roll-up rules), if any.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -3998,28 +3998,28 @@ func ServiceTypeM3db() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"name": {
-						Description: "The (optional) name of the rule",
+						Description: "The (optional) name of the rule.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"namespaces": {
 						Deprecated:  "This will be removed in v5.0.0 and replaced with namespaces_string instead.",
-						Description: "This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by glob (=wildcards)",
+						Description: "This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by glob (=wildcards).",
 						Elem:        &schema.Schema{Type: schema.TypeString},
 						MaxItems:    10,
 						Optional:    true,
 						Type:        schema.TypeList,
 					},
 					"namespaces_object": {
-						Description: "This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by exact match of retention period and resolution",
+						Description: "This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by exact match of retention period and resolution.",
 						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 							"resolution": {
-								Description: "The resolution for the matching namespace",
+								Description: "The resolution for the matching namespace.",
 								Optional:    true,
 								Type:        schema.TypeString,
 							},
 							"retention": {
-								Description: "The retention period of the matching namespace",
+								Description: "The retention period of the matching namespace.",
 								Optional:    true,
 								Type:        schema.TypeString,
 							},
@@ -4029,15 +4029,15 @@ func ServiceTypeM3db() *schema.Schema {
 						Type:     schema.TypeList,
 					},
 					"tags": {
-						Description: "List of tags to be appended to matching metrics",
+						Description: "List of tags to be appended to matching metrics.",
 						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 							"name": {
-								Description: "Name of the tag",
+								Description: "Name of the tag.",
 								Optional:    true,
 								Type:        schema.TypeString,
 							},
 							"value": {
-								Description: "Value of the tag",
+								Description: "Value of the tag.",
 								Optional:    true,
 								Type:        schema.TypeString,
 							},
@@ -4052,17 +4052,17 @@ func ServiceTypeM3db() *schema.Schema {
 				Type:     schema.TypeList,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"mapping": {
-				Description: "List of M3 mapping rules",
+				Description: "List of M3 mapping rules.",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"aggregations": {
-						Description: "List of aggregations to be applied",
+						Description: "List of aggregations to be applied.",
 						Elem:        &schema.Schema{Type: schema.TypeString},
 						MaxItems:    10,
 						Optional:    true,
 						Type:        schema.TypeList,
 					},
 					"drop": {
-						Description: "Only store the derived metric (as specified in the roll-up rules), if any",
+						Description: "Only store the derived metric (as specified in the roll-up rules), if any.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -4072,28 +4072,28 @@ func ServiceTypeM3db() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"name": {
-						Description: "The (optional) name of the rule",
+						Description: "The (optional) name of the rule.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"namespaces": {
 						Deprecated:  "This will be removed in v5.0.0 and replaced with namespaces_string instead.",
-						Description: "This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by glob (=wildcards)",
+						Description: "This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by glob (=wildcards).",
 						Elem:        &schema.Schema{Type: schema.TypeString},
 						MaxItems:    10,
 						Optional:    true,
 						Type:        schema.TypeList,
 					},
 					"namespaces_object": {
-						Description: "This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by exact match of retention period and resolution",
+						Description: "This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by exact match of retention period and resolution.",
 						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 							"resolution": {
-								Description: "The resolution for the matching namespace",
+								Description: "The resolution for the matching namespace.",
 								Optional:    true,
 								Type:        schema.TypeString,
 							},
 							"retention": {
-								Description: "The retention period of the matching namespace",
+								Description: "The retention period of the matching namespace.",
 								Optional:    true,
 								Type:        schema.TypeString,
 							},
@@ -4103,15 +4103,15 @@ func ServiceTypeM3db() *schema.Schema {
 						Type:     schema.TypeList,
 					},
 					"tags": {
-						Description: "List of tags to be appended to matching metrics",
+						Description: "List of tags to be appended to matching metrics.",
 						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 							"name": {
-								Description: "Name of the tag",
+								Description: "Name of the tag.",
 								Optional:    true,
 								Type:        schema.TypeString,
 							},
 							"value": {
-								Description: "Value of the tag",
+								Description: "Value of the tag.",
 								Optional:    true,
 								Type:        schema.TypeString,
 							},
@@ -4136,7 +4136,7 @@ func ServiceTypeM3db() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"static_ips": {
-			Description: "Use static public IP addresses",
+			Description: "Use static public IP addresses.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
@@ -4156,7 +4156,7 @@ func ServiceTypeM3db() *schema.Schema {
 func ServiceTypeMysql() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"additional_backup_regions": {
-			Description: "Additional Cloud Regions for Backup Replication",
+			Description: "Additional Cloud Regions for Backup Replication.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			MaxItems:    1,
 			Optional:    true,
@@ -4192,7 +4192,7 @@ func ServiceTypeMysql() *schema.Schema {
 		},
 		"ip_filter": {
 			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
-			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
 				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
@@ -4203,15 +4203,15 @@ func ServiceTypeMysql() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"ip_filter_object": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"description": {
-					Description: "Description for IP filter list entry",
+					Description: "Description for IP filter list entry.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"network": {
-					Description: "CIDR address block",
+					Description: "CIDR address block.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -4221,91 +4221,91 @@ func ServiceTypeMysql() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"migration": {
-			Description: "Migrate data from existing server",
+			Description: "Migrate data from existing server.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"dbname": {
-					Description: "Database name for bootstrapping the initial connection",
+					Description: "Database name for bootstrapping the initial connection.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"host": {
-					Description: "Hostname or IP address of the server where to migrate data from",
+					Description: "Hostname or IP address of the server where to migrate data from.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"ignore_dbs": {
-					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)",
+					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"method": {
-					Description: "The migration method to be used (currently supported only by Redis and MySQL service types)",
+					Description: "The migration method to be used (currently supported only by Redis and MySQL service types).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"password": {
-					Description: "Password for authentication with the server where to migrate data from",
+					Description: "Password for authentication with the server where to migrate data from.",
 					Optional:    true,
 					Sensitive:   true,
 					Type:        schema.TypeString,
 				},
 				"port": {
-					Description: "Port number of the server where to migrate data from",
+					Description: "Port number of the server where to migrate data from.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"ssl": {
 					Default:     true,
-					Description: "The server where to migrate data from is secured with SSL The default value is `true`.",
+					Description: "The server where to migrate data from is secured with SSL. The default value is `true`.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"username": {
-					Description: "User name for authentication with the server where to migrate data from",
+					Description: "User name for authentication with the server where to migrate data from.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"dbname": {
-					Description: "Database name for bootstrapping the initial connection",
+					Description: "Database name for bootstrapping the initial connection.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"host": {
-					Description: "Hostname or IP address of the server where to migrate data from",
+					Description: "Hostname or IP address of the server where to migrate data from.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"ignore_dbs": {
-					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)",
+					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"method": {
-					Description: "The migration method to be used (currently supported only by Redis and MySQL service types)",
+					Description: "The migration method to be used (currently supported only by Redis and MySQL service types).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"password": {
-					Description: "Password for authentication with the server where to migrate data from",
+					Description: "Password for authentication with the server where to migrate data from.",
 					Optional:    true,
 					Sensitive:   true,
 					Type:        schema.TypeString,
 				},
 				"port": {
-					Description: "Port number of the server where to migrate data from",
+					Description: "Port number of the server where to migrate data from.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"ssl": {
 					Default:     true,
-					Description: "The server where to migrate data from is secured with SSL The default value is `true`.",
+					Description: "The server where to migrate data from is secured with SSL. The default value is `true`.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"username": {
-					Description: "User name for authentication with the server where to migrate data from",
+					Description: "User name for authentication with the server where to migrate data from.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -4315,10 +4315,10 @@ func ServiceTypeMysql() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"mysql": {
-			Description: "mysql.conf configuration values",
+			Description: "mysql.conf configuration values.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"connect_timeout": {
-					Description: "The number of seconds that the mysqld server waits for a connect packet before responding with Bad handshake",
+					Description: "The number of seconds that the mysqld server waits for a connect packet before responding with Bad handshake.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -4333,17 +4333,17 @@ func ServiceTypeMysql() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"information_schema_stats_expiry": {
-					Description: "The time, in seconds, before cached statistics expire",
+					Description: "The time, in seconds, before cached statistics expire.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"innodb_change_buffer_max_size": {
-					Description: "Maximum size for the InnoDB change buffer, as a percentage of the total size of the buffer pool. Default is 25",
+					Description: "Maximum size for the InnoDB change buffer, as a percentage of the total size of the buffer pool. Default is 25.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"innodb_flush_neighbors": {
-					Description: "Specifies whether flushing a page from the InnoDB buffer pool also flushes other dirty pages in the same extent (default is 1): 0 - dirty pages in the same extent are not flushed,  1 - flush contiguous dirty pages in the same extent,  2 - flush dirty pages in the same extent",
+					Description: "Specifies whether flushing a page from the InnoDB buffer pool also flushes other dirty pages in the same extent (default is 1): 0 - dirty pages in the same extent are not flushed,  1 - flush contiguous dirty pages in the same extent,  2 - flush dirty pages in the same extent.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -4388,7 +4388,7 @@ func ServiceTypeMysql() *schema.Schema {
 					Type:        schema.TypeBool,
 				},
 				"innodb_thread_concurrency": {
-					Description: "Defines the maximum number of threads permitted inside of InnoDB. Default is 0 (infinite concurrency - no limit)",
+					Description: "Defines the maximum number of threads permitted inside of InnoDB. Default is 0 (infinite concurrency - no limit).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -4408,17 +4408,17 @@ func ServiceTypeMysql() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"long_query_time": {
-					Description: "The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Default is 10s",
+					Description: "The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Default is 10s.",
 					Optional:    true,
 					Type:        schema.TypeFloat,
 				},
 				"max_allowed_packet": {
-					Description: "Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M)",
+					Description: "Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_heap_table_size": {
-					Description: "Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M)",
+					Description: "Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -4438,12 +4438,12 @@ func ServiceTypeMysql() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"slow_query_log": {
-					Description: "Slow query log enables capturing of slow queries. Setting slow_query_log to false also truncates the mysql.slow_log table. Default is off",
+					Description: "Slow query log enables capturing of slow queries. Setting slow_query_log to false also truncates the mysql.slow_log table. Default is off.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"sort_buffer_size": {
-					Description: "Sort buffer size in bytes for ORDER BY optimization. Default is 262144 (256K)",
+					Description: "Sort buffer size in bytes for ORDER BY optimization. Default is 262144 (256K).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -4458,7 +4458,7 @@ func ServiceTypeMysql() *schema.Schema {
 					Type:        schema.TypeBool,
 				},
 				"tmp_table_size": {
-					Description: "Limits the size of internal in-memory tables. Also set max_heap_table_size. Default is 16777216 (16M)",
+					Description: "Limits the size of internal in-memory tables. Also set max_heap_table_size. Default is 16777216 (16M).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -4470,7 +4470,7 @@ func ServiceTypeMysql() *schema.Schema {
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"connect_timeout": {
-					Description: "The number of seconds that the mysqld server waits for a connect packet before responding with Bad handshake",
+					Description: "The number of seconds that the mysqld server waits for a connect packet before responding with Bad handshake.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -4485,17 +4485,17 @@ func ServiceTypeMysql() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"information_schema_stats_expiry": {
-					Description: "The time, in seconds, before cached statistics expire",
+					Description: "The time, in seconds, before cached statistics expire.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"innodb_change_buffer_max_size": {
-					Description: "Maximum size for the InnoDB change buffer, as a percentage of the total size of the buffer pool. Default is 25",
+					Description: "Maximum size for the InnoDB change buffer, as a percentage of the total size of the buffer pool. Default is 25.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"innodb_flush_neighbors": {
-					Description: "Specifies whether flushing a page from the InnoDB buffer pool also flushes other dirty pages in the same extent (default is 1): 0 - dirty pages in the same extent are not flushed,  1 - flush contiguous dirty pages in the same extent,  2 - flush dirty pages in the same extent",
+					Description: "Specifies whether flushing a page from the InnoDB buffer pool also flushes other dirty pages in the same extent (default is 1): 0 - dirty pages in the same extent are not flushed,  1 - flush contiguous dirty pages in the same extent,  2 - flush dirty pages in the same extent.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -4540,7 +4540,7 @@ func ServiceTypeMysql() *schema.Schema {
 					Type:        schema.TypeBool,
 				},
 				"innodb_thread_concurrency": {
-					Description: "Defines the maximum number of threads permitted inside of InnoDB. Default is 0 (infinite concurrency - no limit)",
+					Description: "Defines the maximum number of threads permitted inside of InnoDB. Default is 0 (infinite concurrency - no limit).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -4560,17 +4560,17 @@ func ServiceTypeMysql() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"long_query_time": {
-					Description: "The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Default is 10s",
+					Description: "The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Default is 10s.",
 					Optional:    true,
 					Type:        schema.TypeFloat,
 				},
 				"max_allowed_packet": {
-					Description: "Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M)",
+					Description: "Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_heap_table_size": {
-					Description: "Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M)",
+					Description: "Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -4590,12 +4590,12 @@ func ServiceTypeMysql() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"slow_query_log": {
-					Description: "Slow query log enables capturing of slow queries. Setting slow_query_log to false also truncates the mysql.slow_log table. Default is off",
+					Description: "Slow query log enables capturing of slow queries. Setting slow_query_log to false also truncates the mysql.slow_log table. Default is off.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"sort_buffer_size": {
-					Description: "Sort buffer size in bytes for ORDER BY optimization. Default is 262144 (256K)",
+					Description: "Sort buffer size in bytes for ORDER BY optimization. Default is 262144 (256K).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -4610,7 +4610,7 @@ func ServiceTypeMysql() *schema.Schema {
 					Type:        schema.TypeBool,
 				},
 				"tmp_table_size": {
-					Description: "Limits the size of internal in-memory tables. Also set max_heap_table_size. Default is 16777216 (16M)",
+					Description: "Limits the size of internal in-memory tables. Also set max_heap_table_size. Default is 16777216 (16M).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -4625,42 +4625,42 @@ func ServiceTypeMysql() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"mysql_version": {
-			Description: "MySQL major version",
+			Description: "MySQL major version.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"private_access": {
-			Description: "Allow access to selected service ports from private networks",
+			Description: "Allow access to selected service ports from private networks.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"mysql": {
-					Description: "Allow clients to connect to mysql with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to mysql with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"mysqlx": {
-					Description: "Allow clients to connect to mysqlx with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to mysqlx with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"mysql": {
-					Description: "Allow clients to connect to mysql with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to mysql with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"mysqlx": {
-					Description: "Allow clients to connect to mysqlx with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to mysqlx with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -4670,37 +4670,37 @@ func ServiceTypeMysql() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"privatelink_access": {
-			Description: "Allow access to selected service components through Privatelink",
+			Description: "Allow access to selected service components through Privatelink.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"mysql": {
-					Description: "Enable mysql",
+					Description: "Enable mysql.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"mysqlx": {
-					Description: "Enable mysqlx",
+					Description: "Enable mysqlx.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Enable prometheus",
+					Description: "Enable prometheus.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"mysql": {
-					Description: "Enable mysql",
+					Description: "Enable mysql.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"mysqlx": {
-					Description: "Enable mysqlx",
+					Description: "Enable mysqlx.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Enable prometheus",
+					Description: "Enable prometheus.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -4716,37 +4716,37 @@ func ServiceTypeMysql() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"public_access": {
-			Description: "Allow access to selected service ports from the public Internet",
+			Description: "Allow access to selected service ports from the public Internet.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"mysql": {
-					Description: "Allow clients to connect to mysql from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to mysql from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"mysqlx": {
-					Description: "Allow clients to connect to mysqlx from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to mysqlx from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"mysql": {
-					Description: "Allow clients to connect to mysql from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to mysql from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"mysqlx": {
-					Description: "Allow clients to connect to mysqlx from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to mysqlx from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -4768,7 +4768,7 @@ func ServiceTypeMysql() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"static_ips": {
-			Description: "Use static public IP addresses",
+			Description: "Use static public IP addresses.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
@@ -4788,14 +4788,14 @@ func ServiceTypeMysql() *schema.Schema {
 func ServiceTypeOpensearch() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"additional_backup_regions": {
-			Description: "Additional Cloud Regions for Backup Replication",
+			Description: "Additional Cloud Regions for Backup Replication.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			MaxItems:    1,
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
 		"custom_domain": {
-			Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name",
+			Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
@@ -4806,21 +4806,21 @@ func ServiceTypeOpensearch() *schema.Schema {
 			Type:        schema.TypeBool,
 		},
 		"index_patterns": {
-			Description: "Index patterns",
+			Description: "Index patterns.",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"max_index_count": {
-					Description: "Maximum number of indexes to keep",
+					Description: "Maximum number of indexes to keep.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"pattern": {
-					Description: "fnmatch pattern",
+					Description: "fnmatch pattern.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"sorting_algorithm": {
 					Default:     "creation_date",
-					Description: "Deletion sorting algorithm The default value is `creation_date`.",
+					Description: "Deletion sorting algorithm. The default value is `creation_date`.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -4830,7 +4830,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"index_template": {
-			Description: "Template settings for all new indexes",
+			Description: "Template settings for all new indexes.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"mapping_nested_objects_limit": {
 					Description: "The maximum number of nested JSON objects that a single document can contain across all nested types. This limit helps to prevent out of memory errors when a document contains too many nested objects. Default is 10000.",
@@ -4871,7 +4871,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 		},
 		"ip_filter": {
 			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
-			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
 				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
@@ -4882,15 +4882,15 @@ func ServiceTypeOpensearch() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"ip_filter_object": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"description": {
-					Description: "Description for IP filter list entry",
+					Description: "Description for IP filter list entry.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"network": {
-					Description: "CIDR address block",
+					Description: "CIDR address block.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -4907,25 +4907,25 @@ func ServiceTypeOpensearch() *schema.Schema {
 		"max_index_count": {
 			Default:     "0",
 			Deprecated:  "Usage of this field is discouraged.",
-			Description: "use index_patterns instead The default value is `0`.",
+			Description: "Use index_patterns instead. The default value is `0`.",
 			Optional:    true,
 			Type:        schema.TypeInt,
 		},
 		"opensearch": {
-			Description: "OpenSearch settings",
+			Description: "OpenSearch settings.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"action_auto_create_index_enabled": {
-					Description: "Explicitly allow or block automatic creation of indices. Defaults to true",
+					Description: "Explicitly allow or block automatic creation of indices. Defaults to true.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"action_destructive_requires_name": {
-					Description: "Require explicit index names when deleting",
+					Description: "Require explicit index names when deleting.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"cluster_max_shards_per_node": {
-					Description: "Controls the number of shards allowed in the cluster per data node",
+					Description: "Controls the number of shards allowed in the cluster per data node.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -4935,18 +4935,18 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"email_sender_name": {
-					Description: "This should be identical to the Sender name defined in Opensearch dashboards",
+					Description: "This should be identical to the Sender name defined in Opensearch dashboards.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"email_sender_password": {
-					Description: "Sender email password for Opensearch alerts to authenticate with SMTP server",
+					Description: "Sender email password for Opensearch alerts to authenticate with SMTP server.",
 					Optional:    true,
 					Sensitive:   true,
 					Type:        schema.TypeString,
 				},
 				"email_sender_username": {
-					Description: "Sender email address for Opensearch alerts",
+					Description: "Sender email address for Opensearch alerts.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -4956,12 +4956,12 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"http_max_header_size": {
-					Description: "The max size of allowed headers, in bytes",
+					Description: "The max size of allowed headers, in bytes.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"http_max_initial_line_length": {
-					Description: "The max length of an HTTP URL, in bytes",
+					Description: "The max length of an HTTP URL, in bytes.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -4986,7 +4986,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"indices_recovery_max_bytes_per_sec": {
-					Description: "Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb",
+					Description: "Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -4996,7 +4996,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"override_main_response_version": {
-					Description: "Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false",
+					Description: "Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -5008,7 +5008,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Type:        schema.TypeList,
 				},
 				"script_max_compilations_rate": {
-					Description: "Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context",
+					Description: "Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -5075,17 +5075,17 @@ func ServiceTypeOpensearch() *schema.Schema {
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"action_auto_create_index_enabled": {
-					Description: "Explicitly allow or block automatic creation of indices. Defaults to true",
+					Description: "Explicitly allow or block automatic creation of indices. Defaults to true.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"action_destructive_requires_name": {
-					Description: "Require explicit index names when deleting",
+					Description: "Require explicit index names when deleting.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"cluster_max_shards_per_node": {
-					Description: "Controls the number of shards allowed in the cluster per data node",
+					Description: "Controls the number of shards allowed in the cluster per data node.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -5095,18 +5095,18 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"email_sender_name": {
-					Description: "This should be identical to the Sender name defined in Opensearch dashboards",
+					Description: "This should be identical to the Sender name defined in Opensearch dashboards.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"email_sender_password": {
-					Description: "Sender email password for Opensearch alerts to authenticate with SMTP server",
+					Description: "Sender email password for Opensearch alerts to authenticate with SMTP server.",
 					Optional:    true,
 					Sensitive:   true,
 					Type:        schema.TypeString,
 				},
 				"email_sender_username": {
-					Description: "Sender email address for Opensearch alerts",
+					Description: "Sender email address for Opensearch alerts.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -5116,12 +5116,12 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"http_max_header_size": {
-					Description: "The max size of allowed headers, in bytes",
+					Description: "The max size of allowed headers, in bytes.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"http_max_initial_line_length": {
-					Description: "The max length of an HTTP URL, in bytes",
+					Description: "The max length of an HTTP URL, in bytes.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -5146,7 +5146,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"indices_recovery_max_bytes_per_sec": {
-					Description: "Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb",
+					Description: "Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -5156,7 +5156,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"override_main_response_version": {
-					Description: "Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false",
+					Description: "Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -5168,7 +5168,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Type:        schema.TypeList,
 				},
 				"script_max_compilations_rate": {
-					Description: "Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context",
+					Description: "Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -5238,11 +5238,11 @@ func ServiceTypeOpensearch() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"opensearch_dashboards": {
-			Description: "OpenSearch Dashboards settings",
+			Description: "OpenSearch Dashboards settings.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"enabled": {
 					Default:     true,
-					Description: "Enable or disable OpenSearch Dashboards The default value is `true`.",
+					Description: "Enable or disable OpenSearch Dashboards. The default value is `true`.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -5254,7 +5254,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 				},
 				"opensearch_request_timeout": {
 					Default:     "30000",
-					Description: "Timeout in milliseconds for requests made by OpenSearch Dashboards towards OpenSearch The default value is `30000`.",
+					Description: "Timeout in milliseconds for requests made by OpenSearch Dashboards towards OpenSearch. The default value is `30000`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -5262,7 +5262,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"enabled": {
 					Default:     true,
-					Description: "Enable or disable OpenSearch Dashboards The default value is `true`.",
+					Description: "Enable or disable OpenSearch Dashboards. The default value is `true`.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -5274,7 +5274,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 				},
 				"opensearch_request_timeout": {
 					Default:     "30000",
-					Description: "Timeout in milliseconds for requests made by OpenSearch Dashboards towards OpenSearch The default value is `30000`.",
+					Description: "Timeout in milliseconds for requests made by OpenSearch Dashboards towards OpenSearch. The default value is `30000`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -5284,42 +5284,42 @@ func ServiceTypeOpensearch() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"opensearch_version": {
-			Description: "OpenSearch major version",
+			Description: "OpenSearch major version.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"private_access": {
-			Description: "Allow access to selected service ports from private networks",
+			Description: "Allow access to selected service ports from private networks.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"opensearch": {
-					Description: "Allow clients to connect to opensearch with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to opensearch with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"opensearch_dashboards": {
-					Description: "Allow clients to connect to opensearch_dashboards with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to opensearch_dashboards with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"opensearch": {
-					Description: "Allow clients to connect to opensearch with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to opensearch with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"opensearch_dashboards": {
-					Description: "Allow clients to connect to opensearch_dashboards with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to opensearch_dashboards with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -5329,37 +5329,37 @@ func ServiceTypeOpensearch() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"privatelink_access": {
-			Description: "Allow access to selected service components through Privatelink",
+			Description: "Allow access to selected service components through Privatelink.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"opensearch": {
-					Description: "Enable opensearch",
+					Description: "Enable opensearch.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"opensearch_dashboards": {
-					Description: "Enable opensearch_dashboards",
+					Description: "Enable opensearch_dashboards.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Enable prometheus",
+					Description: "Enable prometheus.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"opensearch": {
-					Description: "Enable opensearch",
+					Description: "Enable opensearch.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"opensearch_dashboards": {
-					Description: "Enable opensearch_dashboards",
+					Description: "Enable opensearch_dashboards.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Enable prometheus",
+					Description: "Enable prometheus.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -5375,37 +5375,37 @@ func ServiceTypeOpensearch() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"public_access": {
-			Description: "Allow access to selected service ports from the public Internet",
+			Description: "Allow access to selected service ports from the public Internet.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"opensearch": {
-					Description: "Allow clients to connect to opensearch from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to opensearch from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"opensearch_dashboards": {
-					Description: "Allow clients to connect to opensearch_dashboards from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to opensearch_dashboards from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"opensearch": {
-					Description: "Allow clients to connect to opensearch from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to opensearch from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"opensearch_dashboards": {
-					Description: "Allow clients to connect to opensearch_dashboards from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to opensearch_dashboards from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -5415,7 +5415,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"recovery_basebackup_name": {
-			Description: "Name of the basebackup to restore in forked service",
+			Description: "Name of the basebackup to restore in forked service.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
@@ -5426,7 +5426,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"static_ips": {
-			Description: "Use static public IP addresses",
+			Description: "Use static public IP addresses.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
@@ -5446,7 +5446,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 func ServiceTypePg() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"additional_backup_regions": {
-			Description: "Additional Cloud Regions for Backup Replication",
+			Description: "Additional Cloud Regions for Backup Replication.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			MaxItems:    1,
 			Optional:    true,
@@ -5476,13 +5476,13 @@ func ServiceTypePg() *schema.Schema {
 			Type:        schema.TypeInt,
 		},
 		"enable_ipv6": {
-			Description: "Register AAAA DNS records for the service, and allow IPv6 packets to service ports",
+			Description: "Register AAAA DNS records for the service, and allow IPv6 packets to service ports.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
 		"ip_filter": {
 			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
-			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
 				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
@@ -5493,15 +5493,15 @@ func ServiceTypePg() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"ip_filter_object": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"description": {
-					Description: "Description for IP filter list entry",
+					Description: "Description for IP filter list entry.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"network": {
-					Description: "CIDR address block",
+					Description: "CIDR address block.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -5511,91 +5511,91 @@ func ServiceTypePg() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"migration": {
-			Description: "Migrate data from existing server",
+			Description: "Migrate data from existing server.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"dbname": {
-					Description: "Database name for bootstrapping the initial connection",
+					Description: "Database name for bootstrapping the initial connection.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"host": {
-					Description: "Hostname or IP address of the server where to migrate data from",
+					Description: "Hostname or IP address of the server where to migrate data from.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"ignore_dbs": {
-					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)",
+					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"method": {
-					Description: "The migration method to be used (currently supported only by Redis and MySQL service types)",
+					Description: "The migration method to be used (currently supported only by Redis and MySQL service types).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"password": {
-					Description: "Password for authentication with the server where to migrate data from",
+					Description: "Password for authentication with the server where to migrate data from.",
 					Optional:    true,
 					Sensitive:   true,
 					Type:        schema.TypeString,
 				},
 				"port": {
-					Description: "Port number of the server where to migrate data from",
+					Description: "Port number of the server where to migrate data from.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"ssl": {
 					Default:     true,
-					Description: "The server where to migrate data from is secured with SSL The default value is `true`.",
+					Description: "The server where to migrate data from is secured with SSL. The default value is `true`.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"username": {
-					Description: "User name for authentication with the server where to migrate data from",
+					Description: "User name for authentication with the server where to migrate data from.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"dbname": {
-					Description: "Database name for bootstrapping the initial connection",
+					Description: "Database name for bootstrapping the initial connection.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"host": {
-					Description: "Hostname or IP address of the server where to migrate data from",
+					Description: "Hostname or IP address of the server where to migrate data from.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"ignore_dbs": {
-					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)",
+					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"method": {
-					Description: "The migration method to be used (currently supported only by Redis and MySQL service types)",
+					Description: "The migration method to be used (currently supported only by Redis and MySQL service types).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"password": {
-					Description: "Password for authentication with the server where to migrate data from",
+					Description: "Password for authentication with the server where to migrate data from.",
 					Optional:    true,
 					Sensitive:   true,
 					Type:        schema.TypeString,
 				},
 				"port": {
-					Description: "Port number of the server where to migrate data from",
+					Description: "Port number of the server where to migrate data from.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"ssl": {
 					Default:     true,
-					Description: "The server where to migrate data from is secured with SSL The default value is `true`.",
+					Description: "The server where to migrate data from is secured with SSL. The default value is `true`.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"username": {
-					Description: "User name for authentication with the server where to migrate data from",
+					Description: "User name for authentication with the server where to migrate data from.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -5605,10 +5605,10 @@ func ServiceTypePg() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"pg": {
-			Description: "postgresql.conf configuration values",
+			Description: "postgresql.conf configuration values.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"autovacuum_analyze_scale_factor": {
-					Description: "Specifies a fraction of the table size to add to autovacuum_analyze_threshold when deciding whether to trigger an ANALYZE. The default is 0.2 (20% of table size)",
+					Description: "Specifies a fraction of the table size to add to autovacuum_analyze_threshold when deciding whether to trigger an ANALYZE. The default is 0.2 (20% of table size).",
 					Optional:    true,
 					Type:        schema.TypeFloat,
 				},
@@ -5628,12 +5628,12 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"autovacuum_naptime": {
-					Description: "Specifies the minimum delay between autovacuum runs on any given database. The delay is measured in seconds, and the default is one minute",
+					Description: "Specifies the minimum delay between autovacuum runs on any given database. The delay is measured in seconds, and the default is one minute.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"autovacuum_vacuum_cost_delay": {
-					Description: "Specifies the cost delay value that will be used in automatic VACUUM operations. If -1 is specified, the regular vacuum_cost_delay value will be used. The default value is 20 milliseconds",
+					Description: "Specifies the cost delay value that will be used in automatic VACUUM operations. If -1 is specified, the regular vacuum_cost_delay value will be used. The default value is 20 milliseconds.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -5643,12 +5643,12 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"autovacuum_vacuum_scale_factor": {
-					Description: "Specifies a fraction of the table size to add to autovacuum_vacuum_threshold when deciding whether to trigger a VACUUM. The default is 0.2 (20% of table size)",
+					Description: "Specifies a fraction of the table size to add to autovacuum_vacuum_threshold when deciding whether to trigger a VACUUM. The default is 0.2 (20% of table size).",
 					Optional:    true,
 					Type:        schema.TypeFloat,
 				},
 				"autovacuum_vacuum_threshold": {
-					Description: "Specifies the minimum number of updated or deleted tuples needed to trigger a VACUUM in any one table. The default is 50 tuples",
+					Description: "Specifies the minimum number of updated or deleted tuples needed to trigger a VACUUM in any one table. The default is 50 tuples.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -5683,7 +5683,7 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"idle_in_transaction_session_timeout": {
-					Description: "Time out sessions with open transactions after this number of milliseconds",
+					Description: "Time out sessions with open transactions after this number of milliseconds.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -5708,52 +5708,52 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"log_min_duration_statement": {
-					Description: "Log statements that take more than this number of milliseconds to run, -1 disables",
+					Description: "Log statements that take more than this number of milliseconds to run, -1 disables.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"log_temp_files": {
-					Description: "Log statements for each temporary file created larger than this number of kilobytes, -1 disables",
+					Description: "Log statements for each temporary file created larger than this number of kilobytes, -1 disables.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_files_per_process": {
-					Description: "PostgreSQL maximum number of files that can be open per process",
+					Description: "PostgreSQL maximum number of files that can be open per process.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_locks_per_transaction": {
-					Description: "PostgreSQL maximum locks per transaction",
+					Description: "PostgreSQL maximum locks per transaction.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_logical_replication_workers": {
-					Description: "PostgreSQL maximum logical replication workers (taken from the pool of max_parallel_workers)",
+					Description: "PostgreSQL maximum logical replication workers (taken from the pool of max_parallel_workers).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_parallel_workers": {
-					Description: "Sets the maximum number of workers that the system can support for parallel queries",
+					Description: "Sets the maximum number of workers that the system can support for parallel queries.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_parallel_workers_per_gather": {
-					Description: "Sets the maximum number of workers that can be started by a single Gather or Gather Merge node",
+					Description: "Sets the maximum number of workers that can be started by a single Gather or Gather Merge node.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_pred_locks_per_transaction": {
-					Description: "PostgreSQL maximum predicate locks per transaction",
+					Description: "PostgreSQL maximum predicate locks per transaction.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_prepared_transactions": {
-					Description: "PostgreSQL maximum prepared transactions",
+					Description: "PostgreSQL maximum prepared transactions.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_replication_slots": {
-					Description: "PostgreSQL maximum replication slots",
+					Description: "PostgreSQL maximum replication slots.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -5763,32 +5763,32 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"max_stack_depth": {
-					Description: "Maximum depth of the stack in bytes",
+					Description: "Maximum depth of the stack in bytes.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_standby_archive_delay": {
-					Description: "Max standby archive delay in milliseconds",
+					Description: "Max standby archive delay in milliseconds.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_standby_streaming_delay": {
-					Description: "Max standby streaming delay in milliseconds",
+					Description: "Max standby streaming delay in milliseconds.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_wal_senders": {
-					Description: "PostgreSQL maximum WAL senders",
+					Description: "PostgreSQL maximum WAL senders.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_worker_processes": {
-					Description: "Sets the maximum number of background processes that the system can support",
+					Description: "Sets the maximum number of background processes that the system can support.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"pg_partman_bgw__dot__interval": {
-					Description: "Sets the time interval to run pg_partman's scheduled tasks",
+					Description: "Sets the time interval to run pg_partman's scheduled tasks.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -5798,12 +5798,12 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"pg_stat_monitor__dot__pgsm_enable_query_plan": {
-					Description: "Enables or disables query plan monitoring",
+					Description: "Enables or disables query plan monitoring.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"pg_stat_monitor__dot__pgsm_max_buckets": {
-					Description: "Sets the maximum number of buckets ",
+					Description: "Sets the maximum number of buckets .",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -5813,12 +5813,12 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"temp_file_limit": {
-					Description: "PostgreSQL temporary file limit in KiB, -1 for unlimited",
+					Description: "PostgreSQL temporary file limit in KiB, -1 for unlimited.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"timezone": {
-					Description: "PostgreSQL service timezone",
+					Description: "PostgreSQL service timezone.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -5848,14 +5848,14 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"wal_writer_delay": {
-					Description: "WAL flush interval in milliseconds. Note that setting this value to lower than the default 200ms may negatively impact performance",
+					Description: "WAL flush interval in milliseconds. Note that setting this value to lower than the default 200ms may negatively impact performance.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"autovacuum_analyze_scale_factor": {
-					Description: "Specifies a fraction of the table size to add to autovacuum_analyze_threshold when deciding whether to trigger an ANALYZE. The default is 0.2 (20% of table size)",
+					Description: "Specifies a fraction of the table size to add to autovacuum_analyze_threshold when deciding whether to trigger an ANALYZE. The default is 0.2 (20% of table size).",
 					Optional:    true,
 					Type:        schema.TypeFloat,
 				},
@@ -5875,12 +5875,12 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"autovacuum_naptime": {
-					Description: "Specifies the minimum delay between autovacuum runs on any given database. The delay is measured in seconds, and the default is one minute",
+					Description: "Specifies the minimum delay between autovacuum runs on any given database. The delay is measured in seconds, and the default is one minute.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"autovacuum_vacuum_cost_delay": {
-					Description: "Specifies the cost delay value that will be used in automatic VACUUM operations. If -1 is specified, the regular vacuum_cost_delay value will be used. The default value is 20 milliseconds",
+					Description: "Specifies the cost delay value that will be used in automatic VACUUM operations. If -1 is specified, the regular vacuum_cost_delay value will be used. The default value is 20 milliseconds.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -5890,12 +5890,12 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"autovacuum_vacuum_scale_factor": {
-					Description: "Specifies a fraction of the table size to add to autovacuum_vacuum_threshold when deciding whether to trigger a VACUUM. The default is 0.2 (20% of table size)",
+					Description: "Specifies a fraction of the table size to add to autovacuum_vacuum_threshold when deciding whether to trigger a VACUUM. The default is 0.2 (20% of table size).",
 					Optional:    true,
 					Type:        schema.TypeFloat,
 				},
 				"autovacuum_vacuum_threshold": {
-					Description: "Specifies the minimum number of updated or deleted tuples needed to trigger a VACUUM in any one table. The default is 50 tuples",
+					Description: "Specifies the minimum number of updated or deleted tuples needed to trigger a VACUUM in any one table. The default is 50 tuples.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -5930,7 +5930,7 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"idle_in_transaction_session_timeout": {
-					Description: "Time out sessions with open transactions after this number of milliseconds",
+					Description: "Time out sessions with open transactions after this number of milliseconds.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -5955,52 +5955,52 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"log_min_duration_statement": {
-					Description: "Log statements that take more than this number of milliseconds to run, -1 disables",
+					Description: "Log statements that take more than this number of milliseconds to run, -1 disables.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"log_temp_files": {
-					Description: "Log statements for each temporary file created larger than this number of kilobytes, -1 disables",
+					Description: "Log statements for each temporary file created larger than this number of kilobytes, -1 disables.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_files_per_process": {
-					Description: "PostgreSQL maximum number of files that can be open per process",
+					Description: "PostgreSQL maximum number of files that can be open per process.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_locks_per_transaction": {
-					Description: "PostgreSQL maximum locks per transaction",
+					Description: "PostgreSQL maximum locks per transaction.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_logical_replication_workers": {
-					Description: "PostgreSQL maximum logical replication workers (taken from the pool of max_parallel_workers)",
+					Description: "PostgreSQL maximum logical replication workers (taken from the pool of max_parallel_workers).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_parallel_workers": {
-					Description: "Sets the maximum number of workers that the system can support for parallel queries",
+					Description: "Sets the maximum number of workers that the system can support for parallel queries.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_parallel_workers_per_gather": {
-					Description: "Sets the maximum number of workers that can be started by a single Gather or Gather Merge node",
+					Description: "Sets the maximum number of workers that can be started by a single Gather or Gather Merge node.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_pred_locks_per_transaction": {
-					Description: "PostgreSQL maximum predicate locks per transaction",
+					Description: "PostgreSQL maximum predicate locks per transaction.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_prepared_transactions": {
-					Description: "PostgreSQL maximum prepared transactions",
+					Description: "PostgreSQL maximum prepared transactions.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_replication_slots": {
-					Description: "PostgreSQL maximum replication slots",
+					Description: "PostgreSQL maximum replication slots.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -6010,32 +6010,32 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"max_stack_depth": {
-					Description: "Maximum depth of the stack in bytes",
+					Description: "Maximum depth of the stack in bytes.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_standby_archive_delay": {
-					Description: "Max standby archive delay in milliseconds",
+					Description: "Max standby archive delay in milliseconds.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_standby_streaming_delay": {
-					Description: "Max standby streaming delay in milliseconds",
+					Description: "Max standby streaming delay in milliseconds.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_wal_senders": {
-					Description: "PostgreSQL maximum WAL senders",
+					Description: "PostgreSQL maximum WAL senders.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_worker_processes": {
-					Description: "Sets the maximum number of background processes that the system can support",
+					Description: "Sets the maximum number of background processes that the system can support.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"pg_partman_bgw__dot__interval": {
-					Description: "Sets the time interval to run pg_partman's scheduled tasks",
+					Description: "Sets the time interval to run pg_partman's scheduled tasks.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -6045,12 +6045,12 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"pg_stat_monitor__dot__pgsm_enable_query_plan": {
-					Description: "Enables or disables query plan monitoring",
+					Description: "Enables or disables query plan monitoring.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"pg_stat_monitor__dot__pgsm_max_buckets": {
-					Description: "Sets the maximum number of buckets ",
+					Description: "Sets the maximum number of buckets .",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -6060,12 +6060,12 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"temp_file_limit": {
-					Description: "PostgreSQL temporary file limit in KiB, -1 for unlimited",
+					Description: "PostgreSQL temporary file limit in KiB, -1 for unlimited.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"timezone": {
-					Description: "PostgreSQL service timezone",
+					Description: "PostgreSQL service timezone.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -6095,7 +6095,7 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"wal_writer_delay": {
-					Description: "WAL flush interval in milliseconds. Note that setting this value to lower than the default 200ms may negatively impact performance",
+					Description: "WAL flush interval in milliseconds. Note that setting this value to lower than the default 200ms may negatively impact performance.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -6119,20 +6119,20 @@ func ServiceTypePg() *schema.Schema {
 		},
 		"pg_stat_monitor_enable": {
 			Default:     false,
-			Description: "Enable the pg_stat_monitor extension. Enabling this extension will cause the cluster to be restarted.When this extension is enabled, pg_stat_statements results for utility commands are unreliable The default value is `false`.",
+			Description: "Enable the pg_stat_monitor extension. Enabling this extension will cause the cluster to be restarted.When this extension is enabled, pg_stat_statements results for utility commands are unreliable. The default value is `false`.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
 		"pg_version": {
-			Description: "PostgreSQL major version",
+			Description: "PostgreSQL major version.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"pgbouncer": {
-			Description: "PGBouncer connection pooling settings",
+			Description: "PGBouncer connection pooling settings.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"autodb_idle_timeout": {
-					Description: "If the automatically created database pools have been unused this many seconds, they are freed. If 0 then timeout is disabled. [seconds]",
+					Description: "If the automatically created database pools have been unused this many seconds, they are freed. If 0 then timeout is disabled. (seconds).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -6142,7 +6142,7 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"autodb_pool_mode": {
-					Description: "PGBouncer pool mode",
+					Description: "PGBouncer pool mode.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -6152,7 +6152,7 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"ignore_startup_parameters": {
-					Description: "List of parameters to ignore when given in startup packet",
+					Description: "List of parameters to ignore when given in startup packet.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					MaxItems:    32,
 					Optional:    true,
@@ -6164,24 +6164,24 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"server_idle_timeout": {
-					Description: "If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. [seconds]",
+					Description: "If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. (seconds).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"server_lifetime": {
-					Description: "The pooler will close an unused server connection that has been connected longer than this. [seconds]",
+					Description: "The pooler will close an unused server connection that has been connected longer than this. (seconds).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"server_reset_query_always": {
-					Description: "Run server_reset_query (DISCARD ALL) in all pooling modes",
+					Description: "Run server_reset_query (DISCARD ALL) in all pooling modes.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"autodb_idle_timeout": {
-					Description: "If the automatically created database pools have been unused this many seconds, they are freed. If 0 then timeout is disabled. [seconds]",
+					Description: "If the automatically created database pools have been unused this many seconds, they are freed. If 0 then timeout is disabled. (seconds).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -6191,7 +6191,7 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"autodb_pool_mode": {
-					Description: "PGBouncer pool mode",
+					Description: "PGBouncer pool mode.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -6201,7 +6201,7 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"ignore_startup_parameters": {
-					Description: "List of parameters to ignore when given in startup packet",
+					Description: "List of parameters to ignore when given in startup packet.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					MaxItems:    32,
 					Optional:    true,
@@ -6213,17 +6213,17 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"server_idle_timeout": {
-					Description: "If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. [seconds]",
+					Description: "If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. (seconds).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"server_lifetime": {
-					Description: "The pooler will close an unused server connection that has been connected longer than this. [seconds]",
+					Description: "The pooler will close an unused server connection that has been connected longer than this. (seconds).",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"server_reset_query_always": {
-					Description: "Run server_reset_query (DISCARD ALL) in all pooling modes",
+					Description: "Run server_reset_query (DISCARD ALL) in all pooling modes.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -6233,16 +6233,16 @@ func ServiceTypePg() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"pglookout": {
-			Description: "PGLookout settings",
+			Description: "PGLookout settings.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"max_failover_replication_time_lag": {
 				Default:     "60",
-				Description: "Number of seconds of master unavailability before triggering database failover to standby The default value is `60`.",
+				Description: "Number of seconds of master unavailability before triggering database failover to standby. The default value is `60`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"max_failover_replication_time_lag": {
 				Default:     "60",
-				Description: "Number of seconds of master unavailability before triggering database failover to standby The default value is `60`.",
+				Description: "Number of seconds of master unavailability before triggering database failover to standby. The default value is `60`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			}}},
@@ -6251,37 +6251,37 @@ func ServiceTypePg() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"private_access": {
-			Description: "Allow access to selected service ports from private networks",
+			Description: "Allow access to selected service ports from private networks.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"pg": {
-					Description: "Allow clients to connect to pg with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to pg with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"pgbouncer": {
-					Description: "Allow clients to connect to pgbouncer with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to pgbouncer with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"pg": {
-					Description: "Allow clients to connect to pg with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to pg with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"pgbouncer": {
-					Description: "Allow clients to connect to pgbouncer with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to pgbouncer with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -6291,37 +6291,37 @@ func ServiceTypePg() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"privatelink_access": {
-			Description: "Allow access to selected service components through Privatelink",
+			Description: "Allow access to selected service components through Privatelink.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"pg": {
-					Description: "Enable pg",
+					Description: "Enable pg.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"pgbouncer": {
-					Description: "Enable pgbouncer",
+					Description: "Enable pgbouncer.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Enable prometheus",
+					Description: "Enable prometheus.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"pg": {
-					Description: "Enable pg",
+					Description: "Enable pg.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"pgbouncer": {
-					Description: "Enable pgbouncer",
+					Description: "Enable pgbouncer.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Enable prometheus",
+					Description: "Enable prometheus.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -6337,37 +6337,37 @@ func ServiceTypePg() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"public_access": {
-			Description: "Allow access to selected service ports from the public Internet",
+			Description: "Allow access to selected service ports from the public Internet.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"pg": {
-					Description: "Allow clients to connect to pg from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to pg from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"pgbouncer": {
-					Description: "Allow clients to connect to pgbouncer from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to pgbouncer from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"pg": {
-					Description: "Allow clients to connect to pg from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to pg from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"pgbouncer": {
-					Description: "Allow clients to connect to pgbouncer from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to pgbouncer from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -6394,7 +6394,7 @@ func ServiceTypePg() *schema.Schema {
 			Type:        schema.TypeFloat,
 		},
 		"static_ips": {
-			Description: "Use static public IP addresses",
+			Description: "Use static public IP addresses.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
@@ -6404,7 +6404,7 @@ func ServiceTypePg() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"timescaledb": {
-			Description: "TimescaleDB extension configuration values",
+			Description: "TimescaleDB extension configuration values.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"max_background_workers": {
 				Description: "The number of background workers for timescaledb operations. You should configure this setting to the sum of your number of databases and the total number of concurrent background workers you want running at any given point in time.",
 				Optional:    true,
@@ -6420,7 +6420,7 @@ func ServiceTypePg() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"variant": {
-			Description: "Variant of the PostgreSQL service, may affect the features that are exposed by default",
+			Description: "Variant of the PostgreSQL service, may affect the features that are exposed by default.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
@@ -6445,7 +6445,7 @@ func ServiceTypePg() *schema.Schema {
 func ServiceTypeRedis() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"additional_backup_regions": {
-			Description: "Additional Cloud Regions for Backup Replication",
+			Description: "Additional Cloud Regions for Backup Replication.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			MaxItems:    1,
 			Optional:    true,
@@ -6453,7 +6453,7 @@ func ServiceTypeRedis() *schema.Schema {
 		},
 		"ip_filter": {
 			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
-			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
 				DiffSuppressFunc: schemautil.IPFilterValueDiffSuppressFunc,
@@ -6464,15 +6464,15 @@ func ServiceTypeRedis() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"ip_filter_object": {
-			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+			Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"description": {
-					Description: "Description for IP filter list entry",
+					Description: "Description for IP filter list entry.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"network": {
-					Description: "CIDR address block",
+					Description: "CIDR address block.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -6482,91 +6482,91 @@ func ServiceTypeRedis() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"migration": {
-			Description: "Migrate data from existing server",
+			Description: "Migrate data from existing server.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"dbname": {
-					Description: "Database name for bootstrapping the initial connection",
+					Description: "Database name for bootstrapping the initial connection.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"host": {
-					Description: "Hostname or IP address of the server where to migrate data from",
+					Description: "Hostname or IP address of the server where to migrate data from.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"ignore_dbs": {
-					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)",
+					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"method": {
-					Description: "The migration method to be used (currently supported only by Redis and MySQL service types)",
+					Description: "The migration method to be used (currently supported only by Redis and MySQL service types).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"password": {
-					Description: "Password for authentication with the server where to migrate data from",
+					Description: "Password for authentication with the server where to migrate data from.",
 					Optional:    true,
 					Sensitive:   true,
 					Type:        schema.TypeString,
 				},
 				"port": {
-					Description: "Port number of the server where to migrate data from",
+					Description: "Port number of the server where to migrate data from.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"ssl": {
 					Default:     true,
-					Description: "The server where to migrate data from is secured with SSL The default value is `true`.",
+					Description: "The server where to migrate data from is secured with SSL. The default value is `true`.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"username": {
-					Description: "User name for authentication with the server where to migrate data from",
+					Description: "User name for authentication with the server where to migrate data from.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"dbname": {
-					Description: "Database name for bootstrapping the initial connection",
+					Description: "Database name for bootstrapping the initial connection.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"host": {
-					Description: "Hostname or IP address of the server where to migrate data from",
+					Description: "Hostname or IP address of the server where to migrate data from.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"ignore_dbs": {
-					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment)",
+					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"method": {
-					Description: "The migration method to be used (currently supported only by Redis and MySQL service types)",
+					Description: "The migration method to be used (currently supported only by Redis and MySQL service types).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"password": {
-					Description: "Password for authentication with the server where to migrate data from",
+					Description: "Password for authentication with the server where to migrate data from.",
 					Optional:    true,
 					Sensitive:   true,
 					Type:        schema.TypeString,
 				},
 				"port": {
-					Description: "Port number of the server where to migrate data from",
+					Description: "Port number of the server where to migrate data from.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"ssl": {
 					Default:     true,
-					Description: "The server where to migrate data from is secured with SSL The default value is `true`.",
+					Description: "The server where to migrate data from is secured with SSL. The default value is `true`.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"username": {
-					Description: "User name for authentication with the server where to migrate data from",
+					Description: "User name for authentication with the server where to migrate data from.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -6576,27 +6576,27 @@ func ServiceTypeRedis() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"private_access": {
-			Description: "Allow access to selected service ports from private networks",
+			Description: "Allow access to selected service ports from private networks.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"redis": {
-					Description: "Allow clients to connect to redis with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to redis with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"redis": {
-					Description: "Allow clients to connect to redis with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations",
+					Description: "Allow clients to connect to redis with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -6606,27 +6606,27 @@ func ServiceTypeRedis() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"privatelink_access": {
-			Description: "Allow access to selected service components through Privatelink",
+			Description: "Allow access to selected service components through Privatelink.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"prometheus": {
-					Description: "Enable prometheus",
+					Description: "Enable prometheus.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"redis": {
-					Description: "Enable redis",
+					Description: "Enable redis.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"prometheus": {
-					Description: "Enable prometheus",
+					Description: "Enable prometheus.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"redis": {
-					Description: "Enable redis",
+					Description: "Enable redis.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -6642,27 +6642,27 @@ func ServiceTypeRedis() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"public_access": {
-			Description: "Allow access to selected service ports from the public Internet",
+			Description: "Allow access to selected service ports from the public Internet.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"redis": {
-					Description: "Allow clients to connect to redis from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to redis from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"prometheus": {
-					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"redis": {
-					Description: "Allow clients to connect to redis from the public internet for service nodes that are in a project VPC or another type of private network",
+					Description: "Allow clients to connect to redis from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -6672,7 +6672,7 @@ func ServiceTypeRedis() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"recovery_basebackup_name": {
-			Description: "Name of the basebackup to restore in forked service",
+			Description: "Name of the basebackup to restore in forked service.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
@@ -6682,31 +6682,31 @@ func ServiceTypeRedis() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"redis_io_threads": {
-			Description: "Redis IO thread count",
+			Description: "Redis IO thread count.",
 			Optional:    true,
 			Type:        schema.TypeInt,
 		},
 		"redis_lfu_decay_time": {
 			Default:     "1",
-			Description: "LFU maxmemory-policy counter decay time in minutes The default value is `1`.",
+			Description: "LFU maxmemory-policy counter decay time in minutes. The default value is `1`.",
 			Optional:    true,
 			Type:        schema.TypeInt,
 		},
 		"redis_lfu_log_factor": {
 			Default:     "10",
-			Description: "Counter logarithm factor for volatile-lfu and allkeys-lfu maxmemory-policies The default value is `10`.",
+			Description: "Counter logarithm factor for volatile-lfu and allkeys-lfu maxmemory-policies. The default value is `10`.",
 			Optional:    true,
 			Type:        schema.TypeInt,
 		},
 		"redis_maxmemory_policy": {
 			Default:     "noeviction",
-			Description: "Redis maxmemory-policy The default value is `noeviction`.",
+			Description: "Redis maxmemory-policy. The default value is `noeviction`.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
 		"redis_notify_keyspace_events": {
 			Default:     "",
-			Description: "Set notify-keyspace-events option",
+			Description: "Set notify-keyspace-events option.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
@@ -6727,13 +6727,13 @@ func ServiceTypeRedis() *schema.Schema {
 		},
 		"redis_ssl": {
 			Default:     true,
-			Description: "Require SSL to access Redis The default value is `true`.",
+			Description: "Require SSL to access Redis. The default value is `true`.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
 		"redis_timeout": {
 			Default:     "300",
-			Description: "Redis idle connection timeout in seconds The default value is `300`.",
+			Description: "Redis idle connection timeout in seconds. The default value is `300`.",
 			Optional:    true,
 			Type:        schema.TypeInt,
 		},
@@ -6744,7 +6744,7 @@ func ServiceTypeRedis() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"static_ips": {
-			Description: "Use static public IP addresses",
+			Description: "Use static public IP addresses.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},

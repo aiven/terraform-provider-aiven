@@ -59,26 +59,26 @@ resource "aiven_service_integration" "my_integration_metrics" {
 
 Optional:
 
-- `tables` (Block List, Max: 100) Tables to create (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables))
+- `tables` (Block List, Max: 100) Tables to create. (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables))
 
 <a id="nestedblock--clickhouse_kafka_user_config--tables"></a>
 ### Nested Schema for `clickhouse_kafka_user_config.tables`
 
 Optional:
 
-- `columns` (Block List, Max: 100) Table columns (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--columns))
-- `data_format` (String) Message data format The default value is `JSONEachRow`.
-- `group_name` (String) Kafka consumers group The default value is `clickhouse`.
-- `name` (String) Name of the table
-- `topics` (Block List, Max: 100) Kafka topics (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--topics))
+- `columns` (Block List, Max: 100) Table columns. (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--columns))
+- `data_format` (String) Message data format. The default value is `JSONEachRow`.
+- `group_name` (String) Kafka consumers group. The default value is `clickhouse`.
+- `name` (String) Name of the table.
+- `topics` (Block List, Max: 100) Kafka topics. (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--topics))
 
 <a id="nestedblock--clickhouse_kafka_user_config--tables--columns"></a>
 ### Nested Schema for `clickhouse_kafka_user_config.tables.columns`
 
 Optional:
 
-- `name` (String) Column name
-- `type` (String) Column type
+- `name` (String) Column name.
+- `type` (String) Column type.
 
 
 <a id="nestedblock--clickhouse_kafka_user_config--tables--topics"></a>
@@ -86,7 +86,7 @@ Optional:
 
 Optional:
 
-- `name` (String) Name of the topic
+- `name` (String) Name of the topic.
 
 
 
@@ -96,15 +96,15 @@ Optional:
 
 Optional:
 
-- `databases` (Block List, Max: 10) Databases to expose (see [below for nested schema](#nestedblock--clickhouse_postgresql_user_config--databases))
+- `databases` (Block List, Max: 10) Databases to expose. (see [below for nested schema](#nestedblock--clickhouse_postgresql_user_config--databases))
 
 <a id="nestedblock--clickhouse_postgresql_user_config--databases"></a>
 ### Nested Schema for `clickhouse_postgresql_user_config.databases`
 
 Optional:
 
-- `database` (String) PostgreSQL database to expose The default value is `defaultdb`.
-- `schema` (String) PostgreSQL schema to expose The default value is `public`.
+- `database` (String) PostgreSQL database to expose. The default value is `defaultdb`.
+- `schema` (String) PostgreSQL schema to expose. The default value is `public`.
 
 
 
@@ -113,22 +113,22 @@ Optional:
 
 Optional:
 
-- `datadog_dbm_enabled` (Boolean) Enable Datadog Database Monitoring
-- `datadog_tags` (Block List, Max: 32) Custom tags provided by user (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))
-- `exclude_consumer_groups` (List of String) List of custom metrics
-- `exclude_topics` (List of String) List of topics to exclude
-- `include_consumer_groups` (List of String) List of custom metrics
-- `include_topics` (List of String) List of topics to include
-- `kafka_custom_metrics` (List of String) List of custom metrics
-- `max_jmx_metrics` (Number) Maximum number of JMX metrics to send
-- `opensearch` (Block List, Max: 1) Datadog Opensearch Options (see [below for nested schema](#nestedblock--datadog_user_config--opensearch))
+- `datadog_dbm_enabled` (Boolean) Enable Datadog Database Monitoring.
+- `datadog_tags` (Block List, Max: 32) Custom tags provided by user. (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))
+- `exclude_consumer_groups` (List of String) List of custom metrics.
+- `exclude_topics` (List of String) List of topics to exclude.
+- `include_consumer_groups` (List of String) List of custom metrics.
+- `include_topics` (List of String) List of topics to include.
+- `kafka_custom_metrics` (List of String) List of custom metrics.
+- `max_jmx_metrics` (Number) Maximum number of JMX metrics to send.
+- `opensearch` (Block List, Max: 1) Datadog Opensearch Options. (see [below for nested schema](#nestedblock--datadog_user_config--opensearch))
 
 <a id="nestedblock--datadog_user_config--datadog_tags"></a>
 ### Nested Schema for `datadog_user_config.datadog_tags`
 
 Optional:
 
-- `comment` (String) Optional tag explanation
+- `comment` (String) Optional tag explanation.
 - `tag` (String) Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix 'aiven-' are reserved for Aiven.
 
 
@@ -137,9 +137,9 @@ Optional:
 
 Optional:
 
-- `index_stats_enabled` (Boolean) Enable Datadog Opensearch Index Monitoring
-- `pending_task_stats_enabled` (Boolean) Enable Datadog Opensearch Pending Task Monitoring
-- `pshard_stats_enabled` (Boolean) Enable Datadog Opensearch Primary Shard Monitoring
+- `index_stats_enabled` (Boolean) Enable Datadog Opensearch Index Monitoring.
+- `pending_task_stats_enabled` (Boolean) Enable Datadog Opensearch Pending Task Monitoring.
+- `pshard_stats_enabled` (Boolean) Enable Datadog Opensearch Primary Shard Monitoring.
 
 
 
@@ -175,7 +175,7 @@ Optional:
 
 Optional:
 
-- `kafka_connect` (Block List, Max: 1) Kafka Connect service configuration values (see [below for nested schema](#nestedblock--kafka_connect_user_config--kafka_connect))
+- `kafka_connect` (Block List, Max: 1) Kafka Connect service configuration values. (see [below for nested schema](#nestedblock--kafka_connect_user_config--kafka_connect))
 
 <a id="nestedblock--kafka_connect_user_config--kafka_connect"></a>
 ### Nested Schema for `kafka_connect_user_config.kafka_connect`
@@ -194,7 +194,7 @@ Optional:
 
 Optional:
 
-- `kafka_topic` (String) Topic name
+- `kafka_topic` (String) Topic name.
 
 
 <a id="nestedblock--kafka_mirrormaker_user_config"></a>
@@ -203,14 +203,14 @@ Optional:
 Optional:
 
 - `cluster_alias` (String) The alias under which the Kafka cluster is known to MirrorMaker. Can contain the following symbols: ASCII alphanumerics, '.', '_', and '-'.
-- `kafka_mirrormaker` (Block List, Max: 1) Kafka MirrorMaker configuration values (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker))
+- `kafka_mirrormaker` (Block List, Max: 1) Kafka MirrorMaker configuration values. (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker))
 
 <a id="nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker"></a>
 ### Nested Schema for `kafka_mirrormaker_user_config.kafka_mirrormaker`
 
 Optional:
 
-- `consumer_fetch_min_bytes` (Number) The minimum amount of data the server should return for a fetch request
+- `consumer_fetch_min_bytes` (Number) The minimum amount of data the server should return for a fetch request.
 - `producer_batch_size` (Number) The batch size in bytes producer will attempt to collect before publishing to broker.
 - `producer_buffer_memory` (Number) The amount of bytes producer can use for buffering data before publishing to broker.
 - `producer_linger_ms` (Number) The linger time (ms) for waiting new data to arrive for publishing.
@@ -223,8 +223,8 @@ Optional:
 
 Optional:
 
-- `elasticsearch_index_days_max` (Number) Elasticsearch index retention limit The default value is `3`.
-- `elasticsearch_index_prefix` (String) Elasticsearch index prefix The default value is `logs`.
+- `elasticsearch_index_days_max` (Number) Elasticsearch index retention limit. The default value is `3`.
+- `elasticsearch_index_prefix` (String) Elasticsearch index prefix. The default value is `logs`.
 
 
 <a id="nestedblock--metrics_user_config"></a>
@@ -235,7 +235,7 @@ Optional:
 - `database` (String) Name of the database where to store metric datapoints. Only affects PostgreSQL destinations. Defaults to 'metrics'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
 - `retention_days` (Number) Number of days to keep old metrics. Only affects PostgreSQL destinations. Set to 0 for no automatic cleanup. Defaults to 30 days.
 - `ro_username` (String) Name of a user that can be used to read metrics. This will be used for Grafana integration (if enabled) to prevent Grafana users from making undesired changes. Only affects PostgreSQL destinations. Defaults to 'metrics_reader'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
-- `source_mysql` (Block List, Max: 1) Configuration options for metrics where source service is MySQL (see [below for nested schema](#nestedblock--metrics_user_config--source_mysql))
+- `source_mysql` (Block List, Max: 1) Configuration options for metrics where source service is MySQL. (see [below for nested schema](#nestedblock--metrics_user_config--source_mysql))
 - `username` (String) Name of the user used to write metrics. Only affects PostgreSQL destinations. Defaults to 'metrics_writer'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
 
 <a id="nestedblock--metrics_user_config--source_mysql"></a>
@@ -243,27 +243,27 @@ Optional:
 
 Optional:
 
-- `telegraf` (Block List, Max: 1) Configuration options for Telegraf MySQL input plugin (see [below for nested schema](#nestedblock--metrics_user_config--source_mysql--telegraf))
+- `telegraf` (Block List, Max: 1) Configuration options for Telegraf MySQL input plugin. (see [below for nested schema](#nestedblock--metrics_user_config--source_mysql--telegraf))
 
 <a id="nestedblock--metrics_user_config--source_mysql--telegraf"></a>
 ### Nested Schema for `metrics_user_config.source_mysql.telegraf`
 
 Optional:
 
-- `gather_event_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS
-- `gather_file_events_stats` (Boolean) gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME
-- `gather_index_io_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE
-- `gather_info_schema_auto_inc` (Boolean) Gather auto_increment columns and max values from information schema
-- `gather_innodb_metrics` (Boolean) Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS
-- `gather_perf_events_statements` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST
-- `gather_process_list` (Boolean) Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST
-- `gather_slave_status` (Boolean) Gather metrics from SHOW SLAVE STATUS command output
-- `gather_table_io_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE
-- `gather_table_lock_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS
-- `gather_table_schema` (Boolean) Gather metrics from INFORMATION_SCHEMA.TABLES
-- `perf_events_statements_digest_text_limit` (Number) Truncates digest text from perf_events_statements into this many characters
-- `perf_events_statements_limit` (Number) Limits metrics from perf_events_statements
-- `perf_events_statements_time_limit` (Number) Only include perf_events_statements whose last seen is less than this many seconds
+- `gather_event_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS.
+- `gather_file_events_stats` (Boolean) gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME.
+- `gather_index_io_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE.
+- `gather_info_schema_auto_inc` (Boolean) Gather auto_increment columns and max values from information schema.
+- `gather_innodb_metrics` (Boolean) Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS.
+- `gather_perf_events_statements` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST.
+- `gather_process_list` (Boolean) Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST.
+- `gather_slave_status` (Boolean) Gather metrics from SHOW SLAVE STATUS command output.
+- `gather_table_io_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE.
+- `gather_table_lock_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS.
+- `gather_table_schema` (Boolean) Gather metrics from INFORMATION_SCHEMA.TABLES.
+- `perf_events_statements_digest_text_limit` (Number) Truncates digest text from perf_events_statements into this many characters.
+- `perf_events_statements_limit` (Number) Limits metrics from perf_events_statements.
+- `perf_events_statements_time_limit` (Number) Only include perf_events_statements whose last seen is less than this many seconds.
 
 
 
@@ -273,7 +273,7 @@ Optional:
 
 Optional:
 
-- `mirrormaker_whitelist` (String) Mirrormaker topic whitelist The default value is `.*`.
+- `mirrormaker_whitelist` (String) Mirrormaker topic whitelist. The default value is `.*`.
 
 
 <a id="nestedblock--timeouts"></a>
