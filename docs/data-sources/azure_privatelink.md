@@ -34,6 +34,6 @@ data "aiven_azure_privatelink" "foo" {
 - `id` (String) The ID of this resource.
 - `message` (String) Printable result of the Azure Privatelink request
 - `state` (String) Privatelink resource state
-- `user_subscription_ids` (Set of String) A List of allowed Subscription IDs Maximum Length: `16`.
+- `user_subscription_ids` (Set of String) A List of allowed Subscription IDs. Maximum length: `16`.
 
 

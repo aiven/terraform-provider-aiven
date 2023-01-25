@@ -157,8 +157,7 @@ func SlicedString(v interface{}) []string {
 var constDescriptionReplaceables = map[string]string{
 	"DEPRECATED: ":                 "",
 	"This setting is deprecated. ": "",
-	// TODO: Introduce in a separate PR.
-	//"[seconds]":                    "seconds",
+	"[seconds]":                    "(seconds)",
 }
 
 // descriptionForProperty is a function that returns the description for a property.
@@ -173,12 +172,25 @@ func descriptionForProperty(p map[string]interface{}, t string) (id bool, d stri
 		id = true
 	}
 
+	// sc is short for "should capitalize".
+	sc := false
+
 	// Some descriptions have a built-in deprecation notice, so we need to remove it.
 	for k, v := range constDescriptionReplaceables {
+		pd := d
+
 		d = strings.ReplaceAll(d, k, v)
+
+		if pd != d {
+			sc = true
+		}
 	}
 
 	b := Desc(d)
+
+	if sc {
+		b = b.ForceFirstLetterCapitalization()
+	}
 
 	if def, ok := p["default"]; ok && isTerraformTypePrimitive(t) {
 		skip := false

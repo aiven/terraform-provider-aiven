@@ -10,18 +10,18 @@ import (
 // IntegrationTypeClickhouseKafka is a generated function returning the schema of the clickhouse_kafka IntegrationType.
 func IntegrationTypeClickhouseKafka() *schema.Schema {
 	s := map[string]*schema.Schema{"tables": {
-		Description: "Tables to create",
+		Description: "Tables to create.",
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"columns": {
-				Description: "Table columns",
+				Description: "Table columns.",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"name": {
-						Description: "Column name",
+						Description: "Column name.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"type": {
-						Description: "Column type",
+						Description: "Column type.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
@@ -32,25 +32,25 @@ func IntegrationTypeClickhouseKafka() *schema.Schema {
 			},
 			"data_format": {
 				Default:     "JSONEachRow",
-				Description: "Message data format The default value is `JSONEachRow`.",
+				Description: "Message data format. The default value is `JSONEachRow`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"group_name": {
 				Default:     "clickhouse",
-				Description: "Kafka consumers group The default value is `clickhouse`.",
+				Description: "Kafka consumers group. The default value is `clickhouse`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"name": {
-				Description: "Name of the table",
+				Description: "Name of the table.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"topics": {
-				Description: "Kafka topics",
+				Description: "Kafka topics.",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"name": {
-					Description: "Name of the topic",
+					Description: "Name of the topic.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				}}},
@@ -77,17 +77,17 @@ func IntegrationTypeClickhouseKafka() *schema.Schema {
 // IntegrationTypeClickhousePostgresql is a generated function returning the schema of the clickhouse_postgresql IntegrationType.
 func IntegrationTypeClickhousePostgresql() *schema.Schema {
 	s := map[string]*schema.Schema{"databases": {
-		Description: "Databases to expose",
+		Description: "Databases to expose.",
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"database": {
 				Default:     "defaultdb",
-				Description: "PostgreSQL database to expose The default value is `defaultdb`.",
+				Description: "PostgreSQL database to expose. The default value is `defaultdb`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"schema": {
 				Default:     "public",
-				Description: "PostgreSQL schema to expose The default value is `public`.",
+				Description: "PostgreSQL schema to expose. The default value is `public`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -111,15 +111,15 @@ func IntegrationTypeClickhousePostgresql() *schema.Schema {
 func IntegrationTypeDatadog() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"datadog_dbm_enabled": {
-			Description: "Enable Datadog Database Monitoring",
+			Description: "Enable Datadog Database Monitoring.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
 		"datadog_tags": {
-			Description: "Custom tags provided by user",
+			Description: "Custom tags provided by user.",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"comment": {
-					Description: "Optional tag explanation",
+					Description: "Optional tag explanation.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -134,77 +134,77 @@ func IntegrationTypeDatadog() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"exclude_consumer_groups": {
-			Description: "List of custom metrics",
+			Description: "List of custom metrics.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			MaxItems:    1024,
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
 		"exclude_topics": {
-			Description: "List of topics to exclude",
+			Description: "List of topics to exclude.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			MaxItems:    1024,
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
 		"include_consumer_groups": {
-			Description: "List of custom metrics",
+			Description: "List of custom metrics.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			MaxItems:    1024,
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
 		"include_topics": {
-			Description: "List of topics to include",
+			Description: "List of topics to include.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			MaxItems:    1024,
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
 		"kafka_custom_metrics": {
-			Description: "List of custom metrics",
+			Description: "List of custom metrics.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			MaxItems:    1024,
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
 		"max_jmx_metrics": {
-			Description: "Maximum number of JMX metrics to send",
+			Description: "Maximum number of JMX metrics to send.",
 			Optional:    true,
 			Type:        schema.TypeInt,
 		},
 		"opensearch": {
-			Description: "Datadog Opensearch Options",
+			Description: "Datadog Opensearch Options.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"index_stats_enabled": {
-					Description: "Enable Datadog Opensearch Index Monitoring",
+					Description: "Enable Datadog Opensearch Index Monitoring.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"pending_task_stats_enabled": {
-					Description: "Enable Datadog Opensearch Pending Task Monitoring",
+					Description: "Enable Datadog Opensearch Pending Task Monitoring.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"pshard_stats_enabled": {
-					Description: "Enable Datadog Opensearch Primary Shard Monitoring",
+					Description: "Enable Datadog Opensearch Primary Shard Monitoring.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"index_stats_enabled": {
-					Description: "Enable Datadog Opensearch Index Monitoring",
+					Description: "Enable Datadog Opensearch Index Monitoring.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"pending_task_stats_enabled": {
-					Description: "Enable Datadog Opensearch Pending Task Monitoring",
+					Description: "Enable Datadog Opensearch Pending Task Monitoring.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"pshard_stats_enabled": {
-					Description: "Enable Datadog Opensearch Primary Shard Monitoring",
+					Description: "Enable Datadog Opensearch Primary Shard Monitoring.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -229,15 +229,15 @@ func IntegrationTypeDatadog() *schema.Schema {
 func IntegrationTypeExternalAwsCloudwatchMetrics() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"dropped_metrics": {
-			Description: "Metrics to not send to AWS CloudWatch (takes precedence over extra_metrics)",
+			Description: "Metrics to not send to AWS CloudWatch (takes precedence over extra_metrics).",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"field": {
-					Description: "Identifier of a value in the metric",
+					Description: "Identifier of a value in the metric.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"metric": {
-					Description: "Identifier of the metric",
+					Description: "Identifier of the metric.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -247,15 +247,15 @@ func IntegrationTypeExternalAwsCloudwatchMetrics() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"extra_metrics": {
-			Description: "Metrics to allow through to AWS CloudWatch (in addition to default metrics)",
+			Description: "Metrics to allow through to AWS CloudWatch (in addition to default metrics).",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"field": {
-					Description: "Identifier of a value in the metric",
+					Description: "Identifier of a value in the metric.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"metric": {
-					Description: "Identifier of the metric",
+					Description: "Identifier of the metric.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -279,7 +279,7 @@ func IntegrationTypeExternalAwsCloudwatchMetrics() *schema.Schema {
 // IntegrationTypeKafkaConnect is a generated function returning the schema of the kafka_connect IntegrationType.
 func IntegrationTypeKafkaConnect() *schema.Schema {
 	s := map[string]*schema.Schema{"kafka_connect": {
-		Description: "Kafka Connect service configuration values",
+		Description: "Kafka Connect service configuration values.",
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 			"config_storage_topic": {
 				Description: "The name of the topic where connector and task configuration data are stored.This must be the same for all workers with the same group_id.",
@@ -342,7 +342,7 @@ func IntegrationTypeKafkaConnect() *schema.Schema {
 // IntegrationTypeKafkaLogs is a generated function returning the schema of the kafka_logs IntegrationType.
 func IntegrationTypeKafkaLogs() *schema.Schema {
 	s := map[string]*schema.Schema{"kafka_topic": {
-		Description: "Topic name",
+		Description: "Topic name.",
 		Optional:    true,
 		Type:        schema.TypeString,
 	}}
@@ -366,10 +366,10 @@ func IntegrationTypeKafkaMirrormaker() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"kafka_mirrormaker": {
-			Description: "Kafka MirrorMaker configuration values",
+			Description: "Kafka MirrorMaker configuration values.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"consumer_fetch_min_bytes": {
-					Description: "The minimum amount of data the server should return for a fetch request",
+					Description: "The minimum amount of data the server should return for a fetch request.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -396,7 +396,7 @@ func IntegrationTypeKafkaMirrormaker() *schema.Schema {
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"consumer_fetch_min_bytes": {
-					Description: "The minimum amount of data the server should return for a fetch request",
+					Description: "The minimum amount of data the server should return for a fetch request.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -442,13 +442,13 @@ func IntegrationTypeLogs() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"elasticsearch_index_days_max": {
 			Default:     "3",
-			Description: "Elasticsearch index retention limit The default value is `3`.",
+			Description: "Elasticsearch index retention limit. The default value is `3`.",
 			Optional:    true,
 			Type:        schema.TypeInt,
 		},
 		"elasticsearch_index_prefix": {
 			Default:     "logs",
-			Description: "Elasticsearch index prefix The default value is `logs`.",
+			Description: "Elasticsearch index prefix. The default value is `logs`.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
@@ -483,149 +483,149 @@ func IntegrationTypeMetrics() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"source_mysql": {
-			Description: "Configuration options for metrics where source service is MySQL",
+			Description: "Configuration options for metrics where source service is MySQL.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"telegraf": {
-				Description: "Configuration options for Telegraf MySQL input plugin",
+				Description: "Configuration options for Telegraf MySQL input plugin.",
 				DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 					"gather_event_waits": {
-						Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_file_events_stats": {
-						Description: "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME",
+						Description: "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_index_io_waits": {
-						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_info_schema_auto_inc": {
-						Description: "Gather auto_increment columns and max values from information schema",
+						Description: "Gather auto_increment columns and max values from information schema.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_innodb_metrics": {
-						Description: "Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS",
+						Description: "Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_perf_events_statements": {
-						Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_process_list": {
-						Description: "Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST",
+						Description: "Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_slave_status": {
-						Description: "Gather metrics from SHOW SLAVE STATUS command output",
+						Description: "Gather metrics from SHOW SLAVE STATUS command output.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_table_io_waits": {
-						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_table_lock_waits": {
-						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_table_schema": {
-						Description: "Gather metrics from INFORMATION_SCHEMA.TABLES",
+						Description: "Gather metrics from INFORMATION_SCHEMA.TABLES.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"perf_events_statements_digest_text_limit": {
-						Description: "Truncates digest text from perf_events_statements into this many characters",
+						Description: "Truncates digest text from perf_events_statements into this many characters.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"perf_events_statements_limit": {
-						Description: "Limits metrics from perf_events_statements",
+						Description: "Limits metrics from perf_events_statements.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"perf_events_statements_time_limit": {
-						Description: "Only include perf_events_statements whose last seen is less than this many seconds",
+						Description: "Only include perf_events_statements whose last seen is less than this many seconds.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 				}),
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"gather_event_waits": {
-						Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_file_events_stats": {
-						Description: "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME",
+						Description: "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_index_io_waits": {
-						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_info_schema_auto_inc": {
-						Description: "Gather auto_increment columns and max values from information schema",
+						Description: "Gather auto_increment columns and max values from information schema.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_innodb_metrics": {
-						Description: "Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS",
+						Description: "Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_perf_events_statements": {
-						Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_process_list": {
-						Description: "Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST",
+						Description: "Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_slave_status": {
-						Description: "Gather metrics from SHOW SLAVE STATUS command output",
+						Description: "Gather metrics from SHOW SLAVE STATUS command output.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_table_io_waits": {
-						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_table_lock_waits": {
-						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_table_schema": {
-						Description: "Gather metrics from INFORMATION_SCHEMA.TABLES",
+						Description: "Gather metrics from INFORMATION_SCHEMA.TABLES.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"perf_events_statements_digest_text_limit": {
-						Description: "Truncates digest text from perf_events_statements into this many characters",
+						Description: "Truncates digest text from perf_events_statements into this many characters.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"perf_events_statements_limit": {
-						Description: "Limits metrics from perf_events_statements",
+						Description: "Limits metrics from perf_events_statements.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"perf_events_statements_time_limit": {
-						Description: "Only include perf_events_statements whose last seen is less than this many seconds",
+						Description: "Only include perf_events_statements whose last seen is less than this many seconds.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -635,147 +635,147 @@ func IntegrationTypeMetrics() *schema.Schema {
 				Type:     schema.TypeList,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"telegraf": {
-				Description: "Configuration options for Telegraf MySQL input plugin",
+				Description: "Configuration options for Telegraf MySQL input plugin.",
 				DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 					"gather_event_waits": {
-						Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_file_events_stats": {
-						Description: "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME",
+						Description: "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_index_io_waits": {
-						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_info_schema_auto_inc": {
-						Description: "Gather auto_increment columns and max values from information schema",
+						Description: "Gather auto_increment columns and max values from information schema.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_innodb_metrics": {
-						Description: "Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS",
+						Description: "Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_perf_events_statements": {
-						Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_process_list": {
-						Description: "Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST",
+						Description: "Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_slave_status": {
-						Description: "Gather metrics from SHOW SLAVE STATUS command output",
+						Description: "Gather metrics from SHOW SLAVE STATUS command output.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_table_io_waits": {
-						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_table_lock_waits": {
-						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_table_schema": {
-						Description: "Gather metrics from INFORMATION_SCHEMA.TABLES",
+						Description: "Gather metrics from INFORMATION_SCHEMA.TABLES.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"perf_events_statements_digest_text_limit": {
-						Description: "Truncates digest text from perf_events_statements into this many characters",
+						Description: "Truncates digest text from perf_events_statements into this many characters.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"perf_events_statements_limit": {
-						Description: "Limits metrics from perf_events_statements",
+						Description: "Limits metrics from perf_events_statements.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"perf_events_statements_time_limit": {
-						Description: "Only include perf_events_statements whose last seen is less than this many seconds",
+						Description: "Only include perf_events_statements whose last seen is less than this many seconds.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 				}),
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"gather_event_waits": {
-						Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_file_events_stats": {
-						Description: "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME",
+						Description: "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_index_io_waits": {
-						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_info_schema_auto_inc": {
-						Description: "Gather auto_increment columns and max values from information schema",
+						Description: "Gather auto_increment columns and max values from information schema.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_innodb_metrics": {
-						Description: "Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS",
+						Description: "Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_perf_events_statements": {
-						Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_process_list": {
-						Description: "Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST",
+						Description: "Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_slave_status": {
-						Description: "Gather metrics from SHOW SLAVE STATUS command output",
+						Description: "Gather metrics from SHOW SLAVE STATUS command output.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_table_io_waits": {
-						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_table_lock_waits": {
-						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"gather_table_schema": {
-						Description: "Gather metrics from INFORMATION_SCHEMA.TABLES",
+						Description: "Gather metrics from INFORMATION_SCHEMA.TABLES.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"perf_events_statements_digest_text_limit": {
-						Description: "Truncates digest text from perf_events_statements into this many characters",
+						Description: "Truncates digest text from perf_events_statements into this many characters.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"perf_events_statements_limit": {
-						Description: "Limits metrics from perf_events_statements",
+						Description: "Limits metrics from perf_events_statements.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"perf_events_statements_time_limit": {
-						Description: "Only include perf_events_statements whose last seen is less than this many seconds",
+						Description: "Only include perf_events_statements whose last seen is less than this many seconds.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -809,7 +809,7 @@ func IntegrationTypeMetrics() *schema.Schema {
 func IntegrationTypeMirrormaker() *schema.Schema {
 	s := map[string]*schema.Schema{"mirrormaker_whitelist": {
 		Default:     ".*",
-		Description: "Mirrormaker topic whitelist The default value is `.*`.",
+		Description: "Mirrormaker topic whitelist. The default value is `.*`.",
 		Optional:    true,
 		Type:        schema.TypeString,
 	}}
@@ -827,149 +827,149 @@ func IntegrationTypeMirrormaker() *schema.Schema {
 // IntegrationTypePrometheus is a generated function returning the schema of the prometheus IntegrationType.
 func IntegrationTypePrometheus() *schema.Schema {
 	s := map[string]*schema.Schema{"source_mysql": {
-		Description: "Configuration options for metrics where source service is MySQL",
+		Description: "Configuration options for metrics where source service is MySQL.",
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"telegraf": {
-			Description: "Configuration options for Telegraf MySQL input plugin",
+			Description: "Configuration options for Telegraf MySQL input plugin.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"gather_event_waits": {
-					Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS",
+					Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_file_events_stats": {
-					Description: "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME",
+					Description: "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_index_io_waits": {
-					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE",
+					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_info_schema_auto_inc": {
-					Description: "Gather auto_increment columns and max values from information schema",
+					Description: "Gather auto_increment columns and max values from information schema.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_innodb_metrics": {
-					Description: "Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS",
+					Description: "Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_perf_events_statements": {
-					Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST",
+					Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_process_list": {
-					Description: "Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST",
+					Description: "Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_slave_status": {
-					Description: "Gather metrics from SHOW SLAVE STATUS command output",
+					Description: "Gather metrics from SHOW SLAVE STATUS command output.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_table_io_waits": {
-					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE",
+					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_table_lock_waits": {
-					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS",
+					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_table_schema": {
-					Description: "Gather metrics from INFORMATION_SCHEMA.TABLES",
+					Description: "Gather metrics from INFORMATION_SCHEMA.TABLES.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"perf_events_statements_digest_text_limit": {
-					Description: "Truncates digest text from perf_events_statements into this many characters",
+					Description: "Truncates digest text from perf_events_statements into this many characters.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"perf_events_statements_limit": {
-					Description: "Limits metrics from perf_events_statements",
+					Description: "Limits metrics from perf_events_statements.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"perf_events_statements_time_limit": {
-					Description: "Only include perf_events_statements whose last seen is less than this many seconds",
+					Description: "Only include perf_events_statements whose last seen is less than this many seconds.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"gather_event_waits": {
-					Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS",
+					Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_file_events_stats": {
-					Description: "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME",
+					Description: "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_index_io_waits": {
-					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE",
+					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_info_schema_auto_inc": {
-					Description: "Gather auto_increment columns and max values from information schema",
+					Description: "Gather auto_increment columns and max values from information schema.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_innodb_metrics": {
-					Description: "Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS",
+					Description: "Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_perf_events_statements": {
-					Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST",
+					Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_process_list": {
-					Description: "Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST",
+					Description: "Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_slave_status": {
-					Description: "Gather metrics from SHOW SLAVE STATUS command output",
+					Description: "Gather metrics from SHOW SLAVE STATUS command output.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_table_io_waits": {
-					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE",
+					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_table_lock_waits": {
-					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS",
+					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_table_schema": {
-					Description: "Gather metrics from INFORMATION_SCHEMA.TABLES",
+					Description: "Gather metrics from INFORMATION_SCHEMA.TABLES.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"perf_events_statements_digest_text_limit": {
-					Description: "Truncates digest text from perf_events_statements into this many characters",
+					Description: "Truncates digest text from perf_events_statements into this many characters.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"perf_events_statements_limit": {
-					Description: "Limits metrics from perf_events_statements",
+					Description: "Limits metrics from perf_events_statements.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"perf_events_statements_time_limit": {
-					Description: "Only include perf_events_statements whose last seen is less than this many seconds",
+					Description: "Only include perf_events_statements whose last seen is less than this many seconds.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -979,147 +979,147 @@ func IntegrationTypePrometheus() *schema.Schema {
 			Type:     schema.TypeList,
 		}}),
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{"telegraf": {
-			Description: "Configuration options for Telegraf MySQL input plugin",
+			Description: "Configuration options for Telegraf MySQL input plugin.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"gather_event_waits": {
-					Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS",
+					Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_file_events_stats": {
-					Description: "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME",
+					Description: "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_index_io_waits": {
-					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE",
+					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_info_schema_auto_inc": {
-					Description: "Gather auto_increment columns and max values from information schema",
+					Description: "Gather auto_increment columns and max values from information schema.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_innodb_metrics": {
-					Description: "Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS",
+					Description: "Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_perf_events_statements": {
-					Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST",
+					Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_process_list": {
-					Description: "Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST",
+					Description: "Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_slave_status": {
-					Description: "Gather metrics from SHOW SLAVE STATUS command output",
+					Description: "Gather metrics from SHOW SLAVE STATUS command output.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_table_io_waits": {
-					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE",
+					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_table_lock_waits": {
-					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS",
+					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_table_schema": {
-					Description: "Gather metrics from INFORMATION_SCHEMA.TABLES",
+					Description: "Gather metrics from INFORMATION_SCHEMA.TABLES.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"perf_events_statements_digest_text_limit": {
-					Description: "Truncates digest text from perf_events_statements into this many characters",
+					Description: "Truncates digest text from perf_events_statements into this many characters.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"perf_events_statements_limit": {
-					Description: "Limits metrics from perf_events_statements",
+					Description: "Limits metrics from perf_events_statements.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"perf_events_statements_time_limit": {
-					Description: "Only include perf_events_statements whose last seen is less than this many seconds",
+					Description: "Only include perf_events_statements whose last seen is less than this many seconds.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"gather_event_waits": {
-					Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS",
+					Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_file_events_stats": {
-					Description: "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME",
+					Description: "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_index_io_waits": {
-					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE",
+					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_info_schema_auto_inc": {
-					Description: "Gather auto_increment columns and max values from information schema",
+					Description: "Gather auto_increment columns and max values from information schema.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_innodb_metrics": {
-					Description: "Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS",
+					Description: "Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_perf_events_statements": {
-					Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST",
+					Description: "Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_process_list": {
-					Description: "Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST",
+					Description: "Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_slave_status": {
-					Description: "Gather metrics from SHOW SLAVE STATUS command output",
+					Description: "Gather metrics from SHOW SLAVE STATUS command output.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_table_io_waits": {
-					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE",
+					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_table_lock_waits": {
-					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS",
+					Description: "Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"gather_table_schema": {
-					Description: "Gather metrics from INFORMATION_SCHEMA.TABLES",
+					Description: "Gather metrics from INFORMATION_SCHEMA.TABLES.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"perf_events_statements_digest_text_limit": {
-					Description: "Truncates digest text from perf_events_statements into this many characters",
+					Description: "Truncates digest text from perf_events_statements into this many characters.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"perf_events_statements_limit": {
-					Description: "Limits metrics from perf_events_statements",
+					Description: "Limits metrics from perf_events_statements.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"perf_events_statements_time_limit": {
-					Description: "Only include perf_events_statements whose last seen is less than this many seconds",
+					Description: "Only include perf_events_statements whose last seen is less than this many seconds.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
