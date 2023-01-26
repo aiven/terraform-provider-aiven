@@ -106,10 +106,13 @@ Optional:
 <a id="nestedblock--opensearch_user_config--index_patterns"></a>
 ### Nested Schema for `opensearch_user_config.index_patterns`
 
-Optional:
+Required:
 
 - `max_index_count` (Number) Maximum number of indexes to keep.
 - `pattern` (String) fnmatch pattern.
+
+Optional:
+
 - `sorting_algorithm` (String) Deletion sorting algorithm. The default value is `creation_date`.
 
 
@@ -126,10 +129,13 @@ Optional:
 <a id="nestedblock--opensearch_user_config--ip_filter_object"></a>
 ### Nested Schema for `opensearch_user_config.ip_filter_object`
 
+Required:
+
+- `network` (String) CIDR address block.
+
 Optional:
 
 - `description` (String) Description for IP filter list entry.
-- `network` (String) CIDR address block.
 
 
 <a id="nestedblock--opensearch_user_config--opensearch"></a>

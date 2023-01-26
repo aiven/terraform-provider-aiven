@@ -63,18 +63,21 @@ Optional:
 <a id="nestedblock--clickhouse_kafka_user_config--tables"></a>
 ### Nested Schema for `clickhouse_kafka_user_config.tables`
 
-Optional:
+Required:
 
-- `columns` (Block List, Max: 100) Table columns. (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--columns))
 - `data_format` (String) Message data format. The default value is `JSONEachRow`.
 - `group_name` (String) Kafka consumers group. The default value is `clickhouse`.
 - `name` (String) Name of the table.
+
+Optional:
+
+- `columns` (Block List, Max: 100) Table columns. (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--columns))
 - `topics` (Block List, Max: 100) Kafka topics. (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--topics))
 
 <a id="nestedblock--clickhouse_kafka_user_config--tables--columns"></a>
 ### Nested Schema for `clickhouse_kafka_user_config.tables.columns`
 
-Optional:
+Required:
 
 - `name` (String) Column name.
 - `type` (String) Column type.
@@ -83,7 +86,7 @@ Optional:
 <a id="nestedblock--clickhouse_kafka_user_config--tables--topics"></a>
 ### Nested Schema for `clickhouse_kafka_user_config.tables.topics`
 
-Optional:
+Required:
 
 - `name` (String) Name of the topic.
 
@@ -125,10 +128,13 @@ Optional:
 <a id="nestedblock--datadog_user_config--datadog_tags"></a>
 ### Nested Schema for `datadog_user_config.datadog_tags`
 
+Required:
+
+- `tag` (String) Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix 'aiven-' are reserved for Aiven.
+
 Optional:
 
 - `comment` (String) Optional tag explanation.
-- `tag` (String) Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix 'aiven-' are reserved for Aiven.
 
 
 <a id="nestedblock--datadog_user_config--opensearch"></a>

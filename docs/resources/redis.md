@@ -103,23 +103,29 @@ Optional:
 <a id="nestedblock--redis_user_config--ip_filter_object"></a>
 ### Nested Schema for `redis_user_config.ip_filter_object`
 
+Required:
+
+- `network` (String) CIDR address block.
+
 Optional:
 
 - `description` (String) Description for IP filter list entry.
-- `network` (String) CIDR address block.
 
 
 <a id="nestedblock--redis_user_config--migration"></a>
 ### Nested Schema for `redis_user_config.migration`
 
+Required:
+
+- `host` (String) Hostname or IP address of the server where to migrate data from.
+- `port` (Number) Port number of the server where to migrate data from.
+
 Optional:
 
 - `dbname` (String) Database name for bootstrapping the initial connection.
-- `host` (String) Hostname or IP address of the server where to migrate data from.
 - `ignore_dbs` (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment).
 - `method` (String) The migration method to be used (currently supported only by Redis and MySQL service types).
 - `password` (String, Sensitive) Password for authentication with the server where to migrate data from.
-- `port` (Number) Port number of the server where to migrate data from.
 - `ssl` (Boolean) The server where to migrate data from is secured with SSL. The default value is `true`.
 - `username` (String) User name for authentication with the server where to migrate data from.
 

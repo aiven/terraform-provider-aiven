@@ -225,3 +225,14 @@ func DecodeKey(k string) string {
 func IsKeyTyped(k string) bool {
 	return regexp.MustCompile(`^.*_(boolean|integer|number|string|array|object)$`).MatchString(k)
 }
+
+// SliceToKeyedMap is a function that converts a slice of strings to a map.
+func SliceToKeyedMap(s []interface{}) map[string]struct{} {
+	r := make(map[string]struct{})
+
+	for _, v := range s {
+		r[v.(string)] = struct{}{}
+	}
+
+	return r
+}
