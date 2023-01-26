@@ -42,7 +42,6 @@ data "aiven_service_integration" "myintegration" {
 - `kafka_mirrormaker_user_config` (List of Object) KafkaMirrormaker user configurable settings (see [below for nested schema](#nestedatt--kafka_mirrormaker_user_config))
 - `logs_user_config` (List of Object) Logs user configurable settings (see [below for nested schema](#nestedatt--logs_user_config))
 - `metrics_user_config` (List of Object) Metrics user configurable settings (see [below for nested schema](#nestedatt--metrics_user_config))
-- `mirrormaker_user_config` (List of Object) Mirrormaker user configurable settings (see [below for nested schema](#nestedatt--mirrormaker_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration (if any)
 
 <a id="nestedatt--clickhouse_kafka_user_config"></a>
@@ -255,14 +254,4 @@ Read-Only:
 - `perf_events_statements_digest_text_limit` (Number)
 - `perf_events_statements_limit` (Number)
 - `perf_events_statements_time_limit` (Number)
-
-
-
-
-<a id="nestedatt--mirrormaker_user_config"></a>
-### Nested Schema for `mirrormaker_user_config`
-
-Read-Only:
-
-- `mirrormaker_whitelist` (String)
 
