@@ -97,10 +97,13 @@ Optional:
 <a id="nestedblock--m3db_user_config--ip_filter_object"></a>
 ### Nested Schema for `m3db_user_config.ip_filter_object`
 
+Required:
+
+- `network` (String) CIDR address block.
+
 Optional:
 
 - `description` (String) Description for IP filter list entry.
-- `network` (String) CIDR address block.
 
 
 <a id="nestedblock--m3db_user_config--limits"></a>
@@ -119,12 +122,15 @@ Optional:
 <a id="nestedblock--m3db_user_config--namespaces"></a>
 ### Nested Schema for `m3db_user_config.namespaces`
 
-Optional:
+Required:
 
 - `name` (String) The name of the namespace.
+- `type` (String) The type of aggregation (aggregated/unaggregated).
+
+Optional:
+
 - `options` (Block List, Max: 1) Namespace options. (see [below for nested schema](#nestedblock--m3db_user_config--namespaces--options))
 - `resolution` (String) The resolution for an aggregated namespace.
-- `type` (String) The type of aggregation (aggregated/unaggregated).
 
 <a id="nestedblock--m3db_user_config--namespaces--options"></a>
 ### Nested Schema for `m3db_user_config.namespaces.options`
@@ -175,11 +181,14 @@ Optional:
 <a id="nestedblock--m3db_user_config--rules--mapping"></a>
 ### Nested Schema for `m3db_user_config.rules.mapping`
 
+Required:
+
+- `filter` (String) Matching metric names with wildcards (using __name__:wildcard) or matching tags and their (optionally wildcarded) values. For value, ! can be used at start of value for negation, and multiple filters can be supplied using space as separator.
+
 Optional:
 
 - `aggregations` (List of String) List of aggregations to be applied.
 - `drop` (Boolean) Only store the derived metric (as specified in the roll-up rules), if any.
-- `filter` (String) Matching metric names with wildcards (using __name__:wildcard) or matching tags and their (optionally wildcarded) values. For value, ! can be used at start of value for negation, and multiple filters can be supplied using space as separator.
 - `name` (String) The (optional) name of the rule.
 - `namespaces` (List of String, Deprecated) This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by glob (=wildcards).
 - `namespaces_object` (Block List, Max: 10) This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by exact match of retention period and resolution. (see [below for nested schema](#nestedblock--m3db_user_config--rules--mapping--namespaces_object))
@@ -197,7 +206,7 @@ Optional:
 <a id="nestedblock--m3db_user_config--rules--mapping--tags"></a>
 ### Nested Schema for `m3db_user_config.rules.mapping.tags`
 
-Optional:
+Required:
 
 - `name` (String) Name of the tag.
 - `value` (String) Value of the tag.
