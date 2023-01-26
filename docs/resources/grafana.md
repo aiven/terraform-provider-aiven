@@ -119,48 +119,62 @@ Optional:
 <a id="nestedblock--grafana_user_config--auth_azuread"></a>
 ### Nested Schema for `grafana_user_config.auth_azuread`
 
-Optional:
+Required:
 
-- `allow_sign_up` (Boolean) Automatically sign-up users on successful sign-in.
-- `allowed_domains` (List of String) Allowed domains.
-- `allowed_groups` (List of String) Require users to belong to one of given groups.
 - `auth_url` (String) Authorization URL.
 - `client_id` (String) Client ID from provider.
 - `client_secret` (String) Client secret from provider.
 - `token_url` (String) Token URL.
 
+Optional:
+
+- `allow_sign_up` (Boolean) Automatically sign-up users on successful sign-in.
+- `allowed_domains` (List of String) Allowed domains.
+- `allowed_groups` (List of String) Require users to belong to one of given groups.
+
 
 <a id="nestedblock--grafana_user_config--auth_generic_oauth"></a>
 ### Nested Schema for `grafana_user_config.auth_generic_oauth`
+
+Required:
+
+- `api_url` (String) API URL.
+- `auth_url` (String) Authorization URL.
+- `client_id` (String) Client ID from provider.
+- `client_secret` (String) Client secret from provider.
+- `token_url` (String) Token URL.
 
 Optional:
 
 - `allow_sign_up` (Boolean) Automatically sign-up users on successful sign-in.
 - `allowed_domains` (List of String) Allowed domains.
 - `allowed_organizations` (List of String) Require user to be member of one of the listed organizations.
-- `api_url` (String) API URL.
-- `auth_url` (String) Authorization URL.
-- `client_id` (String) Client ID from provider.
-- `client_secret` (String) Client secret from provider.
 - `name` (String) Name of the OAuth integration.
 - `scopes` (List of String) OAuth scopes.
-- `token_url` (String) Token URL.
 
 
 <a id="nestedblock--grafana_user_config--auth_github"></a>
 ### Nested Schema for `grafana_user_config.auth_github`
 
+Required:
+
+- `client_id` (String) Client ID from provider.
+- `client_secret` (String) Client secret from provider.
+
 Optional:
 
 - `allow_sign_up` (Boolean) Automatically sign-up users on successful sign-in.
 - `allowed_organizations` (List of String) Require users to belong to one of given organizations.
-- `client_id` (String) Client ID from provider.
-- `client_secret` (String) Client secret from provider.
 - `team_ids` (List of Number) Require users to belong to one of given team IDs.
 
 
 <a id="nestedblock--grafana_user_config--auth_gitlab"></a>
 ### Nested Schema for `grafana_user_config.auth_gitlab`
+
+Required:
+
+- `client_id` (String) Client ID from provider.
+- `client_secret` (String) Client secret from provider.
 
 Optional:
 
@@ -168,20 +182,21 @@ Optional:
 - `allowed_groups` (List of String) Require users to belong to one of given groups.
 - `api_url` (String) API URL. This only needs to be set when using self hosted GitLab.
 - `auth_url` (String) Authorization URL. This only needs to be set when using self hosted GitLab.
-- `client_id` (String) Client ID from provider.
-- `client_secret` (String) Client secret from provider.
 - `token_url` (String) Token URL. This only needs to be set when using self hosted GitLab.
 
 
 <a id="nestedblock--grafana_user_config--auth_google"></a>
 ### Nested Schema for `grafana_user_config.auth_google`
 
+Required:
+
+- `client_id` (String) Client ID from provider.
+- `client_secret` (String) Client secret from provider.
+
 Optional:
 
 - `allow_sign_up` (Boolean) Automatically sign-up users on successful sign-in.
 - `allowed_domains` (List of String) Domains allowed to sign-in to this Grafana.
-- `client_id` (String) Client ID from provider.
-- `client_secret` (String) Client secret from provider.
 
 
 <a id="nestedblock--grafana_user_config--date_formats"></a>
@@ -202,7 +217,7 @@ Optional:
 <a id="nestedblock--grafana_user_config--external_image_storage"></a>
 ### Nested Schema for `grafana_user_config.external_image_storage`
 
-Optional:
+Required:
 
 - `access_key` (String) S3 access key. Requires permissions to the S3 bucket for the s3:PutObject and s3:PutObjectAcl actions.
 - `bucket_url` (String) Bucket URL for S3.
@@ -213,10 +228,13 @@ Optional:
 <a id="nestedblock--grafana_user_config--ip_filter_object"></a>
 ### Nested Schema for `grafana_user_config.ip_filter_object`
 
+Required:
+
+- `network` (String) CIDR address block.
+
 Optional:
 
 - `description` (String) Description for IP filter list entry.
-- `network` (String) CIDR address block.
 
 
 <a id="nestedblock--grafana_user_config--private_access"></a>
@@ -246,13 +264,16 @@ Optional:
 <a id="nestedblock--grafana_user_config--smtp_server"></a>
 ### Nested Schema for `grafana_user_config.smtp_server`
 
-Optional:
+Required:
 
 - `from_address` (String) Address used for sending emails.
-- `from_name` (String) Name used in outgoing emails, defaults to Grafana.
 - `host` (String) Server hostname or IP.
-- `password` (String, Sensitive) Password for SMTP authentication.
 - `port` (Number) SMTP server port.
+
+Optional:
+
+- `from_name` (String) Name used in outgoing emails, defaults to Grafana.
+- `password` (String, Sensitive) Password for SMTP authentication.
 - `skip_verify` (Boolean) Skip verifying server certificate. Defaults to false.
 - `starttls_policy` (String) Either OpportunisticStartTLS, MandatoryStartTLS or NoStartTLS. Default is OpportunisticStartTLS.
 - `username` (String) Username for SMTP authentication.

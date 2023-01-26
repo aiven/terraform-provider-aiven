@@ -26,7 +26,7 @@ func IntegrationEndpointTypeDatadog() *schema.Schema {
 				},
 				"tag": {
 					Description: "Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix 'aiven-' are reserved for Aiven.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},

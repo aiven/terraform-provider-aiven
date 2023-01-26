@@ -84,7 +84,7 @@ func ServiceTypeCassandra() *schema.Schema {
 				},
 				"network": {
 					Description: "CIDR address block.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -195,7 +195,7 @@ func ServiceTypeClickhouse() *schema.Schema {
 				},
 				"network": {
 					Description: "CIDR address block.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -584,12 +584,12 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"max_index_count": {
 					Description: "Maximum number of indexes to keep.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeInt,
 				},
 				"pattern": {
 					Description: "fnmatch pattern.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"sorting_algorithm": {
@@ -665,7 +665,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 				},
 				"network": {
 					Description: "CIDR address block.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -937,7 +937,7 @@ func ServiceTypeFlink() *schema.Schema {
 				},
 				"network": {
 					Description: "CIDR address block.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -1076,22 +1076,22 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"auth_url": {
 					Description: "Authorization URL.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"client_id": {
 					Description: "Client ID from provider.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"client_secret": {
 					Description: "Client secret from provider.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"token_url": {
 					Description: "Token URL.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}),
@@ -1117,22 +1117,22 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"auth_url": {
 					Description: "Authorization URL.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"client_id": {
 					Description: "Client ID from provider.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"client_secret": {
 					Description: "Client secret from provider.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"token_url": {
 					Description: "Token URL.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -1169,22 +1169,22 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"api_url": {
 					Description: "API URL.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"auth_url": {
 					Description: "Authorization URL.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"client_id": {
 					Description: "Client ID from provider.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"client_secret": {
 					Description: "Client secret from provider.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"name": {
@@ -1201,7 +1201,7 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"token_url": {
 					Description: "Token URL.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}),
@@ -1227,22 +1227,22 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"api_url": {
 					Description: "API URL.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"auth_url": {
 					Description: "Authorization URL.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"client_id": {
 					Description: "Client ID from provider.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"client_secret": {
 					Description: "Client secret from provider.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"name": {
@@ -1259,7 +1259,7 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"token_url": {
 					Description: "Token URL.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -1284,12 +1284,12 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"client_id": {
 					Description: "Client ID from provider.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"client_secret": {
 					Description: "Client secret from provider.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"team_ids": {
@@ -1315,12 +1315,12 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"client_id": {
 					Description: "Client ID from provider.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"client_secret": {
 					Description: "Client secret from provider.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"team_ids": {
@@ -1362,12 +1362,12 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"client_id": {
 					Description: "Client ID from provider.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"client_secret": {
 					Description: "Client secret from provider.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"token_url": {
@@ -1401,12 +1401,12 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"client_id": {
 					Description: "Client ID from provider.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"client_secret": {
 					Description: "Client secret from provider.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"token_url": {
@@ -1436,12 +1436,12 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"client_id": {
 					Description: "Client ID from provider.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"client_secret": {
 					Description: "Client secret from provider.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}),
@@ -1460,12 +1460,12 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"client_id": {
 					Description: "Client ID from provider.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"client_secret": {
 					Description: "Client secret from provider.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -1613,44 +1613,44 @@ func ServiceTypeGrafana() *schema.Schema {
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"access_key": {
 					Description: "S3 access key. Requires permissions to the S3 bucket for the s3:PutObject and s3:PutObjectAcl actions.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"bucket_url": {
 					Description: "Bucket URL for S3.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"provider": {
 					Description: "Provider type.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"secret_key": {
 					Description: "S3 secret key.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"access_key": {
 					Description: "S3 access key. Requires permissions to the S3 bucket for the s3:PutObject and s3:PutObjectAcl actions.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"bucket_url": {
 					Description: "Bucket URL for S3.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"provider": {
 					Description: "Provider type.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"secret_key": {
 					Description: "S3 secret key.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -1685,7 +1685,7 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"network": {
 					Description: "CIDR address block.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -1768,7 +1768,7 @@ func ServiceTypeGrafana() *schema.Schema {
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"from_address": {
 					Description: "Address used for sending emails.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"from_name": {
@@ -1778,7 +1778,7 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"host": {
 					Description: "Server hostname or IP.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"password": {
@@ -1789,7 +1789,7 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"port": {
 					Description: "SMTP server port.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeInt,
 				},
 				"skip_verify": {
@@ -1811,7 +1811,7 @@ func ServiceTypeGrafana() *schema.Schema {
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"from_address": {
 					Description: "Address used for sending emails.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"from_name": {
@@ -1821,7 +1821,7 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"host": {
 					Description: "Server hostname or IP.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"password": {
@@ -1832,7 +1832,7 @@ func ServiceTypeGrafana() *schema.Schema {
 				},
 				"port": {
 					Description: "SMTP server port.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeInt,
 				},
 				"skip_verify": {
@@ -1994,7 +1994,7 @@ func ServiceTypeInfluxdb() *schema.Schema {
 				},
 				"network": {
 					Description: "CIDR address block.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -2121,7 +2121,7 @@ func ServiceTypeKafka() *schema.Schema {
 				},
 				"network": {
 					Description: "CIDR address block.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -3112,7 +3112,7 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 				},
 				"network": {
 					Description: "CIDR address block.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -3429,7 +3429,7 @@ func ServiceTypeKafkaMirrormaker() *schema.Schema {
 				},
 				"network": {
 					Description: "CIDR address block.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -3596,7 +3596,7 @@ func ServiceTypeM3aggregator() *schema.Schema {
 				},
 				"network": {
 					Description: "CIDR address block.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -3669,7 +3669,7 @@ func ServiceTypeM3db() *schema.Schema {
 				},
 				"network": {
 					Description: "CIDR address block.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -3769,7 +3769,7 @@ func ServiceTypeM3db() *schema.Schema {
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"name": {
 					Description: "The name of the namespace.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"options": {
@@ -3929,7 +3929,7 @@ func ServiceTypeM3db() *schema.Schema {
 				},
 				"type": {
 					Description: "The type of aggregation (aggregated/unaggregated).",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -3994,7 +3994,7 @@ func ServiceTypeM3db() *schema.Schema {
 					},
 					"filter": {
 						Description: "Matching metric names with wildcards (using __name__:wildcard) or matching tags and their (optionally wildcarded) values. For value, ! can be used at start of value for negation, and multiple filters can be supplied using space as separator.",
-						Optional:    true,
+						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"name": {
@@ -4033,12 +4033,12 @@ func ServiceTypeM3db() *schema.Schema {
 						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 							"name": {
 								Description: "Name of the tag.",
-								Optional:    true,
+								Required:    true,
 								Type:        schema.TypeString,
 							},
 							"value": {
 								Description: "Value of the tag.",
-								Optional:    true,
+								Required:    true,
 								Type:        schema.TypeString,
 							},
 						}},
@@ -4068,7 +4068,7 @@ func ServiceTypeM3db() *schema.Schema {
 					},
 					"filter": {
 						Description: "Matching metric names with wildcards (using __name__:wildcard) or matching tags and their (optionally wildcarded) values. For value, ! can be used at start of value for negation, and multiple filters can be supplied using space as separator.",
-						Optional:    true,
+						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"name": {
@@ -4107,12 +4107,12 @@ func ServiceTypeM3db() *schema.Schema {
 						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 							"name": {
 								Description: "Name of the tag.",
-								Optional:    true,
+								Required:    true,
 								Type:        schema.TypeString,
 							},
 							"value": {
 								Description: "Value of the tag.",
-								Optional:    true,
+								Required:    true,
 								Type:        schema.TypeString,
 							},
 						}},
@@ -4212,7 +4212,7 @@ func ServiceTypeMysql() *schema.Schema {
 				},
 				"network": {
 					Description: "CIDR address block.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -4230,7 +4230,7 @@ func ServiceTypeMysql() *schema.Schema {
 				},
 				"host": {
 					Description: "Hostname or IP address of the server where to migrate data from.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"ignore_dbs": {
@@ -4251,7 +4251,7 @@ func ServiceTypeMysql() *schema.Schema {
 				},
 				"port": {
 					Description: "Port number of the server where to migrate data from.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeInt,
 				},
 				"ssl": {
@@ -4274,7 +4274,7 @@ func ServiceTypeMysql() *schema.Schema {
 				},
 				"host": {
 					Description: "Hostname or IP address of the server where to migrate data from.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"ignore_dbs": {
@@ -4295,7 +4295,7 @@ func ServiceTypeMysql() *schema.Schema {
 				},
 				"port": {
 					Description: "Port number of the server where to migrate data from.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeInt,
 				},
 				"ssl": {
@@ -4810,12 +4810,12 @@ func ServiceTypeOpensearch() *schema.Schema {
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"max_index_count": {
 					Description: "Maximum number of indexes to keep.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeInt,
 				},
 				"pattern": {
 					Description: "fnmatch pattern.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"sorting_algorithm": {
@@ -4891,7 +4891,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 				},
 				"network": {
 					Description: "CIDR address block.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -5502,7 +5502,7 @@ func ServiceTypePg() *schema.Schema {
 				},
 				"network": {
 					Description: "CIDR address block.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -5520,7 +5520,7 @@ func ServiceTypePg() *schema.Schema {
 				},
 				"host": {
 					Description: "Hostname or IP address of the server where to migrate data from.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"ignore_dbs": {
@@ -5541,7 +5541,7 @@ func ServiceTypePg() *schema.Schema {
 				},
 				"port": {
 					Description: "Port number of the server where to migrate data from.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeInt,
 				},
 				"ssl": {
@@ -5564,7 +5564,7 @@ func ServiceTypePg() *schema.Schema {
 				},
 				"host": {
 					Description: "Hostname or IP address of the server where to migrate data from.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"ignore_dbs": {
@@ -5585,7 +5585,7 @@ func ServiceTypePg() *schema.Schema {
 				},
 				"port": {
 					Description: "Port number of the server where to migrate data from.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeInt,
 				},
 				"ssl": {
@@ -6473,7 +6473,7 @@ func ServiceTypeRedis() *schema.Schema {
 				},
 				"network": {
 					Description: "CIDR address block.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 			}},
@@ -6491,7 +6491,7 @@ func ServiceTypeRedis() *schema.Schema {
 				},
 				"host": {
 					Description: "Hostname or IP address of the server where to migrate data from.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"ignore_dbs": {
@@ -6512,7 +6512,7 @@ func ServiceTypeRedis() *schema.Schema {
 				},
 				"port": {
 					Description: "Port number of the server where to migrate data from.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeInt,
 				},
 				"ssl": {
@@ -6535,7 +6535,7 @@ func ServiceTypeRedis() *schema.Schema {
 				},
 				"host": {
 					Description: "Hostname or IP address of the server where to migrate data from.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"ignore_dbs": {
@@ -6556,7 +6556,7 @@ func ServiceTypeRedis() *schema.Schema {
 				},
 				"port": {
 					Description: "Port number of the server where to migrate data from.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeInt,
 				},
 				"ssl": {
