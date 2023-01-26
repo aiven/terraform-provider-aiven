@@ -104,10 +104,13 @@ Optional:
 <a id="nestedblock--influxdb_user_config--ip_filter_object"></a>
 ### Nested Schema for `influxdb_user_config.ip_filter_object`
 
+Required:
+
+- `network` (String) CIDR address block.
+
 Optional:
 
 - `description` (String) Description for IP filter list entry.
-- `network` (String) CIDR address block.
 
 
 <a id="nestedblock--influxdb_user_config--private_access"></a>

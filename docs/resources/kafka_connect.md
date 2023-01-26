@@ -91,10 +91,13 @@ Optional:
 <a id="nestedblock--kafka_connect_user_config--ip_filter_object"></a>
 ### Nested Schema for `kafka_connect_user_config.ip_filter_object`
 
+Required:
+
+- `network` (String) CIDR address block.
+
 Optional:
 
 - `description` (String) Description for IP filter list entry.
-- `network` (String) CIDR address block.
 
 
 <a id="nestedblock--kafka_connect_user_config--kafka_connect"></a>

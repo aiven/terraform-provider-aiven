@@ -78,10 +78,13 @@ Optional:
 <a id="nestedblock--clickhouse_user_config--ip_filter_object"></a>
 ### Nested Schema for `clickhouse_user_config.ip_filter_object`
 
+Required:
+
+- `network` (String) CIDR address block.
+
 Optional:
 
 - `description` (String) Description for IP filter list entry.
-- `network` (String) CIDR address block.
 
 
 
