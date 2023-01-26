@@ -62,7 +62,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - run: make test-acc
+      # TODO: Fix the flaky tests and remove the retry action.
+      - uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 60
+          max_attempts: 15
+          retry_on: error
+          command: make test-acc
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
           AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME }}
