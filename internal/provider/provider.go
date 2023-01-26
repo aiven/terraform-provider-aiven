@@ -196,9 +196,7 @@ func Provider() *schema.Provider {
 			"aiven_m3aggregator": m3db.ResourceM3Aggregator(),
 
 			// flink
-			"aiven_flink":       flink.ResourceFlink(),
-			"aiven_flink_table": flink.ResourceFlinkTable(),
-			"aiven_flink_job":   flink.ResourceFlinkJob(),
+			"aiven_flink": flink.ResourceFlink(),
 
 			// opensearch
 			"aiven_opensearch":            opensearch.ResourceOpensearch(),
