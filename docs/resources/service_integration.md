@@ -43,7 +43,6 @@ resource "aiven_service_integration" "my_integration_metrics" {
 - `kafka_mirrormaker_user_config` (Block List, Max: 1) KafkaMirrormaker user configurable settings (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config))
 - `logs_user_config` (Block List, Max: 1) Logs user configurable settings (see [below for nested schema](#nestedblock--logs_user_config))
 - `metrics_user_config` (Block List, Max: 1) Metrics user configurable settings (see [below for nested schema](#nestedblock--metrics_user_config))
-- `mirrormaker_user_config` (Block List, Max: 1) Mirrormaker user configurable settings (see [below for nested schema](#nestedblock--mirrormaker_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration (if any)
 - `source_service_name` (String) Source service for the integration (if any)
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
@@ -244,14 +243,6 @@ Optional:
 - `perf_events_statements_time_limit` (Number) Only include perf_events_statements whose last seen is less than this many seconds.
 
 
-
-
-<a id="nestedblock--mirrormaker_user_config"></a>
-### Nested Schema for `mirrormaker_user_config`
-
-Optional:
-
-- `mirrormaker_whitelist` (String) Mirrormaker topic whitelist. The default value is `.*`.
 
 
 <a id="nestedblock--timeouts"></a>

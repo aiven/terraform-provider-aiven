@@ -69,7 +69,6 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 	},
 	"logs_user_config":                  dist.IntegrationTypeLogs(),
-	"mirrormaker_user_config":           dist.IntegrationTypeMirrormaker(),
 	"kafka_mirrormaker_user_config":     dist.IntegrationTypeKafkaMirrormaker(),
 	"kafka_connect_user_config":         dist.IntegrationTypeKafkaConnect(),
 	"kafka_logs_user_config":            dist.IntegrationTypeKafkaLogs(),
