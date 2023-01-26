@@ -893,23 +893,6 @@ func ServiceTypeElasticsearch() *schema.Schema {
 // ServiceTypeFlink is a generated function returning the schema of the flink ServiceType.
 func ServiceTypeFlink() *schema.Schema {
 	s := map[string]*schema.Schema{
-		"additional_backup_regions": {
-			Description: "Additional Cloud Regions for Backup Replication.",
-			Elem:        &schema.Schema{Type: schema.TypeString},
-			MaxItems:    1,
-			Optional:    true,
-			Type:        schema.TypeList,
-		},
-		"execution_checkpointing_interval_ms": {
-			Description: "Checkpointing is Flink’s primary fault-tolerance mechanism, wherein a snapshot of your job’s state persisted periodically to some durable location. In the case of failure, Flink will restart from the most recent checkpoint and resume processing. A jobs checkpoint interval configures how often Flink will take these snapshots.",
-			Optional:    true,
-			Type:        schema.TypeInt,
-		},
-		"execution_checkpointing_timeout_ms": {
-			Description: "The time after which a checkpoint-in-progress is aborted, if it did not complete by then.",
-			Optional:    true,
-			Type:        schema.TypeInt,
-		},
 		"flink_version": {
 			Description: "Flink major version.",
 			Optional:    true,
@@ -950,11 +933,6 @@ func ServiceTypeFlink() *schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeInt,
 		},
-		"parallelism_default": {
-			Description: "How many parallel task slots each new job is assigned. Unless you understand how Flink parallel dataflows work, please leave this at 1. Please do not set this value higher than (total number of nodes x number_of_task_slots), or every new job created will fail.",
-			Optional:    true,
-			Type:        schema.TypeInt,
-		},
 		"privatelink_access": {
 			Description: "Allow access to selected service components through Privatelink.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
@@ -984,26 +962,6 @@ func ServiceTypeFlink() *schema.Schema {
 			MaxItems: 1,
 			Optional: true,
 			Type:     schema.TypeList,
-		},
-		"restart_strategy": {
-			Description: "failure-rate (default): Restarts the job after failure, but when failure rate (failures per time interval) is exceeded, the job eventually fails. Restart strategy waits a fixed amount of time between attempts.fixed-delay: Attempts to restart the job a given number of times before it fails. Restart strategy waits a fixed amount of time between attempts. exponential-delay: Attempts to restart the job infinitely, with increasing delay up to the maximum delay. The job never fails. none: The job fails directly and no restart is attempted.",
-			Optional:    true,
-			Type:        schema.TypeString,
-		},
-		"restart_strategy_delay_sec": {
-			Description: "Delay between two consecutive restart attempts if restart-strategy has been set to fixed-delay or failure-rate. Delaying the retries can be helpful when the program interacts with external systems where for example connections or pending transactions should reach a timeout before re-execution is attempted.",
-			Optional:    true,
-			Type:        schema.TypeInt,
-		},
-		"restart_strategy_failure_rate_interval_min": {
-			Description: "Time interval for measuring failure rate if restart-strategy has been set to failure-rate. Specified in minutes.",
-			Optional:    true,
-			Type:        schema.TypeInt,
-		},
-		"restart_strategy_max_failures": {
-			Description: "The number of times that Flink retries the execution before the job is declared as failed if restart-strategy has been set to fixed-delay or failure-rate.",
-			Optional:    true,
-			Type:        schema.TypeInt,
 		},
 	}
 
