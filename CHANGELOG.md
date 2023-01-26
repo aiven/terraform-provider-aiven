@@ -8,11 +8,12 @@ nav_order: 1
 
 ## [4.0.0] - YYYY-MM-DD
 
-- Mark `ip_filter` and `namespaces` deprecated
+- Mark `ip_filter` and `namespaces` user configuration options as deprecated
 - Make schema fields use strict types instead of string
 - Add support for strict types in diff functions
 - Add `stateupgrader` package which aims to assist with upgrading from v3.x to v4.0.0
 - Remove deprecated resources (with data sources): `aiven_database`, `aiven_service_user`, `aiven_vpc_peering_connection`
+- Remove deprecated resources: `aiven_flink_table` and `aiven_flink_job`
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 

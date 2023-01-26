@@ -803,25 +803,6 @@ func IntegrationTypeMetrics() *schema.Schema {
 	}
 }
 
-// IntegrationTypeMirrormaker is a generated function returning the schema of the mirrormaker IntegrationType.
-func IntegrationTypeMirrormaker() *schema.Schema {
-	s := map[string]*schema.Schema{"mirrormaker_whitelist": {
-		Default:     ".*",
-		Description: "Mirrormaker topic whitelist. The default value is `.*`.",
-		Optional:    true,
-		Type:        schema.TypeString,
-	}}
-
-	return &schema.Schema{
-		Description:      "Mirrormaker user configurable settings",
-		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(s),
-		Elem:             &schema.Resource{Schema: s},
-		MaxItems:         1,
-		Optional:         true,
-		Type:             schema.TypeList,
-	}
-}
-
 // IntegrationTypePrometheus is a generated function returning the schema of the prometheus IntegrationType.
 func IntegrationTypePrometheus() *schema.Schema {
 	s := map[string]*schema.Schema{"source_mysql": {
