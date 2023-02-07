@@ -38,6 +38,7 @@ resource "aiven_service_integration" "my_integration_metrics" {
 - `datadog_user_config` (Block List, Max: 1) Datadog user configurable settings (see [below for nested schema](#nestedblock--datadog_user_config))
 - `destination_endpoint_id` (String) Destination endpoint for the integration (if any)
 - `destination_service_name` (String) Destination service for the integration (if any)
+- `external_aws_cloudwatch_metrics_user_config` (Block List, Max: 1) ExternalAwsCloudwatchMetrics user configurable settings (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config))
 - `kafka_connect_user_config` (Block List, Max: 1) KafkaConnect user configurable settings (see [below for nested schema](#nestedblock--kafka_connect_user_config))
 - `kafka_logs_user_config` (Block List, Max: 1) KafkaLogs user configurable settings (see [below for nested schema](#nestedblock--kafka_logs_user_config))
 - `kafka_mirrormaker_user_config` (Block List, Max: 1) KafkaMirrormaker user configurable settings (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config))
@@ -128,6 +129,33 @@ Optional:
 
 - `comment` (String) Optional tag explanation
 - `tag` (String) Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix 'aiven-' are reserved for Aiven.
+
+
+
+<a id="nestedblock--external_aws_cloudwatch_metrics_user_config"></a>
+### Nested Schema for `external_aws_cloudwatch_metrics_user_config`
+
+Optional:
+
+- `dropped_metrics` (Block List, Max: 1024) Metrics to not send to AWS CloudWatch (takes precedence over extra_metrics) (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config--dropped_metrics))
+- `extra_metrics` (Block List, Max: 1024) Metrics to allow through to AWS CloudWatch (in addition to default metrics) (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config--extra_metrics))
+
+<a id="nestedblock--external_aws_cloudwatch_metrics_user_config--dropped_metrics"></a>
+### Nested Schema for `external_aws_cloudwatch_metrics_user_config.dropped_metrics`
+
+Optional:
+
+- `field` (String) Identifier of a value in the metric
+- `metric` (String) Identifier of the metric
+
+
+<a id="nestedblock--external_aws_cloudwatch_metrics_user_config--extra_metrics"></a>
+### Nested Schema for `external_aws_cloudwatch_metrics_user_config.extra_metrics`
+
+Optional:
+
+- `field` (String) Identifier of a value in the metric
+- `metric` (String) Identifier of the metric
 
 
 

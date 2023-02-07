@@ -10,6 +10,7 @@ nav_order: 1
 - Fix user config serialization with null values only
 - Fix incorrect state name spelling in Flink resource
 - Add `aiven_flink_application` resource
+- Add `external_aws_cloudwatch_metrics` integration type
 
 ## [3.11.0] - 2023-01-09
 - Fix races in tests
