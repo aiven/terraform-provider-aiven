@@ -34,6 +34,7 @@ data "aiven_service_integration" "myintegration" {
 - `clickhouse_postgresql_user_config` (List of Object) ClickhousePostgresql user configurable settings (see [below for nested schema](#nestedatt--clickhouse_postgresql_user_config))
 - `datadog_user_config` (List of Object) Datadog user configurable settings (see [below for nested schema](#nestedatt--datadog_user_config))
 - `destination_endpoint_id` (String) Destination endpoint for the integration (if any)
+- `external_aws_cloudwatch_metrics_user_config` (List of Object) ExternalAwsCloudwatchMetrics user configurable settings (see [below for nested schema](#nestedatt--external_aws_cloudwatch_metrics_user_config))
 - `id` (String) The ID of this resource.
 - `integration_id` (String) Service Integration Id at aiven
 - `kafka_connect_user_config` (List of Object) KafkaConnect user configurable settings (see [below for nested schema](#nestedatt--kafka_connect_user_config))
@@ -119,6 +120,33 @@ Read-Only:
 
 - `comment` (String)
 - `tag` (String)
+
+
+
+<a id="nestedatt--external_aws_cloudwatch_metrics_user_config"></a>
+### Nested Schema for `external_aws_cloudwatch_metrics_user_config`
+
+Read-Only:
+
+- `dropped_metrics` (List of Object) (see [below for nested schema](#nestedobjatt--external_aws_cloudwatch_metrics_user_config--dropped_metrics))
+- `extra_metrics` (List of Object) (see [below for nested schema](#nestedobjatt--external_aws_cloudwatch_metrics_user_config--extra_metrics))
+
+<a id="nestedobjatt--external_aws_cloudwatch_metrics_user_config--dropped_metrics"></a>
+### Nested Schema for `external_aws_cloudwatch_metrics_user_config.dropped_metrics`
+
+Read-Only:
+
+- `field` (String)
+- `metric` (String)
+
+
+<a id="nestedobjatt--external_aws_cloudwatch_metrics_user_config--extra_metrics"></a>
+### Nested Schema for `external_aws_cloudwatch_metrics_user_config.extra_metrics`
+
+Read-Only:
+
+- `field` (String)
+- `metric` (String)
 
 
 
