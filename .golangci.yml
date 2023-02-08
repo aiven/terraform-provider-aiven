@@ -1,7 +1,6 @@
 linters:
   disable-all: true
   enable:
-    - deadcode
     - errcheck
     - gofmt
     - goimports
@@ -14,10 +13,8 @@ linters:
     - nilerr
     - revive # TODO: Configure according to https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md.
     - staticcheck
-    - structcheck
     - unconvert
     - unused
-    - varcheck
     - stylecheck
 
 
