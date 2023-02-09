@@ -23,10 +23,12 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 	}
 	aivenKafkaSchema["default_acl"] = &schema.Schema{
-		Type:        schema.TypeBool,
-		Optional:    true,
-		Default:     true,
-		Description: "Create default wildcard Kafka ACL",
+		Type:             schema.TypeBool,
+		Optional:         true,
+		ForceNew:         true,
+		Default:          true,
+		DiffSuppressFunc: schemautil.CreateOnlyDiffSuppressFunc,
+		Description:      "Create default wildcard Kafka ACL",
 	}
 	aivenKafkaSchema[schemautil.ServiceTypeKafka] = &schema.Schema{
 		Type:        schema.TypeList,
