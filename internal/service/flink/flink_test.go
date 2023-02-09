@@ -9,6 +9,7 @@ import (
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 // TestAccAiven_flink tests Flink resource.
@@ -32,7 +33,7 @@ variable "service_name" {
 resource "aiven_flink" "bar" {
   project                 = var.project_name
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-4"
+  plan                    = "business-4"
   service_name            = var.service_name
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -67,7 +68,7 @@ variable "service_name" {
 resource "aiven_flink" "bar" {
   project                 = var.project_name
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-4"
+  plan                    = "business-4"
   service_name            = var.service_name
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -86,6 +87,12 @@ resource "aiven_flink_application" "foo" {
   project      = var.project_name
   service_name = aiven_flink.bar.service_name
   name         = "test"
+}
+
+data "aiven_flink_application" "bar" {
+  project      = aiven_flink_application.foo.project
+  service_name = aiven_flink_application.foo.service_name
+  name         = aiven_flink_application.foo.name
 }
 
 data "aiven_flink" "service" {
@@ -108,7 +115,7 @@ variable "service_name" {
 resource "aiven_flink" "bar" {
   project                 = var.project_name
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-4"
+  plan                    = "business-4"
   service_name            = var.service_name
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
@@ -131,6 +138,12 @@ resource "aiven_flink_application" "foo" {
   project      = var.project_name
   service_name = aiven_flink.bar.service_name
   name         = "test"
+}
+
+data "aiven_flink_application" "bar" {
+  project      = aiven_flink_application.foo.project
+  service_name = aiven_flink_application.foo.service_name
+  name         = aiven_flink_application.foo.name
 }
 
 data "aiven_flink" "service" {
@@ -166,6 +179,7 @@ data "aiven_flink" "service" {
 			{
 				Config: manifestApplication,
 				Check: resource.ComposeTestCheckFunc(
+					aivenFlinkApplicationAttributes("data.aiven_flink_application.bar"),
 					resource.TestCheckResourceAttr(resourceNameApplication, "name", "test"),
 				),
 			},
@@ -177,4 +191,51 @@ data "aiven_flink" "service" {
 			},
 		},
 	})
+}
+
+func aivenFlinkApplicationAttributes(n string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no record ID is set")
+		}
+
+		if rs.Primary.Attributes["project"] == "" {
+			return fmt.Errorf("no project name is set")
+		}
+
+		if rs.Primary.Attributes["service_name"] == "" {
+			return fmt.Errorf("no service name is set")
+		}
+
+		if rs.Primary.Attributes["name"] == "" {
+			return fmt.Errorf("no application name is set")
+		}
+
+		if rs.Primary.Attributes["application_id"] == "" {
+			return fmt.Errorf("no application id is set")
+		}
+
+		if rs.Primary.Attributes["created_at"] == "" {
+			return fmt.Errorf("no created at is set")
+		}
+
+		if rs.Primary.Attributes["created_by"] == "" {
+			return fmt.Errorf("no created by is set")
+		}
+
+		if rs.Primary.Attributes["updated_at"] == "" {
+			return fmt.Errorf("no updated at is set")
+		}
+
+		if rs.Primary.Attributes["updated_by"] == "" {
+			return fmt.Errorf("no updated by is set")
+		}
+
+		return nil
+	}
 }

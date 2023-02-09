@@ -112,7 +112,9 @@ func Provider() *schema.Provider {
 			"aiven_m3aggregator": m3db.DatasourceM3Aggregator(),
 
 			// flink
-			"aiven_flink": flink.DatasourceFlink(),
+			"aiven_flink":                     flink.DatasourceFlink(),
+			"aiven_flink_application":         flink.DatasourceFlinkApplication(),
+			"aiven_flink_application_version": flink.DatasourceFlinkApplicationVersion(),
 
 			// opensearch
 			"aiven_opensearch":            opensearch.DatasourceOpensearch(),
@@ -204,10 +206,11 @@ func Provider() *schema.Provider {
 			"aiven_m3aggregator": m3db.ResourceM3Aggregator(),
 
 			// flink
-			"aiven_flink":             flink.ResourceFlink(),
-			"aiven_flink_table":       flink.ResourceFlinkTable(),
-			"aiven_flink_job":         flink.ResourceFlinkJob(),
-			"aiven_flink_application": flink.ResourceFlinkApplication(),
+			"aiven_flink":                     flink.ResourceFlink(),
+			"aiven_flink_table":               flink.ResourceFlinkTable(),
+			"aiven_flink_job":                 flink.ResourceFlinkJob(),
+			"aiven_flink_application":         flink.ResourceFlinkApplication(),
+			"aiven_flink_application_version": flink.ResourceFlinkApplicationVersion(),
 
 			// opensearch
 			"aiven_opensearch":            opensearch.ResourceOpensearch(),

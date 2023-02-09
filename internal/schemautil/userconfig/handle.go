@@ -57,7 +57,7 @@ func handleArrayOfPrimitiveTypeProperty(n string, t string) *jen.Statement {
 
 	if n == "ip_filter" {
 		// TODO: Add ip_filter_object to this sanity check when DiffSuppressFunc is implemented for it.
-		r[jen.Id("DiffSuppressFunc")] = jen.Qual(SchemaUtilPackage, "IpFilterValueDiffSuppressFunc")
+		r[jen.Id("DiffSuppressFunc")] = jen.Qual(SchemaUtilPackage, "IPFilterValueDiffSuppressFunc")
 	}
 
 	return jen.Op("&").Qual(SchemaPackage, "Schema").Values(r)
@@ -180,7 +180,7 @@ func handleArrayProperty(n string, p map[string]interface{}, t string) (map[stri
 
 		if an == "ip_filter" {
 			// TODO: Add ip_filter_object to this sanity check when DiffSuppressFunc is implemented for it.
-			s[jen.Id("DiffSuppressFunc")] = jen.Qual(SchemaUtilPackage, "IpFilterArrayDiffSuppressFunc")
+			s[jen.Id("DiffSuppressFunc")] = jen.Qual(SchemaUtilPackage, "IPFilterArrayDiffSuppressFunc")
 		}
 
 		if mi, ok := p["max_items"].(int); ok {

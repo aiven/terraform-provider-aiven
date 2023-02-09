@@ -1,0 +1,1 @@
+terraform import aiven_flink_application.myapp project/service/application_name

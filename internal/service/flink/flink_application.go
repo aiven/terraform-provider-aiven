@@ -22,7 +22,7 @@ var aivenFlinkApplicationSchema = map[string]*schema.Schema{
 	},
 
 	// Computed fields.
-	"id": {
+	"application_id": {
 		Type:        schema.TypeString,
 		Computed:    true,
 		Description: "Application ID",
@@ -94,8 +94,8 @@ func resourceFlinkApplicationRead(_ context.Context, d *schema.ResourceData, m i
 		return diag.Errorf("error setting Flink Application `name` for resource %s: %s", d.Id(), err)
 	}
 
-	if err := d.Set("id", r.ID); err != nil {
-		return diag.Errorf("error setting Flink Application `id` for resource %s: %s", d.Id(), err)
+	if err := d.Set("application_id", r.ID); err != nil {
+		return diag.Errorf("error setting Flink Application `application_id` for resource %s: %s", d.Id(), err)
 	}
 
 	if err := d.Set("created_at", r.CreatedAt); err != nil {

@@ -1,0 +1,1 @@
+terraform import aiven_flink_application_version.v1 project/service/application_id/application_version_id
