@@ -153,25 +153,25 @@ Optional:
 
 Optional:
 
-- `dropped_metrics` (Block List, Max: 1024) Metrics to not send to AWS CloudWatch (takes precedence over extra_metrics) (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config--dropped_metrics))
-- `extra_metrics` (Block List, Max: 1024) Metrics to allow through to AWS CloudWatch (in addition to default metrics) (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config--extra_metrics))
+- `dropped_metrics` (Block List, Max: 1024) Metrics to not send to AWS CloudWatch (takes precedence over extra_metrics). (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config--dropped_metrics))
+- `extra_metrics` (Block List, Max: 1024) Metrics to allow through to AWS CloudWatch (in addition to default metrics). (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config--extra_metrics))
 
 <a id="nestedblock--external_aws_cloudwatch_metrics_user_config--dropped_metrics"></a>
 ### Nested Schema for `external_aws_cloudwatch_metrics_user_config.dropped_metrics`
 
-Optional:
+Required:
 
-- `field` (String) Identifier of a value in the metric
-- `metric` (String) Identifier of the metric
+- `field` (String) Identifier of a value in the metric.
+- `metric` (String) Identifier of the metric.
 
 
 <a id="nestedblock--external_aws_cloudwatch_metrics_user_config--extra_metrics"></a>
 ### Nested Schema for `external_aws_cloudwatch_metrics_user_config.extra_metrics`
 
-Optional:
+Required:
 
-- `field` (String) Identifier of a value in the metric
-- `metric` (String) Identifier of the metric
+- `field` (String) Identifier of a value in the metric.
+- `metric` (String) Identifier of the metric.
 
 
 
