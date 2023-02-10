@@ -15,6 +15,7 @@ nav_order: 1
 - Add `aiven_flink_application` resource
 - Add `aiven_flink_application_version` resource
 - Add `external_aws_cloudwatch_metrics` integration type
+- Fix Kafka `default_acl` field acting incorrectly on import and creation
 
 ## [3.11.0] - 2023-01-09
 
