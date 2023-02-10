@@ -7,6 +7,9 @@ nav_order: 1
 # Changelog
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+## [3.12.0] - 2023-02-10
+
 - Fix user config serialization with null values only
 - Fix incorrect state name spelling in Flink resource
 - Add `aiven_flink_application` resource
@@ -14,12 +17,14 @@ nav_order: 1
 - Add `external_aws_cloudwatch_metrics` integration type
 
 ## [3.11.0] - 2023-01-09
+
 - Fix races in tests
 - Add support for normalization of `ip_filter_object` user config options
 - Improve team member deletion
 - Recreate missing kafka topics
 
 ## [3.10.0] - 2022-12-14
+
 - Add ClickHouse examples:
   - Standalone service
   - Integration with Kafka source
