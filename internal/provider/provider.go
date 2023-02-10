@@ -199,8 +199,6 @@ func Provider() *schema.Provider {
 
 			// flink
 			"aiven_flink":                     flink.ResourceFlink(),
-			"aiven_flink_table":               flink.ResourceFlinkTable(),
-			"aiven_flink_job":                 flink.ResourceFlinkJob(),
 			"aiven_flink_application":         flink.ResourceFlinkApplication(),
 			"aiven_flink_application_version": flink.ResourceFlinkApplicationVersion(),
 
