@@ -44,7 +44,7 @@ func TestAccAiven_kafka(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
-					resource.TestCheckResourceAttr(resourceName, "default_acl", "true"),
+					resource.TestCheckResourceAttr(resourceName, "default_acl", "false"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_username"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_password"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_host"),
@@ -116,6 +116,7 @@ resource "aiven_kafka" "bar" {
   service_name            = "test-acc-sr-%s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
+  default_acl             = false
 
   kafka_user_config {
     kafka {
