@@ -121,7 +121,7 @@ func ParseOptionalStringToBool(val interface{}) *bool {
 }
 
 func CreateOnlyDiffSuppressFunc(_, _, _ string, d *schema.ResourceData) bool {
-	return !d.IsNewResource()
+	return len(d.Id()) > 0
 }
 
 // EmptyObjectDiffSuppressFunc suppresses a diff for service user configuration options when
