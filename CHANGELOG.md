@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `CreateOnlyDiffSuppressFunc`
+
 ## [3.12.0] - 2023-02-10
 
 - Fix user config serialization with null values only
