@@ -9,6 +9,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Fix `CreateOnlyDiffSuppressFunc`
+- Fix `maintenance_window_dow` set `never` blocks resource update
 
 ## [3.12.0] - 2023-02-10
 

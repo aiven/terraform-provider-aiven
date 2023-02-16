@@ -61,6 +61,11 @@ func GetProjectVPCIdPointer(d ResourceStateOrResourceDiff) (*string, error) {
 
 func GetMaintenanceWindow(d ResourceStateOrResourceDiff) *aiven.MaintenanceWindow {
 	dow := d.Get("maintenance_window_dow").(string)
+	if dow == "never" {
+		// `never` is not available in the API, but can be set on the backend
+		// Sending this back to the backend will fail the validation
+		return nil
+	}
 	t := d.Get("maintenance_window_time").(string)
 	if len(dow) > 0 && len(t) > 0 {
 		return &aiven.MaintenanceWindow{DayOfWeek: dow, TimeOfDay: t}
