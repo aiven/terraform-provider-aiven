@@ -71,6 +71,10 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 				return new == ""
 			},
+			// There is also `never` value, which can't be set, but can be received from the backend.
+			// Sending `never` is suppressed in GetMaintenanceWindow function,
+			// but then we need to not let to set `never` manually
+			ValidateDiagFunc: ValidateEnum("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"),
 		},
 		"maintenance_window_time": {
 			Type:        schema.TypeString,
