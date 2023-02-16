@@ -8,8 +8,11 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [3.12.1] - 2023-02-16
+
 - Fix `CreateOnlyDiffSuppressFunc`
 - Fix `maintenance_window_dow` set `never` blocks resource update
+- Fix Kafka `default_acl` field acting incorrectly on import and creation
 
 ## [3.12.0] - 2023-02-10
 
@@ -18,7 +21,6 @@ nav_order: 1
 - Add `aiven_flink_application` resource
 - Add `aiven_flink_application_version` resource
 - Add `external_aws_cloudwatch_metrics` integration type
-- Fix Kafka `default_acl` field acting incorrectly on import and creation
 
 ## [3.11.0] - 2023-01-09
 
