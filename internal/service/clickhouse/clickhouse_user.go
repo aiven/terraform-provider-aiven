@@ -49,6 +49,7 @@ func ResourceClickhouseUser() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+		Timeouts: schemautil.DefaultResourceTimeouts(),
 
 		Schema: aivenClickhouseUserSchema,
 	}

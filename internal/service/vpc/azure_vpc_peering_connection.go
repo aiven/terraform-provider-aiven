@@ -76,10 +76,7 @@ func ResourceAzureVPCPeeringConnection() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(20 * time.Minute),
-			Delete: schema.DefaultTimeout(20 * time.Minute),
-		},
+		Timeouts: schemautil.DefaultResourceTimeouts(),
 
 		Schema: aivenAzureVPCPeeringConnectionSchema,
 	}

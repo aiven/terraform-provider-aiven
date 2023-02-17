@@ -37,6 +37,7 @@ resource "aiven_project" "myproject" {
 - `default_cloud` (String) Defines the default cloud provider and region where services are hosted. This can be changed freely after the project is created. This will not affect existing services.
 - `tag` (Block Set) Tags are key-value pairs that allow you to categorize projects. (see [below for nested schema](#nestedblock--tag))
 - `technical_emails` (Set of String) Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability. It is  good practice to keep this up-to-date to be aware of any potential issues with your project.
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `use_source_project_billing_group` (Boolean) Use the same billing group that is used in source project.
 
 ### Read-Only
@@ -53,6 +54,17 @@ Required:
 
 - `key` (String) Project tag key
 - `value` (String) Project tag value
+
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String)
+- `default` (String)
+- `delete` (String)
+- `update` (String)
 
 ## Import
 

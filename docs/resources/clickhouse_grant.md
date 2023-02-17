@@ -87,6 +87,7 @@ resource "aiven_clickhouse_grant" "demo-user-grant" {
 - `privilege_grant` (Block Set) Configuration to grant a privilege. This property cannot be changed, doing so forces recreation of the resource. (see [below for nested schema](#nestedblock--privilege_grant))
 - `role` (String) The role to grant privileges or roles to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 - `role_grant` (Block Set) Configuration to grant a role. This property cannot be changed, doing so forces recreation of the resource. (see [below for nested schema](#nestedblock--role_grant))
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `user` (String) The user to grant privileges or roles to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Read-Only
@@ -114,5 +115,16 @@ Optional:
 Optional:
 
 - `role` (String) The role that is to be granted. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String)
+- `default` (String)
+- `delete` (String)
+- `update` (String)
 
 

@@ -48,6 +48,8 @@ resource "aiven_aws_privatelink" "foo" {
 Optional:
 
 - `create` (String)
+- `default` (String)
+- `delete` (String)
 - `update` (String)
 
 ## Import

@@ -105,6 +105,7 @@ Notes:
 		ReadContext:        resourceClickhouseGrantRead,
 		DeleteContext:      resourceClickhouseGrantDelete,
 		Schema:             aivenClickhouseGrantSchema,
+		Timeouts:           schemautil.DefaultResourceTimeouts(),
 	}
 }
 

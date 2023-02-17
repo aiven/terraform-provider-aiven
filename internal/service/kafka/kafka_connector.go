@@ -94,9 +94,7 @@ func ResourceKafkaConnector() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Timeouts: &schema.ResourceTimeout{
-			Read: schema.DefaultTimeout(2 * time.Minute),
-		},
+		Timeouts: schemautil.DefaultResourceTimeouts(),
 
 		Schema: aivenKafkaConnectorSchema,
 		CustomizeDiff: customdiff.IfValueChange("config",

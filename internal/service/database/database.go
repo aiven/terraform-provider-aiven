@@ -72,9 +72,7 @@ func ResourceDatabase() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceDatabaseState,
 		},
-		Timeouts: &schema.ResourceTimeout{
-			Delete: schema.DefaultTimeout(2 * time.Minute),
-		},
+		Timeouts: schemautil.DefaultResourceTimeouts(),
 
 		// TODO: add user config
 		Schema: aivenDatabaseSchema,

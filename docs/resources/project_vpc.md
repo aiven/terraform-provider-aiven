@@ -48,7 +48,9 @@ resource "aiven_project_vpc" "myvpc" {
 Optional:
 
 - `create` (String)
+- `default` (String)
 - `delete` (String)
+- `update` (String)
 
 ## Import
 

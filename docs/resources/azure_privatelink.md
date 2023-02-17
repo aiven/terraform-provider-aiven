@@ -50,6 +50,7 @@ resource "aiven_azure_privatelink" "foo" {
 Optional:
 
 - `create` (String)
+- `default` (String)
 - `delete` (String)
 - `update` (String)
 

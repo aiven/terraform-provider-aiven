@@ -35,6 +35,9 @@ The InfluxDB Database resource allows the creation and management of Aiven Influ
 
 Optional:
 
+- `create` (String)
+- `default` (String)
 - `delete` (String)
+- `update` (String)
 
 

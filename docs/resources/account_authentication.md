@@ -45,6 +45,7 @@ resource "aiven_account_authentication" "foo" {
 - `saml_idp_url` (String) SAML Idp URL
 - `saml_signature_algorithm` (String) Signature algorithm. This is an advanced option that typically does not need to be set.
 - `saml_variant` (String) SAML server variant
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
@@ -65,6 +66,17 @@ Optional:
 - `identity` (String) Field name for user's identity. This field must always exist in responses, and must be immutable and unique. Contents of this field are used to identify the user. Using user ID (such as unix user id) is highly recommended, as email address may change, requiring relinking user to Aiven user.
 - `last_name` (String) Field name for user's last name
 - `real_name` (String) Field name for user's full name. If specified, first_name and last_name mappings are ignored
+
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String)
+- `default` (String)
+- `delete` (String)
+- `update` (String)
 
 ## Import
 

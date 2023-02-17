@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/docker/go-units"
@@ -15,6 +16,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+func DefaultResourceTimeouts() *schema.ResourceTimeout {
+	// DefaultTimeoutMinutes is the default timeout for service operations.
+	const DefaultTimeoutMinutes = 20
+
+	return &schema.ResourceTimeout{
+		Create:  schema.DefaultTimeout(DefaultTimeoutMinutes * time.Minute),
+		Update:  schema.DefaultTimeout(DefaultTimeoutMinutes * time.Minute),
+		Delete:  schema.DefaultTimeout(DefaultTimeoutMinutes * time.Minute),
+		Default: schema.DefaultTimeout(DefaultTimeoutMinutes * time.Minute),
+	}
+}
 
 const (
 	ServiceTypePG               = "pg"

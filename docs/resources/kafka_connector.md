@@ -60,7 +60,10 @@ resource "aiven_kafka_connector" "kafka-os-con1" {
 
 Optional:
 
-- `read` (String)
+- `create` (String)
+- `default` (String)
+- `delete` (String)
+- `update` (String)
 
 
 <a id="nestedatt--task"></a>

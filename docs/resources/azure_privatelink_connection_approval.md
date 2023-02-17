@@ -94,6 +94,7 @@ resource "aiven_azure_privatelink_connection_approval" "approval" {
 Optional:
 
 - `create` (String)
+- `default` (String)
 - `delete` (String)
 - `update` (String)
 

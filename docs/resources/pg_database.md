@@ -45,7 +45,10 @@ resource "aiven_pg_database" "mydatabase" {
 
 Optional:
 
+- `create` (String)
+- `default` (String)
 - `delete` (String)
+- `update` (String)
 
 ## Import
 

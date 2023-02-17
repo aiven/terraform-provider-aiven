@@ -52,7 +52,8 @@ func ResourceStaticIP() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Schema: aivenStaticIPSchema,
+		Timeouts: schemautil.DefaultResourceTimeouts(),
+		Schema:   aivenStaticIPSchema,
 	}
 }
 

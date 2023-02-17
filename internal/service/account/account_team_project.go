@@ -51,6 +51,8 @@ account team you are trying to link to this project.
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+		Timeouts: schemautil.DefaultResourceTimeouts(),
+
 		Schema: aivenAccountTeamProjectSchema,
 	}
 }

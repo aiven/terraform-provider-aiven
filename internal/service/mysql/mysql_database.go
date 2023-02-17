@@ -2,7 +2,6 @@ package mysql
 
 import (
 	"context"
-	"time"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -37,9 +36,7 @@ func ResourceMySQLDatabase() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Timeouts: &schema.ResourceTimeout{
-			Delete: schema.DefaultTimeout(2 * time.Minute),
-		},
+		Timeouts: schemautil.DefaultResourceTimeouts(),
 
 		Schema: aivenMySQLDatabaseSchema,
 	}

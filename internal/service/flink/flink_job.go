@@ -52,14 +52,11 @@ var aivenFlinkJobSchema = map[string]*schema.Schema{
 
 func ResourceFlinkJob() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Flink Job resource allows the creation and management of Aiven Jobs.",
-		ReadContext:   resourceFlinkJobRead,
-		CreateContext: resourceFlinkJobCreate,
-		DeleteContext: resourceFlinkJobDelete,
-		Timeouts: &schema.ResourceTimeout{
-			Read:   schema.DefaultTimeout(1 * time.Minute),
-			Delete: schema.DefaultTimeout(1 * time.Minute),
-		},
+		Description:        "The Flink Job resource allows the creation and management of Aiven Jobs.",
+		ReadContext:        resourceFlinkJobRead,
+		CreateContext:      resourceFlinkJobCreate,
+		DeleteContext:      resourceFlinkJobDelete,
+		Timeouts:           schemautil.DefaultResourceTimeouts(),
 		Schema:             aivenFlinkJobSchema,
 		CustomizeDiff:      customdiff.If(schemautil.ResourceShouldExist, resourceFlinkJobCustomizeDiff),
 		DeprecationMessage: schemautil.DeprecationMessage,

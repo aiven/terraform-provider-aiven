@@ -34,6 +34,7 @@ resource "aiven_pg_user" "foo" {
 
 - `password` (String, Sensitive) The password of the PG User ( not applicable for all services ).
 - `pg_allow_replication` (Boolean) Defines whether replication is allowed. This property cannot be changed, doing so forces recreation of the resource.
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
@@ -41,6 +42,16 @@ resource "aiven_pg_user" "foo" {
 - `access_key` (String, Sensitive) Access certificate key for the user
 - `id` (String) The ID of this resource.
 - `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String)
+- `default` (String)
+- `delete` (String)
+- `update` (String)
 
 ## Import
 

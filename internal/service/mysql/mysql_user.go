@@ -68,6 +68,7 @@ func ResourceMySQLUser() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+		Timeouts: schemautil.DefaultResourceTimeouts(),
 
 		Schema: aivenMySQLUserSchema,
 	}

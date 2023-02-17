@@ -197,6 +197,7 @@ func ResourceFlinkTable() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+		Timeouts:           schemautil.DefaultResourceTimeouts(),
 		Schema:             aivenFlinkTableSchema,
 		CustomizeDiff:      customdiff.If(schemautil.ResourceShouldExist, resourceFlinkTableCustomizeDiff),
 		DeprecationMessage: schemautil.DeprecationMessage,

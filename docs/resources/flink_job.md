@@ -57,7 +57,9 @@ resource "aiven_flink_job" "job" {
 
 Optional:
 
+- `create` (String)
+- `default` (String)
 - `delete` (String)
-- `read` (String)
+- `update` (String)
 
 

@@ -45,12 +45,23 @@ resource "aiven_project" "pr1" {
 - `copy_from_billing_group` (String) ID of the billing group to copy from
 - `country_code` (String) Country code
 - `state` (String) State
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `vat_id` (String) VAT id
 - `zip_code` (String) Zip Code
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String)
+- `default` (String)
+- `delete` (String)
+- `update` (String)
 
 ## Import
 

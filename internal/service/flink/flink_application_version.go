@@ -103,7 +103,8 @@ func ResourceFlinkApplicationVersion() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Schema: aivenFlinkApplicationVersionSchema,
+		Timeouts: schemautil.DefaultResourceTimeouts(),
+		Schema:   aivenFlinkApplicationVersionSchema,
 	}
 }
 
