@@ -2,7 +2,6 @@ package vpc
 
 import (
 	"context"
-	"time"
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -72,9 +71,7 @@ func ResourceTransitGatewayVPCAttachment() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(2 * time.Minute),
-		},
+		Timeouts: schemautil.DefaultResourceTimeouts(),
 
 		Schema: aivenTransitGatewayVPCAttachmentSchema,
 	}

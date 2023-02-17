@@ -38,12 +38,23 @@ resource "aiven_connection_pool" "mytestpool" {
 
 - `pool_mode` (String) The mode the pool operates in The possible values are `session`, `transaction` and `statement`. The default value is `transaction`.
 - `pool_size` (Number) The number of connections the pool may create towards the backend server. This does not affect the number of incoming connections, which is always a much larger number. The default value is `10`.
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `username` (String) The name of the service user used to connect to the database. To set up proper dependencies please refer to this variable as a reference.
 
 ### Read-Only
 
 - `connection_uri` (String, Sensitive) The URI for connecting to the pool
 - `id` (String) The ID of this resource.
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String)
+- `default` (String)
+- `delete` (String)
+- `update` (String)
 
 ## Import
 

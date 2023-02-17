@@ -8,6 +8,9 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Unified timeout values across all resources
+- Added ability for more granular timeout configuration
+
 ## [3.12.1] - 2023-02-16
 
 - Fix `CreateOnlyDiffSuppressFunc`

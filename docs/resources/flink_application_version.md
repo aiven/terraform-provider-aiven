@@ -65,6 +65,10 @@ resource "aiven_flink_application_version" "foo" {
 - `sources` (Block Set, Min: 1) Application sources (see [below for nested schema](#nestedblock--sources))
 - `statement` (String) Job SQL statement
 
+### Optional
+
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+
 ### Read-Only
 
 - `application_version_id` (String) Application version ID
@@ -95,6 +99,17 @@ Required:
 Optional:
 
 - `integration_id` (String) The integration ID
+
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String)
+- `default` (String)
+- `delete` (String)
+- `update` (String)
 
 ## Import
 

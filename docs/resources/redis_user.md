@@ -37,10 +37,21 @@ resource "aiven_redis_user" "foo" {
 - `redis_acl_channels` (List of String) Defines the permitted pub/sub channel patterns. This property cannot be changed, doing so forces recreation of the resource.
 - `redis_acl_commands` (List of String) Defines rules for individual commands. The field is required with`redis_acl_categories` and `redis_acl_keys`. This property cannot be changed, doing so forces recreation of the resource.
 - `redis_acl_keys` (List of String) Defines key access rules. The field is required with`redis_acl_categories` and `redis_acl_keys`. This property cannot be changed, doing so forces recreation of the resource.
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
 - `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String)
+- `default` (String)
+- `delete` (String)
+- `update` (String)
 
 

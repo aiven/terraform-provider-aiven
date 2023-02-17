@@ -90,6 +90,7 @@ func ResourceKafkaSchema() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		CustomizeDiff: resourceKafkaSchemaCustomizeDiff,
+		Timeouts:      schemautil.DefaultResourceTimeouts(),
 
 		Schema: aivenKafkaSchemaSchema,
 	}

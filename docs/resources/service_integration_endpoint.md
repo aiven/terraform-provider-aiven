@@ -35,6 +35,7 @@ The Service Integration Endpoint resource allows the creation and management of 
 - `prometheus_user_config` (Block List, Max: 1) Prometheus user configurable settings (see [below for nested schema](#nestedblock--prometheus_user_config))
 - `rsyslog_user_config` (Block List, Max: 1) Rsyslog user configurable settings (see [below for nested schema](#nestedblock--rsyslog_user_config))
 - `signalfx_user_config` (Block List, Max: 1) Signalfx user configurable settings (see [below for nested schema](#nestedblock--signalfx_user_config))
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
@@ -189,5 +190,16 @@ Optional:
 - `enabled_metrics` (List of String) list of metrics to send
 - `signalfx_api_key` (String, Sensitive) SignalFX API key
 - `signalfx_realm` (String) SignalFX realm
+
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String)
+- `default` (String)
+- `delete` (String)
+- `update` (String)
 
 

@@ -92,10 +92,7 @@ func ResourceVPCPeeringConnection() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceVPCPeeringConnectionImport,
 		},
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(2 * time.Minute),
-			Delete: schema.DefaultTimeout(2 * time.Minute),
-		},
+		Timeouts: schemautil.DefaultResourceTimeouts(),
 
 		Schema:             aivenVPCPeeringConnectionSchema,
 		DeprecationMessage: "Please use a cloud specific VPC peering connection resource",

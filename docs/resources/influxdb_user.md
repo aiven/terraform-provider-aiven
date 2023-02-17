@@ -33,6 +33,7 @@ resource "aiven_influxdb_user" "foo" {
 ### Optional
 
 - `password` (String, Sensitive) The password of the InfluxDB User.
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
@@ -40,5 +41,15 @@ resource "aiven_influxdb_user" "foo" {
 - `access_key` (String, Sensitive) Access certificate key for the user if applicable for the service in question
 - `id` (String) The ID of this resource.
 - `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String)
+- `default` (String)
+- `delete` (String)
+- `update` (String)
 
 

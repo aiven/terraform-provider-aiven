@@ -34,6 +34,7 @@ resource "aiven_mysql_user" "foo" {
 
 - `authentication` (String) Authentication details. The possible values are `caching_sha2_password` and `mysql_native_password`.
 - `password` (String, Sensitive) The password of the MySQL User ( not applicable for all services ).
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
@@ -41,5 +42,15 @@ resource "aiven_mysql_user" "foo" {
 - `access_key` (String, Sensitive) Access certificate key for the user
 - `id` (String) The ID of this resource.
 - `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String)
+- `default` (String)
+- `delete` (String)
+- `update` (String)
 
 

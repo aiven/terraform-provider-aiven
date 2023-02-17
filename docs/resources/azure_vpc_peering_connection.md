@@ -52,7 +52,9 @@ resource "aiven_azure_vpc_peering_connection" "foo" {
 Optional:
 
 - `create` (String)
+- `default` (String)
 - `delete` (String)
+- `update` (String)
 
 ## Import
 

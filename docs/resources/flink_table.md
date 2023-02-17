@@ -57,12 +57,24 @@ resource "aiven_flink_table" "table" {
 - `kafka_value_format` (String) Kafka Value Format The possible values are `avro`, `avro-confluent`, `debezium-avro-confluent`, `debezium-json` and `json`. This property cannot be changed, doing so forces recreation of the resource.
 - `like_options` (String) [LIKE](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/sql/create/#like) statement for table creation. This property cannot be changed, doing so forces recreation of the resource.
 - `opensearch_index` (String) For an OpenSearch table, the OpenSearch index the table outputs to. This property cannot be changed, doing so forces recreation of the resource.
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `upsert_kafka` (Block Set, Max: 1) Kafka upsert connector configuration. (see [below for nested schema](#nestedblock--upsert_kafka))
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
 - `table_id` (String) The Table ID of the flink table in the flink service.
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String)
+- `default` (String)
+- `delete` (String)
+- `update` (String)
+
 
 <a id="nestedblock--upsert_kafka"></a>
 ### Nested Schema for `upsert_kafka`

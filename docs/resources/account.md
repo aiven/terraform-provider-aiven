@@ -28,6 +28,7 @@ resource "aiven_account" "account1" {
 ### Optional
 
 - `primary_billing_group_id` (String) Billing group id
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
@@ -38,6 +39,16 @@ resource "aiven_account" "account1" {
 - `owner_team_id` (String) Owner team id
 - `tenant_id` (String) Tenant id
 - `update_time` (String) Time of last update
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String)
+- `default` (String)
+- `delete` (String)
+- `update` (String)
 
 ## Import
 

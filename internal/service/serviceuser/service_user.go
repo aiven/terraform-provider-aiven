@@ -119,6 +119,7 @@ func ResourceServiceUser() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServiceUserState,
 		},
+		Timeouts: schemautil.DefaultResourceTimeouts(),
 
 		Schema:             aivenServiceUserSchema,
 		DeprecationMessage: "Please use service-specific resources instead of this one, for example: aiven_kafka_user, aiven_pg_user etc.",

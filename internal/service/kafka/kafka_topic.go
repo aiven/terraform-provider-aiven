@@ -231,12 +231,8 @@ func ResourceKafkaTopic() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(5 * time.Minute),
-			Read:   schema.DefaultTimeout(10 * time.Minute),
-			Delete: schema.DefaultTimeout(2 * time.Minute),
-		},
-		Schema: aivenKafkaTopicSchema,
+		Timeouts: schemautil.DefaultResourceTimeouts(),
+		Schema:   aivenKafkaTopicSchema,
 	}
 }
 

@@ -64,6 +64,7 @@ eliminate an account team member if one has accepted an invitation previously.
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+		Timeouts: schemautil.DefaultResourceTimeouts(),
 
 		Schema: aivenAccountTeamMemberSchema,
 	}

@@ -27,12 +27,26 @@ resource "aiven_account_team" "account_team1" {
 - `account_id` (String) The unique account id
 - `name` (String) The account team name
 
+### Optional
+
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+
 ### Read-Only
 
 - `create_time` (String) Time of creation
 - `id` (String) The ID of this resource.
 - `team_id` (String) The auto-generated unique account team id
 - `update_time` (String) Time of last update
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String)
+- `default` (String)
+- `delete` (String)
+- `update` (String)
 
 ## Import
 

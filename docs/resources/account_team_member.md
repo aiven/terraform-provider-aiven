@@ -40,12 +40,26 @@ resource "aiven_account_team_member" "foo" {
 - `team_id` (String) An account team id This property cannot be changed, doing so forces recreation of the resource.
 - `user_email` (String) Is a user email address that first will be invited, and after accepting an invitation, he or she becomes a member of a team. This property cannot be changed, doing so forces recreation of the resource.
 
+### Optional
+
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+
 ### Read-Only
 
 - `accepted` (Boolean) is a boolean flag that determines whether an invitation was accepted or not by the user. `false` value means that the invitation was sent to the user but not yet accepted. `true` means that the user accepted the invitation and now a member of an account team.
 - `create_time` (String) Time of creation
 - `id` (String) The ID of this resource.
 - `invited_by_user_email` (String) The email address that invited this user.
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String)
+- `default` (String)
+- `delete` (String)
+- `update` (String)
 
 ## Import
 

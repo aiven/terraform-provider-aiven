@@ -64,7 +64,8 @@ func ResourceFlinkApplication() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Schema: aivenFlinkApplicationSchema,
+		Timeouts: schemautil.DefaultResourceTimeouts(),
+		Schema:   aivenFlinkApplicationSchema,
 	}
 }
 

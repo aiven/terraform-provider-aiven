@@ -43,7 +43,10 @@ resource "aiven_clickhouse_database" "clickhouse_db" {
 
 Optional:
 
+- `create` (String)
+- `default` (String)
 - `delete` (String)
+- `update` (String)
 
 ## Import
 

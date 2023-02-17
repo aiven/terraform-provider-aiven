@@ -159,6 +159,7 @@ Required:
 Optional:
 
 - `create` (String)
+- `default` (String)
 - `delete` (String)
 - `update` (String)
 
