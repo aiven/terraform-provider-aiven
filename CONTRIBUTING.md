@@ -115,3 +115,8 @@ Now we can see that the debugged process did hit the breakpoint we specified ear
 - Choose a meaningful title for your pull request.
 - The pull request description should focus on what changed and why.
 - Check that the tests pass (and add test coverage for your changes if appropriate).
+
+### Commit Messages
+
+This project adheres to the [Conventional Commits](https://conventionalcommits.org/en/v1.0.0/) specification.
+Please, make sure that your commit messages follow that specification.
