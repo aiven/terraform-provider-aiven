@@ -9,6 +9,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -65,7 +66,9 @@ func ResourceServiceIntegrationEndpoint() *schema.Resource {
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema: aivenServiceIntegrationEndpointSchema,
+		Schema:         aivenServiceIntegrationEndpointSchema,
+		SchemaVersion:  1,
+		StateUpgraders: stateupgrader.ServiceIntegrationEndpoint(),
 	}
 }
 

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -20,7 +21,7 @@ var aivenProjectVPCSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: schemautil.Complex("Defines where the cloud provider and region where the service is hosted in. See the Service resource for additional information.").ForceNew().Build(),
+		Description: userconfig.Desc("Defines where the cloud provider and region where the service is hosted in. See the Service resource for additional information.").ForceNew().Build(),
 	},
 	"network_cidr": {
 		ForceNew:    true,
@@ -31,7 +32,7 @@ var aivenProjectVPCSchema = map[string]*schema.Schema{
 	"state": {
 		Computed:    true,
 		Type:        schema.TypeString,
-		Description: schemautil.Complex("State of the VPC.").PossibleValues("APPROVED", "ACTIVE", "DELETING", "DELETED").Build(),
+		Description: userconfig.Desc("State of the VPC.").PossibleValues("APPROVED", "ACTIVE", "DELETING", "DELETED").Build(),
 	},
 }
 

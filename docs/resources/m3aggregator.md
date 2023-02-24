@@ -73,20 +73,23 @@ resource "aiven_m3aggregator" "m3a" {
 
 Optional:
 
-- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name
-- `ip_filter` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
-- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--m3aggregator_user_config--ip_filter_object))
-- `m3_version` (String) M3 major version (deprecated, use m3aggregator_version)
-- `m3aggregator_version` (String) M3 major version (the minimum compatible version)
-- `static_ips` (String) Use static public IP addresses
+- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
+- `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'. (see [below for nested schema](#nestedblock--m3aggregator_user_config--ip_filter_object))
+- `m3_version` (String, Deprecated) M3 major version (deprecated, use m3aggregator_version).
+- `m3aggregator_version` (String) M3 major version (the minimum compatible version).
+- `static_ips` (Boolean) Use static public IP addresses.
 
 <a id="nestedblock--m3aggregator_user_config--ip_filter_object"></a>
 ### Nested Schema for `m3aggregator_user_config.ip_filter_object`
 
+Required:
+
+- `network` (String) CIDR address block.
+
 Optional:
 
-- `description` (String) Description for IP filter list entry
-- `network` (String) CIDR address block
+- `description` (String) Description for IP filter list entry.
 
 
 

@@ -71,21 +71,21 @@ Optional:
 - `index_interval_bytes` (String) index.interval.bytes value
 - `max_compaction_lag_ms` (String) max.compaction.lag.ms value
 - `max_message_bytes` (String) max.message.bytes value
-- `message_downconversion_enable` (String) message.downconversion.enable value
+- `message_downconversion_enable` (Boolean) message.downconversion.enable value
 - `message_format_version` (String) message.format.version value
 - `message_timestamp_difference_max_ms` (String) message.timestamp.difference.max.ms value
 - `message_timestamp_type` (String) message.timestamp.type value
-- `min_cleanable_dirty_ratio` (String) min.cleanable.dirty.ratio value
+- `min_cleanable_dirty_ratio` (Number) min.cleanable.dirty.ratio value
 - `min_compaction_lag_ms` (String) min.compaction.lag.ms value
 - `min_insync_replicas` (String) min.insync.replicas value
-- `preallocate` (String) preallocate value
+- `preallocate` (Boolean) preallocate value
 - `retention_bytes` (String) retention.bytes value
 - `retention_ms` (String) retention.ms value
 - `segment_bytes` (String) segment.bytes value
 - `segment_index_bytes` (String) segment.index.bytes value
 - `segment_jitter_ms` (String) segment.jitter.ms value
 - `segment_ms` (String) segment.ms value
-- `unclean_leader_election_enable` (String) unclean.leader.election.enable value
+- `unclean_leader_election_enable` (Boolean) unclean.leader.election.enable value
 
 
 <a id="nestedblock--tag"></a>
@@ -93,11 +93,11 @@ Optional:
 
 Required:
 
-- `key` (String) Topic tag key. Maximum Length: `64`.
+- `key` (String) Topic tag key. Maximum length: `64`.
 
 Optional:
 
-- `value` (String) Topic tag value. Maximum Length: `256`.
+- `value` (String) Topic tag value. Maximum length: `256`.
 
 
 <a id="nestedblock--timeouts"></a>

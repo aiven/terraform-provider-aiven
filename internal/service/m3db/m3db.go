@@ -3,6 +3,7 @@ package m3db
 import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -57,6 +58,8 @@ func ResourceM3DB() *schema.Resource {
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema: aivenM3DBSchema(),
+		Schema:         aivenM3DBSchema(),
+		SchemaVersion:  1,
+		StateUpgraders: stateupgrader.M3DB(),
 	}
 }

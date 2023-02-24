@@ -44,7 +44,7 @@ func generateSchema(n string, m map[string]interface{}) error {
 
 		f.Commentf("%s is a generated function returning the schema of the %s %s.", fn, k, n)
 
-		pm, err := convertPropertiesToSchemaMap(pa)
+		pm, err := convertPropertiesToSchemaMap(pa, map[string]struct{}{})
 		if err != nil {
 			return err
 		}

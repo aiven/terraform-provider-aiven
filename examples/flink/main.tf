@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aiven = {
       source  = "aiven/aiven"
-      version = ">= 2.0.0, < 3.0.0"
+      version = ">=4.0.0, <5.0.0"
     }
   }
 }
@@ -59,47 +59,5 @@ resource "aiven_kafka_topic" "sink" {
   partitions   = 2
   replication  = 3
   topic_name   = "sink_topic"
-}
-
-resource "aiven_flink_table" "source" {
-  project        = aiven_flink.flink.project
-  service_name   = aiven_flink.flink.service_name
-  integration_id = aiven_service_integration.flink_to_kafka.integration_id
-  table_name     = "source_table"
-  kafka_topic    = aiven_kafka_topic.source.topic_name
-  schema_sql     = <<EOF
-    `cpu` INT,
-    `node` INT,
-    `occurred_at` TIMESTAMP(3) METADATA FROM 'timestamp',
-    WATERMARK FOR `occurred_at` AS `occurred_at` - INTERVAL '5' SECOND
-  EOF
-}
-
-resource "aiven_flink_table" "sink" {
-  project        = aiven_flink.flink.project
-  service_name   = aiven_flink.flink.service_name
-  integration_id = aiven_service_integration.flink_to_kafka.integration_id
-  table_name     = "sink_table"
-  kafka_topic    = aiven_kafka_topic.sink.topic_name
-  schema_sql     = <<EOF
-    `cpu` INT,
-    `node` INT,
-    `occurred_at` TIMESTAMP(3)
-  EOF
-}
-
-resource "aiven_flink_job" "flink_job" {
-  project      = aiven_flink.flink.project
-  service_name = aiven_flink.flink.service_name
-  job_name     = "my_job"
-  table_ids    = [
-    aiven_flink_table.source.table_id,
-    aiven_flink_table.sink.table_id
-  ]
-  statement = <<EOF
-    INSERT INTO ${aiven_flink_table.sink.table_name}
-    SELECT * FROM ${aiven_flink_table.source.table_name}
-    WHERE `cpu` > 70
-  EOF
 }
 

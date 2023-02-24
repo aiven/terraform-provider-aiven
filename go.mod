@@ -3,8 +3,8 @@ module github.com/aiven/terraform-provider-aiven
 go 1.18
 
 require (
-	github.com/aiven/aiven-go-client v1.7.1-0.20230208122034-270adff994ec
-	github.com/aiven/aiven-go-client/tools/exp v0.0.0-20221102122203-4f39deb34b6a
+	github.com/aiven/aiven-go-client v1.7.1-0.20230203152437-836836b77f9f
+	github.com/aiven/aiven-go-client/tools/exp v0.0.0-20230203152437-836836b77f9f
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/dave/jennifer v1.5.1
 	github.com/docker/go-units v0.5.0
@@ -12,6 +12,8 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/gruntwork-io/terratest v0.40.22
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
+	github.com/hashicorp/terraform-plugin-go v0.14.3
+	github.com/hashicorp/terraform-plugin-mux v0.9.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.24.1
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/stretchr/testify v1.8.0
@@ -38,9 +40,9 @@ require (
 	github.com/hashicorp/go-checkpoint v0.5.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-getter v1.6.1 // indirect
-	github.com/hashicorp/go-hclog v1.2.2 // indirect
+	github.com/hashicorp/go-hclog v1.4.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/hashicorp/go-plugin v1.4.6 // indirect
+	github.com/hashicorp/go-plugin v1.4.8 // indirect
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
@@ -49,9 +51,8 @@ require (
 	github.com/hashicorp/logutils v1.0.0 // indirect
 	github.com/hashicorp/terraform-exec v0.17.3 // indirect
 	github.com/hashicorp/terraform-json v0.14.0 // indirect
-	github.com/hashicorp/terraform-plugin-go v0.14.1 // indirect
-	github.com/hashicorp/terraform-plugin-log v0.7.0 // indirect
-	github.com/hashicorp/terraform-registry-address v0.0.0-20220623143253-7d51757b572c // indirect
+	github.com/hashicorp/terraform-plugin-log v0.8.0 // indirect
+	github.com/hashicorp/terraform-registry-address v0.1.0 // indirect
 	github.com/hashicorp/terraform-svchost v0.0.0-20200729002733-f050f53b9734 // indirect
 	github.com/hashicorp/yamux v0.1.1 // indirect
 	github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a // indirect
@@ -79,16 +80,15 @@ require (
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
-	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
+	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
 	golang.org/x/net v0.0.0-20220812174116-3211cb980234 // indirect
 	golang.org/x/oauth2 v0.0.0-20210514164344-f6687ab2804c // indirect
 	golang.org/x/sys v0.0.0-20220817070843-5a390386f1f2 // indirect
-	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/tools v0.1.10 // indirect
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	golang.org/x/text v0.4.0 // indirect
+	golang.org/x/tools v0.1.12 // indirect
 	google.golang.org/api v0.47.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220728213248-dd149ef739b9 // indirect
-	google.golang.org/grpc v1.50.1 // indirect
+	google.golang.org/grpc v1.51.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )

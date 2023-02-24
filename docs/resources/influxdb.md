@@ -75,39 +75,42 @@ resource "aiven_influxdb" "inf1" {
 
 Optional:
 
-- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
-- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name
-- `influxdb` (Block List, Max: 1) influxdb.conf configuration values (see [below for nested schema](#nestedblock--influxdb_user_config--influxdb))
-- `ip_filter` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
-- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--influxdb_user_config--ip_filter_object))
-- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--influxdb_user_config--private_access))
-- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--influxdb_user_config--privatelink_access))
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
+- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
+- `influxdb` (Block List, Max: 1) influxdb.conf configuration values. (see [below for nested schema](#nestedblock--influxdb_user_config--influxdb))
+- `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'. (see [below for nested schema](#nestedblock--influxdb_user_config--ip_filter_object))
+- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks. (see [below for nested schema](#nestedblock--influxdb_user_config--private_access))
+- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink. (see [below for nested schema](#nestedblock--influxdb_user_config--privatelink_access))
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
-- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--influxdb_user_config--public_access))
-- `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service
+- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet. (see [below for nested schema](#nestedblock--influxdb_user_config--public_access))
+- `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service.
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
-- `static_ips` (String) Use static public IP addresses
+- `static_ips` (Boolean) Use static public IP addresses.
 
 <a id="nestedblock--influxdb_user_config--influxdb"></a>
 ### Nested Schema for `influxdb_user_config.influxdb`
 
 Optional:
 
-- `log_queries_after` (String) The maximum duration in seconds before a query is logged as a slow query. Setting this to 0 (the default) will never log slow queries.
-- `max_connection_limit` (String) Maximum number of connections to InfluxDB. Setting this to 0 (default) means no limit. If using max_connection_limit, it is recommended to set the value to be large enough in order to not block clients unnecessarily.
-- `max_row_limit` (String) The maximum number of rows returned in a non-chunked query. Setting this to 0 (the default) allows an unlimited number to be returned.
-- `max_select_buckets` (String) The maximum number of `GROUP BY time()` buckets that can be processed in a query. Setting this to 0 (the default) allows an unlimited number to be processed.
-- `max_select_point` (String) The maximum number of points that can be processed in a SELECT statement. Setting this to 0 (the default) allows an unlimited number to be processed.
-- `query_timeout` (String) The maximum duration in seconds before a query is killed. Setting this to 0 (the default) will never kill slow queries.
+- `log_queries_after` (Number) The maximum duration in seconds before a query is logged as a slow query. Setting this to 0 (the default) will never log slow queries.
+- `max_connection_limit` (Number) Maximum number of connections to InfluxDB. Setting this to 0 (default) means no limit. If using max_connection_limit, it is recommended to set the value to be large enough in order to not block clients unnecessarily.
+- `max_row_limit` (Number) The maximum number of rows returned in a non-chunked query. Setting this to 0 (the default) allows an unlimited number to be returned.
+- `max_select_buckets` (Number) The maximum number of `GROUP BY time()` buckets that can be processed in a query. Setting this to 0 (the default) allows an unlimited number to be processed.
+- `max_select_point` (Number) The maximum number of points that can be processed in a SELECT statement. Setting this to 0 (the default) allows an unlimited number to be processed.
+- `query_timeout` (Number) The maximum duration in seconds before a query is killed. Setting this to 0 (the default) will never kill slow queries.
 
 
 <a id="nestedblock--influxdb_user_config--ip_filter_object"></a>
 ### Nested Schema for `influxdb_user_config.ip_filter_object`
 
+Required:
+
+- `network` (String) CIDR address block.
+
 Optional:
 
-- `description` (String) Description for IP filter list entry
-- `network` (String) CIDR address block
+- `description` (String) Description for IP filter list entry.
 
 
 <a id="nestedblock--influxdb_user_config--private_access"></a>
@@ -115,7 +118,7 @@ Optional:
 
 Optional:
 
-- `influxdb` (String) Allow clients to connect to influxdb with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+- `influxdb` (Boolean) Allow clients to connect to influxdb with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
 
 
 <a id="nestedblock--influxdb_user_config--privatelink_access"></a>
@@ -123,7 +126,7 @@ Optional:
 
 Optional:
 
-- `influxdb` (String) Enable influxdb
+- `influxdb` (Boolean) Enable influxdb.
 
 
 <a id="nestedblock--influxdb_user_config--public_access"></a>
@@ -131,7 +134,7 @@ Optional:
 
 Optional:
 
-- `influxdb` (String) Allow clients to connect to influxdb from the public internet for service nodes that are in a project VPC or another type of private network
+- `influxdb` (Boolean) Allow clients to connect to influxdb from the public internet for service nodes that are in a project VPC or another type of private network.
 
 
 

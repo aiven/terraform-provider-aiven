@@ -11,19 +11,24 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var ErrInvalidStateType = fmt.Errorf("invalid terraform state type")
-
 // SchemaType is a custom type that represents a Terraform schema type.
 type SchemaType int
 
 const (
+	// ServiceTypes is a constant that represents service schema type.
 	ServiceTypes SchemaType = iota
+
+	// IntegrationTypes is a constant that represents integration schema type.
 	IntegrationTypes
+
+	// IntegrationEndpointTypes is a constant that represents integration endpoint schema type.
 	IntegrationEndpointTypes
 )
 
 // cachedRepresentationMaps is a map of cached representation maps.
 var cachedRepresentationMaps = make(map[SchemaType]map[string]interface{}, 3)
+
+// cachedRepresentationMapsMutex is a mutex for the cached representation maps.
 var cachedRepresentationMapsMutex = sync.Mutex{}
 
 // CachedRepresentationMap is a function that returns a cached representation map.
@@ -78,15 +83,11 @@ func TerraformTypes(t []string) ([]string, []string, error) {
 			//  There should be a default value set for this case.
 			continue
 		case "boolean":
-			// TODO: Make those types be actual types instead of strings.
-			// r = append(r, "TypeBool")
-			r = append(r, "TypeString")
+			r = append(r, "TypeBool")
 		case "integer":
-			// r = append(r, "TypeInt")
-			r = append(r, "TypeString")
+			r = append(r, "TypeInt")
 		case "number":
-			// r = append(r, "TypeFloat")
-			r = append(r, "TypeString")
+			r = append(r, "TypeFloat")
 		case "string":
 			r = append(r, "TypeString")
 		case "array", "object":
@@ -152,19 +153,62 @@ func SlicedString(v interface{}) []string {
 	return []string{vsa}
 }
 
+// constDescriptionReplaceables is a slice of strings that are replaced in descriptions.
+var constDescriptionReplaceables = map[string]string{
+	"DEPRECATED: ":                 "",
+	"This setting is deprecated. ": "",
+	"[seconds]":                    "(seconds)",
+}
+
 // descriptionForProperty is a function that returns the description for a property.
-func descriptionForProperty(p map[string]interface{}) (string, string) {
-	k := "Description"
-
-	if d, ok := p["description"].(string); ok {
-		if strings.Contains(strings.ToLower(d), "deprecated") {
-			k = "Deprecated"
-		}
-
-		return k, d
+func descriptionForProperty(p map[string]interface{}, t string) (id bool, d string) {
+	if da, ok := p["description"].(string); ok {
+		d = da
+	} else {
+		d = p["title"].(string)
 	}
 
-	return k, p["title"].(string)
+	if strings.Contains(strings.ToLower(d), "deprecated") {
+		id = true
+	}
+
+	// sc is short for "should capitalize".
+	sc := false
+
+	// Some descriptions have a built-in deprecation notice, so we need to remove it.
+	for k, v := range constDescriptionReplaceables {
+		pd := d
+
+		d = strings.ReplaceAll(d, k, v)
+
+		if pd != d {
+			sc = true
+		}
+	}
+
+	b := Desc(d)
+
+	if sc {
+		b = b.ForceFirstLetterCapitalization()
+	}
+
+	if def, ok := p["default"]; ok && isTerraformTypePrimitive(t) {
+		skip := false
+
+		if adef, ok := def.(string); ok {
+			if adef == "" {
+				skip = true
+			}
+		}
+
+		if !skip {
+			b = b.DefaultValue(def)
+		}
+	}
+
+	d = b.Build()
+
+	return id, d
 }
 
 // EncodeKey is a function that encodes a key for a Terraform schema.
@@ -180,4 +224,15 @@ func DecodeKey(k string) string {
 // IsKeyTyped is a function that checks if a key is typed, i.e. has a type suffix in it.
 func IsKeyTyped(k string) bool {
 	return regexp.MustCompile(`^.*_(boolean|integer|number|string|array|object)$`).MatchString(k)
+}
+
+// SliceToKeyedMap is a function that converts a slice of strings to a map.
+func SliceToKeyedMap(s []interface{}) map[string]struct{} {
+	r := make(map[string]struct{})
+
+	for _, v := range s {
+		r[v.(string)] = struct{}{}
+	}
+
+	return r
 }

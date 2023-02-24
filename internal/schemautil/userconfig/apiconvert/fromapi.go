@@ -44,21 +44,16 @@ func unsettedAPIValue(t string) interface{} {
 	var res interface{}
 
 	switch t {
-	// TODO: Uncomment when we use the actual types in the schema.
-	//case "boolean":
-	//	res = false
-	//case "integer":
-	//	res = 0
-	//case "number":
-	//	res = float64(0)
-	//case "string":
-	//	res = ""
-	default:
+	case "boolean":
+		res = false
+	case "integer":
+		res = 0
+	case "number":
+		res = float64(0)
+	case "string":
 		res = ""
 	case "array":
 		res = []interface{}{}
-	case "object":
-		res = map[string]interface{}{}
 	}
 
 	return res
@@ -100,8 +95,7 @@ func propsFromAPI(n string, r map[string]interface{}, p map[string]interface{}) 
 		default:
 			switch vra := vr.(type) {
 			default:
-				// TODO: Drop this when we will be using actual types.
-				vrs = fmt.Sprintf("%v", vr)
+				vrs = vr
 			case []interface{}:
 				var l []interface{}
 

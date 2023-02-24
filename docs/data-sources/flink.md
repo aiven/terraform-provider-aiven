@@ -83,19 +83,11 @@ Read-Only:
 
 Read-Only:
 
-- `additional_backup_regions` (List of String)
-- `execution_checkpointing_interval_ms` (String)
-- `execution_checkpointing_timeout_ms` (String)
 - `flink_version` (String)
 - `ip_filter` (List of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--flink_user_config--ip_filter_object))
-- `number_of_task_slots` (String)
-- `parallelism_default` (String)
+- `number_of_task_slots` (Number)
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--flink_user_config--privatelink_access))
-- `restart_strategy` (String)
-- `restart_strategy_delay_sec` (String)
-- `restart_strategy_failure_rate_interval_min` (String)
-- `restart_strategy_max_failures` (String)
 
 <a id="nestedobjatt--flink_user_config--ip_filter_object"></a>
 ### Nested Schema for `flink_user_config.ip_filter_object`
@@ -111,8 +103,8 @@ Read-Only:
 
 Read-Only:
 
-- `flink` (String)
-- `prometheus` (String)
+- `flink` (Boolean)
+- `prometheus` (Boolean)
 
 
 

@@ -9,12 +9,17 @@ import (
 )
 
 // handlePrimitiveTypeProperty is a function that converts a primitive type property to a Terraform schema.
-func handlePrimitiveTypeProperty(n string, p map[string]interface{}, t string) map[string]*jen.Statement {
-	return map[string]*jen.Statement{n: jen.Values(convertPropertyToSchema(n, p, t, true))}
+func handlePrimitiveTypeProperty(n string, p map[string]interface{}, t string, ireq bool) map[string]*jen.Statement {
+	return map[string]*jen.Statement{n: jen.Values(convertPropertyToSchema(n, p, t, true, ireq))}
 }
 
 // handleObjectProperty is a function that converts an object type property to a Terraform schema.
-func handleObjectProperty(n string, p map[string]interface{}, t string) (map[string]*jen.Statement, error) {
+func handleObjectProperty(
+	n string,
+	p map[string]interface{},
+	t string,
+	req map[string]struct{},
+) (map[string]*jen.Statement, error) {
 	pa, ok := p["properties"].(map[string]interface{})
 	if !ok {
 		it, ok := p["items"].(map[string]interface{})
@@ -27,9 +32,9 @@ func handleObjectProperty(n string, p map[string]interface{}, t string) (map[str
 		}
 	}
 
-	r := convertPropertyToSchema(n, p, t, true)
+	r := convertPropertyToSchema(n, p, t, true, false)
 
-	pc, err := convertPropertiesToSchemaMap(pa)
+	pc, err := convertPropertiesToSchemaMap(pa, req)
 	if err != nil {
 		return nil, err
 	}
@@ -65,8 +70,8 @@ func handleArrayOfPrimitiveTypeProperty(n string, t string) *jen.Statement {
 
 // handleArrayOfAggregateTypeProperty is a function that converts an array of aggregate type property to a Terraform
 // schema.
-func handleArrayOfAggregateTypeProperty(ip map[string]interface{}) (*jen.Statement, error) {
-	pc, err := convertPropertiesToSchemaMap(ip)
+func handleArrayOfAggregateTypeProperty(ip map[string]interface{}, req map[string]struct{}) (*jen.Statement, error) {
+	pc, err := convertPropertiesToSchemaMap(ip, req)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +82,11 @@ func handleArrayOfAggregateTypeProperty(ip map[string]interface{}) (*jen.Stateme
 }
 
 // handleArrayProperty is a function that converts an array type property to a Terraform schema.
-func handleArrayProperty(n string, p map[string]interface{}, t string) (map[string]*jen.Statement, error) {
+func handleArrayProperty(
+	n string,
+	p map[string]interface{},
+	t string,
+) (map[string]*jen.Statement, error) {
 	ia, ok := p["items"].(map[string]interface{})
 	if !ok {
 		return nil, fmt.Errorf("items is not a map[string]interface{}: %#v", p)
@@ -161,19 +170,35 @@ func handleArrayProperty(n string, p map[string]interface{}, t string) (map[stri
 				}
 			}
 
-			e, err = handleArrayOfAggregateTypeProperty(ipa)
+			req := map[string]struct{}{}
+
+			if sreq, ok := ia["required"].([]interface{}); ok {
+				req = SliceToKeyedMap(sreq)
+			}
+
+			e, err = handleArrayOfAggregateTypeProperty(ipa, req)
 			if err != nil {
 				return nil, err
 			}
 		}
 
-		s := convertPropertyToSchema(n, p, t, !iof)
+		s := convertPropertyToSchema(n, p, t, !iof, false)
 
 		if iof {
-			_, dpv := descriptionForProperty(p)
-			dooik, dooiv := descriptionForProperty(ooia)
+			ooiat, ok := ooia["type"].(string)
+			if !ok {
+				return nil, fmt.Errorf("one_of item type is not a string: %#v", ooia)
+			}
 
-			s[jen.Id(dooik)] = jen.Lit(fmt.Sprintf("%s %s", dpv, dooiv))
+			_, dpv := descriptionForProperty(p, t)
+
+			dooiid, dooid := descriptionForProperty(ooia, ooiat)
+
+			s[jen.Id("Description")] = jen.Lit(fmt.Sprintf("%s %s", dpv, dooid))
+
+			if dooiid {
+				s[jen.Id("Deprecated")] = jen.Lit("Usage of this field is discouraged.")
+			}
 		}
 
 		s[jen.Id("Elem")] = e
@@ -185,6 +210,13 @@ func handleArrayProperty(n string, p map[string]interface{}, t string) (map[stri
 
 		if mi, ok := p["max_items"].(int); ok {
 			s[jen.Id("MaxItems")] = jen.Lit(mi)
+		}
+
+		// TODO: Remove with the next major version.
+		if an == "ip_filter" || an == "namespaces" {
+			s[jen.Id("Deprecated")] = jen.Lit(
+				fmt.Sprintf("This will be removed in v5.0.0 and replaced with %s_string instead.", an),
+			)
 		}
 
 		r[an] = jen.Values(s)
@@ -202,9 +234,15 @@ func handleAggregateTypeProperty(
 ) (map[string]*jen.Statement, error) {
 	r := make(map[string]*jen.Statement)
 
+	req := map[string]struct{}{}
+
+	if sreq, ok := p["required"].([]interface{}); ok {
+		req = SliceToKeyedMap(sreq)
+	}
+
 	switch at {
 	case "object":
-		v, err := handleObjectProperty(n, p, t)
+		v, err := handleObjectProperty(n, p, t, req)
 		if err != nil {
 			return nil, err
 		}

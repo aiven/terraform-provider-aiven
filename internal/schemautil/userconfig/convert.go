@@ -9,21 +9,30 @@ import (
 )
 
 // convertPropertyToSchema is a function that converts a property to a Terraform schema.
-func convertPropertyToSchema(n string, p map[string]interface{}, t string, ad bool) jen.Dict {
+func convertPropertyToSchema(n string, p map[string]interface{}, t string, ad bool, ireq bool) jen.Dict {
 	r := jen.Dict{
-		jen.Id("Type"):     jen.Qual(SchemaPackage, t),
-		jen.Id("Optional"): jen.Lit(true),
+		jen.Id("Type"): jen.Qual(SchemaPackage, t),
 	}
 
 	if ad {
-		dk, dv := descriptionForProperty(p)
-		r[jen.Id(dk)] = jen.Lit(dv)
+		id, d := descriptionForProperty(p, t)
+
+		r[jen.Id("Description")] = jen.Lit(d)
+
+		if id {
+			r[jen.Id("Deprecated")] = jen.Lit("Usage of this field is discouraged.")
+		}
 	}
 
-	// TODO: Discuss if we want this behavior.
-	//if d, ok := p["default"]; ok && isTerraformTypePrimitive(t) {
-	//	r[jen.Id("Default")] = jen.Lit(d)
-	//}
+	if ireq {
+		r[jen.Id("Required")] = jen.Lit(true)
+	} else {
+		r[jen.Id("Optional")] = jen.Lit(true)
+
+		if d, ok := p["default"]; ok && isTerraformTypePrimitive(t) {
+			r[jen.Id("Default")] = jen.Lit(d)
+		}
+	}
 
 	if co, ok := p["create_only"]; ok && co.(bool) {
 		r[jen.Id("ForceNew")] = jen.Lit(true)
@@ -39,7 +48,7 @@ func convertPropertyToSchema(n string, p map[string]interface{}, t string, ad bo
 }
 
 // convertPropertiesToSchemaMap is a function that converts a map of properties to a map of Terraform schemas.
-func convertPropertiesToSchemaMap(p map[string]interface{}) (jen.Dict, error) {
+func convertPropertiesToSchemaMap(p map[string]interface{}, req map[string]struct{}) (jen.Dict, error) {
 	r := make(jen.Dict, len(p))
 
 	for k, v := range p {
@@ -59,10 +68,12 @@ func convertPropertiesToSchemaMap(p map[string]interface{}) (jen.Dict, error) {
 
 		t, at := ts[0], ats[0]
 
+		_, ireq := req[k]
+
 		var s map[string]*jen.Statement
 
 		if isTerraformTypePrimitive(t) {
-			s = handlePrimitiveTypeProperty(k, va, t)
+			s = handlePrimitiveTypeProperty(k, va, t, ireq)
 		} else {
 			s, err = handleAggregateTypeProperty(k, va, t, at)
 			if err != nil {

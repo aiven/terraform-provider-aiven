@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -68,7 +69,6 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 	},
 	"logs_user_config":                            dist.IntegrationTypeLogs(),
-	"mirrormaker_user_config":                     dist.IntegrationTypeMirrormaker(),
 	"kafka_mirrormaker_user_config":               dist.IntegrationTypeKafkaMirrormaker(),
 	"kafka_connect_user_config":                   dist.IntegrationTypeKafkaConnect(),
 	"kafka_logs_user_config":                      dist.IntegrationTypeKafkaLogs(),
@@ -91,7 +91,9 @@ func ResourceServiceIntegration() *schema.Resource {
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema: aivenServiceIntegrationSchema,
+		Schema:         aivenServiceIntegrationSchema,
+		SchemaVersion:  1,
+		StateUpgraders: stateupgrader.ServiceIntegration(),
 	}
 }
 

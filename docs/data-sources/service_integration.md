@@ -42,7 +42,6 @@ data "aiven_service_integration" "myintegration" {
 - `kafka_mirrormaker_user_config` (List of Object) KafkaMirrormaker user configurable settings (see [below for nested schema](#nestedatt--kafka_mirrormaker_user_config))
 - `logs_user_config` (List of Object) Logs user configurable settings (see [below for nested schema](#nestedatt--logs_user_config))
 - `metrics_user_config` (List of Object) Metrics user configurable settings (see [below for nested schema](#nestedatt--metrics_user_config))
-- `mirrormaker_user_config` (List of Object) Mirrormaker user configurable settings (see [below for nested schema](#nestedatt--mirrormaker_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration (if any)
 
 <a id="nestedatt--clickhouse_kafka_user_config"></a>
@@ -104,14 +103,15 @@ Read-Only:
 
 Read-Only:
 
-- `datadog_dbm_enabled` (String)
+- `datadog_dbm_enabled` (Boolean)
 - `datadog_tags` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--datadog_tags))
 - `exclude_consumer_groups` (List of String)
 - `exclude_topics` (List of String)
 - `include_consumer_groups` (List of String)
 - `include_topics` (List of String)
 - `kafka_custom_metrics` (List of String)
-- `max_jmx_metrics` (String)
+- `max_jmx_metrics` (Number)
+- `opensearch` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--opensearch))
 
 <a id="nestedobjatt--datadog_user_config--datadog_tags"></a>
 ### Nested Schema for `datadog_user_config.datadog_tags`
@@ -120,6 +120,16 @@ Read-Only:
 
 - `comment` (String)
 - `tag` (String)
+
+
+<a id="nestedobjatt--datadog_user_config--opensearch"></a>
+### Nested Schema for `datadog_user_config.opensearch`
+
+Read-Only:
+
+- `index_stats_enabled` (Boolean)
+- `pending_task_stats_enabled` (Boolean)
+- `pshard_stats_enabled` (Boolean)
 
 
 
@@ -190,11 +200,11 @@ Read-Only:
 
 Read-Only:
 
-- `consumer_fetch_min_bytes` (String)
-- `producer_batch_size` (String)
-- `producer_buffer_memory` (String)
-- `producer_linger_ms` (String)
-- `producer_max_request_size` (String)
+- `consumer_fetch_min_bytes` (Number)
+- `producer_batch_size` (Number)
+- `producer_buffer_memory` (Number)
+- `producer_linger_ms` (Number)
+- `producer_max_request_size` (Number)
 
 
 
@@ -203,7 +213,7 @@ Read-Only:
 
 Read-Only:
 
-- `elasticsearch_index_days_max` (String)
+- `elasticsearch_index_days_max` (Number)
 - `elasticsearch_index_prefix` (String)
 
 
@@ -213,7 +223,7 @@ Read-Only:
 Read-Only:
 
 - `database` (String)
-- `retention_days` (String)
+- `retention_days` (Number)
 - `ro_username` (String)
 - `source_mysql` (List of Object) (see [below for nested schema](#nestedobjatt--metrics_user_config--source_mysql))
 - `username` (String)
@@ -230,28 +240,18 @@ Read-Only:
 
 Read-Only:
 
-- `gather_event_waits` (String)
-- `gather_file_events_stats` (String)
-- `gather_index_io_waits` (String)
-- `gather_info_schema_auto_inc` (String)
-- `gather_innodb_metrics` (String)
-- `gather_perf_events_statements` (String)
-- `gather_process_list` (String)
-- `gather_slave_status` (String)
-- `gather_table_io_waits` (String)
-- `gather_table_lock_waits` (String)
-- `gather_table_schema` (String)
-- `perf_events_statements_digest_text_limit` (String)
-- `perf_events_statements_limit` (String)
-- `perf_events_statements_time_limit` (String)
-
-
-
-
-<a id="nestedatt--mirrormaker_user_config"></a>
-### Nested Schema for `mirrormaker_user_config`
-
-Read-Only:
-
-- `mirrormaker_whitelist` (String)
+- `gather_event_waits` (Boolean)
+- `gather_file_events_stats` (Boolean)
+- `gather_index_io_waits` (Boolean)
+- `gather_info_schema_auto_inc` (Boolean)
+- `gather_innodb_metrics` (Boolean)
+- `gather_perf_events_statements` (Boolean)
+- `gather_process_list` (Boolean)
+- `gather_slave_status` (Boolean)
+- `gather_table_io_waits` (Boolean)
+- `gather_table_lock_waits` (Boolean)
+- `gather_table_schema` (Boolean)
+- `perf_events_statements_digest_text_limit` (Number)
+- `perf_events_statements_limit` (Number)
+- `perf_events_statements_time_limit` (Number)
 

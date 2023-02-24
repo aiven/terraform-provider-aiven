@@ -77,36 +77,39 @@ resource "aiven_cassandra" "bar" {
 
 Optional:
 
-- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication
-- `cassandra` (Block List, Max: 1) cassandra configuration values (see [below for nested schema](#nestedblock--cassandra_user_config--cassandra))
-- `cassandra_version` (String) Cassandra major version
-- `ip_filter` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'
-- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--cassandra_user_config--ip_filter_object))
-- `migrate_sstableloader` (String) Sets the service into migration mode enabling the sstableloader utility to be used to upload Cassandra data files. Available only on service create.
-- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--cassandra_user_config--private_access))
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
+- `cassandra` (Block List, Max: 1) cassandra configuration values. (see [below for nested schema](#nestedblock--cassandra_user_config--cassandra))
+- `cassandra_version` (String) Cassandra major version.
+- `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'. (see [below for nested schema](#nestedblock--cassandra_user_config--ip_filter_object))
+- `migrate_sstableloader` (Boolean) Sets the service into migration mode enabling the sstableloader utility to be used to upload Cassandra data files. Available only on service create.
+- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks. (see [below for nested schema](#nestedblock--cassandra_user_config--private_access))
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
-- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--cassandra_user_config--public_access))
+- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet. (see [below for nested schema](#nestedblock--cassandra_user_config--public_access))
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
 - `service_to_join_with` (String) When bootstrapping, instead of creating a new Cassandra cluster try to join an existing one from another service. Can only be set on service creation.
-- `static_ips` (String) Use static public IP addresses
+- `static_ips` (Boolean) Use static public IP addresses.
 
 <a id="nestedblock--cassandra_user_config--cassandra"></a>
 ### Nested Schema for `cassandra_user_config.cassandra`
 
 Optional:
 
-- `batch_size_fail_threshold_in_kb` (String) Fail any multiple-partition batch exceeding this value. 50kb (10x warn threshold) by default.
-- `batch_size_warn_threshold_in_kb` (String) Log a warning message on any multiple-partition batch size exceeding this value.5kb per batch by default.Caution should be taken on increasing the size of this thresholdas it can lead to node instability.
+- `batch_size_fail_threshold_in_kb` (Number) Fail any multiple-partition batch exceeding this value. 50kb (10x warn threshold) by default.
+- `batch_size_warn_threshold_in_kb` (Number) Log a warning message on any multiple-partition batch size exceeding this value.5kb per batch by default.Caution should be taken on increasing the size of this thresholdas it can lead to node instability.
 - `datacenter` (String) Name of the datacenter to which nodes of this service belong. Can be set only when creating the service.
 
 
 <a id="nestedblock--cassandra_user_config--ip_filter_object"></a>
 ### Nested Schema for `cassandra_user_config.ip_filter_object`
 
+Required:
+
+- `network` (String) CIDR address block.
+
 Optional:
 
-- `description` (String) Description for IP filter list entry
-- `network` (String) CIDR address block
+- `description` (String) Description for IP filter list entry.
 
 
 <a id="nestedblock--cassandra_user_config--private_access"></a>
@@ -114,7 +117,7 @@ Optional:
 
 Optional:
 
-- `prometheus` (String) Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations
+- `prometheus` (Boolean) Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
 
 
 <a id="nestedblock--cassandra_user_config--public_access"></a>
@@ -122,7 +125,7 @@ Optional:
 
 Optional:
 
-- `prometheus` (String) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network
+- `prometheus` (Boolean) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.
 
 
 

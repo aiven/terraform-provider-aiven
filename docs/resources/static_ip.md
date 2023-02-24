@@ -27,7 +27,7 @@ The aiven_static_ip resource allows the creation and deletion of static ips. Ple
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `ip_address` (String) The address of the static ip
+- `ip_address` (String) The address of the static ip.
 - `service_name` (String) The service name the static ip is associated with.
 - `state` (String) The state the static ip is in.
 - `static_ip_address_id` (String) The static ip id of the resource. Should be used as a reference elsewhere.

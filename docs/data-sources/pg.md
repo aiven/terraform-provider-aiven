@@ -94,16 +94,16 @@ Read-Only:
 - `additional_backup_regions` (List of String)
 - `admin_password` (String)
 - `admin_username` (String)
-- `backup_hour` (String)
-- `backup_minute` (String)
-- `enable_ipv6` (String)
+- `backup_hour` (Number)
+- `backup_minute` (Number)
+- `enable_ipv6` (Boolean)
 - `ip_filter` (List of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--ip_filter_object))
 - `migration` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--migration))
 - `pg` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pg))
-- `pg_read_replica` (String)
+- `pg_read_replica` (Boolean)
 - `pg_service_to_fork_from` (String)
-- `pg_stat_monitor_enable` (String)
+- `pg_stat_monitor_enable` (Boolean)
 - `pg_version` (String)
 - `pgbouncer` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pgbouncer))
 - `pglookout` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pglookout))
@@ -113,12 +113,12 @@ Read-Only:
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--public_access))
 - `recovery_target_time` (String)
 - `service_to_fork_from` (String)
-- `shared_buffers_percentage` (String)
-- `static_ips` (String)
+- `shared_buffers_percentage` (Number)
+- `static_ips` (Boolean)
 - `synchronous_replication` (String)
 - `timescaledb` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--timescaledb))
 - `variant` (String)
-- `work_mem` (String)
+- `work_mem` (Number)
 
 <a id="nestedobjatt--pg_user_config--ip_filter_object"></a>
 ### Nested Schema for `pg_user_config.ip_filter_object`
@@ -139,8 +139,8 @@ Read-Only:
 - `ignore_dbs` (String)
 - `method` (String)
 - `password` (String)
-- `port` (String)
-- `ssl` (String)
+- `port` (Number)
+- `ssl` (Boolean)
 - `username` (String)
 
 
@@ -149,53 +149,55 @@ Read-Only:
 
 Read-Only:
 
-- `autovacuum_analyze_scale_factor` (String)
-- `autovacuum_analyze_threshold` (String)
-- `autovacuum_freeze_max_age` (String)
-- `autovacuum_max_workers` (String)
-- `autovacuum_naptime` (String)
-- `autovacuum_vacuum_cost_delay` (String)
-- `autovacuum_vacuum_cost_limit` (String)
-- `autovacuum_vacuum_scale_factor` (String)
-- `autovacuum_vacuum_threshold` (String)
-- `bgwriter_delay` (String)
-- `bgwriter_flush_after` (String)
-- `bgwriter_lru_maxpages` (String)
-- `bgwriter_lru_multiplier` (String)
-- `deadlock_timeout` (String)
+- `autovacuum_analyze_scale_factor` (Number)
+- `autovacuum_analyze_threshold` (Number)
+- `autovacuum_freeze_max_age` (Number)
+- `autovacuum_max_workers` (Number)
+- `autovacuum_naptime` (Number)
+- `autovacuum_vacuum_cost_delay` (Number)
+- `autovacuum_vacuum_cost_limit` (Number)
+- `autovacuum_vacuum_scale_factor` (Number)
+- `autovacuum_vacuum_threshold` (Number)
+- `bgwriter_delay` (Number)
+- `bgwriter_flush_after` (Number)
+- `bgwriter_lru_maxpages` (Number)
+- `bgwriter_lru_multiplier` (Number)
+- `deadlock_timeout` (Number)
 - `default_toast_compression` (String)
-- `idle_in_transaction_session_timeout` (String)
-- `jit` (String)
-- `log_autovacuum_min_duration` (String)
+- `idle_in_transaction_session_timeout` (Number)
+- `jit` (Boolean)
+- `log_autovacuum_min_duration` (Number)
 - `log_error_verbosity` (String)
 - `log_line_prefix` (String)
-- `log_min_duration_statement` (String)
-- `log_temp_files` (String)
-- `max_files_per_process` (String)
-- `max_locks_per_transaction` (String)
-- `max_logical_replication_workers` (String)
-- `max_parallel_workers` (String)
-- `max_parallel_workers_per_gather` (String)
-- `max_pred_locks_per_transaction` (String)
-- `max_prepared_transactions` (String)
-- `max_replication_slots` (String)
-- `max_slot_wal_keep_size` (String)
-- `max_stack_depth` (String)
-- `max_standby_archive_delay` (String)
-- `max_standby_streaming_delay` (String)
-- `max_wal_senders` (String)
-- `max_worker_processes` (String)
-- `pg_partman_bgw__dot__interval` (String)
+- `log_min_duration_statement` (Number)
+- `log_temp_files` (Number)
+- `max_files_per_process` (Number)
+- `max_locks_per_transaction` (Number)
+- `max_logical_replication_workers` (Number)
+- `max_parallel_workers` (Number)
+- `max_parallel_workers_per_gather` (Number)
+- `max_pred_locks_per_transaction` (Number)
+- `max_prepared_transactions` (Number)
+- `max_replication_slots` (Number)
+- `max_slot_wal_keep_size` (Number)
+- `max_stack_depth` (Number)
+- `max_standby_archive_delay` (Number)
+- `max_standby_streaming_delay` (Number)
+- `max_wal_senders` (Number)
+- `max_worker_processes` (Number)
+- `pg_partman_bgw__dot__interval` (Number)
 - `pg_partman_bgw__dot__role` (String)
+- `pg_stat_monitor__dot__pgsm_enable_query_plan` (Boolean)
+- `pg_stat_monitor__dot__pgsm_max_buckets` (Number)
 - `pg_stat_statements__dot__track` (String)
-- `temp_file_limit` (String)
+- `temp_file_limit` (Number)
 - `timezone` (String)
-- `track_activity_query_size` (String)
+- `track_activity_query_size` (Number)
 - `track_commit_timestamp` (String)
 - `track_functions` (String)
 - `track_io_timing` (String)
-- `wal_sender_timeout` (String)
-- `wal_writer_delay` (String)
+- `wal_sender_timeout` (Number)
+- `wal_writer_delay` (Number)
 
 
 <a id="nestedobjatt--pg_user_config--pgbouncer"></a>
@@ -203,15 +205,15 @@ Read-Only:
 
 Read-Only:
 
-- `autodb_idle_timeout` (String)
-- `autodb_max_db_connections` (String)
+- `autodb_idle_timeout` (Number)
+- `autodb_max_db_connections` (Number)
 - `autodb_pool_mode` (String)
-- `autodb_pool_size` (String)
+- `autodb_pool_size` (Number)
 - `ignore_startup_parameters` (List of String)
-- `min_pool_size` (String)
-- `server_idle_timeout` (String)
-- `server_lifetime` (String)
-- `server_reset_query_always` (String)
+- `min_pool_size` (Number)
+- `server_idle_timeout` (Number)
+- `server_lifetime` (Number)
+- `server_reset_query_always` (Boolean)
 
 
 <a id="nestedobjatt--pg_user_config--pglookout"></a>
@@ -219,7 +221,7 @@ Read-Only:
 
 Read-Only:
 
-- `max_failover_replication_time_lag` (String)
+- `max_failover_replication_time_lag` (Number)
 
 
 <a id="nestedobjatt--pg_user_config--private_access"></a>
@@ -227,9 +229,9 @@ Read-Only:
 
 Read-Only:
 
-- `pg` (String)
-- `pgbouncer` (String)
-- `prometheus` (String)
+- `pg` (Boolean)
+- `pgbouncer` (Boolean)
+- `prometheus` (Boolean)
 
 
 <a id="nestedobjatt--pg_user_config--privatelink_access"></a>
@@ -237,9 +239,9 @@ Read-Only:
 
 Read-Only:
 
-- `pg` (String)
-- `pgbouncer` (String)
-- `prometheus` (String)
+- `pg` (Boolean)
+- `pgbouncer` (Boolean)
+- `prometheus` (Boolean)
 
 
 <a id="nestedobjatt--pg_user_config--public_access"></a>
@@ -247,9 +249,9 @@ Read-Only:
 
 Read-Only:
 
-- `pg` (String)
-- `pgbouncer` (String)
-- `prometheus` (String)
+- `pg` (Boolean)
+- `pgbouncer` (Boolean)
+- `prometheus` (Boolean)
 
 
 <a id="nestedobjatt--pg_user_config--timescaledb"></a>
@@ -257,7 +259,7 @@ Read-Only:
 
 Read-Only:
 
-- `max_background_workers` (String)
+- `max_background_workers` (Number)
 
 
 

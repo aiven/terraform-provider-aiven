@@ -73,21 +73,21 @@ Read-Only:
 - `cassandra_version` (String)
 - `ip_filter` (List of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--ip_filter_object))
-- `migrate_sstableloader` (String)
+- `migrate_sstableloader` (Boolean)
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--private_access))
 - `project_to_fork_from` (String)
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--public_access))
 - `service_to_fork_from` (String)
 - `service_to_join_with` (String)
-- `static_ips` (String)
+- `static_ips` (Boolean)
 
 <a id="nestedobjatt--cassandra_user_config--cassandra"></a>
 ### Nested Schema for `cassandra_user_config.cassandra`
 
 Read-Only:
 
-- `batch_size_fail_threshold_in_kb` (String)
-- `batch_size_warn_threshold_in_kb` (String)
+- `batch_size_fail_threshold_in_kb` (Number)
+- `batch_size_warn_threshold_in_kb` (Number)
 - `datacenter` (String)
 
 
@@ -105,7 +105,7 @@ Read-Only:
 
 Read-Only:
 
-- `prometheus` (String)
+- `prometheus` (Boolean)
 
 
 <a id="nestedobjatt--cassandra_user_config--public_access"></a>
@@ -113,7 +113,7 @@ Read-Only:
 
 Read-Only:
 
-- `prometheus` (String)
+- `prometheus` (Boolean)
 
 
 

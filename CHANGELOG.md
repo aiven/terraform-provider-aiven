@@ -6,6 +6,17 @@ nav_order: 1
 
 # Changelog
 
+## [4.0.0] - YYYY-MM-DD
+
+- Mark `ip_filter` and `namespaces` user configuration options as deprecated
+- Make schema fields use strict types instead of string
+- Add support for strict types in diff functions
+- Add `stateupgrader` package which aims to assist with upgrading from v3.x to v4.0.0
+- Remove deprecated resources (with data sources): `aiven_database`, `aiven_service_user`, `aiven_vpc_peering_connection`
+- Remove deprecated resources: `aiven_flink_table` and `aiven_flink_job`
+- Switch to Terraform plugin framework
+- Add support for Terraform protocol version 6
+
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Unified timeout values across all resources

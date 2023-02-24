@@ -95,17 +95,18 @@ Read-Only:
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--ip_filter_object))
 - `kafka` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka))
 - `kafka_authentication_methods` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_authentication_methods))
-- `kafka_connect` (String)
+- `kafka_connect` (Boolean)
 - `kafka_connect_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_config))
-- `kafka_rest` (String)
+- `kafka_rest` (Boolean)
+- `kafka_rest_authorization` (Boolean)
 - `kafka_rest_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_rest_config))
 - `kafka_version` (String)
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--private_access))
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--privatelink_access))
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--public_access))
-- `schema_registry` (String)
+- `schema_registry` (Boolean)
 - `schema_registry_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--schema_registry_config))
-- `static_ips` (String)
+- `static_ips` (Boolean)
 
 <a id="nestedobjatt--kafka_user_config--ip_filter_object"></a>
 ### Nested Schema for `kafka_user_config.ip_filter_object`
@@ -121,45 +122,45 @@ Read-Only:
 
 Read-Only:
 
-- `auto_create_topics_enable` (String)
+- `auto_create_topics_enable` (Boolean)
 - `compression_type` (String)
-- `connections_max_idle_ms` (String)
-- `default_replication_factor` (String)
-- `group_initial_rebalance_delay_ms` (String)
-- `group_max_session_timeout_ms` (String)
-- `group_min_session_timeout_ms` (String)
-- `log_cleaner_delete_retention_ms` (String)
-- `log_cleaner_max_compaction_lag_ms` (String)
-- `log_cleaner_min_cleanable_ratio` (String)
-- `log_cleaner_min_compaction_lag_ms` (String)
+- `connections_max_idle_ms` (Number)
+- `default_replication_factor` (Number)
+- `group_initial_rebalance_delay_ms` (Number)
+- `group_max_session_timeout_ms` (Number)
+- `group_min_session_timeout_ms` (Number)
+- `log_cleaner_delete_retention_ms` (Number)
+- `log_cleaner_max_compaction_lag_ms` (Number)
+- `log_cleaner_min_cleanable_ratio` (Number)
+- `log_cleaner_min_compaction_lag_ms` (Number)
 - `log_cleanup_policy` (String)
-- `log_flush_interval_messages` (String)
-- `log_flush_interval_ms` (String)
-- `log_index_interval_bytes` (String)
-- `log_index_size_max_bytes` (String)
-- `log_message_downconversion_enable` (String)
-- `log_message_timestamp_difference_max_ms` (String)
+- `log_flush_interval_messages` (Number)
+- `log_flush_interval_ms` (Number)
+- `log_index_interval_bytes` (Number)
+- `log_index_size_max_bytes` (Number)
+- `log_message_downconversion_enable` (Boolean)
+- `log_message_timestamp_difference_max_ms` (Number)
 - `log_message_timestamp_type` (String)
-- `log_preallocate` (String)
-- `log_retention_bytes` (String)
-- `log_retention_hours` (String)
-- `log_retention_ms` (String)
-- `log_roll_jitter_ms` (String)
-- `log_roll_ms` (String)
-- `log_segment_bytes` (String)
-- `log_segment_delete_delay_ms` (String)
-- `max_connections_per_ip` (String)
-- `max_incremental_fetch_session_cache_slots` (String)
-- `message_max_bytes` (String)
-- `min_insync_replicas` (String)
-- `num_partitions` (String)
-- `offsets_retention_minutes` (String)
-- `producer_purgatory_purge_interval_requests` (String)
-- `replica_fetch_max_bytes` (String)
-- `replica_fetch_response_max_bytes` (String)
-- `socket_request_max_bytes` (String)
-- `transaction_remove_expired_transaction_cleanup_interval_ms` (String)
-- `transaction_state_log_segment_bytes` (String)
+- `log_preallocate` (Boolean)
+- `log_retention_bytes` (Number)
+- `log_retention_hours` (Number)
+- `log_retention_ms` (Number)
+- `log_roll_jitter_ms` (Number)
+- `log_roll_ms` (Number)
+- `log_segment_bytes` (Number)
+- `log_segment_delete_delay_ms` (Number)
+- `max_connections_per_ip` (Number)
+- `max_incremental_fetch_session_cache_slots` (Number)
+- `message_max_bytes` (Number)
+- `min_insync_replicas` (Number)
+- `num_partitions` (Number)
+- `offsets_retention_minutes` (Number)
+- `producer_purgatory_purge_interval_requests` (Number)
+- `replica_fetch_max_bytes` (Number)
+- `replica_fetch_response_max_bytes` (Number)
+- `socket_request_max_bytes` (Number)
+- `transaction_remove_expired_transaction_cleanup_interval_ms` (Number)
+- `transaction_state_log_segment_bytes` (Number)
 
 
 <a id="nestedobjatt--kafka_user_config--kafka_authentication_methods"></a>
@@ -167,8 +168,8 @@ Read-Only:
 
 Read-Only:
 
-- `certificate` (String)
-- `sasl` (String)
+- `certificate` (Boolean)
+- `sasl` (Boolean)
 
 
 <a id="nestedobjatt--kafka_user_config--kafka_connect_config"></a>
@@ -178,16 +179,19 @@ Read-Only:
 
 - `connector_client_config_override_policy` (String)
 - `consumer_auto_offset_reset` (String)
-- `consumer_fetch_max_bytes` (String)
+- `consumer_fetch_max_bytes` (Number)
 - `consumer_isolation_level` (String)
-- `consumer_max_partition_fetch_bytes` (String)
-- `consumer_max_poll_interval_ms` (String)
-- `consumer_max_poll_records` (String)
-- `offset_flush_interval_ms` (String)
-- `offset_flush_timeout_ms` (String)
+- `consumer_max_partition_fetch_bytes` (Number)
+- `consumer_max_poll_interval_ms` (Number)
+- `consumer_max_poll_records` (Number)
+- `offset_flush_interval_ms` (Number)
+- `offset_flush_timeout_ms` (Number)
+- `producer_batch_size` (Number)
+- `producer_buffer_memory` (Number)
 - `producer_compression_type` (String)
-- `producer_max_request_size` (String)
-- `session_timeout_ms` (String)
+- `producer_linger_ms` (Number)
+- `producer_max_request_size` (Number)
+- `session_timeout_ms` (Number)
 
 
 <a id="nestedobjatt--kafka_user_config--kafka_rest_config"></a>
@@ -195,12 +199,13 @@ Read-Only:
 
 Read-Only:
 
-- `consumer_enable_auto_commit` (String)
-- `consumer_request_max_bytes` (String)
-- `consumer_request_timeout_ms` (String)
+- `consumer_enable_auto_commit` (Boolean)
+- `consumer_request_max_bytes` (Number)
+- `consumer_request_timeout_ms` (Number)
 - `producer_acks` (String)
-- `producer_linger_ms` (String)
-- `simpleconsumer_pool_size_max` (String)
+- `producer_compression_type` (String)
+- `producer_linger_ms` (Number)
+- `simpleconsumer_pool_size_max` (Number)
 
 
 <a id="nestedobjatt--kafka_user_config--private_access"></a>
@@ -208,7 +213,11 @@ Read-Only:
 
 Read-Only:
 
-- `prometheus` (String)
+- `kafka` (Boolean)
+- `kafka_connect` (Boolean)
+- `kafka_rest` (Boolean)
+- `prometheus` (Boolean)
+- `schema_registry` (Boolean)
 
 
 <a id="nestedobjatt--kafka_user_config--privatelink_access"></a>
@@ -216,12 +225,12 @@ Read-Only:
 
 Read-Only:
 
-- `jolokia` (String)
-- `kafka` (String)
-- `kafka_connect` (String)
-- `kafka_rest` (String)
-- `prometheus` (String)
-- `schema_registry` (String)
+- `jolokia` (Boolean)
+- `kafka` (Boolean)
+- `kafka_connect` (Boolean)
+- `kafka_rest` (Boolean)
+- `prometheus` (Boolean)
+- `schema_registry` (Boolean)
 
 
 <a id="nestedobjatt--kafka_user_config--public_access"></a>
@@ -229,11 +238,11 @@ Read-Only:
 
 Read-Only:
 
-- `kafka` (String)
-- `kafka_connect` (String)
-- `kafka_rest` (String)
-- `prometheus` (String)
-- `schema_registry` (String)
+- `kafka` (Boolean)
+- `kafka_connect` (Boolean)
+- `kafka_rest` (Boolean)
+- `prometheus` (Boolean)
+- `schema_registry` (Boolean)
 
 
 <a id="nestedobjatt--kafka_user_config--schema_registry_config"></a>
@@ -241,7 +250,7 @@ Read-Only:
 
 Read-Only:
 
-- `leader_eligibility` (String)
+- `leader_eligibility` (Boolean)
 - `topic_name` (String)
 
 
