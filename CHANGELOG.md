@@ -6,7 +6,9 @@ nav_order: 1
 
 # Changelog
 
-## [4.0.0] - YYYY-MM-DD
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+## [4.0.0] - 2023-02-24
 
 - Mark `ip_filter` and `namespaces` user configuration options as deprecated
 - Make schema fields use strict types instead of string
@@ -16,9 +18,6 @@ nav_order: 1
 - Remove deprecated resources: `aiven_flink_table` and `aiven_flink_job`
 - Switch to Terraform plugin framework
 - Add support for Terraform protocol version 6
-
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
-
 - Unified timeout values across all resources
 - Added ability for more granular timeout configuration
 
