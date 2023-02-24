@@ -18,8 +18,6 @@ nav_order: 1
 - Remove deprecated resources: `aiven_flink_table` and `aiven_flink_job`
 - Switch to Terraform plugin framework
 - Add support for Terraform protocol version 6
-- Unified timeout values across all resources
-- Added ability for more granular timeout configuration
 
 ## [3.12.1] - 2023-02-16
 
