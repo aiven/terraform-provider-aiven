@@ -6,7 +6,7 @@ nav_order: 1
 
 # Changelog
 
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+## [3.13.0] - 2023-02-24
 
 - Unified timeout values across all resources
 - Added ability for more granular timeout configuration
