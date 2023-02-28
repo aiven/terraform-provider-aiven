@@ -116,42 +116,6 @@ func ParseOptionalStringToInt64(val interface{}) *int64 {
 	return &res
 }
 
-func ParseOptionalStringToFloat64(val interface{}) *float64 {
-	v, ok := val.(string)
-	if !ok {
-		return nil
-	}
-
-	if v == "" {
-		return nil
-	}
-
-	res, err := strconv.ParseFloat(v, 64)
-	if err != nil {
-		return nil
-	}
-
-	return &res
-}
-
-func ParseOptionalStringToBool(val interface{}) *bool {
-	v, ok := val.(string)
-	if !ok {
-		return nil
-	}
-
-	if v == "" {
-		return nil
-	}
-
-	res, err := strconv.ParseBool(v)
-	if err != nil {
-		return nil
-	}
-
-	return &res
-}
-
 func CreateOnlyDiffSuppressFunc(_, _, _ string, d *schema.ResourceData) bool {
 	return len(d.Id()) > 0
 }

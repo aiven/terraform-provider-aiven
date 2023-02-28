@@ -3,16 +3,20 @@ package project
 import (
 	"context"
 	"log"
+	"net/http"
 	"os"
 	"regexp"
+	"strings"
+	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 var aivenProjectSchema = map[string]*schema.Schema{
@@ -139,7 +143,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 			AccountId:                    schemautil.OptionalStringPointer(d, "account_id"),
 			UseSourceProjectBillingGroup: d.Get("use_source_project_billing_group").(bool),
 			BillingGroupId:               d.Get("billing_group").(string),
-			AddAccountOwnersAdminAccess:  schemautil.ParseOptionalStringToBool(d.Get("add_account_owners_admin_access")),
+			AddAccountOwnersAdminAccess:  schemautil.OptionalBoolPointer(d, "add_account_owners_admin_access"),
 			Tags:                         schemautil.GetTagsFromSchema(d),
 		},
 	)
@@ -221,15 +225,32 @@ func resourceProjectAssignToBillingGroup(
 	return nil
 }
 
-func resourceProjectRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	project, err := client.Projects.Get(d.Id())
+	conf := &resource.StateChangeConf{
+		Pending:    []string{"pending"},
+		Target:     []string{"target"},
+		Timeout:    time.Minute,
+		MinTimeout: time.Second,
+		Delay:      time.Second,
+		Refresh: func() (result interface{}, state string, err error) {
+			p, err := client.Projects.Get(d.Id())
+			if isNotProjectMember(err) {
+				return nil, "pending", nil
+			}
+			if err != nil {
+				return nil, "", err
+			}
+			return p, "target", nil
+		},
+	}
+
+	project, err := conf.WaitForStateContext(ctx)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
-
-	return setProjectTerraformProperties(d, client, project)
+	return setProjectTerraformProperties(d, client, project.(*aiven.Project))
 }
 
 func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -245,7 +266,7 @@ func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interfac
 			TechnicalEmails:             contactEmailListForAPI(d, "technical_emails", false),
 			AccountId:                   d.Get("account_id").(string),
 			Tags:                        schemautil.GetTagsFromSchema(d),
-			AddAccountOwnersAdminAccess: schemautil.ParseOptionalStringToBool(d.Get("add_account_owners_admin_access")),
+			AddAccountOwnersAdminAccess: schemautil.OptionalBoolPointer(d, "add_account_owners_admin_access"),
 		},
 	)
 	if err != nil {
@@ -388,4 +409,13 @@ func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client,
 	}
 
 	return nil
+}
+
+// isNotProjectMember This happens right after project created
+func isNotProjectMember(err error) bool {
+	if err == nil {
+		return false
+	}
+	e, ok := err.(aiven.Error)
+	return ok && e.Status == http.StatusForbidden && strings.Contains(e.Message, "Not a project member")
 }
