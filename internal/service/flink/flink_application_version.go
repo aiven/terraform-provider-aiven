@@ -20,10 +20,37 @@ var aivenFlinkApplicationVersionSchema = map[string]*schema.Schema{
 		Description: "Application ID",
 	},
 	"sinks": {
-		Type:        schema.TypeSet,
-		Required:    true,
-		ForceNew:    true,
-		Description: "Application sinks",
+		Type:             schema.TypeSet,
+		Optional:         true,
+		ForceNew:         true,
+		Description:      "Application sinks",
+		Deprecated:       "This field is deprecated and will be removed in the next major release. Use `sink` instead.",
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+		ConflictsWith:    []string{"sink"},
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"create_table": {
+					Type:        schema.TypeString,
+					Required:    true,
+					ForceNew:    true,
+					Description: "The CREATE TABLE statement",
+				},
+				"integration_id": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					ForceNew:    true,
+					Description: "The integration ID",
+				},
+			},
+		},
+	},
+	"sink": {
+		Type:             schema.TypeSet,
+		Optional:         true,
+		ForceNew:         true,
+		Description:      "Application sink",
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+		ConflictsWith:    []string{"sinks"},
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"create_table": {
@@ -42,10 +69,37 @@ var aivenFlinkApplicationVersionSchema = map[string]*schema.Schema{
 		},
 	},
 	"sources": {
-		Type:        schema.TypeSet,
-		Required:    true,
-		ForceNew:    true,
-		Description: "Application sources",
+		Type:             schema.TypeSet,
+		Optional:         true,
+		ForceNew:         true,
+		Description:      "Application sources",
+		Deprecated:       "This field is deprecated and will be removed in the next major release. Use `source` instead.",
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+		ConflictsWith:    []string{"source"},
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"create_table": {
+					Type:        schema.TypeString,
+					Required:    true,
+					ForceNew:    true,
+					Description: "The CREATE TABLE statement",
+				},
+				"integration_id": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					ForceNew:    true,
+					Description: "The integration ID",
+				},
+			},
+		},
+	},
+	"source": {
+		Type:             schema.TypeSet,
+		Optional:         true,
+		ForceNew:         true,
+		Description:      "Application source",
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+		ConflictsWith:    []string{"sources"},
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"create_table": {
@@ -116,10 +170,25 @@ func resourceFlinkApplicationVersionCreate(ctx context.Context, d *schema.Resour
 	serviceName := d.Get("service_name").(string)
 	applicationID := d.Get("application_id").(string)
 
+	sources := []aiven.FlinkApplicationVersionRelation{}
+	sinks := []aiven.FlinkApplicationVersionRelation{}
+	if d.Get("sources").(*schema.Set).Len() > 0 {
+		sources = expandFlinkApplicationVersionSourcesOrSinks(d.Get("sources").(*schema.Set).List())
+	}
+	if d.Get("sinks").(*schema.Set).Len() > 0 {
+		sinks = expandFlinkApplicationVersionSourcesOrSinks(d.Get("sinks").(*schema.Set).List())
+	}
+	if d.Get("source").(*schema.Set).Len() > 0 {
+		sources = expandFlinkApplicationVersionSourcesOrSinks(d.Get("source").(*schema.Set).List())
+	}
+	if d.Get("sink").(*schema.Set).Len() > 0 {
+		sinks = expandFlinkApplicationVersionSourcesOrSinks(d.Get("sink").(*schema.Set).List())
+	}
+
 	r, err := client.FlinkApplicationVersions.Create(project, serviceName, applicationID, aiven.GenericFlinkApplicationVersionRequest{
 		Statement: d.Get("statement").(string),
-		Sources:   expandFlinkApplicationVersionSourcesOrSinks(d.Get("sources").(*schema.Set).List()),
-		Sinks:     expandFlinkApplicationVersionSourcesOrSinks(d.Get("sinks").(*schema.Set).List()),
+		Sources:   sources,
+		Sinks:     sinks,
 	})
 	if err != nil {
 		return diag.Errorf("cannot create Flink Application Version: %+v - %v", expandFlinkApplicationVersionSourcesOrSinks(d.Get("sources").(*schema.Set).List()), err)
@@ -197,6 +266,14 @@ func resourceFlinkApplicationVersionRead(_ context.Context, d *schema.ResourceDa
 
 	if err := d.Set("sinks", flattenFlinkApplicationVersionSourcesOrSinks(r.Sinks)); err != nil {
 		return diag.Errorf("error setting Flink Application Version `sinks` field: %s", err)
+	}
+
+	if err := d.Set("source", flattenFlinkApplicationVersionSourcesOrSinks(r.Sources)); err != nil {
+		return diag.Errorf("error setting Flink Application Version `source` field: %s", err)
+	}
+
+	if err := d.Set("sink", flattenFlinkApplicationVersionSourcesOrSinks(r.Sinks)); err != nil {
+		return diag.Errorf("error setting Flink Application Version `sink` field: %s", err)
 	}
 
 	if err := d.Set("application_version_id", r.ID); err != nil {

@@ -28,8 +28,8 @@ func TestAccAivenFlinkApplicationVersion_basic(t *testing.T) {
 					checkAivenFlinkApplicationVersionAttributes("data.aiven_flink_application_version.bar"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-flink-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "sinks.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "sources.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "sink.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "source.#", "1"),
 				),
 			},
 		},
@@ -117,11 +117,11 @@ resource "aiven_flink_application_version" "foo" {
   service_name   = aiven_flink.foo.service_name
   application_id = aiven_flink_application.foo.application_id
   statement      = "INSERT INTO kafka_known_pizza SELECT * FROM kafka_pizza WHERE shop LIKE 'Luigis Pizza'"
-  sinks {
+  sink {
     create_table   = "CREATE TABLE kafka_known_pizza (shop STRING,name STRING) WITH ('connector' = 'kafka','properties.bootstrap.servers' = '','scan.startup.mode' = 'earliest-offset','topic' = 'test_out','value.format' = 'json')"
     integration_id = aiven_service_integration.flink_to_kafka.integration_id
   }
-  sources {
+  source {
     create_table   = "CREATE TABLE kafka_pizza (shop STRING, name STRING) WITH ('connector' = 'kafka','properties.bootstrap.servers' = '','scan.startup.mode' = 'earliest-offset','topic' = 'test','value.format' = 'json')"
     integration_id = aiven_service_integration.flink_to_kafka.integration_id
   }
@@ -163,12 +163,12 @@ func checkAivenFlinkApplicationVersionAttributes(n string) resource.TestCheckFun
 			return fmt.Errorf("no statement is set")
 		}
 
-		if rn.Primary.Attributes["sources.#"] == "" {
-			return fmt.Errorf("no sources are set")
+		if rn.Primary.Attributes["source.#"] == "" {
+			return fmt.Errorf("no source are set")
 		}
 
-		if rn.Primary.Attributes["sinks.#"] == "" {
-			return fmt.Errorf("no sinks are set")
+		if rn.Primary.Attributes["sink.#"] == "" {
+			return fmt.Errorf("no sink are set")
 		}
 
 		return nil
