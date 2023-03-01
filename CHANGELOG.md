@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `add_account_owners_admin_access` type issue
+
 ## [4.0.0] - 2023-02-24
 
 - Mark `ip_filter` and `namespaces` user configuration options as deprecated
