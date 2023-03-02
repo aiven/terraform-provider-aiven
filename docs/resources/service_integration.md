@@ -281,6 +281,7 @@ Optional:
 - `create` (String)
 - `default` (String)
 - `delete` (String)
+- `read` (String)
 - `update` (String)
 ## Import
 Import is supported using the following syntax:
