@@ -24,7 +24,7 @@ data "aiven_service_integration" "myintegration" {
 ### Required
 
 - `destination_service_name` (String) Destination service for the integration (if any)
-- `integration_type` (String) Type of the service integration
+- `integration_type` (String) Type of the service integration. Possible values: `alertmanager`, `cassandra_cross_service_cluster`, `clickhouse_kafka`, `clickhouse_postgresql`, `dashboard`, `datadog`, `datasource`, `external_aws_cloudwatch_logs`, `external_aws_cloudwatch_metrics`, `external_elasticsearch_logs`, `external_google_cloud_logging`, `external_opensearch_logs`, `flink`, `internal_connectivity`, `jolokia`, `kafka_connect`, `kafka_logs`, `kafka_mirrormaker`, `logs`, `m3aggregator`, `m3coordinator`, `metrics`, `opensearch_cross_cluster_replication`, `opensearch_cross_cluster_search`, `prometheus`, `read_replica`, `rsyslog`, `schema_registry_proxy`
 - `project` (String) Project the integration belongs to
 - `source_service_name` (String) Source service for the integration (if any)
 

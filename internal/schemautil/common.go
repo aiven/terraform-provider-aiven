@@ -5,12 +5,13 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"golang.org/x/exp/slices"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 const DeprecationMessage = "This resource is deprecated and will be removed in the next major release."
@@ -98,4 +99,14 @@ func PointerValueOrDefault[T comparable](v *T, d T) T {
 		return d
 	}
 	return *v
+}
+
+func JoinQuoted[T string | int](elems []T, sep, quote string) (result string) {
+	for i, v := range elems {
+		if i != 0 {
+			result += sep
+		}
+		result = fmt.Sprintf("%s%s%v%s", result, quote, v, quote)
+	}
+	return result
 }

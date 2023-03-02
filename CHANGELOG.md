@@ -9,6 +9,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Fix `add_account_owners_admin_access` type issue
+- Add service integration `integration_type` enum validation
 
 ## [4.0.0] - 2023-02-24
 
