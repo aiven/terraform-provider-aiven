@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -18,9 +17,41 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 )
 
 const serviceIntegrationEndpointRegExp = "^[a-zA-Z0-9_-]*\\/{1}[a-zA-Z0-9_-]*$"
+
+var integrationTypes = []string{
+	"alertmanager",
+	"cassandra_cross_service_cluster",
+	"clickhouse_kafka",
+	"clickhouse_postgresql",
+	"dashboard",
+	"datadog",
+	"datasource",
+	"external_aws_cloudwatch_logs",
+	"external_aws_cloudwatch_metrics",
+	"external_elasticsearch_logs",
+	"external_google_cloud_logging",
+	"external_opensearch_logs",
+	"flink",
+	"internal_connectivity",
+	"jolokia",
+	"kafka_connect",
+	"kafka_logs",
+	"kafka_mirrormaker",
+	"logs",
+	"m3aggregator",
+	"m3coordinator",
+	"metrics",
+	"opensearch_cross_cluster_replication",
+	"opensearch_cross_cluster_search",
+	"prometheus",
+	"read_replica",
+	"rsyslog",
+	"schema_registry_proxy",
+}
 
 var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 	"integration_id": {
@@ -43,10 +74,11 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 	},
 	"integration_type": {
-		Description: "Type of the service integration",
-		ForceNew:    true,
-		Required:    true,
-		Type:        schema.TypeString,
+		Description:      "Type of the service integration. Possible values: " + schemautil.JoinQuoted(integrationTypes, ", ", "`"),
+		ForceNew:         true,
+		Required:         true,
+		Type:             schema.TypeString,
+		ValidateDiagFunc: schemautil.ValidateEnum(integrationTypes...),
 	},
 	"project": {
 		Description: "Project the integration belongs to",
