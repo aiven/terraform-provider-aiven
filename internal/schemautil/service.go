@@ -26,6 +26,7 @@ func DefaultResourceTimeouts() *schema.ResourceTimeout {
 		Update:  schema.DefaultTimeout(DefaultTimeoutMinutes * time.Minute),
 		Delete:  schema.DefaultTimeout(DefaultTimeoutMinutes * time.Minute),
 		Default: schema.DefaultTimeout(DefaultTimeoutMinutes * time.Minute),
+		Read:    schema.DefaultTimeout(DefaultTimeoutMinutes * time.Minute),
 	}
 }
 
