@@ -10,6 +10,7 @@ nav_order: 1
 
 - Fix `add_account_owners_admin_access` type issue
 - Add service integration `integration_type` enum validation
+- Rename `aiven_flink_application_version` field `sources` and `sinks` to `source` and `sink`
 
 ## [4.0.0] - 2023-02-24
 

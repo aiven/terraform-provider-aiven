@@ -61,12 +61,14 @@ resource "aiven_flink_application_version" "foo" {
 - `application_id` (String) Application ID
 - `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 - `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `sinks` (Block Set, Min: 1) Application sinks (see [below for nested schema](#nestedblock--sinks))
-- `sources` (Block Set, Min: 1) Application sources (see [below for nested schema](#nestedblock--sources))
 - `statement` (String) Job SQL statement
 
 ### Optional
 
+- `sink` (Block Set) Application sink (see [below for nested schema](#nestedblock--sink))
+- `sinks` (Block Set, Deprecated) Application sinks (see [below for nested schema](#nestedblock--sinks))
+- `source` (Block Set) Application source (see [below for nested schema](#nestedblock--source))
+- `sources` (Block Set, Deprecated) Application sources (see [below for nested schema](#nestedblock--sources))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
@@ -77,8 +79,32 @@ resource "aiven_flink_application_version" "foo" {
 - `id` (String) The ID of this resource.
 - `version` (Number) Application version number
 
+<a id="nestedblock--sink"></a>
+### Nested Schema for `sink`
+
+Required:
+
+- `create_table` (String) The CREATE TABLE statement
+
+Optional:
+
+- `integration_id` (String) The integration ID
+
+
 <a id="nestedblock--sinks"></a>
 ### Nested Schema for `sinks`
+
+Required:
+
+- `create_table` (String) The CREATE TABLE statement
+
+Optional:
+
+- `integration_id` (String) The integration ID
+
+
+<a id="nestedblock--source"></a>
+### Nested Schema for `source`
 
 Required:
 

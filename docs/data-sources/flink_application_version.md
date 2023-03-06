@@ -36,13 +36,33 @@ data "aiven_flink_application_version" "app1" {
 - `created_at` (String) Application version creation time
 - `created_by` (String) Application version creator
 - `id` (String) The ID of this resource.
+- `sink` (Set of Object) Application sink (see [below for nested schema](#nestedatt--sink))
 - `sinks` (Set of Object) Application sinks (see [below for nested schema](#nestedatt--sinks))
+- `source` (Set of Object) Application source (see [below for nested schema](#nestedatt--source))
 - `sources` (Set of Object) Application sources (see [below for nested schema](#nestedatt--sources))
 - `statement` (String) Job SQL statement
 - `version` (Number) Application version number
 
+<a id="nestedatt--sink"></a>
+### Nested Schema for `sink`
+
+Read-Only:
+
+- `create_table` (String)
+- `integration_id` (String)
+
+
 <a id="nestedatt--sinks"></a>
 ### Nested Schema for `sinks`
+
+Read-Only:
+
+- `create_table` (String)
+- `integration_id` (String)
+
+
+<a id="nestedatt--source"></a>
+### Nested Schema for `source`
 
 Read-Only:
 
