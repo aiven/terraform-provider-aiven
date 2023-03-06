@@ -4,8 +4,6 @@ updates:
     directory: /
     schedule:
       interval: daily
-    commit-message:
-      prefix: "chore:"
   - package-ecosystem: gomod
     directory: /
     schedule:
@@ -13,8 +11,6 @@ updates:
     ignore:
       - dependency-name: golang.org/x/tools
       - dependency-name: google.golang.org/grpc
-    commit-message:
-      prefix: "chore:"
   - package-ecosystem: gomod
     directory: /tools
     schedule:
@@ -22,5 +18,3 @@ updates:
     ignore:
       - dependency-name: golang.org/x/tools
       - dependency-name: google.golang.org/grpc
-    commit-message:
-      prefix: "chore:"
