@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.1.0] - 2023-03-07
+
 - Fix `add_account_owners_admin_access` type issue
 - Add service integration `integration_type` enum validation
 - Rename `aiven_flink_application_version` field `sources` and `sinks` to `source` and `sink`
