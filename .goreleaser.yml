@@ -5,7 +5,7 @@ builds:
     flags:
       - -trimpath
     ldflags:
-      - '-s -w -X github.com/aiven/terraform-provider-aiven/internal/provider.version={{.Version}}'
+      - '-s -w -X github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider.version={{.Version}}'
     goos:
       - freebsd
       - windows
