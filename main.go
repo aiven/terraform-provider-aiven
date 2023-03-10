@@ -5,7 +5,7 @@ import (
 	"flag"
 	"log"
 
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/tf6server"
 	"github.com/hashicorp/terraform-plugin-mux/tf5to6server"
@@ -19,7 +19,7 @@ func main() {
 
 	ctx := context.Background()
 
-	sdkProvider, err := tf5to6server.UpgradeServer(context.Background(), sdkprovider.Provider().GRPCProvider)
+	sdkProvider, err := tf5to6server.UpgradeServer(context.Background(), provider.Provider().GRPCProvider)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -14,8 +14,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
-const DeprecationMessage = "This resource is deprecated and will be removed in the next major release."
-
 //goland:noinspection GoDeprecation
 func GetACLUserValidateFunc() schema.SchemaValidateFunc { //nolint:staticcheck
 	return validation.StringMatch(
@@ -26,7 +24,7 @@ func GetACLUserValidateFunc() schema.SchemaValidateFunc { //nolint:staticcheck
 //goland:noinspection GoDeprecation
 func GetServiceUserValidateFunc() schema.SchemaValidateFunc { //nolint:staticcheck
 	return validation.StringMatch(
-		regexp.MustCompile(`^(\*$|[a-zA-Z0-9_?][a-zA-Z0-9-_?*\.].{0,62})$`),
+		regexp.MustCompile(`^(\*$|[a-zA-Z0-9_?][a-zA-Z0-9-_?*.].{0,62})$`),
 		"username should be alphanumeric, may not start with dash or dot, max 64 characters")
 }
 

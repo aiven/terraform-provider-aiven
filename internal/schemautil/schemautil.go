@@ -16,14 +16,6 @@ import (
 // errInvalidStateType is an error that is returned when an invalid state type is encountered.
 var errInvalidStateType = fmt.Errorf("invalid terraform state type")
 
-func OptionalString(d *schema.ResourceData, key string) string {
-	str, ok := d.Get(key).(string)
-	if !ok {
-		return ""
-	}
-	return str
-}
-
 // OptionalStringPointer retrieves a string pointer to a field, empty string
 // will be converted to nil
 func OptionalStringPointer(d *schema.ResourceData, key string) *string {

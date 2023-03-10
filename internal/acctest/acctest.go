@@ -9,11 +9,11 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider"
 )
 
 var (
@@ -22,7 +22,7 @@ var (
 )
 
 func init() {
-	TestAccProvider = sdkprovider.Provider()
+	TestAccProvider = provider.Provider()
 	TestAccProviderFactories = map[string]func() (*schema.Provider, error){
 		"aiven": func() (*schema.Provider, error) {
 			return TestAccProvider, nil
