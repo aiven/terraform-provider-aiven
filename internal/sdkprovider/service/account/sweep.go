@@ -9,7 +9,7 @@ import (
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/sweep"
+	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
 
 func init() {

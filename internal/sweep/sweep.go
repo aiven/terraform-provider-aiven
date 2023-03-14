@@ -8,8 +8,9 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
 var sharedClient *aiven.Client
