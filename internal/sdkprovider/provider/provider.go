@@ -4,24 +4,24 @@ import (
 	"context"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
-	account2 "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
-	cassandra2 "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/cassandra"
-	clickhouse2 "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
-	connectionpool2 "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/connectionpool"
-	flink2 "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/flink"
-	grafana2 "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/grafana"
-	influxdb2 "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/influxdb"
-	kafka2 "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafka"
-	m3db2 "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/m3db"
-	mysql2 "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/mysql"
-	opensearch2 "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/opensearch"
-	pg2 "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/pg"
-	project2 "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/project"
-	redis2 "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/redis"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/cassandra"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/connectionpool"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/flink"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/grafana"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/influxdb"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafka"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/m3db"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/mysql"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/opensearch"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/pg"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/project"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/redis"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/servicecomponent"
-	serviceintegration2 "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/serviceintegration"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/serviceintegration"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/staticip"
-	vpc2 "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/vpc"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/vpc"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -46,186 +46,186 @@ func Provider() *schema.Provider {
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"aiven_connection_pool":   connectionpool2.DatasourceConnectionPool(),
+			"aiven_connection_pool":   connectionpool.DatasourceConnectionPool(),
 			"aiven_service_component": servicecomponent.DatasourceServiceComponent(),
 
 			// influxdb
-			"aiven_influxdb":          influxdb2.DatasourceInfluxDB(),
-			"aiven_influxdb_user":     influxdb2.DatasourceInfluxDBUser(),
-			"aiven_influxdb_database": influxdb2.DatasourceInfluxDBDatabase(),
+			"aiven_influxdb":          influxdb.DatasourceInfluxDB(),
+			"aiven_influxdb_user":     influxdb.DatasourceInfluxDBUser(),
+			"aiven_influxdb_database": influxdb.DatasourceInfluxDBDatabase(),
 
 			// grafana
-			"aiven_grafana": grafana2.DatasourceGrafana(),
+			"aiven_grafana": grafana.DatasourceGrafana(),
 
 			// mysql
-			"aiven_mysql":          mysql2.DatasourceMySQL(),
-			"aiven_mysql_user":     mysql2.DatasourceMySQLUser(),
-			"aiven_mysql_database": mysql2.DatasourceMySQLDatabase(),
+			"aiven_mysql":          mysql.DatasourceMySQL(),
+			"aiven_mysql_user":     mysql.DatasourceMySQLUser(),
+			"aiven_mysql_database": mysql.DatasourceMySQLDatabase(),
 
 			// redis
-			"aiven_redis":      redis2.DatasourceRedis(),
-			"aiven_redis_user": redis2.DatasourceRedisUser(),
+			"aiven_redis":      redis.DatasourceRedis(),
+			"aiven_redis_user": redis.DatasourceRedisUser(),
 
 			// pg
-			"aiven_pg":          pg2.DatasourcePG(),
-			"aiven_pg_user":     pg2.DatasourcePGUser(),
-			"aiven_pg_database": pg2.DatasourcePGDatabase(),
+			"aiven_pg":          pg.DatasourcePG(),
+			"aiven_pg_user":     pg.DatasourcePGUser(),
+			"aiven_pg_database": pg.DatasourcePGDatabase(),
 
 			// cassandra
-			"aiven_cassandra":      cassandra2.DatasourceCassandra(),
-			"aiven_cassandra_user": cassandra2.DatasourceCassandraUser(),
+			"aiven_cassandra":      cassandra.DatasourceCassandra(),
+			"aiven_cassandra_user": cassandra.DatasourceCassandraUser(),
 
 			// account
-			"aiven_account":                account2.DatasourceAccount(),
-			"aiven_account_team":           account2.DatasourceAccountTeam(),
-			"aiven_account_team_project":   account2.DatasourceAccountTeamProject(),
-			"aiven_account_team_member":    account2.DatasourceAccountTeamMember(),
-			"aiven_account_authentication": account2.DatasourceAccountAuthentication(),
+			"aiven_account":                account.DatasourceAccount(),
+			"aiven_account_team":           account.DatasourceAccountTeam(),
+			"aiven_account_team_project":   account.DatasourceAccountTeamProject(),
+			"aiven_account_team_member":    account.DatasourceAccountTeamMember(),
+			"aiven_account_authentication": account.DatasourceAccountAuthentication(),
 
 			// project
-			"aiven_project":       project2.DatasourceProject(),
-			"aiven_project_user":  project2.DatasourceProjectUser(),
-			"aiven_billing_group": project2.DatasourceBillingGroup(),
+			"aiven_project":       project.DatasourceProject(),
+			"aiven_project_user":  project.DatasourceProjectUser(),
+			"aiven_billing_group": project.DatasourceBillingGroup(),
 
 			// vpc
-			"aiven_aws_privatelink":                vpc2.DatasourceAWSPrivatelink(),
-			"aiven_aws_vpc_peering_connection":     vpc2.DatasourceAWSVPCPeeringConnection(),
-			"aiven_azure_privatelink":              vpc2.DatasourceAzurePrivatelink(),
-			"aiven_azure_vpc_peering_connection":   vpc2.DatasourceAzureVPCPeeringConnection(),
-			"aiven_gcp_vpc_peering_connection":     vpc2.DatasourceGCPVPCPeeringConnection(),
-			"aiven_project_vpc":                    vpc2.DatasourceProjectVPC(),
-			"aiven_transit_gateway_vpc_attachment": vpc2.DatasourceTransitGatewayVPCAttachment(),
+			"aiven_aws_privatelink":                vpc.DatasourceAWSPrivatelink(),
+			"aiven_aws_vpc_peering_connection":     vpc.DatasourceAWSVPCPeeringConnection(),
+			"aiven_azure_privatelink":              vpc.DatasourceAzurePrivatelink(),
+			"aiven_azure_vpc_peering_connection":   vpc.DatasourceAzureVPCPeeringConnection(),
+			"aiven_gcp_vpc_peering_connection":     vpc.DatasourceGCPVPCPeeringConnection(),
+			"aiven_project_vpc":                    vpc.DatasourceProjectVPC(),
+			"aiven_transit_gateway_vpc_attachment": vpc.DatasourceTransitGatewayVPCAttachment(),
 
 			// service integrations
-			"aiven_service_integration":          serviceintegration2.DatasourceServiceIntegration(),
-			"aiven_service_integration_endpoint": serviceintegration2.DatasourceServiceIntegrationEndpoint(),
+			"aiven_service_integration":          serviceintegration.DatasourceServiceIntegration(),
+			"aiven_service_integration_endpoint": serviceintegration.DatasourceServiceIntegrationEndpoint(),
 
 			// m3db
-			"aiven_m3db":         m3db2.DatasourceM3DB(),
-			"aiven_m3db_user":    m3db2.DatasourceM3DBUser(),
-			"aiven_m3aggregator": m3db2.DatasourceM3Aggregator(),
+			"aiven_m3db":         m3db.DatasourceM3DB(),
+			"aiven_m3db_user":    m3db.DatasourceM3DBUser(),
+			"aiven_m3aggregator": m3db.DatasourceM3Aggregator(),
 
 			// flink
-			"aiven_flink":                     flink2.DatasourceFlink(),
-			"aiven_flink_application":         flink2.DatasourceFlinkApplication(),
-			"aiven_flink_application_version": flink2.DatasourceFlinkApplicationVersion(),
+			"aiven_flink":                     flink.DatasourceFlink(),
+			"aiven_flink_application":         flink.DatasourceFlinkApplication(),
+			"aiven_flink_application_version": flink.DatasourceFlinkApplicationVersion(),
 
 			// opensearch
-			"aiven_opensearch":            opensearch2.DatasourceOpensearch(),
-			"aiven_opensearch_user":       opensearch2.DatasourceOpensearchUser(),
-			"aiven_opensearch_acl_config": opensearch2.DatasourceOpensearchACLConfig(),
-			"aiven_opensearch_acl_rule":   opensearch2.DatasourceOpensearchACLRule(),
+			"aiven_opensearch":            opensearch.DatasourceOpensearch(),
+			"aiven_opensearch_user":       opensearch.DatasourceOpensearchUser(),
+			"aiven_opensearch_acl_config": opensearch.DatasourceOpensearchACLConfig(),
+			"aiven_opensearch_acl_rule":   opensearch.DatasourceOpensearchACLRule(),
 
 			// kafka
-			"aiven_kafka":                        kafka2.DatasourceKafka(),
-			"aiven_kafka_user":                   kafka2.DatasourceKafkaUser(),
-			"aiven_kafka_acl":                    kafka2.DatasourceKafkaACL(),
-			"aiven_kafka_schema_registry_acl":    kafka2.DatasourceKafkaSchemaRegistryACL(),
-			"aiven_kafka_topic":                  kafka2.DatasourceKafkaTopic(),
-			"aiven_kafka_schema":                 kafka2.DatasourceKafkaSchema(),
-			"aiven_kafka_schema_configuration":   kafka2.DatasourceKafkaSchemaConfiguration(),
-			"aiven_kafka_connector":              kafka2.DatasourceKafkaConnector(),
-			"aiven_mirrormaker_replication_flow": kafka2.DatasourceMirrorMakerReplicationFlowTopic(),
-			"aiven_kafka_connect":                kafka2.DatasourceKafkaConnect(),
-			"aiven_kafka_mirrormaker":            kafka2.DatasourceKafkaMirrormaker(),
+			"aiven_kafka":                        kafka.DatasourceKafka(),
+			"aiven_kafka_user":                   kafka.DatasourceKafkaUser(),
+			"aiven_kafka_acl":                    kafka.DatasourceKafkaACL(),
+			"aiven_kafka_schema_registry_acl":    kafka.DatasourceKafkaSchemaRegistryACL(),
+			"aiven_kafka_topic":                  kafka.DatasourceKafkaTopic(),
+			"aiven_kafka_schema":                 kafka.DatasourceKafkaSchema(),
+			"aiven_kafka_schema_configuration":   kafka.DatasourceKafkaSchemaConfiguration(),
+			"aiven_kafka_connector":              kafka.DatasourceKafkaConnector(),
+			"aiven_mirrormaker_replication_flow": kafka.DatasourceMirrorMakerReplicationFlowTopic(),
+			"aiven_kafka_connect":                kafka.DatasourceKafkaConnect(),
+			"aiven_kafka_mirrormaker":            kafka.DatasourceKafkaMirrormaker(),
 
 			// clickhouse
-			"aiven_clickhouse":          clickhouse2.DatasourceClickhouse(),
-			"aiven_clickhouse_database": clickhouse2.DatasourceClickhouseDatabase(),
-			"aiven_clickhouse_user":     clickhouse2.DatasourceClickhouseUser(),
+			"aiven_clickhouse":          clickhouse.DatasourceClickhouse(),
+			"aiven_clickhouse_database": clickhouse.DatasourceClickhouseDatabase(),
+			"aiven_clickhouse_user":     clickhouse.DatasourceClickhouseUser(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"aiven_connection_pool": connectionpool2.ResourceConnectionPool(),
+			"aiven_connection_pool": connectionpool.ResourceConnectionPool(),
 			"aiven_static_ip":       staticip.ResourceStaticIP(),
 
 			// influxdb
-			"aiven_influxdb":          influxdb2.ResourceInfluxDB(),
-			"aiven_influxdb_user":     influxdb2.ResourceInfluxDBUser(),
-			"aiven_influxdb_database": influxdb2.ResourceInfluxDBDatabase(),
+			"aiven_influxdb":          influxdb.ResourceInfluxDB(),
+			"aiven_influxdb_user":     influxdb.ResourceInfluxDBUser(),
+			"aiven_influxdb_database": influxdb.ResourceInfluxDBDatabase(),
 
 			// grafana
-			"aiven_grafana": grafana2.ResourceGrafana(),
+			"aiven_grafana": grafana.ResourceGrafana(),
 
 			// mysql
-			"aiven_mysql":          mysql2.ResourceMySQL(),
-			"aiven_mysql_user":     mysql2.ResourceMySQLUser(),
-			"aiven_mysql_database": mysql2.ResourceMySQLDatabase(),
+			"aiven_mysql":          mysql.ResourceMySQL(),
+			"aiven_mysql_user":     mysql.ResourceMySQLUser(),
+			"aiven_mysql_database": mysql.ResourceMySQLDatabase(),
 
 			// redis
-			"aiven_redis":      redis2.ResourceRedis(),
-			"aiven_redis_user": redis2.ResourceRedisUser(),
+			"aiven_redis":      redis.ResourceRedis(),
+			"aiven_redis_user": redis.ResourceRedisUser(),
 
 			// pg
-			"aiven_pg":          pg2.ResourcePG(),
-			"aiven_pg_user":     pg2.ResourcePGUser(),
-			"aiven_pg_database": pg2.ResourcePGDatabase(),
+			"aiven_pg":          pg.ResourcePG(),
+			"aiven_pg_user":     pg.ResourcePGUser(),
+			"aiven_pg_database": pg.ResourcePGDatabase(),
 
 			// cassandra
-			"aiven_cassandra":      cassandra2.ResourceCassandra(),
-			"aiven_cassandra_user": cassandra2.ResourceCassandraUser(),
+			"aiven_cassandra":      cassandra.ResourceCassandra(),
+			"aiven_cassandra_user": cassandra.ResourceCassandraUser(),
 
 			// account
-			"aiven_account":                account2.ResourceAccount(),
-			"aiven_account_team":           account2.ResourceAccountTeam(),
-			"aiven_account_team_project":   account2.ResourceAccountTeamProject(),
-			"aiven_account_team_member":    account2.ResourceAccountTeamMember(),
-			"aiven_account_authentication": account2.ResourceAccountAuthentication(),
+			"aiven_account":                account.ResourceAccount(),
+			"aiven_account_team":           account.ResourceAccountTeam(),
+			"aiven_account_team_project":   account.ResourceAccountTeamProject(),
+			"aiven_account_team_member":    account.ResourceAccountTeamMember(),
+			"aiven_account_authentication": account.ResourceAccountAuthentication(),
 
 			// project
-			"aiven_project":       project2.ResourceProject(),
-			"aiven_project_user":  project2.ResourceProjectUser(),
-			"aiven_billing_group": project2.ResourceBillingGroup(),
+			"aiven_project":       project.ResourceProject(),
+			"aiven_project_user":  project.ResourceProjectUser(),
+			"aiven_billing_group": project.ResourceBillingGroup(),
 
 			// vpc
-			"aiven_aws_privatelink":                       vpc2.ResourceAWSPrivatelink(),
-			"aiven_azure_privatelink":                     vpc2.ResourceAzurePrivatelink(),
-			"aiven_azure_privatelink_connection_approval": vpc2.ResourceAzurePrivatelinkConnectionApproval(),
-			"aiven_aws_vpc_peering_connection":            vpc2.ResourceAWSVPCPeeringConnection(),
-			"aiven_azure_vpc_peering_connection":          vpc2.ResourceAzureVPCPeeringConnection(),
-			"aiven_gcp_vpc_peering_connection":            vpc2.ResourceGCPVPCPeeringConnection(),
-			"aiven_project_vpc":                           vpc2.ResourceProjectVPC(),
-			"aiven_transit_gateway_vpc_attachment":        vpc2.ResourceTransitGatewayVPCAttachment(),
+			"aiven_aws_privatelink":                       vpc.ResourceAWSPrivatelink(),
+			"aiven_azure_privatelink":                     vpc.ResourceAzurePrivatelink(),
+			"aiven_azure_privatelink_connection_approval": vpc.ResourceAzurePrivatelinkConnectionApproval(),
+			"aiven_aws_vpc_peering_connection":            vpc.ResourceAWSVPCPeeringConnection(),
+			"aiven_azure_vpc_peering_connection":          vpc.ResourceAzureVPCPeeringConnection(),
+			"aiven_gcp_vpc_peering_connection":            vpc.ResourceGCPVPCPeeringConnection(),
+			"aiven_project_vpc":                           vpc.ResourceProjectVPC(),
+			"aiven_transit_gateway_vpc_attachment":        vpc.ResourceTransitGatewayVPCAttachment(),
 
 			// service integrations
-			"aiven_service_integration":          serviceintegration2.ResourceServiceIntegration(),
-			"aiven_service_integration_endpoint": serviceintegration2.ResourceServiceIntegrationEndpoint(),
+			"aiven_service_integration":          serviceintegration.ResourceServiceIntegration(),
+			"aiven_service_integration_endpoint": serviceintegration.ResourceServiceIntegrationEndpoint(),
 
 			// m3db
-			"aiven_m3db":         m3db2.ResourceM3DB(),
-			"aiven_m3db_user":    m3db2.ResourceM3DBUser(),
-			"aiven_m3aggregator": m3db2.ResourceM3Aggregator(),
+			"aiven_m3db":         m3db.ResourceM3DB(),
+			"aiven_m3db_user":    m3db.ResourceM3DBUser(),
+			"aiven_m3aggregator": m3db.ResourceM3Aggregator(),
 
 			// flink
-			"aiven_flink":                     flink2.ResourceFlink(),
-			"aiven_flink_application":         flink2.ResourceFlinkApplication(),
-			"aiven_flink_application_version": flink2.ResourceFlinkApplicationVersion(),
+			"aiven_flink":                     flink.ResourceFlink(),
+			"aiven_flink_application":         flink.ResourceFlinkApplication(),
+			"aiven_flink_application_version": flink.ResourceFlinkApplicationVersion(),
 
 			// opensearch
-			"aiven_opensearch":            opensearch2.ResourceOpensearch(),
-			"aiven_opensearch_user":       opensearch2.ResourceOpensearchUser(),
-			"aiven_opensearch_acl_config": opensearch2.ResourceOpensearchACLConfig(),
-			"aiven_opensearch_acl_rule":   opensearch2.ResourceOpensearchACLRule(),
+			"aiven_opensearch":            opensearch.ResourceOpensearch(),
+			"aiven_opensearch_user":       opensearch.ResourceOpensearchUser(),
+			"aiven_opensearch_acl_config": opensearch.ResourceOpensearchACLConfig(),
+			"aiven_opensearch_acl_rule":   opensearch.ResourceOpensearchACLRule(),
 
 			// kafka
-			"aiven_kafka":                        kafka2.ResourceKafka(),
-			"aiven_kafka_user":                   kafka2.ResourceKafkaUser(),
-			"aiven_kafka_acl":                    kafka2.ResourceKafkaACL(),
-			"aiven_kafka_schema_registry_acl":    kafka2.ResourceKafkaSchemaRegistryACL(),
-			"aiven_kafka_topic":                  kafka2.ResourceKafkaTopic(),
-			"aiven_kafka_schema":                 kafka2.ResourceKafkaSchema(),
-			"aiven_kafka_schema_configuration":   kafka2.ResourceKafkaSchemaConfiguration(),
-			"aiven_kafka_connector":              kafka2.ResourceKafkaConnector(),
-			"aiven_mirrormaker_replication_flow": kafka2.ResourceMirrorMakerReplicationFlow(),
-			"aiven_kafka_connect":                kafka2.ResourceKafkaConnect(),
-			"aiven_kafka_mirrormaker":            kafka2.ResourceKafkaMirrormaker(),
+			"aiven_kafka":                        kafka.ResourceKafka(),
+			"aiven_kafka_user":                   kafka.ResourceKafkaUser(),
+			"aiven_kafka_acl":                    kafka.ResourceKafkaACL(),
+			"aiven_kafka_schema_registry_acl":    kafka.ResourceKafkaSchemaRegistryACL(),
+			"aiven_kafka_topic":                  kafka.ResourceKafkaTopic(),
+			"aiven_kafka_schema":                 kafka.ResourceKafkaSchema(),
+			"aiven_kafka_schema_configuration":   kafka.ResourceKafkaSchemaConfiguration(),
+			"aiven_kafka_connector":              kafka.ResourceKafkaConnector(),
+			"aiven_mirrormaker_replication_flow": kafka.ResourceMirrorMakerReplicationFlow(),
+			"aiven_kafka_connect":                kafka.ResourceKafkaConnect(),
+			"aiven_kafka_mirrormaker":            kafka.ResourceKafkaMirrormaker(),
 
 			// clickhouse
-			"aiven_clickhouse":          clickhouse2.ResourceClickhouse(),
-			"aiven_clickhouse_database": clickhouse2.ResourceClickhouseDatabase(),
-			"aiven_clickhouse_user":     clickhouse2.ResourceClickhouseUser(),
-			"aiven_clickhouse_role":     clickhouse2.ResourceClickhouseRole(),
-			"aiven_clickhouse_grant":    clickhouse2.ResourceClickhouseGrant(),
+			"aiven_clickhouse":          clickhouse.ResourceClickhouse(),
+			"aiven_clickhouse_database": clickhouse.ResourceClickhouseDatabase(),
+			"aiven_clickhouse_user":     clickhouse.ResourceClickhouseUser(),
+			"aiven_clickhouse_role":     clickhouse.ResourceClickhouseRole(),
+			"aiven_clickhouse_grant":    clickhouse.ResourceClickhouseGrant(),
 		},
 	}
 
