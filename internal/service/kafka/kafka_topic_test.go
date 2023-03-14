@@ -491,3 +491,55 @@ resource "aiven_kafka_topic" "topic" {
 `, prefix, project)
 	return result
 }
+
+func TestAccAivenKafkaTopic_conflicts_if_exists(t *testing.T) {
+	project := os.Getenv("AIVEN_PROJECT_NAME")
+	prefix := "test-tf-acc-" + acctest.RandString(7)
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccAivenKafkaTopicConflictsIfExists(prefix, project),
+				ExpectError: regexp.MustCompile(`Topic conflict already exists"`),
+			},
+		},
+	})
+}
+
+func testAccAivenKafkaTopicConflictsIfExists(prefix, project string) string {
+	return fmt.Sprintf(`data "aiven_project" "project" {
+  project = %[2]q
+}
+
+resource "aiven_kafka" "kafka" {
+  project                 = data.aiven_project.project.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-2"
+  service_name            = "%[1]s-kafka"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_kafka_topic" "topic" {
+  project      = aiven_kafka.kafka.project
+  service_name = aiven_kafka.kafka.service_name
+  topic_name   = "conflict"
+  partitions   = 5
+  replication  = 3
+}
+
+resource "aiven_kafka_topic" "topic_conflict" {
+  project      = aiven_kafka.kafka.project
+  service_name = aiven_kafka.kafka.service_name
+  topic_name   = "conflict"
+  partitions   = 5
+  replication  = 3
+
+  depends_on = [
+    aiven_kafka_topic.topic
+  ]
+}
+`, prefix, project)
+}

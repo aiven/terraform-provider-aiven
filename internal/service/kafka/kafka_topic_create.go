@@ -22,12 +22,20 @@ type kafkaTopicCreateWaiter struct {
 
 // RefreshFunc will call the Aiven client and refresh it's state.
 func (w *kafkaTopicCreateWaiter) RefreshFunc() resource.StateRefreshFunc {
+	// Should check if topic does not exist before create
+	// Assumes it exists, should prove it doesn't by getting no error
+	found := true
 	return func() (interface{}, string, error) {
 		err := w.Client.KafkaTopics.Create(
 			w.Project,
 			w.ServiceName,
 			w.CreateRequest,
 		)
+
+		if err == nil {
+			// This can happen once only
+			found = false
+		}
 
 		if err != nil {
 			// If some brokers are offline while the request is being executed
@@ -39,6 +47,10 @@ func (w *kafkaTopicCreateWaiter) RefreshFunc() resource.StateRefreshFunc {
 			}
 
 			if ok && aiven.IsAlreadyExists(aivenError) {
+				if found {
+					// If KafkaTopics.Create() didn't succeed, then this is a conflict
+					return nil, "", err
+				}
 				return w.CreateRequest.TopicName, "CREATED", nil
 			}
 

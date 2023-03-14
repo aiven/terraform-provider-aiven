@@ -6,6 +6,9 @@ nav_order: 1
 
 # Changelog
 
+## [3.13.1] - 2023-03-15
+- Fix `aiven_kafka_topic` create. Now conflicts if topic exists
+
 ## [3.13.0] - 2023-02-24
 
 - Unified timeout values across all resources
