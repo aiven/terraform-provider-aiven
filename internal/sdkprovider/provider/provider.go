@@ -26,14 +26,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-var (
-	version = "dev"
-)
-
 // Provider returns terraform.ResourceProvider.
 //
 //goland:noinspection GoDeprecation
-func Provider() *schema.Provider {
+func Provider(version string) *schema.Provider {
 	p := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"api_token": {

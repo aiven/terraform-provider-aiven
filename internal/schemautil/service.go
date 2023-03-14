@@ -17,17 +17,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// DefaultTimeout is the default timeout for service operations. This is not a const because it can be changed during
-// compile time with -ldflags "-X github.com/aiven/terraform-provider-aiven/internal/schemautil.DefaultTimeout=30".
-var DefaultTimeout time.Duration = 20
+// defaultTimeout is the default timeout for service operations. This is not a const because it can be changed during
+// compile time with -ldflags "-X github.com/aiven/terraform-provider-aiven/internal/schemautil.defaultTimeout=30".
+var defaultTimeout time.Duration = 20
 
 func DefaultResourceTimeouts() *schema.ResourceTimeout {
 	return &schema.ResourceTimeout{
-		Create:  schema.DefaultTimeout(DefaultTimeout * time.Minute),
-		Update:  schema.DefaultTimeout(DefaultTimeout * time.Minute),
-		Delete:  schema.DefaultTimeout(DefaultTimeout * time.Minute),
-		Default: schema.DefaultTimeout(DefaultTimeout * time.Minute),
-		Read:    schema.DefaultTimeout(DefaultTimeout * time.Minute),
+		Create:  schema.DefaultTimeout(defaultTimeout * time.Minute),
+		Update:  schema.DefaultTimeout(defaultTimeout * time.Minute),
+		Delete:  schema.DefaultTimeout(defaultTimeout * time.Minute),
+		Default: schema.DefaultTimeout(defaultTimeout * time.Minute),
+		Read:    schema.DefaultTimeout(defaultTimeout * time.Minute),
 	}
 }
 
