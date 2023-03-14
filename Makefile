@@ -72,7 +72,7 @@ test-unit:
 
 PKG_PATH ?= internal
 ifneq ($(origin PKG), undefined)
-	PKG_PATH = internal/service/$(PKG)
+	PKG_PATH = internal/sdkprovider/service/$(PKG)
 endif
 
 TEST_COUNT ?= 1
