@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `aiven_kafka_topic` create. Now conflicts if topic exists
+
 ## [4.1.0] - 2023-03-07
 
 - Fix `add_account_owners_admin_access` type issue
