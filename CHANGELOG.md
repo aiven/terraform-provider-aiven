@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.1.1] - 2023-03-15
+
 - Fix `aiven_kafka_topic` create. Now conflicts if topic exists
 
 ## [4.1.0] - 2023-03-07
