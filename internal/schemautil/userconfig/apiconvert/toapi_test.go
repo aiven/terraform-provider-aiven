@@ -507,6 +507,10 @@ func TestToAPI(t *testing.T) {
 										"description": "",
 										"network":     "10.20.0.0/16",
 									},
+									map[string]interface{}{
+										"description": "foo",
+										"network":     "1.3.3.7/32",
+									},
 								},
 							},
 						},
@@ -516,12 +520,16 @@ func TestToAPI(t *testing.T) {
 						"m3db_user_config.0.ip_filter_object.0":             {},
 						"m3db_user_config.0.ip_filter_object.0.description": {},
 						"m3db_user_config.0.ip_filter_object.0.network":     {},
+						"m3db_user_config.0.ip_filter_object.1":             {},
+						"m3db_user_config.0.ip_filter_object.1.description": {},
+						"m3db_user_config.0.ip_filter_object.1.network":     {},
 					},
 					map[string]struct{}{
 						"m3db_user_config.0.ip_filter_object":               {},
 						"m3db_user_config.0.ip_filter_object.1":             {},
 						"m3db_user_config.0.ip_filter_object.1.description": {},
 						"m3db_user_config.0.ip_filter_object.1.network":     {},
+						"m3db_user_config.0.ip_filter_object.2":             {},
 					},
 					false,
 				),
@@ -535,6 +543,10 @@ func TestToAPI(t *testing.T) {
 					map[string]interface{}{
 						"description": "",
 						"network":     "10.20.0.0/16",
+					},
+					map[string]interface{}{
+						"description": "foo",
+						"network":     "1.3.3.7/32",
 					},
 				},
 			},
