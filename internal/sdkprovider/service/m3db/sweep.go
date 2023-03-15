@@ -3,7 +3,7 @@
 package m3db
 
 import (
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/sweep"
+	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
 
 func init() {
