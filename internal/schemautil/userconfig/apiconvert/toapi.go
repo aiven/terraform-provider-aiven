@@ -2,6 +2,7 @@ package apiconvert
 
 import (
 	"fmt"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -176,10 +177,21 @@ func itemToAPI(
 	//
 	// We check that there are more than three elements in the fk slice, because we don't want to send the value if
 	// the parent object is the root object.
-	_, e := d.GetOk(fks)
+	if o && len(fk) > 3 {
+		// We find the last index of the dot with a number after it, because we want to check if the parent object
+		// was changed.
+		match := regexp.MustCompile(`\.\d($|\.)`).FindAllStringIndex(fks, -1)
+		if match != nil {
+			// We check if fks exists, i.e. it was set by the user, because if it was not set, we don't want to send
+			// the value.
+			_, e := d.GetOk(fks)
 
-	if o && e && len(fk) > 3 && d.HasChange(fks[:strings.LastIndex(fks, ".0")]) {
-		o = false
+			// Since Terraform thinks that new array elements are added without "existing", we also send the value if
+			// it does not exist, but is not empty either.
+			if (e || !reflect.ValueOf(v).IsZero()) && d.HasChange(fks[:match[len(match)-1][0]]) {
+				o = false
+			}
+		}
 	}
 
 	// TODO: Remove this statement and the branch below it when we use actual types in the schema.
