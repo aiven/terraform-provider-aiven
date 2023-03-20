@@ -6,10 +6,11 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 func ServiceIntegrationShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
@@ -111,11 +112,7 @@ func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m 
 
 func SetServiceTypeIfEmpty(t string) schema.CustomizeDiffFunc {
 	return func(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
-		if err := diff.SetNew("service_type", t); err != nil {
-			return err
-		}
-
-		return nil
+		return diff.SetNew("service_type", t)
 	}
 }
 

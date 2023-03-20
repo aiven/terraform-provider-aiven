@@ -4,11 +4,12 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 var aivenConnectionPoolSchema = map[string]*schema.Schema{
@@ -185,9 +186,6 @@ func copyConnectionPoolPropertiesFromAPIResponseToTerraform(
 	if err := d.Set("pool_size", pool.PoolSize); err != nil {
 		return err
 	}
-	if err := d.Set("username", pool.Username); err != nil {
-		return err
-	}
 
-	return nil
+	return d.Set("username", pool.Username)
 }

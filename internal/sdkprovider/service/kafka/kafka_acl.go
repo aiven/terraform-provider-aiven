@@ -3,13 +3,15 @@ package kafka
 import (
 	"context"
 
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
+
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 var aivenKafkaACLSchema = map[string]*schema.Schema{
@@ -142,9 +144,6 @@ func copyKafkaACLPropertiesFromAPIResponseToTerraform(
 	if err := d.Set("username", acl.Username); err != nil {
 		return err
 	}
-	if err := d.Set("acl_id", acl.ID); err != nil {
-		return err
-	}
 
-	return nil
+	return d.Set("acl_id", acl.ID)
 }
