@@ -5,6 +5,7 @@ import (
 	"regexp"
 
 	"github.com/aiven/aiven-go-client"
+
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 
@@ -242,10 +243,7 @@ func setPrivilegeGrantsInSchema(d *schema.ResourceData, grants []PrivilegeGrant)
 	for _, grant := range grants {
 		res = append(res, privilegeGrantToSchema(grant))
 	}
-	if err := d.Set("privilege_grant", res); err != nil {
-		return err
-	}
-	return nil
+	return d.Set("privilege_grant", res)
 }
 
 func privilegeGrantToSchema(grant PrivilegeGrant) map[string]interface{} {
@@ -280,10 +278,7 @@ func setRoleGrantsInSchema(d *schema.ResourceData, grants []RoleGrant) error {
 	for _, grant := range grants {
 		res = append(res, roleGrantToSchema(grant))
 	}
-	if err := d.Set("role_grant", res); err != nil {
-		return err
-	}
-	return nil
+	return d.Set("role_grant", res)
 }
 
 func roleGrantToSchema(grant RoleGrant) map[string]interface{} {

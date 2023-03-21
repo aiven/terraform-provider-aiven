@@ -15,6 +15,6 @@ func TestProvider(t *testing.T) {
 	}
 }
 
-func TestProviderImpl(t *testing.T) {
+func TestProviderImpl(*testing.T) {
 	var _ = provider.Provider(version)
 }

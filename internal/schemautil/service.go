@@ -800,11 +800,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 		panic(fmt.Sprintf("Unsupported service type %v", serviceType))
 	}
 
-	if err := d.Set(serviceType, []map[string]interface{}{props}); err != nil {
-		return err
-	}
-
-	return nil
+	return d.Set(serviceType, []map[string]interface{}{props})
 }
 
 // IsUnknownRole checks if the database returned an error because of an unknown role

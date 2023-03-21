@@ -20,4 +20,4 @@ var testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServe
 // testAccPreCheck is a helper function that is called by acceptance tests prior to any test case execution.
 // It is used to perform any pre-test setup, such as environment variable validation.
 // nolint:unused // TODO: Remove this once we have acceptance tests.
-func testAccPreCheck(t *testing.T) {}
+func testAccPreCheck(*testing.T) {}

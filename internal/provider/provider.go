@@ -5,12 +5,13 @@ import (
 	"context"
 	"os"
 
-	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
 // AivenProvider is the provider implementation for Aiven.
@@ -27,14 +28,14 @@ type AivenProviderModel struct {
 }
 
 // Metadata returns information about the provider.
-func (p *AivenProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
+func (p *AivenProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
 	resp.TypeName = "aiven"
 
 	resp.Version = p.version
 }
 
 // Schema returns the schema for this provider's configuration.
-func (p *AivenProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+func (p *AivenProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"api_token": schema.StringAttribute{
@@ -88,12 +89,12 @@ func (p *AivenProvider) Configure(ctx context.Context, req provider.ConfigureReq
 }
 
 // Resources returns the resources supported by this provider.
-func (p *AivenProvider) Resources(ctx context.Context) []func() resource.Resource {
+func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 	return []func() resource.Resource{}
 }
 
 // DataSources returns the data sources supported by this provider.
-func (p *AivenProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
+func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{}
 }
 

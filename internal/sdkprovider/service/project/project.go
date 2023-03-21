@@ -369,11 +369,7 @@ func contactEmailListForTerraform(d *schema.ResourceData, field string, contactE
 		results = append(results, contactEmail.Email)
 	}
 
-	if err := d.Set(field, results); err != nil {
-		return err
-	}
-
-	return nil
+	return d.Set(field, results)
 }
 
 func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client, project *aiven.Project) diag.Diagnostics {

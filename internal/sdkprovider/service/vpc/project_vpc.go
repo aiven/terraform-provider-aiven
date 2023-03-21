@@ -6,10 +6,11 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
@@ -137,11 +138,8 @@ func copyVPCPropertiesFromAPIResponseToTerraform(d *schema.ResourceData, vpc *ai
 	if err := d.Set("network_cidr", vpc.NetworkCIDR); err != nil {
 		return err
 	}
-	if err := d.Set("state", vpc.State); err != nil {
-		return err
-	}
 
-	return nil
+	return d.Set("state", vpc.State)
 }
 
 // ProjectVPCActiveWaiter is used to wait for VPC to enter active state. This check needs to be

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aiven/aiven-go-client"
+
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
@@ -199,9 +200,6 @@ func copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(
 			endpointConfig[key] = fmt.Sprintf("%v", value)
 		}
 	}
-	if err := d.Set("endpoint_config", endpointConfig); err != nil {
-		return err
-	}
 
-	return nil
+	return d.Set("endpoint_config", endpointConfig)
 }
