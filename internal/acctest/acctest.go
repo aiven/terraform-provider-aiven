@@ -22,7 +22,7 @@ var (
 )
 
 func init() {
-	TestAccProvider = provider.Provider()
+	TestAccProvider = provider.Provider("test")
 	TestAccProviderFactories = map[string]func() (*schema.Provider, error){
 		"aiven": func() (*schema.Provider, error) {
 			return TestAccProvider, nil
