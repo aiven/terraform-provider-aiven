@@ -6,7 +6,7 @@ nav_order: 1
 
 # Changelog
 
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+## [4.1.2] - 2023-03-21
 
 - Fix for "to API" converter for objects and arrays
 
