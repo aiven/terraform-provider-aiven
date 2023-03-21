@@ -12,7 +12,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader/v0/dist"
 )
 
-const serviceIntegrationEndpointRegExp = "^[a-zA-Z0-9_-]*\\/{1}[a-zA-Z0-9_-]*$"
+var serviceIntegrationEndpointRegExp = regexp.MustCompile(`^[a-zA-Z0-9_-]*/[a-zA-Z0-9_-]*$`)
 
 var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 	"integration_id": {
@@ -25,7 +25,7 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 		Optional:    true,
 		Type:        schema.TypeString,
-		ValidateFunc: validation.StringMatch(regexp.MustCompile(serviceIntegrationEndpointRegExp),
+		ValidateFunc: validation.StringMatch(serviceIntegrationEndpointRegExp,
 			"endpoint id should have the following format: project_name/endpoint_id"),
 	},
 	"destination_service_name": {
@@ -51,7 +51,7 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 		Optional:    true,
 		Type:        schema.TypeString,
-		ValidateFunc: validation.StringMatch(regexp.MustCompile(serviceIntegrationEndpointRegExp),
+		ValidateFunc: validation.StringMatch(serviceIntegrationEndpointRegExp,
 			"endpoint id should have the following format: project_name/endpoint_id"),
 	},
 	"source_service_name": {

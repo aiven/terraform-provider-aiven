@@ -31,6 +31,9 @@ var cachedRepresentationMaps = make(map[SchemaType]map[string]interface{}, 3)
 // cachedRepresentationMapsMutex is a mutex for the cached representation maps.
 var cachedRepresentationMapsMutex = sync.Mutex{}
 
+// typeSuffixRegExp is a regular expression that matches type suffixes.
+var typeSuffixRegExp = regexp.MustCompile(`^.*_(boolean|integer|number|string|array|object)$`)
+
 // CachedRepresentationMap is a function that returns a cached representation map.
 func CachedRepresentationMap(st SchemaType) (map[string]interface{}, error) {
 	if _, ok := map[SchemaType]struct{}{
@@ -223,7 +226,7 @@ func DecodeKey(k string) string {
 
 // IsKeyTyped is a function that checks if a key is typed, i.e. has a type suffix in it.
 func IsKeyTyped(k string) bool {
-	return regexp.MustCompile(`^.*_(boolean|integer|number|string|array|object)$`).MatchString(k)
+	return typeSuffixRegExp.MatchString(k)
 }
 
 // SliceToKeyedMap is a function that converts a slice of strings to a map.

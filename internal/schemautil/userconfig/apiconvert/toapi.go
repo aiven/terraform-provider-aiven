@@ -17,6 +17,36 @@ type resourceDatable interface {
 	IsNewResource() bool
 }
 
+var (
+	// dotAnyDotNumberRegExp is a regular expression that matches a string that matches:
+	//   1. key.1.key2.0.key3.2.key.5
+	//   2. key123.0
+	//   3. key.1
+	//   4. key2.9
+	//   5. key..8
+	// and does not match:
+	//   1. key.key2
+	//   2. key.01
+	//   3. key.abc
+	//   4. .1
+	//   5. key.
+	dotAnyDotNumberRegExp = regexp.MustCompile(`.+\.[0-9]$`)
+
+	// dotNumberEOLOrDotRegExp is a regular expression that matches a string that matches:
+	//   1. .5 (match: .5)
+	//   2. .9. (match: .9.)
+	//   3. 0.1 (match: .1)
+	//   4. key.2 (match: .2)
+	//   5. 1.2.3 (match: .2.)
+	//   6. key..8 (match: .8)
+	// and does not match:
+	//   1. .123
+	//   2. 1.
+	//   3. 1..
+	//   4. .5a
+	dotNumberEOLOrDotRegExp = regexp.MustCompile(`\.\d($|\.)`)
+)
+
 // arrayItemToAPI is a function that converts array property of Terraform user configuration schema to API
 // compatible format.
 func arrayItemToAPI(
@@ -143,7 +173,7 @@ func objectItemToAPI(
 		return nil, false, fmt.Errorf("%s (item): properties key not found", fks)
 	}
 
-	if !regexp.MustCompile(`.+\.[0-9]$`).MatchString(fks) {
+	if !dotAnyDotNumberRegExp.MatchString(fks) {
 		fk = append(fk, "0")
 	}
 
@@ -180,7 +210,7 @@ func itemToAPI(
 	if o && len(fk) > 3 {
 		// We find the last index of the dot with a number after it, because we want to check if the parent object
 		// was changed.
-		match := regexp.MustCompile(`\.\d($|\.)`).FindAllStringIndex(fks, -1)
+		match := dotNumberEOLOrDotRegExp.FindAllStringIndex(fks, -1)
 		if match != nil {
 			// We check if fks exists, i.e. it was set by the user, because if it was not set, we don't want to send
 			// the value.
@@ -192,11 +222,6 @@ func itemToAPI(
 				o = false
 			}
 		}
-	}
-
-	// TODO: Remove this statement and the branch below it when we use actual types in the schema.
-	if va, ok := v.(string); ok && va == "" {
-		return res, o, nil
 	}
 
 	// Assert the type of the value to match.
