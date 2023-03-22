@@ -8,6 +8,10 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.1.3] - 2023-03-22
+
+- Fix the provider not working completely due to incorrect Plugin Framework configuration
+
 ## [4.1.2] - 2023-03-21
 
 - Fix for "to API" converter for objects and arrays
