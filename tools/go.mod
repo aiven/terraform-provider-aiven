@@ -3,7 +3,7 @@ module github.com/aiven/terraform-provider-aiven/tools
 go 1.18
 
 require (
-	github.com/golangci/golangci-lint v1.52.0
+	github.com/golangci/golangci-lint v1.52.1
 	github.com/hashicorp/terraform-plugin-docs v0.14.1
 	github.com/katbyte/terrafmt v0.5.2
 )
