@@ -87,6 +87,7 @@ Read-Only:
 - `ip_filter` (List of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--ip_filter_object))
 - `limits` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--limits))
+- `m3` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--m3))
 - `m3_version` (String)
 - `m3coordinator_enable_graphite_carbon_ingest` (Boolean)
 - `m3db_version` (String)
@@ -118,6 +119,23 @@ Read-Only:
 - `query_docs` (Number)
 - `query_require_exhaustive` (Boolean)
 - `query_series` (Number)
+
+
+<a id="nestedobjatt--m3db_user_config--m3"></a>
+### Nested Schema for `m3db_user_config.m3`
+
+Read-Only:
+
+- `tag_options` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--m3--tag_options))
+
+<a id="nestedobjatt--m3db_user_config--m3--tag_options"></a>
+### Nested Schema for `m3db_user_config.m3.tag_options`
+
+Read-Only:
+
+- `allow_tag_name_duplicates` (Boolean)
+- `allow_tag_value_empty` (Boolean)
+
 
 
 <a id="nestedobjatt--m3db_user_config--namespaces"></a>

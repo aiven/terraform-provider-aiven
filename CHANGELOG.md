@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `aiven_m3db` specific configuration options
+
 ## [4.1.3] - 2023-03-22
 
 - Fix the provider not working completely due to incorrect Plugin Framework configuration

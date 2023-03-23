@@ -13,6 +13,8 @@ import (
 	sdkprovider "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
 )
 
+//go:generate go test -tags userconfig ./internal/schemautil/userconfig
+
 // version is the version of the provider.
 var version = "dev"
 

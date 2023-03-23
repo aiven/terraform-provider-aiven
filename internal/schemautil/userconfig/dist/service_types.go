@@ -3705,6 +3705,72 @@ func ServiceTypeM3db() *schema.Schema {
 			Optional: true,
 			Type:     schema.TypeList,
 		},
+		"m3": {
+			Description: "M3 specific configuration options.",
+			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"tag_options": {
+				Description: "M3 Tag Options.",
+				DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+					"allow_tag_name_duplicates": {
+						Description: "Allows for duplicate tags to appear on series (not allowed by default).",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"allow_tag_value_empty": {
+						Description: "Allows for empty tags to appear on series (not allowed by default).",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+				}),
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"allow_tag_name_duplicates": {
+						Description: "Allows for duplicate tags to appear on series (not allowed by default).",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"allow_tag_value_empty": {
+						Description: "Allows for empty tags to appear on series (not allowed by default).",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+				}},
+				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
+			}}),
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"tag_options": {
+				Description: "M3 Tag Options.",
+				DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+					"allow_tag_name_duplicates": {
+						Description: "Allows for duplicate tags to appear on series (not allowed by default).",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"allow_tag_value_empty": {
+						Description: "Allows for empty tags to appear on series (not allowed by default).",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+				}),
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"allow_tag_name_duplicates": {
+						Description: "Allows for duplicate tags to appear on series (not allowed by default).",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"allow_tag_value_empty": {
+						Description: "Allows for empty tags to appear on series (not allowed by default).",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+				}},
+				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
+			}}},
+			MaxItems: 1,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
 		"m3_version": {
 			Deprecated:  "Usage of this field is discouraged.",
 			Description: "M3 major version (deprecated, use m3db_version).",
@@ -4192,12 +4258,12 @@ func ServiceTypeMysql() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"ignore_dbs": {
-					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment).",
+					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"method": {
-					Description: "The migration method to be used (currently supported only by Redis and MySQL service types).",
+					Description: "The migration method to be used (currently supported only by Redis, MySQL and PostgreSQL service types).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -4236,12 +4302,12 @@ func ServiceTypeMysql() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"ignore_dbs": {
-					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment).",
+					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"method": {
-					Description: "The migration method to be used (currently supported only by Redis and MySQL service types).",
+					Description: "The migration method to be used (currently supported only by Redis, MySQL and PostgreSQL service types).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -4898,13 +4964,13 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"email_sender_password": {
-					Description: "Sender email password for Opensearch alerts to authenticate with SMTP server.",
+					Description: "Sender password for Opensearch alerts to authenticate with SMTP server.",
 					Optional:    true,
 					Sensitive:   true,
 					Type:        schema.TypeString,
 				},
 				"email_sender_username": {
-					Description: "Sender email address for Opensearch alerts.",
+					Description: "Sender username for Opensearch alerts.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -5058,13 +5124,13 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"email_sender_password": {
-					Description: "Sender email password for Opensearch alerts to authenticate with SMTP server.",
+					Description: "Sender password for Opensearch alerts to authenticate with SMTP server.",
 					Optional:    true,
 					Sensitive:   true,
 					Type:        schema.TypeString,
 				},
 				"email_sender_username": {
-					Description: "Sender email address for Opensearch alerts.",
+					Description: "Sender username for Opensearch alerts.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -5482,12 +5548,12 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"ignore_dbs": {
-					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment).",
+					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"method": {
-					Description: "The migration method to be used (currently supported only by Redis and MySQL service types).",
+					Description: "The migration method to be used (currently supported only by Redis, MySQL and PostgreSQL service types).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -5526,12 +5592,12 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"ignore_dbs": {
-					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment).",
+					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"method": {
-					Description: "The migration method to be used (currently supported only by Redis and MySQL service types).",
+					Description: "The migration method to be used (currently supported only by Redis, MySQL and PostgreSQL service types).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -6453,12 +6519,12 @@ func ServiceTypeRedis() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"ignore_dbs": {
-					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment).",
+					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"method": {
-					Description: "The migration method to be used (currently supported only by Redis and MySQL service types).",
+					Description: "The migration method to be used (currently supported only by Redis, MySQL and PostgreSQL service types).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -6497,12 +6563,12 @@ func ServiceTypeRedis() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"ignore_dbs": {
-					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL only at the moment).",
+					Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"method": {
-					Description: "The migration method to be used (currently supported only by Redis and MySQL service types).",
+					Description: "The migration method to be used (currently supported only by Redis, MySQL and PostgreSQL service types).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
