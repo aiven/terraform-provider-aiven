@@ -83,6 +83,7 @@ Optional:
 - `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
 - `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'. (see [below for nested schema](#nestedblock--m3db_user_config--ip_filter_object))
 - `limits` (Block List, Max: 1) M3 limits. (see [below for nested schema](#nestedblock--m3db_user_config--limits))
+- `m3` (Block List, Max: 1) M3 specific configuration options. (see [below for nested schema](#nestedblock--m3db_user_config--m3))
 - `m3_version` (String, Deprecated) M3 major version (deprecated, use m3db_version).
 - `m3coordinator_enable_graphite_carbon_ingest` (Boolean) Enables access to Graphite Carbon plaintext metrics ingestion. It can be enabled only for services inside VPCs. The metrics are written to aggregated namespaces only.
 - `m3db_version` (String) M3 major version (the minimum compatible version).
@@ -117,6 +118,23 @@ Optional:
 - `query_docs` (Number) The maximum number of docs fetched in single query.
 - `query_require_exhaustive` (Boolean) When query limits are exceeded, whether to return error or return partial results.
 - `query_series` (Number) The maximum number of series fetched in single query.
+
+
+<a id="nestedblock--m3db_user_config--m3"></a>
+### Nested Schema for `m3db_user_config.m3`
+
+Optional:
+
+- `tag_options` (Block List, Max: 1) M3 Tag Options. (see [below for nested schema](#nestedblock--m3db_user_config--m3--tag_options))
+
+<a id="nestedblock--m3db_user_config--m3--tag_options"></a>
+### Nested Schema for `m3db_user_config.m3.tag_options`
+
+Optional:
+
+- `allow_tag_name_duplicates` (Boolean) Allows for duplicate tags to appear on series (not allowed by default).
+- `allow_tag_value_empty` (Boolean) Allows for empty tags to appear on series (not allowed by default).
+
 
 
 <a id="nestedblock--m3db_user_config--namespaces"></a>

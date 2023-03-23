@@ -148,8 +148,8 @@ Optional:
 - `cluster_max_shards_per_node` (Number) Controls the number of shards allowed in the cluster per data node.
 - `cluster_routing_allocation_node_concurrent_recoveries` (Number) How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to 2.
 - `email_sender_name` (String) This should be identical to the Sender name defined in Opensearch dashboards.
-- `email_sender_password` (String, Sensitive) Sender email password for Opensearch alerts to authenticate with SMTP server.
-- `email_sender_username` (String) Sender email address for Opensearch alerts.
+- `email_sender_password` (String, Sensitive) Sender password for Opensearch alerts to authenticate with SMTP server.
+- `email_sender_username` (String) Sender username for Opensearch alerts.
 - `http_max_content_length` (Number) Maximum content length for HTTP requests to the OpenSearch HTTP API, in bytes.
 - `http_max_header_size` (Number) The max size of allowed headers, in bytes.
 - `http_max_initial_line_length` (Number) The max length of an HTTP URL, in bytes.
