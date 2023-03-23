@@ -2,19 +2,20 @@ package kafka
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 )
 
 var aivenKafkaTopicSchema = map[string]*schema.Schema{
@@ -237,6 +238,25 @@ func ResourceKafkaTopic() *schema.Resource {
 		Schema:         aivenKafkaTopicSchema,
 		SchemaVersion:  1,
 		StateUpgraders: stateupgrader.KafkaTopic(),
+		CustomizeDiff: func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+			oldPartitions, newPartitions := d.GetChange("partitions")
+
+			assertedOldPartitions, ok := oldPartitions.(int)
+			if !ok {
+				return nil
+			}
+
+			assertedNewPartitions, ok := newPartitions.(int)
+			if !ok {
+				return nil
+			}
+
+			if assertedOldPartitions > assertedNewPartitions {
+				return errors.New("number of partitions cannot be decreased")
+			}
+
+			return nil
+		},
 	}
 }
 
