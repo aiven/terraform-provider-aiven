@@ -35,7 +35,7 @@ resource "aiven_kafka_connector" "kafka-os-con1" {
 
 ### Required
 
-- `config` (Map of String, Sensitive) The Kafka Connector configuration parameters.
+- `config` (Map of String) The Kafka Connector configuration parameters.
 - `connector_name` (String) The kafka connector name. This property cannot be changed, doing so forces recreation of the resource.
 - `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 - `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.

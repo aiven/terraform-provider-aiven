@@ -26,9 +26,8 @@ var aivenKafkaConnectorSchema = map[string]*schema.Schema{
 		Description: userconfig.Desc("The kafka connector name.").ForceNew().Build(),
 	},
 	"config": {
-		Type:      schema.TypeMap,
-		Required:  true,
-		Sensitive: true,
+		Type:     schema.TypeMap,
+		Required: true,
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
