@@ -90,6 +90,7 @@ Read-Only:
 - `binlog_retention_period` (Number)
 - `ip_filter` (List of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--ip_filter_object))
+- `ip_filter_string` (List of String)
 - `migration` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--migration))
 - `mysql` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--mysql))
 - `mysql_version` (String)

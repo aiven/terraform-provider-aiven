@@ -71,6 +71,7 @@ Read-Only:
 - `additional_backup_regions` (List of String)
 - `ip_filter` (List of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--clickhouse_user_config--ip_filter_object))
+- `ip_filter_string` (List of String)
 - `project_to_fork_from` (String)
 - `service_to_fork_from` (String)
 

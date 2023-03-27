@@ -99,6 +99,7 @@ Read-Only:
 - `enable_ipv6` (Boolean)
 - `ip_filter` (List of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--ip_filter_object))
+- `ip_filter_string` (List of String)
 - `migration` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--migration))
 - `pg` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pg))
 - `pg_read_replica` (Boolean)

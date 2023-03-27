@@ -88,6 +88,7 @@ Read-Only:
 - `influxdb` (List of Object) (see [below for nested schema](#nestedobjatt--influxdb_user_config--influxdb))
 - `ip_filter` (List of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--influxdb_user_config--ip_filter_object))
+- `ip_filter_string` (List of String)
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--influxdb_user_config--private_access))
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--influxdb_user_config--privatelink_access))
 - `project_to_fork_from` (String)
