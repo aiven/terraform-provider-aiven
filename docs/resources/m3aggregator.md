@@ -76,6 +76,7 @@ Optional:
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
 - `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
 - `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'. (see [below for nested schema](#nestedblock--m3aggregator_user_config--ip_filter_object))
+- `ip_filter_string` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
 - `m3_version` (String, Deprecated) M3 major version (deprecated, use m3aggregator_version).
 - `m3aggregator_version` (String) M3 major version (the minimum compatible version).
 - `static_ips` (Boolean) Use static public IP addresses.

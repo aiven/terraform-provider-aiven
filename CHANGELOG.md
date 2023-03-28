@@ -11,6 +11,7 @@ nav_order: 1
 - Add `aiven_m3db` specific configuration options
 - Fix `aiven_kafka_topic`: add client-side validation for the `partitions` field
 - Make `config` field of `aiven_kafka_connector` resource non-sensitive
+- Add string-suffixed alias fields for `ip_filter` and `namespaces` user config options
 
 ## [4.1.3] - 2023-03-22
 

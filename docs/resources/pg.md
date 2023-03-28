@@ -123,6 +123,7 @@ Optional:
 - `enable_ipv6` (Boolean) Register AAAA DNS records for the service, and allow IPv6 packets to service ports.
 - `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
 - `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'. (see [below for nested schema](#nestedblock--pg_user_config--ip_filter_object))
+- `ip_filter_string` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
 - `migration` (Block List, Max: 1) Migrate data from existing server. (see [below for nested schema](#nestedblock--pg_user_config--migration))
 - `pg` (Block List, Max: 1) postgresql.conf configuration values. (see [below for nested schema](#nestedblock--pg_user_config--pg))
 - `pg_read_replica` (Boolean, Deprecated) Use read_replica service integration instead.

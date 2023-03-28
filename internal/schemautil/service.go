@@ -674,6 +674,15 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		// TODO: Remove when the remote schema in Aiven begins to contain information about sensitive fields.
 		copySensitiveFields(oldUserConfigFirst, newUserConfigFirst)
 
+		// TODO: Remove when we no longer need to support the deprecated `ip_filter` field.
+		if _, exists := d.GetOk(serviceType + "_user_config.0.ip_filter_string"); exists {
+			stringSuffixForIPFilters(newUserConfigFirst)
+		}
+
+		if _, exists := d.GetOk(serviceType + "_user_config.0.rules.0.mapping.0.namespaces_string"); exists {
+			stringSuffixForNamespaces(newUserConfigFirst)
+		}
+
 		normalizeIPFilter(oldUserConfigFirst, newUserConfigFirst)
 	}
 

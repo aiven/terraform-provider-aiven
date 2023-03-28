@@ -212,14 +212,27 @@ func handleArrayProperty(
 			s[jen.Id("MaxItems")] = jen.Lit(mi)
 		}
 
+		os := jen.Dict{}
+		for k, v := range s {
+			os[k] = v
+		}
+
 		// TODO: Remove with the next major version.
-		if an == "ip_filter" || an == "namespaces" {
+		if an == "ip_filter" || (iof && an == "namespaces") {
 			s[jen.Id("Deprecated")] = jen.Lit(
-				fmt.Sprintf("This will be removed in v5.0.0 and replaced with %s_string instead.", an),
+				fmt.Sprintf(
+					"This will be removed in v5.0.0 and replaced with %s_string instead. "+
+						"When switching to %s_string, please apply the changes twice due to technical limitations.",
+					an, an,
+				),
 			)
 		}
 
 		r[an] = jen.Values(s)
+
+		if an == "ip_filter" || (iof && an == "namespaces") {
+			r[fmt.Sprintf("%s_string", an)] = jen.Values(os)
+		}
 	}
 
 	return r, nil

@@ -108,6 +108,7 @@ Read-Only:
 - `google_analytics_ua_id` (String)
 - `ip_filter` (List of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--ip_filter_object))
+- `ip_filter_string` (List of String)
 - `metrics_enabled` (Boolean)
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--private_access))
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--privatelink_access))

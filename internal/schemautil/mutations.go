@@ -27,17 +27,25 @@ func normalizeIPFilter(old, new map[string]interface{}) {
 	if oldIPFilters == nil || newIPFilters == nil {
 		var ok bool
 
-		oldIPFilters, ok = old["ip_filter_object"].([]interface{})
-		if !ok {
-			return
-		}
+		oldIPFilters, _ = old["ip_filter_string"].([]interface{})
 
-		newIPFilters, ok = new["ip_filter_object"].([]interface{})
-		if !ok {
-			return
-		}
+		newIPFilters, ok = new["ip_filter_string"].([]interface{})
 
-		fieldToWrite = "ip_filter_object"
+		fieldToWrite = "ip_filter_string"
+
+		if !ok {
+			oldIPFilters, ok = old["ip_filter_object"].([]interface{})
+			if !ok {
+				return
+			}
+
+			newIPFilters, ok = new["ip_filter_object"].([]interface{})
+			if !ok {
+				return
+			}
+
+			fieldToWrite = "ip_filter_object"
+		}
 	}
 
 	var normalizedIPFilters []interface{}
@@ -55,7 +63,7 @@ func normalizeIPFilter(old, new map[string]interface{}) {
 			var comparableN interface{}
 
 			// If we're dealing with a string format, we need to compare the values directly.
-			if fieldToWrite == "ip_filter" {
+			if fieldToWrite == "ip_filter" || fieldToWrite == "ip_filter_string" {
 				comparableO = o
 
 				comparableN = n
@@ -91,7 +99,7 @@ func normalizeIPFilter(old, new map[string]interface{}) {
 
 			var comparableN interface{}
 
-			if fieldToWrite == "ip_filter" {
+			if fieldToWrite == "ip_filter" || fieldToWrite == "ip_filter_string" {
 				comparableO = o
 
 				comparableN = n
@@ -114,4 +122,30 @@ func normalizeIPFilter(old, new map[string]interface{}) {
 	}
 
 	new[fieldToWrite] = append(normalizedIPFilters, nonexistentIPFilters...)
+}
+
+// stringSuffixForIPFilters adds a _string suffix to the IP filters.
+func stringSuffixForIPFilters(new map[string]interface{}) {
+	ipFilters := new["ip_filter"].([]interface{})
+
+	if ipFilters == nil {
+		return
+	}
+
+	new["ip_filter_string"] = ipFilters
+
+	new["ip_filter"] = nil
+}
+
+// stringSuffixForNamespaces adds a _string suffix to the namespaces.
+func stringSuffixForNamespaces(new map[string]interface{}) {
+	namespaces := new["namespaces"].([]interface{})
+
+	if namespaces == nil {
+		return
+	}
+
+	new["namespace_string"] = namespaces
+
+	new["namespaces"] = nil
 }
