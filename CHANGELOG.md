@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.2.0] - 2023-03-29
+
 - Add `aiven_m3db` specific configuration options
 - Fix `aiven_kafka_topic`: add client-side validation for the `partitions` field
 - Make `config` field of `aiven_kafka_connector` resource non-sensitive
