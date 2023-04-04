@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `ip_filter`, `ip_filter_string`, `ip_filter_object` sorting causes unexpected diff
+
 ## [4.2.0] - 2023-03-29
 
 - Add `aiven_m3db` specific configuration options

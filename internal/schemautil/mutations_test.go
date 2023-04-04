@@ -123,8 +123,8 @@ func TestNormalizeIpFilter(t *testing.T) {
 			want: map[string]interface{}{
 				"foo": "bar",
 				"ip_filter": []interface{}{
-					"1.3.3.8/32",
 					"1.3.3.7/32",
+					"1.3.3.8/32",
 				},
 			},
 		},
@@ -150,8 +150,8 @@ func TestNormalizeIpFilter(t *testing.T) {
 			want: map[string]interface{}{
 				"foo": "bar",
 				"ip_filter": []interface{}{
-					"1.3.3.8/32",
 					"1.3.3.7/32",
+					"1.3.3.8/32",
 					"1.3.3.9/32",
 				},
 			},
@@ -190,11 +190,11 @@ func TestNormalizeIpFilter(t *testing.T) {
 				"foo": "bar",
 				"ip_filter_object": []interface{}{
 					map[string]interface{}{
-						"network":     "1.3.3.8/32",
+						"network":     "1.3.3.7/32",
 						"description": "foo",
 					},
 					map[string]interface{}{
-						"network":     "1.3.3.7/32",
+						"network":     "1.3.3.8/32",
 						"description": "foo",
 					},
 				},
@@ -238,11 +238,11 @@ func TestNormalizeIpFilter(t *testing.T) {
 				"foo": "bar",
 				"ip_filter_object": []interface{}{
 					map[string]interface{}{
-						"network":     "1.3.3.8/32",
+						"network":     "1.3.3.7/32",
 						"description": "foo",
 					},
 					map[string]interface{}{
-						"network":     "1.3.3.7/32",
+						"network":     "1.3.3.8/32",
 						"description": "foo",
 					},
 					map[string]interface{}{
