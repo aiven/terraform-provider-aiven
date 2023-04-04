@@ -199,7 +199,7 @@ func itemToAPI(
 
 	fks := strings.Join(fk, ".")
 
-	// We omit the value if has no changes in the Terraform user configuration.
+	// We omit the value if it has no changes in the Terraform user configuration.
 	o := !d.HasChange(fks)
 
 	// We need to make sure that if there were any changes to the parent object, we also send the value, even if it
@@ -270,6 +270,69 @@ func itemToAPI(
 	return res, o, nil
 }
 
+// processManyToOneKeys is a function that processes many to one keys.
+// It processes the provided result with keys in their flattened form and sets the many to one key to the value of the
+// first flattened key that is not empty, and uses it to send the value to the API.
+func processManyToOneKeys(res map[string]interface{}) {
+	// mto is a map of many to one keys that exist in the provided properties.
+	mto := make(map[string][]string)
+
+	// TODO: Remove all ip_filter and namespaces special cases when these fields are removed.
+	for k, v := range res {
+		// If the value is a map, we process it recursively.
+		if va, ok := v.(map[string]interface{}); ok {
+			processManyToOneKeys(va)
+		}
+
+		// We ignore untyped keys, because they cannot be many to one.
+		if !userconfig.IsKeyTyped(k) && k != "ip_filter" && k != "namespaces" {
+			continue
+		}
+
+		// rk is the real key, i.e. the key without the suffix.
+		rk := k
+
+		if k != "ip_filter" && k != "namespaces" {
+			rk = k[:strings.LastIndexByte(k, '_')]
+		}
+
+		// If the key does not exist in the map, we create it.
+		if _, ok := mto[rk]; !ok {
+			mto[rk] = []string{}
+		}
+
+		// We append the key to the list of keys that are many to one.
+		mto[rk] = append(mto[rk], k)
+	}
+
+	// At this point mto looks like this, or similar:
+	// map[string][]string{
+	//  // ip_filter has two keys set in the user configuration, so we use the first one that is not empty,
+	//  // e.g. when user switches from ip_filter to ip_filter_object, we use ip_filter_object.
+	// 	"ip_filter": []string{"ip_filter", "ip_filter_object"},
+	//  // namespaces has only one key set in the user configuration, so we use it.
+	// 	"namespaces": []string{"namespaces"},
+	// }
+
+	// We iterate over the map of many to one keys and process them.
+	for k, v := range mto {
+		// nv is the new value of the key.
+		var nv interface{}
+
+		for _, vn := range v {
+			// If the many to one key is not set or is empty, we skip it by removing it from the map.
+			if rv, ok := res[vn].([]interface{}); ok && len(rv) > 0 {
+				nv = rv
+
+				delete(res, vn)
+			}
+		}
+
+		// Finally, we set the new value of the key.
+		res[k] = nv
+	}
+}
+
 // propsToAPI is a function that converts properties of Terraform user configuration schema to API compatible format.
 func propsToAPI(
 	n string,
@@ -329,9 +392,11 @@ func propsToAPI(
 		}
 
 		if !o {
-			res[rk] = cv
+			res[k] = cv
 		}
 	}
+
+	processManyToOneKeys(res)
 
 	return res, nil
 }
