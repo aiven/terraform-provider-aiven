@@ -9,8 +9,7 @@ import (
 	"github.com/docker/go-units"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
+	"golang.org/x/exp/slices"
 )
 
 func ServiceIntegrationShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
@@ -166,113 +165,68 @@ func CustomizeDiffCheckStaticIPDisassociation(_ context.Context, d *schema.Resou
 	return nil
 }
 
-// typedKeys is a helper function that returns a list of typed keys from cty.Value map.
-func typedKeys(m map[string]cty.Value) map[string]struct{} {
-	tks := map[string]struct{}{}
+// CustomizeDiffDisallowMultipleManyToOneKeys checks that we don't have multiple keys that are going to be converted to
+// a single key in the API request, e.g. 'ip_filter' and 'ip_filter_object' in the same diff.
+func CustomizeDiffDisallowMultipleManyToOneKeys(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	for k, v := range d.GetRawConfig().AsValueMap() {
+		if strings.Contains(k, "_user_config") { // we only care about *_user_config
+			if err := checkForMultipleValues(v); err != nil {
+				return err
+			}
+		}
 
-	for k, v := range m {
+	}
+
+	return nil
+}
+
+// checkForMultipleValues checks for multiple values in a cty.Value
+// It returns an error if multiple values are set for 'ip_filter' or 'namespaces'
+func checkForMultipleValues(v cty.Value) error {
+	// If v is null or empty, do not continue
+	if v.IsNull() || len(v.AsValueSlice()) == 0 {
+		return nil
+	}
+
+	val := v.AsValueSlice()
+	// If the first element is not iterable, do not continue
+	if !val[0].CanIterateElements() {
+		return nil
+	}
+
+	ipFilterSetBy, namespacesSetBy := "", ""
+	for k, v := range val[0].AsValueMap() {
 		if v.IsNull() {
 			continue
 		}
 
-		if v.CanIterateElements() {
-			vs := v.AsValueSlice()
-
-			if len(vs) == 0 {
-				continue
-			}
-
-			vsf := vs[0]
-
-			if vsf.CanIterateElements() {
-				vsfm := vsf.AsValueMap()
-
-				if len(vsfm) != 0 {
-					ntks := typedKeys(vsfm)
-
-					if len(ntks) != 0 {
-						for nk := range ntks {
-							tks[nk] = struct{}{}
-						}
-					}
-				}
-			}
-		}
-
-		ak := k
-
-		// TODO: Remove this in the next major version.
-		if k == "ip_filter" || k == "namespaces" {
-			ak = fmt.Sprintf("%s_string", k)
-		}
-
-		if userconfig.IsKeyTyped(ak) {
-			tks[ak] = struct{}{}
-		}
-	}
-
-	return tks
-}
-
-// CustomizeDiffDisallowMultipleManyToOneKeys checks that we don't have multiple keys that are going to be converted to
-// a single key in the API request, e.g. 'ip_filter' and 'ip_filter_object' in the same diff.
-func CustomizeDiffDisallowMultipleManyToOneKeys(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
-	ks := d.GetRawConfig().AsValueMap()
-
-	tks := map[string]struct{}{}
-
-	for k, v := range ks {
-		if !strings.Contains(k, "_user_config") {
+		// If v is iterable and empty, skip to next iteration
+		if v.CanIterateElements() && len(v.AsValueSlice()) == 0 {
 			continue
 		}
 
-		va := v.AsValueSlice()
-
-		if len(va) == 0 {
-			continue
+		// Checking for IP filters duplicates
+		if slices.Contains([]string{"ip_filter", "ip_filter_string", "ip_filter_object"}, k) {
+			if ipFilterSetBy != "" {
+				return fmt.Errorf("cannot set '%s' and '%s'", k, ipFilterSetBy)
+			}
+			ipFilterSetBy = k
 		}
 
-		tks = typedKeys(va[0].AsValueMap())
-	}
-
-	if len(tks) == 0 {
-		return nil
-	}
-
-	em := map[string]string{}
-
-	for k := range tks {
-		ak := k[:strings.LastIndexByte(k, '_')]
-
-		if sv, ok := em[ak]; ok {
-			asv := sv
-
-			aak := k
-
-			// TODO: Remove this in the next major version.
-			if sv == "ip_filter_string" {
-				asv = "ip_filter"
+		// Checking for namespaces duplicates
+		if slices.Contains([]string{"namespaces", "namespaces_string", "namespaces_object"}, k) {
+			if namespacesSetBy != "" {
+				return fmt.Errorf("cannot set '%s' and '%s'", k, namespacesSetBy)
 			}
-
-			// TODO: Remove this in the next major version.
-			if k == "ip_filter_string" {
-				aak = "ip_filter"
-			}
-
-			// TODO: Remove this in the next major version.
-			if sv == "namespaces_string" {
-				asv = "namespaces"
-			}
-
-			// TODO: Remove this in the next major version.
-			if k == "namespaces_string" {
-				aak = "namespaces"
-			}
-
-			return fmt.Errorf("cannot set both '%s' and '%s'", asv, aak)
+			namespacesSetBy = k
 		}
 
-		em[ak] = k
+		// If the data structure allows going deeper recursively that do so
+		if v.Type().IsListType() || v.Type().IsSetType() {
+			if err := checkForMultipleValues(v); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil

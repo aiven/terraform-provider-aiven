@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+  -Fix add conflicting with logic for M3DB `namespaces` and `ip_filters`
+
 ## [4.2.0] - 2023-03-29
 
 - Add `aiven_m3db` specific configuration options
