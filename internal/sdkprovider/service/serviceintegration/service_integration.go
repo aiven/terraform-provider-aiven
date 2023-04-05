@@ -289,6 +289,7 @@ func resourceServiceIntegrationCheckForPreexistingResource(_ context.Context, d 
 	return nil, nil
 }
 
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.ResourceData, m interface{}) error {
 	const (
 		active    = "ACTIVE"

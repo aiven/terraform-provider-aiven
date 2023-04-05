@@ -50,6 +50,7 @@ func ResourceAzurePrivatelinkConnectionApproval() *schema.Resource {
 	}
 }
 
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func waitForConnectionState(_ context.Context, client *aiven.Client, project string, service string, t time.Duration, pending []string, target []string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending: pending,

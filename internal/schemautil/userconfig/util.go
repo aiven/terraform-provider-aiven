@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/aiven/aiven-go-client/tools/exp/dist"
+	"github.com/aiven/go-api-schemas/pkg/dist"
 	"gopkg.in/yaml.v3"
 )
 

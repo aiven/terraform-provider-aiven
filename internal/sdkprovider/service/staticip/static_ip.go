@@ -142,6 +142,7 @@ func resourceStaticIPDelete(_ context.Context, d *schema.ResourceData, m interfa
 	return nil
 }
 
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 

@@ -162,6 +162,7 @@ func resourceAzurePrivatelinkUpdate(ctx context.Context, d *schema.ResourceData,
 }
 
 // waitForAzurePrivatelinkToBeActive waits until the Azure privatelink is active
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func waitForAzurePrivatelinkToBeActive(client *aiven.Client, project string, serviceName string, t time.Duration) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending: []string{"creating"},
@@ -182,6 +183,7 @@ func waitForAzurePrivatelinkToBeActive(client *aiven.Client, project string, ser
 	}
 }
 
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceAzurePrivatelinkDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())

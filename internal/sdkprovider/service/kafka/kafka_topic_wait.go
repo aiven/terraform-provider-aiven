@@ -34,6 +34,7 @@ func newKafkaTopicAvailabilityWaiter(client *aiven.Client, project, serviceName,
 }
 
 // RefreshFunc will call the Aiven client and refresh it's state.
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func (w *kafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		cache := getTopicCache()
@@ -105,6 +106,7 @@ func (w *kafkaTopicAvailabilityWaiter) refresh() error {
 }
 
 // Conf sets up the configuration to refresh.
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func (w *kafkaTopicAvailabilityWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
 	log.Printf("[DEBUG] Kafka Topic availability waiter timeout %.0f minutes", timeout.Minutes())
 
