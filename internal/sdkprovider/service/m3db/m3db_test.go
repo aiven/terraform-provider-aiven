@@ -21,6 +21,139 @@ func TestAccAiven_m3db(t *testing.T) {
 		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
+				Config: `
+resource "aiven_m3db" "bar" {
+  project      = "test"
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-8"
+  service_name = "test-1"
+
+  m3db_user_config {
+    rules {
+      mapping {
+        filter     = "test"
+        namespaces = ["test"]
+        namespaces_object {
+          retention  = "40h"
+          resolution = "30s"
+        }
+      }
+    }
+  }
+}`,
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ExpectError:        regexp.MustCompile("cannot set"),
+			},
+			{
+				Config: `
+resource "aiven_m3db" "bar" {
+  project      = "test"
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-8"
+  service_name = "test-1"
+
+  m3db_user_config {
+    rules {
+      mapping {
+        filter            = "test"
+        namespaces_string = ["test"]
+        namespaces_object {
+          retention  = "40h"
+          resolution = "30s"
+        }
+      }
+    }
+  }
+}`,
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ExpectError:        regexp.MustCompile("cannot set"),
+			},
+			{
+				Config: `
+resource "aiven_m3db" "bar" {
+  project      = "test"
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-8"
+  service_name = "test-1"
+
+  m3db_user_config {
+    rules {
+      mapping {
+        filter            = "test"
+        namespaces_string = ["test"]
+        namespaces        = ["test"]
+      }
+    }
+  }
+}`,
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ExpectError:        regexp.MustCompile("cannot set"),
+			},
+			{
+				Config: `
+resource "aiven_m3db" "bar" {
+  project      = "test"
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-8"
+  service_name = "test-1"
+
+  m3db_user_config {
+    ip_filter = ["0.0.0.0/24"]
+    ip_filter_object {
+      network = "0.0.0.0/24"
+    }
+  }
+}`,
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ExpectError:        regexp.MustCompile("cannot set"),
+			},
+			{
+				Config: `
+resource "aiven_m3db" "bar" {
+  project      = "test"
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-8"
+  service_name = "test-1"
+
+  m3db_user_config {
+    ip_filter_string = ["0.0.0.0/24"]
+    ip_filter_object {
+      network = "0.0.0.0/24"
+    }
+  }
+}`,
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ExpectError:        regexp.MustCompile("cannot set"),
+			},
+			{
+				Config: `
+resource "aiven_m3db" "bar" {
+  project      = "test"
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-8"
+  service_name = "test-1"
+
+  m3db_user_config {
+    ip_filter        = ["0.0.0.0/24"]
+    ip_filter_string = ["0.0.0.0/24"]
+  }
+}`,
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ExpectError:        regexp.MustCompile("cannot set"),
+			},
+			{
+				Config:             testAccM3DBDoubleTagResource(rName),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ExpectError:        regexp.MustCompile("tag keys should be unique"),
+			},
+			{
 				Config: testAccM3DBResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					acctest3.TestAccCheckAivenServiceCommonAttributes("data.aiven_m3db.common"),
@@ -38,12 +171,6 @@ func TestAccAiven_m3db(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "service_port"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_uri"),
 				),
-			},
-			{
-				Config:             testAccM3DBDoubleTagResource(rName),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: true,
-				ExpectError:        regexp.MustCompile("tag keys should be unique"),
 			},
 		},
 	})
