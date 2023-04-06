@@ -152,6 +152,7 @@ type ProjectVPCActiveWaiter struct {
 }
 
 // RefreshFunc will call the Aiven client and refresh it's state.
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func (w *ProjectVPCActiveWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		vpc, err := w.Client.VPCs.Get(w.Project, w.VPCID)
@@ -166,6 +167,7 @@ func (w *ProjectVPCActiveWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 // Conf sets up the configuration to refresh.
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func (w *ProjectVPCActiveWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
 	log.Printf("[DEBUG] Active waiter timeout %.0f minutes", timeout.Minutes())
 
@@ -187,6 +189,7 @@ type ProjectVPCDeleteWaiter struct {
 }
 
 // RefreshFunc will call the Aiven client and refresh it's state.
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func (w *ProjectVPCDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		vpc, err := w.Client.VPCs.Get(w.Project, w.VPCID)
@@ -221,6 +224,7 @@ func (w *ProjectVPCDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 // Conf sets up the configuration to refresh.
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func (w *ProjectVPCDeleteWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
 	log.Printf("[DEBUG] Delete waiter timeout %.0f minutes", timeout.Minutes())
 

@@ -21,6 +21,7 @@ type kafkaTopicCreateWaiter struct {
 }
 
 // RefreshFunc will call the Aiven client and refresh it's state.
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func (w *kafkaTopicCreateWaiter) RefreshFunc() resource.StateRefreshFunc {
 	// Should check if topic does not exist before create
 	// Assumes it exists, should prove it doesn't by getting no error
@@ -67,6 +68,7 @@ func (w *kafkaTopicCreateWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 // Conf sets up the configuration to refresh.
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func (w *kafkaTopicCreateWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
 	log.Printf("[DEBUG] Create waiter timeout %.0f minutes", timeout.Minutes())
 

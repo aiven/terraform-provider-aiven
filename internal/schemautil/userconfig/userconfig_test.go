@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/tools/exp/dist"
+	"github.com/aiven/go-api-schemas/pkg/dist"
 	"github.com/dave/jennifer/jen"
 	"github.com/ettle/strcase"
 	"golang.org/x/exp/maps"

@@ -21,6 +21,7 @@ const (
 	aivenServicesStartingState = "WAITING_FOR_SERVICES"
 )
 
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, m interface{}) (*aiven.Service, error) {
 	client := m.(*aiven.Client)
 
@@ -77,6 +78,7 @@ func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, m inter
 	return aux.(*aiven.Service), nil
 }
 
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func WaitForServiceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) (*aiven.Service, error) {
 	client := m.(*aiven.Client)
 
@@ -128,6 +130,7 @@ func WaitForServiceUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	return aux.(*aiven.Service), nil
 }
 
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func WaitStaticIpsDissassociation(ctx context.Context, d *schema.ResourceData, m interface{}) error {
 	timeout := d.Timeout(schema.TimeoutDelete)
 	log.Printf("[DEBUG] Static Ip dissassociation timeout %.0f minutes", timeout.Minutes())
@@ -157,6 +160,7 @@ func WaitStaticIpsDissassociation(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func WaitForDeletion(ctx context.Context, d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 

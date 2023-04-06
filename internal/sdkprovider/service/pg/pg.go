@@ -191,6 +191,7 @@ type ServiceTaskWaiter struct {
 }
 
 // RefreshFunc will call the Aiven client and refresh its state.
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func (w *ServiceTaskWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		t, err := w.Client.ServiceTask.Get(
@@ -211,6 +212,7 @@ func (w *ServiceTaskWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 // Conf sets up the configuration to refresh.
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func (w *ServiceTaskWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:                   []string{"IN_PROGRESS"},

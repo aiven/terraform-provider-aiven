@@ -147,6 +147,7 @@ func flattenKafkaConnectorTasks(r *aiven.KafkaConnector) []map[string]interface{
 	return tasks
 }
 
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceKafkaConnectorRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project, serviceName, connectorName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {

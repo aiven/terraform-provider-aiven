@@ -68,6 +68,7 @@ func ResourceGCPVPCPeeringConnection() *schema.Resource {
 	}
 }
 
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var (
 		pc  *aiven.VPCPeeringConnection
@@ -169,6 +170,7 @@ func resourceGCPVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceDa
 	return copyGCPVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, p.projectName, p.vpcID)
 }
 
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceGCPVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	p, err := parsePeerVPCID(d.Id())

@@ -83,6 +83,7 @@ func ResourceAzureVPCPeeringConnection() *schema.Resource {
 	}
 }
 
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	projectName, vpcID, err := schemautil.SplitResourceID2(d.Get("vpc_id").(string))
@@ -195,6 +196,7 @@ func resourceAzureVPCPeeringConnectionRead(_ context.Context, d *schema.Resource
 	return copyAzureVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, p.projectName, p.vpcID)
 }
 
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceAzureVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 

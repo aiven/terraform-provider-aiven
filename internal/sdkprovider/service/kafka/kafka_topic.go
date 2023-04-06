@@ -548,6 +548,7 @@ type TopicDeleteWaiter struct {
 }
 
 // RefreshFunc will call the Aiven client and refresh it's state.
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func (w *TopicDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		err := w.Client.KafkaTopics.Delete(w.ProjectName, w.ServiceName, w.TopicName)
@@ -562,6 +563,7 @@ func (w *TopicDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 // Conf sets up the configuration to refresh.
+// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func (w *TopicDeleteWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
 	log.Printf("[DEBUG] Delete waiter timeout %.0f minutes", timeout.Minutes())
 
