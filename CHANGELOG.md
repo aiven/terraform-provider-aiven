@@ -7,9 +7,12 @@ nav_order: 1
 # Changelog
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
-- Add gcp virtual network peering example
 
-  -Fix add conflicting with logic for M3DB `namespaces` and `ip_filters`
+## [4.2.1] - 2023-04-06
+
+- Add GCP virtual network peering example
+- Fix add conflicting with logic for M3DB `namespaces` and `ip_filters`
+- Fix double apply necessity when migrating from `ip_filter` to `ip_filter_object` and similar fields
 
 ## [4.2.0] - 2023-03-29
 
@@ -17,7 +20,6 @@ nav_order: 1
 - Fix `aiven_kafka_topic`: add client-side validation for the `partitions` field
 - Make `config` field of `aiven_kafka_connector` resource non-sensitive
 - Add string-suffixed alias fields for `ip_filter` and `namespaces` user config options
-- Fix double apply necessity when migrating from `ip_filter` to `ip_filter_object` and similar fields
 
 ## [4.1.3] - 2023-03-22
 
