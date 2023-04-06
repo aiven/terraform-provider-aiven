@@ -220,11 +220,7 @@ func handleArrayProperty(
 		// TODO: Remove with the next major version.
 		if an == "ip_filter" || (iof && an == "namespaces") {
 			s[jen.Id("Deprecated")] = jen.Lit(
-				fmt.Sprintf(
-					"This will be removed in v5.0.0 and replaced with %s_string instead. "+
-						"When switching to %s_string, please apply the changes twice due to technical limitations.",
-					an, an,
-				),
+				fmt.Sprintf("This will be removed in v5.0.0 and replaced with %s_string instead.", an),
 			)
 		}
 

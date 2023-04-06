@@ -17,6 +17,7 @@ nav_order: 1
 - Fix `aiven_kafka_topic`: add client-side validation for the `partitions` field
 - Make `config` field of `aiven_kafka_connector` resource non-sensitive
 - Add string-suffixed alias fields for `ip_filter` and `namespaces` user config options
+- Fix double apply necessity when migrating from `ip_filter` to `ip_filter_object` and similar fields
 
 ## [4.1.3] - 2023-03-22
 

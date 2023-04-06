@@ -3,8 +3,9 @@ package apiconvert
 import (
 	"testing"
 
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/google/go-cmp/cmp"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 // testResourceData is a resourceDatable compatible struct for testing.
@@ -583,6 +584,73 @@ func TestToAPI(t *testing.T) {
 			want: map[string]any{},
 		},
 		{
+			name: "migration from strings to objects in many to one array",
+			args: args{
+				st: userconfig.ServiceTypes,
+				n:  "m3db",
+				d: newTestResourceData(
+					map[string]interface{}{
+						"m3db_user_config": []interface{}{
+							map[string]interface{}{
+								"ip_filter": []interface{}{},
+								"ip_filter_object": []interface{}{
+									map[string]interface{}{
+										"description": "test",
+										"network":     "0.0.0.0/0",
+									},
+									map[string]interface{}{
+										"description": "",
+										"network":     "10.20.0.0/16",
+									},
+									map[string]interface{}{
+										"description": "foo",
+										"network":     "1.3.3.7/32",
+									},
+								},
+							},
+						},
+					},
+					map[string]struct{}{
+						"m3db_user_config":                                  {},
+						"m3db_user_config.0.ip_filter.0":                    {},
+						"m3db_user_config.0.ip_filter.1":                    {},
+						"m3db_user_config.0.ip_filter.2":                    {},
+						"m3db_user_config.0.ip_filter_object.0":             {},
+						"m3db_user_config.0.ip_filter_object.0.description": {},
+						"m3db_user_config.0.ip_filter_object.0.network":     {},
+						"m3db_user_config.0.ip_filter_object.1":             {},
+						"m3db_user_config.0.ip_filter_object.1.description": {},
+						"m3db_user_config.0.ip_filter_object.1.network":     {},
+					},
+					map[string]struct{}{
+						"m3db_user_config.0.ip_filter":                      {},
+						"m3db_user_config.0.ip_filter_object":               {},
+						"m3db_user_config.0.ip_filter_object.1":             {},
+						"m3db_user_config.0.ip_filter_object.1.description": {},
+						"m3db_user_config.0.ip_filter_object.1.network":     {},
+						"m3db_user_config.0.ip_filter_object.2":             {},
+					},
+					false,
+				),
+			},
+			want: map[string]any{
+				"ip_filter": []interface{}{
+					map[string]interface{}{
+						"description": "test",
+						"network":     "0.0.0.0/0",
+					},
+					map[string]interface{}{
+						"description": "",
+						"network":     "10.20.0.0/16",
+					},
+					map[string]interface{}{
+						"description": "foo",
+						"network":     "1.3.3.7/32",
+					},
+				},
+			},
+		},
+		{
 			name: "strings in many to one array via one_of",
 			args: args{
 				st: userconfig.ServiceTypes,
@@ -811,6 +879,67 @@ func TestToAPI(t *testing.T) {
 				),
 			},
 			want: map[string]any{},
+		},
+		{
+			name: "migration from strings to objects in many to one array via one_of",
+			args: args{
+				st: userconfig.ServiceTypes,
+				n:  "m3db",
+				d: newTestResourceData(
+					map[string]interface{}{
+						"m3db_user_config": []interface{}{
+							map[string]interface{}{
+								"rules": []interface{}{
+									map[string]interface{}{
+										"mapping": []interface{}{
+											map[string]interface{}{
+												"namespaces": []interface{}{},
+												"namespaces_object": []interface{}{
+													map[string]interface{}{
+														"resolution": "30s",
+														"retention":  "48h",
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					map[string]struct{}{
+						"m3db_user_config": {},
+						"m3db_user_config.0.rules.0.mapping.0.namespaces.0":                   {},
+						"m3db_user_config.0.rules.0.mapping.0.namespaces_object.0.resolution": {},
+						"m3db_user_config.0.rules.0.mapping.0.namespaces_object.0.retention":  {},
+					},
+					map[string]struct{}{
+						"m3db_user_config.0.rules":                                            {},
+						"m3db_user_config.0.rules.0":                                          {},
+						"m3db_user_config.0.rules.0.mapping":                                  {},
+						"m3db_user_config.0.rules.0.mapping.0":                                {},
+						"m3db_user_config.0.rules.0.mapping.0.namespaces_object":              {},
+						"m3db_user_config.0.rules.0.mapping.0.namespaces_object.0":            {},
+						"m3db_user_config.0.rules.0.mapping.0.namespaces_object.0.resolution": {},
+						"m3db_user_config.0.rules.0.mapping.0.namespaces_object.0.retention":  {},
+					},
+					false,
+				),
+			},
+			want: map[string]any{
+				"rules": map[string]interface{}{
+					"mapping": []interface{}{
+						map[string]interface{}{
+							"namespaces": []interface{}{
+								map[string]interface{}{
+									"resolution": "30s",
+									"retention":  "48h",
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 

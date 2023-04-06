@@ -63,7 +63,7 @@ func ServiceTypeCassandra() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"ip_filter": {
-			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead. When switching to ip_filter_string, please apply the changes twice due to technical limitations.",
+			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
@@ -185,7 +185,7 @@ func ServiceTypeClickhouse() *schema.Schema {
 			Type:        schema.TypeList,
 		},
 		"ip_filter": {
-			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead. When switching to ip_filter_string, please apply the changes twice due to technical limitations.",
+			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
@@ -666,7 +666,7 @@ func ServiceTypeElasticsearch() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"ip_filter": {
-			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead. When switching to ip_filter_string, please apply the changes twice due to technical limitations.",
+			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
@@ -932,7 +932,7 @@ func ServiceTypeFlink() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"ip_filter": {
-			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead. When switching to ip_filter_string, please apply the changes twice due to technical limitations.",
+			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
@@ -1666,7 +1666,7 @@ func ServiceTypeGrafana() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"ip_filter": {
-			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead. When switching to ip_filter_string, please apply the changes twice due to technical limitations.",
+			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
@@ -1986,7 +1986,7 @@ func ServiceTypeInfluxdb() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"ip_filter": {
-			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead. When switching to ip_filter_string, please apply the changes twice due to technical limitations.",
+			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
@@ -2124,7 +2124,7 @@ func ServiceTypeKafka() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"ip_filter": {
-			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead. When switching to ip_filter_string, please apply the changes twice due to technical limitations.",
+			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
@@ -3126,7 +3126,7 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 			Type:        schema.TypeList,
 		},
 		"ip_filter": {
-			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead. When switching to ip_filter_string, please apply the changes twice due to technical limitations.",
+			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
@@ -3454,7 +3454,7 @@ func ServiceTypeKafkaMirrormaker() *schema.Schema {
 			Type:        schema.TypeList,
 		},
 		"ip_filter": {
-			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead. When switching to ip_filter_string, please apply the changes twice due to technical limitations.",
+			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
@@ -3632,7 +3632,7 @@ func ServiceTypeM3aggregator() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"ip_filter": {
-			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead. When switching to ip_filter_string, please apply the changes twice due to technical limitations.",
+			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
@@ -3716,7 +3716,7 @@ func ServiceTypeM3db() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"ip_filter": {
-			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead. When switching to ip_filter_string, please apply the changes twice due to technical limitations.",
+			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
@@ -4147,7 +4147,7 @@ func ServiceTypeM3db() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"namespaces": {
-						Deprecated:  "This will be removed in v5.0.0 and replaced with namespaces_string instead. When switching to namespaces_string, please apply the changes twice due to technical limitations.",
+						Deprecated:  "This will be removed in v5.0.0 and replaced with namespaces_string instead.",
 						Description: "This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by glob (=wildcards).",
 						Elem:        &schema.Schema{Type: schema.TypeString},
 						MaxItems:    10,
@@ -4228,7 +4228,7 @@ func ServiceTypeM3db() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"namespaces": {
-						Deprecated:  "This will be removed in v5.0.0 and replaced with namespaces_string instead. When switching to namespaces_string, please apply the changes twice due to technical limitations.",
+						Deprecated:  "This will be removed in v5.0.0 and replaced with namespaces_string instead.",
 						Description: "This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by glob (=wildcards).",
 						Elem:        &schema.Schema{Type: schema.TypeString},
 						MaxItems:    10,
@@ -4349,7 +4349,7 @@ func ServiceTypeMysql() *schema.Schema {
 			Type:        schema.TypeInt,
 		},
 		"ip_filter": {
-			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead. When switching to ip_filter_string, please apply the changes twice due to technical limitations.",
+			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
@@ -5039,7 +5039,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"ip_filter": {
-			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead. When switching to ip_filter_string, please apply the changes twice due to technical limitations.",
+			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
@@ -5661,7 +5661,7 @@ func ServiceTypePg() *schema.Schema {
 			Type:        schema.TypeBool,
 		},
 		"ip_filter": {
-			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead. When switching to ip_filter_string, please apply the changes twice due to technical limitations.",
+			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
@@ -6643,7 +6643,7 @@ func ServiceTypeRedis() *schema.Schema {
 			Type:        schema.TypeList,
 		},
 		"ip_filter": {
-			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead. When switching to ip_filter_string, please apply the changes twice due to technical limitations.",
+			Deprecated:       "This will be removed in v5.0.0 and replaced with ip_filter_string instead.",
 			Description:      "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
 			DiffSuppressFunc: schemautil.IPFilterArrayDiffSuppressFunc,
 			Elem: &schema.Schema{
