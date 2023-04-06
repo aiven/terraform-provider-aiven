@@ -7,6 +7,7 @@ nav_order: 1
 # Changelog
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+- Add gcp virtual network peering example
 
   -Fix add conflicting with logic for M3DB `namespaces` and `ip_filters`
 
