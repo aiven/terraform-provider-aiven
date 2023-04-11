@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/aiven/aiven-go-client v1.7.1-0.20230322225521-95b16e6cdbe8
 	github.com/avast/retry-go v3.0.0+incompatible
-	github.com/dave/jennifer v1.6.0
+	github.com/dave/jennifer v1.6.1
 	github.com/docker/go-units v0.5.0
 	github.com/ettle/strcase v0.1.1
 	github.com/google/go-cmp v0.5.9
