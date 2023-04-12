@@ -18,7 +18,7 @@ The Service Integration Endpoint resource allows the creation and management of 
 ### Required
 
 - `endpoint_name` (String) Name of the service integration endpoint
-- `endpoint_type` (String) Type of the service integration endpoint. Possible values: `datadog`, `prometheus`, `rsyslog`, `external_elasticsearch_logs`, `external_opensearch_logs`, `external_aws_cloudwatch_logs`, `external_google_cloud_logging`, `external_kafka`, `jolokia`, `signalfx`, `external_schema_registry`, `external_aws_cloudwatch_metrics`
+- `endpoint_type` (String) Type of the service integration endpoint. Possible values: `datadog`, `prometheus`, `rsyslog`, `external_elasticsearch_logs`, `external_opensearch_logs`, `external_aws_cloudwatch_logs`, `external_google_cloud_logging`, `external_kafka`, `jolokia`, `external_schema_registry`, `external_aws_cloudwatch_metrics`
 - `project` (String) Project the service integration endpoint belongs to
 
 ### Optional
@@ -34,7 +34,6 @@ The Service Integration Endpoint resource allows the creation and management of 
 - `jolokia_user_config` (Block List, Max: 1) Jolokia user configurable settings (see [below for nested schema](#nestedblock--jolokia_user_config))
 - `prometheus_user_config` (Block List, Max: 1) Prometheus user configurable settings (see [below for nested schema](#nestedblock--prometheus_user_config))
 - `rsyslog_user_config` (Block List, Max: 1) Rsyslog user configurable settings (see [below for nested schema](#nestedblock--rsyslog_user_config))
-- `signalfx_user_config` (Block List, Max: 1) Signalfx user configurable settings (see [below for nested schema](#nestedblock--signalfx_user_config))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
@@ -183,16 +182,6 @@ Optional:
 - `sd` (String) Structured data block for log message.
 - `server` (String) rsyslog server IP address or hostname.
 - `tls` (Boolean) Require TLS. The default value is `true`.
-
-
-<a id="nestedblock--signalfx_user_config"></a>
-### Nested Schema for `signalfx_user_config`
-
-Optional:
-
-- `enabled_metrics` (List of String) list of metrics to send.
-- `signalfx_api_key` (String, Sensitive) SignalFX API key.
-- `signalfx_realm` (String) SignalFX realm. The default value is `us0`.
 
 
 <a id="nestedblock--timeouts"></a>

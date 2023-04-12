@@ -43,7 +43,6 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 	"external_google_cloud_logging_user_config":   dist.IntegrationEndpointTypeExternalGoogleCloudLogging(),
 	"external_kafka_user_config":                  dist.IntegrationEndpointTypeExternalKafka(),
 	"jolokia_user_config":                         dist.IntegrationEndpointTypeJolokia(),
-	"signalfx_user_config":                        dist.IntegrationEndpointTypeSignalfx(),
 	"external_schema_registry_user_config":        dist.IntegrationEndpointTypeExternalSchemaRegistry(),
 	"external_aws_cloudwatch_metrics_user_config": dist.IntegrationEndpointTypeExternalAwsCloudwatchMetrics(),
 }
