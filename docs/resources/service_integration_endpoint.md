@@ -18,7 +18,7 @@ The Service Integration Endpoint resource allows the creation and management of 
 ### Required
 
 - `endpoint_name` (String) Name of the service integration endpoint
-- `endpoint_type` (String) Type of the service integration endpoint
+- `endpoint_type` (String) Type of the service integration endpoint. Possible values: `datadog`, `prometheus`, `rsyslog`, `external_elasticsearch_logs`, `external_opensearch_logs`, `external_aws_cloudwatch_logs`, `external_google_cloud_logging`, `external_kafka`, `jolokia`, `signalfx`, `external_schema_registry`, `external_aws_cloudwatch_metrics`
 - `project` (String) Project the service integration endpoint belongs to
 
 ### Optional
