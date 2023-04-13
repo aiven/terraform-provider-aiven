@@ -9,6 +9,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Added docs and validation for `aiven_service_integration_endpoint`
+- Dropped `signalfx` from supported integration types
 
 ## [4.2.1] - 2023-04-06
 
