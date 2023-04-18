@@ -85,7 +85,8 @@ func resourceMySQLUserCreate(ctx context.Context, d *schema.ResourceData, m inte
 		projectName,
 		serviceName,
 		aiven.CreateServiceUserRequest{
-			Username: username,
+			Username:       username,
+			Authentication: schemautil.OptionalStringPointer(d, "authentication"),
 		},
 	)
 	if err != nil {
@@ -95,8 +96,7 @@ func resourceMySQLUserCreate(ctx context.Context, d *schema.ResourceData, m inte
 	if _, ok := d.GetOk("password"); ok {
 		_, err := client.ServiceUsers.Update(projectName, serviceName, username,
 			aiven.ModifyServiceUserRequest{
-				Authentication: schemautil.OptionalStringPointer(d, "authentication"),
-				NewPassword:    schemautil.OptionalStringPointer(d, "password"),
+				NewPassword: schemautil.OptionalStringPointer(d, "password"),
 			})
 		if err != nil {
 			return diag.FromErr(err)
