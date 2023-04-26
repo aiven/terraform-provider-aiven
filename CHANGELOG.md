@@ -11,6 +11,7 @@ nav_order: 1
 - Added docs and validation for `aiven_service_integration_endpoint`
 - Dropped `signalfx` from supported integration types
 - Fix MySQL user creation authentication field 
+- Fix Account SAML Field mapping set method
 
 ## [4.2.1] - 2023-04-06
 

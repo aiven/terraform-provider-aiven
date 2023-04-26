@@ -59,6 +59,14 @@ resource "aiven_account_authentication" "method" {
   saml_certificate = <<-EOT
   %[2]s
   EOT
+
+  saml_field_mapping {
+    email      = "test@aiven.io"
+    first_name = "TestName"
+    identity   = "1234567"
+    last_name  = "TestLastName"
+    real_name  = "TestRealName"
+  }
 }
 `, rName, certificate)
 }
