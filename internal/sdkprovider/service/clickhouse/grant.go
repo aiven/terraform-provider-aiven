@@ -145,12 +145,14 @@ func createPrivilegeGrantStatement(grant PrivilegeGrant) string {
 
 	if len(grant.Table) > 0 {
 		b.WriteString(fmt.Sprintf(".%s", escape(grant.Table)))
+	} else {
+		b.WriteString(".*")
 	}
 
 	b.WriteString(fmt.Sprintf(" TO %s", escape(userOrRole(grant.Grantee))))
 
 	if grant.WithGrant {
-		b.WriteString(" WITH GRANT")
+		b.WriteString(" WITH GRANT OPTION")
 	}
 
 	return b.String()
@@ -171,6 +173,8 @@ func revokePrivilegeGrantStatement(grant PrivilegeGrant) string {
 
 	if len(grant.Table) > 0 {
 		b.WriteString(fmt.Sprintf(".%s", escape(grant.Table)))
+	} else {
+		b.WriteString(".*")
 	}
 
 	b.WriteString(fmt.Sprintf(" FROM %s", escape(userOrRole(grant.Grantee))))

@@ -12,6 +12,7 @@ nav_order: 1
 - Dropped `signalfx` from supported integration types
 - Fix MySQL user creation authentication field 
 - Fix Account SAML Field mapping set method
+- Adjust generated SQL for ClickHouse privilege grants
 
 ## [4.2.1] - 2023-04-06
 

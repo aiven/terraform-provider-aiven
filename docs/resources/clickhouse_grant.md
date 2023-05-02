@@ -47,13 +47,12 @@ resource "aiven_clickhouse_grant" "demo-role-grant" {
   privilege_grant {
     privilege = "INSERT"
     database  = aiven_clickhouse_database.demodb.name
-    table     = "*"
+    table     = "demo-table"
   }
 
   privilege_grant {
     privilege = "SELECT"
     database  = aiven_clickhouse_database.demodb.name
-    table     = "*"
   }
 }
 
