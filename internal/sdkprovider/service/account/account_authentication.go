@@ -222,7 +222,7 @@ func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData
 	if err := d.Set("saml_digest_algorithm", r.AuthenticationMethod.SAMLDigestAlgorithm); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("saml_field_mapping", r.AuthenticationMethod.SAMLFieldMapping); err != nil {
+	if err := d.Set("saml_field_mapping", flattenSAMLFieldMapping(r.AuthenticationMethod.SAMLFieldMapping)); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("saml_idp_login_allowed", r.AuthenticationMethod.SAMLIdpLoginAllowed); err != nil {
@@ -257,6 +257,21 @@ func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData
 	}
 
 	return nil
+}
+
+func flattenSAMLFieldMapping(s *aiven.SAMLFieldMapping) []map[string]interface{} {
+	if s == nil {
+		return make([]map[string]interface{}, 0)
+	}
+
+	v := make([]map[string]interface{}, 0)
+	return append(v, map[string]interface{}{
+		"email":      s.Email,
+		"first_name": s.FirstName,
+		"identity":   s.Identity,
+		"last_name":  s.LastName,
+		"real_name":  s.RealName,
+	})
 }
 
 func resourceAccountAuthenticationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
