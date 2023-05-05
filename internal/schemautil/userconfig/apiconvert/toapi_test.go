@@ -941,6 +941,43 @@ func TestToAPI(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "required",
+			args: args{
+				st: userconfig.IntegrationEndpointTypes,
+				n:  "rsyslog",
+				d: newTestResourceData(
+					map[string]interface{}{
+						"rsyslog_user_config": []interface{}{
+							map[string]interface{}{
+								"format":  "rfc5424",
+								"port":    514,
+								"server":  "rsyslog-server",
+								"tls":     false,
+								"logline": "some logline",
+							},
+						},
+					},
+					map[string]struct{}{
+						"rsyslog_user_config": {},
+					},
+					map[string]struct{}{
+						"rsyslog_user_config.0.format":  {},
+						"rsyslog_user_config.0.port":    {},
+						"rsyslog_user_config.0.server":  {},
+						"rsyslog_user_config.0.logline": {},
+					},
+					false,
+				),
+			},
+			want: map[string]interface{}{
+				"format":  "rfc5424",
+				"port":    514,
+				"server":  "rsyslog-server",
+				"tls":     false,
+				"logline": "some logline",
+			},
+		},
 	}
 
 	for _, tt := range tests {

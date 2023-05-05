@@ -229,7 +229,7 @@ func FromAPI(st userconfig.SchemaType, n string, r map[string]interface{}) ([]ma
 		return res, nil
 	}
 
-	p, err := props(st, n)
+	p, _, err := propsReqs(st, n)
 	if err != nil {
 		return nil, err
 	}
