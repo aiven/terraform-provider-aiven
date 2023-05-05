@@ -197,7 +197,7 @@ Optional:
 <a id="nestedblock--kafka_logs_user_config"></a>
 ### Nested Schema for `kafka_logs_user_config`
 
-Optional:
+Required:
 
 - `kafka_topic` (String) Topic name.
 

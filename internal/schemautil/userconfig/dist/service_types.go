@@ -4527,7 +4527,7 @@ func ServiceTypeMysql() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"innodb_lock_wait_timeout": {
-					Description: "The length of time in seconds an InnoDB transaction waits for a row lock before giving up.",
+					Description: "The length of time in seconds an InnoDB transaction waits for a row lock before giving up. Default is 120.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -4679,7 +4679,7 @@ func ServiceTypeMysql() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"innodb_lock_wait_timeout": {
-					Description: "The length of time in seconds an InnoDB transaction waits for a row lock before giving up.",
+					Description: "The length of time in seconds an InnoDB transaction waits for a row lock before giving up. Default is 120.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -5598,6 +5598,76 @@ func ServiceTypeOpensearch() *schema.Schema {
 			Description: "Name of the basebackup to restore in forked service.",
 			Optional:    true,
 			Type:        schema.TypeString,
+		},
+		"saml": {
+			Description: "OpenSearch SAML configuration.",
+			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+				"enabled": {
+					Description: "Enables or disables SAML-based authentication for OpenSearch. When enabled, users can authenticate using SAML with an Identity Provider. The default value is `true`.",
+					Required:    true,
+					Type:        schema.TypeBool,
+				},
+				"idp_entity_id": {
+					Description: "The unique identifier for the Identity Provider (IdP) entity that is used for SAML authentication. This value is typically provided by the IdP.",
+					Required:    true,
+					Type:        schema.TypeString,
+				},
+				"idp_metadata_url": {
+					Description: "The URL of the SAML metadata for the Identity Provider (IdP). This is used to configure SAML-based authentication with the IdP.",
+					Required:    true,
+					Type:        schema.TypeString,
+				},
+				"roles_key": {
+					Description: "Optional. Specifies the attribute in the SAML response where role information is stored, if available. Role attributes are not required for SAML authentication, but can be included in SAML assertions by most Identity Providers (IdPs) to determine user access levels or permissions.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"sp_entity_id": {
+					Description: "The unique identifier for the Service Provider (SP) entity that is used for SAML authentication. This value is typically provided by the SP.",
+					Required:    true,
+					Type:        schema.TypeString,
+				},
+				"subject_key": {
+					Description: "Optional. Specifies the attribute in the SAML response where the subject identifier is stored. If not configured, the NameID attribute is used by default.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}),
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"enabled": {
+					Description: "Enables or disables SAML-based authentication for OpenSearch. When enabled, users can authenticate using SAML with an Identity Provider. The default value is `true`.",
+					Required:    true,
+					Type:        schema.TypeBool,
+				},
+				"idp_entity_id": {
+					Description: "The unique identifier for the Identity Provider (IdP) entity that is used for SAML authentication. This value is typically provided by the IdP.",
+					Required:    true,
+					Type:        schema.TypeString,
+				},
+				"idp_metadata_url": {
+					Description: "The URL of the SAML metadata for the Identity Provider (IdP). This is used to configure SAML-based authentication with the IdP.",
+					Required:    true,
+					Type:        schema.TypeString,
+				},
+				"roles_key": {
+					Description: "Optional. Specifies the attribute in the SAML response where role information is stored, if available. Role attributes are not required for SAML authentication, but can be included in SAML assertions by most Identity Providers (IdPs) to determine user access levels or permissions.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"sp_entity_id": {
+					Description: "The unique identifier for the Service Provider (SP) entity that is used for SAML authentication. This value is typically provided by the SP.",
+					Required:    true,
+					Type:        schema.TypeString,
+				},
+				"subject_key": {
+					Description: "Optional. Specifies the attribute in the SAML response where the subject identifier is stored. If not configured, the NameID attribute is used by default.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 1,
+			Optional: true,
+			Type:     schema.TypeList,
 		},
 		"service_to_fork_from": {
 			Description: "Name of another service to fork from. This has effect only when a new service is being created.",

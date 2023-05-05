@@ -101,6 +101,7 @@ Read-Only:
 - `project_to_fork_from` (String)
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--public_access))
 - `recovery_basebackup_name` (String)
+- `saml` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--saml))
 - `service_to_fork_from` (String)
 - `static_ips` (Boolean)
 
@@ -209,6 +210,19 @@ Read-Only:
 - `opensearch` (Boolean)
 - `opensearch_dashboards` (Boolean)
 - `prometheus` (Boolean)
+
+
+<a id="nestedobjatt--opensearch_user_config--saml"></a>
+### Nested Schema for `opensearch_user_config.saml`
+
+Read-Only:
+
+- `enabled` (Boolean)
+- `idp_entity_id` (String)
+- `idp_metadata_url` (String)
+- `roles_key` (String)
+- `sp_entity_id` (String)
+- `subject_key` (String)
 
 
 

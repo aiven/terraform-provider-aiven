@@ -12,7 +12,7 @@ func IntegrationEndpointTypeDatadog() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"datadog_api_key": {
 			Description: "Datadog API key.",
-			Optional:    true,
+			Required:    true,
 			Sensitive:   true,
 			Type:        schema.TypeString,
 		},
@@ -76,7 +76,7 @@ func IntegrationEndpointTypeExternalAwsCloudwatchLogs() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"access_key": {
 			Description: "AWS access key. Required permissions are logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents and logs:DescribeLogStreams.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"log_group_name": {
@@ -86,12 +86,12 @@ func IntegrationEndpointTypeExternalAwsCloudwatchLogs() *schema.Schema {
 		},
 		"region": {
 			Description: "AWS region.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"secret_key": {
 			Description: "AWS secret key.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 	}
@@ -111,22 +111,22 @@ func IntegrationEndpointTypeExternalAwsCloudwatchMetrics() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"access_key": {
 			Description: "AWS access key. Required permissions are cloudwatch:PutMetricData.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"namespace": {
 			Description: "AWS CloudWatch Metrics Namespace.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"region": {
 			Description: "AWS region.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"secret_key": {
 			Description: "AWS secret key.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 	}
@@ -156,9 +156,8 @@ func IntegrationEndpointTypeExternalElasticsearchLogs() *schema.Schema {
 			Type:        schema.TypeInt,
 		},
 		"index_prefix": {
-			Default:     "logs",
 			Description: "Elasticsearch index prefix. The default value is `logs`.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"timeout": {
@@ -169,7 +168,7 @@ func IntegrationEndpointTypeExternalElasticsearchLogs() *schema.Schema {
 		},
 		"url": {
 			Description: "Elasticsearch connection URL.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 	}
@@ -189,17 +188,17 @@ func IntegrationEndpointTypeExternalGoogleCloudLogging() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"log_id": {
 			Description: "Google Cloud Logging log id.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"project_id": {
 			Description: "GCP project id.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"service_account_credentials": {
 			Description: "This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys .",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 	}
@@ -219,7 +218,7 @@ func IntegrationEndpointTypeExternalKafka() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"bootstrap_servers": {
 			Description: "Bootstrap servers.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"sasl_mechanism": {
@@ -240,7 +239,7 @@ func IntegrationEndpointTypeExternalKafka() *schema.Schema {
 		},
 		"security_protocol": {
 			Description: "Security protocol.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"ssl_ca_cert": {
@@ -290,9 +289,8 @@ func IntegrationEndpointTypeExternalOpensearchLogs() *schema.Schema {
 			Type:        schema.TypeInt,
 		},
 		"index_prefix": {
-			Default:     "logs",
 			Description: "OpenSearch index prefix. The default value is `logs`.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"timeout": {
@@ -303,7 +301,7 @@ func IntegrationEndpointTypeExternalOpensearchLogs() *schema.Schema {
 		},
 		"url": {
 			Description: "OpenSearch connection URL.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 	}
@@ -323,18 +321,18 @@ func IntegrationEndpointTypeExternalPostgresql() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"host": {
 			Description: "Hostname or IP address of the server.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"password": {
 			Description: "Password.",
-			Optional:    true,
+			Required:    true,
 			Sensitive:   true,
 			Type:        schema.TypeString,
 		},
 		"port": {
 			Description: "Port number of the server.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeInt,
 		},
 		"ssl_mode": {
@@ -351,7 +349,7 @@ func IntegrationEndpointTypeExternalPostgresql() *schema.Schema {
 		},
 		"username": {
 			Description: "User name.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 	}
@@ -371,7 +369,7 @@ func IntegrationEndpointTypeExternalSchemaRegistry() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"authentication": {
 			Description: "Authentication method.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"basic_auth_password": {
@@ -387,7 +385,7 @@ func IntegrationEndpointTypeExternalSchemaRegistry() *schema.Schema {
 		},
 		"url": {
 			Description: "Schema Registry URL.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 	}
@@ -468,9 +466,8 @@ func IntegrationEndpointTypeRsyslog() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"format": {
-			Default:     "rfc5424",
 			Description: "message format. The default value is `rfc5424`.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"key": {
@@ -484,9 +481,8 @@ func IntegrationEndpointTypeRsyslog() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"port": {
-			Default:     "514",
 			Description: "rsyslog server port. The default value is `514`.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeInt,
 		},
 		"sd": {
@@ -496,53 +492,18 @@ func IntegrationEndpointTypeRsyslog() *schema.Schema {
 		},
 		"server": {
 			Description: "rsyslog server IP address or hostname.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"tls": {
-			Default:     true,
 			Description: "Require TLS. The default value is `true`.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeBool,
 		},
 	}
 
 	return &schema.Schema{
 		Description:      "Rsyslog user configurable settings",
-		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(s),
-		Elem:             &schema.Resource{Schema: s},
-		MaxItems:         1,
-		Optional:         true,
-		Type:             schema.TypeList,
-	}
-}
-
-// IntegrationEndpointTypeSignalfx is a generated function returning the schema of the signalfx IntegrationEndpointType.
-func IntegrationEndpointTypeSignalfx() *schema.Schema {
-	s := map[string]*schema.Schema{
-		"enabled_metrics": {
-			Description: "list of metrics to send.",
-			Elem:        &schema.Schema{Type: schema.TypeString},
-			MaxItems:    256,
-			Optional:    true,
-			Type:        schema.TypeList,
-		},
-		"signalfx_api_key": {
-			Description: "SignalFX API key.",
-			Optional:    true,
-			Sensitive:   true,
-			Type:        schema.TypeString,
-		},
-		"signalfx_realm": {
-			Default:     "us0",
-			Description: "SignalFX realm. The default value is `us0`.",
-			Optional:    true,
-			Type:        schema.TypeString,
-		},
-	}
-
-	return &schema.Schema{
-		Description:      "Signalfx user configurable settings",
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(s),
 		Elem:             &schema.Resource{Schema: s},
 		MaxItems:         1,

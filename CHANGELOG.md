@@ -13,6 +13,7 @@ nav_order: 1
 - Fix MySQL user creation authentication field 
 - Fix Account SAML Field mapping set method
 - Adjust generated SQL for ClickHouse privilege grants
+- Fix `required` not generated for top level fields for user config options
 
 ## [4.2.1] - 2023-04-06
 

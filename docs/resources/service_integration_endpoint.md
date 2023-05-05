@@ -44,9 +44,12 @@ The Service Integration Endpoint resource allows the creation and management of 
 <a id="nestedblock--datadog_user_config"></a>
 ### Nested Schema for `datadog_user_config`
 
-Optional:
+Required:
 
 - `datadog_api_key` (String, Sensitive) Datadog API key.
+
+Optional:
+
 - `datadog_tags` (Block List, Max: 32) Custom tags provided by user. (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))
 - `disable_consumer_stats` (Boolean) Disable consumer group metrics.
 - `kafka_consumer_check_instances` (Number) Number of separate instances to fetch kafka consumer statistics with.
@@ -70,18 +73,21 @@ Optional:
 <a id="nestedblock--external_aws_cloudwatch_logs_user_config"></a>
 ### Nested Schema for `external_aws_cloudwatch_logs_user_config`
 
-Optional:
+Required:
 
 - `access_key` (String) AWS access key. Required permissions are logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents and logs:DescribeLogStreams.
-- `log_group_name` (String) AWS CloudWatch log group name.
 - `region` (String) AWS region.
 - `secret_key` (String) AWS secret key.
+
+Optional:
+
+- `log_group_name` (String) AWS CloudWatch log group name.
 
 
 <a id="nestedblock--external_aws_cloudwatch_metrics_user_config"></a>
 ### Nested Schema for `external_aws_cloudwatch_metrics_user_config`
 
-Optional:
+Required:
 
 - `access_key` (String) AWS access key. Required permissions are cloudwatch:PutMetricData.
 - `namespace` (String) AWS CloudWatch Metrics Namespace.
@@ -92,19 +98,22 @@ Optional:
 <a id="nestedblock--external_elasticsearch_logs_user_config"></a>
 ### Nested Schema for `external_elasticsearch_logs_user_config`
 
+Required:
+
+- `index_prefix` (String) Elasticsearch index prefix. The default value is `logs`.
+- `url` (String) Elasticsearch connection URL.
+
 Optional:
 
 - `ca` (String) PEM encoded CA certificate.
 - `index_days_max` (Number) Maximum number of days of logs to keep. The default value is `3`.
-- `index_prefix` (String) Elasticsearch index prefix. The default value is `logs`.
 - `timeout` (Number) Elasticsearch request timeout limit. The default value is `10.0`.
-- `url` (String) Elasticsearch connection URL.
 
 
 <a id="nestedblock--external_google_cloud_logging_user_config"></a>
 ### Nested Schema for `external_google_cloud_logging_user_config`
 
-Optional:
+Required:
 
 - `log_id` (String) Google Cloud Logging log id.
 - `project_id` (String) GCP project id.
@@ -114,13 +123,16 @@ Optional:
 <a id="nestedblock--external_kafka_user_config"></a>
 ### Nested Schema for `external_kafka_user_config`
 
-Optional:
+Required:
 
 - `bootstrap_servers` (String) Bootstrap servers.
+- `security_protocol` (String) Security protocol.
+
+Optional:
+
 - `sasl_mechanism` (String) The list of SASL mechanisms enabled in the Kafka server.
 - `sasl_plain_password` (String, Sensitive) Password for SASL PLAIN mechanism in the Kafka server.
 - `sasl_plain_username` (String) Username for SASL PLAIN mechanism in the Kafka server.
-- `security_protocol` (String) Security protocol.
 - `ssl_ca_cert` (String) PEM-encoded CA certificate.
 - `ssl_client_cert` (String) PEM-encoded client certificate.
 - `ssl_client_key` (String) PEM-encoded client key.
@@ -130,24 +142,30 @@ Optional:
 <a id="nestedblock--external_opensearch_logs_user_config"></a>
 ### Nested Schema for `external_opensearch_logs_user_config`
 
+Required:
+
+- `index_prefix` (String) OpenSearch index prefix. The default value is `logs`.
+- `url` (String) OpenSearch connection URL.
+
 Optional:
 
 - `ca` (String) PEM encoded CA certificate.
 - `index_days_max` (Number) Maximum number of days of logs to keep. The default value is `3`.
-- `index_prefix` (String) OpenSearch index prefix. The default value is `logs`.
 - `timeout` (Number) OpenSearch request timeout limit. The default value is `10.0`.
-- `url` (String) OpenSearch connection URL.
 
 
 <a id="nestedblock--external_schema_registry_user_config"></a>
 ### Nested Schema for `external_schema_registry_user_config`
 
-Optional:
+Required:
 
 - `authentication` (String) Authentication method.
+- `url` (String) Schema Registry URL.
+
+Optional:
+
 - `basic_auth_password` (String, Sensitive) Basic authentication password.
 - `basic_auth_username` (String) Basic authentication user name.
-- `url` (String) Schema Registry URL.
 
 
 <a id="nestedblock--jolokia_user_config"></a>
@@ -171,17 +189,20 @@ Optional:
 <a id="nestedblock--rsyslog_user_config"></a>
 ### Nested Schema for `rsyslog_user_config`
 
+Required:
+
+- `format` (String) message format. The default value is `rfc5424`.
+- `port` (Number) rsyslog server port. The default value is `514`.
+- `server` (String) rsyslog server IP address or hostname.
+- `tls` (Boolean) Require TLS. The default value is `true`.
+
 Optional:
 
 - `ca` (String) PEM encoded CA certificate.
 - `cert` (String) PEM encoded client certificate.
-- `format` (String) message format. The default value is `rfc5424`.
 - `key` (String) PEM encoded client key.
 - `logline` (String) custom syslog message format.
-- `port` (Number) rsyslog server port. The default value is `514`.
 - `sd` (String) Structured data block for log message.
-- `server` (String) rsyslog server IP address or hostname.
-- `tls` (Boolean) Require TLS. The default value is `true`.
 
 
 <a id="nestedblock--timeouts"></a>
