@@ -26,7 +26,7 @@ terraform {
   required_providers {
     aiven = {
       source = "aiven/aiven"
-      version = ">= 2.0.0, < 3.0.0"
+      version = ">=4.0.0, < 5.0.0"
     }
   }
 }
@@ -65,7 +65,6 @@ resource "aiven_service_integration" "rsys_int" {
     destination_endpoint_id = aiven_service_integration_endpoint.rsys.id
     destination_service_name = ""
     integration_type = "rsyslog"
-    source_endpoint_id = ""
     source_service_name = data.aiven_kafka.kfk1.service_name
 }
 ```

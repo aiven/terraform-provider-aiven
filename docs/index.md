@@ -32,9 +32,7 @@ You can also set the environment variable `AIVEN_TOKEN` for the `api_token` prop
 Look at the [Sample Project Guide](guides/sample-project.md) and the [Examples Guide](guides/examples.md) for more examples on how to use the various Aiven resources.
 
 ## Resource options
-The list of options in this document is not comprehensive, for most part they map directly to the [Aiven REST API](https://api.aiven.io/doc/) properties.
-
-For various objects called `x_user_config`, the exact configuration options are available in [Service User Config](https://github.com/aiven/aiven-go-client/blob/master/tools/exp/dist/service_types.yml), [Integration User Config](https://github.com/aiven/aiven-go-client/blob/master/tools/exp/dist/integration_types.yml) and in [Integration Endpoint User Config](https://github.com/aiven/aiven-go-client/blob/master/tools/exp/dist/integration_endpoint_types.yml) schema files.
+The list of options in this document is not comprehensive. However, most map directly to the [Aiven REST API](https://api.aiven.io/doc/) properties.
 
 ## A word of caution
 Recreating stateful services with Terraform will possibly **delete** the service and all its data before creating it again. Whenever the Terraform plan indicates that a service will be **deleted** or **replaced**, a catastrophic action is possibly about to happen.
