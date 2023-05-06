@@ -101,6 +101,7 @@ Optional:
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet. (see [below for nested schema](#nestedblock--opensearch_user_config--public_access))
 - `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service.
+- `saml` (Block List, Max: 1) OpenSearch SAML configuration. (see [below for nested schema](#nestedblock--opensearch_user_config--saml))
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
 - `static_ips` (Boolean) Use static public IP addresses.
 
@@ -215,6 +216,22 @@ Optional:
 - `opensearch` (Boolean) Allow clients to connect to opensearch from the public internet for service nodes that are in a project VPC or another type of private network.
 - `opensearch_dashboards` (Boolean) Allow clients to connect to opensearch_dashboards from the public internet for service nodes that are in a project VPC or another type of private network.
 - `prometheus` (Boolean) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.
+
+
+<a id="nestedblock--opensearch_user_config--saml"></a>
+### Nested Schema for `opensearch_user_config.saml`
+
+Required:
+
+- `enabled` (Boolean) Enables or disables SAML-based authentication for OpenSearch. When enabled, users can authenticate using SAML with an Identity Provider. The default value is `true`.
+- `idp_entity_id` (String) The unique identifier for the Identity Provider (IdP) entity that is used for SAML authentication. This value is typically provided by the IdP.
+- `idp_metadata_url` (String) The URL of the SAML metadata for the Identity Provider (IdP). This is used to configure SAML-based authentication with the IdP.
+- `sp_entity_id` (String) The unique identifier for the Service Provider (SP) entity that is used for SAML authentication. This value is typically provided by the SP.
+
+Optional:
+
+- `roles_key` (String) Optional. Specifies the attribute in the SAML response where role information is stored, if available. Role attributes are not required for SAML authentication, but can be included in SAML assertions by most Identity Providers (IdPs) to determine user access levels or permissions.
+- `subject_key` (String) Optional. Specifies the attribute in the SAML response where the subject identifier is stored. If not configured, the NameID attribute is used by default.
 
 
 

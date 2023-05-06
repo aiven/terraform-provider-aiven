@@ -44,7 +44,13 @@ func generateSchema(n string, m map[string]interface{}) error {
 
 		f.Commentf("%s is a generated function returning the schema of the %s %s.", fn, k, n)
 
-		pm, err := convertPropertiesToSchemaMap(pa, map[string]struct{}{})
+		req := map[string]struct{}{}
+
+		if sreq, ok := va["required"].([]interface{}); ok {
+			req = SliceToKeyedMap(sreq)
+		}
+
+		pm, err := convertPropertiesToSchemaMap(pa, req)
 		if err != nil {
 			return err
 		}

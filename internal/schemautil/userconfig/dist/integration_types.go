@@ -341,7 +341,7 @@ func IntegrationTypeKafkaConnect() *schema.Schema {
 func IntegrationTypeKafkaLogs() *schema.Schema {
 	s := map[string]*schema.Schema{"kafka_topic": {
 		Description: "Topic name.",
-		Optional:    true,
+		Required:    true,
 		Type:        schema.TypeString,
 	}}
 
