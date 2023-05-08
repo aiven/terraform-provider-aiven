@@ -12,6 +12,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/toapi"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -401,7 +402,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.Errorf("error getting project VPC ID: %s", err)
 	}
 
-	cuc, err := apiconvert.ToAPI(userconfig.ServiceTypes, serviceType, d)
+	cuc := fillInServiceUserConfigData(d.Get(serviceType+"_user_config"), toapi.GetToAPIBlueprint(serviceType))
 	if err != nil {
 		return diag.Errorf(
 			"error converting user config options for service type %s to API format: %s", serviceType, err,
@@ -428,7 +429,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.Errorf("error creating a service: %s", err)
 	}
 
-	// Create already takes care of static ip associations, no need to explictely associate them here
+	// Create already takes care of static ip associations, no need to explicitly associate them here
 
 	s, err := WaitForServiceCreation(ctx, d, m)
 	if err != nil {
@@ -488,8 +489,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	st := d.Get("service_type").(string)
-
-	cuc, err := apiconvert.ToAPI(userconfig.ServiceTypes, st, d)
+	cuc := fillInServiceUserConfigData(d.Get(st+"_user_config"), toapi.GetToAPIBlueprint(st))
 	if err != nil {
 		return diag.Errorf(
 			"error converting user config options for service type %s to API format: %s", st, err,
