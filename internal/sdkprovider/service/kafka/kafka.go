@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/aiven/aiven-go-client"
+
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
@@ -21,6 +22,7 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 		Optional:         true,
 		Description:      "Switch the service to use Karapace for schema registry and REST proxy",
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+		Deprecated:       "Usage of this field is discouraged.",
 	}
 	aivenKafkaSchema["default_acl"] = &schema.Schema{
 		Type:             schema.TypeBool,
