@@ -1,0 +1,23 @@
+name: 'userconfig: generate schema'
+
+on:
+  pull_request: {}
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+      - run: go generate ./...
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "chore(userconfig): generate schema"
