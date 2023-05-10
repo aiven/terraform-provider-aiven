@@ -16,6 +16,7 @@ nav_order: 1
 - Fix `required` not generated for top level fields for user config options
 - Deprecate `karapace` option on `aiven_kafka` schema
 - Deprecate service `disk_space` field
+- Fix `required` properties not always sent to the API for user config options
 
 ## [4.2.1] - 2023-04-06
 

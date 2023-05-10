@@ -129,7 +129,16 @@ func arrayItemToAPI(
 			vn = []interface{}{vn}
 		}
 
-		vnc, o, err := itemToAPI(n, iit, append(fk, fmt.Sprintf("%d", i)), fmt.Sprintf("%s.%d", k, i), vn, ii, d)
+		vnc, o, err := itemToAPI(
+			n,
+			iit,
+			append(fk, fmt.Sprintf("%d", i)),
+			fmt.Sprintf("%s.%d", k, i),
+			vn,
+			ii,
+			false,
+			d,
+		)
 		if err != nil {
 			return nil, false, err
 		}
@@ -173,11 +182,17 @@ func objectItemToAPI(
 		return nil, false, fmt.Errorf("%s (item): properties key not found", fks)
 	}
 
+	reqs := map[string]struct{}{}
+
+	if sreqs, ok := i["required"].([]interface{}); ok {
+		reqs = userconfig.SliceToKeyedMap(sreqs)
+	}
+
 	if !dotAnyDotNumberRegExp.MatchString(fks) {
 		fk = append(fk, "0")
 	}
 
-	res, err := propsToAPI(n, fk, fva, ip, d)
+	res, err := propsToAPI(n, fk, fva, ip, reqs, d)
 	if err != nil {
 		return nil, false, err
 	}
@@ -193,6 +208,7 @@ func itemToAPI(
 	k string,
 	v interface{},
 	i map[string]interface{},
+	ireq bool,
 	d resourceDatable,
 ) (interface{}, bool, error) {
 	res := v
@@ -222,6 +238,11 @@ func itemToAPI(
 				o = false
 			}
 		}
+	}
+
+	// We need to make sure that if the value is required, we send it, even if it has no changes in the Terraform.
+	if o && ireq {
+		o = false
 	}
 
 	// Assert the type of the value to match.
@@ -339,6 +360,7 @@ func propsToAPI(
 	fk []string,
 	tp map[string]interface{},
 	p map[string]interface{},
+	reqs map[string]struct{},
 	d resourceDatable,
 ) (map[string]interface{}, error) {
 	res := make(map[string]interface{}, len(tp))
@@ -384,9 +406,11 @@ func propsToAPI(
 			return nil, fmt.Errorf("%s.%s.type: multiple types", fks, k)
 		}
 
+		_, ireq := reqs[k]
+
 		t := ats[0]
 
-		cv, o, err := itemToAPI(n, t, append(fk, k), k, v, ia, d)
+		cv, o, err := itemToAPI(n, t, append(fk, k), k, v, ia, ireq, d)
 		if err != nil {
 			return nil, err
 		}
@@ -428,12 +452,12 @@ func ToAPI(st userconfig.SchemaType, n string, d resourceDatable) (map[string]in
 		return nil, fmt.Errorf("%s.0 (%d): not a map", n, st)
 	}
 
-	p, err := props(st, n)
+	p, reqs, err := propsReqs(st, n)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err = propsToAPI(n, append(fk, "0"), ftpa, p, d)
+	res, err = propsToAPI(n, append(fk, "0"), ftpa, p, reqs, d)
 	if err != nil {
 		return nil, err
 	}
