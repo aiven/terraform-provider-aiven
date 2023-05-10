@@ -34,45 +34,38 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 	}
 	aivenKafkaSchema[schemautil.ServiceTypeKafka] = &schema.Schema{
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Computed:    true,
 		Description: "Kafka server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"access_cert": {
 					Type:        schema.TypeString,
 					Computed:    true,
 					Description: "The Kafka client certificate",
-					Optional:    true,
 					Sensitive:   true,
 				},
 				"access_key": {
 					Type:        schema.TypeString,
 					Computed:    true,
 					Description: "The Kafka client certificate key",
-					Optional:    true,
 					Sensitive:   true,
 				},
 				"connect_uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
 					Description: "The Kafka Connect URI, if any",
-					Optional:    true,
 					Sensitive:   true,
 				},
 				"rest_uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
 					Description: "The Kafka REST URI, if any",
-					Optional:    true,
 					Sensitive:   true,
 				},
 				"schema_registry_uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
 					Description: "The Schema Registry URI, if any",
-					Optional:    true,
 					Sensitive:   true,
 				},
 			},
