@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.3.0] - 2023-05-10
+
 - Added docs and validation for `aiven_service_integration_endpoint`
 - Dropped `signalfx` from supported integration types
 - Fix MySQL user creation authentication field 
