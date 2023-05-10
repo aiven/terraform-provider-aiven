@@ -110,6 +110,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Description:   "Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.",
 			ValidateFunc:  ValidateHumanByteSizeString,
 			ConflictsWith: []string{"additional_disk_space"},
+			Deprecated:    "This will be removed in v5.0.0 and replaced with additional_disk_space instead.",
 		},
 		"disk_space_used": {
 			Type:        schema.TypeString,
