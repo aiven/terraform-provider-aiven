@@ -56,5 +56,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_clickhouse_user.ch-user project/service_name/id
+terraform import aiven_clickhouse_user.ch-user project/service_name/username
 ```

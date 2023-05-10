@@ -53,10 +53,9 @@ resource "aiven_kafka" "kafka1" {
 - `additional_disk_space` (String) Additional disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 - `default_acl` (Boolean) Create default wildcard Kafka ACL
-- `disk_space` (String) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
-- `kafka` (Block List, Max: 1) Kafka server provided values (see [below for nested schema](#nestedblock--kafka))
+- `disk_space` (String, Deprecated) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `kafka_user_config` (Block List, Max: 1) Kafka user configurable settings (see [below for nested schema](#nestedblock--kafka_user_config))
-- `karapace` (Boolean) Switch the service to use Karapace for schema registry and REST proxy
+- `karapace` (Boolean, Deprecated) Switch the service to use Karapace for schema registry and REST proxy
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
 - `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
@@ -75,6 +74,7 @@ resource "aiven_kafka" "kafka1" {
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) Disk space that service is currently using
 - `id` (String) The ID of this resource.
+- `kafka` (List of Object) Kafka server provided values (see [below for nested schema](#nestedatt--kafka))
 - `service_host` (String) The hostname of the service.
 - `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
 - `service_port` (Number) The port of the service
@@ -82,18 +82,6 @@ resource "aiven_kafka" "kafka1" {
 - `service_uri` (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
 - `service_username` (String) Username used for connecting to the service, if applicable
 - `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
-
-<a id="nestedblock--kafka"></a>
-### Nested Schema for `kafka`
-
-Optional:
-
-- `access_cert` (String, Sensitive) The Kafka client certificate
-- `access_key` (String, Sensitive) The Kafka client certificate key
-- `connect_uri` (String, Sensitive) The Kafka Connect URI, if any
-- `rest_uri` (String, Sensitive) The Kafka REST URI, if any
-- `schema_registry_uri` (String, Sensitive) The Schema Registry URI, if any
-
 
 <a id="nestedblock--kafka_user_config"></a>
 ### Nested Schema for `kafka_user_config`
@@ -312,6 +300,18 @@ Read-Only:
 - `route` (String)
 - `ssl` (Boolean)
 - `usage` (String)
+
+
+<a id="nestedatt--kafka"></a>
+### Nested Schema for `kafka`
+
+Read-Only:
+
+- `access_cert` (String)
+- `access_key` (String)
+- `connect_uri` (String)
+- `rest_uri` (String)
+- `schema_registry_uri` (String)
 
 ## Import
 

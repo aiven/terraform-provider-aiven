@@ -53,4 +53,10 @@ Optional:
 - `read` (String)
 - `update` (String)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_influxdb_user.foo project/service_name/username
+```
