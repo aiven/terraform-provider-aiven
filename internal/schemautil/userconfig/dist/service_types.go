@@ -5617,6 +5617,11 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Required:    true,
 					Type:        schema.TypeString,
 				},
+				"idp_pemtrustedcas_content": {
+					Description: "This parameter specifies the PEM-encoded root certificate authority (CA) content for the SAML identity provider (IdP) server verification. The root CA content is used to verify the SSL/TLS certificate presented by the server.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
 				"roles_key": {
 					Description: "Optional. Specifies the attribute in the SAML response where role information is stored, if available. Role attributes are not required for SAML authentication, but can be included in SAML assertions by most Identity Providers (IdPs) to determine user access levels or permissions.",
 					Optional:    true,
@@ -5647,6 +5652,11 @@ func ServiceTypeOpensearch() *schema.Schema {
 				"idp_metadata_url": {
 					Description: "The URL of the SAML metadata for the Identity Provider (IdP). This is used to configure SAML-based authentication with the IdP.",
 					Required:    true,
+					Type:        schema.TypeString,
+				},
+				"idp_pemtrustedcas_content": {
+					Description: "This parameter specifies the PEM-encoded root certificate authority (CA) content for the SAML identity provider (IdP) server verification. The root CA content is used to verify the SSL/TLS certificate presented by the server.",
+					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"roles_key": {
