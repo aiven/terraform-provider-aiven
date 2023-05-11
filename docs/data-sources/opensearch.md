@@ -220,6 +220,7 @@ Read-Only:
 - `enabled` (Boolean)
 - `idp_entity_id` (String)
 - `idp_metadata_url` (String)
+- `idp_pemtrustedcas_content` (String)
 - `roles_key` (String)
 - `sp_entity_id` (String)
 - `subject_key` (String)
