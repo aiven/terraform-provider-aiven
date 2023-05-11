@@ -18,6 +18,7 @@ jobs:
         with:
           go-version-file: go.mod
       - run: go generate ./...
+      - run: make docs
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "chore(userconfig): generate schema"
