@@ -130,7 +130,7 @@ Required:
 
 Optional:
 
-- `sasl_mechanism` (String) The list of SASL mechanisms enabled in the Kafka server.
+- `sasl_mechanism` (String) SASL mechanism used for connections to the Kafka server.
 - `sasl_plain_password` (String, Sensitive) Password for SASL PLAIN mechanism in the Kafka server.
 - `sasl_plain_username` (String) Username for SASL PLAIN mechanism in the Kafka server.
 - `ssl_ca_cert` (String) PEM-encoded CA certificate.
