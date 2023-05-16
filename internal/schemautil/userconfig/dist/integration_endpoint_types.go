@@ -222,7 +222,7 @@ func IntegrationEndpointTypeExternalKafka() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"sasl_mechanism": {
-			Description: "The list of SASL mechanisms enabled in the Kafka server.",
+			Description: "SASL mechanism used for connections to the Kafka server.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
