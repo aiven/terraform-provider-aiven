@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Set `TypeSet` for `user_peer_network_cidrs` field
+
 ## [4.3.0] - 2023-05-10
 
 - Added docs and validation for `aiven_service_integration_endpoint`

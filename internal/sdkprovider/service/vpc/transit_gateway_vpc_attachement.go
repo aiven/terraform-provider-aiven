@@ -4,11 +4,11 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 var aivenTransitGatewayVPCAttachmentSchema = map[string]*schema.Schema{
@@ -32,7 +32,7 @@ var aivenTransitGatewayVPCAttachmentSchema = map[string]*schema.Schema{
 	},
 	"user_peer_network_cidrs": {
 		Required:    true,
-		Type:        schema.TypeList,
+		Type:        schema.TypeSet,
 		Description: "List of private IPv4 ranges to route through the peering connection",
 		Elem: &schema.Schema{
 			Type:     schema.TypeString,

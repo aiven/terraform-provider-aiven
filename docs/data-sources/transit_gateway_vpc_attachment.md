@@ -36,6 +36,6 @@ data "aiven_transit_gateway_vpc_attachment" "attachment" {
 - `peering_connection_id` (String) Cloud provider identifier for the peering connection if available
 - `state` (String) State of the peering connection
 - `state_info` (Map of String) State-specific help or error information
-- `user_peer_network_cidrs` (List of String) List of private IPv4 ranges to route through the peering connection
+- `user_peer_network_cidrs` (Set of String) List of private IPv4 ranges to route through the peering connection
 
 

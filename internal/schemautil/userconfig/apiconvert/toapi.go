@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
@@ -268,7 +270,12 @@ func itemToAPI(
 
 		va, ok := v.([]interface{})
 		if !ok {
-			return nil, false, fmt.Errorf("%s: not a slice", fks)
+			// This can be TypeSet
+			set, ok := v.(*schema.Set)
+			if !ok {
+				return nil, false, fmt.Errorf("%s: not slice or set", fks)
+			}
+			va = set.List()
 		}
 
 		if va == nil || o {
