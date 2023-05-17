@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 
@@ -54,7 +55,8 @@ account team you are trying to link to this project.
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema: aivenAccountTeamProjectSchema,
+		Schema:             aivenAccountTeamProjectSchema,
+		DeprecationMessage: "This resource is deprecated and will be removed in the next major release.",
 	}
 }
 

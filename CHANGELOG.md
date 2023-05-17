@@ -9,6 +9,13 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Set `TypeSet` for `user_peer_network_cidrs` field
+- Added `aiven_organization` and `aiven_organizational_unit` resources and corresponding data sources
+- Deprecated the `aiven_account` resource, added a hint for the following fields that won't be supported in the future:
+  - `account_id` (should use `id` instead)
+  - `primary_billing_group_id`
+  - `owner_team_id`
+  - `is_account_owner`
+- Deprecated `aiven_account_team_project` resource
 
 ## [4.3.0] - 2023-05-10
 

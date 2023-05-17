@@ -3,6 +3,9 @@ package provider
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/cassandra"
@@ -15,6 +18,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/m3db"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/mysql"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/opensearch"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/organization"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/pg"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/project"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/redis"
@@ -22,8 +26,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/serviceintegration"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/staticip"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/vpc"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Provider returns terraform.ResourceProvider.
@@ -77,6 +79,10 @@ func Provider(version string) *schema.Provider {
 			"aiven_account_team_project":   account.DatasourceAccountTeamProject(),
 			"aiven_account_team_member":    account.DatasourceAccountTeamMember(),
 			"aiven_account_authentication": account.DatasourceAccountAuthentication(),
+
+			// organization
+			"aiven_organization":        organization.DatasourceOrganization(),
+			"aiven_organizational_unit": organization.DatasourceOrganizationalUnit(),
 
 			// project
 			"aiven_project":       project.DatasourceProject(),
@@ -167,6 +173,10 @@ func Provider(version string) *schema.Provider {
 			"aiven_account_team_project":   account.ResourceAccountTeamProject(),
 			"aiven_account_team_member":    account.ResourceAccountTeamMember(),
 			"aiven_account_authentication": account.ResourceAccountAuthentication(),
+
+			// organization
+			"aiven_organization":        organization.ResourceOrganization(),
+			"aiven_organizational_unit": organization.ResourceOrganizationalUnit(),
 
 			// project
 			"aiven_project":       project.ResourceProject(),
