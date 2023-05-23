@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.4.0] - 2023-05-23
+
 - Set `TypeSet` for `user_peer_network_cidrs` field
 - Added `aiven_organization` and `aiven_organizational_unit` resources and corresponding data sources
 - Deprecated the `aiven_account` resource, added a hint for the following fields that won't be supported in the future:
