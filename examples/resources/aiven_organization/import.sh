@@ -1,0 +1,1 @@
+terraform import aiven_organization.organization1 organization_id

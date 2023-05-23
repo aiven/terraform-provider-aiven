@@ -15,6 +15,7 @@ var aivenAccountSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Computed:    true,
 		Description: "Account id",
+		Deprecated:  "The new aiven_organization resource won't have it, use the built-in ID field instead.",
 	},
 	"name": {
 		Type:        schema.TypeString,
@@ -26,11 +27,13 @@ var aivenAccountSchema = map[string]*schema.Schema{
 		Optional:    true,
 		ForceNew:    true,
 		Description: "Billing group id",
+		Deprecated:  "The new aiven_organization resource won't have it, and will not have a replacement.",
 	},
 	"owner_team_id": {
 		Type:        schema.TypeString,
 		Computed:    true,
 		Description: "Owner team id",
+		Deprecated:  "The new aiven_organization resource won't have it, and will not have a replacement.",
 	},
 	"tenant_id": {
 		Type:        schema.TypeString,
@@ -51,6 +54,7 @@ var aivenAccountSchema = map[string]*schema.Schema{
 		Type:        schema.TypeBool,
 		Computed:    true,
 		Description: "If true, user is part of the owners team for this account",
+		Deprecated:  "The new aiven_organization resource won't have it, and will not have a replacement.",
 	},
 }
 
@@ -67,6 +71,8 @@ func ResourceAccount() *schema.Resource {
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
 		Schema: aivenAccountSchema,
+
+		DeprecationMessage: "This resource will be removed in v5.0.0, use aiven_organization instead.",
 	}
 }
 
