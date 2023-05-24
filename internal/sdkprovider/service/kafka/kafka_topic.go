@@ -223,7 +223,7 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 }
 
 func ResourceKafkaTopic() *schema.Resource {
-	_ = newTopicCache()
+	initTopicCache()
 
 	return &schema.Resource{
 		Description:   "The Kafka Topic resource allows the creation and management of Aiven Kafka Topics.",

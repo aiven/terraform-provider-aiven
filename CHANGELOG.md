@@ -18,6 +18,7 @@ nav_order: 1
   - `owner_team_id`
   - `is_account_owner`
 - Deprecated `aiven_account_team_project` resource
+- Improve Kafka Topic 404 error handling
 
 ## [4.3.0] - 2023-05-10
 

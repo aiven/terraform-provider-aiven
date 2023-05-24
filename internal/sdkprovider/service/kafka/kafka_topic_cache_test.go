@@ -11,7 +11,7 @@ func setupTopicCacheTestCase(t *testing.T) func(t *testing.T) {
 	t.Log("setup Kafka Topic Cache test case")
 
 	if getTopicCache() == nil {
-		_ = newTopicCache()
+		initTopicCache()
 	}
 
 	return func(t *testing.T) {
@@ -35,6 +35,8 @@ func TestGetTopicCache(t *testing.T) {
 			&kafkaTopicCache{
 				internal: make(map[string]map[string]aiven.KafkaTopic),
 				inQueue:  make(map[string][]string),
+				missing:  make(map[string][]string),
+				v1list:   make(map[string][]string),
 			},
 		},
 	}
