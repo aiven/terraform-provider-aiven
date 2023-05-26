@@ -74,11 +74,11 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 	},
 	"integration_type": {
-		Description:      "Type of the service integration. Possible values: " + schemautil.JoinQuoted(integrationTypes, ", ", "`"),
-		ForceNew:         true,
-		Required:         true,
-		Type:             schema.TypeString,
-		ValidateDiagFunc: schemautil.ValidateEnum(integrationTypes...),
+		Description:  "Type of the service integration. Possible values: " + schemautil.JoinQuoted(integrationTypes, ", ", "`"),
+		ForceNew:     true,
+		Required:     true,
+		Type:         schema.TypeString,
+		ValidateFunc: validation.StringInSlice(integrationTypes, false),
 	},
 	"project": {
 		Description: "Project the integration belongs to",

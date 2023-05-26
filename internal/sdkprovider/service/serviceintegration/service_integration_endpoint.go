@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
@@ -46,10 +47,10 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 	"endpoint_type": {
 		Description: "Type of the service integration endpoint. Possible values: " +
 			schemautil.JoinQuoted(integrationEndpointTypes, ", ", "`"),
-		ForceNew:         true,
-		Required:         true,
-		Type:             schema.TypeString,
-		ValidateDiagFunc: schemautil.ValidateEnum(integrationEndpointTypes...),
+		ForceNew:     true,
+		Required:     true,
+		Type:         schema.TypeString,
+		ValidateFunc: validation.StringInSlice(integrationEndpointTypes, false),
 	},
 	"endpoint_config": {
 		Description: "Integration endpoint specific backend configuration",

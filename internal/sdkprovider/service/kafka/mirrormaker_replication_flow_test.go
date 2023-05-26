@@ -7,11 +7,11 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -256,7 +256,7 @@ resource "aiven_mirrormaker_replication_flow" "foo" {
 		Steps: []resource.TestStep{
 			{
 				Config:      config,
-				ExpectError: regexp.MustCompile(`"lol_offset" is not one of: "source", "target"`),
+				ExpectError: regexp.MustCompile(`expected offset_syncs_topic_location to be one of \[source target], got lol_offset`),
 			},
 		},
 	})

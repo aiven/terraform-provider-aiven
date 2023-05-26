@@ -9,6 +9,7 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/docker/go-units"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
@@ -89,7 +90,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			// There is also `never` value, which can't be set, but can be received from the backend.
 			// Sending `never` is suppressed in GetMaintenanceWindow function,
 			// but then we need to not let to set `never` manually
-			ValidateDiagFunc: ValidateEnum("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"),
+			ValidateFunc: validation.StringInSlice([]string{"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}, false),
 		},
 		"maintenance_window_time": {
 			Type:        schema.TypeString,

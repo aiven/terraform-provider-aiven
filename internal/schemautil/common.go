@@ -3,13 +3,9 @@ package schemautil
 import (
 	"fmt"
 	"regexp"
-	"strings"
 
-	"github.com/hashicorp/go-cty/cty"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"golang.org/x/exp/slices"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -75,20 +71,6 @@ func GetTagsFromSchema(d *schema.ResourceData) map[string]string {
 	}
 
 	return tags
-}
-
-func ValidateEnum[T string | int](enum ...T) schema.SchemaValidateDiagFunc {
-	return func(i interface{}, path cty.Path) diag.Diagnostics {
-		value := i.(T)
-		if !slices.Contains(enum, value) {
-			allowed := make([]string, 0, len(enum))
-			for _, s := range enum {
-				allowed = append(allowed, fmt.Sprintf("%q", s))
-			}
-			return diag.Errorf("%q is not one of: %s", value, strings.Join(allowed, ", "))
-		}
-		return nil
-	}
 }
 
 // PointerValueOrDefault returns pointer's value or default
