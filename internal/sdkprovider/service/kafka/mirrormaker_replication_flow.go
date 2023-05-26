@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 var (
@@ -87,10 +87,10 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 		Description: userconfig.Desc("Emit heartbeats enabled.").DefaultValue(false).Build(),
 	},
 	"offset_syncs_topic_location": {
-		Type:             schema.TypeString,
-		Optional:         true,
-		Description:      "Offset syncs topic location.",
-		ValidateDiagFunc: schemautil.ValidateEnum("source", "target"),
+		Type:         schema.TypeString,
+		Optional:     true,
+		Description:  "Offset syncs topic location.",
+		ValidateFunc: validation.StringInSlice([]string{"source", "target"}, false),
 	},
 }
 
