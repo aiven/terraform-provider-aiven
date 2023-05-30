@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/aiven/aiven-go-client"
+	"golang.org/x/exp/slices"
 )
 
 var (
@@ -17,20 +18,22 @@ type kafkaTopicCache struct {
 	sync.RWMutex
 	internal map[string]map[string]aiven.KafkaTopic
 	inQueue  map[string][]string
+	missing  map[string][]string
+	v1list   map[string][]string
 }
 
-// newTopicCache creates new global instance of Kafka Topic Cache
-func newTopicCache() *kafkaTopicCache {
+// initTopicCache creates new global instance of Kafka Topic Cache
+func initTopicCache() {
 	log.Print("[DEBUG] Creating an instance of kafkaTopicCache ...")
 
 	once.Do(func() {
 		topicCache = &kafkaTopicCache{
 			internal: make(map[string]map[string]aiven.KafkaTopic),
 			inQueue:  make(map[string][]string),
+			missing:  make(map[string][]string),
+			v1list:   make(map[string][]string),
 		}
 	})
-
-	return topicCache
 }
 
 // getTopicCache gets a global Kafka Topics Cache
@@ -66,7 +69,7 @@ func (t *kafkaTopicCache) LoadByTopicName(projectName, serviceName, topicName st
 		result.State = "CONFIGURING"
 	}
 
-	log.Printf("[TRACE] retrienve from a topic cache `%+#v` for a topic name `%s`", result, topicName)
+	log.Printf("[TRACE] retrieving from a topic cache `%+#v` for a topic name `%s`", result, topicName)
 
 	return result, ok
 }
@@ -125,6 +128,27 @@ func (t *kafkaTopicCache) AddToQueue(projectName, serviceName, topicName string)
 	t.Unlock()
 }
 
+// DeleteFromQueueAndMarkMissing topic from the queue and marks it as missing
+func (t *kafkaTopicCache) DeleteFromQueueAndMarkMissing(projectName, serviceName, topicName string) {
+	t.Lock()
+	for k, name := range t.inQueue[projectName+serviceName] {
+		if name == topicName {
+			t.inQueue[projectName+serviceName] = slices.Delete(t.inQueue[projectName+serviceName], k, k+1)
+		}
+	}
+
+	t.missing[projectName+serviceName] = append(t.missing[projectName+serviceName], topicName)
+	t.Unlock()
+}
+
+// GetMissing retrieves a list of missing topics
+func (t *kafkaTopicCache) GetMissing(projectName, serviceName string) []string {
+	t.RLock()
+	defer t.RUnlock()
+
+	return t.missing[projectName+serviceName]
+}
+
 // GetQueue retrieves a topics queue, retrieves up to 100 first elements
 func (t *kafkaTopicCache) GetQueue(projectName, serviceName string) []string {
 	t.RLock()
@@ -145,4 +169,21 @@ func FlushTopicCache() {
 		delete(c.internal, k)
 	}
 	c.Unlock()
+}
+
+// SetV1List sets v1 topics list
+func (t *kafkaTopicCache) SetV1List(projectName, serviceName string, list []*aiven.KafkaListTopic) {
+	t.Lock()
+	for _, v := range list {
+		t.v1list[projectName+serviceName] = append(t.v1list[projectName+serviceName], v.TopicName)
+	}
+	t.Unlock()
+}
+
+// GetV1List retrieves a list of V1 kafka topic names
+func (t *kafkaTopicCache) GetV1List(projectName, serviceName string) []string {
+	t.RLock()
+	defer t.RUnlock()
+
+	return t.v1list[projectName+serviceName]
 }
