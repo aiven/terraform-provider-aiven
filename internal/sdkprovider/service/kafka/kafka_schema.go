@@ -7,13 +7,13 @@ import (
 	"reflect"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 var aivenKafkaSchemaSchema = map[string]*schema.Schema{
@@ -40,6 +40,12 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 		Description:  "Kafka Schema type JSON or AVRO",
 		Default:      "AVRO",
 		ValidateFunc: validation.StringInSlice([]string{"AVRO", "JSON"}, false),
+		DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+			// This field can't be retrieved once resource is created.
+			// That produces a diff on plan on resource import.
+			// Ignores imported field.
+			return oldValue == "" && d.Id() != ""
+		},
 	},
 	"version": {
 		Type:        schema.TypeInt,

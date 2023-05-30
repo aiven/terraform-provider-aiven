@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Suppress diff for `schema_type` on `aiven_kafka_schema` resource import
+
 ## [4.4.0] - 2023-05-23
 
 - Set `TypeSet` for `user_peer_network_cidrs` field
