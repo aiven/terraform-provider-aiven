@@ -203,6 +203,7 @@ Read-Only:
 - `consumer_fetch_min_bytes` (Number)
 - `producer_batch_size` (Number)
 - `producer_buffer_memory` (Number)
+- `producer_compression_type` (String)
 - `producer_linger_ms` (Number)
 - `producer_max_request_size` (Number)
 

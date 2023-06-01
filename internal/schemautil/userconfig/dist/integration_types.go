@@ -381,6 +381,11 @@ func IntegrationTypeKafkaMirrormaker() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
+				"producer_compression_type": {
+					Description: "Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
 				"producer_linger_ms": {
 					Description: "The linger time (ms) for waiting new data to arrive for publishing.",
 					Optional:    true,
@@ -407,6 +412,11 @@ func IntegrationTypeKafkaMirrormaker() *schema.Schema {
 					Description: "The amount of bytes producer can use for buffering data before publishing to broker.",
 					Optional:    true,
 					Type:        schema.TypeInt,
+				},
+				"producer_compression_type": {
+					Description: "Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.",
+					Optional:    true,
+					Type:        schema.TypeString,
 				},
 				"producer_linger_ms": {
 					Description: "The linger time (ms) for waiting new data to arrive for publishing.",

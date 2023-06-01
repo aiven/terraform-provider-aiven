@@ -218,6 +218,7 @@ Optional:
 - `consumer_fetch_min_bytes` (Number) The minimum amount of data the server should return for a fetch request.
 - `producer_batch_size` (Number) The batch size in bytes producer will attempt to collect before publishing to broker.
 - `producer_buffer_memory` (Number) The amount of bytes producer can use for buffering data before publishing to broker.
+- `producer_compression_type` (String) Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.
 - `producer_linger_ms` (Number) The linger time (ms) for waiting new data to arrive for publishing.
 - `producer_max_request_size` (Number) The maximum request size in bytes.
 
