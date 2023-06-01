@@ -8,7 +8,11 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.4.1] - 2023-06-01
+
 - Suppress diff for `schema_type` on `aiven_kafka_schema` resource import
+- Improve Kafka Topic 404 error handling
+- Use default validation.StringInSlice
 
 ## [4.4.0] - 2023-05-23
 
@@ -20,7 +24,6 @@ nav_order: 1
   - `owner_team_id`
   - `is_account_owner`
 - Deprecated `aiven_account_team_project` resource
-- Improve Kafka Topic 404 error handling
 
 ## [4.3.0] - 2023-05-10
 
