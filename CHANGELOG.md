@@ -6,6 +6,11 @@ nav_order: 1
 
 # Changelog
 
+## [3.13.2] - 2023-06-01
+
+- Improve Kafka Topic 404 error handling
+
+
 ## [3.13.1] - 2023-03-15
 - Fix `aiven_kafka_topic` create. Now conflicts if topic exists
 
