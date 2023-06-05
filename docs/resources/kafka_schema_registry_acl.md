@@ -25,11 +25,11 @@ The Resource Kafka Schema Registry ACL resource allows the creation and manageme
 
 ### Optional
 
-- `acl_id` (String) Kafka Schema Registry ACL ID
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
+- `acl_id` (String) Kafka Schema Registry ACL ID
 - `id` (String) The ID of this resource.
 
 <a id="nestedblock--timeouts"></a>

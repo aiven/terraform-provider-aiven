@@ -100,7 +100,6 @@ var aivenProjectSchema = map[string]*schema.Schema{
 	"available_credits": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Optional:    true,
 		Description: "The amount of platform credits available to the project. This could be your free trial or other promotional credits.",
 	},
 	"estimated_balance": {

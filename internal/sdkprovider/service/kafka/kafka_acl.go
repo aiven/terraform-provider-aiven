@@ -42,7 +42,6 @@ var aivenKafkaACLSchema = map[string]*schema.Schema{
 	"acl_id": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Optional:    true,
 		Description: "Kafka ACL ID",
 	},
 }
