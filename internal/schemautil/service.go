@@ -216,7 +216,6 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 					"kafka_authentication_method": {
 						Type:        schema.TypeString,
 						Computed:    true,
-						Optional:    true,
 						Description: "Kafka authentication method. This is a value specific to the 'kafka' service component",
 					},
 					"port": {

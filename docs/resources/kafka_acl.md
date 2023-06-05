@@ -35,11 +35,11 @@ resource "aiven_kafka_acl" "mytestacl" {
 
 ### Optional
 
-- `acl_id` (String) Kafka ACL ID
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
+- `acl_id` (String) Kafka ACL ID
 - `id` (String) The ID of this resource.
 
 <a id="nestedblock--timeouts"></a>
