@@ -76,6 +76,7 @@ func TestPropsReqs(t *testing.T) {
 						"example":    "<%pri%>%timestamp:::date-rfc3339% %HOSTNAME% %app-name% %msg%",
 						"max_length": 512,
 						"min_length": 1,
+						"pattern":    "^[ -~\\t]+$",
 						"title":      "custom syslog message format",
 						"type":       "string",
 					},
@@ -125,11 +126,11 @@ func TestPropsReqs(t *testing.T) {
 			gotP, gotR, _ := propsReqs(tt.args.st, tt.args.n)
 
 			if !cmp.Equal(gotP, tt.want.wantP) {
-				t.Errorf(cmp.Diff(tt.want, gotP))
+				t.Errorf(cmp.Diff(tt.want.wantP, gotP))
 			}
 
 			if !cmp.Equal(gotR, tt.want.wantR) {
-				t.Errorf(cmp.Diff(tt.want, gotR))
+				t.Errorf(cmp.Diff(tt.want.wantR, gotR))
 			}
 		})
 	}
