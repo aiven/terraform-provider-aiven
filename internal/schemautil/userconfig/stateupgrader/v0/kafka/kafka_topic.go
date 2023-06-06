@@ -209,6 +209,7 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 					Description:      "unclean.leader.election.enable value",
 					Optional:         true,
 					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+					Deprecated:       "This field is deprecated and won't be available starting from the next major release.",
 				},
 			},
 		},
