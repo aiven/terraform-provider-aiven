@@ -393,7 +393,8 @@ func TestAccAivenKafkaTopic_recreate_missing(t *testing.T) {
 					kafka.FlushTopicCache()
 				},
 				// Everything should be fine
-				Config: config, // terraform apply
+				ExpectNonEmptyPlan: true,
+				Config:             config, // terraform apply
 				Check: resource.ComposeTestCheckFunc(
 					// Saved in state
 					resource.TestCheckResourceAttr(kafkaResource, "id", kafkaID),
