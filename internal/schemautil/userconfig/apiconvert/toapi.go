@@ -1,6 +1,7 @@
 package apiconvert
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -62,9 +63,7 @@ func arrayItemToAPI(
 	var res []interface{}
 
 	if len(v) == 0 {
-		res = []interface{}{}
-
-		return res, false, nil
+		return json.RawMessage("[]"), false, nil
 	}
 
 	fks := strings.Join(fk, ".")
@@ -298,65 +297,72 @@ func itemToAPI(
 	return res, o, nil
 }
 
-// processManyToOneKeys is a function that processes many to one keys.
-// It processes the provided result with keys in their flattened form and sets the many to one key to the value of the
-// first flattened key that is not empty, and uses it to send the value to the API.
+// processManyToOneKeys processes many to one keys by mapping them to their first non-empty value.
 func processManyToOneKeys(res map[string]interface{}) {
-	// mto is a map of many to one keys that exist in the provided properties.
+	// mto is a map that stores the keys and their associated many to one keys.
 	mto := make(map[string][]string)
 
+	// Iterate over the result map.
 	// TODO: Remove all ip_filter and namespaces special cases when these fields are removed.
 	for k, v := range res {
-		// If the value is a map, we process it recursively.
+		// If the value is a map, process it recursively.
 		if va, ok := v.(map[string]interface{}); ok {
 			processManyToOneKeys(va)
 		}
 
-		// We ignore untyped keys, because they cannot be many to one.
+		// Ignore keys that are not typed and are not special keys.
 		if !userconfig.IsKeyTyped(k) && k != "ip_filter" && k != "namespaces" {
 			continue
 		}
 
-		// rk is the real key, i.e. the key without the suffix.
+		// Extract the real key, which is the key without suffix unless it's a special key.
 		rk := k
-
 		if k != "ip_filter" && k != "namespaces" {
 			rk = k[:strings.LastIndexByte(k, '_')]
 		}
 
-		// If the key does not exist in the map, we create it.
-		if _, ok := mto[rk]; !ok {
-			mto[rk] = []string{}
-		}
-
-		// We append the key to the list of keys that are many to one.
+		// Append the key to its corresponding list in the mto map.
 		mto[rk] = append(mto[rk], k)
 	}
 
-	// At this point mto looks like this, or similar:
+	// By this stage, the 'mto' map takes a form similar to the following:
 	// map[string][]string{
-	//  // ip_filter has two keys set in the user configuration, so we use the first one that is not empty,
-	//  // e.g. when user switches from ip_filter to ip_filter_object, we use ip_filter_object.
+	//  // For 'ip_filter', there are two associated keys in the user configuration. The first non-empty one is used,
+	//  // for instance, if the user shifts from 'ip_filter' to 'ip_filter_object', the latter is preferred.
 	// 	"ip_filter": []string{"ip_filter", "ip_filter_object"},
-	//  // namespaces has only one key set in the user configuration, so we use it.
+	//  // For 'namespaces', only a single key is present in the user configuration, so it's directly used.
 	// 	"namespaces": []string{"namespaces"},
 	// }
 
-	// We iterate over the map of many to one keys and process them.
+	// Iterate over the many to one keys.
 	for k, v := range mto {
-		// nv is the new value of the key.
-		var nv interface{}
+		var nv interface{} // The new value for the key.
 
+		wasDeleted := false // Track if any key was deleted in the loop.
+
+		// Attempt to process the values as []interface{}.
 		for _, vn := range v {
-			// If the many to one key is not set or is empty, we skip it by removing it from the map.
 			if rv, ok := res[vn].([]interface{}); ok && len(rv) > 0 {
 				nv = rv
 
-				delete(res, vn)
+				delete(res, vn) // Delete the processed key-value pair from the result.
+
+				wasDeleted = true
 			}
 		}
 
-		// Finally, we set the new value of the key.
+		// If no key was deleted, attempt to process the values as json.RawMessage.
+		if !wasDeleted {
+			for _, vn := range v {
+				if rv, ok := res[vn].(json.RawMessage); ok {
+					nv = rv
+
+					delete(res, vn) // Delete the processed key-value pair from the result.
+				}
+			}
+		}
+
+		// Finally, set the new value for the key.
 		res[k] = nv
 	}
 }

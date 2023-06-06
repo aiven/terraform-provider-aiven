@@ -1,6 +1,7 @@
 package apiconvert
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -439,6 +440,35 @@ func TestToAPI(t *testing.T) {
 				),
 			},
 			want: map[string]any{},
+		},
+		{
+			name: "strings in many to one array unset",
+			args: args{
+				st: userconfig.ServiceTypes,
+				n:  "m3db",
+				d: newTestResourceData(
+					map[string]interface{}{
+						"m3db_user_config": []interface{}{
+							map[string]interface{}{
+								"ip_filter": []interface{}{},
+							},
+						},
+					},
+					map[string]struct{}{
+						"m3db_user_config":             {},
+						"m3db_user_config.0.ip_filter": {},
+					},
+					map[string]struct{}{
+						"m3db_user_config.0.ip_filter":   {},
+						"m3db_user_config.0.ip_filter.0": {},
+						"m3db_user_config.0.ip_filter.1": {},
+					},
+					false,
+				),
+			},
+			want: map[string]any{
+				"ip_filter": json.RawMessage("[]"), // empty array
+			},
 		},
 		{
 			name: "objects in many to one array",
