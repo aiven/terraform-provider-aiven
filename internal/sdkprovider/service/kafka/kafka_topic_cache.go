@@ -167,6 +167,9 @@ func FlushTopicCache() {
 	c.Lock()
 	for k := range c.internal {
 		delete(c.internal, k)
+		delete(c.inQueue, k)
+		delete(c.missing, k)
+		delete(c.v1list, k)
 	}
 	c.Unlock()
 }
