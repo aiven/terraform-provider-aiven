@@ -155,11 +155,10 @@ resource "aiven_kafka_topic" "foo" {
   replication  = 2
 
   config {
-    flush_ms                       = 10
-    unclean_leader_election_enable = true
-    cleanup_policy                 = "compact"
-    min_cleanable_dirty_ratio      = 0.01
-    delete_retention_ms            = 50000
+    flush_ms                  = 10
+    cleanup_policy            = "compact"
+    min_cleanable_dirty_ratio = 0.01
+    delete_retention_ms       = 50000
   }
 }
 

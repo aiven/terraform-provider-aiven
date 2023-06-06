@@ -206,9 +206,10 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 				},
 				"unclean_leader_election_enable": {
 					Type:             schema.TypeString,
-					Description:      "unclean.leader.election.enable value",
+					Description:      "unclean.leader.election.enable value; This field is deprecated and no longer functional.",
 					Optional:         true,
 					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+					Deprecated:       "This field is deprecated and no longer functional.",
 				},
 			},
 		},
@@ -250,11 +251,9 @@ func ResourceKafkaTopicStateUpgrade(
 	}
 
 	err := typeupgrader.Map(config, map[string]string{
-		"message_downconversion_enable":  "bool",
-		"min_cleanable_dirty_ratio":      "float",
-		"preallocate":                    "bool",
-		"unclean_leader_election_enable": "bool",
-	})
+		"message_downconversion_enable": "bool",
+		"min_cleanable_dirty_ratio":     "float",
+		"preallocate":                   "bool"})
 	if err != nil {
 		return rawState, err
 	}

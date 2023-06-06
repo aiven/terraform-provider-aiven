@@ -28,7 +28,6 @@ resource "aiven_kafka_topic" "edge_measurements" {
 
   config {
     flush_ms                       = 10
-    unclean_leader_election_enable = true
     cleanup_policy                 = "delete"
     retention_bytes                = "134217728" // 10 GiB
     retention_ms                   = "604800000" // 1 week

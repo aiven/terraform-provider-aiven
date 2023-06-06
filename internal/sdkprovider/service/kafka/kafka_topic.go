@@ -213,9 +213,10 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 				},
 				"unclean_leader_election_enable": {
 					Type:             schema.TypeBool,
-					Description:      "unclean.leader.election.enable value",
+					Description:      "unclean.leader.election.enable value; This field is deprecated and no longer functional.",
 					Optional:         true,
 					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+					Deprecated:       "This field is deprecated and no longer functional.",
 				},
 			},
 		},
@@ -534,7 +535,6 @@ func flattenKafkaTopicConfig(t *aiven.KafkaTopic) []map[string]interface{} {
 			"segment_index_bytes":                 schemautil.ToOptionalString(t.Config.SegmentIndexBytes.Value),
 			"segment_jitter_ms":                   schemautil.ToOptionalString(t.Config.SegmentJitterMs.Value),
 			"segment_ms":                          schemautil.ToOptionalString(t.Config.SegmentMs.Value),
-			"unclean_leader_election_enable":      t.Config.UncleanLeaderElectionEnable.Value,
 		},
 	}
 }

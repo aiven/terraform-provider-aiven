@@ -8,7 +8,6 @@ resource "aiven_kafka_topic" "mytesttopic" {
 
   config {
     flush_ms                       = 10
-    unclean_leader_election_enable = true
     cleanup_policy                 = "compact,delete"
   }
 
