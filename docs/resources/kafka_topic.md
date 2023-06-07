@@ -23,7 +23,6 @@ resource "aiven_kafka_topic" "mytesttopic" {
 
   config {
     flush_ms                       = 10
-    unclean_leader_election_enable = true
     cleanup_policy                 = "compact,delete"
   }
 
@@ -85,7 +84,7 @@ Optional:
 - `segment_index_bytes` (String) segment.index.bytes value
 - `segment_jitter_ms` (String) segment.jitter.ms value
 - `segment_ms` (String) segment.ms value
-- `unclean_leader_election_enable` (Boolean) unclean.leader.election.enable value
+- `unclean_leader_election_enable` (Boolean, Deprecated) unclean.leader.election.enable value; This field is deprecated and no longer functional.
 
 
 <a id="nestedblock--tag"></a>
