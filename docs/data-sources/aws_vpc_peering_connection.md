@@ -36,5 +36,3 @@ data "aiven_aws_vpc_peering_connection" "foo" {
 - `id` (String) The ID of this resource.
 - `state` (String) State of the peering connection
 - `state_info` (Map of String) State-specific help or error information
-
-

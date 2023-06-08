@@ -35,5 +35,3 @@ data "aiven_account" "account1" {
 - `primary_billing_group_id` (String) Billing group id
 - `tenant_id` (String) Tenant id
 - `update_time` (String) Time of last update
-
-

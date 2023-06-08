@@ -37,5 +37,3 @@ data "aiven_pg_user" "user" {
 - `password` (String, Sensitive) The password of the PG User ( not applicable for all services ).
 - `pg_allow_replication` (Boolean) Defines whether replication is allowed. This property cannot be changed, doing so forces recreation of the resource.
 - `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.
-
-

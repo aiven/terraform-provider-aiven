@@ -35,5 +35,3 @@ data "aiven_account_team_member" "foo" {
 - `create_time` (String) Time of creation
 - `id` (String) The ID of this resource.
 - `invited_by_user_email` (String) The email address that invited this user.
-
-

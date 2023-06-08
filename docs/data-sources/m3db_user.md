@@ -34,5 +34,3 @@ data "aiven_m3db_user" "user" {
 - `id` (String) The ID of this resource.
 - `password` (String, Sensitive) The password of the M3DB User.
 - `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.
-
-

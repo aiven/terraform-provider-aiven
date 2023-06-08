@@ -35,5 +35,3 @@ data "aiven_gcp_vpc_peering_connection" "foo" {
 - `self_link` (String) Computed GCP network peering link
 - `state` (String) State of the peering connection
 - `state_info` (Map of String) State-specific help or error information
-
-

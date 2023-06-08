@@ -35,5 +35,3 @@ data "aiven_clickhouse_user" "ch-user" {
 - `password` (String, Sensitive) The password of the clickhouse user.
 - `required` (Boolean) Indicates if a clickhouse user is required
 - `uuid` (String) UUID of the clickhouse user.
-
-

@@ -32,5 +32,3 @@ data "aiven_project_user" "mytestuser" {
 - `accepted` (Boolean) Whether the user has accepted the request to join the project; adding user to a project sends an invitation to the target user and the actual membership is only created once the user accepts the invitation.
 - `id` (String) The ID of this resource.
 - `member_type` (String) Project membership type. The possible values are `admin`, `developer` and `operator`.
-
-

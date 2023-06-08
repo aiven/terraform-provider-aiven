@@ -37,5 +37,3 @@ data "aiven_kafka_acl" "mytestacl" {
 
 - `acl_id` (String) Kafka ACL ID
 - `id` (String) The ID of this resource.
-
-

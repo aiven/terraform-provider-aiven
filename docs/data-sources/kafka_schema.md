@@ -35,5 +35,3 @@ data "aiven_kafka_schema_configuration" "config" {
 - `schema` (String) Kafka Schema configuration should be a valid Avro Schema JSON format.
 - `schema_type` (String) Kafka Schema type JSON or AVRO
 - `version` (Number) Kafka Schema configuration version.
-
-

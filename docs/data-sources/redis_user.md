@@ -38,5 +38,3 @@ data "aiven_redis_user" "user" {
 - `redis_acl_commands` (List of String) Defines rules for individual commands. The field is required with`redis_acl_categories` and `redis_acl_keys`. This property cannot be changed, doing so forces recreation of the resource.
 - `redis_acl_keys` (List of String) Defines key access rules. The field is required with`redis_acl_categories` and `redis_acl_keys`. This property cannot be changed, doing so forces recreation of the resource.
 - `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.
-
-

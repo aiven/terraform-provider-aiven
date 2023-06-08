@@ -27,5 +27,3 @@ The Data Source Kafka Schema Registry ACL data source provides information about
 
 - `acl_id` (String) Kafka Schema Registry ACL ID
 - `id` (String) The ID of this resource.
-
-

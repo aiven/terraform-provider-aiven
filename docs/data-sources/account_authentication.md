@@ -57,5 +57,3 @@ Read-Only:
 - `identity` (String)
 - `last_name` (String)
 - `real_name` (String)
-
-

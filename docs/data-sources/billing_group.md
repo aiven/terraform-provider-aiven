@@ -42,5 +42,3 @@ data "aiven_billing_group" "foo" {
 - `state` (String) State
 - `vat_id` (String) VAT id
 - `zip_code` (String) Zip Code
-
-

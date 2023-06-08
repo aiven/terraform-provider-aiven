@@ -35,5 +35,3 @@ data "aiven_pg_database" "mydatabase" {
 - `lc_collate` (String) Default string sort order (`LC_COLLATE`) of the database. The default value is `en_US.UTF-8`. This property cannot be changed, doing so forces recreation of the resource.
 - `lc_ctype` (String) Default character classification (`LC_CTYPE`) of the database. The default value is `en_US.UTF-8`. This property cannot be changed, doing so forces recreation of the resource.
 - `termination_protection` (Boolean) It is a Terraform client-side deletion protections, which prevents the database from being deleted by Terraform. It is recommended to enable this for any production databases containing critical data. The default value is `false`.
-
-

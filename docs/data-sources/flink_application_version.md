@@ -77,5 +77,3 @@ Read-Only:
 
 - `create_table` (String)
 - `integration_id` (String)
-
-
