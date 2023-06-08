@@ -37,5 +37,3 @@ data "aiven_mysql_user" "user" {
 - `id` (String) The ID of this resource.
 - `password` (String, Sensitive) The password of the MySQL User ( not applicable for all services ).
 - `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.
-
-

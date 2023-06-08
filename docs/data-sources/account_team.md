@@ -33,5 +33,3 @@ data "aiven_account_team" "account_team1" {
 - `id` (String) The ID of this resource.
 - `team_id` (String) The auto-generated unique account team id
 - `update_time` (String) Time of last update
-
-

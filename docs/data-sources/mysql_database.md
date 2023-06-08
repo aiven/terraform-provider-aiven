@@ -33,5 +33,3 @@ data "aiven_mysql_database" "mydatabase" {
 
 - `id` (String) The ID of this resource.
 - `termination_protection` (Boolean) It is a Terraform client-side deletion protections, which prevents the database from being deleted by Terraform. It is recommended to enable this for any production databases containing critical data. The default value is `false`.
-
-

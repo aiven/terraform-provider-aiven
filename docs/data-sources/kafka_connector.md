@@ -48,5 +48,3 @@ Read-Only:
 
 - `connector` (String)
 - `task` (Number)
-
-

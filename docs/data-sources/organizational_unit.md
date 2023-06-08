@@ -33,5 +33,3 @@ data "aiven_organizational_unit" "organizational_unit1" {
 - `parent_id` (String) Parent ID
 - `tenant_id` (String) Tenant ID
 - `update_time` (String) Time of last update
-
-

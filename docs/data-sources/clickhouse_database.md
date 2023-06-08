@@ -33,5 +33,3 @@ data "aiven_clickhouse_database" "clickhouse_db" {
 
 - `id` (String) The ID of this resource.
 - `termination_protection` (Boolean) It is a Terraform client-side deletion protections, which prevents the Clickhouse database from being deleted by Terraform. It is recommended to enable this for any production Clickhouse databases containing critical data. The default value is `false`.
-
-

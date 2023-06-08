@@ -36,5 +36,3 @@ data "aiven_kafka_user" "user" {
 - `id` (String) The ID of this resource.
 - `password` (String, Sensitive) The password of the Kafka User.
 - `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.
-
-

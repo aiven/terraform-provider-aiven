@@ -31,5 +31,3 @@ data "aiven_organization" "organization1" {
 - `id` (String) The ID of this resource.
 - `tenant_id` (String) Tenant ID
 - `update_time` (String) Time of last update
-
-

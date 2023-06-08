@@ -33,5 +33,3 @@ data "aiven_aws_privatelink" "foo" {
 - `aws_service_name` (String) AWS service name
 - `id` (String) The ID of this resource.
 - `principals` (Set of String) List of allowed principals
-
-

@@ -42,5 +42,3 @@ data "aiven_mirrormaker_replication_flow" "f1" {
 - `sync_group_offsets_interval_seconds` (Number) Frequency of consumer group offset sync. The default value is `1`.
 - `topics` (List of String) List of topics and/or regular expressions to replicate
 - `topics_blacklist` (List of String) List of topics and/or regular expressions to not replicate.
-
-

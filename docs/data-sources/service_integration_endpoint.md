@@ -182,5 +182,3 @@ Read-Only:
 - `sd` (String)
 - `server` (String)
 - `tls` (Boolean)
-
-

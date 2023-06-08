@@ -37,5 +37,3 @@ data "aiven_flink_application" "app1" {
 - `id` (String) The ID of this resource.
 - `updated_at` (String) Application update time
 - `updated_by` (String) Application updater
-
-

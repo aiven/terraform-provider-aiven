@@ -36,5 +36,3 @@ resource "aiven_kafka_schema_configuration" "config" {
 - `schema_type` (String) Kafka Schema type JSON or AVRO
 - `subject_name` (String) The Kafka Schema Subject name. This property cannot be changed, doing so forces recreation of the resource.
 - `version` (Number) Kafka Schema configuration version.
-
-

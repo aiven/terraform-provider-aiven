@@ -30,5 +30,3 @@ The Azure VPC Peering Connection data source provides information about the exis
 - `peering_connection_id` (String) Cloud provider identifier for the peering connection if available
 - `state` (String) State of the peering connection
 - `state_info` (Map of String) State-specific help or error information
-
-
