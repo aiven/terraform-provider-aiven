@@ -208,6 +208,7 @@ Optional:
 - `producer_acks` (String) The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to 'all' or '-1', the leader will wait for the full set of in-sync replicas to acknowledge the record. The default value is `1`.
 - `producer_compression_type` (String) Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.
 - `producer_linger_ms` (Number) Wait for up to the given delay to allow batching records together. The default value is `0`.
+- `producer_max_request_size` (Number) The maximum size of a request in bytes. Note that Kafka broker can also cap the record batch size. The default value is `1048576`.
 - `simpleconsumer_pool_size_max` (Number) Maximum number of SimpleConsumers that can be instantiated per broker. The default value is `25`.
 
 

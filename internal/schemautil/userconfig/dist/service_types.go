@@ -2813,6 +2813,12 @@ func ServiceTypeKafka() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
+				"producer_max_request_size": {
+					Default:     "1048576",
+					Description: "The maximum size of a request in bytes. Note that Kafka broker can also cap the record batch size. The default value is `1048576`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
 				"simpleconsumer_pool_size_max": {
 					Default:     "25",
 					Description: "Maximum number of SimpleConsumers that can be instantiated per broker. The default value is `25`.",
@@ -2853,6 +2859,12 @@ func ServiceTypeKafka() *schema.Schema {
 				"producer_linger_ms": {
 					Default:     "0",
 					Description: "Wait for up to the given delay to allow batching records together. The default value is `0`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"producer_max_request_size": {
+					Default:     "1048576",
+					Description: "The maximum size of a request in bytes. Note that Kafka broker can also cap the record batch size. The default value is `1048576`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},

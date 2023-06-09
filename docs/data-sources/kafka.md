@@ -206,6 +206,7 @@ Read-Only:
 - `producer_acks` (String)
 - `producer_compression_type` (String)
 - `producer_linger_ms` (Number)
+- `producer_max_request_size` (Number)
 - `simpleconsumer_pool_size_max` (Number)
 
 
