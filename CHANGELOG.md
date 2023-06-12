@@ -10,6 +10,8 @@ nav_order: 1
 
 - Fix not being able to be set `ip_filter` and similar array fields in user config options to an empty array
 - `aiven_kafka_topic` field `unclean_leader_election_enable` is deprecated
+- Fix CIDRs handled improperly in VPC resources
+- Deprecate `peer_region` field of `aiven_transit_gateway_vpc_attachment` resource
 
 ## [4.4.1] - 2023-06-01
 

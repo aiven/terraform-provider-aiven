@@ -36,8 +36,11 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 		region = &peerRegion
 	}
 
-	if userPeerNetworkCidrs, ok := d.GetOk("user_peer_network_cidrs"); ok {
-		cidrs = schemautil.FlattenToString(userPeerNetworkCidrs.([]interface{}))
+	if cidrsv, ok := d.GetOk("user_peer_network_cidrs"); ok {
+		cidrsva, ok := cidrsv.(*schema.Set)
+		if ok {
+			cidrs = schemautil.FlattenToString(cidrsva.List())
+		}
 	}
 
 	// Azure related fields are only available for VPC Peering Connection resource but
@@ -409,7 +412,7 @@ func copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(
 			cidrs[i] = cidr
 		}
 
-		if err := d.Set("user_peer_network_cidrs", cidrs); err != nil {
+		if err := d.Set("user_peer_network_cidrs", schema.NewSet(schema.HashString, cidrs)); err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
 				Summary:  fmt.Sprintf("Unable to set user_peer_network_cidrs field: %s", err),

@@ -41,9 +41,10 @@ var aivenTransitGatewayVPCAttachmentSchema = map[string]*schema.Schema{
 		},
 	},
 	"peer_region": {
-		Required:    true,
+		Optional:    true,
 		Type:        schema.TypeString,
 		Description: "AWS region of the peered VPC (if not in the same region as Aiven VPC)",
+		Deprecated:  "This field is deprecated and will be removed in the next major release.",
 	},
 	"state": {
 		Computed:    true,
@@ -86,7 +87,16 @@ func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.Re
 		return diag.Errorf("error parsing peering VPC ID: %s", err)
 	}
 
-	cidrs := schemautil.FlattenToString(d.Get("user_peer_network_cidrs").([]interface{}))
+	var cidrs []string
+
+	cidrsv, ok := d.GetOk("user_peer_network_cidrs")
+	if ok {
+		cidrsva, ok := cidrsv.(*schema.Set)
+		if ok {
+			cidrs = schemautil.FlattenToString(cidrsva.List())
+		}
+	}
+
 	peeringConnection, err := client.VPCPeeringConnections.Get(p.projectName, p.vpcID, p.peerCloudAccount, p.peerVPC)
 	if err != nil {
 		return diag.Errorf("cannot get transit gateway vpc attachment by id %s: %s", d.Id(), err)
