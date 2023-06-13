@@ -142,7 +142,7 @@ func EmptyObjectDiffSuppressFuncSkipArrays(s map[string]*schema.Schema) schema.S
 	var skipKeys []string
 	for key, sh := range s {
 		switch sh.Type {
-		case schema.TypeList, schema.TypeSet:
+		case schema.TypeList:
 			skipKeys = append(skipKeys, key)
 		}
 	}

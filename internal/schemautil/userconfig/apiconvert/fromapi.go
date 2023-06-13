@@ -3,8 +3,6 @@ package apiconvert
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
@@ -192,11 +190,6 @@ func propsFromAPI(n string, r map[string]interface{}, p map[string]interface{}) 
 				}
 
 				vrs = l
-
-				switch k {
-				case "user_peer_network_cidrs":
-					vrs = schema.NewSet(schema.HashString, l)
-				}
 			}
 		case "object":
 			vra, ok := vr.(map[string]interface{})
