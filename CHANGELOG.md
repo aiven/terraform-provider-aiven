@@ -12,6 +12,7 @@ nav_order: 1
 - `aiven_kafka_topic` field `unclean_leader_election_enable` is deprecated
 - Fix CIDRs handled improperly in VPC resources
 - Deprecate `peer_region` field of `aiven_transit_gateway_vpc_attachment` resource
+- Un-deprecated `aiven_account_team_project`, it will be deprecated when there is an alternative
 
 ## [4.4.1] - 2023-06-01
 

@@ -55,8 +55,7 @@ account team you are trying to link to this project.
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema:             aivenAccountTeamProjectSchema,
-		DeprecationMessage: "This resource is deprecated and will be removed in the next major release.",
+		Schema: aivenAccountTeamProjectSchema,
 	}
 }
 
