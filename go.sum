@@ -197,8 +197,8 @@ github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7l
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/aiven/aiven-go-client v1.15.0 h1:0QrL6Y5QZEi2Zre0ZEz5zq2lRXx6yPGf3nj83KEluVo=
 github.com/aiven/aiven-go-client v1.15.0/go.mod h1:3Hh1PDNcqNNCYrkU/jSAHMV/b/ynoy73fwhBPKnMe6I=
-github.com/aiven/go-api-schemas v1.13.0 h1:PNvSYFOz0ybs+bKSVvvKTfONpftu4p1C5j8Rs+QDntg=
-github.com/aiven/go-api-schemas v1.13.0/go.mod h1:RmQ8MfxwxAP2ji9eJtP6dICOaTMcQD9b5aQT3Bp7uzI=
+github.com/aiven/go-api-schemas v1.14.0 h1:9qQQdYAd4u0EWJ/BxKIj5YfdlYAwmYcfRbfNd4qFjJo=
+github.com/aiven/go-api-schemas v1.14.0/go.mod h1:RmQ8MfxwxAP2ji9eJtP6dICOaTMcQD9b5aQT3Bp7uzI=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/apparentlymart/go-dump v0.0.0-20180507223929-23540a00eaa3/go.mod h1:oL81AME2rN47vu18xqj1S1jPIPuN7afo62yKTNn3XMM=
 github.com/apparentlymart/go-textseg v1.0.0/go.mod h1:z96Txxhf3xSFMPmb5X/1W05FF/Nj9VFpLOpjS5yuumk=
