@@ -211,6 +211,24 @@ func IntegrationTypeDatadog() *schema.Schema {
 			Optional: true,
 			Type:     schema.TypeList,
 		},
+		"redis": {
+			Description: "Datadog Redis Options.",
+			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"command_stats_enabled": {
+				Default:     false,
+				Description: "Enable command_stats option in the agent's configuration. The default value is `false`.",
+				Optional:    true,
+				Type:        schema.TypeBool,
+			}}),
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"command_stats_enabled": {
+				Default:     false,
+				Description: "Enable command_stats option in the agent's configuration. The default value is `false`.",
+				Optional:    true,
+				Type:        schema.TypeBool,
+			}}},
+			MaxItems: 1,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
 	}
 
 	return &schema.Schema{

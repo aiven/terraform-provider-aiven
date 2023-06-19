@@ -112,6 +112,7 @@ Read-Only:
 - `kafka_custom_metrics` (List of String)
 - `max_jmx_metrics` (Number)
 - `opensearch` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--opensearch))
+- `redis` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--redis))
 
 <a id="nestedobjatt--datadog_user_config--datadog_tags"></a>
 ### Nested Schema for `datadog_user_config.datadog_tags`
@@ -130,6 +131,14 @@ Read-Only:
 - `index_stats_enabled` (Boolean)
 - `pending_task_stats_enabled` (Boolean)
 - `pshard_stats_enabled` (Boolean)
+
+
+<a id="nestedobjatt--datadog_user_config--redis"></a>
+### Nested Schema for `datadog_user_config.redis`
+
+Read-Only:
+
+- `command_stats_enabled` (Boolean)
 
 
 

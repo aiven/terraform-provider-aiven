@@ -124,6 +124,7 @@ Optional:
 - `kafka_custom_metrics` (List of String) List of custom metrics.
 - `max_jmx_metrics` (Number) Maximum number of JMX metrics to send.
 - `opensearch` (Block List, Max: 1) Datadog Opensearch Options. (see [below for nested schema](#nestedblock--datadog_user_config--opensearch))
+- `redis` (Block List, Max: 1) Datadog Redis Options. (see [below for nested schema](#nestedblock--datadog_user_config--redis))
 
 <a id="nestedblock--datadog_user_config--datadog_tags"></a>
 ### Nested Schema for `datadog_user_config.datadog_tags`
@@ -145,6 +146,14 @@ Optional:
 - `index_stats_enabled` (Boolean) Enable Datadog Opensearch Index Monitoring.
 - `pending_task_stats_enabled` (Boolean) Enable Datadog Opensearch Pending Task Monitoring.
 - `pshard_stats_enabled` (Boolean) Enable Datadog Opensearch Primary Shard Monitoring.
+
+
+<a id="nestedblock--datadog_user_config--redis"></a>
+### Nested Schema for `datadog_user_config.redis`
+
+Optional:
+
+- `command_stats_enabled` (Boolean) Enable command_stats option in the agent's configuration. The default value is `false`.
 
 
 
