@@ -193,7 +193,7 @@ func resourceProjectCopyBillingGroupFromProject(
 
 func resourceProjectAssignToBillingGroup(
 	projectName, billingGroupID string, client *aiven.Client, d *schema.ResourceData) diag.Diagnostics {
-	log.Printf("[DEBUG] Assoviating project `%s` with the billing group `%s`", projectName, billingGroupID)
+	log.Printf("[DEBUG] Associating project `%s` with the billing group `%s`", projectName, billingGroupID)
 	_, err := client.BillingGroup.Get(billingGroupID)
 	if err != nil {
 		return diag.Errorf("cannot get a billing group by id: %s", err)
