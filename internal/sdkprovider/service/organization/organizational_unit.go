@@ -58,7 +58,11 @@ func ResourceOrganizationalUnit() *schema.Resource {
 func resourceOrganizationalUnitCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	name := d.Get("name").(string)
-	parentID := d.Get("parent_id").(string)
+
+	parentID, err := normalizeID(client, d.Get("parent_id").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	r, err := client.Accounts.Create(
 		aiven.Account{
@@ -120,8 +124,7 @@ func resourceOrganizationalUnitUpdate(ctx context.Context, d *schema.ResourceDat
 func resourceOrganizationalUnitDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	err := client.Accounts.Delete(d.Id())
-	if err != nil && !aiven.IsNotFound(err) {
+	if err := client.Accounts.Delete(d.Id()); err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
 
