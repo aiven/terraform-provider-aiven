@@ -62,7 +62,7 @@ func resourceOrganizationCreate(ctx context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(err)
 	}
 
-	d.SetId(r.Account.Id)
+	d.SetId(r.Account.OrganizationId)
 
 	return resourceOrganizationRead(ctx, d, m)
 }
@@ -70,7 +70,12 @@ func resourceOrganizationCreate(ctx context.Context, d *schema.ResourceData, m i
 func resourceOrganizationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	r, err := client.Accounts.Get(d.Id())
+	id, err := normalizeID(client, d.Id())
+	if err != nil {
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+	}
+
+	r, err := client.Accounts.Get(id)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -94,14 +99,19 @@ func resourceOrganizationRead(_ context.Context, d *schema.ResourceData, m inter
 func resourceOrganizationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	r, err := client.Accounts.Update(d.Id(), aiven.Account{
+	id, err := normalizeID(client, d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	r, err := client.Accounts.Update(id, aiven.Account{
 		Name: d.Get("name").(string),
 	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(r.Account.Id)
+	d.SetId(r.Account.OrganizationId)
 
 	return resourceOrganizationRead(ctx, d, m)
 }
@@ -109,8 +119,12 @@ func resourceOrganizationUpdate(ctx context.Context, d *schema.ResourceData, m i
 func resourceOrganizationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	err := client.Accounts.Delete(d.Id())
-	if err != nil && !aiven.IsNotFound(err) {
+	id, err := normalizeID(client, d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err = client.Accounts.Delete(id); err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
 

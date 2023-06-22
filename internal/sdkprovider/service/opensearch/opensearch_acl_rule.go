@@ -4,11 +4,12 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 var aivenOpensearchACLRuleSchema = map[string]*schema.Schema{
@@ -126,7 +127,7 @@ func resourceOpensearchACLRuleUpdate(ctx context.Context, d *schema.ResourceData
 	modifier := resourceElasticsearchACLModifierUpdateACLRule(username, index, permission)
 	err := resourceOpensearchACLModifyRemoteConfig(project, serviceName, client, modifier)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(err)
 	}
 
 	d.SetId(schemautil.BuildResourceID(project, serviceName, username, index))
@@ -146,7 +147,7 @@ func resourceOpensearchACLRuleDelete(_ context.Context, d *schema.ResourceData, 
 	modifier := resourceElasticsearchACLModifierDeleteACLRule(username, index, permission)
 	err := resourceOpensearchACLModifyRemoteConfig(project, serviceName, client, modifier)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(err)
 	}
 	return nil
 }

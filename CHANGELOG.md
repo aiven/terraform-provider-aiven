@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix wrong ID used for `organization` resources
+
 ## [4.5.0] - 2023-06-14
 
 - Fix not being able to be set `ip_filter` and similar array fields in user config options to an empty array

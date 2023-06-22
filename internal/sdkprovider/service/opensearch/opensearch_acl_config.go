@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 
@@ -81,7 +82,7 @@ func resourceOpensearchACLConfigUpdate(ctx context.Context, d *schema.ResourceDa
 	modifier := resourceElasticsearchACLModifierToggleConfigFields(d.Get("enabled").(bool), d.Get("extended_acl").(bool))
 	err := resourceOpensearchACLModifyRemoteConfig(project, serviceName, client, modifier)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(err)
 	}
 
 	d.SetId(schemautil.BuildResourceID(project, serviceName))
@@ -98,7 +99,7 @@ func resourceOpensearchACLConfigDelete(_ context.Context, d *schema.ResourceData
 	modifier := resourceElasticsearchACLModifierToggleConfigFields(false, false)
 	err := resourceOpensearchACLModifyRemoteConfig(project, serviceName, client, modifier)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return diag.FromErr(err)
 	}
 
 	return nil
