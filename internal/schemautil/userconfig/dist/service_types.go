@@ -17,6 +17,16 @@ func ServiceTypeCassandra() *schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
+		"backup_hour": {
+			Description: "The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.",
+			Optional:    true,
+			Type:        schema.TypeInt,
+		},
+		"backup_minute": {
+			Description: "The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.",
+			Optional:    true,
+			Type:        schema.TypeInt,
+		},
 		"cassandra": {
 			Description: "cassandra configuration values.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
