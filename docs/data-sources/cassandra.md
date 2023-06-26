@@ -69,6 +69,8 @@ Read-Only:
 Read-Only:
 
 - `additional_backup_regions` (List of String)
+- `backup_hour` (Number)
+- `backup_minute` (Number)
 - `cassandra` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--cassandra))
 - `cassandra_version` (String)
 - `ip_filter` (List of String)
