@@ -10,6 +10,7 @@ nav_order: 1
 
 - Add Organization User Groups support
 - Fixed incorrect `account_id` behavior in mixed constraint setup in `aiven_project` resource
+- Remove custom retries, use client builtin ones
 
 ## [4.8.0] - 2023-07-19
 

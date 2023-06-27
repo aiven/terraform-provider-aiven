@@ -39,7 +39,7 @@ func TestAccAivenProjectVPC_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenProjectVPCAttributes("data.aiven_project_vpc.vpc"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
+					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west2"),
 					resource.TestCheckResourceAttr(resourceName, "network_cidr", "192.168.0.0/24"),
 					resource.TestCheckResourceAttr(resourceName, "state", "ACTIVE"),
 				),
@@ -66,7 +66,7 @@ data "aiven_project" "foo" {
 
 resource "aiven_project_vpc" "bar" {
   project      = data.aiven_project.foo.project
-  cloud_name   = "google-europe-west1"
+  cloud_name   = "google-europe-west2"
   network_cidr = "192.168.0.0/24"
 }
 

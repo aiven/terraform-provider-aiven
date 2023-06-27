@@ -7,13 +7,14 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 var aivenKafkaConnectorSchema = map[string]*schema.Schema{
@@ -238,9 +239,23 @@ func resourceKafkaConnectorCreate(ctx context.Context, d *schema.ResourceData, m
 		config[k] = cS.(string)
 	}
 
-	err := m.(*aiven.Client).KafkaConnectors.Create(project, serviceName, config)
+	// Sometimes this method returns 404: Not Found
+	// Since the aiven.Client has own retries for various scenarios
+	// we retry here 404 only
+	err := retry.RetryContext(ctx, time.Second*30, func() *retry.RetryError {
+		err := m.(*aiven.Client).KafkaConnectors.Create(project, serviceName, config)
+		if err != nil {
+			return &retry.RetryError{
+				Err:       err,
+				Retryable: aiven.IsNotFound(err), // retries 404 only
+			}
+		}
+		return nil
+	})
+
 	if err != nil {
-		return diag.FromErr(err)
+		log.Printf("[DEBUG] Kafka Connectors create err %s", err.Error())
+		return diag.FromErr(fmt.Errorf("kafka connector create error: %w", err))
 	}
 
 	d.SetId(schemautil.BuildResourceID(project, serviceName, connectorName))

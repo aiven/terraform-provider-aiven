@@ -6,9 +6,10 @@ import (
 	"regexp"
 	"testing"
 
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
 // TestAccAivenDatasourceKafkaTopic_doesnt_exist this datasource shares Read() function with real "resource"
@@ -29,7 +30,7 @@ func TestAccAivenDatasourceKafkaTopic_doesnt_exist(t *testing.T) {
 				// Can't import unknown topic
 				Config:      testAccAivenDatasourceKafkaTopicDoesntExist(prefix, project, true),
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile(`Topic\(s\) not found`),
+				ExpectError: regexp.MustCompile(`not found`),
 			},
 		},
 	})

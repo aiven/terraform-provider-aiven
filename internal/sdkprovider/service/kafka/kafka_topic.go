@@ -268,6 +268,21 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 	partitions := d.Get("partitions").(int)
 	replication := d.Get("replication").(int)
 
+	// aiven.KafkaTopics.Create() function may return 501 on create
+	// Second call might say that topic already exists
+	// So to be sure, better check it before create
+	_, err := getTopic(ctx, m, d.Timeout(schema.TimeoutRead), project, serviceName, topicName)
+
+	// No error means topic exists
+	if err == nil {
+		return diag.Errorf("Topic conflict, already exists: %s", topicName)
+	}
+
+	// If this is not "does not exist", then something happened
+	if !aiven.IsNotFound(err) {
+		return diag.FromErr(err)
+	}
+
 	createRequest := aiven.CreateKafkaTopicRequest{
 		Partitions:  &partitions,
 		Replication: &replication,
@@ -284,12 +299,15 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	timeout := d.Timeout(schema.TimeoutCreate)
-	_, err := w.Conf(timeout).WaitForStateContext(ctx)
+	_, err = w.Conf(timeout).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId(schemautil.BuildResourceID(project, serviceName, topicName))
+
+	// Invalidates cache for the topic
+	DeleteTopicFromCache(project, serviceName, topicName)
 
 	// We do not call a Kafka Topic read here to speed up the performance.
 	// However, in the case of Kafka Topic resource getting a computed field
@@ -357,7 +375,7 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	topic, err := getTopic(ctx, d, m)
+	topic, err := getTopic(ctx, m, d.Timeout(schema.TimeoutRead), project, serviceName, topicName)
 
 	// Topics are destroyed when kafka is off
 	// https://docs.aiven.io/docs/platform/concepts/service-power-cycle
@@ -370,6 +388,9 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 		if !isResource {
 			return diag.FromErr(err)
 		}
+
+		// This might help with knowing what ResourceReadHandleNotFound has set
+		log.Printf("[DEBUG] KafkaTopic get error %s, known=%v, is_new=%v", err, schemautil.IsUnknownResource(err), d.IsNewResource())
 
 		// Datasource sets id to find, this might drop id to empty
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
@@ -425,12 +446,7 @@ func flattenKafkaTopicTags(list []aiven.KafkaTopicTag) []map[string]interface{} 
 	return tags
 }
 
-func getTopic(ctx context.Context, d *schema.ResourceData, m interface{}) (*aiven.KafkaTopic, error) {
-	project, serviceName, topicName, err := schemautil.SplitResourceID3(d.Id())
-	if err != nil {
-		return nil, err
-	}
-
+func getTopic(ctx context.Context, m interface{}, timeout time.Duration, project, serviceName, topicName string) (*aiven.KafkaTopic, error) {
 	client, ok := m.(*aiven.Client)
 	if !ok {
 		return nil, fmt.Errorf("invalid Aiven client")
@@ -441,7 +457,6 @@ func getTopic(ctx context.Context, d *schema.ResourceData, m interface{}) (*aive
 		return nil, err
 	}
 
-	timeout := d.Timeout(schema.TimeoutRead)
 	topic, err := w.Conf(timeout).WaitForStateContext(ctx)
 	if err != nil {
 		return nil, err

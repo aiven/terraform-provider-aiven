@@ -323,7 +323,6 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 			}
 
 			if ii.IntegrationType == "kafka_connect" && ii.DestinationService != nil {
-				// This might fail for a long time with 501: Connector list not currently available
 				if _, err := client.KafkaConnectors.List(projectName, *ii.DestinationService); err != nil {
 					log.Println("[DEBUG] Service Integration: error listing kafka connectors: ", err)
 					return nil, notActive, nil

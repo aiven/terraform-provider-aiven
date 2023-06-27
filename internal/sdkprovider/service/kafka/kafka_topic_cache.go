@@ -161,19 +161,6 @@ func (t *kafkaTopicCache) GetQueue(projectName, serviceName string) []string {
 	return t.inQueue[projectName+serviceName]
 }
 
-// FlushTopicCache for tests only!
-func FlushTopicCache() {
-	c := getTopicCache()
-	c.Lock()
-	for k := range c.internal {
-		delete(c.internal, k)
-		delete(c.inQueue, k)
-		delete(c.missing, k)
-		delete(c.v1list, k)
-	}
-	c.Unlock()
-}
-
 // SetV1List sets v1 topics list
 func (t *kafkaTopicCache) SetV1List(projectName, serviceName string, list []*aiven.KafkaListTopic) {
 	t.Lock()
@@ -189,4 +176,25 @@ func (t *kafkaTopicCache) GetV1List(projectName, serviceName string) []string {
 	defer t.RUnlock()
 
 	return t.v1list[projectName+serviceName]
+}
+
+// DeleteTopicFromCache Invalidates cache for the topic
+func DeleteTopicFromCache(projectName, serviceName, topicName string) {
+	t := getTopicCache()
+	t.Lock()
+	key := projectName + serviceName
+	for k, name := range t.missing[key] {
+		if name == topicName {
+			t.missing[key] = slices.Delete(t.missing[key], k, k+1)
+		}
+	}
+	for k, name := range t.v1list[key] {
+		if name == topicName {
+			t.v1list[key] = slices.Delete(t.v1list[key], k, k+1)
+		}
+	}
+	if t.internal[key] != nil {
+		delete(t.internal[key], topicName)
+	}
+	t.Unlock()
 }
