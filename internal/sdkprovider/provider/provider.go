@@ -203,9 +203,10 @@ func Provider(version string) *schema.Provider {
 			"aiven_m3aggregator": m3db.ResourceM3Aggregator(),
 
 			// flink
-			"aiven_flink":                     flink.ResourceFlink(),
-			"aiven_flink_application":         flink.ResourceFlinkApplication(),
-			"aiven_flink_application_version": flink.ResourceFlinkApplicationVersion(),
+			"aiven_flink":                        flink.ResourceFlink(),
+			"aiven_flink_application":            flink.ResourceFlinkApplication(),
+			"aiven_flink_application_version":    flink.ResourceFlinkApplicationVersion(),
+			"aiven_flink_application_deployment": flink.ResourceFlinkApplicationDeployment(),
 
 			// opensearch
 			"aiven_opensearch":            opensearch.ResourceOpensearch(),

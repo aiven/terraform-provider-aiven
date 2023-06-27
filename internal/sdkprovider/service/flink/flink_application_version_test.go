@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
+
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -16,6 +17,7 @@ import (
 
 func TestAccAivenFlinkApplicationVersion_basic(t *testing.T) {
 	resourceName := "aiven_flink_application_version.foo"
+	resourceNameDeployment := "aiven_flink_application_deployment.foobar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
@@ -27,9 +29,21 @@ func TestAccAivenFlinkApplicationVersion_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					checkAivenFlinkApplicationVersionAttributes("data.aiven_flink_application_version.bar"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-flink-%s", rName)),
+					resource.TestCheckResourceAttr(
+						resourceName,
+						"service_name",
+						fmt.Sprintf("test-acc-flink-%s", rName),
+					),
 					resource.TestCheckResourceAttr(resourceName, "sink.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "source.#", "1"),
+					resource.TestCheckResourceAttr(
+						resourceNameDeployment, "project", os.Getenv("AIVEN_PROJECT_NAME"),
+					),
+					resource.TestCheckResourceAttr(
+						resourceNameDeployment,
+						"service_name",
+						fmt.Sprintf("test-acc-flink-%s", rName),
+					),
 				),
 			},
 		},
@@ -125,6 +139,13 @@ resource "aiven_flink_application_version" "foo" {
     create_table   = "CREATE TABLE kafka_pizza (shop STRING, name STRING) WITH ('connector' = 'kafka','properties.bootstrap.servers' = '','scan.startup.mode' = 'earliest-offset','topic' = 'test','value.format' = 'json')"
     integration_id = aiven_service_integration.flink_to_kafka.integration_id
   }
+}
+
+resource "aiven_flink_application_deployment" "foobar" {
+  project        = data.aiven_project.foo.project
+  service_name   = aiven_flink.foo.service_name
+  application_id = aiven_flink_application.foo.application_id
+  version_id     = data.aiven_flink_application_version.bar.application_version_id
 }
 
 data "aiven_flink_application_version" "bar" {
