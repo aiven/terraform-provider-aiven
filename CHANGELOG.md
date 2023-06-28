@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.6.0] - 2023-06-28
+
 - Fix wrong ID used for `organization` resources
 - Add `aiven_flink_application_deployment` resource
 
