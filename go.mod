@@ -13,7 +13,7 @@ require (
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/terraform-plugin-framework v1.3.2
 	github.com/hashicorp/terraform-plugin-go v0.17.0
-	github.com/hashicorp/terraform-plugin-mux v0.10.0
+	github.com/hashicorp/terraform-plugin-mux v0.11.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.27.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/stretchr/testify v1.8.4
