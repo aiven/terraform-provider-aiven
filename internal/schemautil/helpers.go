@@ -125,3 +125,56 @@ func HumanReadableByteSize(s int) string {
 
 	return units.CustomSize("%.12g%s", float64(s), 1024.0, suffixes)
 }
+
+// isStringAnOrganizationID is a helper function that returns true if the string is an organization ID.
+func isStringAnOrganizationID(s string) bool {
+	return strings.HasPrefix(s, "org")
+}
+
+// NormalizeOrganizationID is a helper function that returns the ID to use for the API call.
+// If the ID is an organization ID, it will be converted to an account ID via the API.
+// If the ID is an account ID, it will be returned as is, without performing any API calls.
+func NormalizeOrganizationID(client *aiven.Client, id string) (string, error) {
+	if isStringAnOrganizationID(id) {
+		r, err := client.Organization.Get(id)
+		if err != nil {
+			return "", err
+		}
+
+		id = r.AccountID
+	}
+
+	return id, nil
+}
+
+// DetermineMixedOrganizationConstraintIDToStore is a helper function that returns the ID to store in the state.
+// We have several fields that can be either an organization ID or an account ID.
+// We want to store the one that was already in the state, if it was already there.
+// If it was not, we want to prioritize the organization ID, but if it is not available, we want to store the account
+// ID.
+// If the ID is an account ID, it will be returned as is, without performing any API calls.
+// If the ID is an organization ID, it will be refreshed via the provided account ID and returned.
+func DetermineMixedOrganizationConstraintIDToStore(
+	client *aiven.Client,
+	stateID string,
+	accountID string,
+) (string, error) {
+	if len(accountID) == 0 {
+		return "", nil
+	}
+
+	if !isStringAnOrganizationID(stateID) {
+		return accountID, nil
+	}
+
+	r, err := client.Accounts.Get(accountID)
+	if err != nil {
+		return "", err
+	}
+
+	if len(r.Account.OrganizationId) == 0 {
+		return accountID, nil
+	}
+
+	return r.Account.OrganizationId, nil
+}

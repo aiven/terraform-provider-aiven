@@ -59,7 +59,7 @@ func resourceOrganizationalUnitCreate(ctx context.Context, d *schema.ResourceDat
 	client := m.(*aiven.Client)
 	name := d.Get("name").(string)
 
-	parentID, err := normalizeID(client, d.Get("parent_id").(string))
+	parentID, err := schemautil.NormalizeOrganizationID(client, d.Get("parent_id").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -87,10 +87,22 @@ func resourceOrganizationalUnitRead(_ context.Context, d *schema.ResourceData, m
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
-	if err := d.Set("name", r.Account.Name); err != nil {
-		return diag.FromErr(err)
+	if stateID, _ := d.GetOk("parent_id"); true {
+		idToSet, err := schemautil.DetermineMixedOrganizationConstraintIDToStore(
+			client,
+			stateID.(string),
+			r.Account.ParentAccountId,
+		)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		if err := d.Set("parent_id", idToSet); err != nil {
+			return diag.FromErr(err)
+		}
 	}
-	if err := d.Set("parent_id", r.Account.ParentAccountId); err != nil {
+
+	if err := d.Set("name", r.Account.Name); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("tenant_id", r.Account.TenantId); err != nil {

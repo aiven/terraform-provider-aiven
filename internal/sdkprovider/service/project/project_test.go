@@ -7,10 +7,11 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
 func TestAccAivenProject_basic(t *testing.T) {
@@ -74,6 +75,26 @@ func TestAccAivenProject_accounts(t *testing.T) {
 	})
 }
 
+func TestAccAivenProject_organizations(t *testing.T) {
+	resourceName := "aiven_project.foo"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckAivenProjectResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccProjectResourceOrganizations(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenProjectAttributes("data.aiven_project.project", "owner_entity_id"),
+					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
+				),
+			},
+		},
+	})
+}
+
 func testAccProjectDoubleTagResource(name string) string {
 	return fmt.Sprintf(`
 resource "aiven_account" "foo" {
@@ -111,6 +132,29 @@ resource "aiven_project" "foo" {
   project       = "test-acc-pr-%s"
   account_id    = aiven_account.foo.account_id
   default_cloud = "aws-eu-west-2"
+  tag {
+    key   = "test"
+    value = "val"
+  }
+}
+
+data "aiven_project" "project" {
+  project = aiven_project.foo.project
+
+  depends_on = [aiven_project.foo]
+}`, name, name)
+}
+
+func testAccProjectResourceOrganizations(name string) string {
+	return fmt.Sprintf(`
+resource "aiven_organization" "foo" {
+  name = "test-acc-org-%s"
+}
+
+resource "aiven_project" "foo" {
+  project         = "test-acc-pr-%s"
+  owner_entity_id = aiven_organization.foo.id
+  default_cloud   = "aws-eu-west-2"
   tag {
     key   = "test"
     value = "val"

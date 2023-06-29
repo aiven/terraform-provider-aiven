@@ -27,9 +27,19 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Description: "The CA certificate of the project. This is required for configuring clients that connect to certain services like Kafka.",
 	},
 	"account_id": {
-		Type:        schema.TypeString,
-		Optional:    true,
-		Description: userconfig.Desc("An optional property to link a project to already an existing account by using account ID.").Referenced().Build(),
+		Type:             schema.TypeString,
+		Optional:         true,
+		Description:      userconfig.Desc("An optional property to link a project to an already existing account by using account ID.").Referenced().Build(),
+		Deprecated:       "Use owner_entity_id instead. This field will be removed in the next major release.",
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"owner_entity_id": {
+		Type:     schema.TypeString,
+		Optional: true,
+		Description: userconfig.Desc(
+			"An optional property to link a project to an already existing organization or account by using its ID.",
+		).Referenced().Build(),
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 	},
 	"copy_from_project": {
 		Type:             schema.TypeString,
@@ -46,7 +56,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 	"add_account_owners_admin_access": {
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Description: userconfig.Desc("If account_id is set, grant account owner team admin access to the new project.").DefaultValue(true).Build(),
+		Description: userconfig.Desc("If owner_entity_id is set, grant account owner team admin access to the new project.").DefaultValue(true).Build(),
 	},
 	"project": {
 		Type:        schema.TypeString,
@@ -133,19 +143,26 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
-	_, err := client.Projects.Create(
-		aiven.CreateProjectRequest{
-			Cloud:                        schemautil.OptionalStringPointer(d, "default_cloud"),
-			CopyFromProject:              d.Get("copy_from_project").(string),
-			Project:                      projectName,
-			TechnicalEmails:              contactEmailListForAPI(d, "technical_emails", true),
-			AccountId:                    schemautil.OptionalStringPointer(d, "account_id"),
-			UseSourceProjectBillingGroup: d.Get("use_source_project_billing_group").(bool),
-			BillingGroupId:               d.Get("billing_group").(string),
-			AddAccountOwnersAdminAccess:  schemautil.OptionalBoolPointer(d, "add_account_owners_admin_access"),
-			Tags:                         schemautil.GetTagsFromSchema(d),
-		},
-	)
+
+	req := aiven.CreateProjectRequest{
+		Cloud:                        schemautil.OptionalStringPointer(d, "default_cloud"),
+		CopyFromProject:              d.Get("copy_from_project").(string),
+		Project:                      projectName,
+		TechnicalEmails:              contactEmailListForAPI(d, "technical_emails", true),
+		UseSourceProjectBillingGroup: d.Get("use_source_project_billing_group").(bool),
+		BillingGroupId:               d.Get("billing_group").(string),
+		AddAccountOwnersAdminAccess:  schemautil.OptionalBoolPointer(d, "add_account_owners_admin_access"),
+		Tags:                         schemautil.GetTagsFromSchema(d),
+	}
+
+	ptrAccountID, err := accountIDPointer(client, d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	req.AccountId = ptrAccountID
+
+	_, err = client.Projects.Create(req)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -256,19 +273,29 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	var project *aiven.Project
 	projectName := d.Get("project").(string)
-	project, err := client.Projects.Update(
-		d.Id(),
-		aiven.UpdateProjectRequest{
-			Name:                        projectName,
-			Cloud:                       schemautil.OptionalStringPointer(d, "default_cloud"),
-			TechnicalEmails:             contactEmailListForAPI(d, "technical_emails", false),
-			AccountId:                   d.Get("account_id").(string),
-			Tags:                        schemautil.GetTagsFromSchema(d),
-			AddAccountOwnersAdminAccess: schemautil.OptionalBoolPointer(d, "add_account_owners_admin_access"),
-		},
-	)
+
+	req := aiven.UpdateProjectRequest{
+		Name:                        projectName,
+		Cloud:                       schemautil.OptionalStringPointer(d, "default_cloud"),
+		TechnicalEmails:             contactEmailListForAPI(d, "technical_emails", false),
+		Tags:                        schemautil.GetTagsFromSchema(d),
+		AddAccountOwnersAdminAccess: schemautil.OptionalBoolPointer(d, "add_account_owners_admin_access"),
+	}
+
+	ptrAccountID, err := accountIDPointer(client, d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	// TODO: Perhaps req.AccountId should also be a pointer here?
+	if ptrAccountID == nil {
+		req.AccountId = ""
+	} else {
+		req.AccountId = *ptrAccountID
+	}
+
+	project, err := client.Projects.Update(d.Id(), req)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -373,6 +400,21 @@ func contactEmailListForTerraform(d *schema.ResourceData, field string, contactE
 }
 
 func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client, project *aiven.Project) diag.Diagnostics {
+	if stateID, _ := d.GetOk("owner_entity_id"); true {
+		idToSet, err := schemautil.DetermineMixedOrganizationConstraintIDToStore(
+			client,
+			stateID.(string),
+			project.AccountId,
+		)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		if err := d.Set("owner_entity_id", idToSet); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	if err := d.Set("project", project.Name); err != nil {
 		return diag.FromErr(err)
 	}

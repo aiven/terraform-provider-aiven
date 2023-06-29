@@ -70,7 +70,7 @@ func resourceOrganizationCreate(ctx context.Context, d *schema.ResourceData, m i
 func resourceOrganizationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	id, err := normalizeID(client, d.Id())
+	id, err := schemautil.NormalizeOrganizationID(client, d.Id())
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -99,7 +99,7 @@ func resourceOrganizationRead(_ context.Context, d *schema.ResourceData, m inter
 func resourceOrganizationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	id, err := normalizeID(client, d.Id())
+	id, err := schemautil.NormalizeOrganizationID(client, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -119,7 +119,7 @@ func resourceOrganizationUpdate(ctx context.Context, d *schema.ResourceData, m i
 func resourceOrganizationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	id, err := normalizeID(client, d.Id())
+	id, err := schemautil.NormalizeOrganizationID(client, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
