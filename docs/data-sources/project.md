@@ -27,8 +27,8 @@ data "aiven_project" "myproject" {
 
 ### Read-Only
 
-- `account_id` (String) An optional property to link a project to already an existing account by using account ID. To set up proper dependencies please refer to this variable as a reference.
-- `add_account_owners_admin_access` (Boolean) If account_id is set, grant account owner team admin access to the new project. The default value is `true`.
+- `account_id` (String) An optional property to link a project to an already existing account by using account ID. To set up proper dependencies please refer to this variable as a reference.
+- `add_account_owners_admin_access` (Boolean) If owner_entity_id is set, grant account owner team admin access to the new project. The default value is `true`.
 - `available_credits` (String) The amount of platform credits available to the project. This could be your free trial or other promotional credits.
 - `billing_group` (String) The id of the billing group that is linked to this project. To set up proper dependencies please refer to this variable as a reference.
 - `ca_cert` (String, Sensitive) The CA certificate of the project. This is required for configuring clients that connect to certain services like Kafka.
@@ -36,6 +36,7 @@ data "aiven_project" "myproject" {
 - `default_cloud` (String) Defines the default cloud provider and region where services are hosted. This can be changed freely after the project is created. This will not affect existing services.
 - `estimated_balance` (String) The current accumulated bill for this project in the current billing period.
 - `id` (String) The ID of this resource.
+- `owner_entity_id` (String) An optional property to link a project to an already existing organization or account by using its ID. To set up proper dependencies please refer to this variable as a reference.
 - `payment_method` (String) The method of invoicing used for payments for this project, e.g. `card`.
 - `tag` (Set of Object) Tags are key-value pairs that allow you to categorize projects. (see [below for nested schema](#nestedatt--tag))
 - `technical_emails` (Set of String) Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability. It is  good practice to keep this up-to-date to be aware of any potential issues with your project.

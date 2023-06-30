@@ -39,6 +39,7 @@ data "aiven_billing_group" "foo" {
 - `country_code` (String) Country code
 - `id` (String) The ID of this resource.
 - `name` (String) Billing Group name
+- `owner_entity_id` (String) An optional property to link a billing group to an already existing organization or account by using its ID. To set up proper dependencies please refer to this variable as a reference.
 - `state` (String) State
 - `vat_id` (String) VAT id
 - `zip_code` (String) Zip Code

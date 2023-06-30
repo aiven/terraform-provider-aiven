@@ -4,10 +4,11 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 var aivenBillingGroupSchema = map[string]*schema.Schema{
@@ -33,6 +34,16 @@ var aivenBillingGroupSchema = map[string]*schema.Schema{
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
 		Description:      "Account id",
+		Deprecated:       "Use owner_entity_id instead. This field will be removed in the next major release.",
+	},
+	"owner_entity_id": {
+		Type:             schema.TypeString,
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
+		Description: userconfig.Desc(
+			"An optional property to link a billing group to an already existing organization or account by using " +
+				"its ID.",
+		).Referenced().Build(),
 	},
 	"billing_currency": {
 		Type:             schema.TypeString,
@@ -127,24 +138,30 @@ func resourceBillingGroupCreate(ctx context.Context, d *schema.ResourceData, m i
 		return diag.Errorf("Error getting long card id: %s", err)
 	}
 
-	bg, err := client.BillingGroup.Create(
-		aiven.BillingGroupRequest{
-			BillingGroupName:     d.Get("name").(string),
-			AccountId:            schemautil.OptionalStringPointer(d, "account_id"),
-			CardId:               cardID,
-			VatId:                schemautil.OptionalStringPointer(d, "vat_id"),
-			BillingCurrency:      schemautil.OptionalStringPointer(d, "billing_currency"),
-			BillingExtraText:     schemautil.OptionalStringPointer(d, "billing_extra_text"),
-			BillingEmails:        billingEmails,
-			Company:              schemautil.OptionalStringPointer(d, "company"),
-			AddressLines:         schemautil.FlattenToString(d.Get("address_lines").(*schema.Set).List()),
-			CountryCode:          schemautil.OptionalStringPointer(d, "country_code"),
-			City:                 schemautil.OptionalStringPointer(d, "city"),
-			ZipCode:              schemautil.OptionalStringPointer(d, "zip_code"),
-			State:                schemautil.OptionalStringPointer(d, "state"),
-			CopyFromBillingGroup: schemautil.OptionalStringPointer(d, "copy_from_billing_group"),
-		},
-	)
+	req := aiven.BillingGroupRequest{
+		BillingGroupName:     d.Get("name").(string),
+		CardId:               cardID,
+		VatId:                schemautil.OptionalStringPointer(d, "vat_id"),
+		BillingCurrency:      schemautil.OptionalStringPointer(d, "billing_currency"),
+		BillingExtraText:     schemautil.OptionalStringPointer(d, "billing_extra_text"),
+		BillingEmails:        billingEmails,
+		Company:              schemautil.OptionalStringPointer(d, "company"),
+		AddressLines:         schemautil.FlattenToString(d.Get("address_lines").(*schema.Set).List()),
+		CountryCode:          schemautil.OptionalStringPointer(d, "country_code"),
+		City:                 schemautil.OptionalStringPointer(d, "city"),
+		ZipCode:              schemautil.OptionalStringPointer(d, "zip_code"),
+		State:                schemautil.OptionalStringPointer(d, "state"),
+		CopyFromBillingGroup: schemautil.OptionalStringPointer(d, "copy_from_billing_group"),
+	}
+
+	ptrAccountID, err := accountIDPointer(client, d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	req.AccountId = ptrAccountID
+
+	bg, err := client.BillingGroup.Create(req)
 	if err != nil {
 		return diag.Errorf("cannot create billing group: %s", err)
 	}
@@ -160,6 +177,23 @@ func resourceBillingGroupRead(_ context.Context, d *schema.ResourceData, m inter
 	bg, err := client.BillingGroup.Get(d.Id())
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+	}
+
+	if stateID, _ := d.GetOk("owner_entity_id"); true {
+		var accountID string
+
+		if bg.AccountId != nil {
+			accountID = *bg.AccountId
+		}
+
+		idToSet, err := schemautil.DetermineMixedOrganizationConstraintIDToStore(client, stateID.(string), accountID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		if err := d.Set("owner_entity_id", idToSet); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	if err := d.Set("name", bg.BillingGroupName); err != nil {
@@ -218,24 +252,29 @@ func resourceBillingGroupUpdate(ctx context.Context, d *schema.ResourceData, m i
 		return diag.Errorf("Error getting long card id: %s", err)
 	}
 
-	bg, err := client.BillingGroup.Update(
-		d.Id(),
-		aiven.BillingGroupRequest{
-			BillingGroupName: d.Get("name").(string),
-			AccountId:        schemautil.OptionalStringPointer(d, "account_id"),
-			CardId:           cardID,
-			VatId:            schemautil.OptionalStringPointer(d, "vat_id"),
-			BillingCurrency:  schemautil.OptionalStringPointer(d, "billing_currency"),
-			BillingExtraText: schemautil.OptionalStringPointer(d, "billing_extra_text"),
-			BillingEmails:    billingEmails,
-			Company:          schemautil.OptionalStringPointer(d, "company"),
-			AddressLines:     schemautil.FlattenToString(d.Get("address_lines").(*schema.Set).List()),
-			CountryCode:      schemautil.OptionalStringPointer(d, "country_code"),
-			City:             schemautil.OptionalStringPointer(d, "city"),
-			ZipCode:          schemautil.OptionalStringPointer(d, "zip_code"),
-			State:            schemautil.OptionalStringPointer(d, "state"),
-		},
-	)
+	req := aiven.BillingGroupRequest{
+		BillingGroupName: d.Get("name").(string),
+		CardId:           cardID,
+		VatId:            schemautil.OptionalStringPointer(d, "vat_id"),
+		BillingCurrency:  schemautil.OptionalStringPointer(d, "billing_currency"),
+		BillingExtraText: schemautil.OptionalStringPointer(d, "billing_extra_text"),
+		BillingEmails:    billingEmails,
+		Company:          schemautil.OptionalStringPointer(d, "company"),
+		AddressLines:     schemautil.FlattenToString(d.Get("address_lines").(*schema.Set).List()),
+		CountryCode:      schemautil.OptionalStringPointer(d, "country_code"),
+		City:             schemautil.OptionalStringPointer(d, "city"),
+		ZipCode:          schemautil.OptionalStringPointer(d, "zip_code"),
+		State:            schemautil.OptionalStringPointer(d, "state"),
+	}
+
+	ptrAccountID, err := accountIDPointer(client, d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	req.AccountId = ptrAccountID
+
+	bg, err := client.BillingGroup.Update(d.Id(), req)
 	if err != nil {
 		return diag.Errorf("cannot update billing group: %s", err)
 	}
