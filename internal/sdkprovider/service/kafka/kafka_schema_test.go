@@ -7,13 +7,89 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
+
+// TestAccAivenKafkaSchema_import_compatibility_level
+// checks that compatibility_level doesn't appear in plan after KafkaSchema import
+func TestAccAivenKafkaSchema_import_compatibility_level(t *testing.T) {
+	project := os.Getenv("AIVEN_PROJECT_NAME")
+	serviceName := "test-acc-sr-" + acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	resourceName := "aiven_kafka_schema.schema"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                  func() { acc.TestAccPreCheck(t) },
+		ProviderFactories:         acc.TestAccProviderFactories,
+		CheckDestroy:              testAccCheckAivenKafkaSchemaResourceDestroy,
+		PreventPostDestroyRefresh: true,
+		Steps: []resource.TestStep{
+			{
+				// Creates resources
+				Config: testAccKafkaSchemaImportCompatibilityLevel(project, serviceName, "test-subject"),
+			},
+			{
+				// Imports the schema
+				ResourceName:       resourceName,
+				ExpectNonEmptyPlan: false, // compatibility_level doesn't appear in plan
+				ImportState:        true,
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					rs, ok := s.RootModule().Resources[resourceName]
+					if !ok {
+						return "", fmt.Errorf("expected resource %q to be present in the state", resourceName)
+					}
+
+					v := rs.Primary.Attributes["compatibility_level"]
+					if v != "FULL_TRANSITIVE" {
+						return "", fmt.Errorf(`expected resource %q to have compatibility_level = "FULL_TRANSITIVE", got %q`, resourceName, v)
+					}
+					return rs.Primary.ID, nil
+				},
+			},
+		},
+	})
+}
+
+func testAccKafkaSchemaImportCompatibilityLevel(project, serviceName, subjectName string) string {
+	return fmt.Sprintf(`
+resource "aiven_kafka" "kafka" {
+  project      = %q
+  service_name = %q
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-2"
+
+  kafka_user_config {
+    schema_registry = true
+  }
+}
+
+resource "aiven_kafka_schema" "schema" {
+  project             = aiven_kafka.kafka.project
+  service_name        = aiven_kafka.kafka.service_name
+  subject_name        = %q
+  compatibility_level = "FULL_TRANSITIVE"
+
+  schema = <<EOT
+    {
+       "doc": "example",
+       "fields": [{
+           "default": 5,
+           "doc": "my test number",
+           "name": "test",
+           "namespace": "test",
+           "type": "int"
+       }],
+       "name": "example",
+       "namespace": "example",
+       "type": "record"
+    }
+    EOT
+}
+`, project, serviceName, subjectName)
+}
 
 func TestAccAivenKafkaSchema_json_basic(t *testing.T) {
 	resourceName := "aiven_kafka_schema.foo"

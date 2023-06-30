@@ -94,7 +94,7 @@ func ResourceKafkaSchema() *schema.Resource {
 		ReadContext:   resourceKafkaSchemaRead,
 		DeleteContext: resourceKafkaSchemaDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: schemautil.ImportStatePassthroughContext,
 		},
 		CustomizeDiff: resourceKafkaSchemaCustomizeDiff,
 		Timeouts:      schemautil.DefaultResourceTimeouts(),
@@ -254,7 +254,7 @@ func resourceKafkaSchemaRead(_ context.Context, d *schema.ResourceData, m interf
 		}
 	} else {
 		// only update if was set to not empty values by the user
-		if _, ok := d.GetOk("compatibility_level"); ok {
+		if _, ok := d.GetOk("compatibility_level"); ok || schemautil.IsImportingResource(d) {
 			if err := d.Set("compatibility_level", c.CompatibilityLevel); err != nil {
 				return diag.FromErr(err)
 			}

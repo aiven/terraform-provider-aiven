@@ -13,6 +13,7 @@ nav_order: 1
 - Deprecated `account_id` in `aiven_project` and `aiven_billing_group` resources
   - Please use `parent_id` instead, `account_id` is going to be removed in the next major release
 - Fix `parent_id` storing mechanism in `aiven_organizational_unit`
+- Fix `aiven_kafka_schema` import produced non-empty plan for `compatibility_level` attribute
 
 ## [4.6.0] - 2023-06-28
 
