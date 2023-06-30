@@ -12,7 +12,7 @@ import (
 // If the ID is an account ID, it will be returned as is, without performing any API calls.
 func normalizeID(client *aiven.Client, id string) (string, error) {
 	if strings.HasPrefix(id, "org") {
-		r, err := client.Organizations.Get(id)
+		r, err := client.Organization.Get(id)
 
 		if err != nil {
 			return "", err
