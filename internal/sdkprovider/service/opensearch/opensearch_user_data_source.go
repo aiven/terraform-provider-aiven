@@ -9,7 +9,7 @@ import (
 func DatasourceOpensearchUser() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: schemautil.DatasourceServiceUserRead,
-		Description: "The Opensearch User data source provides information about the existing Aiven Cassandra User.",
+		Description: "The Opensearch User data source provides information about the existing Aiven Opensearch User.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenOpensearchUserSchema,
 			"project", "service_name", "username"),
 	}
