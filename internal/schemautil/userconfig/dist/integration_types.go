@@ -12,6 +12,12 @@ func IntegrationTypeClickhouseKafka() *schema.Schema {
 	s := map[string]*schema.Schema{"tables": {
 		Description: "Tables to create.",
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+			"auto_offset_reset": {
+				Default:     "earliest",
+				Description: "Action to take when there is no initial offset in offset store or the desired offset is out of range. The default value is `earliest`.",
+				Optional:    true,
+				Type:        schema.TypeString,
+			},
 			"columns": {
 				Description: "Table columns.",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
@@ -35,15 +41,57 @@ func IntegrationTypeClickhouseKafka() *schema.Schema {
 				Required:    true,
 				Type:        schema.TypeString,
 			},
+			"date_time_input_format": {
+				Default:     "basic",
+				Description: "Method to read DateTime from text input formats. The default value is `basic`.",
+				Optional:    true,
+				Type:        schema.TypeString,
+			},
 			"group_name": {
 				Description: "Kafka consumers group. The default value is `clickhouse`.",
 				Required:    true,
 				Type:        schema.TypeString,
 			},
+			"handle_error_mode": {
+				Default:     "default",
+				Description: "How to handle errors for Kafka engine. The default value is `default`.",
+				Optional:    true,
+				Type:        schema.TypeString,
+			},
+			"max_block_size": {
+				Default:     "0",
+				Description: "Number of row collected by poll(s) for flushing data from Kafka. The default value is `0`.",
+				Optional:    true,
+				Type:        schema.TypeInt,
+			},
+			"max_rows_per_message": {
+				Default:     "1",
+				Description: "The maximum number of rows produced in one kafka message for row-based formats. The default value is `1`.",
+				Optional:    true,
+				Type:        schema.TypeInt,
+			},
 			"name": {
 				Description: "Name of the table.",
 				Required:    true,
 				Type:        schema.TypeString,
+			},
+			"num_consumers": {
+				Default:     "1",
+				Description: "The number of consumers per table per replica. The default value is `1`.",
+				Optional:    true,
+				Type:        schema.TypeInt,
+			},
+			"poll_max_batch_size": {
+				Default:     "0",
+				Description: "Maximum amount of messages to be polled in a single Kafka poll. The default value is `0`.",
+				Optional:    true,
+				Type:        schema.TypeInt,
+			},
+			"skip_broken_messages": {
+				Default:     "0",
+				Description: "Skip at least this number of broken messages from Kafka topic per block. The default value is `0`.",
+				Optional:    true,
+				Type:        schema.TypeInt,
 			},
 			"topics": {
 				Description: "Kafka topics.",
