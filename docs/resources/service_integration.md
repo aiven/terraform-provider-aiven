@@ -71,7 +71,15 @@ Required:
 
 Optional:
 
+- `auto_offset_reset` (String) Action to take when there is no initial offset in offset store or the desired offset is out of range. The default value is `earliest`.
 - `columns` (Block List, Max: 100) Table columns. (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--columns))
+- `date_time_input_format` (String) Method to read DateTime from text input formats. The default value is `basic`.
+- `handle_error_mode` (String) How to handle errors for Kafka engine. The default value is `default`.
+- `max_block_size` (Number) Number of row collected by poll(s) for flushing data from Kafka. The default value is `0`.
+- `max_rows_per_message` (Number) The maximum number of rows produced in one kafka message for row-based formats. The default value is `1`.
+- `num_consumers` (Number) The number of consumers per table per replica. The default value is `1`.
+- `poll_max_batch_size` (Number) Maximum amount of messages to be polled in a single Kafka poll. The default value is `0`.
+- `skip_broken_messages` (Number) Skip at least this number of broken messages from Kafka topic per block. The default value is `0`.
 - `topics` (Block List, Max: 100) Kafka topics. (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--topics))
 
 <a id="nestedblock--clickhouse_kafka_user_config--tables--columns"></a>

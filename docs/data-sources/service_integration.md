@@ -56,10 +56,18 @@ Read-Only:
 
 Read-Only:
 
+- `auto_offset_reset` (String)
 - `columns` (List of Object) (see [below for nested schema](#nestedobjatt--clickhouse_kafka_user_config--tables--columns))
 - `data_format` (String)
+- `date_time_input_format` (String)
 - `group_name` (String)
+- `handle_error_mode` (String)
+- `max_block_size` (Number)
+- `max_rows_per_message` (Number)
 - `name` (String)
+- `num_consumers` (Number)
+- `poll_max_batch_size` (Number)
+- `skip_broken_messages` (Number)
 - `topics` (List of Object) (see [below for nested schema](#nestedobjatt--clickhouse_kafka_user_config--tables--topics))
 
 <a id="nestedobjatt--clickhouse_kafka_user_config--tables--columns"></a>
