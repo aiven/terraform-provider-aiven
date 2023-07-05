@@ -8,10 +8,10 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
-- Add `owner_entity_id` field in `aiven_project` and `aiven_billing_group` resources
+- Add `parent_id` field in `aiven_project` and `aiven_billing_group` resources
   - This field accepts either organization or account ID
 - Deprecated `account_id` in `aiven_project` and `aiven_billing_group` resources
-  - Please use `owner_entity_id` instead, `account_id` is going to be removed in the next major release
+  - Please use `parent_id` instead, `account_id` is going to be removed in the next major release
 - Fix `parent_id` storing mechanism in `aiven_organizational_unit`
 
 ## [4.6.0] - 2023-06-28

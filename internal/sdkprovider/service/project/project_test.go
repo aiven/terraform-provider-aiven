@@ -87,7 +87,7 @@ func TestAccAivenProject_organizations(t *testing.T) {
 			{
 				Config: testAccProjectResourceOrganizations(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenProjectAttributes("data.aiven_project.project", "owner_entity_id"),
+					testAccCheckAivenProjectAttributes("data.aiven_project.project", "parent_id"),
 					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
 				),
 			},
@@ -152,9 +152,9 @@ resource "aiven_organization" "foo" {
 }
 
 resource "aiven_project" "foo" {
-  project         = "test-acc-pr-%s"
-  owner_entity_id = aiven_organization.foo.id
-  default_cloud   = "aws-eu-west-2"
+  project       = "test-acc-pr-%s"
+  parent_id     = aiven_organization.foo.id
+  default_cloud = "aws-eu-west-2"
   tag {
     key   = "test"
     value = "val"
