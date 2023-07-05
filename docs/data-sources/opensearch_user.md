@@ -3,12 +3,12 @@
 page_title: "aiven_opensearch_user Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Opensearch User data source provides information about the existing Aiven Cassandra User.
+  The Opensearch User data source provides information about the existing Aiven Opensearch User.
 ---
 
 # aiven_opensearch_user (Data Source)
 
-The Opensearch User data source provides information about the existing Aiven Cassandra User.
+The Opensearch User data source provides information about the existing Aiven Opensearch User.
 
 ## Example Usage
 
