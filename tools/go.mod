@@ -1,6 +1,6 @@
 module github.com/aiven/terraform-provider-aiven/tools
 
-go 1.18
+go 1.19
 
 require (
 	github.com/golangci/golangci-lint v1.53.3
