@@ -44,7 +44,7 @@ resource "aiven_project" "pr1" {
 - `company` (String) Company name
 - `copy_from_billing_group` (String) ID of the billing group to copy from
 - `country_code` (String) Country code
-- `owner_entity_id` (String) An optional property to link a billing group to an already existing organization or account by using its ID. To set up proper dependencies please refer to this variable as a reference.
+- `parent_id` (String) An optional property to link a billing group to an already existing organization or account by using its ID. To set up proper dependencies please refer to this variable as a reference.
 - `state` (String) State
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `vat_id` (String) VAT id

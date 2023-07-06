@@ -30,10 +30,10 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Optional:         true,
 		Description:      userconfig.Desc("An optional property to link a project to an already existing account by using account ID.").Referenced().Build(),
-		Deprecated:       "Use owner_entity_id instead. This field will be removed in the next major release.",
+		Deprecated:       "Use parent_id instead. This field will be removed in the next major release.",
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 	},
-	"owner_entity_id": {
+	"parent_id": {
 		Type:     schema.TypeString,
 		Optional: true,
 		Description: userconfig.Desc(
@@ -56,7 +56,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 	"add_account_owners_admin_access": {
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Description: userconfig.Desc("If owner_entity_id is set, grant account owner team admin access to the new project.").DefaultValue(true).Build(),
+		Description: userconfig.Desc("If parent_id is set, grant account owner team admin access to the new project.").DefaultValue(true).Build(),
 	},
 	"project": {
 		Type:        schema.TypeString,
@@ -245,6 +245,7 @@ func resourceProjectAssignToBillingGroup(
 func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
+	//goland:noinspection GoDeprecation
 	conf := &resource.StateChangeConf{
 		Pending:    []string{"pending"},
 		Target:     []string{"target"},
@@ -400,7 +401,7 @@ func contactEmailListForTerraform(d *schema.ResourceData, field string, contactE
 }
 
 func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client, project *aiven.Project) diag.Diagnostics {
-	if stateID, _ := d.GetOk("owner_entity_id"); true {
+	if stateID, _ := d.GetOk("parent_id"); true {
 		idToSet, err := schemautil.DetermineMixedOrganizationConstraintIDToStore(
 			client,
 			stateID.(string),
@@ -410,7 +411,7 @@ func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client,
 			return diag.FromErr(err)
 		}
 
-		if err := d.Set("owner_entity_id", idToSet); err != nil {
+		if err := d.Set("parent_id", idToSet); err != nil {
 			return diag.FromErr(err)
 		}
 	}

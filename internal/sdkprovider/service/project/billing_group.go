@@ -34,9 +34,9 @@ var aivenBillingGroupSchema = map[string]*schema.Schema{
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
 		Description:      "Account id",
-		Deprecated:       "Use owner_entity_id instead. This field will be removed in the next major release.",
+		Deprecated:       "Use parent_id instead. This field will be removed in the next major release.",
 	},
-	"owner_entity_id": {
+	"parent_id": {
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
@@ -179,7 +179,7 @@ func resourceBillingGroupRead(_ context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
-	if stateID, _ := d.GetOk("owner_entity_id"); true {
+	if stateID, _ := d.GetOk("parent_id"); true {
 		var accountID string
 
 		if bg.AccountId != nil {
@@ -191,7 +191,7 @@ func resourceBillingGroupRead(_ context.Context, d *schema.ResourceData, m inter
 			return diag.FromErr(err)
 		}
 
-		if err := d.Set("owner_entity_id", idToSet); err != nil {
+		if err := d.Set("parent_id", idToSet); err != nil {
 			return diag.FromErr(err)
 		}
 	}

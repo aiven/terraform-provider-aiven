@@ -30,11 +30,11 @@ resource "aiven_project" "myproject" {
 ### Optional
 
 - `account_id` (String, Deprecated) An optional property to link a project to an already existing account by using account ID. To set up proper dependencies please refer to this variable as a reference.
-- `add_account_owners_admin_access` (Boolean) If owner_entity_id is set, grant account owner team admin access to the new project. The default value is `true`.
+- `add_account_owners_admin_access` (Boolean) If parent_id is set, grant account owner team admin access to the new project. The default value is `true`.
 - `billing_group` (String) The id of the billing group that is linked to this project. To set up proper dependencies please refer to this variable as a reference.
 - `copy_from_project` (String) is the name of another project used to copy billing information and some other project attributes like technical contacts from. This is mostly relevant when an existing project has billing type set to invoice and that needs to be copied over to a new project. (Setting billing is otherwise not allowed over the API.) This only has effect when the project is created. To set up proper dependencies please refer to this variable as a reference.
 - `default_cloud` (String) Defines the default cloud provider and region where services are hosted. This can be changed freely after the project is created. This will not affect existing services.
-- `owner_entity_id` (String) An optional property to link a project to an already existing organization or account by using its ID. To set up proper dependencies please refer to this variable as a reference.
+- `parent_id` (String) An optional property to link a project to an already existing organization or account by using its ID. To set up proper dependencies please refer to this variable as a reference.
 - `tag` (Block Set) Tags are key-value pairs that allow you to categorize projects. (see [below for nested schema](#nestedblock--tag))
 - `technical_emails` (Set of String) Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability. It is  good practice to keep this up-to-date to be aware of any potential issues with your project.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
