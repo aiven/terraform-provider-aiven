@@ -270,18 +270,18 @@ func ServiceTypeElasticsearch() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"email_sender_name": {
-					Description: "This should be identical to the Sender name defined in Opensearch dashboards",
+					Description: "This should be identical to the Sender name defined in OpenSearch dashboards",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"email_sender_password": {
-					Description: "Sender email password for Opensearch alerts to authenticate with SMTP server",
+					Description: "Sender email password for OpenSearch alerts to authenticate with SMTP server",
 					Optional:    true,
 					Sensitive:   true,
 					Type:        schema.TypeString,
 				},
 				"email_sender_username": {
-					Description: "Sender email address for Opensearch alerts",
+					Description: "Sender email address for OpenSearch alerts",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -430,18 +430,18 @@ func ServiceTypeElasticsearch() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"email_sender_name": {
-					Description: "This should be identical to the Sender name defined in Opensearch dashboards",
+					Description: "This should be identical to the Sender name defined in OpenSearch dashboards",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"email_sender_password": {
-					Description: "Sender email password for Opensearch alerts to authenticate with SMTP server",
+					Description: "Sender email password for OpenSearch alerts to authenticate with SMTP server",
 					Optional:    true,
 					Sensitive:   true,
 					Type:        schema.TypeString,
 				},
 				"email_sender_username": {
-					Description: "Sender email address for Opensearch alerts",
+					Description: "Sender email address for OpenSearch alerts",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -4616,8 +4616,8 @@ func ServiceTypeMysql() *schema.Schema {
 	}
 }
 
-// ServiceTypeOpensearch is a generated function returning the schema of the opensearch ServiceType.
-func ServiceTypeOpensearch() *schema.Schema {
+// ServiceTypeOpenSearch is a generated function returning the schema of the opensearch ServiceType.
+func ServiceTypeOpenSearch() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"additional_backup_regions": {
 			Description: "Additional Cloud Regions for Backup Replication",
@@ -4762,18 +4762,18 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"email_sender_name": {
-					Description: "This should be identical to the Sender name defined in Opensearch dashboards",
+					Description: "This should be identical to the Sender name defined in OpenSearch dashboards",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"email_sender_password": {
-					Description: "Sender email password for Opensearch alerts to authenticate with SMTP server",
+					Description: "Sender email password for OpenSearch alerts to authenticate with SMTP server",
 					Optional:    true,
 					Sensitive:   true,
 					Type:        schema.TypeString,
 				},
 				"email_sender_username": {
-					Description: "Sender email address for Opensearch alerts",
+					Description: "Sender email address for OpenSearch alerts",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -4922,18 +4922,18 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"email_sender_name": {
-					Description: "This should be identical to the Sender name defined in Opensearch dashboards",
+					Description: "This should be identical to the Sender name defined in OpenSearch dashboards",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"email_sender_password": {
-					Description: "Sender email password for Opensearch alerts to authenticate with SMTP server",
+					Description: "Sender email password for OpenSearch alerts to authenticate with SMTP server",
 					Optional:    true,
 					Sensitive:   true,
 					Type:        schema.TypeString,
 				},
 				"email_sender_username": {
-					Description: "Sender email address for Opensearch alerts",
+					Description: "Sender email address for OpenSearch alerts",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -5254,7 +5254,7 @@ func ServiceTypeOpensearch() *schema.Schema {
 	}
 
 	return &schema.Schema{
-		Description:      "Opensearch user configurable settings",
+		Description:      "OpenSearch user configurable settings",
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(s),
 		Elem:             &schema.Resource{Schema: s},
 		MaxItems:         1,

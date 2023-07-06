@@ -3,12 +3,12 @@
 page_title: "aiven_opensearch Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Opensearch resource allows the creation and management of Aiven Opensearch services.
+  The OpenSearch resource allows the creation and management of Aiven OpenSearch services.
 ---
 
 # aiven_opensearch (Resource)
 
-The Opensearch resource allows the creation and management of Aiven Opensearch services.
+The OpenSearch resource allows the creation and management of Aiven OpenSearch services.
 
 ## Example Usage
 
@@ -52,7 +52,7 @@ resource "aiven_opensearch" "os1" {
 - `disk_space` (String, Deprecated) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
-- `opensearch_user_config` (Block List, Max: 1) Opensearch user configurable settings (see [below for nested schema](#nestedblock--opensearch_user_config))
+- `opensearch_user_config` (Block List, Max: 1) OpenSearch user configurable settings (see [below for nested schema](#nestedblock--opensearch_user_config))
 - `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
 - `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
 - `service_integrations` (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
@@ -69,7 +69,7 @@ resource "aiven_opensearch" "os1" {
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) Disk space that service is currently using
 - `id` (String) The ID of this resource.
-- `opensearch` (List of Object) Opensearch server provided values (see [below for nested schema](#nestedatt--opensearch))
+- `opensearch` (List of Object) OpenSearch server provided values (see [below for nested schema](#nestedatt--opensearch))
 - `service_host` (String) The hostname of the service.
 - `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
 - `service_port` (Number) The port of the service
@@ -149,9 +149,9 @@ Optional:
 - `action_destructive_requires_name` (Boolean) Require explicit index names when deleting.
 - `cluster_max_shards_per_node` (Number) Controls the number of shards allowed in the cluster per data node.
 - `cluster_routing_allocation_node_concurrent_recoveries` (Number) How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to 2.
-- `email_sender_name` (String) This should be identical to the Sender name defined in Opensearch dashboards.
-- `email_sender_password` (String, Sensitive) Sender password for Opensearch alerts to authenticate with SMTP server.
-- `email_sender_username` (String) Sender username for Opensearch alerts.
+- `email_sender_name` (String) This should be identical to the Sender name defined in OpenSearch dashboards.
+- `email_sender_password` (String, Sensitive) Sender password for OpenSearch alerts to authenticate with SMTP server.
+- `email_sender_username` (String) Sender username for OpenSearch alerts.
 - `http_max_content_length` (Number) Maximum content length for HTTP requests to the OpenSearch HTTP API, in bytes.
 - `http_max_header_size` (Number) The max size of allowed headers, in bytes.
 - `http_max_initial_line_length` (Number) The max length of an HTTP URL, in bytes.

@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-// Opensearch service tests
+// OpenSearch service tests
 func TestAccAivenService_os(t *testing.T) {
 	resourceName := "aiven_opensearch.bar-os"
 	projectName := os.Getenv("AIVEN_PROJECT_NAME")

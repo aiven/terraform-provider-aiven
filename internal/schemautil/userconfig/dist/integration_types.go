@@ -220,37 +220,37 @@ func IntegrationTypeDatadog() *schema.Schema {
 			Type:        schema.TypeInt,
 		},
 		"opensearch": {
-			Description: "Datadog Opensearch Options.",
+			Description: "Datadog OpenSearch Options.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"index_stats_enabled": {
-					Description: "Enable Datadog Opensearch Index Monitoring.",
+					Description: "Enable Datadog OpenSearch Index Monitoring.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"pending_task_stats_enabled": {
-					Description: "Enable Datadog Opensearch Pending Task Monitoring.",
+					Description: "Enable Datadog OpenSearch Pending Task Monitoring.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"pshard_stats_enabled": {
-					Description: "Enable Datadog Opensearch Primary Shard Monitoring.",
+					Description: "Enable Datadog OpenSearch Primary Shard Monitoring.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"index_stats_enabled": {
-					Description: "Enable Datadog Opensearch Index Monitoring.",
+					Description: "Enable Datadog OpenSearch Index Monitoring.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"pending_task_stats_enabled": {
-					Description: "Enable Datadog Opensearch Pending Task Monitoring.",
+					Description: "Enable Datadog OpenSearch Pending Task Monitoring.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"pshard_stats_enabled": {
-					Description: "Enable Datadog Opensearch Primary Shard Monitoring.",
+					Description: "Enable Datadog OpenSearch Primary Shard Monitoring.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},

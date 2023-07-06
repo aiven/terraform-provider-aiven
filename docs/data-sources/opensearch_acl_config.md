@@ -3,12 +3,12 @@
 page_title: "aiven_opensearch_acl_config Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Opensearch ACL Config data source provides information about an existing Aiven Opensearch ACL Config.
+  The OpenSearch ACL Config data source provides information about an existing Aiven OpenSearch ACL Config.
 ---
 
 # aiven_opensearch_acl_config (Data Source)
 
-The Opensearch ACL Config data source provides information about an existing Aiven Opensearch ACL Config.
+The OpenSearch ACL Config data source provides information about an existing Aiven OpenSearch ACL Config.
 
 ## Example Usage
 
@@ -29,6 +29,6 @@ data "aiven_opensearch_acl_config" "os-acl-config" {
 
 ### Read-Only
 
-- `enabled` (Boolean) Enable Opensearch ACLs. When disabled authenticated service users have unrestricted access. The default value is `true`.
+- `enabled` (Boolean) Enable OpenSearch ACLs. When disabled authenticated service users have unrestricted access. The default value is `true`.
 - `extended_acl` (Boolean) Index rules can be applied in a limited fashion to the _mget, _msearch and _bulk APIs (and only those) by enabling the ExtendedAcl option for the service. When it is enabled, users can use these APIs as long as all operations only target indexes they have been granted access to. The default value is `true`.
 - `id` (String) The ID of this resource.

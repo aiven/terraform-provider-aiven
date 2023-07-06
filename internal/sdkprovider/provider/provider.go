@@ -114,10 +114,10 @@ func Provider(version string) *schema.Provider {
 			"aiven_flink_application_version": flink.DatasourceFlinkApplicationVersion(),
 
 			// opensearch
-			"aiven_opensearch":            opensearch.DatasourceOpensearch(),
-			"aiven_opensearch_user":       opensearch.DatasourceOpensearchUser(),
-			"aiven_opensearch_acl_config": opensearch.DatasourceOpensearchACLConfig(),
-			"aiven_opensearch_acl_rule":   opensearch.DatasourceOpensearchACLRule(),
+			"aiven_opensearch":            opensearch.DatasourceOpenSearch(),
+			"aiven_opensearch_user":       opensearch.DatasourceOpenSearchUser(),
+			"aiven_opensearch_acl_config": opensearch.DatasourceOpenSearchACLConfig(),
+			"aiven_opensearch_acl_rule":   opensearch.DatasourceOpenSearchACLRule(),
 
 			// kafka
 			"aiven_kafka":                        kafka.DatasourceKafka(),
@@ -211,10 +211,10 @@ func Provider(version string) *schema.Provider {
 			"aiven_flink_application_deployment": flink.ResourceFlinkApplicationDeployment(),
 
 			// opensearch
-			"aiven_opensearch":            opensearch.ResourceOpensearch(),
-			"aiven_opensearch_user":       opensearch.ResourceOpensearchUser(),
-			"aiven_opensearch_acl_config": opensearch.ResourceOpensearchACLConfig(),
-			"aiven_opensearch_acl_rule":   opensearch.ResourceOpensearchACLRule(),
+			"aiven_opensearch":            opensearch.ResourceOpenSearch(),
+			"aiven_opensearch_user":       opensearch.ResourceOpenSearchUser(),
+			"aiven_opensearch_acl_config": opensearch.ResourceOpenSearchACLConfig(),
+			"aiven_opensearch_acl_rule":   opensearch.ResourceOpenSearchACLRule(),
 
 			// kafka
 			"aiven_kafka":                        kafka.ResourceKafka(),

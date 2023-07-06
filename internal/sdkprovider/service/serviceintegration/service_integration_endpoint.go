@@ -62,7 +62,7 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 	"prometheus_user_config":                      dist.IntegrationEndpointTypePrometheus(),
 	"rsyslog_user_config":                         dist.IntegrationEndpointTypeRsyslog(),
 	"external_elasticsearch_logs_user_config":     dist.IntegrationEndpointTypeExternalElasticsearchLogs(),
-	"external_opensearch_logs_user_config":        dist.IntegrationEndpointTypeExternalOpensearchLogs(),
+	"external_opensearch_logs_user_config":        dist.IntegrationEndpointTypeExternalOpenSearchLogs(),
 	"external_aws_cloudwatch_logs_user_config":    dist.IntegrationEndpointTypeExternalAwsCloudwatchLogs(),
 	"external_google_cloud_logging_user_config":   dist.IntegrationEndpointTypeExternalGoogleCloudLogging(),
 	"external_kafka_user_config":                  dist.IntegrationEndpointTypeExternalKafka(),

@@ -12,7 +12,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
-var aivenOpensearchACLRuleSchema = map[string]*schema.Schema{
+var aivenOpenSearchACLRuleSchema = map[string]*schema.Schema{
 	"project":      schemautil.CommonSchemaProjectReference,
 	"service_name": schemautil.CommonSchemaServiceNameReference,
 	"username": {
@@ -37,19 +37,19 @@ var aivenOpensearchACLRuleSchema = map[string]*schema.Schema{
 	},
 }
 
-func ResourceOpensearchACLRule() *schema.Resource {
+func ResourceOpenSearchACLRule() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Opensearch ACL Rule resource models a single ACL Rule for an Aiven Opensearch service.",
-		CreateContext: resourceOpensearchACLRuleUpdate,
-		ReadContext:   resourceOpensearchACLRuleRead,
-		UpdateContext: resourceOpensearchACLRuleUpdate,
-		DeleteContext: resourceOpensearchACLRuleDelete,
+		Description:   "The OpenSearch ACL Rule resource models a single ACL Rule for an Aiven OpenSearch service.",
+		CreateContext: resourceOpenSearchACLRuleUpdate,
+		ReadContext:   resourceOpenSearchACLRuleRead,
+		UpdateContext: resourceOpenSearchACLRuleUpdate,
+		DeleteContext: resourceOpenSearchACLRuleDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema: aivenOpensearchACLRuleSchema,
+		Schema: aivenOpenSearchACLRuleSchema,
 	}
 }
 
@@ -67,7 +67,7 @@ func resourceElasticsearchACLRuleGetPermissionFromACLResponse(cfg aiven.ElasticS
 	return "", false
 }
 
-func resourceOpensearchACLRuleRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenSearchACLRuleRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, username, index, err := schemautil.SplitResourceID4(d.Id())
@@ -103,7 +103,7 @@ func resourceOpensearchACLRuleRead(_ context.Context, d *schema.ResourceData, m 
 	return nil
 }
 
-func resourceOpensearchACLRuleMkAivenACL(username, index, permission string) aiven.ElasticSearchACL {
+func resourceOpenSearchACLRuleMkAivenACL(username, index, permission string) aiven.ElasticSearchACL {
 	return aiven.ElasticSearchACL{
 		Username: username,
 		Rules: []aiven.ElasticsearchACLRule{
@@ -115,7 +115,7 @@ func resourceOpensearchACLRuleMkAivenACL(username, index, permission string) aiv
 	}
 }
 
-func resourceOpensearchACLRuleUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenSearchACLRuleUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -125,17 +125,17 @@ func resourceOpensearchACLRuleUpdate(ctx context.Context, d *schema.ResourceData
 	permission := d.Get("permission").(string)
 
 	modifier := resourceElasticsearchACLModifierUpdateACLRule(username, index, permission)
-	err := resourceOpensearchACLModifyRemoteConfig(project, serviceName, client, modifier)
+	err := resourceOpenSearchACLModifyRemoteConfig(project, serviceName, client, modifier)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId(schemautil.BuildResourceID(project, serviceName, username, index))
 
-	return resourceOpensearchACLRuleRead(ctx, d, m)
+	return resourceOpenSearchACLRuleRead(ctx, d, m)
 }
 
-func resourceOpensearchACLRuleDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenSearchACLRuleDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -145,7 +145,7 @@ func resourceOpensearchACLRuleDelete(_ context.Context, d *schema.ResourceData, 
 	permission := d.Get("permission").(string)
 
 	modifier := resourceElasticsearchACLModifierDeleteACLRule(username, index, permission)
-	err := resourceOpensearchACLModifyRemoteConfig(project, serviceName, client, modifier)
+	err := resourceOpenSearchACLModifyRemoteConfig(project, serviceName, client, modifier)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -3,12 +3,12 @@
 page_title: "aiven_opensearch_acl_rule Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Opensearch ACL Rule data source provides information about an existing Aiven Opensearch ACL Rule.
+  The OpenSearch ACL Rule data source provides information about an existing Aiven OpenSearch ACL Rule.
 ---
 
 # aiven_opensearch_acl_rule (Data Source)
 
-The Opensearch ACL Rule data source provides information about an existing Aiven Opensearch ACL Rule.
+The OpenSearch ACL Rule data source provides information about an existing Aiven OpenSearch ACL Rule.
 
 ## Example Usage
 

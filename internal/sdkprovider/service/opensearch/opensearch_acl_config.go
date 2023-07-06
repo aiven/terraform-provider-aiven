@@ -12,14 +12,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-var aivenOpensearchACLConfigSchema = map[string]*schema.Schema{
+var aivenOpenSearchACLConfigSchema = map[string]*schema.Schema{
 	"project":      schemautil.CommonSchemaProjectReference,
 	"service_name": schemautil.CommonSchemaServiceNameReference,
 	"enabled": {
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     true,
-		Description: userconfig.Desc("Enable Opensearch ACLs. When disabled authenticated service users have unrestricted access.").DefaultValue(true).Build(),
+		Description: userconfig.Desc("Enable OpenSearch ACLs. When disabled authenticated service users have unrestricted access.").DefaultValue(true).Build(),
 	},
 	"extended_acl": {
 		Type:        schema.TypeBool,
@@ -29,23 +29,23 @@ var aivenOpensearchACLConfigSchema = map[string]*schema.Schema{
 	},
 }
 
-func ResourceOpensearchACLConfig() *schema.Resource {
+func ResourceOpenSearchACLConfig() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Opensearch resource allows the creation and management of Aiven Opensearch services.",
-		CreateContext: resourceOpensearchACLConfigUpdate,
-		ReadContext:   resourceOpensearchACLConfigRead,
-		UpdateContext: resourceOpensearchACLConfigUpdate,
-		DeleteContext: resourceOpensearchACLConfigDelete,
+		Description:   "The OpenSearch resource allows the creation and management of Aiven OpenSearch services.",
+		CreateContext: resourceOpenSearchACLConfigUpdate,
+		ReadContext:   resourceOpenSearchACLConfigRead,
+		UpdateContext: resourceOpenSearchACLConfigUpdate,
+		DeleteContext: resourceOpenSearchACLConfigDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema: aivenOpensearchACLConfigSchema,
+		Schema: aivenOpenSearchACLConfigSchema,
 	}
 }
 
-func resourceOpensearchACLConfigRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenSearchACLConfigRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
@@ -73,31 +73,31 @@ func resourceOpensearchACLConfigRead(_ context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceOpensearchACLConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenSearchACLConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 
 	modifier := resourceElasticsearchACLModifierToggleConfigFields(d.Get("enabled").(bool), d.Get("extended_acl").(bool))
-	err := resourceOpensearchACLModifyRemoteConfig(project, serviceName, client, modifier)
+	err := resourceOpenSearchACLModifyRemoteConfig(project, serviceName, client, modifier)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId(schemautil.BuildResourceID(project, serviceName))
 
-	return resourceOpensearchACLConfigRead(ctx, d, m)
+	return resourceOpenSearchACLConfigRead(ctx, d, m)
 }
 
-func resourceOpensearchACLConfigDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenSearchACLConfigDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 
 	modifier := resourceElasticsearchACLModifierToggleConfigFields(false, false)
-	err := resourceOpensearchACLModifyRemoteConfig(project, serviceName, client, modifier)
+	err := resourceOpenSearchACLModifyRemoteConfig(project, serviceName, client, modifier)
 	if err != nil {
 		return diag.FromErr(err)
 	}

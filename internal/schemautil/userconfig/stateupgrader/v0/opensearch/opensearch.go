@@ -14,35 +14,35 @@ import (
 
 func opensearchSchema() map[string]*schema.Schema {
 	s := schemautil.ServiceCommonSchema()
-	s[schemautil.ServiceTypeOpensearch] = &schema.Schema{
+	s[schemautil.ServiceTypeOpenSearch] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
-		Description: "Opensearch server provided values",
+		Description: "OpenSearch server provided values",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"opensearch_dashboards_uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "URI for Opensearch dashboard frontend",
+					Description: "URI for OpenSearch dashboard frontend",
 					Sensitive:   true,
 				},
 			},
 		},
 	}
-	s[schemautil.ServiceTypeOpensearch+"_user_config"] = dist.ServiceTypeOpensearch()
+	s[schemautil.ServiceTypeOpenSearch+"_user_config"] = dist.ServiceTypeOpenSearch()
 
 	return s
 }
 
-func ResourceOpensearch() *schema.Resource {
+func ResourceOpenSearch() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Opensearch resource allows the creation and management of Aiven Opensearch services.",
-		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeOpensearch),
+		Description:   "The OpenSearch resource allows the creation and management of Aiven OpenSearch services.",
+		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeOpenSearch),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
 		DeleteContext: schemautil.ResourceServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeOpensearch),
+			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeOpenSearch),
 			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
 			customdiff.IfValueChange("tag",
 				schemautil.TagsShouldNotBeEmpty,
@@ -78,7 +78,7 @@ func ResourceOpensearch() *schema.Resource {
 	}
 }
 
-func ResourceOpensearchStateUpgrade(
+func ResourceOpenSearchStateUpgrade(
 	_ context.Context,
 	rawState map[string]interface{},
 	_ interface{},
