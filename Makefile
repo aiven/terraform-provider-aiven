@@ -102,7 +102,7 @@ lint-go: $(GOLANGCILINT)
 
 
 lint-test: $(TERRAFMT)
-	$(TERRAFMT) diff ./internal -cfv
+	$(TERRAFMT) diff ./internal -cfq
 
 
 lint-docs: $(TFPLUGINDOCS)
