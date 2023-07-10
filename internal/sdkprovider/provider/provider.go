@@ -83,6 +83,7 @@ func Provider(version string) *schema.Provider {
 			// organization
 			"aiven_organization":        organization.DatasourceOrganization(),
 			"aiven_organizational_unit": organization.DatasourceOrganizationalUnit(),
+			"aiven_organization_user":   organization.DatasourceOrganizationUser(),
 
 			// project
 			"aiven_project":       project.DatasourceProject(),
@@ -177,6 +178,7 @@ func Provider(version string) *schema.Provider {
 			// organization
 			"aiven_organization":        organization.ResourceOrganization(),
 			"aiven_organizational_unit": organization.ResourceOrganizationalUnit(),
+			"aiven_organization_user":   organization.ResourceOrganizationUser(),
 
 			// project
 			"aiven_project":       project.ResourceProject(),
