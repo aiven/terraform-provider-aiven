@@ -6472,7 +6472,7 @@ func ServiceTypeRedis() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"redis_io_threads": {
-			Description: "Redis IO thread count",
+			Description: "Redis IO thread count. Changing this will cause a restart of the Redis service.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
@@ -6497,7 +6497,7 @@ func ServiceTypeRedis() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"redis_number_of_databases": {
-			Description: "Set number of redis databases. Changing this will cause a restart of redis service.",
+			Description: "Set number of Redis databases. Changing this will cause a restart of the Redis service.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},

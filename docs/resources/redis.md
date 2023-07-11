@@ -88,12 +88,12 @@ Optional:
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet. (see [below for nested schema](#nestedblock--redis_user_config--public_access))
 - `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service.
 - `redis_acl_channels_default` (String) Determines default pub/sub channels' ACL for new users if ACL is not supplied. When this option is not defined, all_channels is assumed to keep backward compatibility. This option doesn't affect Redis configuration acl-pubsub-default.
-- `redis_io_threads` (Number) Redis IO thread count.
+- `redis_io_threads` (Number) Redis IO thread count. Changing this will cause a restart of the Redis service.
 - `redis_lfu_decay_time` (Number) LFU maxmemory-policy counter decay time in minutes. The default value is `1`.
 - `redis_lfu_log_factor` (Number) Counter logarithm factor for volatile-lfu and allkeys-lfu maxmemory-policies. The default value is `10`.
 - `redis_maxmemory_policy` (String) Redis maxmemory-policy. The default value is `noeviction`.
 - `redis_notify_keyspace_events` (String) Set notify-keyspace-events option.
-- `redis_number_of_databases` (Number) Set number of redis databases. Changing this will cause a restart of redis service.
+- `redis_number_of_databases` (Number) Set number of Redis databases. Changing this will cause a restart of the Redis service.
 - `redis_persistence` (String) When persistence is 'rdb', Redis does RDB dumps each 10 minutes if any key is changed. Also RDB dumps are done according to backup schedule for backup purposes. When persistence is 'off', no RDB dumps and backups are done, so data can be lost at any moment if service is restarted for any reason, or if service is powered off. Also service can't be forked.
 - `redis_pubsub_client_output_buffer_limit` (Number) Set output buffer limit for pub / sub clients in MB. The value is the hard limit, the soft limit is 1/4 of the hard limit. When setting the limit, be mindful of the available memory in the selected service plan.
 - `redis_ssl` (Boolean) Require SSL to access Redis. The default value is `true`.
