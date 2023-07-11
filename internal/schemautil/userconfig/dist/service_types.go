@@ -235,17 +235,142 @@ func ServiceTypeClickhouse() *schema.Schema {
 			Optional: true,
 			Type:     schema.TypeList,
 		},
+		"private_access": {
+			Description: "Allow access to selected service ports from private networks.",
+			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+				"clickhouse": {
+					Description: "Allow clients to connect to clickhouse with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"clickhouse_https": {
+					Description: "Allow clients to connect to clickhouse_https with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"prometheus": {
+					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+			}),
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"clickhouse": {
+					Description: "Allow clients to connect to clickhouse with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"clickhouse_https": {
+					Description: "Allow clients to connect to clickhouse_https with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"prometheus": {
+					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+			}},
+			MaxItems: 1,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"privatelink_access": {
+			Description: "Allow access to selected service components through Privatelink.",
+			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+				"clickhouse": {
+					Description: "Enable clickhouse.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"clickhouse_https": {
+					Description: "Enable clickhouse_https.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"prometheus": {
+					Description: "Enable prometheus.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+			}),
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"clickhouse": {
+					Description: "Enable clickhouse.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"clickhouse_https": {
+					Description: "Enable clickhouse_https.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"prometheus": {
+					Description: "Enable prometheus.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+			}},
+			MaxItems: 1,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
 		"project_to_fork_from": {
 			Description: "Name of another project to fork a service from. This has effect only when a new service is being created.",
 			ForceNew:    true,
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
+		"public_access": {
+			Description: "Allow access to selected service ports from the public Internet.",
+			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+				"clickhouse": {
+					Description: "Allow clients to connect to clickhouse from the public internet for service nodes that are in a project VPC or another type of private network.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"clickhouse_https": {
+					Description: "Allow clients to connect to clickhouse_https from the public internet for service nodes that are in a project VPC or another type of private network.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"prometheus": {
+					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+			}),
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"clickhouse": {
+					Description: "Allow clients to connect to clickhouse from the public internet for service nodes that are in a project VPC or another type of private network.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"clickhouse_https": {
+					Description: "Allow clients to connect to clickhouse_https from the public internet for service nodes that are in a project VPC or another type of private network.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"prometheus": {
+					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+			}},
+			MaxItems: 1,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
 		"service_to_fork_from": {
 			Description: "Name of another service to fork from. This has effect only when a new service is being created.",
 			ForceNew:    true,
 			Optional:    true,
 			Type:        schema.TypeString,
+		},
+		"static_ips": {
+			Description: "Use static public IP addresses.",
+			Optional:    true,
+			Type:        schema.TypeBool,
 		},
 	}
 
@@ -1953,6 +2078,11 @@ func ServiceTypeInfluxdb() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
+				"query_log_enabled": {
+					Description: "Whether queries should be logged before execution. May log sensitive data contained within a query.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
 				"query_timeout": {
 					Description: "The maximum duration in seconds before a query is killed. Setting this to 0 (the default) will never kill slow queries.",
 					Optional:    true,
@@ -1984,6 +2114,11 @@ func ServiceTypeInfluxdb() *schema.Schema {
 					Description: "The maximum number of points that can be processed in a SELECT statement. Setting this to 0 (the default) allows an unlimited number to be processed.",
 					Optional:    true,
 					Type:        schema.TypeInt,
+				},
+				"query_log_enabled": {
+					Description: "Whether queries should be logged before execution. May log sensitive data contained within a query.",
+					Optional:    true,
+					Type:        schema.TypeBool,
 				},
 				"query_timeout": {
 					Description: "The maximum duration in seconds before a query is killed. Setting this to 0 (the default) will never kill slow queries.",

@@ -73,8 +73,12 @@ Optional:
 - `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
 - `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'. (see [below for nested schema](#nestedblock--clickhouse_user_config--ip_filter_object))
 - `ip_filter_string` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks. (see [below for nested schema](#nestedblock--clickhouse_user_config--private_access))
+- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink. (see [below for nested schema](#nestedblock--clickhouse_user_config--privatelink_access))
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
+- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet. (see [below for nested schema](#nestedblock--clickhouse_user_config--public_access))
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
+- `static_ips` (Boolean) Use static public IP addresses.
 
 <a id="nestedblock--clickhouse_user_config--ip_filter_object"></a>
 ### Nested Schema for `clickhouse_user_config.ip_filter_object`
@@ -86,6 +90,36 @@ Required:
 Optional:
 
 - `description` (String) Description for IP filter list entry.
+
+
+<a id="nestedblock--clickhouse_user_config--private_access"></a>
+### Nested Schema for `clickhouse_user_config.private_access`
+
+Optional:
+
+- `clickhouse` (Boolean) Allow clients to connect to clickhouse with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
+- `clickhouse_https` (Boolean) Allow clients to connect to clickhouse_https with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
+- `prometheus` (Boolean) Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
+
+
+<a id="nestedblock--clickhouse_user_config--privatelink_access"></a>
+### Nested Schema for `clickhouse_user_config.privatelink_access`
+
+Optional:
+
+- `clickhouse` (Boolean) Enable clickhouse.
+- `clickhouse_https` (Boolean) Enable clickhouse_https.
+- `prometheus` (Boolean) Enable prometheus.
+
+
+<a id="nestedblock--clickhouse_user_config--public_access"></a>
+### Nested Schema for `clickhouse_user_config.public_access`
+
+Optional:
+
+- `clickhouse` (Boolean) Allow clients to connect to clickhouse from the public internet for service nodes that are in a project VPC or another type of private network.
+- `clickhouse_https` (Boolean) Allow clients to connect to clickhouse_https from the public internet for service nodes that are in a project VPC or another type of private network.
+- `prometheus` (Boolean) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.
 
 
 

@@ -99,6 +99,7 @@ Optional:
 - `max_row_limit` (Number) The maximum number of rows returned in a non-chunked query. Setting this to 0 (the default) allows an unlimited number to be returned.
 - `max_select_buckets` (Number) The maximum number of `GROUP BY time()` buckets that can be processed in a query. Setting this to 0 (the default) allows an unlimited number to be processed.
 - `max_select_point` (Number) The maximum number of points that can be processed in a SELECT statement. Setting this to 0 (the default) allows an unlimited number to be processed.
+- `query_log_enabled` (Boolean) Whether queries should be logged before execution. May log sensitive data contained within a query.
 - `query_timeout` (Number) The maximum duration in seconds before a query is killed. Setting this to 0 (the default) will never kill slow queries.
 
 

@@ -107,6 +107,7 @@ Read-Only:
 - `max_row_limit` (Number)
 - `max_select_buckets` (Number)
 - `max_select_point` (Number)
+- `query_log_enabled` (Boolean)
 - `query_timeout` (Number)
 
 
