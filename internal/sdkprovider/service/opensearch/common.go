@@ -9,14 +9,14 @@ import (
 var (
 	// this mutex is needed to serialize calls to modify the remote config
 	// since it's an abstraction that first GETs, modifies and then PUTs again
-	resourceOpensearchACLModifierMutex sync.Mutex
+	resourceOpenSearchACLModifierMutex sync.Mutex
 )
 
 // GETs the remote config, applies the modifiers and PUTs it again
 // The Config that is passed to the modifiers is guaranteed to be not nil
-func resourceOpensearchACLModifyRemoteConfig(project, serviceName string, client *aiven.Client, modifiers ...func(*aiven.ElasticSearchACLConfig)) error {
-	resourceOpensearchACLModifierMutex.Lock()
-	defer resourceOpensearchACLModifierMutex.Unlock()
+func resourceOpenSearchACLModifyRemoteConfig(project, serviceName string, client *aiven.Client, modifiers ...func(*aiven.ElasticSearchACLConfig)) error {
+	resourceOpenSearchACLModifierMutex.Lock()
+	defer resourceOpenSearchACLModifierMutex.Unlock()
 
 	r, err := client.ElasticsearchACLs.Get(project, serviceName)
 	if err != nil {
@@ -42,18 +42,18 @@ func resourceOpensearchACLModifyRemoteConfig(project, serviceName string, client
 
 func resourceElasticsearchACLModifierUpdateACLRule(username, index, permission string) func(*aiven.ElasticSearchACLConfig) {
 	return func(cfg *aiven.ElasticSearchACLConfig) {
-		cfg.Add(resourceOpensearchACLRuleMkAivenACL(username, index, permission))
+		cfg.Add(resourceOpenSearchACLRuleMkAivenACL(username, index, permission))
 
 		// delete the old acl if it's there
 		if prevPerm, ok := resourceElasticsearchACLRuleGetPermissionFromACLResponse(*cfg, username, index); ok && prevPerm != permission {
-			cfg.Delete(resourceOpensearchACLRuleMkAivenACL(username, index, prevPerm))
+			cfg.Delete(resourceOpenSearchACLRuleMkAivenACL(username, index, prevPerm))
 		}
 	}
 }
 
 func resourceElasticsearchACLModifierDeleteACLRule(username, index, permission string) func(*aiven.ElasticSearchACLConfig) {
 	return func(cfg *aiven.ElasticSearchACLConfig) {
-		cfg.Delete(resourceOpensearchACLRuleMkAivenACL(username, index, permission))
+		cfg.Delete(resourceOpenSearchACLRuleMkAivenACL(username, index, permission))
 	}
 }
 

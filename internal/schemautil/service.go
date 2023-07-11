@@ -36,7 +36,7 @@ const (
 	ServiceTypePG               = "pg"
 	ServiceTypeCassandra        = "cassandra"
 	ServiceTypeElasticsearch    = "elasticsearch"
-	ServiceTypeOpensearch       = "opensearch"
+	ServiceTypeOpenSearch       = "opensearch"
 	ServiceTypeGrafana          = "grafana"
 	ServiceTypeInfluxDB         = "influxdb"
 	ServiceTypeRedis            = "redis"
@@ -300,7 +300,7 @@ func ResourceServiceCreateWrapper(serviceType string) schema.CreateContextFunc {
 			if err := d.Set(ServiceTypeRedis, []map[string]interface{}{}); err != nil {
 				return diag.FromErr(err)
 			}
-			if err := d.Set(ServiceTypeOpensearch, []map[string]interface{}{}); err != nil {
+			if err := d.Set(ServiceTypeOpenSearch, []map[string]interface{}{}); err != nil {
 				return diag.FromErr(err)
 			}
 			if err := d.Set(ServiceTypeFlink, []map[string]interface{}{}); err != nil {

@@ -10,15 +10,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func DatasourceOpensearchACLRule() *schema.Resource {
+func DatasourceOpenSearchACLRule() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: datasourceOpensearchACLRuleRead,
-		Description: "The Opensearch ACL Rule data source provides information about an existing Aiven Opensearch ACL Rule.",
-		Schema:      schemautil.ResourceSchemaAsDatasourceSchema(aivenOpensearchACLRuleSchema, "project", "service_name", "username", "index", "permission"),
+		ReadContext: datasourceOpenSearchACLRuleRead,
+		Description: "The OpenSearch ACL Rule data source provides information about an existing Aiven OpenSearch ACL Rule.",
+		Schema:      schemautil.ResourceSchemaAsDatasourceSchema(aivenOpenSearchACLRuleSchema, "project", "service_name", "username", "index", "permission"),
 	}
 }
 
-func datasourceOpensearchACLRuleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func datasourceOpenSearchACLRuleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -37,5 +37,5 @@ func datasourceOpensearchACLRuleRead(ctx context.Context, d *schema.ResourceData
 
 	d.SetId(schemautil.BuildResourceID(projectName, serviceName, username, index))
 
-	return resourceOpensearchACLRuleRead(ctx, d, m)
+	return resourceOpenSearchACLRuleRead(ctx, d, m)
 }

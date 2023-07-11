@@ -3,12 +3,12 @@
 page_title: "aiven_opensearch_user Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Opensearch User resource allows the creation and management of Aiven Opensearch Users.
+  The OpenSearch User resource allows the creation and management of Aiven OpenSearch Users.
 ---
 
 # aiven_opensearch_user (Resource)
 
-The Opensearch User resource allows the creation and management of Aiven Opensearch Users.
+The OpenSearch User resource allows the creation and management of Aiven OpenSearch Users.
 
 ## Example Usage
 
@@ -28,11 +28,11 @@ resource "aiven_opensearch_user" "foo" {
 
 - `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 - `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `username` (String) The actual name of the Opensearch User. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `username` (String) The actual name of the OpenSearch User. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Optional
 
-- `password` (String, Sensitive) The password of the Opensearch User.
+- `password` (String, Sensitive) The password of the OpenSearch User.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

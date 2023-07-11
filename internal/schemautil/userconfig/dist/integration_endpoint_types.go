@@ -274,8 +274,8 @@ func IntegrationEndpointTypeExternalKafka() *schema.Schema {
 	}
 }
 
-// IntegrationEndpointTypeExternalOpensearchLogs is a generated function returning the schema of the external_opensearch_logs IntegrationEndpointType.
-func IntegrationEndpointTypeExternalOpensearchLogs() *schema.Schema {
+// IntegrationEndpointTypeExternalOpenSearchLogs is a generated function returning the schema of the external_opensearch_logs IntegrationEndpointType.
+func IntegrationEndpointTypeExternalOpenSearchLogs() *schema.Schema {
 	s := map[string]*schema.Schema{
 		"ca": {
 			Description: "PEM encoded CA certificate.",
@@ -307,7 +307,7 @@ func IntegrationEndpointTypeExternalOpensearchLogs() *schema.Schema {
 	}
 
 	return &schema.Schema{
-		Description:      "ExternalOpensearchLogs user configurable settings",
+		Description:      "ExternalOpenSearchLogs user configurable settings",
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(s),
 		Elem:             &schema.Resource{Schema: s},
 		MaxItems:         1,

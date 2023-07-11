@@ -38,7 +38,7 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 	"prometheus_user_config":                      dist.IntegrationEndpointTypePrometheus(),
 	"rsyslog_user_config":                         dist.IntegrationEndpointTypeRsyslog(),
 	"external_elasticsearch_logs_user_config":     dist.IntegrationEndpointTypeExternalElasticsearchLogs(),
-	"external_opensearch_logs_user_config":        dist.IntegrationEndpointTypeExternalOpensearchLogs(),
+	"external_opensearch_logs_user_config":        dist.IntegrationEndpointTypeExternalOpenSearchLogs(),
 	"external_aws_cloudwatch_logs_user_config":    dist.IntegrationEndpointTypeExternalAwsCloudwatchLogs(),
 	"external_google_cloud_logging_user_config":   dist.IntegrationEndpointTypeExternalGoogleCloudLogging(),
 	"external_kafka_user_config":                  dist.IntegrationEndpointTypeExternalKafka(),
@@ -78,7 +78,7 @@ func ResourceServiceIntegrationEndpointStateUpgrade(
 		return rawState, err
 	}
 
-	err = externalOpensearchLogsStateUpgrade(rawState)
+	err = externalOpenSearchLogsStateUpgrade(rawState)
 	if err != nil {
 		return rawState, err
 	}
@@ -166,7 +166,7 @@ func externalElasticsearchLogsStateUpgrade(rawState map[string]interface{}) erro
 	return nil
 }
 
-func externalOpensearchLogsStateUpgrade(rawState map[string]interface{}) error {
+func externalOpenSearchLogsStateUpgrade(rawState map[string]interface{}) error {
 	userConfigSlice, ok := rawState["external_opensearch_logs_user_config"].([]interface{})
 	if !ok {
 		return nil

@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-var aivenOpensearchUserSchema = map[string]*schema.Schema{
+var aivenOpenSearchUserSchema = map[string]*schema.Schema{
 	"project":      schemautil.CommonSchemaProjectReference,
 	"service_name": schemautil.CommonSchemaServiceNameReference,
 
@@ -16,7 +16,7 @@ var aivenOpensearchUserSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: schemautil.GetServiceUserValidateFunc(),
-		Description:  userconfig.Desc("The actual name of the Opensearch User.").ForceNew().Referenced().Build(),
+		Description:  userconfig.Desc("The actual name of the OpenSearch User.").ForceNew().Referenced().Build(),
 	},
 	"password": {
 		Type:             schema.TypeString,
@@ -24,7 +24,7 @@ var aivenOpensearchUserSchema = map[string]*schema.Schema{
 		Sensitive:        true,
 		Computed:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		Description:      "The password of the Opensearch User.",
+		Description:      "The password of the OpenSearch User.",
 	},
 
 	// computed fields
@@ -35,9 +35,9 @@ var aivenOpensearchUserSchema = map[string]*schema.Schema{
 	},
 }
 
-func ResourceOpensearchUser() *schema.Resource {
+func ResourceOpenSearchUser() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Opensearch User resource allows the creation and management of Aiven Opensearch Users.",
+		Description:   "The OpenSearch User resource allows the creation and management of Aiven OpenSearch Users.",
 		CreateContext: schemautil.ResourceServiceUserCreate,
 		UpdateContext: schemautil.ResourceServiceUserUpdate,
 		ReadContext:   schemautil.ResourceServiceUserRead,
@@ -47,6 +47,6 @@ func ResourceOpensearchUser() *schema.Resource {
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema: aivenOpensearchUserSchema,
+		Schema: aivenOpenSearchUserSchema,
 	}
 }

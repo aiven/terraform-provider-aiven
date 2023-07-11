@@ -125,11 +125,11 @@ func MySQL() []schema.StateUpgrader {
 	}
 }
 
-func Opensearch() []schema.StateUpgrader {
+func OpenSearch() []schema.StateUpgrader {
 	return []schema.StateUpgrader{
 		{
-			Type:    opensearch.ResourceOpensearch().CoreConfigSchema().ImpliedType(),
-			Upgrade: opensearch.ResourceOpensearchStateUpgrade,
+			Type:    opensearch.ResourceOpenSearch().CoreConfigSchema().ImpliedType(),
+			Upgrade: opensearch.ResourceOpenSearchStateUpgrade,
 			Version: 0,
 		},
 	}

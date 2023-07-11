@@ -3,12 +3,12 @@
 page_title: "aiven_opensearch_acl_rule Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Opensearch ACL Rule resource models a single ACL Rule for an Aiven Opensearch service.
+  The OpenSearch ACL Rule resource models a single ACL Rule for an Aiven OpenSearch service.
 ---
 
 # aiven_opensearch_acl_rule (Resource)
 
-The Opensearch ACL Rule resource models a single ACL Rule for an Aiven Opensearch service.
+The OpenSearch ACL Rule resource models a single ACL Rule for an Aiven OpenSearch service.
 
 ## Example Usage
 

@@ -14,17 +14,17 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
-func TestAccAivenOpensearchACLConfig_basic(t *testing.T) {
+func TestAccAivenOpenSearchACLConfig_basic(t *testing.T) {
 	resourceName := "aiven_opensearch_acl_config.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenOpensearchACLConfigResourceDestroy,
+		CheckDestroy:      testAccCheckAivenOpenSearchACLConfigResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpensearchACLConfigResource(rName),
+				Config: testAccOpenSearchACLConfigResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-es-aclconf-%s", rName)),
@@ -36,7 +36,7 @@ func TestAccAivenOpensearchACLConfig_basic(t *testing.T) {
 	})
 }
 
-func testAccOpensearchACLConfigResource(name string) string {
+func testAccOpenSearchACLConfigResource(name string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
   project = "%s"
@@ -65,7 +65,7 @@ resource "aiven_opensearch_acl_config" "foo" {
 }`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
-func testAccCheckAivenOpensearchACLConfigResourceDestroy(s *terraform.State) error {
+func testAccCheckAivenOpenSearchACLConfigResourceDestroy(s *terraform.State) error {
 	c := acc.TestAccProvider.Meta().(*aiven.Client)
 
 	// loop through the resources in state, verifying each OS ACL Config is destroyed

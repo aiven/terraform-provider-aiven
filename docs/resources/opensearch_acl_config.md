@@ -3,12 +3,12 @@
 page_title: "aiven_opensearch_acl_config Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Opensearch resource allows the creation and management of Aiven Opensearch services.
+  The OpenSearch resource allows the creation and management of Aiven OpenSearch services.
 ---
 
 # aiven_opensearch_acl_config (Resource)
 
-The Opensearch resource allows the creation and management of Aiven Opensearch services.
+The OpenSearch resource allows the creation and management of Aiven OpenSearch services.
 
 ## Example Usage
 
@@ -50,7 +50,7 @@ resource "aiven_opensearch_acl_config" "foo" {
 
 ### Optional
 
-- `enabled` (Boolean) Enable Opensearch ACLs. When disabled authenticated service users have unrestricted access. The default value is `true`.
+- `enabled` (Boolean) Enable OpenSearch ACLs. When disabled authenticated service users have unrestricted access. The default value is `true`.
 - `extended_acl` (Boolean) Index rules can be applied in a limited fashion to the _mget, _msearch and _bulk APIs (and only those) by enabling the ExtendedAcl option for the service. When it is enabled, users can use these APIs as long as all operations only target indexes they have been granted access to. The default value is `true`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 

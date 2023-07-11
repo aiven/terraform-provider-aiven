@@ -9,15 +9,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func DatasourceOpensearchACLConfig() *schema.Resource {
+func DatasourceOpenSearchACLConfig() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: datasourceOpensearchACLConfigRead,
-		Description: "The Opensearch ACL Config data source provides information about an existing Aiven Opensearch ACL Config.",
-		Schema:      schemautil.ResourceSchemaAsDatasourceSchema(aivenOpensearchACLConfigSchema, "project", "service_name"),
+		ReadContext: datasourceOpenSearchACLConfigRead,
+		Description: "The OpenSearch ACL Config data source provides information about an existing Aiven OpenSearch ACL Config.",
+		Schema:      schemautil.ResourceSchemaAsDatasourceSchema(aivenOpenSearchACLConfigSchema, "project", "service_name"),
 	}
 }
 
-func datasourceOpensearchACLConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func datasourceOpenSearchACLConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -31,7 +31,7 @@ func datasourceOpensearchACLConfigRead(ctx context.Context, d *schema.ResourceDa
 	if acl != nil {
 		d.SetId(schemautil.BuildResourceID(projectName, serviceName))
 
-		return resourceOpensearchACLConfigRead(ctx, d, m)
+		return resourceOpenSearchACLConfigRead(ctx, d, m)
 	}
 
 	return diag.Errorf("acl config %s/%s not found", projectName, serviceName)

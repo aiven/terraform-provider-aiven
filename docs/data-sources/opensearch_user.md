@@ -3,12 +3,12 @@
 page_title: "aiven_opensearch_user Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Opensearch User data source provides information about the existing Aiven Opensearch User.
+  The OpenSearch User data source provides information about the existing Aiven OpenSearch User.
 ---
 
 # aiven_opensearch_user (Data Source)
 
-The Opensearch User data source provides information about the existing Aiven Opensearch User.
+The OpenSearch User data source provides information about the existing Aiven OpenSearch User.
 
 ## Example Usage
 
@@ -27,10 +27,10 @@ data "aiven_opensearch_user" "user" {
 
 - `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 - `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `username` (String) The actual name of the Opensearch User. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `username` (String) The actual name of the OpenSearch User. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `password` (String, Sensitive) The password of the Opensearch User.
+- `password` (String, Sensitive) The password of the OpenSearch User.
 - `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.

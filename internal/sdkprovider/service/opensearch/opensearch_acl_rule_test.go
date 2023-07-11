@@ -14,17 +14,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAivenOpensearchACLRule_basic(t *testing.T) {
+func TestAccAivenOpenSearchACLRule_basic(t *testing.T) {
 	resourceName := "aiven_opensearch_acl_rule.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenOpensearchACLRuleResourceDestroy,
+		CheckDestroy:      testAccCheckAivenOpenSearchACLRuleResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpensearchACLRuleResource(rName),
+				Config: testAccOpenSearchACLRuleResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-aclrule-%s", rName)),
@@ -37,7 +37,7 @@ func TestAccAivenOpensearchACLRule_basic(t *testing.T) {
 	})
 }
 
-func testAccOpensearchACLRuleResource(name string) string {
+func testAccOpenSearchACLRuleResource(name string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
   project = "%s"
@@ -74,7 +74,7 @@ resource "aiven_opensearch_acl_rule" "foo" {
 }`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
 }
 
-func testAccCheckAivenOpensearchACLRuleResourceDestroy(s *terraform.State) error {
+func testAccCheckAivenOpenSearchACLRuleResourceDestroy(s *terraform.State) error {
 	c := acc.TestAccProvider.Meta().(*aiven.Client)
 
 	// loop through the resources in state, verifying each ES ACL is destroyed

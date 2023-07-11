@@ -6,11 +6,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func DatasourceOpensearchUser() *schema.Resource {
+func DatasourceOpenSearchUser() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: schemautil.DatasourceServiceUserRead,
-		Description: "The Opensearch User data source provides information about the existing Aiven Opensearch User.",
-		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenOpensearchUserSchema,
+		Description: "The OpenSearch User data source provides information about the existing Aiven OpenSearch User.",
+		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenOpenSearchUserSchema,
 			"project", "service_name", "username"),
 	}
 }

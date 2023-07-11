@@ -14,17 +14,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAivenOpensearchUser_basic(t *testing.T) {
+func TestAccAivenOpenSearchUser_basic(t *testing.T) {
 	resourceName := "aiven_opensearch_user.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenOpensearchUserResourceDestroy,
+		CheckDestroy:      testAccCheckAivenOpenSearchUserResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpensearchUserResource(rName),
+				Config: testAccOpenSearchUserResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_opensearch_user.user"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
@@ -37,7 +37,7 @@ func TestAccAivenOpensearchUser_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckAivenOpensearchUserResourceDestroy(s *terraform.State) error {
+func testAccCheckAivenOpenSearchUserResourceDestroy(s *terraform.State) error {
 	c := acc.TestAccProvider.Meta().(*aiven.Client)
 
 	// loop through the resources in state, verifying each aiven_opensearch_user is destroyed
@@ -66,7 +66,7 @@ func testAccCheckAivenOpensearchUserResourceDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccOpensearchUserResource(name string) string {
+func testAccOpenSearchUserResource(name string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
   project = "%s"

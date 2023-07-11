@@ -1,4 +1,4 @@
-# Opensearch service
+# OpenSearch service
 resource "aiven_opensearch" "os" {
   project                 = aiven_project.os-project.project
   cloud_name              = "google-europe-west1"
@@ -8,7 +8,7 @@ resource "aiven_opensearch" "os" {
   maintenance_window_time = "10:00:00"
 }
 
-# Opensearch user
+# OpenSearch user
 resource "aiven_opensearch_user" "os-user" {
   project      = aiven_project.os-project.project
   service_name = aiven_opensearch.os.service_name
