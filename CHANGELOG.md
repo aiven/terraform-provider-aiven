@@ -421,7 +421,7 @@ New resources and data-sources:
 - Add support for `oneOf` user configuration option type
 - Add Debug mode and documentation
 - Add a new field `add_account_owners_admin_access` to the `aiven_project` resource
-- Add Azure PrivateLink support
+- Add Azure Privatelink support
 - Fix typo in OpenSearch resource docs
 
 ## [2.2.1] - 2021-09-24
