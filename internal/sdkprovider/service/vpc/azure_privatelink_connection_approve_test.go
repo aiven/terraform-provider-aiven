@@ -18,7 +18,7 @@ type azureSecrets struct {
 	SubscriptionID string `envconfig:"AZURE_SUBSCRIPTION_ID" required:"true"`
 }
 
-func TestAccAivenAzurePrivateLinkConnectionApproval_basic(t *testing.T) {
+func TestAccAivenAzurePrivatelinkConnectionApproval_basic(t *testing.T) {
 	var s azureSecrets
 	err := envconfig.Process("", &s)
 	if err != nil {
@@ -37,7 +37,7 @@ func TestAccAivenAzurePrivateLinkConnectionApproval_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAzurePrivateLinkConnectionApprovalResource(prefix, &s),
+				Config: testAccAzurePrivatelinkConnectionApprovalResource(prefix, &s),
 				Check: resource.ComposeTestCheckFunc(
 					// Aiven resources
 					resource.TestCheckResourceAttr("aiven_project_vpc.project_vpc", "state", "ACTIVE"),
@@ -66,7 +66,7 @@ func TestAccAivenAzurePrivateLinkConnectionApproval_basic(t *testing.T) {
 	})
 }
 
-func testAccAzurePrivateLinkConnectionApprovalResource(prefix string, s *azureSecrets) string {
+func testAccAzurePrivatelinkConnectionApprovalResource(prefix string, s *azureSecrets) string {
 	return fmt.Sprintf(`
 data "aiven_project" "project" {
   project = %[2]q

@@ -10,7 +10,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-func TestAccAivenAWSPrivateLink_basic(t *testing.T) {
+func TestAccAivenAWSPrivatelink_basic(t *testing.T) {
 	var s awsSecrets
 	err := envconfig.Process("", &s)
 	if err != nil {
@@ -30,7 +30,7 @@ func TestAccAivenAWSPrivateLink_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAWSPrivateLinkResource(prefix, &s),
+				Config: testAccAWSPrivatelinkResource(prefix, &s),
 				Check: resource.ComposeTestCheckFunc(
 					// Aiven resources
 					resource.TestCheckResourceAttr("aiven_project_vpc.aiven_vpc", "state", "ACTIVE"),
@@ -55,7 +55,7 @@ func TestAccAivenAWSPrivateLink_basic(t *testing.T) {
 	})
 }
 
-func testAccAWSPrivateLinkResource(prefix string, s *awsSecrets) string {
+func testAccAWSPrivatelinkResource(prefix string, s *awsSecrets) string {
 	return fmt.Sprintf(`
 data "aiven_project" "project" {
   project = %[2]q
