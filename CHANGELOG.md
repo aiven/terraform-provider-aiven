@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add GCP private service connect (Privatelink) support
+
 ## [4.7.0] - 2023-07-11
 
 - Add `parent_id` field in `aiven_project` and `aiven_billing_group` resources

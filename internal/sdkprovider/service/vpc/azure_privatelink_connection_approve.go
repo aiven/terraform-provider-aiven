@@ -13,7 +13,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
-var aivenPrivatelinkConnectionApprovalSchema = map[string]*schema.Schema{
+var aivenAzurePrivatelinkConnectionApprovalSchema = map[string]*schema.Schema{
 	"project":      schemautil.CommonSchemaProjectReference,
 	"service_name": schemautil.CommonSchemaServiceNameReference,
 	"endpoint_ip_address": {
@@ -37,21 +37,21 @@ var aivenPrivatelinkConnectionApprovalSchema = map[string]*schema.Schema{
 func ResourceAzurePrivatelinkConnectionApproval() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The Azure privatelink approve resource waits for an aiven privatelink connection on a service and approves it with associated endpoint IP",
-		CreateContext: resourcePrivatelinkConnectionApprovalUpdate,
-		ReadContext:   resourcePrivatelinkConnectionApprovalRead,
-		UpdateContext: resourcePrivatelinkConnectionApprovalUpdate,
-		DeleteContext: resourcePrivatelinkConnectionApprovalDelete,
+		CreateContext: resourceAzurePrivatelinkConnectionApprovalUpdate,
+		ReadContext:   resourceAzurePrivatelinkConnectionApprovalRead,
+		UpdateContext: resourceAzurePrivatelinkConnectionApprovalUpdate,
+		DeleteContext: resourceAzurePrivatelinkConnectionApprovalDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema: aivenPrivatelinkConnectionApprovalSchema,
+		Schema: aivenAzurePrivatelinkConnectionApprovalSchema,
 	}
 }
 
 // nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
-func waitForConnectionState(_ context.Context, client *aiven.Client, project string, service string, t time.Duration, pending []string, target []string) *resource.StateChangeConf {
+func waitForAzureConnectionState(_ context.Context, client *aiven.Client, project string, service string, t time.Duration, pending []string, target []string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending: pending,
 		Target:  target,
@@ -82,7 +82,7 @@ func waitForConnectionState(_ context.Context, client *aiven.Client, project str
 	}
 }
 
-func resourcePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAzurePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	var project = d.Get("project").(string)
@@ -97,7 +97,7 @@ func resourcePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *schema.
 	pending := []string{""}
 	target := []string{"pending-user-approval", "user-approved", "connected", "active"}
 
-	_, err = waitForConnectionState(ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target).WaitForStateContext(ctx)
+	_, err = waitForAzureConnectionState(ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for privatelink connection after refresh: %s", err)
 	}
@@ -123,7 +123,7 @@ func resourcePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *schema.
 
 	pending = []string{"user-approved"}
 	target = []string{"connected"}
-	_, err = waitForConnectionState(ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target).WaitForStateContext(ctx)
+	_, err = waitForAzureConnectionState(ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for privatelink connection after approval: %s", err)
 	}
@@ -138,7 +138,7 @@ func resourcePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *schema.
 
 	pending = []string{"connected"}
 	target = []string{"active"}
-	_, err = waitForConnectionState(ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target).WaitForStateContext(ctx)
+	_, err = waitForAzureConnectionState(ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for privatelink connection after update: %s", err)
 	}
@@ -149,10 +149,10 @@ func resourcePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *schema.
 
 	d.SetId(schemautil.BuildResourceID(project, serviceName))
 
-	return resourcePrivatelinkConnectionApprovalRead(ctx, d, m)
+	return resourceAzurePrivatelinkConnectionApprovalRead(ctx, d, m)
 }
 
-func resourcePrivatelinkConnectionApprovalRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAzurePrivatelinkConnectionApprovalRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	project, service, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
@@ -185,7 +185,7 @@ func resourcePrivatelinkConnectionApprovalRead(_ context.Context, d *schema.Reso
 	return nil
 }
 
-func resourcePrivatelinkConnectionApprovalDelete(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
+func resourceAzurePrivatelinkConnectionApprovalDelete(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	/// API only supports approve/list/update. approved connection is deleted with the associated azure_privatelink resource
 	return nil
 }

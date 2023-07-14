@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/kelseyhightower/envconfig"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
 type azureSecrets struct {
@@ -163,19 +163,4 @@ resource "aiven_azure_privatelink_connection_approval" "approval" {
   service_name        = aiven_pg.pg.service_name
   endpoint_ip_address = azurerm_private_endpoint.private_endpoint.private_service_connection[0].private_ip_address
 }`, prefix, s.Project, s.TenantID, s.SubscriptionID)
-}
-
-func importStateByName(name string) resource.TestStep {
-	return resource.TestStep{
-		ResourceName: name,
-		ImportState:  true,
-		ImportStateIdFunc: func(s *terraform.State) (string, error) {
-			root := s.RootModule()
-			rs, ok := root.Resources[name]
-			if !ok {
-				return "", fmt.Errorf(`resource %q not found in the state`, name)
-			}
-			return rs.Primary.ID, nil
-		},
-	}
 }
