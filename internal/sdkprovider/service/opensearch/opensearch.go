@@ -26,7 +26,7 @@ func opensearchSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	s[schemautil.ServiceTypeOpenSearch+"_user_config"] = dist.ServiceTypeOpenSearch()
+	s[schemautil.ServiceTypeOpenSearch+"_user_config"] = dist.ServiceTypeOpensearch()
 
 	return s
 }

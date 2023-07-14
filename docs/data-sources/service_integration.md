@@ -202,6 +202,7 @@ Read-Only:
 Read-Only:
 
 - `kafka_topic` (String)
+- `selected_log_fields` (List of String)
 
 
 <a id="nestedatt--kafka_mirrormaker_user_config"></a>
@@ -233,6 +234,7 @@ Read-Only:
 
 - `elasticsearch_index_days_max` (Number)
 - `elasticsearch_index_prefix` (String)
+- `selected_log_fields` (List of String)
 
 
 <a id="nestedatt--metrics_user_config"></a>

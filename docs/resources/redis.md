@@ -88,7 +88,7 @@ Optional:
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet. (see [below for nested schema](#nestedblock--redis_user_config--public_access))
 - `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service.
 - `redis_acl_channels_default` (String) Determines default pub/sub channels' ACL for new users if ACL is not supplied. When this option is not defined, all_channels is assumed to keep backward compatibility. This option doesn't affect Redis configuration acl-pubsub-default.
-- `redis_io_threads` (Number) Redis IO thread count. Changing this will cause a restart of the Redis service.
+- `redis_io_threads` (Number) Set Redis IO thread count. Changing this will cause a restart of the Redis service.
 - `redis_lfu_decay_time` (Number) LFU maxmemory-policy counter decay time in minutes. The default value is `1`.
 - `redis_lfu_log_factor` (Number) Counter logarithm factor for volatile-lfu and allkeys-lfu maxmemory-policies. The default value is `10`.
 - `redis_maxmemory_policy` (String) Redis maxmemory-policy. The default value is `noeviction`.

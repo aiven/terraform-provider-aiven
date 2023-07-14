@@ -131,7 +131,7 @@ Optional:
 - `include_topics` (List of String) List of topics to include.
 - `kafka_custom_metrics` (List of String) List of custom metrics.
 - `max_jmx_metrics` (Number) Maximum number of JMX metrics to send.
-- `opensearch` (Block List, Max: 1) Datadog OpenSearch Options. (see [below for nested schema](#nestedblock--datadog_user_config--opensearch))
+- `opensearch` (Block List, Max: 1) Datadog Opensearch Options. (see [below for nested schema](#nestedblock--datadog_user_config--opensearch))
 - `redis` (Block List, Max: 1) Datadog Redis Options. (see [below for nested schema](#nestedblock--datadog_user_config--redis))
 
 <a id="nestedblock--datadog_user_config--datadog_tags"></a>
@@ -151,9 +151,9 @@ Optional:
 
 Optional:
 
-- `index_stats_enabled` (Boolean) Enable Datadog OpenSearch Index Monitoring.
-- `pending_task_stats_enabled` (Boolean) Enable Datadog OpenSearch Pending Task Monitoring.
-- `pshard_stats_enabled` (Boolean) Enable Datadog OpenSearch Primary Shard Monitoring.
+- `index_stats_enabled` (Boolean) Enable Datadog Opensearch Index Monitoring.
+- `pending_task_stats_enabled` (Boolean) Enable Datadog Opensearch Pending Task Monitoring.
+- `pshard_stats_enabled` (Boolean) Enable Datadog Opensearch Primary Shard Monitoring.
 
 
 <a id="nestedblock--datadog_user_config--redis"></a>
@@ -218,6 +218,10 @@ Required:
 
 - `kafka_topic` (String) Topic name.
 
+Optional:
+
+- `selected_log_fields` (List of String) The list of logging fields that will be sent to the integration logging service. The MESSAGE and timestamp fields are always sent.
+
 
 <a id="nestedblock--kafka_mirrormaker_user_config"></a>
 ### Nested Schema for `kafka_mirrormaker_user_config`
@@ -248,6 +252,7 @@ Optional:
 
 - `elasticsearch_index_days_max` (Number) Elasticsearch index retention limit. The default value is `3`.
 - `elasticsearch_index_prefix` (String) Elasticsearch index prefix. The default value is `logs`.
+- `selected_log_fields` (List of String) The list of logging fields that will be sent to the integration logging service. The MESSAGE and timestamp fields are always sent.
 
 
 <a id="nestedblock--metrics_user_config"></a>
