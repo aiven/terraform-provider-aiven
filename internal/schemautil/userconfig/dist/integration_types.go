@@ -220,37 +220,37 @@ func IntegrationTypeDatadog() *schema.Schema {
 			Type:        schema.TypeInt,
 		},
 		"opensearch": {
-			Description: "Datadog OpenSearch Options.",
+			Description: "Datadog Opensearch Options.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
 				"index_stats_enabled": {
-					Description: "Enable Datadog OpenSearch Index Monitoring.",
+					Description: "Enable Datadog Opensearch Index Monitoring.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"pending_task_stats_enabled": {
-					Description: "Enable Datadog OpenSearch Pending Task Monitoring.",
+					Description: "Enable Datadog Opensearch Pending Task Monitoring.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"pshard_stats_enabled": {
-					Description: "Enable Datadog OpenSearch Primary Shard Monitoring.",
+					Description: "Enable Datadog Opensearch Primary Shard Monitoring.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 			}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"index_stats_enabled": {
-					Description: "Enable Datadog OpenSearch Index Monitoring.",
+					Description: "Enable Datadog Opensearch Index Monitoring.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"pending_task_stats_enabled": {
-					Description: "Enable Datadog OpenSearch Pending Task Monitoring.",
+					Description: "Enable Datadog Opensearch Pending Task Monitoring.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
 				"pshard_stats_enabled": {
-					Description: "Enable Datadog OpenSearch Primary Shard Monitoring.",
+					Description: "Enable Datadog Opensearch Primary Shard Monitoring.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -281,6 +281,26 @@ func IntegrationTypeDatadog() *schema.Schema {
 
 	return &schema.Schema{
 		Description:      "Datadog user configurable settings",
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(s),
+		Elem:             &schema.Resource{Schema: s},
+		MaxItems:         1,
+		Optional:         true,
+		Type:             schema.TypeList,
+	}
+}
+
+// IntegrationTypeExternalAwsCloudwatchLogs is a generated function returning the schema of the external_aws_cloudwatch_logs IntegrationType.
+func IntegrationTypeExternalAwsCloudwatchLogs() *schema.Schema {
+	s := map[string]*schema.Schema{"selected_log_fields": {
+		Description: "The list of logging fields that will be sent to the integration logging service. The MESSAGE and timestamp fields are always sent.",
+		Elem:        &schema.Schema{Type: schema.TypeString},
+		MaxItems:    5,
+		Optional:    true,
+		Type:        schema.TypeList,
+	}}
+
+	return &schema.Schema{
+		Description:      "ExternalAwsCloudwatchLogs user configurable settings",
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(s),
 		Elem:             &schema.Resource{Schema: s},
 		MaxItems:         1,
@@ -332,6 +352,46 @@ func IntegrationTypeExternalAwsCloudwatchMetrics() *schema.Schema {
 
 	return &schema.Schema{
 		Description:      "ExternalAwsCloudwatchMetrics user configurable settings",
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(s),
+		Elem:             &schema.Resource{Schema: s},
+		MaxItems:         1,
+		Optional:         true,
+		Type:             schema.TypeList,
+	}
+}
+
+// IntegrationTypeExternalElasticsearchLogs is a generated function returning the schema of the external_elasticsearch_logs IntegrationType.
+func IntegrationTypeExternalElasticsearchLogs() *schema.Schema {
+	s := map[string]*schema.Schema{"selected_log_fields": {
+		Description: "The list of logging fields that will be sent to the integration logging service. The MESSAGE and timestamp fields are always sent.",
+		Elem:        &schema.Schema{Type: schema.TypeString},
+		MaxItems:    5,
+		Optional:    true,
+		Type:        schema.TypeList,
+	}}
+
+	return &schema.Schema{
+		Description:      "ExternalElasticsearchLogs user configurable settings",
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(s),
+		Elem:             &schema.Resource{Schema: s},
+		MaxItems:         1,
+		Optional:         true,
+		Type:             schema.TypeList,
+	}
+}
+
+// IntegrationTypeExternalOpensearchLogs is a generated function returning the schema of the external_opensearch_logs IntegrationType.
+func IntegrationTypeExternalOpensearchLogs() *schema.Schema {
+	s := map[string]*schema.Schema{"selected_log_fields": {
+		Description: "The list of logging fields that will be sent to the integration logging service. The MESSAGE and timestamp fields are always sent.",
+		Elem:        &schema.Schema{Type: schema.TypeString},
+		MaxItems:    5,
+		Optional:    true,
+		Type:        schema.TypeList,
+	}}
+
+	return &schema.Schema{
+		Description:      "ExternalOpensearchLogs user configurable settings",
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(s),
 		Elem:             &schema.Resource{Schema: s},
 		MaxItems:         1,
@@ -405,11 +465,20 @@ func IntegrationTypeKafkaConnect() *schema.Schema {
 
 // IntegrationTypeKafkaLogs is a generated function returning the schema of the kafka_logs IntegrationType.
 func IntegrationTypeKafkaLogs() *schema.Schema {
-	s := map[string]*schema.Schema{"kafka_topic": {
-		Description: "Topic name.",
-		Required:    true,
-		Type:        schema.TypeString,
-	}}
+	s := map[string]*schema.Schema{
+		"kafka_topic": {
+			Description: "Topic name.",
+			Required:    true,
+			Type:        schema.TypeString,
+		},
+		"selected_log_fields": {
+			Description: "The list of logging fields that will be sent to the integration logging service. The MESSAGE and timestamp fields are always sent.",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			MaxItems:    5,
+			Optional:    true,
+			Type:        schema.TypeList,
+		},
+	}
 
 	return &schema.Schema{
 		Description:      "KafkaLogs user configurable settings",
@@ -525,6 +594,13 @@ func IntegrationTypeLogs() *schema.Schema {
 			Description: "Elasticsearch index prefix. The default value is `logs`.",
 			Optional:    true,
 			Type:        schema.TypeString,
+		},
+		"selected_log_fields": {
+			Description: "The list of logging fields that will be sent to the integration logging service. The MESSAGE and timestamp fields are always sent.",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			MaxItems:    5,
+			Optional:    true,
+			Type:        schema.TypeList,
 		},
 	}
 

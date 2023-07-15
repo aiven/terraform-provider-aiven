@@ -37,7 +37,7 @@ data "aiven_service_integration_endpoint" "myendpoint" {
 - `external_elasticsearch_logs_user_config` (List of Object) ExternalElasticsearchLogs user configurable settings (see [below for nested schema](#nestedatt--external_elasticsearch_logs_user_config))
 - `external_google_cloud_logging_user_config` (List of Object) ExternalGoogleCloudLogging user configurable settings (see [below for nested schema](#nestedatt--external_google_cloud_logging_user_config))
 - `external_kafka_user_config` (List of Object) ExternalKafka user configurable settings (see [below for nested schema](#nestedatt--external_kafka_user_config))
-- `external_opensearch_logs_user_config` (List of Object) ExternalOpenSearchLogs user configurable settings (see [below for nested schema](#nestedatt--external_opensearch_logs_user_config))
+- `external_opensearch_logs_user_config` (List of Object) ExternalOpensearchLogs user configurable settings (see [below for nested schema](#nestedatt--external_opensearch_logs_user_config))
 - `external_schema_registry_user_config` (List of Object) ExternalSchemaRegistry user configurable settings (see [below for nested schema](#nestedatt--external_schema_registry_user_config))
 - `id` (String) The ID of this resource.
 - `jolokia_user_config` (List of Object) Jolokia user configurable settings (see [below for nested schema](#nestedatt--jolokia_user_config))
