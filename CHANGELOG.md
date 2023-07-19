@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.8.0] - 2023-07-19
+
 - Add GCP private service connect (Privatelink) support
 
 ## [4.7.0] - 2023-07-11
