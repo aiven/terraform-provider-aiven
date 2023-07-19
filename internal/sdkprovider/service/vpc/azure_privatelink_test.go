@@ -6,11 +6,12 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func TestAccAivenAzurePrivatelink_basic(t *testing.T) {
@@ -43,7 +44,7 @@ func TestAccAivenAzurePrivatelink_basic(t *testing.T) {
 func testAccCheckAivenAzurePrivatelinkResourceDestroy(s *terraform.State) error {
 	c := acc.TestAccProvider.Meta().(*aiven.Client)
 
-	// loop through the resources in state, verifying each AWS privatelink is destroyed
+	// loop through the resources in state, verifying each Azure privatelink is destroyed
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_azure_privatelink" {
 			continue
