@@ -183,6 +183,31 @@ func IntegrationEndpointTypeExternalElasticsearchLogs() *schema.Schema {
 	}
 }
 
+// IntegrationEndpointTypeExternalGoogleCloudBigquery is a generated function returning the schema of the external_google_cloud_bigquery IntegrationEndpointType.
+func IntegrationEndpointTypeExternalGoogleCloudBigquery() *schema.Schema {
+	s := map[string]*schema.Schema{
+		"project_id": {
+			Description: "GCP project id.",
+			Required:    true,
+			Type:        schema.TypeString,
+		},
+		"service_account_credentials": {
+			Description: "This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys .",
+			Required:    true,
+			Type:        schema.TypeString,
+		},
+	}
+
+	return &schema.Schema{
+		Description:      "ExternalGoogleCloudBigquery user configurable settings",
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(s),
+		Elem:             &schema.Resource{Schema: s},
+		MaxItems:         1,
+		Optional:         true,
+		Type:             schema.TypeList,
+	}
+}
+
 // IntegrationEndpointTypeExternalGoogleCloudLogging is a generated function returning the schema of the external_google_cloud_logging IntegrationEndpointType.
 func IntegrationEndpointTypeExternalGoogleCloudLogging() *schema.Schema {
 	s := map[string]*schema.Schema{

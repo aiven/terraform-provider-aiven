@@ -1846,6 +1846,11 @@ func ServiceTypeGrafana() *schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
+		"oauth_allow_insecure_email_lookup": {
+			Description: "Enforce user lookup based on email instead of the unique ID provided by the IdP.",
+			Optional:    true,
+			Type:        schema.TypeBool,
+		},
 		"private_access": {
 			Description: "Allow access to selected service ports from private networks.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"grafana": {
