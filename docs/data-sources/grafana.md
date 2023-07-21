@@ -110,6 +110,7 @@ Read-Only:
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--ip_filter_object))
 - `ip_filter_string` (List of String)
 - `metrics_enabled` (Boolean)
+- `oauth_allow_insecure_email_lookup` (Boolean)
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--private_access))
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--privatelink_access))
 - `project_to_fork_from` (String)
