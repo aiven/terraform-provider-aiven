@@ -157,6 +157,7 @@ Read-Only:
 - `num_partitions` (Number)
 - `offsets_retention_minutes` (Number)
 - `producer_purgatory_purge_interval_requests` (Number)
+- `remote_log_storage_system_enable` (Boolean)
 - `replica_fetch_max_bytes` (Number)
 - `replica_fetch_response_max_bytes` (Number)
 - `socket_request_max_bytes` (Number)

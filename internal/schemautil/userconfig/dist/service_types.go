@@ -2487,6 +2487,11 @@ func ServiceTypeKafka() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
+				"remote_log_storage_system_enable": {
+					Description: "Whether to enable the tiered storage functionality.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
 				"replica_fetch_max_bytes": {
 					Description: "The number of bytes of messages to attempt to fetch for each partition (defaults to 1048576). This is not an absolute maximum, if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made.",
 					Optional:    true,
@@ -2683,6 +2688,11 @@ func ServiceTypeKafka() *schema.Schema {
 					Description: "The purge interval (in number of requests) of the producer request purgatory(defaults to 1000).",
 					Optional:    true,
 					Type:        schema.TypeInt,
+				},
+				"remote_log_storage_system_enable": {
+					Description: "Whether to enable the tiered storage functionality.",
+					Optional:    true,
+					Type:        schema.TypeBool,
 				},
 				"replica_fetch_max_bytes": {
 					Description: "The number of bytes of messages to attempt to fetch for each partition (defaults to 1048576). This is not an absolute maximum, if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made.",
