@@ -159,6 +159,7 @@ Optional:
 - `num_partitions` (Number) Number of partitions for autocreated topics.
 - `offsets_retention_minutes` (Number) Log retention window in minutes for offsets topic.
 - `producer_purgatory_purge_interval_requests` (Number) The purge interval (in number of requests) of the producer request purgatory(defaults to 1000).
+- `remote_log_storage_system_enable` (Boolean) Whether to enable the tiered storage functionality.
 - `replica_fetch_max_bytes` (Number) The number of bytes of messages to attempt to fetch for each partition (defaults to 1048576). This is not an absolute maximum, if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made.
 - `replica_fetch_response_max_bytes` (Number) Maximum bytes expected for the entire fetch response (defaults to 10485760). Records are fetched in batches, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made. As such, this is not an absolute maximum.
 - `socket_request_max_bytes` (Number) The maximum number of bytes in a socket request (defaults to 104857600).
