@@ -107,18 +107,32 @@ func resourceAzurePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *sc
 		return diag.FromErr(err)
 	}
 
-	if len(plConnections.Connections) != 1 {
-		return diag.Errorf("number of privatelink connections != 1 (%d", len(plConnections.Connections))
+	var pplConnection *aiven.AzurePrivatelinkConnectionResponse
+
+	for _, v := range plConnections.Connections {
+		if v.State == "pending-user-approval" {
+			if pplConnection != nil {
+				return diag.Errorf(
+					"multiple privatelink connections in pending-user-approval state (%d),"+
+						" delete one of them before proceeding",
+					len(plConnections.Connections),
+				)
+			}
+
+			pplConnection = &v
+		}
 	}
 
-	plConnection := plConnections.Connections[0]
+	if pplConnection == nil {
+		return diag.Errorf("no privatelink connections in pending-user-approval state")
+	}
+
+	plConnection := *pplConnection
 	plConnectionID := plConnection.PrivatelinkConnectionID
 
-	if plConnection.State == "pending-user-approval" {
-		err = client.AzurePrivatelink.ConnectionApprove(project, serviceName, plConnectionID)
-		if err != nil {
-			return diag.Errorf("Error approving privatelink connection %s/%s/%s: %s", project, serviceName, plConnectionID, err)
-		}
+	err = client.AzurePrivatelink.ConnectionApprove(project, serviceName, plConnectionID)
+	if err != nil {
+		return diag.Errorf("Error approving privatelink connection %s/%s/%s: %s", project, serviceName, plConnectionID, err)
 	}
 
 	pending = []string{"user-approved"}

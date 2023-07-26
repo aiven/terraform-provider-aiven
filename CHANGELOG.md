@@ -9,6 +9,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Add Organization User Groups support
+- Add support for multiple approvals for Privatelink resources
 
 ## [4.8.0] - 2023-07-19
 
