@@ -36,10 +36,11 @@ func Provider(version string) *schema.Provider {
 		Schema: map[string]*schema.Schema{
 			"api_token": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("AIVEN_TOKEN", nil),
-				Description: "Aiven Authentication Token",
+				// Description should match the one in internal/provider/provider.go.
+				Description: "Aiven authentication token. Can also be set with the AIVEN_TOKEN environment variable.",
 			},
 		},
 

@@ -5,17 +5,17 @@ import (
 	"context"
 	"os"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
-	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
 // AivenProvider is the provider implementation for Aiven.
 type AivenProvider struct {
+	// version is the version of the provider.
 	version string
 }
 
@@ -39,16 +39,30 @@ func (p *AivenProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"api_token": schema.StringAttribute{
+				// Description should match the one in internal/sdkprovider/provider/provider.go.
 				Description: "Aiven authentication token. " +
 					"Can also be set with the AIVEN_TOKEN environment variable.",
-				MarkdownDescription: "Aiven authentication token. " +
-					"Can also be set with the `AIVEN_TOKEN` environment variable.",
-				Required:  true,
+				// TODO: MarkdownDescription is not supported by Terraform Plugin SDK, and is a feature
+				//  that is only available in the Terraform Plugin Framework.
+				//  We need to uncomment this once the Terraform Plugin SDK supports it (unlikely), or
+				//  when we fully migrate to the Terraform Plugin Framework.
+				//
+				// MarkdownDescription: "Aiven authentication token. " +
+				// 	"Can also be set with the `AIVEN_TOKEN` environment variable.",
+				Optional:  true,
 				Sensitive: true,
 			},
 		},
-		MarkdownDescription: "The Aiven provider is used to interact with the various services that Aiven offers. " +
-			"The provider needs to be configured with the proper credentials before it can be used.",
+		// TODO: Description and MarkdownDescription are not supported by Terraform Plugin SDK, and are features
+		//  that are only available in the Terraform Plugin Framework.
+		//  We need to uncomment this once the Terraform Plugin SDK supports them (unlikely), or
+		//  when we fully migrate to the Terraform Plugin Framework.
+		//
+		//  N.B. Description is supported by the Terraform Plugin SDK when used in the context of a resource or
+		//  data source.
+		//
+		// MarkdownDescription: "The Aiven provider is used to interact with the various services that Aiven offers. " +
+		// 	"The provider needs to be configured with the proper credentials before it can be used.",
 	}
 }
 

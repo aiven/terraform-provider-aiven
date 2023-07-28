@@ -5,12 +5,13 @@ import (
 	"flag"
 	"log"
 
+	frameworkprovider "github.com/aiven/terraform-provider-aiven/internal/provider"
+	sdkprovider "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/tf6server"
 	"github.com/hashicorp/terraform-plugin-mux/tf5to6server"
 	"github.com/hashicorp/terraform-plugin-mux/tf6muxserver"
-
-	sdkprovider "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
 )
 
 //go:generate go test -tags userconfig ./internal/schemautil/userconfig
@@ -34,8 +35,7 @@ func main() {
 		func() tfprotov6.ProviderServer {
 			return sdkProvider
 		},
-		// TODO: Uncomment when this works properly.
-		//providerserver.NewProtocol6(frameworkprovider.New(version)()),
+		providerserver.NewProtocol6(frameworkprovider.New(version)()),
 	}
 
 	muxServer, err := tf6muxserver.NewMuxServer(ctx, providers...)
