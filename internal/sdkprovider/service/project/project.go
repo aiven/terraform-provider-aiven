@@ -27,11 +27,14 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Description: "The CA certificate of the project. This is required for configuring clients that connect to certain services like Kafka.",
 	},
 	"account_id": {
-		Type:             schema.TypeString,
-		Optional:         true,
-		Description:      userconfig.Desc("An optional property to link a project to an already existing account by using account ID.").Referenced().Build(),
-		Deprecated:       "Use parent_id instead. This field will be removed in the next major release.",
-		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: userconfig.Desc("An optional property to link a project to an already existing account by using account ID.").Referenced().Build(),
+		Deprecated:  "Use parent_id instead. This field will be removed in the next major release.",
+		DiffSuppressFunc: func(_, _, _ string, d *schema.ResourceData) bool {
+			_, ok := d.GetOk("parent_id")
+			return ok
+		},
 	},
 	"parent_id": {
 		Type:     schema.TypeString,
@@ -39,7 +42,10 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Description: userconfig.Desc(
 			"An optional property to link a project to an already existing organization or account by using its ID.",
 		).Referenced().Build(),
-		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+		DiffSuppressFunc: func(_, _, _ string, d *schema.ResourceData) bool {
+			_, ok := d.GetOk("account_id")
+			return ok
+		},
 	},
 	"copy_from_project": {
 		Type:             schema.TypeString,
@@ -401,7 +407,7 @@ func contactEmailListForTerraform(d *schema.ResourceData, field string, contactE
 }
 
 func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client, project *aiven.Project) diag.Diagnostics {
-	if stateID, _ := d.GetOk("parent_id"); true {
+	if stateID, ok := d.GetOk("parent_id"); ok {
 		idToSet, err := schemautil.DetermineMixedOrganizationConstraintIDToStore(
 			client,
 			stateID.(string),
