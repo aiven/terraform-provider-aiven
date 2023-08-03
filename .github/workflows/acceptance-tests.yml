@@ -33,6 +33,7 @@ jobs:
           m3db,
           mysql,
           opensearch,
+          organization,
           project,
           redis,
           servicecomponent,
