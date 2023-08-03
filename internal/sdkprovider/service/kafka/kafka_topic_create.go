@@ -2,7 +2,6 @@ package kafka
 
 import (
 	"log"
-	"strings"
 	"time"
 
 	"github.com/aiven/aiven-go-client"
@@ -25,7 +24,6 @@ type kafkaTopicCreateWaiter struct {
 func (w *kafkaTopicCreateWaiter) RefreshFunc() resource.StateRefreshFunc {
 	// Should check if topic does not exist before create
 	// Assumes it exists, should prove it doesn't by getting no error
-	found := true
 	return func() (interface{}, string, error) {
 		err := w.Client.KafkaTopics.Create(
 			w.Project,
@@ -33,34 +31,18 @@ func (w *kafkaTopicCreateWaiter) RefreshFunc() resource.StateRefreshFunc {
 			w.CreateRequest,
 		)
 
-		if err == nil {
-			// This can happen once only
-			found = false
-		}
-
 		if err != nil {
 			// If some brokers are offline while the request is being executed
 			// the operation may fail.
 			aivenError, ok := err.(aiven.Error)
-			if ok && aivenError.Status == 409 && !aiven.IsAlreadyExists(aivenError) {
+			if !ok {
+				return nil, "", err
+			}
+
+			if !aiven.IsAlreadyExists(aivenError) {
 				log.Printf("[DEBUG] Got error %v while waiting for topic to be created.", aivenError)
 				return nil, "CREATING", nil
 			}
-
-			if ok && aiven.IsAlreadyExists(aivenError) {
-				if found {
-					// If KafkaTopics.Create() didn't succeed, then this is a conflict
-					return nil, "", err
-				}
-				return w.CreateRequest.TopicName, "CREATED", nil
-			}
-
-			if ok && aivenError.Status == 501 &&
-				strings.Contains(aivenError.Message, "An error occurred. Please try again later") {
-				return nil, "CREATING", nil
-			}
-
-			return nil, "", err
 		}
 
 		return w.CreateRequest.TopicName, "CREATED", nil

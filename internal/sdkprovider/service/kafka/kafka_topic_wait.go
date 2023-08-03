@@ -61,17 +61,6 @@ func (w *kafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 			err := w.refresh()
 
 			if err != nil {
-				aivenError, ok := err.(aiven.Error)
-				if !ok {
-					return nil, "CONFIGURING", err
-				}
-
-				// Getting topic info can sometimes temporarily fail with 501 and 502. Don't
-				// treat that as fatal error but keep on retrying instead.
-				if aivenError.Status == 501 || aivenError.Status == 502 {
-					log.Printf("[DEBUG] Got an error while waiting for a topic '%s' to be ACTIVE: %s.", w.TopicName, err)
-					return nil, "CONFIGURING", nil
-				}
 				return nil, "CONFIGURING", err
 			}
 

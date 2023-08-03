@@ -1,6 +1,7 @@
 package kafka_test
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -10,9 +11,9 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/assert"
 
@@ -388,12 +389,16 @@ func TestAccAivenKafkaTopic_recreate_missing(t *testing.T) {
 					assert.Nil(t, tc)
 					assert.True(t, aiven.IsNotFound(err))
 
-					// We use cache for topics
-					kafka.FlushTopicCache()
+					// Invalidates cache for the topic
+					kafka.DeleteTopicFromCache(project, kafkaName, topicName)
 				},
-				// Everything should be fine
+				// Now plan shows a diff
 				ExpectNonEmptyPlan: true,
-				Config:             config, // terraform apply
+				RefreshState:       true,
+			},
+			{
+				// Step 3: recreates the topic
+				Config: config,
 				Check: resource.ComposeTestCheckFunc(
 					// Saved in state
 					resource.TestCheckResourceAttr(kafkaResource, "id", kafkaID),
@@ -402,16 +407,21 @@ func TestAccAivenKafkaTopic_recreate_missing(t *testing.T) {
 						// Topic exists and active
 						client, ok := acc.TestAccProvider.Meta().(*aiven.Client)
 						assert.True(t, ok, "invalid aiven client")
-
-						// Sometimes it gets 501
-						return retry.Do(func() error {
-							tc, err := client.KafkaTopics.Get(project, kafkaName, topicName)
-							if err != nil {
-								return err
-							}
-							assert.Equal(t, tc.State, "ACTIVE")
-							return nil
-						}, retry.Attempts(5), retry.Delay(time.Second*5))
+						return retry.RetryContext(
+							context.Background(),
+							time.Minute,
+							func() *retry.RetryError {
+								tc, err := client.KafkaTopics.Get(project, kafkaName, topicName)
+								if err != nil {
+									return &retry.RetryError{
+										Err:       err,
+										Retryable: aiven.IsNotFound(err),
+									}
+								}
+								assert.Equal(t, tc.State, "ACTIVE")
+								return nil
+							},
+						)
 					},
 				),
 			},
@@ -455,9 +465,17 @@ func TestAccAivenKafkaTopic_import_missing(t *testing.T) {
 		CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
 		Steps: []resource.TestStep{
 			{
+				// Step 1: setups resources, creates the state
+				Config: testAccAivenKafkaTopicResourceImportMissing(prefix, project),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("aiven_kafka.kafka", "id", fmt.Sprintf("%s/%s", project, kafkaName)),
+				),
+			},
+			{
+				// Step 2:
 				// Tries to import non-existing topic
 				// Must fail not create
-				Config:        testAccAivenKafkaTopicResourceImportMissing(prefix, project),
+				Config:        testAccAivenKafkaTopicResourceImportMissingStep2(prefix, project),
 				ResourceName:  "aiven_kafka_topic.topic",
 				ImportState:   true,
 				ImportStateId: fmt.Sprintf("%s/%s/%s", project, kafkaName, topicName),
@@ -468,12 +486,23 @@ func TestAccAivenKafkaTopic_import_missing(t *testing.T) {
 }
 
 func testAccAivenKafkaTopicResourceImportMissing(prefix, project string) string {
-	result := fmt.Sprintf(`data "aiven_project" "project" {
-  project = %[2]q
+	result := fmt.Sprintf(`
+resource "aiven_kafka" "kafka" {
+  project                 = %[2]q
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-2"
+  service_name            = "%[1]s-kafka"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+`, prefix, project)
+	return result
 }
 
+func testAccAivenKafkaTopicResourceImportMissingStep2(prefix, project string) string {
+	result := fmt.Sprintf(`
 resource "aiven_kafka" "kafka" {
-  project                 = data.aiven_project.project.project
+  project                 = %[2]q
   cloud_name              = "google-europe-west1"
   plan                    = "startup-2"
   service_name            = "%[1]s-kafka"
@@ -502,7 +531,7 @@ func TestAccAivenKafkaTopic_conflicts_if_exists(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccAivenKafkaTopicConflictsIfExists(prefix, project),
-				ExpectError: regexp.MustCompile(`Topic conflict already exists"`),
+				ExpectError: regexp.MustCompile(`Topic conflict, already exists`),
 			},
 		},
 	})
