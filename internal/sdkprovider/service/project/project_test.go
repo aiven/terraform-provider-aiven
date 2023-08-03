@@ -87,7 +87,7 @@ func TestAccAivenProject_organizations(t *testing.T) {
 			{
 				Config: testAccProjectResourceOrganizations(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAivenProjectAttributes("data.aiven_project.project", "parent_id"),
+					testAccCheckAivenProjectAttributes(resourceName, "parent_id"),
 					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
 				),
 			},
@@ -159,12 +159,6 @@ resource "aiven_project" "foo" {
     key   = "test"
     value = "val"
   }
-}
-
-data "aiven_project" "project" {
-  project = aiven_project.foo.project
-
-  depends_on = [aiven_project.foo]
 }`, name, name)
 }
 
