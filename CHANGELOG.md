@@ -9,6 +9,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Add Organization User Groups support
+- Fixed incorrect `account_id` behavior in mixed constraint setup in `aiven_project` resource
 
 ## [4.8.0] - 2023-07-19
 
