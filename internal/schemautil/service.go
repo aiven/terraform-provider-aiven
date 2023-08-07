@@ -61,7 +61,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 		},
 		"plan": {
 			Type:        schema.TypeString,
-			Optional:    true,
+			Required:    true,
 			Description: "Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).",
 		},
 		"service_name": {
@@ -111,7 +111,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Description:   "Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.",
 			ValidateFunc:  ValidateHumanByteSizeString,
 			ConflictsWith: []string{"additional_disk_space"},
-			Deprecated:    "This will be removed in v5.0.0 and replaced with additional_disk_space instead.",
+			Deprecated:    "This will be removed in v5.0.0. Please use `additional_disk_space` to specify the space to be added to the default `disk_space` defined by the plan.",
 		},
 		"disk_space_used": {
 			Type:        schema.TypeString,
