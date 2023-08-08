@@ -3,8 +3,9 @@ package apiconvert
 import (
 	"testing"
 
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/google/go-cmp/cmp"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 // TestFromAPI is a test for FromAPI.

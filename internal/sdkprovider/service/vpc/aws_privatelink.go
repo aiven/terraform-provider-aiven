@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 var aivenAWSPrivatelinkSchema = map[string]*schema.Schema{
@@ -77,6 +77,7 @@ func resourceAWSPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m
 		ServiceName: serviceName,
 	}
 
+	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = w.Conf(d.Timeout(schema.TimeoutCreate)).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for AWS privatelink creation: %s", err)
@@ -147,6 +148,7 @@ func resourceAWSPrivatelinkUpdate(ctx context.Context, d *schema.ResourceData, m
 		ServiceName: serviceName,
 	}
 
+	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = w.Conf(d.Timeout(schema.TimeoutCreate)).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for AWS privatelink to be updated: %s", err)

@@ -7,8 +7,8 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
@@ -116,6 +116,7 @@ func resourceGCPPrivatelinkConnectionApprovalUpdate(
 	pending := []string{""}
 	target := []string{"pending-user-approval", "user-approved", "connected", "active"}
 
+	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = waitForGCPConnectionState(
 		ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target,
 	).WaitForStateContext(ctx)
@@ -153,6 +154,8 @@ func resourceGCPPrivatelinkConnectionApprovalUpdate(
 
 	pending = []string{"user-approved"}
 	target = []string{"connected", "active"}
+
+	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = waitForGCPConnectionState(
 		ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target,
 	).WaitForStateContext(ctx)

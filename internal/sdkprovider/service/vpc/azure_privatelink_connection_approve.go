@@ -7,8 +7,8 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
@@ -97,6 +97,7 @@ func resourceAzurePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *sc
 	pending := []string{""}
 	target := []string{"pending-user-approval", "user-approved", "connected", "active"}
 
+	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = waitForAzureConnectionState(ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for privatelink connection after refresh: %s", err)
@@ -123,6 +124,8 @@ func resourceAzurePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *sc
 
 	pending = []string{"user-approved"}
 	target = []string{"connected"}
+
+	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = waitForAzureConnectionState(ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for privatelink connection after approval: %s", err)
@@ -138,6 +141,8 @@ func resourceAzurePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *sc
 
 	pending = []string{"connected"}
 	target = []string{"active"}
+
+	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = waitForAzureConnectionState(ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for privatelink connection after update: %s", err)
@@ -186,6 +191,6 @@ func resourceAzurePrivatelinkConnectionApprovalRead(_ context.Context, d *schema
 }
 
 func resourceAzurePrivatelinkConnectionApprovalDelete(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
-	/// API only supports approve/list/update. approved connection is deleted with the associated azure_privatelink resource
+	// API only supports approve/list/update. approved connection is deleted with the associated azure_privatelink resource
 	return nil
 }
