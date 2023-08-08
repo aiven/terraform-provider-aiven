@@ -24,5 +24,6 @@ The Organization User Groupe data source provides information about the existing
 
 - `create_time` (String) Time of creation
 - `description` (String) The organization user group description. This property cannot be changed, doing so forces recreation of the resource.
+- `group_id` (String) Organization user group ID
 - `id` (String) The ID of this resource.
 - `update_time` (String) Time of last update

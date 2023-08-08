@@ -38,6 +38,11 @@ var aivenOrganizationUserSchema = map[string]*schema.Schema{
 			"`false` value means that the invitation was sent to the user but not yet accepted. `true` means that" +
 			" the user accepted the invitation and now a member of an organization.",
 	},
+	"user_id": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "Organization User ID, available only after invitation is accepted",
+	},
 	"create_time": {
 		Type:        schema.TypeString,
 		Computed:    true,
@@ -147,6 +152,10 @@ func resourceOrganizationUserRead(ctx context.Context, d *schema.ResourceData, m
 				// when a user accepts an invitation, it will appear in the member's list
 				// and disappear from invitations list
 				if err := d.Set("accepted", true); err != nil {
+					return diag.FromErr(err)
+				}
+
+				if err := d.Set("user_id", user.UserID); err != nil {
 					return diag.FromErr(err)
 				}
 			}

@@ -26,3 +26,4 @@ The Organization User data source provides information about the existing Aiven 
 - `create_time` (String) Time of creation
 - `id` (String) The ID of this resource.
 - `invited_by` (String) The email address of the user who sent an invitation to the user.
+- `user_id` (String) Organization User ID, available only after invitation is accepted

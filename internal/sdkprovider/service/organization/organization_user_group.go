@@ -29,6 +29,11 @@ var aivenOrganizationUserGroupSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Description: userconfig.Desc("The organization user group description").ForceNew().Build(),
 	},
+	"group_id": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "Organization user group ID",
+	},
 	"create_time": {
 		Type:        schema.TypeString,
 		Computed:    true,
@@ -100,6 +105,9 @@ func resourceOrganizationUserGroupRead(_ context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 	if err := d.Set("update_time", r.UpdateTime); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("group_id", userGroupID); err != nil {
 		return diag.FromErr(err)
 	}
 
