@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/aiven/aiven-go-client v1.35.0
-	github.com/dave/jennifer v1.6.1
+	github.com/dave/jennifer v1.7.0
 	github.com/docker/go-units v0.5.0
 	github.com/ettle/strcase v0.1.1
 	github.com/google/go-cmp v0.5.9
