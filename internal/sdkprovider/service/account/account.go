@@ -2,6 +2,10 @@ package account
 
 import (
 	"context"
+	"strings"
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 
@@ -148,11 +152,25 @@ func resourceAccountUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	return resourceAccountRead(ctx, d, m)
 }
 
-func resourceAccountDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAccountDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	err := client.Accounts.Delete(d.Id())
-	if err != nil && !aiven.IsNotFound(err) {
+	// Sometimes deleting an account fails with "Billing group with existing projects cannot be deleted", which
+	// happens due to a race condition between deleting projects and deleting the account. To avoid this, we retry
+	// the deletion until it succeeds or fails with a different error.
+	//
+	// TODO: Ideally, this should be fixed in the Aiven API. This is a temporary workaround, and should be removed
+	//  once the API is fixed.
+	if err := retry.RetryContext(ctx, time.Second*30, func() *retry.RetryError {
+		err := client.Accounts.Delete(d.Id())
+		if err != nil {
+			return &retry.RetryError{
+				Err:       err,
+				Retryable: strings.Contains(err.Error(), "Billing group with existing projects cannot be deleted"),
+			}
+		}
+		return nil
+	}); err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
 

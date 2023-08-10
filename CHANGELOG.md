@@ -13,6 +13,7 @@ nav_order: 1
 - Remove custom retries, use client builtin ones
 - Change `plan` from optional to required
 - Improve `disk_space` deprecation message to become more explicit to migrating users
+- Fix account deletion flakiness
 
 ## [4.8.0] - 2023-07-19
 
