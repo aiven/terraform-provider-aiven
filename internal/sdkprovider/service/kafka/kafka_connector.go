@@ -242,7 +242,7 @@ func resourceKafkaConnectorCreate(ctx context.Context, d *schema.ResourceData, m
 	// Sometimes this method returns 404: Not Found
 	// Since the aiven.Client has own retries for various scenarios
 	// we retry here 404 only
-	err := retry.RetryContext(ctx, time.Second*30, func() *retry.RetryError {
+	err := retry.RetryContext(ctx, time.Minute, func() *retry.RetryError {
 		err := m.(*aiven.Client).KafkaConnectors.Create(project, serviceName, config)
 		if err != nil {
 			return &retry.RetryError{
