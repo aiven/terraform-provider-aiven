@@ -7,10 +7,11 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/stretchr/testify/suite"
+
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
 type envConfig struct {

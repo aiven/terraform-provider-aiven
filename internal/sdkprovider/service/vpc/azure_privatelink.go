@@ -6,12 +6,13 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 var aivenAzurePrivatelinkSchema = map[string]*schema.Schema{
@@ -83,6 +84,7 @@ func resourceAzurePrivatelinkCreate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
+	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = waitForAzurePrivatelinkToBeActive(client, project, serviceName,
 		d.Timeout(schema.TimeoutCreate)).WaitForStateContext(ctx)
 	if err != nil {
@@ -152,6 +154,7 @@ func resourceAzurePrivatelinkUpdate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
+	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = waitForAzurePrivatelinkToBeActive(client, project, serviceName,
 		d.Timeout(schema.TimeoutUpdate)).WaitForStateContext(ctx)
 	if err != nil {

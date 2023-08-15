@@ -1,8 +1,9 @@
 package opensearch
 
 import (
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func DatasourceOpenSearch() *schema.Resource {

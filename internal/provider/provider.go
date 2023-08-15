@@ -5,12 +5,14 @@ import (
 	"context"
 	"os"
 
-	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/aiven/terraform-provider-aiven/internal/common"
+	"github.com/aiven/terraform-provider-aiven/internal/provider/errmsg"
 )
 
 // AivenProvider is the provider implementation for Aiven.
@@ -67,7 +69,11 @@ func (p *AivenProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp
 }
 
 // Configure configures the provider.
-func (p *AivenProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+func (p *AivenProvider) Configure(
+	ctx context.Context,
+	req provider.ConfigureRequest,
+	resp *provider.ConfigureResponse,
+) {
 	var data AivenProviderModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -79,10 +85,7 @@ func (p *AivenProvider) Configure(ctx context.Context, req provider.ConfigureReq
 	if data.APIToken.IsNull() {
 		token, ok := os.LookupEnv("AIVEN_TOKEN")
 		if !ok {
-			resp.Diagnostics.AddError(
-				"Aiven API token not set",
-				"Aiven API token was not set in the provider configuration or the AIVEN_TOKEN environment variable.",
-			)
+			resp.Diagnostics.AddError(errmsg.SummaryTokenMissing, errmsg.DetailTokenMissing)
 
 			return
 		}
@@ -92,7 +95,7 @@ func (p *AivenProvider) Configure(ctx context.Context, req provider.ConfigureReq
 
 	client, err := common.NewCustomAivenClient(data.APIToken.String(), req.TerraformVersion, p.version)
 	if err != nil {
-		resp.Diagnostics.AddError("Error creating Aiven client", err.Error())
+		resp.Diagnostics.AddError(errmsg.SummaryConstructingClient, err.Error())
 
 		return
 	}
@@ -104,12 +107,16 @@ func (p *AivenProvider) Configure(ctx context.Context, req provider.ConfigureReq
 
 // Resources returns the resources supported by this provider.
 func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
-	return []func() resource.Resource{}
+	return []func() resource.Resource{
+		NewOrganizationResource,
+	}
 }
 
 // DataSources returns the data sources supported by this provider.
 func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{}
+	return []func() datasource.DataSource{
+		NewOrganizationDataSource,
+	}
 }
 
 // New returns a new provider factory for the Aiven provider.

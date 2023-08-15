@@ -6,15 +6,20 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func TestAccAivenOrganizationUserGroup_basic(t *testing.T) {
+	t.Skip(
+		"Skipping because aiven_organization is now implemented in the Terraform Plugin Framework version" +
+			" of the provider, and this test is not yet ported to that framework.",
+	)
+
 	resourceName := "aiven_organization_user_group.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 

@@ -8,8 +8,8 @@ import (
 	"github.com/aiven/aiven-go-client"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
@@ -62,6 +62,7 @@ func resourceGCPPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
+	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = waitForGCPPrivatelinkToBeActive(client, project, serviceName,
 		d.Timeout(schema.TimeoutCreate)).WaitForStateContext(ctx)
 	if err != nil {
@@ -165,6 +166,8 @@ func resourceGCPPrivatelinkDelete(ctx context.Context, d *schema.ResourceData, m
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		MinTimeout: 2 * time.Second,
 	}
+
+	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = stateChangeConf.WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for GCP privatelink: %s", err)

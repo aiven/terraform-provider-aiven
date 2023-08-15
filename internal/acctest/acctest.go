@@ -9,11 +9,11 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
 )
 
 var (
@@ -32,7 +32,6 @@ func init() {
 
 func TestAccPreCheck(t *testing.T) {
 	if v := os.Getenv("AIVEN_TOKEN"); v == "" {
-		t.Log(v)
 		t.Fatal("AIVEN_TOKEN must be set for acceptance tests")
 	}
 

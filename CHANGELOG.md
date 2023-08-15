@@ -14,6 +14,7 @@ nav_order: 1
 - Change `plan` from optional to required
 - Improve `disk_space` deprecation message to become more explicit to migrating users
 - Fix account deletion flakiness
+- Make `aiven_organization` resource and data source use Terraform Plugin Framework
 
 ## [4.8.0] - 2023-07-19
 
