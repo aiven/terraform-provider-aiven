@@ -5,10 +5,21 @@ import (
 	"flag"
 	"log"
 
+<<<<<<< HEAD
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/tf6server"
 
 	"github.com/aiven/terraform-provider-aiven/internal/server"
+=======
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6/tf6server"
+	"github.com/hashicorp/terraform-plugin-mux/tf5to6server"
+	"github.com/hashicorp/terraform-plugin-mux/tf6muxserver"
+
+	frameworkprovider "github.com/aiven/terraform-provider-aiven/internal/provider"
+	sdkprovider "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
+>>>>>>> fd0b89f6 (feat(frameworkprovider): organization resource and data source (#1283))
 )
 
 //go:generate go test -tags userconfig ./internal/schemautil/userconfig

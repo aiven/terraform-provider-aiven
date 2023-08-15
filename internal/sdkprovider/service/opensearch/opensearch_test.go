@@ -11,7 +11,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
+<<<<<<< HEAD
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+=======
+	acctest3 "github.com/aiven/terraform-provider-aiven/internal/acctest"
+>>>>>>> fd0b89f6 (feat(frameworkprovider): organization resource and data source (#1283))
 )
 
 // OpenSearch service tests

@@ -4,6 +4,12 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+<<<<<<< HEAD
+=======
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+
+>>>>>>> fd0b89f6 (feat(frameworkprovider): organization resource and data source (#1283))
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 

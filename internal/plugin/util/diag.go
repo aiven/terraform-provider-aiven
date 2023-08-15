@@ -6,7 +6,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 
+<<<<<<< HEAD:internal/plugin/util/diag.go
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+=======
+	"github.com/aiven/terraform-provider-aiven/internal/provider/errmsg"
+>>>>>>> fd0b89f6 (feat(frameworkprovider): organization resource and data source (#1283)):internal/provider/util/diag.go
 )
 
 // DiagErrorUnexpectedProviderDataType is a function that adds an unexpected provider data type error to the

@@ -6,11 +6,20 @@ import (
 	"regexp"
 	"testing"
 
+<<<<<<< HEAD
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+=======
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	acctest3 "github.com/aiven/terraform-provider-aiven/internal/acctest"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+>>>>>>> fd0b89f6 (feat(frameworkprovider): organization resource and data source (#1283))
 )
 
 func TestAccAiven_grafana(t *testing.T) {

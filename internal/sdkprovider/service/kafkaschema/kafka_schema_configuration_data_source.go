@@ -4,6 +4,12 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client"
+<<<<<<< HEAD:internal/sdkprovider/service/kafkaschema/kafka_schema_configuration_data_source.go
+=======
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+
+>>>>>>> fd0b89f6 (feat(frameworkprovider): organization resource and data source (#1283)):internal/sdkprovider/service/kafka/kafka_schema_configuration_data_source.go
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 

@@ -12,8 +12,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
+<<<<<<< HEAD:internal/plugin/provider.go
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization"
+=======
+	"github.com/aiven/terraform-provider-aiven/internal/provider/errmsg"
+>>>>>>> fd0b89f6 (feat(frameworkprovider): organization resource and data source (#1283)):internal/provider/provider.go
 )
 
 // AivenProvider is the provider implementation for Aiven.
@@ -109,14 +113,22 @@ func (p *AivenProvider) Configure(
 // Resources returns the resources supported by this provider.
 func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+<<<<<<< HEAD:internal/plugin/provider.go
 		organization.NewOrganizationResource,
+=======
+		NewOrganizationResource,
+>>>>>>> fd0b89f6 (feat(frameworkprovider): organization resource and data source (#1283)):internal/provider/provider.go
 	}
 }
 
 // DataSources returns the data sources supported by this provider.
 func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+<<<<<<< HEAD:internal/plugin/provider.go
 		organization.NewOrganizationDataSource,
+=======
+		NewOrganizationDataSource,
+>>>>>>> fd0b89f6 (feat(frameworkprovider): organization resource and data source (#1283)):internal/provider/provider.go
 	}
 }
 

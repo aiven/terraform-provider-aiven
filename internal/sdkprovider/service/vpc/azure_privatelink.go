@@ -6,12 +6,22 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
+<<<<<<< HEAD
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
+=======
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+>>>>>>> fd0b89f6 (feat(frameworkprovider): organization resource and data source (#1283))
 )
 
 var aivenAzurePrivatelinkSchema = map[string]*schema.Schema{

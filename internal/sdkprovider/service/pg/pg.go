@@ -16,6 +16,17 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
+<<<<<<< HEAD
+=======
+
+	"github.com/aiven/aiven-go-client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+>>>>>>> fd0b89f6 (feat(frameworkprovider): organization resource and data source (#1283))
 )
 
 func aivenPGSchema() map[string]*schema.Schema {

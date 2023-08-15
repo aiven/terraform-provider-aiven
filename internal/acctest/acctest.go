@@ -11,12 +11,20 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
+<<<<<<< HEAD
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+=======
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+>>>>>>> fd0b89f6 (feat(frameworkprovider): organization resource and data source (#1283))
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+<<<<<<< HEAD
 	"github.com/aiven/terraform-provider-aiven/internal/server"
+=======
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
+>>>>>>> fd0b89f6 (feat(frameworkprovider): organization resource and data source (#1283))
 )
 
 var (
@@ -51,8 +59,13 @@ const (
 // TestAccPreCheck is a helper function that is called by acceptance tests prior to any test case execution.
 // It is used to perform any pre-test setup, such as environment variable validation.
 func TestAccPreCheck(t *testing.T) {
+<<<<<<< HEAD
 	if _, ok := os.LookupEnv("AIVEN_TOKEN"); !ok {
 		t.Fatal("AIVEN_TOKEN environment variable must be set for acceptance tests.")
+=======
+	if v := os.Getenv("AIVEN_TOKEN"); v == "" {
+		t.Fatal("AIVEN_TOKEN must be set for acceptance tests")
+>>>>>>> fd0b89f6 (feat(frameworkprovider): organization resource and data source (#1283))
 	}
 
 	if _, ok := os.LookupEnv("AIVEN_PROJECT_NAME"); !ok {

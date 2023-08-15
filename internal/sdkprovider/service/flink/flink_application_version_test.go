@@ -12,6 +12,13 @@ import (
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+<<<<<<< HEAD
+=======
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+>>>>>>> fd0b89f6 (feat(frameworkprovider): organization resource and data source (#1283))
 )
 
 func TestAccAivenFlinkApplicationVersion_basic(t *testing.T) {

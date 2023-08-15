@@ -22,6 +22,11 @@ import (
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/redis"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/serviceintegration"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/staticip"
+<<<<<<< HEAD
+=======
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+>>>>>>> fd0b89f6 (feat(frameworkprovider): organization resource and data source (#1283))
 )
 
 func TestMain(m *testing.M) {
