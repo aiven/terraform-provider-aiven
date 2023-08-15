@@ -37,12 +37,6 @@ func TestAccAivenAccount_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet("data.aiven_project.pr", "account_id"),
 				),
 			},
-			{
-				Config: testAccAccountProjectDissociate(rName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.aiven_project.pr", "account_id", ""),
-				),
-			},
 		},
 	})
 }
@@ -72,21 +66,6 @@ resource "aiven_account" "foo" {
 resource "aiven_project" "bar" {
   project    = "test-acc-ac-%s"
   account_id = aiven_account.foo.account_id
-}
-
-data "aiven_project" "pr" {
-  project = aiven_project.bar.project
-}`, name, name)
-}
-
-func testAccAccountProjectDissociate(name string) string {
-	return fmt.Sprintf(`
-resource "aiven_account" "foo" {
-  name = "test-acc-ac-%s"
-}
-
-resource "aiven_project" "bar" {
-  project = "test-acc-ac-%s"
 }
 
 data "aiven_project" "pr" {

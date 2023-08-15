@@ -169,8 +169,13 @@ resource "aiven_project" "foo" {
 
 func testAccProjectResource(name string) string {
 	return fmt.Sprintf(`
+resource "aiven_account" "bar" {
+  name = "test-acc-ac-%[1]s"
+}
+
 resource "aiven_project" "foo" {
-  project                         = "test-acc-pr-%s"
+  project                         = "test-acc-pr-%[1]s"
+  account_id                      = aiven_account.bar.account_id
   default_cloud                   = "aws-eu-west-2"
   add_account_owners_admin_access = true
   tag {
@@ -187,14 +192,19 @@ data "aiven_project" "project" {
 
 func testAccProjectCopyFromProjectResource(name string) string {
 	return fmt.Sprintf(`
+resource "aiven_account" "bar" {
+  name = "test-acc-ac-%[1]s"
+}
+
 resource "aiven_billing_group" "foo" {
-  name             = "test-acc-bg-%s"
+  name             = "test-acc-bg-%[1]s"
   billing_currency = "USD"
   vat_id           = "123"
 }
 
 resource "aiven_project" "source" {
-  project       = "test-acc-pr-source-%s"
+  project       = "test-acc-pr-source-%[1]s"
+  account_id    = aiven_account.bar.account_id
   billing_group = aiven_billing_group.foo.id
   tag {
     key   = "test"
@@ -203,7 +213,8 @@ resource "aiven_project" "source" {
 }
 
 resource "aiven_project" "foo" {
-  project                          = "test-acc-pr-%s"
+  project                          = "test-acc-pr-%[1]s"
+  account_id                       = aiven_account.bar.account_id
   copy_from_project                = aiven_project.source.project
   use_source_project_billing_group = false
 }
@@ -211,7 +222,7 @@ resource "aiven_project" "foo" {
 data "aiven_project" "project" {
   project    = aiven_project.foo.project
   depends_on = [aiven_project.foo]
-}`, name, name, name)
+}`, name)
 }
 
 func testAccCheckAivenProjectAttributes(n string, attributes ...string) resource.TestCheckFunc {

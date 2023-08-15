@@ -41,12 +41,6 @@ func TestAccAivenOrganization_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet("data.aiven_project.pr", "account_id"),
 				),
 			},
-			{
-				Config: testAccOrganizationProjectDissociate(rName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.aiven_project.pr", "account_id", ""),
-				),
-			},
 		},
 	})
 }
@@ -85,30 +79,6 @@ resource "aiven_organizational_unit" "foo" {
 resource "aiven_project" "bar" {
   project    = "test-acc-org-unit-%s"
   account_id = aiven_organizational_unit.foo.id
-}
-
-data "aiven_project" "pr" {
-  project = aiven_project.bar.project
-}
-
-data "aiven_organization" "organization" {
-  name = aiven_organization.foo.name
-}`, name, name, name)
-}
-
-func testAccOrganizationProjectDissociate(name string) string {
-	return fmt.Sprintf(`
-resource "aiven_organization" "foo" {
-  name = "test-acc-org-%s"
-}
-
-resource "aiven_organizational_unit" "foo" {
-  name      = "test-acc-org-unit-%s"
-  parent_id = data.aiven_organization.organization.id
-}
-
-resource "aiven_project" "bar" {
-  project = "test-acc-org-unit-%s"
 }
 
 data "aiven_project" "pr" {
