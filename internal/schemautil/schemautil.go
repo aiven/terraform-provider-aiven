@@ -1,13 +1,11 @@
 package schemautil
 
 import (
-	"context"
 	"fmt"
 	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/aiven/aiven-go-client"
@@ -337,28 +335,4 @@ func unmarshalUserConfig(src interface{}) ([]map[string]interface{}, error) {
 	}
 
 	return []map[string]interface{}{config}, nil
-}
-
-// importingResourceIDs Stores `terraform import` resource id
-// The terraform import command can only import one resource at a time
-// https://developer.hashicorp.com/terraform/cli/import/usage
-// But tests might run multiple imports
-var importingResourceIDs sync.Map
-
-// ImportStatePassthroughContext same as schema.ImportStatePassthroughContext
-// but stores importing resource id to now if Read() handler has been called on `terraform import` command
-func ImportStatePassthroughContext(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	// This will never happen except tests,
-	// because terraform runs one import per resource
-	// but just in case
-	if IsImportingResource(d) {
-		return nil, fmt.Errorf("%q already importing", d.Id())
-	}
-	importingResourceIDs.Store(d.Id(), true)
-	return schema.ImportStatePassthroughContext(ctx, d, m)
-}
-
-func IsImportingResource(d *schema.ResourceData) bool {
-	_, ok := importingResourceIDs.Load(d.Id())
-	return ok
 }

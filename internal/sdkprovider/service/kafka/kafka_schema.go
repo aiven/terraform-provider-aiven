@@ -94,7 +94,7 @@ func ResourceKafkaSchema() *schema.Resource {
 		ReadContext:   resourceKafkaSchemaRead,
 		DeleteContext: resourceKafkaSchemaDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schemautil.ImportStatePassthroughContext,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		CustomizeDiff: resourceKafkaSchemaCustomizeDiff,
 		Timeouts:      schemautil.DefaultResourceTimeouts(),
@@ -198,16 +198,13 @@ func resourceKafkaSchemaUpdate(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	// if compatibility_level has changed and the new value is not empty
-	_, ok := d.GetOk("compatibility_level")
-	if d.HasChange("compatibility_level") && ok {
-		_, err := client.KafkaSubjectSchemas.UpdateConfiguration(
-			project,
-			serviceName,
-			subjectName,
-			d.Get("compatibility_level").(string))
-		if err != nil {
-			return diag.Errorf("unable to update configuration: %s", err)
-		}
+	_, err = client.KafkaSubjectSchemas.UpdateConfiguration(
+		project,
+		serviceName,
+		subjectName,
+		d.Get("compatibility_level").(string))
+	if err != nil {
+		return diag.Errorf("unable to update configuration: %s", err)
 	}
 
 	return resourceKafkaSchemaRead(ctx, d, m)
@@ -253,11 +250,8 @@ func resourceKafkaSchemaRead(_ context.Context, d *schema.ResourceData, m interf
 			return diag.FromErr(err)
 		}
 	} else {
-		// only update if was set to not empty values by the user
-		if _, ok := d.GetOk("compatibility_level"); ok || schemautil.IsImportingResource(d) {
-			if err := d.Set("compatibility_level", c.CompatibilityLevel); err != nil {
-				return diag.FromErr(err)
-			}
+		if err := d.Set("compatibility_level", c.CompatibilityLevel); err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
