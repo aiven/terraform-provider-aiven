@@ -3,7 +3,7 @@
 page_title: "aiven_organization_user_group Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Organization User Groupe data source provides information about the existing Aiven Organization User Group.
+  The Organization User Group data source provides information about the existing Aiven Organization User Group.
 ---
 
 # aiven_organization_user_group (Data Source)

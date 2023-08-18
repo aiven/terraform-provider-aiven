@@ -58,12 +58,10 @@ func resourceOrganizationUserGroupMemberCreate(ctx context.Context, d *schema.Re
 	orgID := d.Get("organization_id").(string)
 	grID := d.Get("group_id").(string)
 	userID := d.Get("user_id").(string)
-	err := client.OrganizationUserGroupMembers.Modify(
-		orgID, grID,
-		aiven.OrganizationUserGroupMemberRequest{
-			Operation: "add_members",
-			MemberIDs: []string{userID},
-		},
+	err := client.OrganizationUserGroupMembers.Modify(ctx, orgID, grID, aiven.OrganizationUserGroupMemberRequest{
+		Operation: aiven.OrganizationGroupMemberAdd,
+		MemberIDs: []string{userID},
+	},
 	)
 	if err != nil {
 		return diag.Errorf("error creating user group member %s: %s", schemautil.BuildResourceID(orgID, grID, userID), err)
@@ -107,7 +105,7 @@ func resourceOrganizationUserGroupMemberRead(_ context.Context, d *schema.Resour
 	return nil
 }
 
-func resourceOrganizationUserGroupMemberDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOrganizationUserGroupMemberDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	orgID, grID, userID, err := schemautil.SplitResourceID3(d.Id())
@@ -115,12 +113,10 @@ func resourceOrganizationUserGroupMemberDelete(_ context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	err = client.OrganizationUserGroupMembers.Modify(
-		orgID, grID,
-		aiven.OrganizationUserGroupMemberRequest{
-			Operation: "remove_members",
-			MemberIDs: []string{userID},
-		},
+	err = client.OrganizationUserGroupMembers.Modify(ctx, orgID, grID, aiven.OrganizationUserGroupMemberRequest{
+		Operation: aiven.OrganizationGroupMemberRemove,
+		MemberIDs: []string{userID},
+	},
 	)
 	if err != nil {
 		return diag.FromErr(err)

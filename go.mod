@@ -3,7 +3,11 @@ module github.com/aiven/terraform-provider-aiven
 go 1.21.1
 
 require (
+<<<<<<< HEAD
 	github.com/aiven/aiven-go-client v1.36.0
+=======
+	github.com/aiven/aiven-go-client v1.35.1-0.20230815150934-6404eb82048f
+>>>>>>> 4c33f5e7 (dd)
 	github.com/dave/jennifer v1.7.0
 	github.com/docker/go-units v0.5.0
 	github.com/ettle/strcase v0.1.1
@@ -42,7 +46,12 @@ require (
 	cloud.google.com/go v0.110.0 // indirect
 	cloud.google.com/go/storage v1.28.1 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
+<<<<<<< HEAD
 	github.com/aiven/go-api-schemas v1.27.1-0.20230823111901-1e0306909d02
+=======
+	github.com/aiven/go-api-schemas v1.26.0
+	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
+>>>>>>> e48f43be (chore: update user config schemas (#1299))
 	github.com/aws/aws-sdk-go v1.44.122 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

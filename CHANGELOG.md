@@ -31,7 +31,9 @@ nav_order: 1
 - Make `aiven_organization` resource and data source use Terraform Plugin Framework
 - Add `scheduled_rebalance_max_delay_ms` property to `aiven_kafka` and `aiven_kafka_connect`
 - Add `openid` property to `aiven_opensearch`
-- Add `auto_login` property to `aiven_grafana`
+
+## [4.8.0] - 2023-07-19
+
 - Add GCP private service connect (Privatelink) support
 
 ## [4.7.0] - 2023-07-11
