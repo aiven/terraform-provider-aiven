@@ -15,6 +15,8 @@ nav_order: 1
 - Improve `disk_space` deprecation message to become more explicit to migrating users
 - Fix account deletion flakiness
 - Make `aiven_organization` resource and data source use Terraform Plugin Framework
+- Add `scheduled_rebalance_max_delay_ms` property to `aiven_kafka` and `aiven_kafka_connect`
+- Add `openid` property to `aiven_opensearch`
 
 ## [4.8.0] - 2023-07-19
 

@@ -194,6 +194,7 @@ Read-Only:
 - `producer_compression_type` (String)
 - `producer_linger_ms` (Number)
 - `producer_max_request_size` (Number)
+- `scheduled_rebalance_max_delay_ms` (Number)
 - `session_timeout_ms` (Number)
 
 
