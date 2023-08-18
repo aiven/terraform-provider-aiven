@@ -198,13 +198,15 @@ func resourceKafkaSchemaUpdate(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	// if compatibility_level has changed and the new value is not empty
-	_, err = client.KafkaSubjectSchemas.UpdateConfiguration(
-		project,
-		serviceName,
-		subjectName,
-		d.Get("compatibility_level").(string))
-	if err != nil {
-		return diag.Errorf("unable to update configuration: %s", err)
+	if compatibility, ok := d.GetOk("compatibility_level"); ok {
+		_, err = client.KafkaSubjectSchemas.UpdateConfiguration(
+			project,
+			serviceName,
+			subjectName,
+			compatibility.(string))
+		if err != nil {
+			return diag.Errorf("unable to update configuration: %s", err)
+		}
 	}
 
 	return resourceKafkaSchemaRead(ctx, d, m)
