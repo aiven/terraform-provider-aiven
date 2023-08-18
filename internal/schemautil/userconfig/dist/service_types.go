@@ -2837,6 +2837,11 @@ func ServiceTypeKafka() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
+				"scheduled_rebalance_max_delay_ms": {
+					Description: "The maximum delay that is scheduled in order to wait for the return of one or more departed workers before rebalancing and reassigning their connectors and tasks to the group. During this period the connectors and tasks of the departed workers remain unassigned.  Defaults to 5 minutes.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
 				"session_timeout_ms": {
 					Description: "The timeout in milliseconds used to detect failures when using Kafka’s group management facilities (defaults to 10000).",
 					Optional:    true,
@@ -2911,6 +2916,11 @@ func ServiceTypeKafka() *schema.Schema {
 				},
 				"producer_max_request_size": {
 					Description: "This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"scheduled_rebalance_max_delay_ms": {
+					Description: "The maximum delay that is scheduled in order to wait for the return of one or more departed workers before rebalancing and reassigning their connectors and tasks to the group. During this period the connectors and tasks of the departed workers remain unassigned.  Defaults to 5 minutes.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -3463,6 +3473,11 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
+				"scheduled_rebalance_max_delay_ms": {
+					Description: "The maximum delay that is scheduled in order to wait for the return of one or more departed workers before rebalancing and reassigning their connectors and tasks to the group. During this period the connectors and tasks of the departed workers remain unassigned.  Defaults to 5 minutes.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
 				"session_timeout_ms": {
 					Description: "The timeout in milliseconds used to detect failures when using Kafka’s group management facilities (defaults to 10000).",
 					Optional:    true,
@@ -3537,6 +3552,11 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 				},
 				"producer_max_request_size": {
 					Description: "This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"scheduled_rebalance_max_delay_ms": {
+					Description: "The maximum delay that is scheduled in order to wait for the return of one or more departed workers before rebalancing and reassigning their connectors and tasks to the group. During this period the connectors and tasks of the departed workers remain unassigned.  Defaults to 5 minutes.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -5314,6 +5334,144 @@ func ServiceTypeOpensearch() *schema.Schema {
 			Description: "Use index_patterns instead. The default value is `0`.",
 			Optional:    true,
 			Type:        schema.TypeInt,
+		},
+		"openid": {
+			Description: "OpenSearch OpenID Connect Configuration.",
+			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+				"client_id": {
+					Description: "The ID of the OpenID Connect client configured in your IdP. Required.",
+					Required:    true,
+					Type:        schema.TypeString,
+				},
+				"client_secret": {
+					Description: "The client secret of the OpenID Connect client configured in your IdP. Required.",
+					Required:    true,
+					Type:        schema.TypeString,
+				},
+				"connect_url": {
+					Description: "The URL of your IdP where the Security plugin can find the OpenID Connect metadata/configuration settings.",
+					Required:    true,
+					Type:        schema.TypeString,
+				},
+				"enabled": {
+					Default:     true,
+					Description: "Enables or disables OpenID Connect authentication for OpenSearch. When enabled, users can authenticate using OpenID Connect with an Identity Provider. The default value is `true`.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"header": {
+					Default:     "Authorization",
+					Description: "HTTP header name of the JWT token. Optional. Default is Authorization. The default value is `Authorization`.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"jwt_header": {
+					Description: "The HTTP header that stores the token. Typically the Authorization header with the Bearer schema: Authorization: Bearer <token>. Optional. Default is Authorization.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"jwt_url_parameter": {
+					Description: "If the token is not transmitted in the HTTP header, but as an URL parameter, define the name of the parameter here. Optional.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"refresh_rate_limit_count": {
+					Default:     "10",
+					Description: "The maximum number of unknown key IDs in the time frame. Default is 10. Optional. The default value is `10`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"refresh_rate_limit_time_window_ms": {
+					Default:     "10000",
+					Description: "The time frame to use when checking the maximum number of unknown key IDs, in milliseconds. Optional.Default is 10000 (10 seconds). The default value is `10000`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"roles_key": {
+					Description: "The key in the JSON payload that stores the user’s roles. The value of this key must be a comma-separated list of roles. Required only if you want to use roles in the JWT.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"scope": {
+					Description: "The scope of the identity token issued by the IdP. Optional. Default is openid profile email address phone.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"subject_key": {
+					Description: "The key in the JSON payload that stores the user’s name. If not defined, the subject registered claim is used. Most IdP providers use the preferred_username claim. Optional.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}),
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"client_id": {
+					Description: "The ID of the OpenID Connect client configured in your IdP. Required.",
+					Required:    true,
+					Type:        schema.TypeString,
+				},
+				"client_secret": {
+					Description: "The client secret of the OpenID Connect client configured in your IdP. Required.",
+					Required:    true,
+					Type:        schema.TypeString,
+				},
+				"connect_url": {
+					Description: "The URL of your IdP where the Security plugin can find the OpenID Connect metadata/configuration settings.",
+					Required:    true,
+					Type:        schema.TypeString,
+				},
+				"enabled": {
+					Default:     true,
+					Description: "Enables or disables OpenID Connect authentication for OpenSearch. When enabled, users can authenticate using OpenID Connect with an Identity Provider. The default value is `true`.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"header": {
+					Default:     "Authorization",
+					Description: "HTTP header name of the JWT token. Optional. Default is Authorization. The default value is `Authorization`.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"jwt_header": {
+					Description: "The HTTP header that stores the token. Typically the Authorization header with the Bearer schema: Authorization: Bearer <token>. Optional. Default is Authorization.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"jwt_url_parameter": {
+					Description: "If the token is not transmitted in the HTTP header, but as an URL parameter, define the name of the parameter here. Optional.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"refresh_rate_limit_count": {
+					Default:     "10",
+					Description: "The maximum number of unknown key IDs in the time frame. Default is 10. Optional. The default value is `10`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"refresh_rate_limit_time_window_ms": {
+					Default:     "10000",
+					Description: "The time frame to use when checking the maximum number of unknown key IDs, in milliseconds. Optional.Default is 10000 (10 seconds). The default value is `10000`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"roles_key": {
+					Description: "The key in the JSON payload that stores the user’s roles. The value of this key must be a comma-separated list of roles. Required only if you want to use roles in the JWT.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"scope": {
+					Description: "The scope of the identity token issued by the IdP. Optional. Default is openid profile email address phone.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"subject_key": {
+					Description: "The key in the JSON payload that stores the user’s name. If not defined, the subject registered claim is used. Most IdP providers use the preferred_username claim. Optional.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+			}},
+			MaxItems: 1,
+			Optional: true,
+			Type:     schema.TypeList,
 		},
 		"opensearch": {
 			Description: "OpenSearch settings.",

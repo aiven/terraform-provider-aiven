@@ -93,6 +93,7 @@ Read-Only:
 - `ip_filter_string` (List of String)
 - `keep_index_refresh_interval` (Boolean)
 - `max_index_count` (Number)
+- `openid` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--openid))
 - `opensearch` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch))
 - `opensearch_dashboards` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch_dashboards))
 - `opensearch_version` (String)
@@ -132,6 +133,25 @@ Read-Only:
 
 - `description` (String)
 - `network` (String)
+
+
+<a id="nestedobjatt--opensearch_user_config--openid"></a>
+### Nested Schema for `opensearch_user_config.openid`
+
+Read-Only:
+
+- `client_id` (String)
+- `client_secret` (String)
+- `connect_url` (String)
+- `enabled` (Boolean)
+- `header` (String)
+- `jwt_header` (String)
+- `jwt_url_parameter` (String)
+- `refresh_rate_limit_count` (Number)
+- `refresh_rate_limit_time_window_ms` (Number)
+- `roles_key` (String)
+- `scope` (String)
+- `subject_key` (String)
 
 
 <a id="nestedobjatt--opensearch_user_config--opensearch"></a>

@@ -1,4 +1,4 @@
-.PHONY: build build-dev test test-unit test-acc test-examples lint lint-go lint-test lint-docs fmt fmt-test docs clean clean-tools sweep
+.PHONY: build build-dev test test-unit test-acc test-examples lint lint-go lint-test lint-docs fmt fmt-test docs clean clean-tools sweep go-generate generate
 
 #################################################
 # Global
@@ -140,3 +140,9 @@ SWEEP ?= global
 sweep:
 	@echo 'WARNING: This will destroy infrastructure. Use only in development accounts.'
 	$(GO) test ./internal/sweep -v -tags=sweep -sweep=$(SWEEP) $(SWEEP_ARGS) -timeout 15m
+
+go-generate:
+	go generate ./...
+
+
+generate: go-generate docs

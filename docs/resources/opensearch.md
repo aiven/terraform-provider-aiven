@@ -93,6 +93,7 @@ Optional:
 - `ip_filter_string` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
 - `keep_index_refresh_interval` (Boolean) Aiven automation resets index.refresh_interval to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.
 - `max_index_count` (Number, Deprecated) Use index_patterns instead. The default value is `0`.
+- `openid` (Block List, Max: 1) OpenSearch OpenID Connect Configuration. (see [below for nested schema](#nestedblock--opensearch_user_config--openid))
 - `opensearch` (Block List, Max: 1) OpenSearch settings. (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch))
 - `opensearch_dashboards` (Block List, Max: 1) OpenSearch Dashboards settings. (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch_dashboards))
 - `opensearch_version` (String) OpenSearch major version.
@@ -138,6 +139,28 @@ Required:
 Optional:
 
 - `description` (String) Description for IP filter list entry.
+
+
+<a id="nestedblock--opensearch_user_config--openid"></a>
+### Nested Schema for `opensearch_user_config.openid`
+
+Required:
+
+- `client_id` (String) The ID of the OpenID Connect client configured in your IdP. Required.
+- `client_secret` (String) The client secret of the OpenID Connect client configured in your IdP. Required.
+- `connect_url` (String) The URL of your IdP where the Security plugin can find the OpenID Connect metadata/configuration settings.
+
+Optional:
+
+- `enabled` (Boolean) Enables or disables OpenID Connect authentication for OpenSearch. When enabled, users can authenticate using OpenID Connect with an Identity Provider. The default value is `true`.
+- `header` (String) HTTP header name of the JWT token. Optional. Default is Authorization. The default value is `Authorization`.
+- `jwt_header` (String) The HTTP header that stores the token. Typically the Authorization header with the Bearer schema: Authorization: Bearer <token>. Optional. Default is Authorization.
+- `jwt_url_parameter` (String) If the token is not transmitted in the HTTP header, but as an URL parameter, define the name of the parameter here. Optional.
+- `refresh_rate_limit_count` (Number) The maximum number of unknown key IDs in the time frame. Default is 10. Optional. The default value is `10`.
+- `refresh_rate_limit_time_window_ms` (Number) The time frame to use when checking the maximum number of unknown key IDs, in milliseconds. Optional.Default is 10000 (10 seconds). The default value is `10000`.
+- `roles_key` (String) The key in the JSON payload that stores the user’s roles. The value of this key must be a comma-separated list of roles. Required only if you want to use roles in the JWT.
+- `scope` (String) The scope of the identity token issued by the IdP. Optional. Default is openid profile email address phone.
+- `subject_key` (String) The key in the JSON payload that stores the user’s name. If not defined, the subject registered claim is used. Most IdP providers use the preferred_username claim. Optional.
 
 
 <a id="nestedblock--opensearch_user_config--opensearch"></a>
