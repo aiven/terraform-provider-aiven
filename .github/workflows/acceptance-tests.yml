@@ -69,6 +69,16 @@ jobs:
           AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME }}
           PKG: ${{matrix.pkg}}
 
+      - uses: ravsamhq/notify-slack-action@v2
+        if: ${{ github.ref == 'refs/heads/main' }}
+        with:
+          status: ${{ job.status }}
+          notification_title: "{workflow} has {status_message}"
+          message_format: "{emoji} *{workflow}* {status_message} in <{repo_url}|{repo}>"
+          footer: "Linked Repo <{repo_url}|{repo}>"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
   sweep:
     if: ${{ always() }}
     needs: acceptance_tests
