@@ -147,6 +147,7 @@ Read-Only:
 - `allowed_organizations` (List of String)
 - `api_url` (String)
 - `auth_url` (String)
+- `auto_login` (Boolean)
 - `client_id` (String)
 - `client_secret` (String)
 - `name` (String)

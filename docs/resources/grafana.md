@@ -151,6 +151,7 @@ Optional:
 - `allow_sign_up` (Boolean) Automatically sign-up users on successful sign-in.
 - `allowed_domains` (List of String) Allowed domains.
 - `allowed_organizations` (List of String) Require user to be member of one of the listed organizations.
+- `auto_login` (Boolean) Allow users to bypass the login screen and automatically log in.
 - `name` (String) Name of the OAuth integration.
 - `scopes` (List of String) OAuth scopes.
 

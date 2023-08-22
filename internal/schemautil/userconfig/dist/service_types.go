@@ -1314,6 +1314,11 @@ func ServiceTypeGrafana() *schema.Schema {
 					Required:    true,
 					Type:        schema.TypeString,
 				},
+				"auto_login": {
+					Description: "Allow users to bypass the login screen and automatically log in.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
 				"client_id": {
 					Description: "Client ID from provider.",
 					Required:    true,
@@ -1371,6 +1376,11 @@ func ServiceTypeGrafana() *schema.Schema {
 					Description: "Authorization URL.",
 					Required:    true,
 					Type:        schema.TypeString,
+				},
+				"auto_login": {
+					Description: "Allow users to bypass the login screen and automatically log in.",
+					Optional:    true,
+					Type:        schema.TypeBool,
 				},
 				"client_id": {
 					Description: "Client ID from provider.",
