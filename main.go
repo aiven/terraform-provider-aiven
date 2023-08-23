@@ -15,8 +15,7 @@ import (
 	sdkprovider "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
 )
 
-// fixme: enable code generation when Tiered Storage is GA
-////go:generate go test -tags userconfig ./internal/schemautil/userconfig
+//go:generate go test -tags userconfig ./internal/schemautil/userconfig
 
 // version is the version of the provider.
 var version = "dev"
