@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -35,10 +36,9 @@ func Provider(version string) *schema.Provider {
 	p := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"api_token": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Sensitive:   true,
-				DefaultFunc: schema.EnvDefaultFunc("AIVEN_TOKEN", nil),
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
 				// Description should match the one in internal/provider/provider.go.
 				Description: "Aiven authentication token. Can also be set with the AIVEN_TOKEN environment variable.",
 			},
@@ -243,7 +243,12 @@ func Provider(version string) *schema.Provider {
 	}
 
 	p.ConfigureContextFunc = func(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-		client, err := common.NewCustomAivenClient(d.Get("api_token").(string), p.TerraformVersion, version)
+		token := d.Get("api_token").(string)
+		if token == "" {
+			token = os.Getenv("AIVEN_TOKEN")
+		}
+
+		client, err := common.NewCustomAivenClient(token, p.TerraformVersion, version)
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
