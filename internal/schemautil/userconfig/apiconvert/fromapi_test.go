@@ -128,7 +128,6 @@ func TestFromAPI(t *testing.T) {
 					"num_partitions":                                             0,
 					"offsets_retention_minutes":                                  0,
 					"producer_purgatory_purge_interval_requests":                 0,
-					"remote_log_storage_system_enable":                           false,
 					"replica_fetch_max_bytes":                                    0,
 					"replica_fetch_response_max_bytes":                           0,
 					"socket_request_max_bytes":                                   0,
