@@ -107,6 +107,7 @@ Optional:
 - `schema_registry` (Boolean) Enable Schema-Registry service. The default value is `false`.
 - `schema_registry_config` (Block List, Max: 1) Schema Registry configuration. (see [below for nested schema](#nestedblock--kafka_user_config--schema_registry_config))
 - `static_ips` (Boolean) Use static public IP addresses.
+- `tiered_storage` (Block List, Max: 1) Tiered storage configuration. (see [below for nested schema](#nestedblock--kafka_user_config--tiered_storage))
 
 <a id="nestedblock--kafka_user_config--ip_filter_object"></a>
 ### Nested Schema for `kafka_user_config.ip_filter_object`
@@ -159,6 +160,7 @@ Optional:
 - `num_partitions` (Number) Number of partitions for autocreated topics.
 - `offsets_retention_minutes` (Number) Log retention window in minutes for offsets topic.
 - `producer_purgatory_purge_interval_requests` (Number) The purge interval (in number of requests) of the producer request purgatory(defaults to 1000).
+- `remote_log_storage_system_enable` (Boolean) Whether to enable the tiered storage functionality.
 - `replica_fetch_max_bytes` (Number) The number of bytes of messages to attempt to fetch for each partition (defaults to 1048576). This is not an absolute maximum, if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made.
 - `replica_fetch_response_max_bytes` (Number) Maximum bytes expected for the entire fetch response (defaults to 10485760). Records are fetched in batches, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made. As such, this is not an absolute maximum.
 - `socket_request_max_bytes` (Number) The maximum number of bytes in a socket request (defaults to 104857600).
@@ -257,6 +259,23 @@ Optional:
 
 - `leader_eligibility` (Boolean) If true, Karapace / Schema Registry on the service nodes can participate in leader election. It might be needed to disable this when the schemas topic is replicated to a secondary cluster and Karapace / Schema Registry there must not participate in leader election. Defaults to `true`.
 - `topic_name` (String) The durable single partition topic that acts as the durable log for the data. This topic must be compacted to avoid losing data due to retention policy. Please note that changing this configuration in an existing Schema Registry / Karapace setup leads to previous schemas being inaccessible, data encoded with them potentially unreadable and schema ID sequence put out of order. It's only possible to do the switch while Schema Registry / Karapace is disabled. Defaults to `_schemas`.
+
+
+<a id="nestedblock--kafka_user_config--tiered_storage"></a>
+### Nested Schema for `kafka_user_config.tiered_storage`
+
+Optional:
+
+- `enabled` (Boolean) Whether to enable the tiered storage functionality.
+- `local_cache` (Block List, Max: 1) Local cache configuration. (see [below for nested schema](#nestedblock--kafka_user_config--tiered_storage--local_cache))
+
+<a id="nestedblock--kafka_user_config--tiered_storage--local_cache"></a>
+### Nested Schema for `kafka_user_config.tiered_storage.local_cache`
+
+Optional:
+
+- `size` (Number) Local cache size in bytes.
+
 
 
 
