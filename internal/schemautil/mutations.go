@@ -126,11 +126,11 @@ func normalizeIPFilter(old, new map[string]interface{}) {
 
 // stringSuffixForIPFilters adds a _string suffix to the IP filters.
 func stringSuffixForIPFilters(new map[string]interface{}) {
-	ipFilters := new["ip_filter"].([]interface{})
-
-	if ipFilters == nil {
+	if new["ip_filter"] == nil {
 		return
 	}
+
+	ipFilters := new["ip_filter"].([]interface{})
 
 	new["ip_filter_string"] = ipFilters
 
