@@ -72,9 +72,9 @@ resource "aiven_clickhouse_grant" "foo-user-grant" {
 }`, projectName, serviceName)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenClickhouseGrantResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenClickhouseGrantResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: manifest,
@@ -94,7 +94,7 @@ resource "aiven_clickhouse_grant" "foo-user-grant" {
 }
 
 func testAccCheckAivenClickhouseGrantResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each aiven_clickhouse_role is destroyed
 	for _, rs := range s.RootModule().Resources {

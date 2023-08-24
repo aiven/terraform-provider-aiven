@@ -38,9 +38,9 @@ resource "aiven_clickhouse_role" "foo" {
 }`, projectName, serviceName)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenClickhouseRoleResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenClickhouseRoleResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: manifest,
@@ -55,7 +55,7 @@ resource "aiven_clickhouse_role" "foo" {
 }
 
 func testAccCheckAivenClickhouseRoleResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each aiven_clickhouse_role is destroyed
 	for _, rs := range s.RootModule().Resources {

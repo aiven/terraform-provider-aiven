@@ -1,5 +1,4 @@
-// Package provider is the implementation of the Aiven provider.
-package provider
+package organization_test
 
 import (
 	"fmt"
@@ -7,6 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
 // TestAccOrganizationResourceDataSource tests the organization resource and data source.
@@ -18,21 +19,21 @@ func TestAccOrganizationResourceDataSource(t *testing.T) {
 		"data.aiven_organization.bar",
 	}
 
-	suffix := acctest.RandStringFromCharSet(DefaultRandomSuffixLength, acctest.CharSetAlphaNum)
+	suffix := acctest.RandStringFromCharSet(acc.DefaultRandomSuffixLength, acctest.CharSetAlphaNum)
 
 	resource.Test(t, resource.TestCase{
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(`
 resource "aiven_organization" "foo" {
   name = "%s-org-%s"
 }
-`, DefaultResourceNamePrefix, suffix),
+`, acc.DefaultResourceNamePrefix, suffix),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						name, "name", fmt.Sprintf("%s-org-%s", DefaultResourceNamePrefix, suffix),
+						name, "name", fmt.Sprintf("%s-org-%s", acc.DefaultResourceNamePrefix, suffix),
 					),
 					resource.TestCheckResourceAttrSet(name, "id"),
 					resource.TestCheckResourceAttrSet(name, "tenant_id"),
@@ -50,10 +51,10 @@ resource "aiven_organization" "foo" {
 resource "aiven_organization" "foo" {
   name = "%s-org-%s-1"
 }
-`, DefaultResourceNamePrefix, suffix),
+`, acc.DefaultResourceNamePrefix, suffix),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						name, "name", fmt.Sprintf("%s-org-%s-1", DefaultResourceNamePrefix, suffix),
+						name, "name", fmt.Sprintf("%s-org-%s-1", acc.DefaultResourceNamePrefix, suffix),
 					),
 				),
 			},
@@ -70,10 +71,10 @@ data "aiven_organization" "foo" {
 data "aiven_organization" "bar" {
   name = aiven_organization.foo.name
 }
-`, DefaultResourceNamePrefix, suffix),
+`, acc.DefaultResourceNamePrefix, suffix),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						dnames[0], "name", fmt.Sprintf("%s-org-%s-1", DefaultResourceNamePrefix, suffix),
+						dnames[0], "name", fmt.Sprintf("%s-org-%s-1", acc.DefaultResourceNamePrefix, suffix),
 					),
 					resource.TestCheckResourceAttrPair(
 						dnames[1], "id", name, "id",

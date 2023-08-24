@@ -20,9 +20,9 @@ func TestAccAiven_kafka(t *testing.T) {
 	rName2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config:             testAccKafkaDoubleTagResource(rName),
@@ -76,7 +76,7 @@ func TestAccAiven_kafka(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "service_port"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_uri"),
 					func(state *terraform.State) error {
-						c := acctest3.TestAccProvider.Meta().(*aiven.Client)
+						c := acctest3.GetTestAivenClient()
 						a, err := c.KafkaACLs.List(os.Getenv("AIVEN_PROJECT_NAME"), rName2)
 						if err != nil && !aiven.IsNotFound(err) {
 							return fmt.Errorf("cannot get a list of kafka ACLs: %s", err)
@@ -230,9 +230,9 @@ func TestAccAivenService_kafka(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKafkaServiceResource(rName),
@@ -375,9 +375,9 @@ func TestAccAiven_kafka_userconfig_kafka_null_fields_only(t *testing.T) {
 	prefix := "test-tf-acc-" + acctest.RandString(7)
 	resourceName := "aiven_kafka.kafka"
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKafkaResourceUserConfigKafkaNullFieldsOnly(project, prefix),

@@ -27,8 +27,8 @@ func TestAccAivenAzureVPCPeeringConnection_basic(t *testing.T) {
 	configTwo := configOne + testAccVPCPeeringConnectionAzureResourcePartTwo(prefix, &s)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"azurerm": {
 				Source:            "hashicorp/azurerm",

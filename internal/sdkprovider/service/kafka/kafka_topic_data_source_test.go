@@ -18,8 +18,8 @@ func TestAccAivenDatasourceKafkaTopic_doesnt_exist(t *testing.T) {
 	project := os.Getenv("AIVEN_PROJECT_NAME")
 	prefix := "test-tf-acc-" + acctest.RandString(7)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				// Kafka exists

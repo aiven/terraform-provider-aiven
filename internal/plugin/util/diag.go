@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 
-	"github.com/aiven/terraform-provider-aiven/internal/provider/errmsg"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 )
 
 // DiagErrorUnexpectedProviderDataType is a function that adds an unexpected provider data type error to the

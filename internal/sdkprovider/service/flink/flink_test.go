@@ -159,8 +159,8 @@ data "aiven_flink" "service" {
 	resourceNameApplication := "aiven_flink_application.foo"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: manifest,

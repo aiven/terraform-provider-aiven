@@ -17,9 +17,9 @@ func TestAccAivenBillingGroup_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenBillingGroupResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenBillingGroupResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBillingGroupResource(rName),
@@ -43,7 +43,7 @@ func TestAccAivenBillingGroup_basic(t *testing.T) {
 }
 
 func testAccCheckAivenBillingGroupResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each billing group is destroyed
 	for _, rs := range s.RootModule().Resources {

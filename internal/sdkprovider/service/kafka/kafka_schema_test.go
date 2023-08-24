@@ -23,7 +23,7 @@ func TestAccAivenKafkaSchema_import_compatibility_level(t *testing.T) {
 	resourceName := "aiven_kafka_schema.schema"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                  func() { acc.TestAccPreCheck(t) },
-		ProviderFactories:         acc.TestAccProviderFactories,
+		ProtoV6ProviderFactories:  acc.TestProtoV6ProviderFactories,
 		CheckDestroy:              testAccCheckAivenKafkaSchemaResourceDestroy,
 		PreventPostDestroyRefresh: true,
 		Steps: []resource.TestStep{
@@ -96,9 +96,9 @@ func TestAccAivenKafkaSchema_json_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenKafkaSchemaResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenKafkaSchemaResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKafkaSchemaJSONResource(rName),
@@ -119,9 +119,9 @@ func TestAccAivenKafkaSchema_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenKafkaSchemaResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenKafkaSchemaResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKafkaSchemaResource(rName),
@@ -154,7 +154,7 @@ func TestAccAivenKafkaSchema_basic(t *testing.T) {
 }
 
 func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each aiven_kafka_schema is destroyed
 	for _, rs := range s.RootModule().Resources {

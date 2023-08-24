@@ -20,9 +20,9 @@ func TestAccAivenM3DBUser_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenM3DBUserResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenM3DBUserResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccM3DBUserResource(rName),
@@ -39,7 +39,7 @@ func TestAccAivenM3DBUser_basic(t *testing.T) {
 }
 
 func testAccCheckAivenM3DBUserResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each aiven_m3db_user is destroyed
 	for _, rs := range s.RootModule().Resources {

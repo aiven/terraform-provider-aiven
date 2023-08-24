@@ -1,5 +1,5 @@
 // Package provider is the implementation of the Aiven provider.
-package provider
+package plugin
 
 import (
 	"context"
@@ -12,7 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
-	"github.com/aiven/terraform-provider-aiven/internal/provider/errmsg"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization"
 )
 
 // AivenProvider is the provider implementation for Aiven.
@@ -108,14 +109,14 @@ func (p *AivenProvider) Configure(
 // Resources returns the resources supported by this provider.
 func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewOrganizationResource,
+		organization.NewOrganizationResource,
 	}
 }
 
 // DataSources returns the data sources supported by this provider.
 func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		NewOrganizationDataSource,
+		organization.NewOrganizationDataSource,
 	}
 }
 

@@ -32,8 +32,8 @@ func TestAccAivenGCPPeeringConnection_basic(t *testing.T) {
 	importResourceName := "aiven_gcp_vpc_peering_connection.foo"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"google": {
 				Source:            "hashicorp/google",
@@ -54,7 +54,7 @@ func TestAccAivenGCPPeeringConnection_basic(t *testing.T) {
 			{
 				Config: testAccGCPVPCPeeringConnection(&s),
 				Check: func(state *terraform.State) error {
-					c := acc.TestAccProvider.Meta().(*aiven.Client)
+					c := acc.GetTestAivenClient()
 					p := s.AivenProject
 
 				QueryVpc:

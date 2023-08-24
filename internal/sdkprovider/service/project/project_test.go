@@ -20,9 +20,9 @@ func TestAccAivenProject_basic(t *testing.T) {
 	rName2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenProjectResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenProjectResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectResource(rName),
@@ -60,9 +60,9 @@ func TestAccAivenProject_accounts(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenProjectResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenProjectResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectResourceAccounts(rName),
@@ -76,18 +76,13 @@ func TestAccAivenProject_accounts(t *testing.T) {
 }
 
 func TestAccAivenProject_organizations(t *testing.T) {
-	t.Skip(
-		"Skipping because aiven_organization is now implemented in the Terraform Plugin Framework version" +
-			" of the provider, and this test is not yet ported to that framework.",
-	)
-
 	resourceName := "aiven_project.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenProjectResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenProjectResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProjectResourceOrganizations(rName),
@@ -251,7 +246,7 @@ func testAccCheckAivenProjectAttributes(n string, attributes ...string) resource
 }
 
 func testAccCheckAivenProjectResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each project is destroyed
 	for _, rs := range s.RootModule().Resources {

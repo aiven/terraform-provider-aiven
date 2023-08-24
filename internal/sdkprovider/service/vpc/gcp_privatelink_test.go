@@ -19,9 +19,9 @@ func TestAccAivenGCPPrivatelink_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenGCPPrivatelinkResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenGCPPrivatelinkResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGCPPrivatelinkResource(rName),
@@ -36,7 +36,7 @@ func TestAccAivenGCPPrivatelink_basic(t *testing.T) {
 }
 
 func testAccCheckAivenGCPPrivatelinkResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each GCP privatelink is destroyed
 	for _, rs := range s.RootModule().Resources {

@@ -29,9 +29,9 @@ func TestAccAivenAccountAuthentication_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenAccountAuthenticationResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenAccountAuthenticationResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAccountAuthenticationResource(rName),
@@ -82,9 +82,9 @@ func TestAccAivenAccountAuthentication_saml_valid_certificate_create_update(t *t
 	resourceName := "aiven_account_authentication.method"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenAccountAuthenticationResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenAccountAuthenticationResourceDestroy,
 		Steps: []resource.TestStep{
 			// Creates
 			{
@@ -115,9 +115,9 @@ func TestAccAivenAccountAuthentication_saml_invalid_certificate(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenAccountAuthenticationResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenAccountAuthenticationResourceDestroy,
 		Steps: []resource.TestStep{
 			// Creates
 			{
@@ -136,9 +136,9 @@ func TestAccAivenAccountAuthentication_auto_join_team_id(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenAccountAuthenticationWithAutoJoinTeamIDResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenAccountAuthenticationWithAutoJoinTeamIDResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAccountAuthenticationWithAutoJoinTeamIDResource(rName),
@@ -210,7 +210,7 @@ data "aiven_account_authentication" "auth" {
 }
 
 func testAccCheckAivenAccountAuthenticationResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each account authentication is destroyed
 	for _, rs := range s.RootModule().Resources {
@@ -256,7 +256,7 @@ func testAccCheckAivenAccountAuthenticationResourceDestroy(s *terraform.State) e
 }
 
 func testAccCheckAivenAccountAuthenticationWithAutoJoinTeamIDResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each account authentication is destroyed
 	for _, rs := range s.RootModule().Resources {
