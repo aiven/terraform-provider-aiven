@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix IP Filter migrations error
+
 ## [4.8.1] - 2023-08-23
 
 - Add Organization User Groups support
