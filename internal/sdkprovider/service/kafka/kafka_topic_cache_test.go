@@ -7,68 +7,21 @@ import (
 	"github.com/aiven/aiven-go-client"
 )
 
-func setupTopicCacheTestCase(t *testing.T) func(t *testing.T) {
-	t.Log("setup Kafka Topic Cache test case")
-
-	if getTopicCache() == nil {
-		initTopicCache()
-	}
-
-	return func(t *testing.T) {
-		t.Log("teardown Kafka Topic Cache test case")
-
-		// clean topic cache after each test
-		topicCache.internal = make(map[string]map[string]aiven.KafkaTopic)
-	}
-}
-
-func TestGetTopicCache(t *testing.T) {
-	tests := []struct {
-		name string
-		init func()
-		want *kafkaTopicCache
-	}{
-		{
-			"not_initialized",
-			func() {
-			},
-			&kafkaTopicCache{
-				internal: make(map[string]map[string]aiven.KafkaTopic),
-				inQueue:  make(map[string][]string),
-				missing:  make(map[string][]string),
-				v1list:   make(map[string][]string),
-			},
-		},
-	}
-	for _, tt := range tests {
-		tt.init()
-
-		t.Run(tt.name, func(t *testing.T) {
-			if got := getTopicCache(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("getTopicCache() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestTopicCache_LoadByProjectAndServiceName(t1 *testing.T) {
-	tearDown := setupTopicCacheTestCase(t1)
-	defer tearDown(t1)
-
 	type args struct {
 		projectName string
 		serviceName string
 	}
 	tests := []struct {
 		name        string
-		doSomething func()
+		doSomething func(*kafkaTopicCache)
 		args        args
 		want        map[string]aiven.KafkaTopic
 		want1       bool
 	}{
 		{
 			"not_found",
-			func() {
+			func(*kafkaTopicCache) {
 			},
 			args{
 				projectName: "test-pr1",
@@ -99,9 +52,9 @@ func TestTopicCache_LoadByProjectAndServiceName(t1 *testing.T) {
 			true,
 		},
 	}
-	t := getTopicCache()
 	for _, tt := range tests {
-		tt.doSomething()
+		t := newTopicCache()
+		tt.doSomething(t)
 
 		t1.Run(tt.name, func(t1 *testing.T) {
 			got, got1 := t.LoadByProjectAndServiceName(tt.args.projectName, tt.args.serviceName)
@@ -116,9 +69,6 @@ func TestTopicCache_LoadByProjectAndServiceName(t1 *testing.T) {
 }
 
 func TestTopicCache_LoadByTopicName(t1 *testing.T) {
-	tearDown := setupTopicCacheTestCase(t1)
-	defer tearDown(t1)
-
 	type args struct {
 		projectName string
 		serviceName string
@@ -126,14 +76,14 @@ func TestTopicCache_LoadByTopicName(t1 *testing.T) {
 	}
 	tests := []struct {
 		name        string
-		doSomething func()
+		doSomething func(*kafkaTopicCache)
 		args        args
 		want        aiven.KafkaTopic
 		want1       bool
 	}{
 		{
 			"not_found",
-			func() {
+			func(*kafkaTopicCache) {
 
 			},
 			args{
@@ -162,9 +112,9 @@ func TestTopicCache_LoadByTopicName(t1 *testing.T) {
 			true,
 		},
 	}
-	t := getTopicCache()
 	for _, tt := range tests {
-		tt.doSomething()
+		t := newTopicCache()
+		tt.doSomething(t)
 
 		t1.Run(tt.name, func(t1 *testing.T) {
 			got, got1 := t.LoadByTopicName(tt.args.projectName, tt.args.serviceName, tt.args.topicName)
@@ -179,16 +129,13 @@ func TestTopicCache_LoadByTopicName(t1 *testing.T) {
 }
 
 func TestTopicCache_DeleteByProjectAndServiceName(t1 *testing.T) {
-	tearDown := setupTopicCacheTestCase(t1)
-	defer tearDown(t1)
-
 	type args struct {
 		projectName string
 		serviceName string
 	}
 	tests := []struct {
 		name        string
-		doSomething func()
+		doSomething func(*kafkaTopicCache)
 		args        args
 	}{
 		{
@@ -200,9 +147,9 @@ func TestTopicCache_DeleteByProjectAndServiceName(t1 *testing.T) {
 			},
 		},
 	}
-	t := getTopicCache()
 	for _, tt := range tests {
-		tt.doSomething()
+		t := newTopicCache()
+		tt.doSomething(t)
 
 		t1.Run(tt.name, func(t1 *testing.T) {
 			got, got1 := t.LoadByProjectAndServiceName(tt.args.projectName, tt.args.serviceName)
@@ -226,9 +173,8 @@ func TestTopicCache_DeleteByProjectAndServiceName(t1 *testing.T) {
 	}
 }
 
-func testAddTwoTopicsToCache() {
-	cache := getTopicCache()
-	cache.StoreByProjectAndServiceName(
+func testAddTwoTopicsToCache(c *kafkaTopicCache) {
+	c.StoreByProjectAndServiceName(
 		"test-pr1",
 		"test-sr1",
 		[]*aiven.KafkaTopic{

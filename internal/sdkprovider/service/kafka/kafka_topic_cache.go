@@ -8,10 +8,7 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-var (
-	once       sync.Once
-	topicCache *kafkaTopicCache
-)
+var topicCache = newTopicCache()
 
 // kafkaTopicCache represents Kafka Topics cache based on Service and Project identifiers
 type kafkaTopicCache struct {
@@ -22,18 +19,14 @@ type kafkaTopicCache struct {
 	v1list   map[string][]string
 }
 
-// initTopicCache creates new global instance of Kafka Topic Cache
-func initTopicCache() {
-	log.Print("[DEBUG] Creating an instance of kafkaTopicCache ...")
-
-	once.Do(func() {
-		topicCache = &kafkaTopicCache{
-			internal: make(map[string]map[string]aiven.KafkaTopic),
-			inQueue:  make(map[string][]string),
-			missing:  make(map[string][]string),
-			v1list:   make(map[string][]string),
-		}
-	})
+// newTopicCache creates new instance of Kafka Topic Cache
+func newTopicCache() *kafkaTopicCache {
+	return &kafkaTopicCache{
+		internal: make(map[string]map[string]aiven.KafkaTopic),
+		inQueue:  make(map[string][]string),
+		missing:  make(map[string][]string),
+		v1list:   make(map[string][]string),
+	}
 }
 
 // getTopicCache gets a global Kafka Topics Cache
