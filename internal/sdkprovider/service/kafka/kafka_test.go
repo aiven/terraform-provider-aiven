@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
-	acctest3 "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
 func TestAccAiven_kafka(t *testing.T) {
@@ -20,9 +20,9 @@ func TestAccAiven_kafka(t *testing.T) {
 	rName2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
-		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config:             testAccKafkaDoubleTagResource(rName),
@@ -33,7 +33,7 @@ func TestAccAiven_kafka(t *testing.T) {
 			{
 				Config: testAccKafkaResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					acctest3.TestAccCheckAivenServiceCommonAttributes("data.aiven_kafka.common"),
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_kafka.common"),
 					testAccCheckAivenServiceKafkaAttributes("data.aiven_kafka.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
@@ -55,7 +55,7 @@ func TestAccAiven_kafka(t *testing.T) {
 			{
 				Config: testAccKafkaWithoutDefaultACLResource(rName2),
 				Check: resource.ComposeTestCheckFunc(
-					acctest3.TestAccCheckAivenServiceCommonAttributes("data.aiven_kafka.common"),
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_kafka.common"),
 					testAccCheckAivenServiceKafkaAttributes("data.aiven_kafka.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName2)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
@@ -76,7 +76,7 @@ func TestAccAiven_kafka(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "service_port"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_uri"),
 					func(state *terraform.State) error {
-						c := acctest3.GetTestAivenClient()
+						c := acc.GetTestAivenClient()
 						a, err := c.KafkaACLs.List(os.Getenv("AIVEN_PROJECT_NAME"), rName2)
 						if err != nil && !aiven.IsNotFound(err) {
 							return fmt.Errorf("cannot get a list of kafka ACLs: %s", err)
@@ -230,14 +230,14 @@ func TestAccAivenService_kafka(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
-		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKafkaServiceResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					acctest3.TestAccCheckAivenServiceCommonAttributes("data.aiven_kafka.common"),
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_kafka.common"),
 					testAccCheckAivenServiceKafkaAttributes("data.aiven_kafka.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
@@ -375,9 +375,9 @@ func TestAccAiven_kafka_userconfig_kafka_null_fields_only(t *testing.T) {
 	prefix := "test-tf-acc-" + acctest.RandString(7)
 	resourceName := "aiven_kafka.kafka"
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
-		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKafkaResourceUserConfigKafkaNullFieldsOnly(project, prefix),

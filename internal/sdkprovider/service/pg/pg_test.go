@@ -7,22 +7,19 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	acctest3 "github.com/aiven/terraform-provider-aiven/internal/acctest"
-
+	"github.com/aiven/aiven-go-client"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
-	"github.com/aiven/aiven-go-client"
-
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func TestAccAivenPG_no_existing_project(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config:             testAccPGProjectDoesntExist(),
@@ -37,8 +34,8 @@ func TestAccAivenPG_invalid_disk_size(t *testing.T) {
 	expectErrorRegexBadString := regexp.MustCompile(regexp.QuoteMeta("configured string must match ^[1-9][0-9]*(G|GiB)"))
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// bad strings
 			{
@@ -126,9 +123,9 @@ func TestAccAivenPG_static_ips(t *testing.T) {
 	resourceName := "aiven_pg.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
-		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGWithStaticIps(rName, 2),
@@ -192,9 +189,9 @@ func TestAccAivenPG_changing_plan(t *testing.T) {
 	resourceName := "aiven_pg.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
-		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGResourcePlanChange(rName, "business-8"),
@@ -234,9 +231,9 @@ func TestAccAivenPG_deleting_additional_disk_size(t *testing.T) {
 	resourceName := "aiven_pg.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
-		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGResourceWithAdditionalDiskSize(rName, "20GiB"),
@@ -279,9 +276,9 @@ func TestAccAivenPG_deleting_disk_size(t *testing.T) {
 	resourceName := "aiven_pg.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
-		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGResourceWithDiskSize(rName, "90GiB"),
@@ -323,9 +320,9 @@ func TestAccAivenPG_changing_disk_size(t *testing.T) {
 	resourceName := "aiven_pg.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
-		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGResourceWithDiskSize(rName, "90GiB"),
@@ -614,9 +611,9 @@ func TestAccAivenPG_admin_creds(t *testing.T) {
 	project := os.Getenv("AIVEN_PROJECT_NAME")
 	expectedURLPrefix := fmt.Sprintf("postgres://root:%s-password", prefix)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
-		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGResourceAdminCreds(prefix, project),
@@ -657,14 +654,14 @@ func TestAccAivenServicePG_basic(t *testing.T) {
 	resourceName := "aiven_pg.bar-pg"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
-		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGServiceResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					acctest3.TestAccCheckAivenServiceCommonAttributes("data.aiven_pg.common-pg"),
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_pg.common-pg"),
 					testAccCheckAivenServicePGAttributes("data.aiven_pg.common-pg"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
@@ -683,15 +680,15 @@ func TestAccAivenServicePG_termination_protection(t *testing.T) {
 	resourceName := "aiven_pg.bar-pg"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
-		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGTerminationProtectionServiceResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceTerminationProtection("data.aiven_pg.common-pg"),
-					acctest3.TestAccCheckAivenServiceCommonAttributes("data.aiven_pg.common-pg"),
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_pg.common-pg"),
 					testAccCheckAivenServicePGAttributes("data.aiven_pg.common-pg"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
@@ -711,15 +708,15 @@ func TestAccAivenServicePG_read_replica(t *testing.T) {
 	resourceName := "aiven_pg.bar-pg"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
-		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config:                    testAccPGReadReplicaServiceResource(rName),
 				PreventPostDestroyRefresh: true,
 				Check: resource.ComposeTestCheckFunc(
-					acctest3.TestAccCheckAivenServiceCommonAttributes("data.aiven_pg.common-pg"),
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_pg.common-pg"),
 					testAccCheckAivenServicePGAttributes("data.aiven_pg.common-pg"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
@@ -738,14 +735,14 @@ func TestAccAivenServicePG_custom_timeouts(t *testing.T) {
 	resourceName := "aiven_pg.bar-pg"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
-		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGServiceCustomTimeoutsResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					acctest3.TestAccCheckAivenServiceCommonAttributes("data.aiven_pg.common-pg"),
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_pg.common-pg"),
 					testAccCheckAivenServicePGAttributes("data.aiven_pg.common-pg"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
@@ -950,7 +947,7 @@ func testAccCheckAivenServiceTerminationProtection(n string) resource.TestCheckF
 			return err
 		}
 
-		c := acctest3.GetTestAivenClient()
+		c := acc.GetTestAivenClient()
 
 		service, err := c.Services.Get(projectName, serviceName)
 		if err != nil {

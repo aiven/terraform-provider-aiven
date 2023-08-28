@@ -4,8 +4,9 @@
 package dist
 
 import (
-	schemautil "github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	schema "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	schemautil "github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 // ServiceTypeCassandra is a generated function returning the schema of the cassandra ServiceType.

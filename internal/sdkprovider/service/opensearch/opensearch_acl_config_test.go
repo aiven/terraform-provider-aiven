@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 

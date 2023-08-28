@@ -1,4 +1,4 @@
-.PHONY: build build-dev test test-unit test-acc test-examples lint lint-go lint-test lint-docs fmt fmt-test docs clean clean-tools sweep go-generate generate
+.PHONY: build build-dev test test-unit test-acc test-examples lint lint-go lint-test lint-docs fmt fmt-test docs clean clean-tools sweep go-generate generate imports
 
 #################################################
 # Global
@@ -112,10 +112,15 @@ lint-docs: $(TFPLUGINDOCS)
 # Format
 #################################################
 
-fmt: fmt-test
+fmt: imports fmt-test
 
 fmt-test: $(TERRAFMT)
 	$(TERRAFMT) fmt ./internal -fv
+
+# On MACOS requires gnu-sed. Run `brew info gnu-sed` and follow instructions to replace default sed.
+imports:
+	find . -type f -name '*.go' -exec sed -zi 's/"\n\+\t"/"\n"/g' {} +
+	goimports -local "github.com/aiven/terraform-provider-aiven" -w .
 
 #################################################
 # Docs

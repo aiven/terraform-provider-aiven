@@ -6,12 +6,11 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	acctest3 "github.com/aiven/terraform-provider-aiven/internal/acctest"
-
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
 func TestAccAiven_grafana(t *testing.T) {
@@ -19,14 +18,14 @@ func TestAccAiven_grafana(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
-		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGrafanaResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					acctest3.TestAccCheckAivenServiceCommonAttributes("data.aiven_grafana.common"),
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_grafana.common"),
 					testAccCheckAivenServiceGrafanaAttributes("data.aiven_grafana.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
@@ -54,14 +53,14 @@ func TestAccAiven_grafana_user_config(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
-		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGrafanaResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					acctest3.TestAccCheckAivenServiceCommonAttributes("data.aiven_grafana.common"),
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_grafana.common"),
 					testAccCheckAivenServiceGrafanaAttributes("data.aiven_grafana.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.ip_filter.#", "1"),
@@ -304,14 +303,14 @@ func TestAccAivenService_grafana(t *testing.T) {
 	rName2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
-		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGrafanaServiceResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					acctest3.TestAccCheckAivenServiceCommonAttributes("data.aiven_grafana.common"),
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_grafana.common"),
 					testAccCheckAivenServiceGrafanaAttributes("data.aiven_grafana.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
@@ -327,7 +326,7 @@ func TestAccAivenService_grafana(t *testing.T) {
 			{
 				Config: testAccGrafanaServiceCustomIPFiltersResource(rName2),
 				Check: resource.ComposeTestCheckFunc(
-					acctest3.TestAccCheckAivenServiceCommonAttributes("data.aiven_grafana.common"),
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_grafana.common"),
 					testAccCheckAivenServiceGrafanaAttributes("data.aiven_grafana.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName2)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
@@ -443,9 +442,9 @@ func TestAccAivenService_grafana_with_ip_filter_objects(t *testing.T) {
 	)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
-		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGrafanaServiceResourceWithIPFilterObjects(prefix, project, true),
