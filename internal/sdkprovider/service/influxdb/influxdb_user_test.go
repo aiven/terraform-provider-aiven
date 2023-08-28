@@ -6,13 +6,12 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
-
-	acctest3 "github.com/aiven/terraform-provider-aiven/internal/acctest"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func TestAccAivenInfluxDBUser_basic(t *testing.T) {
@@ -20,8 +19,8 @@ func TestAccAivenInfluxDBUser_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckAivenInfluxDBUserResourceDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -39,7 +38,7 @@ func TestAccAivenInfluxDBUser_basic(t *testing.T) {
 }
 
 func testAccCheckAivenInfluxDBUserResourceDestroy(s *terraform.State) error {
-	c := acctest3.GetTestAivenClient()
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each aiven_influxdb_user is destroyed
 	for _, rs := range s.RootModule().Resources {
@@ -102,14 +101,14 @@ func TestAccAivenService_influxdb(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
-		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccInfluxdbServiceResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					acctest3.TestAccCheckAivenServiceCommonAttributes("data.aiven_influxdb.common"),
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_influxdb.common"),
 					testAccCheckAivenServiceInfluxdbAttributes("data.aiven_influxdb.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),

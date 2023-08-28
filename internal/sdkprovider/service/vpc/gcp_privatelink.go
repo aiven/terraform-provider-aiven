@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"

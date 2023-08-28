@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	acctest3 "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
 func TestAccAiven_m3db(t *testing.T) {
@@ -17,9 +17,9 @@ func TestAccAiven_m3db(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
-		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: `
@@ -157,7 +157,7 @@ resource "aiven_m3db" "bar" {
 			{
 				Config: testAccM3DBResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					acctest3.TestAccCheckAivenServiceCommonAttributes("data.aiven_m3db.common"),
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_m3db.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "m3db"),

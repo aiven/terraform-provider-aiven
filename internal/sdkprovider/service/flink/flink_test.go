@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
-	acctest3 "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
 // TestAccAiven_flink tests Flink resource.
@@ -159,13 +159,13 @@ data "aiven_flink" "service" {
 	resourceNameApplication := "aiven_flink_application.foo"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: manifest,
 				Check: resource.ComposeTestCheckFunc(
-					acctest3.TestAccCheckAivenServiceCommonAttributes("data.aiven_flink.service"),
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_flink.service"),
 					resource.TestCheckResourceAttr(resourceName, "project", projectName),
 					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),

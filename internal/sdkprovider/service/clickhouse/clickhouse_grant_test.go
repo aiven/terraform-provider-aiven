@@ -11,9 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
-	clickhouse2 "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
-
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	clickhouse2 "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
 )
 
 func TestAccAivenClickhouseGrant(t *testing.T) {

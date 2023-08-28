@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
-	acctest3 "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
 // OpenSearch service tests
@@ -121,14 +121,14 @@ data "aiven_opensearch" "common-os" {
 }`, projectName, serviceName)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
-		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: manifest,
 				Check: resource.ComposeTestCheckFunc(
-					acctest3.TestAccCheckAivenServiceCommonAttributes("data.aiven_opensearch.common-os"),
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_opensearch.common-os"),
 					testAccCheckAivenServiceOSAttributes("data.aiven_opensearch.common-os"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", serviceName),
 					resource.TestCheckResourceAttr(resourceName, "project", projectName),

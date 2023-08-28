@@ -5,6 +5,8 @@ package sweep_test
 import (
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/cassandra"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
@@ -20,8 +22,6 @@ import (
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/redis"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/serviceintegration"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/staticip"
-
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestMain(m *testing.M) {
