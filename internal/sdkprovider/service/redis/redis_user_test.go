@@ -20,9 +20,9 @@ func TestAccAivenRedisUser_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenRedisUserResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenRedisUserResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRedisUserRedisACLResource(rName),
@@ -38,7 +38,7 @@ func TestAccAivenRedisUser_basic(t *testing.T) {
 }
 
 func testAccCheckAivenRedisUserResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each aiven_redis_user is destroyed
 	for _, rs := range s.RootModule().Resources {

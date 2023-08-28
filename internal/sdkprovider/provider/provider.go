@@ -39,7 +39,7 @@ func Provider(version string) *schema.Provider {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
-				// Description should match the one in internal/provider/provider.go.
+				// Description should match the one in internal/plugin/provider.go.
 				Description: "Aiven authentication token. Can also be set with the AIVEN_TOKEN environment variable.",
 			},
 		},

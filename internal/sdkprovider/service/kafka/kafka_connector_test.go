@@ -20,9 +20,9 @@ func TestAccAivenKafkaConnector_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenKafkaConnectorResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenKafkaConnectorResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKafkaConnectorResource(rName),
@@ -51,9 +51,9 @@ func TestAccAivenKafkaConnector_mogosink(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenKafkaConnectorResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenKafkaConnectorResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKafkaConnectorMonoSinkResource(rName),
@@ -68,7 +68,7 @@ func TestAccAivenKafkaConnector_mogosink(t *testing.T) {
 }
 
 func testAccCheckAivenKafkaConnectorResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each aiven_kafka_connector is destroyed
 	for _, rs := range s.RootModule().Resources {

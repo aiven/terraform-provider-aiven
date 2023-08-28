@@ -20,8 +20,8 @@ func TestAccAivenAWSTransitGatewayVPCAttachment_basic(t *testing.T) {
 
 	prefix := "test-tf-acc-" + acctest.RandString(7)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"aws": {
 				Source:            "hashicorp/aws",

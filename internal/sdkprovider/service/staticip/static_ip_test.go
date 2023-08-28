@@ -25,9 +25,9 @@ resource "aiven_static_ip" "foo" {
 }`, projectName, cloudName)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      acc.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: manifest,
@@ -82,9 +82,9 @@ resource "aiven_static_ip" "foo" {
 }`, projectName, cloudName)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      acc.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: manifest,

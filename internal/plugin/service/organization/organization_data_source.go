@@ -1,5 +1,4 @@
-// Package provider is the implementation of the Aiven provider.
-package provider
+package organization
 
 import (
 	"context"
@@ -11,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/aiven/terraform-provider-aiven/internal/provider/util"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 

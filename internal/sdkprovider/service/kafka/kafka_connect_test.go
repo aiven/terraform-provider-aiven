@@ -18,9 +18,9 @@ func TestAccAiven_kafkaconnect(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKafkaConnectResource(rName),
@@ -81,9 +81,9 @@ func TestAccAivenService_kafkaconnect(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKafkaConnectServiceResource(rName),

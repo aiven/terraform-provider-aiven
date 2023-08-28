@@ -21,8 +21,8 @@ func TestAccAivenServiceComponentDataSource_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			//{
 			//	Config:      testAccServiceComponentKafkaAuthMethodMissingErrorMessages(rName),

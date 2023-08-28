@@ -21,9 +21,9 @@ func TestAccAivenKafkaSchemaRegistryACL_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenKafkaSchemaRegistryACLResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenKafkaSchemaRegistryACLResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccKafkaSchemaRegistryACLWrongProjectResource(rName),
@@ -241,7 +241,7 @@ data "aiven_kafka_schema_registry_acl" "acl" {
 }
 
 func testAccCheckAivenKafkaSchemaRegistryACLResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each kafka ACL is destroyed
 	for _, rs := range s.RootModule().Resources {

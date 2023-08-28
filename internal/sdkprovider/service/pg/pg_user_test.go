@@ -19,9 +19,9 @@ func TestAccAivenPGUser_basic(t *testing.T) {
 	resourceName := "aiven_pg_user.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenPGUserResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenPGUserResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGUserNewPasswordResource(rName),
@@ -42,9 +42,9 @@ func TestAccAivenPGUser_pg_no_password(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenPGUserResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenPGUserResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGUserNoPasswordResource(rName),
@@ -64,9 +64,9 @@ func TestAccAivenPGUser_pg_replica(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenPGUserResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenPGUserResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGUserPgReplicationResource(rName),
@@ -84,7 +84,7 @@ func TestAccAivenPGUser_pg_replica(t *testing.T) {
 }
 
 func testAccCheckAivenPGUserResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each aiven_pg_user is destroyed
 	for _, rs := range s.RootModule().Resources {

@@ -1,49 +1,67 @@
 package acctest
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"sort"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
+	"github.com/aiven/terraform-provider-aiven/internal/server"
 )
 
 var (
-	TestAccProvider          *schema.Provider
-	TestAccProviderFactories map[string]func() (*schema.Provider, error)
-)
-
-func init() {
-	TestAccProvider = provider.Provider("test")
-	TestAccProviderFactories = map[string]func() (*schema.Provider, error){
-		"aiven": func() (*schema.Provider, error) {
-			return TestAccProvider, nil
+	testAivenClient              *aiven.Client
+	testAivenClientOnce          sync.Once
+	TestProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
+		"aiven": func() (tfprotov6.ProviderServer, error) {
+			return server.NewMuxServer(context.Background(), "test")
 		},
 	}
+)
+
+func GetTestAivenClient() *aiven.Client {
+	testAivenClientOnce.Do(func() {
+		client, err := common.NewAivenClient()
+		if err != nil {
+			log.Fatal(err)
+		}
+		testAivenClient = client
+	})
+	return testAivenClient
 }
 
+const (
+	// DefaultResourceNamePrefix is the default prefix used for resource names in acceptance tests.
+	DefaultResourceNamePrefix = "test-acc"
+
+	// DefaultRandomSuffixLength is the default length of the random suffix used in acceptance tests.
+	DefaultRandomSuffixLength = 10
+)
+
+// TestAccPreCheck is a helper function that is called by acceptance tests prior to any test case execution.
+// It is used to perform any pre-test setup, such as environment variable validation.
 func TestAccPreCheck(t *testing.T) {
-	if v := os.Getenv("AIVEN_TOKEN"); v == "" {
-		t.Fatal("AIVEN_TOKEN must be set for acceptance tests")
+	if _, ok := os.LookupEnv("AIVEN_TOKEN"); !ok {
+		t.Fatal("AIVEN_TOKEN environment variable must be set for acceptance tests.")
 	}
 
-	// Provider a project name with enough credits to run acceptance
-	// tests or project name with the assigned payment card.
-	if v := os.Getenv("AIVEN_PROJECT_NAME"); v == "" {
-		log.Print("[WARNING] AIVEN_PROJECT_NAME must be set for some acceptance tests")
+	if _, ok := os.LookupEnv("AIVEN_PROJECT_NAME"); !ok {
+		t.Log("AIVEN_PROJECT_NAME environment variable is not set. Some acceptance tests will be skipped.")
 	}
 }
 
 func TestAccCheckAivenServiceResourceDestroy(s *terraform.State) error {
-	c := TestAccProvider.Meta().(*aiven.Client)
+	c := GetTestAivenClient()
 	// loop through the resources in state, verifying each service is destroyed
 	for n, rs := range s.RootModule().Resources {
 		// ignore datasource

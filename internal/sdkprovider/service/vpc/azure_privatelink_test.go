@@ -24,9 +24,9 @@ func TestAccAivenAzurePrivatelink_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenAzurePrivatelinkResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenAzurePrivatelinkResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAzurePrivatelinkResource(rName),
@@ -42,7 +42,7 @@ func TestAccAivenAzurePrivatelink_basic(t *testing.T) {
 }
 
 func testAccCheckAivenAzurePrivatelinkResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each Azure privatelink is destroyed
 	for _, rs := range s.RootModule().Resources {

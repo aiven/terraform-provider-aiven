@@ -10,18 +10,13 @@ import (
 )
 
 func TestAccAivenOrganizationUserDataSource_basic(t *testing.T) {
-	t.Skip(
-		"Skipping because aiven_organization is now implemented in the Terraform Plugin Framework version" +
-			" of the provider, and this test is not yet ported to that framework.",
-	)
-
 	datasourceName := "data.aiven_organization_user.member"
 	resourceName := "aiven_organization_user.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOrganizationUserResource(rName),

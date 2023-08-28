@@ -20,9 +20,9 @@ func TestAccAivenOpenSearchACLConfig_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenOpenSearchACLConfigResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenOpenSearchACLConfigResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOpenSearchACLConfigResource(rName),
@@ -67,7 +67,7 @@ resource "aiven_opensearch_acl_config" "foo" {
 }
 
 func testAccCheckAivenOpenSearchACLConfigResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each OS ACL Config is destroyed
 	for _, rs := range s.RootModule().Resources {

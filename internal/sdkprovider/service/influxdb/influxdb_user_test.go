@@ -20,9 +20,9 @@ func TestAccAivenInfluxDBUser_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenInfluxDBUserResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenInfluxDBUserResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccInfluxDBUserResource(rName),
@@ -39,7 +39,7 @@ func TestAccAivenInfluxDBUser_basic(t *testing.T) {
 }
 
 func testAccCheckAivenInfluxDBUserResourceDestroy(s *terraform.State) error {
-	c := acctest3.TestAccProvider.Meta().(*aiven.Client)
+	c := acctest3.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each aiven_influxdb_user is destroyed
 	for _, rs := range s.RootModule().Resources {
@@ -102,9 +102,9 @@ func TestAccAivenService_influxdb(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccInfluxdbServiceResource(rName),

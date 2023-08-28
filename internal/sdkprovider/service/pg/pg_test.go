@@ -21,8 +21,8 @@ import (
 
 func TestAccAivenPG_no_existing_project(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config:             testAccPGProjectDoesntExist(),
@@ -37,8 +37,8 @@ func TestAccAivenPG_invalid_disk_size(t *testing.T) {
 	expectErrorRegexBadString := regexp.MustCompile(regexp.QuoteMeta("configured string must match ^[1-9][0-9]*(G|GiB)"))
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// bad strings
 			{
@@ -126,9 +126,9 @@ func TestAccAivenPG_static_ips(t *testing.T) {
 	resourceName := "aiven_pg.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGWithStaticIps(rName, 2),
@@ -192,9 +192,9 @@ func TestAccAivenPG_changing_plan(t *testing.T) {
 	resourceName := "aiven_pg.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGResourcePlanChange(rName, "business-8"),
@@ -234,9 +234,9 @@ func TestAccAivenPG_deleting_additional_disk_size(t *testing.T) {
 	resourceName := "aiven_pg.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGResourceWithAdditionalDiskSize(rName, "20GiB"),
@@ -279,9 +279,9 @@ func TestAccAivenPG_deleting_disk_size(t *testing.T) {
 	resourceName := "aiven_pg.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGResourceWithDiskSize(rName, "90GiB"),
@@ -323,9 +323,9 @@ func TestAccAivenPG_changing_disk_size(t *testing.T) {
 	resourceName := "aiven_pg.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGResourceWithDiskSize(rName, "90GiB"),
@@ -614,9 +614,9 @@ func TestAccAivenPG_admin_creds(t *testing.T) {
 	project := os.Getenv("AIVEN_PROJECT_NAME")
 	expectedURLPrefix := fmt.Sprintf("postgres://root:%s-password", prefix)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGResourceAdminCreds(prefix, project),
@@ -657,9 +657,9 @@ func TestAccAivenServicePG_basic(t *testing.T) {
 	resourceName := "aiven_pg.bar-pg"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGServiceResource(rName),
@@ -683,9 +683,9 @@ func TestAccAivenServicePG_termination_protection(t *testing.T) {
 	resourceName := "aiven_pg.bar-pg"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGTerminationProtectionServiceResource(rName),
@@ -711,9 +711,9 @@ func TestAccAivenServicePG_read_replica(t *testing.T) {
 	resourceName := "aiven_pg.bar-pg"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config:                    testAccPGReadReplicaServiceResource(rName),
@@ -738,9 +738,9 @@ func TestAccAivenServicePG_custom_timeouts(t *testing.T) {
 	resourceName := "aiven_pg.bar-pg"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPGServiceCustomTimeoutsResource(rName),
@@ -950,7 +950,7 @@ func testAccCheckAivenServiceTerminationProtection(n string) resource.TestCheckF
 			return err
 		}
 
-		c := acctest3.TestAccProvider.Meta().(*aiven.Client)
+		c := acctest3.GetTestAivenClient()
 
 		service, err := c.Services.Get(projectName, serviceName)
 		if err != nil {

@@ -20,9 +20,9 @@ func TestAccAivenAWSPrivatelink_basic(t *testing.T) {
 
 	prefix := "test-tf-acc-" + acctest.RandString(7)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      acc.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"aws": {
 				Source:            "hashicorp/aws",

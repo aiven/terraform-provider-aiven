@@ -26,9 +26,9 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 	resourceName := "aiven_kafka_topic.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKafkaTopicResource(rName),
@@ -50,9 +50,9 @@ func TestAccAivenKafkaTopic_many_topics(t *testing.T) {
 	resourceName := "aiven_kafka_topic.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKafka451TopicResource(rName),
@@ -73,9 +73,9 @@ func TestAccAivenKafkaTopic_termination_protection(t *testing.T) {
 	resourceName := "aiven_kafka_topic.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config:                    testAccKafkaTopicTerminationProtectionResource(rName),
@@ -99,9 +99,9 @@ func TestAccAivenKafkaTopic_custom_timeouts(t *testing.T) {
 	resourceName := "aiven_kafka_topic.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKafkaTopicCustomTimeoutsResource(rName),
@@ -286,7 +286,7 @@ func testAccCheckAivenKafkaTopicAttributes(n string) resource.TestCheckFunc {
 }
 
 func testAccCheckAivenKafkaTopicResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each kafka topic is destroyed
 	for _, rs := range s.RootModule().Resources {
@@ -362,9 +362,9 @@ func TestAccAivenKafkaTopic_recreate_missing(t *testing.T) {
 
 	config := testAccAivenKafkaTopicResourceRecreateMissing(prefix, project)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				// Step 1: setups resources, creates the state
@@ -377,8 +377,7 @@ func TestAccAivenKafkaTopic_recreate_missing(t *testing.T) {
 			{
 				// Step 2: deletes topic, then runs apply, same config & checks
 				PreConfig: func() {
-					client, ok := acc.TestAccProvider.Meta().(*aiven.Client)
-					assert.True(t, ok, "invalid aiven client")
+					client := acc.GetTestAivenClient()
 
 					// deletes
 					err := client.KafkaTopics.Delete(project, kafkaName, topicName)
@@ -405,8 +404,7 @@ func TestAccAivenKafkaTopic_recreate_missing(t *testing.T) {
 					resource.TestCheckResourceAttr(topicResource, "id", topicID),
 					func(state *terraform.State) error {
 						// Topic exists and active
-						client, ok := acc.TestAccProvider.Meta().(*aiven.Client)
-						assert.True(t, ok, "invalid aiven client")
+						client := acc.GetTestAivenClient()
 						return retry.RetryContext(
 							context.Background(),
 							time.Minute,
@@ -460,9 +458,9 @@ func TestAccAivenKafkaTopic_import_missing(t *testing.T) {
 	kafkaName := prefix + "-kafka"
 	topicName := "topic"
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				// Step 1: setups resources, creates the state
@@ -525,9 +523,9 @@ func TestAccAivenKafkaTopic_conflicts_if_exists(t *testing.T) {
 	project := os.Getenv("AIVEN_PROJECT_NAME")
 	prefix := "test-tf-acc-" + acctest.RandString(7)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenKafkaTopicResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenKafkaTopicResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccAivenKafkaTopicConflictsIfExists(prefix, project),

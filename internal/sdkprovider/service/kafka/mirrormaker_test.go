@@ -18,9 +18,9 @@ func TestAccAivenService_mirrormaker(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      acc.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMirrorMakerServiceResource(rName),

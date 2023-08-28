@@ -18,7 +18,7 @@ func TestAccAivenKafkaSchemaConfiguration_basic(t *testing.T) {
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                  func() { acc.TestAccPreCheck(t) },
-		ProviderFactories:         acc.TestAccProviderFactories,
+		ProtoV6ProviderFactories:  acc.TestProtoV6ProviderFactories,
 		PreventPostDestroyRefresh: true,
 		CheckDestroy:              testAccCheckAivenKafkaSchemaConfigurationResourceDestroy,
 		Steps: []resource.TestStep{

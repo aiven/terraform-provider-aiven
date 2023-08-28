@@ -20,9 +20,9 @@ func TestAccAivenProjectVPC_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenProjectVPCResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenProjectVPCResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				PlanOnly:    true,
@@ -106,7 +106,7 @@ func testAccCheckAivenProjectVPCAttributes(n string) resource.TestCheckFunc {
 }
 
 func testAccCheckAivenProjectVPCResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each project VPC is destroyed
 	for _, rs := range s.RootModule().Resources {

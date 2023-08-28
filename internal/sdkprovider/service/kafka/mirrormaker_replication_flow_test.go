@@ -20,9 +20,9 @@ func TestAccAivenMirrorMakerReplicationFlow_basic(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenMirrorMakerReplicationFlowResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenMirrorMakerReplicationFlowResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMirrorMakerReplicationFlowResource(rName),
@@ -41,7 +41,7 @@ func TestAccAivenMirrorMakerReplicationFlow_basic(t *testing.T) {
 }
 
 func testAccCheckAivenMirrorMakerReplicationFlowResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each kafka mirror maker
 	// replication flow is destroyed
@@ -251,8 +251,8 @@ resource "aiven_mirrormaker_replication_flow" "foo" {
 }
 `
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config:      config,

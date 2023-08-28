@@ -24,9 +24,9 @@ func TestAccAivenInfluxDBDatabase_basic(t *testing.T) {
 	rName2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenInfluxDBDatabaseResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenInfluxDBDatabaseResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccInfluxDBDatabaseResource(projectName, rName),
@@ -88,7 +88,7 @@ func TestAccAivenInfluxDBDatabase_basic(t *testing.T) {
 }
 
 func testAccCheckAivenInfluxDBDatabaseResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each database is destroyed
 	for _, rs := range s.RootModule().Resources {

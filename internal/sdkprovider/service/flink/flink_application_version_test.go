@@ -20,9 +20,9 @@ func TestAccAivenFlinkApplicationVersion_basic(t *testing.T) {
 	resourceNameDeployment := "aiven_flink_application_deployment.foobar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenFlinkDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenFlinkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFlinkApplicationVersionResource(rName),
@@ -51,7 +51,7 @@ func TestAccAivenFlinkApplicationVersion_basic(t *testing.T) {
 }
 
 func testAccCheckAivenFlinkDestroy(s *terraform.State) error {
-	client := acc.TestAccProvider.Meta().(*aiven.Client)
+	client := acc.GetTestAivenClient()
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_flink_application_version" {

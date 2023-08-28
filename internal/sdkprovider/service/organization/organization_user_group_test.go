@@ -15,18 +15,13 @@ import (
 )
 
 func TestAccAivenOrganizationUserGroup_basic(t *testing.T) {
-	t.Skip(
-		"Skipping because aiven_organization is now implemented in the Terraform Plugin Framework version" +
-			" of the provider, and this test is not yet ported to that framework.",
-	)
-
 	resourceName := "aiven_organization_user_group.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAivenOrganizationUserGroupResourceDestroy,
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenOrganizationUserGroupResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOrganizationUserGroupResource(rName),
@@ -63,7 +58,7 @@ data "aiven_organization_user_group" "bar" {
 }
 
 func testAccCheckAivenOrganizationUserGroupResourceDestroy(s *terraform.State) error {
-	c := acc.TestAccProvider.Meta().(*aiven.Client)
+	c := acc.GetTestAivenClient()
 
 	// loop through the resources in state, verifying each organization user group is destroyed
 	for _, rs := range s.RootModule().Resources {

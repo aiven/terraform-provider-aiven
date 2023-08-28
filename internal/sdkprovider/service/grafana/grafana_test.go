@@ -19,9 +19,9 @@ func TestAccAiven_grafana(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGrafanaResource(rName),
@@ -54,9 +54,9 @@ func TestAccAiven_grafana_user_config(t *testing.T) {
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGrafanaResource(rName),
@@ -304,9 +304,9 @@ func TestAccAivenService_grafana(t *testing.T) {
 	rName2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGrafanaServiceResource(rName),
@@ -443,9 +443,9 @@ func TestAccAivenService_grafana_with_ip_filter_objects(t *testing.T) {
 	)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest3.TestAccPreCheck(t) },
-		ProviderFactories: acctest3.TestAccProviderFactories,
-		CheckDestroy:      acctest3.TestAccCheckAivenServiceResourceDestroy,
+		PreCheck:                 func() { acctest3.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest3.TestProtoV6ProviderFactories,
+		CheckDestroy:             acctest3.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGrafanaServiceResourceWithIPFilterObjects(prefix, project, true),
