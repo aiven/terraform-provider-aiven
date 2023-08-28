@@ -16,6 +16,8 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/grafana"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/influxdb"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafka"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafkaschema"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafkatopic"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/m3db"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/mysql"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/opensearch"
@@ -125,10 +127,10 @@ func Provider(version string) *schema.Provider {
 			"aiven_kafka":                        kafka.DatasourceKafka(),
 			"aiven_kafka_user":                   kafka.DatasourceKafkaUser(),
 			"aiven_kafka_acl":                    kafka.DatasourceKafkaACL(),
-			"aiven_kafka_schema_registry_acl":    kafka.DatasourceKafkaSchemaRegistryACL(),
-			"aiven_kafka_topic":                  kafka.DatasourceKafkaTopic(),
-			"aiven_kafka_schema":                 kafka.DatasourceKafkaSchema(),
-			"aiven_kafka_schema_configuration":   kafka.DatasourceKafkaSchemaConfiguration(),
+			"aiven_kafka_schema_registry_acl":    kafkaschema.DatasourceKafkaSchemaRegistryACL(),
+			"aiven_kafka_topic":                  kafkatopic.DatasourceKafkaTopic(),
+			"aiven_kafka_schema":                 kafkaschema.DatasourceKafkaSchema(),
+			"aiven_kafka_schema_configuration":   kafkaschema.DatasourceKafkaSchemaConfiguration(),
 			"aiven_kafka_connector":              kafka.DatasourceKafkaConnector(),
 			"aiven_mirrormaker_replication_flow": kafka.DatasourceMirrorMakerReplicationFlowTopic(),
 			"aiven_kafka_connect":                kafka.DatasourceKafkaConnect(),
@@ -224,10 +226,10 @@ func Provider(version string) *schema.Provider {
 			"aiven_kafka":                        kafka.ResourceKafka(),
 			"aiven_kafka_user":                   kafka.ResourceKafkaUser(),
 			"aiven_kafka_acl":                    kafka.ResourceKafkaACL(),
-			"aiven_kafka_schema_registry_acl":    kafka.ResourceKafkaSchemaRegistryACL(),
-			"aiven_kafka_topic":                  kafka.ResourceKafkaTopic(),
-			"aiven_kafka_schema":                 kafka.ResourceKafkaSchema(),
-			"aiven_kafka_schema_configuration":   kafka.ResourceKafkaSchemaConfiguration(),
+			"aiven_kafka_schema_registry_acl":    kafkaschema.ResourceKafkaSchemaRegistryACL(),
+			"aiven_kafka_topic":                  kafkatopic.ResourceKafkaTopic(),
+			"aiven_kafka_schema":                 kafkaschema.ResourceKafkaSchema(),
+			"aiven_kafka_schema_configuration":   kafkaschema.ResourceKafkaSchemaConfiguration(),
 			"aiven_kafka_connector":              kafka.ResourceKafkaConnector(),
 			"aiven_mirrormaker_replication_flow": kafka.ResourceMirrorMakerReplicationFlow(),
 			"aiven_kafka_connect":                kafka.ResourceKafkaConnect(),

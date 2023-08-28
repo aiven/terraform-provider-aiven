@@ -22,6 +22,8 @@ jobs:
       matrix:
         pkg: [
           kafka,
+          kafkatopic,
+          kafkaschema,
           account,
           cassandra,
           clickhouse,

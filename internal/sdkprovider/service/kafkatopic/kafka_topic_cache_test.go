@@ -1,4 +1,4 @@
-package kafka
+package kafkatopic
 
 import (
 	"reflect"

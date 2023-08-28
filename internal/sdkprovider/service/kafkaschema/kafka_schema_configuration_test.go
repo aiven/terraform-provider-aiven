@@ -1,4 +1,4 @@
-package kafka_test
+package kafkaschema_test
 
 import (
 	"fmt"
