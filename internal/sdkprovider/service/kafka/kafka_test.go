@@ -339,14 +339,6 @@ func testAccCheckAivenServiceKafkaAttributes(n string) resource.TestCheckFunc {
 	}
 }
 
-// partitions returns a slice, of empty aiven.Partition, of specified size
-func partitions(numPartitions int) (partitions []*aiven.Partition) {
-	for i := 0; i < numPartitions; i++ {
-		partitions = append(partitions, &aiven.Partition{})
-	}
-	return
-}
-
 func testAccKafkaResourceUserConfigKafkaNullFieldsOnly(project, prefix string) string {
 	return fmt.Sprintf(`
 resource "aiven_kafka" "kafka" {

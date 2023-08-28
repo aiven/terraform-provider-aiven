@@ -1,4 +1,4 @@
-package kafka_test
+package kafkatopic_test
 
 import (
 	"context"
@@ -19,7 +19,7 @@ import (
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafka"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafkatopic"
 )
 
 func TestAccAivenKafkaTopic_basic(t *testing.T) {
@@ -389,7 +389,7 @@ func TestAccAivenKafkaTopic_recreate_missing(t *testing.T) {
 					assert.True(t, aiven.IsNotFound(err))
 
 					// Invalidates cache for the topic
-					kafka.DeleteTopicFromCache(project, kafkaName, topicName)
+					kafkatopic.DeleteTopicFromCache(project, kafkaName, topicName)
 				},
 				// Now plan shows a diff
 				ExpectNonEmptyPlan: true,
@@ -569,4 +569,12 @@ resource "aiven_kafka_topic" "topic_conflict" {
   ]
 }
 `, prefix, project)
+}
+
+// partitions returns a slice, of empty aiven.Partition, of specified size
+func partitions(numPartitions int) (partitions []*aiven.Partition) {
+	for i := 0; i < numPartitions; i++ {
+		partitions = append(partitions, &aiven.Partition{})
+	}
+	return
 }
