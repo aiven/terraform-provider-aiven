@@ -107,6 +107,7 @@ Optional:
 - `schema_registry` (Boolean) Enable Schema-Registry service. The default value is `false`.
 - `schema_registry_config` (Block List, Max: 1) Schema Registry configuration. (see [below for nested schema](#nestedblock--kafka_user_config--schema_registry_config))
 - `static_ips` (Boolean) Use static public IP addresses.
+- `tiered_storage` (Block List, Max: 1) Tiered storage configuration. (see [below for nested schema](#nestedblock--kafka_user_config--tiered_storage))
 
 <a id="nestedblock--kafka_user_config--ip_filter_object"></a>
 ### Nested Schema for `kafka_user_config.ip_filter_object`
@@ -257,6 +258,23 @@ Optional:
 
 - `leader_eligibility` (Boolean) If true, Karapace / Schema Registry on the service nodes can participate in leader election. It might be needed to disable this when the schemas topic is replicated to a secondary cluster and Karapace / Schema Registry there must not participate in leader election. Defaults to `true`.
 - `topic_name` (String) The durable single partition topic that acts as the durable log for the data. This topic must be compacted to avoid losing data due to retention policy. Please note that changing this configuration in an existing Schema Registry / Karapace setup leads to previous schemas being inaccessible, data encoded with them potentially unreadable and schema ID sequence put out of order. It's only possible to do the switch while Schema Registry / Karapace is disabled. Defaults to `_schemas`.
+
+
+<a id="nestedblock--kafka_user_config--tiered_storage"></a>
+### Nested Schema for `kafka_user_config.tiered_storage`
+
+Optional:
+
+- `enabled` (Boolean) Whether to enable the tiered storage functionality.
+- `local_cache` (Block List, Max: 1) Local cache configuration. (see [below for nested schema](#nestedblock--kafka_user_config--tiered_storage--local_cache))
+
+<a id="nestedblock--kafka_user_config--tiered_storage--local_cache"></a>
+### Nested Schema for `kafka_user_config.tiered_storage.local_cache`
+
+Optional:
+
+- `size` (Number) Local cache size in bytes.
+
 
 
 

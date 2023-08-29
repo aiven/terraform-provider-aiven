@@ -3285,6 +3285,58 @@ func ServiceTypeKafka() *schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
+		"tiered_storage": {
+			Description: "Tiered storage configuration.",
+			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+				"enabled": {
+					Description: "Whether to enable the tiered storage functionality.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"local_cache": {
+					Description: "Local cache configuration.",
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"size": {
+						Description: "Local cache size in bytes.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					}}),
+					Elem: &schema.Resource{Schema: map[string]*schema.Schema{"size": {
+						Description: "Local cache size in bytes.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					}}},
+					MaxItems: 1,
+					Optional: true,
+					Type:     schema.TypeList,
+				},
+			}),
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"enabled": {
+					Description: "Whether to enable the tiered storage functionality.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"local_cache": {
+					Description: "Local cache configuration.",
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"size": {
+						Description: "Local cache size in bytes.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					}}),
+					Elem: &schema.Resource{Schema: map[string]*schema.Schema{"size": {
+						Description: "Local cache size in bytes.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					}}},
+					MaxItems: 1,
+					Optional: true,
+					Type:     schema.TypeList,
+				},
+			}},
+			MaxItems: 1,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
 	}
 
 	return &schema.Schema{
