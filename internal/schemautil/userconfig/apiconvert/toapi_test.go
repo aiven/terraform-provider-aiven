@@ -1008,6 +1008,124 @@ func TestToAPI(t *testing.T) {
 				"logline": "some logline",
 			},
 		},
+		{
+			name: "nested arrays no changes",
+			args: args{
+				st: userconfig.IntegrationTypes,
+				n:  "clickhouse_kafka",
+				d: newTestResourceData(
+					map[string]interface{}{
+						"clickhouse_kafka_user_config": []interface{}{
+							map[string]interface{}{
+								"tables": []interface{}{
+									map[string]interface{}{
+										"name": "foo",
+										"topics": []interface{}{
+											map[string]interface{}{
+												"name": "bar",
+											},
+										},
+										"columns": []interface{}{
+											map[string]interface{}{
+												"name": "baz",
+												"type": "UInt16",
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					map[string]struct{}{
+						"clickhouse_kafka_user_config": {},
+					},
+					map[string]struct{}{
+						"clickhouse_kafka_user_config.0.tables":           {},
+						"clickhouse_kafka_user_config.0.tables.0.topics":  {},
+						"clickhouse_kafka_user_config.0.tables.0.columns": {},
+					},
+					true,
+				),
+			},
+			want: map[string]interface{}{
+				"tables": []interface{}{
+					map[string]interface{}{
+						"name": "foo",
+						"topics": []interface{}{
+							map[string]interface{}{
+								"name": "bar",
+							},
+						},
+						"columns": []interface{}{
+							map[string]interface{}{
+								"name": "baz",
+								"type": "UInt16",
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "nested arrays change in top level element",
+			args: args{
+				st: userconfig.IntegrationTypes,
+				n:  "clickhouse_kafka",
+				d: newTestResourceData(
+					map[string]interface{}{
+						"clickhouse_kafka_user_config": []interface{}{
+							map[string]interface{}{
+								"tables": []interface{}{
+									map[string]interface{}{
+										"name": "foo",
+										"topics": []interface{}{
+											map[string]interface{}{
+												"name": "bar",
+											},
+										},
+										"columns": []interface{}{
+											map[string]interface{}{
+												"name": "baz",
+												"type": "UInt16",
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					map[string]struct{}{
+						"clickhouse_kafka_user_config":                    {},
+						"clickhouse_kafka_user_config.0.tables":           {},
+						"clickhouse_kafka_user_config.0.tables.0.topics":  {},
+						"clickhouse_kafka_user_config.0.tables.0.columns": {},
+					},
+					map[string]struct{}{
+						"clickhouse_kafka_user_config.0.tables":        {},
+						"clickhouse_kafka_user_config.0.tables.0.name": {},
+					},
+					false,
+				),
+			},
+			want: map[string]interface{}{
+				"tables": []interface{}{
+					map[string]interface{}{
+						"name": "foo",
+						"topics": []interface{}{
+							map[string]interface{}{
+								"name": "bar",
+							},
+						},
+						"columns": []interface{}{
+							map[string]interface{}{
+								"name": "baz",
+								"type": "UInt16",
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	for _, tt := range tests {
