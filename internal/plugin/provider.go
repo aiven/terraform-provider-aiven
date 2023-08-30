@@ -14,6 +14,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/serviceintegration"
 )
 
 // AivenProvider is the provider implementation for Aiven.
@@ -110,6 +111,7 @@ func (p *AivenProvider) Configure(
 func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		organization.NewOrganizationResource,
+		serviceintegration.NewServiceIntegrationResource,
 	}
 }
 
@@ -117,6 +119,7 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		organization.NewOrganizationDataSource,
+		serviceintegration.NewServiceIntegrationDataSource,
 	}
 }
 

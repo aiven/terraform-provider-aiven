@@ -62,8 +62,6 @@ func (t *kafkaTopicCache) LoadByTopicName(projectName, serviceName, topicName st
 		result.State = "CONFIGURING"
 	}
 
-	log.Printf("[TRACE] retrieving from a topic cache `%+#v` for a topic name `%s`", result, topicName)
-
 	return result, ok
 }
 

@@ -10,14 +10,16 @@ import (
 
 // GeneralizeSchema is a function that generalizes the schema by adding the common definitions to the schema.
 func GeneralizeSchema(ctx context.Context, s schema.Schema) schema.Schema {
-	s.Blocks = map[string]schema.Block{
-		"timeouts": timeouts.Block(ctx, timeouts.Opts{
-			Create: true,
-			Read:   true,
-			Update: true,
-			Delete: true,
-		}),
+	if s.Blocks == nil {
+		s.Blocks = make(map[string]schema.Block)
 	}
+
+	s.Blocks["timeouts"] = timeouts.Block(ctx, timeouts.Opts{
+		Create: true,
+		Read:   true,
+		Update: true,
+		Delete: true,
+	})
 
 	return s
 }
