@@ -10,6 +10,7 @@ nav_order: 1
 
 - Fix IP Filter migrations error
 - Fix `aiven_transit_gateway_vpc_attachment` resource update
+- Fix `aiven_clickhouse_grant`, allow `*` table name
 
 ## [4.8.1] - 2023-08-23
 
