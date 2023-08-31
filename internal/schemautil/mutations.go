@@ -54,8 +54,6 @@ func normalizeIPFilter(old, new map[string]interface{}) {
 	// First, we take all the elements from old and if they match with the elements in new,
 	// we preserve them in the same order as they were defined in old.
 	for _, o := range oldIPFilters {
-		found := false
-
 		for _, n := range newIPFilters {
 			// Define two comparison variables to avoid code duplication in the loop.
 			var comparableO interface{}
@@ -76,16 +74,8 @@ func normalizeIPFilter(old, new map[string]interface{}) {
 
 			if comparableO == comparableN {
 				normalizedIPFilters = append(normalizedIPFilters, o)
-
-				found = true
-
 				break
 			}
-		}
-
-		// We append old elements that are missing in new to nonexistentIPFilters.
-		if !found {
-			nonexistentIPFilters = append(nonexistentIPFilters, o)
 		}
 	}
 
