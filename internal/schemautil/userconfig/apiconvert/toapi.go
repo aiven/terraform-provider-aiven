@@ -231,9 +231,14 @@ func itemToAPI(
 			// the value.
 			_, e := d.GetOk(fks)
 
+			// We get the length of the match slice to use it in the formula: lmatch - (lmatch - 1), which gives us
+			// the index of the last match, which is the parent object. We then get the index of the parent object
+			// in the fk slice and use it to get the key of the parent object.
+			lmatch := len(match)
+
 			// Since Terraform thinks that new array elements are added without "existing", we also send the value if
 			// it does not exist, but is not empty either.
-			if (e || !reflect.ValueOf(v).IsZero()) && d.HasChange(fks[:match[len(match)-1][0]]) {
+			if (e || !reflect.ValueOf(v).IsZero()) && d.HasChange(fks[:match[lmatch-(lmatch-1)][0]]) {
 				o = false
 			}
 		}
