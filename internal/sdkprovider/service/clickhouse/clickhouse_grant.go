@@ -102,12 +102,11 @@ Notes:
 * To grant a privilege on all tables of a database, do not write table = "*". Instead, omit the table and only keep the database.
 * Currently changes will first revoke all grants and then reissue the remaining grants for convergence.
 `,
-		DeprecationMessage: betaDeprecationMessage,
-		CreateContext:      resourceClickhouseGrantCreate,
-		ReadContext:        resourceClickhouseGrantRead,
-		DeleteContext:      resourceClickhouseGrantDelete,
-		Schema:             aivenClickhouseGrantSchema,
-		Timeouts:           schemautil.DefaultResourceTimeouts(),
+		CreateContext: resourceClickhouseGrantCreate,
+		ReadContext:   resourceClickhouseGrantRead,
+		DeleteContext: resourceClickhouseGrantDelete,
+		Schema:        aivenClickhouseGrantSchema,
+		Timeouts:      schemautil.DefaultResourceTimeouts(),
 	}
 }
 
