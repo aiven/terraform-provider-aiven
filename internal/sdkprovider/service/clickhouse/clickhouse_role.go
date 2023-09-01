@@ -26,7 +26,6 @@ var aivenClickhouseRoleSchema = map[string]*schema.Schema{
 func ResourceClickhouseRole() *schema.Resource {
 	return &schema.Resource{
 		Description:        "The Clickhouse Role resource allows the creation and management of Roles in Aiven Clickhouse services",
-		DeprecationMessage: betaDeprecationMessage,
 		CreateContext:      resourceClickhouseRoleCreate,
 		ReadContext:        resourceClickhouseRoleRead,
 		DeleteContext:      resourceClickhouseRoleDelete,
