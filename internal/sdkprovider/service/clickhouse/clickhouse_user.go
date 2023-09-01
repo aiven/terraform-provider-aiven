@@ -42,10 +42,10 @@ var aivenClickhouseUserSchema = map[string]*schema.Schema{
 
 func ResourceClickhouseUser() *schema.Resource {
 	return &schema.Resource{
-		Description:        "The Clickhouse User resource allows the creation and management of Aiven Clikhouse Users.",
-		CreateContext:      resourceClickhouseUserCreate,
-		ReadContext:        resourceClickhouseUserRead,
-		DeleteContext:      resourceClickhouseUserDelete,
+		Description:   "The Clickhouse User resource allows the creation and management of Aiven Clikhouse Users.",
+		CreateContext: resourceClickhouseUserCreate,
+		ReadContext:   resourceClickhouseUserRead,
+		DeleteContext: resourceClickhouseUserDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
