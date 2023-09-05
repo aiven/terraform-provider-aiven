@@ -12,6 +12,7 @@ nav_order: 1
 - Fix `aiven_transit_gateway_vpc_attachment` resource update
 - Fix service IP filters normalization
 - Fix improper omitting in `ToAPI`
+- Fix Kafka Topic perfomance
 
 ## [4.8.1] - 2023-08-23
 
