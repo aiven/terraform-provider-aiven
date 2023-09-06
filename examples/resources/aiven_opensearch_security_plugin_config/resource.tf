@@ -17,9 +17,8 @@ resource "aiven_opensearch_user" "foo" {
   username     = "user-example"
 }
 
-resource "aiven_opensearch_acl_config" "foo" {
-  project      = data.aiven_project.foo.project
-  service_name = aiven_opensearch.bar.service_name
-  enabled      = true
-  extended_acl = false
+resource "aiven_opensearch_security_config" "foo" {
+  project        = data.aiven_project.foo.project
+  service_name   = aiven_opensearch.bar.service_name
+  admin_password = "ThisIsATest123^=^"
 }

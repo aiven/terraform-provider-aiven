@@ -1,3 +1,4 @@
+// Package opensearch implements the Aiven OpenSearch service.
 package opensearch
 
 import (
@@ -30,7 +31,7 @@ var aivenOpenSearchACLConfigSchema = map[string]*schema.Schema{
 
 func ResourceOpenSearchACLConfig() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The OpenSearch resource allows the creation and management of Aiven OpenSearch services.",
+		Description:   "The OpenSearch ACL Config resource allows the creation and management of Aiven OpenSearch ACLs.",
 		CreateContext: resourceOpenSearchACLConfigUpdate,
 		ReadContext:   resourceOpenSearchACLConfigRead,
 		UpdateContext: resourceOpenSearchACLConfigUpdate,

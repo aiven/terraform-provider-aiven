@@ -7,6 +7,7 @@ import (
 
 	"github.com/aiven/aiven-go-client"
 	"github.com/docker/go-units"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
 
 // ResourceStateOrResourceDiff either *schema.ResourceState or *schema.ResourceDiff
@@ -177,4 +178,17 @@ func DetermineMixedOrganizationConstraintIDToStore(
 	}
 
 	return r.Account.OrganizationId, nil
+}
+
+// StringToDiagWarning is a function that converts a string to a diag warning.
+func StringToDiagWarning(msg string) diag.Diagnostics {
+	return diag.Diagnostics{{
+		Severity: diag.Warning,
+		Summary:  msg,
+	}}
+}
+
+// ErrorToDiagWarning is a function that converts an error to a diag warning.
+func ErrorToDiagWarning(err error) diag.Diagnostics {
+	return StringToDiagWarning(err.Error())
 }
