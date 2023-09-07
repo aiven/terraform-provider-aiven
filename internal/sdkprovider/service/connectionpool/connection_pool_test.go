@@ -108,7 +108,7 @@ resource "aiven_pg" "bar" {
   maintenance_window_time = "10:00:00"
 }
 
-resource "aiven_opensearch_user" "foo" {
+resource "aiven_pg_user" "foo" {
   service_name = aiven_pg.bar.service_name
   project      = data.aiven_project.foo.project
   username     = "user-%s"
@@ -124,7 +124,7 @@ resource "aiven_connection_pool" "foo" {
   service_name  = aiven_pg.bar.service_name
   project       = data.aiven_project.foo.project
   database_name = aiven_pg_database.foo.database_name
-  username      = aiven_opensearch_user.foo.username
+  username      = aiven_pg_user.foo.username
   pool_name     = "test-acc-pool-%s"
   pool_size     = 25
   pool_mode     = "transaction"
