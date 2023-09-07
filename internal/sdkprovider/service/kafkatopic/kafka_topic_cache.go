@@ -178,11 +178,19 @@ func DeleteTopicFromCache(projectName, serviceName, topicName string) {
 	key := projectName + serviceName
 	for k, name := range t.missing[key] {
 		if name == topicName {
+			if l := len(t.missing[key]); k+1 > l {
+				t.missing[key] = t.missing[key][:l-1]
+				continue
+			}
 			t.missing[key] = slices.Delete(t.missing[key], k, k+1)
 		}
 	}
 	for k, name := range t.v1list[key] {
 		if name == topicName {
+			if l := len(t.v1list[key]); k+1 > l {
+				t.v1list[key] = t.v1list[key][:l-1]
+				continue
+			}
 			t.v1list[key] = slices.Delete(t.v1list[key], k, k+1)
 		}
 	}
