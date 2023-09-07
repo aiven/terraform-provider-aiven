@@ -13,6 +13,7 @@ nav_order: 1
 - Fix service IP filters normalization
 - Fix improper omitting in `ToAPI`
 - Fix Kafka Topic perfomance
+- Add OpenSearch Security Plugin support (`aiven_opensearch_security_plugin_config` resource)
 
 ## [4.8.1] - 2023-08-23
 
