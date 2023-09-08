@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.9.0] - 2023-09-18
+
 - Fix IP Filter migrations error
 - Fix `aiven_transit_gateway_vpc_attachment` resource update
 - Fix service IP filters normalization
