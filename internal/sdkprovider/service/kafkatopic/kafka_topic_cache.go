@@ -142,6 +142,14 @@ func (t *kafkaTopicCache) GetMissing(projectName, serviceName string) []string {
 	return t.missing[projectName+serviceName]
 }
 
+// GetFullQueue retrieves a topics queue
+func (t *kafkaTopicCache) GetFullQueue(projectName, serviceName string) []string {
+	t.RLock()
+	defer t.RUnlock()
+
+	return t.inQueue[projectName+serviceName]
+}
+
 // GetQueue retrieves a topics queue, retrieves up to 100 first elements
 func (t *kafkaTopicCache) GetQueue(projectName, serviceName string) []string {
 	t.RLock()
@@ -157,6 +165,7 @@ func (t *kafkaTopicCache) GetQueue(projectName, serviceName string) []string {
 // SetV1List sets v1 topics list
 func (t *kafkaTopicCache) SetV1List(projectName, serviceName string, list []*aiven.KafkaListTopic) {
 	t.Lock()
+	t.v1list[projectName+serviceName] = nil
 	for _, v := range list {
 		t.v1list[projectName+serviceName] = append(t.v1list[projectName+serviceName], v.TopicName)
 	}

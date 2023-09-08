@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/aiven/aiven-go-client"
@@ -12,6 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"golang.org/x/exp/slices"
+	"golang.org/x/sync/semaphore"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
@@ -259,27 +262,18 @@ func ResourceKafkaTopic() *schema.Resource {
 	}
 }
 
+var kafkaTopicCreateSem = semaphore.NewWeighted(1)
+var onceCreate sync.Map
+
 func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	topicName := d.Get("topic_name").(string)
 	partitions := d.Get("partitions").(int)
 	replication := d.Get("replication").(int)
-
-	// aiven.KafkaTopics.Create() function may return 501 on create
-	// Second call might say that topic already exists
-	// So to be sure, better check it before create
-	_, err := getTopic(ctx, m, d.Timeout(schema.TimeoutRead), project, serviceName, topicName)
-
-	// No error means topic exists
-	if err == nil {
-		return diag.Errorf("Topic conflict, already exists: %s", topicName)
-	}
-
-	// If this is not "does not exist", then something happened
-	if !aiven.IsNotFound(err) {
-		return diag.FromErr(err)
-	}
+	c := getTopicCache()
+	client := m.(*aiven.Client)
+	var err error
 
 	createRequest := aiven.CreateKafkaTopicRequest{
 		Partitions:  &partitions,
@@ -289,25 +283,39 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 		Tags:        getTags(d),
 	}
 
-	w := &kafkaTopicCreateWaiter{
-		Client:        m.(*aiven.Client),
-		Project:       project,
-		ServiceName:   serviceName,
-		CreateRequest: createRequest,
+	once, _ := onceCreate.LoadOrStore(project+serviceName, new(sync.Once))
+	once.(*sync.Once).Do(func() {
+		var list []*aiven.KafkaListTopic
+		list, err = client.KafkaTopics.List(project, serviceName)
+		if err != nil {
+			return
+		}
+
+		c.SetV1List(project, serviceName, list)
+	})
+	if err != nil {
+		diag.Errorf("cannot check kafka topic existence: %s", err)
 	}
 
-	timeout := d.Timeout(schema.TimeoutCreate)
+	// Checking if the Kafka topic was already in the queue and, if not, setting it atomically
+	_ = kafkaTopicCreateSem.Acquire(ctx, 1)
+	if slices.Contains(c.GetV1List(project, serviceName), topicName) ||
+		slices.Contains(c.GetFullQueue(project, serviceName), topicName) {
+		return diag.Errorf("Topic conflict already exists: %s", topicName)
+	}
+	c.AddToQueue(project, serviceName, topicName)
+	kafkaTopicCreateSem.Release(1)
 
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
-	_, err = w.Conf(timeout).WaitForStateContext(ctx)
-	if err != nil {
-		return diag.FromErr(err)
+	err = client.KafkaTopics.Create(
+		project,
+		serviceName,
+		createRequest,
+	)
+	if err != nil && !aiven.IsAlreadyExists(err) {
+		diag.FromErr(err)
 	}
 
 	d.SetId(schemautil.BuildResourceID(project, serviceName, topicName))
-
-	// Invalidates cache for the topic
-	DeleteTopicFromCache(project, serviceName, topicName)
 
 	// We do not call a Kafka Topic read here to speed up the performance.
 	// However, in the case of Kafka Topic resource getting a computed field
@@ -374,6 +382,8 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	getTopicCache().AddToQueue(project, serviceName, topicName)
 
 	topic, err := getTopic(ctx, m, d.Timeout(schema.TimeoutRead), project, serviceName, topicName)
 
