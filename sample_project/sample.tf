@@ -78,7 +78,9 @@ resource "aiven_influxdb" "sampleinflux" {
   maintenance_window_dow  = "monday"
   maintenance_window_time = "11:00:00"
   influxdb_user_config {
-    ip_filter = ["0.0.0.0/0"]
+    ip_filter_object {
+      network = "0.0.0.0/0"
+    }
   }
 }
 
@@ -90,7 +92,7 @@ resource "aiven_service_integration" "samplekafka_metrics" {
   destination_service_name = aiven_influxdb.sampleinflux.service_name
 }
 
-# PostreSQL service
+# PostgreSQL service
 resource "aiven_pg" "samplepg" {
   project                 = data.aiven_project.sample.project
   cloud_name              = "google-europe-west1"
@@ -147,7 +149,9 @@ resource "aiven_grafana" "samplegrafana" {
   plan         = "startup-4"
   service_name = "samplegrafana"
   grafana_user_config {
-    ip_filter = ["0.0.0.0/0"]
+    ip_filter_object {
+      network = "0.0.0.0/0"
+    }
   }
 }
 
