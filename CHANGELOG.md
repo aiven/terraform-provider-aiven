@@ -14,6 +14,7 @@ nav_order: 1
 - Fix improper omitting in `ToAPI`
 - Fix Kafka Topic perfomance
 - Add OpenSearch Security Plugin support (`aiven_opensearch_security_plugin_config` resource)
+- Deprecate `add_account_owners_admin_access` and `use_source_project_billing_group` fields in `aiven_project` resource
 
 ## [4.8.1] - 2023-08-23
 
