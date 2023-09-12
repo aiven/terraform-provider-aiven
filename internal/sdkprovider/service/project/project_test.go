@@ -31,7 +31,6 @@ func TestAccAivenProject_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "project", fmt.Sprintf("test-acc-pr-%s", rName)),
 					resource.TestCheckResourceAttrSet(resourceName, "default_cloud"),
 					resource.TestCheckResourceAttrSet(resourceName, "ca_cert"),
-					resource.TestCheckResourceAttr(resourceName, "add_account_owners_admin_access", "true"),
 				),
 			},
 			{
@@ -42,7 +41,6 @@ func TestAccAivenProject_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "default_cloud"),
 					resource.TestCheckResourceAttrSet(resourceName, "ca_cert"),
 					resource.TestCheckResourceAttrSet(resourceName, "billing_group"),
-					resource.TestCheckResourceAttr(resourceName, "add_account_owners_admin_access", "false"),
 				),
 			},
 			{
@@ -169,10 +167,9 @@ resource "aiven_account" "bar" {
 }
 
 resource "aiven_project" "foo" {
-  project                         = "test-acc-pr-%[1]s"
-  account_id                      = aiven_account.bar.account_id
-  default_cloud                   = "aws-eu-west-2"
-  add_account_owners_admin_access = true
+  project       = "test-acc-pr-%[1]s"
+  account_id    = aiven_account.bar.account_id
+  default_cloud = "aws-eu-west-2"
   tag {
     key   = "test"
     value = "val"
@@ -208,10 +205,9 @@ resource "aiven_project" "source" {
 }
 
 resource "aiven_project" "foo" {
-  project                          = "test-acc-pr-%[1]s"
-  account_id                       = aiven_account.bar.account_id
-  copy_from_project                = aiven_project.source.project
-  use_source_project_billing_group = false
+  project           = "test-acc-pr-%[1]s"
+  account_id        = aiven_account.bar.account_id
+  copy_from_project = aiven_project.source.project
 }
 
 data "aiven_project" "project" {

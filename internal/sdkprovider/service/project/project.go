@@ -58,11 +58,17 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Optional:         true,
 		DiffSuppressFunc: schemautil.CreateOnlyDiffSuppressFunc,
 		Description:      "Use the same billing group that is used in source project.",
+		Deprecated:       "This field is deprecated and will be removed in the next major release.",
 	},
 	"add_account_owners_admin_access": {
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Description: userconfig.Desc("If parent_id is set, grant account owner team admin access to the new project.").DefaultValue(true).Build(),
+		Deprecated: "This field is deprecated and will be removed in the next major release. " +
+			"Currently, it will always be set to true, regardless of the value set in the manifest.",
+		DiffSuppressFunc: func(_ string, _ string, _ string, _ *schema.ResourceData) bool {
+			return true
+		},
 	},
 	"project": {
 		Type:        schema.TypeString,
