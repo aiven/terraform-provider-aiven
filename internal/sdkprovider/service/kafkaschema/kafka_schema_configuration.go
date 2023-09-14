@@ -3,7 +3,7 @@ package kafkaschema
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -62,6 +62,7 @@ func resourceKafkaSchemaConfigurationUpdate(ctx context.Context, d *schema.Resou
 	}
 
 	_, err = m.(*aiven.Client).KafkaGlobalSchemaConfig.Update(
+		ctx,
 		project,
 		serviceName,
 		aiven.KafkaSchemaConfig{
@@ -80,6 +81,7 @@ func resourceKafkaSchemaConfigurationCreate(ctx context.Context, d *schema.Resou
 	serviceName := d.Get("service_name").(string)
 
 	_, err := m.(*aiven.Client).KafkaGlobalSchemaConfig.Update(
+		ctx,
 		project,
 		serviceName,
 		aiven.KafkaSchemaConfig{
@@ -94,13 +96,13 @@ func resourceKafkaSchemaConfigurationCreate(ctx context.Context, d *schema.Resou
 	return resourceKafkaSchemaConfigurationRead(ctx, d, m)
 }
 
-func resourceKafkaSchemaConfigurationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaSchemaConfigurationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	r, err := m.(*aiven.Client).KafkaGlobalSchemaConfig.Get(project, serviceName)
+	r, err := m.(*aiven.Client).KafkaGlobalSchemaConfig.Get(ctx, project, serviceName)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -120,13 +122,14 @@ func resourceKafkaSchemaConfigurationRead(_ context.Context, d *schema.ResourceD
 
 // resourceKafkaSchemaConfigurationDelete Kafka Schemas configuration cannot be deleted, therefore
 // on delete event configuration will be set to the default setting
-func resourceKafkaSchemaConfigurationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaSchemaConfigurationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	_, err = m.(*aiven.Client).KafkaGlobalSchemaConfig.Update(
+		ctx,
 		project,
 		serviceName,
 		aiven.KafkaSchemaConfig{

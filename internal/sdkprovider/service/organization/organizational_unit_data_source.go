@@ -3,7 +3,7 @@ package organization
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -24,7 +24,7 @@ func datasourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceDat
 
 	name := d.Get("name").(string)
 
-	r, err := client.Accounts.List()
+	r, err := client.Accounts.List(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}

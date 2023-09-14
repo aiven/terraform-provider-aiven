@@ -1,11 +1,12 @@
 package opensearch_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -68,6 +69,8 @@ resource "aiven_opensearch_acl_config" "foo" {
 func testAccCheckAivenOpenSearchACLConfigResourceDestroy(s *terraform.State) error {
 	c := acc.GetTestAivenClient()
 
+	ctx := context.Background()
+
 	// loop through the resources in state, verifying each OS ACL Config is destroyed
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_opensearch_acl_config" {
@@ -79,7 +82,7 @@ func testAccCheckAivenOpenSearchACLConfigResourceDestroy(s *terraform.State) err
 			return err
 		}
 
-		r, err := c.ElasticsearchACLs.Get(projectName, serviceName)
+		r, err := c.ElasticsearchACLs.Get(ctx, projectName, serviceName)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {
 				return err

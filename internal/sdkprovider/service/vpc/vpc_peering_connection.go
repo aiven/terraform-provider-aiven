@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -58,6 +58,7 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 	}
 
 	if _, err = client.VPCPeeringConnections.Create(
+		ctx,
 		projectName,
 		vpcID,
 		aiven.CreateVPCPeeringConnectionRequest{
@@ -86,6 +87,7 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 		},
 		Refresh: func() (interface{}, string, error) {
 			pc, err := client.VPCPeeringConnections.GetVPCPeering(
+				ctx,
 				projectName,
 				vpcID,
 				peerCloudAccount,
@@ -177,14 +179,14 @@ func parsePeerVPCID(src string) (*peeringVPCID, error) {
 	return pID, nil
 }
 
-func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	p, err := parsePeerVPCID(d.Id())
 	if err != nil {
 		return diag.Errorf("error parsing peering VPC ID: %s", err)
 	}
 
 	client := m.(*aiven.Client)
-	isAzure, err := isAzureVPCPeeringConnection(d, client)
+	isAzure, err := isAzureVPCPeeringConnection(ctx, d, client)
 	if err != nil {
 		return diag.Errorf("Error checking if it Azure VPC peering connection: %s", err)
 	}
@@ -194,7 +196,14 @@ func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData,
 		peerResourceGroup := schemautil.OptionalStringPointer(d, "peer_resource_group")
 		if peerResourceGroup != nil {
 			pc, err = client.VPCPeeringConnections.GetVPCPeeringWithResourceGroup(
-				p.projectName, p.vpcID, p.peerCloudAccount, p.peerVPC, p.peerRegion, peerResourceGroup)
+				ctx,
+				p.projectName,
+				p.vpcID,
+				p.peerCloudAccount,
+				p.peerVPC,
+				p.peerRegion,
+				peerResourceGroup,
+			)
 			if err != nil {
 				return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 			}
@@ -208,7 +217,13 @@ func resourceVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData,
 	}
 
 	pc, err = client.VPCPeeringConnections.GetVPCPeering(
-		p.projectName, p.vpcID, p.peerCloudAccount, p.peerVPC, p.peerRegion)
+		ctx,
+		p.projectName,
+		p.vpcID,
+		p.peerCloudAccount,
+		p.peerVPC,
+		p.peerRegion,
+	)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -225,7 +240,7 @@ func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceD
 		return diag.Errorf("error parsing peering VPC ID: %s", err)
 	}
 
-	isAzure, err := isAzureVPCPeeringConnection(d, client)
+	isAzure, err := isAzureVPCPeeringConnection(ctx, d, client)
 	if err != nil {
 		return diag.Errorf("Error checking if it Azure VPC peering connection: %s", err)
 	}
@@ -233,6 +248,7 @@ func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceD
 	if isAzure {
 		if peerResourceGroup, ok := d.GetOk("peer_resource_group"); ok {
 			if err = client.VPCPeeringConnections.DeleteVPCPeeringWithResourceGroup(
+				ctx,
 				p.projectName,
 				p.vpcID,
 				p.peerCloudAccount,
@@ -247,6 +263,7 @@ func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceD
 		}
 	}
 	if err = client.VPCPeeringConnections.DeleteVPCPeering(
+		ctx,
 		p.projectName,
 		p.vpcID,
 		p.peerCloudAccount,
@@ -274,15 +291,18 @@ func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceD
 			var pc *aiven.VPCPeeringConnection
 			if isAzure {
 				pc, err = client.VPCPeeringConnections.GetVPCPeeringWithResourceGroup(
+					ctx,
 					p.projectName,
 					p.vpcID,
 					p.peerCloudAccount,
 					p.peerVPC,
 					p.peerRegion,
 					schemautil.OptionalStringPointer(d, "peer_resource_group"), // was already checked
+
 				)
 			} else {
 				pc, err = client.VPCPeeringConnections.GetVPCPeering(
+					ctx,
 					p.projectName,
 					p.vpcID,
 					p.peerCloudAccount,
@@ -442,7 +462,7 @@ func ConvertStateInfoToMap(s *map[string]interface{}) map[string]string {
 }
 
 // isAzureVPCPeeringConnection checking if peered VPC is in the Azure cloud
-func isAzureVPCPeeringConnection(d *schema.ResourceData, c *aiven.Client) (bool, error) {
+func isAzureVPCPeeringConnection(ctx context.Context, d *schema.ResourceData, c *aiven.Client) (bool, error) {
 	p, err := parsePeerVPCID(d.Id())
 	if err != nil {
 		return false, fmt.Errorf("error parsing Azure peering VPC ID: %s", err)
@@ -451,7 +471,7 @@ func isAzureVPCPeeringConnection(d *schema.ResourceData, c *aiven.Client) (bool,
 	// If peerRegion is nil the peered VPC is assumed to be in the same region and
 	// cloud as the project VPC
 	if p.peerRegion == nil {
-		vpc, err := c.VPCs.Get(p.projectName, p.vpcID)
+		vpc, err := c.VPCs.Get(ctx, p.projectName, p.vpcID)
 		if err != nil {
 			return false, err
 		}

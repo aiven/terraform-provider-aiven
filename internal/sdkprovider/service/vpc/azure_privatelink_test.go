@@ -1,11 +1,12 @@
 package vpc_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -44,6 +45,8 @@ func TestAccAivenAzurePrivatelink_basic(t *testing.T) {
 func testAccCheckAivenAzurePrivatelinkResourceDestroy(s *terraform.State) error {
 	c := acc.GetTestAivenClient()
 
+	ctx := context.Background()
+
 	// loop through the resources in state, verifying each Azure privatelink is destroyed
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_azure_privatelink" {
@@ -55,7 +58,7 @@ func testAccCheckAivenAzurePrivatelinkResourceDestroy(s *terraform.State) error 
 			return err
 		}
 
-		pv, err := c.AzurePrivatelink.Get(project, serviceName)
+		pv, err := c.AzurePrivatelink.Get(ctx, project, serviceName)
 		if err != nil && !aiven.IsNotFound(err) && err.(aiven.Error).Status != 500 {
 			return fmt.Errorf("error getting a Azure Privatelink: %w", err)
 		}

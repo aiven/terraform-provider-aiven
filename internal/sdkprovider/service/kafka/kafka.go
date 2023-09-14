@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -118,7 +118,7 @@ func ResourceKafka() *schema.Resource {
 				serviceName := d.Get("service_name").(string)
 				client := m.(*aiven.Client)
 
-				kafka, err := client.Services.Get(project, serviceName)
+				kafka, err := client.Services.Get(ctx, project, serviceName)
 				if err != nil {
 					return false
 				}
@@ -156,7 +156,7 @@ func resourceKafkaCreate(ctx context.Context, d *schema.ResourceData, m interfac
 			defaultSchemaRegistryACLSubject = "default-sr-admin-subject"
 		)
 
-		if err := client.KafkaACLs.Delete(project, serviceName, defaultACLId); err != nil && !aiven.IsNotFound(err) {
+		if err := client.KafkaACLs.Delete(ctx, project, serviceName, defaultACLId); err != nil && !aiven.IsNotFound(err) {
 			return diag.Errorf("cannot delete default wildcard kafka acl: %s", err)
 		}
 
@@ -165,7 +165,7 @@ func resourceKafkaCreate(ctx context.Context, d *schema.ResourceData, m interfac
 			defaultSchemaRegistryACLSubject,
 		}
 		for _, acl := range defaultSchemaACLLs {
-			if err := client.KafkaSchemaRegistryACLs.Delete(project, serviceName, acl); err != nil && !aiven.IsNotFound(err) {
+			if err := client.KafkaSchemaRegistryACLs.Delete(ctx, project, serviceName, acl); err != nil && !aiven.IsNotFound(err) {
 				return diag.Errorf("cannot delete `%s` kafka ACL for Schema Registry: %s", acl, err)
 			}
 		}
@@ -182,7 +182,7 @@ func resourceKafkaRead(ctx context.Context, d *schema.ResourceData, m interface{
 		return diag.FromErr(err)
 	}
 
-	kafka, err := client.Services.Get(project, service)
+	kafka, err := client.Services.Get(ctx, project, service)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}

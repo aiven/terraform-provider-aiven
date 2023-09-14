@@ -3,6 +3,7 @@
 package examples
 
 import (
+	"context"
 	"testing"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
@@ -43,17 +44,19 @@ func (s *KafkaConnectorTestSuite) TestKafkaConnectorOS() {
 	terraform.Apply(s.T(), opts)
 
 	// Then
-	kafkaService, err := s.client.Services.Get(s.config.Project, kafkaServiceName)
+	ctx := context.Background()
+
+	kafkaService, err := s.client.Services.Get(ctx, s.config.Project, kafkaServiceName)
 	s.NoError(err)
 	s.Equal("kafka", kafkaService.Type)
 	s.Equal("business-4", kafkaService.Plan)
 	s.Equal("google-europe-west1", kafkaService.CloudName)
 
-	kafkaConnector, err := s.client.KafkaConnectors.GetByName(s.config.Project, kafkaServiceName, kafkaConnectorName)
+	kafkaConnector, err := s.client.KafkaConnectors.GetByName(ctx, s.config.Project, kafkaServiceName, kafkaConnectorName)
 	s.NoError(err)
 	s.Equal(kafkaConnector.Name, kafkaConnectorName)
 
-	osService, err := s.client.Services.Get(s.config.Project, osServiceName)
+	osService, err := s.client.Services.Get(ctx, s.config.Project, osServiceName)
 	s.NoError(err)
 	s.Equal("opensearch", osService.Type)
 	s.Equal("startup-4", osService.Plan)

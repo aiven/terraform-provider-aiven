@@ -1,11 +1,12 @@
 package account_test
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -70,6 +71,8 @@ data "aiven_account_team_project" "project" {
 func testAccCheckAivenAccountTeamProjectResourceDestroy(s *terraform.State) error {
 	c := acc.GetTestAivenClient()
 
+	ctx := context.Background()
+
 	// loop through the resources in state, verifying each account team project is destroyed
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_account_team_project" {
@@ -81,7 +84,7 @@ func testAccCheckAivenAccountTeamProjectResourceDestroy(s *terraform.State) erro
 			return err
 		}
 
-		r, err := c.Accounts.List()
+		r, err := c.Accounts.List(ctx)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {
 				return err
@@ -92,7 +95,7 @@ func testAccCheckAivenAccountTeamProjectResourceDestroy(s *terraform.State) erro
 
 		for _, a := range r.Accounts {
 			if a.Id == accountID {
-				rp, err := c.AccountTeamProjects.List(accountID, teamID)
+				rp, err := c.AccountTeamProjects.List(ctx, accountID, teamID)
 				if err != nil {
 					if err.(aiven.Error).Status != 404 {
 						return err

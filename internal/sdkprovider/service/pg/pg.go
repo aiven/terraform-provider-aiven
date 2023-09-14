@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -141,13 +141,13 @@ func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	}
 
 	if userConfig["pg_version"] != nil {
-		s, err := client.Services.Get(projectName, serviceName)
+		s, err := client.Services.Get(ctx, projectName, serviceName)
 		if err != nil {
 			return diag.Errorf("cannot get a common: %s", err)
 		}
 
 		if userConfig["pg_version"].(string) != s.UserConfig["pg_version"].(string) {
-			t, err := client.ServiceTask.Create(projectName, serviceName, aiven.ServiceTaskRequest{
+			t, err := client.ServiceTask.Create(ctx, projectName, serviceName, aiven.ServiceTaskRequest{
 				TargetVersion: userConfig["pg_version"].(string),
 				TaskType:      "upgrade_check",
 			})
@@ -156,6 +156,7 @@ func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			}
 
 			w := &ServiceTaskWaiter{
+				Context:     ctx,
 				Client:      m.(*aiven.Client),
 				Project:     projectName,
 				ServiceName: serviceName,
@@ -185,6 +186,7 @@ func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m inte
 // ServiceTaskWaiter is used to refresh the Aiven Service Task endpoints when
 // provisioning.
 type ServiceTaskWaiter struct {
+	Context     context.Context
 	Client      *aiven.Client
 	Project     string
 	ServiceName string
@@ -196,6 +198,7 @@ type ServiceTaskWaiter struct {
 func (w *ServiceTaskWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		t, err := w.Client.ServiceTask.Get(
+			w.Context,
 			w.Project,
 			w.ServiceName,
 			w.TaskID,

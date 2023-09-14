@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/stretchr/testify/suite"
@@ -64,6 +64,8 @@ func (s *BaseTestSuite) TearDownSuite() {
 }
 
 // withDefaults adds default options for terraform test
+//
+//lint:ignore U1000 Ignore unused function. Used in child structs
 func (s *BaseTestSuite) withDefaults(opts *terraform.Options) *terraform.Options {
 	// No need to use lock file for dev build
 	opts.Lock = false

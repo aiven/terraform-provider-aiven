@@ -3,7 +3,7 @@ package mysql
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -82,6 +82,7 @@ func resourceMySQLUserCreate(ctx context.Context, d *schema.ResourceData, m inte
 	serviceName := d.Get("service_name").(string)
 	username := d.Get("username").(string)
 	_, err := client.ServiceUsers.Create(
+		ctx,
 		projectName,
 		serviceName,
 		aiven.CreateServiceUserRequest{
@@ -94,7 +95,7 @@ func resourceMySQLUserCreate(ctx context.Context, d *schema.ResourceData, m inte
 	}
 
 	if _, ok := d.GetOk("password"); ok {
-		_, err := client.ServiceUsers.Update(projectName, serviceName, username,
+		_, err := client.ServiceUsers.Update(ctx, projectName, serviceName, username,
 			aiven.ModifyServiceUserRequest{
 				NewPassword: schemautil.OptionalStringPointer(d, "password"),
 			})
@@ -116,7 +117,7 @@ func resourceMySQLUserUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	_, err = client.ServiceUsers.Update(projectName, serviceName, username,
+	_, err = client.ServiceUsers.Update(ctx, projectName, serviceName, username,
 		aiven.ModifyServiceUserRequest{
 			Authentication: schemautil.OptionalStringPointer(d, "authentication"),
 			NewPassword:    schemautil.OptionalStringPointer(d, "password"),

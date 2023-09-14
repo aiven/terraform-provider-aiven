@@ -4,7 +4,7 @@ package opensearch
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -32,7 +32,7 @@ func datasourceOpenSearchSecurityPluginConfigRead(ctx context.Context, d *schema
 
 	serviceName := d.Get("service_name").(string)
 
-	if _, err := client.OpenSearchSecurityPluginHandler.Get(projectName, serviceName); err != nil {
+	if _, err := client.OpenSearchSecurityPluginHandler.Get(ctx, projectName, serviceName); err != nil {
 		return diag.FromErr(err)
 	}
 

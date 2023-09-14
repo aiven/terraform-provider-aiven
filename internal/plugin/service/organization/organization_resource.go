@@ -3,7 +3,7 @@ package organization
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -123,13 +123,13 @@ func (r *organizationResource) Configure(
 }
 
 // fillModel fills the organization resource model from the Aiven API.
-func (r *organizationResource) fillModel(model *organizationResourceModel) (err error) {
-	normalizedID, err := schemautil.NormalizeOrganizationID(r.client, model.ID.ValueString())
+func (r *organizationResource) fillModel(ctx context.Context, model *organizationResourceModel) (err error) {
+	normalizedID, err := schemautil.NormalizeOrganizationID(ctx, r.client, model.ID.ValueString())
 	if err != nil {
 		return
 	}
 
-	account, err := r.client.Accounts.Get(normalizedID)
+	account, err := r.client.Accounts.Get(ctx, normalizedID)
 	if err != nil {
 		return
 	}
@@ -153,7 +153,7 @@ func (r *organizationResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	account, err := r.client.Accounts.Create(aiven.Account{
+	account, err := r.client.Accounts.Create(ctx, aiven.Account{
 		Name: plan.Name.ValueString(),
 	})
 	if err != nil {
@@ -164,7 +164,7 @@ func (r *organizationResource) Create(ctx context.Context, req resource.CreateRe
 
 	plan.ID = types.StringValue(account.Account.OrganizationId)
 
-	err = r.fillModel(&plan)
+	err = r.fillModel(ctx, &plan)
 	if err != nil {
 		resp.Diagnostics = util.DiagErrorCreatingResource(resp.Diagnostics, r, err)
 
@@ -184,7 +184,7 @@ func (r *organizationResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	err := r.fillModel(&state)
+	err := r.fillModel(ctx, &state)
 	if err != nil {
 		resp.Diagnostics = util.DiagErrorReadingResource(resp.Diagnostics, r, err)
 
@@ -204,14 +204,14 @@ func (r *organizationResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	normalizedID, err := schemautil.NormalizeOrganizationID(r.client, plan.ID.ValueString())
+	normalizedID, err := schemautil.NormalizeOrganizationID(ctx, r.client, plan.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics = util.DiagErrorUpdatingResource(resp.Diagnostics, r, err)
 
 		return
 	}
 
-	_, err = r.client.Accounts.Update(normalizedID, aiven.Account{
+	_, err = r.client.Accounts.Update(ctx, normalizedID, aiven.Account{
 		Name: plan.Name.ValueString(),
 	})
 	if err != nil {
@@ -220,7 +220,7 @@ func (r *organizationResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	err = r.fillModel(&plan)
+	err = r.fillModel(ctx, &plan)
 	if err != nil {
 		resp.Diagnostics = util.DiagErrorUpdatingResource(resp.Diagnostics, r, err)
 
@@ -240,14 +240,14 @@ func (r *organizationResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	normalizedID, err := schemautil.NormalizeOrganizationID(r.client, state.ID.ValueString())
+	normalizedID, err := schemautil.NormalizeOrganizationID(ctx, r.client, state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics = util.DiagErrorDeletingResource(resp.Diagnostics, r, err)
 
 		return
 	}
 
-	err = r.client.Accounts.Delete(normalizedID)
+	err = r.client.Accounts.Delete(ctx, normalizedID)
 	if err != nil {
 		resp.Diagnostics = util.DiagErrorDeletingResource(resp.Diagnostics, r, err)
 

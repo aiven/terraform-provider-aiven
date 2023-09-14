@@ -3,7 +3,7 @@ package pg
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -80,6 +80,7 @@ func resourcePGUserCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	username := d.Get("username").(string)
 	allowReplication := d.Get("pg_allow_replication").(bool)
 	_, err := client.ServiceUsers.Create(
+		ctx,
 		projectName,
 		serviceName,
 		aiven.CreateServiceUserRequest{
@@ -94,7 +95,7 @@ func resourcePGUserCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	if _, ok := d.GetOk("password"); ok {
-		_, err := client.ServiceUsers.Update(projectName, serviceName, username,
+		_, err := client.ServiceUsers.Update(ctx, projectName, serviceName, username,
 			aiven.ModifyServiceUserRequest{
 				NewPassword: schemautil.OptionalStringPointer(d, "password"),
 			})
@@ -116,7 +117,7 @@ func resourcePGUserUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 
-	_, err = client.ServiceUsers.Update(projectName, serviceName, username,
+	_, err = client.ServiceUsers.Update(ctx, projectName, serviceName, username,
 		aiven.ModifyServiceUserRequest{
 			NewPassword: schemautil.OptionalStringPointer(d, "password"),
 		})
@@ -144,7 +145,7 @@ func resourcePGUserUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	return resourcePGUserRead(ctx, d, m)
 }
 
-func resourcePGUserRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePGUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
@@ -152,7 +153,7 @@ func resourcePGUserRead(_ context.Context, d *schema.ResourceData, m interface{}
 		return diag.FromErr(err)
 	}
 
-	user, err := client.ServiceUsers.Get(projectName, serviceName, username)
+	user, err := client.ServiceUsers.Get(ctx, projectName, serviceName, username)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}

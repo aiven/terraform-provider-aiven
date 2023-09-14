@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -19,6 +19,7 @@ func ResourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m in
 	serviceName := d.Get("service_name").(string)
 	username := d.Get("username").(string)
 	_, err := client.ServiceUsers.Create(
+		ctx,
 		projectName,
 		serviceName,
 		aiven.CreateServiceUserRequest{
@@ -30,7 +31,7 @@ func ResourceServiceUserCreate(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	if _, ok := d.GetOk("password"); ok {
-		_, err := client.ServiceUsers.Update(projectName, serviceName, username,
+		_, err := client.ServiceUsers.Update(ctx, projectName, serviceName, username,
 			aiven.ModifyServiceUserRequest{
 				NewPassword: OptionalStringPointer(d, "password"),
 			})
@@ -52,7 +53,7 @@ func ResourceServiceUserUpdate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	_, err = client.ServiceUsers.Update(projectName, serviceName, username,
+	_, err = client.ServiceUsers.Update(ctx, projectName, serviceName, username,
 		aiven.ModifyServiceUserRequest{
 			NewPassword: OptionalStringPointer(d, "password"),
 		})
@@ -63,7 +64,7 @@ func ResourceServiceUserUpdate(ctx context.Context, d *schema.ResourceData, m in
 	return ResourceServiceUserRead(ctx, d, m)
 }
 
-func ResourceServiceUserRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func ResourceServiceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, username, err := SplitResourceID3(d.Id())
@@ -71,7 +72,7 @@ func ResourceServiceUserRead(_ context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	user, err := client.ServiceUsers.Get(projectName, serviceName, username)
+	user, err := client.ServiceUsers.Get(ctx, projectName, serviceName, username)
 	if err != nil {
 		return diag.FromErr(ResourceReadHandleNotFound(err, d))
 	}
@@ -84,7 +85,7 @@ func ResourceServiceUserRead(_ context.Context, d *schema.ResourceData, m interf
 	return nil
 }
 
-func ResourceServiceUserDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func ResourceServiceUserDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, username, err := SplitResourceID3(d.Id())
@@ -92,7 +93,7 @@ func ResourceServiceUserDelete(_ context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	err = client.ServiceUsers.Delete(projectName, serviceName, username)
+	err = client.ServiceUsers.Delete(ctx, projectName, serviceName, username)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
@@ -107,7 +108,7 @@ func DatasourceServiceUserRead(ctx context.Context, d *schema.ResourceData, m in
 	serviceName := d.Get("service_name").(string)
 	userName := d.Get("username").(string)
 
-	list, err := client.ServiceUsers.List(projectName, serviceName)
+	list, err := client.ServiceUsers.List(ctx, projectName, serviceName)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -2,6 +2,7 @@ package account_test
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -14,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -212,6 +213,8 @@ data "aiven_account_authentication" "auth" {
 func testAccCheckAivenAccountAuthenticationResourceDestroy(s *terraform.State) error {
 	c := acc.GetTestAivenClient()
 
+	ctx := context.Background()
+
 	// loop through the resources in state, verifying each account authentication is destroyed
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_account_authentication" {
@@ -223,7 +226,7 @@ func testAccCheckAivenAccountAuthenticationResourceDestroy(s *terraform.State) e
 			return err
 		}
 
-		r, err := c.Accounts.List()
+		r, err := c.Accounts.List(ctx)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {
 				return err
@@ -234,7 +237,7 @@ func testAccCheckAivenAccountAuthenticationResourceDestroy(s *terraform.State) e
 
 		for _, ac := range r.Accounts {
 			if ac.Id == accountID {
-				ra, err := c.AccountAuthentications.List(accountID)
+				ra, err := c.AccountAuthentications.List(ctx, accountID)
 				if err != nil {
 					if err.(aiven.Error).Status != 404 {
 						return err
@@ -258,6 +261,8 @@ func testAccCheckAivenAccountAuthenticationResourceDestroy(s *terraform.State) e
 func testAccCheckAivenAccountAuthenticationWithAutoJoinTeamIDResourceDestroy(s *terraform.State) error {
 	c := acc.GetTestAivenClient()
 
+	ctx := context.Background()
+
 	// loop through the resources in state, verifying each account authentication is destroyed
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_account_team" && rs.Type != "aiven_account_authentication" {
@@ -271,7 +276,7 @@ func testAccCheckAivenAccountAuthenticationWithAutoJoinTeamIDResourceDestroy(s *
 			return err
 		}
 
-		r, err := c.Accounts.List()
+		r, err := c.Accounts.List(ctx)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {
 				return err
@@ -280,10 +285,12 @@ func testAccCheckAivenAccountAuthenticationWithAutoJoinTeamIDResourceDestroy(s *
 			return nil
 		}
 
+		ctx := context.Background()
+
 		for _, ac := range r.Accounts {
 			if ac.Id == accountID {
 				if isTeam {
-					rl, err := c.AccountTeams.List(accountID)
+					rl, err := c.AccountTeams.List(ctx, accountID)
 					if err != nil {
 						if err.(aiven.Error).Status != 404 {
 							return err
@@ -298,7 +305,7 @@ func testAccCheckAivenAccountAuthenticationWithAutoJoinTeamIDResourceDestroy(s *
 						}
 					}
 				} else {
-					ra, err := c.AccountAuthentications.List(accountID)
+					ra, err := c.AccountAuthentications.List(ctx, accountID)
 					if err != nil {
 						if err.(aiven.Error).Status != 404 {
 							return err

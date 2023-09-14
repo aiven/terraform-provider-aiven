@@ -1,13 +1,14 @@
 package vpc_test
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/kelseyhightower/envconfig"
@@ -55,10 +56,13 @@ func TestAccAivenGCPPeeringConnection_basic(t *testing.T) {
 				Config: testAccGCPVPCPeeringConnection(&s),
 				Check: func(state *terraform.State) error {
 					c := acc.GetTestAivenClient()
+
+					ctx := context.Background()
+
 					p := s.AivenProject
 
 				QueryVpc:
-					vpcs, err := c.VPCs.List(p)
+					vpcs, err := c.VPCs.List(ctx, p)
 					if err != nil {
 						return err
 					}
@@ -74,7 +78,7 @@ func TestAccAivenGCPPeeringConnection_basic(t *testing.T) {
 						return errors.New("error getting GCP peering connection, project VPC is empty")
 					}
 
-					cons, err := c.VPCPeeringConnections.List(p, v.ProjectVPCID)
+					cons, err := c.VPCPeeringConnections.List(ctx, p, v.ProjectVPCID)
 					if err != nil {
 						return fmt.Errorf("error getting list of peering connections: %w", err)
 					}

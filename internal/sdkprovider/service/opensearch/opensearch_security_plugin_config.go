@@ -4,7 +4,7 @@ package opensearch
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -70,6 +70,7 @@ func resourceOpenSearchSecurityPluginConfigCreate(
 	serviceName := d.Get("service_name").(string)
 
 	if _, err := client.OpenSearchSecurityPluginHandler.Enable(
+		ctx,
 		project,
 		serviceName,
 		aiven.OpenSearchSecurityPluginEnableRequest{
@@ -87,7 +88,7 @@ func resourceOpenSearchSecurityPluginConfigCreate(
 // resourceOpenSearchSecurityPluginConfigRead reads the OpenSearch Security Plugin config from an existing OpenSearch
 // service.
 func resourceOpenSearchSecurityPluginConfigRead(
-	_ context.Context,
+	ctx context.Context,
 	d *schema.ResourceData,
 	m any,
 ) diag.Diagnostics {
@@ -98,7 +99,7 @@ func resourceOpenSearchSecurityPluginConfigRead(
 		return diag.FromErr(err)
 	}
 
-	r, err := client.OpenSearchSecurityPluginHandler.Get(project, serviceName)
+	r, err := client.OpenSearchSecurityPluginHandler.Get(ctx, project, serviceName)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -142,6 +143,7 @@ func resourceOpenSearchSecurityPluginConfigUpdate(
 	oldAdminPassword, newAdminPassword := d.GetChange("admin_password")
 
 	if _, err := client.OpenSearchSecurityPluginHandler.UpdatePassword(
+		ctx,
 		project,
 		serviceName,
 		aiven.OpenSearchSecurityPluginUpdatePasswordRequest{

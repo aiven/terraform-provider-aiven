@@ -3,7 +3,7 @@ package clickhouse
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -62,6 +62,7 @@ func resourceClickhouseUserCreate(ctx context.Context, d *schema.ResourceData, m
 	serviceName := d.Get("service_name").(string)
 	username := d.Get("username").(string)
 	u, err := client.ClickhouseUser.Create(
+		ctx,
 		projectName,
 		serviceName,
 		username,
@@ -79,7 +80,7 @@ func resourceClickhouseUserCreate(ctx context.Context, d *schema.ResourceData, m
 	return resourceClickhouseUserRead(ctx, d, m)
 }
 
-func resourceClickhouseUserRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceClickhouseUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, uuid, err := schemautil.SplitResourceID3(d.Id())
@@ -87,7 +88,7 @@ func resourceClickhouseUserRead(_ context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(err)
 	}
 
-	user, err := client.ClickhouseUser.Get(projectName, serviceName, uuid)
+	user, err := client.ClickhouseUser.Get(ctx, projectName, serviceName, uuid)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -111,7 +112,7 @@ func resourceClickhouseUserRead(_ context.Context, d *schema.ResourceData, m int
 	return nil
 }
 
-func resourceClickhouseUserDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceClickhouseUserDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, uuid, err := schemautil.SplitResourceID3(d.Id())
@@ -119,7 +120,7 @@ func resourceClickhouseUserDelete(_ context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(err)
 	}
 
-	err = client.ClickhouseUser.Delete(projectName, serviceName, uuid)
+	err = client.ClickhouseUser.Delete(ctx, projectName, serviceName, uuid)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
@@ -91,8 +91,8 @@ func GetServicePlanParametersFromSchema(ctx context.Context, client *aiven.Clien
 	return getServicePlanParametersInternal(ctx, client, project, serviceType, servicePlan)
 }
 
-func getServicePlanParametersInternal(_ context.Context, client *aiven.Client, project, serviceType, servicePlan string) (PlanParameters, error) {
-	servicePlanResponse, err := client.ServiceTypes.GetPlan(project, serviceType, servicePlan)
+func getServicePlanParametersInternal(ctx context.Context, client *aiven.Client, project, serviceType, servicePlan string) (PlanParameters, error) {
+	servicePlanResponse, err := client.ServiceTypes.GetPlan(ctx, project, serviceType, servicePlan)
 	if err != nil {
 		return PlanParameters{}, err
 	}
@@ -103,7 +103,7 @@ func getServicePlanParametersInternal(_ context.Context, client *aiven.Client, p
 	}, nil
 }
 
-func dynamicDiskSpaceIsAllowedByPricing(_ context.Context, client *aiven.Client, d ResourceStateOrResourceDiff) (bool, error) {
+func dynamicDiskSpaceIsAllowedByPricing(ctx context.Context, client *aiven.Client, d ResourceStateOrResourceDiff) (bool, error) {
 	// to check if dynamic disk space is allowed, we currently have to check
 	// the pricing api to see if the `extra_disk_price_per_gb_usd` field is set
 
@@ -112,7 +112,7 @@ func dynamicDiskSpaceIsAllowedByPricing(_ context.Context, client *aiven.Client,
 	servicePlan := d.Get("plan").(string)
 	cloudName := d.Get("cloud_name").(string)
 
-	servicePlanPricingResponse, err := client.ServiceTypes.GetPlanPricing(project, serviceType, servicePlan, cloudName)
+	servicePlanPricingResponse, err := client.ServiceTypes.GetPlanPricing(ctx, project, serviceType, servicePlan, cloudName)
 	if err != nil {
 		return false, fmt.Errorf("unable to get service plan pricing from api: %w", err)
 	}
@@ -135,9 +135,9 @@ func isStringAnOrganizationID(s string) bool {
 // NormalizeOrganizationID is a helper function that returns the ID to use for the API call.
 // If the ID is an organization ID, it will be converted to an account ID via the API.
 // If the ID is an account ID, it will be returned as is, without performing any API calls.
-func NormalizeOrganizationID(client *aiven.Client, id string) (string, error) {
+func NormalizeOrganizationID(ctx context.Context, client *aiven.Client, id string) (string, error) {
 	if isStringAnOrganizationID(id) {
-		r, err := client.Organization.Get(id)
+		r, err := client.Organization.Get(ctx, id)
 		if err != nil {
 			return "", err
 		}
@@ -156,6 +156,7 @@ func NormalizeOrganizationID(client *aiven.Client, id string) (string, error) {
 // If the ID is an account ID, it will be returned as is, without performing any API calls.
 // If the ID is an organization ID, it will be refreshed via the provided account ID and returned.
 func DetermineMixedOrganizationConstraintIDToStore(
+	ctx context.Context,
 	client *aiven.Client,
 	stateID string,
 	accountID string,
@@ -168,7 +169,7 @@ func DetermineMixedOrganizationConstraintIDToStore(
 		return accountID, nil
 	}
 
-	r, err := client.Accounts.Get(accountID)
+	r, err := client.Accounts.Get(ctx, accountID)
 	if err != nil {
 		return "", err
 	}

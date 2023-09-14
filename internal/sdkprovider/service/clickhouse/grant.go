@@ -1,12 +1,13 @@
 package clickhouse
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 )
 
 type Grantee struct {
@@ -39,27 +40,45 @@ func userOrRole(g Grantee) string {
 	return g.Role
 }
 
-func CreateRoleGrant(client *aiven.Client, projectName, serviceName string, grant RoleGrant) error {
+func CreateRoleGrant(
+	ctx context.Context,
+	client *aiven.Client,
+	projectName string,
+	serviceName string,
+	grant RoleGrant,
+) error {
 	query := createRoleGrantStatement(grant)
 
 	log.Println("[DEBUG] Clickhouse: create role grant query: ", query)
-	_, err := client.ClickHouseQuery.Query(projectName, serviceName, defaultDatabase, query)
+	_, err := client.ClickHouseQuery.Query(ctx, projectName, serviceName, defaultDatabase, query)
 	return err
 }
 
-func RevokeRoleGrant(client *aiven.Client, projectName, serviceName string, grant RoleGrant) error {
+func RevokeRoleGrant(
+	ctx context.Context,
+	client *aiven.Client,
+	projectName string,
+	serviceName string,
+	grant RoleGrant,
+) error {
 	query := revokeRoleGrantStatement(grant)
 
 	log.Println("[DEBUG] privilege revocation query: ", query)
-	_, err := client.ClickHouseQuery.Query(projectName, serviceName, defaultDatabase, query)
+	_, err := client.ClickHouseQuery.Query(ctx, projectName, serviceName, defaultDatabase, query)
 	return err
 }
 
-func ReadRoleGrants(client *aiven.Client, projectName, serviceName string, grantee Grantee) ([]RoleGrant, error) {
+func ReadRoleGrants(
+	ctx context.Context,
+	client *aiven.Client,
+	projectName string,
+	serviceName string,
+	grantee Grantee,
+) ([]RoleGrant, error) {
 	query := readRoleGrantsStatement()
 
 	log.Println("[DEBUG] Clickhouse: read role grant query: ", query)
-	r, err := client.ClickHouseQuery.Query(projectName, serviceName, defaultDatabase, query)
+	r, err := client.ClickHouseQuery.Query(ctx, projectName, serviceName, defaultDatabase, query)
 	if err != nil {
 		return nil, err
 	}
@@ -79,19 +98,31 @@ func ReadRoleGrants(client *aiven.Client, projectName, serviceName string, grant
 	return res, err
 }
 
-func CreatePrivilegeGrant(client *aiven.Client, projectName, serviceName string, grant PrivilegeGrant) error {
+func CreatePrivilegeGrant(
+	ctx context.Context,
+	client *aiven.Client,
+	projectName string,
+	serviceName string,
+	grant PrivilegeGrant,
+) error {
 	query := createPrivilegeGrantStatement(grant)
 
 	log.Println("[DEBUG] Clickhouse: create privilege grant query: ", query)
-	_, err := client.ClickHouseQuery.Query(projectName, serviceName, defaultDatabase, query)
+	_, err := client.ClickHouseQuery.Query(ctx, projectName, serviceName, defaultDatabase, query)
 	return err
 }
 
-func ReadPrivilegeGrants(client *aiven.Client, projectName, serviceName string, grantee Grantee) ([]PrivilegeGrant, error) {
+func ReadPrivilegeGrants(
+	ctx context.Context,
+	client *aiven.Client,
+	projectName string,
+	serviceName string,
+	grantee Grantee,
+) ([]PrivilegeGrant, error) {
 	query := readPrivilegeGrantsStatement()
 
 	log.Println("[DEBUG] Clickhouse: read privilege grant query: ", query)
-	r, err := client.ClickHouseQuery.Query(projectName, serviceName, defaultDatabase, query)
+	r, err := client.ClickHouseQuery.Query(ctx, projectName, serviceName, defaultDatabase, query)
 	if err != nil {
 		return nil, err
 	}
@@ -110,11 +141,17 @@ func ReadPrivilegeGrants(client *aiven.Client, projectName, serviceName string, 
 	return res, err
 }
 
-func RevokePrivilegeGrant(client *aiven.Client, projectName, serviceName string, grant PrivilegeGrant) error {
+func RevokePrivilegeGrant(
+	ctx context.Context,
+	client *aiven.Client,
+	projectName string,
+	serviceName string,
+	grant PrivilegeGrant,
+) error {
 	query := revokePrivilegeGrantStatement(grant)
 
 	log.Println("[DEBUG] privilege revocation query: ", query)
-	_, err := client.ClickHouseQuery.Query(projectName, serviceName, defaultDatabase, query)
+	_, err := client.ClickHouseQuery.Query(ctx, projectName, serviceName, defaultDatabase, query)
 	return err
 }
 

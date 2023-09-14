@@ -3,7 +3,7 @@ package flink
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -186,7 +186,7 @@ func resourceFlinkApplicationVersionCreate(ctx context.Context, d *schema.Resour
 		sinks = expandFlinkApplicationVersionSourcesOrSinks(d.Get("sink").(*schema.Set).List())
 	}
 
-	r, err := client.FlinkApplicationVersions.Create(project, serviceName, applicationID, aiven.GenericFlinkApplicationVersionRequest{
+	r, err := client.FlinkApplicationVersions.Create(ctx, project, serviceName, applicationID, aiven.GenericFlinkApplicationVersionRequest{
 		Statement: d.Get("statement").(string),
 		Sources:   sources,
 		Sinks:     sinks,
@@ -215,7 +215,7 @@ func expandFlinkApplicationVersionSourcesOrSinks(sources []interface{}) []aiven.
 }
 
 // resourceFlinkApplicationVersionDelete is the delete function for the Flink Application Version resource.
-func resourceFlinkApplicationVersionDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceFlinkApplicationVersionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, applicationID, version, err := schemautil.SplitResourceID4(d.Id())
@@ -223,7 +223,7 @@ func resourceFlinkApplicationVersionDelete(_ context.Context, d *schema.Resource
 		return diag.Errorf("cannot read Flink Application Version resource ID: %v", err)
 	}
 
-	_, err = client.FlinkApplicationVersions.Delete(project, serviceName, applicationID, version)
+	_, err = client.FlinkApplicationVersions.Delete(ctx, project, serviceName, applicationID, version)
 	if err != nil {
 		return diag.Errorf("error deleting Flink Application Version: %v", err)
 	}
@@ -232,7 +232,7 @@ func resourceFlinkApplicationVersionDelete(_ context.Context, d *schema.Resource
 }
 
 // resourceFlinkApplicationVersionRead is the read function for the Flink Application Version resource.
-func resourceFlinkApplicationVersionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceFlinkApplicationVersionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, applicationID, version, err := schemautil.SplitResourceID4(d.Id())
@@ -240,7 +240,7 @@ func resourceFlinkApplicationVersionRead(_ context.Context, d *schema.ResourceDa
 		return diag.Errorf("cannot read Flink Application Version resource ID: %v", err)
 	}
 
-	r, err := client.FlinkApplicationVersions.Get(project, serviceName, applicationID, version)
+	r, err := client.FlinkApplicationVersions.Get(ctx, project, serviceName, applicationID, version)
 	if err != nil {
 		return diag.Errorf("cannot get Flink Application Version: %v", err)
 	}

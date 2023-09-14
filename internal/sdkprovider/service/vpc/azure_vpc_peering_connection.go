@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -109,7 +109,13 @@ func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.Reso
 	}
 
 	pc, err := client.VPCPeeringConnections.GetVPCPeering(
-		projectName, vpcID, azureSubscriptionID, vnetName, &peerResourceGroup)
+		ctx,
+		projectName,
+		vpcID,
+		azureSubscriptionID,
+		vnetName,
+		&peerResourceGroup,
+	)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("error checking azure connection: %s", err)
 	}
@@ -119,6 +125,7 @@ func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.Reso
 	}
 
 	if _, err := client.VPCPeeringConnections.Create(
+		ctx,
 		projectName,
 		vpcID,
 		aiven.CreateVPCPeeringConnectionRequest{
@@ -145,6 +152,7 @@ func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.Reso
 		},
 		Refresh: func() (interface{}, string, error) {
 			pc, err := client.VPCPeeringConnections.GetVPCPeering(
+				ctx,
 				projectName,
 				vpcID,
 				azureSubscriptionID,
@@ -179,7 +187,7 @@ func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.Reso
 	return append(diags, resourceAzureVPCPeeringConnectionRead(ctx, d, m)...)
 }
 
-func resourceAzureVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAzureVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	p, err := parsePeerVPCID(d.Id())
@@ -188,7 +196,14 @@ func resourceAzureVPCPeeringConnectionRead(_ context.Context, d *schema.Resource
 	}
 
 	pc, err := client.VPCPeeringConnections.GetVPCPeeringWithResourceGroup(
-		p.projectName, p.vpcID, p.peerCloudAccount, p.peerVPC, p.peerRegion, schemautil.OptionalStringPointer(d, "peer_resource_group"))
+		ctx,
+		p.projectName,
+		p.vpcID,
+		p.peerCloudAccount,
+		p.peerVPC,
+		p.peerRegion,
+		schemautil.OptionalStringPointer(d, "peer_resource_group"),
+	)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -206,6 +221,7 @@ func resourceAzureVPCPeeringConnectionDelete(ctx context.Context, d *schema.Reso
 	}
 	peerResourceGroup := d.Get("peer_resource_group").(string)
 	err = client.VPCPeeringConnections.DeleteVPCPeeringWithResourceGroup(
+		ctx,
 		p.projectName,
 		p.vpcID,
 		p.peerCloudAccount,
@@ -233,12 +249,14 @@ func resourceAzureVPCPeeringConnectionDelete(ctx context.Context, d *schema.Reso
 		},
 		Refresh: func() (interface{}, string, error) {
 			pc, err := client.VPCPeeringConnections.GetVPCPeeringWithResourceGroup(
+				ctx,
 				p.projectName,
 				p.vpcID,
 				p.peerCloudAccount,
 				p.peerVPC,
 				p.peerRegion,
 				schemautil.OptionalStringPointer(d, "peer_resource_group"), // was already checked
+
 			)
 			if err != nil {
 				return nil, "", err

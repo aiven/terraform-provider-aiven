@@ -3,7 +3,7 @@ package project
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -18,12 +18,12 @@ func DatasourceProject() *schema.Resource {
 	}
 }
 
-func datasourceProjectRead(c context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func datasourceProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
 
-	projects, err := client.Projects.List()
+	projects, err := client.Projects.List(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -31,7 +31,7 @@ func datasourceProjectRead(c context.Context, d *schema.ResourceData, m interfac
 	for _, project := range projects {
 		if project.Name == projectName {
 			d.SetId(projectName)
-			return resourceProjectRead(c, d, m)
+			return resourceProjectRead(ctx, d, m)
 		}
 	}
 

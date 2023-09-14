@@ -3,7 +3,7 @@ package connectionpool
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -77,6 +77,7 @@ func resourceConnectionPoolCreate(ctx context.Context, d *schema.ResourceData, m
 	serviceName := d.Get("service_name").(string)
 	poolName := d.Get("pool_name").(string)
 	_, err := client.ConnectionPools.Create(
+		ctx,
 		project,
 		serviceName,
 		aiven.CreateConnectionPoolRequest{
@@ -96,7 +97,7 @@ func resourceConnectionPoolCreate(ctx context.Context, d *schema.ResourceData, m
 	return resourceConnectionPoolRead(ctx, d, m)
 }
 
-func resourceConnectionPoolRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceConnectionPoolRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, poolName, err := schemautil.SplitResourceID3(d.Id())
@@ -104,7 +105,7 @@ func resourceConnectionPoolRead(_ context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(err)
 	}
 
-	pool, err := client.ConnectionPools.Get(project, serviceName, poolName)
+	pool, err := client.ConnectionPools.Get(ctx, project, serviceName, poolName)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -126,6 +127,7 @@ func resourceConnectionPoolUpdate(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	_, err = client.ConnectionPools.Update(
+		ctx,
 		project,
 		serviceName,
 		poolName,
@@ -143,7 +145,7 @@ func resourceConnectionPoolUpdate(ctx context.Context, d *schema.ResourceData, m
 	return resourceConnectionPoolRead(ctx, d, m)
 }
 
-func resourceConnectionPoolDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceConnectionPoolDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, poolName, err := schemautil.SplitResourceID3(d.Id())
@@ -151,7 +153,7 @@ func resourceConnectionPoolDelete(_ context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(err)
 	}
 
-	err = client.ConnectionPools.Delete(projectName, serviceName, poolName)
+	err = client.ConnectionPools.Delete(ctx, projectName, serviceName, poolName)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}

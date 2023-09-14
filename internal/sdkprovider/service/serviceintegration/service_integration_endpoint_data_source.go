@@ -3,7 +3,7 @@ package serviceintegration
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -25,7 +25,7 @@ func datasourceServiceIntegrationEndpointRead(ctx context.Context, d *schema.Res
 	projectName := d.Get("project").(string)
 	endpointName := d.Get("endpoint_name").(string)
 
-	endpoints, err := client.ServiceIntegrationEndpoints.List(projectName)
+	endpoints, err := client.ServiceIntegrationEndpoints.List(ctx, projectName)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -3,6 +3,7 @@
 package examples
 
 import (
+	"context"
 	"testing"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
@@ -41,19 +42,21 @@ func (s *PostgresTestSuite) TestPostgres() {
 	terraform.Apply(s.T(), opts)
 
 	// Then
-	pgEU, err := s.client.Services.Get(s.config.Project, pgNameEU)
+	ctx := context.Background()
+
+	pgEU, err := s.client.Services.Get(ctx, s.config.Project, pgNameEU)
 	s.NoError(err)
 	s.Equal("pg", pgEU.Type)
 	s.Equal("startup-4", pgEU.Plan)
 	s.Equal("aws-eu-west-2", pgEU.CloudName)
 
-	pgUS, err := s.client.Services.Get(s.config.Project, pgNameUS)
+	pgUS, err := s.client.Services.Get(ctx, s.config.Project, pgNameUS)
 	s.NoError(err)
 	s.Equal("pg", pgUS.Type)
 	s.Equal("business-8", pgUS.Plan)
 	s.Equal("do-nyc", pgUS.CloudName)
 
-	pgAS, err := s.client.Services.Get(s.config.Project, pgNameAS)
+	pgAS, err := s.client.Services.Get(ctx, s.config.Project, pgNameAS)
 	s.NoError(err)
 	s.Equal("pg", pgAS.Type)
 	s.Equal("business-8", pgAS.Plan)

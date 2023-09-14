@@ -3,7 +3,7 @@ package pg
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -77,6 +77,7 @@ func resourcePGDatabaseCreate(ctx context.Context, d *schema.ResourceData, m int
 	serviceName := d.Get("service_name").(string)
 	databaseName := d.Get("database_name").(string)
 	_, err := client.Databases.Create(
+		ctx,
 		projectName,
 		serviceName,
 		aiven.CreateDatabaseRequest{
@@ -98,7 +99,7 @@ func resourcePGDatabaseUpdate(ctx context.Context, d *schema.ResourceData, m int
 	return resourcePGDatabaseRead(ctx, d, m)
 }
 
-func resourcePGDatabaseRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePGDatabaseRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, databaseName, err := schemautil.SplitResourceID3(d.Id())
@@ -106,7 +107,7 @@ func resourcePGDatabaseRead(_ context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 
-	database, err := client.Databases.Get(projectName, serviceName, databaseName)
+	database, err := client.Databases.Get(ctx, projectName, serviceName, databaseName)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}

@@ -3,9 +3,10 @@
 package examples
 
 import (
+	"context"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/suite"
 )
@@ -42,13 +43,15 @@ func (s *KafkaPrometheusTestSuite) TestKafkaPrometheus() {
 	terraform.Apply(s.T(), opts)
 
 	// Then
-	kafkaService, err := s.client.Services.Get(s.config.Project, kafkaServiceName)
+	ctx := context.Background()
+
+	kafkaService, err := s.client.Services.Get(ctx, s.config.Project, kafkaServiceName)
 	s.NoError(err)
 	s.Equal("kafka", kafkaService.Type)
 	s.Equal("business-4", kafkaService.Plan)
 	s.Equal("google-europe-west1", kafkaService.CloudName)
 
-	endpoints, err := s.client.ServiceIntegrationEndpoints.List(s.config.Project)
+	endpoints, err := s.client.ServiceIntegrationEndpoints.List(ctx, s.config.Project)
 	s.NoError(err)
 	foundEndpoints := make([]*aiven.ServiceIntegrationEndpoint, 0)
 	for _, e := range endpoints {
@@ -58,7 +61,7 @@ func (s *KafkaPrometheusTestSuite) TestKafkaPrometheus() {
 	}
 	s.Len(foundEndpoints, 1)
 
-	integrations, err := s.client.ServiceIntegrations.List(s.config.Project, kafkaServiceName)
+	integrations, err := s.client.ServiceIntegrations.List(ctx, s.config.Project, kafkaServiceName)
 	s.NoError(err)
 	foundIntegrations := 0
 	for _, i := range integrations {

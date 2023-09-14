@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -85,6 +85,7 @@ func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interf
 	bgID := d.Get("primary_billing_group_id").(string)
 
 	r, err := client.Accounts.Create(
+		ctx,
 		aiven.Account{
 			Name:                  name,
 			PrimaryBillingGroupId: bgID,
@@ -99,10 +100,10 @@ func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interf
 	return resourceAccountRead(ctx, d, m)
 }
 
-func resourceAccountRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	r, err := client.Accounts.Get(d.Id())
+	r, err := client.Accounts.Get(ctx, d.Id())
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -138,7 +139,7 @@ func resourceAccountRead(_ context.Context, d *schema.ResourceData, m interface{
 func resourceAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	r, err := client.Accounts.Update(d.Id(), aiven.Account{
+	r, err := client.Accounts.Update(ctx, d.Id(), aiven.Account{
 		Name:                  d.Get("name").(string),
 		PrimaryBillingGroupId: d.Get("primary_billing_group_id").(string),
 	})
@@ -161,7 +162,7 @@ func resourceAccountDelete(ctx context.Context, d *schema.ResourceData, m interf
 	// TODO: Ideally, this should be fixed in the Aiven API. This is a temporary workaround, and should be removed
 	//  once the API is fixed.
 	if err := retry.RetryContext(ctx, time.Second*30, func() *retry.RetryError {
-		err := client.Accounts.Delete(d.Id())
+		err := client.Accounts.Delete(ctx, d.Id())
 		if err != nil {
 			return &retry.RetryError{
 				Err:       err,

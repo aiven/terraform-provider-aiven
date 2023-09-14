@@ -1,9 +1,10 @@
 package opensearch
 
 import (
+	"context"
 	"sync"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 )
 
 var (
@@ -14,11 +15,17 @@ var (
 
 // GETs the remote config, applies the modifiers and PUTs it again
 // The Config that is passed to the modifiers is guaranteed to be not nil
-func resourceOpenSearchACLModifyRemoteConfig(project, serviceName string, client *aiven.Client, modifiers ...func(*aiven.ElasticSearchACLConfig)) error {
+func resourceOpenSearchACLModifyRemoteConfig(
+	ctx context.Context,
+	project string,
+	serviceName string,
+	client *aiven.Client,
+	modifiers ...func(*aiven.ElasticSearchACLConfig),
+) error {
 	resourceOpenSearchACLModifierMutex.Lock()
 	defer resourceOpenSearchACLModifierMutex.Unlock()
 
-	r, err := client.ElasticsearchACLs.Get(project, serviceName)
+	r, err := client.ElasticsearchACLs.Get(ctx, project, serviceName)
 	if err != nil {
 		return err
 	}
@@ -29,6 +36,7 @@ func resourceOpenSearchACLModifyRemoteConfig(project, serviceName string, client
 	}
 
 	_, err = client.ElasticsearchACLs.Update(
+		ctx,
 		project,
 		serviceName,
 		aiven.ElasticsearchACLRequest{ElasticSearchACLConfig: config})
@@ -40,20 +48,30 @@ func resourceOpenSearchACLModifyRemoteConfig(project, serviceName string, client
 
 // some modifiers
 
-func resourceElasticsearchACLModifierUpdateACLRule(username, index, permission string) func(*aiven.ElasticSearchACLConfig) {
+func resourceElasticsearchACLModifierUpdateACLRule(
+	ctx context.Context,
+	username string,
+	index string,
+	permission string,
+) func(*aiven.ElasticSearchACLConfig) {
 	return func(cfg *aiven.ElasticSearchACLConfig) {
 		cfg.Add(resourceOpenSearchACLRuleMkAivenACL(username, index, permission))
 
 		// delete the old acl if it's there
 		if prevPerm, ok := resourceElasticsearchACLRuleGetPermissionFromACLResponse(*cfg, username, index); ok && prevPerm != permission {
-			cfg.Delete(resourceOpenSearchACLRuleMkAivenACL(username, index, prevPerm))
+			cfg.Delete(ctx, resourceOpenSearchACLRuleMkAivenACL(username, index, prevPerm))
 		}
 	}
 }
 
-func resourceElasticsearchACLModifierDeleteACLRule(username, index, permission string) func(*aiven.ElasticSearchACLConfig) {
+func resourceElasticsearchACLModifierDeleteACLRule(
+	ctx context.Context,
+	username string,
+	index string,
+	permission string,
+) func(*aiven.ElasticSearchACLConfig) {
 	return func(cfg *aiven.ElasticSearchACLConfig) {
-		cfg.Delete(resourceOpenSearchACLRuleMkAivenACL(username, index, permission))
+		cfg.Delete(ctx, resourceOpenSearchACLRuleMkAivenACL(username, index, permission))
 	}
 }
 

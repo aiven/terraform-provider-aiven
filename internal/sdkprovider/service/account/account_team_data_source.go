@@ -3,7 +3,7 @@ package account
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -25,7 +25,7 @@ func datasourceAccountTeamRead(ctx context.Context, d *schema.ResourceData, m in
 	name := d.Get("name").(string)
 	accountID := d.Get("account_id").(string)
 
-	r, err := client.AccountTeams.List(accountID)
+	r, err := client.AccountTeams.List(ctx, accountID)
 	if err != nil {
 		return diag.FromErr(err)
 	}

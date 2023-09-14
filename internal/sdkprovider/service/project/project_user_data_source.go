@@ -3,7 +3,7 @@ package project
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -25,7 +25,7 @@ func datasourceProjectUserRead(ctx context.Context, d *schema.ResourceData, m in
 	projectName := d.Get("project").(string)
 	email := d.Get("email").(string)
 
-	users, invitations, err := client.ProjectUsers.List(projectName)
+	users, invitations, err := client.ProjectUsers.List(ctx, projectName)
 	if err != nil {
 		return diag.FromErr(err)
 	}

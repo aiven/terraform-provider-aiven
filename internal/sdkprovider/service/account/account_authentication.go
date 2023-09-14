@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -162,6 +162,7 @@ func resourceAccountAuthenticationCreate(ctx context.Context, d *schema.Resource
 
 	accountID := d.Get("account_id").(string)
 	r, err := client.AccountAuthentications.Create(
+		ctx,
 		accountID,
 		aiven.AccountAuthenticationMethodCreate{
 			AuthenticationMethodName: d.Get("name").(string),
@@ -188,7 +189,7 @@ func resourceAccountAuthenticationCreate(ctx context.Context, d *schema.Resource
 	return resourceAccountAuthenticationRead(ctx, d, m)
 }
 
-func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAccountAuthenticationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	accountID, authID, err := schemautil.SplitResourceID2(d.Id())
@@ -196,7 +197,7 @@ func resourceAccountAuthenticationRead(_ context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	r, err := client.AccountAuthentications.Get(accountID, authID)
+	r, err := client.AccountAuthentications.Get(ctx, accountID, authID)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -295,7 +296,7 @@ func resourceAccountAuthenticationUpdate(ctx context.Context, d *schema.Resource
 		SAMLEntity:                  d.Get("saml_entity_id").(string),
 	}
 
-	_, err = client.AccountAuthentications.Update(accountID, authID, r)
+	_, err = client.AccountAuthentications.Update(ctx, accountID, authID, r)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -304,7 +305,7 @@ func resourceAccountAuthenticationUpdate(ctx context.Context, d *schema.Resource
 	return resourceAccountAuthenticationRead(ctx, d, m)
 }
 
-func resourceAccountAuthenticationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAccountAuthenticationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	accountID, teamID, err := schemautil.SplitResourceID2(d.Id())
@@ -312,7 +313,7 @@ func resourceAccountAuthenticationDelete(_ context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	err = client.AccountAuthentications.Delete(accountID, teamID)
+	err = client.AccountAuthentications.Delete(ctx, accountID, teamID)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}

@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -37,7 +37,7 @@ func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, m inter
 		MinTimeout:                2 * time.Second,
 		ContinuousTargetOccurence: 5,
 		Refresh: func() (interface{}, string, error) {
-			service, err := client.Services.Get(projectName, serviceName)
+			service, err := client.Services.Get(ctx, projectName, serviceName)
 			if err != nil {
 				return nil, "", fmt.Errorf("unable to fetch service from api: %w", err)
 			}
@@ -59,7 +59,7 @@ func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, m inter
 				return service, aivenServicesStartingState, nil
 			}
 
-			if rdy, err := staticIpsReady(d, m); err != nil {
+			if rdy, err := staticIpsReady(ctx, d, m); err != nil {
 				return nil, "", fmt.Errorf("unable to check if static ips are ready: %w", err)
 			} else if !rdy {
 				log.Printf("[DEBUG] service reports as %s, still waiting for static ips", state)
@@ -94,7 +94,7 @@ func WaitForServiceUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		MinTimeout:                2 * time.Second,
 		ContinuousTargetOccurence: 5,
 		Refresh: func() (interface{}, string, error) {
-			service, err := client.Services.Get(projectName, serviceName)
+			service, err := client.Services.Get(ctx, projectName, serviceName)
 			if err != nil {
 				return nil, "", fmt.Errorf("unable to fetch service from api: %w", err)
 			}
@@ -111,7 +111,7 @@ func WaitForServiceUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 				return service, "updating", nil
 			}
 
-			if rdy, err := staticIpsReady(d, m); err != nil {
+			if rdy, err := staticIpsReady(ctx, d, m); err != nil {
 				return nil, "", fmt.Errorf("unable to check if static ips are ready: %w", err)
 			} else if !rdy {
 				log.Printf("[DEBUG] service reports as %s, still waiting for static ips", state)
@@ -142,7 +142,7 @@ func WaitStaticIpsDissassociation(ctx context.Context, d *schema.ResourceData, m
 		MinTimeout:                2 * time.Second,
 		ContinuousTargetOccurence: 5,
 		Refresh: func() (interface{}, string, error) {
-			if dis, err := staticIpsAreDisassociated(d, m); err != nil {
+			if dis, err := staticIpsAreDisassociated(ctx, d, m); err != nil {
 				return nil, "", fmt.Errorf("unable to check if static ips are disassociated: %w", err)
 			} else if !dis {
 				log.Printf("[DEBUG] still waiting for static ips to be disassociated")
@@ -176,14 +176,14 @@ func WaitForDeletion(ctx context.Context, d *schema.ResourceData, m interface{})
 		MinTimeout:                20 * time.Second,
 		ContinuousTargetOccurence: 5,
 		Refresh: func() (interface{}, string, error) {
-			_, err := client.Services.Get(projectName, serviceName)
+			_, err := client.Services.Get(ctx, projectName, serviceName)
 			if err != nil && !aiven.IsNotFound(err) {
 				return nil, "", fmt.Errorf("unable to check if service is gone: %w", err)
 			}
 
 			log.Printf("[DEBUG] service gone, still waiting for static ips to be disassociated")
 
-			if dis, err := staticIpsDisassociatedAfterServiceDeletion(d, m); err != nil {
+			if dis, err := staticIpsDisassociatedAfterServiceDeletion(ctx, d, m); err != nil {
 				return nil, "", fmt.Errorf("unable to check if static ips are disassociated: %w", err)
 			} else if !dis {
 				return struct{}{}, "deleting", nil
@@ -270,7 +270,7 @@ func backupsReady(service *aiven.Service) bool {
 
 // staticIpsReady checks that the static ips that are associated with the service are either
 // in state 'assigned' or 'available'
-func staticIpsReady(d *schema.ResourceData, m interface{}) (bool, error) {
+func staticIpsReady(ctx context.Context, d *schema.ResourceData, m interface{}) (bool, error) {
 	expectedStaticIps := staticIpsForServiceFromSchema(d)
 	if len(expectedStaticIps) == 0 {
 		return true, nil
@@ -279,7 +279,7 @@ func staticIpsReady(d *schema.ResourceData, m interface{}) (bool, error) {
 	client := m.(*aiven.Client)
 	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
 
-	staticIpsList, err := client.StaticIPs.List(projectName)
+	staticIpsList, err := client.StaticIPs.List(ctx, projectName)
 	if err != nil {
 		return false, fmt.Errorf("unable to fetch static ips for project '%s': '%w", projectName, err)
 	}
@@ -303,7 +303,11 @@ L:
 
 // staticIpsDisassociatedAfterServiceDeletion checks that after service deletion
 // all static ips that were associated to the service are available again
-func staticIpsDisassociatedAfterServiceDeletion(d *schema.ResourceData, m interface{}) (bool, error) {
+func staticIpsDisassociatedAfterServiceDeletion(
+	ctx context.Context,
+	d *schema.ResourceData,
+	m interface{},
+) (bool, error) {
 	expectedStaticIps := staticIpsForServiceFromSchema(d)
 	if len(expectedStaticIps) == 0 {
 		return true, nil
@@ -312,7 +316,7 @@ func staticIpsDisassociatedAfterServiceDeletion(d *schema.ResourceData, m interf
 	client := m.(*aiven.Client)
 	projectName := d.Get("project").(string)
 
-	staticIpsList, err := client.StaticIPs.List(projectName)
+	staticIpsList, err := client.StaticIPs.List(ctx, projectName)
 	if err != nil {
 		return false, fmt.Errorf("unable to fetch static ips for project '%s': '%w", projectName, err)
 	}
@@ -334,12 +338,12 @@ func staticIpsDisassociatedAfterServiceDeletion(d *schema.ResourceData, m interf
 
 // staticIpsAreDisassociated checks that after service update
 // all static ips that are not used by the service anymore are available again
-func staticIpsAreDisassociated(d *schema.ResourceData, m interface{}) (bool, error) {
+func staticIpsAreDisassociated(ctx context.Context, d *schema.ResourceData, m interface{}) (bool, error) {
 	client := m.(*aiven.Client)
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 
-	staticIpsList, err := client.StaticIPs.List(projectName)
+	staticIpsList, err := client.StaticIPs.List(ctx, projectName)
 	if err != nil {
 		return false, fmt.Errorf("unable to fetch static ips for project '%s': '%w", projectName, err)
 	}

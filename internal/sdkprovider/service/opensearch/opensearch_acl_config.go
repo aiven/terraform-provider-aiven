@@ -4,7 +4,7 @@ package opensearch
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -45,7 +45,7 @@ func ResourceOpenSearchACLConfig() *schema.Resource {
 	}
 }
 
-func resourceOpenSearchACLConfigRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenSearchACLConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
@@ -53,7 +53,7 @@ func resourceOpenSearchACLConfigRead(_ context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	r, err := client.ElasticsearchACLs.Get(project, serviceName)
+	r, err := client.ElasticsearchACLs.Get(ctx, project, serviceName)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -80,7 +80,7 @@ func resourceOpenSearchACLConfigUpdate(ctx context.Context, d *schema.ResourceDa
 	serviceName := d.Get("service_name").(string)
 
 	modifier := resourceElasticsearchACLModifierToggleConfigFields(d.Get("enabled").(bool), d.Get("extended_acl").(bool))
-	err := resourceOpenSearchACLModifyRemoteConfig(project, serviceName, client, modifier)
+	err := resourceOpenSearchACLModifyRemoteConfig(ctx, project, serviceName, client, modifier)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -90,14 +90,14 @@ func resourceOpenSearchACLConfigUpdate(ctx context.Context, d *schema.ResourceDa
 	return resourceOpenSearchACLConfigRead(ctx, d, m)
 }
 
-func resourceOpenSearchACLConfigDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenSearchACLConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 
 	modifier := resourceElasticsearchACLModifierToggleConfigFields(false, false)
-	err := resourceOpenSearchACLModifyRemoteConfig(project, serviceName, client, modifier)
+	err := resourceOpenSearchACLModifyRemoteConfig(ctx, project, serviceName, client, modifier)
 	if err != nil {
 		return diag.FromErr(err)
 	}

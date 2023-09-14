@@ -3,7 +3,7 @@ package serviceintegration
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -27,7 +27,7 @@ func datasourceServiceIntegrationRead(ctx context.Context, d *schema.ResourceDat
 	sourceServiceName := d.Get("source_service_name").(string)
 	destinationServiceName := d.Get("destination_service_name").(string)
 
-	integrations, err := client.ServiceIntegrations.List(projectName, sourceServiceName)
+	integrations, err := client.ServiceIntegrations.List(ctx, projectName, sourceServiceName)
 	if err != nil {
 		return diag.Errorf("unable to list integrations for %s/%s: %s", projectName, sourceServiceName, err)
 	}

@@ -1,11 +1,12 @@
 package clickhouse_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -56,6 +57,8 @@ resource "aiven_clickhouse_role" "foo" {
 func testAccCheckAivenClickhouseRoleResourceDestroy(s *terraform.State) error {
 	c := acc.GetTestAivenClient()
 
+	ctx := context.Background()
+
 	// loop through the resources in state, verifying each aiven_clickhouse_role is destroyed
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_clickhouse_role" {
@@ -67,7 +70,7 @@ func testAccCheckAivenClickhouseRoleResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
-		if exists, err := clickhouse.RoleExists(c, projectName, serviceName, roleName); err != nil {
+		if exists, err := clickhouse.RoleExists(ctx, c, projectName, serviceName, roleName); err != nil {
 			if aiven.IsNotFound(err) {
 				continue
 			}

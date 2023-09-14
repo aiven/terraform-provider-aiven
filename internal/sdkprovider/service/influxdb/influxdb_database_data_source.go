@@ -3,7 +3,7 @@ package influxdb
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -26,7 +26,7 @@ func datasourceDatabaseRead(ctx context.Context, d *schema.ResourceData, m inter
 	serviceName := d.Get("service_name").(string)
 	databaseName := d.Get("database_name").(string)
 
-	databases, err := client.Databases.List(projectName, serviceName)
+	databases, err := client.Databases.List(ctx, projectName, serviceName)
 	if err != nil {
 		return diag.FromErr(err)
 	}

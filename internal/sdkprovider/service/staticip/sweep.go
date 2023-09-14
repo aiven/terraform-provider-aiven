@@ -3,19 +3,27 @@
 package staticip
 
 import (
+	"context"
 	"fmt"
 	"os"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
 
 func init() {
+	ctx := context.Background()
+
+	client, err := sweep.SharedClient()
+	if err != nil {
+		panic(fmt.Sprintf("error getting client: %s", err))
+	}
+
 	resource.AddTestSweepers("aiven_static_ip", &resource.Sweeper{
 		Name: "aiven_static_ip",
-		F:    sweepStaticIPs,
+		F:    sweepStaticIPs(ctx, client),
 		Dependencies: []string{
 			"aiven_cassandra",
 			"aiven_clickhouse",
@@ -36,30 +44,27 @@ func init() {
 
 }
 
-func sweepStaticIPs(region string) error {
-	client, err := sweep.SharedClient(region)
-	if err != nil {
-		return fmt.Errorf("error getting client: %s", err)
-	}
+func sweepStaticIPs(ctx context.Context, client *aiven.Client) func(region string) error {
+	return func(region string) error {
+		projectName := os.Getenv("AIVEN_PROJECT_NAME")
 
-	projectName := os.Getenv("AIVEN_PROJECT_NAME")
-	conn := client.(*aiven.Client)
-
-	r, err := conn.StaticIPs.List(projectName)
-	if err != nil {
-		return fmt.Errorf("error retrieving a list of static_ips : %w", err)
-	}
-
-	for _, ip := range r.StaticIPs {
-		err := conn.StaticIPs.Delete(
-			projectName,
-			aiven.DeleteStaticIPRequest{
-				StaticIPAddressID: ip.StaticIPAddressID,
-			})
-		if err != nil && !aiven.IsNotFound(err) {
-			return fmt.Errorf("error deleting staticip: %w", err)
+		r, err := client.StaticIPs.List(ctx, projectName)
+		if err != nil {
+			return fmt.Errorf("error retrieving a list of static_ips : %w", err)
 		}
-	}
 
-	return nil
+		for _, ip := range r.StaticIPs {
+			err := client.StaticIPs.Delete(
+				ctx,
+				projectName,
+				aiven.DeleteStaticIPRequest{
+					StaticIPAddressID: ip.StaticIPAddressID,
+				})
+			if err != nil && !aiven.IsNotFound(err) {
+				return fmt.Errorf("error deleting staticip: %w", err)
+			}
+		}
+
+		return nil
+	}
 }

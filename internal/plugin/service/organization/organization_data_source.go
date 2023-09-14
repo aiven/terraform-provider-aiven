@@ -3,7 +3,7 @@ package organization
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -132,13 +132,13 @@ func (r *organizationDataSource) ConfigValidators(_ context.Context) []datasourc
 }
 
 // fillModel fills the organization data source model from the Aiven API.
-func (r *organizationDataSource) fillModel(model *organizationDataSourceModel) (err error) {
-	normalizedID, err := schemautil.NormalizeOrganizationID(r.client, model.ID.ValueString())
+func (r *organizationDataSource) fillModel(ctx context.Context, model *organizationDataSourceModel) (err error) {
+	normalizedID, err := schemautil.NormalizeOrganizationID(ctx, r.client, model.ID.ValueString())
 	if err != nil {
 		return
 	}
 
-	account, err := r.client.Accounts.Get(normalizedID)
+	account, err := r.client.Accounts.Get(ctx, normalizedID)
 	if err != nil {
 		return
 	}
@@ -163,7 +163,7 @@ func (r *organizationDataSource) Read(ctx context.Context, req datasource.ReadRe
 	}
 
 	if state.ID.IsNull() {
-		list, err := r.client.Accounts.List()
+		list, err := r.client.Accounts.List(ctx)
 		if err != nil {
 			resp.Diagnostics = util.DiagErrorReadingDataSource(resp.Diagnostics, r, err)
 
@@ -187,7 +187,7 @@ func (r *organizationDataSource) Read(ctx context.Context, req datasource.ReadRe
 		}
 	}
 
-	err := r.fillModel(&state)
+	err := r.fillModel(ctx, &state)
 	if err != nil {
 		resp.Diagnostics = util.DiagErrorReadingDataSource(resp.Diagnostics, r, err)
 

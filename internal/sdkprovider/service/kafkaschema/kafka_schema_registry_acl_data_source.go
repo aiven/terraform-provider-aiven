@@ -3,7 +3,7 @@ package kafkaschema
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -29,7 +29,7 @@ func datasourceKafkaSchemaRegistryACLRead(ctx context.Context, d *schema.Resourc
 	userName := d.Get("username").(string)
 	permission := d.Get("permission").(string)
 
-	acls, err := client.KafkaSchemaRegistryACLs.List(projectName, serviceName)
+	acls, err := client.KafkaSchemaRegistryACLs.List(ctx, projectName, serviceName)
 	if err != nil {
 		return diag.FromErr(err)
 	}

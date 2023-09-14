@@ -3,7 +3,7 @@ package clickhouse
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -51,7 +51,7 @@ func resourceClickhouseDatabaseCreate(ctx context.Context, d *schema.ResourceDat
 	serviceName := d.Get("service_name").(string)
 	databaseName := d.Get("name").(string)
 
-	err := client.ClickhouseDatabase.Create(projectName, serviceName, databaseName)
+	err := client.ClickhouseDatabase.Create(ctx, projectName, serviceName, databaseName)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -61,7 +61,7 @@ func resourceClickhouseDatabaseCreate(ctx context.Context, d *schema.ResourceDat
 	return resourceClickhouseDatabaseRead(ctx, d, m)
 }
 
-func resourceClickhouseDatabaseRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceClickhouseDatabaseRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, databaseName, err := schemautil.SplitResourceID3(d.Id())
@@ -69,7 +69,7 @@ func resourceClickhouseDatabaseRead(_ context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	database, err := client.ClickhouseDatabase.Get(projectName, serviceName, databaseName)
+	database, err := client.ClickhouseDatabase.Get(ctx, projectName, serviceName, databaseName)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -81,7 +81,7 @@ func resourceClickhouseDatabaseRead(_ context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceClickhouseDatabaseDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceClickhouseDatabaseDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, databaseName, err := schemautil.SplitResourceID3(d.Id())
@@ -93,7 +93,7 @@ func resourceClickhouseDatabaseDelete(_ context.Context, d *schema.ResourceData,
 		return diag.Errorf("cannot delete a database termination_protection is enabled")
 	}
 
-	err = client.ClickhouseDatabase.Delete(projectName, serviceName, databaseName)
+	err = client.ClickhouseDatabase.Delete(ctx, projectName, serviceName, databaseName)
 	if err != nil {
 		return diag.FromErr(err)
 	}

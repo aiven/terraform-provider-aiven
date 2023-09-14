@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -56,14 +56,19 @@ func resourceGCPPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m
 	var project = d.Get("project").(string)
 	var serviceName = d.Get("service_name").(string)
 
-	_, err := client.GCPPrivatelink.Create(project, serviceName)
+	_, err := client.GCPPrivatelink.Create(ctx, project, serviceName)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
-	_, err = waitForGCPPrivatelinkToBeActive(client, project, serviceName,
-		d.Timeout(schema.TimeoutCreate)).WaitForStateContext(ctx)
+	_, err = waitForGCPPrivatelinkToBeActive(
+		ctx,
+		client,
+		project,
+		serviceName,
+		d.Timeout(schema.TimeoutCreate),
+	).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for GCP privatelink: %s", err)
 	}
@@ -73,7 +78,7 @@ func resourceGCPPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m
 	return resourceGCPPrivatelinkRead(ctx, d, m)
 }
 
-func resourceGCPPrivatelinkRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceGCPPrivatelinkRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
@@ -81,7 +86,7 @@ func resourceGCPPrivatelinkRead(_ context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(err)
 	}
 
-	pl, err := client.GCPPrivatelink.Get(project, serviceName)
+	pl, err := client.GCPPrivatelink.Get(ctx, project, serviceName)
 	if err != nil {
 		return diag.Errorf("Error getting GCP privatelink: %s", err)
 	}
@@ -108,6 +113,7 @@ func resourceGCPPrivatelinkRead(_ context.Context, d *schema.ResourceData, m int
 // waitForGCPPrivatelinkToBeActive waits until the GCP privatelink is active
 // nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func waitForGCPPrivatelinkToBeActive(
+	ctx context.Context,
 	client *aiven.Client,
 	project string,
 	serviceName string,
@@ -117,7 +123,7 @@ func waitForGCPPrivatelinkToBeActive(
 		Pending: []string{"creating"},
 		Target:  []string{"active"},
 		Refresh: func() (interface{}, string, error) {
-			pl, err := client.GCPPrivatelink.Get(project, serviceName)
+			pl, err := client.GCPPrivatelink.Get(ctx, project, serviceName)
 			if err != nil {
 				return nil, "", err
 			}
@@ -140,7 +146,7 @@ func resourceGCPPrivatelinkDelete(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	err = client.GCPPrivatelink.Delete(project, serviceName)
+	err = client.GCPPrivatelink.Delete(ctx, project, serviceName)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
@@ -149,7 +155,7 @@ func resourceGCPPrivatelinkDelete(ctx context.Context, d *schema.ResourceData, m
 		Pending: []string{"deleting"},
 		Target:  []string{"deleted"},
 		Refresh: func() (interface{}, string, error) {
-			pl, err := client.GCPPrivatelink.Get(project, serviceName)
+			pl, err := client.GCPPrivatelink.Get(ctx, project, serviceName)
 			if err != nil {
 				if aiven.IsNotFound(err) {
 					return struct{}{}, "deleted", nil

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -126,7 +126,7 @@ func CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether(_ context.Contex
 
 // CustomizeDiffCheckStaticIPDisassociation checks that we dont disassociate ips we should not
 // and are not assigning ips that are not 'created'
-func CustomizeDiffCheckStaticIPDisassociation(_ context.Context, d *schema.ResourceDiff, m interface{}) error {
+func CustomizeDiffCheckStaticIPDisassociation(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
 	contains := func(l []string, e string) bool {
 		for i := range l {
 			if l[i] == e {
@@ -148,7 +148,7 @@ func CustomizeDiffCheckStaticIPDisassociation(_ context.Context, d *schema.Resou
 		plannedStaticIps = FlattenToString(staticIps.(*schema.Set).List())
 	}
 
-	resp, err := client.StaticIPs.List(projectName)
+	resp, err := client.StaticIPs.List(ctx, projectName)
 	if err != nil {
 		return fmt.Errorf("unable to get static ips for project '%s': %w", projectName, err)
 	}

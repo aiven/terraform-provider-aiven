@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -288,6 +288,8 @@ func testAccCheckAivenKafkaTopicAttributes(n string) resource.TestCheckFunc {
 func testAccCheckAivenKafkaTopicResourceDestroy(s *terraform.State) error {
 	c := acc.GetTestAivenClient()
 
+	ctx := context.Background()
+
 	// loop through the resources in state, verifying each kafka topic is destroyed
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_kafka_topic" {
@@ -299,7 +301,7 @@ func testAccCheckAivenKafkaTopicResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
-		_, err = c.Services.Get(project, serviceName)
+		_, err = c.Services.Get(ctx, project, serviceName)
 		if err != nil {
 			if aiven.IsNotFound(err) {
 				return nil
@@ -307,7 +309,7 @@ func testAccCheckAivenKafkaTopicResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
-		t, err := c.KafkaTopics.Get(project, serviceName, topicName)
+		t, err := c.KafkaTopics.Get(ctx, project, serviceName, topicName)
 		if err != nil {
 			if aiven.IsNotFound(err) {
 				return nil
@@ -379,12 +381,14 @@ func TestAccAivenKafkaTopic_recreate_missing(t *testing.T) {
 				PreConfig: func() {
 					client := acc.GetTestAivenClient()
 
+					ctx := context.Background()
+
 					// deletes
-					err := client.KafkaTopics.Delete(project, kafkaName, topicName)
+					err := client.KafkaTopics.Delete(ctx, project, kafkaName, topicName)
 					assert.NoError(t, err)
 
 					// Makes sure topic does not exist
-					tc, err := client.KafkaTopics.Get(project, kafkaName, topicName)
+					tc, err := client.KafkaTopics.Get(ctx, project, kafkaName, topicName)
 					assert.Nil(t, tc)
 					assert.True(t, aiven.IsNotFound(err))
 
@@ -409,7 +413,9 @@ func TestAccAivenKafkaTopic_recreate_missing(t *testing.T) {
 							context.Background(),
 							time.Minute,
 							func() *retry.RetryError {
-								tc, err := client.KafkaTopics.Get(project, kafkaName, topicName)
+								ctx := context.Background()
+
+								tc, err := client.KafkaTopics.Get(ctx, project, kafkaName, topicName)
 								if err != nil {
 									return &retry.RetryError{
 										Err:       err,

@@ -4,7 +4,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"golang.org/x/exp/slices"
 )
 

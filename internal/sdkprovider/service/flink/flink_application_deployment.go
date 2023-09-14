@@ -5,7 +5,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -112,7 +112,7 @@ func resourceFlinkApplicationDeploymentCreate(
 		req.VersionID = v.(string)
 	}
 
-	r, err := client.FlinkApplicationDeployments.Create(project, serviceName, applicationID, req)
+	r, err := client.FlinkApplicationDeployments.Create(ctx, project, serviceName, applicationID, req)
 	if err != nil {
 		return diag.Errorf("cannot create Flink Application Deployment: %v", err)
 	}
@@ -137,7 +137,7 @@ func resourceFlinkApplicationDeploymentDelete(
 		return diag.Errorf("cannot read Flink Application Deployment resource ID: %v", err)
 	}
 
-	_, err = client.FlinkApplicationDeployments.Cancel(project, serviceName, applicationID, deploymentID)
+	_, err = client.FlinkApplicationDeployments.Cancel(ctx, project, serviceName, applicationID, deploymentID)
 	if err != nil {
 		return diag.Errorf("error cancelling Flink Application Deployment: %v", err)
 	}
@@ -151,7 +151,7 @@ func resourceFlinkApplicationDeploymentDelete(
 			"CANCELED",
 		},
 		Refresh: func() (interface{}, string, error) {
-			r, err := client.FlinkApplicationDeployments.Get(project, serviceName, applicationID, deploymentID)
+			r, err := client.FlinkApplicationDeployments.Get(ctx, project, serviceName, applicationID, deploymentID)
 			if err != nil {
 				return nil, "", err
 			}
@@ -167,7 +167,7 @@ func resourceFlinkApplicationDeploymentDelete(
 		return diag.Errorf("error waiting for Flink Application Deployment to become canceled: %s", err)
 	}
 
-	_, err = client.FlinkApplicationDeployments.Delete(project, serviceName, applicationID, deploymentID)
+	_, err = client.FlinkApplicationDeployments.Delete(ctx, project, serviceName, applicationID, deploymentID)
 	if err != nil {
 		return diag.Errorf("error deleting Flink Application Deployment: %v", err)
 	}
@@ -176,7 +176,7 @@ func resourceFlinkApplicationDeploymentDelete(
 }
 
 // resourceFlinkApplicationDeploymentRead reads an existing Flink Application Deployment resource.
-func resourceFlinkApplicationDeploymentRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceFlinkApplicationDeploymentRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, applicationID, deploymentID, err := schemautil.SplitResourceID4(d.Id())
@@ -184,7 +184,7 @@ func resourceFlinkApplicationDeploymentRead(_ context.Context, d *schema.Resourc
 		return diag.Errorf("cannot read Flink Application Deployment resource ID: %v", err)
 	}
 
-	r, err := client.FlinkApplicationDeployments.Get(project, serviceName, applicationID, deploymentID)
+	r, err := client.FlinkApplicationDeployments.Get(ctx, project, serviceName, applicationID, deploymentID)
 	if err != nil {
 		return diag.Errorf("cannot get Flink Application Deployment: %v", err)
 	}
