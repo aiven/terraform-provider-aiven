@@ -447,7 +447,7 @@ resource "aiven_kafka_topic" "topic" {
   service_name = aiven_kafka.kafka.service_name
   topic_name   = "topic"
   partitions   = 5
-  replication  = 3
+  replication  = 2
 }`, prefix, project)
 }
 
@@ -513,7 +513,7 @@ resource "aiven_kafka_topic" "topic" {
   service_name = aiven_kafka.kafka.service_name
   topic_name   = "topic"
   partitions   = 5
-  replication  = 3
+  replication  = 2
 }
 `, prefix, project)
 	return result
@@ -554,7 +554,7 @@ resource "aiven_kafka_topic" "topic" {
   service_name = aiven_kafka.kafka.service_name
   topic_name   = "conflict"
   partitions   = 5
-  replication  = 3
+  replication  = 2
 }
 
 resource "aiven_kafka_topic" "topic_conflict" {
@@ -562,7 +562,7 @@ resource "aiven_kafka_topic" "topic_conflict" {
   service_name = aiven_kafka.kafka.service_name
   topic_name   = "conflict"
   partitions   = 5
-  replication  = 3
+  replication  = 2
 
   depends_on = [
     aiven_kafka_topic.topic
