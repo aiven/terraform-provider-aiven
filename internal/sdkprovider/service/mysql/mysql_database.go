@@ -112,6 +112,7 @@ func resourceMySQLDatabaseDelete(ctx context.Context, d *schema.ResourceData, m 
 	}
 
 	waiter := schemautil.DatabaseDeleteWaiter{
+		Context:     ctx,
 		Client:      client,
 		ProjectName: projectName,
 		ServiceName: serviceName,

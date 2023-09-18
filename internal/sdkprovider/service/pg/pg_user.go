@@ -130,7 +130,7 @@ func resourcePGUserUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 
 		op := "set-access-control"
 
-		_, err = client.ServiceUsers.Update(projectName, serviceName, username,
+		_, err = client.ServiceUsers.Update(ctx, projectName, serviceName, username,
 			aiven.ModifyServiceUserRequest{
 				AccessControl: &aiven.AccessControl{
 					PostgresAllowReplication: &allowReplication,
