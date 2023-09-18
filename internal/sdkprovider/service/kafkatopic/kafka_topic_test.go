@@ -397,8 +397,7 @@ func TestAccAivenKafkaTopic_recreate_missing(t *testing.T) {
 			},
 			{
 				// Step 3: recreates the topic
-				Config:             config,
-				ExpectNonEmptyPlan: true,
+				Config: config,
 				Check: resource.ComposeTestCheckFunc(
 					// Saved in state
 					resource.TestCheckResourceAttr(kafkaResource, "id", kafkaID),
@@ -530,7 +529,7 @@ func TestAccAivenKafkaTopic_conflicts_if_exists(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccAivenKafkaTopicConflictsIfExists(prefix, project),
-				ExpectError: regexp.MustCompile(`Topic conflict already exists`),
+				ExpectError: regexp.MustCompile(`Topic conflict, already exists: conflict`),
 			},
 		},
 	})

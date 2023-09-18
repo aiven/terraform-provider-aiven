@@ -12,7 +12,6 @@ nav_order: 1
 - Fix `aiven_transit_gateway_vpc_attachment` resource update
 - Fix service IP filters normalization
 - Fix improper omitting in `ToAPI`
-- Fix Kafka Topic perfomance
 - Add OpenSearch Security Plugin support (`aiven_opensearch_security_plugin_config` resource)
 - Deprecate `add_account_owners_admin_access` and `use_source_project_billing_group` fields in `aiven_project` resource
 
