@@ -28,16 +28,12 @@ var aivenPGUserSchema = map[string]*schema.Schema{
 		Sensitive:        true,
 		Computed:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		Description:      "The password of the PG User ( not applicable for all services ).",
+		Description:      "The password of the PG User (not applicable for all services).",
 	},
 	"pg_allow_replication": {
 		Type:        schema.TypeBool,
 		Optional:    true,
-		ForceNew:    true,
-		Description: userconfig.Desc("Defines whether replication is allowed.").ForceNew().Build(),
-		Elem: &schema.Schema{
-			Type: schema.TypeBool,
-		},
+		Description: "Defines whether replication is allowed.",
 	},
 
 	// computed fields
@@ -126,6 +122,23 @@ func resourcePGUserUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		})
 	if err != nil {
 		return diag.FromErr(err)
+	}
+
+	if d.HasChange("pg_allow_replication") {
+		allowReplication := d.Get("pg_allow_replication").(bool)
+
+		op := "set-access-control"
+
+		_, err = client.ServiceUsers.Update(projectName, serviceName, username,
+			aiven.ModifyServiceUserRequest{
+				AccessControl: &aiven.AccessControl{
+					PostgresAllowReplication: &allowReplication,
+				},
+				Operation: &op,
+			})
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	return resourcePGUserRead(ctx, d, m)
