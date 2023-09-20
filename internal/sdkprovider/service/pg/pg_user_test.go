@@ -78,6 +78,28 @@ func TestAccAivenPGUser_pg_replica(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "pg_allow_replication", "true"),
 				),
 			},
+			{
+				Config: testAccPGUserPgReplicationDisableResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_pg_user.user"),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
+					resource.TestCheckResourceAttr(resourceName, "pg_allow_replication", "false"),
+				),
+			},
+			{
+				Config: testAccPGUserPgReplicationEnableResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					schemautil.TestAccCheckAivenServiceUserAttributes("data.aiven_pg_user.user"),
+					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "username", fmt.Sprintf("user-%s", rName)),
+					resource.TestCheckResourceAttr(resourceName, "password", "Test$1234"),
+					resource.TestCheckResourceAttr(resourceName, "pg_allow_replication", "true"),
+				),
+			},
 		},
 	})
 }
@@ -112,6 +134,70 @@ func testAccCheckAivenPGUserResourceDestroy(s *terraform.State) error {
 }
 
 func testAccPGUserPgReplicationResource(name string) string {
+	return fmt.Sprintf(`
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_pg" "bar" {
+  project      = data.aiven_project.foo.project
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = "test-acc-sr-%s"
+}
+
+resource "aiven_pg_user" "foo" {
+  service_name         = aiven_pg.bar.service_name
+  project              = aiven_pg.bar.project
+  username             = "user-%s"
+  password             = "Test$1234"
+  pg_allow_replication = true
+
+  depends_on = [aiven_pg.bar]
+}
+
+data "aiven_pg_user" "user" {
+  service_name = aiven_pg_user.foo.service_name
+  project      = aiven_pg_user.foo.project
+  username     = aiven_pg_user.foo.username
+
+  depends_on = [aiven_pg_user.foo]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}
+
+func testAccPGUserPgReplicationDisableResource(name string) string {
+	return fmt.Sprintf(`
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_pg" "bar" {
+  project      = data.aiven_project.foo.project
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = "test-acc-sr-%s"
+}
+
+resource "aiven_pg_user" "foo" {
+  service_name         = aiven_pg.bar.service_name
+  project              = aiven_pg.bar.project
+  username             = "user-%s"
+  password             = "Test$1234"
+  pg_allow_replication = false
+
+  depends_on = [aiven_pg.bar]
+}
+
+data "aiven_pg_user" "user" {
+  service_name = aiven_pg_user.foo.service_name
+  project      = aiven_pg_user.foo.project
+  username     = aiven_pg_user.foo.username
+
+  depends_on = [aiven_pg_user.foo]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}
+
+func testAccPGUserPgReplicationEnableResource(name string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
   project = "%s"

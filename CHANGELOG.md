@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Allow to modify `pg_user` replication settings
+
 ## [4.9.0] - 2023-09-18
 
 - Fix IP Filter migrations error

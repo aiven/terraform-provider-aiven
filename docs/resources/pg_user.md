@@ -32,8 +32,8 @@ resource "aiven_pg_user" "foo" {
 
 ### Optional
 
-- `password` (String, Sensitive) The password of the PG User ( not applicable for all services ).
-- `pg_allow_replication` (Boolean) Defines whether replication is allowed. This property cannot be changed, doing so forces recreation of the resource.
+- `password` (String, Sensitive) The password of the PG User (not applicable for all services).
+- `pg_allow_replication` (Boolean) Defines whether replication is allowed.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
