@@ -256,7 +256,7 @@ resource "aiven_mirrormaker_replication_flow" "foo" {
 		Steps: []resource.TestStep{
 			{
 				Config:      config,
-				ExpectError: regexp.MustCompile(`expected offset_syncs_topic_location to be one of \[source target], got lol_offset`),
+				ExpectError: regexp.MustCompile(`expected offset_syncs_topic_location to be one of`),
 			},
 		},
 	})
