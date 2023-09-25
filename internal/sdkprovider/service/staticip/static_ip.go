@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -59,7 +59,7 @@ func ResourceStaticIP() *schema.Resource {
 	}
 }
 
-func resourceStaticIPRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceStaticIPRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, staticIPAddressID, err := schemautil.SplitResourceID2(d.Id())
@@ -67,7 +67,7 @@ func resourceStaticIPRead(_ context.Context, d *schema.ResourceData, m interface
 		return diag.Errorf("error splitting static IP ID: %s", err)
 	}
 
-	r, err := client.StaticIPs.List(project)
+	r, err := client.StaticIPs.List(ctx, project)
 	if err != nil {
 		if schemautil.ResourceReadHandleNotFound(err, d) == nil {
 			return nil
@@ -94,7 +94,7 @@ func resourceStaticIPCreate(ctx context.Context, d *schema.ResourceData, m inter
 	project := d.Get("project").(string)
 	cloudName := d.Get("cloud_name").(string)
 
-	r, err := client.StaticIPs.Create(project, aiven.CreateStaticIPRequest{CloudName: cloudName})
+	r, err := client.StaticIPs.Create(ctx, project, aiven.CreateStaticIPRequest{CloudName: cloudName})
 	if err != nil {
 		return diag.Errorf("error creating static ip: %s", err)
 	}
@@ -108,7 +108,7 @@ func resourceStaticIPCreate(ctx context.Context, d *schema.ResourceData, m inter
 	return resourceStaticIPRead(ctx, d, m)
 }
 
-func resourceStaticIPDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceStaticIPDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, staticIPAddressID, err := schemautil.SplitResourceID2(d.Id())
@@ -116,7 +116,7 @@ func resourceStaticIPDelete(_ context.Context, d *schema.ResourceData, m interfa
 		return diag.Errorf("error spliting static IP ID: %s:", err)
 	}
 
-	staticIP, err := client.StaticIPs.Get(project, staticIPAddressID)
+	staticIP, err := client.StaticIPs.Get(ctx, project, staticIPAddressID)
 	if err != nil {
 		if aiven.IsNotFound(err) {
 			return nil
@@ -126,12 +126,13 @@ func resourceStaticIPDelete(_ context.Context, d *schema.ResourceData, m interfa
 	}
 
 	if staticIP.State == schemautil.StaticIPAvailable {
-		if err := client.StaticIPs.Dissociate(project, staticIPAddressID); err != nil {
+		if err := client.StaticIPs.Dissociate(ctx, project, staticIPAddressID); err != nil {
 			return diag.Errorf("error dissociating static IP (%s): %s", staticIPAddressID, err)
 		}
 	}
 
 	err = client.StaticIPs.Delete(
+		ctx,
 		project,
 		aiven.DeleteStaticIPRequest{
 			StaticIPAddressID: staticIPAddressID,
@@ -158,7 +159,7 @@ func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interfa
 		Timeout: d.Timeout(schema.TimeoutCreate),
 		Refresh: func() (result interface{}, state string, err error) {
 			log.Println("[DEBUG] checking if static ip", staticIPAddressID, "is in 'created' state")
-			r, err := client.StaticIPs.List(project)
+			r, err := client.StaticIPs.List(ctx, project)
 			if err != nil {
 				return nil, "", fmt.Errorf("unable to fetch static ips: %w", err)
 			}

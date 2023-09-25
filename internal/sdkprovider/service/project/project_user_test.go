@@ -1,10 +1,11 @@
 package project_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -47,6 +48,8 @@ func TestAccAivenProjectUser_basic(t *testing.T) {
 func testAccCheckAivenProjectUserResourceDestroy(s *terraform.State) error {
 	c := acc.GetTestAivenClient()
 
+	ctx := context.Background()
+
 	// loop through the resources in state, verifying each project is destroyed
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_project_user" {
@@ -58,7 +61,7 @@ func testAccCheckAivenProjectUserResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
-		p, i, err := c.ProjectUsers.Get(projectName, email)
+		p, i, err := c.ProjectUsers.Get(ctx, projectName, email)
 		if err != nil {
 			errStatus := err.(aiven.Error).Status
 			if errStatus != 404 && errStatus != 403 {

@@ -3,7 +3,7 @@ package organization
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -62,6 +62,7 @@ func resourceOrganizationUserGroupCreate(ctx context.Context, d *schema.Resource
 
 	orgID := d.Get("organization_id").(string)
 	r, err := client.OrganizationUserGroups.Create(
+		ctx,
 		orgID,
 		aiven.OrganizationUserGroupRequest{
 			UserGroupName: d.Get("name").(string),
@@ -77,7 +78,7 @@ func resourceOrganizationUserGroupCreate(ctx context.Context, d *schema.Resource
 	return resourceOrganizationUserGroupRead(ctx, d, m)
 }
 
-func resourceOrganizationUserGroupRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOrganizationUserGroupRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	orgID, userGroupID, err := schemautil.SplitResourceID2(d.Id())
@@ -85,7 +86,7 @@ func resourceOrganizationUserGroupRead(_ context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	r, err := client.OrganizationUserGroups.Get(orgID, userGroupID)
+	r, err := client.OrganizationUserGroups.Get(ctx, orgID, userGroupID)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -96,10 +97,10 @@ func resourceOrganizationUserGroupRead(_ context.Context, d *schema.ResourceData
 	if err := d.Set("description", r.Description); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("create_time", r.CreateTime); err != nil {
+	if err := d.Set("create_time", r.CreateTime.String()); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("update_time", r.UpdateTime); err != nil {
+	if err := d.Set("update_time", r.UpdateTime.String()); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -114,7 +115,7 @@ func resourceOrganizationUserGroupUpdate(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	_, err = client.OrganizationUserGroups.Update(orgID, userGroupID, aiven.OrganizationUserGroupRequest{
+	_, err = client.OrganizationUserGroups.Update(ctx, orgID, userGroupID, aiven.OrganizationUserGroupRequest{
 		UserGroupName: d.Get("name").(string),
 		Description:   d.Get("description").(string),
 	})
@@ -125,7 +126,7 @@ func resourceOrganizationUserGroupUpdate(ctx context.Context, d *schema.Resource
 	return resourceOrganizationUserGroupRead(ctx, d, m)
 }
 
-func resourceOrganizationUserGroupDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOrganizationUserGroupDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	orgID, userGroupID, err := schemautil.SplitResourceID2(d.Id())
@@ -133,7 +134,7 @@ func resourceOrganizationUserGroupDelete(_ context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	if err = client.OrganizationUserGroups.Delete(orgID, userGroupID); err != nil && !aiven.IsNotFound(err) {
+	if err = client.OrganizationUserGroups.Delete(ctx, orgID, userGroupID); err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
 

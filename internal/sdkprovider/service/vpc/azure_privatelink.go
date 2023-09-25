@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -75,6 +75,7 @@ func resourceAzurePrivatelinkCreate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	_, err := client.AzurePrivatelink.Create(
+		ctx,
 		project,
 		serviceName,
 		aiven.AzurePrivatelinkRequest{UserSubscriptionIDs: subscriptionIDs},
@@ -84,8 +85,13 @@ func resourceAzurePrivatelinkCreate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
-	_, err = waitForAzurePrivatelinkToBeActive(client, project, serviceName,
-		d.Timeout(schema.TimeoutCreate)).WaitForStateContext(ctx)
+	_, err = waitForAzurePrivatelinkToBeActive(
+		ctx,
+		client,
+		project,
+		serviceName,
+		d.Timeout(schema.TimeoutCreate),
+	).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for Azure privatelink: %s", err)
 	}
@@ -95,14 +101,14 @@ func resourceAzurePrivatelinkCreate(ctx context.Context, d *schema.ResourceData,
 	return resourceAzurePrivatelinkRead(ctx, d, m)
 }
 
-func resourceAzurePrivatelinkRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAzurePrivatelinkRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	pl, err := client.AzurePrivatelink.Get(project, serviceName)
+	pl, err := client.AzurePrivatelink.Get(ctx, project, serviceName)
 	if err != nil {
 		return diag.Errorf("Error getting Azure privatelink: %s", err)
 	}
@@ -145,6 +151,7 @@ func resourceAzurePrivatelinkUpdate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	_, err = client.AzurePrivatelink.Update(
+		ctx,
 		project,
 		serviceName,
 		aiven.AzurePrivatelinkRequest{UserSubscriptionIDs: subscriptionIDs},
@@ -154,8 +161,13 @@ func resourceAzurePrivatelinkUpdate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
-	_, err = waitForAzurePrivatelinkToBeActive(client, project, serviceName,
-		d.Timeout(schema.TimeoutUpdate)).WaitForStateContext(ctx)
+	_, err = waitForAzurePrivatelinkToBeActive(
+		ctx,
+		client,
+		project,
+		serviceName,
+		d.Timeout(schema.TimeoutUpdate),
+	).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for Azure privatelink: %s", err)
 	}
@@ -165,12 +177,18 @@ func resourceAzurePrivatelinkUpdate(ctx context.Context, d *schema.ResourceData,
 
 // waitForAzurePrivatelinkToBeActive waits until the Azure privatelink is active
 // nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
-func waitForAzurePrivatelinkToBeActive(client *aiven.Client, project string, serviceName string, t time.Duration) *resource.StateChangeConf {
+func waitForAzurePrivatelinkToBeActive(
+	ctx context.Context,
+	client *aiven.Client,
+	project string,
+	serviceName string,
+	t time.Duration,
+) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending: []string{"creating"},
 		Target:  []string{"active"},
 		Refresh: func() (interface{}, string, error) {
-			pl, err := client.AzurePrivatelink.Get(project, serviceName)
+			pl, err := client.AzurePrivatelink.Get(ctx, project, serviceName)
 			if err != nil {
 				return nil, "", err
 			}
@@ -193,7 +211,7 @@ func resourceAzurePrivatelinkDelete(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	err = client.AzurePrivatelink.Delete(project, serviceName)
+	err = client.AzurePrivatelink.Delete(ctx, project, serviceName)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
@@ -202,7 +220,7 @@ func resourceAzurePrivatelinkDelete(ctx context.Context, d *schema.ResourceData,
 		Pending: []string{"deleting"},
 		Target:  []string{"deleted"},
 		Refresh: func() (interface{}, string, error) {
-			pl, err := client.AzurePrivatelink.Get(project, serviceName)
+			pl, err := client.AzurePrivatelink.Get(ctx, project, serviceName)
 			if err != nil {
 				if aiven.IsNotFound(err) {
 					return struct{}{}, "deleted", nil

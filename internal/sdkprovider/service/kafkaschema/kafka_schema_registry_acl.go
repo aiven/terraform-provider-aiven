@@ -3,7 +3,7 @@ package kafkaschema
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -66,6 +66,7 @@ func resourceKafkaSchemaRegistryACLCreate(ctx context.Context, d *schema.Resourc
 	serviceName := d.Get("service_name").(string)
 
 	acl, err := client.KafkaSchemaRegistryACLs.Create(
+		ctx,
 		project,
 		serviceName,
 		aiven.CreateKafkaSchemaRegistryACLRequest{
@@ -83,7 +84,7 @@ func resourceKafkaSchemaRegistryACLCreate(ctx context.Context, d *schema.Resourc
 	return resourceKafkaSchemaRegistryACLRead(ctx, d, m)
 }
 
-func resourceKafkaSchemaRegistryACLRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaSchemaRegistryACLRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, aclID, err := schemautil.SplitResourceID3(d.Id())
@@ -91,7 +92,7 @@ func resourceKafkaSchemaRegistryACLRead(_ context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	acl, err := client.KafkaSchemaRegistryACLs.Get(project, serviceName, aclID)
+	acl, err := client.KafkaSchemaRegistryACLs.Get(ctx, project, serviceName, aclID)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -104,7 +105,7 @@ func resourceKafkaSchemaRegistryACLRead(_ context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourceKafkaSchemaRegistryACLDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaSchemaRegistryACLDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, aclID, err := schemautil.SplitResourceID3(d.Id())
@@ -112,7 +113,7 @@ func resourceKafkaSchemaRegistryACLDelete(_ context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	err = client.KafkaSchemaRegistryACLs.Delete(projectName, serviceName, aclID)
+	err = client.KafkaSchemaRegistryACLs.Delete(ctx, projectName, serviceName, aclID)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}

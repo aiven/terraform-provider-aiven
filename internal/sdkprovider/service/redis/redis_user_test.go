@@ -1,11 +1,12 @@
 package redis_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -39,6 +40,8 @@ func TestAccAivenRedisUser_basic(t *testing.T) {
 func testAccCheckAivenRedisUserResourceDestroy(s *terraform.State) error {
 	c := acc.GetTestAivenClient()
 
+	ctx := context.Background()
+
 	// loop through the resources in state, verifying each aiven_redis_user is destroyed
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_redis_user" {
@@ -50,7 +53,7 @@ func testAccCheckAivenRedisUserResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
-		p, err := c.ServiceUsers.Get(projectName, serviceName, username)
+		p, err := c.ServiceUsers.Get(ctx, projectName, serviceName, username)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {
 				return err

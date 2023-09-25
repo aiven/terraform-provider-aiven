@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -78,9 +78,11 @@ func resourceAccountTeamMemberCreate(ctx context.Context, d *schema.ResourceData
 	userEmail := d.Get("user_email").(string)
 
 	err := client.AccountTeamMembers.Invite(
+		ctx,
 		accountID,
 		teamID,
-		userEmail)
+		userEmail,
+	)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -99,7 +101,7 @@ func resourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	r, err := client.AccountTeamInvites.List(accountID, teamID)
+	r, err := client.AccountTeamInvites.List(ctx, accountID, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -132,7 +134,7 @@ func resourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	if !found {
-		rm, err := client.AccountTeamMembers.List(accountID, teamID)
+		rm, err := client.AccountTeamMembers.List(ctx, accountID, teamID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -174,7 +176,7 @@ func resourceAccountTeamMemberRead(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceAccountTeamMemberDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAccountTeamMemberDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	accountID, teamID, userEmail, err := schemautil.SplitResourceID3(d.Id())
@@ -183,12 +185,12 @@ func resourceAccountTeamMemberDelete(_ context.Context, d *schema.ResourceData, 
 	}
 
 	// delete account team user invitation
-	err = client.AccountTeamInvites.Delete(accountID, teamID, userEmail)
+	err = client.AccountTeamInvites.Delete(ctx, accountID, teamID, userEmail)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
 
-	r, err := client.AccountTeamMembers.List(accountID, teamID)
+	r, err := client.AccountTeamMembers.List(ctx, accountID, teamID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -201,7 +203,7 @@ func resourceAccountTeamMemberDelete(_ context.Context, d *schema.ResourceData, 
 	found := false
 	for _, m := range r.Members {
 		if m.UserEmail == userEmail {
-			err = client.AccountTeamMembers.Delete(accountID, teamID, m.UserId)
+			err = client.AccountTeamMembers.Delete(ctx, accountID, teamID, m.UserId)
 			if err != nil && !aiven.IsNotFound(err) {
 				return diag.FromErr(err)
 			}

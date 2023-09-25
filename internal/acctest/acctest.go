@@ -10,7 +10,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
@@ -62,6 +62,9 @@ func TestAccPreCheck(t *testing.T) {
 
 func TestAccCheckAivenServiceResourceDestroy(s *terraform.State) error {
 	c := GetTestAivenClient()
+
+	ctx := context.Background()
+
 	// loop through the resources in state, verifying each service is destroyed
 	for n, rs := range s.RootModule().Resources {
 		// ignore datasource
@@ -95,7 +98,7 @@ func TestAccCheckAivenServiceResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
-		p, err := c.Services.Get(projectName, serviceName)
+		p, err := c.Services.Get(ctx, projectName, serviceName)
 		if err != nil {
 			if !aiven.IsNotFound(err) {
 				return err

@@ -1,12 +1,13 @@
 package kafka_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"regexp"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -77,7 +78,10 @@ func TestAccAiven_kafka(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "service_uri"),
 					func(state *terraform.State) error {
 						c := acc.GetTestAivenClient()
-						a, err := c.KafkaACLs.List(os.Getenv("AIVEN_PROJECT_NAME"), rName2)
+
+						ctx := context.Background()
+
+						a, err := c.KafkaACLs.List(ctx, os.Getenv("AIVEN_PROJECT_NAME"), rName2)
 						if err != nil && !aiven.IsNotFound(err) {
 							return fmt.Errorf("cannot get a list of kafka ACLs: %s", err)
 						}
@@ -86,7 +90,7 @@ func TestAccAiven_kafka(t *testing.T) {
 							return fmt.Errorf("list of ACLs should be empty")
 						}
 
-						s, err := c.KafkaSchemaRegistryACLs.List(os.Getenv("AIVEN_PROJECT_NAME"), rName2)
+						s, err := c.KafkaSchemaRegistryACLs.List(ctx, os.Getenv("AIVEN_PROJECT_NAME"), rName2)
 						if err != nil && !aiven.IsNotFound(err) {
 							return fmt.Errorf("cannot get a list of Kafka Schema ACLs: %s", err)
 						}

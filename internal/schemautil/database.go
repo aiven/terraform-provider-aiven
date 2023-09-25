@@ -1,14 +1,16 @@
 package schemautil
 
 import (
+	"context"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 // DatabaseDeleteWaiter is used to wait for Database to be deleted.
 type DatabaseDeleteWaiter struct {
+	Context     context.Context
 	Client      *aiven.Client
 	ProjectName string
 	ServiceName string
@@ -19,7 +21,7 @@ type DatabaseDeleteWaiter struct {
 // nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func (w *DatabaseDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		err := w.Client.Databases.Delete(w.ProjectName, w.ServiceName, w.Database)
+		err := w.Client.Databases.Delete(w.Context, w.ProjectName, w.ServiceName, w.Database)
 		if err != nil && !aiven.IsNotFound(err) {
 			return nil, "REMOVING", nil
 		}

@@ -3,7 +3,7 @@ package opensearch
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -24,7 +24,7 @@ func datasourceOpenSearchACLConfigRead(ctx context.Context, d *schema.ResourceDa
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 
-	acl, err := client.ElasticsearchACLs.Get(projectName, serviceName)
+	acl, err := client.ElasticsearchACLs.Get(ctx, projectName, serviceName)
 	if err != nil {
 		return diag.FromErr(err)
 	}

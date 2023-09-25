@@ -1,11 +1,12 @@
 package clickhouse_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -95,6 +96,8 @@ resource "aiven_clickhouse_grant" "foo-user-grant" {
 func testAccCheckAivenClickhouseGrantResourceDestroy(s *terraform.State) error {
 	c := acc.GetTestAivenClient()
 
+	ctx := context.Background()
+
 	// loop through the resources in state, verifying each aiven_clickhouse_role is destroyed
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_clickhouse_grant" {
@@ -114,7 +117,13 @@ func testAccCheckAivenClickhouseGrantResourceDestroy(s *terraform.State) error {
 			grantee.User = granteeName
 		}
 
-		if privilegeGrants, err := clickhouse2.ReadPrivilegeGrants(c, projectName, serviceName, grantee); err != nil {
+		if privilegeGrants, err := clickhouse2.ReadPrivilegeGrants(
+			ctx,
+			c,
+			projectName,
+			serviceName,
+			grantee,
+		); err != nil {
 			if aiven.IsNotFound(err) {
 				continue
 			}
@@ -123,7 +132,7 @@ func testAccCheckAivenClickhouseGrantResourceDestroy(s *terraform.State) error {
 			return fmt.Errorf("'%s' still has privilege grants exists", granteeName)
 		}
 
-		if roleGrants, err := clickhouse2.ReadRoleGrants(c, projectName, serviceName, grantee); err != nil {
+		if roleGrants, err := clickhouse2.ReadRoleGrants(ctx, c, projectName, serviceName, grantee); err != nil {
 			if aiven.IsNotFound(err) {
 				continue
 			}

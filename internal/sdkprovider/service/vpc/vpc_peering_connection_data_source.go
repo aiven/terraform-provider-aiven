@@ -3,7 +3,7 @@ package vpc
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -21,7 +21,7 @@ func datasourceVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceD
 	peerCloudAccount := d.Get("peer_cloud_account").(string)
 	peerVPC := d.Get("peer_vpc").(string)
 
-	vpc, err := client.VPCs.Get(projectName, vpcID)
+	vpc, err := client.VPCs.Get(ctx, projectName, vpcID)
 	if err != nil {
 		return diag.Errorf("Error getting VPC peering connection: %s", err)
 	}

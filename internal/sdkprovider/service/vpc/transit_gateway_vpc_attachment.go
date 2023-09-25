@@ -3,7 +3,7 @@ package vpc
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -97,7 +97,7 @@ func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.Re
 		}
 	}
 
-	peeringConnection, err := client.VPCPeeringConnections.Get(p.projectName, p.vpcID, p.peerCloudAccount, p.peerVPC)
+	peeringConnection, err := client.VPCPeeringConnections.Get(ctx, p.projectName, p.vpcID, p.peerCloudAccount, p.peerVPC)
 	if err != nil {
 		return diag.Errorf("cannot get transit gateway vpc attachment by id %s: %s", d.Id(), err)
 	}
@@ -148,7 +148,7 @@ func resourceTransitGatewayVPCAttachmentUpdate(ctx context.Context, d *schema.Re
 		return resourceVPCPeeringConnectionRead(ctx, d, m)
 	}
 
-	_, err = client.TransitGatewayVPCAttachment.Update(p.projectName, p.vpcID, aiven.TransitGatewayVPCAttachmentRequest{
+	_, err = client.TransitGatewayVPCAttachment.Update(ctx, p.projectName, p.vpcID, aiven.TransitGatewayVPCAttachmentRequest{
 		Add:    add,
 		Delete: deleteCIDRs,
 	})

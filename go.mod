@@ -3,7 +3,7 @@ module github.com/aiven/terraform-provider-aiven
 go 1.21.1
 
 require (
-	github.com/aiven/aiven-go-client v1.36.0
+	github.com/aiven/aiven-go-client/v2 v2.0.0
 	github.com/dave/jennifer v1.7.0
 	github.com/docker/go-units v0.5.0
 	github.com/ettle/strcase v0.1.1

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
@@ -103,10 +103,16 @@ func ResourceKafkaSchema() *schema.Resource {
 	}
 }
 
-func kafkaSchemaSubjectGetLastVersion(m interface{}, project, serviceName, subjectName string) (int, error) {
+func kafkaSchemaSubjectGetLastVersion(
+	ctx context.Context,
+	m interface{},
+	project string,
+	serviceName string,
+	subjectName string,
+) (int, error) {
 	client := m.(*aiven.Client)
 
-	r, err := client.KafkaSubjectSchemas.GetVersions(project, serviceName, subjectName)
+	r, err := client.KafkaSubjectSchemas.GetVersions(ctx, project, serviceName, subjectName)
 	if err != nil {
 		return 0, err
 	}
@@ -134,6 +140,7 @@ func resourceKafkaSchemaCreate(ctx context.Context, d *schema.ResourceData, m in
 
 	// create Kafka Schema Subject
 	_, err := client.KafkaSubjectSchemas.Add(
+		ctx,
 		project,
 		serviceName,
 		subjectName,
@@ -149,6 +156,7 @@ func resourceKafkaSchemaCreate(ctx context.Context, d *schema.ResourceData, m in
 	// set compatibility level if defined for a newly created Kafka Schema Subject
 	if compatibility, ok := d.GetOk("compatibility_level"); ok {
 		_, err := client.KafkaSubjectSchemas.UpdateConfiguration(
+			ctx,
 			project,
 			serviceName,
 			subjectName,
@@ -159,7 +167,7 @@ func resourceKafkaSchemaCreate(ctx context.Context, d *schema.ResourceData, m in
 		}
 	}
 
-	version, err := kafkaSchemaSubjectGetLastVersion(m, project, serviceName, subjectName)
+	version, err := kafkaSchemaSubjectGetLastVersion(ctx, m, project, serviceName, subjectName)
 	if err != nil {
 		return diag.Errorf("unable to get last version: %s", err)
 	}
@@ -184,6 +192,7 @@ func resourceKafkaSchemaUpdate(ctx context.Context, d *schema.ResourceData, m in
 
 	if d.HasChange("schema") {
 		_, err := client.KafkaSubjectSchemas.Add(
+			ctx,
 			project,
 			serviceName,
 			subjectName,
@@ -200,6 +209,7 @@ func resourceKafkaSchemaUpdate(ctx context.Context, d *schema.ResourceData, m in
 	// if compatibility_level has changed and the new value is not empty
 	if compatibility, ok := d.GetOk("compatibility_level"); ok {
 		_, err = client.KafkaSubjectSchemas.UpdateConfiguration(
+			ctx,
 			project,
 			serviceName,
 			subjectName,
@@ -212,7 +222,7 @@ func resourceKafkaSchemaUpdate(ctx context.Context, d *schema.ResourceData, m in
 	return resourceKafkaSchemaRead(ctx, d, m)
 }
 
-func resourceKafkaSchemaRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaSchemaRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project, serviceName, subjectName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
@@ -220,12 +230,12 @@ func resourceKafkaSchemaRead(_ context.Context, d *schema.ResourceData, m interf
 
 	client := m.(*aiven.Client)
 
-	version, err := kafkaSchemaSubjectGetLastVersion(m, project, serviceName, subjectName)
+	version, err := kafkaSchemaSubjectGetLastVersion(ctx, m, project, serviceName, subjectName)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
-	r, err := client.KafkaSubjectSchemas.Get(project, serviceName, subjectName, version)
+	r, err := client.KafkaSubjectSchemas.Get(ctx, project, serviceName, subjectName, version)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -246,7 +256,7 @@ func resourceKafkaSchemaRead(_ context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	c, err := client.KafkaSubjectSchemas.GetConfiguration(project, serviceName, subjectName)
+	c, err := client.KafkaSubjectSchemas.GetConfiguration(ctx, project, serviceName, subjectName)
 	if err != nil {
 		if !aiven.IsNotFound(err) {
 			return diag.FromErr(err)
@@ -260,13 +270,13 @@ func resourceKafkaSchemaRead(_ context.Context, d *schema.ResourceData, m interf
 	return nil
 }
 
-func resourceKafkaSchemaDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaSchemaDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project, serviceName, schemaName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = m.(*aiven.Client).KafkaSubjectSchemas.Delete(project, serviceName, schemaName)
+	err = m.(*aiven.Client).KafkaSubjectSchemas.Delete(ctx, project, serviceName, schemaName)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
@@ -274,7 +284,7 @@ func resourceKafkaSchemaDelete(_ context.Context, d *schema.ResourceData, m inte
 	return nil
 }
 
-func resourceKafkaSchemaCustomizeDiff(_ context.Context, d *schema.ResourceDiff, m interface{}) error {
+func resourceKafkaSchemaCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
 	client := m.(*aiven.Client)
 
 	// no previous version: allow the diff, nothing to check compatibility against
@@ -283,6 +293,7 @@ func resourceKafkaSchemaCustomizeDiff(_ context.Context, d *schema.ResourceDiff,
 	}
 
 	if compatible, err := client.KafkaSubjectSchemas.Validate(
+		ctx,
 		d.Get("project").(string),
 		d.Get("service_name").(string),
 		d.Get("subject_name").(string),

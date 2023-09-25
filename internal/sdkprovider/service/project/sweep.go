@@ -3,20 +3,28 @@
 package project
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
 
 func init() {
+	ctx := context.Background()
+
+	client, err := sweep.SharedClient()
+	if err != nil {
+		panic(fmt.Sprintf("error getting client: %s", err))
+	}
+
 	resource.AddTestSweepers("aiven_project", &resource.Sweeper{
 		Name: "aiven_project",
-		F:    sweepProjects,
+		F:    sweepProjects(ctx, client),
 		Dependencies: []string{
 			"aiven_cassandra",
 			"aiven_clickhouse",
@@ -36,39 +44,34 @@ func init() {
 	})
 }
 
-func sweepProjects(region string) error {
-	client, err := sweep.SharedClient(region)
-	if err != nil {
-		return fmt.Errorf("error getting client: %s", err)
-	}
+func sweepProjects(ctx context.Context, client *aiven.Client) func(region string) error {
+	return func(region string) error {
+		projects, err := client.Projects.List(ctx)
+		if err != nil {
+			return fmt.Errorf("error retrieving a list of projects : %s", err)
+		}
 
-	conn := client.(*aiven.Client)
+		for _, project := range projects {
+			if strings.Contains(project.Name, "test-acc-") {
+				if err := client.Projects.Delete(ctx, project.Name); err != nil {
+					e := err.(aiven.Error)
 
-	projects, err := conn.Projects.List()
-	if err != nil {
-		return fmt.Errorf("error retrieving a list of projects : %s", err)
-	}
+					// project not found
+					if e.Status == 404 {
+						continue
+					}
 
-	for _, project := range projects {
-		if strings.Contains(project.Name, "test-acc-") {
-			if err := conn.Projects.Delete(project.Name); err != nil {
-				e := err.(aiven.Error)
+					// project with open balance cannot be destroyed
+					if strings.Contains(e.Message, "open balance") && e.Status == 403 {
+						log.Printf("[DEBUG] project %s with open balance cannot be destroyed", project.Name)
+						continue
+					}
 
-				// project not found
-				if e.Status == 404 {
-					continue
+					return fmt.Errorf("error destroying project %s during sweep: %s", project.Name, err)
 				}
-
-				// project with open balance cannot be destroyed
-				if strings.Contains(e.Message, "open balance") && e.Status == 403 {
-					log.Printf("[DEBUG] project %s with open balance cannot be destroyed", project.Name)
-					continue
-				}
-
-				return fmt.Errorf("error destroying project %s during sweep: %s", project.Name, err)
 			}
 		}
-	}
 
-	return nil
+		return nil
+	}
 }

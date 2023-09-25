@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 )
 
 func NewAivenClient() (*aiven.Client, error) {

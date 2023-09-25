@@ -3,7 +3,7 @@ package clickhouse
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -45,7 +45,7 @@ func resourceClickhouseRoleCreate(ctx context.Context, d *schema.ResourceData, m
 	serviceName := d.Get("service_name").(string)
 	roleName := d.Get("role").(string)
 
-	if err := CreateRole(client, projectName, serviceName, roleName); err != nil {
+	if err := CreateRole(ctx, client, projectName, serviceName, roleName); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -54,7 +54,7 @@ func resourceClickhouseRoleCreate(ctx context.Context, d *schema.ResourceData, m
 	return resourceClickhouseRoleRead(ctx, d, m)
 }
 
-func resourceClickhouseRoleRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceClickhouseRoleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, roleName, err := schemautil.SplitResourceID3(d.Id())
@@ -62,7 +62,7 @@ func resourceClickhouseRoleRead(_ context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(err)
 	}
 
-	if exists, err := RoleExists(client, projectName, serviceName, roleName); err != nil {
+	if exists, err := RoleExists(ctx, client, projectName, serviceName, roleName); err != nil {
 		return diag.FromErr(err)
 	} else if !exists {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
@@ -80,7 +80,7 @@ func resourceClickhouseRoleRead(_ context.Context, d *schema.ResourceData, m int
 	return nil
 }
 
-func resourceClickhouseRoleDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceClickhouseRoleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, roleName, err := schemautil.SplitResourceID3(d.Id())
@@ -88,7 +88,7 @@ func resourceClickhouseRoleDelete(_ context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(err)
 	}
 
-	if err := DropRole(client, projectName, serviceName, roleName); err != nil {
+	if err := DropRole(ctx, client, projectName, serviceName, roleName); err != nil {
 		return diag.FromErr(err)
 	}
 	return nil

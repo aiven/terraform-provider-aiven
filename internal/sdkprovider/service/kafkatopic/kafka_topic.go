@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -290,6 +290,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	w := &kafkaTopicCreateWaiter{
+		Context:       ctx,
 		Client:        m.(*aiven.Client),
 		Project:       project,
 		ServiceName:   serviceName,
@@ -452,7 +453,7 @@ func getTopic(ctx context.Context, m interface{}, timeout time.Duration, project
 		return nil, fmt.Errorf("invalid Aiven client")
 	}
 
-	w, err := newKafkaTopicAvailabilityWaiter(client, project, serviceName, topicName)
+	w, err := newKafkaTopicAvailabilityWaiter(ctx, client, project, serviceName, topicName)
 	if err != nil {
 		return nil, err
 	}
@@ -470,7 +471,7 @@ func getTopic(ctx context.Context, m interface{}, timeout time.Duration, project
 	return &kt, nil
 }
 
-func resourceKafkaTopicUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaTopicUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	partitions := d.Get("partitions").(int)
@@ -480,6 +481,7 @@ func resourceKafkaTopicUpdate(_ context.Context, d *schema.ResourceData, m inter
 	}
 
 	err = client.KafkaTopics.Update(
+		ctx,
 		projectName,
 		serviceName,
 		topicName,
@@ -510,6 +512,7 @@ func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	waiter := TopicDeleteWaiter{
+		Context:     ctx,
 		Client:      client,
 		ProjectName: projectName,
 		ServiceName: serviceName,
@@ -559,6 +562,7 @@ func flattenKafkaTopicConfig(t *aiven.KafkaTopic) []map[string]interface{} {
 
 // TopicDeleteWaiter is used to wait for Kafka Topic to be deleted.
 type TopicDeleteWaiter struct {
+	Context     context.Context
 	Client      *aiven.Client
 	ProjectName string
 	ServiceName string
@@ -569,7 +573,7 @@ type TopicDeleteWaiter struct {
 // nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func (w *TopicDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		err := w.Client.KafkaTopics.Delete(w.ProjectName, w.ServiceName, w.TopicName)
+		err := w.Client.KafkaTopics.Delete(w.Context, w.ProjectName, w.ServiceName, w.TopicName)
 		if err != nil {
 			if !aiven.IsNotFound(err) {
 				return nil, "REMOVING", nil

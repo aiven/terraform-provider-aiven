@@ -3,7 +3,7 @@ package connectionpool
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -26,7 +26,7 @@ func datasourceConnectionPoolRead(ctx context.Context, d *schema.ResourceData, m
 	serviceName := d.Get("service_name").(string)
 	poolName := d.Get("pool_name").(string)
 
-	pools, err := client.ConnectionPools.List(projectName, serviceName)
+	pools, err := client.ConnectionPools.List(ctx, projectName, serviceName)
 	if err != nil {
 		return diag.FromErr(err)
 	}

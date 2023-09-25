@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -72,7 +72,7 @@ func resourceOrganizationUserCreate(ctx context.Context, d *schema.ResourceData,
 	organizationID := d.Get("organization_id").(string)
 	userEmail := d.Get("user_email").(string)
 
-	err := client.OrganizationUserInvitations.Invite(organizationID, aiven.OrganizationUserInvitationAddRequest{
+	err := client.OrganizationUserInvitations.Invite(ctx, organizationID, aiven.OrganizationUserInvitationAddRequest{
 		UserEmail: userEmail,
 	})
 	if err != nil {
@@ -93,7 +93,7 @@ func resourceOrganizationUserRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	r, err := client.OrganizationUserInvitations.List(organizationID)
+	r, err := client.OrganizationUserInvitations.List(ctx, organizationID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -111,7 +111,7 @@ func resourceOrganizationUserRead(ctx context.Context, d *schema.ResourceData, m
 			if err := d.Set("invited_by", invite.InvitedBy); err != nil {
 				return diag.FromErr(err)
 			}
-			if err := d.Set("create_time", invite.CreateTime); err != nil {
+			if err := d.Set("create_time", invite.CreateTime.String()); err != nil {
 				return diag.FromErr(err)
 			}
 
@@ -123,7 +123,7 @@ func resourceOrganizationUserRead(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	if !found {
-		rm, err := client.OrganizationUser.List(organizationID)
+		rm, err := client.OrganizationUser.List(ctx, organizationID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -164,7 +164,7 @@ func resourceOrganizationUserRead(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceOrganizationUserDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOrganizationUserDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	organizationID, userEmail, err := schemautil.SplitResourceID2(d.Id())
@@ -175,7 +175,7 @@ func resourceOrganizationUserDelete(_ context.Context, d *schema.ResourceData, m
 	found := true
 
 	// delete organization user invitation
-	err = client.OrganizationUserInvitations.Delete(organizationID, userEmail)
+	err = client.OrganizationUserInvitations.Delete(ctx, organizationID, userEmail)
 	if err != nil {
 		if !aiven.IsNotFound(err) {
 			return diag.FromErr(err)
@@ -184,7 +184,7 @@ func resourceOrganizationUserDelete(_ context.Context, d *schema.ResourceData, m
 		found = false
 	}
 
-	r, err := client.OrganizationUser.List(organizationID)
+	r, err := client.OrganizationUser.List(ctx, organizationID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -198,7 +198,7 @@ func resourceOrganizationUserDelete(_ context.Context, d *schema.ResourceData, m
 		userInfo := u.UserInfo
 
 		if userInfo.UserEmail == userEmail {
-			err = client.OrganizationUser.Delete(organizationID, u.UserID)
+			err = client.OrganizationUser.Delete(ctx, organizationID, u.UserID)
 			if err != nil && !aiven.IsNotFound(err) {
 				return diag.FromErr(err)
 			}

@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -124,7 +124,7 @@ func ResourceKafka() *schema.Resource {
 				serviceName := d.Get("service_name").(string)
 				client := m.(*aiven.Client)
 
-				kafka, err := client.Services.Get(project, serviceName)
+				kafka, err := client.Services.Get(ctx, project, serviceName)
 				if err != nil {
 					return false
 				}

@@ -3,7 +3,7 @@ package flink
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -71,7 +71,7 @@ func ResourceFlinkApplication() *schema.Resource {
 }
 
 // resourceFlinkApplicationRead is the read function for the Flink Application resource.
-func resourceFlinkApplicationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceFlinkApplicationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, ID, err := schemautil.SplitResourceID3(d.Id())
@@ -79,7 +79,7 @@ func resourceFlinkApplicationRead(_ context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(err)
 	}
 
-	r, err := client.FlinkApplications.Get(project, serviceName, ID)
+	r, err := client.FlinkApplications.Get(ctx, project, serviceName, ID)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -126,7 +126,7 @@ func resourceFlinkApplicationCreate(ctx context.Context, d *schema.ResourceData,
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 
-	r, err := client.FlinkApplications.Create(project, serviceName, aiven.CreateFlinkApplicationRequest{
+	r, err := client.FlinkApplications.Create(ctx, project, serviceName, aiven.CreateFlinkApplicationRequest{
 		Name: d.Get("name").(string),
 	})
 	if err != nil {
@@ -146,7 +146,7 @@ func resourceFlinkApplicationUpdate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	_, err = client.FlinkApplications.Update(project, serviceName, ID, aiven.UpdateFlinkApplicationRequest{
+	_, err = client.FlinkApplications.Update(ctx, project, serviceName, ID, aiven.UpdateFlinkApplicationRequest{
 		Name: d.Get("name").(string),
 	})
 	if err != nil {
@@ -157,7 +157,7 @@ func resourceFlinkApplicationUpdate(ctx context.Context, d *schema.ResourceData,
 }
 
 // resourceFlinkApplicationDelete is the delete function for the Flink Application resource.
-func resourceFlinkApplicationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceFlinkApplicationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, ID, err := schemautil.SplitResourceID3(d.Id())
@@ -165,7 +165,7 @@ func resourceFlinkApplicationDelete(_ context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	_, err = client.FlinkApplications.Delete(project, serviceName, ID)
+	_, err = client.FlinkApplications.Delete(ctx, project, serviceName, ID)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}

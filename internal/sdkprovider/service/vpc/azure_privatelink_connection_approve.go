@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -51,17 +51,25 @@ func ResourceAzurePrivatelinkConnectionApproval() *schema.Resource {
 }
 
 // nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
-func waitForAzureConnectionState(_ context.Context, client *aiven.Client, project string, service string, t time.Duration, pending []string, target []string) *resource.StateChangeConf {
+func waitForAzureConnectionState(
+	ctx context.Context,
+	client *aiven.Client,
+	project string,
+	service string,
+	t time.Duration,
+	pending []string,
+	target []string,
+) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending: pending,
 		Target:  target,
 		Refresh: func() (interface{}, string, error) {
-			err := client.AzurePrivatelink.Refresh(project, service)
+			err := client.AzurePrivatelink.Refresh(ctx, project, service)
 			if err != nil {
 				return nil, "", err
 			}
 
-			plConnections, err := client.AzurePrivatelink.ConnectionsList(project, service)
+			plConnections, err := client.AzurePrivatelink.ConnectionsList(ctx, project, service)
 			if err != nil {
 				return nil, "", err
 			}
@@ -89,7 +97,7 @@ func resourceAzurePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *sc
 	var serviceName = d.Get("service_name").(string)
 	var endpointIPAddress = d.Get("endpoint_ip_address").(string)
 
-	err := client.AzurePrivatelink.Refresh(project, serviceName)
+	err := client.AzurePrivatelink.Refresh(ctx, project, serviceName)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -103,7 +111,7 @@ func resourceAzurePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *sc
 		return diag.Errorf("Error waiting for privatelink connection after refresh: %s", err)
 	}
 
-	plConnections, err := client.AzurePrivatelink.ConnectionsList(project, serviceName)
+	plConnections, err := client.AzurePrivatelink.ConnectionsList(ctx, project, serviceName)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -116,7 +124,7 @@ func resourceAzurePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *sc
 	plConnectionID := plConnection.PrivatelinkConnectionID
 
 	if plConnection.State == "pending-user-approval" {
-		err = client.AzurePrivatelink.ConnectionApprove(project, serviceName, plConnectionID)
+		err = client.AzurePrivatelink.ConnectionApprove(ctx, project, serviceName, plConnectionID)
 		if err != nil {
 			return diag.Errorf("Error approving privatelink connection %s/%s/%s: %s", project, serviceName, plConnectionID, err)
 		}
@@ -134,7 +142,7 @@ func resourceAzurePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *sc
 	updateReq := aiven.AzurePrivatelinkConnectionUpdateRequest{
 		UserIPAddress: endpointIPAddress,
 	}
-	err = client.AzurePrivatelink.ConnectionUpdate(project, serviceName, plConnectionID, updateReq)
+	err = client.AzurePrivatelink.ConnectionUpdate(ctx, project, serviceName, plConnectionID, updateReq)
 	if err != nil {
 		return diag.Errorf("Error updating privatelink connection %s/%s/%s: %s", project, serviceName, plConnectionID, err)
 	}
@@ -157,7 +165,7 @@ func resourceAzurePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *sc
 	return resourceAzurePrivatelinkConnectionApprovalRead(ctx, d, m)
 }
 
-func resourceAzurePrivatelinkConnectionApprovalRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAzurePrivatelinkConnectionApprovalRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	project, service, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
@@ -165,7 +173,7 @@ func resourceAzurePrivatelinkConnectionApprovalRead(_ context.Context, d *schema
 	}
 
 	plConnectionID := schemautil.OptionalStringPointer(d, "privatelink_connection_id")
-	plConnection, err := client.AzurePrivatelink.ConnectionGet(project, service, plConnectionID)
+	plConnection, err := client.AzurePrivatelink.ConnectionGet(ctx, project, service, plConnectionID)
 	if err != nil {
 		if aiven.IsNotFound(err) {
 			if err := d.Set("privatelink_connection_id", ""); err != nil {

@@ -3,7 +3,7 @@ package flink
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -26,7 +26,7 @@ func datasourceFlinkApplicationVersionRead(ctx context.Context, d *schema.Resour
 	appID := d.Get("application_id").(string)
 	versionID := d.Get("application_version_id").(string)
 
-	_, err := client.FlinkApplicationVersions.Get(project, serviceName, appID, versionID)
+	_, err := client.FlinkApplicationVersions.Get(ctx, project, serviceName, appID, versionID)
 	if err != nil {
 		if aiven.IsNotFound(err) {
 			return diag.Errorf("flink application version %s not found", versionID)

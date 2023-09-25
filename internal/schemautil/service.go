@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -332,7 +332,7 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.Errorf("error splitting service ID: %s", err)
 	}
 
-	s, err := client.Services.Get(projectName, serviceName)
+	s, err := client.Services.Get(ctx, projectName, serviceName)
 	if err != nil {
 		if err = ResourceReadHandleNotFound(err, d); err != nil {
 			return diag.Errorf("unable to GET service %s: %s", d.Id(), err)
@@ -358,7 +358,7 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.Errorf("unable to set static ips field in schema: %s", err)
 	}
 
-	t, err := client.ServiceTags.Get(projectName, serviceName)
+	t, err := client.ServiceTags.Get(ctx, projectName, serviceName)
 	if err != nil {
 		return diag.Errorf("unable to get service tags: %s", err)
 	}
@@ -409,6 +409,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	_, err = client.Services.Create(
+		ctx,
 		project,
 		aiven.CreateServiceRequest{
 			Cloud:                 d.Get("cloud_name").(string),
@@ -435,7 +436,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.Errorf("error waiting for service creation: %s", err)
 	}
 
-	_, err = client.ServiceTags.Set(project, d.Get("service_name").(string), aiven.ServiceTagsRequest{
+	_, err = client.ServiceTags.Set(ctx, project, d.Get("service_name").(string), aiven.ServiceTagsRequest{
 		Tags: GetTagsFromSchema(d),
 	})
 	if err != nil {
@@ -476,7 +477,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	// associate first, so that we can enable `static_ips` for a preexisting common
 	for _, aip := range ass {
-		if err := client.StaticIPs.Associate(projectName, aip, aiven.AssociateStaticIPRequest{ServiceName: serviceName}); err != nil {
+		if err := client.StaticIPs.Associate(ctx, projectName, aip, aiven.AssociateStaticIPRequest{ServiceName: serviceName}); err != nil {
 			return diag.Errorf("error associating Static IP (%s) to a service: %s", aip, err)
 		}
 	}
@@ -497,6 +498,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	if _, err := client.Services.Update(
+		ctx,
 		projectName,
 		serviceName,
 		aiven.UpdateServiceRequest{
@@ -520,7 +522,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	if len(dis) > 0 {
 		for _, dip := range dis {
-			if err := client.StaticIPs.Dissociate(projectName, dip); err != nil {
+			if err := client.StaticIPs.Dissociate(ctx, projectName, dip); err != nil {
 				return diag.Errorf("error dissociating Static IP (%s) from the service (%s): %s", dip, serviceName, err)
 			}
 		}
@@ -529,7 +531,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		}
 	}
 
-	_, err = client.ServiceTags.Set(projectName, serviceName, aiven.ServiceTagsRequest{
+	_, err = client.ServiceTags.Set(ctx, projectName, serviceName, aiven.ServiceTagsRequest{
 		Tags: GetTagsFromSchema(d),
 	})
 	if err != nil {
@@ -572,7 +574,7 @@ func ResourceServiceDelete(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.Errorf("error splitting service ID: %s", err)
 	}
 
-	if err := client.Services.Delete(projectName, serviceName); err != nil && !aiven.IsNotFound(err) {
+	if err := client.Services.Delete(ctx, projectName, serviceName); err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("error deleting a service: %s", err)
 	}
 
@@ -842,7 +844,7 @@ func DatasourceServiceRead(ctx context.Context, d *schema.ResourceData, m interf
 	serviceName := d.Get("service_name").(string)
 	d.SetId(BuildResourceID(projectName, serviceName))
 
-	services, err := client.Services.List(projectName)
+	services, err := client.Services.List(ctx, projectName)
 	if err != nil {
 		return diag.Errorf("error getting a list of services: %s", err)
 	}

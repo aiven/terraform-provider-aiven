@@ -3,7 +3,7 @@ package organization
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -59,12 +59,13 @@ func resourceOrganizationalUnitCreate(ctx context.Context, d *schema.ResourceDat
 	client := m.(*aiven.Client)
 	name := d.Get("name").(string)
 
-	parentID, err := schemautil.NormalizeOrganizationID(client, d.Get("parent_id").(string))
+	parentID, err := schemautil.NormalizeOrganizationID(ctx, client, d.Get("parent_id").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	r, err := client.Accounts.Create(
+		ctx,
 		aiven.Account{
 			Name:            name,
 			ParentAccountId: parentID,
@@ -79,16 +80,17 @@ func resourceOrganizationalUnitCreate(ctx context.Context, d *schema.ResourceDat
 	return resourceOrganizationalUnitRead(ctx, d, m)
 }
 
-func resourceOrganizationalUnitRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	r, err := client.Accounts.Get(d.Id())
+	r, err := client.Accounts.Get(ctx, d.Id())
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if stateID, _ := d.GetOk("parent_id"); true {
 		idToSet, err := schemautil.DetermineMixedOrganizationConstraintIDToStore(
+			ctx,
 			client,
 			stateID.(string),
 			r.Account.ParentAccountId,
@@ -121,7 +123,7 @@ func resourceOrganizationalUnitRead(_ context.Context, d *schema.ResourceData, m
 func resourceOrganizationalUnitUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	r, err := client.Accounts.Update(d.Id(), aiven.Account{
+	r, err := client.Accounts.Update(ctx, d.Id(), aiven.Account{
 		Name: d.Get("name").(string),
 	})
 	if err != nil {
@@ -133,10 +135,10 @@ func resourceOrganizationalUnitUpdate(ctx context.Context, d *schema.ResourceDat
 	return resourceOrganizationalUnitRead(ctx, d, m)
 }
 
-func resourceOrganizationalUnitDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOrganizationalUnitDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	if err := client.Accounts.Delete(d.Id()); err != nil && !aiven.IsNotFound(err) {
+	if err := client.Accounts.Delete(ctx, d.Id()); err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
 

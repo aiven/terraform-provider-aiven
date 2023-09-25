@@ -1,13 +1,14 @@
 package pg_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"regexp"
 	"strings"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -949,7 +950,9 @@ func testAccCheckAivenServiceTerminationProtection(n string) resource.TestCheckF
 
 		c := acc.GetTestAivenClient()
 
-		service, err := c.Services.Get(projectName, serviceName)
+		ctx := context.Background()
+
+		service, err := c.Services.Get(ctx, projectName, serviceName)
 		if err != nil {
 			return fmt.Errorf("cannot get service %s err: %s", serviceName, err)
 		}
@@ -960,21 +963,26 @@ func testAccCheckAivenServiceTerminationProtection(n string) resource.TestCheckF
 
 		// try to delete Aiven service with termination_protection enabled
 		// should be an error from Aiven API
-		err = c.Services.Delete(projectName, serviceName)
+		err = c.Services.Delete(ctx, projectName, serviceName)
 		if err == nil {
 			return fmt.Errorf("termination_protection enabled should prevent from deletion of a service, deletion went OK")
 		}
 
 		// set service termination_protection to false to make Terraform Destroy plan work
-		_, err = c.Services.Update(projectName, service.Name, aiven.UpdateServiceRequest{
-			Cloud:                 service.CloudName,
-			MaintenanceWindow:     &service.MaintenanceWindow,
-			Plan:                  service.Plan,
-			ProjectVPCID:          service.ProjectVPCID,
-			Powered:               true,
-			TerminationProtection: false,
-			UserConfig:            service.UserConfig,
-		})
+		_, err = c.Services.Update(
+			ctx,
+			projectName,
+			service.Name,
+			aiven.UpdateServiceRequest{
+				Cloud:                 service.CloudName,
+				MaintenanceWindow:     &service.MaintenanceWindow,
+				Plan:                  service.Plan,
+				ProjectVPCID:          service.ProjectVPCID,
+				Powered:               true,
+				TerminationProtection: false,
+				UserConfig:            service.UserConfig,
+			},
+		)
 
 		if err != nil {
 			return fmt.Errorf("unable to update Aiven service to set termination_protection=false err: %s", err)

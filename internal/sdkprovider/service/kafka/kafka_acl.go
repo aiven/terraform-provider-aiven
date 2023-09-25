@@ -3,7 +3,7 @@ package kafka
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -66,6 +66,7 @@ func resourceKafkaACLCreate(ctx context.Context, d *schema.ResourceData, m inter
 	serviceName := d.Get("service_name").(string)
 
 	acl, err := client.KafkaACLs.Create(
+		ctx,
 		project,
 		serviceName,
 		aiven.CreateKafkaACLRequest{
@@ -83,7 +84,7 @@ func resourceKafkaACLCreate(ctx context.Context, d *schema.ResourceData, m inter
 	return resourceKafkaACLRead(ctx, d, m)
 }
 
-func resourceKafkaACLRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaACLRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, aclID, err := schemautil.SplitResourceID3(d.Id())
@@ -91,7 +92,7 @@ func resourceKafkaACLRead(_ context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 
-	acl, err := kafkaACLCache{}.Read(project, serviceName, aclID, client)
+	acl, err := kafkaACLCache{}.Read(ctx, project, serviceName, aclID, client)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -104,7 +105,7 @@ func resourceKafkaACLRead(_ context.Context, d *schema.ResourceData, m interface
 	return nil
 }
 
-func resourceKafkaACLDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaACLDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, aclID, err := schemautil.SplitResourceID3(d.Id())
@@ -112,7 +113,7 @@ func resourceKafkaACLDelete(_ context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 
-	err = client.KafkaACLs.Delete(projectName, serviceName, aclID)
+	err = client.KafkaACLs.Delete(ctx, projectName, serviceName, aclID)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}

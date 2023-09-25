@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
@@ -159,7 +159,7 @@ func resourceKafkaConnectorRead(ctx context.Context, d *schema.ResourceData, m i
 		Pending: []string{"IN_PROGRESS"},
 		Target:  []string{"OK"},
 		Refresh: func() (interface{}, string, error) {
-			list, err := m.(*aiven.Client).KafkaConnectors.List(project, serviceName)
+			list, err := m.(*aiven.Client).KafkaConnectors.List(ctx, project, serviceName)
 			if err != nil {
 				log.Printf("[DEBUG] Kafka Connectors list waiter err %s", err.Error())
 				if aiven.IsNotFound(err) {
@@ -243,7 +243,7 @@ func resourceKafkaConnectorCreate(ctx context.Context, d *schema.ResourceData, m
 	// Since the aiven.Client has own retries for various scenarios
 	// we retry here 404 only
 	err := retry.RetryContext(ctx, time.Minute, func() *retry.RetryError {
-		err := m.(*aiven.Client).KafkaConnectors.Create(project, serviceName, config)
+		err := m.(*aiven.Client).KafkaConnectors.Create(ctx, project, serviceName, config)
 		if err != nil {
 			return &retry.RetryError{
 				Err:       err,
@@ -263,13 +263,13 @@ func resourceKafkaConnectorCreate(ctx context.Context, d *schema.ResourceData, m
 	return resourceKafkaConnectorRead(ctx, d, m)
 }
 
-func resourceKafkaConnectorDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKafkaConnectorDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project, service, name, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = m.(*aiven.Client).KafkaConnectors.Delete(project, service, name)
+	err = m.(*aiven.Client).KafkaConnectors.Delete(ctx, project, service, name)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.FromErr(err)
 	}
@@ -288,7 +288,7 @@ func resourceKafkaTConnectorUpdate(ctx context.Context, d *schema.ResourceData, 
 		config[k] = cS.(string)
 	}
 
-	_, err = m.(*aiven.Client).KafkaConnectors.Update(project, serviceName, connectorName, config)
+	_, err = m.(*aiven.Client).KafkaConnectors.Update(ctx, project, serviceName, connectorName, config)
 	if err != nil {
 		return diag.FromErr(err)
 	}

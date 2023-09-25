@@ -3,7 +3,7 @@ package project
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -133,7 +133,7 @@ func resourceBillingGroupCreate(ctx context.Context, d *schema.ResourceData, m i
 		billingEmails = *emails
 	}
 
-	cardID, err := getLongCardID(client, d.Get("card_id").(string))
+	cardID, err := getLongCardID(ctx, client, d.Get("card_id").(string))
 	if err != nil {
 		return diag.Errorf("Error getting long card id: %s", err)
 	}
@@ -154,14 +154,14 @@ func resourceBillingGroupCreate(ctx context.Context, d *schema.ResourceData, m i
 		CopyFromBillingGroup: schemautil.OptionalStringPointer(d, "copy_from_billing_group"),
 	}
 
-	ptrAccountID, err := accountIDPointer(client, d)
+	ptrAccountID, err := accountIDPointer(ctx, client, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	req.AccountId = ptrAccountID
 
-	bg, err := client.BillingGroup.Create(req)
+	bg, err := client.BillingGroup.Create(ctx, req)
 	if err != nil {
 		return diag.Errorf("cannot create billing group: %s", err)
 	}
@@ -171,10 +171,10 @@ func resourceBillingGroupCreate(ctx context.Context, d *schema.ResourceData, m i
 	return resourceBillingGroupRead(ctx, d, m)
 }
 
-func resourceBillingGroupRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceBillingGroupRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	bg, err := client.BillingGroup.Get(d.Id())
+	bg, err := client.BillingGroup.Get(ctx, d.Id())
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -186,7 +186,12 @@ func resourceBillingGroupRead(_ context.Context, d *schema.ResourceData, m inter
 			accountID = *bg.AccountId
 		}
 
-		idToSet, err := schemautil.DetermineMixedOrganizationConstraintIDToStore(client, stateID.(string), accountID)
+		idToSet, err := schemautil.DetermineMixedOrganizationConstraintIDToStore(
+			ctx,
+			client,
+			stateID.(string),
+			accountID,
+		)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -247,7 +252,7 @@ func resourceBillingGroupUpdate(ctx context.Context, d *schema.ResourceData, m i
 		billingEmails = *emails
 	}
 
-	cardID, err := getLongCardID(client, d.Get("card_id").(string))
+	cardID, err := getLongCardID(ctx, client, d.Get("card_id").(string))
 	if err != nil {
 		return diag.Errorf("Error getting long card id: %s", err)
 	}
@@ -267,14 +272,14 @@ func resourceBillingGroupUpdate(ctx context.Context, d *schema.ResourceData, m i
 		State:            schemautil.OptionalStringPointer(d, "state"),
 	}
 
-	ptrAccountID, err := accountIDPointer(client, d)
+	ptrAccountID, err := accountIDPointer(ctx, client, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	req.AccountId = ptrAccountID
 
-	bg, err := client.BillingGroup.Update(d.Id(), req)
+	bg, err := client.BillingGroup.Update(ctx, d.Id(), req)
 	if err != nil {
 		return diag.Errorf("cannot update billing group: %s", err)
 	}
@@ -284,10 +289,10 @@ func resourceBillingGroupUpdate(ctx context.Context, d *schema.ResourceData, m i
 	return resourceBillingGroupRead(ctx, d, m)
 }
 
-func resourceBillingGroupDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceBillingGroupDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	err := client.BillingGroup.Delete(d.Id())
+	err := client.BillingGroup.Delete(ctx, d.Id())
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("cannot delete a billing group: %s", err)
 	}

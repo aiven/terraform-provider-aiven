@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -85,7 +85,13 @@ func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 	peerVPC := d.Get("peer_vpc").(string)
 
 	pc, err = client.VPCPeeringConnections.GetVPCPeering(
-		projectName, vpcID, gcpProjectID, peerVPC, nil)
+		ctx,
+		projectName,
+		vpcID,
+		gcpProjectID,
+		peerVPC,
+		nil,
+	)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("error checking gcp peering connection: %s", err)
 	}
@@ -95,6 +101,7 @@ func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 	}
 
 	if _, err = client.VPCPeeringConnections.Create(
+		ctx,
 		projectName,
 		vpcID,
 		aiven.CreateVPCPeeringConnectionRequest{
@@ -118,6 +125,7 @@ func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 		},
 		Refresh: func() (interface{}, string, error) {
 			pc, err := client.VPCPeeringConnections.GetVPCPeering(
+				ctx,
 				projectName,
 				vpcID,
 				gcpProjectID,
@@ -152,7 +160,7 @@ func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 	return append(diags, resourceGCPVPCPeeringConnectionRead(ctx, d, m)...)
 }
 
-func resourceGCPVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceGCPVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	p, err := parsePeerVPCID(d.Id())
@@ -162,7 +170,13 @@ func resourceGCPVPCPeeringConnectionRead(_ context.Context, d *schema.ResourceDa
 
 	var pc *aiven.VPCPeeringConnection
 	pc, err = client.VPCPeeringConnections.GetVPCPeering(
-		p.projectName, p.vpcID, p.peerCloudAccount, p.peerVPC, p.peerRegion)
+		ctx,
+		p.projectName,
+		p.vpcID,
+		p.peerCloudAccount,
+		p.peerVPC,
+		p.peerRegion,
+	)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -178,6 +192,7 @@ func resourceGCPVPCPeeringConnectionDelete(ctx context.Context, d *schema.Resour
 		return diag.Errorf("error parsing GCP peering VPC ID: %s", err)
 	}
 	err = client.VPCPeeringConnections.DeleteVPCPeering(
+		ctx,
 		p.projectName,
 		p.vpcID,
 		p.peerCloudAccount,
@@ -204,6 +219,7 @@ func resourceGCPVPCPeeringConnectionDelete(ctx context.Context, d *schema.Resour
 		},
 		Refresh: func() (interface{}, string, error) {
 			pc, err := client.VPCPeeringConnections.GetVPCPeering(
+				ctx,
 				p.projectName,
 				p.vpcID,
 				p.peerCloudAccount,

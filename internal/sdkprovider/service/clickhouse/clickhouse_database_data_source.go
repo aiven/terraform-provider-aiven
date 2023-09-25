@@ -3,7 +3,7 @@ package clickhouse
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -26,7 +26,7 @@ func datasourceClickhouseDatabaseRead(ctx context.Context, d *schema.ResourceDat
 	serviceName := d.Get("service_name").(string)
 	databaseName := d.Get("name").(string)
 
-	r, err := client.ClickhouseDatabase.List(projectName, serviceName)
+	r, err := client.ClickhouseDatabase.List(ctx, projectName, serviceName)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -1,10 +1,11 @@
 package kafkatopic
 
 import (
+	"context"
 	"log"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
@@ -13,6 +14,7 @@ import (
 // that prevent creating the topics like all brokers not being online. This
 // allows retrying the operation until failing it.
 type kafkaTopicCreateWaiter struct {
+	Context       context.Context
 	Client        *aiven.Client
 	Project       string
 	ServiceName   string
@@ -26,6 +28,7 @@ func (w *kafkaTopicCreateWaiter) RefreshFunc() resource.StateRefreshFunc {
 	// Assumes it exists, should prove it doesn't by getting no error
 	return func() (interface{}, string, error) {
 		err := w.Client.KafkaTopics.Create(
+			w.Context,
 			w.Project,
 			w.ServiceName,
 			w.CreateRequest,

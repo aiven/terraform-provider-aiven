@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -55,6 +55,7 @@ func resourceProjectVPCCreate(ctx context.Context, d *schema.ResourceData, m int
 	client := m.(*aiven.Client)
 	projectName := d.Get("project").(string)
 	vpc, err := client.VPCs.Create(
+		ctx,
 		projectName,
 		aiven.CreateVPCRequest{
 			CloudName:   d.Get("cloud_name").(string),
@@ -68,6 +69,7 @@ func resourceProjectVPCCreate(ctx context.Context, d *schema.ResourceData, m int
 	// Make sure the VPC is active before returning it because service creation, moving
 	// service to VPC, and some other operations will fail unless the VPC is active
 	waiter := ProjectVPCActiveWaiter{
+		Context: ctx,
 		Client:  client,
 		Project: projectName,
 		VPCID:   vpc.ProjectVPCID,
@@ -84,7 +86,7 @@ func resourceProjectVPCCreate(ctx context.Context, d *schema.ResourceData, m int
 	return resourceProjectVPCRead(ctx, d, m)
 }
 
-func resourceProjectVPCRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceProjectVPCRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, vpcID, err := schemautil.SplitResourceID2(d.Id())
@@ -92,7 +94,7 @@ func resourceProjectVPCRead(_ context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 
-	vpc, err := client.VPCs.Get(projectName, vpcID)
+	vpc, err := client.VPCs.Get(ctx, projectName, vpcID)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -114,6 +116,7 @@ func resourceProjectVPCDelete(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	waiter := ProjectVPCDeleteWaiter{
+		Context: ctx,
 		Client:  client,
 		Project: projectName,
 		VPCID:   vpcID,
@@ -148,6 +151,7 @@ func copyVPCPropertiesFromAPIResponseToTerraform(d *schema.ResourceData, vpc *ai
 // performed before creating a service that has a project VPC to ensure there has been sufficient
 // time for other actions that update the state to have been completed
 type ProjectVPCActiveWaiter struct {
+	Context context.Context
 	Client  *aiven.Client
 	Project string
 	VPCID   string
@@ -157,7 +161,7 @@ type ProjectVPCActiveWaiter struct {
 // nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func (w *ProjectVPCActiveWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		vpc, err := w.Client.VPCs.Get(w.Project, w.VPCID)
+		vpc, err := w.Client.VPCs.Get(w.Context, w.Project, w.VPCID)
 		if err != nil {
 			return nil, "", err
 		}
@@ -185,6 +189,7 @@ func (w *ProjectVPCActiveWaiter) Conf(timeout time.Duration) *resource.StateChan
 
 // ProjectVPCDeleteWaiter is used to wait for VPC been deleted.
 type ProjectVPCDeleteWaiter struct {
+	Context context.Context
 	Client  *aiven.Client
 	Project string
 	VPCID   string
@@ -194,7 +199,7 @@ type ProjectVPCDeleteWaiter struct {
 // nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func (w *ProjectVPCDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		vpc, err := w.Client.VPCs.Get(w.Project, w.VPCID)
+		vpc, err := w.Client.VPCs.Get(w.Context, w.Project, w.VPCID)
 		if err != nil {
 			// might be already gone after deletion
 			if aiven.IsNotFound(err) {
@@ -205,7 +210,7 @@ func (w *ProjectVPCDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 		}
 
 		if vpc.State != "DELETING" && vpc.State != "DELETED" {
-			err := w.Client.VPCs.Delete(w.Project, w.VPCID)
+			err := w.Client.VPCs.Delete(w.Context, w.Project, w.VPCID)
 			if err != nil {
 				if aiven.IsNotFound(err) {
 					return vpc, "DELETED", nil

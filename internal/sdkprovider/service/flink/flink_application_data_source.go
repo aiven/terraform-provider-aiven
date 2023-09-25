@@ -3,7 +3,7 @@ package flink
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -25,7 +25,7 @@ func datasourceFlinkApplicationRead(ctx context.Context, d *schema.ResourceData,
 	serviceName := d.Get("service_name").(string)
 	applicationName := d.Get("name").(string)
 
-	a, err := client.FlinkApplications.List(project, serviceName)
+	a, err := client.FlinkApplications.List(ctx, project, serviceName)
 	if err != nil {
 		return diag.FromErr(err)
 	}

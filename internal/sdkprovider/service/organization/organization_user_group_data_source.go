@@ -3,7 +3,7 @@ package organization
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -26,7 +26,7 @@ func datasourceOrganizationUserGroupRead(ctx context.Context, d *schema.Resource
 	name := d.Get("name").(string)
 
 	client := m.(*aiven.Client)
-	list, err := client.OrganizationUserGroups.List(organizationID)
+	list, err := client.OrganizationUserGroups.List(ctx, organizationID)
 	if err != nil {
 		return diag.FromErr(err)
 	}

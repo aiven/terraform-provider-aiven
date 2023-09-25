@@ -3,11 +3,12 @@
 package sweep
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -16,7 +17,7 @@ import (
 var sharedClient *aiven.Client
 
 // SharedClient returns a common Aiven Client setup needed for the sweeper
-func SharedClient(region string) (interface{}, error) {
+func SharedClient() (*aiven.Client, error) {
 	if os.Getenv("AIVEN_PROJECT_NAME") == "" {
 		return nil, fmt.Errorf("must provide environment variable AIVEN_PROJECT_NAME ")
 	}
@@ -33,16 +34,15 @@ func SharedClient(region string) (interface{}, error) {
 	return sharedClient, nil
 }
 
-func SweepServices(region, t string) error {
-	client, err := SharedClient(region)
+func SweepServices(ctx context.Context, t string) error {
+	client, err := SharedClient()
 	if err != nil {
 		return fmt.Errorf("error getting client: %s", err)
 	}
 
 	projectName := os.Getenv("AIVEN_PROJECT_NAME")
-	conn := client.(*aiven.Client)
 
-	services, err := conn.Services.List(projectName)
+	services, err := client.Services.List(ctx, projectName)
 	if err != nil && !aiven.IsNotFound(err) {
 		return fmt.Errorf("error retrieving a list of services for a project `%s`: %w", projectName, err)
 	}
@@ -59,7 +59,7 @@ func SweepServices(region, t string) error {
 		// if service termination_protection is on service cannot be deleted
 		// update service and turn termination_protection off
 		if s.TerminationProtection {
-			_, err := conn.Services.Update(projectName, s.Name, aiven.UpdateServiceRequest{
+			_, err := client.Services.Update(ctx, projectName, s.Name, aiven.UpdateServiceRequest{
 				Cloud:                 s.CloudName,
 				MaintenanceWindow:     &s.MaintenanceWindow,
 				Plan:                  s.Plan,
@@ -74,7 +74,7 @@ func SweepServices(region, t string) error {
 			}
 		}
 
-		if err := conn.Services.Delete(projectName, s.Name); err != nil {
+		if err := client.Services.Delete(ctx, projectName, s.Name); err != nil {
 			if err != nil && !aiven.IsNotFound(err) {
 				return fmt.Errorf("error destroying service %s during sweep: %s", s.Name, err)
 			}
@@ -86,8 +86,8 @@ func SweepServices(region, t string) error {
 func AddServiceSweeper(t string) {
 	resource.AddTestSweepers("aiven_"+t, &resource.Sweeper{
 		Name: "aiven_" + t,
-		F: func(r string) error {
-			return SweepServices(r, t)
+		F: func(_ string) error {
+			return SweepServices(context.Background(), t)
 		},
 		Dependencies: []string{"aiven_service_integration", "aiven_service_integration_endpoint"},
 	})

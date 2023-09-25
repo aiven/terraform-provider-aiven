@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -58,7 +58,7 @@ func ResourceGCPPrivatelinkConnectionApproval() *schema.Resource {
 
 // nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func waitForGCPConnectionState(
-	_ context.Context,
+	ctx context.Context,
 	client *aiven.Client,
 	project string,
 	service string,
@@ -70,12 +70,12 @@ func waitForGCPConnectionState(
 		Pending: pending,
 		Target:  target,
 		Refresh: func() (interface{}, string, error) {
-			err := client.GCPPrivatelink.Refresh(project, service)
+			err := client.GCPPrivatelink.Refresh(ctx, project, service)
 			if err != nil {
 				return nil, "", err
 			}
 
-			plConnections, err := client.GCPPrivatelink.ConnectionsList(project, service)
+			plConnections, err := client.GCPPrivatelink.ConnectionsList(ctx, project, service)
 			if err != nil {
 				return nil, "", err
 			}
@@ -108,7 +108,7 @@ func resourceGCPPrivatelinkConnectionApprovalUpdate(
 	var project = d.Get("project").(string)
 	var serviceName = d.Get("service_name").(string)
 
-	err := client.GCPPrivatelink.Refresh(project, serviceName)
+	err := client.GCPPrivatelink.Refresh(ctx, project, serviceName)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -124,7 +124,7 @@ func resourceGCPPrivatelinkConnectionApprovalUpdate(
 		return diag.Errorf("Error waiting for privatelink connection after refresh: %s", err)
 	}
 
-	plConnections, err := client.GCPPrivatelink.ConnectionsList(project, serviceName)
+	plConnections, err := client.GCPPrivatelink.ConnectionsList(ctx, project, serviceName)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -138,6 +138,7 @@ func resourceGCPPrivatelinkConnectionApprovalUpdate(
 
 	if plConnection.State == "pending-user-approval" {
 		err = client.GCPPrivatelink.ConnectionApprove(
+			ctx,
 			project,
 			serviceName,
 			plConnectionID,
@@ -173,7 +174,7 @@ func resourceGCPPrivatelinkConnectionApprovalUpdate(
 }
 
 func resourceGCPPrivatelinkConnectionApprovalRead(
-	_ context.Context,
+	ctx context.Context,
 	d *schema.ResourceData,
 	m interface{},
 ) diag.Diagnostics {
@@ -184,7 +185,7 @@ func resourceGCPPrivatelinkConnectionApprovalRead(
 	}
 
 	plConnectionID := schemautil.OptionalStringPointer(d, "privatelink_connection_id")
-	plConnection, err := client.GCPPrivatelink.ConnectionGet(project, service, plConnectionID)
+	plConnection, err := client.GCPPrivatelink.ConnectionGet(ctx, project, service, plConnectionID)
 	if err != nil {
 		if aiven.IsNotFound(err) {
 			if err := d.Set("privatelink_connection_id", ""); err != nil {

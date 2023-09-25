@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -165,6 +165,7 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 	}
 
 	integration, err := client.ServiceIntegrations.Create(
+		ctx,
 		projectName,
 		aiven.CreateServiceIntegrationRequest{
 			DestinationEndpointID: plainEndpointID(schemautil.OptionalStringPointer(d, "destination_endpoint_id")),
@@ -186,7 +187,7 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 	return resourceServiceIntegrationRead(ctx, d, m)
 }
 
-func resourceServiceIntegrationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceServiceIntegrationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, integrationID, err := schemautil.SplitResourceID2(d.Id())
@@ -194,7 +195,7 @@ func resourceServiceIntegrationRead(_ context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	integration, err := client.ServiceIntegrations.Get(projectName, integrationID)
+	integration, err := client.ServiceIntegrations.Get(ctx, projectName, integrationID)
 	if err != nil {
 		err = schemautil.ResourceReadHandleNotFound(err, d)
 		if err != nil {
@@ -229,6 +230,7 @@ func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceDat
 	}
 
 	_, err = client.ServiceIntegrations.Update(
+		ctx,
 		projectName,
 		integrationID,
 		aiven.UpdateServiceIntegrationRequest{
@@ -245,7 +247,7 @@ func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceDat
 	return resourceServiceIntegrationRead(ctx, d, m)
 }
 
-func resourceServiceIntegrationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceServiceIntegrationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, integrationID, err := schemautil.SplitResourceID2(d.Id())
@@ -253,7 +255,7 @@ func resourceServiceIntegrationDelete(_ context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	err = client.ServiceIntegrations.Delete(projectName, integrationID)
+	err = client.ServiceIntegrations.Delete(ctx, projectName, integrationID)
 	if err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("cannot delete service integration: %s", err)
 	}
@@ -261,7 +263,7 @@ func resourceServiceIntegrationDelete(_ context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceServiceIntegrationCheckForPreexistingResource(_ context.Context, d *schema.ResourceData, m interface{}) (*aiven.ServiceIntegration, error) {
+func resourceServiceIntegrationCheckForPreexistingResource(ctx context.Context, d *schema.ResourceData, m interface{}) (*aiven.ServiceIntegration, error) {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -269,7 +271,7 @@ func resourceServiceIntegrationCheckForPreexistingResource(_ context.Context, d 
 	sourceServiceName := d.Get("source_service_name").(string)
 	destinationServiceName := d.Get("destination_service_name").(string)
 
-	integrations, err := client.ServiceIntegrations.List(projectName, sourceServiceName)
+	integrations, err := client.ServiceIntegrations.List(ctx, projectName, sourceServiceName)
 	if err != nil && !aiven.IsNotFound(err) {
 		return nil, fmt.Errorf("unable to get list of service integrations: %s", err)
 	}
@@ -308,7 +310,7 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 		Refresh: func() (interface{}, string, error) {
 			log.Println("[DEBUG] Service Integration: waiting until active")
 
-			ii, err := client.ServiceIntegrations.Get(projectName, integrationID)
+			ii, err := client.ServiceIntegrations.Get(ctx, projectName, integrationID)
 			if err != nil {
 				// Sometimes Aiven API retrieves 404 error even when a successful service integration is created
 				if aiven.IsNotFound(err) {
@@ -323,7 +325,7 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 			}
 
 			if ii.IntegrationType == "kafka_connect" && ii.DestinationService != nil {
-				if _, err := client.KafkaConnectors.List(projectName, *ii.DestinationService); err != nil {
+				if _, err := client.KafkaConnectors.List(ctx, projectName, *ii.DestinationService); err != nil {
 					log.Println("[DEBUG] Service Integration: error listing kafka connectors: ", err)
 					return nil, notActive, nil
 				}

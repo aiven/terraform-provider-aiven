@@ -3,6 +3,7 @@
 package examples
 
 import (
+	"context"
 	"testing"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
@@ -39,19 +40,21 @@ func (s *KafkaConnectTestSuite) TestKafkaConnect() {
 	terraform.Apply(s.T(), opts)
 
 	// Then
-	kafkaService, err := s.client.Services.Get(s.config.Project, kafkaServiceName)
+	ctx := context.Background()
+
+	kafkaService, err := s.client.Services.Get(ctx, s.config.Project, kafkaServiceName)
 	s.NoError(err)
 	s.Equal("kafka", kafkaService.Type)
 	s.Equal("startup-2", kafkaService.Plan)
 	s.Equal("google-europe-west1", kafkaService.CloudName)
 
-	kafkaConnect, err := s.client.Services.Get(s.config.Project, kafkaConnectName)
+	kafkaConnect, err := s.client.Services.Get(ctx, s.config.Project, kafkaConnectName)
 	s.NoError(err)
 	s.Equal("kafka_connect", kafkaConnect.Type)
 	s.Equal("startup-4", kafkaConnect.Plan)
 	s.Equal("google-europe-west1", kafkaConnect.CloudName)
 
-	integrations, err := s.client.ServiceIntegrations.List(s.config.Project, kafkaServiceName)
+	integrations, err := s.client.ServiceIntegrations.List(ctx, s.config.Project, kafkaServiceName)
 	s.NoError(err)
 
 	// We don't have integration ID here

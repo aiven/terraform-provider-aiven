@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -15,11 +15,11 @@ const (
 	StaticIPAssigned  = "assigned"
 )
 
-func CurrentlyAllocatedStaticIps(_ context.Context, projectName, serviceName string, m interface{}) ([]string, error) {
+func CurrentlyAllocatedStaticIps(ctx context.Context, projectName, serviceName string, m interface{}) ([]string, error) {
 	client := m.(*aiven.Client)
 
 	// special handling for static ips
-	staticIPListResponse, err := client.StaticIPs.List(projectName)
+	staticIPListResponse, err := client.StaticIPs.List(ctx, projectName)
 	if err != nil {
 		return nil, fmt.Errorf("unable to list static ips for project '%s': %w", projectName, err)
 	}
@@ -48,13 +48,13 @@ func staticIpsFromSchema(d *schema.ResourceData) []string {
 	return FlattenToString(d.Get("static_ips").(*schema.Set).List())
 }
 
-func staticIpsFromAPI(_ context.Context, d *schema.ResourceData, m interface{}) ([]string, error) {
+func staticIpsFromAPI(ctx context.Context, d *schema.ResourceData, m interface{}) ([]string, error) {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 
-	staticIpsForProject, err := client.StaticIPs.List(project)
+	staticIpsForProject, err := client.StaticIPs.List(ctx, project)
 	if err != nil {
 		return nil, fmt.Errorf("unable to list static ips for project '%s': %w", project, err)
 	}

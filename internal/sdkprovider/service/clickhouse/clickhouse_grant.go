@@ -4,7 +4,7 @@ import (
 	"context"
 	"regexp"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -117,12 +117,12 @@ func resourceClickhouseGrantCreate(ctx context.Context, d *schema.ResourceData, 
 	projectName := d.Get("project").(string)
 
 	for _, grant := range readPrivilegeGrantsFromSchema(d) {
-		if err := CreatePrivilegeGrant(client, projectName, serviceName, grant); err != nil {
+		if err := CreatePrivilegeGrant(ctx, client, projectName, serviceName, grant); err != nil {
 			return diag.FromErr(err)
 		}
 	}
 	for _, grant := range readRoleGrantsFromSchema(d) {
-		if err := CreateRoleGrant(client, projectName, serviceName, grant); err != nil {
+		if err := CreateRoleGrant(ctx, client, projectName, serviceName, grant); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -157,7 +157,7 @@ func setUserOrRole(d *schema.ResourceData, granteeType, userOrRole string) error
 	return nil
 }
 
-func resourceClickhouseGrantRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceClickhouseGrantRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName, granteeType, userOrRole, err := schemautil.SplitResourceID4(d.Id())
@@ -177,7 +177,7 @@ func resourceClickhouseGrantRead(_ context.Context, d *schema.ResourceData, m in
 
 	grantee := Grantee{User: d.Get("user").(string), Role: d.Get("role").(string)}
 
-	privilegeGrants, err := ReadPrivilegeGrants(client, projectName, serviceName, grantee)
+	privilegeGrants, err := ReadPrivilegeGrants(ctx, client, projectName, serviceName, grantee)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -185,7 +185,7 @@ func resourceClickhouseGrantRead(_ context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	roleGrants, err := ReadRoleGrants(client, projectName, serviceName, grantee)
+	roleGrants, err := ReadRoleGrants(ctx, client, projectName, serviceName, grantee)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -195,20 +195,20 @@ func resourceClickhouseGrantRead(_ context.Context, d *schema.ResourceData, m in
 	return nil
 }
 
-func resourceClickhouseGrantDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceClickhouseGrantDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 
 	for _, grant := range readPrivilegeGrantsFromSchema(d) {
-		if err := RevokePrivilegeGrant(client, projectName, serviceName, grant); err != nil {
+		if err := RevokePrivilegeGrant(ctx, client, projectName, serviceName, grant); err != nil {
 			return diag.FromErr(err)
 		}
 	}
 
 	for _, grant := range readRoleGrantsFromSchema(d) {
-		if err := RevokeRoleGrant(client, projectName, serviceName, grant); err != nil {
+		if err := RevokeRoleGrant(ctx, client, projectName, serviceName, grant); err != nil {
 			return diag.FromErr(err)
 		}
 	}

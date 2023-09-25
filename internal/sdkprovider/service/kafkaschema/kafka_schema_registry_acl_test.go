@@ -1,13 +1,14 @@
 package kafkaschema_test
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"regexp"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -243,6 +244,8 @@ data "aiven_kafka_schema_registry_acl" "acl" {
 func testAccCheckAivenKafkaSchemaRegistryACLResourceDestroy(s *terraform.State) error {
 	c := acc.GetTestAivenClient()
 
+	ctx := context.Background()
+
 	// loop through the resources in state, verifying each kafka ACL is destroyed
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_kafka_schema_registry_acl" {
@@ -254,7 +257,7 @@ func testAccCheckAivenKafkaSchemaRegistryACLResourceDestroy(s *terraform.State) 
 			return err
 		}
 
-		p, err := c.KafkaSchemaRegistryACLs.Get(project, serviceName, aclID)
+		p, err := c.KafkaSchemaRegistryACLs.Get(ctx, project, serviceName, aclID)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {
 				return err

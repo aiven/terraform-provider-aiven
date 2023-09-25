@@ -3,7 +3,7 @@ package opensearch
 import (
 	"context"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -67,7 +67,7 @@ func resourceElasticsearchACLRuleGetPermissionFromACLResponse(cfg aiven.ElasticS
 	return "", false
 }
 
-func resourceOpenSearchACLRuleRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenSearchACLRuleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project, serviceName, username, index, err := schemautil.SplitResourceID4(d.Id())
@@ -75,7 +75,7 @@ func resourceOpenSearchACLRuleRead(_ context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 
-	r, err := client.ElasticsearchACLs.Get(project, serviceName)
+	r, err := client.ElasticsearchACLs.Get(ctx, project, serviceName)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -124,8 +124,8 @@ func resourceOpenSearchACLRuleUpdate(ctx context.Context, d *schema.ResourceData
 	index := d.Get("index").(string)
 	permission := d.Get("permission").(string)
 
-	modifier := resourceElasticsearchACLModifierUpdateACLRule(username, index, permission)
-	err := resourceOpenSearchACLModifyRemoteConfig(project, serviceName, client, modifier)
+	modifier := resourceElasticsearchACLModifierUpdateACLRule(ctx, username, index, permission)
+	err := resourceOpenSearchACLModifyRemoteConfig(ctx, project, serviceName, client, modifier)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -135,7 +135,7 @@ func resourceOpenSearchACLRuleUpdate(ctx context.Context, d *schema.ResourceData
 	return resourceOpenSearchACLRuleRead(ctx, d, m)
 }
 
-func resourceOpenSearchACLRuleDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceOpenSearchACLRuleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -144,8 +144,8 @@ func resourceOpenSearchACLRuleDelete(_ context.Context, d *schema.ResourceData, 
 	index := d.Get("index").(string)
 	permission := d.Get("permission").(string)
 
-	modifier := resourceElasticsearchACLModifierDeleteACLRule(username, index, permission)
-	err := resourceOpenSearchACLModifyRemoteConfig(project, serviceName, client, modifier)
+	modifier := resourceElasticsearchACLModifierDeleteACLRule(ctx, username, index, permission)
+	err := resourceOpenSearchACLModifyRemoteConfig(ctx, project, serviceName, client, modifier)
 	if err != nil {
 		return diag.FromErr(err)
 	}

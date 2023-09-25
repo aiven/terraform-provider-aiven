@@ -1,11 +1,12 @@
 package m3db_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -40,6 +41,8 @@ func TestAccAivenM3DBUser_basic(t *testing.T) {
 func testAccCheckAivenM3DBUserResourceDestroy(s *terraform.State) error {
 	c := acc.GetTestAivenClient()
 
+	ctx := context.Background()
+
 	// loop through the resources in state, verifying each aiven_m3db_user is destroyed
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_m3db_user" {
@@ -51,7 +54,7 @@ func testAccCheckAivenM3DBUserResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
-		p, err := c.ServiceUsers.Get(projectName, serviceName, username)
+		p, err := c.ServiceUsers.Get(ctx, projectName, serviceName, username)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {
 				return err

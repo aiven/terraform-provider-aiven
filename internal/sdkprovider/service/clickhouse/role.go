@@ -1,11 +1,12 @@
 package clickhouse
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 )
 
 func isUnknownRole(err error) bool {
@@ -16,22 +17,22 @@ func isUnknownRole(err error) bool {
 	return strings.Contains(aivenError.Message, "Code: 511")
 }
 
-func CreateRole(client *aiven.Client, projectName, serviceName, roleName string) error {
+func CreateRole(ctx context.Context, client *aiven.Client, projectName, serviceName, roleName string) error {
 	query := createRoleStatement(roleName)
 
 	log.Println("[DEBUG] Clickhouse: create role query: ", query)
 
 	// TODO inspect result?
-	_, err := client.ClickHouseQuery.Query(projectName, serviceName, defaultDatabase, query)
+	_, err := client.ClickHouseQuery.Query(ctx, projectName, serviceName, defaultDatabase, query)
 	return err
 }
 
-func RoleExists(client *aiven.Client, projectName, serviceName, roleName string) (bool, error) {
+func RoleExists(ctx context.Context, client *aiven.Client, projectName, serviceName, roleName string) (bool, error) {
 	query := showCreateRoleStatement(roleName)
 
 	log.Println("[DEBUG] Clickhouse: role exists query: ", query)
 
-	r, err := client.ClickHouseQuery.Query(projectName, serviceName, defaultDatabase, query)
+	r, err := client.ClickHouseQuery.Query(ctx, projectName, serviceName, defaultDatabase, query)
 	if err != nil {
 		if isUnknownRole(err) {
 			return false, nil
@@ -41,12 +42,12 @@ func RoleExists(client *aiven.Client, projectName, serviceName, roleName string)
 	return len(r.Data) > 0, nil
 }
 
-func DropRole(client *aiven.Client, projectName, serviceName, roleName string) error {
+func DropRole(ctx context.Context, client *aiven.Client, projectName, serviceName, roleName string) error {
 	query := dropRoleStatement(roleName)
 
 	log.Println("[DEBUG] Clickhouse: drop role query: ", query)
 
-	_, err := client.ClickHouseQuery.Query(projectName, serviceName, defaultDatabase, query)
+	_, err := client.ClickHouseQuery.Query(ctx, projectName, serviceName, defaultDatabase, query)
 	if err != nil && isUnknownRole(err) {
 		return nil
 	}

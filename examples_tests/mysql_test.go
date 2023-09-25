@@ -3,6 +3,7 @@
 package examples
 
 import (
+	"context"
 	"testing"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
@@ -39,7 +40,9 @@ func (s *MysqlTestSuite) TestMysql() {
 	terraform.Apply(s.T(), opts)
 
 	// Then
-	mysql, err := s.client.Services.Get(s.config.Project, mysqlName)
+	ctx := context.Background()
+
+	mysql, err := s.client.Services.Get(ctx, s.config.Project, mysqlName)
 	s.NoError(err)
 	s.Equal("mysql", mysql.Type)
 	s.Equal("business-4", mysql.Plan)

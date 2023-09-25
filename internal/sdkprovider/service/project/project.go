@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -167,14 +167,14 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 		Tags:                         schemautil.GetTagsFromSchema(d),
 	}
 
-	ptrAccountID, err := accountIDPointer(client, d)
+	ptrAccountID, err := accountIDPointer(ctx, client, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	req.AccountId = ptrAccountID
 
-	_, err = client.Projects.Create(req)
+	_, err = client.Projects.Create(ctx, req)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -183,7 +183,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 		// if billing_group is not set but copy_from_project is not empty,
 		// copy billing group from source project
 		if sourceProject, ok := d.GetOk("copy_from_project"); ok {
-			dia := resourceProjectCopyBillingGroupFromProject(client, sourceProject.(string), d)
+			dia := resourceProjectCopyBillingGroupFromProject(ctx, client, sourceProject.(string), d)
 			if dia.HasError() {
 				diag.FromErr(err)
 			}
@@ -196,14 +196,18 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceProjectCopyBillingGroupFromProject(
-	client *aiven.Client, sourceProjectName string, d *schema.ResourceData) diag.Diagnostics {
-	list, err := client.BillingGroup.ListAll()
+	ctx context.Context,
+	client *aiven.Client,
+	sourceProjectName string,
+	d *schema.ResourceData,
+) diag.Diagnostics {
+	list, err := client.BillingGroup.ListAll(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	for _, bg := range list {
-		projects, err := client.BillingGroup.GetProjects(bg.Id)
+		projects, err := client.BillingGroup.GetProjects(ctx, bg.Id)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -211,7 +215,7 @@ func resourceProjectCopyBillingGroupFromProject(
 		for _, pr := range projects {
 			if pr == sourceProjectName {
 				log.Printf("[DEBUG] Source project `%s` has billing group `%s`", sourceProjectName, bg.Id)
-				return resourceProjectAssignToBillingGroup(sourceProjectName, bg.Id, client, d)
+				return resourceProjectAssignToBillingGroup(ctx, sourceProjectName, bg.Id, client, d)
 			}
 		}
 	}
@@ -221,15 +225,20 @@ func resourceProjectCopyBillingGroupFromProject(
 }
 
 func resourceProjectAssignToBillingGroup(
-	projectName, billingGroupID string, client *aiven.Client, d *schema.ResourceData) diag.Diagnostics {
+	ctx context.Context,
+	projectName string,
+	billingGroupID string,
+	client *aiven.Client,
+	d *schema.ResourceData,
+) diag.Diagnostics {
 	log.Printf("[DEBUG] Associating project `%s` with the billing group `%s`", projectName, billingGroupID)
-	_, err := client.BillingGroup.Get(billingGroupID)
+	_, err := client.BillingGroup.Get(ctx, billingGroupID)
 	if err != nil {
 		return diag.Errorf("cannot get a billing group by id: %s", err)
 	}
 
 	var isAlreadyAssigned bool
-	assignedProjects, err := client.BillingGroup.GetProjects(billingGroupID)
+	assignedProjects, err := client.BillingGroup.GetProjects(ctx, billingGroupID)
 	if err != nil {
 		return diag.Errorf("cannot get a billing group assigned projects list: %s", err)
 	}
@@ -240,7 +249,7 @@ func resourceProjectAssignToBillingGroup(
 	}
 
 	if !isAlreadyAssigned {
-		err = client.BillingGroup.AssignProjects(billingGroupID, []string{projectName})
+		err = client.BillingGroup.AssignProjects(ctx, billingGroupID, []string{projectName})
 		if err != nil {
 			return diag.Errorf("cannot assign project to a billing group: %s", err)
 		}
@@ -265,7 +274,7 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 		MinTimeout: time.Second,
 		Delay:      time.Second,
 		Refresh: func() (result interface{}, state string, err error) {
-			p, err := client.Projects.Get(d.Id())
+			p, err := client.Projects.Get(ctx, d.Id())
 			if isNotProjectMember(err) {
 				return nil, "pending", nil
 			}
@@ -280,10 +289,10 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
-	return setProjectTerraformProperties(d, client, project.(*aiven.Project))
+	return setProjectTerraformProperties(ctx, d, client, project.(*aiven.Project))
 }
 
-func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -296,7 +305,7 @@ func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interfac
 		AddAccountOwnersAdminAccess: schemautil.OptionalBoolPointer(d, "add_account_owners_admin_access"),
 	}
 
-	ptrAccountID, err := accountIDPointer(client, d)
+	ptrAccountID, err := accountIDPointer(ctx, client, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -308,13 +317,19 @@ func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interfac
 		req.AccountId = *ptrAccountID
 	}
 
-	project, err := client.Projects.Update(d.Id(), req)
+	project, err := client.Projects.Update(ctx, d.Id(), req)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	if billingGroupID, ok := d.GetOk("billing_group"); ok {
-		dia := resourceProjectAssignToBillingGroup(d.Get("project").(string), billingGroupID.(string), client, d)
+		dia := resourceProjectAssignToBillingGroup(
+			ctx,
+			d.Get("project").(string),
+			billingGroupID.(string),
+			client,
+			d,
+		)
 		if dia.HasError() {
 			return dia
 		}
@@ -325,10 +340,10 @@ func resourceProjectUpdate(_ context.Context, d *schema.ResourceData, m interfac
 	return nil
 }
 
-func resourceProjectDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	err := client.Projects.Delete(d.Id())
+	err := client.Projects.Delete(ctx, d.Id())
 
 	// Silence "Project with open balance cannot be deleted" error
 	// to make long acceptance tests pass which generate some balance
@@ -350,8 +365,13 @@ func resourceProjectDelete(_ context.Context, d *schema.ResourceData, m interfac
 	return nil
 }
 
-func resourceProjectGetCACert(project string, client *aiven.Client, d *schema.ResourceData) diag.Diagnostics {
-	ca, err := client.CA.Get(project)
+func resourceProjectGetCACert(
+	ctx context.Context,
+	project string,
+	client *aiven.Client,
+	d *schema.ResourceData,
+) diag.Diagnostics {
+	ca, err := client.CA.Get(ctx, project)
 	if err == nil {
 		if err := d.Set("ca_cert", ca); err != nil {
 			return diag.FromErr(err)
@@ -361,12 +381,12 @@ func resourceProjectGetCACert(project string, client *aiven.Client, d *schema.Re
 	return nil
 }
 
-func getLongCardID(client *aiven.Client, cardID string) (*string, error) {
+func getLongCardID(ctx context.Context, client *aiven.Client, cardID string) (*string, error) {
 	if cardID == "" {
 		return nil, nil
 	}
 
-	card, err := client.CardsHandler.Get(cardID)
+	card, err := client.CardsHandler.Get(ctx, cardID)
 	if err != nil {
 		return nil, err
 	}
@@ -412,9 +432,15 @@ func contactEmailListForTerraform(d *schema.ResourceData, field string, contactE
 	return d.Set(field, results)
 }
 
-func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client, project *aiven.Project) diag.Diagnostics {
+func setProjectTerraformProperties(
+	ctx context.Context,
+	d *schema.ResourceData,
+	client *aiven.Client,
+	project *aiven.Project,
+) diag.Diagnostics {
 	if stateID, ok := d.GetOk("parent_id"); ok {
 		idToSet, err := schemautil.DetermineMixedOrganizationConstraintIDToStore(
+			ctx,
 			client,
 			stateID.(string),
 			project.AccountId,
@@ -437,7 +463,7 @@ func setProjectTerraformProperties(d *schema.ResourceData, client *aiven.Client,
 	if err := contactEmailListForTerraform(d, "technical_emails", project.TechnicalEmails); err != nil {
 		return diag.FromErr(err)
 	}
-	if d := resourceProjectGetCACert(project.Name, client, d); d != nil {
+	if d := resourceProjectGetCACert(ctx, project.Name, client, d); d != nil {
 		return d
 	}
 	if err := d.Set("default_cloud", project.DefaultCloud); err != nil {

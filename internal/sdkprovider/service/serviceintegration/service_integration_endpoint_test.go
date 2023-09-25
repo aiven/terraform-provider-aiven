@@ -1,11 +1,12 @@
 package serviceintegration_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -93,6 +94,8 @@ data "aiven_service_integration_endpoint" "endpoint" {
 func testAccCheckAivenServiceIntegraitonEndpointResourceDestroy(s *terraform.State) error {
 	c := acc.GetTestAivenClient()
 
+	ctx := context.Background()
+
 	// loop through the resources in state, verifying each aiven_service_integration_endpoint is destroyed
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_service_integration_endpoint" {
@@ -104,7 +107,7 @@ func testAccCheckAivenServiceIntegraitonEndpointResourceDestroy(s *terraform.Sta
 			return err
 		}
 
-		i, err := c.ServiceIntegrationEndpoints.Get(projectName, endpointID)
+		i, err := c.ServiceIntegrationEndpoints.Get(ctx, projectName, endpointID)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {
 				return err

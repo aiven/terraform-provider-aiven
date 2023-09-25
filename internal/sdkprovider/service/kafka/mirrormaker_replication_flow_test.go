@@ -1,12 +1,13 @@
 package kafka_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"regexp"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -43,6 +44,8 @@ func TestAccAivenMirrorMakerReplicationFlow_basic(t *testing.T) {
 func testAccCheckAivenMirrorMakerReplicationFlowResourceDestroy(s *terraform.State) error {
 	c := acc.GetTestAivenClient()
 
+	ctx := context.Background()
+
 	// loop through the resources in state, verifying each kafka mirror maker
 	// replication flow is destroyed
 	for _, rs := range s.RootModule().Resources {
@@ -55,7 +58,7 @@ func testAccCheckAivenMirrorMakerReplicationFlowResourceDestroy(s *terraform.Sta
 			return err
 		}
 
-		s, err := c.Services.Get(project, serviceName)
+		s, err := c.Services.Get(ctx, project, serviceName)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {
 				return err
@@ -64,7 +67,7 @@ func testAccCheckAivenMirrorMakerReplicationFlowResourceDestroy(s *terraform.Sta
 		}
 
 		if s.Type == "kafka_mirrormaker" {
-			f, err := c.KafkaMirrorMakerReplicationFlow.Get(project, serviceName, sourceCluster, targetCluster)
+			f, err := c.KafkaMirrorMakerReplicationFlow.Get(ctx, project, serviceName, sourceCluster, targetCluster)
 			if err != nil {
 				if err.(aiven.Error).Status != 404 {
 					return err

@@ -1,12 +1,13 @@
 package kafkaschema_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"regexp"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -156,6 +157,8 @@ func TestAccAivenKafkaSchema_basic(t *testing.T) {
 func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 	c := acc.GetTestAivenClient()
 
+	ctx := context.Background()
+
 	// loop through the resources in state, verifying each aiven_kafka_schema is destroyed
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_kafka" {
@@ -167,7 +170,7 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
-		_, err = c.Services.Get(projectName, serviceName)
+		_, err = c.Services.Get(ctx, projectName, serviceName)
 		if err != nil {
 			if err.(aiven.Error).Status == 404 {
 				return nil
@@ -176,7 +179,7 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
-		schemaList, err := c.KafkaSubjectSchemas.List(projectName, serviceName)
+		schemaList, err := c.KafkaSubjectSchemas.List(ctx, projectName, serviceName)
 		if err != nil {
 			if err.(aiven.Error).Status == 404 {
 				return nil
@@ -186,7 +189,7 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 		}
 
 		for _, s := range schemaList.KafkaSchemaSubjects.Subjects {
-			versions, err := c.KafkaSubjectSchemas.GetVersions(projectName, serviceName, s)
+			versions, err := c.KafkaSubjectSchemas.GetVersions(ctx, projectName, serviceName, s)
 			if err != nil {
 				if err.(aiven.Error).Status == 404 {
 					return nil

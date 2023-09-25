@@ -1,11 +1,12 @@
 package organization_test
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -59,6 +60,8 @@ data "aiven_organization_user" "member" {
 func testAccCheckAivenOrganizationUserResourceDestroy(s *terraform.State) error {
 	c := acc.GetTestAivenClient()
 
+	ctx := context.Background()
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_organization_user" {
 			continue
@@ -69,7 +72,7 @@ func testAccCheckAivenOrganizationUserResourceDestroy(s *terraform.State) error 
 			return err
 		}
 
-		r, err := c.Organization.Get(organizationID)
+		r, err := c.Organization.Get(ctx, organizationID)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {
 				return err
@@ -79,7 +82,7 @@ func testAccCheckAivenOrganizationUserResourceDestroy(s *terraform.State) error 
 		}
 
 		if r.ID == organizationID {
-			ri, err := c.OrganizationUserInvitations.List(organizationID)
+			ri, err := c.OrganizationUserInvitations.List(ctx, organizationID)
 			if err != nil {
 				if err.(aiven.Error).Status != 404 {
 					return err

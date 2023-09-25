@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -62,7 +62,7 @@ func DatasourceProjectVPC() *schema.Resource {
 	}
 }
 
-func datasourceProjectVPCRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func datasourceProjectVPCRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	var vpcID, projectName, cloudName string
@@ -80,7 +80,7 @@ func datasourceProjectVPCRead(_ context.Context, d *schema.ResourceData, m inter
 		cloudName = d.Get("cloud_name").(string)
 	}
 
-	vpcList, err := client.VPCs.List(projectName)
+	vpcList, err := client.VPCs.List(ctx, projectName)
 	if err != nil {
 		return diag.Errorf("error getting a list of project %q VPCs: %s", projectName, err)
 	}

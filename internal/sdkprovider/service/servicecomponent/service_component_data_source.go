@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -103,7 +103,7 @@ func DatasourceServiceComponent() *schema.Resource {
 	}
 }
 
-func datasourceServiceComponentRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func datasourceServiceComponentRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
 	projectName := d.Get("project").(string)
@@ -112,7 +112,7 @@ func datasourceServiceComponentRead(_ context.Context, d *schema.ResourceData, m
 	route := d.Get("route").(string)
 	usage := d.Get("usage").(string)
 
-	service, err := client.Services.Get(projectName, serviceName)
+	service, err := client.Services.Get(ctx, projectName, serviceName)
 	if err != nil {
 		return diag.Errorf("common %s/%s not found: %s", projectName, serviceName, err)
 	}

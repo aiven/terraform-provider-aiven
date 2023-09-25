@@ -1,11 +1,12 @@
 package pg_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -118,7 +119,9 @@ func testAccCheckAivenPGUserResourceDestroy(s *terraform.State) error {
 			return err
 		}
 
-		p, err := c.ServiceUsers.Get(projectName, serviceName, username)
+		ctx := context.Background()
+
+		p, err := c.ServiceUsers.Get(ctx, projectName, serviceName, username)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {
 				return err

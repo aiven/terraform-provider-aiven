@@ -1,10 +1,11 @@
 package project_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -45,13 +46,15 @@ func TestAccAivenBillingGroup_basic(t *testing.T) {
 func testAccCheckAivenBillingGroupResourceDestroy(s *terraform.State) error {
 	c := acc.GetTestAivenClient()
 
+	ctx := context.Background()
+
 	// loop through the resources in state, verifying each billing group is destroyed
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_billing_group" {
 			continue
 		}
 
-		db, err := c.BillingGroup.Get(rs.Primary.ID)
+		db, err := c.BillingGroup.Get(ctx, rs.Primary.ID)
 		if err != nil && !aiven.IsNotFound(err) && err.(aiven.Error).Status != 500 {
 			return fmt.Errorf("error getting a billing group by id: %w", err)
 		}

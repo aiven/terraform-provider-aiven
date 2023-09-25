@@ -1,11 +1,12 @@
 package flink_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
 
-	"github.com/aiven/aiven-go-client"
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -52,6 +53,8 @@ func TestAccAivenFlinkApplicationVersion_basic(t *testing.T) {
 func testAccCheckAivenFlinkDestroy(s *terraform.State) error {
 	client := acc.GetTestAivenClient()
 
+	ctx := context.Background()
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_flink_application_version" {
 			continue
@@ -61,7 +64,8 @@ func testAccCheckAivenFlinkDestroy(s *terraform.State) error {
 		if err != nil {
 			return err
 		}
-		v, err := client.FlinkApplicationVersions.Get(project, serviceName, applicationID, version)
+
+		v, err := client.FlinkApplicationVersions.Get(ctx, project, serviceName, applicationID, version)
 		if err != nil && !aiven.IsNotFound(err) {
 			return err
 		}
