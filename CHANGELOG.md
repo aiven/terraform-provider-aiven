@@ -10,6 +10,7 @@ nav_order: 1
 
 - Allow to modify `pg_user` replication settings
 - Fix `aiven_project_user` 409 error handling
+- Allow usage of `protobuf` schema in Kafka
 
 ## [4.9.0] - 2023-09-18
 

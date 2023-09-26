@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"regexp"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -15,6 +16,9 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
+
+// newlineRegExp is a regular expression that matches a newline.
+var newlineRegExp = regexp.MustCompile(`\r?\n`)
 
 var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 	"project":      schemautil.CommonSchemaProjectReference,
@@ -28,18 +32,19 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 	"schema": {
 		Type:             schema.TypeString,
 		Required:         true,
-		ValidateFunc:     validation.StringIsJSON,
-		StateFunc:        normalizeJSONString,
-		DiffSuppressFunc: diffSuppressJSONObject,
-		Description:      "Kafka Schema configuration should be a valid Avro Schema JSON format.",
+		StateFunc:        normalizeJSONOrProtobufString,
+		DiffSuppressFunc: diffSuppressJSONObjectOrProtobufString,
+		Description: "Kafka Schema configuration. Should be a valid Avro, JSON, or Protobuf schema," +
+			" depending on the schema type.",
 	},
 	"schema_type": {
-		Type:         schema.TypeString,
-		Optional:     true,
-		ForceNew:     true,
-		Description:  "Kafka Schema type JSON or AVRO",
+		Type:     schema.TypeString,
+		Optional: true,
+		ForceNew: true,
+		Description: "Kafka Schema configuration type. Defaults to AVRO. Possible values are AVRO, JSON, " +
+			"and PROTOBUF.",
 		Default:      "AVRO",
-		ValidateFunc: validation.StringInSlice([]string{"AVRO", "JSON"}, false),
+		ValidateFunc: validation.StringInSlice([]string{"AVRO", "JSON", "PROTOBUF"}, false),
 		DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 			// This field can't be retrieved once resource is created.
 			// That produces a diff on plan on resource import.
@@ -79,11 +84,31 @@ func diffSuppressJSONObject(_, old, new string, _ *schema.ResourceData) bool {
 	return reflect.DeepEqual(objNew, objOld)
 }
 
-// normalizeJSONString returns normalized JSON string
-func normalizeJSONString(v interface{}) string {
-	jsonString, _ := structure.NormalizeJsonString(v)
+// diffSuppressJSONObjectOrProtobufString checks logical equivalences in JSON or Protobuf Kafka Schema values.
+func diffSuppressJSONObjectOrProtobufString(k, old, new string, d *schema.ResourceData) bool {
+	if !diffSuppressJSONObject(k, old, new, d) {
+		return normalizeProtobufString(old) == normalizeProtobufString(new)
+	}
 
-	return jsonString
+	return false
+}
+
+// normalizeProtobufString returns normalized Protobuf string.
+func normalizeProtobufString(i any) string {
+	v := i.(string)
+
+	return newlineRegExp.ReplaceAllString(v, "")
+}
+
+// normalizeJSONOrProtobufString returns normalized JSON or Protobuf string.
+func normalizeJSONOrProtobufString(i any) string {
+	v := i.(string)
+
+	if n, err := structure.NormalizeJsonString(v); err == nil {
+		return n
+	}
+
+	return normalizeProtobufString(v)
 }
 
 func ResourceKafkaSchema() *schema.Resource {
