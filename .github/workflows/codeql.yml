@@ -32,6 +32,9 @@ jobs:
           - go
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
       - uses: github/codeql-action/init@v2
         with:
           languages: '${{ matrix.language }}'
