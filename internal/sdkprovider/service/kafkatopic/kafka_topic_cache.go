@@ -172,6 +172,10 @@ func (t *kafkaTopicCache) GetV1List(projectName, serviceName string) []string {
 }
 
 // DeleteTopicFromCache Invalidates cache for the topic
+// This function only exists to pass acceptance tests. Cache invalidation
+// happens automatically in Terraform when used in the real-life world between
+// each subsequent operation. However, during the acceptance test execution,
+// we need to mimic the cache invalidation mechanism by calling this function.
 func DeleteTopicFromCache(projectName, serviceName, topicName string) {
 	t := getTopicCache()
 	t.Lock()

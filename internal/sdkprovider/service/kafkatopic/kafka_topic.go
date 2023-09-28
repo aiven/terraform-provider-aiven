@@ -289,19 +289,13 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 		Tags:        getTags(d),
 	}
 
-	w := &kafkaTopicCreateWaiter{
-		Context:       ctx,
-		Client:        m.(*aiven.Client),
-		Project:       project,
-		ServiceName:   serviceName,
-		CreateRequest: createRequest,
-	}
-
-	timeout := d.Timeout(schema.TimeoutCreate)
-
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
-	_, err = w.Conf(timeout).WaitForStateContext(ctx)
-	if err != nil {
+	err = m.(*aiven.Client).KafkaTopics.Create(
+		ctx,
+		project,
+		serviceName,
+		createRequest,
+	)
+	if err != nil && !aiven.IsAlreadyExists(err) {
 		return diag.FromErr(err)
 	}
 
