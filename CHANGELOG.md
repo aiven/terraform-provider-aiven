@@ -6,6 +6,11 @@ nav_order: 1
 
 # Changelog
 
+
+## [3.13.3] - 2023-09-28
+
+- Fix `aiven_project_user` 409 error handling
+
 ## [3.13.2] - 2023-06-01
 
 - Improve Kafka Topic 404 error handling
