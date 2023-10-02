@@ -48,6 +48,16 @@ func ResourceProjectUser() *schema.Resource {
 	}
 }
 
+// isProjectUserAlreadyInvited return true if user already been invited to the project
+func isProjectUserAlreadyInvited(err error) bool {
+	if e, ok := err.(aiven.Error); ok {
+		if strings.Contains(e.Message, "already been invited to this project") && e.Status == 409 {
+			return true
+		}
+	}
+	return false
+}
+
 func resourceProjectUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	projectName := d.Get("project").(string)
@@ -60,7 +70,7 @@ func resourceProjectUserCreate(ctx context.Context, d *schema.ResourceData, m in
 			MemberType: d.Get("member_type").(string),
 		},
 	)
-	if err != nil {
+	if err != nil && !isProjectUserAlreadyInvited(err) {
 		return diag.FromErr(err)
 	}
 

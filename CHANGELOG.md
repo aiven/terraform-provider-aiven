@@ -9,6 +9,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Allow to modify `pg_user` replication settings
+- Fix `aiven_project_user` 409 error handling
 
 ## [4.9.0] - 2023-09-18
 
