@@ -92,8 +92,11 @@ resource "aiven_kafka_schema" "schema" {
 `, project, serviceName, subjectName)
 }
 
-func TestAccAivenKafkaSchema_json_basic(t *testing.T) {
+// TestAccAivenKafkaSchema_json_protobuf_basic is a test for JSON and Protobuf schema Kafka Schema resource.
+func TestAccAivenKafkaSchema_json_protobuf_basic(t *testing.T) {
 	resourceName := "aiven_kafka_schema.foo"
+	resourceName2 := "aiven_kafka_schema.bar"
+
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -102,19 +105,34 @@ func TestAccAivenKafkaSchema_json_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckAivenKafkaSchemaResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKafkaSchemaJSONResource(rName),
+				Config: testAccKafkaSchemaJSONProtobufResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenKafkaSchemaAttributes("data.aiven_kafka_schema.schema"),
+					testAccCheckAivenKafkaSchemaAttributes("data.aiven_kafka_schema.schema2"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
-					resource.TestCheckResourceAttr(resourceName, "subject_name", fmt.Sprintf("kafka-schema-%s", rName)),
+					resource.TestCheckResourceAttr(
+						resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName),
+					),
+					resource.TestCheckResourceAttr(
+						resourceName, "subject_name", fmt.Sprintf("kafka-schema-%s-foo", rName),
+					),
 					resource.TestCheckResourceAttr(resourceName, "version", "1"),
 					resource.TestCheckResourceAttr(resourceName, "schema_type", "JSON"),
+					resource.TestCheckResourceAttr(resourceName2, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(
+						resourceName2, "service_name", fmt.Sprintf("test-acc-sr-%s", rName),
+					),
+					resource.TestCheckResourceAttr(
+						resourceName2, "subject_name", fmt.Sprintf("kafka-schema-%s-bar", rName),
+					),
+					resource.TestCheckResourceAttr(resourceName2, "version", "1"),
+					resource.TestCheckResourceAttr(resourceName2, "schema_type", "PROTOBUF"),
 				),
 			},
 		},
 	})
 }
+
 func TestAccAivenKafkaSchema_basic(t *testing.T) {
 	resourceName := "aiven_kafka_schema.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
@@ -208,17 +226,18 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccKafkaSchemaJSONResource(name string) string {
+// testAccKafkaSchemaJSONProtobufResource is a test resource for JSON and Protobuf schema Kafka Schema resource.
+func testAccKafkaSchemaJSONProtobufResource(name string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
-  project = "%s"
+  project = "%[1]s"
 }
 
 resource "aiven_kafka" "bar" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
   plan                    = "startup-2"
-  service_name            = "test-acc-sr-%s"
+  service_name            = "test-acc-sr-%[2]s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 
@@ -241,7 +260,7 @@ resource "aiven_kafka_schema_configuration" "foo" {
 resource "aiven_kafka_schema" "foo" {
   project      = aiven_kafka_schema_configuration.foo.project
   service_name = aiven_kafka_schema_configuration.foo.service_name
-  subject_name = "kafka-schema-%s"
+  subject_name = "kafka-schema-%[2]s-foo"
   schema_type  = "JSON"
 
   schema = <<EOT
@@ -266,7 +285,31 @@ data "aiven_kafka_schema" "schema" {
   subject_name = aiven_kafka_schema.foo.subject_name
 
   depends_on = [aiven_kafka_schema.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}
+
+resource "aiven_kafka_schema" "bar" {
+  project      = aiven_kafka_schema_configuration.foo.project
+  service_name = aiven_kafka_schema_configuration.foo.service_name
+  subject_name = "kafka-schema-%[2]s-bar"
+  schema_type  = "PROTOBUF"
+
+  schema = <<EOT
+syntax = "proto3";
+
+message Example {
+  int32 test = 5;
+}
+
+EOT
+}
+
+data "aiven_kafka_schema" "schema2" {
+  project      = aiven_kafka_schema.bar.project
+  service_name = aiven_kafka_schema.bar.service_name
+  subject_name = aiven_kafka_schema.bar.subject_name
+
+  depends_on = [aiven_kafka_schema.bar]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
 func testAccKafkaSchemaResource(name string) string {
