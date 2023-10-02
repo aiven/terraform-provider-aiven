@@ -200,6 +200,7 @@ Optional:
 - `create` (String)
 - `default` (String)
 - `delete` (String)
+- `read` (String)
 - `update` (String)
 
 

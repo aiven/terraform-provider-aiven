@@ -7,6 +7,10 @@ nav_order: 1
 # Changelog
 
 
+## [3.13.4] - 2023-09-28
+
+- Add missing service read timeout
+
 ## [3.13.3] - 2023-09-28
 
 - Fix `aiven_project_user` 409 error handling
