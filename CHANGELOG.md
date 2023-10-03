@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.9.1] - 2023-10-03
+
 - Allow to modify `pg_user` replication settings
 - Fix `aiven_project_user` 409 error handling
 - Allow usage of `protobuf` schema in Kafka
