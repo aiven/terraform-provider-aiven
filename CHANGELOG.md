@@ -6,6 +6,11 @@ nav_order: 1
 
 # Changelog
 
+## [5.0.0] - YYYY-MM-DD
+
+- Migrate `aiven_service_integration` to the Plugin Framework
+
+
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 ## [4.9.1] - 2023-10-03

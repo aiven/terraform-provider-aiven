@@ -25,7 +25,7 @@ func TestAccAivenServiceIntegration_should_fail(t *testing.T) {
 			{
 				Config:      testAccServiceIntegrationShouldFailResource(),
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile("endpoint id should have the following format: project_name/endpoint_id"),
+				ExpectError: regexp.MustCompile("endpoint id should have the following"),
 			},
 		},
 	})

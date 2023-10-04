@@ -118,8 +118,9 @@ fmt-test: $(TERRAFMT)
 	$(TERRAFMT) fmt ./internal -fv
 
 # On MACOS requires gnu-sed. Run `brew info gnu-sed` and follow instructions to replace default sed.
+# Negative lookbehind tries to find "= `" pattern to not affect go templates for code generation
 imports:
-	find . -type f -name '*.go' -exec sed -zi 's/"\n\+\t"/"\n"/g' {} +
+	find . -type f -name '*.go' -exec sed -zi 's/(?<== `\s+)"\n\+\t"/"\n"/g' {} +
 	goimports -local "github.com/aiven/terraform-provider-aiven" -w .
 
 #################################################
@@ -150,4 +151,4 @@ go-generate:
 	go generate ./...
 
 
-generate: go-generate docs
+generate: go-generate imports docs
