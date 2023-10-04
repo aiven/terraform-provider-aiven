@@ -140,7 +140,7 @@ func resourceOrganizationUserRead(ctx context.Context, d *schema.ResourceData, m
 				if err := d.Set("user_email", userInfo.UserEmail); err != nil {
 					return diag.FromErr(err)
 				}
-				if err := d.Set("create_time", user.JoinTime); err != nil {
+				if err := d.Set("create_time", user.JoinTime.String()); err != nil {
 					return diag.FromErr(err)
 				}
 
