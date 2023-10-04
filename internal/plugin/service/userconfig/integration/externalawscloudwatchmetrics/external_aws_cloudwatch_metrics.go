@@ -5,7 +5,7 @@ package externalawscloudwatchmetrics
 import (
 	"context"
 
-	listvalidator "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	setvalidator "github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 	datasource "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	diag "github.com/hashicorp/terraform-plugin-framework/diag"
@@ -17,11 +17,11 @@ import (
 )
 
 // NewResourceSchema returns resource schema
-func NewResourceSchema() resource.ListNestedBlock {
-	return resource.ListNestedBlock{
+func NewResourceSchema() resource.SetNestedBlock {
+	return resource.SetNestedBlock{
 		Description: "External AWS CloudWatch Metrics integration user config",
 		NestedObject: resource.NestedBlockObject{Blocks: map[string]resource.Block{
-			"dropped_metrics": resource.ListNestedBlock{
+			"dropped_metrics": resource.SetNestedBlock{
 				Description: "Metrics to not send to AWS CloudWatch (takes precedence over extra_metrics)",
 				NestedObject: resource.NestedBlockObject{Attributes: map[string]resource.Attribute{
 					"field": resource.StringAttribute{
@@ -33,9 +33,9 @@ func NewResourceSchema() resource.ListNestedBlock {
 						Required:    true,
 					},
 				}},
-				Validators: []validator.List{listvalidator.SizeAtMost(1024)},
+				Validators: []validator.Set{setvalidator.SizeAtMost(1024)},
 			},
-			"extra_metrics": resource.ListNestedBlock{
+			"extra_metrics": resource.SetNestedBlock{
 				Description: "Metrics to allow through to AWS CloudWatch (in addition to default metrics)",
 				NestedObject: resource.NestedBlockObject{Attributes: map[string]resource.Attribute{
 					"field": resource.StringAttribute{
@@ -47,19 +47,19 @@ func NewResourceSchema() resource.ListNestedBlock {
 						Required:    true,
 					},
 				}},
-				Validators: []validator.List{listvalidator.SizeAtMost(1024)},
+				Validators: []validator.Set{setvalidator.SizeAtMost(1024)},
 			},
 		}},
-		Validators: []validator.List{listvalidator.SizeAtMost(1)},
+		Validators: []validator.Set{setvalidator.SizeAtMost(1)},
 	}
 }
 
 // NewDataSourceSchema returns datasource schema
-func NewDataSourceSchema() datasource.ListNestedBlock {
-	return datasource.ListNestedBlock{
+func NewDataSourceSchema() datasource.SetNestedBlock {
+	return datasource.SetNestedBlock{
 		Description: "External AWS CloudWatch Metrics integration user config",
 		NestedObject: datasource.NestedBlockObject{Blocks: map[string]datasource.Block{
-			"dropped_metrics": datasource.ListNestedBlock{
+			"dropped_metrics": datasource.SetNestedBlock{
 				Description: "Metrics to not send to AWS CloudWatch (takes precedence over extra_metrics)",
 				NestedObject: datasource.NestedBlockObject{Attributes: map[string]datasource.Attribute{
 					"field": datasource.StringAttribute{
@@ -71,9 +71,9 @@ func NewDataSourceSchema() datasource.ListNestedBlock {
 						Description: "Identifier of the metric.",
 					},
 				}},
-				Validators: []validator.List{listvalidator.SizeAtMost(1024)},
+				Validators: []validator.Set{setvalidator.SizeAtMost(1024)},
 			},
-			"extra_metrics": datasource.ListNestedBlock{
+			"extra_metrics": datasource.SetNestedBlock{
 				Description: "Metrics to allow through to AWS CloudWatch (in addition to default metrics)",
 				NestedObject: datasource.NestedBlockObject{Attributes: map[string]datasource.Attribute{
 					"field": datasource.StringAttribute{
@@ -85,17 +85,17 @@ func NewDataSourceSchema() datasource.ListNestedBlock {
 						Description: "Identifier of the metric.",
 					},
 				}},
-				Validators: []validator.List{listvalidator.SizeAtMost(1024)},
+				Validators: []validator.Set{setvalidator.SizeAtMost(1024)},
 			},
 		}},
-		Validators: []validator.List{listvalidator.SizeAtMost(1)},
+		Validators: []validator.Set{setvalidator.SizeAtMost(1)},
 	}
 }
 
 // tfoUserConfig External AWS CloudWatch Metrics integration user config
 type tfoUserConfig struct {
-	DroppedMetrics types.List `tfsdk:"dropped_metrics"`
-	ExtraMetrics   types.List `tfsdk:"extra_metrics"`
+	DroppedMetrics types.Set `tfsdk:"dropped_metrics"`
+	ExtraMetrics   types.Set `tfsdk:"extra_metrics"`
 }
 
 // dtoUserConfig request/response object
@@ -106,11 +106,11 @@ type dtoUserConfig struct {
 
 // expandUserConfig expands tf object into dto object
 func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
-	droppedMetricsVar := schemautil.ExpandListNested[tfoDroppedMetrics, dtoDroppedMetrics](ctx, diags, expandDroppedMetrics, o.DroppedMetrics)
+	droppedMetricsVar := schemautil.ExpandSetNested[tfoDroppedMetrics, dtoDroppedMetrics](ctx, diags, expandDroppedMetrics, o.DroppedMetrics)
 	if diags.HasError() {
 		return nil
 	}
-	extraMetricsVar := schemautil.ExpandListNested[tfoExtraMetrics, dtoExtraMetrics](ctx, diags, expandExtraMetrics, o.ExtraMetrics)
+	extraMetricsVar := schemautil.ExpandSetNested[tfoExtraMetrics, dtoExtraMetrics](ctx, diags, expandExtraMetrics, o.ExtraMetrics)
 	if diags.HasError() {
 		return nil
 	}
@@ -122,11 +122,11 @@ func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserCo
 
 // flattenUserConfig flattens dto object into tf object
 func flattenUserConfig(ctx context.Context, diags *diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
-	droppedMetricsVar := schemautil.FlattenListNested[dtoDroppedMetrics, tfoDroppedMetrics](ctx, diags, flattenDroppedMetrics, droppedMetricsAttrs, o.DroppedMetrics)
+	droppedMetricsVar := schemautil.FlattenSetNested[dtoDroppedMetrics, tfoDroppedMetrics](ctx, diags, flattenDroppedMetrics, droppedMetricsAttrs, o.DroppedMetrics)
 	if diags.HasError() {
 		return nil
 	}
-	extraMetricsVar := schemautil.FlattenListNested[dtoExtraMetrics, tfoExtraMetrics](ctx, diags, flattenExtraMetrics, extraMetricsAttrs, o.ExtraMetrics)
+	extraMetricsVar := schemautil.FlattenSetNested[dtoExtraMetrics, tfoExtraMetrics](ctx, diags, flattenExtraMetrics, extraMetricsAttrs, o.ExtraMetrics)
 	if diags.HasError() {
 		return nil
 	}
@@ -137,8 +137,8 @@ func flattenUserConfig(ctx context.Context, diags *diag.Diagnostics, o *dtoUserC
 }
 
 var userConfigAttrs = map[string]attr.Type{
-	"dropped_metrics": types.ListType{ElemType: types.ObjectType{AttrTypes: droppedMetricsAttrs}},
-	"extra_metrics":   types.ListType{ElemType: types.ObjectType{AttrTypes: extraMetricsAttrs}},
+	"dropped_metrics": types.SetType{ElemType: types.ObjectType{AttrTypes: droppedMetricsAttrs}},
+	"extra_metrics":   types.SetType{ElemType: types.ObjectType{AttrTypes: extraMetricsAttrs}},
 }
 
 // tfoDroppedMetrics Metric name and subfield
@@ -208,17 +208,17 @@ var extraMetricsAttrs = map[string]attr.Type{
 }
 
 // Expand public function that converts tf object into dto
-func Expand(ctx context.Context, diags *diag.Diagnostics, list types.List) *dtoUserConfig {
-	return schemautil.ExpandListBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, list)
+func Expand(ctx context.Context, diags *diag.Diagnostics, set types.Set) *dtoUserConfig {
+	return schemautil.ExpandSetBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, set)
 }
 
 // Flatten public function that converts dto into tf object
-func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.List {
+func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.Set {
 	o := new(dtoUserConfig)
 	err := schemautil.MapToDTO(m, o)
 	if err != nil {
 		diags.AddError("failed to marshal map user config to dto", err.Error())
-		return types.ListNull(types.ObjectType{AttrTypes: userConfigAttrs})
+		return types.SetNull(types.ObjectType{AttrTypes: userConfigAttrs})
 	}
-	return schemautil.FlattenListBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
+	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
 }

@@ -131,6 +131,6 @@ func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *resourceM
 	}
 }
 
-func isSet(o types.List) bool {
+func isSet(o types.Set) bool {
 	return !(o.IsUnknown() || o.IsNull())
 }

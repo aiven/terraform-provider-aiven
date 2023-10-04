@@ -5,7 +5,7 @@ package datadog
 import (
 	"context"
 
-	listvalidator "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	setvalidator "github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 	datasource "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	diag "github.com/hashicorp/terraform-plugin-framework/diag"
@@ -18,8 +18,8 @@ import (
 )
 
 // NewResourceSchema returns resource schema
-func NewResourceSchema() resource.ListNestedBlock {
-	return resource.ListNestedBlock{
+func NewResourceSchema() resource.SetNestedBlock {
+	return resource.SetNestedBlock{
 		NestedObject: resource.NestedBlockObject{
 			Attributes: map[string]resource.Attribute{
 				"datadog_dbm_enabled": resource.BoolAttribute{
@@ -27,40 +27,40 @@ func NewResourceSchema() resource.ListNestedBlock {
 					Description: "Enable Datadog Database Monitoring.",
 					Optional:    true,
 				},
-				"exclude_consumer_groups": resource.ListAttribute{
+				"exclude_consumer_groups": resource.SetAttribute{
 					Computed:    true,
 					Description: "List of custom metrics.",
 					ElementType: types.StringType,
 					Optional:    true,
-					Validators:  []validator.List{listvalidator.SizeAtMost(1024)},
+					Validators:  []validator.Set{setvalidator.SizeAtMost(1024)},
 				},
-				"exclude_topics": resource.ListAttribute{
+				"exclude_topics": resource.SetAttribute{
 					Computed:    true,
 					Description: "List of topics to exclude.",
 					ElementType: types.StringType,
 					Optional:    true,
-					Validators:  []validator.List{listvalidator.SizeAtMost(1024)},
+					Validators:  []validator.Set{setvalidator.SizeAtMost(1024)},
 				},
-				"include_consumer_groups": resource.ListAttribute{
+				"include_consumer_groups": resource.SetAttribute{
 					Computed:    true,
 					Description: "List of custom metrics.",
 					ElementType: types.StringType,
 					Optional:    true,
-					Validators:  []validator.List{listvalidator.SizeAtMost(1024)},
+					Validators:  []validator.Set{setvalidator.SizeAtMost(1024)},
 				},
-				"include_topics": resource.ListAttribute{
+				"include_topics": resource.SetAttribute{
 					Computed:    true,
 					Description: "List of topics to include.",
 					ElementType: types.StringType,
 					Optional:    true,
-					Validators:  []validator.List{listvalidator.SizeAtMost(1024)},
+					Validators:  []validator.Set{setvalidator.SizeAtMost(1024)},
 				},
-				"kafka_custom_metrics": resource.ListAttribute{
+				"kafka_custom_metrics": resource.SetAttribute{
 					Computed:    true,
 					Description: "List of custom metrics.",
 					ElementType: types.StringType,
 					Optional:    true,
-					Validators:  []validator.List{listvalidator.SizeAtMost(1024)},
+					Validators:  []validator.Set{setvalidator.SizeAtMost(1024)},
 				},
 				"max_jmx_metrics": resource.Int64Attribute{
 					Computed:    true,
@@ -69,7 +69,7 @@ func NewResourceSchema() resource.ListNestedBlock {
 				},
 			},
 			Blocks: map[string]resource.Block{
-				"datadog_tags": resource.ListNestedBlock{
+				"datadog_tags": resource.SetNestedBlock{
 					Description: "Custom tags provided by user",
 					NestedObject: resource.NestedBlockObject{Attributes: map[string]resource.Attribute{
 						"comment": resource.StringAttribute{
@@ -82,9 +82,9 @@ func NewResourceSchema() resource.ListNestedBlock {
 							Required:    true,
 						},
 					}},
-					Validators: []validator.List{listvalidator.SizeAtMost(32)},
+					Validators: []validator.Set{setvalidator.SizeAtMost(32)},
 				},
-				"opensearch": resource.ListNestedBlock{
+				"opensearch": resource.SetNestedBlock{
 					Description: "Datadog Opensearch Options",
 					NestedObject: resource.NestedBlockObject{Attributes: map[string]resource.Attribute{
 						"index_stats_enabled": resource.BoolAttribute{
@@ -104,7 +104,7 @@ func NewResourceSchema() resource.ListNestedBlock {
 						},
 					}},
 				},
-				"redis": resource.ListNestedBlock{
+				"redis": resource.SetNestedBlock{
 					Description: "Datadog Redis Options",
 					NestedObject: resource.NestedBlockObject{Attributes: map[string]resource.Attribute{"command_stats_enabled": resource.BoolAttribute{
 						Computed:    true,
@@ -115,48 +115,48 @@ func NewResourceSchema() resource.ListNestedBlock {
 				},
 			},
 		},
-		Validators: []validator.List{listvalidator.SizeAtMost(1)},
+		Validators: []validator.Set{setvalidator.SizeAtMost(1)},
 	}
 }
 
 // NewDataSourceSchema returns datasource schema
-func NewDataSourceSchema() datasource.ListNestedBlock {
-	return datasource.ListNestedBlock{
+func NewDataSourceSchema() datasource.SetNestedBlock {
+	return datasource.SetNestedBlock{
 		NestedObject: datasource.NestedBlockObject{
 			Attributes: map[string]datasource.Attribute{
 				"datadog_dbm_enabled": datasource.BoolAttribute{
 					Computed:    true,
 					Description: "Enable Datadog Database Monitoring.",
 				},
-				"exclude_consumer_groups": datasource.ListAttribute{
+				"exclude_consumer_groups": datasource.SetAttribute{
 					Computed:    true,
 					Description: "List of custom metrics.",
 					ElementType: types.StringType,
-					Validators:  []validator.List{listvalidator.SizeAtMost(1024)},
+					Validators:  []validator.Set{setvalidator.SizeAtMost(1024)},
 				},
-				"exclude_topics": datasource.ListAttribute{
+				"exclude_topics": datasource.SetAttribute{
 					Computed:    true,
 					Description: "List of topics to exclude.",
 					ElementType: types.StringType,
-					Validators:  []validator.List{listvalidator.SizeAtMost(1024)},
+					Validators:  []validator.Set{setvalidator.SizeAtMost(1024)},
 				},
-				"include_consumer_groups": datasource.ListAttribute{
+				"include_consumer_groups": datasource.SetAttribute{
 					Computed:    true,
 					Description: "List of custom metrics.",
 					ElementType: types.StringType,
-					Validators:  []validator.List{listvalidator.SizeAtMost(1024)},
+					Validators:  []validator.Set{setvalidator.SizeAtMost(1024)},
 				},
-				"include_topics": datasource.ListAttribute{
+				"include_topics": datasource.SetAttribute{
 					Computed:    true,
 					Description: "List of topics to include.",
 					ElementType: types.StringType,
-					Validators:  []validator.List{listvalidator.SizeAtMost(1024)},
+					Validators:  []validator.Set{setvalidator.SizeAtMost(1024)},
 				},
-				"kafka_custom_metrics": datasource.ListAttribute{
+				"kafka_custom_metrics": datasource.SetAttribute{
 					Computed:    true,
 					Description: "List of custom metrics.",
 					ElementType: types.StringType,
-					Validators:  []validator.List{listvalidator.SizeAtMost(1024)},
+					Validators:  []validator.Set{setvalidator.SizeAtMost(1024)},
 				},
 				"max_jmx_metrics": datasource.Int64Attribute{
 					Computed:    true,
@@ -164,7 +164,7 @@ func NewDataSourceSchema() datasource.ListNestedBlock {
 				},
 			},
 			Blocks: map[string]datasource.Block{
-				"datadog_tags": datasource.ListNestedBlock{
+				"datadog_tags": datasource.SetNestedBlock{
 					Description: "Custom tags provided by user",
 					NestedObject: datasource.NestedBlockObject{Attributes: map[string]datasource.Attribute{
 						"comment": datasource.StringAttribute{
@@ -176,9 +176,9 @@ func NewDataSourceSchema() datasource.ListNestedBlock {
 							Description: "Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix 'aiven-' are reserved for Aiven.",
 						},
 					}},
-					Validators: []validator.List{listvalidator.SizeAtMost(32)},
+					Validators: []validator.Set{setvalidator.SizeAtMost(32)},
 				},
-				"opensearch": datasource.ListNestedBlock{
+				"opensearch": datasource.SetNestedBlock{
 					Description: "Datadog Opensearch Options",
 					NestedObject: datasource.NestedBlockObject{Attributes: map[string]datasource.Attribute{
 						"index_stats_enabled": datasource.BoolAttribute{
@@ -195,7 +195,7 @@ func NewDataSourceSchema() datasource.ListNestedBlock {
 						},
 					}},
 				},
-				"redis": datasource.ListNestedBlock{
+				"redis": datasource.SetNestedBlock{
 					Description: "Datadog Redis Options",
 					NestedObject: datasource.NestedBlockObject{Attributes: map[string]datasource.Attribute{"command_stats_enabled": datasource.BoolAttribute{
 						Computed:    true,
@@ -204,22 +204,22 @@ func NewDataSourceSchema() datasource.ListNestedBlock {
 				},
 			},
 		},
-		Validators: []validator.List{listvalidator.SizeAtMost(1)},
+		Validators: []validator.Set{setvalidator.SizeAtMost(1)},
 	}
 }
 
 // tfoUserConfig
 type tfoUserConfig struct {
 	DatadogDbmEnabled     types.Bool  `tfsdk:"datadog_dbm_enabled"`
-	DatadogTags           types.List  `tfsdk:"datadog_tags"`
-	ExcludeConsumerGroups types.List  `tfsdk:"exclude_consumer_groups"`
-	ExcludeTopics         types.List  `tfsdk:"exclude_topics"`
-	IncludeConsumerGroups types.List  `tfsdk:"include_consumer_groups"`
-	IncludeTopics         types.List  `tfsdk:"include_topics"`
-	KafkaCustomMetrics    types.List  `tfsdk:"kafka_custom_metrics"`
+	DatadogTags           types.Set   `tfsdk:"datadog_tags"`
+	ExcludeConsumerGroups types.Set   `tfsdk:"exclude_consumer_groups"`
+	ExcludeTopics         types.Set   `tfsdk:"exclude_topics"`
+	IncludeConsumerGroups types.Set   `tfsdk:"include_consumer_groups"`
+	IncludeTopics         types.Set   `tfsdk:"include_topics"`
+	KafkaCustomMetrics    types.Set   `tfsdk:"kafka_custom_metrics"`
 	MaxJmxMetrics         types.Int64 `tfsdk:"max_jmx_metrics"`
-	Opensearch            types.List  `tfsdk:"opensearch"`
-	Redis                 types.List  `tfsdk:"redis"`
+	Opensearch            types.Set   `tfsdk:"opensearch"`
+	Redis                 types.Set   `tfsdk:"redis"`
 }
 
 // dtoUserConfig request/response object
@@ -238,35 +238,35 @@ type dtoUserConfig struct {
 
 // expandUserConfig expands tf object into dto object
 func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
-	datadogTagsVar := schemautil.ExpandListNested[tfoDatadogTags, dtoDatadogTags](ctx, diags, expandDatadogTags, o.DatadogTags)
+	datadogTagsVar := schemautil.ExpandSetNested[tfoDatadogTags, dtoDatadogTags](ctx, diags, expandDatadogTags, o.DatadogTags)
 	if diags.HasError() {
 		return nil
 	}
-	excludeConsumerGroupsVar := schemautil.ExpandList[string](ctx, diags, o.ExcludeConsumerGroups)
+	excludeConsumerGroupsVar := schemautil.ExpandSet[string](ctx, diags, o.ExcludeConsumerGroups)
 	if diags.HasError() {
 		return nil
 	}
-	excludeTopicsVar := schemautil.ExpandList[string](ctx, diags, o.ExcludeTopics)
+	excludeTopicsVar := schemautil.ExpandSet[string](ctx, diags, o.ExcludeTopics)
 	if diags.HasError() {
 		return nil
 	}
-	includeConsumerGroupsVar := schemautil.ExpandList[string](ctx, diags, o.IncludeConsumerGroups)
+	includeConsumerGroupsVar := schemautil.ExpandSet[string](ctx, diags, o.IncludeConsumerGroups)
 	if diags.HasError() {
 		return nil
 	}
-	includeTopicsVar := schemautil.ExpandList[string](ctx, diags, o.IncludeTopics)
+	includeTopicsVar := schemautil.ExpandSet[string](ctx, diags, o.IncludeTopics)
 	if diags.HasError() {
 		return nil
 	}
-	kafkaCustomMetricsVar := schemautil.ExpandList[string](ctx, diags, o.KafkaCustomMetrics)
+	kafkaCustomMetricsVar := schemautil.ExpandSet[string](ctx, diags, o.KafkaCustomMetrics)
 	if diags.HasError() {
 		return nil
 	}
-	opensearchVar := schemautil.ExpandListBlockNested[tfoOpensearch, dtoOpensearch](ctx, diags, expandOpensearch, o.Opensearch)
+	opensearchVar := schemautil.ExpandSetBlockNested[tfoOpensearch, dtoOpensearch](ctx, diags, expandOpensearch, o.Opensearch)
 	if diags.HasError() {
 		return nil
 	}
-	redisVar := schemautil.ExpandListBlockNested[tfoRedis, dtoRedis](ctx, diags, expandRedis, o.Redis)
+	redisVar := schemautil.ExpandSetBlockNested[tfoRedis, dtoRedis](ctx, diags, expandRedis, o.Redis)
 	if diags.HasError() {
 		return nil
 	}
@@ -286,40 +286,40 @@ func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserCo
 
 // flattenUserConfig flattens dto object into tf object
 func flattenUserConfig(ctx context.Context, diags *diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
-	datadogTagsVar := schemautil.FlattenListNested[dtoDatadogTags, tfoDatadogTags](ctx, diags, flattenDatadogTags, datadogTagsAttrs, o.DatadogTags)
+	datadogTagsVar := schemautil.FlattenSetNested[dtoDatadogTags, tfoDatadogTags](ctx, diags, flattenDatadogTags, datadogTagsAttrs, o.DatadogTags)
 	if diags.HasError() {
 		return nil
 	}
-	excludeConsumerGroupsVar, d := types.ListValueFrom(ctx, types.StringType, o.ExcludeConsumerGroups)
+	excludeConsumerGroupsVar, d := types.SetValueFrom(ctx, types.StringType, o.ExcludeConsumerGroups)
 	diags.Append(d...)
 	if diags.HasError() {
 		return nil
 	}
-	excludeTopicsVar, d := types.ListValueFrom(ctx, types.StringType, o.ExcludeTopics)
+	excludeTopicsVar, d := types.SetValueFrom(ctx, types.StringType, o.ExcludeTopics)
 	diags.Append(d...)
 	if diags.HasError() {
 		return nil
 	}
-	includeConsumerGroupsVar, d := types.ListValueFrom(ctx, types.StringType, o.IncludeConsumerGroups)
+	includeConsumerGroupsVar, d := types.SetValueFrom(ctx, types.StringType, o.IncludeConsumerGroups)
 	diags.Append(d...)
 	if diags.HasError() {
 		return nil
 	}
-	includeTopicsVar, d := types.ListValueFrom(ctx, types.StringType, o.IncludeTopics)
+	includeTopicsVar, d := types.SetValueFrom(ctx, types.StringType, o.IncludeTopics)
 	diags.Append(d...)
 	if diags.HasError() {
 		return nil
 	}
-	kafkaCustomMetricsVar, d := types.ListValueFrom(ctx, types.StringType, o.KafkaCustomMetrics)
+	kafkaCustomMetricsVar, d := types.SetValueFrom(ctx, types.StringType, o.KafkaCustomMetrics)
 	diags.Append(d...)
 	if diags.HasError() {
 		return nil
 	}
-	opensearchVar := schemautil.FlattenListBlockNested[dtoOpensearch, tfoOpensearch](ctx, diags, flattenOpensearch, opensearchAttrs, o.Opensearch)
+	opensearchVar := schemautil.FlattenSetBlockNested[dtoOpensearch, tfoOpensearch](ctx, diags, flattenOpensearch, opensearchAttrs, o.Opensearch)
 	if diags.HasError() {
 		return nil
 	}
-	redisVar := schemautil.FlattenListBlockNested[dtoRedis, tfoRedis](ctx, diags, flattenRedis, redisAttrs, o.Redis)
+	redisVar := schemautil.FlattenSetBlockNested[dtoRedis, tfoRedis](ctx, diags, flattenRedis, redisAttrs, o.Redis)
 	if diags.HasError() {
 		return nil
 	}
@@ -339,15 +339,15 @@ func flattenUserConfig(ctx context.Context, diags *diag.Diagnostics, o *dtoUserC
 
 var userConfigAttrs = map[string]attr.Type{
 	"datadog_dbm_enabled":     types.BoolType,
-	"datadog_tags":            types.ListType{ElemType: types.ObjectType{AttrTypes: datadogTagsAttrs}},
-	"exclude_consumer_groups": types.ListType{ElemType: types.StringType},
-	"exclude_topics":          types.ListType{ElemType: types.StringType},
-	"include_consumer_groups": types.ListType{ElemType: types.StringType},
-	"include_topics":          types.ListType{ElemType: types.StringType},
-	"kafka_custom_metrics":    types.ListType{ElemType: types.StringType},
+	"datadog_tags":            types.SetType{ElemType: types.ObjectType{AttrTypes: datadogTagsAttrs}},
+	"exclude_consumer_groups": types.SetType{ElemType: types.StringType},
+	"exclude_topics":          types.SetType{ElemType: types.StringType},
+	"include_consumer_groups": types.SetType{ElemType: types.StringType},
+	"include_topics":          types.SetType{ElemType: types.StringType},
+	"kafka_custom_metrics":    types.SetType{ElemType: types.StringType},
 	"max_jmx_metrics":         types.Int64Type,
-	"opensearch":              types.ListType{ElemType: types.ObjectType{AttrTypes: opensearchAttrs}},
-	"redis":                   types.ListType{ElemType: types.ObjectType{AttrTypes: redisAttrs}},
+	"opensearch":              types.SetType{ElemType: types.ObjectType{AttrTypes: opensearchAttrs}},
+	"redis":                   types.SetType{ElemType: types.ObjectType{AttrTypes: redisAttrs}},
 }
 
 // tfoDatadogTags Datadog tag defined by user
@@ -444,17 +444,17 @@ func flattenRedis(ctx context.Context, diags *diag.Diagnostics, o *dtoRedis) *tf
 var redisAttrs = map[string]attr.Type{"command_stats_enabled": types.BoolType}
 
 // Expand public function that converts tf object into dto
-func Expand(ctx context.Context, diags *diag.Diagnostics, list types.List) *dtoUserConfig {
-	return schemautil.ExpandListBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, list)
+func Expand(ctx context.Context, diags *diag.Diagnostics, set types.Set) *dtoUserConfig {
+	return schemautil.ExpandSetBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, set)
 }
 
 // Flatten public function that converts dto into tf object
-func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.List {
+func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.Set {
 	o := new(dtoUserConfig)
 	err := schemautil.MapToDTO(m, o)
 	if err != nil {
 		diags.AddError("failed to marshal map user config to dto", err.Error())
-		return types.ListNull(types.ObjectType{AttrTypes: userConfigAttrs})
+		return types.SetNull(types.ObjectType{AttrTypes: userConfigAttrs})
 	}
-	return schemautil.FlattenListBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
+	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
 }

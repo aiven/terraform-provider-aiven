@@ -5,7 +5,7 @@ package metrics
 import (
 	"context"
 
-	listvalidator "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	setvalidator "github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 	datasource "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	diag "github.com/hashicorp/terraform-plugin-framework/diag"
@@ -17,8 +17,8 @@ import (
 )
 
 // NewResourceSchema returns resource schema
-func NewResourceSchema() resource.ListNestedBlock {
-	return resource.ListNestedBlock{
+func NewResourceSchema() resource.SetNestedBlock {
+	return resource.SetNestedBlock{
 		Description: "Integration user config",
 		NestedObject: resource.NestedBlockObject{
 			Attributes: map[string]resource.Attribute{
@@ -43,9 +43,9 @@ func NewResourceSchema() resource.ListNestedBlock {
 					Optional:    true,
 				},
 			},
-			Blocks: map[string]resource.Block{"source_mysql": resource.ListNestedBlock{
+			Blocks: map[string]resource.Block{"source_mysql": resource.SetNestedBlock{
 				Description: "Configuration options for metrics where source service is MySQL",
-				NestedObject: resource.NestedBlockObject{Blocks: map[string]resource.Block{"telegraf": resource.ListNestedBlock{
+				NestedObject: resource.NestedBlockObject{Blocks: map[string]resource.Block{"telegraf": resource.SetNestedBlock{
 					Description: "Configuration options for Telegraf MySQL input plugin",
 					NestedObject: resource.NestedBlockObject{Attributes: map[string]resource.Attribute{
 						"gather_event_waits": resource.BoolAttribute{
@@ -122,13 +122,13 @@ func NewResourceSchema() resource.ListNestedBlock {
 				}}},
 			}},
 		},
-		Validators: []validator.List{listvalidator.SizeAtMost(1)},
+		Validators: []validator.Set{setvalidator.SizeAtMost(1)},
 	}
 }
 
 // NewDataSourceSchema returns datasource schema
-func NewDataSourceSchema() datasource.ListNestedBlock {
-	return datasource.ListNestedBlock{
+func NewDataSourceSchema() datasource.SetNestedBlock {
+	return datasource.SetNestedBlock{
 		Description: "Integration user config",
 		NestedObject: datasource.NestedBlockObject{
 			Attributes: map[string]datasource.Attribute{
@@ -149,9 +149,9 @@ func NewDataSourceSchema() datasource.ListNestedBlock {
 					Description: "Name of the user used to write metrics. Only affects PostgreSQL destinations. Defaults to 'metrics_writer'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.",
 				},
 			},
-			Blocks: map[string]datasource.Block{"source_mysql": datasource.ListNestedBlock{
+			Blocks: map[string]datasource.Block{"source_mysql": datasource.SetNestedBlock{
 				Description: "Configuration options for metrics where source service is MySQL",
-				NestedObject: datasource.NestedBlockObject{Blocks: map[string]datasource.Block{"telegraf": datasource.ListNestedBlock{
+				NestedObject: datasource.NestedBlockObject{Blocks: map[string]datasource.Block{"telegraf": datasource.SetNestedBlock{
 					Description: "Configuration options for Telegraf MySQL input plugin",
 					NestedObject: datasource.NestedBlockObject{Attributes: map[string]datasource.Attribute{
 						"gather_event_waits": datasource.BoolAttribute{
@@ -214,7 +214,7 @@ func NewDataSourceSchema() datasource.ListNestedBlock {
 				}}},
 			}},
 		},
-		Validators: []validator.List{listvalidator.SizeAtMost(1)},
+		Validators: []validator.Set{setvalidator.SizeAtMost(1)},
 	}
 }
 
@@ -223,7 +223,7 @@ type tfoUserConfig struct {
 	Database      types.String `tfsdk:"database"`
 	RetentionDays types.Int64  `tfsdk:"retention_days"`
 	RoUsername    types.String `tfsdk:"ro_username"`
-	SourceMysql   types.List   `tfsdk:"source_mysql"`
+	SourceMysql   types.Set    `tfsdk:"source_mysql"`
 	Username      types.String `tfsdk:"username"`
 }
 
@@ -238,7 +238,7 @@ type dtoUserConfig struct {
 
 // expandUserConfig expands tf object into dto object
 func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
-	sourceMysqlVar := schemautil.ExpandListBlockNested[tfoSourceMysql, dtoSourceMysql](ctx, diags, expandSourceMysql, o.SourceMysql)
+	sourceMysqlVar := schemautil.ExpandSetBlockNested[tfoSourceMysql, dtoSourceMysql](ctx, diags, expandSourceMysql, o.SourceMysql)
 	if diags.HasError() {
 		return nil
 	}
@@ -253,7 +253,7 @@ func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserCo
 
 // flattenUserConfig flattens dto object into tf object
 func flattenUserConfig(ctx context.Context, diags *diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
-	sourceMysqlVar := schemautil.FlattenListBlockNested[dtoSourceMysql, tfoSourceMysql](ctx, diags, flattenSourceMysql, sourceMysqlAttrs, o.SourceMysql)
+	sourceMysqlVar := schemautil.FlattenSetBlockNested[dtoSourceMysql, tfoSourceMysql](ctx, diags, flattenSourceMysql, sourceMysqlAttrs, o.SourceMysql)
 	if diags.HasError() {
 		return nil
 	}
@@ -270,13 +270,13 @@ var userConfigAttrs = map[string]attr.Type{
 	"database":       types.StringType,
 	"retention_days": types.Int64Type,
 	"ro_username":    types.StringType,
-	"source_mysql":   types.ListType{ElemType: types.ObjectType{AttrTypes: sourceMysqlAttrs}},
+	"source_mysql":   types.SetType{ElemType: types.ObjectType{AttrTypes: sourceMysqlAttrs}},
 	"username":       types.StringType,
 }
 
 // tfoSourceMysql Configuration options for metrics where source service is MySQL
 type tfoSourceMysql struct {
-	Telegraf types.List `tfsdk:"telegraf"`
+	Telegraf types.Set `tfsdk:"telegraf"`
 }
 
 // dtoSourceMysql request/response object
@@ -286,7 +286,7 @@ type dtoSourceMysql struct {
 
 // expandSourceMysql expands tf object into dto object
 func expandSourceMysql(ctx context.Context, diags *diag.Diagnostics, o *tfoSourceMysql) *dtoSourceMysql {
-	telegrafVar := schemautil.ExpandListBlockNested[tfoTelegraf, dtoTelegraf](ctx, diags, expandTelegraf, o.Telegraf)
+	telegrafVar := schemautil.ExpandSetBlockNested[tfoTelegraf, dtoTelegraf](ctx, diags, expandTelegraf, o.Telegraf)
 	if diags.HasError() {
 		return nil
 	}
@@ -295,14 +295,14 @@ func expandSourceMysql(ctx context.Context, diags *diag.Diagnostics, o *tfoSourc
 
 // flattenSourceMysql flattens dto object into tf object
 func flattenSourceMysql(ctx context.Context, diags *diag.Diagnostics, o *dtoSourceMysql) *tfoSourceMysql {
-	telegrafVar := schemautil.FlattenListBlockNested[dtoTelegraf, tfoTelegraf](ctx, diags, flattenTelegraf, telegrafAttrs, o.Telegraf)
+	telegrafVar := schemautil.FlattenSetBlockNested[dtoTelegraf, tfoTelegraf](ctx, diags, flattenTelegraf, telegrafAttrs, o.Telegraf)
 	if diags.HasError() {
 		return nil
 	}
 	return &tfoSourceMysql{Telegraf: telegrafVar}
 }
 
-var sourceMysqlAttrs = map[string]attr.Type{"telegraf": types.ListType{ElemType: types.ObjectType{AttrTypes: telegrafAttrs}}}
+var sourceMysqlAttrs = map[string]attr.Type{"telegraf": types.SetType{ElemType: types.ObjectType{AttrTypes: telegrafAttrs}}}
 
 // tfoTelegraf Configuration options for Telegraf MySQL input plugin
 type tfoTelegraf struct {
@@ -398,17 +398,17 @@ var telegrafAttrs = map[string]attr.Type{
 }
 
 // Expand public function that converts tf object into dto
-func Expand(ctx context.Context, diags *diag.Diagnostics, list types.List) *dtoUserConfig {
-	return schemautil.ExpandListBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, list)
+func Expand(ctx context.Context, diags *diag.Diagnostics, set types.Set) *dtoUserConfig {
+	return schemautil.ExpandSetBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, set)
 }
 
 // Flatten public function that converts dto into tf object
-func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.List {
+func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.Set {
 	o := new(dtoUserConfig)
 	err := schemautil.MapToDTO(m, o)
 	if err != nil {
 		diags.AddError("failed to marshal map user config to dto", err.Error())
-		return types.ListNull(types.ObjectType{AttrTypes: userConfigAttrs})
+		return types.SetNull(types.ObjectType{AttrTypes: userConfigAttrs})
 	}
-	return schemautil.FlattenListBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
+	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
 }

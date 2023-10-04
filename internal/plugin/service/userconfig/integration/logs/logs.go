@@ -5,7 +5,7 @@ package logs
 import (
 	"context"
 
-	listvalidator "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	setvalidator "github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 	datasource "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	diag "github.com/hashicorp/terraform-plugin-framework/diag"
@@ -19,8 +19,8 @@ import (
 )
 
 // NewResourceSchema returns resource schema
-func NewResourceSchema() resource.ListNestedBlock {
-	return resource.ListNestedBlock{
+func NewResourceSchema() resource.SetNestedBlock {
+	return resource.SetNestedBlock{
 		NestedObject: resource.NestedBlockObject{Attributes: map[string]resource.Attribute{
 			"elasticsearch_index_days_max": resource.Int64Attribute{
 				Computed:    true,
@@ -34,21 +34,21 @@ func NewResourceSchema() resource.ListNestedBlock {
 				Description: "Elasticsearch index prefix. The default value is `logs`.",
 				Optional:    true,
 			},
-			"selected_log_fields": resource.ListAttribute{
+			"selected_log_fields": resource.SetAttribute{
 				Computed:    true,
 				Description: "The list of logging fields that will be sent to the integration logging service. The MESSAGE and timestamp fields are always sent.",
 				ElementType: types.StringType,
 				Optional:    true,
-				Validators:  []validator.List{listvalidator.SizeAtMost(5)},
+				Validators:  []validator.Set{setvalidator.SizeAtMost(5)},
 			},
 		}},
-		Validators: []validator.List{listvalidator.SizeAtMost(1)},
+		Validators: []validator.Set{setvalidator.SizeAtMost(1)},
 	}
 }
 
 // NewDataSourceSchema returns datasource schema
-func NewDataSourceSchema() datasource.ListNestedBlock {
-	return datasource.ListNestedBlock{
+func NewDataSourceSchema() datasource.SetNestedBlock {
+	return datasource.SetNestedBlock{
 		NestedObject: datasource.NestedBlockObject{Attributes: map[string]datasource.Attribute{
 			"elasticsearch_index_days_max": datasource.Int64Attribute{
 				Computed:    true,
@@ -58,14 +58,14 @@ func NewDataSourceSchema() datasource.ListNestedBlock {
 				Computed:    true,
 				Description: "Elasticsearch index prefix. The default value is `logs`.",
 			},
-			"selected_log_fields": datasource.ListAttribute{
+			"selected_log_fields": datasource.SetAttribute{
 				Computed:    true,
 				Description: "The list of logging fields that will be sent to the integration logging service. The MESSAGE and timestamp fields are always sent.",
 				ElementType: types.StringType,
-				Validators:  []validator.List{listvalidator.SizeAtMost(5)},
+				Validators:  []validator.Set{setvalidator.SizeAtMost(5)},
 			},
 		}},
-		Validators: []validator.List{listvalidator.SizeAtMost(1)},
+		Validators: []validator.Set{setvalidator.SizeAtMost(1)},
 	}
 }
 
@@ -73,7 +73,7 @@ func NewDataSourceSchema() datasource.ListNestedBlock {
 type tfoUserConfig struct {
 	ElasticsearchIndexDaysMax types.Int64  `tfsdk:"elasticsearch_index_days_max"`
 	ElasticsearchIndexPrefix  types.String `tfsdk:"elasticsearch_index_prefix"`
-	SelectedLogFields         types.List   `tfsdk:"selected_log_fields"`
+	SelectedLogFields         types.Set    `tfsdk:"selected_log_fields"`
 }
 
 // dtoUserConfig request/response object
@@ -85,7 +85,7 @@ type dtoUserConfig struct {
 
 // expandUserConfig expands tf object into dto object
 func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
-	selectedLogFieldsVar := schemautil.ExpandList[string](ctx, diags, o.SelectedLogFields)
+	selectedLogFieldsVar := schemautil.ExpandSet[string](ctx, diags, o.SelectedLogFields)
 	if diags.HasError() {
 		return nil
 	}
@@ -98,7 +98,7 @@ func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserCo
 
 // flattenUserConfig flattens dto object into tf object
 func flattenUserConfig(ctx context.Context, diags *diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
-	selectedLogFieldsVar, d := types.ListValueFrom(ctx, types.StringType, o.SelectedLogFields)
+	selectedLogFieldsVar, d := types.SetValueFrom(ctx, types.StringType, o.SelectedLogFields)
 	diags.Append(d...)
 	if diags.HasError() {
 		return nil
@@ -113,21 +113,21 @@ func flattenUserConfig(ctx context.Context, diags *diag.Diagnostics, o *dtoUserC
 var userConfigAttrs = map[string]attr.Type{
 	"elasticsearch_index_days_max": types.Int64Type,
 	"elasticsearch_index_prefix":   types.StringType,
-	"selected_log_fields":          types.ListType{ElemType: types.StringType},
+	"selected_log_fields":          types.SetType{ElemType: types.StringType},
 }
 
 // Expand public function that converts tf object into dto
-func Expand(ctx context.Context, diags *diag.Diagnostics, list types.List) *dtoUserConfig {
-	return schemautil.ExpandListBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, list)
+func Expand(ctx context.Context, diags *diag.Diagnostics, set types.Set) *dtoUserConfig {
+	return schemautil.ExpandSetBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, set)
 }
 
 // Flatten public function that converts dto into tf object
-func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.List {
+func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.Set {
 	o := new(dtoUserConfig)
 	err := schemautil.MapToDTO(m, o)
 	if err != nil {
 		diags.AddError("failed to marshal map user config to dto", err.Error())
-		return types.ListNull(types.ObjectType{AttrTypes: userConfigAttrs})
+		return types.SetNull(types.ObjectType{AttrTypes: userConfigAttrs})
 	}
-	return schemautil.FlattenListBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
+	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
 }

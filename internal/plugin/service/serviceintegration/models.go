@@ -26,15 +26,15 @@ type resourceModel struct {
 	IntegrationType                        types.String   `tfsdk:"integration_type" copier:"IntegrationType"`
 	SourceEndpointID                       types.String   `tfsdk:"source_endpoint_id" copier:"SourceEndpointID"`
 	SourceServiceName                      types.String   `tfsdk:"source_service_name" copier:"SourceServiceName"`
-	ClickhouseKafkaUserConfig              types.List     `tfsdk:"clickhouse_kafka_user_config" copier:"ClickhouseKafkaUserConfig"`
-	ClickhousePostgresqlUserConfig         types.List     `tfsdk:"clickhouse_postgresql_user_config" copier:"ClickhousePostgresqlUserConfig"`
-	DatadogUserConfig                      types.List     `tfsdk:"datadog_user_config" copier:"DatadogUserConfig"`
-	ExternalAwsCloudwatchMetricsUserConfig types.List     `tfsdk:"external_aws_cloudwatch_metrics_user_config" copier:"ExternalAwsCloudwatchMetricsUserConfig"`
-	KafkaConnectUserConfig                 types.List     `tfsdk:"kafka_connect_user_config" copier:"KafkaConnectUserConfig"`
-	KafkaLogsUserConfig                    types.List     `tfsdk:"kafka_logs_user_config" copier:"KafkaLogsUserConfig"`
-	KafkaMirrormakerUserConfig             types.List     `tfsdk:"kafka_mirrormaker_user_config" copier:"KafkaMirrormakerUserConfig"`
-	LogsUserConfig                         types.List     `tfsdk:"logs_user_config" copier:"LogsUserConfig"`
-	MetricsUserConfig                      types.List     `tfsdk:"metrics_user_config" copier:"MetricsUserConfig"`
+	ClickhouseKafkaUserConfig              types.Set      `tfsdk:"clickhouse_kafka_user_config" copier:"ClickhouseKafkaUserConfig"`
+	ClickhousePostgresqlUserConfig         types.Set      `tfsdk:"clickhouse_postgresql_user_config" copier:"ClickhousePostgresqlUserConfig"`
+	DatadogUserConfig                      types.Set      `tfsdk:"datadog_user_config" copier:"DatadogUserConfig"`
+	ExternalAwsCloudwatchMetricsUserConfig types.Set      `tfsdk:"external_aws_cloudwatch_metrics_user_config" copier:"ExternalAwsCloudwatchMetricsUserConfig"`
+	KafkaConnectUserConfig                 types.Set      `tfsdk:"kafka_connect_user_config" copier:"KafkaConnectUserConfig"`
+	KafkaLogsUserConfig                    types.Set      `tfsdk:"kafka_logs_user_config" copier:"KafkaLogsUserConfig"`
+	KafkaMirrormakerUserConfig             types.Set      `tfsdk:"kafka_mirrormaker_user_config" copier:"KafkaMirrormakerUserConfig"`
+	LogsUserConfig                         types.Set      `tfsdk:"logs_user_config" copier:"LogsUserConfig"`
+	MetricsUserConfig                      types.Set      `tfsdk:"metrics_user_config" copier:"MetricsUserConfig"`
 }
 
 type dataSourceModel struct {
@@ -46,15 +46,15 @@ type dataSourceModel struct {
 	IntegrationType                        types.String `tfsdk:"integration_type" copier:"IntegrationType"`
 	SourceEndpointID                       types.String `tfsdk:"source_endpoint_id" copier:"SourceEndpointID"`
 	SourceServiceName                      types.String `tfsdk:"source_service_name" copier:"SourceServiceName"`
-	ClickhouseKafkaUserConfig              types.List   `tfsdk:"clickhouse_kafka_user_config" copier:"ClickhouseKafkaUserConfig"`
-	ClickhousePostgresqlUserConfig         types.List   `tfsdk:"clickhouse_postgresql_user_config" copier:"ClickhousePostgresqlUserConfig"`
-	DatadogUserConfig                      types.List   `tfsdk:"datadog_user_config" copier:"DatadogUserConfig"`
-	ExternalAwsCloudwatchMetricsUserConfig types.List   `tfsdk:"external_aws_cloudwatch_metrics_user_config" copier:"ExternalAwsCloudwatchMetricsUserConfig"`
-	KafkaConnectUserConfig                 types.List   `tfsdk:"kafka_connect_user_config" copier:"KafkaConnectUserConfig"`
-	KafkaLogsUserConfig                    types.List   `tfsdk:"kafka_logs_user_config" copier:"KafkaLogsUserConfig"`
-	KafkaMirrormakerUserConfig             types.List   `tfsdk:"kafka_mirrormaker_user_config" copier:"KafkaMirrormakerUserConfig"`
-	LogsUserConfig                         types.List   `tfsdk:"logs_user_config" copier:"LogsUserConfig"`
-	MetricsUserConfig                      types.List   `tfsdk:"metrics_user_config" copier:"MetricsUserConfig"`
+	ClickhouseKafkaUserConfig              types.Set    `tfsdk:"clickhouse_kafka_user_config" copier:"ClickhouseKafkaUserConfig"`
+	ClickhousePostgresqlUserConfig         types.Set    `tfsdk:"clickhouse_postgresql_user_config" copier:"ClickhousePostgresqlUserConfig"`
+	DatadogUserConfig                      types.Set    `tfsdk:"datadog_user_config" copier:"DatadogUserConfig"`
+	ExternalAwsCloudwatchMetricsUserConfig types.Set    `tfsdk:"external_aws_cloudwatch_metrics_user_config" copier:"ExternalAwsCloudwatchMetricsUserConfig"`
+	KafkaConnectUserConfig                 types.Set    `tfsdk:"kafka_connect_user_config" copier:"KafkaConnectUserConfig"`
+	KafkaLogsUserConfig                    types.Set    `tfsdk:"kafka_logs_user_config" copier:"KafkaLogsUserConfig"`
+	KafkaMirrormakerUserConfig             types.Set    `tfsdk:"kafka_mirrormaker_user_config" copier:"KafkaMirrormakerUserConfig"`
+	LogsUserConfig                         types.Set    `tfsdk:"logs_user_config" copier:"LogsUserConfig"`
+	MetricsUserConfig                      types.Set    `tfsdk:"metrics_user_config" copier:"MetricsUserConfig"`
 }
 
 func (p *resourceModel) getID() string {
