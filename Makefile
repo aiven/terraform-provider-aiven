@@ -70,17 +70,12 @@ test-unit:
 	$(GO) test -v --cover ./...
 
 
-PKG_PATH ?= internal
-ifneq ($(origin PKG), undefined)
-	PKG_PATH = internal/sdkprovider/service/$(PKG)
-endif
-
 TEST_COUNT ?= 1
 ACC_TEST_TIMEOUT ?= 180m
 ACC_TEST_PARALLELISM ?= 10
 
 test-acc:
-	TF_ACC=1 $(GO) test ./$(PKG_PATH)/... \
+	TF_ACC=1 $(GO) test -run=$(PKG) ./... \
 	-v -count $(TEST_COUNT) -parallel $(ACC_TEST_PARALLELISM) $(RUNARGS) $(TESTARGS) -timeout $(ACC_TEST_TIMEOUT)
 
 clean-examples:
