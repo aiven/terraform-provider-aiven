@@ -107,6 +107,7 @@ Optional:
 - `schema_registry` (Boolean) Enable Schema-Registry service. The default value is `false`.
 - `schema_registry_config` (Block List, Max: 1) Schema Registry configuration. (see [below for nested schema](#nestedblock--kafka_user_config--schema_registry_config))
 - `static_ips` (Boolean) Use static public IP addresses.
+- `tiered_storage` (Block List, Max: 1) Tiered storage configuration. (see [below for nested schema](#nestedblock--kafka_user_config--tiered_storage))
 
 <a id="nestedblock--kafka_user_config--ip_filter_object"></a>
 ### Nested Schema for `kafka_user_config.ip_filter_object`
@@ -141,6 +142,8 @@ Optional:
 - `log_flush_interval_ms` (Number) The maximum time in ms that a message in any topic is kept in memory before flushed to disk. If not set, the value in log.flush.scheduler.interval.ms is used.
 - `log_index_interval_bytes` (Number) The interval with which Kafka adds an entry to the offset index.
 - `log_index_size_max_bytes` (Number) The maximum size in bytes of the offset index.
+- `log_local_retention_bytes` (Number) The maximum size of local log segments that can grow for a partition before it gets eligible for deletion. If set to -2, the value of log.retention.bytes is used. The effective value should always be less than or equal to log.retention.bytes value.
+- `log_local_retention_ms` (Number) The number of milliseconds to keep the local log segments before it gets eligible for deletion. If set to -2, the value of log.retention.ms is used. The effective value should always be less than or equal to log.retention.ms value.
 - `log_message_downconversion_enable` (Boolean) This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. .
 - `log_message_timestamp_difference_max_ms` (Number) The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message.
 - `log_message_timestamp_type` (String) Define whether the timestamp in the message is message create time or log append time.
@@ -257,6 +260,23 @@ Optional:
 
 - `leader_eligibility` (Boolean) If true, Karapace / Schema Registry on the service nodes can participate in leader election. It might be needed to disable this when the schemas topic is replicated to a secondary cluster and Karapace / Schema Registry there must not participate in leader election. Defaults to `true`.
 - `topic_name` (String) The durable single partition topic that acts as the durable log for the data. This topic must be compacted to avoid losing data due to retention policy. Please note that changing this configuration in an existing Schema Registry / Karapace setup leads to previous schemas being inaccessible, data encoded with them potentially unreadable and schema ID sequence put out of order. It's only possible to do the switch while Schema Registry / Karapace is disabled. Defaults to `_schemas`.
+
+
+<a id="nestedblock--kafka_user_config--tiered_storage"></a>
+### Nested Schema for `kafka_user_config.tiered_storage`
+
+Optional:
+
+- `enabled` (Boolean) Whether to enable the tiered storage functionality.
+- `local_cache` (Block List, Max: 1) Local cache configuration. (see [below for nested schema](#nestedblock--kafka_user_config--tiered_storage--local_cache))
+
+<a id="nestedblock--kafka_user_config--tiered_storage--local_cache"></a>
+### Nested Schema for `kafka_user_config.tiered_storage.local_cache`
+
+Optional:
+
+- `size` (Number) Local cache size in bytes.
+
 
 
 

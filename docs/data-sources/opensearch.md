@@ -161,6 +161,7 @@ Read-Only:
 
 - `action_auto_create_index_enabled` (Boolean)
 - `action_destructive_requires_name` (Boolean)
+- `auth_failure_listeners` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--auth_failure_listeners))
 - `cluster_max_shards_per_node` (Number)
 - `cluster_routing_allocation_node_concurrent_recoveries` (Number)
 - `email_sender_name` (String)
@@ -175,6 +176,12 @@ Read-Only:
 - `indices_query_bool_max_clause_count` (Number)
 - `indices_recovery_max_bytes_per_sec` (Number)
 - `indices_recovery_max_concurrent_file_chunks` (Number)
+- `ism_enabled` (Boolean)
+- `ism_history_enabled` (Boolean)
+- `ism_history_max_age` (Number)
+- `ism_history_max_docs` (Number)
+- `ism_history_rollover_check_period` (Number)
+- `ism_history_rollover_retention_period` (Number)
 - `override_main_response_version` (Boolean)
 - `reindex_remote_whitelist` (List of String)
 - `script_max_compilations_rate` (String)
@@ -190,6 +197,42 @@ Read-Only:
 - `thread_pool_search_throttled_size` (Number)
 - `thread_pool_write_queue_size` (Number)
 - `thread_pool_write_size` (Number)
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--auth_failure_listeners"></a>
+### Nested Schema for `opensearch_user_config.opensearch.auth_failure_listeners`
+
+Read-Only:
+
+- `internal_authentication_backend_limiting` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--auth_failure_listeners--internal_authentication_backend_limiting))
+- `ip_rate_limiting` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--auth_failure_listeners--ip_rate_limiting))
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--auth_failure_listeners--internal_authentication_backend_limiting"></a>
+### Nested Schema for `opensearch_user_config.opensearch.auth_failure_listeners.ip_rate_limiting`
+
+Read-Only:
+
+- `allowed_tries` (Number)
+- `authentication_backend` (String)
+- `block_expiry_seconds` (Number)
+- `max_blocked_clients` (Number)
+- `max_tracked_clients` (Number)
+- `time_window_seconds` (Number)
+- `type` (String)
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--auth_failure_listeners--ip_rate_limiting"></a>
+### Nested Schema for `opensearch_user_config.opensearch.auth_failure_listeners.ip_rate_limiting`
+
+Read-Only:
+
+- `allowed_tries` (Number)
+- `block_expiry_seconds` (Number)
+- `max_blocked_clients` (Number)
+- `max_tracked_clients` (Number)
+- `time_window_seconds` (Number)
+- `type` (String)
+
+
 
 
 <a id="nestedobjatt--opensearch_user_config--opensearch_dashboards"></a>

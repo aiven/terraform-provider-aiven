@@ -108,6 +108,7 @@ Read-Only:
 - `schema_registry` (Boolean)
 - `schema_registry_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--schema_registry_config))
 - `static_ips` (Boolean)
+- `tiered_storage` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--tiered_storage))
 
 <a id="nestedobjatt--kafka_user_config--ip_filter_object"></a>
 ### Nested Schema for `kafka_user_config.ip_filter_object`
@@ -139,6 +140,8 @@ Read-Only:
 - `log_flush_interval_ms` (Number)
 - `log_index_interval_bytes` (Number)
 - `log_index_size_max_bytes` (Number)
+- `log_local_retention_bytes` (Number)
+- `log_local_retention_ms` (Number)
 - `log_message_downconversion_enable` (Boolean)
 - `log_message_timestamp_difference_max_ms` (Number)
 - `log_message_timestamp_type` (String)
@@ -255,6 +258,23 @@ Read-Only:
 
 - `leader_eligibility` (Boolean)
 - `topic_name` (String)
+
+
+<a id="nestedobjatt--kafka_user_config--tiered_storage"></a>
+### Nested Schema for `kafka_user_config.tiered_storage`
+
+Read-Only:
+
+- `enabled` (Boolean)
+- `local_cache` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--tiered_storage--local_cache))
+
+<a id="nestedobjatt--kafka_user_config--tiered_storage--local_cache"></a>
+### Nested Schema for `kafka_user_config.tiered_storage.local_cache`
+
+Read-Only:
+
+- `size` (Number)
+
 
 
 

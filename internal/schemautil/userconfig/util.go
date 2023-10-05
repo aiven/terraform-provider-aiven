@@ -167,8 +167,8 @@ var constDescriptionReplaceables = map[string]string{
 func descriptionForProperty(p map[string]interface{}, t string) (id bool, d string) {
 	if da, ok := p["description"].(string); ok {
 		d = da
-	} else {
-		d = p["title"].(string)
+	} else if title, ok := p["title"].(string); ok {
+		d = title
 	}
 
 	if strings.Contains(strings.ToLower(d), "deprecated") {

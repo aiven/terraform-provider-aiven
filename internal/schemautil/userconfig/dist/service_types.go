@@ -1062,6 +1062,13 @@ func ServiceTypeElasticsearch() *schema.Schema {
 // ServiceTypeFlink is a generated function returning the schema of the flink ServiceType.
 func ServiceTypeFlink() *schema.Schema {
 	s := map[string]*schema.Schema{
+		"additional_backup_regions": {
+			Description: "Additional Cloud Regions for Backup Replication.",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			MaxItems:    1,
+			Optional:    true,
+			Type:        schema.TypeList,
+		},
 		"flink_version": {
 			Description: "Flink major version.",
 			Optional:    true,
@@ -1143,6 +1150,11 @@ func ServiceTypeFlink() *schema.Schema {
 			Optional: true,
 			Type:     schema.TypeList,
 		},
+		"static_ips": {
+			Description: "Use static public IP addresses.",
+			Optional:    true,
+			Type:        schema.TypeBool,
+		},
 	}
 
 	return &schema.Schema{
@@ -1166,7 +1178,7 @@ func ServiceTypeGrafana() *schema.Schema {
 			Type:        schema.TypeList,
 		},
 		"alerting_enabled": {
-			Description: "Enable or disable Grafana alerting functionality.",
+			Description: "Enable or disable Grafana legacy alerting functionality. This should not be enabled with unified_alerting_enabled.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
@@ -2024,6 +2036,11 @@ func ServiceTypeGrafana() *schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
+		"unified_alerting_enabled": {
+			Description: "Enable or disable Grafana unified alerting functionality. By default this is enabled and any legacy alerts will be migrated on upgrade to Grafana 9+. To stay on legacy alerting, set unified_alerting_enabled to false and alerting_enabled to true. See https://grafana.com/docs/grafana/latest/alerting/set-up/migrating-alerts/ for more details.",
+			Optional:    true,
+			Type:        schema.TypeBool,
+		},
 		"user_auto_assign_org": {
 			Description: "Auto-assign new users on signup to main organization. Defaults to false.",
 			Optional:    true,
@@ -2408,6 +2425,16 @@ func ServiceTypeKafka() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
+				"log_local_retention_bytes": {
+					Description: "The maximum size of local log segments that can grow for a partition before it gets eligible for deletion. If set to -2, the value of log.retention.bytes is used. The effective value should always be less than or equal to log.retention.bytes value.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"log_local_retention_ms": {
+					Description: "The number of milliseconds to keep the local log segments before it gets eligible for deletion. If set to -2, the value of log.retention.ms is used. The effective value should always be less than or equal to log.retention.ms value.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
 				"log_message_downconversion_enable": {
 					Description: "This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. .",
 					Optional:    true,
@@ -2602,6 +2629,16 @@ func ServiceTypeKafka() *schema.Schema {
 				},
 				"log_index_size_max_bytes": {
 					Description: "The maximum size in bytes of the offset index.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"log_local_retention_bytes": {
+					Description: "The maximum size of local log segments that can grow for a partition before it gets eligible for deletion. If set to -2, the value of log.retention.bytes is used. The effective value should always be less than or equal to log.retention.bytes value.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"log_local_retention_ms": {
+					Description: "The number of milliseconds to keep the local log segments before it gets eligible for deletion. If set to -2, the value of log.retention.ms is used. The effective value should always be less than or equal to log.retention.ms value.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -3285,6 +3322,58 @@ func ServiceTypeKafka() *schema.Schema {
 			Description: "Use static public IP addresses.",
 			Optional:    true,
 			Type:        schema.TypeBool,
+		},
+		"tiered_storage": {
+			Description: "Tiered storage configuration.",
+			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+				"enabled": {
+					Description: "Whether to enable the tiered storage functionality.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"local_cache": {
+					Description: "Local cache configuration.",
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"size": {
+						Description: "Local cache size in bytes.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					}}),
+					Elem: &schema.Resource{Schema: map[string]*schema.Schema{"size": {
+						Description: "Local cache size in bytes.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					}}},
+					MaxItems: 1,
+					Optional: true,
+					Type:     schema.TypeList,
+				},
+			}),
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"enabled": {
+					Description: "Whether to enable the tiered storage functionality.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"local_cache": {
+					Description: "Local cache configuration.",
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"size": {
+						Description: "Local cache size in bytes.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					}}),
+					Elem: &schema.Resource{Schema: map[string]*schema.Schema{"size": {
+						Description: "Local cache size in bytes.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					}}},
+					MaxItems: 1,
+					Optional: true,
+					Type:     schema.TypeList,
+				},
+			}},
+			MaxItems: 1,
+			Optional: true,
+			Type:     schema.TypeList,
 		},
 	}
 
@@ -5435,6 +5524,316 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
+				"auth_failure_listeners": {
+					Description: "Opensearch Security Plugin Settings.",
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+						"internal_authentication_backend_limiting": {
+							Description: ".",
+							DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+								"allowed_tries": {
+									Description: "The number of login attempts allowed before login is blocked.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"authentication_backend": {
+									Description: "The internal backend. Enter `internal`.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"block_expiry_seconds": {
+									Description: "The duration of time that login remains blocked after a failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_blocked_clients": {
+									Description: "The maximum number of blocked IP addresses.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_tracked_clients": {
+									Description: "The maximum number of tracked IP addresses that have failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"time_window_seconds": {
+									Description: "The window of time in which the value for `allowed_tries` is enforced.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"type": {
+									Description: "The type of rate limiting.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+							}),
+							Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+								"allowed_tries": {
+									Description: "The number of login attempts allowed before login is blocked.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"authentication_backend": {
+									Description: "The internal backend. Enter `internal`.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"block_expiry_seconds": {
+									Description: "The duration of time that login remains blocked after a failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_blocked_clients": {
+									Description: "The maximum number of blocked IP addresses.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_tracked_clients": {
+									Description: "The maximum number of tracked IP addresses that have failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"time_window_seconds": {
+									Description: "The window of time in which the value for `allowed_tries` is enforced.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"type": {
+									Description: "The type of rate limiting.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+							}},
+							MaxItems: 1,
+							Optional: true,
+							Type:     schema.TypeList,
+						},
+						"ip_rate_limiting": {
+							Description: "IP address rate limiting settings.",
+							DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+								"allowed_tries": {
+									Description: "The number of login attempts allowed before login is blocked.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"block_expiry_seconds": {
+									Description: "The duration of time that login remains blocked after a failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_blocked_clients": {
+									Description: "The maximum number of blocked IP addresses.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_tracked_clients": {
+									Description: "The maximum number of tracked IP addresses that have failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"time_window_seconds": {
+									Description: "The window of time in which the value for `allowed_tries` is enforced.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"type": {
+									Description: "The type of rate limiting.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+							}),
+							Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+								"allowed_tries": {
+									Description: "The number of login attempts allowed before login is blocked.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"block_expiry_seconds": {
+									Description: "The duration of time that login remains blocked after a failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_blocked_clients": {
+									Description: "The maximum number of blocked IP addresses.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_tracked_clients": {
+									Description: "The maximum number of tracked IP addresses that have failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"time_window_seconds": {
+									Description: "The window of time in which the value for `allowed_tries` is enforced.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"type": {
+									Description: "The type of rate limiting.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+							}},
+							MaxItems: 1,
+							Optional: true,
+							Type:     schema.TypeList,
+						},
+					}),
+					Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+						"internal_authentication_backend_limiting": {
+							Description: ".",
+							DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+								"allowed_tries": {
+									Description: "The number of login attempts allowed before login is blocked.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"authentication_backend": {
+									Description: "The internal backend. Enter `internal`.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"block_expiry_seconds": {
+									Description: "The duration of time that login remains blocked after a failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_blocked_clients": {
+									Description: "The maximum number of blocked IP addresses.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_tracked_clients": {
+									Description: "The maximum number of tracked IP addresses that have failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"time_window_seconds": {
+									Description: "The window of time in which the value for `allowed_tries` is enforced.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"type": {
+									Description: "The type of rate limiting.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+							}),
+							Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+								"allowed_tries": {
+									Description: "The number of login attempts allowed before login is blocked.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"authentication_backend": {
+									Description: "The internal backend. Enter `internal`.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"block_expiry_seconds": {
+									Description: "The duration of time that login remains blocked after a failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_blocked_clients": {
+									Description: "The maximum number of blocked IP addresses.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_tracked_clients": {
+									Description: "The maximum number of tracked IP addresses that have failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"time_window_seconds": {
+									Description: "The window of time in which the value for `allowed_tries` is enforced.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"type": {
+									Description: "The type of rate limiting.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+							}},
+							MaxItems: 1,
+							Optional: true,
+							Type:     schema.TypeList,
+						},
+						"ip_rate_limiting": {
+							Description: "IP address rate limiting settings.",
+							DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+								"allowed_tries": {
+									Description: "The number of login attempts allowed before login is blocked.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"block_expiry_seconds": {
+									Description: "The duration of time that login remains blocked after a failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_blocked_clients": {
+									Description: "The maximum number of blocked IP addresses.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_tracked_clients": {
+									Description: "The maximum number of tracked IP addresses that have failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"time_window_seconds": {
+									Description: "The window of time in which the value for `allowed_tries` is enforced.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"type": {
+									Description: "The type of rate limiting.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+							}),
+							Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+								"allowed_tries": {
+									Description: "The number of login attempts allowed before login is blocked.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"block_expiry_seconds": {
+									Description: "The duration of time that login remains blocked after a failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_blocked_clients": {
+									Description: "The maximum number of blocked IP addresses.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_tracked_clients": {
+									Description: "The maximum number of tracked IP addresses that have failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"time_window_seconds": {
+									Description: "The window of time in which the value for `allowed_tries` is enforced.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"type": {
+									Description: "The type of rate limiting.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+							}},
+							MaxItems: 1,
+							Optional: true,
+							Type:     schema.TypeList,
+						},
+					}},
+					MaxItems: 1,
+					Optional: true,
+					Type:     schema.TypeList,
+				},
 				"cluster_max_shards_per_node": {
 					Description: "Controls the number of shards allowed in the cluster per data node.",
 					Optional:    true,
@@ -5503,6 +5902,42 @@ func ServiceTypeOpensearch() *schema.Schema {
 				},
 				"indices_recovery_max_concurrent_file_chunks": {
 					Description: "Number of file chunks sent in parallel for each recovery. Defaults to 2.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"ism_enabled": {
+					Default:     true,
+					Description: "Specifies whether ISM is enabled or not. The default value is `true`.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"ism_history_enabled": {
+					Default:     true,
+					Description: "Specifies whether audit history is enabled or not. The logs from ISM are automatically indexed to a logs document. The default value is `true`.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"ism_history_max_age": {
+					Default:     "24",
+					Description: "The maximum age before rolling over the audit history index in hours. The default value is `24`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"ism_history_max_docs": {
+					Default:     "2500000",
+					Description: "The maximum number of documents before rolling over the audit history index. The default value is `2500000`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"ism_history_rollover_check_period": {
+					Default:     "8",
+					Description: "The time between rollover checks for the audit history index in hours. The default value is `8`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"ism_history_rollover_retention_period": {
+					Default:     "30",
+					Description: "How long audit history indices are kept in days. The default value is `30`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -5595,6 +6030,316 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
+				"auth_failure_listeners": {
+					Description: "Opensearch Security Plugin Settings.",
+					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+						"internal_authentication_backend_limiting": {
+							Description: ".",
+							DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+								"allowed_tries": {
+									Description: "The number of login attempts allowed before login is blocked.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"authentication_backend": {
+									Description: "The internal backend. Enter `internal`.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"block_expiry_seconds": {
+									Description: "The duration of time that login remains blocked after a failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_blocked_clients": {
+									Description: "The maximum number of blocked IP addresses.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_tracked_clients": {
+									Description: "The maximum number of tracked IP addresses that have failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"time_window_seconds": {
+									Description: "The window of time in which the value for `allowed_tries` is enforced.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"type": {
+									Description: "The type of rate limiting.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+							}),
+							Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+								"allowed_tries": {
+									Description: "The number of login attempts allowed before login is blocked.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"authentication_backend": {
+									Description: "The internal backend. Enter `internal`.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"block_expiry_seconds": {
+									Description: "The duration of time that login remains blocked after a failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_blocked_clients": {
+									Description: "The maximum number of blocked IP addresses.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_tracked_clients": {
+									Description: "The maximum number of tracked IP addresses that have failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"time_window_seconds": {
+									Description: "The window of time in which the value for `allowed_tries` is enforced.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"type": {
+									Description: "The type of rate limiting.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+							}},
+							MaxItems: 1,
+							Optional: true,
+							Type:     schema.TypeList,
+						},
+						"ip_rate_limiting": {
+							Description: "IP address rate limiting settings.",
+							DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+								"allowed_tries": {
+									Description: "The number of login attempts allowed before login is blocked.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"block_expiry_seconds": {
+									Description: "The duration of time that login remains blocked after a failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_blocked_clients": {
+									Description: "The maximum number of blocked IP addresses.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_tracked_clients": {
+									Description: "The maximum number of tracked IP addresses that have failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"time_window_seconds": {
+									Description: "The window of time in which the value for `allowed_tries` is enforced.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"type": {
+									Description: "The type of rate limiting.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+							}),
+							Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+								"allowed_tries": {
+									Description: "The number of login attempts allowed before login is blocked.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"block_expiry_seconds": {
+									Description: "The duration of time that login remains blocked after a failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_blocked_clients": {
+									Description: "The maximum number of blocked IP addresses.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_tracked_clients": {
+									Description: "The maximum number of tracked IP addresses that have failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"time_window_seconds": {
+									Description: "The window of time in which the value for `allowed_tries` is enforced.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"type": {
+									Description: "The type of rate limiting.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+							}},
+							MaxItems: 1,
+							Optional: true,
+							Type:     schema.TypeList,
+						},
+					}),
+					Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+						"internal_authentication_backend_limiting": {
+							Description: ".",
+							DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+								"allowed_tries": {
+									Description: "The number of login attempts allowed before login is blocked.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"authentication_backend": {
+									Description: "The internal backend. Enter `internal`.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"block_expiry_seconds": {
+									Description: "The duration of time that login remains blocked after a failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_blocked_clients": {
+									Description: "The maximum number of blocked IP addresses.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_tracked_clients": {
+									Description: "The maximum number of tracked IP addresses that have failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"time_window_seconds": {
+									Description: "The window of time in which the value for `allowed_tries` is enforced.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"type": {
+									Description: "The type of rate limiting.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+							}),
+							Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+								"allowed_tries": {
+									Description: "The number of login attempts allowed before login is blocked.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"authentication_backend": {
+									Description: "The internal backend. Enter `internal`.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+								"block_expiry_seconds": {
+									Description: "The duration of time that login remains blocked after a failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_blocked_clients": {
+									Description: "The maximum number of blocked IP addresses.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_tracked_clients": {
+									Description: "The maximum number of tracked IP addresses that have failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"time_window_seconds": {
+									Description: "The window of time in which the value for `allowed_tries` is enforced.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"type": {
+									Description: "The type of rate limiting.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+							}},
+							MaxItems: 1,
+							Optional: true,
+							Type:     schema.TypeList,
+						},
+						"ip_rate_limiting": {
+							Description: "IP address rate limiting settings.",
+							DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+								"allowed_tries": {
+									Description: "The number of login attempts allowed before login is blocked.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"block_expiry_seconds": {
+									Description: "The duration of time that login remains blocked after a failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_blocked_clients": {
+									Description: "The maximum number of blocked IP addresses.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_tracked_clients": {
+									Description: "The maximum number of tracked IP addresses that have failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"time_window_seconds": {
+									Description: "The window of time in which the value for `allowed_tries` is enforced.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"type": {
+									Description: "The type of rate limiting.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+							}),
+							Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+								"allowed_tries": {
+									Description: "The number of login attempts allowed before login is blocked.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"block_expiry_seconds": {
+									Description: "The duration of time that login remains blocked after a failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_blocked_clients": {
+									Description: "The maximum number of blocked IP addresses.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"max_tracked_clients": {
+									Description: "The maximum number of tracked IP addresses that have failed login.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"time_window_seconds": {
+									Description: "The window of time in which the value for `allowed_tries` is enforced.",
+									Optional:    true,
+									Type:        schema.TypeInt,
+								},
+								"type": {
+									Description: "The type of rate limiting.",
+									Optional:    true,
+									Type:        schema.TypeString,
+								},
+							}},
+							MaxItems: 1,
+							Optional: true,
+							Type:     schema.TypeList,
+						},
+					}},
+					MaxItems: 1,
+					Optional: true,
+					Type:     schema.TypeList,
+				},
 				"cluster_max_shards_per_node": {
 					Description: "Controls the number of shards allowed in the cluster per data node.",
 					Optional:    true,
@@ -5663,6 +6408,42 @@ func ServiceTypeOpensearch() *schema.Schema {
 				},
 				"indices_recovery_max_concurrent_file_chunks": {
 					Description: "Number of file chunks sent in parallel for each recovery. Defaults to 2.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"ism_enabled": {
+					Default:     true,
+					Description: "Specifies whether ISM is enabled or not. The default value is `true`.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"ism_history_enabled": {
+					Default:     true,
+					Description: "Specifies whether audit history is enabled or not. The logs from ISM are automatically indexed to a logs document. The default value is `true`.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"ism_history_max_age": {
+					Default:     "24",
+					Description: "The maximum age before rolling over the audit history index in hours. The default value is `24`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"ism_history_max_docs": {
+					Default:     "2500000",
+					Description: "The maximum number of documents before rolling over the audit history index. The default value is `2500000`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"ism_history_rollover_check_period": {
+					Default:     "8",
+					Description: "The time between rollover checks for the audit history index in hours. The default value is `8`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"ism_history_rollover_retention_period": {
+					Default:     "30",
+					Description: "How long audit history indices are kept in days. The default value is `30`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
