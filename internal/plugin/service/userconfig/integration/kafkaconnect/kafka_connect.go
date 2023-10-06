@@ -5,7 +5,7 @@ package kafkaconnect
 import (
 	"context"
 
-	listvalidator "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	setvalidator "github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 	datasource "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	diag "github.com/hashicorp/terraform-plugin-framework/diag"
@@ -17,10 +17,10 @@ import (
 )
 
 // NewResourceSchema returns resource schema
-func NewResourceSchema() resource.ListNestedBlock {
-	return resource.ListNestedBlock{
+func NewResourceSchema() resource.SetNestedBlock {
+	return resource.SetNestedBlock{
 		Description: "Integration user config",
-		NestedObject: resource.NestedBlockObject{Blocks: map[string]resource.Block{"kafka_connect": resource.ListNestedBlock{
+		NestedObject: resource.NestedBlockObject{Blocks: map[string]resource.Block{"kafka_connect": resource.SetNestedBlock{
 			Description: "Kafka Connect service configuration values",
 			NestedObject: resource.NestedBlockObject{Attributes: map[string]resource.Attribute{
 				"config_storage_topic": resource.StringAttribute{
@@ -45,15 +45,15 @@ func NewResourceSchema() resource.ListNestedBlock {
 				},
 			}},
 		}}},
-		Validators: []validator.List{listvalidator.SizeAtMost(1)},
+		Validators: []validator.Set{setvalidator.SizeAtMost(1)},
 	}
 }
 
 // NewDataSourceSchema returns datasource schema
-func NewDataSourceSchema() datasource.ListNestedBlock {
-	return datasource.ListNestedBlock{
+func NewDataSourceSchema() datasource.SetNestedBlock {
+	return datasource.SetNestedBlock{
 		Description: "Integration user config",
-		NestedObject: datasource.NestedBlockObject{Blocks: map[string]datasource.Block{"kafka_connect": datasource.ListNestedBlock{
+		NestedObject: datasource.NestedBlockObject{Blocks: map[string]datasource.Block{"kafka_connect": datasource.SetNestedBlock{
 			Description: "Kafka Connect service configuration values",
 			NestedObject: datasource.NestedBlockObject{Attributes: map[string]datasource.Attribute{
 				"config_storage_topic": datasource.StringAttribute{
@@ -74,13 +74,13 @@ func NewDataSourceSchema() datasource.ListNestedBlock {
 				},
 			}},
 		}}},
-		Validators: []validator.List{listvalidator.SizeAtMost(1)},
+		Validators: []validator.Set{setvalidator.SizeAtMost(1)},
 	}
 }
 
 // tfoUserConfig Integration user config
 type tfoUserConfig struct {
-	KafkaConnect types.List `tfsdk:"kafka_connect"`
+	KafkaConnect types.Set `tfsdk:"kafka_connect"`
 }
 
 // dtoUserConfig request/response object
@@ -90,7 +90,7 @@ type dtoUserConfig struct {
 
 // expandUserConfig expands tf object into dto object
 func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
-	kafkaConnectVar := schemautil.ExpandListBlockNested[tfoKafkaConnect, dtoKafkaConnect](ctx, diags, expandKafkaConnect, o.KafkaConnect)
+	kafkaConnectVar := schemautil.ExpandSetBlockNested[tfoKafkaConnect, dtoKafkaConnect](ctx, diags, expandKafkaConnect, o.KafkaConnect)
 	if diags.HasError() {
 		return nil
 	}
@@ -99,14 +99,14 @@ func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserCo
 
 // flattenUserConfig flattens dto object into tf object
 func flattenUserConfig(ctx context.Context, diags *diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
-	kafkaConnectVar := schemautil.FlattenListBlockNested[dtoKafkaConnect, tfoKafkaConnect](ctx, diags, flattenKafkaConnect, kafkaConnectAttrs, o.KafkaConnect)
+	kafkaConnectVar := schemautil.FlattenSetBlockNested[dtoKafkaConnect, tfoKafkaConnect](ctx, diags, flattenKafkaConnect, kafkaConnectAttrs, o.KafkaConnect)
 	if diags.HasError() {
 		return nil
 	}
 	return &tfoUserConfig{KafkaConnect: kafkaConnectVar}
 }
 
-var userConfigAttrs = map[string]attr.Type{"kafka_connect": types.ListType{ElemType: types.ObjectType{AttrTypes: kafkaConnectAttrs}}}
+var userConfigAttrs = map[string]attr.Type{"kafka_connect": types.SetType{ElemType: types.ObjectType{AttrTypes: kafkaConnectAttrs}}}
 
 // tfoKafkaConnect Kafka Connect service configuration values
 type tfoKafkaConnect struct {
@@ -152,17 +152,17 @@ var kafkaConnectAttrs = map[string]attr.Type{
 }
 
 // Expand public function that converts tf object into dto
-func Expand(ctx context.Context, diags *diag.Diagnostics, list types.List) *dtoUserConfig {
-	return schemautil.ExpandListBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, list)
+func Expand(ctx context.Context, diags *diag.Diagnostics, set types.Set) *dtoUserConfig {
+	return schemautil.ExpandSetBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, set)
 }
 
 // Flatten public function that converts dto into tf object
-func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.List {
+func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.Set {
 	o := new(dtoUserConfig)
 	err := schemautil.MapToDTO(m, o)
 	if err != nil {
 		diags.AddError("failed to marshal map user config to dto", err.Error())
-		return types.ListNull(types.ObjectType{AttrTypes: userConfigAttrs})
+		return types.SetNull(types.ObjectType{AttrTypes: userConfigAttrs})
 	}
-	return schemautil.FlattenListBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
+	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
 }

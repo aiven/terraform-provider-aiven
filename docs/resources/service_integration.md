@@ -33,17 +33,17 @@ resource "aiven_service_integration" "my_integration_metrics" {
 
 ### Optional
 
-- `clickhouse_kafka_user_config` (Block List) Integration user config (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config))
-- `clickhouse_postgresql_user_config` (Block List) Integration user config (see [below for nested schema](#nestedblock--clickhouse_postgresql_user_config))
-- `datadog_user_config` (Block List) (see [below for nested schema](#nestedblock--datadog_user_config))
+- `clickhouse_kafka_user_config` (Block Set) Integration user config (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config))
+- `clickhouse_postgresql_user_config` (Block Set) Integration user config (see [below for nested schema](#nestedblock--clickhouse_postgresql_user_config))
+- `datadog_user_config` (Block Set) (see [below for nested schema](#nestedblock--datadog_user_config))
 - `destination_endpoint_id` (String) Destination endpoint for the integration (if any)
 - `destination_service_name` (String) Destination service for the integration (if any)
-- `external_aws_cloudwatch_metrics_user_config` (Block List) External AWS CloudWatch Metrics integration user config (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config))
-- `kafka_connect_user_config` (Block List) Integration user config (see [below for nested schema](#nestedblock--kafka_connect_user_config))
-- `kafka_logs_user_config` (Block List) (see [below for nested schema](#nestedblock--kafka_logs_user_config))
-- `kafka_mirrormaker_user_config` (Block List) Integration user config (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config))
-- `logs_user_config` (Block List) (see [below for nested schema](#nestedblock--logs_user_config))
-- `metrics_user_config` (Block List) Integration user config (see [below for nested schema](#nestedblock--metrics_user_config))
+- `external_aws_cloudwatch_metrics_user_config` (Block Set) External AWS CloudWatch Metrics integration user config (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config))
+- `kafka_connect_user_config` (Block Set) Integration user config (see [below for nested schema](#nestedblock--kafka_connect_user_config))
+- `kafka_logs_user_config` (Block Set) (see [below for nested schema](#nestedblock--kafka_logs_user_config))
+- `kafka_mirrormaker_user_config` (Block Set) Integration user config (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config))
+- `logs_user_config` (Block Set) (see [below for nested schema](#nestedblock--logs_user_config))
+- `metrics_user_config` (Block Set) Integration user config (see [below for nested schema](#nestedblock--metrics_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration (if any)
 - `source_service_name` (String) Source service for the integration (if any)
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
@@ -58,7 +58,7 @@ resource "aiven_service_integration" "my_integration_metrics" {
 
 Optional:
 
-- `tables` (Block List) Tables to create (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables))
+- `tables` (Block Set) Tables to create (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables))
 
 <a id="nestedblock--clickhouse_kafka_user_config--tables"></a>
 ### Nested Schema for `clickhouse_kafka_user_config.tables`
@@ -72,7 +72,7 @@ Required:
 Optional:
 
 - `auto_offset_reset` (String) Action to take when there is no initial offset in offset store or the desired offset is out of range. The default value is `earliest`.
-- `columns` (Block List) Table columns (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--columns))
+- `columns` (Block Set) Table columns (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--columns))
 - `date_time_input_format` (String) Method to read DateTime from text input formats. The default value is `basic`.
 - `handle_error_mode` (String) How to handle errors for Kafka engine. The default value is `default`.
 - `max_block_size` (Number) Number of row collected by poll(s) for flushing data from Kafka. The default value is `0`.
@@ -80,7 +80,7 @@ Optional:
 - `num_consumers` (Number) The number of consumers per table per replica. The default value is `1`.
 - `poll_max_batch_size` (Number) Maximum amount of messages to be polled in a single Kafka poll. The default value is `0`.
 - `skip_broken_messages` (Number) Skip at least this number of broken messages from Kafka topic per block. The default value is `0`.
-- `topics` (Block List) Kafka topics (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--topics))
+- `topics` (Block Set) Kafka topics (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--topics))
 
 <a id="nestedblock--clickhouse_kafka_user_config--tables--columns"></a>
 ### Nested Schema for `clickhouse_kafka_user_config.tables.columns`
@@ -106,7 +106,7 @@ Required:
 
 Optional:
 
-- `databases` (Block List) Databases to expose (see [below for nested schema](#nestedblock--clickhouse_postgresql_user_config--databases))
+- `databases` (Block Set) Databases to expose (see [below for nested schema](#nestedblock--clickhouse_postgresql_user_config--databases))
 
 <a id="nestedblock--clickhouse_postgresql_user_config--databases"></a>
 ### Nested Schema for `clickhouse_postgresql_user_config.databases`
@@ -124,15 +124,15 @@ Optional:
 Optional:
 
 - `datadog_dbm_enabled` (Boolean) Enable Datadog Database Monitoring.
-- `datadog_tags` (Block List) Custom tags provided by user (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))
-- `exclude_consumer_groups` (List of String) List of custom metrics.
-- `exclude_topics` (List of String) List of topics to exclude.
-- `include_consumer_groups` (List of String) List of custom metrics.
-- `include_topics` (List of String) List of topics to include.
-- `kafka_custom_metrics` (List of String) List of custom metrics.
+- `datadog_tags` (Block Set) Custom tags provided by user (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))
+- `exclude_consumer_groups` (Set of String) List of custom metrics.
+- `exclude_topics` (Set of String) List of topics to exclude.
+- `include_consumer_groups` (Set of String) List of custom metrics.
+- `include_topics` (Set of String) List of topics to include.
+- `kafka_custom_metrics` (Set of String) List of custom metrics.
 - `max_jmx_metrics` (Number) Maximum number of JMX metrics to send.
-- `opensearch` (Block List) Datadog Opensearch Options (see [below for nested schema](#nestedblock--datadog_user_config--opensearch))
-- `redis` (Block List) Datadog Redis Options (see [below for nested schema](#nestedblock--datadog_user_config--redis))
+- `opensearch` (Block Set) Datadog Opensearch Options (see [below for nested schema](#nestedblock--datadog_user_config--opensearch))
+- `redis` (Block Set) Datadog Redis Options (see [below for nested schema](#nestedblock--datadog_user_config--redis))
 
 <a id="nestedblock--datadog_user_config--datadog_tags"></a>
 ### Nested Schema for `datadog_user_config.datadog_tags`
@@ -170,8 +170,8 @@ Optional:
 
 Optional:
 
-- `dropped_metrics` (Block List) Metrics to not send to AWS CloudWatch (takes precedence over extra_metrics) (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config--dropped_metrics))
-- `extra_metrics` (Block List) Metrics to allow through to AWS CloudWatch (in addition to default metrics) (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config--extra_metrics))
+- `dropped_metrics` (Block Set) Metrics to not send to AWS CloudWatch (takes precedence over extra_metrics) (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config--dropped_metrics))
+- `extra_metrics` (Block Set) Metrics to allow through to AWS CloudWatch (in addition to default metrics) (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config--extra_metrics))
 
 <a id="nestedblock--external_aws_cloudwatch_metrics_user_config--dropped_metrics"></a>
 ### Nested Schema for `external_aws_cloudwatch_metrics_user_config.dropped_metrics`
@@ -197,7 +197,7 @@ Required:
 
 Optional:
 
-- `kafka_connect` (Block List) Kafka Connect service configuration values (see [below for nested schema](#nestedblock--kafka_connect_user_config--kafka_connect))
+- `kafka_connect` (Block Set) Kafka Connect service configuration values (see [below for nested schema](#nestedblock--kafka_connect_user_config--kafka_connect))
 
 <a id="nestedblock--kafka_connect_user_config--kafka_connect"></a>
 ### Nested Schema for `kafka_connect_user_config.kafka_connect`
@@ -220,7 +220,7 @@ Required:
 
 Optional:
 
-- `selected_log_fields` (List of String) The list of logging fields that will be sent to the integration logging service. The MESSAGE and timestamp fields are always sent.
+- `selected_log_fields` (Set of String) The list of logging fields that will be sent to the integration logging service. The MESSAGE and timestamp fields are always sent.
 
 
 <a id="nestedblock--kafka_mirrormaker_user_config"></a>
@@ -229,7 +229,7 @@ Optional:
 Optional:
 
 - `cluster_alias` (String) The alias under which the Kafka cluster is known to MirrorMaker. Can contain the following symbols: ASCII alphanumerics, '.', '_', and '-'.
-- `kafka_mirrormaker` (Block List) Kafka MirrorMaker configuration values (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker))
+- `kafka_mirrormaker` (Block Set) Kafka MirrorMaker configuration values (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker))
 
 <a id="nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker"></a>
 ### Nested Schema for `kafka_mirrormaker_user_config.kafka_mirrormaker`
@@ -252,7 +252,7 @@ Optional:
 
 - `elasticsearch_index_days_max` (Number) Elasticsearch index retention limit. The default value is `3`.
 - `elasticsearch_index_prefix` (String) Elasticsearch index prefix. The default value is `logs`.
-- `selected_log_fields` (List of String) The list of logging fields that will be sent to the integration logging service. The MESSAGE and timestamp fields are always sent.
+- `selected_log_fields` (Set of String) The list of logging fields that will be sent to the integration logging service. The MESSAGE and timestamp fields are always sent.
 
 
 <a id="nestedblock--metrics_user_config"></a>
@@ -263,7 +263,7 @@ Optional:
 - `database` (String) Name of the database where to store metric datapoints. Only affects PostgreSQL destinations. Defaults to 'metrics'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
 - `retention_days` (Number) Number of days to keep old metrics. Only affects PostgreSQL destinations. Set to 0 for no automatic cleanup. Defaults to 30 days.
 - `ro_username` (String) Name of a user that can be used to read metrics. This will be used for Grafana integration (if enabled) to prevent Grafana users from making undesired changes. Only affects PostgreSQL destinations. Defaults to 'metrics_reader'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
-- `source_mysql` (Block List) Configuration options for metrics where source service is MySQL (see [below for nested schema](#nestedblock--metrics_user_config--source_mysql))
+- `source_mysql` (Block Set) Configuration options for metrics where source service is MySQL (see [below for nested schema](#nestedblock--metrics_user_config--source_mysql))
 - `username` (String) Name of the user used to write metrics. Only affects PostgreSQL destinations. Defaults to 'metrics_writer'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
 
 <a id="nestedblock--metrics_user_config--source_mysql"></a>
@@ -271,7 +271,7 @@ Optional:
 
 Optional:
 
-- `telegraf` (Block List) Configuration options for Telegraf MySQL input plugin (see [below for nested schema](#nestedblock--metrics_user_config--source_mysql--telegraf))
+- `telegraf` (Block Set) Configuration options for Telegraf MySQL input plugin (see [below for nested schema](#nestedblock--metrics_user_config--source_mysql--telegraf))
 
 <a id="nestedblock--metrics_user_config--source_mysql--telegraf"></a>
 ### Nested Schema for `metrics_user_config.source_mysql.telegraf`

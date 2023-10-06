@@ -5,7 +5,7 @@ package clickhousekafka
 import (
 	"context"
 
-	listvalidator "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	setvalidator "github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 	datasource "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	diag "github.com/hashicorp/terraform-plugin-framework/diag"
@@ -19,10 +19,10 @@ import (
 )
 
 // NewResourceSchema returns resource schema
-func NewResourceSchema() resource.ListNestedBlock {
-	return resource.ListNestedBlock{
+func NewResourceSchema() resource.SetNestedBlock {
+	return resource.SetNestedBlock{
 		Description: "Integration user config",
-		NestedObject: resource.NestedBlockObject{Blocks: map[string]resource.Block{"tables": resource.ListNestedBlock{
+		NestedObject: resource.NestedBlockObject{Blocks: map[string]resource.Block{"tables": resource.SetNestedBlock{
 			Description: "Tables to create",
 			NestedObject: resource.NestedBlockObject{
 				Attributes: map[string]resource.Attribute{
@@ -88,7 +88,7 @@ func NewResourceSchema() resource.ListNestedBlock {
 					},
 				},
 				Blocks: map[string]resource.Block{
-					"columns": resource.ListNestedBlock{
+					"columns": resource.SetNestedBlock{
 						Description: "Table columns",
 						NestedObject: resource.NestedBlockObject{Attributes: map[string]resource.Attribute{
 							"name": resource.StringAttribute{
@@ -100,29 +100,29 @@ func NewResourceSchema() resource.ListNestedBlock {
 								Required:    true,
 							},
 						}},
-						Validators: []validator.List{listvalidator.SizeAtMost(100)},
+						Validators: []validator.Set{setvalidator.SizeAtMost(100)},
 					},
-					"topics": resource.ListNestedBlock{
+					"topics": resource.SetNestedBlock{
 						Description: "Kafka topics",
 						NestedObject: resource.NestedBlockObject{Attributes: map[string]resource.Attribute{"name": resource.StringAttribute{
 							Description: "Name of the topic.",
 							Required:    true,
 						}}},
-						Validators: []validator.List{listvalidator.SizeAtMost(100)},
+						Validators: []validator.Set{setvalidator.SizeAtMost(100)},
 					},
 				},
 			},
-			Validators: []validator.List{listvalidator.SizeAtMost(100)},
+			Validators: []validator.Set{setvalidator.SizeAtMost(100)},
 		}}},
-		Validators: []validator.List{listvalidator.SizeAtMost(1)},
+		Validators: []validator.Set{setvalidator.SizeAtMost(1)},
 	}
 }
 
 // NewDataSourceSchema returns datasource schema
-func NewDataSourceSchema() datasource.ListNestedBlock {
-	return datasource.ListNestedBlock{
+func NewDataSourceSchema() datasource.SetNestedBlock {
+	return datasource.SetNestedBlock{
 		Description: "Integration user config",
-		NestedObject: datasource.NestedBlockObject{Blocks: map[string]datasource.Block{"tables": datasource.ListNestedBlock{
+		NestedObject: datasource.NestedBlockObject{Blocks: map[string]datasource.Block{"tables": datasource.SetNestedBlock{
 			Description: "Tables to create",
 			NestedObject: datasource.NestedBlockObject{
 				Attributes: map[string]datasource.Attribute{
@@ -172,7 +172,7 @@ func NewDataSourceSchema() datasource.ListNestedBlock {
 					},
 				},
 				Blocks: map[string]datasource.Block{
-					"columns": datasource.ListNestedBlock{
+					"columns": datasource.SetNestedBlock{
 						Description: "Table columns",
 						NestedObject: datasource.NestedBlockObject{Attributes: map[string]datasource.Attribute{
 							"name": datasource.StringAttribute{
@@ -184,27 +184,27 @@ func NewDataSourceSchema() datasource.ListNestedBlock {
 								Description: "Column type.",
 							},
 						}},
-						Validators: []validator.List{listvalidator.SizeAtMost(100)},
+						Validators: []validator.Set{setvalidator.SizeAtMost(100)},
 					},
-					"topics": datasource.ListNestedBlock{
+					"topics": datasource.SetNestedBlock{
 						Description: "Kafka topics",
 						NestedObject: datasource.NestedBlockObject{Attributes: map[string]datasource.Attribute{"name": datasource.StringAttribute{
 							Computed:    true,
 							Description: "Name of the topic.",
 						}}},
-						Validators: []validator.List{listvalidator.SizeAtMost(100)},
+						Validators: []validator.Set{setvalidator.SizeAtMost(100)},
 					},
 				},
 			},
-			Validators: []validator.List{listvalidator.SizeAtMost(100)},
+			Validators: []validator.Set{setvalidator.SizeAtMost(100)},
 		}}},
-		Validators: []validator.List{listvalidator.SizeAtMost(1)},
+		Validators: []validator.Set{setvalidator.SizeAtMost(1)},
 	}
 }
 
 // tfoUserConfig Integration user config
 type tfoUserConfig struct {
-	Tables types.List `tfsdk:"tables"`
+	Tables types.Set `tfsdk:"tables"`
 }
 
 // dtoUserConfig request/response object
@@ -214,7 +214,7 @@ type dtoUserConfig struct {
 
 // expandUserConfig expands tf object into dto object
 func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
-	tablesVar := schemautil.ExpandListNested[tfoTables, dtoTables](ctx, diags, expandTables, o.Tables)
+	tablesVar := schemautil.ExpandSetNested[tfoTables, dtoTables](ctx, diags, expandTables, o.Tables)
 	if diags.HasError() {
 		return nil
 	}
@@ -223,19 +223,19 @@ func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserCo
 
 // flattenUserConfig flattens dto object into tf object
 func flattenUserConfig(ctx context.Context, diags *diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
-	tablesVar := schemautil.FlattenListNested[dtoTables, tfoTables](ctx, diags, flattenTables, tablesAttrs, o.Tables)
+	tablesVar := schemautil.FlattenSetNested[dtoTables, tfoTables](ctx, diags, flattenTables, tablesAttrs, o.Tables)
 	if diags.HasError() {
 		return nil
 	}
 	return &tfoUserConfig{Tables: tablesVar}
 }
 
-var userConfigAttrs = map[string]attr.Type{"tables": types.ListType{ElemType: types.ObjectType{AttrTypes: tablesAttrs}}}
+var userConfigAttrs = map[string]attr.Type{"tables": types.SetType{ElemType: types.ObjectType{AttrTypes: tablesAttrs}}}
 
 // tfoTables Table to create
 type tfoTables struct {
 	AutoOffsetReset     types.String `tfsdk:"auto_offset_reset"`
-	Columns             types.List   `tfsdk:"columns"`
+	Columns             types.Set    `tfsdk:"columns"`
 	DataFormat          types.String `tfsdk:"data_format"`
 	DateTimeInputFormat types.String `tfsdk:"date_time_input_format"`
 	GroupName           types.String `tfsdk:"group_name"`
@@ -246,7 +246,7 @@ type tfoTables struct {
 	NumConsumers        types.Int64  `tfsdk:"num_consumers"`
 	PollMaxBatchSize    types.Int64  `tfsdk:"poll_max_batch_size"`
 	SkipBrokenMessages  types.Int64  `tfsdk:"skip_broken_messages"`
-	Topics              types.List   `tfsdk:"topics"`
+	Topics              types.Set    `tfsdk:"topics"`
 }
 
 // dtoTables request/response object
@@ -268,11 +268,11 @@ type dtoTables struct {
 
 // expandTables expands tf object into dto object
 func expandTables(ctx context.Context, diags *diag.Diagnostics, o *tfoTables) *dtoTables {
-	columnsVar := schemautil.ExpandListNested[tfoColumns, dtoColumns](ctx, diags, expandColumns, o.Columns)
+	columnsVar := schemautil.ExpandSetNested[tfoColumns, dtoColumns](ctx, diags, expandColumns, o.Columns)
 	if diags.HasError() {
 		return nil
 	}
-	topicsVar := schemautil.ExpandListNested[tfoTopics, dtoTopics](ctx, diags, expandTopics, o.Topics)
+	topicsVar := schemautil.ExpandSetNested[tfoTopics, dtoTopics](ctx, diags, expandTopics, o.Topics)
 	if diags.HasError() {
 		return nil
 	}
@@ -295,11 +295,11 @@ func expandTables(ctx context.Context, diags *diag.Diagnostics, o *tfoTables) *d
 
 // flattenTables flattens dto object into tf object
 func flattenTables(ctx context.Context, diags *diag.Diagnostics, o *dtoTables) *tfoTables {
-	columnsVar := schemautil.FlattenListNested[dtoColumns, tfoColumns](ctx, diags, flattenColumns, columnsAttrs, o.Columns)
+	columnsVar := schemautil.FlattenSetNested[dtoColumns, tfoColumns](ctx, diags, flattenColumns, columnsAttrs, o.Columns)
 	if diags.HasError() {
 		return nil
 	}
-	topicsVar := schemautil.FlattenListNested[dtoTopics, tfoTopics](ctx, diags, flattenTopics, topicsAttrs, o.Topics)
+	topicsVar := schemautil.FlattenSetNested[dtoTopics, tfoTopics](ctx, diags, flattenTopics, topicsAttrs, o.Topics)
 	if diags.HasError() {
 		return nil
 	}
@@ -322,7 +322,7 @@ func flattenTables(ctx context.Context, diags *diag.Diagnostics, o *dtoTables) *
 
 var tablesAttrs = map[string]attr.Type{
 	"auto_offset_reset":      types.StringType,
-	"columns":                types.ListType{ElemType: types.ObjectType{AttrTypes: columnsAttrs}},
+	"columns":                types.SetType{ElemType: types.ObjectType{AttrTypes: columnsAttrs}},
 	"data_format":            types.StringType,
 	"date_time_input_format": types.StringType,
 	"group_name":             types.StringType,
@@ -333,7 +333,7 @@ var tablesAttrs = map[string]attr.Type{
 	"num_consumers":          types.Int64Type,
 	"poll_max_batch_size":    types.Int64Type,
 	"skip_broken_messages":   types.Int64Type,
-	"topics":                 types.ListType{ElemType: types.ObjectType{AttrTypes: topicsAttrs}},
+	"topics":                 types.SetType{ElemType: types.ObjectType{AttrTypes: topicsAttrs}},
 }
 
 // tfoColumns Table column
@@ -392,17 +392,17 @@ func flattenTopics(ctx context.Context, diags *diag.Diagnostics, o *dtoTopics) *
 var topicsAttrs = map[string]attr.Type{"name": types.StringType}
 
 // Expand public function that converts tf object into dto
-func Expand(ctx context.Context, diags *diag.Diagnostics, list types.List) *dtoUserConfig {
-	return schemautil.ExpandListBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, list)
+func Expand(ctx context.Context, diags *diag.Diagnostics, set types.Set) *dtoUserConfig {
+	return schemautil.ExpandSetBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, set)
 }
 
 // Flatten public function that converts dto into tf object
-func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.List {
+func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.Set {
 	o := new(dtoUserConfig)
 	err := schemautil.MapToDTO(m, o)
 	if err != nil {
 		diags.AddError("failed to marshal map user config to dto", err.Error())
-		return types.ListNull(types.ObjectType{AttrTypes: userConfigAttrs})
+		return types.SetNull(types.ObjectType{AttrTypes: userConfigAttrs})
 	}
-	return schemautil.FlattenListBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
+	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
 }

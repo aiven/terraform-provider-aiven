@@ -5,7 +5,7 @@ package clickhousepostgresql
 import (
 	"context"
 
-	listvalidator "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	setvalidator "github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 	datasource "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	diag "github.com/hashicorp/terraform-plugin-framework/diag"
@@ -18,10 +18,10 @@ import (
 )
 
 // NewResourceSchema returns resource schema
-func NewResourceSchema() resource.ListNestedBlock {
-	return resource.ListNestedBlock{
+func NewResourceSchema() resource.SetNestedBlock {
+	return resource.SetNestedBlock{
 		Description: "Integration user config",
-		NestedObject: resource.NestedBlockObject{Blocks: map[string]resource.Block{"databases": resource.ListNestedBlock{
+		NestedObject: resource.NestedBlockObject{Blocks: map[string]resource.Block{"databases": resource.SetNestedBlock{
 			Description: "Databases to expose",
 			NestedObject: resource.NestedBlockObject{Attributes: map[string]resource.Attribute{
 				"database": resource.StringAttribute{
@@ -37,17 +37,17 @@ func NewResourceSchema() resource.ListNestedBlock {
 					Optional:    true,
 				},
 			}},
-			Validators: []validator.List{listvalidator.SizeAtMost(10)},
+			Validators: []validator.Set{setvalidator.SizeAtMost(10)},
 		}}},
-		Validators: []validator.List{listvalidator.SizeAtMost(1)},
+		Validators: []validator.Set{setvalidator.SizeAtMost(1)},
 	}
 }
 
 // NewDataSourceSchema returns datasource schema
-func NewDataSourceSchema() datasource.ListNestedBlock {
-	return datasource.ListNestedBlock{
+func NewDataSourceSchema() datasource.SetNestedBlock {
+	return datasource.SetNestedBlock{
 		Description: "Integration user config",
-		NestedObject: datasource.NestedBlockObject{Blocks: map[string]datasource.Block{"databases": datasource.ListNestedBlock{
+		NestedObject: datasource.NestedBlockObject{Blocks: map[string]datasource.Block{"databases": datasource.SetNestedBlock{
 			Description: "Databases to expose",
 			NestedObject: datasource.NestedBlockObject{Attributes: map[string]datasource.Attribute{
 				"database": datasource.StringAttribute{
@@ -59,15 +59,15 @@ func NewDataSourceSchema() datasource.ListNestedBlock {
 					Description: "PostgreSQL schema to expose. The default value is `public`.",
 				},
 			}},
-			Validators: []validator.List{listvalidator.SizeAtMost(10)},
+			Validators: []validator.Set{setvalidator.SizeAtMost(10)},
 		}}},
-		Validators: []validator.List{listvalidator.SizeAtMost(1)},
+		Validators: []validator.Set{setvalidator.SizeAtMost(1)},
 	}
 }
 
 // tfoUserConfig Integration user config
 type tfoUserConfig struct {
-	Databases types.List `tfsdk:"databases"`
+	Databases types.Set `tfsdk:"databases"`
 }
 
 // dtoUserConfig request/response object
@@ -77,7 +77,7 @@ type dtoUserConfig struct {
 
 // expandUserConfig expands tf object into dto object
 func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
-	databasesVar := schemautil.ExpandListNested[tfoDatabases, dtoDatabases](ctx, diags, expandDatabases, o.Databases)
+	databasesVar := schemautil.ExpandSetNested[tfoDatabases, dtoDatabases](ctx, diags, expandDatabases, o.Databases)
 	if diags.HasError() {
 		return nil
 	}
@@ -86,14 +86,14 @@ func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserCo
 
 // flattenUserConfig flattens dto object into tf object
 func flattenUserConfig(ctx context.Context, diags *diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
-	databasesVar := schemautil.FlattenListNested[dtoDatabases, tfoDatabases](ctx, diags, flattenDatabases, databasesAttrs, o.Databases)
+	databasesVar := schemautil.FlattenSetNested[dtoDatabases, tfoDatabases](ctx, diags, flattenDatabases, databasesAttrs, o.Databases)
 	if diags.HasError() {
 		return nil
 	}
 	return &tfoUserConfig{Databases: databasesVar}
 }
 
-var userConfigAttrs = map[string]attr.Type{"databases": types.ListType{ElemType: types.ObjectType{AttrTypes: databasesAttrs}}}
+var userConfigAttrs = map[string]attr.Type{"databases": types.SetType{ElemType: types.ObjectType{AttrTypes: databasesAttrs}}}
 
 // tfoDatabases Database to expose
 type tfoDatabases struct {
@@ -129,17 +129,17 @@ var databasesAttrs = map[string]attr.Type{
 }
 
 // Expand public function that converts tf object into dto
-func Expand(ctx context.Context, diags *diag.Diagnostics, list types.List) *dtoUserConfig {
-	return schemautil.ExpandListBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, list)
+func Expand(ctx context.Context, diags *diag.Diagnostics, set types.Set) *dtoUserConfig {
+	return schemautil.ExpandSetBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, set)
 }
 
 // Flatten public function that converts dto into tf object
-func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.List {
+func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.Set {
 	o := new(dtoUserConfig)
 	err := schemautil.MapToDTO(m, o)
 	if err != nil {
 		diags.AddError("failed to marshal map user config to dto", err.Error())
-		return types.ListNull(types.ObjectType{AttrTypes: userConfigAttrs})
+		return types.SetNull(types.ObjectType{AttrTypes: userConfigAttrs})
 	}
-	return schemautil.FlattenListBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
+	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
 }
