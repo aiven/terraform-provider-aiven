@@ -170,6 +170,7 @@ Optional:
 
 - `action_auto_create_index_enabled` (Boolean) Explicitly allow or block automatic creation of indices. Defaults to true.
 - `action_destructive_requires_name` (Boolean) Require explicit index names when deleting.
+- `auth_failure_listeners` (Block List, Max: 1) Opensearch Security Plugin Settings. (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--auth_failure_listeners))
 - `cluster_max_shards_per_node` (Number) Controls the number of shards allowed in the cluster per data node.
 - `cluster_routing_allocation_node_concurrent_recoveries` (Number) How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to 2.
 - `email_sender_name` (String) This should be identical to the Sender name defined in Opensearch dashboards.
@@ -184,6 +185,12 @@ Optional:
 - `indices_query_bool_max_clause_count` (Number) Maximum number of clauses Lucene BooleanQuery can have. The default value (1024) is relatively high, and increasing it may cause performance issues. Investigate other approaches first before increasing this value.
 - `indices_recovery_max_bytes_per_sec` (Number) Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb.
 - `indices_recovery_max_concurrent_file_chunks` (Number) Number of file chunks sent in parallel for each recovery. Defaults to 2.
+- `ism_enabled` (Boolean) Specifies whether ISM is enabled or not. The default value is `true`.
+- `ism_history_enabled` (Boolean) Specifies whether audit history is enabled or not. The logs from ISM are automatically indexed to a logs document. The default value is `true`.
+- `ism_history_max_age` (Number) The maximum age before rolling over the audit history index in hours. The default value is `24`.
+- `ism_history_max_docs` (Number) The maximum number of documents before rolling over the audit history index. The default value is `2500000`.
+- `ism_history_rollover_check_period` (Number) The time between rollover checks for the audit history index in hours. The default value is `8`.
+- `ism_history_rollover_retention_period` (Number) How long audit history indices are kept in days. The default value is `30`.
 - `override_main_response_version` (Boolean) Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false.
 - `reindex_remote_whitelist` (List of String) Whitelisted addresses for reindexing. Changing this value will cause all OpenSearch instances to restart.
 - `script_max_compilations_rate` (String) Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context.
@@ -199,6 +206,42 @@ Optional:
 - `thread_pool_search_throttled_size` (Number) Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
 - `thread_pool_write_queue_size` (Number) Size for the thread pool queue. See documentation for exact details.
 - `thread_pool_write_size` (Number) Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
+
+<a id="nestedblock--opensearch_user_config--opensearch--auth_failure_listeners"></a>
+### Nested Schema for `opensearch_user_config.opensearch.auth_failure_listeners`
+
+Optional:
+
+- `internal_authentication_backend_limiting` (Block List, Max: 1) . (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--auth_failure_listeners--internal_authentication_backend_limiting))
+- `ip_rate_limiting` (Block List, Max: 1) IP address rate limiting settings. (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--auth_failure_listeners--ip_rate_limiting))
+
+<a id="nestedblock--opensearch_user_config--opensearch--auth_failure_listeners--internal_authentication_backend_limiting"></a>
+### Nested Schema for `opensearch_user_config.opensearch.auth_failure_listeners.internal_authentication_backend_limiting`
+
+Optional:
+
+- `allowed_tries` (Number) The number of login attempts allowed before login is blocked.
+- `authentication_backend` (String) The internal backend. Enter `internal`.
+- `block_expiry_seconds` (Number) The duration of time that login remains blocked after a failed login.
+- `max_blocked_clients` (Number) The maximum number of blocked IP addresses.
+- `max_tracked_clients` (Number) The maximum number of tracked IP addresses that have failed login.
+- `time_window_seconds` (Number) The window of time in which the value for `allowed_tries` is enforced.
+- `type` (String) The type of rate limiting.
+
+
+<a id="nestedblock--opensearch_user_config--opensearch--auth_failure_listeners--ip_rate_limiting"></a>
+### Nested Schema for `opensearch_user_config.opensearch.auth_failure_listeners.ip_rate_limiting`
+
+Optional:
+
+- `allowed_tries` (Number) The number of login attempts allowed before login is blocked.
+- `block_expiry_seconds` (Number) The duration of time that login remains blocked after a failed login.
+- `max_blocked_clients` (Number) The maximum number of blocked IP addresses.
+- `max_tracked_clients` (Number) The maximum number of tracked IP addresses that have failed login.
+- `time_window_seconds` (Number) The window of time in which the value for `allowed_tries` is enforced.
+- `type` (String) The type of rate limiting.
+
+
 
 
 <a id="nestedblock--opensearch_user_config--opensearch_dashboards"></a>

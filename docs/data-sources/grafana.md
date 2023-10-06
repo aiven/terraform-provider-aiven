@@ -119,6 +119,7 @@ Read-Only:
 - `service_to_fork_from` (String)
 - `smtp_server` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--smtp_server))
 - `static_ips` (Boolean)
+- `unified_alerting_enabled` (Boolean)
 - `user_auto_assign_org` (Boolean)
 - `user_auto_assign_org_role` (String)
 - `viewers_can_edit` (Boolean)

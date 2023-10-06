@@ -78,7 +78,7 @@ resource "aiven_grafana" "gr1" {
 Optional:
 
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
-- `alerting_enabled` (Boolean) Enable or disable Grafana alerting functionality.
+- `alerting_enabled` (Boolean) Enable or disable Grafana legacy alerting functionality. This should not be enabled with unified_alerting_enabled.
 - `alerting_error_or_timeout` (String) Default error or timeout setting for new alerting rules.
 - `alerting_max_annotations_to_keep` (Number) Max number of alert annotations that Grafana stores. 0 (default) keeps all alert annotations.
 - `alerting_nodata_or_nullvalues` (String) Default value for 'no data or null values' for new alerting rules.
@@ -114,6 +114,7 @@ Optional:
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
 - `smtp_server` (Block List, Max: 1) SMTP server settings. (see [below for nested schema](#nestedblock--grafana_user_config--smtp_server))
 - `static_ips` (Boolean) Use static public IP addresses.
+- `unified_alerting_enabled` (Boolean) Enable or disable Grafana unified alerting functionality. By default this is enabled and any legacy alerts will be migrated on upgrade to Grafana 9+. To stay on legacy alerting, set unified_alerting_enabled to false and alerting_enabled to true. See https://grafana.com/docs/grafana/latest/alerting/set-up/migrating-alerts/ for more details.
 - `user_auto_assign_org` (Boolean) Auto-assign new users on signup to main organization. Defaults to false.
 - `user_auto_assign_org_role` (String) Set role for new signups. Defaults to Viewer.
 - `viewers_can_edit` (Boolean) Users with view-only permission can edit but not save dashboards.

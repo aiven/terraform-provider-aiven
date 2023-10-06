@@ -110,6 +110,8 @@ func TestFromAPI(t *testing.T) {
 					"log_flush_interval_ms":                                      0,
 					"log_index_interval_bytes":                                   0,
 					"log_index_size_max_bytes":                                   0,
+					"log_local_retention_bytes":                                  0,
+					"log_local_retention_ms":                                     0,
 					"log_message_downconversion_enable":                          false,
 					"log_message_timestamp_difference_max_ms":                    0,
 					"log_message_timestamp_type":                                 "",
