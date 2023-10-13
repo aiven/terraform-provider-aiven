@@ -67,7 +67,8 @@ eliminate an account team member if one has accepted an invitation previously.
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema: aivenAccountTeamMemberSchema,
+		Schema:             aivenAccountTeamMemberSchema,
+		DeprecationMessage: "This resource is deprecated",
 	}
 }
 
