@@ -104,19 +104,19 @@ func Test%[3]s(t *testing.T) {
 		name string
 		source string
 		expect string
-		marshal func (any) (map[string]any, error)
+		create bool
 	}{
 		{
 			name: "fields to create resource",
 			source: allFields,
 			expect: allFields,
-			marshal: schemautil.MarshalCreateUserConfig,
+			create: true,
 		},
 		{
 			name: "only fields to update resource",
 			source: allFields,
 			expect: updateOnlyFields, // usually, fewer fields
-			marshal: schemautil.MarshalUpdateUserConfig,
+			create: false,
 		},
 	}
 
@@ -137,7 +137,7 @@ func Test%[3]s(t *testing.T) {
 			require.Empty(t, diags)
 			
 			// Run specific marshal (create or update resource)
-			dtoConfig, err := opt.marshal(config)
+			dtoConfig, err := schemautil.MarshalUserConfig(config, opt.create)
 			require.NoError(t, err)
 
 			// Compares that output is strictly equal to the input

@@ -161,7 +161,7 @@ func (s *serviceIntegrationResource) Create(ctx context.Context, req resource.Cr
 	// all other integrations should be imported using `terraform import`
 	if o.IntegrationType.ValueString() == readReplicaType {
 		if preexisting, err := getSIByName(ctx, s.client, &o); err != nil {
-			resp.Diagnostics.AddError("unable to search for possible preexisting 'read_replica' service integration", err.Error())
+			resp.Diagnostics.AddError("Unable to search for possible preexisting 'read_replica' service integration", err.Error())
 			return
 		} else if preexisting != nil {
 			o.IntegrationID = types.StringValue(preexisting.ServiceIntegrationID)
@@ -170,11 +170,11 @@ func (s *serviceIntegrationResource) Create(ctx context.Context, req resource.Cr
 		}
 	}
 
-	userConfig, err := expandUserConfig(ctx, &resp.Diagnostics, &o, true)
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to expand user config", err.Error())
+	userConfig := expandUserConfig(ctx, &resp.Diagnostics, &o, true)
+	if resp.Diagnostics.HasError() {
 		return
 	}
+
 	createReq := aiven.CreateServiceIntegrationRequest{
 		DestinationProject:    getProjectPointer(o.DestinationEndpointID.ValueString()),
 		DestinationEndpointID: getEndpointIDPointer(o.DestinationEndpointID.ValueString()),
@@ -206,27 +206,27 @@ func (s *serviceIntegrationResource) Read(ctx context.Context, req resource.Read
 }
 
 func (s *serviceIntegrationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var state resourceModel
-	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
 	var o resourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &o)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Copies ID from the state
-	o.IntegrationID = state.IntegrationID
-	userConfig, err := expandUserConfig(ctx, &resp.Diagnostics, &o, false)
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to expand user config", err.Error())
+	// We read state to get integration's ID
+	var state resourceModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	_, err = s.client.ServiceIntegrations.Update(
+	// Copies ID from the state
+	o.IntegrationID = state.IntegrationID
+	userConfig := expandUserConfig(ctx, &resp.Diagnostics, &o, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	_, err := s.client.ServiceIntegrations.Update(
 		ctx,
 		state.Project.ValueString(),
 		state.IntegrationID.ValueString(),

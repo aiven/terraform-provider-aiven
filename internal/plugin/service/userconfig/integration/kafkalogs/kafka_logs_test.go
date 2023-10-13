@@ -29,22 +29,22 @@ const updateOnlyFields = `{
 
 func TestUserConfig(t *testing.T) {
 	cases := []struct {
-		name    string
-		source  string
-		expect  string
-		marshal func(any) (map[string]any, error)
+		name   string
+		source string
+		expect string
+		create bool
 	}{
 		{
-			name:    "fields to create resource",
-			source:  allFields,
-			expect:  allFields,
-			marshal: schemautil.MarshalCreateUserConfig,
+			name:   "fields to create resource",
+			source: allFields,
+			expect: allFields,
+			create: true,
 		},
 		{
-			name:    "only fields to update resource",
-			source:  allFields,
-			expect:  updateOnlyFields, // usually, fewer fields
-			marshal: schemautil.MarshalUpdateUserConfig,
+			name:   "only fields to update resource",
+			source: allFields,
+			expect: updateOnlyFields, // usually, fewer fields
+			create: false,
 		},
 	}
 
@@ -65,7 +65,7 @@ func TestUserConfig(t *testing.T) {
 			require.Empty(t, diags)
 
 			// Run specific marshal (create or update resource)
-			dtoConfig, err := opt.marshal(config)
+			dtoConfig, err := schemautil.MarshalUserConfig(config, opt.create)
 			require.NoError(t, err)
 
 			// Compares that output is strictly equal to the input
