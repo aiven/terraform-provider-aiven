@@ -201,3 +201,11 @@ func DeleteTopicFromCache(projectName, serviceName, topicName string) {
 	}
 	t.Unlock()
 }
+
+// GetFullQueue retrieves a topics queue
+func (t *kafkaTopicCache) GetFullQueue(projectName, serviceName string) []string {
+	t.RLock()
+	defer t.RUnlock()
+
+	return t.inQueue[projectName+serviceName]
+}
