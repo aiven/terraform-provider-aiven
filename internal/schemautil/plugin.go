@@ -98,13 +98,10 @@ func marshalUserConfig(c any, groups ...string) (map[string]any, error) {
 	return m, nil
 }
 
-// MarshalCreateUserConfig returns marshaled user config for Create operation
-func MarshalCreateUserConfig(c any) (map[string]any, error) {
-	return marshalUserConfig(c, "create", "update")
-}
-
-// MarshalUpdateUserConfig returns marshaled user config for Update operation
-func MarshalUpdateUserConfig(c any) (map[string]any, error) {
+func MarshalUserConfig(c any, create bool) (map[string]any, error) {
+	if create {
+		return marshalUserConfig(c, "create", "update")
+	}
 	return marshalUserConfig(c, "update")
 }
 
@@ -150,4 +147,8 @@ func ValueFloat64Pointer(v types.Float64) *float64 {
 		return nil
 	}
 	return v.ValueFloat64Pointer()
+}
+
+func HasValue(o types.Set) bool {
+	return !(o.IsUnknown() || o.IsNull())
 }
