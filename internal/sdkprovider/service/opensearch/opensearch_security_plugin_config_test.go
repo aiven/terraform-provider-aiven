@@ -13,9 +13,6 @@ import (
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
-// openSearchSecurityPluginTestPassword is the password used for the OpenSearch Security Plugin Config tests.
-const openSearchSecurityPluginTestPassword = "ThisIsATest123^=^"
-
 // TestAccAivenOpenSearchSecurityPluginConfig_basic tests the basic functionality of the OpenSearch Security Plugin
 // Config resource.
 func TestAccAivenOpenSearchSecurityPluginConfig_basic(t *testing.T) {
@@ -53,14 +50,14 @@ resource "aiven_opensearch_security_plugin_config" "foo" {
   admin_password = "%s"
 
   depends_on = [aiven_opensearch.bar, aiven_opensearch_user.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), rName, openSearchSecurityPluginTestPassword),
+}`, os.Getenv("AIVEN_PROJECT_NAME"), rName, openSearchTestPassword),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(
 						resourceName, "service_name", fmt.Sprintf("test-acc-sr-os-sec-plugin-%s", rName),
 					),
 					resource.TestCheckResourceAttr(
-						resourceName, "admin_password", openSearchSecurityPluginTestPassword,
+						resourceName, "admin_password", openSearchTestPassword,
 					),
 					resource.TestCheckResourceAttr(resourceName, "available", "true"),
 					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
@@ -88,14 +85,14 @@ resource "aiven_opensearch_security_plugin_config" "foo" {
   admin_password = "%s"
 
   depends_on = [aiven_opensearch.bar]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), rName, openSearchSecurityPluginTestPassword),
+}`, os.Getenv("AIVEN_PROJECT_NAME"), rName, openSearchTestPassword),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(
 						resourceName, "service_name", fmt.Sprintf("test-acc-sr-os-sec-plugin-%s", rName),
 					),
 					resource.TestCheckResourceAttr(
-						resourceName, "admin_password", openSearchSecurityPluginTestPassword,
+						resourceName, "admin_password", openSearchTestPassword,
 					),
 					resource.TestCheckResourceAttr(resourceName, "available", "true"),
 					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
@@ -129,7 +126,7 @@ resource "aiven_opensearch_security_plugin_config" "foo" {
   admin_password = "%s"
 
   depends_on = [aiven_opensearch.bar, aiven_opensearch_user.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), rName, openSearchSecurityPluginTestPassword),
+}`, os.Getenv("AIVEN_PROJECT_NAME"), rName, openSearchTestPassword),
 				ExpectError: regexp.MustCompile("when the OpenSearch Security Plugin is enabled"),
 			},
 		},
