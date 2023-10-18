@@ -164,6 +164,10 @@ Optional:
 - `producer_purgatory_purge_interval_requests` (Number) The purge interval (in number of requests) of the producer request purgatory(defaults to 1000).
 - `replica_fetch_max_bytes` (Number) The number of bytes of messages to attempt to fetch for each partition (defaults to 1048576). This is not an absolute maximum, if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made.
 - `replica_fetch_response_max_bytes` (Number) Maximum bytes expected for the entire fetch response (defaults to 10485760). Records are fetched in batches, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made. As such, this is not an absolute maximum.
+- `sasl_oauthbearer_expected_audience` (String) The (optional) comma-delimited setting for the broker to use to verify that the JWT was issued for one of the expected audiences.
+- `sasl_oauthbearer_expected_issuer` (String) Optional setting for the broker to use to verify that the JWT was created by the expected issuer.
+- `sasl_oauthbearer_jwks_endpoint_url` (String) OIDC JWKS endpoint URL. By setting this the SASL SSL OAuth2/OIDC authentication is enabled. See also other options for SASL OAuth2/OIDC. .
+- `sasl_oauthbearer_sub_claim_name` (String) Name of the scope from which to extract the subject claim from the JWT. Defaults to sub.
 - `socket_request_max_bytes` (Number) The maximum number of bytes in a socket request (defaults to 104857600).
 - `transaction_remove_expired_transaction_cleanup_interval_ms` (Number) The interval at which to remove transactions that have expired due to transactional.id.expiration.ms passing (defaults to 3600000 (1 hour)).
 - `transaction_state_log_segment_bytes` (Number) The transaction topic segment bytes should be kept relatively small in order to facilitate faster log compaction and cache loads (defaults to 104857600 (100 mebibytes)).

@@ -2535,6 +2535,26 @@ func ServiceTypeKafka() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
+				"sasl_oauthbearer_expected_audience": {
+					Description: "The (optional) comma-delimited setting for the broker to use to verify that the JWT was issued for one of the expected audiences.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"sasl_oauthbearer_expected_issuer": {
+					Description: "Optional setting for the broker to use to verify that the JWT was created by the expected issuer.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"sasl_oauthbearer_jwks_endpoint_url": {
+					Description: "OIDC JWKS endpoint URL. By setting this the SASL SSL OAuth2/OIDC authentication is enabled. See also other options for SASL OAuth2/OIDC. .",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"sasl_oauthbearer_sub_claim_name": {
+					Description: "Name of the scope from which to extract the subject claim from the JWT. Defaults to sub.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
 				"socket_request_max_bytes": {
 					Description: "The maximum number of bytes in a socket request (defaults to 104857600).",
 					Optional:    true,
@@ -2741,6 +2761,26 @@ func ServiceTypeKafka() *schema.Schema {
 					Description: "Maximum bytes expected for the entire fetch response (defaults to 10485760). Records are fetched in batches, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made. As such, this is not an absolute maximum.",
 					Optional:    true,
 					Type:        schema.TypeInt,
+				},
+				"sasl_oauthbearer_expected_audience": {
+					Description: "The (optional) comma-delimited setting for the broker to use to verify that the JWT was issued for one of the expected audiences.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"sasl_oauthbearer_expected_issuer": {
+					Description: "Optional setting for the broker to use to verify that the JWT was created by the expected issuer.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"sasl_oauthbearer_jwks_endpoint_url": {
+					Description: "OIDC JWKS endpoint URL. By setting this the SASL SSL OAuth2/OIDC authentication is enabled. See also other options for SASL OAuth2/OIDC. .",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"sasl_oauthbearer_sub_claim_name": {
+					Description: "Name of the scope from which to extract the subject claim from the JWT. Defaults to sub.",
+					Optional:    true,
+					Type:        schema.TypeString,
 				},
 				"socket_request_max_bytes": {
 					Description: "The maximum number of bytes in a socket request (defaults to 104857600).",
