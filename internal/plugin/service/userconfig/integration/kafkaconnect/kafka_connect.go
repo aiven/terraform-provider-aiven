@@ -19,7 +19,7 @@ import (
 // NewResourceSchema returns resource schema
 func NewResourceSchema() resource.SetNestedBlock {
 	return resource.SetNestedBlock{
-		Description: "Integration user config",
+		Description: "KafkaConnect user configurable settings",
 		NestedObject: resource.NestedBlockObject{Blocks: map[string]resource.Block{"kafka_connect": resource.SetNestedBlock{
 			Description: "Kafka Connect service configuration values",
 			NestedObject: resource.NestedBlockObject{Attributes: map[string]resource.Attribute{
@@ -52,7 +52,7 @@ func NewResourceSchema() resource.SetNestedBlock {
 // NewDataSourceSchema returns datasource schema
 func NewDataSourceSchema() datasource.SetNestedBlock {
 	return datasource.SetNestedBlock{
-		Description: "Integration user config",
+		Description: "KafkaConnect user configurable settings",
 		NestedObject: datasource.NestedBlockObject{Blocks: map[string]datasource.Block{"kafka_connect": datasource.SetNestedBlock{
 			Description: "Kafka Connect service configuration values",
 			NestedObject: datasource.NestedBlockObject{Attributes: map[string]datasource.Attribute{
@@ -78,7 +78,7 @@ func NewDataSourceSchema() datasource.SetNestedBlock {
 	}
 }
 
-// tfoUserConfig Integration user config
+// tfoUserConfig KafkaConnect user configurable settings
 type tfoUserConfig struct {
 	KafkaConnect types.Set `tfsdk:"kafka_connect"`
 }
@@ -89,8 +89,8 @@ type dtoUserConfig struct {
 }
 
 // expandUserConfig expands tf object into dto object
-func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
-	kafkaConnectVar := schemautil.ExpandSetBlockNested[tfoKafkaConnect, dtoKafkaConnect](ctx, diags, expandKafkaConnect, o.KafkaConnect)
+func expandUserConfig(ctx context.Context, diags diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
+	kafkaConnectVar := schemautil.ExpandSetBlockNested(ctx, diags, expandKafkaConnect, o.KafkaConnect)
 	if diags.HasError() {
 		return nil
 	}
@@ -98,8 +98,8 @@ func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserCo
 }
 
 // flattenUserConfig flattens dto object into tf object
-func flattenUserConfig(ctx context.Context, diags *diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
-	kafkaConnectVar := schemautil.FlattenSetBlockNested[dtoKafkaConnect, tfoKafkaConnect](ctx, diags, flattenKafkaConnect, kafkaConnectAttrs, o.KafkaConnect)
+func flattenUserConfig(ctx context.Context, diags diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
+	kafkaConnectVar := schemautil.FlattenSetBlockNested(ctx, diags, flattenKafkaConnect, o.KafkaConnect, kafkaConnectAttrs)
 	if diags.HasError() {
 		return nil
 	}
@@ -125,7 +125,7 @@ type dtoKafkaConnect struct {
 }
 
 // expandKafkaConnect expands tf object into dto object
-func expandKafkaConnect(ctx context.Context, diags *diag.Diagnostics, o *tfoKafkaConnect) *dtoKafkaConnect {
+func expandKafkaConnect(ctx context.Context, diags diag.Diagnostics, o *tfoKafkaConnect) *dtoKafkaConnect {
 	return &dtoKafkaConnect{
 		ConfigStorageTopic: schemautil.ValueStringPointer(o.ConfigStorageTopic),
 		GroupId:            schemautil.ValueStringPointer(o.GroupId),
@@ -135,7 +135,7 @@ func expandKafkaConnect(ctx context.Context, diags *diag.Diagnostics, o *tfoKafk
 }
 
 // flattenKafkaConnect flattens dto object into tf object
-func flattenKafkaConnect(ctx context.Context, diags *diag.Diagnostics, o *dtoKafkaConnect) *tfoKafkaConnect {
+func flattenKafkaConnect(ctx context.Context, diags diag.Diagnostics, o *dtoKafkaConnect) *tfoKafkaConnect {
 	return &tfoKafkaConnect{
 		ConfigStorageTopic: types.StringPointerValue(o.ConfigStorageTopic),
 		GroupId:            types.StringPointerValue(o.GroupId),
@@ -152,17 +152,17 @@ var kafkaConnectAttrs = map[string]attr.Type{
 }
 
 // Expand public function that converts tf object into dto
-func Expand(ctx context.Context, diags *diag.Diagnostics, set types.Set) *dtoUserConfig {
+func Expand(ctx context.Context, diags diag.Diagnostics, set types.Set) *dtoUserConfig {
 	return schemautil.ExpandSetBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, set)
 }
 
 // Flatten public function that converts dto into tf object
-func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.Set {
+func Flatten(ctx context.Context, diags diag.Diagnostics, m map[string]any) types.Set {
 	o := new(dtoUserConfig)
 	err := schemautil.MapToDTO(m, o)
 	if err != nil {
-		diags.AddError("failed to marshal map user config to dto", err.Error())
+		diags.AddError("Failed to marshal map user config to dto", err.Error())
 		return types.SetNull(types.ObjectType{AttrTypes: userConfigAttrs})
 	}
-	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
+	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, o, userConfigAttrs)
 }

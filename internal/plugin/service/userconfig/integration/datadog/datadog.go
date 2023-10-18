@@ -20,6 +20,7 @@ import (
 // NewResourceSchema returns resource schema
 func NewResourceSchema() resource.SetNestedBlock {
 	return resource.SetNestedBlock{
+		Description: "Datadog user configurable settings",
 		NestedObject: resource.NestedBlockObject{
 			Attributes: map[string]resource.Attribute{
 				"datadog_dbm_enabled": resource.BoolAttribute{
@@ -122,6 +123,7 @@ func NewResourceSchema() resource.SetNestedBlock {
 // NewDataSourceSchema returns datasource schema
 func NewDataSourceSchema() datasource.SetNestedBlock {
 	return datasource.SetNestedBlock{
+		Description: "Datadog user configurable settings",
 		NestedObject: datasource.NestedBlockObject{
 			Attributes: map[string]datasource.Attribute{
 				"datadog_dbm_enabled": datasource.BoolAttribute{
@@ -208,7 +210,7 @@ func NewDataSourceSchema() datasource.SetNestedBlock {
 	}
 }
 
-// tfoUserConfig
+// tfoUserConfig Datadog user configurable settings
 type tfoUserConfig struct {
 	DatadogDbmEnabled     types.Bool  `tfsdk:"datadog_dbm_enabled"`
 	DatadogTags           types.Set   `tfsdk:"datadog_tags"`
@@ -237,8 +239,8 @@ type dtoUserConfig struct {
 }
 
 // expandUserConfig expands tf object into dto object
-func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
-	datadogTagsVar := schemautil.ExpandSetNested[tfoDatadogTags, dtoDatadogTags](ctx, diags, expandDatadogTags, o.DatadogTags)
+func expandUserConfig(ctx context.Context, diags diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
+	datadogTagsVar := schemautil.ExpandSetNested(ctx, diags, expandDatadogTags, o.DatadogTags)
 	if diags.HasError() {
 		return nil
 	}
@@ -262,11 +264,11 @@ func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserCo
 	if diags.HasError() {
 		return nil
 	}
-	opensearchVar := schemautil.ExpandSetBlockNested[tfoOpensearch, dtoOpensearch](ctx, diags, expandOpensearch, o.Opensearch)
+	opensearchVar := schemautil.ExpandSetBlockNested(ctx, diags, expandOpensearch, o.Opensearch)
 	if diags.HasError() {
 		return nil
 	}
-	redisVar := schemautil.ExpandSetBlockNested[tfoRedis, dtoRedis](ctx, diags, expandRedis, o.Redis)
+	redisVar := schemautil.ExpandSetBlockNested(ctx, diags, expandRedis, o.Redis)
 	if diags.HasError() {
 		return nil
 	}
@@ -285,8 +287,8 @@ func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserCo
 }
 
 // flattenUserConfig flattens dto object into tf object
-func flattenUserConfig(ctx context.Context, diags *diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
-	datadogTagsVar := schemautil.FlattenSetNested[dtoDatadogTags, tfoDatadogTags](ctx, diags, flattenDatadogTags, datadogTagsAttrs, o.DatadogTags)
+func flattenUserConfig(ctx context.Context, diags diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
+	datadogTagsVar := schemautil.FlattenSetNested(ctx, diags, flattenDatadogTags, o.DatadogTags, datadogTagsAttrs)
 	if diags.HasError() {
 		return nil
 	}
@@ -315,11 +317,11 @@ func flattenUserConfig(ctx context.Context, diags *diag.Diagnostics, o *dtoUserC
 	if diags.HasError() {
 		return nil
 	}
-	opensearchVar := schemautil.FlattenSetBlockNested[dtoOpensearch, tfoOpensearch](ctx, diags, flattenOpensearch, opensearchAttrs, o.Opensearch)
+	opensearchVar := schemautil.FlattenSetBlockNested(ctx, diags, flattenOpensearch, o.Opensearch, opensearchAttrs)
 	if diags.HasError() {
 		return nil
 	}
-	redisVar := schemautil.FlattenSetBlockNested[dtoRedis, tfoRedis](ctx, diags, flattenRedis, redisAttrs, o.Redis)
+	redisVar := schemautil.FlattenSetBlockNested(ctx, diags, flattenRedis, o.Redis, redisAttrs)
 	if diags.HasError() {
 		return nil
 	}
@@ -363,7 +365,7 @@ type dtoDatadogTags struct {
 }
 
 // expandDatadogTags expands tf object into dto object
-func expandDatadogTags(ctx context.Context, diags *diag.Diagnostics, o *tfoDatadogTags) *dtoDatadogTags {
+func expandDatadogTags(ctx context.Context, diags diag.Diagnostics, o *tfoDatadogTags) *dtoDatadogTags {
 	return &dtoDatadogTags{
 		Comment: schemautil.ValueStringPointer(o.Comment),
 		Tag:     o.Tag.ValueString(),
@@ -371,7 +373,7 @@ func expandDatadogTags(ctx context.Context, diags *diag.Diagnostics, o *tfoDatad
 }
 
 // flattenDatadogTags flattens dto object into tf object
-func flattenDatadogTags(ctx context.Context, diags *diag.Diagnostics, o *dtoDatadogTags) *tfoDatadogTags {
+func flattenDatadogTags(ctx context.Context, diags diag.Diagnostics, o *dtoDatadogTags) *tfoDatadogTags {
 	return &tfoDatadogTags{
 		Comment: types.StringPointerValue(o.Comment),
 		Tag:     types.StringValue(o.Tag),
@@ -398,7 +400,7 @@ type dtoOpensearch struct {
 }
 
 // expandOpensearch expands tf object into dto object
-func expandOpensearch(ctx context.Context, diags *diag.Diagnostics, o *tfoOpensearch) *dtoOpensearch {
+func expandOpensearch(ctx context.Context, diags diag.Diagnostics, o *tfoOpensearch) *dtoOpensearch {
 	return &dtoOpensearch{
 		IndexStatsEnabled:       schemautil.ValueBoolPointer(o.IndexStatsEnabled),
 		PendingTaskStatsEnabled: schemautil.ValueBoolPointer(o.PendingTaskStatsEnabled),
@@ -407,7 +409,7 @@ func expandOpensearch(ctx context.Context, diags *diag.Diagnostics, o *tfoOpense
 }
 
 // flattenOpensearch flattens dto object into tf object
-func flattenOpensearch(ctx context.Context, diags *diag.Diagnostics, o *dtoOpensearch) *tfoOpensearch {
+func flattenOpensearch(ctx context.Context, diags diag.Diagnostics, o *dtoOpensearch) *tfoOpensearch {
 	return &tfoOpensearch{
 		IndexStatsEnabled:       types.BoolPointerValue(o.IndexStatsEnabled),
 		PendingTaskStatsEnabled: types.BoolPointerValue(o.PendingTaskStatsEnabled),
@@ -432,29 +434,29 @@ type dtoRedis struct {
 }
 
 // expandRedis expands tf object into dto object
-func expandRedis(ctx context.Context, diags *diag.Diagnostics, o *tfoRedis) *dtoRedis {
+func expandRedis(ctx context.Context, diags diag.Diagnostics, o *tfoRedis) *dtoRedis {
 	return &dtoRedis{CommandStatsEnabled: schemautil.ValueBoolPointer(o.CommandStatsEnabled)}
 }
 
 // flattenRedis flattens dto object into tf object
-func flattenRedis(ctx context.Context, diags *diag.Diagnostics, o *dtoRedis) *tfoRedis {
+func flattenRedis(ctx context.Context, diags diag.Diagnostics, o *dtoRedis) *tfoRedis {
 	return &tfoRedis{CommandStatsEnabled: types.BoolPointerValue(o.CommandStatsEnabled)}
 }
 
 var redisAttrs = map[string]attr.Type{"command_stats_enabled": types.BoolType}
 
 // Expand public function that converts tf object into dto
-func Expand(ctx context.Context, diags *diag.Diagnostics, set types.Set) *dtoUserConfig {
+func Expand(ctx context.Context, diags diag.Diagnostics, set types.Set) *dtoUserConfig {
 	return schemautil.ExpandSetBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, set)
 }
 
 // Flatten public function that converts dto into tf object
-func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.Set {
+func Flatten(ctx context.Context, diags diag.Diagnostics, m map[string]any) types.Set {
 	o := new(dtoUserConfig)
 	err := schemautil.MapToDTO(m, o)
 	if err != nil {
-		diags.AddError("failed to marshal map user config to dto", err.Error())
+		diags.AddError("Failed to marshal map user config to dto", err.Error())
 		return types.SetNull(types.ObjectType{AttrTypes: userConfigAttrs})
 	}
-	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
+	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, o, userConfigAttrs)
 }

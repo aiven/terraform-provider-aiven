@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -18,7 +18,7 @@ var (
 	_ datasource.DataSource              = &organizationDataSource{}
 	_ datasource.DataSourceWithConfigure = &organizationDataSource{}
 
-	_ util.TypeNameable = &organizationDataSource{}
+	_ common.TypeNameable = &organizationDataSource{}
 )
 
 // NewOrganizationDataSource is a constructor for the organization data source.
@@ -110,7 +110,7 @@ func (r *organizationDataSource) Configure(
 
 	client, ok := req.ProviderData.(*aiven.Client)
 	if !ok {
-		resp.Diagnostics = util.DiagErrorUnexpectedProviderDataType(resp.Diagnostics, req.ProviderData)
+		resp.Diagnostics = common.DiagErrorUnexpectedProviderDataType(resp.Diagnostics, req.ProviderData)
 
 		return
 	}
@@ -158,14 +158,14 @@ func (r *organizationDataSource) fillModel(ctx context.Context, model *organizat
 func (r *organizationDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state organizationDataSourceModel
 
-	if !util.ConfigToModel(ctx, &req.Config, &state, &resp.Diagnostics) {
+	if !common.ConfigToModel(ctx, &req.Config, &state, &resp.Diagnostics) {
 		return
 	}
 
 	if state.ID.IsNull() {
 		list, err := r.client.Accounts.List(ctx)
 		if err != nil {
-			resp.Diagnostics = util.DiagErrorReadingDataSource(resp.Diagnostics, r, err)
+			resp.Diagnostics = common.DiagErrorReadingDataSource(resp.Diagnostics, r, err)
 
 			return
 		}
@@ -175,7 +175,7 @@ func (r *organizationDataSource) Read(ctx context.Context, req datasource.ReadRe
 		for _, account := range list.Accounts {
 			if account.Name == state.Name.ValueString() {
 				if found {
-					resp.Diagnostics = util.DiagDuplicateFoundByName(resp.Diagnostics, state.Name.ValueString())
+					resp.Diagnostics = common.DiagDuplicateFoundByName(resp.Diagnostics, state.Name.ValueString())
 
 					return
 				}
@@ -189,12 +189,12 @@ func (r *organizationDataSource) Read(ctx context.Context, req datasource.ReadRe
 
 	err := r.fillModel(ctx, &state)
 	if err != nil {
-		resp.Diagnostics = util.DiagErrorReadingDataSource(resp.Diagnostics, r, err)
+		resp.Diagnostics = common.DiagErrorReadingDataSource(resp.Diagnostics, r, err)
 
 		return
 	}
 
-	if !util.ModelToPlanState(ctx, state, &resp.State, &resp.Diagnostics) {
+	if !common.ModelToPlanState(ctx, state, &resp.State, &resp.Diagnostics) {
 		return
 	}
 }

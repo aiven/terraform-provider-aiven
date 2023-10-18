@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -21,7 +21,7 @@ var (
 	_ resource.ResourceWithConfigure   = &organizationResource{}
 	_ resource.ResourceWithImportState = &organizationResource{}
 
-	_ util.TypeNameable = &organizationResource{}
+	_ common.TypeNameable = &organizationResource{}
 )
 
 // NewOrganizationResource is a constructor for the organization resource.
@@ -72,7 +72,7 @@ func (r *organizationResource) TypeName() string {
 
 // Schema defines the schema for the organization resource.
 func (r *organizationResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
+	resp.Schema = common.WithDefaultTimeouts(ctx, schema.Schema{
 		Description: "Creates and manages an organization in Aiven.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -114,7 +114,7 @@ func (r *organizationResource) Configure(
 
 	client, ok := req.ProviderData.(*aiven.Client)
 	if !ok {
-		resp.Diagnostics = util.DiagErrorUnexpectedProviderDataType(resp.Diagnostics, req.ProviderData)
+		resp.Diagnostics = common.DiagErrorUnexpectedProviderDataType(resp.Diagnostics, req.ProviderData)
 
 		return
 	}
@@ -149,7 +149,7 @@ func (r *organizationResource) fillModel(ctx context.Context, model *organizatio
 func (r *organizationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan organizationResourceModel
 
-	if !util.PlanStateToModel(ctx, &req.Plan, &plan, &resp.Diagnostics) {
+	if !common.PlanStateToModel(ctx, &req.Plan, &plan, &resp.Diagnostics) {
 		return
 	}
 
@@ -157,7 +157,7 @@ func (r *organizationResource) Create(ctx context.Context, req resource.CreateRe
 		Name: plan.Name.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics = util.DiagErrorCreatingResource(resp.Diagnostics, r, err)
+		resp.Diagnostics = common.DiagErrorCreatingResource(resp.Diagnostics, r, err)
 
 		return
 	}
@@ -166,12 +166,12 @@ func (r *organizationResource) Create(ctx context.Context, req resource.CreateRe
 
 	err = r.fillModel(ctx, &plan)
 	if err != nil {
-		resp.Diagnostics = util.DiagErrorCreatingResource(resp.Diagnostics, r, err)
+		resp.Diagnostics = common.DiagErrorCreatingResource(resp.Diagnostics, r, err)
 
 		return
 	}
 
-	if !util.ModelToPlanState(ctx, plan, &resp.State, &resp.Diagnostics) {
+	if !common.ModelToPlanState(ctx, plan, &resp.State, &resp.Diagnostics) {
 		return
 	}
 }
@@ -180,18 +180,18 @@ func (r *organizationResource) Create(ctx context.Context, req resource.CreateRe
 func (r *organizationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state organizationResourceModel
 
-	if !util.PlanStateToModel(ctx, &req.State, &state, &resp.Diagnostics) {
+	if !common.PlanStateToModel(ctx, &req.State, &state, &resp.Diagnostics) {
 		return
 	}
 
 	err := r.fillModel(ctx, &state)
 	if err != nil {
-		resp.Diagnostics = util.DiagErrorReadingResource(resp.Diagnostics, r, err)
+		resp.Diagnostics = common.DiagErrorReadingResource(resp.Diagnostics, r, err)
 
 		return
 	}
 
-	if !util.ModelToPlanState(ctx, state, &resp.State, &resp.Diagnostics) {
+	if !common.ModelToPlanState(ctx, state, &resp.State, &resp.Diagnostics) {
 		return
 	}
 }
@@ -200,13 +200,13 @@ func (r *organizationResource) Read(ctx context.Context, req resource.ReadReques
 func (r *organizationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan organizationResourceModel
 
-	if !util.PlanStateToModel(ctx, &req.Plan, &plan, &resp.Diagnostics) {
+	if !common.PlanStateToModel(ctx, &req.Plan, &plan, &resp.Diagnostics) {
 		return
 	}
 
 	normalizedID, err := schemautil.NormalizeOrganizationID(ctx, r.client, plan.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics = util.DiagErrorUpdatingResource(resp.Diagnostics, r, err)
+		resp.Diagnostics = common.DiagErrorUpdatingResource(resp.Diagnostics, r, err)
 
 		return
 	}
@@ -215,19 +215,19 @@ func (r *organizationResource) Update(ctx context.Context, req resource.UpdateRe
 		Name: plan.Name.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics = util.DiagErrorUpdatingResource(resp.Diagnostics, r, err)
+		resp.Diagnostics = common.DiagErrorUpdatingResource(resp.Diagnostics, r, err)
 
 		return
 	}
 
 	err = r.fillModel(ctx, &plan)
 	if err != nil {
-		resp.Diagnostics = util.DiagErrorUpdatingResource(resp.Diagnostics, r, err)
+		resp.Diagnostics = common.DiagErrorUpdatingResource(resp.Diagnostics, r, err)
 
 		return
 	}
 
-	if !util.ModelToPlanState(ctx, plan, &resp.State, &resp.Diagnostics) {
+	if !common.ModelToPlanState(ctx, plan, &resp.State, &resp.Diagnostics) {
 		return
 	}
 }
@@ -236,20 +236,20 @@ func (r *organizationResource) Update(ctx context.Context, req resource.UpdateRe
 func (r *organizationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state organizationResourceModel
 
-	if !util.PlanStateToModel(ctx, &req.State, &state, &resp.Diagnostics) {
+	if !common.PlanStateToModel(ctx, &req.State, &state, &resp.Diagnostics) {
 		return
 	}
 
 	normalizedID, err := schemautil.NormalizeOrganizationID(ctx, r.client, state.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics = util.DiagErrorDeletingResource(resp.Diagnostics, r, err)
+		resp.Diagnostics = common.DiagErrorDeletingResource(resp.Diagnostics, r, err)
 
 		return
 	}
 
 	err = r.client.Accounts.Delete(ctx, normalizedID)
 	if err != nil {
-		resp.Diagnostics = util.DiagErrorDeletingResource(resp.Diagnostics, r, err)
+		resp.Diagnostics = common.DiagErrorDeletingResource(resp.Diagnostics, r, err)
 
 		return
 	}

@@ -21,6 +21,7 @@ import (
 // NewResourceSchema returns resource schema
 func NewResourceSchema() resource.SetNestedBlock {
 	return resource.SetNestedBlock{
+		Description: "Logs user configurable settings",
 		NestedObject: resource.NestedBlockObject{Attributes: map[string]resource.Attribute{
 			"elasticsearch_index_days_max": resource.Int64Attribute{
 				Computed:    true,
@@ -49,6 +50,7 @@ func NewResourceSchema() resource.SetNestedBlock {
 // NewDataSourceSchema returns datasource schema
 func NewDataSourceSchema() datasource.SetNestedBlock {
 	return datasource.SetNestedBlock{
+		Description: "Logs user configurable settings",
 		NestedObject: datasource.NestedBlockObject{Attributes: map[string]datasource.Attribute{
 			"elasticsearch_index_days_max": datasource.Int64Attribute{
 				Computed:    true,
@@ -69,7 +71,7 @@ func NewDataSourceSchema() datasource.SetNestedBlock {
 	}
 }
 
-// tfoUserConfig
+// tfoUserConfig Logs user configurable settings
 type tfoUserConfig struct {
 	ElasticsearchIndexDaysMax types.Int64  `tfsdk:"elasticsearch_index_days_max"`
 	ElasticsearchIndexPrefix  types.String `tfsdk:"elasticsearch_index_prefix"`
@@ -84,7 +86,7 @@ type dtoUserConfig struct {
 }
 
 // expandUserConfig expands tf object into dto object
-func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
+func expandUserConfig(ctx context.Context, diags diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
 	selectedLogFieldsVar := schemautil.ExpandSet[string](ctx, diags, o.SelectedLogFields)
 	if diags.HasError() {
 		return nil
@@ -97,7 +99,7 @@ func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserCo
 }
 
 // flattenUserConfig flattens dto object into tf object
-func flattenUserConfig(ctx context.Context, diags *diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
+func flattenUserConfig(ctx context.Context, diags diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
 	selectedLogFieldsVar, d := types.SetValueFrom(ctx, types.StringType, o.SelectedLogFields)
 	diags.Append(d...)
 	if diags.HasError() {
@@ -117,17 +119,17 @@ var userConfigAttrs = map[string]attr.Type{
 }
 
 // Expand public function that converts tf object into dto
-func Expand(ctx context.Context, diags *diag.Diagnostics, set types.Set) *dtoUserConfig {
+func Expand(ctx context.Context, diags diag.Diagnostics, set types.Set) *dtoUserConfig {
 	return schemautil.ExpandSetBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, set)
 }
 
 // Flatten public function that converts dto into tf object
-func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.Set {
+func Flatten(ctx context.Context, diags diag.Diagnostics, m map[string]any) types.Set {
 	o := new(dtoUserConfig)
 	err := schemautil.MapToDTO(m, o)
 	if err != nil {
-		diags.AddError("failed to marshal map user config to dto", err.Error())
+		diags.AddError("Failed to marshal map user config to dto", err.Error())
 		return types.SetNull(types.ObjectType{AttrTypes: userConfigAttrs})
 	}
-	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
+	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, o, userConfigAttrs)
 }

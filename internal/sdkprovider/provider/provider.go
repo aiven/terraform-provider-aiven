@@ -124,7 +124,6 @@ func Provider(version string) *schema.Provider {
 			"aiven_opensearch_security_plugin_config": opensearch.DatasourceOpenSearchSecurityPluginConfig(),
 
 			// kafka
-			"aiven_kafka":                        kafka.DatasourceKafka(),
 			"aiven_kafka_user":                   kafka.DatasourceKafkaUser(),
 			"aiven_kafka_acl":                    kafka.DatasourceKafkaACL(),
 			"aiven_kafka_schema_registry_acl":    kafkaschema.DatasourceKafkaSchemaRegistryACL(),
@@ -223,7 +222,6 @@ func Provider(version string) *schema.Provider {
 			"aiven_opensearch_security_plugin_config": opensearch.ResourceOpenSearchSecurityPluginConfig(),
 
 			// kafka
-			"aiven_kafka":                        kafka.ResourceKafka(),
 			"aiven_kafka_user":                   kafka.ResourceKafkaUser(),
 			"aiven_kafka_acl":                    kafka.ResourceKafkaACL(),
 			"aiven_kafka_schema_registry_acl":    kafkaschema.ResourceKafkaSchemaRegistryACL(),

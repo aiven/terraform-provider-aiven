@@ -13,6 +13,7 @@ import (
 
 //go:generate go test -tags userconfig ./internal/schemautil/userconfig
 //go:generate go run ./ucgenerator/... --integrations clickhouse_kafka,clickhouse_postgresql,datadog,external_aws_cloudwatch_metrics,kafka_connect,kafka_logs,kafka_mirrormaker,logs,metrics
+//go:generate go run ./ucgenerator/... --services pg,cassandra,elasticsearch,opensearch,grafana,influxdb,redis,mysql,kafka,kafka_connect,kafka_mirrormaker,m3db,m3aggregator,flink,clickhouse
 
 // version is the version of the provider.
 var version = "dev"

@@ -21,7 +21,7 @@ import (
 // NewResourceSchema returns resource schema
 func NewResourceSchema() resource.SetNestedBlock {
 	return resource.SetNestedBlock{
-		Description: "Integration user config",
+		Description: "ClickhouseKafka user configurable settings",
 		NestedObject: resource.NestedBlockObject{Blocks: map[string]resource.Block{"tables": resource.SetNestedBlock{
 			Description: "Tables to create",
 			NestedObject: resource.NestedBlockObject{
@@ -121,7 +121,7 @@ func NewResourceSchema() resource.SetNestedBlock {
 // NewDataSourceSchema returns datasource schema
 func NewDataSourceSchema() datasource.SetNestedBlock {
 	return datasource.SetNestedBlock{
-		Description: "Integration user config",
+		Description: "ClickhouseKafka user configurable settings",
 		NestedObject: datasource.NestedBlockObject{Blocks: map[string]datasource.Block{"tables": datasource.SetNestedBlock{
 			Description: "Tables to create",
 			NestedObject: datasource.NestedBlockObject{
@@ -202,7 +202,7 @@ func NewDataSourceSchema() datasource.SetNestedBlock {
 	}
 }
 
-// tfoUserConfig Integration user config
+// tfoUserConfig ClickhouseKafka user configurable settings
 type tfoUserConfig struct {
 	Tables types.Set `tfsdk:"tables"`
 }
@@ -213,8 +213,8 @@ type dtoUserConfig struct {
 }
 
 // expandUserConfig expands tf object into dto object
-func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
-	tablesVar := schemautil.ExpandSetNested[tfoTables, dtoTables](ctx, diags, expandTables, o.Tables)
+func expandUserConfig(ctx context.Context, diags diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
+	tablesVar := schemautil.ExpandSetNested(ctx, diags, expandTables, o.Tables)
 	if diags.HasError() {
 		return nil
 	}
@@ -222,8 +222,8 @@ func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserCo
 }
 
 // flattenUserConfig flattens dto object into tf object
-func flattenUserConfig(ctx context.Context, diags *diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
-	tablesVar := schemautil.FlattenSetNested[dtoTables, tfoTables](ctx, diags, flattenTables, tablesAttrs, o.Tables)
+func flattenUserConfig(ctx context.Context, diags diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
+	tablesVar := schemautil.FlattenSetNested(ctx, diags, flattenTables, o.Tables, tablesAttrs)
 	if diags.HasError() {
 		return nil
 	}
@@ -267,12 +267,12 @@ type dtoTables struct {
 }
 
 // expandTables expands tf object into dto object
-func expandTables(ctx context.Context, diags *diag.Diagnostics, o *tfoTables) *dtoTables {
-	columnsVar := schemautil.ExpandSetNested[tfoColumns, dtoColumns](ctx, diags, expandColumns, o.Columns)
+func expandTables(ctx context.Context, diags diag.Diagnostics, o *tfoTables) *dtoTables {
+	columnsVar := schemautil.ExpandSetNested(ctx, diags, expandColumns, o.Columns)
 	if diags.HasError() {
 		return nil
 	}
-	topicsVar := schemautil.ExpandSetNested[tfoTopics, dtoTopics](ctx, diags, expandTopics, o.Topics)
+	topicsVar := schemautil.ExpandSetNested(ctx, diags, expandTopics, o.Topics)
 	if diags.HasError() {
 		return nil
 	}
@@ -294,12 +294,12 @@ func expandTables(ctx context.Context, diags *diag.Diagnostics, o *tfoTables) *d
 }
 
 // flattenTables flattens dto object into tf object
-func flattenTables(ctx context.Context, diags *diag.Diagnostics, o *dtoTables) *tfoTables {
-	columnsVar := schemautil.FlattenSetNested[dtoColumns, tfoColumns](ctx, diags, flattenColumns, columnsAttrs, o.Columns)
+func flattenTables(ctx context.Context, diags diag.Diagnostics, o *dtoTables) *tfoTables {
+	columnsVar := schemautil.FlattenSetNested(ctx, diags, flattenColumns, o.Columns, columnsAttrs)
 	if diags.HasError() {
 		return nil
 	}
-	topicsVar := schemautil.FlattenSetNested[dtoTopics, tfoTopics](ctx, diags, flattenTopics, topicsAttrs, o.Topics)
+	topicsVar := schemautil.FlattenSetNested(ctx, diags, flattenTopics, o.Topics, topicsAttrs)
 	if diags.HasError() {
 		return nil
 	}
@@ -349,7 +349,7 @@ type dtoColumns struct {
 }
 
 // expandColumns expands tf object into dto object
-func expandColumns(ctx context.Context, diags *diag.Diagnostics, o *tfoColumns) *dtoColumns {
+func expandColumns(ctx context.Context, diags diag.Diagnostics, o *tfoColumns) *dtoColumns {
 	return &dtoColumns{
 		Name: o.Name.ValueString(),
 		Type: o.Type.ValueString(),
@@ -357,7 +357,7 @@ func expandColumns(ctx context.Context, diags *diag.Diagnostics, o *tfoColumns) 
 }
 
 // flattenColumns flattens dto object into tf object
-func flattenColumns(ctx context.Context, diags *diag.Diagnostics, o *dtoColumns) *tfoColumns {
+func flattenColumns(ctx context.Context, diags diag.Diagnostics, o *dtoColumns) *tfoColumns {
 	return &tfoColumns{
 		Name: types.StringValue(o.Name),
 		Type: types.StringValue(o.Type),
@@ -380,29 +380,29 @@ type dtoTopics struct {
 }
 
 // expandTopics expands tf object into dto object
-func expandTopics(ctx context.Context, diags *diag.Diagnostics, o *tfoTopics) *dtoTopics {
+func expandTopics(ctx context.Context, diags diag.Diagnostics, o *tfoTopics) *dtoTopics {
 	return &dtoTopics{Name: o.Name.ValueString()}
 }
 
 // flattenTopics flattens dto object into tf object
-func flattenTopics(ctx context.Context, diags *diag.Diagnostics, o *dtoTopics) *tfoTopics {
+func flattenTopics(ctx context.Context, diags diag.Diagnostics, o *dtoTopics) *tfoTopics {
 	return &tfoTopics{Name: types.StringValue(o.Name)}
 }
 
 var topicsAttrs = map[string]attr.Type{"name": types.StringType}
 
 // Expand public function that converts tf object into dto
-func Expand(ctx context.Context, diags *diag.Diagnostics, set types.Set) *dtoUserConfig {
+func Expand(ctx context.Context, diags diag.Diagnostics, set types.Set) *dtoUserConfig {
 	return schemautil.ExpandSetBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, set)
 }
 
 // Flatten public function that converts dto into tf object
-func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.Set {
+func Flatten(ctx context.Context, diags diag.Diagnostics, m map[string]any) types.Set {
 	o := new(dtoUserConfig)
 	err := schemautil.MapToDTO(m, o)
 	if err != nil {
-		diags.AddError("failed to marshal map user config to dto", err.Error())
+		diags.AddError("Failed to marshal map user config to dto", err.Error())
 		return types.SetNull(types.ObjectType{AttrTypes: userConfigAttrs})
 	}
-	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
+	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, o, userConfigAttrs)
 }

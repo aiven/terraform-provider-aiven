@@ -12,6 +12,7 @@ import (
 
 	"github.com/aiven/go-api-schemas/pkg/dist"
 	"github.com/dave/jennifer/jen"
+	"github.com/stoewer/go-strcase"
 	"golang.org/x/exp/slices"
 	"golang.org/x/tools/imports"
 	"gopkg.in/yaml.v3"
@@ -71,7 +72,10 @@ func generate(kind string, data []byte, keys []string) error {
 
 		pkgName := strings.ReplaceAll(key, "_", "")
 		o.isRoot = true
-		o.init("UserConfig")
+		o.init("UserConfig", make(map[string]int))
+		if o.Description == "" {
+			o.Description = strcase.UpperCamelCase(key) + " user configurable settings"
+		}
 
 		// Generates file
 		f := jen.NewFile(pkgName)
@@ -126,9 +130,9 @@ func genAllForObject(f *jen.File, o *object) {
 	genFlattener(f, o)
 	genAttrsMap(f, o)
 
-	for _, p := range o.properties {
+	for _, p := range o.ListProperties() {
 		if p.isNestedBlock() {
-			if p.Type == objectTypeArray {
+			if p.isArray() {
 				genAllForObject(f, p.ArrayItems)
 			} else {
 				genAllForObject(f, p)
@@ -143,61 +147,43 @@ func genAllForObject(f *jen.File, o *object) {
 	// Exports handy public functions for root object only
 	f.Op(`
 // Expand public function that converts tf object into dto
-func Expand(ctx context.Context, diags *diag.Diagnostics, set types.Set) *dtoUserConfig {
+func Expand(ctx context.Context, diags diag.Diagnostics, set types.Set) *dtoUserConfig {
 	return schemautil.ExpandSetBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, set)
 }
 
 // Flatten public function that converts dto into tf object
-func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.Set {
+func Flatten(ctx context.Context, diags diag.Diagnostics, m map[string]any) types.Set {
 	o := new(dtoUserConfig)
 	err := schemautil.MapToDTO(m, o)
 	if err != nil {
-		diags.AddError("failed to marshal map user config to dto", err.Error())
+		diags.AddError("Failed to marshal map user config to dto", err.Error())
 		return types.SetNull(types.ObjectType{AttrTypes: userConfigAttrs})
 	}
-	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
+	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, o, userConfigAttrs)
 }
 `)
 }
 
-// genExpander creates function that unwraps TF object into json
+// genExpander creates a function that unwraps TF object into json
 func genExpander(f *jen.File, o *object) {
 	body := make([]jen.Code, 0)
 	props := jen.Dict{}
-	for _, p := range o.properties {
-		var value *jen.Statement
-		switch p.Type {
-		case objectTypeObject:
-			value = jen.Op(p.varName)
-			v := jen.Id(p.varName).Op(":=").Qual(importSchemautil, "ExpandSetBlockNested").Types(jen.Id(p.tfoStructName), jen.Id(p.dtoStructName)).Call(
+
+	for _, p := range o.ListProperties() {
+		value := jen.Op(p.varName)
+		switch {
+		case p.isNestedBlock():
+			body = append(body, varConverter(p, "expand"), ifErr())
+		case p.isArray():
+			// It is a list of scalars
+			// We don't want pointer scalars here
+			t := strings.ReplaceAll(getDTOType(p.ArrayItems), "*", "")
+			v := jen.Id(p.varName).Op(":=").Qual(importSchemautil, "ExpandSet").Types(jen.Id(t)).Call(
 				jen.Id("ctx"),
 				jen.Id("diags"),
-				jen.Id("expand"+p.camelName),
 				jen.Id("o").Dot(p.camelName),
 			)
 			body = append(body, v, ifErr())
-		case objectTypeArray:
-			value = jen.Op(p.varName)
-			if p.ArrayItems.Type == objectTypeObject {
-				// It is a list of objects
-				v := jen.Id(p.varName).Op(":=").Qual(importSchemautil, "ExpandSetNested").Types(jen.Id(p.tfoStructName), jen.Id(p.dtoStructName)).Call(
-					jen.Id("ctx"),
-					jen.Id("diags"),
-					jen.Id("expand"+p.camelName),
-					jen.Id("o").Dot(p.camelName),
-				)
-				body = append(body, v, ifErr())
-			} else {
-				// It is a list of scalars
-				// We don't want pointer scalars here
-				t := strings.ReplaceAll(getDTOType(p.ArrayItems), "*", "")
-				v := jen.Id(p.varName).Op(":=").Qual(importSchemautil, "ExpandSet").Types(jen.Id(t)).Call(
-					jen.Id("ctx"),
-					jen.Id("diags"),
-					jen.Id("o").Dot(p.camelName),
-				)
-				body = append(body, v, ifErr())
-			}
 		default:
 			if p.Required {
 				value = jen.Id("o").Dot(p.camelName).Dot(getTFTypeToValue(p)).Call()
@@ -211,126 +197,124 @@ func genExpander(f *jen.File, o *object) {
 	}
 
 	// Function body + return statement
-	body = append(
-		body,
-		jen.Return(jen.Id("&"+o.dtoStructName).Values(props)),
-	)
+	body = append(body, jen.Return(jen.Id("&"+o.dtoStructName).Values(props)))
 
 	funcName := "expand" + o.camelName
 	f.Comment(funcName + " expands tf object into dto object")
 	f.Func().Id(funcName).Params(
 		jen.Id("ctx").Qual("context", "Context"),
-		jen.Id("diags").Op("*").Qual(importDiag, "Diagnostics"),
+		jen.Id("diags").Qual(importDiag, "Diagnostics"),
 		jen.Id("o").Op("*"+o.tfoStructName),
 	).Id("*" + o.dtoStructName).Block(body...)
 }
 
-// genFlattener creates function that unwraps json into TF object
+// genFlattener creates a function that unwraps json into TF object
 func genFlattener(f *jen.File, o *object) {
 	body := make([]jen.Code, 0)
 	props := jen.Dict{}
-	for _, p := range o.properties {
-		var value *jen.Statement
-		switch p.Type {
-		case objectTypeObject:
-			value = jen.Op(p.varName)
-			v := jen.Id(p.varName).Op(":=").Qual(importSchemautil, "FlattenSetBlockNested").Types(jen.Id(p.dtoStructName), jen.Id(p.tfoStructName)).Call(
+
+	for _, p := range o.ListProperties() {
+		value := jen.Op(p.varName)
+		switch {
+		case p.isNestedBlock():
+			body = append(body, varConverter(p, "flatten"), ifErr())
+		case p.isArray():
+			//It is a list of scalars
+			v := jen.List(jen.Id(p.varName), jen.Id("d")).Op(":=").Qual(importTypes, "SetValueFrom").Call(
 				jen.Id("ctx"),
-				jen.Id("diags"),
-				jen.Id("flatten"+p.camelName),
-				jen.Id(p.attrsName),
+				jen.Qual(importTypes, getTFType(p.ArrayItems)+"Type"),
 				jen.Id("o").Dot(p.camelName),
 			)
-			body = append(body, v, ifErr())
-		case objectTypeArray:
-			value = jen.Op(p.varName)
-			if p.ArrayItems.Type == objectTypeObject {
-				// It is a list of objects
-				v := jen.Id(p.varName).Op(":=").Qual(importSchemautil, "FlattenSetNested").Types(jen.Id(p.dtoStructName), jen.Id(p.tfoStructName)).Call(
-					jen.Id("ctx"),
-					jen.Id("diags"),
-					jen.Id("flatten"+p.camelName),
-					jen.Id(p.attrsName),
-					jen.Id("o").Dot(p.camelName),
-				)
-				body = append(body, v, ifErr())
-			} else {
-				//It is a list of scalars
-				v := jen.List(jen.Id(p.varName), jen.Id("d")).Op(":=").Qual(importTypes, "SetValueFrom").Call(
-					jen.Id("ctx"),
-					jen.Qual(importTypes, getTFType(p.ArrayItems)+"Type"),
-					jen.Id("o").Dot(p.camelName),
-				)
-				body = append(
-					body,
-					v,
-					jen.Id("diags").Dot("Append").Call(jen.Id("d").Op("...")),
-					ifErr(),
-				)
-			}
+			body = append(
+				body,
+				v,
+				jen.Id("diags").Dot("Append").Call(jen.Id("d").Op("...")),
+				ifErr(),
+			)
 		default:
 			value = jen.Qual(importTypes, getTFTypeFromValue(p)).Call(jen.Id("o").Dot(p.camelName))
-		}
-
-		if value == nil {
-			continue
 		}
 
 		props[jen.Id(p.camelName)] = value
 	}
 
 	// Function body + return statement
-	body = append(
-		body,
-		jen.Return(jen.Id("&"+o.tfoStructName).Values(props)),
-	)
+	body = append(body, jen.Return(jen.Id("&"+o.tfoStructName).Values(props)))
 
 	funcName := "flatten" + o.camelName
 	f.Comment(funcName + " flattens dto object into tf object")
 	f.Func().Id(funcName).Params(
 		jen.Id("ctx").Qual("context", "Context"),
-		jen.Id("diags").Op("*").Qual(importDiag, "Diagnostics"),
+		jen.Id("diags").Qual(importDiag, "Diagnostics"),
 		jen.Id("o").Op("*"+o.dtoStructName),
 	).Id("*" + o.tfoStructName).Block(body...)
 }
 
-// genAttrsMap creates attributes map for Flatten functions to "unwrap" response json into TF object
+// varConverter makes a string like:
+// publicAccessVar := schemautil.FlattenSetBlockNested(ctx, diags, flattenPublicAccess, o.PublicAccess, publicAccessAttrs)
+func varConverter(o *object, action string) *jen.Statement {
+	args := []jen.Code{
+		jen.Id("ctx"),
+		jen.Id("diags"),
+		jen.Id(action + o.camelName),
+		jen.Id("o").Dot(o.camelName),
+	}
+
+	var f string
+	switch {
+	case action == "expand":
+		f = "ExpandSetNested"
+		if o.isObject() {
+			f = "ExpandSetBlockNested"
+		}
+	default:
+		f = "FlattenSetNested"
+		args = append(args, jen.Id(o.attrsName))
+		if o.isObject() {
+			f = "FlattenSetBlockNested"
+		}
+	}
+
+	return jen.Id(o.varName).Op(":=").Qual(importSchemautil, f).Call(args...)
+}
+
+// genAttrsMap creates an attribute map for Flatten functions to "unwrap" response json into TF object
 func genAttrsMap(f *jen.File, o *object) {
 	values := jen.Dict{}
-	for _, p := range o.properties {
+	for _, p := range o.ListProperties() {
 		key := jen.Lit(p.tfName)
-		switch p.Type {
-		case objectTypeArray, objectTypeObject:
-			var v jen.Code
-			if p.isNestedBlock() {
-				v = jen.Qual(importTypes, "ObjectType").Values(jen.Dict{
-					jen.Id("AttrTypes"): jen.Id(p.attrsName),
-				})
-			} else {
-				v = jen.Qual(importTypes, getTFType(p.ArrayItems)+"Type")
-			}
-			values[key] = jen.Qual(importTypes, "SetType").Values(jen.Dict{jen.Id("ElemType"): v})
-		default:
+		if p.isScalar() {
 			values[key] = jen.Qual(importTypes, getTFType(p)+"Type")
+			continue
 		}
+
+		var v jen.Code
+		if p.isNestedBlock() {
+			v = jen.Qual(importTypes, "ObjectType").Values(jen.Dict{
+				jen.Id("AttrTypes"): jen.Id(p.attrsName),
+			})
+		} else {
+			v = jen.Qual(importTypes, getTFType(p.ArrayItems)+"Type")
+		}
+		values[key] = jen.Qual(importTypes, "SetType").Values(jen.Dict{jen.Id("ElemType"): v})
 	}
 	f.Var().Id(o.attrsName).Op("=").Map(jen.String()).Qual(importAttr, "Type").Values(values)
 }
 
-// genTFObject creates TF object (for plan)
+// genTFObject creates a TF object (for plan)
 func genTFObject(f *jen.File, o *object) {
 	fields := make([]jen.Code, 0)
-	for _, p := range o.properties {
+	for _, p := range o.ListProperties() {
 		fields = append(fields, jen.Id(p.camelName).Qual(importTypes, getTFType(p)).Tag(map[string]string{"tfsdk": p.tfName}))
 	}
 	f.Comment(fmt.Sprintf("%s %s", o.tfoStructName, getDescription(o)))
 	f.Type().Id(o.tfoStructName).Struct(fields...)
 }
 
-// genDTOObject creates DTO object to send over HTTP
+// genDTOObject creates a DTO object to send over HTTP
 func genDTOObject(f *jen.File, o *object) {
 	fields := make([]jen.Code, 0)
-	for _, p := range o.properties {
+	for _, p := range o.ListProperties() {
 		tags := map[string]string{"json": p.jsonName, "groups": "create"}
 		if !p.Required {
 			tags["json"] += ",omitempty"
@@ -342,6 +326,10 @@ func genDTOObject(f *jen.File, o *object) {
 	}
 	f.Comment(o.dtoStructName + " request/response object")
 	f.Type().Id(o.dtoStructName).Struct(fields...)
+
+	if o.jsonName == "ip_filter" {
+		f.Add(jen.Op(strings.ReplaceAll(ipFilterUnmarshal, "|", "`")))
+	}
 }
 
 // genSchema generates TF schema. For root object only, i.e. RedisUserConfig
@@ -362,13 +350,7 @@ func getSchemaAttributes(o *object, pkg string) jen.Code {
 	blocks := jen.Dict{}
 	attribs := jen.Dict{}
 
-	// Array properties are its item properties
-	properties := o.properties
-	if o.Type == objectTypeArray {
-		properties = o.ArrayItems.properties
-	}
-
-	for _, p := range properties {
+	for _, p := range o.ListProperties() {
 		key := jen.Lit(p.tfName)
 		if p.isNestedBlock() {
 			blocks[key] = getSchemaAttributes(p, pkg)
@@ -384,7 +366,9 @@ func getSchemaAttributes(o *object, pkg string) jen.Code {
 			}
 
 			values := getSchemaAttributeValues(p, isResource)
-			values[jen.Id("ElementType")] = value
+			if value != nil {
+				values[jen.Id("ElementType")] = value
+			}
 			attribs[jen.Lit(p.tfName)] = jen.Qual(pkg, getTFType(p)+"Attribute").Values(values)
 		}
 	}
@@ -466,7 +450,7 @@ func getTFType(o *object) string {
 	case objectTypeNumber:
 		return "Float64"
 	}
-	panic(fmt.Sprintf("Unknown type for %q", o.jsonName))
+	panic(fmt.Sprintf("Unknown type for %q, original type is %v", o.jsonName, o.OrigType))
 }
 
 func getTFTypeToValue(o *object) string {
@@ -496,7 +480,7 @@ func getDTOType(o *object) string {
 		return "*" + o.dtoStructName
 	case objectTypeArray:
 		t := "[]" + getDTOType(o.ArrayItems)
-		if o.ArrayItems.Type == objectTypeObject {
+		if o.ArrayItems.isObject() {
 			return t
 		}
 		// We don't want pointer scalars in slice
@@ -544,11 +528,13 @@ func getDescription(o *object) string {
 		d = o.Title
 	}
 
+	// Comes from the schema, quite confusing
+	d = strings.TrimSuffix(d, "The default value is `map[]`.")
 	if d != "" {
 		desc = append(desc, addDot(d))
 	}
 
-	if o.Default != nil && o.Type != objectTypeArray {
+	if o.isScalar() && o.Default != nil {
 		desc = append(desc, fmt.Sprintf("The default value is `%v`.", o.Default))
 	}
 
@@ -595,3 +581,28 @@ func ifErr() *jen.Statement {
 func toPtr[T any](v T) *T {
 	return &v
 }
+
+const ipFilterUnmarshal = `
+func (d *dtoIpFilter) UnmarshalJSON(data []byte) error {
+	var s string
+	err := json.Unmarshal(data, &s)
+	if err == nil {
+		d.Network = s
+		return nil
+	}
+
+	type obj dtoIpFilter
+	o := &struct {
+		Description *string |groups:"create,update" json:"description,omitempty"|
+		Network     string  |groups:"create,update" json:"network"|
+	}{}
+	err = json.Unmarshal(data, o)
+	if err != nil {
+		return err 
+	}
+	
+	d.Description = o.Description
+	d.Network = o.Network
+	return nil
+}
+`

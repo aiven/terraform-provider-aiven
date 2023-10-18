@@ -8,8 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/jinzhu/copier"
 
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/userconfig/integration/clickhousekafka"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/userconfig/integration/clickhousepostgresql"
@@ -76,10 +76,7 @@ func (s *serviceIntegrationDataSource) Schema(_ context.Context, _ datasource.Sc
 					stringvalidator.OneOf(integrationTypes()...),
 				},
 			},
-			"project": schema.StringAttribute{
-				Description: "Project the integration belongs to",
-				Required:    true,
-			},
+			"project": common.ProjectString(),
 			"source_endpoint_id": schema.StringAttribute{
 				Description: "Source endpoint for the integration (if any)",
 				Computed:    true,
@@ -114,27 +111,20 @@ func (s *serviceIntegrationDataSource) Read(ctx context.Context, req datasource.
 		return
 	}
 
-	var res resourceModel
-	err := copier.Copy(&res, &o)
-	if err != nil {
-		resp.Diagnostics.AddError("data config copy error", err.Error())
-	}
+	var r resourceModel
+	copyBack := common.Copy(&o, &r)
 
-	dto, err := getSIByName(ctx, s.client, &res)
+	dto, err := getSIByName(ctx, s.client, &r)
 	if err != nil {
 		resp.Diagnostics.AddError(errmsg.SummaryErrorReadingResource, err.Error())
 		return
 	}
 
-	loadFromDTO(ctx, &resp.Diagnostics, &res, dto)
+	loadFromDTO(ctx, resp.Diagnostics, &r, dto)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	err = copier.Copy(&o, &res)
-	if err != nil {
-		resp.Diagnostics.AddError("dto copy error", err.Error())
-	}
-
+	copyBack()
 	resp.Diagnostics.Append(resp.State.Set(ctx, o)...)
 }

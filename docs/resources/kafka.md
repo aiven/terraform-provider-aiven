@@ -46,7 +46,7 @@ resource "aiven_kafka" "kafka1" {
 ### Required
 
 - `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) Identifies the project this resource belongs to.
 - `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Optional
@@ -54,13 +54,11 @@ resource "aiven_kafka" "kafka1" {
 - `additional_disk_space` (String) Additional disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 - `default_acl` (Boolean) Create default wildcard Kafka ACL
-- `disk_space` (String, Deprecated) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
-- `kafka_user_config` (Block List, Max: 1) Kafka user configurable settings (see [below for nested schema](#nestedblock--kafka_user_config))
-- `karapace` (Boolean, Deprecated) Switch the service to use Karapace for schema registry and REST proxy
+- `kafka_user_config` (Block Set) Kafka user configurable settings (see [below for nested schema](#nestedblock--kafka_user_config))
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
 - `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
-- `service_integrations` (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
+- `service_integrations` (Block Set) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
 - `static_ips` (Set of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 - `tag` (Block Set) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedblock--tag))
 - `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
@@ -68,13 +66,13 @@ resource "aiven_kafka" "kafka1" {
 
 ### Read-Only
 
-- `components` (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
+- `components` (Block Set) Service component information objects (see [below for nested schema](#nestedblock--components))
 - `disk_space_cap` (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
 - `disk_space_default` (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) Disk space that service is currently using
 - `id` (String) The ID of this resource.
-- `kafka` (List of Object) Kafka server provided values (see [below for nested schema](#nestedatt--kafka))
+- `kafka` (Block Set) Kafka server provided values (see [below for nested schema](#nestedblock--kafka))
 - `service_host` (String) The hostname of the service.
 - `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
 - `service_port` (Number) The port of the service
@@ -88,29 +86,27 @@ resource "aiven_kafka" "kafka1" {
 
 Optional:
 
-- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
+- `additional_backup_regions` (Set of String) Additional Cloud Regions for Backup Replication.
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
-- `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'. (see [below for nested schema](#nestedblock--kafka_user_config--ip_filter_object))
-- `ip_filter_string` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `kafka` (Block List, Max: 1) Kafka broker configuration values. (see [below for nested schema](#nestedblock--kafka_user_config--kafka))
-- `kafka_authentication_methods` (Block List, Max: 1) Kafka authentication methods. (see [below for nested schema](#nestedblock--kafka_user_config--kafka_authentication_methods))
+- `ip_filter` (Block Set) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--kafka_user_config--ip_filter))
+- `kafka` (Block Set) Kafka broker configuration values (see [below for nested schema](#nestedblock--kafka_user_config--kafka))
+- `kafka_authentication_methods` (Block Set) Kafka authentication methods (see [below for nested schema](#nestedblock--kafka_user_config--kafka_authentication_methods))
 - `kafka_connect` (Boolean) Enable Kafka Connect service. The default value is `false`.
-- `kafka_connect_config` (Block List, Max: 1) Kafka Connect configuration values. (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_config))
+- `kafka_connect_config` (Block Set) Kafka Connect configuration values (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_config))
 - `kafka_rest` (Boolean) Enable Kafka-REST service. The default value is `false`.
 - `kafka_rest_authorization` (Boolean) Enable authorization in Kafka-REST service.
-- `kafka_rest_config` (Block List, Max: 1) Kafka REST configuration. (see [below for nested schema](#nestedblock--kafka_user_config--kafka_rest_config))
+- `kafka_rest_config` (Block Set) Kafka REST configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_rest_config))
 - `kafka_version` (String) Kafka major version.
-- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks. (see [below for nested schema](#nestedblock--kafka_user_config--private_access))
-- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink. (see [below for nested schema](#nestedblock--kafka_user_config--privatelink_access))
-- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet. (see [below for nested schema](#nestedblock--kafka_user_config--public_access))
+- `private_access` (Block Set) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--kafka_user_config--private_access))
+- `privatelink_access` (Block Set) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--kafka_user_config--privatelink_access))
+- `public_access` (Block Set) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--kafka_user_config--public_access))
 - `schema_registry` (Boolean) Enable Schema-Registry service. The default value is `false`.
-- `schema_registry_config` (Block List, Max: 1) Schema Registry configuration. (see [below for nested schema](#nestedblock--kafka_user_config--schema_registry_config))
+- `schema_registry_config` (Block Set) Schema Registry configuration (see [below for nested schema](#nestedblock--kafka_user_config--schema_registry_config))
 - `static_ips` (Boolean) Use static public IP addresses.
-- `tiered_storage` (Block List, Max: 1) Tiered storage configuration. (see [below for nested schema](#nestedblock--kafka_user_config--tiered_storage))
+- `tiered_storage` (Block Set) Tiered storage configuration (see [below for nested schema](#nestedblock--kafka_user_config--tiered_storage))
 
-<a id="nestedblock--kafka_user_config--ip_filter_object"></a>
-### Nested Schema for `kafka_user_config.ip_filter_object`
+<a id="nestedblock--kafka_user_config--ip_filter"></a>
+### Nested Schema for `kafka_user_config.ip_filter`
 
 Required:
 
@@ -133,7 +129,7 @@ Optional:
 - `group_initial_rebalance_delay_ms` (Number) The amount of time, in milliseconds, the group coordinator will wait for more consumers to join a new group before performing the first rebalance. A longer delay means potentially fewer rebalances, but increases the time until processing begins. The default value for this is 3 seconds. During development and testing it might be desirable to set this to 0 in order to not delay test execution time.
 - `group_max_session_timeout_ms` (Number) The maximum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures.
 - `group_min_session_timeout_ms` (Number) The minimum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures.
-- `log_cleaner_delete_retention_ms` (Number) How long are delete records retained?.
+- `log_cleaner_delete_retention_ms` (Number) How long are delete records retained?
 - `log_cleaner_max_compaction_lag_ms` (Number) The maximum amount of time message will remain uncompacted. Only applicable for logs that are being compacted.
 - `log_cleaner_min_cleanable_ratio` (Number) Controls log compactor frequency. Larger value means more frequent compactions but also more space wasted for logs. Consider setting log.cleaner.max.compaction.lag.ms to enforce compactions sooner, instead of setting a very high value for this option.
 - `log_cleaner_min_compaction_lag_ms` (Number) The minimum time a message will remain uncompacted in the log. Only applicable for logs that are being compacted.
@@ -147,7 +143,7 @@ Optional:
 - `log_message_downconversion_enable` (Boolean) This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. .
 - `log_message_timestamp_difference_max_ms` (Number) The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message.
 - `log_message_timestamp_type` (String) Define whether the timestamp in the message is message create time or log append time.
-- `log_preallocate` (Boolean) Should pre allocate file when create new segment?.
+- `log_preallocate` (Boolean) Should pre allocate file when create new segment?
 - `log_retention_bytes` (Number) The maximum size of the log before deleting messages.
 - `log_retention_hours` (Number) The number of hours to keep a log file before deleting it.
 - `log_retention_ms` (Number) The number of milliseconds to keep a log file before deleting it (in milliseconds), If not set, the value in log.retention.minutes is used. If set to -1, no time limit is applied.
@@ -272,14 +268,14 @@ Optional:
 Optional:
 
 - `enabled` (Boolean) Whether to enable the tiered storage functionality.
-- `local_cache` (Block List, Max: 1) Local cache configuration. (see [below for nested schema](#nestedblock--kafka_user_config--tiered_storage--local_cache))
+- `local_cache` (Block Set, Deprecated) Local cache configuration (see [below for nested schema](#nestedblock--kafka_user_config--tiered_storage--local_cache))
 
 <a id="nestedblock--kafka_user_config--tiered_storage--local_cache"></a>
 ### Nested Schema for `kafka_user_config.tiered_storage.local_cache`
 
 Optional:
 
-- `size` (Number) Local cache size in bytes.
+- `size` (Number, Deprecated) Local cache size in bytes.
 
 
 
@@ -307,37 +303,36 @@ Required:
 
 Optional:
 
-- `create` (String)
-- `default` (String)
-- `delete` (String)
-- `read` (String)
-- `update` (String)
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
 
-<a id="nestedatt--components"></a>
+<a id="nestedblock--components"></a>
 ### Nested Schema for `components`
 
 Read-Only:
 
-- `component` (String)
-- `host` (String)
-- `kafka_authentication_method` (String)
-- `port` (Number)
-- `route` (String)
-- `ssl` (Boolean)
-- `usage` (String)
+- `component` (String) Service component name
+- `host` (String) DNS name for connecting to the service component
+- `kafka_authentication_method` (String) Kafka authentication method. This is a value specific to the 'kafka' service component
+- `port` (Number) Port number for connecting to the service component
+- `route` (String) Network access route
+- `ssl` (Boolean) Whether the endpoint is encrypted or accepts plaintext. By default endpoints are always encrypted and this property is only included for service components they may disable encryption
+- `usage` (String) DNS usage name
 
 
-<a id="nestedatt--kafka"></a>
+<a id="nestedblock--kafka"></a>
 ### Nested Schema for `kafka`
 
 Read-Only:
 
-- `access_cert` (String)
-- `access_key` (String)
-- `connect_uri` (String)
-- `rest_uri` (String)
-- `schema_registry_uri` (String)
+- `access_cert` (String, Sensitive) The Kafka client certificate
+- `access_key` (String, Sensitive) The Kafka client certificate key
+- `connect_uri` (String, Sensitive) The Kafka Connect URI, if any
+- `rest_uri` (String, Sensitive) The Kafka REST URI, if any
+- `schema_registry_uri` (String, Sensitive) The Schema Registry URI, if any
 
 ## Import
 

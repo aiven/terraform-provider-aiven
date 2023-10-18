@@ -121,7 +121,7 @@ func Test%[3]s(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	diags := new(diag.Diagnostics)
+	diags := make(diag.Diagnostics, 0)
 	for _, opt := range cases {
 		t.Run(opt.name, func(t *testing.T) {
 			dto := new(dto%[3]s)

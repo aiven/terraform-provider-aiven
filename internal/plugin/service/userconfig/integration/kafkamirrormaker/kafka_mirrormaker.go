@@ -19,7 +19,7 @@ import (
 // NewResourceSchema returns resource schema
 func NewResourceSchema() resource.SetNestedBlock {
 	return resource.SetNestedBlock{
-		Description: "Integration user config",
+		Description: "KafkaMirrormaker user configurable settings",
 		NestedObject: resource.NestedBlockObject{
 			Attributes: map[string]resource.Attribute{"cluster_alias": resource.StringAttribute{
 				Computed:    true,
@@ -69,7 +69,7 @@ func NewResourceSchema() resource.SetNestedBlock {
 // NewDataSourceSchema returns datasource schema
 func NewDataSourceSchema() datasource.SetNestedBlock {
 	return datasource.SetNestedBlock{
-		Description: "Integration user config",
+		Description: "KafkaMirrormaker user configurable settings",
 		NestedObject: datasource.NestedBlockObject{
 			Attributes: map[string]datasource.Attribute{"cluster_alias": datasource.StringAttribute{
 				Computed:    true,
@@ -109,7 +109,7 @@ func NewDataSourceSchema() datasource.SetNestedBlock {
 	}
 }
 
-// tfoUserConfig Integration user config
+// tfoUserConfig KafkaMirrormaker user configurable settings
 type tfoUserConfig struct {
 	ClusterAlias     types.String `tfsdk:"cluster_alias"`
 	KafkaMirrormaker types.Set    `tfsdk:"kafka_mirrormaker"`
@@ -122,8 +122,8 @@ type dtoUserConfig struct {
 }
 
 // expandUserConfig expands tf object into dto object
-func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
-	kafkaMirrormakerVar := schemautil.ExpandSetBlockNested[tfoKafkaMirrormaker, dtoKafkaMirrormaker](ctx, diags, expandKafkaMirrormaker, o.KafkaMirrormaker)
+func expandUserConfig(ctx context.Context, diags diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
+	kafkaMirrormakerVar := schemautil.ExpandSetBlockNested(ctx, diags, expandKafkaMirrormaker, o.KafkaMirrormaker)
 	if diags.HasError() {
 		return nil
 	}
@@ -134,8 +134,8 @@ func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserCo
 }
 
 // flattenUserConfig flattens dto object into tf object
-func flattenUserConfig(ctx context.Context, diags *diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
-	kafkaMirrormakerVar := schemautil.FlattenSetBlockNested[dtoKafkaMirrormaker, tfoKafkaMirrormaker](ctx, diags, flattenKafkaMirrormaker, kafkaMirrormakerAttrs, o.KafkaMirrormaker)
+func flattenUserConfig(ctx context.Context, diags diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
+	kafkaMirrormakerVar := schemautil.FlattenSetBlockNested(ctx, diags, flattenKafkaMirrormaker, o.KafkaMirrormaker, kafkaMirrormakerAttrs)
 	if diags.HasError() {
 		return nil
 	}
@@ -171,7 +171,7 @@ type dtoKafkaMirrormaker struct {
 }
 
 // expandKafkaMirrormaker expands tf object into dto object
-func expandKafkaMirrormaker(ctx context.Context, diags *diag.Diagnostics, o *tfoKafkaMirrormaker) *dtoKafkaMirrormaker {
+func expandKafkaMirrormaker(ctx context.Context, diags diag.Diagnostics, o *tfoKafkaMirrormaker) *dtoKafkaMirrormaker {
 	return &dtoKafkaMirrormaker{
 		ConsumerFetchMinBytes:   schemautil.ValueInt64Pointer(o.ConsumerFetchMinBytes),
 		ProducerBatchSize:       schemautil.ValueInt64Pointer(o.ProducerBatchSize),
@@ -183,7 +183,7 @@ func expandKafkaMirrormaker(ctx context.Context, diags *diag.Diagnostics, o *tfo
 }
 
 // flattenKafkaMirrormaker flattens dto object into tf object
-func flattenKafkaMirrormaker(ctx context.Context, diags *diag.Diagnostics, o *dtoKafkaMirrormaker) *tfoKafkaMirrormaker {
+func flattenKafkaMirrormaker(ctx context.Context, diags diag.Diagnostics, o *dtoKafkaMirrormaker) *tfoKafkaMirrormaker {
 	return &tfoKafkaMirrormaker{
 		ConsumerFetchMinBytes:   types.Int64PointerValue(o.ConsumerFetchMinBytes),
 		ProducerBatchSize:       types.Int64PointerValue(o.ProducerBatchSize),
@@ -204,17 +204,17 @@ var kafkaMirrormakerAttrs = map[string]attr.Type{
 }
 
 // Expand public function that converts tf object into dto
-func Expand(ctx context.Context, diags *diag.Diagnostics, set types.Set) *dtoUserConfig {
+func Expand(ctx context.Context, diags diag.Diagnostics, set types.Set) *dtoUserConfig {
 	return schemautil.ExpandSetBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, set)
 }
 
 // Flatten public function that converts dto into tf object
-func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.Set {
+func Flatten(ctx context.Context, diags diag.Diagnostics, m map[string]any) types.Set {
 	o := new(dtoUserConfig)
 	err := schemautil.MapToDTO(m, o)
 	if err != nil {
-		diags.AddError("failed to marshal map user config to dto", err.Error())
+		diags.AddError("Failed to marshal map user config to dto", err.Error())
 		return types.SetNull(types.ObjectType{AttrTypes: userConfigAttrs})
 	}
-	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
+	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, o, userConfigAttrs)
 }

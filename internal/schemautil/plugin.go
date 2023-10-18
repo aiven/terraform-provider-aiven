@@ -11,7 +11,7 @@ import (
 	"github.com/liip/sheriff"
 )
 
-func ExpandSet[T any](ctx context.Context, diags *diag.Diagnostics, list types.Set) (items []T) {
+func ExpandSet[T any](ctx context.Context, diags diag.Diagnostics, list types.Set) (items []T) {
 	if list.IsUnknown() || list.IsNull() {
 		return nil
 	}
@@ -19,9 +19,9 @@ func ExpandSet[T any](ctx context.Context, diags *diag.Diagnostics, list types.S
 	return items
 }
 
-type Expander[T, K any] func(ctx context.Context, diags *diag.Diagnostics, o *T) *K
+type Expander[T, K any] func(ctx context.Context, diags diag.Diagnostics, o *T) *K
 
-func ExpandSetNested[T, K any](ctx context.Context, diags *diag.Diagnostics, expand Expander[T, K], list types.Set) []*K {
+func ExpandSetNested[T, K any](ctx context.Context, diags diag.Diagnostics, expand Expander[T, K], list types.Set) []*K {
 	expanded := ExpandSet[T](ctx, diags, list)
 	if expanded == nil || diags.HasError() {
 		return nil
@@ -37,7 +37,7 @@ func ExpandSetNested[T, K any](ctx context.Context, diags *diag.Diagnostics, exp
 	return items
 }
 
-func ExpandSetBlockNested[T, K any](ctx context.Context, diags *diag.Diagnostics, expand Expander[T, K], list types.Set) *K {
+func ExpandSetBlockNested[T, K any](ctx context.Context, diags diag.Diagnostics, expand Expander[T, K], list types.Set) *K {
 	items := ExpandSetNested(ctx, diags, expand, list)
 	if len(items) == 0 {
 		return nil
@@ -45,11 +45,15 @@ func ExpandSetBlockNested[T, K any](ctx context.Context, diags *diag.Diagnostics
 	return items[0]
 }
 
-type Flattener[T, K any] func(ctx context.Context, diags *diag.Diagnostics, o *T) *K
+type Flattener[T, K any] func(ctx context.Context, diags diag.Diagnostics, o *T) *K
 
-func FlattenSetNested[T, K any](ctx context.Context, diags *diag.Diagnostics, flatten Flattener[T, K], attrs map[string]attr.Type, list []*T) types.Set {
+func FlattenSetNested[T, K any](ctx context.Context, diags diag.Diagnostics, flatten Flattener[T, K], list []*T, attrs map[string]attr.Type) types.Set {
 	oType := types.ObjectType{AttrTypes: attrs}
-	empty := types.SetValueMust(oType, []attr.Value{})
+	empty := types.SetNull(oType)
+	if len(list) == 0 {
+		return empty
+	}
+
 	items := make([]*K, 0, len(list))
 	for _, v := range list {
 		items = append(items, flatten(ctx, diags, v))
@@ -66,11 +70,11 @@ func FlattenSetNested[T, K any](ctx context.Context, diags *diag.Diagnostics, fl
 	return result
 }
 
-func FlattenSetBlockNested[T, K any](ctx context.Context, diags *diag.Diagnostics, flatten Flattener[T, K], attrs map[string]attr.Type, o *T) types.Set {
+func FlattenSetBlockNested[T, K any](ctx context.Context, diags diag.Diagnostics, flatten Flattener[T, K], o *T, attrs map[string]attr.Type) types.Set {
 	if o == nil {
-		return types.SetValueMust(types.ObjectType{AttrTypes: attrs}, []attr.Value{})
+		return types.SetNull(types.ObjectType{AttrTypes: attrs})
 	}
-	return FlattenSetNested(ctx, diags, flatten, attrs, []*T{o})
+	return FlattenSetNested(ctx, diags, flatten, []*T{o}, attrs)
 }
 
 // marshalUserConfig converts user config into json

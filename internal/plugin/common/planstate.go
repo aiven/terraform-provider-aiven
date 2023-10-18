@@ -1,5 +1,5 @@
 // Package util is the package that contains all the utility functions in the provider.
-package util
+package common
 
 import (
 	"context"

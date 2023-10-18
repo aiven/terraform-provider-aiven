@@ -1,4 +1,4 @@
-// Package provider is the implementation of the Aiven provider.
+// Package plugin is the implementation of the Aiven provider.
 package plugin
 
 import (
@@ -13,6 +13,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/kafka"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/serviceintegration"
 )
@@ -112,6 +113,7 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		organization.NewOrganizationResource,
 		serviceintegration.NewServiceIntegrationResource,
+		kafka.NewKafkaResource,
 	}
 }
 
@@ -120,6 +122,7 @@ func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSou
 	return []func() datasource.DataSource{
 		organization.NewOrganizationDataSource,
 		serviceintegration.NewServiceIntegrationDataSource,
+		kafka.NewKafkaDataSource,
 	}
 }
 

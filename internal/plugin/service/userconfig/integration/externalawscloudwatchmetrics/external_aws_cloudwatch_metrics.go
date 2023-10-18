@@ -19,7 +19,7 @@ import (
 // NewResourceSchema returns resource schema
 func NewResourceSchema() resource.SetNestedBlock {
 	return resource.SetNestedBlock{
-		Description: "External AWS CloudWatch Metrics integration user config",
+		Description: "ExternalAwsCloudwatchMetrics user configurable settings",
 		NestedObject: resource.NestedBlockObject{Blocks: map[string]resource.Block{
 			"dropped_metrics": resource.SetNestedBlock{
 				Description: "Metrics to not send to AWS CloudWatch (takes precedence over extra_metrics)",
@@ -57,7 +57,7 @@ func NewResourceSchema() resource.SetNestedBlock {
 // NewDataSourceSchema returns datasource schema
 func NewDataSourceSchema() datasource.SetNestedBlock {
 	return datasource.SetNestedBlock{
-		Description: "External AWS CloudWatch Metrics integration user config",
+		Description: "ExternalAwsCloudwatchMetrics user configurable settings",
 		NestedObject: datasource.NestedBlockObject{Blocks: map[string]datasource.Block{
 			"dropped_metrics": datasource.SetNestedBlock{
 				Description: "Metrics to not send to AWS CloudWatch (takes precedence over extra_metrics)",
@@ -92,7 +92,7 @@ func NewDataSourceSchema() datasource.SetNestedBlock {
 	}
 }
 
-// tfoUserConfig External AWS CloudWatch Metrics integration user config
+// tfoUserConfig ExternalAwsCloudwatchMetrics user configurable settings
 type tfoUserConfig struct {
 	DroppedMetrics types.Set `tfsdk:"dropped_metrics"`
 	ExtraMetrics   types.Set `tfsdk:"extra_metrics"`
@@ -105,12 +105,12 @@ type dtoUserConfig struct {
 }
 
 // expandUserConfig expands tf object into dto object
-func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
-	droppedMetricsVar := schemautil.ExpandSetNested[tfoDroppedMetrics, dtoDroppedMetrics](ctx, diags, expandDroppedMetrics, o.DroppedMetrics)
+func expandUserConfig(ctx context.Context, diags diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
+	droppedMetricsVar := schemautil.ExpandSetNested(ctx, diags, expandDroppedMetrics, o.DroppedMetrics)
 	if diags.HasError() {
 		return nil
 	}
-	extraMetricsVar := schemautil.ExpandSetNested[tfoExtraMetrics, dtoExtraMetrics](ctx, diags, expandExtraMetrics, o.ExtraMetrics)
+	extraMetricsVar := schemautil.ExpandSetNested(ctx, diags, expandExtraMetrics, o.ExtraMetrics)
 	if diags.HasError() {
 		return nil
 	}
@@ -121,12 +121,12 @@ func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserCo
 }
 
 // flattenUserConfig flattens dto object into tf object
-func flattenUserConfig(ctx context.Context, diags *diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
-	droppedMetricsVar := schemautil.FlattenSetNested[dtoDroppedMetrics, tfoDroppedMetrics](ctx, diags, flattenDroppedMetrics, droppedMetricsAttrs, o.DroppedMetrics)
+func flattenUserConfig(ctx context.Context, diags diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
+	droppedMetricsVar := schemautil.FlattenSetNested(ctx, diags, flattenDroppedMetrics, o.DroppedMetrics, droppedMetricsAttrs)
 	if diags.HasError() {
 		return nil
 	}
-	extraMetricsVar := schemautil.FlattenSetNested[dtoExtraMetrics, tfoExtraMetrics](ctx, diags, flattenExtraMetrics, extraMetricsAttrs, o.ExtraMetrics)
+	extraMetricsVar := schemautil.FlattenSetNested(ctx, diags, flattenExtraMetrics, o.ExtraMetrics, extraMetricsAttrs)
 	if diags.HasError() {
 		return nil
 	}
@@ -154,7 +154,7 @@ type dtoDroppedMetrics struct {
 }
 
 // expandDroppedMetrics expands tf object into dto object
-func expandDroppedMetrics(ctx context.Context, diags *diag.Diagnostics, o *tfoDroppedMetrics) *dtoDroppedMetrics {
+func expandDroppedMetrics(ctx context.Context, diags diag.Diagnostics, o *tfoDroppedMetrics) *dtoDroppedMetrics {
 	return &dtoDroppedMetrics{
 		Field:  o.Field.ValueString(),
 		Metric: o.Metric.ValueString(),
@@ -162,7 +162,7 @@ func expandDroppedMetrics(ctx context.Context, diags *diag.Diagnostics, o *tfoDr
 }
 
 // flattenDroppedMetrics flattens dto object into tf object
-func flattenDroppedMetrics(ctx context.Context, diags *diag.Diagnostics, o *dtoDroppedMetrics) *tfoDroppedMetrics {
+func flattenDroppedMetrics(ctx context.Context, diags diag.Diagnostics, o *dtoDroppedMetrics) *tfoDroppedMetrics {
 	return &tfoDroppedMetrics{
 		Field:  types.StringValue(o.Field),
 		Metric: types.StringValue(o.Metric),
@@ -187,7 +187,7 @@ type dtoExtraMetrics struct {
 }
 
 // expandExtraMetrics expands tf object into dto object
-func expandExtraMetrics(ctx context.Context, diags *diag.Diagnostics, o *tfoExtraMetrics) *dtoExtraMetrics {
+func expandExtraMetrics(ctx context.Context, diags diag.Diagnostics, o *tfoExtraMetrics) *dtoExtraMetrics {
 	return &dtoExtraMetrics{
 		Field:  o.Field.ValueString(),
 		Metric: o.Metric.ValueString(),
@@ -195,7 +195,7 @@ func expandExtraMetrics(ctx context.Context, diags *diag.Diagnostics, o *tfoExtr
 }
 
 // flattenExtraMetrics flattens dto object into tf object
-func flattenExtraMetrics(ctx context.Context, diags *diag.Diagnostics, o *dtoExtraMetrics) *tfoExtraMetrics {
+func flattenExtraMetrics(ctx context.Context, diags diag.Diagnostics, o *dtoExtraMetrics) *tfoExtraMetrics {
 	return &tfoExtraMetrics{
 		Field:  types.StringValue(o.Field),
 		Metric: types.StringValue(o.Metric),
@@ -208,17 +208,17 @@ var extraMetricsAttrs = map[string]attr.Type{
 }
 
 // Expand public function that converts tf object into dto
-func Expand(ctx context.Context, diags *diag.Diagnostics, set types.Set) *dtoUserConfig {
+func Expand(ctx context.Context, diags diag.Diagnostics, set types.Set) *dtoUserConfig {
 	return schemautil.ExpandSetBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, set)
 }
 
 // Flatten public function that converts dto into tf object
-func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.Set {
+func Flatten(ctx context.Context, diags diag.Diagnostics, m map[string]any) types.Set {
 	o := new(dtoUserConfig)
 	err := schemautil.MapToDTO(m, o)
 	if err != nil {
-		diags.AddError("failed to marshal map user config to dto", err.Error())
+		diags.AddError("Failed to marshal map user config to dto", err.Error())
 		return types.SetNull(types.ObjectType{AttrTypes: userConfigAttrs})
 	}
-	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
+	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, o, userConfigAttrs)
 }

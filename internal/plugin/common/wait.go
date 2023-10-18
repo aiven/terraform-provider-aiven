@@ -1,4 +1,4 @@
-package util
+package common
 
 import (
 	"context"
@@ -14,7 +14,6 @@ func WaitActive(ctx context.Context, retryableFunc retry.RetryableFunc) error {
 	return retry.Do(
 		retryableFunc,
 		retry.Context(ctx),
-		retry.Attempts(10),
 		retry.Delay(2*time.Second),
 	)
 }

@@ -19,7 +19,7 @@ import (
 // NewResourceSchema returns resource schema
 func NewResourceSchema() resource.SetNestedBlock {
 	return resource.SetNestedBlock{
-		Description: "Integration user config",
+		Description: "Metrics user configurable settings",
 		NestedObject: resource.NestedBlockObject{
 			Attributes: map[string]resource.Attribute{
 				"database": resource.StringAttribute{
@@ -129,7 +129,7 @@ func NewResourceSchema() resource.SetNestedBlock {
 // NewDataSourceSchema returns datasource schema
 func NewDataSourceSchema() datasource.SetNestedBlock {
 	return datasource.SetNestedBlock{
-		Description: "Integration user config",
+		Description: "Metrics user configurable settings",
 		NestedObject: datasource.NestedBlockObject{
 			Attributes: map[string]datasource.Attribute{
 				"database": datasource.StringAttribute{
@@ -218,7 +218,7 @@ func NewDataSourceSchema() datasource.SetNestedBlock {
 	}
 }
 
-// tfoUserConfig Integration user config
+// tfoUserConfig Metrics user configurable settings
 type tfoUserConfig struct {
 	Database      types.String `tfsdk:"database"`
 	RetentionDays types.Int64  `tfsdk:"retention_days"`
@@ -237,8 +237,8 @@ type dtoUserConfig struct {
 }
 
 // expandUserConfig expands tf object into dto object
-func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
-	sourceMysqlVar := schemautil.ExpandSetBlockNested[tfoSourceMysql, dtoSourceMysql](ctx, diags, expandSourceMysql, o.SourceMysql)
+func expandUserConfig(ctx context.Context, diags diag.Diagnostics, o *tfoUserConfig) *dtoUserConfig {
+	sourceMysqlVar := schemautil.ExpandSetBlockNested(ctx, diags, expandSourceMysql, o.SourceMysql)
 	if diags.HasError() {
 		return nil
 	}
@@ -252,8 +252,8 @@ func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *tfoUserCo
 }
 
 // flattenUserConfig flattens dto object into tf object
-func flattenUserConfig(ctx context.Context, diags *diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
-	sourceMysqlVar := schemautil.FlattenSetBlockNested[dtoSourceMysql, tfoSourceMysql](ctx, diags, flattenSourceMysql, sourceMysqlAttrs, o.SourceMysql)
+func flattenUserConfig(ctx context.Context, diags diag.Diagnostics, o *dtoUserConfig) *tfoUserConfig {
+	sourceMysqlVar := schemautil.FlattenSetBlockNested(ctx, diags, flattenSourceMysql, o.SourceMysql, sourceMysqlAttrs)
 	if diags.HasError() {
 		return nil
 	}
@@ -285,8 +285,8 @@ type dtoSourceMysql struct {
 }
 
 // expandSourceMysql expands tf object into dto object
-func expandSourceMysql(ctx context.Context, diags *diag.Diagnostics, o *tfoSourceMysql) *dtoSourceMysql {
-	telegrafVar := schemautil.ExpandSetBlockNested[tfoTelegraf, dtoTelegraf](ctx, diags, expandTelegraf, o.Telegraf)
+func expandSourceMysql(ctx context.Context, diags diag.Diagnostics, o *tfoSourceMysql) *dtoSourceMysql {
+	telegrafVar := schemautil.ExpandSetBlockNested(ctx, diags, expandTelegraf, o.Telegraf)
 	if diags.HasError() {
 		return nil
 	}
@@ -294,8 +294,8 @@ func expandSourceMysql(ctx context.Context, diags *diag.Diagnostics, o *tfoSourc
 }
 
 // flattenSourceMysql flattens dto object into tf object
-func flattenSourceMysql(ctx context.Context, diags *diag.Diagnostics, o *dtoSourceMysql) *tfoSourceMysql {
-	telegrafVar := schemautil.FlattenSetBlockNested[dtoTelegraf, tfoTelegraf](ctx, diags, flattenTelegraf, telegrafAttrs, o.Telegraf)
+func flattenSourceMysql(ctx context.Context, diags diag.Diagnostics, o *dtoSourceMysql) *tfoSourceMysql {
+	telegrafVar := schemautil.FlattenSetBlockNested(ctx, diags, flattenTelegraf, o.Telegraf, telegrafAttrs)
 	if diags.HasError() {
 		return nil
 	}
@@ -341,7 +341,7 @@ type dtoTelegraf struct {
 }
 
 // expandTelegraf expands tf object into dto object
-func expandTelegraf(ctx context.Context, diags *diag.Diagnostics, o *tfoTelegraf) *dtoTelegraf {
+func expandTelegraf(ctx context.Context, diags diag.Diagnostics, o *tfoTelegraf) *dtoTelegraf {
 	return &dtoTelegraf{
 		GatherEventWaits:                    schemautil.ValueBoolPointer(o.GatherEventWaits),
 		GatherFileEventsStats:               schemautil.ValueBoolPointer(o.GatherFileEventsStats),
@@ -361,7 +361,7 @@ func expandTelegraf(ctx context.Context, diags *diag.Diagnostics, o *tfoTelegraf
 }
 
 // flattenTelegraf flattens dto object into tf object
-func flattenTelegraf(ctx context.Context, diags *diag.Diagnostics, o *dtoTelegraf) *tfoTelegraf {
+func flattenTelegraf(ctx context.Context, diags diag.Diagnostics, o *dtoTelegraf) *tfoTelegraf {
 	return &tfoTelegraf{
 		GatherEventWaits:                    types.BoolPointerValue(o.GatherEventWaits),
 		GatherFileEventsStats:               types.BoolPointerValue(o.GatherFileEventsStats),
@@ -398,17 +398,17 @@ var telegrafAttrs = map[string]attr.Type{
 }
 
 // Expand public function that converts tf object into dto
-func Expand(ctx context.Context, diags *diag.Diagnostics, set types.Set) *dtoUserConfig {
+func Expand(ctx context.Context, diags diag.Diagnostics, set types.Set) *dtoUserConfig {
 	return schemautil.ExpandSetBlockNested[tfoUserConfig, dtoUserConfig](ctx, diags, expandUserConfig, set)
 }
 
 // Flatten public function that converts dto into tf object
-func Flatten(ctx context.Context, diags *diag.Diagnostics, m map[string]any) types.Set {
+func Flatten(ctx context.Context, diags diag.Diagnostics, m map[string]any) types.Set {
 	o := new(dtoUserConfig)
 	err := schemautil.MapToDTO(m, o)
 	if err != nil {
-		diags.AddError("failed to marshal map user config to dto", err.Error())
+		diags.AddError("Failed to marshal map user config to dto", err.Error())
 		return types.SetNull(types.ObjectType{AttrTypes: userConfigAttrs})
 	}
-	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, userConfigAttrs, o)
+	return schemautil.FlattenSetBlockNested[dtoUserConfig, tfoUserConfig](ctx, diags, flattenUserConfig, o, userConfigAttrs)
 }

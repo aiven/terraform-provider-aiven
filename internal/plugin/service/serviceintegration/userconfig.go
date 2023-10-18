@@ -65,7 +65,7 @@ func integrationTypes() []string {
 }
 
 // flattenUserConfig from aiven to terraform
-func flattenUserConfig(ctx context.Context, diags *diag.Diagnostics, o *resourceModel, dto *aiven.ServiceIntegration) {
+func flattenUserConfig(ctx context.Context, diags diag.Diagnostics, o *resourceModel, dto *aiven.ServiceIntegration) {
 	if dto.UserConfig == nil {
 		return
 	}
@@ -95,7 +95,7 @@ func flattenUserConfig(ctx context.Context, diags *diag.Diagnostics, o *resource
 }
 
 // expandUserConfig from terraform to aiven
-func expandUserConfig(ctx context.Context, diags *diag.Diagnostics, o *resourceModel, create bool) map[string]any {
+func expandUserConfig(ctx context.Context, diags diag.Diagnostics, o *resourceModel, create bool) map[string]any {
 	var config any
 
 	// If an invalid integration type is set

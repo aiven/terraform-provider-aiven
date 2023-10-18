@@ -29,21 +29,21 @@ resource "aiven_service_integration" "my_integration_metrics" {
 ### Required
 
 - `integration_type` (String) Type of the service integration. Possible values: `alertmanager`, `cassandra_cross_service_cluster`, `clickhouse_kafka`, `clickhouse_postgresql`, `dashboard`, `datadog`, `datasource`, `external_aws_cloudwatch_logs`, `external_aws_cloudwatch_metrics`, `external_elasticsearch_logs`, `external_google_cloud_logging`, `external_opensearch_logs`, `flink`, `internal_connectivity`, `jolokia`, `kafka_connect`, `kafka_logs`, `kafka_mirrormaker`, `logs`, `m3aggregator`, `m3coordinator`, `metrics`, `opensearch_cross_cluster_replication`, `opensearch_cross_cluster_search`, `prometheus`, `read_replica`, `rsyslog`, `schema_registry_proxy`
-- `project` (String) Project the integration belongs to
+- `project` (String) Identifies the project this resource belongs to.
 
 ### Optional
 
-- `clickhouse_kafka_user_config` (Block Set) Integration user config (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config))
-- `clickhouse_postgresql_user_config` (Block Set) Integration user config (see [below for nested schema](#nestedblock--clickhouse_postgresql_user_config))
-- `datadog_user_config` (Block Set) (see [below for nested schema](#nestedblock--datadog_user_config))
+- `clickhouse_kafka_user_config` (Block Set) ClickhouseKafka user configurable settings (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config))
+- `clickhouse_postgresql_user_config` (Block Set) ClickhousePostgresql user configurable settings (see [below for nested schema](#nestedblock--clickhouse_postgresql_user_config))
+- `datadog_user_config` (Block Set) Datadog user configurable settings (see [below for nested schema](#nestedblock--datadog_user_config))
 - `destination_endpoint_id` (String) Destination endpoint for the integration (if any)
 - `destination_service_name` (String) Destination service for the integration (if any)
-- `external_aws_cloudwatch_metrics_user_config` (Block Set) External AWS CloudWatch Metrics integration user config (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config))
-- `kafka_connect_user_config` (Block Set) Integration user config (see [below for nested schema](#nestedblock--kafka_connect_user_config))
-- `kafka_logs_user_config` (Block Set) (see [below for nested schema](#nestedblock--kafka_logs_user_config))
-- `kafka_mirrormaker_user_config` (Block Set) Integration user config (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config))
-- `logs_user_config` (Block Set) (see [below for nested schema](#nestedblock--logs_user_config))
-- `metrics_user_config` (Block Set) Integration user config (see [below for nested schema](#nestedblock--metrics_user_config))
+- `external_aws_cloudwatch_metrics_user_config` (Block Set) ExternalAwsCloudwatchMetrics user configurable settings (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config))
+- `kafka_connect_user_config` (Block Set) KafkaConnect user configurable settings (see [below for nested schema](#nestedblock--kafka_connect_user_config))
+- `kafka_logs_user_config` (Block Set) KafkaLogs user configurable settings (see [below for nested schema](#nestedblock--kafka_logs_user_config))
+- `kafka_mirrormaker_user_config` (Block Set) KafkaMirrormaker user configurable settings (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config))
+- `logs_user_config` (Block Set) Logs user configurable settings (see [below for nested schema](#nestedblock--logs_user_config))
+- `metrics_user_config` (Block Set) Metrics user configurable settings (see [below for nested schema](#nestedblock--metrics_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration (if any)
 - `source_service_name` (String) Source service for the integration (if any)
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))

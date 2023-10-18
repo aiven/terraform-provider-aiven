@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/userconfig/integration/clickhousekafka"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/userconfig/integration/clickhousepostgresql"
@@ -27,7 +28,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/userconfig/integration/kafkamirrormaker"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/userconfig/integration/logs"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/userconfig/integration/metrics"
-	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -63,7 +63,7 @@ func (s *serviceIntegrationResource) Metadata(_ context.Context, _ resource.Meta
 }
 
 func (s *serviceIntegrationResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
+	resp.Schema = common.WithDefaultTimeouts(ctx, schema.Schema{
 		Description: "The Service Integration resource allows the creation and management of Aiven Service Integrations.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -105,13 +105,7 @@ func (s *serviceIntegrationResource) Schema(ctx context.Context, _ resource.Sche
 					stringvalidator.OneOf(integrationTypes()...),
 				},
 			},
-			"project": schema.StringAttribute{
-				Description: "Project the integration belongs to",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-				Required: true,
-			},
+			"project": common.ProjectString(),
 			"source_endpoint_id": schema.StringAttribute{
 				Description: "Source endpoint for the integration (if any)",
 				PlanModifiers: []planmodifier.String{
@@ -165,23 +159,23 @@ func (s *serviceIntegrationResource) Create(ctx context.Context, req resource.Cr
 			return
 		} else if preexisting != nil {
 			o.IntegrationID = types.StringValue(preexisting.ServiceIntegrationID)
-			s.read(ctx, &resp.Diagnostics, &resp.State, &o)
+			s.read(ctx, resp.Diagnostics, &resp.State, &o)
 			return
 		}
 	}
 
-	userConfig := expandUserConfig(ctx, &resp.Diagnostics, &o, true)
+	userConfig := expandUserConfig(ctx, resp.Diagnostics, &o, true)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	createReq := aiven.CreateServiceIntegrationRequest{
-		DestinationProject:    getProjectPointer(o.DestinationEndpointID.ValueString()),
-		DestinationEndpointID: getEndpointIDPointer(o.DestinationEndpointID.ValueString()),
+		DestinationProject:    common.PathIndexPointer(o.DestinationEndpointID.ValueString(), common.ProjectIndex),
+		DestinationEndpointID: common.PathIndexPointer(o.DestinationEndpointID.ValueString(), common.ServiceIndex),
 		DestinationService:    o.DestinationServiceName.ValueStringPointer(),
 		IntegrationType:       o.IntegrationType.ValueString(),
-		SourceProject:         getProjectPointer(o.SourceEndpointID.ValueString()),
-		SourceEndpointID:      getEndpointIDPointer(o.SourceEndpointID.ValueString()),
+		SourceProject:         common.PathIndexPointer(o.SourceEndpointID.ValueString(), common.ProjectIndex),
+		SourceEndpointID:      common.PathIndexPointer(o.SourceEndpointID.ValueString(), common.ServiceIndex),
 		SourceService:         o.SourceServiceName.ValueStringPointer(),
 		UserConfig:            userConfig,
 	}
@@ -193,7 +187,7 @@ func (s *serviceIntegrationResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	o.IntegrationID = types.StringValue(dto.ServiceIntegrationID)
-	s.read(ctx, &resp.Diagnostics, &resp.State, &o)
+	s.read(ctx, resp.Diagnostics, &resp.State, &o)
 }
 
 func (s *serviceIntegrationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -202,7 +196,7 @@ func (s *serviceIntegrationResource) Read(ctx context.Context, req resource.Read
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	s.read(ctx, &resp.Diagnostics, &resp.State, &o)
+	s.read(ctx, resp.Diagnostics, &resp.State, &o)
 }
 
 func (s *serviceIntegrationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -221,7 +215,7 @@ func (s *serviceIntegrationResource) Update(ctx context.Context, req resource.Up
 
 	// Copies ID from the state
 	o.IntegrationID = state.IntegrationID
-	userConfig := expandUserConfig(ctx, &resp.Diagnostics, &o, false)
+	userConfig := expandUserConfig(ctx, resp.Diagnostics, &o, false)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -240,7 +234,7 @@ func (s *serviceIntegrationResource) Update(ctx context.Context, req resource.Up
 		return
 	}
 
-	s.read(ctx, &resp.Diagnostics, &resp.State, &o)
+	s.read(ctx, resp.Diagnostics, &resp.State, &o)
 }
 
 func (s *serviceIntegrationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -257,11 +251,22 @@ func (s *serviceIntegrationResource) Delete(ctx context.Context, req resource.De
 }
 
 func (s *serviceIntegrationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	parts, ok := common.SplitN(req.ID, 2)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Import Identifier",
+			fmt.Sprintf("Expected import identifier with format: project/integration_id. Got: %q", req.ID),
+		)
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("project"), parts[0])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("integration_id"), parts[1])...)
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-// read reads from API and saves to state
-func (s *serviceIntegrationResource) read(ctx context.Context, diags *diag.Diagnostics, state *tfsdk.State, o *resourceModel) {
+// read reads from API and saves it to state
+func (s *serviceIntegrationResource) read(ctx context.Context, diags diag.Diagnostics, state *tfsdk.State, o *resourceModel) {
 	dto, err := getSIByID(ctx, s.client, o)
 	if err != nil {
 		diags.AddError(errmsg.SummaryErrorReadingResource, err.Error())
@@ -277,14 +282,8 @@ func (s *serviceIntegrationResource) read(ctx context.Context, diags *diag.Diagn
 
 // getSIByID gets ServiceIntegration by ID
 func getSIByID(ctx context.Context, client *aiven.Client, o *resourceModel) (dto *aiven.ServiceIntegration, err error) {
-	id := o.getID()
-	project := o.getProject()
-	if len(id)*len(project) == 0 {
-		return nil, fmt.Errorf("no ID or project provided")
-	}
-
-	return dto, util.WaitActive(ctx, func() error {
-		dto, err = client.ServiceIntegrations.Get(ctx, project, id)
+	return dto, common.WaitActive(ctx, func() error {
+		dto, err = client.ServiceIntegrations.Get(ctx, o.Project.ValueString(), o.IntegrationID.ValueString())
 		if err != nil {
 			return err
 		}
@@ -323,15 +322,14 @@ func getSIByName(ctx context.Context, client *aiven.Client, o *resourceModel) (*
 }
 
 // loadFromDTO loads API values to terraform object
-func loadFromDTO(ctx context.Context, diags *diag.Diagnostics, o *resourceModel, dto *aiven.ServiceIntegration) {
+func loadFromDTO(ctx context.Context, diags diag.Diagnostics, o *resourceModel, dto *aiven.ServiceIntegration) {
 	flattenUserConfig(ctx, diags, o, dto)
 	if diags.HasError() {
 		return
 	}
 
-	id := o.getID()
-	project := o.getProject()
-	o.ID = newEndpointID(project, &id)
+	project := o.Project.ValueString()
+	o.ID = newEndpointID(project, o.IntegrationID.ValueStringPointer())
 	o.DestinationEndpointID = newEndpointID(project, dto.DestinationEndpointID)
 	o.DestinationServiceName = types.StringPointerValue(dto.DestinationService)
 	o.IntegrationType = types.StringValue(dto.IntegrationType)
