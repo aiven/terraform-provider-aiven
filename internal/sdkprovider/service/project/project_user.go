@@ -44,7 +44,8 @@ func ResourceProjectUser() *schema.Resource {
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema: aivenProjectUserSchema,
+		Schema:             aivenProjectUserSchema,
+		DeprecationMessage: "This resource is deprecated",
 	}
 }
 

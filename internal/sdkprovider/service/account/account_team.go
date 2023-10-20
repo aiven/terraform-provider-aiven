@@ -50,7 +50,8 @@ func ResourceAccountTeam() *schema.Resource {
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema: aivenAccountTeamSchema,
+		Schema:             aivenAccountTeamSchema,
+		DeprecationMessage: "This resource is deprecated",
 	}
 }
 
