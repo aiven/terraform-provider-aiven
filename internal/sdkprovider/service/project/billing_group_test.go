@@ -69,8 +69,12 @@ func testAccCheckAivenBillingGroupResourceDestroy(s *terraform.State) error {
 
 func testAccBillingGroupResource(name string) string {
 	return fmt.Sprintf(`
+resource "aiven_organization" "foo" {
+  name = "test-acc-org-%[1]s"
+}
+
 resource "aiven_billing_group" "foo" {
-  name           = "test-acc-bg-%s"
+  name           = "test-acc-bg-%[1]s"
   billing_emails = ["ivan.savciuc+test1@aiven.fi", "ivan.savciuc+test2@aiven.fi"]
 }
 
@@ -79,11 +83,12 @@ data "aiven_billing_group" "bar" {
 }
 
 resource "aiven_project" "pr1" {
-  project       = "test-acc-pr-%s"
+  project       = "test-acc-pr-%[1]s"
   billing_group = aiven_billing_group.foo.id
+  parent_id     = aiven_organization.foo.id
 
   depends_on = [aiven_billing_group.foo]
-}`, name, name)
+}`, name)
 }
 
 func testCopyBillingGroupFromExistingOne(name string) string {
