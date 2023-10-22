@@ -53,7 +53,7 @@ func resourceOpenSearchACLConfigRead(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	r, err := client.ElasticsearchACLs.Get(ctx, project, serviceName)
+	r, err := client.OpenSearchACLs.Get(ctx, project, serviceName)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -64,10 +64,10 @@ func resourceOpenSearchACLConfigRead(ctx context.Context, d *schema.ResourceData
 	if err := d.Set("service_name", serviceName); err != nil {
 		return diag.Errorf("error setting ACLs `service_name` for resource %s: %s", d.Id(), err)
 	}
-	if err := d.Set("extended_acl", r.ElasticSearchACLConfig.ExtendedAcl); err != nil {
+	if err := d.Set("extended_acl", r.OpenSearchACLConfig.ExtendedAcl); err != nil {
 		return diag.Errorf("error setting ACLs `extended_acl` for resource %s: %s", d.Id(), err)
 	}
-	if err := d.Set("enabled", r.ElasticSearchACLConfig.Enabled); err != nil {
+	if err := d.Set("enabled", r.OpenSearchACLConfig.Enabled); err != nil {
 		return diag.Errorf("error setting ACLs `enable` for resource %s: %s", d.Id(), err)
 	}
 	return nil
@@ -79,7 +79,7 @@ func resourceOpenSearchACLConfigUpdate(ctx context.Context, d *schema.ResourceDa
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 
-	modifier := resourceElasticsearchACLModifierToggleConfigFields(d.Get("enabled").(bool), d.Get("extended_acl").(bool))
+	modifier := resourceOpenSearchACLModifierToggleConfigFields(d.Get("enabled").(bool), d.Get("extended_acl").(bool))
 	err := resourceOpenSearchACLModifyRemoteConfig(ctx, project, serviceName, client, modifier)
 	if err != nil {
 		return diag.FromErr(err)
@@ -96,7 +96,7 @@ func resourceOpenSearchACLConfigDelete(ctx context.Context, d *schema.ResourceDa
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 
-	modifier := resourceElasticsearchACLModifierToggleConfigFields(false, false)
+	modifier := resourceOpenSearchACLModifierToggleConfigFields(false, false)
 	err := resourceOpenSearchACLModifyRemoteConfig(ctx, project, serviceName, client, modifier)
 	if err != nil {
 		return diag.FromErr(err)

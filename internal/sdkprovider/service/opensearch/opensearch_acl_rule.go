@@ -53,7 +53,7 @@ func ResourceOpenSearchACLRule() *schema.Resource {
 	}
 }
 
-func resourceElasticsearchACLRuleGetPermissionFromACLResponse(cfg aiven.ElasticSearchACLConfig, username, index string) (string, bool) {
+func resourceOpenSearchACLRuleGetPermissionFromACLResponse(cfg aiven.OpenSearchACLConfig, username, index string) (string, bool) {
 	for _, acl := range cfg.ACLs {
 		if acl.Username != username {
 			continue
@@ -75,11 +75,11 @@ func resourceOpenSearchACLRuleRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	r, err := client.ElasticsearchACLs.Get(ctx, project, serviceName)
+	r, err := client.OpenSearchACLs.Get(ctx, project, serviceName)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
-	permission, found := resourceElasticsearchACLRuleGetPermissionFromACLResponse(r.ElasticSearchACLConfig, username, index)
+	permission, found := resourceOpenSearchACLRuleGetPermissionFromACLResponse(r.OpenSearchACLConfig, username, index)
 	if !found {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -103,10 +103,10 @@ func resourceOpenSearchACLRuleRead(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceOpenSearchACLRuleMkAivenACL(username, index, permission string) aiven.ElasticSearchACL {
-	return aiven.ElasticSearchACL{
+func resourceOpenSearchACLRuleMkAivenACL(username, index, permission string) aiven.OpenSearchACL {
+	return aiven.OpenSearchACL{
 		Username: username,
-		Rules: []aiven.ElasticsearchACLRule{
+		Rules: []aiven.OpenSearchACLRule{
 			{
 				Index:      index,
 				Permission: permission,
@@ -124,7 +124,7 @@ func resourceOpenSearchACLRuleUpdate(ctx context.Context, d *schema.ResourceData
 	index := d.Get("index").(string)
 	permission := d.Get("permission").(string)
 
-	modifier := resourceElasticsearchACLModifierUpdateACLRule(ctx, username, index, permission)
+	modifier := resourceOpenSearchACLModifierUpdateACLRule(ctx, username, index, permission)
 	err := resourceOpenSearchACLModifyRemoteConfig(ctx, project, serviceName, client, modifier)
 	if err != nil {
 		return diag.FromErr(err)
@@ -144,7 +144,7 @@ func resourceOpenSearchACLRuleDelete(ctx context.Context, d *schema.ResourceData
 	index := d.Get("index").(string)
 	permission := d.Get("permission").(string)
 
-	modifier := resourceElasticsearchACLModifierDeleteACLRule(ctx, username, index, permission)
+	modifier := resourceOpenSearchACLModifierDeleteACLRule(ctx, username, index, permission)
 	err := resourceOpenSearchACLModifyRemoteConfig(ctx, project, serviceName, client, modifier)
 	if err != nil {
 		return diag.FromErr(err)
