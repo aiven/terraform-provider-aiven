@@ -82,7 +82,7 @@ func testAccCheckAivenOpenSearchACLConfigResourceDestroy(s *terraform.State) err
 			return err
 		}
 
-		r, err := c.ElasticsearchACLs.Get(ctx, projectName, serviceName)
+		r, err := c.OpenSearchACLs.Get(ctx, projectName, serviceName)
 		if err != nil {
 			if err.(aiven.Error).Status != 404 {
 				return err

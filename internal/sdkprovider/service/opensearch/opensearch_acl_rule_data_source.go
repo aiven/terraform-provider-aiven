@@ -26,12 +26,12 @@ func datasourceOpenSearchACLRuleRead(ctx context.Context, d *schema.ResourceData
 	username := d.Get("username").(string)
 	index := d.Get("index").(string)
 
-	r, err := client.ElasticsearchACLs.Get(ctx, projectName, serviceName)
+	r, err := client.OpenSearchACLs.Get(ctx, projectName, serviceName)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if _, found := resourceElasticsearchACLRuleGetPermissionFromACLResponse(r.ElasticSearchACLConfig, username, index); !found {
+	if _, found := resourceOpenSearchACLRuleGetPermissionFromACLResponse(r.OpenSearchACLConfig, username, index); !found {
 		return diag.Errorf("acl rule %s/%s/%s/%s not found", projectName, serviceName, username, index)
 	}
 
