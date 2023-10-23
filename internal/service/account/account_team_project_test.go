@@ -3,6 +3,7 @@ package account_test
 import (
 	"fmt"
 	"log"
+	"os"
 	"testing"
 
 	"github.com/aiven/aiven-go-client"
@@ -14,6 +15,10 @@ import (
 )
 
 func TestAccAivenAccountTeamProject_basic(t *testing.T) {
+	if _, ok := os.LookupEnv("AIVEN_ACCOUNT_NAME"); !ok {
+		t.Skip("AIVEN_ACCOUNT_NAME env variable is required to run this test")
+	}
+
 	resourceName := "aiven_account_team_project.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
@@ -35,23 +40,25 @@ func TestAccAivenAccountTeamProject_basic(t *testing.T) {
 }
 
 func testAccAccountTeamProjectResource(name string) string {
+	orgName := os.Getenv("AIVEN_ACCOUNT_NAME")
+
 	return fmt.Sprintf(`
-resource "aiven_account" "foo" {
-  name = "test-acc-ac-%s"
+data "aiven_account" "foo" {
+  name = "%[1]s"
 }
 
 resource "aiven_account_team" "foo" {
-  account_id = aiven_account.foo.account_id
-  name       = "test-acc-team-%s"
+  account_id = data.aiven_account.foo.account_id
+  name       = "test-acc-team-%[2]s"
 }
 
 resource "aiven_project" "foo" {
-  project    = "test-acc-pr-%s"
+  project    = "test-acc-pr-%[2]s"
   account_id = aiven_account_team.foo.account_id
 }
 
 resource "aiven_account_team_project" "foo" {
-  account_id   = aiven_account.foo.account_id
+  account_id   = data.aiven_account.foo.account_id
   team_id      = aiven_account_team.foo.team_id
   project_name = aiven_project.foo.project
   team_type    = "admin"
@@ -63,7 +70,7 @@ data "aiven_account_team_project" "project" {
   project_name = aiven_account_team_project.foo.project_name
 
   depends_on = [aiven_account_team_project.foo]
-}`, name, name, name)
+}`, orgName, name)
 }
 
 func testAccCheckAivenAccountTeamProjectResourceDestroy(s *terraform.State) error {
