@@ -2,9 +2,12 @@ package flink
 
 import (
 	"context"
+	"regexp"
+	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -186,13 +189,40 @@ func resourceFlinkApplicationVersionCreate(ctx context.Context, d *schema.Resour
 		sinks = expandFlinkApplicationVersionSourcesOrSinks(d.Get("sink").(*schema.Set).List())
 	}
 
-	r, err := client.FlinkApplicationVersions.Create(ctx, project, serviceName, applicationID, aiven.GenericFlinkApplicationVersionRequest{
-		Statement: d.Get("statement").(string),
-		Sources:   sources,
-		Sinks:     sinks,
-	})
-	if err != nil {
-		return diag.Errorf("cannot create Flink Application Version: %+v - %v", expandFlinkApplicationVersionSourcesOrSinks(d.Get("sources").(*schema.Set).List()), err)
+	var r *aiven.DetailedFlinkApplicationVersionResponse
+
+	if err := retry.RetryContext(ctx, time.Second*30, func() *retry.RetryError {
+		var err error
+
+		r, err = client.FlinkApplicationVersions.Create(
+			ctx,
+			project,
+			serviceName,
+			applicationID,
+			aiven.GenericFlinkApplicationVersionRequest{
+				Statement: d.Get("statement").(string),
+				Sources:   sources,
+				Sinks:     sinks,
+			},
+		)
+		if err != nil {
+			return &retry.RetryError{
+				Err: err,
+				Retryable: regexp.MustCompile(
+					"Integration not found: " +
+						"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
+				).MatchString(err.Error()),
+			}
+		}
+		return nil
+	}); err != nil {
+		return diag.Errorf(
+			"cannot create Flink Application Version: %+v - %v",
+			expandFlinkApplicationVersionSourcesOrSinks(
+				d.Get("sources").(*schema.Set).List(),
+			),
+			err,
+		)
 	}
 
 	d.SetId(schemautil.BuildResourceID(project, serviceName, applicationID, r.ID))
