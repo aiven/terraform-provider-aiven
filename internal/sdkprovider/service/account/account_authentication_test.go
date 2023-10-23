@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -133,6 +134,10 @@ func TestAccAivenAccountAuthentication_saml_invalid_certificate(t *testing.T) {
 }
 
 func TestAccAivenAccountAuthentication_auto_join_team_id(t *testing.T) {
+	if _, ok := os.LookupEnv("AIVEN_ACCOUNT_NAME"); !ok {
+		t.Skip("AIVEN_ACCOUNT_NAME env variable is required to run this test")
+	}
+
 	resourceName := "aiven_account_authentication.foo"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
@@ -177,19 +182,21 @@ data "aiven_account_authentication" "auth" {
 }
 
 func testAccAccountAuthenticationWithAutoJoinTeamIDResource(name string) string {
+	orgName := os.Getenv("AIVEN_ACCOUNT_NAME")
+
 	return fmt.Sprintf(`
-resource "aiven_account" "foo" {
-  name = "test-acc-ac-%s"
+data "aiven_account" "foo" {
+  name = "%[1]s"
 }
 
 resource "aiven_account_team" "foo" {
-  account_id = aiven_account.foo.account_id
-  name       = "test-acc-team-%s"
+  account_id = data.aiven_account.foo.account_id
+  name       = "test-acc-team-%[2]s"
 }
 
 resource "aiven_account_authentication" "foo" {
-  account_id        = aiven_account.foo.account_id
-  name              = "test-acc-auth-%s"
+  account_id        = data.aiven_account.foo.account_id
+  name              = "test-acc-auth-%[2]s"
   type              = "saml"
   enabled           = false
   auto_join_team_id = aiven_account_team.foo.team_id
@@ -207,7 +214,7 @@ data "aiven_account_authentication" "auth" {
   name       = aiven_account_authentication.foo.name
 
   depends_on = [aiven_account_authentication.foo]
-}`, name, name, name)
+}`, orgName, name)
 }
 
 func testAccCheckAivenAccountAuthenticationResourceDestroy(s *terraform.State) error {
