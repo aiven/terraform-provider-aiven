@@ -2296,6 +2296,11 @@ func ServiceTypeKafka() *schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
+		"aiven_kafka_topic_messages": {
+			Description: "Allow access to read Kafka topic messages in the Aiven Console and REST API.",
+			Optional:    true,
+			Type:        schema.TypeBool,
+		},
 		"custom_domain": {
 			Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.",
 			Optional:    true,
