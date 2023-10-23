@@ -63,7 +63,7 @@ func ResourceMySQLUser() *schema.Resource {
 		Description:   "The MySQL User resource allows the creation and management of Aiven MySQL Users.",
 		CreateContext: resourceMySQLUserCreate,
 		UpdateContext: resourceMySQLUserUpdate,
-		ReadContext:   schemautil.DatasourceServiceUserRead,
+		ReadContext:   schemautil.ResourceServiceUserRead,
 		DeleteContext: schemautil.ResourceServiceUserDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,

@@ -6,6 +6,9 @@ nav_order: 1
 
 # Changelog
 
+## [X.Y.Z] - YYYY-MM-DD
+
+- Fix incorrect read context in MySQL user resource
 
 ## [3.13.4] - 2023-09-28
 
@@ -51,11 +54,11 @@ nav_order: 1
 ## [3.10.0] - 2022-12-14
 
 - Add ClickHouse examples:
-  - Standalone service
-  - Integration with Kafka source
-  - Integration with PostgreSQL source
+    - Standalone service
+    - Integration with Kafka source
+    - Integration with PostgreSQL source
 - Fix VPC peering ID parser
-- Add `offset_syncs_topic_location` support for `aiven_mirrormaker_replication_flow` resource 
+- Add `offset_syncs_topic_location` support for `aiven_mirrormaker_replication_flow` resource
 - Add `ssl` and `kafka_authentication_method` output support in service components
 - Fix `admin_username` and `admin_password` fields diff
 
@@ -65,7 +68,7 @@ nav_order: 1
 - Add `ip_filter_object` and `namespaces_object` user config options which are meant to extend the existing `ip_filter` and `namespaces` ones
 - Revert `datasource_project_vpc` `cloud_name` and `project` deprecations
 - Add extra timeout for `kafka_connect` service integration create
-- Support `clickhouse_kafka` integration type in `aiven_service_integration` 
+- Support `clickhouse_kafka` integration type in `aiven_service_integration`
 - Fix `aiven_transit_gateway_vpc_attachment` fails to parse ID
 - Prevent generation of `Default` field in static schema generator
 - Add `self_link` field to `aiven_gcp_vpc_peering_connection` resource
@@ -85,7 +88,7 @@ nav_order: 1
 ## [3.8.0] - 2022-09-30
 
 - Fix `aiven_gcp_vpc_peering_connection` creation
-- Improve static IP error handling end messaging 
+- Improve static IP error handling end messaging
 - Fix `aiven_account_authentication` resource update, add tests
 - Change `aiven_project_vpc` datasource behaviour
 - Fix `aiven_service_component` optional parameters filters
@@ -144,7 +147,7 @@ nav_order: 1
 - Update Changelog Enforcer workflow
 - Add CodeQL workflow
 - Add `opensearch_index` support to `aiven_flink_table`
-- Add not found checks to the Kafka availability waiter 
+- Add not found checks to the Kafka availability waiter
 - Add PostgreSQL max connections and PgBouncer outputs
 - Perform general code clean-up and add `revive` linter
 - Add support for new user configuration options
