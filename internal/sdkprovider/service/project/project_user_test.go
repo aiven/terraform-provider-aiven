@@ -109,14 +109,19 @@ data "aiven_project_user" "user" {
 
 func testAccProjectUserDeveloperResource(name string) string {
 	return fmt.Sprintf(`
+resource "aiven_organization" "foo" {
+  name = "test-acc-org-%[1]s"
+}
+
 resource "aiven_project" "foo" {
-  project       = "test-acc-pr-%s"
+  project       = "test-acc-pr-%[1]s"
   default_cloud = "aws-eu-west-2"
+  parent_id     = aiven_organization.foo.id
 }
 
 resource "aiven_project_user" "bar" {
   project     = aiven_project.foo.project
-  email       = "ivan.savciuc+%s@aiven.fi"
+  email       = "ivan.savciuc+%[1]s@aiven.fi"
   member_type = "developer"
 }
 
@@ -125,7 +130,7 @@ data "aiven_project_user" "user" {
   email   = aiven_project_user.bar.email
 
   depends_on = [aiven_project_user.bar]
-}`, name, name)
+}`, name)
 }
 
 func testAccCheckAivenProjectUserAttributes(n string) resource.TestCheckFunc {
