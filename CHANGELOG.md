@@ -6,6 +6,11 @@ nav_order: 1
 
 # Changelog
 
+## [X.Y.Z] - YYYY-MM-DD
+
+- Deprecating `project_user`, `account_team` and `account_team_member resources`
+- Fix incorrect read context in MySQL user resource
+
 ## [4.9.2] - 2023-10-04
 
 - Fix `aiven_organization_user` created time serialization
