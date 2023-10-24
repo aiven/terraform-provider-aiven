@@ -90,6 +90,7 @@ Read-Only:
 Read-Only:
 
 - `additional_backup_regions` (List of String)
+- `aiven_kafka_topic_messages` (Boolean)
 - `custom_domain` (String)
 - `ip_filter` (List of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--ip_filter_object))

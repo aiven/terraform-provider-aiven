@@ -89,10 +89,11 @@ func TestFromAPI(t *testing.T) {
 				},
 			},
 			want: []map[string]interface{}{{
-				"additional_backup_regions": []interface{}(nil),
-				"custom_domain":             "",
-				"ip_filter":                 []interface{}(nil),
-				"ip_filter_object":          []interface{}(nil),
+				"additional_backup_regions":  []interface{}(nil),
+				"aiven_kafka_topic_messages": false,
+				"custom_domain":              "",
+				"ip_filter":                  []interface{}(nil),
+				"ip_filter_object":           []interface{}(nil),
 				"kafka": []map[string]interface{}{{
 					"auto_create_topics_enable":                                  false,
 					"compression_type":                                           "",
