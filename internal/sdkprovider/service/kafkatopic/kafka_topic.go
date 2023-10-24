@@ -265,20 +265,13 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 	topicName := d.Get("topic_name").(string)
 	partitions := d.Get("partitions").(int)
 	replication := d.Get("replication").(int)
+	client := m.(*aiven.Client)
 
 	// aiven.KafkaTopics.Create() function may return 501 on create
 	// Second call might say that topic already exists
 	// So to be sure, better check it before create
-	_, err := getTopic(ctx, m, d.Timeout(schema.TimeoutRead), project, serviceName, topicName)
-
-	// No error means topic exists
-	if err == nil {
+	if isTopicExists(ctx, client, project, serviceName, topicName) {
 		return diag.Errorf("Topic conflict, already exists: %s", topicName)
-	}
-
-	// If this is not "does not exist", then something happened
-	if !aiven.IsNotFound(err) {
-		return diag.FromErr(err)
 	}
 
 	createRequest := aiven.CreateKafkaTopicRequest{
@@ -289,7 +282,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 		Tags:        getTags(d),
 	}
 
-	err = m.(*aiven.Client).KafkaTopics.Create(
+	err := client.KafkaTopics.Create(
 		ctx,
 		project,
 		serviceName,
@@ -300,9 +293,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	d.SetId(schemautil.BuildResourceID(project, serviceName, topicName))
-
-	// Invalidates cache for the topic
-	DeleteTopicFromCache(project, serviceName, topicName)
+	getTopicCache().AddToQueue(project, serviceName, topicName)
 
 	// We do not call a Kafka Topic read here to speed up the performance.
 	// However, in the case of Kafka Topic resource getting a computed field

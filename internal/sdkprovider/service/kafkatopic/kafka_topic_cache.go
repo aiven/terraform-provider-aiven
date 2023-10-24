@@ -142,8 +142,8 @@ func (t *kafkaTopicCache) GetMissing(projectName, serviceName string) []string {
 	return t.missing[projectName+serviceName]
 }
 
-// GetQueue retrieves a topics queue, retrieves up to 100 first elements
-func (t *kafkaTopicCache) GetQueue(projectName, serviceName string) []string {
+// GetQueueTop100 retrieves a topics queue, retrieves up to 100 first elements
+func (t *kafkaTopicCache) GetQueueTop100(projectName, serviceName string) []string {
 	t.RLock()
 	defer t.RUnlock()
 
@@ -202,4 +202,12 @@ func DeleteTopicFromCache(projectName, serviceName, topicName string) {
 		delete(t.internal[key], topicName)
 	}
 	t.Unlock()
+}
+
+// GetFullQueue retrieves a topics queue
+func (t *kafkaTopicCache) GetFullQueue(projectName, serviceName string) []string {
+	t.RLock()
+	defer t.RUnlock()
+
+	return t.inQueue[projectName+serviceName]
 }
