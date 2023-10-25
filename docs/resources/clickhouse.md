@@ -99,6 +99,7 @@ Optional:
 
 - `clickhouse` (Boolean) Allow clients to connect to clickhouse with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
 - `clickhouse_https` (Boolean) Allow clients to connect to clickhouse_https with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
+- `clickhouse_mysql` (Boolean) Allow clients to connect to clickhouse_mysql with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
 - `prometheus` (Boolean) Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
 
 
@@ -109,6 +110,7 @@ Optional:
 
 - `clickhouse` (Boolean) Enable clickhouse.
 - `clickhouse_https` (Boolean) Enable clickhouse_https.
+- `clickhouse_mysql` (Boolean) Enable clickhouse_mysql.
 - `prometheus` (Boolean) Enable prometheus.
 
 
@@ -119,6 +121,7 @@ Optional:
 
 - `clickhouse` (Boolean) Allow clients to connect to clickhouse from the public internet for service nodes that are in a project VPC or another type of private network.
 - `clickhouse_https` (Boolean) Allow clients to connect to clickhouse_https from the public internet for service nodes that are in a project VPC or another type of private network.
+- `clickhouse_mysql` (Boolean) Allow clients to connect to clickhouse_mysql from the public internet for service nodes that are in a project VPC or another type of private network.
 - `prometheus` (Boolean) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.
 
 
