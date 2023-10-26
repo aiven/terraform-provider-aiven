@@ -249,6 +249,11 @@ func ServiceTypeClickhouse() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
+				"clickhouse_mysql": {
+					Description: "Allow clients to connect to clickhouse_mysql with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
@@ -263,6 +268,11 @@ func ServiceTypeClickhouse() *schema.Schema {
 				},
 				"clickhouse_https": {
 					Description: "Allow clients to connect to clickhouse_https with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"clickhouse_mysql": {
+					Description: "Allow clients to connect to clickhouse_mysql with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -289,6 +299,11 @@ func ServiceTypeClickhouse() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
+				"clickhouse_mysql": {
+					Description: "Enable clickhouse_mysql.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
 				"prometheus": {
 					Description: "Enable prometheus.",
 					Optional:    true,
@@ -303,6 +318,11 @@ func ServiceTypeClickhouse() *schema.Schema {
 				},
 				"clickhouse_https": {
 					Description: "Enable clickhouse_https.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"clickhouse_mysql": {
+					Description: "Enable clickhouse_mysql.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -335,6 +355,11 @@ func ServiceTypeClickhouse() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
+				"clickhouse_mysql": {
+					Description: "Allow clients to connect to clickhouse_mysql from the public internet for service nodes that are in a project VPC or another type of private network.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
 				"prometheus": {
 					Description: "Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
@@ -349,6 +374,11 @@ func ServiceTypeClickhouse() *schema.Schema {
 				},
 				"clickhouse_https": {
 					Description: "Allow clients to connect to clickhouse_https from the public internet for service nodes that are in a project VPC or another type of private network.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"clickhouse_mysql": {
+					Description: "Allow clients to connect to clickhouse_mysql from the public internet for service nodes that are in a project VPC or another type of private network.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
