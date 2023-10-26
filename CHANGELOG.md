@@ -9,8 +9,7 @@ nav_order: 1
 ## [5.0.0] - YYYY-MM-DD
 
 - Migrate `aiven_service_integration` to the Plugin Framework
-- Deprecating `project_user`, `account_team` and `account_team_member resources`
-- Fix incorrect read context in MySQL user resource
+- Deprecating `project_user`, `account_team` and `account_team_member` resources
 
 ## [4.9.1] - 2023-10-03
 
