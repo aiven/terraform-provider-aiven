@@ -8,8 +8,11 @@ nav_order: 1
 
 ## [X.Y.Z] - YYYY-MM-DD
 
+## [4.9.3] - 2023-10-27
+
 - Deprecating `project_user`, `account_team` and `account_team_member` resources
 - Fix incorrect read context in MySQL user resource
+- Improve Kafka Topic createtion and reand performance
 
 ## [4.9.2] - 2023-10-04
 
