@@ -12,7 +12,7 @@ nav_order: 1
 
 - Deprecating `project_user`, `account_team` and `account_team_member` resources
 - Fix incorrect read context in MySQL user resource
-- Improve Kafka Topic createtion and reand performance
+- Improve Kafka Topic creation and read performance
 
 ## [4.9.2] - 2023-10-04
 
