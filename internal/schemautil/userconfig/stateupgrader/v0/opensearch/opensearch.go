@@ -80,10 +80,10 @@ func ResourceOpenSearch() *schema.Resource {
 
 func ResourceOpenSearchStateUpgrade(
 	_ context.Context,
-	rawState map[string]interface{},
-	_ interface{},
-) (map[string]interface{}, error) {
-	userConfigSlice, ok := rawState["opensearch_user_config"].([]interface{})
+	rawState map[string]any,
+	_ any,
+) (map[string]any, error) {
+	userConfigSlice, ok := rawState["opensearch_user_config"].([]any)
 	if !ok {
 		return rawState, nil
 	}
@@ -92,7 +92,7 @@ func ResourceOpenSearchStateUpgrade(
 		return rawState, nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]interface{})
+	userConfig, ok := userConfigSlice[0].(map[string]any)
 	if !ok {
 		return rawState, nil
 	}
@@ -107,10 +107,10 @@ func ResourceOpenSearchStateUpgrade(
 		return rawState, err
 	}
 
-	indexPatternsSlice, ok := userConfig["index_patterns"].([]interface{})
+	indexPatternsSlice, ok := userConfig["index_patterns"].([]any)
 	if ok && len(indexPatternsSlice) > 0 {
 		for _, v := range indexPatternsSlice {
-			indexPattern, ok := v.(map[string]interface{})
+			indexPattern, ok := v.(map[string]any)
 			if !ok {
 				continue
 			}
@@ -124,9 +124,9 @@ func ResourceOpenSearchStateUpgrade(
 		}
 	}
 
-	indexTemplateSlice, ok := userConfig["index_template"].([]interface{})
+	indexTemplateSlice, ok := userConfig["index_template"].([]any)
 	if ok && len(indexTemplateSlice) > 0 {
-		indexTemplate, ok := indexTemplateSlice[0].(map[string]interface{})
+		indexTemplate, ok := indexTemplateSlice[0].(map[string]any)
 		if ok {
 			err = typeupgrader.Map(indexTemplate, map[string]string{
 				"mapping_nested_objects_limit": "int",
@@ -139,9 +139,9 @@ func ResourceOpenSearchStateUpgrade(
 		}
 	}
 
-	opensearchSlice, ok := userConfig["opensearch"].([]interface{})
+	opensearchSlice, ok := userConfig["opensearch"].([]any)
 	if ok && len(opensearchSlice) > 0 {
-		opensearch, ok := opensearchSlice[0].(map[string]interface{})
+		opensearch, ok := opensearchSlice[0].(map[string]any)
 		if ok {
 			err = typeupgrader.Map(opensearch, map[string]string{
 				"action_auto_create_index_enabled":                      "bool",
@@ -177,9 +177,9 @@ func ResourceOpenSearchStateUpgrade(
 		}
 	}
 
-	opensearchDashboardsSlice, ok := userConfig["opensearch_dashboards"].([]interface{})
+	opensearchDashboardsSlice, ok := userConfig["opensearch_dashboards"].([]any)
 	if ok && len(opensearchDashboardsSlice) > 0 {
-		opensearchDashboards, ok := opensearchDashboardsSlice[0].(map[string]interface{})
+		opensearchDashboards, ok := opensearchDashboardsSlice[0].(map[string]any)
 		if ok {
 			err = typeupgrader.Map(opensearchDashboards, map[string]string{
 				"enabled":                    "bool",
@@ -192,9 +192,9 @@ func ResourceOpenSearchStateUpgrade(
 		}
 	}
 
-	privateAccessSlice, ok := userConfig["private_access"].([]interface{})
+	privateAccessSlice, ok := userConfig["private_access"].([]any)
 	if ok && len(privateAccessSlice) > 0 {
-		privateAccess, ok := privateAccessSlice[0].(map[string]interface{})
+		privateAccess, ok := privateAccessSlice[0].(map[string]any)
 		if ok {
 			err = typeupgrader.Map(privateAccess, map[string]string{
 				"opensearch":            "bool",
@@ -207,9 +207,9 @@ func ResourceOpenSearchStateUpgrade(
 		}
 	}
 
-	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]interface{})
+	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]any)
 	if ok && len(privateLinkAccessSlice) > 0 {
-		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]interface{})
+		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]any)
 		if ok {
 			err := typeupgrader.Map(privateLinkAccess, map[string]string{
 				"opensearch":            "bool",
@@ -222,9 +222,9 @@ func ResourceOpenSearchStateUpgrade(
 		}
 	}
 
-	publicAccessSlice, ok := userConfig["public_access"].([]interface{})
+	publicAccessSlice, ok := userConfig["public_access"].([]any)
 	if ok && len(publicAccessSlice) > 0 {
-		publicAccess, ok := publicAccessSlice[0].(map[string]interface{})
+		publicAccess, ok := publicAccessSlice[0].(map[string]any)
 		if ok {
 			err := typeupgrader.Map(publicAccess, map[string]string{
 				"opensearch":            "bool",

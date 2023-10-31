@@ -73,10 +73,10 @@ func ResourceMySQLResource() *schema.Resource {
 
 func ResourceMySQLStateUpgrade(
 	_ context.Context,
-	rawState map[string]interface{},
-	_ interface{},
-) (map[string]interface{}, error) {
-	userConfigSlice, ok := rawState["mysql_user_config"].([]interface{})
+	rawState map[string]any,
+	_ any,
+) (map[string]any, error) {
+	userConfigSlice, ok := rawState["mysql_user_config"].([]any)
 	if !ok {
 		return rawState, nil
 	}
@@ -85,7 +85,7 @@ func ResourceMySQLStateUpgrade(
 		return rawState, nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]interface{})
+	userConfig, ok := userConfigSlice[0].(map[string]any)
 	if !ok {
 		return rawState, nil
 	}
@@ -100,9 +100,9 @@ func ResourceMySQLStateUpgrade(
 		return rawState, err
 	}
 
-	migrationSlice, ok := userConfig["migration"].([]interface{})
+	migrationSlice, ok := userConfig["migration"].([]any)
 	if ok && len(migrationSlice) > 0 {
-		migration, ok := migrationSlice[0].(map[string]interface{})
+		migration, ok := migrationSlice[0].(map[string]any)
 		if ok {
 			err = typeupgrader.Map(migration, map[string]string{
 				"port": "int",
@@ -114,9 +114,9 @@ func ResourceMySQLStateUpgrade(
 		}
 	}
 
-	mysqlSlice, ok := userConfig["mysql"].([]interface{})
+	mysqlSlice, ok := userConfig["mysql"].([]any)
 	if ok && len(mysqlSlice) > 0 {
-		mysql, ok := mysqlSlice[0].(map[string]interface{})
+		mysql, ok := mysqlSlice[0].(map[string]any)
 		if ok {
 			err = typeupgrader.Map(mysql, map[string]string{
 				"connect_timeout":                  "int",
@@ -152,9 +152,9 @@ func ResourceMySQLStateUpgrade(
 		}
 	}
 
-	privateAccessSlice, ok := userConfig["private_access"].([]interface{})
+	privateAccessSlice, ok := userConfig["private_access"].([]any)
 	if ok && len(privateAccessSlice) > 0 {
-		privateAccess, ok := privateAccessSlice[0].(map[string]interface{})
+		privateAccess, ok := privateAccessSlice[0].(map[string]any)
 		if ok {
 			err = typeupgrader.Map(privateAccess, map[string]string{
 				"mysql":      "bool",
@@ -167,9 +167,9 @@ func ResourceMySQLStateUpgrade(
 		}
 	}
 
-	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]interface{})
+	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]any)
 	if ok && len(privateLinkAccessSlice) > 0 {
-		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]interface{})
+		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]any)
 		if ok {
 			err := typeupgrader.Map(privateLinkAccess, map[string]string{
 				"mysql":      "bool",
@@ -182,9 +182,9 @@ func ResourceMySQLStateUpgrade(
 		}
 	}
 
-	publicAccessSlice, ok := userConfig["public_access"].([]interface{})
+	publicAccessSlice, ok := userConfig["public_access"].([]any)
 	if ok && len(publicAccessSlice) > 0 {
-		publicAccess, ok := publicAccessSlice[0].(map[string]interface{})
+		publicAccess, ok := publicAccessSlice[0].(map[string]any)
 		if ok {
 			err := typeupgrader.Map(publicAccess, map[string]string{
 				"mysql":      "bool",

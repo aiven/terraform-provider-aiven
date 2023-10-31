@@ -8,37 +8,36 @@ import (
 
 // propsReqs is a function that returns a map of properties and required properties from a given schema type and node
 // name.
-func propsReqs(st userconfig.SchemaType, n string) (map[string]interface{}, map[string]struct{}, error) {
-	rm, err := userconfig.CachedRepresentationMap(st)
+func propsReqs(schemaType userconfig.SchemaType, nodeName string) (map[string]any, map[string]struct{}, error) {
+	representationMap, err := userconfig.CachedRepresentationMap(schemaType)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	s, ok := rm[n]
+	nodeSchema, exists := representationMap[nodeName]
+	if !exists {
+		return nil, nil, fmt.Errorf("no schema found for %s (type %d)", nodeName, schemaType)
+	}
+
+	schemaAsMap, ok := nodeSchema.(map[string]any)
 	if !ok {
-		return nil, nil, fmt.Errorf("no schema found for %s (type %d)", n, st)
+		return nil, nil, fmt.Errorf("schema %s (type %d) is not a map", nodeName, schemaType)
 	}
 
-	as, ok := s.(map[string]interface{})
+	properties, exists := schemaAsMap["properties"]
+	if !exists {
+		return nil, nil, fmt.Errorf("no properties found for %s (type %d)", nodeName, schemaType)
+	}
+
+	propertiesAsMap, ok := properties.(map[string]any)
 	if !ok {
-		return nil, nil, fmt.Errorf("schema %s (type %d) is not a map", n, st)
+		return nil, nil, fmt.Errorf("properties of schema %s (type %d) are not a map", nodeName, schemaType)
 	}
 
-	p, ok := as["properties"]
-	if !ok {
-		return nil, nil, fmt.Errorf("no properties found for %s (type %d)", n, st)
+	requiredProperties := map[string]struct{}{}
+	if requiredPropertiesSlice, exists := schemaAsMap["required"].([]any); exists {
+		requiredProperties = userconfig.SliceToKeyedMap(requiredPropertiesSlice)
 	}
 
-	ap, ok := p.(map[string]interface{})
-	if !ok {
-		return nil, nil, fmt.Errorf("properties of schema %s (type %d) are not a map", n, st)
-	}
-
-	reqs := map[string]struct{}{}
-
-	if sreqs, ok := as["required"].([]interface{}); ok {
-		reqs = userconfig.SliceToKeyedMap(sreqs)
-	}
-
-	return ap, reqs, nil
+	return propertiesAsMap, requiredProperties, nil
 }

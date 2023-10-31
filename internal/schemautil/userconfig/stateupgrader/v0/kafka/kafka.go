@@ -119,7 +119,7 @@ func ResourceKafka() *schema.Resource {
 			),
 
 			// if a kafka_version is >= 3.0 then this schema field is not applicable
-			customdiff.ComputedIf("karapace", func(ctx context.Context, d *schema.ResourceDiff, m interface{}) bool {
+			customdiff.ComputedIf("karapace", func(ctx context.Context, d *schema.ResourceDiff, m any) bool {
 				project := d.Get("project").(string)
 				serviceName := d.Get("service_name").(string)
 				client := m.(*aiven.Client)
@@ -145,10 +145,10 @@ func ResourceKafka() *schema.Resource {
 
 func ResourceKafkaStateUpgrade(
 	_ context.Context,
-	rawState map[string]interface{},
-	_ interface{},
-) (map[string]interface{}, error) {
-	userConfigSlice, ok := rawState["kafka_user_config"].([]interface{})
+	rawState map[string]any,
+	_ any,
+) (map[string]any, error) {
+	userConfigSlice, ok := rawState["kafka_user_config"].([]any)
 	if !ok {
 		return rawState, nil
 	}
@@ -157,7 +157,7 @@ func ResourceKafkaStateUpgrade(
 		return rawState, nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]interface{})
+	userConfig, ok := userConfigSlice[0].(map[string]any)
 	if !ok {
 		return rawState, nil
 	}
@@ -172,9 +172,9 @@ func ResourceKafkaStateUpgrade(
 		return rawState, err
 	}
 
-	kafkaSlice, ok := userConfig["kafka"].([]interface{})
+	kafkaSlice, ok := userConfig["kafka"].([]any)
 	if ok && len(kafkaSlice) > 0 {
-		kafka, ok := kafkaSlice[0].(map[string]interface{})
+		kafka, ok := kafkaSlice[0].(map[string]any)
 		if ok {
 			err = typeupgrader.Map(kafka, map[string]string{
 				"auto_create_topics_enable":                                  "bool",
@@ -220,9 +220,9 @@ func ResourceKafkaStateUpgrade(
 		}
 	}
 
-	kafkaAuthenticationMethodsSlice, ok := userConfig["kafka_authentication_methods"].([]interface{})
+	kafkaAuthenticationMethodsSlice, ok := userConfig["kafka_authentication_methods"].([]any)
 	if ok && len(kafkaAuthenticationMethodsSlice) > 0 {
-		kafkaAuthenticationMethods, ok := kafkaAuthenticationMethodsSlice[0].(map[string]interface{})
+		kafkaAuthenticationMethods, ok := kafkaAuthenticationMethodsSlice[0].(map[string]any)
 		if ok {
 			err = typeupgrader.Map(kafkaAuthenticationMethods, map[string]string{
 				"certificate": "bool",
@@ -234,9 +234,9 @@ func ResourceKafkaStateUpgrade(
 		}
 	}
 
-	kafkaConnectConfigSlice, ok := userConfig["kafka_connect_config"].([]interface{})
+	kafkaConnectConfigSlice, ok := userConfig["kafka_connect_config"].([]any)
 	if ok && len(kafkaConnectConfigSlice) > 0 {
-		kafkaConnectConfig, ok := kafkaConnectConfigSlice[0].(map[string]interface{})
+		kafkaConnectConfig, ok := kafkaConnectConfigSlice[0].(map[string]any)
 		if ok {
 			err = typeupgrader.Map(kafkaConnectConfig, map[string]string{
 				"consumer_fetch_max_bytes":           "int",
@@ -254,9 +254,9 @@ func ResourceKafkaStateUpgrade(
 		}
 	}
 
-	kafkaRestConfigSlice, ok := userConfig["kafka_rest_config"].([]interface{})
+	kafkaRestConfigSlice, ok := userConfig["kafka_rest_config"].([]any)
 	if ok && len(kafkaRestConfigSlice) > 0 {
-		kafkaRestConfig, ok := kafkaRestConfigSlice[0].(map[string]interface{})
+		kafkaRestConfig, ok := kafkaRestConfigSlice[0].(map[string]any)
 		if ok {
 			err = typeupgrader.Map(kafkaRestConfig, map[string]string{
 				"consumer_enable_auto_commit":  "bool",
@@ -271,9 +271,9 @@ func ResourceKafkaStateUpgrade(
 		}
 	}
 
-	privateAccessSlice, ok := userConfig["private_access"].([]interface{})
+	privateAccessSlice, ok := userConfig["private_access"].([]any)
 	if ok && len(privateAccessSlice) > 0 {
-		privateAccess, ok := privateAccessSlice[0].(map[string]interface{})
+		privateAccess, ok := privateAccessSlice[0].(map[string]any)
 		if ok {
 			err = typeupgrader.Map(privateAccess, map[string]string{
 				"prometheus": "bool",
@@ -284,9 +284,9 @@ func ResourceKafkaStateUpgrade(
 		}
 	}
 
-	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]interface{})
+	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]any)
 	if ok && len(privateLinkAccessSlice) > 0 {
-		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]interface{})
+		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]any)
 		if ok {
 			err := typeupgrader.Map(privateLinkAccess, map[string]string{
 				"jolokia":         "bool",
@@ -302,9 +302,9 @@ func ResourceKafkaStateUpgrade(
 		}
 	}
 
-	publicAccessSlice, ok := userConfig["public_access"].([]interface{})
+	publicAccessSlice, ok := userConfig["public_access"].([]any)
 	if ok && len(publicAccessSlice) > 0 {
-		publicAccess, ok := publicAccessSlice[0].(map[string]interface{})
+		publicAccess, ok := publicAccessSlice[0].(map[string]any)
 		if ok {
 			err := typeupgrader.Map(publicAccess, map[string]string{
 				"kafka":           "bool",
@@ -319,9 +319,9 @@ func ResourceKafkaStateUpgrade(
 		}
 	}
 
-	schemaRegistryConfigSlice, ok := userConfig["schema_registry_config"].([]interface{})
+	schemaRegistryConfigSlice, ok := userConfig["schema_registry_config"].([]any)
 	if ok && len(schemaRegistryConfigSlice) > 0 {
-		schemaRegistryConfig, ok := schemaRegistryConfigSlice[0].(map[string]interface{})
+		schemaRegistryConfig, ok := schemaRegistryConfigSlice[0].(map[string]any)
 		if ok {
 			err := typeupgrader.Map(schemaRegistryConfig, map[string]string{
 				"leader_eligibility": "bool",

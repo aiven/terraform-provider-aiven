@@ -68,10 +68,10 @@ func ResourceM3Aggregator() *schema.Resource {
 
 func ResourceM3AggregatorStateUpgrade(
 	_ context.Context,
-	rawState map[string]interface{},
-	_ interface{},
-) (map[string]interface{}, error) {
-	userConfigSlice, ok := rawState["m3aggregator_user_config"].([]interface{})
+	rawState map[string]any,
+	_ any,
+) (map[string]any, error) {
+	userConfigSlice, ok := rawState["m3aggregator_user_config"].([]any)
 	if !ok {
 		return rawState, nil
 	}
@@ -80,7 +80,7 @@ func ResourceM3AggregatorStateUpgrade(
 		return rawState, nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]interface{})
+	userConfig, ok := userConfigSlice[0].(map[string]any)
 	if !ok {
 		return rawState, nil
 	}

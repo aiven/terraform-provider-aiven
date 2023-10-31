@@ -11,7 +11,7 @@ import (
 
 // testResourceData is a resourceDatable compatible struct for testing.
 type testResourceData struct {
-	d map[string]interface{}
+	d map[string]any
 	e map[string]struct{}
 	c map[string]struct{}
 	n bool
@@ -19,7 +19,7 @@ type testResourceData struct {
 
 // newTestResourceData is a constructor for testResourceData.
 func newTestResourceData(
-	d map[string]interface{},
+	d map[string]any,
 	e map[string]struct{},
 	c map[string]struct{},
 	n bool,
@@ -28,7 +28,7 @@ func newTestResourceData(
 }
 
 // GetOk is a test implementation of resourceDatable.GetOk.
-func (t *testResourceData) GetOk(k string) (interface{}, bool) {
+func (t *testResourceData) GetOk(k string) (any, bool) {
 	v := t.d[k]
 
 	_, e := t.e[k]
@@ -51,25 +51,25 @@ func (t *testResourceData) IsNewResource() bool {
 // TestToAPI is a test for ToAPI.
 func TestToAPI(t *testing.T) {
 	type args struct {
-		st userconfig.SchemaType
-		n  string
-		d  resourceDatable
+		schemaType  userconfig.SchemaType
+		serviceName string
+		d           resourceDatable
 	}
 
 	tests := []struct {
 		name string
 		args args
-		want map[string]interface{}
+		want map[string]any
 	}{
 		{
 			name: "boolean",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
 								"m3coordinator_enable_graphite_carbon_ingest": true,
 							},
 						},
@@ -83,19 +83,19 @@ func TestToAPI(t *testing.T) {
 					false,
 				),
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"m3coordinator_enable_graphite_carbon_ingest": true,
 			},
 		},
 		{
 			name: "boolean no changes",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
 								"m3coordinator_enable_graphite_carbon_ingest": true,
 							},
 						},
@@ -107,19 +107,19 @@ func TestToAPI(t *testing.T) {
 					false,
 				),
 			},
-			want: map[string]interface{}{},
+			want: map[string]any{},
 		},
 		{
 			name: "integer",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
-								"limits": []interface{}{
-									map[string]interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
+								"limits": []any{
+									map[string]any{
 										"max_recently_queried_series_blocks": 20000,
 									},
 								},
@@ -136,8 +136,8 @@ func TestToAPI(t *testing.T) {
 					false,
 				),
 			},
-			want: map[string]interface{}{
-				"limits": map[string]interface{}{
+			want: map[string]any{
+				"limits": map[string]any{
 					"max_recently_queried_series_blocks": 20000,
 				},
 			},
@@ -145,14 +145,14 @@ func TestToAPI(t *testing.T) {
 		{
 			name: "integer no changes",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
-								"limits": []interface{}{
-									map[string]interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
+								"limits": []any{
+									map[string]any{
 										"max_recently_queried_series_blocks": 20000,
 									},
 								},
@@ -166,19 +166,19 @@ func TestToAPI(t *testing.T) {
 					false,
 				),
 			},
-			want: map[string]interface{}{},
+			want: map[string]any{},
 		},
 		{
 			name: "number and object",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "kafka",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "kafka",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"kafka_user_config": []interface{}{
-							map[string]interface{}{
-								"kafka": []interface{}{
-									map[string]interface{}{
+					map[string]any{
+						"kafka_user_config": []any{
+							map[string]any{
+								"kafka": []any{
+									map[string]any{
 										"log_cleaner_min_cleanable_ratio": 0.5,
 									},
 								},
@@ -195,8 +195,8 @@ func TestToAPI(t *testing.T) {
 					false,
 				),
 			},
-			want: map[string]interface{}{
-				"kafka": map[string]interface{}{
+			want: map[string]any{
+				"kafka": map[string]any{
 					"log_cleaner_min_cleanable_ratio": 0.5,
 				},
 			},
@@ -204,14 +204,14 @@ func TestToAPI(t *testing.T) {
 		{
 			name: "number and object no changes",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "kafka",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "kafka",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"kafka_user_config": []interface{}{
-							map[string]interface{}{
-								"kafka": []interface{}{
-									map[string]interface{}{
+					map[string]any{
+						"kafka_user_config": []any{
+							map[string]any{
+								"kafka": []any{
+									map[string]any{
 										"log_cleaner_min_cleanable_ratio": 0.5,
 									},
 								},
@@ -225,17 +225,17 @@ func TestToAPI(t *testing.T) {
 					false,
 				),
 			},
-			want: map[string]interface{}{},
+			want: map[string]any{},
 		},
 		{
 			name: "create_only string",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
 								"project_to_fork_from": "anotherprojectname",
 							},
 						},
@@ -249,19 +249,19 @@ func TestToAPI(t *testing.T) {
 					true,
 				),
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"project_to_fork_from": "anotherprojectname",
 			},
 		},
 		{
 			name: "create_only string during update",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
 								"project_to_fork_from": "anotherprojectname",
 							},
 						},
@@ -275,19 +275,19 @@ func TestToAPI(t *testing.T) {
 					false,
 				),
 			},
-			want: map[string]interface{}{},
+			want: map[string]any{},
 		},
 		{
 			name: "array",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
-								"namespaces": []interface{}{
-									map[string]interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
+								"namespaces": []any{
+									map[string]any{
 										"name": "default",
 										"type": "unaggregated",
 									},
@@ -308,7 +308,7 @@ func TestToAPI(t *testing.T) {
 				),
 			},
 			want: map[string]any{
-				"namespaces": []interface{}{
+				"namespaces": []any{
 					map[string]any{
 						"name": "default",
 						"type": "unaggregated",
@@ -319,14 +319,14 @@ func TestToAPI(t *testing.T) {
 		{
 			name: "array no changes in one key",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
-								"namespaces": []interface{}{
-									map[string]interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
+								"namespaces": []any{
+									map[string]any{
 										"name": "default",
 										"type": "unaggregated",
 									},
@@ -347,7 +347,7 @@ func TestToAPI(t *testing.T) {
 				),
 			},
 			want: map[string]any{
-				"namespaces": []interface{}{
+				"namespaces": []any{
 					map[string]any{
 						"name": "default",
 						"type": "unaggregated",
@@ -358,14 +358,14 @@ func TestToAPI(t *testing.T) {
 		{
 			name: "array no changes",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
-								"namespaces": []interface{}{
-									map[string]interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
+								"namespaces": []any{
+									map[string]any{
 										"name": "default",
 										"type": "unaggregated",
 									},
@@ -385,13 +385,13 @@ func TestToAPI(t *testing.T) {
 		{
 			name: "strings in many to one array",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
-								"ip_filter": []interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
+								"ip_filter": []any{
 									"0.0.0.0/0",
 									"10.20.0.0/16",
 								},
@@ -410,7 +410,7 @@ func TestToAPI(t *testing.T) {
 				),
 			},
 			want: map[string]any{
-				"ip_filter": []interface{}{
+				"ip_filter": []any{
 					"0.0.0.0/0",
 					"10.20.0.0/16",
 				},
@@ -419,13 +419,13 @@ func TestToAPI(t *testing.T) {
 		{
 			name: "strings in many to one array no changes",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
-								"ip_filter": []interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
+								"ip_filter": []any{
 									"0.0.0.0/0",
 									"10.20.0.0/16",
 								},
@@ -444,13 +444,13 @@ func TestToAPI(t *testing.T) {
 		{
 			name: "strings in many to one array unset",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
-								"ip_filter": []interface{}{},
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
+								"ip_filter": []any{},
 							},
 						},
 					},
@@ -473,18 +473,18 @@ func TestToAPI(t *testing.T) {
 		{
 			name: "objects in many to one array",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
-								"ip_filter_object": []interface{}{
-									map[string]interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
+								"ip_filter_object": []any{
+									map[string]any{
 										"description": "test",
 										"network":     "0.0.0.0/0",
 									},
-									map[string]interface{}{
+									map[string]any{
 										"description": "",
 										"network":     "10.20.0.0/16",
 									},
@@ -508,12 +508,12 @@ func TestToAPI(t *testing.T) {
 				),
 			},
 			want: map[string]any{
-				"ip_filter": []interface{}{
-					map[string]interface{}{
+				"ip_filter": []any{
+					map[string]any{
 						"description": "test",
 						"network":     "0.0.0.0/0",
 					},
-					map[string]interface{}{
+					map[string]any{
 						"description": "",
 						"network":     "10.20.0.0/16",
 					},
@@ -523,22 +523,22 @@ func TestToAPI(t *testing.T) {
 		{
 			name: "objects in many to one array no changes in one element",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
-								"ip_filter_object": []interface{}{
-									map[string]interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
+								"ip_filter_object": []any{
+									map[string]any{
 										"description": "test",
 										"network":     "0.0.0.0/0",
 									},
-									map[string]interface{}{
+									map[string]any{
 										"description": "",
 										"network":     "10.20.0.0/16",
 									},
-									map[string]interface{}{
+									map[string]any{
 										"description": "foo",
 										"network":     "1.3.3.7/32",
 									},
@@ -566,16 +566,16 @@ func TestToAPI(t *testing.T) {
 				),
 			},
 			want: map[string]any{
-				"ip_filter": []interface{}{
-					map[string]interface{}{
+				"ip_filter": []any{
+					map[string]any{
 						"description": "test",
 						"network":     "0.0.0.0/0",
 					},
-					map[string]interface{}{
+					map[string]any{
 						"description": "",
 						"network":     "10.20.0.0/16",
 					},
-					map[string]interface{}{
+					map[string]any{
 						"description": "foo",
 						"network":     "1.3.3.7/32",
 					},
@@ -585,18 +585,18 @@ func TestToAPI(t *testing.T) {
 		{
 			name: "objects in many to one array no changes",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
-								"ip_filter_object": []interface{}{
-									map[string]interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
+								"ip_filter_object": []any{
+									map[string]any{
 										"description": "test",
 										"network":     "0.0.0.0/0",
 									},
-									map[string]interface{}{
+									map[string]any{
 										"description": "",
 										"network":     "10.20.0.0/16",
 									},
@@ -616,23 +616,23 @@ func TestToAPI(t *testing.T) {
 		{
 			name: "migration from strings to objects in many to one array",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
-								"ip_filter": []interface{}{},
-								"ip_filter_object": []interface{}{
-									map[string]interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
+								"ip_filter": []any{},
+								"ip_filter_object": []any{
+									map[string]any{
 										"description": "test",
 										"network":     "0.0.0.0/0",
 									},
-									map[string]interface{}{
+									map[string]any{
 										"description": "",
 										"network":     "10.20.0.0/16",
 									},
-									map[string]interface{}{
+									map[string]any{
 										"description": "foo",
 										"network":     "1.3.3.7/32",
 									},
@@ -664,16 +664,16 @@ func TestToAPI(t *testing.T) {
 				),
 			},
 			want: map[string]any{
-				"ip_filter": []interface{}{
-					map[string]interface{}{
+				"ip_filter": []any{
+					map[string]any{
 						"description": "test",
 						"network":     "0.0.0.0/0",
 					},
-					map[string]interface{}{
+					map[string]any{
 						"description": "",
 						"network":     "10.20.0.0/16",
 					},
-					map[string]interface{}{
+					map[string]any{
 						"description": "foo",
 						"network":     "1.3.3.7/32",
 					},
@@ -683,17 +683,17 @@ func TestToAPI(t *testing.T) {
 		{
 			name: "strings in many to one array via one_of",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
-								"rules": []interface{}{
-									map[string]interface{}{
-										"mapping": []interface{}{
-											map[string]interface{}{
-												"namespaces": []interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
+								"rules": []any{
+									map[string]any{
+										"mapping": []any{
+											map[string]any{
+												"namespaces": []any{
 													"aggregated_*",
 												},
 											},
@@ -718,10 +718,10 @@ func TestToAPI(t *testing.T) {
 				),
 			},
 			want: map[string]any{
-				"rules": map[string]interface{}{
-					"mapping": []interface{}{
-						map[string]interface{}{
-							"namespaces": []interface{}{
+				"rules": map[string]any{
+					"mapping": []any{
+						map[string]any{
+							"namespaces": []any{
 								"aggregated_*",
 							},
 						},
@@ -732,17 +732,17 @@ func TestToAPI(t *testing.T) {
 		{
 			name: "strings in many to one array via one_of no changes",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
-								"rules": []interface{}{
-									map[string]interface{}{
-										"mapping": []interface{}{
-											map[string]interface{}{
-												"namespaces": []interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
+								"rules": []any{
+									map[string]any{
+										"mapping": []any{
+											map[string]any{
+												"namespaces": []any{
 													"aggregated_*",
 												},
 											},
@@ -764,18 +764,18 @@ func TestToAPI(t *testing.T) {
 		{
 			name: "objects in many to one array via one_of",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
-								"rules": []interface{}{
-									map[string]interface{}{
-										"mapping": []interface{}{
-											map[string]interface{}{
-												"namespaces_object": []interface{}{
-													map[string]interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
+								"rules": []any{
+									map[string]any{
+										"mapping": []any{
+											map[string]any{
+												"namespaces_object": []any{
+													map[string]any{
 														"resolution": "30s",
 														"retention":  "48h",
 													},
@@ -804,11 +804,11 @@ func TestToAPI(t *testing.T) {
 				),
 			},
 			want: map[string]any{
-				"rules": map[string]interface{}{
-					"mapping": []interface{}{
-						map[string]interface{}{
-							"namespaces": []interface{}{
-								map[string]interface{}{
+				"rules": map[string]any{
+					"mapping": []any{
+						map[string]any{
+							"namespaces": []any{
+								map[string]any{
 									"resolution": "30s",
 									"retention":  "48h",
 								},
@@ -821,18 +821,18 @@ func TestToAPI(t *testing.T) {
 		{
 			name: "objects in many to one array via one_of no changes in one key",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
-								"rules": []interface{}{
-									map[string]interface{}{
-										"mapping": []interface{}{
-											map[string]interface{}{
-												"namespaces_object": []interface{}{
-													map[string]interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
+								"rules": []any{
+									map[string]any{
+										"mapping": []any{
+											map[string]any{
+												"namespaces_object": []any{
+													map[string]any{
 														"resolution": "30s",
 														"retention":  "48h",
 													},
@@ -861,11 +861,11 @@ func TestToAPI(t *testing.T) {
 				),
 			},
 			want: map[string]any{
-				"rules": map[string]interface{}{
-					"mapping": []interface{}{
-						map[string]interface{}{
-							"namespaces": []interface{}{
-								map[string]interface{}{
+				"rules": map[string]any{
+					"mapping": []any{
+						map[string]any{
+							"namespaces": []any{
+								map[string]any{
 									"resolution": "30s",
 									"retention":  "48h",
 								},
@@ -878,18 +878,18 @@ func TestToAPI(t *testing.T) {
 		{
 			name: "objects in many to one array via one_of no changes",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
-								"rules": []interface{}{
-									map[string]interface{}{
-										"mapping": []interface{}{
-											map[string]interface{}{
-												"namespaces_object": []interface{}{
-													map[string]interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
+								"rules": []any{
+									map[string]any{
+										"mapping": []any{
+											map[string]any{
+												"namespaces_object": []any{
+													map[string]any{
 														"resolution": "30s",
 														"retention":  "48h",
 													},
@@ -913,19 +913,19 @@ func TestToAPI(t *testing.T) {
 		{
 			name: "migration from strings to objects in many to one array via one_of",
 			args: args{
-				st: userconfig.ServiceTypes,
-				n:  "m3db",
+				schemaType:  userconfig.ServiceTypes,
+				serviceName: "m3db",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"m3db_user_config": []interface{}{
-							map[string]interface{}{
-								"rules": []interface{}{
-									map[string]interface{}{
-										"mapping": []interface{}{
-											map[string]interface{}{
-												"namespaces": []interface{}{},
-												"namespaces_object": []interface{}{
-													map[string]interface{}{
+					map[string]any{
+						"m3db_user_config": []any{
+							map[string]any{
+								"rules": []any{
+									map[string]any{
+										"mapping": []any{
+											map[string]any{
+												"namespaces": []any{},
+												"namespaces_object": []any{
+													map[string]any{
 														"resolution": "30s",
 														"retention":  "48h",
 													},
@@ -957,11 +957,11 @@ func TestToAPI(t *testing.T) {
 				),
 			},
 			want: map[string]any{
-				"rules": map[string]interface{}{
-					"mapping": []interface{}{
-						map[string]interface{}{
-							"namespaces": []interface{}{
-								map[string]interface{}{
+				"rules": map[string]any{
+					"mapping": []any{
+						map[string]any{
+							"namespaces": []any{
+								map[string]any{
 									"resolution": "30s",
 									"retention":  "48h",
 								},
@@ -974,12 +974,12 @@ func TestToAPI(t *testing.T) {
 		{
 			name: "required",
 			args: args{
-				st: userconfig.IntegrationEndpointTypes,
-				n:  "rsyslog",
+				schemaType:  userconfig.IntegrationEndpointTypes,
+				serviceName: "rsyslog",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"rsyslog_user_config": []interface{}{
-							map[string]interface{}{
+					map[string]any{
+						"rsyslog_user_config": []any{
+							map[string]any{
 								"format":  "rfc5424",
 								"port":    514,
 								"server":  "rsyslog-server",
@@ -1000,7 +1000,7 @@ func TestToAPI(t *testing.T) {
 					false,
 				),
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"format":  "rfc5424",
 				"port":    514,
 				"server":  "rsyslog-server",
@@ -1011,22 +1011,22 @@ func TestToAPI(t *testing.T) {
 		{
 			name: "nested arrays no changes",
 			args: args{
-				st: userconfig.IntegrationTypes,
-				n:  "clickhouse_kafka",
+				schemaType:  userconfig.IntegrationTypes,
+				serviceName: "clickhouse_kafka",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"clickhouse_kafka_user_config": []interface{}{
-							map[string]interface{}{
-								"tables": []interface{}{
-									map[string]interface{}{
+					map[string]any{
+						"clickhouse_kafka_user_config": []any{
+							map[string]any{
+								"tables": []any{
+									map[string]any{
 										"name": "foo",
-										"topics": []interface{}{
-											map[string]interface{}{
+										"topics": []any{
+											map[string]any{
 												"name": "bar",
 											},
 										},
-										"columns": []interface{}{
-											map[string]interface{}{
+										"columns": []any{
+											map[string]any{
 												"name": "baz",
 												"type": "UInt16",
 											},
@@ -1047,17 +1047,17 @@ func TestToAPI(t *testing.T) {
 					true,
 				),
 			},
-			want: map[string]interface{}{
-				"tables": []interface{}{
-					map[string]interface{}{
+			want: map[string]any{
+				"tables": []any{
+					map[string]any{
 						"name": "foo",
-						"topics": []interface{}{
-							map[string]interface{}{
+						"topics": []any{
+							map[string]any{
 								"name": "bar",
 							},
 						},
-						"columns": []interface{}{
-							map[string]interface{}{
+						"columns": []any{
+							map[string]any{
 								"name": "baz",
 								"type": "UInt16",
 							},
@@ -1069,22 +1069,22 @@ func TestToAPI(t *testing.T) {
 		{
 			name: "nested arrays change in top level element",
 			args: args{
-				st: userconfig.IntegrationTypes,
-				n:  "clickhouse_kafka",
+				schemaType:  userconfig.IntegrationTypes,
+				serviceName: "clickhouse_kafka",
 				d: newTestResourceData(
-					map[string]interface{}{
-						"clickhouse_kafka_user_config": []interface{}{
-							map[string]interface{}{
-								"tables": []interface{}{
-									map[string]interface{}{
+					map[string]any{
+						"clickhouse_kafka_user_config": []any{
+							map[string]any{
+								"tables": []any{
+									map[string]any{
 										"name": "foo",
-										"topics": []interface{}{
-											map[string]interface{}{
+										"topics": []any{
+											map[string]any{
 												"name": "bar",
 											},
 										},
-										"columns": []interface{}{
-											map[string]interface{}{
+										"columns": []any{
+											map[string]any{
 												"name": "baz",
 												"type": "UInt16",
 											},
@@ -1107,17 +1107,17 @@ func TestToAPI(t *testing.T) {
 					false,
 				),
 			},
-			want: map[string]interface{}{
-				"tables": []interface{}{
-					map[string]interface{}{
+			want: map[string]any{
+				"tables": []any{
+					map[string]any{
 						"name": "foo",
-						"topics": []interface{}{
-							map[string]interface{}{
+						"topics": []any{
+							map[string]any{
 								"name": "bar",
 							},
 						},
-						"columns": []interface{}{
-							map[string]interface{}{
+						"columns": []any{
+							map[string]any{
 								"name": "baz",
 								"type": "UInt16",
 							},
@@ -1130,7 +1130,7 @@ func TestToAPI(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, _ := ToAPI(tt.args.st, tt.args.n, tt.args.d)
+			got, _ := ToAPI(tt.args.schemaType, tt.args.serviceName, tt.args.d)
 
 			if !cmp.Equal(got, tt.want) {
 				t.Errorf(cmp.Diff(tt.want, got))

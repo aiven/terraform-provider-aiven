@@ -11,103 +11,105 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// SchemaType is a custom type that represents a Terraform schema type.
+// SchemaType represents a custom type for Terraform schema.
 type SchemaType int
 
 const (
-	// ServiceTypes is a constant that represents service schema type.
+	// ServiceTypes represents the service schema type.
 	ServiceTypes SchemaType = iota
 
-	// IntegrationTypes is a constant that represents integration schema type.
+	// IntegrationTypes represents the integration schema type.
 	IntegrationTypes
 
-	// IntegrationEndpointTypes is a constant that represents integration endpoint schema type.
+	// IntegrationEndpointTypes represents the integration endpoint schema type.
 	IntegrationEndpointTypes
 )
 
-// cachedRepresentationMaps is a map of cached representation maps.
-var cachedRepresentationMaps = make(map[SchemaType]map[string]interface{}, 3)
+var (
+	// cachedRepresentationMaps is a map of cached representation maps.
+	cachedRepresentationMaps = make(map[SchemaType]map[string]any, 3)
 
-// cachedRepresentationMapsMutex is a mutex for the cached representation maps.
-var cachedRepresentationMapsMutex = sync.Mutex{}
+	// cachedRepresentationMapsMutex is a mutex for the cached representation maps.
+	cachedRepresentationMapsMutex = sync.Mutex{}
 
-// typeSuffixRegExp is a regular expression that matches type suffixes.
-var typeSuffixRegExp = regexp.MustCompile(`^.*_(boolean|integer|number|string|array|object)$`)
+	// typeSuffixRegExp is a regular expression that matches type suffixes.
+	typeSuffixRegExp = regexp.MustCompile(`^.*_(boolean|integer|number|string|array|object)$`)
+)
 
-// CachedRepresentationMap is a function that returns a cached representation map.
-func CachedRepresentationMap(st SchemaType) (map[string]interface{}, error) {
+// CachedRepresentationMap returns a cached representation map for a given schema type.
+func CachedRepresentationMap(schemaType SchemaType) (map[string]any, error) {
 	if _, ok := map[SchemaType]struct{}{
 		ServiceTypes:             {},
 		IntegrationTypes:         {},
 		IntegrationEndpointTypes: {},
-	}[st]; !ok {
-		return nil, fmt.Errorf("unknown schema type: %d", st)
+	}[schemaType]; !ok {
+		return nil, fmt.Errorf("unknown schema type: %d", schemaType)
 	}
 
-	switch st {
+	switch schemaType {
 	case ServiceTypes:
-		return representationToMap(st, dist.ServiceTypes)
+		return representationToMap(schemaType, dist.ServiceTypes)
 	case IntegrationTypes:
-		return representationToMap(st, dist.IntegrationTypes)
+		return representationToMap(schemaType, dist.IntegrationTypes)
 	case IntegrationEndpointTypes:
-		return representationToMap(st, dist.IntegrationEndpointTypes)
+		return representationToMap(schemaType, dist.IntegrationEndpointTypes)
 	default:
-		return nil, fmt.Errorf("unknown schema type %d", st)
+		return nil, fmt.Errorf("unknown schema type %d", schemaType)
 	}
 }
 
 // representationToMap converts a YAML representation of a Terraform schema to a map.
-func representationToMap(st SchemaType, r []byte) (map[string]interface{}, error) {
+func representationToMap(schemaType SchemaType, representation []byte) (map[string]any, error) {
 	cachedRepresentationMapsMutex.Lock()
 	defer cachedRepresentationMapsMutex.Unlock()
 
-	if v, ok := cachedRepresentationMaps[st]; ok {
-		return v, nil
+	if cachedMap, ok := cachedRepresentationMaps[schemaType]; ok {
+		return cachedMap, nil
 	}
 
-	var m map[string]interface{}
-	if err := yaml.Unmarshal(r, &m); err != nil {
+	var mapRepresentation map[string]any
+	if err := yaml.Unmarshal(representation, &mapRepresentation); err != nil {
 		return nil, err
 	}
 
-	cachedRepresentationMaps[st] = m
-	return m, nil
+	cachedRepresentationMaps[schemaType] = mapRepresentation
+	return mapRepresentation, nil
 }
 
-// TerraformTypes is a function that converts schema representation types to Terraform types.
-func TerraformTypes(t []string) ([]string, []string, error) {
-	var r, ar []string
+// TerraformTypes converts schema representation types to Terraform types.
+func TerraformTypes(types []string) ([]string, []string, error) {
+	var terraformTypes, aivenTypes []string
 
-	for _, v := range t {
-		switch v {
+	for _, typeValue := range types {
+		switch typeValue {
 		case "null":
-			// TODO: We should probably handle this case.
-			//  This is a special case where the value can be null.
-			//  There should be a default value set for this case.
+			// TODO: Handle this case.
+			// This is a special case where the value can be null.
+			// There should be a default value set for this case.
 			continue
 		case "boolean":
-			r = append(r, "TypeBool")
+			terraformTypes = append(terraformTypes, "TypeBool")
 		case "integer":
-			r = append(r, "TypeInt")
+			terraformTypes = append(terraformTypes, "TypeInt")
 		case "number":
-			r = append(r, "TypeFloat")
+			terraformTypes = append(terraformTypes, "TypeFloat")
 		case "string":
-			r = append(r, "TypeString")
+			terraformTypes = append(terraformTypes, "TypeString")
 		case "array", "object":
-			r = append(r, "TypeList")
+			terraformTypes = append(terraformTypes, "TypeList")
 		default:
-			return nil, nil, fmt.Errorf("unknown type: %s", v)
+			return nil, nil, fmt.Errorf("unknown type: %s", typeValue)
 		}
 
-		ar = append(ar, v)
+		aivenTypes = append(aivenTypes, typeValue)
 	}
 
-	return r, ar, nil
+	return terraformTypes, aivenTypes, nil
 }
 
-// isTerraformTypePrimitive is a function that checks if a Terraform type is a primitive type.
-func isTerraformTypePrimitive(t string) bool {
-	switch t {
+// isTerraformTypePrimitive checks if a Terraform type is a primitive type.
+func isTerraformTypePrimitive(terraformType string) bool {
+	switch terraformType {
 	case "TypeBool", "TypeInt", "TypeFloat", "TypeString":
 		return true
 	default:
@@ -115,127 +117,135 @@ func isTerraformTypePrimitive(t string) bool {
 	}
 }
 
-// mustStringSlice is a function that converts an interface to a slice of strings.
-func mustStringSlice(v interface{}) ([]string, error) {
-	va, ok := v.([]interface{})
+// mustStringSlice converts an interface to a slice of strings.
+func mustStringSlice(value any) ([]string, error) {
+	valueAsSlice, ok := value.([]any)
 	if !ok {
-		return nil, fmt.Errorf("not a slice: %#v", v)
+		return nil, fmt.Errorf("not a slice: %#v", value)
 	}
 
-	r := make([]string, len(va))
+	stringSlice := make([]string, len(valueAsSlice))
 
-	for k, v := range va {
-		va, ok := v.(string)
+	for index, value := range valueAsSlice {
+		stringValue, ok := value.(string)
 		if !ok {
-			return nil, fmt.Errorf("value is not a string: %#v", v)
+			return nil, fmt.Errorf("value is not a string: %#v", value)
 		}
 
-		r[k] = va
+		stringSlice[index] = stringValue
 	}
 
-	return r, nil
+	return stringSlice, nil
 }
 
-// SlicedString is a function that accepts a string or a slice of strings and returns a slice of strings.
-func SlicedString(v interface{}) []string {
-	va, ok := v.([]interface{})
+// SlicedString accepts a string or a slice of strings and returns a slice of strings.
+func SlicedString(value any) []string {
+	valueAsSlice, ok := value.([]any)
 	if ok {
-		vas, err := mustStringSlice(va)
+		stringSlice, err := mustStringSlice(valueAsSlice)
 		if err != nil {
 			panic(err)
 		}
 
-		return vas
+		return stringSlice
 	}
 
-	vsa, ok := v.(string)
+	valueAsString, ok := value.(string)
 	if !ok {
-		panic(fmt.Sprintf("value is not a string or a slice of strings: %#v", v))
+		panic(fmt.Sprintf("value is not a string or a slice of strings: %#v", value))
 	}
 
-	return []string{vsa}
+	return []string{valueAsString}
 }
 
-// constDescriptionReplaceables is a slice of strings that are replaced in descriptions.
+// constDescriptionReplaceables is a map of strings that are replaced in descriptions.
 var constDescriptionReplaceables = map[string]string{
 	"DEPRECATED: ":                 "",
 	"This setting is deprecated. ": "",
 	"[seconds]":                    "(seconds)",
 }
 
-// descriptionForProperty is a function that returns the description for a property.
-func descriptionForProperty(p map[string]interface{}, t string) (id bool, d string) {
-	if da, ok := p["description"].(string); ok {
-		d = da
+// descriptionForProperty returns the description for a property.
+func descriptionForProperty(
+	property map[string]any,
+	terraformType string,
+) (isDeprecated bool, description string) {
+	if descriptionValue, ok := property["description"].(string); ok {
+		description = descriptionValue
 	} else {
-		d = p["title"].(string)
+		description = property["title"].(string)
 	}
 
-	if strings.Contains(strings.ToLower(d), "deprecated") {
-		id = true
-	}
+	isDeprecated = strings.Contains(strings.ToLower(description), "deprecated")
 
-	// sc is short for "should capitalize".
-	sc := false
+	// shouldCapitalize is a flag indicating if the first letter should be capitalized.
+	shouldCapitalize := false
 
 	// Some descriptions have a built-in deprecation notice, so we need to remove it.
-	for k, v := range constDescriptionReplaceables {
-		pd := d
+	for old, new := range constDescriptionReplaceables {
+		previousDescription := description
 
-		d = strings.ReplaceAll(d, k, v)
+		description = strings.ReplaceAll(description, old, new)
 
-		if pd != d {
-			sc = true
+		if previousDescription != description {
+			shouldCapitalize = true
 		}
 	}
 
-	b := Desc(d)
+	descriptionBuilder := Desc(description)
 
-	if sc {
-		b = b.ForceFirstLetterCapitalization()
+	if shouldCapitalize {
+		descriptionBuilder = descriptionBuilder.ForceFirstLetterCapitalization()
 	}
 
-	if def, ok := p["default"]; ok && isTerraformTypePrimitive(t) {
-		skip := false
+	if defaultValue, ok := property["default"]; ok && isTerraformTypePrimitive(terraformType) {
+		skipDefaultValue := false
 
-		if adef, ok := def.(string); ok {
-			if adef == "" {
-				skip = true
+		if defaultValueAsString, ok := defaultValue.(string); ok {
+			if defaultValueAsString == "" {
+				skipDefaultValue = true
 			}
 		}
 
-		if !skip {
-			b = b.DefaultValue(def)
+		if !skipDefaultValue {
+			descriptionBuilder = descriptionBuilder.DefaultValue(defaultValue)
 		}
 	}
 
-	d = b.Build()
+	description = descriptionBuilder.Build()
 
-	return id, d
+	return isDeprecated, description
 }
 
-// EncodeKey is a function that encodes a key for a Terraform schema.
-func EncodeKey(k string) string {
-	return strings.ReplaceAll(k, ".", "__dot__")
+// EncodeKey encodes a key for a Terraform schema.
+func EncodeKey(key string) string {
+	return strings.ReplaceAll(key, ".", "__dot__")
 }
 
-// DecodeKey is a function that decodes a key for a Terraform schema.
-func DecodeKey(k string) string {
-	return strings.ReplaceAll(k, "__dot__", ".")
+// DecodeKey decodes a key for a Terraform schema.
+func DecodeKey(key string) string {
+	return strings.ReplaceAll(key, "__dot__", ".")
 }
 
-// IsKeyTyped is a function that checks if a key is typed, i.e. has a type suffix in it.
-func IsKeyTyped(k string) bool {
-	return typeSuffixRegExp.MatchString(k)
+// IsKeyTyped checks if a key is typed, i.e., has a type suffix in it.
+func IsKeyTyped(key string) bool {
+	return typeSuffixRegExp.MatchString(key)
 }
 
-// SliceToKeyedMap is a function that converts a slice of strings to a map.
-func SliceToKeyedMap(s []interface{}) map[string]struct{} {
-	r := make(map[string]struct{})
+// SliceToKeyedMap converts a slice of any type to a map with keys of type string.
+// It expects that all elements in the slice are of type string, otherwise it will panic.
+// The values in the map are of type struct{} to minimize memory usage, as we are only interested in the keys.
+func SliceToKeyedMap(slice []any) map[string]struct{} {
+	// Initialize an empty map with string keys and struct{} values.
+	result := make(map[string]struct{})
 
-	for _, v := range s {
-		r[v.(string)] = struct{}{}
+	// Iterate through each element in the slice.
+	for _, value := range slice {
+		// Assert that the element is of type string, and then use it as a key in the map.
+		// The value associated with each key is an empty struct{}.
+		result[value.(string)] = struct{}{}
 	}
 
-	return r
+	// Return the resulting map.
+	return result
 }
