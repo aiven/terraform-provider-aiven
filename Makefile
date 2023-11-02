@@ -1,4 +1,4 @@
-.PHONY: build build-dev test test-unit test-acc test-examples lint lint-go lint-test lint-docs fmt fmt-test fmt-imports clean clean-tools clean-examples sweep generate gen-go docs
+.PHONY: build build-dev debug test test-unit test-acc test-examples lint lint-go lint-test lint-docs fmt fmt-test fmt-imports clean clean-tools clean-examples sweep generate gen-go docs
 
 #################################################
 # Global
@@ -34,6 +34,7 @@ $(TERRAFMT): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
 # See https://github.com/hashicorp/terraform/blob/main/tools/protobuf-compile/protobuf-compile.go#L215
 ARCH ?= $(shell $(GO) env GOOS GOARCH | tr '\n' '_' | sed '$$s/_$$//')
 BUILD_DEV_DIR ?= ~/.terraform.d/plugins/registry.terraform.io/aiven-dev/aiven/0.0.0+dev/$(ARCH)
+BUILD_DEV_BIN ?= $(BUILD_DEV_DIR)/terraform-provider-aiven_v0.0.0+dev
 
 $(BUILD_DEV_DIR):
 	mkdir -p $(BUILD_DEV_DIR)
@@ -57,7 +58,14 @@ build:
 #  }
 #}
 build-dev: $(BUILD_DEV_DIR)
-	$(GO) build -o $(BUILD_DEV_DIR)/terraform-provider-aiven_v0.0.0+dev
+	$(GO) build -gcflags='all=-N -l' -o $(BUILD_DEV_BIN)
+
+#################################################
+# Debug
+#################################################
+
+debug: build-dev
+	$(BUILD_DEV_BIN) -debug
 
 #################################################
 # Test

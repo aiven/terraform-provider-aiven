@@ -8,6 +8,8 @@ nav_order: 1
 
 ## [X.Y.Z] - YYYY-MM-DD
 
+- Fix unmarshalling empty userconfig crash
+
 ## [4.9.3] - 2023-10-27
 
 - Deprecating `project_user`, `account_team` and `account_team_member` resources
