@@ -9,7 +9,7 @@ require (
 	github.com/docker/go-units v0.5.0
 	github.com/ettle/strcase v0.1.1
 	github.com/google/go-cmp v0.6.0
-	github.com/gruntwork-io/terratest v0.46.4
+	github.com/gruntwork-io/terratest v0.46.5
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/terraform-plugin-framework v1.4.2
 	github.com/hashicorp/terraform-plugin-go v0.19.0
