@@ -325,7 +325,10 @@ func unmarshalUserConfig(src interface{}) ([]map[string]interface{}, error) {
 		return nil, fmt.Errorf("%w: expected []interface{}", errInvalidStateType)
 	}
 
-	if len(configList) == 0 {
+	// For some reason, it looks like this is never empty, even if the user config is not set.
+	// We will keep this check here just in case, but the actual check that breaks the code is
+	// the one where we check if the first element is nil.
+	if len(configList) == 0 || configList[0] == nil {
 		return nil, nil
 	}
 
