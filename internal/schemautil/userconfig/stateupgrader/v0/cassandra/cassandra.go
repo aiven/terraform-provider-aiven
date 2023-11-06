@@ -73,10 +73,10 @@ func ResourceCassandra() *schema.Resource {
 
 func ResourceCassandraStateUpgrade(
 	_ context.Context,
-	rawState map[string]interface{},
-	_ interface{},
-) (map[string]interface{}, error) {
-	userConfigSlice, ok := rawState["cassandra_user_config"].([]interface{})
+	rawState map[string]any,
+	_ any,
+) (map[string]any, error) {
+	userConfigSlice, ok := rawState["cassandra_user_config"].([]any)
 	if !ok {
 		return rawState, nil
 	}
@@ -85,7 +85,7 @@ func ResourceCassandraStateUpgrade(
 		return rawState, nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]interface{})
+	userConfig, ok := userConfigSlice[0].(map[string]any)
 	if !ok {
 		return rawState, nil
 	}
@@ -98,9 +98,9 @@ func ResourceCassandraStateUpgrade(
 		return rawState, err
 	}
 
-	cassandraSlice, ok := userConfig["cassandra"].([]interface{})
+	cassandraSlice, ok := userConfig["cassandra"].([]any)
 	if ok && len(cassandraSlice) > 0 {
-		cassandra, ok := cassandraSlice[0].(map[string]interface{})
+		cassandra, ok := cassandraSlice[0].(map[string]any)
 		if ok {
 			err := typeupgrader.Map(cassandra, map[string]string{
 				"batch_size_fail_threshold_in_kb": "int",
@@ -112,9 +112,9 @@ func ResourceCassandraStateUpgrade(
 		}
 	}
 
-	privateAccessSlice, ok := userConfig["private_access"].([]interface{})
+	privateAccessSlice, ok := userConfig["private_access"].([]any)
 	if ok && len(privateAccessSlice) > 0 {
-		privateAccess, ok := privateAccessSlice[0].(map[string]interface{})
+		privateAccess, ok := privateAccessSlice[0].(map[string]any)
 		if ok {
 			err = typeupgrader.Map(privateAccess, map[string]string{
 				"prometheus": "bool",
@@ -125,9 +125,9 @@ func ResourceCassandraStateUpgrade(
 		}
 	}
 
-	publicAccessSlice, ok := userConfig["public_access"].([]interface{})
+	publicAccessSlice, ok := userConfig["public_access"].([]any)
 	if ok && len(publicAccessSlice) > 0 {
-		publicAccess, ok := publicAccessSlice[0].(map[string]interface{})
+		publicAccess, ok := publicAccessSlice[0].(map[string]any)
 		if ok {
 			err := typeupgrader.Map(publicAccess, map[string]string{
 				"prometheus": "bool",

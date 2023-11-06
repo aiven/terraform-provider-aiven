@@ -13,13 +13,13 @@ import (
 // resourceDatable is an interface that allows to get the resource data from the schema.
 // This is needed to be able to test the conversion functions. See schema.ResourceData for more.
 type resourceDatable interface {
-	GetOk(string) (interface{}, bool)
+	GetOk(string) (any, bool)
 	HasChange(string) bool
 	IsNewResource() bool
 }
 
 var (
-	// dotAnyDotNumberRegExp is a regular expression that matches a string that matches:
+	// keyPathEndingInNumberRegExp is a regular expression that matches a string that matches:
 	//   1. key.1.key2.0.key3.2.key.5
 	//   2. key123.0
 	//   3. key.1
@@ -31,9 +31,9 @@ var (
 	//   3. key.abc
 	//   4. .1
 	//   5. key.
-	dotAnyDotNumberRegExp = regexp.MustCompile(`.+\.[0-9]$`)
+	keyPathEndingInNumberRegExp = regexp.MustCompile(`.+\.[0-9]$`)
 
-	// dotNumberEOLOrDotRegExp is a regular expression that matches a string that matches:
+	// dotSeparatedNumberRegExp is a regular expression that matches a string that matches:
 	//   1. .5 (match: .5)
 	//   2. .9. (match: .9.)
 	//   3. 0.1 (match: .1)
@@ -45,58 +45,58 @@ var (
 	//   2. 1.
 	//   3. 1..
 	//   4. .5a
-	dotNumberEOLOrDotRegExp = regexp.MustCompile(`\.\d($|\.)`)
+	dotSeparatedNumberRegExp = regexp.MustCompile(`\.\d($|\.)`)
 )
 
 // arrayItemToAPI is a function that converts array property of Terraform user configuration schema to API
 // compatible format.
 func arrayItemToAPI(
-	n string,
-	fk []string,
-	k string,
-	v []interface{},
-	i map[string]interface{},
-	d resourceDatable,
-) (interface{}, bool, error) {
-	var res []interface{}
+	serviceName string,
+	fullKeyPath []string,
+	arrayKey string,
+	arrayValues []any,
+	itemMap map[string]any,
+	resourceData resourceDatable,
+) (any, bool, error) {
+	var convertedValues []any
 
-	if len(v) == 0 {
+	if len(arrayValues) == 0 {
 		return json.RawMessage("[]"), false, nil
 	}
 
-	fks := strings.Join(fk, ".")
+	fullKeyString := strings.Join(fullKeyPath, ".")
 
 	// TODO: Remove when this is fixed on backend.
-	if k == "additional_backup_regions" {
-		return res, true, nil
+	if arrayKey == "additional_backup_regions" {
+		return convertedValues, true, nil
 	}
 
-	ii, ok := i["items"].(map[string]interface{})
+	itemMapItems, ok := itemMap["items"].(map[string]any)
 	if !ok {
-		return nil, false, fmt.Errorf("%s (item): items key not found", fks)
+		return nil, false, fmt.Errorf("%s (item): items key not found", fullKeyString)
 	}
 
-	var iit string
+	var itemType string
 
 	// If the key has a type suffix, we use it to determine the type of the value.
-	if userconfig.IsKeyTyped(k) {
-		iit = k[strings.LastIndexByte(k, '_')+1:]
+	if userconfig.IsKeyTyped(arrayKey) {
+		itemType = arrayKey[strings.LastIndexByte(arrayKey, '_')+1:]
 
 		// Find the one_of item that matches the type.
-		if oo, ok := ii["one_of"]; ok {
-			ooa, ok := oo.([]interface{})
+		if oneOfItems, ok := itemMapItems["one_of"]; ok {
+			oneOfItemsSlice, ok := oneOfItems.([]any)
 			if !ok {
-				return nil, false, fmt.Errorf("%s (items.one_of): not a slice", fks)
+				return nil, false, fmt.Errorf("%s (items.one_of): not a slice", fullKeyString)
 			}
 
-			for i, vn := range ooa {
-				vna, ok := vn.(map[string]interface{})
+			for i, oneOfItem := range oneOfItemsSlice {
+				oneOfItemMap, ok := oneOfItem.(map[string]any)
 				if !ok {
-					return nil, false, fmt.Errorf("%s (items.one_of.%d): not a map", fks, i)
+					return nil, false, fmt.Errorf("%s (items.one_of.%d): not a map", fullKeyString, i)
 				}
 
-				if ot, ok := vna["type"]; ok && ot == iit {
-					ii = vna
+				if itemTypeValue, ok := oneOfItemMap["type"]; ok && itemTypeValue == itemType {
+					itemMapItems = oneOfItemMap
 
 					break
 				}
@@ -104,226 +104,214 @@ func arrayItemToAPI(
 		}
 	} else {
 		// TODO: Remove this statement and the branch below it with the next major version.
-		_, ok := ii["one_of"]
+		_, ok := itemMapItems["one_of"]
 
-		if k == "ip_filter" || (ok && k == "namespaces") {
-			iit = "string"
+		if arrayKey == "ip_filter" || (ok && arrayKey == "namespaces") {
+			itemType = "string"
 		} else {
-			_, aiits, err := userconfig.TerraformTypes(userconfig.SlicedString(ii["type"]))
+			_, itemTypes, err := userconfig.TerraformTypes(userconfig.SlicedString(itemMapItems["type"]))
 			if err != nil {
 				return nil, false, err
 			}
 
-			if len(aiits) > 1 {
-				return nil, false, fmt.Errorf("%s (type): multiple types", fks)
+			if len(itemTypes) > 1 {
+				return nil, false, fmt.Errorf("%s (type): multiple types", fullKeyString)
 			}
 
-			iit = aiits[0]
+			itemType = itemTypes[0]
 		}
 	}
 
-	for i, vn := range v {
+	for i, arrayValue := range arrayValues {
 		// We only accept slices there, so we need to nest the value into a slice if the value is of object type.
-		if iit == "object" {
-			vn = []interface{}{vn}
+		if itemType == "object" {
+			arrayValue = []any{arrayValue}
 		}
 
-		vnc, o, err := itemToAPI(
-			n,
-			iit,
-			append(fk, fmt.Sprintf("%d", i)),
-			fmt.Sprintf("%s.%d", k, i),
-			vn,
-			ii,
+		convertedValue, omit, err := itemToAPI(
+			serviceName,
+			itemType,
+			append(fullKeyPath, fmt.Sprintf("%d", i)),
+			fmt.Sprintf("%s.%d", arrayKey, i),
+			arrayValue,
+			itemMapItems,
 			false,
-			d,
+			resourceData,
 		)
 		if err != nil {
 			return nil, false, err
 		}
 
-		if !o {
-			res = append(res, vnc)
+		if !omit {
+			convertedValues = append(convertedValues, convertedValue)
 		}
 	}
 
-	return res, false, nil
+	return convertedValues, false, nil
 }
 
 // objectItemToAPI is a function that converts object property of Terraform user configuration schema to API
 // compatible format.
 func objectItemToAPI(
-	n string,
-	fk []string,
-	v []interface{},
-	i map[string]interface{},
-	d resourceDatable,
-) (interface{}, bool, error) {
-	var res interface{}
+	serviceName string,
+	fullKeyPath []string,
+	objectValues []any,
+	itemSchema map[string]any,
+	resourceData resourceDatable,
+) (any, bool, error) {
+	var result any
 
-	fks := strings.Join(fk, ".")
+	fullKeyString := strings.Join(fullKeyPath, ".")
 
-	fv := v[0]
+	firstValue := objectValues[0]
 
 	// Object with only "null" fields becomes nil
 	// Which can't be cast into a map
-	if fv == nil {
-		return res, true, nil
+	if firstValue == nil {
+		return result, true, nil
 	}
 
-	fva, ok := fv.(map[string]interface{})
+	firstValueAsMap, ok := firstValue.(map[string]any)
 	if !ok {
-		return nil, false, fmt.Errorf("%s: not a map", fks)
+		return nil, false, fmt.Errorf("%s: not a map", fullKeyString)
 	}
 
-	ip, ok := i["properties"].(map[string]interface{})
+	itemProperties, ok := itemSchema["properties"].(map[string]any)
 	if !ok {
-		return nil, false, fmt.Errorf("%s (item): properties key not found", fks)
+		return nil, false, fmt.Errorf("%s (item): properties key not found", fullKeyString)
 	}
 
-	reqs := map[string]struct{}{}
+	requiredFields := map[string]struct{}{}
 
-	if sreqs, ok := i["required"].([]interface{}); ok {
-		reqs = userconfig.SliceToKeyedMap(sreqs)
+	if schemaRequiredFields, ok := itemSchema["required"].([]any); ok {
+		requiredFields = userconfig.SliceToKeyedMap(schemaRequiredFields)
 	}
 
-	if !dotAnyDotNumberRegExp.MatchString(fks) {
-		fk = append(fk, "0")
+	if !keyPathEndingInNumberRegExp.MatchString(fullKeyString) {
+		fullKeyPath = append(fullKeyPath, "0")
 	}
 
-	res, err := propsToAPI(n, fk, fva, ip, reqs, d)
+	result, err := propsToAPI(
+		serviceName,
+		fullKeyPath,
+		firstValueAsMap,
+		itemProperties,
+		requiredFields,
+		resourceData,
+	)
 	if err != nil {
 		return nil, false, err
 	}
 
-	return res, false, nil
+	return result, false, nil
 }
 
 // itemToAPI is a function that converts property of Terraform user configuration schema to API compatible format.
 func itemToAPI(
-	n string,
-	t string,
-	fk []string,
-	k string,
-	v interface{},
-	i map[string]interface{},
-	ireq bool,
-	d resourceDatable,
-) (interface{}, bool, error) {
-	res := v
+	serviceName string,
+	itemType string,
+	fullKeyPath []string,
+	key string,
+	value any,
+	inputMap map[string]any,
+	isRequired bool,
+	resourceData resourceDatable,
+) (any, bool, error) {
+	result := value
 
-	fks := strings.Join(fk, ".")
+	fullKeyString := strings.Join(fullKeyPath, ".")
 
-	// We omit the value if it has no changes in the Terraform user configuration.
-	o := !d.HasChange(fks)
+	omitValue := !resourceData.HasChange(fullKeyString)
 
-	// We need to make sure that if there were any changes to the parent object, we also send the value, even if it
-	// was not changed.
-	//
-	// We check that there are more than three elements in the fk slice, because we don't want to send the value if
-	// the parent object is the root object.
-	if o && len(fk) > 3 {
-		// We find the last index of the dot with a number after it, because we want to check if the parent object
-		// was changed.
-		match := dotNumberEOLOrDotRegExp.FindAllStringIndex(fks, -1)
-		if match != nil {
-			// We check if fks exists, i.e. it was set by the user, because if it was not set, we don't want to send
-			// the value.
-			_, e := d.GetOk(fks)
+	if omitValue && len(fullKeyPath) > 3 {
+		lastDotWithNumberIndex := dotSeparatedNumberRegExp.FindAllStringIndex(fullKeyString, -1)
+		if lastDotWithNumberIndex != nil {
+			_, exists := resourceData.GetOk(fullKeyString)
+			lengthOfMatches := len(lastDotWithNumberIndex)
 
-			// We get the length of the match slice to use it in the formula: lmatch - (lmatch - 1), which gives us
-			// the index of the last match, which is the parent object. We then get the index of the parent object
-			// in the fk slice and use it to get the key of the parent object.
-			lmatch := len(match)
-
-			// Since Terraform thinks that new array elements are added without "existing", we also send the value if
-			// it does not exist, but is not empty either.
-			if (e || !reflect.ValueOf(v).IsZero()) && d.HasChange(fks[:match[lmatch-(lmatch-1)][0]]) {
-				o = false
+			if (exists || !reflect.ValueOf(value).IsZero()) &&
+				resourceData.HasChange(fullKeyString[:lastDotWithNumberIndex[lengthOfMatches-(lengthOfMatches-1)][0]]) {
+				omitValue = false
 			}
 		}
 	}
 
-	// We need to make sure that if the value is required, we send it, even if it has no changes in the Terraform.
-	if o && ireq {
-		o = false
+	if omitValue && isRequired {
+		omitValue = false
 	}
 
-	// Assert the type of the value to match.
-	switch t {
+	switch itemType {
 	case "boolean":
-		if _, ok := v.(bool); !ok {
-			return nil, false, fmt.Errorf("%s: not a boolean", fks)
+		if _, ok := value.(bool); !ok {
+			return nil, false, fmt.Errorf("%s: not a boolean", fullKeyString)
 		}
 	case "integer":
-		if _, ok := v.(int); !ok {
-			return nil, false, fmt.Errorf("%s: not an integer", fks)
+		if _, ok := value.(int); !ok {
+			return nil, false, fmt.Errorf("%s: not an integer", fullKeyString)
 		}
 	case "number":
-		if _, ok := v.(float64); !ok {
-			return nil, false, fmt.Errorf("%s: not a number", fks)
+		if _, ok := value.(float64); !ok {
+			return nil, false, fmt.Errorf("%s: not a number", fullKeyString)
 		}
 	case "string":
-		if _, ok := v.(string); !ok {
-			return nil, false, fmt.Errorf("%s: not a string", fks)
+		if _, ok := value.(string); !ok {
+			return nil, false, fmt.Errorf("%s: not a string", fullKeyString)
 		}
 	case "array", "object":
-		// Arrays and objects are handled separately.
-
-		va, ok := v.([]interface{})
+		valueArray, ok := value.([]any)
 		if !ok {
-			return nil, false, fmt.Errorf("%s: not a slice", fks)
+			return nil, false, fmt.Errorf("%s: not a slice", fullKeyString)
 		}
 
-		if va == nil || o {
+		if valueArray == nil || omitValue {
 			return nil, true, nil
 		}
 
-		if t == "array" {
-			return arrayItemToAPI(n, fk, k, va, i, d)
+		if itemType == "array" {
+			return arrayItemToAPI(serviceName, fullKeyPath, key, valueArray, inputMap, resourceData)
 		}
 
-		if len(va) == 0 {
+		if len(valueArray) == 0 {
 			return nil, true, nil
 		}
 
-		return objectItemToAPI(n, fk, va, i, d)
+		return objectItemToAPI(serviceName, fullKeyPath, valueArray, inputMap, resourceData)
 	default:
-		return nil, false, fmt.Errorf("%s: unsupported type %s", fks, t)
+		return nil, false, fmt.Errorf("%s: unsupported type %s", fullKeyString, itemType)
 	}
 
-	return res, o, nil
+	return result, omitValue, nil
 }
 
 // processManyToOneKeys processes many to one keys by mapping them to their first non-empty value.
-func processManyToOneKeys(res map[string]interface{}) {
-	// mto is a map that stores the keys and their associated many to one keys.
-	mto := make(map[string][]string)
+func processManyToOneKeys(result map[string]any) {
+	// manyToOneKeyMap maps primary keys to their associated many-to-one keys.
+	manyToOneKeyMap := make(map[string][]string)
 
 	// Iterate over the result map.
 	// TODO: Remove all ip_filter and namespaces special cases when these fields are removed.
-	for k, v := range res {
+	for key, value := range result {
 		// If the value is a map, process it recursively.
-		if va, ok := v.(map[string]interface{}); ok {
-			processManyToOneKeys(va)
+		if valueAsMap, ok := value.(map[string]any); ok {
+			processManyToOneKeys(valueAsMap)
 		}
 
 		// Ignore keys that are not typed and are not special keys.
-		if !userconfig.IsKeyTyped(k) && k != "ip_filter" && k != "namespaces" {
+		if !userconfig.IsKeyTyped(key) && key != "ip_filter" && key != "namespaces" {
 			continue
 		}
 
 		// Extract the real key, which is the key without suffix unless it's a special key.
-		rk := k
-		if k != "ip_filter" && k != "namespaces" {
-			rk = k[:strings.LastIndexByte(k, '_')]
+		realKey := key
+		if key != "ip_filter" && key != "namespaces" {
+			realKey = key[:strings.LastIndexByte(key, '_')]
 		}
 
-		// Append the key to its corresponding list in the mto map.
-		mto[rk] = append(mto[rk], k)
+		// Append the key to its corresponding list in the manyToOneKeyMap map.
+		manyToOneKeyMap[realKey] = append(manyToOneKeyMap[realKey], key)
 	}
 
-	// By this stage, the 'mto' map takes a form similar to the following:
+	// By this stage, the 'manyToOneKeyMap' map takes a form similar to the following:
 	// map[string][]string{
 	//  // For 'ip_filter', there are two associated keys in the user configuration. The first non-empty one is used,
 	//  // for instance, if the user shifts from 'ip_filter' to 'ip_filter_object', the latter is preferred.
@@ -332,18 +320,18 @@ func processManyToOneKeys(res map[string]interface{}) {
 	// 	"namespaces": []string{"namespaces"},
 	// }
 
-	// Iterate over the many to one keys.
-	for k, v := range mto {
-		var nv interface{} // The new value for the key.
+	// Iterate over the many-to-one keys.
+	for primaryKey, associatedKeys := range manyToOneKeyMap {
+		var newValue any // The new value for the key.
 
 		wasDeleted := false // Track if any key was deleted in the loop.
 
-		// Attempt to process the values as []interface{}.
-		for _, vn := range v {
-			if rv, ok := res[vn].([]interface{}); ok && len(rv) > 0 {
-				nv = rv
+		// Attempt to process the values as []any.
+		for _, associatedKey := range associatedKeys {
+			if associatedValue, ok := result[associatedKey].([]any); ok && len(associatedValue) > 0 {
+				newValue = associatedValue
 
-				delete(res, vn) // Delete the processed key-value pair from the result.
+				delete(result, associatedKey) // Delete the processed key-value pair from the result.
 
 				wasDeleted = true
 			}
@@ -351,127 +339,144 @@ func processManyToOneKeys(res map[string]interface{}) {
 
 		// If no key was deleted, attempt to process the values as json.RawMessage.
 		if !wasDeleted {
-			for _, vn := range v {
-				if rv, ok := res[vn].(json.RawMessage); ok {
-					nv = rv
+			for _, associatedKey := range associatedKeys {
+				if associatedValue, ok := result[associatedKey].(json.RawMessage); ok {
+					newValue = associatedValue
 
-					delete(res, vn) // Delete the processed key-value pair from the result.
+					delete(result, associatedKey) // Delete the processed key-value pair from the result.
+
+					break
 				}
 			}
 		}
 
-		// Finally, set the new value for the key.
-		res[k] = nv
+		result[primaryKey] = newValue // Set the new value for the primary key.
 	}
 }
 
 // propsToAPI is a function that converts properties of Terraform user configuration schema to API compatible format.
 func propsToAPI(
-	n string,
-	fk []string,
-	tp map[string]interface{},
-	p map[string]interface{},
-	reqs map[string]struct{},
-	d resourceDatable,
-) (map[string]interface{}, error) {
-	res := make(map[string]interface{}, len(tp))
+	name string,
+	fullKeyPath []string,
+	types map[string]any,
+	properties map[string]any,
+	requiredFields map[string]struct{},
+	data resourceDatable,
+) (map[string]any, error) {
+	result := make(map[string]any, len(types))
 
-	fks := strings.Join(fk, ".")
+	fullKeyString := strings.Join(fullKeyPath, ".")
 
-	for k, v := range tp {
-		k = userconfig.DecodeKey(k)
+	for typeKey, typeValue := range types {
+		typeKey = userconfig.DecodeKey(typeKey)
 
-		rk := k
+		rawKey := typeKey
 
-		// If the key has a suffix, we need to strip it to be able to find the corresponding property in the schema.
-		if userconfig.IsKeyTyped(k) {
-			rk = k[:strings.LastIndexByte(k, '_')]
+		if userconfig.IsKeyTyped(typeKey) {
+			rawKey = typeKey[:strings.LastIndexByte(typeKey, '_')]
 		}
 
-		i, ok := p[rk]
+		property, ok := properties[rawKey]
 		if !ok {
-			return nil, fmt.Errorf("%s.%s: key not found", fks, k)
+			return nil, fmt.Errorf("%s.%s: key not found", fullKeyString, typeKey)
 		}
 
-		if i == nil {
+		if property == nil {
 			continue
 		}
 
-		ia, ok := i.(map[string]interface{})
+		propertyAttributes, ok := property.(map[string]any)
 		if !ok {
-			return nil, fmt.Errorf("%s.%s: not a map", fks, k)
+			return nil, fmt.Errorf("%s.%s: not a map", fullKeyString, typeKey)
 		}
 
-		// If the property is supposed to be present only during resource's creation,
-		// we need to skip it if the resource is being updated.
-		if co, ok := ia["create_only"]; ok && co.(bool) && !d.IsNewResource() {
+		if createOnly, ok := propertyAttributes["create_only"]; ok && createOnly.(bool) && !data.IsNewResource() {
 			continue
 		}
 
-		_, ats, err := userconfig.TerraformTypes(userconfig.SlicedString(ia["type"]))
+		_, attributeTypes, err := userconfig.TerraformTypes(userconfig.SlicedString(propertyAttributes["type"]))
 		if err != nil {
 			return nil, err
 		}
 
-		if len(ats) > 1 {
-			return nil, fmt.Errorf("%s.%s.type: multiple types", fks, k)
+		if len(attributeTypes) > 1 {
+			return nil, fmt.Errorf("%s.%s.type: multiple types", fullKeyString, typeKey)
 		}
 
-		_, ireq := reqs[k]
+		_, isRequired := requiredFields[typeKey]
 
-		t := ats[0]
+		attributeType := attributeTypes[0]
 
-		cv, o, err := itemToAPI(n, t, append(fk, k), k, v, ia, ireq, d)
+		convertedValue, omit, err := itemToAPI(
+			name,
+			attributeType,
+			append(fullKeyPath, typeKey),
+			typeKey,
+			typeValue,
+			propertyAttributes,
+			isRequired,
+			data,
+		)
 		if err != nil {
 			return nil, err
 		}
 
-		if !o {
-			res[k] = cv
+		if !omit {
+			result[typeKey] = convertedValue
 		}
 	}
 
-	processManyToOneKeys(res)
+	processManyToOneKeys(result)
 
-	return res, nil
+	return result, nil
 }
 
 // ToAPI is a function that converts filled Terraform user configuration schema to API compatible format.
-func ToAPI(st userconfig.SchemaType, n string, d resourceDatable) (map[string]interface{}, error) {
-	var res map[string]interface{}
+func ToAPI(
+	schemaType userconfig.SchemaType,
+	serviceName string,
+	resourceData resourceDatable,
+) (map[string]any, error) {
+	var result map[string]any
 
-	// fk is a full key slice. We use it to get the full key path to the property in the Terraform user configuration.
-	fk := []string{fmt.Sprintf("%s_user_config", n)}
+	fullKeyPath := []string{fmt.Sprintf("%s_user_config", serviceName)}
 
-	tp, ok := d.GetOk(fk[0])
-	if !ok || tp == nil {
-		return res, nil
+	terraformConfig, ok := resourceData.GetOk(fullKeyPath[0])
+	if !ok || terraformConfig == nil {
+		return result, nil
 	}
 
-	tpa, ok := tp.([]interface{})
+	configSlice, ok := terraformConfig.([]any)
 	if !ok {
-		return nil, fmt.Errorf("%s (%d): not a slice", n, st)
+		return nil, fmt.Errorf("%s (%d): not a slice", serviceName, schemaType)
 	}
 
-	ftp := tpa[0]
-	if ftp == nil {
-		return res, nil
+	firstConfig := configSlice[0]
+	if firstConfig == nil {
+		return result, nil
 	}
 
-	ftpa, ok := ftp.(map[string]interface{})
+	configMap, ok := firstConfig.(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("%s.0 (%d): not a map", n, st)
+		return nil, fmt.Errorf("%s.0 (%d): not a map", serviceName, schemaType)
 	}
 
-	p, reqs, err := propsReqs(st, n)
+	properties, requiredProperties, err := propsReqs(schemaType, serviceName)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err = propsToAPI(n, append(fk, "0"), ftpa, p, reqs, d)
+	result, err = propsToAPI(
+		serviceName,
+		append(fullKeyPath, "0"),
+		configMap,
+		properties,
+		requiredProperties,
+		resourceData,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	return result, nil
 }

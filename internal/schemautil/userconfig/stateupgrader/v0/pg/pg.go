@@ -125,10 +125,10 @@ func ResourcePG() *schema.Resource {
 
 func ResourcePGStateUpgrade(
 	_ context.Context,
-	rawState map[string]interface{},
-	_ interface{},
-) (map[string]interface{}, error) {
-	userConfigSlice, ok := rawState["pg_user_config"].([]interface{})
+	rawState map[string]any,
+	_ any,
+) (map[string]any, error) {
+	userConfigSlice, ok := rawState["pg_user_config"].([]any)
 	if !ok {
 		return rawState, nil
 	}
@@ -137,7 +137,7 @@ func ResourcePGStateUpgrade(
 		return rawState, nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]interface{})
+	userConfig, ok := userConfigSlice[0].(map[string]any)
 	if !ok {
 		return rawState, nil
 	}
@@ -156,9 +156,9 @@ func ResourcePGStateUpgrade(
 		return rawState, err
 	}
 
-	migrationSlice, ok := userConfig["migration"].([]interface{})
+	migrationSlice, ok := userConfig["migration"].([]any)
 	if ok && len(migrationSlice) > 0 {
-		migration, ok := migrationSlice[0].(map[string]interface{})
+		migration, ok := migrationSlice[0].(map[string]any)
 		if ok {
 			err := typeupgrader.Map(migration, map[string]string{
 				"port": "int",
@@ -170,9 +170,9 @@ func ResourcePGStateUpgrade(
 		}
 	}
 
-	pgSlice, ok := userConfig["pg"].([]interface{})
+	pgSlice, ok := userConfig["pg"].([]any)
 	if ok && len(pgSlice) > 0 {
-		pg, ok := pgSlice[0].(map[string]interface{})
+		pg, ok := pgSlice[0].(map[string]any)
 		if ok {
 			err := typeupgrader.Map(pg, map[string]string{
 				"autovacuum_analyze_scale_factor":     "float",
@@ -220,9 +220,9 @@ func ResourcePGStateUpgrade(
 		}
 	}
 
-	pgBouncerSlice, ok := userConfig["pgbouncer"].([]interface{})
+	pgBouncerSlice, ok := userConfig["pgbouncer"].([]any)
 	if ok && len(pgBouncerSlice) > 0 {
-		pgBouncer, ok := pgBouncerSlice[0].(map[string]interface{})
+		pgBouncer, ok := pgBouncerSlice[0].(map[string]any)
 		if ok {
 			err := typeupgrader.Map(pgBouncer, map[string]string{
 				"autodb_idle_timeout":       "int",
@@ -239,9 +239,9 @@ func ResourcePGStateUpgrade(
 		}
 	}
 
-	pgLookoutSlice, ok := userConfig["pglookout"].([]interface{})
+	pgLookoutSlice, ok := userConfig["pglookout"].([]any)
 	if ok && len(pgLookoutSlice) > 0 {
-		pgLookout, ok := pgLookoutSlice[0].(map[string]interface{})
+		pgLookout, ok := pgLookoutSlice[0].(map[string]any)
 		if ok {
 			err := typeupgrader.Map(pgLookout, map[string]string{
 				"max_failover_replication_time_lag": "int",
@@ -252,9 +252,9 @@ func ResourcePGStateUpgrade(
 		}
 	}
 
-	privateAccessSlice, ok := userConfig["private_access"].([]interface{})
+	privateAccessSlice, ok := userConfig["private_access"].([]any)
 	if ok && len(privateAccessSlice) > 0 {
-		privateAccess, ok := privateAccessSlice[0].(map[string]interface{})
+		privateAccess, ok := privateAccessSlice[0].(map[string]any)
 		if ok {
 			err = typeupgrader.Map(privateAccess, map[string]string{
 				"pg":         "bool",
@@ -267,9 +267,9 @@ func ResourcePGStateUpgrade(
 		}
 	}
 
-	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]interface{})
+	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]any)
 	if ok && len(privateLinkAccessSlice) > 0 {
-		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]interface{})
+		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]any)
 		if ok {
 			err := typeupgrader.Map(privateLinkAccess, map[string]string{
 				"pg":         "bool",
@@ -282,9 +282,9 @@ func ResourcePGStateUpgrade(
 		}
 	}
 
-	publicAccessSlice, ok := userConfig["public_access"].([]interface{})
+	publicAccessSlice, ok := userConfig["public_access"].([]any)
 	if ok && len(publicAccessSlice) > 0 {
-		publicAccess, ok := publicAccessSlice[0].(map[string]interface{})
+		publicAccess, ok := publicAccessSlice[0].(map[string]any)
 		if ok {
 			err := typeupgrader.Map(publicAccess, map[string]string{
 				"pg":         "bool",
@@ -297,9 +297,9 @@ func ResourcePGStateUpgrade(
 		}
 	}
 
-	timescaleDBSlice, ok := userConfig["timescaledb"].([]interface{})
+	timescaleDBSlice, ok := userConfig["timescaledb"].([]any)
 	if ok && len(timescaleDBSlice) > 0 {
-		timescaleDB, ok := timescaleDBSlice[0].(map[string]interface{})
+		timescaleDB, ok := timescaleDBSlice[0].(map[string]any)
 		if ok {
 			err := typeupgrader.Map(timescaleDB, map[string]string{
 				"max_background_workers": "int",
