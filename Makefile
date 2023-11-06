@@ -1,4 +1,4 @@
-.PHONY: build build-dev test test-unit test-acc test-examples lint lint-go lint-test lint-docs fmt fmt-test docs clean clean-tools sweep go-generate generate imports
+.PHONY: build build-dev debug test test-unit test-acc test-examples lint lint-go lint-test lint-docs fmt fmt-test fmt-imports clean clean-tools clean-examples sweep generate gen-go docs
 
 #################################################
 # Global
@@ -34,6 +34,7 @@ $(TERRAFMT): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
 # See https://github.com/hashicorp/terraform/blob/main/tools/protobuf-compile/protobuf-compile.go#L215
 ARCH ?= $(shell $(GO) env GOOS GOARCH | tr '\n' '_' | sed '$$s/_$$//')
 BUILD_DEV_DIR ?= ~/.terraform.d/plugins/registry.terraform.io/aiven-dev/aiven/0.0.0+dev/$(ARCH)
+BUILD_DEV_BIN ?= $(BUILD_DEV_DIR)/terraform-provider-aiven_v0.0.0+dev
 
 $(BUILD_DEV_DIR):
 	mkdir -p $(BUILD_DEV_DIR)
@@ -57,7 +58,14 @@ build:
 #  }
 #}
 build-dev: $(BUILD_DEV_DIR)
-	$(GO) build -o $(BUILD_DEV_DIR)/terraform-provider-aiven_v0.0.0+dev
+	$(GO) build -gcflags='all=-N -l' -o $(BUILD_DEV_BIN)
+
+#################################################
+# Debug
+#################################################
+
+debug: build-dev
+	$(BUILD_DEV_BIN) -debug
 
 #################################################
 # Test
@@ -83,8 +91,6 @@ test-acc:
 	TF_ACC=1 $(GO) test ./$(PKG_PATH)/... \
 	-v -count $(TEST_COUNT) -parallel $(ACC_TEST_PARALLELISM) $(RUNARGS) $(TESTARGS) -timeout $(ACC_TEST_TIMEOUT)
 
-clean-examples:
-	find ./examples -type f -name '*.tfstate*' -delete
 
 test-examples: build-dev clean-examples
 	AIVEN_PROVIDER_PATH=$(BUILD_DEV_DIR) $(GO) test --tags=examples ./examples_tests/... \
@@ -112,33 +118,33 @@ lint-docs: $(TFPLUGINDOCS)
 # Format
 #################################################
 
-fmt: imports fmt-test
+fmt: fmt-test fmt-imports
+
 
 fmt-test: $(TERRAFMT)
 	$(TERRAFMT) fmt ./internal -fv
 
-# On MACOS requires gnu-sed. Run `brew info gnu-sed` and follow instructions to replace default sed.
-# Negative lookbehind tries to find "= `" pattern to not affect go templates for code generation
-imports:
+
+# macOS requires to install GNU sed first. Use `brew install gnu-sed` to install it.
+# It has to be added to PATH as `sed` command, to replace default BSD sed.
+# See `brew info gnu-sed` for more details on how to add it to PATH.
+fmt-imports:
 	find . -type f -name '*.go' -exec sed -zi 's/(?<== `\s+)"\n\+\t"/"\n"/g' {} +
 	goimports -local "github.com/aiven/terraform-provider-aiven" -w .
-
-#################################################
-# Docs
-#################################################
-
-docs: $(TFPLUGINDOCS)
-	$(TFPLUGINDOCS) generate
 
 #################################################
 # Clean
 #################################################
 
-clean: clean-tools sweep
+clean: clean-tools clean-examples sweep
 
 
 clean-tools: $(TOOLS_BIN_DIR)
 	rm -rf $(TOOLS_BIN_DIR)
+
+
+clean-examples:
+	find ./examples -type f -name '*.tfstate*' -delete
 
 
 SWEEP ?= global
@@ -147,8 +153,17 @@ sweep:
 	@echo 'WARNING: This will destroy infrastructure. Use only in development accounts.'
 	$(GO) test ./internal/sweep -v -tags=sweep -sweep=$(SWEEP) $(SWEEP_ARGS) -timeout 15m
 
-go-generate:
+#################################################
+# Generate
+#################################################
+
+generate: gen-go docs
+
+
+gen-go:
 	go generate ./...
+	$(MAKE) fmt-imports
 
 
-generate: go-generate imports docs
+docs: $(TFPLUGINDOCS)
+	$(TFPLUGINDOCS) generate

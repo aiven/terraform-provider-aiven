@@ -74,6 +74,7 @@ func (w *kafkaTopicAvailabilityWaiter) RefreshFunc() resource.StateRefreshFunc {
 
 func (w *kafkaTopicAvailabilityWaiter) refresh() error {
 	c := getTopicCache()
+	c.AddToQueue(w.Project, w.ServiceName, w.TopicName)
 
 	if !kafkaTopicAvailabilitySem.TryAcquire(1) {
 		log.Printf("[TRACE] Kafka Topic Availability cache refresh already in progress ...")
@@ -86,9 +87,7 @@ func (w *kafkaTopicAvailabilityWaiter) refresh() error {
 		return nil
 	}
 
-	c.AddToQueue(w.Project, w.ServiceName, w.TopicName)
-
-	queue := c.GetQueue(w.Project, w.ServiceName)
+	queue := c.GetQueueTop100(w.Project, w.ServiceName)
 	if len(queue) == 0 {
 		return nil
 	}

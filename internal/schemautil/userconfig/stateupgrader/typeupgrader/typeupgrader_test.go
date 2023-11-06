@@ -9,26 +9,26 @@ import (
 // TestMap is a test for Map.
 func TestMap(t *testing.T) {
 	type args struct {
-		m     map[string]interface{}
-		rules map[string]string
+		mapInput  map[string]any
+		typeRules map[string]string
 	}
 
 	tests := []struct {
 		name    string
 		args    args
-		want    map[string]interface{}
+		want    map[string]any
 		wantErr bool
 	}{
 		{
 			name: "basic",
 			args: args{
-				m: map[string]interface{}{
+				mapInput: map[string]any{
 					"bool": "true",
 					"int":  "1",
 				},
-				rules: map[string]string{},
+				typeRules: map[string]string{},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"bool": "true",
 				"int":  "1",
 			},
@@ -36,15 +36,15 @@ func TestMap(t *testing.T) {
 		{
 			name: "bool",
 			args: args{
-				m: map[string]interface{}{
+				mapInput: map[string]any{
 					"bool": "true",
 					"int":  "1",
 				},
-				rules: map[string]string{
+				typeRules: map[string]string{
 					"bool": "bool",
 				},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"bool": true,
 				"int":  "1",
 			},
@@ -52,15 +52,15 @@ func TestMap(t *testing.T) {
 		{
 			name: "int",
 			args: args{
-				m: map[string]interface{}{
+				mapInput: map[string]any{
 					"bool": "true",
 					"int":  "1",
 				},
-				rules: map[string]string{
+				typeRules: map[string]string{
 					"int": "int",
 				},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"bool": "true",
 				"int":  1,
 			},
@@ -68,16 +68,16 @@ func TestMap(t *testing.T) {
 		{
 			name: "bool and int",
 			args: args{
-				m: map[string]interface{}{
+				mapInput: map[string]any{
 					"bool": "true",
 					"int":  "1",
 				},
-				rules: map[string]string{
+				typeRules: map[string]string{
 					"bool": "bool",
 					"int":  "int",
 				},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"bool": true,
 				"int":  1,
 			},
@@ -85,26 +85,26 @@ func TestMap(t *testing.T) {
 		{
 			name: "complex map",
 			args: args{
-				m: map[string]interface{}{
+				mapInput: map[string]any{
 					"bool": "true",
 					"int":  "1",
-					"map": []interface{}{
-						map[string]interface{}{
+					"map": []any{
+						map[string]any{
 							"bool": "true",
 							"int":  "1",
 						},
 					},
 				},
-				rules: map[string]string{
+				typeRules: map[string]string{
 					"bool": "bool",
 					"int":  "int",
 				},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"bool": true,
 				"int":  1,
-				"map": []interface{}{
-					map[string]interface{}{
+				"map": []any{
+					map[string]any{
 						"bool": "true",
 						"int":  "1",
 					},
@@ -114,11 +114,11 @@ func TestMap(t *testing.T) {
 		{
 			name: "bool and int with error",
 			args: args{
-				m: map[string]interface{}{
+				mapInput: map[string]any{
 					"bool": "true",
 					"int":  "foo",
 				},
-				rules: map[string]string{
+				typeRules: map[string]string{
 					"bool": "bool",
 					"int":  "int",
 				},
@@ -128,11 +128,11 @@ func TestMap(t *testing.T) {
 		{
 			name: "unknown type",
 			args: args{
-				m: map[string]interface{}{
+				mapInput: map[string]any{
 					"bool": "true",
 					"int":  "1",
 				},
-				rules: map[string]string{
+				typeRules: map[string]string{
 					"bool": "bool",
 					"int":  "foo",
 				},
@@ -143,15 +143,15 @@ func TestMap(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := Map(tt.args.m, tt.args.rules)
+			err := Map(tt.args.mapInput, tt.args.typeRules)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UpgradeMap() error = %v, wantErr %v", err, tt.wantErr)
 
 				return
 			}
 
-			if !tt.wantErr && !cmp.Equal(tt.args.m, tt.want) {
-				t.Errorf(cmp.Diff(tt.want, tt.args.m))
+			if !tt.wantErr && !cmp.Equal(tt.args.mapInput, tt.want) {
+				t.Errorf(cmp.Diff(tt.want, tt.args.mapInput))
 			}
 		})
 	}
@@ -160,37 +160,37 @@ func TestMap(t *testing.T) {
 // TestSlice is a test for Slice.
 func TestSlice(t *testing.T) {
 	type args struct {
-		s []interface{}
-		t string
+		sliceInput []any
+		typeInput  string
 	}
 
 	tests := []struct {
 		name    string
 		args    args
-		want    []interface{}
+		want    []any
 		wantErr bool
 	}{
 		{
 			name: "int",
 			args: args{
-				s: []interface{}{"1", "3", "3", "7"},
-				t: "int",
+				sliceInput: []any{"1", "3", "3", "7"},
+				typeInput:  "int",
 			},
-			want: []interface{}{1, 3, 3, 7},
+			want: []any{1, 3, 3, 7},
 		},
 		{
 			name: "int with error",
 			args: args{
-				s: []interface{}{"1", "foo", "3", "7"},
-				t: "int",
+				sliceInput: []any{"1", "foo", "3", "7"},
+				typeInput:  "int",
 			},
 			wantErr: true,
 		},
 		{
 			name: "unknown type",
 			args: args{
-				s: []interface{}{"1", "foo", "3", "7"},
-				t: "foo",
+				sliceInput: []any{"1", "foo", "3", "7"},
+				typeInput:  "foo",
 			},
 			wantErr: true,
 		},
@@ -198,15 +198,15 @@ func TestSlice(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := Slice(tt.args.s, tt.args.t)
+			err := Slice(tt.args.sliceInput, tt.args.typeInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UpgradeSlice() error = %v, wantErr %v", err, tt.wantErr)
 
 				return
 			}
 
-			if !tt.wantErr && !cmp.Equal(tt.args.s, tt.want) {
-				t.Errorf(cmp.Diff(tt.want, tt.args.s))
+			if !tt.wantErr && !cmp.Equal(tt.args.sliceInput, tt.want) {
+				t.Errorf(cmp.Diff(tt.want, tt.args.sliceInput))
 			}
 		})
 	}
