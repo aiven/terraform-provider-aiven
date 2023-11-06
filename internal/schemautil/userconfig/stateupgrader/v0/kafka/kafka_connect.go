@@ -69,10 +69,10 @@ func ResourceKafkaConnect() *schema.Resource {
 
 func ResourceKafkaConnectStateUpgrade(
 	_ context.Context,
-	rawState map[string]any,
-	_ any,
-) (map[string]any, error) {
-	userConfigSlice, ok := rawState["kafka_connect_user_config"].([]any)
+	rawState map[string]interface{},
+	_ interface{},
+) (map[string]interface{}, error) {
+	userConfigSlice, ok := rawState["kafka_connect_user_config"].([]interface{})
 	if !ok {
 		return rawState, nil
 	}
@@ -81,7 +81,7 @@ func ResourceKafkaConnectStateUpgrade(
 		return rawState, nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]any)
+	userConfig, ok := userConfigSlice[0].(map[string]interface{})
 	if !ok {
 		return rawState, nil
 	}
@@ -93,9 +93,9 @@ func ResourceKafkaConnectStateUpgrade(
 		return rawState, err
 	}
 
-	kafkaConnectSlice, ok := userConfig["kafka_connect"].([]any)
+	kafkaConnectSlice, ok := userConfig["kafka_connect"].([]interface{})
 	if ok && len(kafkaConnectSlice) > 0 {
-		kafkaConnect, ok := kafkaConnectSlice[0].(map[string]any)
+		kafkaConnect, ok := kafkaConnectSlice[0].(map[string]interface{})
 		if ok {
 			err = typeupgrader.Map(kafkaConnect, map[string]string{
 				"consumer_fetch_max_bytes":           "int",
@@ -113,9 +113,9 @@ func ResourceKafkaConnectStateUpgrade(
 		}
 	}
 
-	privateAccessSlice, ok := userConfig["private_access"].([]any)
+	privateAccessSlice, ok := userConfig["private_access"].([]interface{})
 	if ok && len(privateAccessSlice) > 0 {
-		privateAccess, ok := privateAccessSlice[0].(map[string]any)
+		privateAccess, ok := privateAccessSlice[0].(map[string]interface{})
 		if ok {
 			err = typeupgrader.Map(privateAccess, map[string]string{
 				"kafka_connect": "bool",
@@ -127,9 +127,9 @@ func ResourceKafkaConnectStateUpgrade(
 		}
 	}
 
-	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]any)
+	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]interface{})
 	if ok && len(privateLinkAccessSlice) > 0 {
-		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]any)
+		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]interface{})
 		if ok {
 			err := typeupgrader.Map(privateLinkAccess, map[string]string{
 				"jolokia":       "bool",
@@ -142,9 +142,9 @@ func ResourceKafkaConnectStateUpgrade(
 		}
 	}
 
-	publicAccessSlice, ok := userConfig["public_access"].([]any)
+	publicAccessSlice, ok := userConfig["public_access"].([]interface{})
 	if ok && len(publicAccessSlice) > 0 {
-		publicAccess, ok := publicAccessSlice[0].(map[string]any)
+		publicAccess, ok := publicAccessSlice[0].(map[string]interface{})
 		if ok {
 			err := typeupgrader.Map(publicAccess, map[string]string{
 				"kafka_connect": "bool",

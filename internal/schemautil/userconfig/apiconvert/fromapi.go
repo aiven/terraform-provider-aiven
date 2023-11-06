@@ -6,248 +6,240 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
-// hasNestedProperties is a function that returns a map of nested properties and a boolean indicating whether the given
-// value has nested properties.
-func hasNestedProperties(
-	valueReceived any,
-	valueAttributes map[string]any,
-) (map[string]any, bool) {
-	var properties map[string]any
-	var resultOk bool
+// sliceHasNestedProperties is a function that checks if the given slice has nested properties.
+func sliceHasNestedProperties(vr interface{}, va map[string]interface{}) (map[string]interface{}, bool) {
+	var res map[string]interface{}
 
-	valueReceivedAsArray, isArray := valueReceived.([]any)
-	if !isArray {
-		return properties, resultOk
+	// rok is the resulting ok value.
+	var rok bool
+
+	vra, ok := vr.([]interface{})
+	if !ok {
+		return res, rok
 	}
 
-	for _, value := range valueReceivedAsArray {
-		if property, isPropertyMap := value.(map[string]any); isPropertyMap && property != nil {
-			resultOk = true
+	for _, v := range vra {
+		if p, ok := v.(map[string]interface{}); ok && p != nil {
+			rok = true
+
 			break
 		}
 	}
 
-	if itemsProperty, isArray := valueAttributes["items"].(map[string]any); isArray && resultOk {
-		if propertyValuesRaw, isPropertyMap := itemsProperty["properties"].(map[string]any); isPropertyMap {
-			properties = propertyValuesRaw
+	if i, ok := va["items"].(map[string]interface{}); ok && rok {
+		if p, ok := i["properties"].(map[string]interface{}); ok {
+			res = p
 		}
 	}
 
-	if resultOk && len(properties) == 0 {
-		resultOk = false
+	if rok && len(res) == 0 {
+		rok = false
 	}
 
-	return properties, resultOk
+	return res, rok
 }
 
-// unsetAPIValue is a function that returns an unset value for a given type.
-func unsetAPIValue(valueType string) any {
-	var unsetValue any
+// unsettedAPIValue is a function that returns an unsetted value with the given type.
+func unsettedAPIValue(t string) interface{} {
+	var res interface{}
 
-	switch valueType {
+	switch t {
 	case "boolean":
-		unsetValue = false
+		res = false
 	case "integer":
-		unsetValue = 0
+		res = 0
 	case "number":
-		unsetValue = float64(0)
+		res = float64(0)
 	case "string":
-		unsetValue = ""
+		res = ""
 	case "array":
-		unsetValue = []any{}
+		res = []interface{}{}
 	}
 
-	return unsetValue
+	return res
 }
 
-// parsePropertiesFromAPI is a function that returns a map of properties parsed from an API response.
-func parsePropertiesFromAPI(
-	nestedName string,
-	responseMapping map[string]any,
-	propertyMapping map[string]any,
-) (map[string]any, error) {
-	propertyMappingCopy := make(map[string]any, len(propertyMapping))
+// propsFromAPI is a function that converts filled API response properties to Terraform user configuration schema.
+func propsFromAPI(n string, r map[string]interface{}, p map[string]interface{}) (map[string]interface{}, error) {
+	res := make(map[string]interface{}, len(p))
 
-	for key, value := range propertyMapping {
-		valueAttributes, isMap := value.(map[string]any)
-		if !isMap {
-			return nil, fmt.Errorf("%s...%s: property is not a map", nestedName, key)
+	for k, v := range p {
+		va, ok := v.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("%s...%s: property is not a map", n, k)
 		}
 
-		_, aivenTypes, err := userconfig.TerraformTypes(userconfig.SlicedString(valueAttributes["type"]))
+		_, ats, err := userconfig.TerraformTypes(userconfig.SlicedString(va["type"]))
 		if err != nil {
 			return nil, err
 		}
 
-		if len(aivenTypes) > 1 {
-			return nil, fmt.Errorf("%s...%s: multiple types", nestedName, key)
+		if len(ats) > 1 {
+			return nil, fmt.Errorf("%s...%s: multiple types", n, k)
 		}
 
-		typeReceived := aivenTypes[0]
+		t := ats[0]
 
-		valueReceived, keyExists := responseMapping[key]
-		if !keyExists || valueReceived == nil {
-			if typeReceived == "object" {
+		vr, ok := r[k]
+		if !ok || vr == nil {
+			if t == "object" {
 				continue
 			}
 
-			valueReceived = unsetAPIValue(typeReceived)
+			vr = unsettedAPIValue(t)
 		}
 
-		var valueReceivedParsed any
+		var vrs interface{}
 
-		switch typeReceived {
+		switch t {
 		default:
-			switch valueReceivedAsArray := valueReceived.(type) {
+			switch vra := vr.(type) {
 			default:
-				valueReceivedParsed = valueReceived
-			case []any:
-				var list []any
+				vrs = vr
+			case []interface{}:
+				var l []interface{}
 
-				if valueNestedProperties, isArray := hasNestedProperties(valueReceived, valueAttributes); isArray {
-					for nestedKey, nestedValue := range valueReceivedAsArray {
-						nestedValueAlpha, valueIsMap := nestedValue.(map[string]any)
-						if !valueIsMap {
-							return nil, fmt.Errorf(
-								"%s...%s.%d: slice item is not a map", nestedName, key, nestedKey,
-							)
+				if vanp, ok := sliceHasNestedProperties(vr, va); ok {
+					for kn, vn := range vra {
+						vna, ok := vn.(map[string]interface{})
+						if !ok {
+							return nil, fmt.Errorf("%s...%s.%d: slice item is not a map", n, k, kn)
 						}
 
-						propertiesParsed, err := parsePropertiesFromAPI(
-							nestedName, nestedValueAlpha, valueNestedProperties,
-						)
+						p, err := propsFromAPI(n, vna, vanp)
 						if err != nil {
 							return nil, err
 						}
 
-						list = append(list, propertiesParsed)
+						l = append(l, p)
 					}
 				} else {
-					list = append(list, valueReceivedAsArray...)
+					l = append(l, vra...)
 				}
 
-				var nestedTypes []string
+				// We need to get nested types for the array items, so we can add suffix if needed.
+				var nts []string
 
-				if itemKey, isArray := valueAttributes["items"].(map[string]any); isArray {
-					if oneOfNumericKey, isArrayNumeric := itemKey["one_of"].([]any); isArrayNumeric {
-						for _, nestedValue := range oneOfNumericKey {
-							if nestedValueAlpha, valueIsMap := nestedValue.(map[string]any); valueIsMap {
-								if nestedValueAlphaType, valueIsString :=
-									nestedValueAlpha["type"].(string); valueIsString {
-									nestedTypes = append(nestedTypes, nestedValueAlphaType)
+				if i, ok := va["items"].(map[string]interface{}); ok {
+					if oo, ok := i["one_of"].([]interface{}); ok {
+						for _, v := range oo {
+							if va, ok := v.(map[string]interface{}); ok {
+								if vat, ok := va["type"].(string); ok {
+									nts = append(nts, vat)
 								}
 							}
 						}
 					} else {
-						_, nestedTypes, err = userconfig.TerraformTypes(userconfig.SlicedString(itemKey["type"]))
+						_, nts, err = userconfig.TerraformTypes(userconfig.SlicedString(i["type"]))
 						if err != nil {
 							return nil, err
 						}
 					}
 				}
 
-				if len(nestedTypes) > 1 {
-					if len(list) > 0 {
-						listFirstSeries := list[0]
+				if len(nts) > 1 {
+					if len(l) > 0 {
+						lf := l[0]
 
-						switch listFirstSeries.(type) {
+						switch lf.(type) {
 						case bool:
-							key = fmt.Sprintf("%s_boolean", key)
+							k = fmt.Sprintf("%s_boolean", k)
 						case int:
-							key = fmt.Sprintf("%s_integer", key)
+							k = fmt.Sprintf("%s_integer", k)
 						case float64:
-							key = fmt.Sprintf("%s_number", key)
+							k = fmt.Sprintf("%s_number", k)
 						case string:
-							key = fmt.Sprintf("%s_string", key)
-						case []any:
-							key = fmt.Sprintf("%s_array", key)
-						case map[string]any:
-							key = fmt.Sprintf("%s_object", key)
+							k = fmt.Sprintf("%s_string", k)
+						case []interface{}:
+							k = fmt.Sprintf("%s_array", k)
+						case map[string]interface{}:
+							k = fmt.Sprintf("%s_object", k)
 						default:
-							return nil, fmt.Errorf("%s...%s: no suffix for given type", nestedName, key)
+							return nil, fmt.Errorf("%s...%s: no suffix for given type", n, k)
 						}
 
-						if key == "ip_filter_string" {
-							key = "ip_filter"
+						// TODO: Remove with the next major version.
+						if k == "ip_filter_string" {
+							k = "ip_filter"
 						}
 
-						if key == "namespaces_string" {
-							key = "namespaces"
+						// TODO: Remove with the next major version.
+						if k == "namespaces_string" {
+							k = "namespaces"
 						}
 					} else {
-						for _, nestedValue := range nestedTypes {
-							trimmedKey := fmt.Sprintf("%s_%s", key, nestedValue)
+						for _, v := range nts {
+							// TODO: Inline with the next major version.
+							tk := fmt.Sprintf("%s_%s", k, v)
 
-							if trimmedKey == "ip_filter_string" {
-								trimmedKey = "ip_filter"
+							// TODO: Remove with the next major version.
+							if tk == "ip_filter_string" {
+								tk = "ip_filter"
 							}
 
-							if trimmedKey == "namespaces_string" {
-								trimmedKey = "namespaces"
+							// TODO: Remove with the next major version.
+							if tk == "namespaces_string" {
+								tk = "namespaces"
 							}
 
-							propertyMappingCopy[trimmedKey] = list
+							res[tk] = l
 						}
 
 						continue
 					}
 				}
 
-				valueReceivedParsed = list
+				vrs = l
 			}
 		case "object":
-			valueReceivedAsAlpha, valueIsMap := valueReceived.(map[string]any)
-			if !valueIsMap {
-				return nil, fmt.Errorf("%s...%s: representation value is not a map", nestedName, key)
+			vra, ok := vr.(map[string]interface{})
+			if !ok {
+				return nil, fmt.Errorf("%s...%s: representation value is not a map", n, k)
 			}
 
-			nestedValues, keyExists := valueAttributes["properties"]
-			if !keyExists {
-				return nil, fmt.Errorf("%s...%s: properties key not found", nestedName, key)
+			nv, ok := va["properties"]
+			if !ok {
+				return nil, fmt.Errorf("%s...%s: properties key not found", n, k)
 			}
 
-			nestedValuesAsAlpha, valueIsMap := nestedValues.(map[string]any)
-			if !valueIsMap {
-				return nil, fmt.Errorf("%s...%s: properties value is not a map", nestedName, key)
+			nva, ok := nv.(map[string]interface{})
+			if !ok {
+				return nil, fmt.Errorf("%s...%s: properties value is not a map", n, k)
 			}
 
-			propertiesParsed, err := parsePropertiesFromAPI(nestedName, valueReceivedAsAlpha, nestedValuesAsAlpha)
+			p, err := propsFromAPI(n, vra, nva)
 			if err != nil {
 				return nil, err
 			}
 
-			valueReceivedParsed = []map[string]any{propertiesParsed}
+			vrs = []map[string]interface{}{p}
 		}
 
-		propertyMappingCopy[userconfig.EncodeKey(key)] = valueReceivedParsed
+		res[userconfig.EncodeKey(k)] = vrs
 	}
 
-	return propertyMappingCopy, nil
+	return res, nil
 }
 
-// FromAPI is a function that returns a slice of properties parsed from an API response.
-func FromAPI(
-	schemaType userconfig.SchemaType,
-	nestedName string,
-	responseMapping map[string]any,
-) ([]map[string]any, error) {
-	var propertiesParsed []map[string]any
+// FromAPI is a function that converts filled API response to Terraform user configuration schema.
+func FromAPI(st userconfig.SchemaType, n string, r map[string]interface{}) ([]map[string]interface{}, error) {
+	var res []map[string]interface{}
 
-	if len(responseMapping) == 0 {
-		return propertiesParsed, nil
+	if len(r) == 0 {
+		return res, nil
 	}
 
-	propertyRequests, _, err := propsReqs(schemaType, nestedName)
+	p, _, err := propsReqs(st, n)
 	if err != nil {
 		return nil, err
 	}
 
-	propertyAttributes, err := parsePropertiesFromAPI(nestedName, responseMapping, propertyRequests)
+	pa, err := propsFromAPI(n, r, p)
 	if err != nil {
 		return nil, err
 	}
 
-	propertiesParsed = append(propertiesParsed, propertyAttributes)
+	res = append(res, pa)
 
-	return propertiesParsed, nil
+	return res, nil
 }

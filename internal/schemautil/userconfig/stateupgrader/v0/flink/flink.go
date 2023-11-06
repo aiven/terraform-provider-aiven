@@ -85,10 +85,10 @@ func ResourceFlink() *schema.Resource {
 
 func ResourceFlinkStateUpgrade(
 	_ context.Context,
-	rawState map[string]any,
-	_ any,
-) (map[string]any, error) {
-	userConfigSlice, ok := rawState["flink_user_config"].([]any)
+	rawState map[string]interface{},
+	_ interface{},
+) (map[string]interface{}, error) {
+	userConfigSlice, ok := rawState["flink_user_config"].([]interface{})
 	if !ok {
 		return rawState, nil
 	}
@@ -97,7 +97,7 @@ func ResourceFlinkStateUpgrade(
 		return rawState, nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]any)
+	userConfig, ok := userConfigSlice[0].(map[string]interface{})
 	if !ok {
 		return rawState, nil
 	}
@@ -115,9 +115,9 @@ func ResourceFlinkStateUpgrade(
 		return rawState, err
 	}
 
-	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]any)
+	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]interface{})
 	if ok && len(privateLinkAccessSlice) > 0 {
-		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]any)
+		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]interface{})
 		if ok {
 			err := typeupgrader.Map(privateLinkAccess, map[string]string{
 				"flink":      "bool",

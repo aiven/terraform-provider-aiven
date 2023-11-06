@@ -71,10 +71,10 @@ func ResourceGrafana() *schema.Resource {
 
 func ResourceGrafanaStateUpgrade(
 	_ context.Context,
-	rawState map[string]any,
-	_ any,
-) (map[string]any, error) {
-	userConfigSlice, ok := rawState["grafana_user_config"].([]any)
+	rawState map[string]interface{},
+	_ interface{},
+) (map[string]interface{}, error) {
+	userConfigSlice, ok := rawState["grafana_user_config"].([]interface{})
 	if !ok {
 		return rawState, nil
 	}
@@ -83,7 +83,7 @@ func ResourceGrafanaStateUpgrade(
 		return rawState, nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]any)
+	userConfig, ok := userConfigSlice[0].(map[string]interface{})
 	if !ok {
 		return rawState, nil
 	}
@@ -108,9 +108,9 @@ func ResourceGrafanaStateUpgrade(
 		return rawState, err
 	}
 
-	authAzureADSlice, ok := userConfig["auth_azuread"].([]any)
+	authAzureADSlice, ok := userConfig["auth_azuread"].([]interface{})
 	if ok && len(authAzureADSlice) > 0 {
-		authAzureAD, ok := authAzureADSlice[0].(map[string]any)
+		authAzureAD, ok := authAzureADSlice[0].(map[string]interface{})
 		if ok {
 			err = typeupgrader.Map(authAzureAD, map[string]string{
 				"allow_sign_up": "bool",
@@ -121,9 +121,9 @@ func ResourceGrafanaStateUpgrade(
 		}
 	}
 
-	authGenericOAuthSlice, ok := userConfig["auth_generic_oauth"].([]any)
+	authGenericOAuthSlice, ok := userConfig["auth_generic_oauth"].([]interface{})
 	if ok && len(authGenericOAuthSlice) > 0 {
-		authGenericOAuth, ok := authGenericOAuthSlice[0].(map[string]any)
+		authGenericOAuth, ok := authGenericOAuthSlice[0].(map[string]interface{})
 		if ok {
 			err = typeupgrader.Map(authGenericOAuth, map[string]string{
 				"allow_sign_up": "bool",
@@ -134,9 +134,9 @@ func ResourceGrafanaStateUpgrade(
 		}
 	}
 
-	authGitHubSlice, ok := userConfig["auth_github"].([]any)
+	authGitHubSlice, ok := userConfig["auth_github"].([]interface{})
 	if ok && len(authGitHubSlice) > 0 {
-		authGitHub, ok := authGitHubSlice[0].(map[string]any)
+		authGitHub, ok := authGitHubSlice[0].(map[string]interface{})
 		if ok {
 			err = typeupgrader.Map(authGitHub, map[string]string{
 				"allow_sign_up": "bool",
@@ -145,7 +145,7 @@ func ResourceGrafanaStateUpgrade(
 				return rawState, err
 			}
 
-			authGitHubTeamIDs, ok := authGitHub["team_ids"].([]any)
+			authGitHubTeamIDs, ok := authGitHub["team_ids"].([]interface{})
 			if ok {
 				err = typeupgrader.Slice(authGitHubTeamIDs, "int")
 				if err != nil {
@@ -155,9 +155,9 @@ func ResourceGrafanaStateUpgrade(
 		}
 	}
 
-	authGitLabSlice, ok := userConfig["auth_gitlab"].([]any)
+	authGitLabSlice, ok := userConfig["auth_gitlab"].([]interface{})
 	if ok && len(authGitLabSlice) > 0 {
-		authGitLab, ok := authGitLabSlice[0].(map[string]any)
+		authGitLab, ok := authGitLabSlice[0].(map[string]interface{})
 		if ok {
 			err = typeupgrader.Map(authGitLab, map[string]string{
 				"allow_sign_up": "bool",
@@ -168,9 +168,9 @@ func ResourceGrafanaStateUpgrade(
 		}
 	}
 
-	authGoogleSlice, ok := userConfig["auth_google"].([]any)
+	authGoogleSlice, ok := userConfig["auth_google"].([]interface{})
 	if ok && len(authGoogleSlice) > 0 {
-		authGoogle, ok := authGoogleSlice[0].(map[string]any)
+		authGoogle, ok := authGoogleSlice[0].(map[string]interface{})
 		if ok {
 			err = typeupgrader.Map(authGoogle, map[string]string{
 				"allow_sign_up": "bool",
@@ -181,9 +181,9 @@ func ResourceGrafanaStateUpgrade(
 		}
 	}
 
-	privateAccessSlice, ok := userConfig["private_access"].([]any)
+	privateAccessSlice, ok := userConfig["private_access"].([]interface{})
 	if ok && len(privateAccessSlice) > 0 {
-		privateAccess, ok := privateAccessSlice[0].(map[string]any)
+		privateAccess, ok := privateAccessSlice[0].(map[string]interface{})
 		if ok {
 			err = typeupgrader.Map(privateAccess, map[string]string{
 				"grafana": "bool",
@@ -194,9 +194,9 @@ func ResourceGrafanaStateUpgrade(
 		}
 	}
 
-	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]any)
+	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]interface{})
 	if ok && len(privateLinkAccessSlice) > 0 {
-		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]any)
+		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]interface{})
 		if ok {
 			err := typeupgrader.Map(privateLinkAccess, map[string]string{
 				"grafana": "bool",
@@ -207,9 +207,9 @@ func ResourceGrafanaStateUpgrade(
 		}
 	}
 
-	publicAccessSlice, ok := userConfig["public_access"].([]any)
+	publicAccessSlice, ok := userConfig["public_access"].([]interface{})
 	if ok && len(publicAccessSlice) > 0 {
-		publicAccess, ok := publicAccessSlice[0].(map[string]any)
+		publicAccess, ok := publicAccessSlice[0].(map[string]interface{})
 		if ok {
 			err := typeupgrader.Map(publicAccess, map[string]string{
 				"grafana": "bool",
@@ -220,9 +220,9 @@ func ResourceGrafanaStateUpgrade(
 		}
 	}
 
-	smtpServerSlice, ok := userConfig["smtp_server"].([]any)
+	smtpServerSlice, ok := userConfig["smtp_server"].([]interface{})
 	if ok && len(smtpServerSlice) > 0 {
-		smtpServer, ok := smtpServerSlice[0].(map[string]any)
+		smtpServer, ok := smtpServerSlice[0].(map[string]interface{})
 		if ok {
 			err := typeupgrader.Map(smtpServer, map[string]string{
 				"port":        "int",

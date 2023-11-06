@@ -11,20 +11,6 @@ nav_order: 1
 - Migrate `aiven_service_integration` to the Plugin Framework
 - Deprecating `project_user`, `account_team` and `account_team_member` resources
 
-## [X.Y.Z] - YYYY-MM-DD
-
-- Fix unmarshalling empty userconfig crash
-
-## [4.9.3] - 2023-10-27
-
-- Deprecating `project_user`, `account_team` and `account_team_member` resources
-- Fix incorrect read context in MySQL user resource
-- Improve Kafka Topic creation and read performance
-
-## [4.9.2] - 2023-10-04
-
-- Fix `aiven_organization_user` created time serialization
-
 ## [4.9.1] - 2023-10-03
 
 - Allow to modify `pg_user` replication settings

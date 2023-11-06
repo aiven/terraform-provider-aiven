@@ -73,10 +73,10 @@ func ResourceM3DBResource() *schema.Resource {
 
 func ResourceM3DBStateUpgrade(
 	_ context.Context,
-	rawState map[string]any,
-	_ any,
-) (map[string]any, error) {
-	userConfigSlice, ok := rawState["m3db_user_config"].([]any)
+	rawState map[string]interface{},
+	_ interface{},
+) (map[string]interface{}, error) {
+	userConfigSlice, ok := rawState["m3db_user_config"].([]interface{})
 	if !ok {
 		return rawState, nil
 	}
@@ -85,7 +85,7 @@ func ResourceM3DBStateUpgrade(
 		return rawState, nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]any)
+	userConfig, ok := userConfigSlice[0].(map[string]interface{})
 	if !ok {
 		return rawState, nil
 	}
@@ -98,9 +98,9 @@ func ResourceM3DBStateUpgrade(
 		return rawState, err
 	}
 
-	limitsSlice, ok := userConfig["limits"].([]any)
+	limitsSlice, ok := userConfig["limits"].([]interface{})
 	if ok && len(limitsSlice) > 0 {
-		limits, ok := limitsSlice[0].(map[string]any)
+		limits, ok := limitsSlice[0].(map[string]interface{})
 		if ok {
 			err := typeupgrader.Map(limits, map[string]string{
 				"max_recently_queried_series_blocks":          "int",
@@ -115,17 +115,17 @@ func ResourceM3DBStateUpgrade(
 		}
 	}
 
-	namespacesSlice, ok := userConfig["namespaces"].([]any)
+	namespacesSlice, ok := userConfig["namespaces"].([]interface{})
 	if ok && len(namespacesSlice) > 0 {
 		for _, v := range namespacesSlice {
-			namespace, ok := v.(map[string]any)
+			namespace, ok := v.(map[string]interface{})
 			if !ok {
 				continue
 			}
 
-			optionsSlice, ok := namespace["options"].([]any)
+			optionsSlice, ok := namespace["options"].([]interface{})
 			if ok && len(optionsSlice) > 0 {
-				options, ok := optionsSlice[0].(map[string]any)
+				options, ok := optionsSlice[0].(map[string]interface{})
 				if ok {
 					err := typeupgrader.Map(options, map[string]string{
 						"snapshot_enabled":    "bool",
@@ -139,9 +139,9 @@ func ResourceM3DBStateUpgrade(
 		}
 	}
 
-	privateAccessSlice, ok := userConfig["private_access"].([]any)
+	privateAccessSlice, ok := userConfig["private_access"].([]interface{})
 	if ok && len(privateAccessSlice) > 0 {
-		privateAccess, ok := privateAccessSlice[0].(map[string]any)
+		privateAccess, ok := privateAccessSlice[0].(map[string]interface{})
 		if ok {
 			err = typeupgrader.Map(privateAccess, map[string]string{
 				"m3coordinator": "bool",
@@ -152,9 +152,9 @@ func ResourceM3DBStateUpgrade(
 		}
 	}
 
-	publicAccessSlice, ok := userConfig["public_access"].([]any)
+	publicAccessSlice, ok := userConfig["public_access"].([]interface{})
 	if ok && len(publicAccessSlice) > 0 {
-		publicAccess, ok := publicAccessSlice[0].(map[string]any)
+		publicAccess, ok := publicAccessSlice[0].(map[string]interface{})
 		if ok {
 			err := typeupgrader.Map(publicAccess, map[string]string{
 				"m3coordinator": "bool",
@@ -165,14 +165,14 @@ func ResourceM3DBStateUpgrade(
 		}
 	}
 
-	rulesSlice, ok := userConfig["rules"].([]any)
+	rulesSlice, ok := userConfig["rules"].([]interface{})
 	if ok && len(rulesSlice) > 0 {
-		rules, ok := rulesSlice[0].(map[string]any)
+		rules, ok := rulesSlice[0].(map[string]interface{})
 		if ok {
-			mappingSlice, ok := rules["mapping"].([]any)
+			mappingSlice, ok := rules["mapping"].([]interface{})
 			if ok && len(mappingSlice) > 0 {
 				for _, v := range mappingSlice {
-					mapping, ok := v.(map[string]any)
+					mapping, ok := v.(map[string]interface{})
 					if !ok {
 						continue
 					}
