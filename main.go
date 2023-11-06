@@ -14,9 +14,6 @@ import (
 //go:generate go test -tags userconfig ./internal/schemautil/userconfig
 //go:generate go run ./ucgenerator/... --integrations clickhouse_kafka,clickhouse_postgresql,datadog,external_aws_cloudwatch_metrics,kafka_connect,kafka_logs,kafka_mirrormaker,logs,metrics
 
-// registryPrefix is the registry prefix for the provider.
-const registryPrefix = "registry.terraform.io/"
-
 // version is the version of the provider.
 var version = "dev"
 
@@ -35,15 +32,8 @@ func main() {
 		serveOpts = append(serveOpts, tf6server.WithManagedDebug())
 	}
 
-	name := registryPrefix + "aiven/aiven"
-
-	//goland:noinspection GoBoolExpressions
-	if version == "dev" {
-		name = registryPrefix + "aiven-dev/aiven"
-	}
-
 	err = tf6server.Serve(
-		name,
+		"registry.terraform.io/aiven/aiven",
 		func() tfprotov6.ProviderServer {
 			return muxServer
 		},

@@ -60,9 +60,9 @@ func ResourceServiceIntegrationEndpoint() *schema.Resource {
 
 func ResourceServiceIntegrationEndpointStateUpgrade(
 	_ context.Context,
-	rawState map[string]any,
-	_ any,
-) (map[string]any, error) {
+	rawState map[string]interface{},
+	_ interface{},
+) (map[string]interface{}, error) {
 	err := serviceIntegrationEndpointDatadogStateUpgrade(rawState)
 	if err != nil {
 		return rawState, err
@@ -86,8 +86,8 @@ func ResourceServiceIntegrationEndpointStateUpgrade(
 	return rawState, nil
 }
 
-func serviceIntegrationEndpointDatadogStateUpgrade(rawState map[string]any) error {
-	userConfigSlice, ok := rawState["datadog_user_config"].([]any)
+func serviceIntegrationEndpointDatadogStateUpgrade(rawState map[string]interface{}) error {
+	userConfigSlice, ok := rawState["datadog_user_config"].([]interface{})
 	if !ok {
 		return nil
 	}
@@ -96,7 +96,7 @@ func serviceIntegrationEndpointDatadogStateUpgrade(rawState map[string]any) erro
 		return nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]any)
+	userConfig, ok := userConfigSlice[0].(map[string]interface{})
 	if !ok {
 		return nil
 	}
@@ -114,8 +114,8 @@ func serviceIntegrationEndpointDatadogStateUpgrade(rawState map[string]any) erro
 	return nil
 }
 
-func rsyslogStateUpgrade(rawState map[string]any) error {
-	userConfigSlice, ok := rawState["rsyslog_user_config"].([]any)
+func rsyslogStateUpgrade(rawState map[string]interface{}) error {
+	userConfigSlice, ok := rawState["rsyslog_user_config"].([]interface{})
 	if !ok {
 		return nil
 	}
@@ -124,7 +124,7 @@ func rsyslogStateUpgrade(rawState map[string]any) error {
 		return nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]any)
+	userConfig, ok := userConfigSlice[0].(map[string]interface{})
 	if !ok {
 		return nil
 	}
@@ -140,8 +140,8 @@ func rsyslogStateUpgrade(rawState map[string]any) error {
 	return nil
 }
 
-func externalElasticsearchLogsStateUpgrade(rawState map[string]any) error {
-	userConfigSlice, ok := rawState["external_elasticsearch_logs_user_config"].([]any)
+func externalElasticsearchLogsStateUpgrade(rawState map[string]interface{}) error {
+	userConfigSlice, ok := rawState["external_elasticsearch_logs_user_config"].([]interface{})
 	if !ok {
 		return nil
 	}
@@ -150,7 +150,7 @@ func externalElasticsearchLogsStateUpgrade(rawState map[string]any) error {
 		return nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]any)
+	userConfig, ok := userConfigSlice[0].(map[string]interface{})
 	if !ok {
 		return nil
 	}
@@ -166,8 +166,8 @@ func externalElasticsearchLogsStateUpgrade(rawState map[string]any) error {
 	return nil
 }
 
-func externalOpenSearchLogsStateUpgrade(rawState map[string]any) error {
-	userConfigSlice, ok := rawState["external_opensearch_logs_user_config"].([]any)
+func externalOpenSearchLogsStateUpgrade(rawState map[string]interface{}) error {
+	userConfigSlice, ok := rawState["external_opensearch_logs_user_config"].([]interface{})
 	if !ok {
 		return nil
 	}
@@ -176,7 +176,7 @@ func externalOpenSearchLogsStateUpgrade(rawState map[string]any) error {
 		return nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]any)
+	userConfig, ok := userConfigSlice[0].(map[string]interface{})
 	if !ok {
 		return nil
 	}

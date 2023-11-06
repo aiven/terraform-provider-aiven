@@ -11,34 +11,34 @@ import (
 // TestFromAPI is a test for FromAPI.
 func TestFromAPI(t *testing.T) {
 	type args struct {
-		schemaType  userconfig.SchemaType
-		serviceName string
-		request     map[string]any
+		st userconfig.SchemaType
+		n  string
+		r  map[string]interface{}
 	}
 
 	tests := []struct {
 		name string
 		args args
-		want []map[string]any
+		want []map[string]interface{}
 	}{
 		{
 			name: "boolean",
 			args: args{
-				schemaType:  userconfig.ServiceTypes,
-				serviceName: "m3db",
-				request: map[string]any{
+				st: userconfig.ServiceTypes,
+				n:  "m3db",
+				r: map[string]interface{}{
 					"m3coordinator_enable_graphite_carbon_ingest": true,
 				},
 			},
-			want: []map[string]any{{
-				"additional_backup_regions": []any(nil),
+			want: []map[string]interface{}{{
+				"additional_backup_regions": []interface{}(nil),
 				"custom_domain":             "",
-				"ip_filter":                 []any(nil),
-				"ip_filter_object":          []any(nil),
+				"ip_filter":                 []interface{}(nil),
+				"ip_filter_object":          []interface{}(nil),
 				"m3coordinator_enable_graphite_carbon_ingest": true,
 				"m3db_version":         "",
 				"m3_version":           "",
-				"namespaces":           []any(nil),
+				"namespaces":           []interface{}(nil),
 				"project_to_fork_from": "",
 				"service_to_fork_from": "",
 				"static_ips":           false,
@@ -47,20 +47,20 @@ func TestFromAPI(t *testing.T) {
 		{
 			name: "integer",
 			args: args{
-				schemaType:  userconfig.ServiceTypes,
-				serviceName: "m3db",
-				request: map[string]any{
-					"limits": map[string]any{
+				st: userconfig.ServiceTypes,
+				n:  "m3db",
+				r: map[string]interface{}{
+					"limits": map[string]interface{}{
 						"max_recently_queried_series_blocks": 20000,
 					},
 				},
 			},
-			want: []map[string]any{{
-				"additional_backup_regions": []any(nil),
+			want: []map[string]interface{}{{
+				"additional_backup_regions": []interface{}(nil),
 				"custom_domain":             "",
-				"ip_filter":                 []any(nil),
-				"ip_filter_object":          []any(nil),
-				"limits": []map[string]any{{
+				"ip_filter":                 []interface{}(nil),
+				"ip_filter_object":          []interface{}(nil),
+				"limits": []map[string]interface{}{{
 					"max_recently_queried_series_blocks":          20000,
 					"max_recently_queried_series_disk_bytes_read": 0,
 					"max_recently_queried_series_lookback":        "",
@@ -71,7 +71,7 @@ func TestFromAPI(t *testing.T) {
 				"m3coordinator_enable_graphite_carbon_ingest": false,
 				"m3db_version":         "",
 				"m3_version":           "",
-				"namespaces":           []any(nil),
+				"namespaces":           []interface{}(nil),
 				"project_to_fork_from": "",
 				"service_to_fork_from": "",
 				"static_ips":           false,
@@ -80,21 +80,21 @@ func TestFromAPI(t *testing.T) {
 		{
 			name: "number and object",
 			args: args{
-				schemaType:  userconfig.ServiceTypes,
-				serviceName: "kafka",
-				request: map[string]any{
-					"kafka": map[string]any{
+				st: userconfig.ServiceTypes,
+				n:  "kafka",
+				r: map[string]interface{}{
+					"kafka": map[string]interface{}{
 						"log_cleaner_min_cleanable_ratio": 0.5,
 					},
 				},
 			},
-			want: []map[string]any{{
-				"additional_backup_regions":  []any(nil),
+			want: []map[string]interface{}{{
+				"additional_backup_regions":  []interface{}(nil),
 				"aiven_kafka_topic_messages": false,
 				"custom_domain":              "",
-				"ip_filter":                  []any(nil),
-				"ip_filter_object":           []any(nil),
-				"kafka": []map[string]any{{
+				"ip_filter":                  []interface{}(nil),
+				"ip_filter_object":           []interface{}(nil),
+				"kafka": []map[string]interface{}{{
 					"auto_create_topics_enable":                                  false,
 					"compression_type":                                           "",
 					"connections_max_idle_ms":                                    0,
@@ -152,27 +152,27 @@ func TestFromAPI(t *testing.T) {
 		{
 			name: "array",
 			args: args{
-				schemaType:  userconfig.ServiceTypes,
-				serviceName: "m3db",
-				request: map[string]any{
-					"namespaces": []any{
-						map[string]any{
+				st: userconfig.ServiceTypes,
+				n:  "m3db",
+				r: map[string]interface{}{
+					"namespaces": []interface{}{
+						map[string]interface{}{
 							"name": "default",
 							"type": "unaggregated",
 						},
 					},
 				},
 			},
-			want: []map[string]any{{
-				"additional_backup_regions": []any(nil),
+			want: []map[string]interface{}{{
+				"additional_backup_regions": []interface{}(nil),
 				"custom_domain":             "",
-				"ip_filter":                 []any(nil),
-				"ip_filter_object":          []any(nil),
+				"ip_filter":                 []interface{}(nil),
+				"ip_filter_object":          []interface{}(nil),
 				"m3coordinator_enable_graphite_carbon_ingest": false,
 				"m3db_version": "",
 				"m3_version":   "",
-				"namespaces": []any{
-					map[string]any{
+				"namespaces": []interface{}{
+					map[string]interface{}{
 						"name":       "default",
 						"resolution": "",
 						"type":       "unaggregated",
@@ -186,26 +186,26 @@ func TestFromAPI(t *testing.T) {
 		{
 			name: "strings in one to many array",
 			args: args{
-				schemaType:  userconfig.ServiceTypes,
-				serviceName: "m3db",
-				request: map[string]any{
-					"ip_filter": []any{
+				st: userconfig.ServiceTypes,
+				n:  "m3db",
+				r: map[string]interface{}{
+					"ip_filter": []interface{}{
 						"0.0.0.0/0",
 						"10.20.0.0/16",
 					},
 				},
 			},
-			want: []map[string]any{{
-				"additional_backup_regions": []any(nil),
+			want: []map[string]interface{}{{
+				"additional_backup_regions": []interface{}(nil),
 				"custom_domain":             "",
-				"ip_filter": []any{
+				"ip_filter": []interface{}{
 					"0.0.0.0/0",
 					"10.20.0.0/16",
 				},
 				"m3coordinator_enable_graphite_carbon_ingest": false,
 				"m3db_version":         "",
 				"m3_version":           "",
-				"namespaces":           []any(nil),
+				"namespaces":           []interface{}(nil),
 				"project_to_fork_from": "",
 				"service_to_fork_from": "",
 				"static_ips":           false,
@@ -214,30 +214,30 @@ func TestFromAPI(t *testing.T) {
 		{
 			name: "objects in one to many array",
 			args: args{
-				schemaType:  userconfig.ServiceTypes,
-				serviceName: "m3db",
-				request: map[string]any{
-					"ip_filter": []any{
-						map[string]any{
+				st: userconfig.ServiceTypes,
+				n:  "m3db",
+				r: map[string]interface{}{
+					"ip_filter": []interface{}{
+						map[string]interface{}{
 							"description": "test",
 							"network":     "0.0.0.0/0",
 						},
-						map[string]any{
+						map[string]interface{}{
 							"description": "",
 							"network":     "10.20.0.0/16",
 						},
 					},
 				},
 			},
-			want: []map[string]any{{
-				"additional_backup_regions": []any(nil),
+			want: []map[string]interface{}{{
+				"additional_backup_regions": []interface{}(nil),
 				"custom_domain":             "",
-				"ip_filter_object": []any{
-					map[string]any{
+				"ip_filter_object": []interface{}{
+					map[string]interface{}{
 						"description": "test",
 						"network":     "0.0.0.0/0",
 					},
-					map[string]any{
+					map[string]interface{}{
 						"description": "",
 						"network":     "10.20.0.0/16",
 					},
@@ -245,7 +245,7 @@ func TestFromAPI(t *testing.T) {
 				"m3coordinator_enable_graphite_carbon_ingest": false,
 				"m3db_version":         "",
 				"m3_version":           "",
-				"namespaces":           []any(nil),
+				"namespaces":           []interface{}(nil),
 				"project_to_fork_from": "",
 				"service_to_fork_from": "",
 				"static_ips":           false,
@@ -254,13 +254,13 @@ func TestFromAPI(t *testing.T) {
 		{
 			name: "strings in one to many array via one_of",
 			args: args{
-				schemaType:  userconfig.ServiceTypes,
-				serviceName: "m3db",
-				request: map[string]any{
-					"rules": map[string]any{
-						"mapping": []any{
-							map[string]any{
-								"namespaces": []any{
+				st: userconfig.ServiceTypes,
+				n:  "m3db",
+				r: map[string]interface{}{
+					"rules": map[string]interface{}{
+						"mapping": []interface{}{
+							map[string]interface{}{
+								"namespaces": []interface{}{
 									"aggregated_*",
 								},
 							},
@@ -268,27 +268,27 @@ func TestFromAPI(t *testing.T) {
 					},
 				},
 			},
-			want: []map[string]any{{
-				"additional_backup_regions": []any(nil),
+			want: []map[string]interface{}{{
+				"additional_backup_regions": []interface{}(nil),
 				"custom_domain":             "",
-				"ip_filter":                 []any(nil),
-				"ip_filter_object":          []any(nil),
+				"ip_filter":                 []interface{}(nil),
+				"ip_filter_object":          []interface{}(nil),
 				"m3coordinator_enable_graphite_carbon_ingest": false,
 				"m3db_version":         "",
 				"m3_version":           "",
-				"namespaces":           []any(nil),
+				"namespaces":           []interface{}(nil),
 				"project_to_fork_from": "",
-				"rules": []map[string]any{{
-					"mapping": []any{
-						map[string]any{
-							"aggregations": []any(nil),
+				"rules": []map[string]interface{}{{
+					"mapping": []interface{}{
+						map[string]interface{}{
+							"aggregations": []interface{}(nil),
 							"drop":         false,
 							"filter":       "",
 							"name":         "",
-							"namespaces": []any{
+							"namespaces": []interface{}{
 								"aggregated_*",
 							},
-							"tags": []any(nil),
+							"tags": []interface{}(nil),
 						},
 					},
 				}},
@@ -299,14 +299,14 @@ func TestFromAPI(t *testing.T) {
 		{
 			name: "objects in one to many array via one_of",
 			args: args{
-				schemaType:  userconfig.ServiceTypes,
-				serviceName: "m3db",
-				request: map[string]any{
-					"rules": map[string]any{
-						"mapping": []any{
-							map[string]any{
-								"namespaces": []any{
-									map[string]any{
+				st: userconfig.ServiceTypes,
+				n:  "m3db",
+				r: map[string]interface{}{
+					"rules": map[string]interface{}{
+						"mapping": []interface{}{
+							map[string]interface{}{
+								"namespaces": []interface{}{
+									map[string]interface{}{
 										"resolution": "30s",
 										"retention":  "48h",
 									},
@@ -316,30 +316,30 @@ func TestFromAPI(t *testing.T) {
 					},
 				},
 			},
-			want: []map[string]any{{
-				"additional_backup_regions": []any(nil),
+			want: []map[string]interface{}{{
+				"additional_backup_regions": []interface{}(nil),
 				"custom_domain":             "",
-				"ip_filter":                 []any(nil),
-				"ip_filter_object":          []any(nil),
+				"ip_filter":                 []interface{}(nil),
+				"ip_filter_object":          []interface{}(nil),
 				"m3coordinator_enable_graphite_carbon_ingest": false,
 				"m3db_version":         "",
 				"m3_version":           "",
-				"namespaces":           []any(nil),
+				"namespaces":           []interface{}(nil),
 				"project_to_fork_from": "",
-				"rules": []map[string]any{{
-					"mapping": []any{
-						map[string]any{
-							"aggregations": []any(nil),
+				"rules": []map[string]interface{}{{
+					"mapping": []interface{}{
+						map[string]interface{}{
+							"aggregations": []interface{}(nil),
 							"drop":         false,
 							"filter":       "",
 							"name":         "",
-							"namespaces_object": []any{
-								map[string]any{
+							"namespaces_object": []interface{}{
+								map[string]interface{}{
 									"resolution": "30s",
 									"retention":  "48h",
 								},
 							},
-							"tags": []any(nil),
+							"tags": []interface{}(nil),
 						},
 					},
 				}},
@@ -351,7 +351,7 @@ func TestFromAPI(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, _ := FromAPI(tt.args.schemaType, tt.args.serviceName, tt.args.request)
+			got, _ := FromAPI(tt.args.st, tt.args.n, tt.args.r)
 
 			if !cmp.Equal(got, tt.want) {
 				t.Errorf(cmp.Diff(tt.want, got))

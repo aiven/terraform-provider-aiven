@@ -234,10 +234,10 @@ func ResourceKafkaTopic() *schema.Resource {
 
 func ResourceKafkaTopicStateUpgrade(
 	_ context.Context,
-	rawState map[string]any,
-	_ any,
-) (map[string]any, error) {
-	configSlice, ok := rawState["config"].([]any)
+	rawState map[string]interface{},
+	_ interface{},
+) (map[string]interface{}, error) {
+	configSlice, ok := rawState["config"].([]interface{})
 	if !ok {
 		return rawState, nil
 	}
@@ -246,7 +246,7 @@ func ResourceKafkaTopicStateUpgrade(
 		return rawState, nil
 	}
 
-	config, ok := configSlice[0].(map[string]any)
+	config, ok := configSlice[0].(map[string]interface{})
 	if !ok {
 		return rawState, nil
 	}

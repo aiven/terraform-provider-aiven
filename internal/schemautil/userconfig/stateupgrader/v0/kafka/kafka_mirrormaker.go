@@ -69,10 +69,10 @@ func ResourceKafkaMirrormaker() *schema.Resource {
 
 func ResourceKafkaMirrormakerStateUpgrade(
 	_ context.Context,
-	rawState map[string]any,
-	_ any,
-) (map[string]any, error) {
-	userConfigSlice, ok := rawState["kafka_mirrormaker_user_config"].([]any)
+	rawState map[string]interface{},
+	_ interface{},
+) (map[string]interface{}, error) {
+	userConfigSlice, ok := rawState["kafka_mirrormaker_user_config"].([]interface{})
 	if !ok {
 		return rawState, nil
 	}
@@ -81,7 +81,7 @@ func ResourceKafkaMirrormakerStateUpgrade(
 		return rawState, nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]any)
+	userConfig, ok := userConfigSlice[0].(map[string]interface{})
 	if !ok {
 		return rawState, nil
 	}
@@ -93,9 +93,9 @@ func ResourceKafkaMirrormakerStateUpgrade(
 		return rawState, err
 	}
 
-	kafkaMirrormakerSlice, ok := userConfig["kafka_mirrormaker"].([]any)
+	kafkaMirrormakerSlice, ok := userConfig["kafka_mirrormaker"].([]interface{})
 	if ok && len(kafkaMirrormakerSlice) > 0 {
-		kafkaMirrormaker, ok := kafkaMirrormakerSlice[0].(map[string]any)
+		kafkaMirrormaker, ok := kafkaMirrormakerSlice[0].(map[string]interface{})
 		if ok {
 			err = typeupgrader.Map(kafkaMirrormaker, map[string]string{
 				"emit_checkpoints_enabled":            "bool",

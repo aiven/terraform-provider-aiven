@@ -73,10 +73,10 @@ func ResourceRedis() *schema.Resource {
 
 func ResourceRedisStateUpgrade(
 	_ context.Context,
-	rawState map[string]any,
-	_ any,
-) (map[string]any, error) {
-	userConfigSlice, ok := rawState["redis_user_config"].([]any)
+	rawState map[string]interface{},
+	_ interface{},
+) (map[string]interface{}, error) {
+	userConfigSlice, ok := rawState["redis_user_config"].([]interface{})
 	if !ok {
 		return rawState, nil
 	}
@@ -85,7 +85,7 @@ func ResourceRedisStateUpgrade(
 		return rawState, nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]any)
+	userConfig, ok := userConfigSlice[0].(map[string]interface{})
 	if !ok {
 		return rawState, nil
 	}
@@ -104,9 +104,9 @@ func ResourceRedisStateUpgrade(
 		return rawState, err
 	}
 
-	migrationSlice, ok := userConfig["migration"].([]any)
+	migrationSlice, ok := userConfig["migration"].([]interface{})
 	if ok && len(migrationSlice) > 0 {
-		migration, ok := migrationSlice[0].(map[string]any)
+		migration, ok := migrationSlice[0].(map[string]interface{})
 		if ok {
 			err := typeupgrader.Map(migration, map[string]string{
 				"port": "int",
@@ -118,9 +118,9 @@ func ResourceRedisStateUpgrade(
 		}
 	}
 
-	privateAccessSlice, ok := userConfig["private_access"].([]any)
+	privateAccessSlice, ok := userConfig["private_access"].([]interface{})
 	if ok && len(privateAccessSlice) > 0 {
-		privateAccess, ok := privateAccessSlice[0].(map[string]any)
+		privateAccess, ok := privateAccessSlice[0].(map[string]interface{})
 		if ok {
 			err = typeupgrader.Map(privateAccess, map[string]string{
 				"prometheus": "bool",
@@ -132,9 +132,9 @@ func ResourceRedisStateUpgrade(
 		}
 	}
 
-	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]any)
+	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]interface{})
 	if ok && len(privateLinkAccessSlice) > 0 {
-		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]any)
+		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]interface{})
 		if ok {
 			err := typeupgrader.Map(privateLinkAccess, map[string]string{
 				"prometheus": "bool",
@@ -146,9 +146,9 @@ func ResourceRedisStateUpgrade(
 		}
 	}
 
-	publicAccessSlice, ok := userConfig["public_access"].([]any)
+	publicAccessSlice, ok := userConfig["public_access"].([]interface{})
 	if ok && len(publicAccessSlice) > 0 {
-		publicAccess, ok := publicAccessSlice[0].(map[string]any)
+		publicAccess, ok := publicAccessSlice[0].(map[string]interface{})
 		if ok {
 			err := typeupgrader.Map(publicAccess, map[string]string{
 				"prometheus": "bool",

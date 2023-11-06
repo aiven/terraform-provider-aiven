@@ -87,9 +87,9 @@ func ResourceServiceIntegration() *schema.Resource {
 
 func ResourceServiceIntegrationStateUpgrade(
 	_ context.Context,
-	rawState map[string]any,
-	_ any,
-) (map[string]any, error) {
+	rawState map[string]interface{},
+	_ interface{},
+) (map[string]interface{}, error) {
 	err := logsStateUpgrade(rawState)
 	if err != nil {
 		return rawState, err
@@ -113,8 +113,8 @@ func ResourceServiceIntegrationStateUpgrade(
 	return rawState, nil
 }
 
-func logsStateUpgrade(rawState map[string]any) error {
-	userConfigSlice, ok := rawState["logs_user_config"].([]any)
+func logsStateUpgrade(rawState map[string]interface{}) error {
+	userConfigSlice, ok := rawState["logs_user_config"].([]interface{})
 	if !ok {
 		return nil
 	}
@@ -123,7 +123,7 @@ func logsStateUpgrade(rawState map[string]any) error {
 		return nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]any)
+	userConfig, ok := userConfigSlice[0].(map[string]interface{})
 	if !ok {
 		return nil
 	}
@@ -138,8 +138,8 @@ func logsStateUpgrade(rawState map[string]any) error {
 	return nil
 }
 
-func kafkaMirrormakerStateUpgrade(rawState map[string]any) error {
-	userConfigSlice, ok := rawState["kafka_mirrormaker_user_config"].([]any)
+func kafkaMirrormakerStateUpgrade(rawState map[string]interface{}) error {
+	userConfigSlice, ok := rawState["kafka_mirrormaker_user_config"].([]interface{})
 	if !ok {
 		return nil
 	}
@@ -148,14 +148,14 @@ func kafkaMirrormakerStateUpgrade(rawState map[string]any) error {
 		return nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]any)
+	userConfig, ok := userConfigSlice[0].(map[string]interface{})
 	if !ok {
 		return nil
 	}
 
-	kafkaMirrormakerSlice, ok := userConfig["kafka_mirrormaker"].([]any)
+	kafkaMirrormakerSlice, ok := userConfig["kafka_mirrormaker"].([]interface{})
 	if ok && len(kafkaMirrormakerSlice) > 0 {
-		kafkaMirrormaker, ok := kafkaMirrormakerSlice[0].(map[string]any)
+		kafkaMirrormaker, ok := kafkaMirrormakerSlice[0].(map[string]interface{})
 		if !ok {
 			return nil
 		}
@@ -175,8 +175,8 @@ func kafkaMirrormakerStateUpgrade(rawState map[string]any) error {
 	return nil
 }
 
-func metricsStateUpgrade(rawState map[string]any) error {
-	userConfigSlice, ok := rawState["metrics_user_config"].([]any)
+func metricsStateUpgrade(rawState map[string]interface{}) error {
+	userConfigSlice, ok := rawState["metrics_user_config"].([]interface{})
 	if !ok {
 		return nil
 	}
@@ -185,7 +185,7 @@ func metricsStateUpgrade(rawState map[string]any) error {
 		return nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]any)
+	userConfig, ok := userConfigSlice[0].(map[string]interface{})
 	if !ok {
 		return nil
 	}
@@ -197,13 +197,13 @@ func metricsStateUpgrade(rawState map[string]any) error {
 		return err
 	}
 
-	sourceMySQLSlice, ok := userConfig["source_mysql"].([]any)
+	sourceMySQLSlice, ok := userConfig["source_mysql"].([]interface{})
 	if ok && len(sourceMySQLSlice) > 0 {
-		sourceMySQL, ok := sourceMySQLSlice[0].(map[string]any)
+		sourceMySQL, ok := sourceMySQLSlice[0].(map[string]interface{})
 		if ok {
-			telegrafSlice, ok := sourceMySQL["telegraf"].([]any)
+			telegrafSlice, ok := sourceMySQL["telegraf"].([]interface{})
 			if ok && len(telegrafSlice) > 0 {
-				telegraf, ok := telegrafSlice[0].(map[string]any)
+				telegraf, ok := telegrafSlice[0].(map[string]interface{})
 				if ok {
 					err := typeupgrader.Map(telegraf, map[string]string{
 						"gather_event_waits":                       "bool",
@@ -232,8 +232,8 @@ func metricsStateUpgrade(rawState map[string]any) error {
 	return nil
 }
 
-func serviceIntegrationDatadogStateUpgrade(rawState map[string]any) error {
-	userConfigSlice, ok := rawState["datadog_user_config"].([]any)
+func serviceIntegrationDatadogStateUpgrade(rawState map[string]interface{}) error {
+	userConfigSlice, ok := rawState["datadog_user_config"].([]interface{})
 	if !ok {
 		return nil
 	}
@@ -242,7 +242,7 @@ func serviceIntegrationDatadogStateUpgrade(rawState map[string]any) error {
 		return nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]any)
+	userConfig, ok := userConfigSlice[0].(map[string]interface{})
 	if !ok {
 		return nil
 	}
