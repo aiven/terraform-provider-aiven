@@ -79,10 +79,10 @@ func ResourceInfluxDB() *schema.Resource {
 
 func ResourceInfluxDBStateUpgrade(
 	_ context.Context,
-	rawState map[string]interface{},
-	_ interface{},
-) (map[string]interface{}, error) {
-	userConfigSlice, ok := rawState["influxdb_user_config"].([]interface{})
+	rawState map[string]any,
+	_ any,
+) (map[string]any, error) {
+	userConfigSlice, ok := rawState["influxdb_user_config"].([]any)
 	if !ok {
 		return rawState, nil
 	}
@@ -91,7 +91,7 @@ func ResourceInfluxDBStateUpgrade(
 		return rawState, nil
 	}
 
-	userConfig, ok := userConfigSlice[0].(map[string]interface{})
+	userConfig, ok := userConfigSlice[0].(map[string]any)
 	if !ok {
 		return rawState, nil
 	}
@@ -103,9 +103,9 @@ func ResourceInfluxDBStateUpgrade(
 		return rawState, err
 	}
 
-	influxDBSlice, ok := userConfig["influxdb"].([]interface{})
+	influxDBSlice, ok := userConfig["influxdb"].([]any)
 	if ok && len(influxDBSlice) > 0 {
-		influxDB, ok := influxDBSlice[0].(map[string]interface{})
+		influxDB, ok := influxDBSlice[0].(map[string]any)
 		if ok {
 			err := typeupgrader.Map(influxDB, map[string]string{
 				"log_queries_after":    "int",
@@ -121,9 +121,9 @@ func ResourceInfluxDBStateUpgrade(
 		}
 	}
 
-	privateAccessSlice, ok := userConfig["private_access"].([]interface{})
+	privateAccessSlice, ok := userConfig["private_access"].([]any)
 	if ok && len(privateAccessSlice) > 0 {
-		privateAccess, ok := privateAccessSlice[0].(map[string]interface{})
+		privateAccess, ok := privateAccessSlice[0].(map[string]any)
 		if ok {
 			err = typeupgrader.Map(privateAccess, map[string]string{
 				"influxdb": "bool",
@@ -134,9 +134,9 @@ func ResourceInfluxDBStateUpgrade(
 		}
 	}
 
-	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]interface{})
+	privateLinkAccessSlice, ok := userConfig["privatelink_access"].([]any)
 	if ok && len(privateLinkAccessSlice) > 0 {
-		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]interface{})
+		privateLinkAccess, ok := privateLinkAccessSlice[0].(map[string]any)
 		if ok {
 			err := typeupgrader.Map(privateLinkAccess, map[string]string{
 				"influxdb": "bool",
@@ -147,9 +147,9 @@ func ResourceInfluxDBStateUpgrade(
 		}
 	}
 
-	publicAccessSlice, ok := userConfig["public_access"].([]interface{})
+	publicAccessSlice, ok := userConfig["public_access"].([]any)
 	if ok && len(publicAccessSlice) > 0 {
-		publicAccess, ok := publicAccessSlice[0].(map[string]interface{})
+		publicAccess, ok := publicAccessSlice[0].(map[string]any)
 		if ok {
 			err := typeupgrader.Map(publicAccess, map[string]string{
 				"influxdb": "bool",

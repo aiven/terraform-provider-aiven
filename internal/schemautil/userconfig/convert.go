@@ -9,86 +9,94 @@ import (
 )
 
 // convertPropertyToSchema is a function that converts a property to a Terraform schema.
-func convertPropertyToSchema(n string, p map[string]interface{}, t string, ad bool, ireq bool) jen.Dict {
-	r := jen.Dict{
-		jen.Id("Type"): jen.Qual(SchemaPackage, t),
+func convertPropertyToSchema(
+	propertyName string,
+	propertyAttributes map[string]any,
+	terraformType string,
+	addDescription bool,
+	isRequired bool,
+) jen.Dict {
+	resultDict := jen.Dict{
+		jen.Id("Type"): jen.Qual(SchemaPackage, terraformType),
 	}
 
-	if ad {
-		id, d := descriptionForProperty(p, t)
+	if addDescription {
+		isDeprecated, description := descriptionForProperty(propertyAttributes, terraformType)
 
-		r[jen.Id("Description")] = jen.Lit(d)
+		resultDict[jen.Id("Description")] = jen.Lit(description)
 
-		if id {
-			r[jen.Id("Deprecated")] = jen.Lit("Usage of this field is discouraged.")
+		if isDeprecated {
+			resultDict[jen.Id("Deprecated")] = jen.Lit("Usage of this field is discouraged.")
 		}
 	}
 
-	if ireq {
-		r[jen.Id("Required")] = jen.Lit(true)
+	if isRequired {
+		resultDict[jen.Id("Required")] = jen.Lit(true)
 	} else {
-		r[jen.Id("Optional")] = jen.Lit(true)
+		resultDict[jen.Id("Optional")] = jen.Lit(true)
 
-		if d, ok := p["default"]; ok && isTerraformTypePrimitive(t) {
-			r[jen.Id("Default")] = jen.Lit(d)
+		if defaultValue, ok := propertyAttributes["default"]; ok && isTerraformTypePrimitive(terraformType) {
+			resultDict[jen.Id("Default")] = jen.Lit(defaultValue)
 		}
 	}
 
-	if co, ok := p["create_only"]; ok && co.(bool) {
-		r[jen.Id("ForceNew")] = jen.Lit(true)
+	if createOnly, ok := propertyAttributes["create_only"]; ok && createOnly.(bool) {
+		resultDict[jen.Id("ForceNew")] = jen.Lit(true)
 	}
 
-	if strings.Contains(n, "api_key") || strings.Contains(n, "password") {
-		r[jen.Id("Sensitive")] = jen.Lit(true)
+	if strings.Contains(propertyName, "api_key") || strings.Contains(propertyName, "password") {
+		resultDict[jen.Id("Sensitive")] = jen.Lit(true)
 	}
 
 	// TODO: Generate validation rules for generated schema properties, also validate that value is within enum values.
 
-	return r
+	return resultDict
 }
 
 // convertPropertiesToSchemaMap is a function that converts a map of properties to a map of Terraform schemas.
-func convertPropertiesToSchemaMap(p map[string]interface{}, req map[string]struct{}) (jen.Dict, error) {
-	r := make(jen.Dict, len(p))
+func convertPropertiesToSchemaMap(properties map[string]any, requiredProperties map[string]struct{}) (jen.Dict, error) {
+	resultDict := make(jen.Dict, len(properties))
 
-	for k, v := range p {
-		va, ok := v.(map[string]interface{})
+	for propertyName, propertyValue := range properties {
+		propertyAttributes, ok := propertyValue.(map[string]any)
 		if !ok {
 			continue
 		}
 
-		ts, ats, err := TerraformTypes(SlicedString(va["type"]))
+		terraformTypes, aivenTypes, err := TerraformTypes(SlicedString(propertyAttributes["type"]))
 		if err != nil {
 			return nil, err
 		}
 
-		if len(ts) > 1 {
-			return nil, fmt.Errorf("multiple types for %s", k)
+		if len(terraformTypes) > 1 {
+			return nil, fmt.Errorf("multiple types for %s", propertyName)
 		}
 
-		t, at := ts[0], ats[0]
+		terraformType, aivenType := terraformTypes[0], aivenTypes[0]
 
-		_, ireq := req[k]
+		_, isRequired := requiredProperties[propertyName]
 
-		var s map[string]*jen.Statement
+		var schemaStatements map[string]*jen.Statement
 
-		if isTerraformTypePrimitive(t) {
-			s = handlePrimitiveTypeProperty(k, va, t, ireq)
+		if isTerraformTypePrimitive(terraformType) {
+			schemaStatements = handlePrimitiveTypeProperty(propertyName, propertyAttributes, terraformType, isRequired)
 		} else {
-			s, err = handleAggregateTypeProperty(k, va, t, at)
+			schemaStatements, err = handleAggregateTypeProperty(
+				propertyName, propertyAttributes, terraformType, aivenType,
+			)
 			if err != nil {
 				return nil, err
 			}
 		}
 
-		if s == nil {
+		if schemaStatements == nil {
 			continue
 		}
 
-		for kn, vn := range s {
-			r[jen.Lit(EncodeKey(kn))] = vn
+		for keyName, valueNode := range schemaStatements {
+			resultDict[jen.Lit(EncodeKey(keyName))] = valueNode
 		}
 	}
 
-	return r, nil
+	return resultDict, nil
 }

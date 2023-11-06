@@ -6,14 +6,14 @@ import (
 )
 
 // Map upgrades map values to the specified types.
-func Map(m map[string]interface{}, rules map[string]string) (err error) {
-	for k, t := range rules {
-		va, ok := m[k].(string)
+func Map(valueMap map[string]any, typeRules map[string]string) (err error) {
+	for key, targetType := range typeRules {
+		valueAsString, ok := valueMap[key].(string)
 		if !ok {
 			continue
 		}
 
-		m[k], err = convert(va, t)
+		valueMap[key], err = convert(valueAsString, targetType)
 		if err != nil {
 			return err
 		}
@@ -23,14 +23,14 @@ func Map(m map[string]interface{}, rules map[string]string) (err error) {
 }
 
 // Slice upgrades slice values to the specified type.
-func Slice(s []interface{}, t string) (err error) {
-	for i, v := range s {
-		va, ok := v.(string)
+func Slice(valueSlice []any, targetType string) (err error) {
+	for index, value := range valueSlice {
+		valueAsString, ok := value.(string)
 		if !ok {
 			continue
 		}
 
-		s[i], err = convert(va, t)
+		valueSlice[index], err = convert(valueAsString, targetType)
 		if err != nil {
 			return err
 		}
@@ -40,27 +40,27 @@ func Slice(s []interface{}, t string) (err error) {
 }
 
 // convert converts a value to the specified type.
-func convert(v string, t string) (res interface{}, err error) {
-	switch t {
+func convert(value string, targetType string) (convertedValue any, err error) {
+	switch targetType {
 	case "bool":
-		if v == "" {
-			v = "false"
+		if value == "" {
+			value = "false"
 		}
 
-		return strconv.ParseBool(v)
+		return strconv.ParseBool(value)
 	case "int":
-		if v == "" {
-			v = "0"
+		if value == "" {
+			value = "0"
 		}
 
-		return strconv.Atoi(v)
+		return strconv.Atoi(value)
 	case "float":
-		if v == "" {
-			v = "0"
+		if value == "" {
+			value = "0"
 		}
 
-		return strconv.ParseFloat(v, 64)
+		return strconv.ParseFloat(value, 64)
 	default:
-		return nil, fmt.Errorf("unsupported type %q", t)
+		return nil, fmt.Errorf("unsupported type %q", targetType)
 	}
 }

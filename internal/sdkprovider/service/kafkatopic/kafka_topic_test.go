@@ -401,7 +401,8 @@ func TestAccAivenKafkaTopic_recreate_missing(t *testing.T) {
 			},
 			{
 				// Step 3: recreates the topic
-				Config: config,
+				ExpectNonEmptyPlan: true,
+				Config:             config,
 				Check: resource.ComposeTestCheckFunc(
 					// Saved in state
 					resource.TestCheckResourceAttr(kafkaResource, "id", kafkaID),
