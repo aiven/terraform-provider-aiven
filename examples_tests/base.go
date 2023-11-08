@@ -2,7 +2,7 @@ package examples
 
 import (
 	"fmt"
-	"math/rand"
+	"math/rand" // nosemgrep: math-random-used
 	"os"
 	"time"
 
