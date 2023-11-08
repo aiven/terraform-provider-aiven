@@ -83,15 +83,15 @@ Read-Only:
 
 Read-Only:
 
-- `additional_backup_regions` (List of String)
+- `additional_backup_regions` (Set of String)
 - `admin_password` (String)
 - `admin_username` (String)
 - `backup_hour` (Number)
 - `backup_minute` (Number)
 - `binlog_retention_period` (Number)
-- `ip_filter` (List of String)
+- `ip_filter` (Set of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--ip_filter_object))
-- `ip_filter_string` (List of String)
+- `ip_filter_string` (Set of String)
 - `migration` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--migration))
 - `mysql` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--mysql))
 - `mysql_version` (String)

@@ -11,6 +11,11 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add new user config generator
+- Use `TypeSet` for arrays with scalar values
+
+## [4.10.0] - YYYY-MM-DD
+
 - Deprecating `project_user`, `account_team` and `account_team_member` resources
 - Fix unmarshalling empty userconfig crash
 - Never skip basic auth username/password in service integrations user config options when sending them to the API

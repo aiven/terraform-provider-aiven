@@ -343,7 +343,7 @@ func testAccCheckAivenServiceKafkaAttributes(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccKafkaResourceUserConfigKafkaNullFieldsOnly(project, prefix string) string {
+func testAccKafkaResourceUserConfigKafkaOmitsNullFields(project, prefix string) string {
 	return fmt.Sprintf(`
 resource "aiven_kafka" "kafka" {
   project                 = "%s"
@@ -366,7 +366,7 @@ resource "aiven_kafka" "kafka" {
 `, project, prefix)
 }
 
-func TestAccAiven_kafka_userconfig_kafka_null_fields_only(t *testing.T) {
+func TestAccAiven_kafka_user_config_kafka_omits_null_fields(t *testing.T) {
 	project := os.Getenv("AIVEN_PROJECT_NAME")
 	prefix := "test-tf-acc-" + acctest.RandString(7)
 	resourceName := "aiven_kafka.kafka"
@@ -376,13 +376,101 @@ func TestAccAiven_kafka_userconfig_kafka_null_fields_only(t *testing.T) {
 		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKafkaResourceUserConfigKafkaNullFieldsOnly(project, prefix),
+				Config: testAccKafkaResourceUserConfigKafkaOmitsNullFields(project, prefix),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka.0.group_max_session_timeout_ms", "0"),
-					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka.0.log_retention_bytes", "0"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+// TestAccAiven_kafka_user_config_boolean_field_removed removed boolean field should not get "false"
+func TestAccAiven_kafka_user_config_boolean_field_removed(t *testing.T) {
+	project := os.Getenv("AIVEN_PROJECT_NAME")
+	prefix := "test-tf-acc-" + acctest.RandString(7)
+	resourceName := "aiven_kafka.kafka"
+	withConfig := func(c string) string {
+		return fmt.Sprintf(`
+resource "aiven_kafka" "kafka" {
+  project      = "%s"
+  service_name = "%s-kafka"
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-2"
+
+  %s
+}
+`, project, prefix, c)
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				// Creates kafka with a "true" value in the user config
+				Config: withConfig(`
+kafka_user_config {
+    schema_registry = true
+}`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.schema_registry", "true"),
+				),
+			},
+			{
+				// Removes the config and expects nothing changed
+				Config: withConfig(``),
+				Check: resource.ComposeTestCheckFunc(
+					// The value remains true
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.schema_registry", "true"),
+				),
+			},
+			{
+				// Sets another field to test that parental "HasChange" doesn't affect sibling field.
+				// For instance, if a sibling is changed, it changes the parent.
+				// That breaks the logic of: d.HasChange(k) && d.HasChange(parentOfK)
+				Config: withConfig(`
+kafka_user_config {
+    schema_registry = true
+	kafka_rest      = true
+}`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.schema_registry", "true"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka_rest", "true"),
+				),
+			},
+			{
+				// Now schema_registry must remain calm, and not affected by kafka_rest
+				Config: withConfig(`
+kafka_user_config {
+    schema_registry = true
+	kafka_rest      = false
+}`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.schema_registry", "true"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka_rest", "false"),
+				),
+			},
+			{
+				// Field removal works too
+				Config: withConfig(`
+kafka_user_config {
+	kafka_rest      = false
+}`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.schema_registry", "true"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka_rest", "false"),
+				),
+			},
+			{
+				// Removing the whole block acts as expected
+				Config: withConfig(``),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.schema_registry", "true"),
+					resource.TestCheckResourceAttr(resourceName, "kafka_user_config.0.kafka_rest", "false"),
 				),
 			},
 		},

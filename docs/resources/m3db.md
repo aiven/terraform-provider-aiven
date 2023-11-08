@@ -78,21 +78,21 @@ resource "aiven_m3db" "m3" {
 
 Optional:
 
-- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
+- `additional_backup_regions` (Set of String) Additional Cloud Regions for Backup Replication.
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
-- `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'. (see [below for nested schema](#nestedblock--m3db_user_config--ip_filter_object))
-- `ip_filter_string` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `limits` (Block List, Max: 1) M3 limits. (see [below for nested schema](#nestedblock--m3db_user_config--limits))
-- `m3` (Block List, Max: 1) M3 specific configuration options. (see [below for nested schema](#nestedblock--m3db_user_config--m3))
-- `m3_version` (String, Deprecated) M3 major version (deprecated, use m3db_version).
+- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--m3db_user_config--ip_filter_object))
+- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `limits` (Block List, Max: 1) M3 limits (see [below for nested schema](#nestedblock--m3db_user_config--limits))
+- `m3` (Block List, Max: 1) M3 specific configuration options (see [below for nested schema](#nestedblock--m3db_user_config--m3))
+- `m3_version` (String) M3 major version (deprecated, use m3db_version).
 - `m3coordinator_enable_graphite_carbon_ingest` (Boolean) Enables access to Graphite Carbon plaintext metrics ingestion. It can be enabled only for services inside VPCs. The metrics are written to aggregated namespaces only.
 - `m3db_version` (String) M3 major version (the minimum compatible version).
-- `namespaces` (Block List, Max: 2147483647) List of M3 namespaces. (see [below for nested schema](#nestedblock--m3db_user_config--namespaces))
-- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks. (see [below for nested schema](#nestedblock--m3db_user_config--private_access))
+- `namespaces` (Block List, Max: 2147483647) List of M3 namespaces (see [below for nested schema](#nestedblock--m3db_user_config--namespaces))
+- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--m3db_user_config--private_access))
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
-- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet. (see [below for nested schema](#nestedblock--m3db_user_config--public_access))
-- `rules` (Block List, Max: 1) M3 rules. (see [below for nested schema](#nestedblock--m3db_user_config--rules))
+- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--m3db_user_config--public_access))
+- `rules` (Block List, Max: 1) M3 rules (see [below for nested schema](#nestedblock--m3db_user_config--rules))
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
 - `static_ips` (Boolean) Use static public IP addresses.
 
@@ -126,7 +126,7 @@ Optional:
 
 Optional:
 
-- `tag_options` (Block List, Max: 1) M3 Tag Options. (see [below for nested schema](#nestedblock--m3db_user_config--m3--tag_options))
+- `tag_options` (Block List, Max: 1) M3 Tag Options (see [below for nested schema](#nestedblock--m3db_user_config--m3--tag_options))
 
 <a id="nestedblock--m3db_user_config--m3--tag_options"></a>
 ### Nested Schema for `m3db_user_config.m3.tag_options`
@@ -148,15 +148,18 @@ Required:
 
 Optional:
 
-- `options` (Block List, Max: 1) Namespace options. (see [below for nested schema](#nestedblock--m3db_user_config--namespaces--options))
+- `options` (Block List, Max: 1) Namespace options (see [below for nested schema](#nestedblock--m3db_user_config--namespaces--options))
 - `resolution` (String) The resolution for an aggregated namespace.
 
 <a id="nestedblock--m3db_user_config--namespaces--options"></a>
 ### Nested Schema for `m3db_user_config.namespaces.options`
 
+Required:
+
+- `retention_options` (Block List, Min: 1, Max: 1) Retention options (see [below for nested schema](#nestedblock--m3db_user_config--namespaces--options--retention_options))
+
 Optional:
 
-- `retention_options` (Block List, Max: 1) Retention options. (see [below for nested schema](#nestedblock--m3db_user_config--namespaces--options--retention_options))
 - `snapshot_enabled` (Boolean) Controls whether M3DB will create snapshot files for this namespace.
 - `writes_to_commitlog` (Boolean) Controls whether M3DB will include writes to this namespace in the commitlog.
 
@@ -195,7 +198,7 @@ Optional:
 
 Optional:
 
-- `mapping` (Block List, Max: 10) List of M3 mapping rules. (see [below for nested schema](#nestedblock--m3db_user_config--rules--mapping))
+- `mapping` (Block List, Max: 10) List of M3 mapping rules (see [below for nested schema](#nestedblock--m3db_user_config--rules--mapping))
 
 <a id="nestedblock--m3db_user_config--rules--mapping"></a>
 ### Nested Schema for `m3db_user_config.rules.mapping`
@@ -206,20 +209,23 @@ Required:
 
 Optional:
 
-- `aggregations` (List of String) List of aggregations to be applied.
+- `aggregations` (Set of String) List of aggregations to be applied.
 - `drop` (Boolean) Only store the derived metric (as specified in the roll-up rules), if any.
 - `name` (String) The (optional) name of the rule.
-- `namespaces` (List of String, Deprecated) This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by glob (=wildcards).
-- `namespaces_object` (Block List, Max: 10) This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by exact match of retention period and resolution. (see [below for nested schema](#nestedblock--m3db_user_config--rules--mapping--namespaces_object))
-- `namespaces_string` (List of String) This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by glob (=wildcards).
-- `tags` (Block List, Max: 10) List of tags to be appended to matching metrics. (see [below for nested schema](#nestedblock--m3db_user_config--rules--mapping--tags))
+- `namespaces` (Set of String, Deprecated) This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by glob (=wildcards).
+- `namespaces_object` (Block List, Max: 10) This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by exact match of retention period and resolution (see [below for nested schema](#nestedblock--m3db_user_config--rules--mapping--namespaces_object))
+- `namespaces_string` (Set of String) This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by glob (=wildcards).
+- `tags` (Block List, Max: 10) List of tags to be appended to matching metrics (see [below for nested schema](#nestedblock--m3db_user_config--rules--mapping--tags))
 
 <a id="nestedblock--m3db_user_config--rules--mapping--namespaces_object"></a>
 ### Nested Schema for `m3db_user_config.rules.mapping.namespaces_object`
 
-Optional:
+Required:
 
 - `resolution` (String) The resolution for the matching namespace.
+
+Optional:
+
 - `retention` (String) The retention period of the matching namespace.
 
 

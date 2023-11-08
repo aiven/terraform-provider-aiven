@@ -83,7 +83,7 @@ Read-Only:
 
 Read-Only:
 
-- `additional_backup_regions` (List of String)
+- `additional_backup_regions` (Set of String)
 - `alerting_enabled` (Boolean)
 - `alerting_error_or_timeout` (String)
 - `alerting_max_annotations_to_keep` (Number)
@@ -107,9 +107,9 @@ Read-Only:
 - `editors_can_admin` (Boolean)
 - `external_image_storage` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--external_image_storage))
 - `google_analytics_ua_id` (String)
-- `ip_filter` (List of String)
+- `ip_filter` (Set of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--ip_filter_object))
-- `ip_filter_string` (List of String)
+- `ip_filter_string` (Set of String)
 - `metrics_enabled` (Boolean)
 - `oauth_allow_insecure_email_lookup` (Boolean)
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--private_access))
@@ -131,8 +131,8 @@ Read-Only:
 Read-Only:
 
 - `allow_sign_up` (Boolean)
-- `allowed_domains` (List of String)
-- `allowed_groups` (List of String)
+- `allowed_domains` (Set of String)
+- `allowed_groups` (Set of String)
 - `auth_url` (String)
 - `client_id` (String)
 - `client_secret` (String)
@@ -145,15 +145,15 @@ Read-Only:
 Read-Only:
 
 - `allow_sign_up` (Boolean)
-- `allowed_domains` (List of String)
-- `allowed_organizations` (List of String)
+- `allowed_domains` (Set of String)
+- `allowed_organizations` (Set of String)
 - `api_url` (String)
 - `auth_url` (String)
 - `auto_login` (Boolean)
 - `client_id` (String)
 - `client_secret` (String)
 - `name` (String)
-- `scopes` (List of String)
+- `scopes` (Set of String)
 - `token_url` (String)
 
 
@@ -163,10 +163,10 @@ Read-Only:
 Read-Only:
 
 - `allow_sign_up` (Boolean)
-- `allowed_organizations` (List of String)
+- `allowed_organizations` (Set of String)
 - `client_id` (String)
 - `client_secret` (String)
-- `team_ids` (List of Number)
+- `team_ids` (Set of Number)
 
 
 <a id="nestedobjatt--grafana_user_config--auth_gitlab"></a>
@@ -175,7 +175,7 @@ Read-Only:
 Read-Only:
 
 - `allow_sign_up` (Boolean)
-- `allowed_groups` (List of String)
+- `allowed_groups` (Set of String)
 - `api_url` (String)
 - `auth_url` (String)
 - `client_id` (String)
@@ -189,7 +189,7 @@ Read-Only:
 Read-Only:
 
 - `allow_sign_up` (Boolean)
-- `allowed_domains` (List of String)
+- `allowed_domains` (Set of String)
 - `client_id` (String)
 - `client_secret` (String)
 

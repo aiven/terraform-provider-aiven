@@ -84,14 +84,14 @@ Read-Only:
 
 Read-Only:
 
-- `additional_backup_regions` (List of String)
+- `additional_backup_regions` (Set of String)
 - `custom_domain` (String)
 - `disable_replication_factor_adjustment` (Boolean)
 - `index_patterns` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--index_patterns))
 - `index_template` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--index_template))
-- `ip_filter` (List of String)
+- `ip_filter` (Set of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--ip_filter_object))
-- `ip_filter_string` (List of String)
+- `ip_filter_string` (Set of String)
 - `keep_index_refresh_interval` (Boolean)
 - `max_index_count` (Number)
 - `openid` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--openid))
@@ -186,7 +186,7 @@ Read-Only:
 - `ism_history_rollover_check_period` (Number)
 - `ism_history_rollover_retention_period` (Number)
 - `override_main_response_version` (Boolean)
-- `reindex_remote_whitelist` (List of String)
+- `reindex_remote_whitelist` (Set of String)
 - `script_max_compilations_rate` (String)
 - `search_max_buckets` (Number)
 - `thread_pool_analyze_queue_size` (Number)

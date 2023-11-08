@@ -92,15 +92,15 @@ Read-Only:
 
 Read-Only:
 
-- `additional_backup_regions` (List of String)
+- `additional_backup_regions` (Set of String)
 - `admin_password` (String)
 - `admin_username` (String)
 - `backup_hour` (Number)
 - `backup_minute` (Number)
 - `enable_ipv6` (Boolean)
-- `ip_filter` (List of String)
+- `ip_filter` (Set of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--ip_filter_object))
-- `ip_filter_string` (List of String)
+- `ip_filter_string` (Set of String)
 - `migration` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--migration))
 - `pg` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pg))
 - `pg_read_replica` (Boolean)
@@ -211,7 +211,7 @@ Read-Only:
 - `autodb_max_db_connections` (Number)
 - `autodb_pool_mode` (String)
 - `autodb_pool_size` (Number)
-- `ignore_startup_parameters` (List of String)
+- `ignore_startup_parameters` (Set of String)
 - `min_pool_size` (Number)
 - `server_idle_timeout` (Number)
 - `server_lifetime` (Number)

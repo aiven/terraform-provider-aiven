@@ -18,8 +18,10 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/liip/sheriff v0.11.1
 	github.com/samber/lo v1.39.0
+	github.com/stoewer/go-strcase v1.3.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/exp v0.0.0-20230809150735-7b3493d9a819
+	golang.org/x/tools v0.13.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 

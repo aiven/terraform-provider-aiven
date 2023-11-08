@@ -499,3 +499,65 @@ resource "aiven_grafana" "grafana" {
 
 `, prefix, project, ipFilterObjs)
 }
+
+// TestAccAiven_grafana_set_change tests that changing a set actually changes it count
+// This is a test for diff suppressor doesn't suppress set's items.
+func TestAccAiven_grafana_set_change(t *testing.T) {
+	resourceName := "aiven_grafana.bar"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccGrafanaResourceSetChange(rName, "100, 101, 111"),
+				Check: resource.ComposeTestCheckFunc(
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_grafana.common"),
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.auth_github.0.client_id", "my_client_id"),
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.auth_github.0.client_secret", "my_client_secret"),
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.auth_github.0.team_ids.#", "3"),
+				),
+			},
+			{
+				Config: testAccGrafanaResourceSetChange(rName, "111"),
+				Check: resource.ComposeTestCheckFunc(
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_grafana.common"),
+					resource.TestCheckResourceAttr(resourceName, "grafana_user_config.0.auth_github.0.team_ids.#", "1"),
+				),
+			},
+		},
+	})
+}
+
+func testAccGrafanaResourceSetChange(name, teamIDs string) string {
+	return fmt.Sprintf(`
+data "aiven_project" "foo" {
+  project = "%s"
+}
+
+resource "aiven_grafana" "bar" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-1"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  grafana_user_config {
+    auth_github {
+      client_id     = "my_client_id"
+      client_secret = "my_client_secret"
+      team_ids      = [%s]
+    }
+  }
+}
+
+data "aiven_grafana" "common" {
+  service_name = aiven_grafana.bar.service_name
+  project      = data.aiven_project.foo.project
+
+  depends_on = [aiven_grafana.bar]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, teamIDs)
+}
