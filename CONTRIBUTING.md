@@ -31,11 +31,15 @@ Run the tests with the command below:
 make test
 ```
 
+Acceptance tests interact with the real Aiven API and require an API token and existing project and organization on Aiven to create resources in. A non-default API URL can be used by setting the `AIVEN_WEB_URL` environment variable to e.g. `https://your.custom.api:443`.
+
 Run the acceptance tests with the commands below:
 
 ```bash
 export AIVEN_TOKEN="your-token"
 export AIVEN_PROJECT_NAME="your-project-name"
+export AIVEN_ORGANIZATION_NAME="your-existing-org-name"
+export AIVEN_ACCOUNT_NAME="$AIVEN_ORGANIZATION_NAME"
 
 # run all acceptance tests
 make test-acc
