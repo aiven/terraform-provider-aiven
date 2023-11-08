@@ -6,12 +6,10 @@ nav_order: 1
 
 # Changelog
 
-## [5.0.0] - YYYY-MM-DD
+<!-- Always keep the following header in place: -->
+<!-- [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
-- Migrate `aiven_service_integration` to the Plugin Framework
-- Deprecating `project_user`, `account_team` and `account_team_member` resources
-
-## [X.Y.Z] - YYYY-MM-DD
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Fix unmarshalling empty userconfig crash
 
