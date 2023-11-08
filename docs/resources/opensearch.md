@@ -84,26 +84,26 @@ resource "aiven_opensearch" "os1" {
 
 Optional:
 
-- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
+- `additional_backup_regions` (List of String, Deprecated) Additional Cloud Regions for Backup Replication.
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
-- `disable_replication_factor_adjustment` (Boolean, Deprecated) Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can no longer be activated.
-- `index_patterns` (Block List, Max: 512) Index patterns. (see [below for nested schema](#nestedblock--opensearch_user_config--index_patterns))
-- `index_template` (Block List, Max: 1) Template settings for all new indexes. (see [below for nested schema](#nestedblock--opensearch_user_config--index_template))
-- `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'. (see [below for nested schema](#nestedblock--opensearch_user_config--ip_filter_object))
-- `ip_filter_string` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `disable_replication_factor_adjustment` (Boolean) Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can no longer be activated.
+- `index_patterns` (Block List, Max: 512) Index patterns (see [below for nested schema](#nestedblock--opensearch_user_config--index_patterns))
+- `index_template` (Block List, Max: 1) Template settings for all new indexes (see [below for nested schema](#nestedblock--opensearch_user_config--index_template))
+- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--opensearch_user_config--ip_filter_object))
+- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
 - `keep_index_refresh_interval` (Boolean) Aiven automation resets index.refresh_interval to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.
-- `max_index_count` (Number, Deprecated) Use index_patterns instead. The default value is `0`.
-- `openid` (Block List, Max: 1) OpenSearch OpenID Connect Configuration. (see [below for nested schema](#nestedblock--opensearch_user_config--openid))
-- `opensearch` (Block List, Max: 1) OpenSearch settings. (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch))
-- `opensearch_dashboards` (Block List, Max: 1) OpenSearch Dashboards settings. (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch_dashboards))
+- `max_index_count` (Number) use index_patterns instead. The default value is `0`.
+- `openid` (Block List, Max: 1) OpenSearch OpenID Connect Configuration (see [below for nested schema](#nestedblock--opensearch_user_config--openid))
+- `opensearch` (Block List, Max: 1) OpenSearch settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch))
+- `opensearch_dashboards` (Block List, Max: 1) OpenSearch Dashboards settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch_dashboards))
 - `opensearch_version` (String) OpenSearch major version.
-- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks. (see [below for nested schema](#nestedblock--opensearch_user_config--private_access))
-- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink. (see [below for nested schema](#nestedblock--opensearch_user_config--privatelink_access))
+- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--opensearch_user_config--private_access))
+- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--opensearch_user_config--privatelink_access))
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
-- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet. (see [below for nested schema](#nestedblock--opensearch_user_config--public_access))
+- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--opensearch_user_config--public_access))
 - `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service.
-- `saml` (Block List, Max: 1) OpenSearch SAML configuration. (see [below for nested schema](#nestedblock--opensearch_user_config--saml))
+- `saml` (Block List, Max: 1) OpenSearch SAML configuration (see [below for nested schema](#nestedblock--opensearch_user_config--saml))
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
 - `static_ips` (Boolean) Use static public IP addresses.
@@ -172,10 +172,10 @@ Optional:
 
 - `action_auto_create_index_enabled` (Boolean) Explicitly allow or block automatic creation of indices. Defaults to true.
 - `action_destructive_requires_name` (Boolean) Require explicit index names when deleting.
-- `auth_failure_listeners` (Block List, Max: 1) Opensearch Security Plugin Settings. (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--auth_failure_listeners))
+- `auth_failure_listeners` (Block List, Max: 1) Opensearch Security Plugin Settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--auth_failure_listeners))
 - `cluster_max_shards_per_node` (Number) Controls the number of shards allowed in the cluster per data node.
 - `cluster_routing_allocation_node_concurrent_recoveries` (Number) How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to 2.
-- `email_sender_name` (String) This should be identical to the Sender name defined in Opensearch dashboards.
+- `email_sender_name` (String) Sender name placeholder to be used in Opensearch Dashboards and Opensearch keystore.
 - `email_sender_password` (String, Sensitive) Sender password for Opensearch alerts to authenticate with SMTP server.
 - `email_sender_username` (String) Sender username for Opensearch alerts.
 - `enable_security_audit` (Boolean) Enable/Disable security audit. The default value is `false`.
@@ -217,8 +217,8 @@ Optional:
 
 Optional:
 
-- `internal_authentication_backend_limiting` (Block List, Max: 1) . (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--auth_failure_listeners--internal_authentication_backend_limiting))
-- `ip_rate_limiting` (Block List, Max: 1) IP address rate limiting settings. (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--auth_failure_listeners--ip_rate_limiting))
+- `internal_authentication_backend_limiting` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--auth_failure_listeners--internal_authentication_backend_limiting))
+- `ip_rate_limiting` (Block List, Max: 1) IP address rate limiting settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--auth_failure_listeners--ip_rate_limiting))
 
 <a id="nestedblock--opensearch_user_config--opensearch--auth_failure_listeners--internal_authentication_backend_limiting"></a>
 ### Nested Schema for `opensearch_user_config.opensearch.auth_failure_listeners.internal_authentication_backend_limiting`
@@ -226,12 +226,12 @@ Optional:
 Optional:
 
 - `allowed_tries` (Number) The number of login attempts allowed before login is blocked.
-- `authentication_backend` (String) The internal backend. Enter `internal`.
+- `authentication_backend` (String) internal_authentication_backend_limiting.authentication_backend.
 - `block_expiry_seconds` (Number) The duration of time that login remains blocked after a failed login.
-- `max_blocked_clients` (Number) The maximum number of blocked IP addresses.
+- `max_blocked_clients` (Number) internal_authentication_backend_limiting.max_blocked_clients.
 - `max_tracked_clients` (Number) The maximum number of tracked IP addresses that have failed login.
 - `time_window_seconds` (Number) The window of time in which the value for `allowed_tries` is enforced.
-- `type` (String) The type of rate limiting.
+- `type` (String) internal_authentication_backend_limiting.type.
 
 
 <a id="nestedblock--opensearch_user_config--opensearch--auth_failure_listeners--ip_rate_limiting"></a>

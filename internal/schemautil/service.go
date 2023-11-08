@@ -14,8 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/converters"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 // defaultTimeout is the default timeout for service operations. This is not a const because it can be changed during
@@ -437,7 +437,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.Errorf("error getting project VPC ID: %s", err)
 	}
 
-	cuc, err := apiconvert.ToAPI(userconfig.ServiceTypes, serviceType, d)
+	cuc, err := ExpandService(serviceType, d)
 	if err != nil {
 		return diag.Errorf(
 			"error converting user config options for service type %s to API format: %s", serviceType, err,
@@ -525,12 +525,11 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.Errorf("error getting project VPC ID: %s", err)
 	}
 
-	st := d.Get("service_type").(string)
-
-	cuc, err := apiconvert.ToAPI(userconfig.ServiceTypes, st, d)
+	serviceType := d.Get("service_type").(string)
+	cuc, err := ExpandService(serviceType, d)
 	if err != nil {
 		return diag.Errorf(
-			"error converting user config options for service type %s to API format: %s", st, err,
+			"error converting user config options for service type %s to API format: %s", serviceType, err,
 		)
 	}
 
@@ -713,35 +712,9 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		}
 	}
 
-	oldUserConfig, err := unmarshalUserConfig(d.Get(serviceType + "_user_config"))
+	newUserConfig, err := FlattenService(serviceType, d, s.UserConfig)
 	if err != nil {
 		return err
-	}
-
-	newUserConfig, err := apiconvert.FromAPI(userconfig.ServiceTypes, serviceType, s.UserConfig)
-	if err != nil {
-		return err
-	}
-
-	// Apply in-place user config mutations.
-	if len(oldUserConfig)*len(newUserConfig) != 0 {
-		oldUserConfigFirst := oldUserConfig[0]
-
-		newUserConfigFirst := newUserConfig[0]
-
-		// TODO: Remove when the remote schema in Aiven begins to contain information about sensitive fields.
-		copySensitiveFields(oldUserConfigFirst, newUserConfigFirst)
-
-		// TODO: Remove when we no longer need to support the deprecated `ip_filter` field.
-		if _, exists := d.GetOk(serviceType + "_user_config.0.ip_filter_string"); exists {
-			stringSuffixForIPFilters(newUserConfigFirst)
-		}
-
-		if _, exists := d.GetOk(serviceType + "_user_config.0.rules.0.mapping.0.namespaces_string"); exists {
-			stringSuffixForNamespaces(newUserConfigFirst)
-		}
-
-		normalizeIPFilter(oldUserConfigFirst, newUserConfigFirst)
 	}
 
 	if err := d.Set(serviceType+"_user_config", newUserConfig); err != nil {
@@ -910,4 +883,12 @@ func getContactEmailListForAPI(d *schema.ResourceData, field string) *[]aiven.Co
 		}
 	}
 	return &results
+}
+
+func ExpandService(kind string, d *schema.ResourceData) (map[string]any, error) {
+	return converters.Expand(kind, service.GetUserConfig(kind), d)
+}
+
+func FlattenService(kind string, d *schema.ResourceData, dto map[string]any) ([]map[string]any, error) {
+	return converters.Flatten(kind, service.GetUserConfig(kind), d, dto)
 }

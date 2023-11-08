@@ -5,8 +5,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 func influxDBSchema() map[string]*schema.Schema {
@@ -25,7 +25,7 @@ func influxDBSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	s[schemautil.ServiceTypeInfluxDB+"_user_config"] = dist.ServiceTypeInfluxdb()
+	s[schemautil.ServiceTypeInfluxDB+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypeInfluxDB)
 
 	return s
 }

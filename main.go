@@ -12,6 +12,7 @@ import (
 )
 
 //go:generate go test -tags userconfig ./internal/schemautil/userconfig
+//go:generate go run ./ucgenerator/... --services cassandra,clickhouse,flink,grafana,influxdb,kafka,kafka_connect,kafka_mirrormaker,m3aggregator,m3db,mysql,opensearch,pg,redis
 
 // registryPrefix is the registry prefix for the provider.
 const registryPrefix = "registry.terraform.io/"
