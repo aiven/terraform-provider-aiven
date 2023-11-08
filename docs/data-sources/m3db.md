@@ -84,11 +84,11 @@ Read-Only:
 
 Read-Only:
 
-- `additional_backup_regions` (List of String)
+- `additional_backup_regions` (Set of String)
 - `custom_domain` (String)
-- `ip_filter` (List of String)
+- `ip_filter` (Set of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--ip_filter_object))
-- `ip_filter_string` (List of String)
+- `ip_filter_string` (Set of String)
 - `limits` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--limits))
 - `m3` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--m3))
 - `m3_version` (String)
@@ -203,13 +203,13 @@ Read-Only:
 
 Read-Only:
 
-- `aggregations` (List of String)
+- `aggregations` (Set of String)
 - `drop` (Boolean)
 - `filter` (String)
 - `name` (String)
-- `namespaces` (List of String)
+- `namespaces` (Set of String)
 - `namespaces_object` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--rules--mapping--namespaces_object))
-- `namespaces_string` (List of String)
+- `namespaces_string` (Set of String)
 - `tags` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--rules--mapping--tags))
 
 <a id="nestedobjatt--m3db_user_config--rules--mapping--namespaces_object"></a>

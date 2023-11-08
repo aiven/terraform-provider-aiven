@@ -85,11 +85,11 @@ Read-Only:
 
 Read-Only:
 
-- `additional_backup_regions` (List of String)
+- `additional_backup_regions` (Set of String)
 - `flink_version` (String)
-- `ip_filter` (List of String)
+- `ip_filter` (Set of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--flink_user_config--ip_filter_object))
-- `ip_filter_string` (List of String)
+- `ip_filter_string` (Set of String)
 - `number_of_task_slots` (Number)
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--flink_user_config--privatelink_access))
 - `service_log` (Boolean)
