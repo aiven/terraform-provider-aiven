@@ -104,6 +104,7 @@ func Provider(version string) *schema.Provider {
 			"aiven_transit_gateway_vpc_attachment": vpc.DatasourceTransitGatewayVPCAttachment(),
 
 			// service integrations
+			"aiven_service_integration":          serviceintegration.DatasourceServiceIntegration(),
 			"aiven_service_integration_endpoint": serviceintegration.DatasourceServiceIntegrationEndpoint(),
 
 			// m3db
@@ -202,6 +203,7 @@ func Provider(version string) *schema.Provider {
 			"aiven_transit_gateway_vpc_attachment":        vpc.ResourceTransitGatewayVPCAttachment(),
 
 			// service integrations
+			"aiven_service_integration":          serviceintegration.ResourceServiceIntegration(),
 			"aiven_service_integration_endpoint": serviceintegration.ResourceServiceIntegrationEndpoint(),
 
 			// m3db

@@ -6,13 +6,9 @@ nav_order: 1
 
 # Changelog
 
-## [5.0.0] - YYYY-MM-DD
-
-- Migrate `aiven_service_integration` to the Plugin Framework
-- Deprecating `project_user`, `account_team` and `account_team_member` resources
-
 ## [X.Y.Z] - YYYY-MM-DD
 
+- Deprecating `project_user`, `account_team` and `account_team_member` resources
 - Fix unmarshalling empty userconfig crash
 
 ## [4.9.3] - 2023-10-27
