@@ -172,6 +172,8 @@ Read-Only:
 - `http_max_initial_line_length` (Number)
 - `indices_fielddata_cache_size` (Number)
 - `indices_memory_index_buffer_size` (Number)
+- `indices_memory_max_index_buffer_size` (Number)
+- `indices_memory_min_index_buffer_size` (Number)
 - `indices_queries_cache_size` (Number)
 - `indices_query_bool_max_clause_count` (Number)
 - `indices_recovery_max_bytes_per_sec` (Number)

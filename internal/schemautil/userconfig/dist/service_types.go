@@ -5960,6 +5960,16 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
+				"indices_memory_max_index_buffer_size": {
+					Description: "Absolute value. Default is unbound. Doesn't work without indices.memory.index_buffer_size. Maximum amount of heap used for query cache, an absolute indices.memory.index_buffer_size maximum hard limit.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"indices_memory_min_index_buffer_size": {
+					Description: "Absolute value. Default is 48mb. Doesn't work without indices.memory.index_buffer_size. Minimum amount of heap used for query cache, an absolute indices.memory.index_buffer_size minimal hard limit.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
 				"indices_queries_cache_size": {
 					Description: "Percentage value. Default is 10%. Maximum amount of heap used for query cache. This is an expert setting. Too low value will decrease query performance and increase performance for other operations; too high value will cause issues with other OpenSearch functionality.",
 					Optional:    true,
@@ -6463,6 +6473,16 @@ func ServiceTypeOpensearch() *schema.Schema {
 				},
 				"indices_memory_index_buffer_size": {
 					Description: "Percentage value. Default is 10%. Total amount of heap used for indexing buffer, before writing segments to disk. This is an expert setting. Too low value will slow down indexing; too high value will increase indexing performance but causes performance issues for query performance.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"indices_memory_max_index_buffer_size": {
+					Description: "Absolute value. Default is unbound. Doesn't work without indices.memory.index_buffer_size. Maximum amount of heap used for query cache, an absolute indices.memory.index_buffer_size maximum hard limit.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"indices_memory_min_index_buffer_size": {
+					Description: "Absolute value. Default is 48mb. Doesn't work without indices.memory.index_buffer_size. Minimum amount of heap used for query cache, an absolute indices.memory.index_buffer_size minimal hard limit.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
