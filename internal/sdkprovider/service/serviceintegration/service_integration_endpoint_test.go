@@ -25,7 +25,7 @@ func TestAccAivenServiceIntegrationEndpoint_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckAivenServiceIntegraitonEndpointResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccServiceIntegrationEndpointResource(rName),
+				Config: testAccServiceIntegrationEndpointBasicResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenServiceEndpointIntegrationAttributes("data.aiven_service_integration_endpoint.endpoint"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
@@ -37,7 +37,50 @@ func TestAccAivenServiceIntegrationEndpoint_basic(t *testing.T) {
 	})
 }
 
-func testAccServiceIntegrationEndpointResource(name string) string {
+func TestAccAivenServiceIntegrationEndpoint_username_password(t *testing.T) {
+	resourceName := "aiven_service_integration_endpoint.bar"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenServiceIntegraitonEndpointResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccServiceIntegrationEndpointUsernamePasswordResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenServiceEndpointIntegrationAttributes(
+						"data.aiven_service_integration_endpoint.endpoint",
+					),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(
+						resourceName, "endpoint_name", fmt.Sprintf("test-acc-ie-%s", rName),
+					),
+					resource.TestCheckResourceAttr(
+						resourceName, "endpoint_type", "external_schema_registry",
+					),
+				),
+			},
+			{
+				Config: testAccServiceIntegrationEndpointUpdatePasswordResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenServiceEndpointIntegrationAttributes(
+						"data.aiven_service_integration_endpoint.endpoint",
+					),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(
+						resourceName, "endpoint_name", fmt.Sprintf("test-acc-ie-%s", rName),
+					),
+					resource.TestCheckResourceAttr(
+						resourceName, "endpoint_type", "external_schema_registry",
+					),
+				),
+			},
+		},
+	})
+}
+
+func testAccServiceIntegrationEndpointBasicResource(name string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
   project = "%s"
@@ -89,6 +132,102 @@ data "aiven_service_integration_endpoint" "endpoint" {
 
   depends_on = [aiven_service_integration_endpoint.bar]
 }`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name)
+}
+
+func testAccServiceIntegrationEndpointUsernamePasswordResource(name string) string {
+	return fmt.Sprintf(`
+data "aiven_project" "foo" {
+  project = "%[1]s"
+}
+
+resource "aiven_pg" "bar-pg" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-pg-%[2]s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  pg_user_config {
+    public_access {
+      pg         = true
+      prometheus = false
+    }
+
+    pg {
+      idle_in_transaction_session_timeout = 900
+    }
+  }
+}
+
+resource "aiven_service_integration_endpoint" "bar" {
+  project       = data.aiven_project.foo.project
+  endpoint_name = "test-acc-ie-%[2]s"
+  endpoint_type = "external_schema_registry"
+
+  external_schema_registry_user_config {
+    url = "https://schema-registry.example.com:8081"
+
+    authentication      = "basic"
+    basic_auth_username = "username"
+    basic_auth_password = "password"
+  }
+}
+
+data "aiven_service_integration_endpoint" "endpoint" {
+  project       = aiven_service_integration_endpoint.bar.project
+  endpoint_name = aiven_service_integration_endpoint.bar.endpoint_name
+
+  depends_on = [aiven_service_integration_endpoint.bar]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}
+
+func testAccServiceIntegrationEndpointUpdatePasswordResource(name string) string {
+	return fmt.Sprintf(`
+data "aiven_project" "foo" {
+  project = "%[1]s"
+}
+
+resource "aiven_pg" "bar-pg" {
+  project                 = data.aiven_project.foo.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-sr-pg-%[2]s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  pg_user_config {
+    public_access {
+      pg         = true
+      prometheus = false
+    }
+
+    pg {
+      idle_in_transaction_session_timeout = 900
+    }
+  }
+}
+
+resource "aiven_service_integration_endpoint" "bar" {
+  project       = data.aiven_project.foo.project
+  endpoint_name = "test-acc-ie-%[2]s"
+  endpoint_type = "external_schema_registry"
+
+  external_schema_registry_user_config {
+    url = "https://schema-registry.example.com:8081"
+
+    authentication      = "basic"
+    basic_auth_username = "username"
+    basic_auth_password = "new-password"
+  }
+}
+
+data "aiven_service_integration_endpoint" "endpoint" {
+  project       = aiven_service_integration_endpoint.bar.project
+  endpoint_name = aiven_service_integration_endpoint.bar.endpoint_name
+
+  depends_on = [aiven_service_integration_endpoint.bar]
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
 func testAccCheckAivenServiceIntegraitonEndpointResourceDestroy(s *terraform.State) error {
