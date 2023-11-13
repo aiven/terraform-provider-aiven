@@ -11,6 +11,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Deprecating `project_user`, `account_team` and `account_team_member` resources
 - Fix unmarshalling empty userconfig crash
 
 ## [4.9.3] - 2023-10-27
