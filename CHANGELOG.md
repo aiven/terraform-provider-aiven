@@ -6,7 +6,10 @@ nav_order: 1
 
 # Changelog
 
-## [X.Y.Z] - YYYY-MM-DD
+<!-- Always keep the following header in place: -->
+<!-- [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
+
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Deprecating `project_user`, `account_team` and `account_team_member` resources
 - Fix unmarshalling empty userconfig crash
