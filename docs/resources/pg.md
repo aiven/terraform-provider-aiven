@@ -169,7 +169,7 @@ Optional:
 
 - `dbname` (String) Database name for bootstrapping the initial connection.
 - `ignore_dbs` (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment).
-- `method` (String) The migration method to be used (currently supported only by Redis, MySQL and PostgreSQL service types).
+- `method` (String) The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).
 - `password` (String, Sensitive) Password for authentication with the server where to migrate data from.
 - `ssl` (Boolean) The server where to migrate data from is secured with SSL. The default value is `true`.
 - `username` (String) User name for authentication with the server where to migrate data from.
