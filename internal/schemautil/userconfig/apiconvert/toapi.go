@@ -236,7 +236,7 @@ func itemToAPI(
 		}
 	}
 
-	if omitValue && isRequired {
+	if omitValue && isRequired || key == "basic_auth_username" || key == "basic_auth_password" {
 		omitValue = false
 	}
 
