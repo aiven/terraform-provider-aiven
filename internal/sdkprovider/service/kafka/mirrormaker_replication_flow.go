@@ -81,10 +81,20 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 		Description:  userconfig.Desc("Frequency of consumer group offset sync.").DefaultValue(1).Build(),
 	},
 	"emit_heartbeats_enabled": {
-		Type:        schema.TypeBool,
-		Optional:    true,
-		Default:     false,
-		Description: userconfig.Desc("Emit heartbeats enabled.").DefaultValue(false).Build(),
+		Type:     schema.TypeBool,
+		Optional: true,
+		Default:  false,
+		Description: userconfig.Desc(
+			"Whether to emit heartbeats to the target cluster",
+		).DefaultValue(false).Build(),
+	},
+	"emit_backward_heartbeats_enabled": {
+		Type:     schema.TypeBool,
+		Optional: true,
+		Default:  false,
+		Description: userconfig.Desc(
+			"Whether to emit heartbeats to the direction opposite to the flow, i.e. to the source cluster",
+		).DefaultValue(false).Build(),
 	},
 	"offset_syncs_topic_location": {
 		Type:         schema.TypeString,
@@ -130,6 +140,7 @@ func resourceMirrorMakerReplicationFlowCreate(ctx context.Context, d *schema.Res
 			SyncGroupOffsetsEnabled:         d.Get("sync_group_offsets_enabled").(bool),
 			SyncGroupOffsetsIntervalSeconds: d.Get("sync_group_offsets_interval_seconds").(int),
 			EmitHeartbeatsEnabled:           d.Get("emit_heartbeats_enabled").(bool),
+			EmitBackwardHeartbeatsEnabled:   d.Get("emit_backward_heartbeats_enabled").(bool),
 			OffsetSyncsTopicLocation:        d.Get("offset_syncs_topic_location").(string),
 		},
 	})
@@ -188,6 +199,12 @@ func resourceMirrorMakerReplicationFlowRead(ctx context.Context, d *schema.Resou
 	if err := d.Set("emit_heartbeats_enabled", replicationFlow.ReplicationFlow.EmitHeartbeatsEnabled); err != nil {
 		return diag.FromErr(err)
 	}
+	if err := d.Set(
+		"emit_backward_heartbeats_enabled",
+		replicationFlow.ReplicationFlow.EmitBackwardHeartbeatsEnabled,
+	); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -215,6 +232,7 @@ func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.Res
 				SyncGroupOffsetsEnabled:         d.Get("sync_group_offsets_enabled").(bool),
 				SyncGroupOffsetsIntervalSeconds: d.Get("sync_group_offsets_interval_seconds").(int),
 				EmitHeartbeatsEnabled:           d.Get("emit_heartbeats_enabled").(bool),
+				EmitBackwardHeartbeatsEnabled:   d.Get("emit_backward_heartbeats_enabled").(bool),
 				OffsetSyncsTopicLocation:        d.Get("offset_syncs_topic_location").(string),
 			},
 		},

@@ -33,7 +33,8 @@ data "aiven_mirrormaker_replication_flow" "f1" {
 
 ### Read-Only
 
-- `emit_heartbeats_enabled` (Boolean) Emit heartbeats enabled. The default value is `false`.
+- `emit_backward_heartbeats_enabled` (Boolean) Whether to emit heartbeats to the direction opposite to the flow, i.e. to the source cluster. The default value is `false`.
+- `emit_heartbeats_enabled` (Boolean) Whether to emit heartbeats to the target cluster. The default value is `false`.
 - `enable` (Boolean) Enable of disable replication flows for a service.
 - `id` (String) The ID of this resource.
 - `offset_syncs_topic_location` (String) Offset syncs topic location.
