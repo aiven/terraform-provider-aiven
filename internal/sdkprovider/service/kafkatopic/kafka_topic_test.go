@@ -19,7 +19,7 @@ import (
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/kafkatopic"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/kafkatopicrepository"
 )
 
 func TestAccAivenKafkaTopic_basic(t *testing.T) {
@@ -392,8 +392,8 @@ func TestAccAivenKafkaTopic_recreate_missing(t *testing.T) {
 					assert.Nil(t, tc)
 					assert.True(t, aiven.IsNotFound(err))
 
-					// Invalidates cache for the topic
-					kafkatopic.DeleteTopicFromCache(project, kafkaName, topicName)
+					// We need to remove it from reps cache
+					assert.NoError(t, kafkatopicrepository.ForgetTopic(project, kafkaName, topicName))
 				},
 				// Now plan shows a diff
 				ExpectNonEmptyPlan: true,
@@ -536,7 +536,7 @@ func TestAccAivenKafkaTopic_conflicts_if_exists(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccAivenKafkaTopicConflictsIfExists(prefix, project),
-				ExpectError: regexp.MustCompile(`Topic conflict, already exists: conflict`),
+				ExpectError: regexp.MustCompile(`Topic conflict, already exists`),
 			},
 		},
 	})

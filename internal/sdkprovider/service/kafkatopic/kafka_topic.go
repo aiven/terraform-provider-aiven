@@ -3,19 +3,17 @@ package kafkatopic
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
-	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/kafkatopicrepository"
 )
 
 var aivenKafkaTopicSchema = map[string]*schema.Schema{
@@ -265,14 +263,6 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 	topicName := d.Get("topic_name").(string)
 	partitions := d.Get("partitions").(int)
 	replication := d.Get("replication").(int)
-	client := m.(*aiven.Client)
-
-	// aiven.KafkaTopics.Create() function may return 501 on create
-	// Second call might say that topic already exists
-	// So to be sure, better check it before create
-	if isTopicExists(ctx, client, project, serviceName, topicName) {
-		return diag.Errorf("Topic conflict, already exists: %s", topicName)
-	}
 
 	createRequest := aiven.CreateKafkaTopicRequest{
 		Partitions:  &partitions,
@@ -282,18 +272,13 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 		Tags:        getTags(d),
 	}
 
-	err := client.KafkaTopics.Create(
-		ctx,
-		project,
-		serviceName,
-		createRequest,
-	)
-	if err != nil && !aiven.IsAlreadyExists(err) {
+	client := m.(*aiven.Client)
+	err := kafkatopicrepository.New(client.KafkaTopics).Create(ctx, project, serviceName, createRequest)
+	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId(schemautil.BuildResourceID(project, serviceName, topicName))
-	getTopicCache().AddToQueue(project, serviceName, topicName)
 
 	// We do not call a Kafka Topic read here to speed up the performance.
 	// However, in the case of Kafka Topic resource getting a computed field
@@ -361,7 +346,8 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	topic, err := getTopic(ctx, m, d.Timeout(schema.TimeoutRead), project, serviceName, topicName)
+	client := m.(*aiven.Client)
+	topic, err := kafkatopicrepository.New(client.KafkaTopics).Read(ctx, project, serviceName, topicName)
 
 	// Topics are destroyed when kafka is off
 	// https://docs.aiven.io/docs/platform/concepts/service-power-cycle
@@ -432,40 +418,15 @@ func flattenKafkaTopicTags(list []aiven.KafkaTopicTag) []map[string]interface{} 
 	return tags
 }
 
-func getTopic(ctx context.Context, m interface{}, timeout time.Duration, project, serviceName, topicName string) (*aiven.KafkaTopic, error) {
-	client, ok := m.(*aiven.Client)
-	if !ok {
-		return nil, fmt.Errorf("invalid Aiven client")
-	}
-
-	w, err := newKafkaTopicAvailabilityWaiter(ctx, client, project, serviceName, topicName)
-	if err != nil {
-		return nil, err
-	}
-
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
-	topic, err := w.Conf(timeout).WaitForStateContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	kt, ok := topic.(aiven.KafkaTopic)
-	if !ok {
-		return nil, fmt.Errorf("can't cast value to aiven.KafkaTopic")
-	}
-	return &kt, nil
-}
-
 func resourceKafkaTopicUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
 	partitions := d.Get("partitions").(int)
 	projectName, serviceName, topicName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = client.KafkaTopics.Update(
+	client := m.(*aiven.Client)
+	err = kafkatopicrepository.New(client.KafkaTopics).Update(
 		ctx,
 		projectName,
 		serviceName,
@@ -485,8 +446,6 @@ func resourceKafkaTopicUpdate(ctx context.Context, d *schema.ResourceData, m int
 }
 
 func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
 	projectName, serviceName, topicName, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
@@ -496,18 +455,7 @@ func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m int
 		return diag.Errorf("cannot delete kafka topic when termination_protection is enabled")
 	}
 
-	waiter := TopicDeleteWaiter{
-		Context:     ctx,
-		Client:      client,
-		ProjectName: projectName,
-		ServiceName: serviceName,
-		TopicName:   topicName,
-	}
-
-	timeout := d.Timeout(schema.TimeoutDelete)
-
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
-	_, err = waiter.Conf(timeout).WaitForStateContext(ctx)
+	err = kafkatopicrepository.New(m.(*aiven.Client).KafkaTopics).Delete(ctx, projectName, serviceName, topicName)
 	if err != nil {
 		return diag.Errorf("error waiting for Aiven Kafka Topic to be DELETED: %s", err)
 	}
@@ -542,44 +490,5 @@ func flattenKafkaTopicConfig(t *aiven.KafkaTopic) []map[string]interface{} {
 			"segment_jitter_ms":                   schemautil.ToOptionalString(t.Config.SegmentJitterMs.Value),
 			"segment_ms":                          schemautil.ToOptionalString(t.Config.SegmentMs.Value),
 		},
-	}
-}
-
-// TopicDeleteWaiter is used to wait for Kafka Topic to be deleted.
-type TopicDeleteWaiter struct {
-	Context     context.Context
-	Client      *aiven.Client
-	ProjectName string
-	ServiceName string
-	TopicName   string
-}
-
-// RefreshFunc will call the Aiven client and refresh it's state.
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
-func (w *TopicDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		err := w.Client.KafkaTopics.Delete(w.Context, w.ProjectName, w.ServiceName, w.TopicName)
-		if err != nil {
-			if !aiven.IsNotFound(err) {
-				return nil, "REMOVING", nil
-			}
-		}
-
-		return aiven.KafkaTopic{}, "DELETED", nil
-	}
-}
-
-// Conf sets up the configuration to refresh.
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
-func (w *TopicDeleteWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
-	log.Printf("[DEBUG] Delete waiter timeout %.0f minutes", timeout.Minutes())
-
-	return &resource.StateChangeConf{
-		Pending:    []string{"REMOVING"},
-		Target:     []string{"DELETED"},
-		Refresh:    w.RefreshFunc(),
-		Delay:      1 * time.Second,
-		Timeout:    timeout,
-		MinTimeout: 1 * time.Second,
 	}
 }
