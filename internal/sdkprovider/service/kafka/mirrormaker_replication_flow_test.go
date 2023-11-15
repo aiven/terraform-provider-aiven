@@ -186,6 +186,7 @@ resource "aiven_mirrormaker_replication_flow" "foo" {
   sync_group_offsets_enabled          = true
   sync_group_offsets_interval_seconds = 10
   emit_heartbeats_enabled             = true
+  emit_backward_heartbeats_enabled    = true
   offset_syncs_topic_location         = "source"
 
   topics = [
@@ -250,6 +251,7 @@ resource "aiven_mirrormaker_replication_flow" "foo" {
   sync_group_offsets_enabled          = true
   sync_group_offsets_interval_seconds = 10
   emit_heartbeats_enabled             = true
+  emit_backward_heartbeats_enabled    = true
   offset_syncs_topic_location         = "lol_offset"
 }
 `

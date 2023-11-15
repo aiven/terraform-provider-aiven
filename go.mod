@@ -3,7 +3,7 @@ module github.com/aiven/terraform-provider-aiven
 go 1.21.1
 
 require (
-	github.com/aiven/aiven-go-client/v2 v2.2.0
+	github.com/aiven/aiven-go-client/v2 v2.2.1-0.20231115125637-62b87a658b17
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/dave/jennifer v1.7.0
 	github.com/docker/go-units v0.5.0
@@ -32,7 +32,7 @@ require (
 	github.com/cloudflare/circl v1.3.3 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
-	github.com/hashicorp/go-retryablehttp v0.7.4 // indirect
+	github.com/hashicorp/go-retryablehttp v0.7.5 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect
