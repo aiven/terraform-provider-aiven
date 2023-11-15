@@ -4765,7 +4765,7 @@ func ServiceTypeMysql() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"method": {
-					Description: "The migration method to be used (currently supported only by Redis, MySQL and PostgreSQL service types).",
+					Description: "The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -4809,7 +4809,7 @@ func ServiceTypeMysql() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"method": {
-					Description: "The migration method to be used (currently supported only by Redis, MySQL and PostgreSQL service types).",
+					Description: "The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -7007,7 +7007,7 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"method": {
-					Description: "The migration method to be used (currently supported only by Redis, MySQL and PostgreSQL service types).",
+					Description: "The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -7051,7 +7051,7 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"method": {
-					Description: "The migration method to be used (currently supported only by Redis, MySQL and PostgreSQL service types).",
+					Description: "The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -7989,7 +7989,7 @@ func ServiceTypeRedis() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"method": {
-					Description: "The migration method to be used (currently supported only by Redis, MySQL and PostgreSQL service types).",
+					Description: "The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
@@ -8033,7 +8033,7 @@ func ServiceTypeRedis() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"method": {
-					Description: "The migration method to be used (currently supported only by Redis, MySQL and PostgreSQL service types).",
+					Description: "The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
