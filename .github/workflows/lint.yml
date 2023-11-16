@@ -31,9 +31,13 @@ jobs:
   semgrep:
     runs-on: ubuntu-latest
     if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
+    container:
+      image: returntocorp/semgrep
     steps:
-      - uses: actions/checkout@v3
-      - uses: returntocorp/semgrep-action@v1
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: semgrep ci --config auto --no-suppress-errors
 
   make_lint:
     runs-on: ubuntu-latest
