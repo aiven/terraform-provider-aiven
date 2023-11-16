@@ -24,7 +24,7 @@ data "aiven_project_user" "mytestuser" {
 
 ### Required
 
-- `email` (String) Email address of the user. This property cannot be changed, doing so forces recreation of the resource.
+- `email` (String) Email address of the user. Should be lowercase. This property cannot be changed, doing so forces recreation of the resource.
 - `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Read-Only

@@ -2,6 +2,7 @@ package schemautil
 
 import (
 	"fmt"
+	"net/mail"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -219,6 +220,22 @@ func ValidateHumanByteSizeString(v interface{}, k string) (ws []string, errors [
 	if _, err := units.RAMInBytes(v.(string)); err != nil {
 		return ws, append(errors, fmt.Errorf("%q: invalid human readable byte size", k))
 	}
+	return
+}
+
+// ValidateEmailAddress is a ValidateFunc that ensures a string is a valid email address
+func ValidateEmailAddress(v any, k string) (ws []string, errors []error) {
+	addr, err := mail.ParseAddress(v.(string))
+	if err != nil {
+		errors = append(errors, err)
+
+		return
+	}
+
+	if strings.ToLower(addr.Address) != addr.Address {
+		errors = append(errors, fmt.Errorf("%q: invalid email address", k))
+	}
+
 	return
 }
 

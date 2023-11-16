@@ -15,6 +15,8 @@ nav_order: 1
 - Fix unmarshalling empty userconfig crash
 - Never skip basic auth username/password in service integrations user config options when sending them to the API
 - Add `emit_backward_heartbeats_enabled` field support in Mirrormaker replication flow
+- Add validation for email fields in `account_team_member`, `organization_user` and `project_user` resources to check
+  if email is lowercase and valid
 
 ## [4.9.3] - 2023-10-27
 

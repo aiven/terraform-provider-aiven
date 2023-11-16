@@ -23,8 +23,10 @@ var aivenOrganizationUserSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Required: true,
 		ForceNew: true,
-		Description: userconfig.Desc("This is a user email address that first will be invited, and after accepting" +
-			" an invitation, they become a member of the organization.").ForceNew().Build(),
+		Description: userconfig.Desc("This is a user email address that first will be invited, " +
+			"and after accepting an invitation, they become a member of the organization. Should be lowercase.",
+		).ForceNew().Build(),
+		ValidateFunc: schemautil.ValidateEmailAddress,
 	},
 	"invited_by": {
 		Type:        schema.TypeString,

@@ -29,7 +29,7 @@ eliminate the member from the organization if one has accepted an invitation pre
 ### Required
 
 - `organization_id` (String) The unique organization ID. This property cannot be changed, doing so forces recreation of the resource.
-- `user_email` (String) This is a user email address that first will be invited, and after accepting an invitation, they become a member of the organization. This property cannot be changed, doing so forces recreation of the resource.
+- `user_email` (String) This is a user email address that first will be invited, and after accepting an invitation, they become a member of the organization. Should be lowercase. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Optional
 

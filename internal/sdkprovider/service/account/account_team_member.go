@@ -26,10 +26,14 @@ var aivenAccountTeamMemberSchema = map[string]*schema.Schema{
 		Description: userconfig.Desc("An account team id").ForceNew().Build(),
 	},
 	"user_email": {
-		Type:        schema.TypeString,
-		Required:    true,
-		ForceNew:    true,
-		Description: userconfig.Desc("Is a user email address that first will be invited, and after accepting an invitation, he or she becomes a member of a team.").ForceNew().Build(),
+		Type:     schema.TypeString,
+		Required: true,
+		ForceNew: true,
+		Description: userconfig.Desc(
+			"Is a user email address that first will be invited, and after accepting an invitation, he " +
+				"or she becomes a member of a team. Should be lowercase.",
+		).ForceNew().Build(),
+		ValidateFunc: schemautil.ValidateEmailAddress,
 	},
 	"invited_by_user_email": {
 		Type:        schema.TypeString,
