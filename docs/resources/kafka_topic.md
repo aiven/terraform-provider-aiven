@@ -85,7 +85,7 @@ Optional:
 - `segment_index_bytes` (String) segment.index.bytes value
 - `segment_jitter_ms` (String) segment.jitter.ms value
 - `segment_ms` (String) segment.ms value
-- `unclean_leader_election_enable` (String) unclean.leader.election.enable value
+- `unclean_leader_election_enable` (String, Deprecated) unclean.leader.election.enable value; deprecated
 
 
 <a id="nestedblock--tag"></a>

@@ -8,6 +8,7 @@ nav_order: 1
 
 ## [X.Y.Z] - YYYY-MM-DD
 
+- `aiven_kafka_topic` field `unclean_leader_election_enable` is deprecated
 - Fix incorrect read context in MySQL user resource
 - Add validation for email fields in `account_team_member` and `project_user` resources to check if email is lowercase and valid
 
