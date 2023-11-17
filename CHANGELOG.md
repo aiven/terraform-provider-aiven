@@ -8,6 +8,7 @@ nav_order: 1
 
 ## [X.Y.Z] - YYYY-MM-DD
 
+- `aiven_kafka_topic` field `unclean_leader_election_enable` is deprecated
 - Fix incorrect read context in MySQL user resource
 
 ## [3.13.4] - 2023-09-28
