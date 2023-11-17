@@ -1,73 +1,74 @@
-# Aiven Project, Account, and Teams Example
+# Aiven organizations, units, and projects example
 
-Please also read through the [official docs](https://docs.aiven.io/docs/platform/concepts/projects_accounts_access.html)
-that talk about projects, accounts, and managing access permissions.
+The Aiven platform uses [organizations, organizational units, and projects to organize services](https://docs.aiven.io/docs/platform/concepts/projects_accounts_access.html).
 
-## Overview
+This example shows you how to use the Aiven Provider for Terraform to create an organization with two organizaitonal units, and add projects to those units. 
 
-We want to create an account and team setup to manage users and services
-across `production`, `qa`, and `development` environments. See the
-following table for roles and privileges:
+Many customers use units to separate projects for different departments within their organization, so this example will create a unit for an engineering department and a finance department.
 
-|                 | Production Env. | QA Env.     | Development Env. |
-|-----------------|-----------------|-------------|------------------|
-| Admin Team      | `admin`         | `admin`     | `admin`          |
-| Operator Team   | `operator`      | `operator`  | `operator`       |
-| Developer Team  | `read_only`     | `developer` | `developer`      |
-| Operator Team   | `read_only`     | `read_only` | `read_only`      |
-| Unassigned Team | N/A             | N/A         | N/A              |
+In each unit, three projects will be created for production, QA, and development environments. 
 
-More information about [Aiven user roles](https://help.aiven.io/en/articles/923754-project-member-privileges) is
-available in our help center. The `unassigned` team is the default role for SSO registrations.
+## Prerequisites
 
-## Setup
+* [Install Terraform](https://www.terraform.io/downloads)
+* [Sign up for Aiven](https://console.aiven.io/signup?utm_source=github&utm_medium=organic&utm_campaign=devportal&utm_content=repo)
+* [Create an authentication token](https://docs.aiven.io/docs/platform/howto/create_authentication_token.html)
 
-### Install Aiven Provider for Terraform
+## Set up the Terraform project
 
-See [Installation Instructions](https://github.com/aiven/terraform-provider-aiven#installation).
+1. Clone this repository.
 
-### Variables
+2. Rename the `./secrets.tfvars.tmp` file to `./secrets.tfvars` and add values for the variables. It's recommended to use your organization name as a prefix for the project names.
 
-Rename `./secrets.tfvars.tmp` to `./secrets.tfvars` and fill in the appropriate values.
-
-### Initialize Terraform
-
-Ensure that you have Terraform v0.12.\* installed and initialize the project.
+3. Ensure that you have Terraform v0.13.0 or higher installed. To check the version, run:  
 
 ```sh
-$ terraform --version && terraform init
+$ terraform --version 
+```
 
-Terraform v0.12.24
-+ provider.aiven (unversioned)
+The output is similar to the following:
 
-Your version of Terraform is out of date! The latest version
-is 0.12.28. You can update by downloading from https://www.terraform.io/downloads.html
+```sh
+Terraform v1.6.2
++ provider registry.terraform.io/aiven/aiven v4.9.2
+```
+
+4. Initialize Terraform:
+
+```sh
+$ terraform init
+```
+
+The output is similar to the following:
+
+```sh
 
 Initializing the backend...
 
 Initializing provider plugins...
-
+- Finding aiven/aiven versions matching ">= 4.0.0, < 5.0.0"...
+- Installing aiven/aiven v4.9.2...
+- Installed aiven/aiven v4.9.2
+...
 Terraform has been successfully initialized!
-
-You may now begin working with Terraform. Try running "terraform plan" to see
-any changes that are required for your infrastructure. All Terraform commands
-should now work.
-
-If you ever set or change modules or backend configuration for Terraform,
-rerun this command to reinitialize your working directory. If you forget, other
-commands will detect it and remind you to do so if necessary.
+...
 ```
 
-# Apply
+5. To create an execution plan and preview the changes that will be made, run:
 
-In a real-world deployment, you likely want to perform a `terraform apply` first.
-See [Hashicorp's Best Practices](https://www.terraform.io/docs/cloud/guides/recommended-practices/index.html)
-documentation for more information.
+```sh
+$ terraform plan
 
-Deploy your changes
+```
+
+6. To deploy your changes, run:
 
 ```sh
 $ terraform apply --var-file=secrets.tfvars
+```
+
+The output will be similar to the following:
+```sh
 
 An execution plan has been generated and is shown below.
 Resource actions are indicated with the following symbols:
@@ -75,44 +76,79 @@ Resource actions are indicated with the following symbols:
 
 Terraform will perform the following actions:
 
-  # aiven_account.acct will be created
+   # aiven_organization.org will be created
+  + resource "aiven_organization" "org" {
+      + create_time = (known after apply)
+      + id          = (known after apply)
+      + name        = "Example Organization"
+      + tenant_id   = (known after apply)
+      + update_time = (known after apply)
+    }
 ...
-Plan: 22 to add, 0 to change, 0 to destroy.
+Plan: 9 to add, 0 to change, 0 to destroy.
+```
+7. Enter yes to confirm. The output will be similar to the following:
 
+```sh
 Do you want to perform these actions?
   Terraform will perform the actions described above.
   Only 'yes' will be accepted to approve.
 
   Enter a value: yes
-...
-aiven_account_team_project.rbac-qa-dev: Creation complete after 1s [id=a2d33b4d2ece/at2d33b4607c5/demo-tech-qa]
 
-Apply complete! Resources: 22 added, 0 changed, 0 destroyed.
+aiven_organization.org: Creating...
+...
+Apply complete! Resources: 9 added, 0 changed, 0 destroyed.
 ```
 
-## Verify Aiven Projects' State
+## Verify the setup in the Aiven Console 
 
-![Account + Projects](assets/accounts_modal.png)
-![Teams](assets/teams.png)
-![Admin Roles](assets/admin_rbac.png)
-![Developer Roles](assets/dev_rbac.png)
-![Default Role](assets/unassigned_rbac.png)
+You can see your organization, organizational units, and projects in the [Aiven Console](https://console.aiven.io/):
 
-# Cleanup
+1. Select the organization from the top menu.
+
+2. Click **Admin**. 
+
+3. In the **Organizational units** section, select a unit.
+
+4. On the unit's page, you can see a list of the projects.
+
+
+## Clean up
+
+To delete the example organization, organizational units, and all projects:
+
+1. To preview the changes first, run:
+
+```sh
+$ terraform plan -destroy --var-file=secrets.tfvars
+```
+
+The output shows what changes will be made when you run the `destroy` command.
+
+2. To delete all resources, run:
 
 ```sh
 $ terraform destroy --var-file=secrets.tfvars
+```
+
+3. Enter yes to confirm the changes:  
+```sh
+Plan: 0 to add, 0 to change, 9 to destroy
 ...
-Plan: 0 to add, 0 to change, 22 to destroy.
 
 Do you really want to destroy all resources?
   Terraform will destroy all your managed infrastructure, as shown above.
   There is no undo. Only 'yes' will be accepted to confirm.
 
   Enter a value: yes
+```
 
+The output will be similar to the following:
+
+```sh
 ...
-aiven_account.acct: Destruction complete after 0s
+aiven_organization.org: Destruction complete after 0s
 
-Destroy complete! Resources: 22 destroyed.
+Destroy complete! Resources: 9 destroyed.
 ```
