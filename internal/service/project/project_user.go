@@ -14,10 +14,11 @@ import (
 var aivenProjectUserSchema = map[string]*schema.Schema{
 	"project": schemautil.CommonSchemaProjectReference,
 	"email": {
-		ForceNew:    true,
-		Required:    true,
-		Type:        schema.TypeString,
-		Description: schemautil.Complex("Email address of the user.").ForceNew().Build(),
+		ForceNew:     true,
+		Required:     true,
+		Type:         schema.TypeString,
+		Description:  "Email address of the user. Should be lowercase",
+		ValidateFunc: schemautil.ValidateEmailAddress,
 	},
 	"member_type": {
 		Required:    true,

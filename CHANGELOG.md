@@ -9,6 +9,7 @@ nav_order: 1
 ## [X.Y.Z] - YYYY-MM-DD
 
 - Fix incorrect read context in MySQL user resource
+- Add validation for email fields in `account_team_member` and `project_user` resources to check if email is lowercase and valid
 
 ## [3.13.4] - 2023-09-28
 
