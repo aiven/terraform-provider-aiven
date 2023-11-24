@@ -28,6 +28,8 @@ var integrationEndpointTypes = []string{
 	"jolokia",
 	"external_schema_registry",
 	"external_aws_cloudwatch_metrics",
+	"external_google_cloud_bigquery",
+	"external_postgresql",
 }
 
 var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
@@ -68,6 +70,8 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 	"jolokia_user_config":                         dist.IntegrationEndpointTypeJolokia(),
 	"external_schema_registry_user_config":        dist.IntegrationEndpointTypeExternalSchemaRegistry(),
 	"external_aws_cloudwatch_metrics_user_config": dist.IntegrationEndpointTypeExternalAwsCloudwatchMetrics(),
+	"external_google_cloud_bigquery":              dist.IntegrationEndpointTypeExternalGoogleCloudBigquery(),
+	"external_postgresql":                         dist.IntegrationEndpointTypeExternalPostgresql(),
 }
 
 func ResourceServiceIntegrationEndpoint() *schema.Resource {
