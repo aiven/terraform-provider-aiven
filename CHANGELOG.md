@@ -17,6 +17,8 @@ nav_order: 1
 - Add `emit_backward_heartbeats_enabled` field support in Mirrormaker replication flow
 - Add validation for email fields in `account_team_member`, `organization_user` and `project_user` resources to check
   if email is lowercase and valid
+- Add `connection_info` field to components of all services. This field contains connection information for the
+  component, and is a combination of the `host` and `port` fields
 
 ## [4.9.3] - 2023-10-27
 
