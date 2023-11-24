@@ -210,17 +210,23 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 					"host": {
 						Type:        schema.TypeString,
 						Computed:    true,
-						Description: "DNS name for connecting to the service component",
-					},
-					"kafka_authentication_method": {
-						Type:        schema.TypeString,
-						Computed:    true,
-						Description: "Kafka authentication method. This is a value specific to the 'kafka' service component",
+						Description: "Host name for connecting to the service component",
 					},
 					"port": {
 						Type:        schema.TypeInt,
 						Computed:    true,
 						Description: "Port number for connecting to the service component",
+					},
+					"connection_info": {
+						Type:     schema.TypeString,
+						Computed: true,
+						Description: "Connection info for connecting to the service component." +
+							" This is a combination of host and port.",
+					},
+					"kafka_authentication_method": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: "Kafka authentication method. This is a value specific to the 'kafka' service component",
 					},
 					"route": {
 						Type:        schema.TypeString,
@@ -744,12 +750,13 @@ func FlattenServiceComponents(r *aiven.Service) []map[string]interface{} {
 			"component":                   c.Component,
 			"host":                        c.Host,
 			"port":                        c.Port,
-			"route":                       c.Route,
-			"usage":                       c.Usage,
+			"connection_info":             fmt.Sprintf("%s:%d", c.Host, c.Port),
 			"kafka_authentication_method": c.KafkaAuthenticationMethod,
+			"route":                       c.Route,
 			// By default, endpoints are always encrypted and
 			// this property is only included for service components that may disable encryption.
-			"ssl": PointerValueOrDefault(c.Ssl, true),
+			"ssl":   PointerValueOrDefault(c.Ssl, true),
+			"usage": c.Usage,
 		}
 		components = append(components, component)
 	}

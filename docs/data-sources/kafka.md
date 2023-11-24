@@ -64,6 +64,7 @@ data "aiven_kafka" "kafka1" {
 Read-Only:
 
 - `component` (String)
+- `connection_info` (String)
 - `host` (String)
 - `kafka_authentication_method` (String)
 - `port` (Number)
