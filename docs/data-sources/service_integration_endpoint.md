@@ -31,13 +31,15 @@ data "aiven_service_integration_endpoint" "myendpoint" {
 
 - `datadog_user_config` (List of Object) Datadog user configurable settings (see [below for nested schema](#nestedatt--datadog_user_config))
 - `endpoint_config` (Map of String) Integration endpoint specific backend configuration
-- `endpoint_type` (String) Type of the service integration endpoint. Possible values: `datadog`, `prometheus`, `rsyslog`, `external_elasticsearch_logs`, `external_opensearch_logs`, `external_aws_cloudwatch_logs`, `external_google_cloud_logging`, `external_kafka`, `jolokia`, `external_schema_registry`, `external_aws_cloudwatch_metrics`
+- `endpoint_type` (String) Type of the service integration endpoint. Possible values: `datadog`, `prometheus`, `rsyslog`, `external_elasticsearch_logs`, `external_opensearch_logs`, `external_aws_cloudwatch_logs`, `external_google_cloud_logging`, `external_kafka`, `jolokia`, `external_schema_registry`, `external_aws_cloudwatch_metrics`, `external_google_cloud_bigquery`, `external_postgresql`
 - `external_aws_cloudwatch_logs_user_config` (List of Object) ExternalAwsCloudwatchLogs user configurable settings (see [below for nested schema](#nestedatt--external_aws_cloudwatch_logs_user_config))
 - `external_aws_cloudwatch_metrics_user_config` (List of Object) ExternalAwsCloudwatchMetrics user configurable settings (see [below for nested schema](#nestedatt--external_aws_cloudwatch_metrics_user_config))
 - `external_elasticsearch_logs_user_config` (List of Object) ExternalElasticsearchLogs user configurable settings (see [below for nested schema](#nestedatt--external_elasticsearch_logs_user_config))
+- `external_google_cloud_bigquery` (List of Object) ExternalGoogleCloudBigquery user configurable settings (see [below for nested schema](#nestedatt--external_google_cloud_bigquery))
 - `external_google_cloud_logging_user_config` (List of Object) ExternalGoogleCloudLogging user configurable settings (see [below for nested schema](#nestedatt--external_google_cloud_logging_user_config))
 - `external_kafka_user_config` (List of Object) ExternalKafka user configurable settings (see [below for nested schema](#nestedatt--external_kafka_user_config))
 - `external_opensearch_logs_user_config` (List of Object) ExternalOpensearchLogs user configurable settings (see [below for nested schema](#nestedatt--external_opensearch_logs_user_config))
+- `external_postgresql` (List of Object) ExternalPostgresql user configurable settings (see [below for nested schema](#nestedatt--external_postgresql))
 - `external_schema_registry_user_config` (List of Object) ExternalSchemaRegistry user configurable settings (see [below for nested schema](#nestedatt--external_schema_registry_user_config))
 - `id` (String) The ID of this resource.
 - `jolokia_user_config` (List of Object) Jolokia user configurable settings (see [below for nested schema](#nestedatt--jolokia_user_config))
@@ -101,6 +103,15 @@ Read-Only:
 - `url` (String)
 
 
+<a id="nestedatt--external_google_cloud_bigquery"></a>
+### Nested Schema for `external_google_cloud_bigquery`
+
+Read-Only:
+
+- `project_id` (String)
+- `service_account_credentials` (String)
+
+
 <a id="nestedatt--external_google_cloud_logging_user_config"></a>
 ### Nested Schema for `external_google_cloud_logging_user_config`
 
@@ -137,6 +148,19 @@ Read-Only:
 - `index_prefix` (String)
 - `timeout` (Number)
 - `url` (String)
+
+
+<a id="nestedatt--external_postgresql"></a>
+### Nested Schema for `external_postgresql`
+
+Read-Only:
+
+- `host` (String)
+- `password` (String)
+- `port` (Number)
+- `ssl_mode` (String)
+- `ssl_root_cert` (String)
+- `username` (String)
 
 
 <a id="nestedatt--external_schema_registry_user_config"></a>

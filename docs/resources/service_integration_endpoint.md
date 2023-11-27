@@ -18,7 +18,7 @@ The Service Integration Endpoint resource allows the creation and management of 
 ### Required
 
 - `endpoint_name` (String) Name of the service integration endpoint
-- `endpoint_type` (String) Type of the service integration endpoint. Possible values: `datadog`, `prometheus`, `rsyslog`, `external_elasticsearch_logs`, `external_opensearch_logs`, `external_aws_cloudwatch_logs`, `external_google_cloud_logging`, `external_kafka`, `jolokia`, `external_schema_registry`, `external_aws_cloudwatch_metrics`
+- `endpoint_type` (String) Type of the service integration endpoint. Possible values: `datadog`, `prometheus`, `rsyslog`, `external_elasticsearch_logs`, `external_opensearch_logs`, `external_aws_cloudwatch_logs`, `external_google_cloud_logging`, `external_kafka`, `jolokia`, `external_schema_registry`, `external_aws_cloudwatch_metrics`, `external_google_cloud_bigquery`, `external_postgresql`
 - `project` (String) Project the service integration endpoint belongs to
 
 ### Optional
@@ -27,9 +27,11 @@ The Service Integration Endpoint resource allows the creation and management of 
 - `external_aws_cloudwatch_logs_user_config` (Block List, Max: 1) ExternalAwsCloudwatchLogs user configurable settings (see [below for nested schema](#nestedblock--external_aws_cloudwatch_logs_user_config))
 - `external_aws_cloudwatch_metrics_user_config` (Block List, Max: 1) ExternalAwsCloudwatchMetrics user configurable settings (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config))
 - `external_elasticsearch_logs_user_config` (Block List, Max: 1) ExternalElasticsearchLogs user configurable settings (see [below for nested schema](#nestedblock--external_elasticsearch_logs_user_config))
+- `external_google_cloud_bigquery` (Block List, Max: 1) ExternalGoogleCloudBigquery user configurable settings (see [below for nested schema](#nestedblock--external_google_cloud_bigquery))
 - `external_google_cloud_logging_user_config` (Block List, Max: 1) ExternalGoogleCloudLogging user configurable settings (see [below for nested schema](#nestedblock--external_google_cloud_logging_user_config))
 - `external_kafka_user_config` (Block List, Max: 1) ExternalKafka user configurable settings (see [below for nested schema](#nestedblock--external_kafka_user_config))
 - `external_opensearch_logs_user_config` (Block List, Max: 1) ExternalOpensearchLogs user configurable settings (see [below for nested schema](#nestedblock--external_opensearch_logs_user_config))
+- `external_postgresql` (Block List, Max: 1) ExternalPostgresql user configurable settings (see [below for nested schema](#nestedblock--external_postgresql))
 - `external_schema_registry_user_config` (Block List, Max: 1) ExternalSchemaRegistry user configurable settings (see [below for nested schema](#nestedblock--external_schema_registry_user_config))
 - `jolokia_user_config` (Block List, Max: 1) Jolokia user configurable settings (see [below for nested schema](#nestedblock--jolokia_user_config))
 - `prometheus_user_config` (Block List, Max: 1) Prometheus user configurable settings (see [below for nested schema](#nestedblock--prometheus_user_config))
@@ -110,6 +112,15 @@ Optional:
 - `timeout` (Number) Elasticsearch request timeout limit. The default value is `10.0`.
 
 
+<a id="nestedblock--external_google_cloud_bigquery"></a>
+### Nested Schema for `external_google_cloud_bigquery`
+
+Required:
+
+- `project_id` (String) GCP project id.
+- `service_account_credentials` (String) This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys .
+
+
 <a id="nestedblock--external_google_cloud_logging_user_config"></a>
 ### Nested Schema for `external_google_cloud_logging_user_config`
 
@@ -152,6 +163,22 @@ Optional:
 - `ca` (String) PEM encoded CA certificate.
 - `index_days_max` (Number) Maximum number of days of logs to keep. The default value is `3`.
 - `timeout` (Number) OpenSearch request timeout limit. The default value is `10.0`.
+
+
+<a id="nestedblock--external_postgresql"></a>
+### Nested Schema for `external_postgresql`
+
+Required:
+
+- `host` (String) Hostname or IP address of the server.
+- `password` (String, Sensitive) Password.
+- `port` (Number) Port number of the server.
+- `username` (String) User name.
+
+Optional:
+
+- `ssl_mode` (String) SSL Mode. The default value is `verify-full`.
+- `ssl_root_cert` (String) SSL Root Cert.
 
 
 <a id="nestedblock--external_schema_registry_user_config"></a>
