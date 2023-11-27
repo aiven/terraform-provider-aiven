@@ -62,7 +62,7 @@ data "aiven_m3aggregator" "m3a" {
 Read-Only:
 
 - `component` (String)
-- `connection_info` (String)
+- `connection_uri` (String)
 - `host` (String)
 - `kafka_authentication_method` (String)
 - `port` (Number)

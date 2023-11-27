@@ -217,7 +217,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 						Computed:    true,
 						Description: "Port number for connecting to the service component",
 					},
-					"connection_info": {
+					"connection_uri": {
 						Type:     schema.TypeString,
 						Computed: true,
 						Description: "Connection info for connecting to the service component." +
@@ -750,7 +750,7 @@ func FlattenServiceComponents(r *aiven.Service) []map[string]interface{} {
 			"component":                   c.Component,
 			"host":                        c.Host,
 			"port":                        c.Port,
-			"connection_info":             fmt.Sprintf("%s:%d", c.Host, c.Port),
+			"connection_uri":              fmt.Sprintf("%s:%d", c.Host, c.Port),
 			"kafka_authentication_method": c.KafkaAuthenticationMethod,
 			"route":                       c.Route,
 			// By default, endpoints are always encrypted and
