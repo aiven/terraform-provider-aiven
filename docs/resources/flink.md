@@ -148,7 +148,7 @@ Optional:
 Read-Only:
 
 - `component` (String)
-- `connection_info` (String)
+- `connection_uri` (String)
 - `host` (String)
 - `kafka_authentication_method` (String)
 - `port` (Number)
