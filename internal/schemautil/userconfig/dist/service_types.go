@@ -2595,6 +2595,11 @@ func ServiceTypeKafka() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
+				"transaction_partition_verification_enable": {
+					Description: "Enable verification that checks that the partition has been added to the transaction before writing transactional records to the partition.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
 				"transaction_remove_expired_transaction_cleanup_interval_ms": {
 					Description: "The interval at which to remove transactions that have expired due to transactional.id.expiration.ms passing (defaults to 3600000 (1 hour)).",
 					Optional:    true,
@@ -2821,6 +2826,11 @@ func ServiceTypeKafka() *schema.Schema {
 					Description: "The maximum number of bytes in a socket request (defaults to 104857600).",
 					Optional:    true,
 					Type:        schema.TypeInt,
+				},
+				"transaction_partition_verification_enable": {
+					Description: "Enable verification that checks that the partition has been added to the transaction before writing transactional records to the partition.",
+					Optional:    true,
+					Type:        schema.TypeBool,
 				},
 				"transaction_remove_expired_transaction_cleanup_interval_ms": {
 					Description: "The interval at which to remove transactions that have expired due to transactional.id.expiration.ms passing (defaults to 3600000 (1 hour)).",
