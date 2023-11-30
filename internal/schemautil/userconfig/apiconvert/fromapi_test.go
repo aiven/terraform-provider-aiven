@@ -138,6 +138,7 @@ func TestFromAPI(t *testing.T) {
 					"sasl_oauthbearer_jwks_endpoint_url":                         "",
 					"sasl_oauthbearer_sub_claim_name":                            "",
 					"socket_request_max_bytes":                                   0,
+					"transaction_partition_verification_enable":                  false,
 					"transaction_remove_expired_transaction_cleanup_interval_ms": 0,
 					"transaction_state_log_segment_bytes":                        0,
 				}},

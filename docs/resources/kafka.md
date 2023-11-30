@@ -170,6 +170,7 @@ Optional:
 - `sasl_oauthbearer_jwks_endpoint_url` (String) OIDC JWKS endpoint URL. By setting this the SASL SSL OAuth2/OIDC authentication is enabled. See also other options for SASL OAuth2/OIDC. .
 - `sasl_oauthbearer_sub_claim_name` (String) Name of the scope from which to extract the subject claim from the JWT. Defaults to sub.
 - `socket_request_max_bytes` (Number) The maximum number of bytes in a socket request (defaults to 104857600).
+- `transaction_partition_verification_enable` (Boolean) Enable verification that checks that the partition has been added to the transaction before writing transactional records to the partition.
 - `transaction_remove_expired_transaction_cleanup_interval_ms` (Number) The interval at which to remove transactions that have expired due to transactional.id.expiration.ms passing (defaults to 3600000 (1 hour)).
 - `transaction_state_log_segment_bytes` (Number) The transaction topic segment bytes should be kept relatively small in order to facilitate faster log compaction and cache loads (defaults to 104857600 (100 mebibytes)).
 

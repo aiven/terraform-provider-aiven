@@ -169,6 +169,7 @@ Read-Only:
 - `sasl_oauthbearer_jwks_endpoint_url` (String)
 - `sasl_oauthbearer_sub_claim_name` (String)
 - `socket_request_max_bytes` (Number)
+- `transaction_partition_verification_enable` (Boolean)
 - `transaction_remove_expired_transaction_cleanup_interval_ms` (Number)
 - `transaction_state_log_segment_bytes` (Number)
 
