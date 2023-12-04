@@ -17,7 +17,7 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.30.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/liip/sheriff v0.11.1
-	github.com/samber/lo v1.38.1
+	github.com/samber/lo v1.39.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/exp v0.0.0-20230809150735-7b3493d9a819
 	gopkg.in/yaml.v3 v3.0.1
