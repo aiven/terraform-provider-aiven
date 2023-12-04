@@ -401,8 +401,7 @@ func TestAccAivenKafkaTopic_recreate_missing(t *testing.T) {
 			},
 			{
 				// Step 3: recreates the topic
-				ExpectNonEmptyPlan: true,
-				Config:             config,
+				Config: config,
 				Check: resource.ComposeTestCheckFunc(
 					// Saved in state
 					resource.TestCheckResourceAttr(kafkaResource, "id", kafkaID),
@@ -419,7 +418,7 @@ func TestAccAivenKafkaTopic_recreate_missing(t *testing.T) {
 								tc, err := client.KafkaTopics.Get(ctx, project, kafkaName, topicName)
 								if err != nil {
 									return &retry.RetryError{
-										Err:       err,
+										Err:       fmt.Errorf(`can't get the "missing" topic: %w`, err),
 										Retryable: aiven.IsNotFound(err),
 									}
 								}
