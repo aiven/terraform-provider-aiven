@@ -87,6 +87,7 @@ Optional:
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks. (see [below for nested schema](#nestedblock--kafka_connect_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink. (see [below for nested schema](#nestedblock--kafka_connect_user_config--privatelink_access))
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet. (see [below for nested schema](#nestedblock--kafka_connect_user_config--public_access))
+- `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `static_ips` (Boolean) Use static public IP addresses.
 
 <a id="nestedblock--kafka_connect_user_config--ip_filter_object"></a>

@@ -82,6 +82,7 @@ Optional:
 - `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'. (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--ip_filter_object))
 - `ip_filter_string` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
 - `kafka_mirrormaker` (Block List, Max: 1) Kafka MirrorMaker configuration values. (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker))
+- `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `static_ips` (Boolean) Use static public IP addresses.
 
 <a id="nestedblock--kafka_mirrormaker_user_config--ip_filter_object"></a>

@@ -98,6 +98,7 @@ Optional:
 - `redis_pubsub_client_output_buffer_limit` (Number) Set output buffer limit for pub / sub clients in MB. The value is the hard limit, the soft limit is 1/4 of the hard limit. When setting the limit, be mindful of the available memory in the selected service plan.
 - `redis_ssl` (Boolean) Require SSL to access Redis. The default value is `true`.
 - `redis_timeout` (Number) Redis idle connection timeout in seconds. The default value is `300`.
+- `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
 - `static_ips` (Boolean) Use static public IP addresses.
 

@@ -98,6 +98,7 @@ Read-Only:
 - `project_to_fork_from` (String)
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--public_access))
 - `rules` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--rules))
+- `service_log` (Boolean)
 - `service_to_fork_from` (String)
 - `static_ips` (Boolean)
 

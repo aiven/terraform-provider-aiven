@@ -89,6 +89,7 @@ Read-Only:
 - `ip_filter_string` (List of String)
 - `m3_version` (String)
 - `m3aggregator_version` (String)
+- `service_log` (Boolean)
 - `static_ips` (Boolean)
 
 <a id="nestedobjatt--m3aggregator_user_config--ip_filter_object"></a>

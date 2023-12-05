@@ -157,6 +157,11 @@ func ServiceTypeCassandra() *schema.Schema {
 			Optional: true,
 			Type:     schema.TypeList,
 		},
+		"service_log": {
+			Description: "Store logs for the service so that they are available in the HTTP API and console.",
+			Optional:    true,
+			Type:        schema.TypeBool,
+		},
 		"service_to_fork_from": {
 			Description: "Name of another service to fork from. This has effect only when a new service is being created.",
 			ForceNew:    true,
@@ -391,6 +396,11 @@ func ServiceTypeClickhouse() *schema.Schema {
 			MaxItems: 1,
 			Optional: true,
 			Type:     schema.TypeList,
+		},
+		"service_log": {
+			Description: "Store logs for the service so that they are available in the HTTP API and console.",
+			Optional:    true,
+			Type:        schema.TypeBool,
 		},
 		"service_to_fork_from": {
 			Description: "Name of another service to fork from. This has effect only when a new service is being created.",
@@ -1180,6 +1190,11 @@ func ServiceTypeFlink() *schema.Schema {
 			Optional: true,
 			Type:     schema.TypeList,
 		},
+		"service_log": {
+			Description: "Store logs for the service so that they are available in the HTTP API and console.",
+			Optional:    true,
+			Type:        schema.TypeBool,
+		},
 		"static_ips": {
 			Description: "Use static public IP addresses.",
 			Optional:    true,
@@ -1963,6 +1978,11 @@ func ServiceTypeGrafana() *schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
+		"service_log": {
+			Description: "Store logs for the service so that they are available in the HTTP API and console.",
+			Optional:    true,
+			Type:        schema.TypeBool,
+		},
 		"service_to_fork_from": {
 			Description: "Name of another service to fork from. This has effect only when a new service is being created.",
 			ForceNew:    true,
@@ -2292,6 +2312,11 @@ func ServiceTypeInfluxdb() *schema.Schema {
 			Description: "Name of the basebackup to restore in forked service.",
 			Optional:    true,
 			Type:        schema.TypeString,
+		},
+		"service_log": {
+			Description: "Store logs for the service so that they are available in the HTTP API and console.",
+			Optional:    true,
+			Type:        schema.TypeBool,
 		},
 		"service_to_fork_from": {
 			Description: "Name of another service to fork from. This has effect only when a new service is being created.",
@@ -3089,6 +3114,12 @@ func ServiceTypeKafka() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
+				"name_strategy_validation": {
+					Default:     true,
+					Description: "If true, validate that given schema is registered under expected subject name by the used name strategy when producing messages. The default value is `true`.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
 				"producer_acks": {
 					Default:     "1",
 					Description: "The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to 'all' or '-1', the leader will wait for the full set of in-sync replicas to acknowledge the record. The default value is `1`.",
@@ -3137,6 +3168,12 @@ func ServiceTypeKafka() *schema.Schema {
 					Description: "The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached. The default value is `1000`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
+				},
+				"name_strategy_validation": {
+					Default:     true,
+					Description: "If true, validate that given schema is registered under expected subject name by the used name strategy when producing messages. The default value is `true`.",
+					Optional:    true,
+					Type:        schema.TypeBool,
 				},
 				"producer_acks": {
 					Default:     "1",
@@ -3402,6 +3439,11 @@ func ServiceTypeKafka() *schema.Schema {
 			MaxItems: 1,
 			Optional: true,
 			Type:     schema.TypeList,
+		},
+		"service_log": {
+			Description: "Store logs for the service so that they are available in the HTTP API and console.",
+			Optional:    true,
+			Type:        schema.TypeBool,
 		},
 		"static_ips": {
 			Description: "Use static public IP addresses.",
@@ -3793,6 +3835,11 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 			Optional: true,
 			Type:     schema.TypeList,
 		},
+		"service_log": {
+			Description: "Store logs for the service so that they are available in the HTTP API and console.",
+			Optional:    true,
+			Type:        schema.TypeBool,
+		},
 		"static_ips": {
 			Description: "Use static public IP addresses.",
 			Optional:    true,
@@ -3973,6 +4020,11 @@ func ServiceTypeKafkaMirrormaker() *schema.Schema {
 			Optional: true,
 			Type:     schema.TypeList,
 		},
+		"service_log": {
+			Description: "Store logs for the service so that they are available in the HTTP API and console.",
+			Optional:    true,
+			Type:        schema.TypeBool,
+		},
 		"static_ips": {
 			Description: "Use static public IP addresses.",
 			Optional:    true,
@@ -4049,6 +4101,11 @@ func ServiceTypeM3aggregator() *schema.Schema {
 			Description: "M3 major version (the minimum compatible version).",
 			Optional:    true,
 			Type:        schema.TypeString,
+		},
+		"service_log": {
+			Description: "Store logs for the service so that they are available in the HTTP API and console.",
+			Optional:    true,
+			Type:        schema.TypeBool,
 		},
 		"static_ips": {
 			Description: "Use static public IP addresses.",
@@ -4653,6 +4710,11 @@ func ServiceTypeM3db() *schema.Schema {
 			MaxItems: 1,
 			Optional: true,
 			Type:     schema.TypeList,
+		},
+		"service_log": {
+			Description: "Store logs for the service so that they are available in the HTTP API and console.",
+			Optional:    true,
+			Type:        schema.TypeBool,
 		},
 		"service_to_fork_from": {
 			Description: "Name of another service to fork from. This has effect only when a new service is being created.",
@@ -5296,6 +5358,11 @@ func ServiceTypeMysql() *schema.Schema {
 			ForceNew:    true,
 			Optional:    true,
 			Type:        schema.TypeString,
+		},
+		"service_log": {
+			Description: "Store logs for the service so that they are available in the HTTP API and console.",
+			Optional:    true,
+			Type:        schema.TypeBool,
 		},
 		"service_to_fork_from": {
 			Description: "Name of another service to fork from. This has effect only when a new service is being created.",
@@ -6896,6 +6963,11 @@ func ServiceTypeOpensearch() *schema.Schema {
 			Optional: true,
 			Type:     schema.TypeList,
 		},
+		"service_log": {
+			Description: "Store logs for the service so that they are available in the HTTP API and console.",
+			Optional:    true,
+			Type:        schema.TypeBool,
+		},
 		"service_to_fork_from": {
 			Description: "Name of another service to fork from. This has effect only when a new service is being created.",
 			ForceNew:    true,
@@ -7592,6 +7664,76 @@ func ServiceTypePg() *schema.Schema {
 			Optional: true,
 			Type:     schema.TypeList,
 		},
+		"pg_qualstats": {
+			Description: "System-wide settings for the pg_qualstats extension.",
+			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{
+				"enabled": {
+					Default:     false,
+					Description: "Enable / Disable pg_qualstats. The default value is `false`.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"min_err_estimate_num": {
+					Default:     "0",
+					Description: "Error estimation num threshold to save quals. The default value is `0`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"min_err_estimate_ratio": {
+					Default:     "0",
+					Description: "Error estimation ratio threshold to save quals. The default value is `0`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"track_constants": {
+					Default:     true,
+					Description: "Enable / Disable pg_qualstats constants tracking. The default value is `true`.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"track_pg_catalog": {
+					Default:     false,
+					Description: "Track quals on system catalogs too. The default value is `false`.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+			}),
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"enabled": {
+					Default:     false,
+					Description: "Enable / Disable pg_qualstats. The default value is `false`.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"min_err_estimate_num": {
+					Default:     "0",
+					Description: "Error estimation num threshold to save quals. The default value is `0`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"min_err_estimate_ratio": {
+					Default:     "0",
+					Description: "Error estimation ratio threshold to save quals. The default value is `0`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"track_constants": {
+					Default:     true,
+					Description: "Enable / Disable pg_qualstats constants tracking. The default value is `true`.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"track_pg_catalog": {
+					Default:     false,
+					Description: "Track quals on system catalogs too. The default value is `false`.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+			}},
+			MaxItems: 1,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
 		"pg_read_replica": {
 			Deprecated:  "Usage of this field is discouraged.",
 			Description: "Use read_replica service integration instead.",
@@ -7721,7 +7863,7 @@ func ServiceTypePg() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"pglookout": {
-			Description: "PGLookout settings.",
+			Description: "System-wide settings for pglookout.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"max_failover_replication_time_lag": {
 				Default:     "60",
 				Description: "Number of seconds of master unavailability before triggering database failover to standby. The default value is `60`.",
@@ -7870,6 +8012,11 @@ func ServiceTypePg() *schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
+		"service_log": {
+			Description: "Store logs for the service so that they are available in the HTTP API and console.",
+			Optional:    true,
+			Type:        schema.TypeBool,
+		},
 		"service_to_fork_from": {
 			Description: "Name of another service to fork from. This has effect only when a new service is being created.",
 			ForceNew:    true,
@@ -7892,14 +8039,16 @@ func ServiceTypePg() *schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"timescaledb": {
-			Description: "TimescaleDB extension configuration values.",
+			Description: "System-wide settings for the timescaledb extension.",
 			DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFuncSkipArrays(map[string]*schema.Schema{"max_background_workers": {
-				Description: "The number of background workers for timescaledb operations. You should configure this setting to the sum of your number of databases and the total number of concurrent background workers you want running at any given point in time.",
+				Default:     "16",
+				Description: "The number of background workers for timescaledb operations. You should configure this setting to the sum of your number of databases and the total number of concurrent background workers you want running at any given point in time. The default value is `16`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			}}),
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"max_background_workers": {
-				Description: "The number of background workers for timescaledb operations. You should configure this setting to the sum of your number of databases and the total number of concurrent background workers you want running at any given point in time.",
+				Default:     "16",
+				Description: "The number of background workers for timescaledb operations. You should configure this setting to the sum of your number of databases and the total number of concurrent background workers you want running at any given point in time. The default value is `16`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			}}},
@@ -8235,6 +8384,11 @@ func ServiceTypeRedis() *schema.Schema {
 			Description: "Redis idle connection timeout in seconds. The default value is `300`.",
 			Optional:    true,
 			Type:        schema.TypeInt,
+		},
+		"service_log": {
+			Description: "Store logs for the service so that they are available in the HTTP API and console.",
+			Optional:    true,
+			Type:        schema.TypeBool,
 		},
 		"service_to_fork_from": {
 			Description: "Name of another service to fork from. This has effect only when a new service is being created.",

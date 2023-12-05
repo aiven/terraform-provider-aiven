@@ -103,6 +103,7 @@ Read-Only:
 - `ip_filter_string` (List of String)
 - `migration` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--migration))
 - `pg` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pg))
+- `pg_qualstats` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pg_qualstats))
 - `pg_read_replica` (Boolean)
 - `pg_service_to_fork_from` (String)
 - `pg_stat_monitor_enable` (Boolean)
@@ -114,6 +115,7 @@ Read-Only:
 - `project_to_fork_from` (String)
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--public_access))
 - `recovery_target_time` (String)
+- `service_log` (Boolean)
 - `service_to_fork_from` (String)
 - `shared_buffers_percentage` (Number)
 - `static_ips` (Boolean)
@@ -200,6 +202,18 @@ Read-Only:
 - `track_io_timing` (String)
 - `wal_sender_timeout` (Number)
 - `wal_writer_delay` (Number)
+
+
+<a id="nestedobjatt--pg_user_config--pg_qualstats"></a>
+### Nested Schema for `pg_user_config.pg_qualstats`
+
+Read-Only:
+
+- `enabled` (Boolean)
+- `min_err_estimate_num` (Number)
+- `min_err_estimate_ratio` (Number)
+- `track_constants` (Boolean)
+- `track_pg_catalog` (Boolean)
 
 
 <a id="nestedobjatt--pg_user_config--pgbouncer"></a>
