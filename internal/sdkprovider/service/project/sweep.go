@@ -42,6 +42,14 @@ func init() {
 			"aiven_redis",
 		},
 	})
+
+	resource.AddTestSweepers("aiven_billing_group", &resource.Sweeper{
+		Name: "aiven_billing_group",
+		F:    sweepBillingGroups(ctx, client),
+		Dependencies: []string{
+			"aiven_project",
+		},
+	})
 }
 
 func sweepProjects(ctx context.Context, client *aiven.Client) func(region string) error {
@@ -68,6 +76,36 @@ func sweepProjects(ctx context.Context, client *aiven.Client) func(region string
 					}
 
 					return fmt.Errorf("error destroying project %s during sweep: %s", project.Name, err)
+				}
+			}
+		}
+
+		return nil
+	}
+}
+
+func sweepBillingGroups(ctx context.Context, client *aiven.Client) func(region string) error {
+	return func(region string) error {
+		billingGroups, err := client.BillingGroup.ListAll(ctx)
+		if err != nil {
+			return fmt.Errorf("error retrieving a list of billing groups : %s", err)
+		}
+
+		for _, billingGroup := range billingGroups {
+			if strings.Contains(billingGroup.BillingGroupName, "test-acc-") {
+				if err := client.BillingGroup.Delete(ctx, billingGroup.Id); err != nil {
+					e := err.(aiven.Error)
+
+					// billing group not found
+					if e.Status == 404 {
+						continue
+					}
+
+					return fmt.Errorf(
+						"error destroying billing group %s during sweep: %s",
+						billingGroup.BillingGroupName,
+						err,
+					)
 				}
 			}
 		}
