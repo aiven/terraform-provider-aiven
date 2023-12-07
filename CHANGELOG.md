@@ -21,6 +21,7 @@ nav_order: 1
 - Add `connection_uri` field to components of all services. This field contains connection information for the
   component, and is a combination of the `host` and `port` fields
 - Add `external_postgresql` and `external_google_cloud_bigquery` service integration endpoints
+- Do not return error on `aiven_account_team_member` deletion if the member does not exist
 
 ## [4.9.3] - 2023-10-27
 
