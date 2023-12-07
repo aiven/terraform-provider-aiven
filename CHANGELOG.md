@@ -12,6 +12,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Deprecating `project_user`, `account_team` and `account_team_member` resources
+- Deprecate `account_authentication` resource. Resource creation is removed, while other operations are still possible.
 - Fix unmarshalling empty userconfig crash
 - Never skip basic auth username/password in service integrations user config options when sending them to the API
 - Add `emit_backward_heartbeats_enabled` field support in Mirrormaker replication flow
