@@ -107,6 +107,7 @@ Optional:
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet. (see [below for nested schema](#nestedblock--kafka_user_config--public_access))
 - `schema_registry` (Boolean) Enable Schema-Registry service. The default value is `false`.
 - `schema_registry_config` (Block List, Max: 1) Schema Registry configuration. (see [below for nested schema](#nestedblock--kafka_user_config--schema_registry_config))
+- `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `static_ips` (Boolean) Use static public IP addresses.
 - `tiered_storage` (Block List, Max: 1) Tiered storage configuration. (see [below for nested schema](#nestedblock--kafka_user_config--tiered_storage))
 
@@ -215,6 +216,7 @@ Optional:
 - `consumer_enable_auto_commit` (Boolean) If true the consumer's offset will be periodically committed to Kafka in the background. The default value is `true`.
 - `consumer_request_max_bytes` (Number) Maximum number of bytes in unencoded message keys and values by a single request. The default value is `67108864`.
 - `consumer_request_timeout_ms` (Number) The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached. The default value is `1000`.
+- `name_strategy_validation` (Boolean) If true, validate that given schema is registered under expected subject name by the used name strategy when producing messages. The default value is `true`.
 - `producer_acks` (String) The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to 'all' or '-1', the leader will wait for the full set of in-sync replicas to acknowledge the record. The default value is `1`.
 - `producer_compression_type` (String) Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.
 - `producer_linger_ms` (Number) Wait for up to the given delay to allow batching records together. The default value is `0`.

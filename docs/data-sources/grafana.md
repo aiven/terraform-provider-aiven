@@ -117,6 +117,7 @@ Read-Only:
 - `project_to_fork_from` (String)
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--public_access))
 - `recovery_basebackup_name` (String)
+- `service_log` (Boolean)
 - `service_to_fork_from` (String)
 - `smtp_server` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--smtp_server))
 - `static_ips` (Boolean)

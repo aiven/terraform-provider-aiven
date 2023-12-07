@@ -111,6 +111,7 @@ Optional:
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet. (see [below for nested schema](#nestedblock--grafana_user_config--public_access))
 - `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service.
+- `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
 - `smtp_server` (Block List, Max: 1) SMTP server settings. (see [below for nested schema](#nestedblock--grafana_user_config--smtp_server))
 - `static_ips` (Boolean) Use static public IP addresses.

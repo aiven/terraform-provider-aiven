@@ -103,6 +103,7 @@ Optional:
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet. (see [below for nested schema](#nestedblock--opensearch_user_config--public_access))
 - `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service.
 - `saml` (Block List, Max: 1) OpenSearch SAML configuration. (see [below for nested schema](#nestedblock--opensearch_user_config--saml))
+- `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
 - `static_ips` (Boolean) Use static public IP addresses.
 

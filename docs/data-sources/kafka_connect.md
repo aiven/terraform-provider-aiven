@@ -91,6 +91,7 @@ Read-Only:
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--private_access))
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--privatelink_access))
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--public_access))
+- `service_log` (Boolean)
 - `static_ips` (Boolean)
 
 <a id="nestedobjatt--kafka_connect_user_config--ip_filter_object"></a>
