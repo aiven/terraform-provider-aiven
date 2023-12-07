@@ -205,21 +205,19 @@ func resourceAccountTeamMemberDelete(ctx context.Context, d *schema.ResourceData
 	}
 
 	// delete account team member
-	found := false
 	for _, m := range r.Members {
 		if m.UserEmail == userEmail {
 			err = client.AccountTeamMembers.Delete(ctx, accountID, teamID, m.UserId)
 			if err != nil && !aiven.IsNotFound(err) {
 				return diag.FromErr(err)
 			}
-			found = true
 			break
 		}
 	}
 
-	if !found {
-		return diag.Errorf("user with email %q is not a part of the team %q", userEmail, teamID)
-	}
+	// we don't need to return an error if a user is not found in the members list
+	// because it means that a user was invited but not yet accepted an invitation,
+	// and we already deleted an invitation above
 
 	return nil
 }
