@@ -153,40 +153,13 @@ func ResourceAccountAuthentication() *schema.Resource {
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema: aivenAccountAuthenticationSchema,
+		Schema:             aivenAccountAuthenticationSchema,
+		DeprecationMessage: "This resource is deprecated",
 	}
 }
 
-func resourceAccountAuthenticationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
-	accountID := d.Get("account_id").(string)
-	r, err := client.AccountAuthentications.Create(
-		ctx,
-		accountID,
-		aiven.AccountAuthenticationMethodCreate{
-			AuthenticationMethodName: d.Get("name").(string),
-			AuthenticationMethodType: d.Get("type").(string),
-			AutoJoinTeamID:           d.Get("auto_join_team_id").(string),
-			SAMLCertificate:          strings.TrimSpace(d.Get("saml_certificate").(string)),
-			SAMLDigestAlgorithm:      d.Get("saml_digest_algorithm").(string),
-			SAMLEntityID:             d.Get("saml_entity_id").(string),
-			SAMLFieldMapping:         readSAMLFieldMappingFromSchema(d),
-			SAMLIdpLoginAllowed:      d.Get("saml_idp_login_allowed").(bool),
-			SAMLIdpURL:               d.Get("saml_idp_url").(string),
-			SAMLSignatureAlgorithm:   d.Get("saml_signature_algorithm").(string),
-			SAMLVariant:              d.Get("saml_variant").(string),
-		},
-	)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	d.SetId(schemautil.BuildResourceID(
-		accountID,
-		r.AuthenticationMethod.AuthenticationMethodID))
-
-	return resourceAccountAuthenticationRead(ctx, d, m)
+func resourceAccountAuthenticationCreate(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
+	return diag.Errorf("creating account authentication is unsupported")
 }
 
 func resourceAccountAuthenticationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
