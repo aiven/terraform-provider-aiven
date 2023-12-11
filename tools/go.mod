@@ -1,8 +1,9 @@
 module github.com/aiven/terraform-provider-aiven/tools
 
-go 1.19
+go 1.21
 
 require (
+	github.com/aiven/terraform-provider-aiven/tools/selproj v0.0.0-00010101000000-000000000000
 	github.com/golangci/golangci-lint v1.55.2
 	github.com/hashicorp/terraform-plugin-docs v0.16.0
 	github.com/katbyte/terrafmt v0.5.2
@@ -26,6 +27,7 @@ require (
 	github.com/OpenPeeDeeP/depguard/v2 v2.1.0 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20230217124315-7d5c6f04bbb8 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
+	github.com/aiven/aiven-go-client/v2 v2.4.0 // indirect
 	github.com/alecthomas/go-check-sumtype v0.1.3 // indirect
 	github.com/alexkohler/nakedret/v2 v2.0.2 // indirect
 	github.com/alexkohler/prealloc v1.0.0 // indirect
@@ -94,6 +96,7 @@ require (
 	github.com/hashicorp/go-checkpoint v0.5.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
+	github.com/hashicorp/go-retryablehttp v0.7.2 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/hashicorp/hc-install v0.5.2 // indirect
@@ -223,3 +226,5 @@ require (
 	mvdan.cc/lint v0.0.0-20170908181259-adc824a0674b // indirect
 	mvdan.cc/unparam v0.0.0-20230312165513-e84e2d14e3b8 // indirect
 )
+
+replace github.com/aiven/terraform-provider-aiven/tools/selproj => ./selproj

@@ -1,4 +1,4 @@
-.PHONY: build build-dev debug test test-unit test-acc test-examples lint lint-go lint-test lint-docs fmt fmt-test fmt-imports clean clean-tools clean-examples sweep generate gen-go docs
+.PHONY: build build-dev debug test test-unit test-acc test-examples lint lint-go lint-test lint-docs fmt fmt-test fmt-imports clean clean-tools clean-examples sweep generate gen-go docs ci-selproj
 
 #################################################
 # Global
@@ -29,6 +29,12 @@ TERRAFMT := $(TOOLS_BIN_DIR)/terrafmt
 
 $(TERRAFMT): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
 	cd $(TOOLS_DIR) && $(GO) build -o bin/terrafmt github.com/katbyte/terrafmt
+
+
+SELPROJ := $(TOOLS_BIN_DIR)/selproj
+
+$(SELPROJ): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
+	cd $(TOOLS_DIR) && $(GO) build -tags tools -o bin/selproj github.com/aiven/terraform-provider-aiven/tools/selproj
 
 
 # See https://github.com/hashicorp/terraform/blob/main/tools/protobuf-compile/protobuf-compile.go#L215
@@ -167,3 +173,10 @@ gen-go:
 
 docs: $(TFPLUGINDOCS)
 	$(TFPLUGINDOCS) generate
+
+#################################################
+# CI
+#################################################
+
+ci-selproj: $(SELPROJ)
+	$(SELPROJ)
