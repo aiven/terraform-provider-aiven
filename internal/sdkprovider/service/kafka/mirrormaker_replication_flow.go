@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"context"
+	"sync"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -13,6 +14,9 @@ import (
 )
 
 var (
+	// lockReplicationFlow a lock for any "write" operations.
+	// todo: remove the lock when API race is fixed
+	lockReplicationFlow      = sync.Mutex{}
 	defaultReplicationPolicy = "org.apache.kafka.connect.mirror.DefaultReplicationPolicy"
 
 	replicationPolicies = []string{
@@ -111,6 +115,9 @@ func ResourceMirrorMakerReplicationFlow() *schema.Resource {
 }
 
 func resourceMirrorMakerReplicationFlowCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	lockReplicationFlow.Lock()
+	defer lockReplicationFlow.Unlock()
+
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -193,6 +200,9 @@ func resourceMirrorMakerReplicationFlowRead(ctx context.Context, d *schema.Resou
 }
 
 func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	lockReplicationFlow.Lock()
+	defer lockReplicationFlow.Unlock()
+
 	client := m.(*aiven.Client)
 
 	project, serviceName, sourceCluster, targetCluster, err := schemautil.SplitResourceID4(d.Id())
@@ -227,6 +237,9 @@ func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.Res
 }
 
 func resourceMirrorMakerReplicationFlowDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	lockReplicationFlow.Lock()
+	defer lockReplicationFlow.Unlock()
+
 	client := m.(*aiven.Client)
 
 	project, serviceName, sourceCluster, targetCluster, err := schemautil.SplitResourceID4(d.Id())

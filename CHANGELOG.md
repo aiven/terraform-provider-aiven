@@ -8,6 +8,10 @@ nav_order: 1
 
 ## [X.Y.Z] - YYYY-MM-DD
 
+## [4.9.4] - 2023-12-13
+
+- Fix race issues with `aiven_mirrormaker_replication_flow` on create/update/delete operations   
+
 ## [4.9.3] - 2023-10-27
 
 - Deprecating `project_user`, `account_team` and `account_team_member` resources
