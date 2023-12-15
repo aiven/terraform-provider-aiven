@@ -169,6 +169,7 @@ Read-Only:
 - `email_sender_name` (String)
 - `email_sender_password` (String)
 - `email_sender_username` (String)
+- `enable_security_audit` (Boolean)
 - `http_max_content_length` (Number)
 - `http_max_header_size` (Number)
 - `http_max_initial_line_length` (Number)
