@@ -9,13 +9,26 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  acceptance_tests:
+  setup_aiven_project:
     runs-on: ubuntu-latest
+    outputs:
+      project_name: ${{ steps.selproj.outputs.project_name }}
+    steps:
+      - uses: actions/checkout@v4
 
+      - id: selproj
+        run: echo "project_name=$(make ci-selproj)" >> $GITHUB_OUTPUT
+        env:
+          AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
+          AIVEN_PROJECT_NAME_PREFIX: ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}
+
+  acceptance_tests:
+    needs: setup_aiven_project
+    runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
       fail-fast: false
@@ -70,18 +83,16 @@ jobs:
       - run: make test-acc
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
-          AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME }}
+          AIVEN_PROJECT_NAME: ${{ needs.setup_aiven_project.outputs.project_name }}
           AIVEN_ORGANIZATION_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
           AIVEN_ACCOUNT_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
           PKG: ${{ matrix.pkg }}
 
   sweep:
     if: always()
-    needs: acceptance_tests
-
+    needs: [acceptance_tests, setup_aiven_project]
     runs-on: ubuntu-latest
     steps:
-
       - uses: softprops/turnstyle@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -112,6 +123,6 @@ jobs:
           command: make sweep
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
-          AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME }}
+          AIVEN_PROJECT_NAME: ${{ needs.setup_aiven_project.outputs.project_name }}
           AIVEN_ORGANIZATION_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
           AIVEN_ACCOUNT_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
