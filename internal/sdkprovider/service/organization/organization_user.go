@@ -2,7 +2,6 @@ package organization
 
 import (
 	"context"
-	"log"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -32,6 +31,7 @@ var aivenOrganizationUserSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Computed:    true,
 		Description: "The email address of the user who sent an invitation to the user.",
+		Deprecated:  "This field is deprecated and will be removed in the next major release. ",
 	},
 	"accepted": {
 		Type:     schema.TypeBool,
@@ -39,11 +39,17 @@ var aivenOrganizationUserSchema = map[string]*schema.Schema{
 		Description: "This is a boolean flag that determines whether an invitation was accepted or not by the user. " +
 			"`false` value means that the invitation was sent to the user but not yet accepted. `true` means that" +
 			" the user accepted the invitation and now a member of an organization.",
+		Deprecated: "This field is deprecated and will be removed in the next major release. ",
 	},
 	"create_time": {
 		Type:        schema.TypeString,
 		Computed:    true,
 		Description: "Time of creation",
+	},
+	"user_id": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "The unique organization user ID",
 	},
 }
 
@@ -66,28 +72,27 @@ eliminate the member from the organization if one has accepted an invitation pre
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 		Schema:   aivenOrganizationUserSchema,
+		DeprecationMessage: `
+This resource is deprecated, please use aiven_organization_user datasource instead. 
+Invitation of organization users is not supported anymore via Terraform. Therefore 
+creation of this resource is not supported anymore. We reccoemnd to use WebUI to create
+and organization user invitation. And upon receiving an invitation, a user can accept it 
+using WebUI. Once accepted, the user will become a member of the organization and will 
+be able to access it via Terraform.
+		`,
 	}
 }
 
-func resourceOrganizationUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-	organizationID := d.Get("organization_id").(string)
-	userEmail := d.Get("user_email").(string)
-
-	err := client.OrganizationUserInvitations.Invite(ctx, organizationID, aiven.OrganizationUserInvitationAddRequest{
-		UserEmail: userEmail,
-	})
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	d.SetId(schemautil.BuildResourceID(organizationID, userEmail))
-
-	return resourceOrganizationUserRead(ctx, d, m)
+// resourceOrganizationUserCreate create is not supported anymore
+func resourceOrganizationUserCreate(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
+	return diag.Errorf("creation of organization user is not supported anymore via Terraform. " +
+		"Please use WebUI to create an organization user invitation. And upon receiving an invitation, " +
+		"a user can accept it using WebUI. Once accepted, the user will become a member of the organization " +
+		"and will be able to access it via Terraform using datasource `aiven_organization_user`")
 }
 
+// resourceOrganizationUserRead reads the properties of an Aiven Organization User and provides them to Terraform
 func resourceOrganizationUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var found bool
 	client := m.(*aiven.Client)
 
 	organizationID, userEmail, err := schemautil.SplitResourceID2(d.Id())
@@ -95,71 +100,27 @@ func resourceOrganizationUserRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	r, err := client.OrganizationUserInvitations.List(ctx, organizationID)
+	rm, err := client.OrganizationUser.List(ctx, organizationID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	for _, invite := range r.Invitations {
-		if invite.UserEmail == userEmail {
-			found = true
+	for _, user := range rm.Users {
+		userInfo := user.UserInfo
 
+		if userInfo.UserEmail == userEmail {
 			if err := d.Set("organization_id", organizationID); err != nil {
 				return diag.FromErr(err)
 			}
-			if err := d.Set("user_email", invite.UserEmail); err != nil {
+			if err := d.Set("user_email", userInfo.UserEmail); err != nil {
 				return diag.FromErr(err)
 			}
-			if err := d.Set("invited_by", invite.InvitedBy); err != nil {
+			if err := d.Set("create_time", user.JoinTime.String()); err != nil {
 				return diag.FromErr(err)
 			}
-			if err := d.Set("create_time", invite.CreateTime.String()); err != nil {
+			if err := d.Set("user_id", user.UserID); err != nil {
 				return diag.FromErr(err)
 			}
-
-			// if a user is in the invitations list, it means invitation was sent but not yet accepted
-			if err := d.Set("accepted", false); err != nil {
-				return diag.FromErr(err)
-			}
-		}
-	}
-
-	if !found {
-		rm, err := client.OrganizationUser.List(ctx, organizationID)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-
-		for _, user := range rm.Users {
-			userInfo := user.UserInfo
-
-			if userInfo.UserEmail == userEmail {
-				found = true
-
-				if err := d.Set("organization_id", organizationID); err != nil {
-					return diag.FromErr(err)
-				}
-				if err := d.Set("user_email", userInfo.UserEmail); err != nil {
-					return diag.FromErr(err)
-				}
-				if err := d.Set("create_time", user.JoinTime.String()); err != nil {
-					return diag.FromErr(err)
-				}
-
-				// when a user accepts an invitation, it will appear in the member's list
-				// and disappear from invitations list
-				if err := d.Set("accepted", true); err != nil {
-					return diag.FromErr(err)
-				}
-			}
-		}
-	}
-
-	if !found {
-		log.Printf("[WARNING] cannot find user invitation for %s", d.Id())
-		if !d.Get("accepted").(bool) {
-			log.Printf("[DEBUG] resending organization user invitation ")
-			return resourceOrganizationUserCreate(ctx, d, m)
 		}
 	}
 

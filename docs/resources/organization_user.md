@@ -37,10 +37,11 @@ eliminate the member from the organization if one has accepted an invitation pre
 
 ### Read-Only
 
-- `accepted` (Boolean) This is a boolean flag that determines whether an invitation was accepted or not by the user. `false` value means that the invitation was sent to the user but not yet accepted. `true` means that the user accepted the invitation and now a member of an organization.
+- `accepted` (Boolean, Deprecated) This is a boolean flag that determines whether an invitation was accepted or not by the user. `false` value means that the invitation was sent to the user but not yet accepted. `true` means that the user accepted the invitation and now a member of an organization.
 - `create_time` (String) Time of creation
 - `id` (String) The ID of this resource.
-- `invited_by` (String) The email address of the user who sent an invitation to the user.
+- `invited_by` (String, Deprecated) The email address of the user who sent an invitation to the user.
+- `user_id` (String) The unique organization user ID
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

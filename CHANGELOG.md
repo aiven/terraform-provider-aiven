@@ -22,6 +22,7 @@ nav_order: 1
   component, and is a combination of the `host` and `port` fields
 - Add `external_postgresql` and `external_google_cloud_bigquery` service integration endpoints
 - Do not return error on `aiven_account_team_member` deletion if the member does not exist
+- Deprecating `aiven_organization_user` resource and update data source logic that will be used instead of the corresponding resource
 
 ## [4.9.4] - 2023-12-13
 
