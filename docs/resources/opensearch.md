@@ -177,6 +177,7 @@ Optional:
 - `email_sender_name` (String) This should be identical to the Sender name defined in Opensearch dashboards.
 - `email_sender_password` (String, Sensitive) Sender password for Opensearch alerts to authenticate with SMTP server.
 - `email_sender_username` (String) Sender username for Opensearch alerts.
+- `enable_security_audit` (Boolean) Enable/Disable security audit. The default value is `false`.
 - `http_max_content_length` (Number) Maximum content length for HTTP requests to the OpenSearch HTTP API, in bytes.
 - `http_max_header_size` (Number) The max size of allowed headers, in bytes.
 - `http_max_initial_line_length` (Number) The max length of an HTTP URL, in bytes.

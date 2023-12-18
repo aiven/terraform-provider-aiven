@@ -6012,6 +6012,12 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
+				"enable_security_audit": {
+					Default:     false,
+					Description: "Enable/Disable security audit. The default value is `false`.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
 				"http_max_content_length": {
 					Description: "Maximum content length for HTTP requests to the OpenSearch HTTP API, in bytes.",
 					Optional:    true,
@@ -6527,6 +6533,12 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Description: "Sender username for Opensearch alerts.",
 					Optional:    true,
 					Type:        schema.TypeString,
+				},
+				"enable_security_audit": {
+					Default:     false,
+					Description: "Enable/Disable security audit. The default value is `false`.",
+					Optional:    true,
+					Type:        schema.TypeBool,
 				},
 				"http_max_content_length": {
 					Description: "Maximum content length for HTTP requests to the OpenSearch HTTP API, in bytes.",
