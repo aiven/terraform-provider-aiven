@@ -29,7 +29,7 @@ func selectProject(ctx context.Context, client AivenClient, prefix string) (stri
 		}
 
 		if len(services) == 0 {
-			return project.Name, nil
+			return strings.TrimPrefix(project.Name, prefix), nil
 		}
 	}
 

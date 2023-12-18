@@ -9,14 +9,23 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: false
+  group: ci-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   sweep:
     runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 2
+      matrix:
+        aiven_project_name_suffix: [
+          '',
+          '-2',
+          '-3',
+          '-4',
+          '-5',
+        ]
     steps:
-
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -32,4 +41,4 @@ jobs:
           command: make sweep
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
-          AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME }}
+          AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}${{ matrix.aiven_project_name_suffix }}
