@@ -39,6 +39,11 @@ var aivenOrganizationUserGroupSchema = map[string]*schema.Schema{
 		Computed:    true,
 		Description: "Time of last update",
 	},
+	"group_id": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "The unique organization user group ID",
+	},
 }
 
 func ResourceOrganizationUserGroup() *schema.Resource {
@@ -101,6 +106,9 @@ func resourceOrganizationUserGroupRead(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 	if err := d.Set("update_time", r.UpdateTime.String()); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("group_id", r.UserGroupID); err != nil {
 		return diag.FromErr(err)
 	}
 

@@ -118,7 +118,7 @@ lint-test: $(TERRAFMT)
 
 
 lint-docs: $(TFPLUGINDOCS)
-	$(TFPLUGINDOCS) validate
+	PROVIDER_AIVEN_ENABLE_BETA=true $(TFPLUGINDOCS) validate
 
 #################################################
 # Format
@@ -172,7 +172,7 @@ gen-go:
 
 
 docs: $(TFPLUGINDOCS)
-	$(TFPLUGINDOCS) generate
+	PROVIDER_AIVEN_ENABLE_BETA=true $(TFPLUGINDOCS) generate
 
 #################################################
 # CI

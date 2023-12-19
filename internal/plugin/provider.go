@@ -108,9 +108,19 @@ func (p *AivenProvider) Configure(
 
 // Resources returns the resources supported by this provider.
 func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
-	return []func() resource.Resource{
+	isBeta := os.Getenv("PROVIDER_AIVEN_ENABLE_BETA") != ""
+
+	// List of resources that are currently available in the provider.
+	resources := []func() resource.Resource{
 		organization.NewOrganizationResource,
 	}
+
+	// Add to a list of resources that are currently in beta.
+	if isBeta {
+		resources = append(resources, organization.NewOrganizationUserGroupMembersResource)
+	}
+
+	return resources
 }
 
 // DataSources returns the data sources supported by this provider.
