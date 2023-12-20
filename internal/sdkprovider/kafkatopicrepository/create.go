@@ -2,12 +2,18 @@ package kafkatopicrepository
 
 import (
 	"context"
+	"regexp"
+	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 )
 
-// Create creates topic.
-// First checks if topic does not exist for the safety
+// reInsufficientBrokers the error message received when kafka is not ready yet
+var reInsufficientBrokers = regexp.MustCompile(`Cluster only has [0-9]+ broker`)
+
+// Create creates a topic.
+// First checks if the topic does not exist for the safety
 // Then calls creates topic.
 func (rep *repository) Create(ctx context.Context, project, service string, req aiven.CreateKafkaTopicRequest) error {
 	// aiven.KafkaTopics.Create() function may return 501 on create
@@ -23,10 +29,26 @@ func (rep *repository) Create(ctx context.Context, project, service string, req 
 		return err
 	}
 
-	// 501 is retried in the client, so it can return 429
-	err = rep.client.Create(ctx, project, service, req)
-	if aiven.IsAlreadyExists(err) {
-		return nil
-	}
+	// When kafka is not ready, it throws reInsufficientBrokers.
+	// Unfortunately, the error might be valid, so it will take a minute to fail.
+	err = retry.RetryContext(ctx, time.Minute, func() *retry.RetryError {
+		err = rep.client.Create(ctx, project, service, req)
+		if err == nil {
+			return nil
+		}
+
+		// The 501 is retried in the client, so it can return 409
+		if aiven.IsAlreadyExists(err) {
+			return nil
+		}
+
+		// We must retry this one
+		if reInsufficientBrokers.MatchString(err.Error()) {
+			return nil
+		}
+
+		// Other errors are non-retryable
+		return retry.NonRetryableError(err)
+	})
 	return err
 }

@@ -68,3 +68,8 @@ func TestCreateRecreateMissing(t *testing.T) {
 	assert.True(t, rep.seenServices["a/b"])
 	assert.True(t, rep.seenTopics["a/b/c"]) // cached again
 }
+
+func TestReInsufficientBrokers(t *testing.T) {
+	assert.True(t, reInsufficientBrokers.MatchString(`{"errors":[{"message":"Cluster only has 2 broker(s), cannot set replication factor to 3","status":409}`))
+	assert.False(t, reInsufficientBrokers.MatchString(`Cluster only has 2 ice creams`))
+}
