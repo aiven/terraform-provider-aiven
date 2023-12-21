@@ -252,9 +252,11 @@ func ResourceKafkaTopicStateUpgrade(
 	}
 
 	err := typeupgrader.Map(config, map[string]string{
-		"message_downconversion_enable": "bool",
-		"min_cleanable_dirty_ratio":     "float",
-		"preallocate":                   "bool"})
+		"message_downconversion_enable":  "bool",
+		"min_cleanable_dirty_ratio":      "float",
+		"preallocate":                    "bool",
+		"unclean_leader_election_enable": "bool",
+	})
 	if err != nil {
 		return rawState, err
 	}
