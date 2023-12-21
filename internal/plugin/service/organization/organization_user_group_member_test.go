@@ -5,8 +5,9 @@ import (
 	"os"
 	"testing"
 
-	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
 func TestAccOrganizationUserGroupMemeber(t *testing.T) {
