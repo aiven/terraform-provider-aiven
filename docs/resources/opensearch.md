@@ -150,10 +150,10 @@ Required:
 - `client_id` (String) The ID of the OpenID Connect client configured in your IdP. Required.
 - `client_secret` (String) The client secret of the OpenID Connect client configured in your IdP. Required.
 - `connect_url` (String) The URL of your IdP where the Security plugin can find the OpenID Connect metadata/configuration settings.
+- `enabled` (Boolean) Enables or disables OpenID Connect authentication for OpenSearch. When enabled, users can authenticate using OpenID Connect with an Identity Provider. The default value is `true`.
 
 Optional:
 
-- `enabled` (Boolean) Enables or disables OpenID Connect authentication for OpenSearch. When enabled, users can authenticate using OpenID Connect with an Identity Provider. The default value is `true`.
 - `header` (String) HTTP header name of the JWT token. Optional. Default is Authorization. The default value is `Authorization`.
 - `jwt_header` (String) The HTTP header that stores the token. Typically the Authorization header with the Bearer schema: Authorization: Bearer <token>. Optional. Default is Authorization.
 - `jwt_url_parameter` (String) If the token is not transmitted in the HTTP header, but as an URL parameter, define the name of the parameter here. Optional.

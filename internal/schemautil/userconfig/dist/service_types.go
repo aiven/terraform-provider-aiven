@@ -5544,9 +5544,8 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"enabled": {
-					Default:     true,
 					Description: "Enables or disables OpenID Connect authentication for OpenSearch. When enabled, users can authenticate using OpenID Connect with an Identity Provider. The default value is `true`.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeBool,
 				},
 				"header": {
@@ -5610,9 +5609,8 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"enabled": {
-					Default:     true,
 					Description: "Enables or disables OpenID Connect authentication for OpenSearch. When enabled, users can authenticate using OpenID Connect with an Identity Provider. The default value is `true`.",
-					Optional:    true,
+					Required:    true,
 					Type:        schema.TypeBool,
 				},
 				"header": {
