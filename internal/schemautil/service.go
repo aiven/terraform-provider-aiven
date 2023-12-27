@@ -67,6 +67,14 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).",
+			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+				// This is a workaround for a bug when migrating from V3 to V4 Aiven Provider.
+				// The bug is that the cloud_name is not set in the state file, but it is set
+				// on the API side. This causes a diff during plan, and it will not disappear
+				// even after consequent applies. This is because the state is not updated
+				// with the cloud_name value.
+				return new == ""
+			},
 		},
 		"plan": {
 			Type:        schema.TypeString,
