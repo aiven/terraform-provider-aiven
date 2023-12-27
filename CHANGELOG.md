@@ -11,6 +11,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.10.0] - 2023-12-27
+
 - Deprecating `project_user`, `account_team` and `account_team_member` resources
 - Deprecate `account_authentication` resource. Resource creation is removed, while other operations are still possible.
 - Fix unmarshalling empty userconfig crash
