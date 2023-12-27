@@ -13,21 +13,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  setup_aiven_project:
+  setup_aiven_project_suffix:
     runs-on: ubuntu-latest
     outputs:
-      project_name: ${{ steps.selproj.outputs.project_name }}
+      project_name_suffix: ${{ steps.selproj.outputs.project_name_suffix }}
     steps:
       - uses: actions/checkout@v4
 
       - id: selproj
-        run: echo "project_name=$(make ci-selproj)" >> $GITHUB_OUTPUT
+        run: echo "project_name_suffix=$(make -s ci-selproj | tr -d '\n')" >> $GITHUB_OUTPUT
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
           AIVEN_PROJECT_NAME_PREFIX: ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}
 
   examples_tests:
-    needs: setup_aiven_project
+    needs: setup_aiven_project_suffix
     runs-on: ubuntu-latest
     steps:
       - uses: softprops/turnstyle@v1
@@ -55,4 +55,5 @@ jobs:
       - run: make test-examples
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
-          AIVEN_PROJECT_NAME: ${{ needs.setup_aiven_project.outputs.project_name }}
+          AIVEN_PROJECT_NAME: >-
+            ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}${{ needs.setup_aiven_project_suffix.outputs.project_name_suffix }}

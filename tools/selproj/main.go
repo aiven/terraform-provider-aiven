@@ -34,5 +34,5 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Print(selectedProject)
+	fmt.Println(selectedProject)
 }

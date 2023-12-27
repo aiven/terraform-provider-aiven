@@ -58,6 +58,7 @@ resource "aiven_opensearch" "os1" {
 - `service_integrations` (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
 - `static_ips` (Set of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 - `tag` (Block Set) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedblock--tag))
+- `tech_emails` (Block Set) Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability. (see [below for nested schema](#nestedblock--tech_emails))
 - `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -150,10 +151,10 @@ Required:
 - `client_id` (String) The ID of the OpenID Connect client configured in your IdP. Required.
 - `client_secret` (String) The client secret of the OpenID Connect client configured in your IdP. Required.
 - `connect_url` (String) The URL of your IdP where the Security plugin can find the OpenID Connect metadata/configuration settings.
+- `enabled` (Boolean) Enables or disables OpenID Connect authentication for OpenSearch. When enabled, users can authenticate using OpenID Connect with an Identity Provider. The default value is `true`.
 
 Optional:
 
-- `enabled` (Boolean) Enables or disables OpenID Connect authentication for OpenSearch. When enabled, users can authenticate using OpenID Connect with an Identity Provider. The default value is `true`.
 - `header` (String) HTTP header name of the JWT token. Optional. Default is Authorization. The default value is `Authorization`.
 - `jwt_header` (String) The HTTP header that stores the token. Typically the Authorization header with the Bearer schema: Authorization: Bearer <token>. Optional. Default is Authorization.
 - `jwt_url_parameter` (String) If the token is not transmitted in the HTTP header, but as an URL parameter, define the name of the parameter here. Optional.
@@ -322,6 +323,14 @@ Required:
 
 - `key` (String) Service tag key
 - `value` (String) Service tag value
+
+
+<a id="nestedblock--tech_emails"></a>
+### Nested Schema for `tech_emails`
+
+Required:
+
+- `email` (String) An email address to contact for technical issues
 
 
 <a id="nestedblock--timeouts"></a>

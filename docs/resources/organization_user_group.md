@@ -28,6 +28,7 @@ The Organization User Group resource allows the creation and management of an Ai
 ### Read-Only
 
 - `create_time` (String) Time of creation
+- `group_id` (String) The unique organization user group ID
 - `id` (String) The ID of this resource.
 - `update_time` (String) Time of last update
 

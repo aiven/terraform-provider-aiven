@@ -52,7 +52,7 @@ func TestSelectProject_Basic(t *testing.T) {
 
 	assert.NoError(t, err, "selectProject should not return an error")
 	assert.Equal(
-		t, "test-project-2", projectName, "selectProject should return the correct project name",
+		t, "-project-2", projectName, "selectProject should return the correct project name",
 	)
 }
 

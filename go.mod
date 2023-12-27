@@ -3,7 +3,7 @@ module github.com/aiven/terraform-provider-aiven
 go 1.21
 
 require (
-	github.com/aiven/aiven-go-client/v2 v2.4.0
+	github.com/aiven/aiven-go-client/v2 v2.5.0
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/dave/jennifer v1.7.0
 	github.com/docker/go-units v0.5.0
@@ -46,7 +46,7 @@ require (
 	cloud.google.com/go v0.110.8 // indirect
 	cloud.google.com/go/storage v1.30.1 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/aiven/go-api-schemas v1.49.0
+	github.com/aiven/go-api-schemas v1.51.0
 	github.com/aws/aws-sdk-go v1.44.122 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -95,7 +95,7 @@ require (
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/zclconf/go-cty v1.14.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/crypto v0.16.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.18.0 // indirect
 	golang.org/x/oauth2 v0.13.0 // indirect

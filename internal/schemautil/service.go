@@ -49,6 +49,16 @@ const (
 	ServiceTypeClickhouse       = "clickhouse"
 )
 
+var TechEmailsResourceSchema = &schema.Resource{
+	Schema: map[string]*schema.Schema{
+		"email": {
+			Type:        schema.TypeString,
+			Description: "An email address to contact for technical issues",
+			Required:    true,
+		},
+	},
+}
+
 func ServiceCommonSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"project": CommonSchemaProjectReference,
@@ -57,6 +67,14 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).",
+			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+				// This is a workaround for a bug when migrating from V3 to V4 Aiven Provider.
+				// The bug is that the cloud_name is not set in the state file, but it is set
+				// on the API side. This causes a diff during plan, and it will not disappear
+				// even after consequent applies. This is because the state is not updated
+				// with the cloud_name value.
+				return new == ""
+			},
 		},
 		"plan": {
 			Type:        schema.TypeString,
@@ -267,6 +285,12 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 				},
 			},
 		},
+		"tech_emails": {
+			Type:        schema.TypeSet,
+			Elem:        TechEmailsResourceSchema,
+			Optional:    true,
+			Description: "Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability.",
+		},
 	}
 }
 
@@ -373,6 +397,10 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.Errorf("unable to set tag's in schema: %s", err)
 	}
 
+	if err := d.Set("tech_emails", getTechnicalEmailsForTerraform(d, "tech_emails", s)); err != nil {
+		return diag.Errorf("unable to set tech_emails in schema: %s", err)
+	}
+
 	return nil
 }
 
@@ -429,6 +457,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 			DiskSpaceMB:           diskSpace,
 			UserConfig:            cuc,
 			StaticIPs:             FlattenToString(d.Get("static_ips").(*schema.Set).List()),
+			TechnicalEmails:       getContactEmailListForAPI(d, "tech_emails"),
 		},
 	)
 	if err != nil {
@@ -517,6 +546,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 			DiskSpaceMB:           diskSpace,
 			Karapace:              karapace,
 			UserConfig:            cuc,
+			TechnicalEmails:       getContactEmailListForAPI(d, "tech_emails"),
 		},
 	); err != nil {
 		return diag.Errorf("error updating (%s) service: %s", serviceName, err)
@@ -570,6 +600,20 @@ func getDefaultDiskSpaceIfNotSet(ctx context.Context, d *schema.ResourceData, cl
 	}
 
 	return diskSpace, nil
+}
+
+func getTechnicalEmailsForTerraform(d *schema.ResourceData, field string, s *aiven.Service) *schema.Set {
+	_, ok := d.GetOk(field)
+	if !ok && len(s.TechnicalEmails) == 0 {
+		return nil
+	}
+
+	techEmails := make([]interface{}, len(s.TechnicalEmails))
+	for i, e := range s.TechnicalEmails {
+		techEmails[i] = map[string]interface{}{"email": e.Email}
+	}
+
+	return schema.NewSet(schema.HashResource(TechEmailsResourceSchema), techEmails)
 }
 
 func ResourceServiceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -654,6 +698,10 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		return err
 	}
 	if err := d.Set("project", project); err != nil {
+		return err
+	}
+
+	if err := d.Set("tech_emails", getTechnicalEmailsForTerraform(d, "tech_emails", s)); err != nil {
 		return err
 	}
 
@@ -863,4 +911,15 @@ func DatasourceServiceRead(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	return diag.Errorf("common %s/%s not found", projectName, serviceName)
+}
+
+func getContactEmailListForAPI(d *schema.ResourceData, field string) *[]aiven.ContactEmail {
+	results := make([]aiven.ContactEmail, 0)
+	valuesInterface, ok := d.GetOk(field)
+	if ok {
+		for _, emailInterface := range valuesInterface.(*schema.Set).List() {
+			results = append(results, aiven.ContactEmail{Email: emailInterface.(map[string]interface{})["email"].(string)})
+		}
+	}
+	return &results
 }

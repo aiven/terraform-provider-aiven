@@ -1,6 +1,6 @@
 # selproj
 
-A tool to select an empty project from a list of projects using a prefix.
+A tool to select an empty project's suffix from a list of projects using a prefix.
 
 ## Usage
 
@@ -17,7 +17,7 @@ The tool requires the following environment variables to be set:
 
 ```text
 $ AIVEN_TOKEN=... AIVEN_PROJECT_NAME_PREFIX=test go run -tags tools .
-test-project-2
+-project-2
 ```
 
 ## Testing
