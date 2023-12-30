@@ -118,6 +118,7 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 	// Add to a list of resources that are currently in beta.
 	if isBeta {
 		resources = append(resources, organization.NewOrganizationUserGroupMembersResource)
+		resources = append(resources, organization.NewOrganizationGroupProjectResource)
 	}
 
 	return resources

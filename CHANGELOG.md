@@ -11,6 +11,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+
+- Add support for `aiven_organization_group_project`. Please note that this resource is in the beta stage, and to use it, you would need to set the environment variable PROVIDER_AIVEN_ENABLE_BETA to a non-zero value.
 - Deprecating `aiven_organization_user` resource and update data source logic that will be used instead of the corresponding resource
 
 ## [4.10.0] - 2023-12-27
