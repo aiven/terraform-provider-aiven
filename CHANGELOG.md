@@ -11,6 +11,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.11.1] - 2024-01-03
+
 - Fix insufficient brokers error when create kafka topic
 
 ## [4.11.0] - 2024-01-02
