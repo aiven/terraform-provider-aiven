@@ -44,7 +44,7 @@ func (rep *repository) Create(ctx context.Context, project, service string, req 
 
 		// We must retry this one
 		if reInsufficientBrokers.MatchString(err.Error()) {
-			return nil
+			return retry.RetryableError(err)
 		}
 
 		// Other errors are non-retryable
