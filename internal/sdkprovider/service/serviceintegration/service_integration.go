@@ -14,10 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/integration"
 )
 
 const serviceIntegrationEndpointRegExp = "^[a-zA-Z0-9_-]*\\/{1}[a-zA-Z0-9_-]*$"
@@ -100,15 +98,18 @@ var aivenServiceIntegrationSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Type:        schema.TypeString,
 	},
-	"logs_user_config":                            dist.IntegrationTypeLogs(),
-	"kafka_mirrormaker_user_config":               dist.IntegrationTypeKafkaMirrormaker(),
-	"kafka_connect_user_config":                   dist.IntegrationTypeKafkaConnect(),
-	"kafka_logs_user_config":                      dist.IntegrationTypeKafkaLogs(),
-	"metrics_user_config":                         dist.IntegrationTypeMetrics(),
-	"datadog_user_config":                         dist.IntegrationTypeDatadog(),
-	"clickhouse_kafka_user_config":                dist.IntegrationTypeClickhouseKafka(),
-	"clickhouse_postgresql_user_config":           dist.IntegrationTypeClickhousePostgresql(),
-	"external_aws_cloudwatch_metrics_user_config": dist.IntegrationTypeExternalAwsCloudwatchMetrics(),
+	"logs_user_config":                            integration.GetUserConfig(schemautil.ServiceIntegrationTypeLogs),
+	"kafka_mirrormaker_user_config":               integration.GetUserConfig(schemautil.ServiceIntegrationTypeKafkaMirrormaker),
+	"kafka_connect_user_config":                   integration.GetUserConfig(schemautil.ServiceIntegrationTypeKafkaConnect),
+	"kafka_logs_user_config":                      integration.GetUserConfig(schemautil.ServiceIntegrationTypeKafkaLogs),
+	"metrics_user_config":                         integration.GetUserConfig(schemautil.ServiceIntegrationTypeMetrics),
+	"datadog_user_config":                         integration.GetUserConfig(schemautil.ServiceIntegrationTypeDatadog),
+	"clickhouse_kafka_user_config":                integration.GetUserConfig(schemautil.ServiceIntegrationTypeClickhouseKafka),
+	"clickhouse_postgresql_user_config":           integration.GetUserConfig(schemautil.ServiceIntegrationTypeClickhousePG),
+	"external_aws_cloudwatch_metrics_user_config": integration.GetUserConfig(schemautil.ServiceIntegrationTypeExternalLogsAWS),
+	"prometheus_user_config":                      integration.GetUserConfig(schemautil.ServiceIntegrationTypePrometheus),
+	"external_opensearch_logs_user_config":        integration.GetUserConfig(schemautil.ServiceIntegrationTypeExternalLogsOS),
+	"external_elasticsearch_logs_user_config":     integration.GetUserConfig(schemautil.ServiceIntegrationTypeExternalLogsES),
 }
 
 func ResourceServiceIntegration() *schema.Resource {
@@ -345,7 +346,7 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 
 func resourceServiceIntegrationUserConfigFromSchemaToAPI(d *schema.ResourceData) (map[string]interface{}, error) {
 	integrationType := d.Get("integration_type").(string)
-	return apiconvert.ToAPI(userconfig.IntegrationTypes, integrationType, d)
+	return schemautil.ExpandServiceIntegration(integrationType, d)
 }
 
 func resourceServiceIntegrationCopyAPIResponseToTerraform(
@@ -383,7 +384,7 @@ func resourceServiceIntegrationCopyAPIResponseToTerraform(
 		return err
 	}
 
-	userConfig, err := apiconvert.FromAPI(userconfig.IntegrationTypes, integrationType, integration.UserConfig)
+	userConfig, err := schemautil.FlattenServiceIntegration(integrationType, d, integration.UserConfig)
 	if err != nil {
 		return err
 	}
