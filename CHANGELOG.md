@@ -11,13 +11,15 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.12.0] - 2024-01-03
+
 - Fix insufficient brokers error when create kafka topic
+- Tiered storage support for `aiven_kafka_topic` resource
 
 ## [4.11.0] - 2024-01-02
 
 - Add support for `aiven_organization_group_project`. Please note that this resource is in the beta stage, and to use it, you would need to set the environment variable PROVIDER_AIVEN_ENABLE_BETA to a non-zero value.
 - Deprecating `aiven_organization_user` resource and update data source logic that will be used instead of the corresponding resource
-- Tiered storage support for `aiven_kafka_topic` resource
 
 ## [4.10.0] - 2023-12-27
 
