@@ -61,33 +61,33 @@ resource "aiven_kafka_topic" "mytesttopic" {
 
 Optional:
 
-- `cleanup_policy` (String) cleanup_policy value
-- `compression_type` (String) compression_type value
-- `delete_retention_ms` (String) delete_retention_ms value
-- `file_delete_delay_ms` (String) file_delete_delay_ms value
-- `flush_messages` (String) flush_messages value
-- `flush_ms` (String) flush_ms value
-- `index_interval_bytes` (String) index_interval_bytes value
-- `local_retention_bytes` (String) local_retention_bytes value
-- `local_retention_ms` (String) local_retention_ms value
-- `max_compaction_lag_ms` (String) max_compaction_lag_ms value
-- `max_message_bytes` (String) max_message_bytes value
-- `message_downconversion_enable` (Boolean) message_downconversion_enable value
-- `message_format_version` (String) message_format_version value
-- `message_timestamp_difference_max_ms` (String) message_timestamp_difference_max_ms value
-- `message_timestamp_type` (String) message_timestamp_type value
-- `min_cleanable_dirty_ratio` (Number) min_cleanable_dirty_ratio value
-- `min_compaction_lag_ms` (String) min_compaction_lag_ms value
-- `min_insync_replicas` (String) min_insync_replicas value
+- `cleanup_policy` (String) cleanup.policy value
+- `compression_type` (String) compression.type value
+- `delete_retention_ms` (String) delete.retention.ms value
+- `file_delete_delay_ms` (String) file.delete.delay.ms value
+- `flush_messages` (String) flush.messages value
+- `flush_ms` (String) flush.ms value
+- `index_interval_bytes` (String) index.interval.bytes value
+- `local_retention_bytes` (String) local.retention.bytes value
+- `local_retention_ms` (String) local.retention.ms value
+- `max_compaction_lag_ms` (String) max.compaction.lag.ms value
+- `max_message_bytes` (String) max.message.bytes value
+- `message_downconversion_enable` (Boolean) message.downconversion.enable value
+- `message_format_version` (String) message.format.version value
+- `message_timestamp_difference_max_ms` (String) message.timestamp.difference.max.ms value
+- `message_timestamp_type` (String) message.timestamp.type value
+- `min_cleanable_dirty_ratio` (Number) min.cleanable.dirty.ratio value
+- `min_compaction_lag_ms` (String) min.compaction.lag.ms value
+- `min_insync_replicas` (String) min.insync.replicas value
 - `preallocate` (Boolean) preallocate value
-- `remote_storage_enable` (Boolean) remote_storage_enable value
-- `retention_bytes` (String) retention_bytes value
-- `retention_ms` (String) retention_ms value
-- `segment_bytes` (String) segment_bytes value
-- `segment_index_bytes` (String) segment_index_bytes value
-- `segment_jitter_ms` (String) segment_jitter_ms value
-- `segment_ms` (String) segment_ms value
-- `unclean_leader_election_enable` (Boolean, Deprecated) unclean_leader_election_enable value; This field is deprecated and no longer functional.
+- `remote_storage_enable` (Boolean) remote.storage.enable value
+- `retention_bytes` (String) retention.bytes value
+- `retention_ms` (String) retention.ms value
+- `segment_bytes` (String) segment.bytes value
+- `segment_index_bytes` (String) segment.index.bytes value
+- `segment_jitter_ms` (String) segment.jitter.ms value
+- `segment_ms` (String) segment.ms value
+- `unclean_leader_election_enable` (Boolean, Deprecated) unclean.leader.election.enable value; This field is deprecated and no longer functional.
 
 
 <a id="nestedblock--tag"></a>
