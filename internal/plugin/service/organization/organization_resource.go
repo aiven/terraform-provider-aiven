@@ -211,10 +211,9 @@ func (r *organizationResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	_, err = r.client.Accounts.Update(ctx, normalizedID, aiven.Account{
+	if _, err = r.client.Accounts.Update(ctx, normalizedID, aiven.Account{
 		Name: plan.Name.ValueString(),
-	})
-	if err != nil {
+	}); err != nil {
 		resp.Diagnostics = util.DiagErrorUpdatingResource(resp.Diagnostics, r, err)
 
 		return
@@ -247,8 +246,7 @@ func (r *organizationResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	err = r.client.Accounts.Delete(ctx, normalizedID)
-	if err != nil {
+	if err = r.client.Accounts.Delete(ctx, normalizedID); err != nil {
 		resp.Diagnostics = util.DiagErrorDeletingResource(resp.Diagnostics, r, err)
 
 		return

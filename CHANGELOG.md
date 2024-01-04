@@ -10,6 +10,7 @@ nav_order: 1
 <!-- [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+- Add organization application users support
 
 ## [4.12.1] - 2024-01-05
 

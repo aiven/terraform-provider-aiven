@@ -6,10 +6,16 @@ import (
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
@@ -21,12 +27,12 @@ var (
 	_ util.TypeNameable = &organizationGroupProjectResource{}
 )
 
-// NewOrganizationGroupProjectResource is a constructor for the organization resource.
+// NewOrganizationGroupProjectResource is a constructor for the organization group project relation resource.
 func NewOrganizationGroupProjectResource() resource.Resource {
 	return &organizationGroupProjectResource{}
 }
 
-// organizationGroupUserResource is the organization resource implementation.
+// organizationGroupUserResource is the organization group project relation resource implementation.
 type organizationGroupProjectResource struct {
 	// client is the instance of the Aiven client to use.
 	client *aiven.Client
@@ -35,19 +41,21 @@ type organizationGroupProjectResource struct {
 	typeName string
 }
 
-// organizationGroupProjectResourceModel is the model for the organization resource.
+// organizationGroupProjectResourceModel is the model for the organization group project relation resource.
 type organizationGroupProjectResourceModel struct {
-	// Name is the name of the organization.
+	// ID is the compound identifier of the organization group project relation.
+	ID types.String `tfsdk:"id"`
+	// Project is the name of the project.
 	Project types.String `tfsdk:"project"`
-	// OrganizationID is the identifier of the organization group.
-	OrganizationGroupID types.String `tfsdk:"group_id"`
+	// GroupID is the identifier of the organization group.
+	GroupID types.String `tfsdk:"group_id"`
 	// Role is the role of the organization group project relation.
 	Role types.String `tfsdk:"role"`
 	// Timeouts is the configuration for resource-specific timeouts.
 	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
-// Metadata returns the metadata for the organization resource.
+// Metadata returns the metadata for the organization group project relation resource.
 func (r *organizationGroupProjectResource) Metadata(
 	_ context.Context,
 	req resource.MetadataRequest,
@@ -69,19 +77,40 @@ func (r *organizationGroupProjectResource) Schema(
 	_ resource.SchemaRequest,
 	resp *resource.SchemaResponse) {
 	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
-		Description: "Creates and manages an organization group project relations in Aiven.",
+		Description: util.BetaDescription(
+			"Creates and manages an organization group project relations in Aiven.",
+		),
 		Attributes: map[string]schema.Attribute{
-			"group_id": schema.StringAttribute{
-				Description: "Organization group identifier of the organization group project relation.",
-				Required:    true,
+			"id": schema.StringAttribute{
+				Description: "Compound identifier of the organization group project relation.",
+				Computed:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"project": schema.StringAttribute{
 				Description: "Tenant identifier of the organization.",
 				Required:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"group_id": schema.StringAttribute{
+				Description: "Organization group identifier of the organization group project relation.",
+				Required:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"role": schema.StringAttribute{
 				Description: "Role of the organization group project relation.",
 				Required:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf("admin", "developer", "operator", "read_only"),
+				},
 			},
 		},
 	})
@@ -107,60 +136,68 @@ func (r *organizationGroupProjectResource) Configure(
 	r.client = client
 }
 
-// CustomizeDiff helps to customize the diff for the resource.
+// fillModel fills the organization group project relation model from the Aiven API.
 func (r *organizationGroupProjectResource) fillModel(
 	ctx context.Context,
-	m *organizationGroupProjectResourceModel,
+	model *organizationGroupProjectResourceModel,
 ) error {
-	list, err := r.client.ProjectOrganization.List(
-		ctx,
-		m.Project.ValueString())
+	list, err := r.client.ProjectOrganization.List(ctx, model.Project.ValueString())
 	if err != nil {
 		return err
 	}
 
-	var isFound bool
-	for _, project := range list {
-		if project.OrganizationGroupID == m.OrganizationGroupID.ValueString() {
-			isFound = true
-			m.OrganizationGroupID = types.StringValue(project.OrganizationGroupID)
-			m.Role = types.StringValue(project.Role)
+	var group *aiven.ProjectUserGroup
+
+	for _, g := range list {
+		if g.OrganizationGroupID == model.GroupID.ValueString() {
+			group = g
+			break
 		}
 	}
 
-	if !isFound {
-		return fmt.Errorf("organization group project relation not found, organization group id: %s, project: %s",
-			m.OrganizationGroupID.ValueString(), m.Project.ValueString())
+	if group == nil {
+		return fmt.Errorf(
+			errmsg.AivenResourceNotFound,
+			r.TypeName(),
+			util.ComposeID(model.Project.ValueString(), model.GroupID.ValueString()),
+		)
 	}
 
-	// There is not API endpoint to get the permission of the organization group project relation.
+	model.GroupID = types.StringValue(group.OrganizationGroupID)
+
+	model.Role = types.StringValue(group.Role)
+
+	// There is no API endpoint to get the permissions of the organization group project relation.
 
 	return nil
 }
 
-// Diff helps to differentiate desired from the existing state of the resource.
+// Create creates an organization group project relation resource.
 func (r *organizationGroupProjectResource) Create(
 	ctx context.Context,
 	req resource.CreateRequest,
 	resp *resource.CreateResponse,
 ) {
 	var plan organizationGroupProjectResourceModel
+
 	if !util.PlanStateToModel(ctx, &req.Plan, &plan, &resp.Diagnostics) {
 		return
 	}
 
-	err := r.client.ProjectOrganization.Add(
+	if err := r.client.ProjectOrganization.Add(
 		ctx,
 		plan.Project.ValueString(),
-		plan.OrganizationGroupID.ValueString(),
-		plan.Role.ValueString())
-	if err != nil {
+		plan.GroupID.ValueString(),
+		plan.Role.ValueString(),
+	); err != nil {
 		resp.Diagnostics = util.DiagErrorCreatingResource(resp.Diagnostics, r, err)
 
 		return
 	}
 
-	err = r.fillModel(ctx, &plan)
+	plan.ID = types.StringValue(util.ComposeID(plan.Project.ValueString(), plan.GroupID.ValueString()))
+
+	err := r.fillModel(ctx, &plan)
 	if err != nil {
 		resp.Diagnostics = util.DiagErrorCreatingResource(resp.Diagnostics, r, err)
 
@@ -168,29 +205,6 @@ func (r *organizationGroupProjectResource) Create(
 	}
 
 	if !util.ModelToPlanState(ctx, plan, &resp.State, &resp.Diagnostics) {
-		return
-	}
-}
-
-// Delete deletes an organization resource.
-func (r *organizationGroupProjectResource) Delete(
-	ctx context.Context,
-	req resource.DeleteRequest,
-	resp *resource.DeleteResponse,
-) {
-	var plan organizationGroupProjectResourceModel
-
-	if !util.PlanStateToModel(ctx, &req.State, &plan, &resp.Diagnostics) {
-		return
-	}
-
-	err := r.client.ProjectOrganization.Delete(
-		ctx,
-		plan.Project.ValueString(),
-		plan.OrganizationGroupID.ValueString())
-	if err != nil {
-		resp.Diagnostics = util.DiagErrorDeletingResource(resp.Diagnostics, r, err)
-
 		return
 	}
 }
@@ -219,28 +233,45 @@ func (r *organizationGroupProjectResource) Read(
 	}
 }
 
-// ImportState imports an existing resource into Terraform.
-func (r *organizationGroupProjectResource) ImportState(
-	_ context.Context,
-	_ resource.ImportStateRequest,
-	resp *resource.ImportStateResponse,
-) {
-	util.DiagErrorUpdatingResource(
-		resp.Diagnostics,
-		r,
-		fmt.Errorf("cannot import %s resource", r.TypeName()),
-	)
-}
-
 // Update updates an organization group project resource.
 func (r *organizationGroupProjectResource) Update(
 	_ context.Context,
 	_ resource.UpdateRequest,
 	resp *resource.UpdateResponse,
 ) {
-	util.DiagErrorUpdatingResource(
-		resp.Diagnostics,
-		r,
-		fmt.Errorf("cannot update %s resource", r.TypeName()),
-	)
+	resp.Diagnostics = util.DiagErrorUpdatingResourceNotSupported(resp.Diagnostics, r)
+}
+
+// Delete deletes an organization group project relation resource.
+func (r *organizationGroupProjectResource) Delete(
+	ctx context.Context,
+	req resource.DeleteRequest,
+	resp *resource.DeleteResponse,
+) {
+	var plan organizationGroupProjectResourceModel
+
+	if !util.PlanStateToModel(ctx, &req.State, &plan, &resp.Diagnostics) {
+		return
+	}
+
+	if err := r.client.ProjectOrganization.Delete(
+		ctx,
+		plan.Project.ValueString(),
+		plan.GroupID.ValueString(),
+	); err != nil {
+		resp.Diagnostics = util.DiagErrorDeletingResource(resp.Diagnostics, r, err)
+
+		return
+	}
+}
+
+// ImportState imports an existing resource into Terraform.
+func (r *organizationGroupProjectResource) ImportState(
+	ctx context.Context,
+	req resource.ImportStateRequest,
+	resp *resource.ImportStateResponse,
+) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+
+	util.UnpackCompoundID(ctx, req, resp, "project", "group_id")
 }

@@ -2,53 +2,77 @@ package organization_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
-func TestAccOrganizationUserGroupMemeber(t *testing.T) {
-	orgID := os.Getenv("AIVEN_ORG_ID")
-	userID := os.Getenv("AIVEN_ORG_USER_ID")
+// TestAccOrganizationUserGroupMember tests the organization user group member resource.
+func TestAccOrganizationUserGroupMember(t *testing.T) {
+	deps := acc.CommonTestDependencies(t)
 
-	if orgID == "" || userID == "" {
-		t.Skip("Skipping test due to missing AIVEN_ORG_ID or AIVEN_ORG_USER_ID environment variable")
+	if !deps.IsBeta() {
+		t.Skip("PROVIDER_AIVEN_ENABLE_BETA must be set for this test to run.")
 	}
 
-	if os.Getenv("PROVIDER_AIVEN_ENABLE_BETA") == "" {
-		t.Skip("Skipping test due to missing PROVIDERX_ENABLE_BETA environment variable")
+	userID := deps.OrganizationUserID()
+	if userID == nil {
+		t.Skip("AIVEN_ORGANIZATION_USER_ID must be set for this test to run.")
 	}
 
-	resourceName := "aiven_organization_user_group_member.foo"
+	name := "aiven_organization_user_group_member.foo"
+
+	suffix := acctest.RandStringFromCharSet(acc.DefaultRandomSuffixLength, acctest.CharSetAlphaNum)
+
 	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOrganizationUserGroupMemberResource(orgID, userID),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(resourceName, "last_activity_time"),
-				),
-			},
-		},
-	})
+				Config: fmt.Sprintf(`
+data "aiven_organization" "foo" {
+  name = "%[3]s"
 }
 
-func testAccOrganizationUserGroupMemberResource(orgID, userID string) string {
-	return fmt.Sprintf(`
 resource "aiven_organization_user_group" "foo" {
-  organization_id = "%[1]s"
-  name            = "testacc-dummy-user-group"
-  description     = "testacc-dummy-user-group-description"
+  organization_id = data.aiven_organization.foo.id
+  name            = "%[1]s-usr-group-%[2]s"
+  description     = "Terraform acceptance tests"
 }
 
 resource "aiven_organization_user_group_member" "foo" {
-  organization_id = "%[1]s"
+  organization_id = data.aiven_organization.foo.id
   group_id        = aiven_organization_user_group.foo.group_id
-  user_id         = "%[2]s"
+  user_id         = "%[4]s"
 }
-	`, orgID, userID)
+	`, acc.DefaultResourceNamePrefix, suffix, deps.OrganizationName(), util.Deref(userID)),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(name, "last_activity_time"),
+				),
+			},
+			{
+				ResourceName:                         name,
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIdentifierAttribute: "user_id",
+				ImportStateIdFunc: func(state *terraform.State) (string, error) {
+					rs, err := acc.ResourceFromState(state, name)
+					if err != nil {
+						return "", err
+					}
+
+					return util.ComposeID(
+						rs.Primary.Attributes["organization_id"],
+						rs.Primary.Attributes["group_id"],
+						rs.Primary.Attributes["user_id"],
+					), nil
+				},
+			},
+		},
+	})
 }

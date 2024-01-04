@@ -80,6 +80,9 @@ var (
 	// DetailErrorUpdatingResource is the detailed error message for when a resource cannot be updated.
 	DetailErrorUpdatingResource = "An unexpected error occurred while updating the resource (%s): %s."
 
+	// DetailErrorUpdatingResourceNotSupported is the detailed error message for when a resource cannot be updated.
+	DetailErrorUpdatingResourceNotSupported = "Updating the resource (%s) is not supported."
+
 	// DetailErrorDeletingResource is the detailed error message for when a resource cannot be deleted.
 	DetailErrorDeletingResource = "An unexpected error occurred while deleting the resource (%s): %s."
 
@@ -89,4 +92,20 @@ var (
 
 	// DetailErrorReadingDataSource is the detailed error message for when a data source cannot be read.
 	DetailErrorReadingDataSource = "An unexpected error occurred while reading the data source (%s): %s."
+)
+
+// Below is the list of classic Go-style error messages that are used in the provider.
+// The classic Go-style error messages are used to provide more information about the error.
+// The classic Go-style error messages should start with a lowercase letter and SHOULD NOT end with a period.
+// The classic Go-style error messages may contain placeholders for values that are not known at the time of writing.
+//
+//	See Go error handling for more information:
+//	  https://blog.golang.org/error-handling-and-go.
+var (
+	// ResourceNotFound is the error message for when a resource cannot be found.
+	// This error is intended to be used in acceptance tests.
+	ResourceNotFound = "resource not found: %s"
+
+	// AivenResourceNotFound is the error message for when an Aiven resource cannot be found.
+	AivenResourceNotFound = "aiven resource %s with compound ID %s not found"
 )

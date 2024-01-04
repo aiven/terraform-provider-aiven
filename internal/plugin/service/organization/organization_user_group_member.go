@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
@@ -21,12 +22,12 @@ var (
 	_ resource.ResourceWithImportState = &organizationUserGroupMembersResource{}
 )
 
-// NewOrganizationUserGroupMembersResource is a constructor for the organization resource.
+// NewOrganizationUserGroupMembersResource is a constructor for the organization user group member resource.
 func NewOrganizationUserGroupMembersResource() resource.Resource {
 	return &organizationUserGroupMembersResource{}
 }
 
-// organizationUserGroupMembersResource is the organization resource implementation.
+// organizationUserGroupMembersResource is the organization user group member resource implementation.
 type organizationUserGroupMembersResource struct {
 	// client is the instance of the Aiven client to use.
 	client *aiven.Client
@@ -35,25 +36,21 @@ type organizationUserGroupMembersResource struct {
 	typeName string
 }
 
-// organizationUserGroupMembersResourceModel is the model for the organization resource.
+// organizationUserGroupMembersResourceModel is the model for the organization user group member resource.
 type organizationUserGroupMembersResourceModel struct {
 	// ID is the identifier of the organization.
 	OrganizationID types.String `tfsdk:"organization_id"`
-
 	// ID is the identifier of the organization user group.
 	OrganizationGroupID types.String `tfsdk:"group_id"`
-
 	// ID is the identifier of the organization user group member.
 	OrganizationUserID types.String `tfsdk:"user_id"`
-
 	// Last activity time of the user group member.
 	LastActivityTime types.String `tfsdk:"last_activity_time"`
-
 	// Timeouts is the configuration for resource-specific timeouts.
 	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
-// Metadata returns the metadata for the organization resource.
+// Metadata returns the metadata for the organization user group member resource.
 func (r *organizationUserGroupMembersResource) Metadata(
 	_ context.Context,
 	req resource.MetadataRequest,
@@ -64,20 +61,19 @@ func (r *organizationUserGroupMembersResource) Metadata(
 	r.typeName = resp.TypeName
 }
 
+// TypeName returns the resource type name.
 func (r *organizationUserGroupMembersResource) TypeName() string {
 	return r.typeName
 }
 
-// Schema returns the schema for the organization resource.
+// Schema returns the schema for the organization user group member resource.
 func (r *organizationUserGroupMembersResource) Schema(
 	ctx context.Context,
 	_ resource.SchemaRequest,
 	resp *resource.SchemaResponse,
 ) {
 	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
-		Description: "Creates and manages an organization user group members in Aiven. " +
-			"Please no that this resource is " + " in beta and may change without notice. " +
-			"To use it please use the beta environment variable PROVIDER_AIVEN_ENABLE_BETA.",
+		Description: util.BetaDescription("Creates and manages an organization user group members in Aiven."),
 		Attributes: map[string]schema.Attribute{
 			"organization_id": schema.StringAttribute{
 				Description: "Identifier of the organization.",
@@ -86,15 +82,15 @@ func (r *organizationUserGroupMembersResource) Schema(
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
-			"user_id": schema.StringAttribute{
-				Description: "Identifier of the organization user group member.",
+			"group_id": schema.StringAttribute{
+				Description: "Identifier of the organization user group.",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
-			"group_id": schema.StringAttribute{
-				Description: "Identifier of the organization user group.",
+			"user_id": schema.StringAttribute{
+				Description: "Identifier of the organization user group member.",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -108,7 +104,7 @@ func (r *organizationUserGroupMembersResource) Schema(
 	})
 }
 
-// Configure configures the organization resource.
+// Configure configures the organization user group member resource.
 func (r *organizationUserGroupMembersResource) Configure(
 	_ context.Context,
 	req resource.ConfigureRequest,
@@ -136,7 +132,8 @@ func (r *organizationUserGroupMembersResource) fillModel(
 	list, err := r.client.OrganizationUserGroupMembers.List(
 		ctx,
 		model.OrganizationID.ValueString(),
-		model.OrganizationGroupID.ValueString())
+		model.OrganizationGroupID.ValueString(),
+	)
 	if err != nil {
 		return err
 	}
@@ -145,13 +142,33 @@ func (r *organizationUserGroupMembersResource) fillModel(
 		return nil
 	}
 
-	member := list.Members[0]
+	var member *aiven.OrganizationUserGroupMember
+
+	for _, m := range list.Members {
+		if m.UserID == model.OrganizationUserID.ValueString() {
+			member = &m
+			break
+		}
+	}
+
+	if member == nil {
+		return fmt.Errorf(
+			errmsg.AivenResourceNotFound,
+			r.TypeName(),
+			util.ComposeID(
+				model.OrganizationID.ValueString(),
+				model.OrganizationGroupID.ValueString(),
+				model.OrganizationUserID.ValueString(),
+			),
+		)
+	}
+
 	model.LastActivityTime = types.StringValue(member.LastActivityTime.String())
 
 	return nil
 }
 
-// Create creates an organization resource.
+// Create creates an organization user group member resource.
 func (r *organizationUserGroupMembersResource) Create(
 	ctx context.Context,
 	req resource.CreateRequest,
@@ -171,7 +188,9 @@ func (r *organizationUserGroupMembersResource) Create(
 			Operation: "add_members",
 			MemberIDs: []string{
 				plan.OrganizationUserID.ValueString(),
-			}})
+			},
+		},
+	)
 	if err != nil {
 		resp.Diagnostics = util.DiagErrorCreatingResource(resp.Diagnostics, r, err)
 
@@ -190,7 +209,7 @@ func (r *organizationUserGroupMembersResource) Create(
 	}
 }
 
-// Delete deletes an organization resource.
+// Delete deletes an organization user group member resource.
 func (r *organizationUserGroupMembersResource) Read(
 	ctx context.Context,
 	req resource.ReadRequest,
@@ -214,7 +233,16 @@ func (r *organizationUserGroupMembersResource) Read(
 	}
 }
 
-// Delete deletes an organization resource.
+// Update updates an organization user group member resource.
+func (r *organizationUserGroupMembersResource) Update(
+	_ context.Context,
+	_ resource.UpdateRequest,
+	resp *resource.UpdateResponse,
+) {
+	resp.Diagnostics = util.DiagErrorUpdatingResourceNotSupported(resp.Diagnostics, r)
+}
+
+// Delete deletes an organization user group member resource.
 func (r *organizationUserGroupMembersResource) Delete(
 	ctx context.Context,
 	req resource.DeleteRequest,
@@ -226,7 +254,7 @@ func (r *organizationUserGroupMembersResource) Delete(
 		return
 	}
 
-	err := r.client.OrganizationUserGroupMembers.Modify(
+	if err := r.client.OrganizationUserGroupMembers.Modify(
 		ctx,
 		plan.OrganizationID.ValueString(),
 		plan.OrganizationGroupID.ValueString(),
@@ -234,36 +262,20 @@ func (r *organizationUserGroupMembersResource) Delete(
 			Operation: "remove_members",
 			MemberIDs: []string{
 				plan.OrganizationGroupID.ValueString(),
-			}})
-	if err != nil {
+			},
+		},
+	); err != nil {
 		resp.Diagnostics = util.DiagErrorDeletingResource(resp.Diagnostics, r, err)
 
 		return
 	}
 }
 
-// Update updates an organization resource.
-func (r *organizationUserGroupMembersResource) Update(
-	_ context.Context,
-	_ resource.UpdateRequest,
-	resp *resource.UpdateResponse,
-) {
-	util.DiagErrorUpdatingResource(
-		resp.Diagnostics,
-		r,
-		fmt.Errorf("cannot update %s resource", r.TypeName()),
-	)
-}
-
-// ImportStatePassthroughID is a helper function to set the import
+// ImportState handles resource's state import requests.
 func (r *organizationUserGroupMembersResource) ImportState(
-	_ context.Context,
-	_ resource.ImportStateRequest,
+	ctx context.Context,
+	req resource.ImportStateRequest,
 	resp *resource.ImportStateResponse,
 ) {
-	util.DiagErrorUpdatingResource(
-		resp.Diagnostics,
-		r,
-		fmt.Errorf("cannot import %s resource", r.TypeName()),
-	)
+	util.UnpackCompoundID(ctx, req, resp, "organization_id", "group_id", "user_id")
 }
