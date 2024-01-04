@@ -2,15 +2,16 @@ package kafkatopicrepository
 
 import (
 	"context"
-	"regexp"
-	"time"
+	"fmt"
+	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+	"github.com/avast/retry-go"
 )
 
-// reInsufficientBrokers the error message received when kafka is not ready yet
-var reInsufficientBrokers = regexp.MustCompile(`Cluster only has [0-9]+ broker`)
+// insufficientBrokersErr the error message received when kafka is not ready yet, like
+// Cluster only has 2 broker(s), cannot set replication factor to 3
+var insufficientBrokersErr = "cannot set replication factor to"
 
 // Create creates a topic.
 // First checks if the topic does not exist for the safety
@@ -31,7 +32,7 @@ func (rep *repository) Create(ctx context.Context, project, service string, req 
 
 	// When kafka is not ready, it throws reInsufficientBrokers.
 	// Unfortunately, the error might be valid, so it will take a minute to fail.
-	err = retry.RetryContext(ctx, time.Minute, func() *retry.RetryError {
+	err = retry.Do(func() error {
 		err = rep.client.Create(ctx, project, service, req)
 		if err == nil {
 			return nil
@@ -42,13 +43,23 @@ func (rep *repository) Create(ctx context.Context, project, service string, req 
 			return nil
 		}
 
-		// We must retry this one
-		if reInsufficientBrokers.MatchString(err.Error()) {
-			return retry.RetryableError(err)
+		// We must retry this one.
+		// Unfortunately, there is no way to tune retries depending on the error.
+		// So this error might be valid (insufficient brokers), then it will retry until context is expired.
+		// This timeout can be adjusted:
+		// https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/kafka_topic#create
+		if strings.Contains(err.Error(), insufficientBrokersErr) {
+			return err
 		}
 
 		// Other errors are non-retryable
-		return retry.NonRetryableError(err)
-	})
+		return retry.Unrecoverable(err)
+	}, retry.Context(ctx))
+
+	// Retry lib returns a custom error object
+	// we can't compare in tests with
+	if err != nil {
+		return fmt.Errorf("topic create error: %s", err)
+	}
 	return err
 }

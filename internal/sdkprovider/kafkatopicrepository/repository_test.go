@@ -256,7 +256,7 @@ type fakeTopicClient struct {
 	// key format: project/service/topic
 	storage map[string]*aiven.KafkaListTopic
 	// errors to return
-	createErr error
+	createErr []error
 	deleteErr error
 	v1ListErr error
 	v2ListErr error
@@ -269,8 +269,11 @@ type fakeTopicClient struct {
 
 func (f *fakeTopicClient) Create(context.Context, string, string, aiven.CreateKafkaTopicRequest) error {
 	time.Sleep(time.Millisecond * 100) // we need some lag to simulate races
-	atomic.AddInt32(&f.createCalled, 1)
-	return f.createErr
+	attempt := atomic.AddInt32(&f.createCalled, 1) - 1
+	if int(attempt) >= len(f.createErr) {
+		return nil
+	}
+	return f.createErr[attempt]
 }
 
 func (f *fakeTopicClient) Update(context.Context, string, string, string, aiven.UpdateKafkaTopicRequest) error {
