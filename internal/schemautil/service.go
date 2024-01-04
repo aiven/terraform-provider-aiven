@@ -3,6 +3,7 @@ package schemautil
 import (
 	"context"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -14,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/converters"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/integration"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
@@ -47,6 +49,20 @@ const (
 	ServiceTypeM3Aggregator     = "m3aggregator"
 	ServiceTypeFlink            = "flink"
 	ServiceTypeClickhouse       = "clickhouse"
+
+	ServiceIntegrationTypeLogs             = "logs"
+	ServiceIntegrationTypeKafkaMirrormaker = "kafka_mirrormaker"
+	ServiceIntegrationTypeKafkaConnect     = "kafka_connect"
+	ServiceIntegrationTypeKafkaLogs        = "kafka_logs"
+	ServiceIntegrationTypeMetrics          = "metrics"
+	ServiceIntegrationTypePrometheus       = "prometheus"
+	ServiceIntegrationTypeDatadog          = "datadog"
+	ServiceIntegrationTypeClickhouseKafka  = "clickhouse_kafka"
+	ServiceIntegrationTypeClickhousePG     = "clickhouse_postgresql"
+	ServiceIntegrationTypeExternalLogsES   = "external_elasticsearch_logs"
+	ServiceIntegrationTypeExternalLogsAWS  = "external_aws_cloudwatch_logs"
+	ServiceIntegrationTypeExternalLogsOS   = "external_opensearch_logs"
+	ServiceIntegrationTypeExternalMetrics  = "external_aws_cloudwatch_metrics"
 )
 
 var TechEmailsResourceSchema = &schema.Resource{
@@ -903,4 +919,22 @@ func ExpandService(kind string, d *schema.ResourceData) (map[string]any, error) 
 
 func FlattenService(kind string, d *schema.ResourceData, dto map[string]any) ([]map[string]any, error) {
 	return converters.Flatten(kind, service.GetUserConfig(kind), d, dto)
+}
+
+func FlattenServiceIntegration(kind string, d *schema.ResourceData, dto map[string]any) ([]map[string]any, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf("[WARN] Recovered from panic in FlattenServiceIntegration: %v", err)
+		}
+	}()
+	return converters.Flatten(kind, integration.GetUserConfig(kind), d, dto)
+}
+
+func ExpandServiceIntegration(kind string, d *schema.ResourceData) (map[string]any, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf("[WARN] Recovered from panic in ExpandServiceIntegration: %v", err)
+		}
+	}()
+	return converters.Expand(kind, integration.GetUserConfig(kind), d)
 }

@@ -11,10 +11,11 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/server"
 )
 
+// registryPrefix is the registry prefix for the provider.
+//
 //go:generate go test -tags userconfig ./internal/schemautil/userconfig
 //go:generate go run ./ucgenerator/... --services cassandra,clickhouse,flink,grafana,influxdb,kafka,kafka_connect,kafka_mirrormaker,m3aggregator,m3db,mysql,opensearch,pg,redis
-
-// registryPrefix is the registry prefix for the provider.
+//go:generate go run ./ucgenerator/... --integrations clickhouse_kafka,clickhouse_postgresql,datadog,external_aws_cloudwatch_logs,external_aws_cloudwatch_metrics,external_elasticsearch_logs,external_opensearch_logs,kafka_connect,kafka_logs,kafka_mirrormaker,logs,metrics,prometheus
 const registryPrefix = "registry.terraform.io/"
 
 // version is the version of the provider.
