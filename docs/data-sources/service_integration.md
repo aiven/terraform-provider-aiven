@@ -34,7 +34,9 @@ data "aiven_service_integration" "myintegration" {
 - `clickhouse_postgresql_user_config` (List of Object) ClickhousePostgresql user configurable settings (see [below for nested schema](#nestedatt--clickhouse_postgresql_user_config))
 - `datadog_user_config` (List of Object) Datadog user configurable settings (see [below for nested schema](#nestedatt--datadog_user_config))
 - `destination_endpoint_id` (String) Destination endpoint for the integration (if any)
-- `external_aws_cloudwatch_metrics_user_config` (List of Object) ExternalAwsCloudwatchMetrics user configurable settings (see [below for nested schema](#nestedatt--external_aws_cloudwatch_metrics_user_config))
+- `external_aws_cloudwatch_metrics_user_config` (List of Object) ExternalAwsCloudwatchLogs user configurable settings (see [below for nested schema](#nestedatt--external_aws_cloudwatch_metrics_user_config))
+- `external_elasticsearch_logs_user_config` (List of Object) ExternalElasticsearchLogs user configurable settings (see [below for nested schema](#nestedatt--external_elasticsearch_logs_user_config))
+- `external_opensearch_logs_user_config` (List of Object) ExternalOpensearchLogs user configurable settings (see [below for nested schema](#nestedatt--external_opensearch_logs_user_config))
 - `id` (String) The ID of this resource.
 - `integration_id` (String) Service Integration Id at aiven
 - `kafka_connect_user_config` (List of Object) KafkaConnect user configurable settings (see [below for nested schema](#nestedatt--kafka_connect_user_config))
@@ -42,6 +44,7 @@ data "aiven_service_integration" "myintegration" {
 - `kafka_mirrormaker_user_config` (List of Object) KafkaMirrormaker user configurable settings (see [below for nested schema](#nestedatt--kafka_mirrormaker_user_config))
 - `logs_user_config` (List of Object) Logs user configurable settings (see [below for nested schema](#nestedatt--logs_user_config))
 - `metrics_user_config` (List of Object) Metrics user configurable settings (see [below for nested schema](#nestedatt--metrics_user_config))
+- `prometheus_user_config` (List of Object) Prometheus user configurable settings (see [below for nested schema](#nestedatt--prometheus_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration (if any)
 
 <a id="nestedatt--clickhouse_kafka_user_config"></a>
@@ -113,11 +116,11 @@ Read-Only:
 
 - `datadog_dbm_enabled` (Boolean)
 - `datadog_tags` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--datadog_tags))
-- `exclude_consumer_groups` (List of String)
-- `exclude_topics` (List of String)
-- `include_consumer_groups` (List of String)
-- `include_topics` (List of String)
-- `kafka_custom_metrics` (List of String)
+- `exclude_consumer_groups` (Set of String)
+- `exclude_topics` (Set of String)
+- `include_consumer_groups` (Set of String)
+- `include_topics` (Set of String)
+- `kafka_custom_metrics` (Set of String)
 - `max_jmx_metrics` (Number)
 - `opensearch` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--opensearch))
 - `redis` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--redis))
@@ -155,26 +158,23 @@ Read-Only:
 
 Read-Only:
 
-- `dropped_metrics` (List of Object) (see [below for nested schema](#nestedobjatt--external_aws_cloudwatch_metrics_user_config--dropped_metrics))
-- `extra_metrics` (List of Object) (see [below for nested schema](#nestedobjatt--external_aws_cloudwatch_metrics_user_config--extra_metrics))
-
-<a id="nestedobjatt--external_aws_cloudwatch_metrics_user_config--dropped_metrics"></a>
-### Nested Schema for `external_aws_cloudwatch_metrics_user_config.dropped_metrics`
-
-Read-Only:
-
-- `field` (String)
-- `metric` (String)
+- `selected_log_fields` (Set of String)
 
 
-<a id="nestedobjatt--external_aws_cloudwatch_metrics_user_config--extra_metrics"></a>
-### Nested Schema for `external_aws_cloudwatch_metrics_user_config.extra_metrics`
+<a id="nestedatt--external_elasticsearch_logs_user_config"></a>
+### Nested Schema for `external_elasticsearch_logs_user_config`
 
 Read-Only:
 
-- `field` (String)
-- `metric` (String)
+- `selected_log_fields` (Set of String)
 
+
+<a id="nestedatt--external_opensearch_logs_user_config"></a>
+### Nested Schema for `external_opensearch_logs_user_config`
+
+Read-Only:
+
+- `selected_log_fields` (Set of String)
 
 
 <a id="nestedatt--kafka_connect_user_config"></a>
@@ -202,7 +202,7 @@ Read-Only:
 Read-Only:
 
 - `kafka_topic` (String)
-- `selected_log_fields` (List of String)
+- `selected_log_fields` (Set of String)
 
 
 <a id="nestedatt--kafka_mirrormaker_user_config"></a>
@@ -234,7 +234,7 @@ Read-Only:
 
 - `elasticsearch_index_days_max` (Number)
 - `elasticsearch_index_prefix` (String)
-- `selected_log_fields` (List of String)
+- `selected_log_fields` (Set of String)
 
 
 <a id="nestedatt--metrics_user_config"></a>
@@ -257,6 +257,43 @@ Read-Only:
 
 <a id="nestedobjatt--metrics_user_config--source_mysql--telegraf"></a>
 ### Nested Schema for `metrics_user_config.source_mysql.telegraf`
+
+Read-Only:
+
+- `gather_event_waits` (Boolean)
+- `gather_file_events_stats` (Boolean)
+- `gather_index_io_waits` (Boolean)
+- `gather_info_schema_auto_inc` (Boolean)
+- `gather_innodb_metrics` (Boolean)
+- `gather_perf_events_statements` (Boolean)
+- `gather_process_list` (Boolean)
+- `gather_slave_status` (Boolean)
+- `gather_table_io_waits` (Boolean)
+- `gather_table_lock_waits` (Boolean)
+- `gather_table_schema` (Boolean)
+- `perf_events_statements_digest_text_limit` (Number)
+- `perf_events_statements_limit` (Number)
+- `perf_events_statements_time_limit` (Number)
+
+
+
+
+<a id="nestedatt--prometheus_user_config"></a>
+### Nested Schema for `prometheus_user_config`
+
+Read-Only:
+
+- `source_mysql` (List of Object) (see [below for nested schema](#nestedobjatt--prometheus_user_config--source_mysql))
+
+<a id="nestedobjatt--prometheus_user_config--source_mysql"></a>
+### Nested Schema for `prometheus_user_config.source_mysql`
+
+Read-Only:
+
+- `telegraf` (List of Object) (see [below for nested schema](#nestedobjatt--prometheus_user_config--source_mysql--telegraf))
+
+<a id="nestedobjatt--prometheus_user_config--source_mysql--telegraf"></a>
+### Nested Schema for `prometheus_user_config.source_mysql.telegraf`
 
 Read-Only:
 
