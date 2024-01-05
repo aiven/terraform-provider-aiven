@@ -68,8 +68,8 @@ Optional:
 - `flush_messages` (String) flush.messages value
 - `flush_ms` (String) flush.ms value
 - `index_interval_bytes` (String) index.interval.bytes value
-- `local_retention_bytes` (String) local.retention.bytes value
-- `local_retention_ms` (String) local.retention.ms value
+- `local_retention_bytes` (String) local.retention.bytes value. This field is temporarily disabled.
+- `local_retention_ms` (String) local.retention.ms value. This field is temporarily disabled.
 - `max_compaction_lag_ms` (String) max.compaction.lag.ms value
 - `max_message_bytes` (String) max.message.bytes value
 - `message_downconversion_enable` (Boolean) message.downconversion.enable value
