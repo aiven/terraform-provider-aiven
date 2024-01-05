@@ -203,6 +203,8 @@ github.com/aiven/aiven-go-client/v2 v2.6.1-0.20240102144320-a7653ed76349 h1:8yrp
 github.com/aiven/aiven-go-client/v2 v2.6.1-0.20240102144320-a7653ed76349/go.mod h1:x0xhzxWEKAwKv0xY5FvECiI6tesWshcPHvjwl0B/1SU=
 github.com/aiven/aiven-go-client/v2 v2.7.0 h1:nvDfzxsELIt+df7zLqePbrI6ZtazmNvhy/8LyKOZ810=
 github.com/aiven/aiven-go-client/v2 v2.7.0/go.mod h1:x0xhzxWEKAwKv0xY5FvECiI6tesWshcPHvjwl0B/1SU=
+github.com/aiven/aiven-go-client/v2 v2.8.0 h1:1JZVmpp2emjrIWrDiec9+7CqTRyH/qTnhzJxkYUgVlU=
+github.com/aiven/aiven-go-client/v2 v2.8.0/go.mod h1:x0xhzxWEKAwKv0xY5FvECiI6tesWshcPHvjwl0B/1SU=
 github.com/aiven/go-api-schemas v1.51.0 h1:6e9oxSTIhKFixOJV3fbnrpKAULhVxls4U4smZjRE7cU=
 github.com/aiven/go-api-schemas v1.51.0/go.mod h1:/bPxBUHza/2Aeer6hIIdB++GxKiw9K1KCBtRa2rtZ5I=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=

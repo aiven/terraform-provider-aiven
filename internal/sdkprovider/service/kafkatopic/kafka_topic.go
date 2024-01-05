@@ -224,13 +224,13 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 				},
 				"local_retention_bytes": {
 					Type:             schema.TypeString,
-					Description:      "local.retention.bytes value",
+					Description:      "local.retention.bytes value. This field is temporarily disabled.",
 					Optional:         true,
 					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
 				"local_retention_ms": {
 					Type:             schema.TypeString,
-					Description:      "local.retention.ms value",
+					Description:      "local.retention.ms value. This field is temporarily disabled.",
 					Optional:         true,
 					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 				},
@@ -356,8 +356,8 @@ func getKafkaTopicConfig(d *schema.ResourceData) aiven.KafkaTopicConfig {
 		SegmentMs:                       schemautil.ParseOptionalStringToInt64(configRaw["segment_ms"]),
 		UncleanLeaderElectionEnable:     schemautil.OptionalBoolPointer(d, "config.0.unclean_leader_election_enable"),
 		RemoteStorageEnable:             schemautil.OptionalBoolPointer(d, "config.0.remote_storage_enable"),
-		LocalRetentionBytes:             schemautil.ParseOptionalStringToInt64(configRaw["local_retention_bytes"]),
-		LocalRetentionMs:                schemautil.ParseOptionalStringToInt64(configRaw["local_retention_ms"]),
+		//LocalRetentionBytes:             schemautil.ParseOptionalStringToInt64(configRaw["local_retention_bytes"]),
+		//LocalRetentionMs:                schemautil.ParseOptionalStringToInt64(configRaw["local_retention_ms"]),
 	}
 }
 
@@ -512,8 +512,8 @@ func flattenKafkaTopicConfig(t *aiven.KafkaTopic) []map[string]interface{} {
 			"segment_ms":                          schemautil.ToOptionalString(t.Config.SegmentMs.Value),
 			"unclean_leader_election_enable":      t.Config.UncleanLeaderElectionEnable.Value,
 			"remote_storage_enable":               t.Config.RemoteStorageEnable.Value,
-			"local_retention_bytes":               schemautil.ToOptionalString(t.Config.LocalRetentionBytes.Value),
-			"local_retention_ms":                  schemautil.ToOptionalString(t.Config.LocalRetentionMs.Value),
+			//"local_retention_bytes":               schemautil.ToOptionalString(t.Config.LocalRetentionBytes.Value),
+			//"local_retention_ms":                  schemautil.ToOptionalString(t.Config.LocalRetentionMs.Value),
 		},
 	}
 }
