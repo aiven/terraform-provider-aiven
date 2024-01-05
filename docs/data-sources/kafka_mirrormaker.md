@@ -89,7 +89,6 @@ Read-Only:
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_mirrormaker_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
 - `kafka_mirrormaker` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_mirrormaker_user_config--kafka_mirrormaker))
-- `service_log` (Boolean)
 - `static_ips` (Boolean)
 
 <a id="nestedobjatt--kafka_mirrormaker_user_config--ip_filter_object"></a>

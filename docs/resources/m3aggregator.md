@@ -80,7 +80,6 @@ Optional:
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
 - `m3_version` (String) M3 major version (deprecated, use m3aggregator_version).
 - `m3aggregator_version` (String) M3 major version (the minimum compatible version).
-- `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `static_ips` (Boolean) Use static public IP addresses.
 
 <a id="nestedblock--m3aggregator_user_config--ip_filter_object"></a>

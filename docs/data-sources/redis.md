@@ -105,7 +105,6 @@ Read-Only:
 - `redis_pubsub_client_output_buffer_limit` (Number)
 - `redis_ssl` (Boolean)
 - `redis_timeout` (Number)
-- `service_log` (Boolean)
 - `service_to_fork_from` (String)
 - `static_ips` (Boolean)
 

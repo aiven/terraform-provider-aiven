@@ -26,13 +26,14 @@ const (
 )
 
 func main() {
-	var serviceList, integrationList string
+	var serviceList, integrationList, integrationEndpointList string
 	flag.StringVar(&serviceList, "services", "", "Comma separated service list of names to generate for")
 	flag.StringVar(&integrationList, "integrations", "", "Comma separated integrations list of names to generate for")
+	flag.StringVar(&integrationEndpointList, "integration-endpoints", "", "Comma separated integration endpoints list of names to generate for")
 	flag.Parse()
 
-	if serviceList+integrationList == "" {
-		log.Fatal("--service or --integrations must be provided")
+	if serviceList+integrationList+integrationEndpointList == "" {
+		log.Fatal("--service or --integrations or --integration-endpoints must be provided")
 	}
 
 	if serviceList != "" {
@@ -44,6 +45,13 @@ func main() {
 
 	if integrationList != "" {
 		err := generate("integration", dist.IntegrationTypes, strings.Split(integrationList, ","))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	if integrationEndpointList != "" {
+		err := generate("integration_endpoint", dist.IntegrationEndpointTypes, strings.Split(integrationEndpointList, ","))
 		if err != nil {
 			log.Fatal(err)
 		}

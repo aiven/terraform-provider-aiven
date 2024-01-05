@@ -110,7 +110,6 @@ Read-Only:
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--public_access))
 - `schema_registry` (Boolean)
 - `schema_registry_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--schema_registry_config))
-- `service_log` (Boolean)
 - `static_ips` (Boolean)
 - `tiered_storage` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--tiered_storage))
 
@@ -216,7 +215,6 @@ Read-Only:
 - `consumer_enable_auto_commit` (Boolean)
 - `consumer_request_max_bytes` (Number)
 - `consumer_request_timeout_ms` (Number)
-- `name_strategy_validation` (Boolean)
 - `producer_acks` (String)
 - `producer_compression_type` (String)
 - `producer_linger_ms` (Number)

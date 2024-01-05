@@ -105,7 +105,6 @@ Read-Only:
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--public_access))
 - `recovery_basebackup_name` (String)
 - `saml` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--saml))
-- `service_log` (Boolean)
 - `service_to_fork_from` (String)
 - `static_ips` (Boolean)
 
@@ -170,7 +169,6 @@ Read-Only:
 - `email_sender_name` (String)
 - `email_sender_password` (String)
 - `email_sender_username` (String)
-- `enable_security_audit` (Boolean)
 - `http_max_content_length` (Number)
 - `http_max_header_size` (Number)
 - `http_max_initial_line_length` (Number)

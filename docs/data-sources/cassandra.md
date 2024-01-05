@@ -81,7 +81,6 @@ Read-Only:
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--private_access))
 - `project_to_fork_from` (String)
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--public_access))
-- `service_log` (Boolean)
 - `service_to_fork_from` (String)
 - `service_to_join_with` (String)
 - `static_ips` (Boolean)

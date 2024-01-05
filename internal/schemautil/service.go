@@ -16,6 +16,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/converters"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/integration"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/integration_endpoint"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
@@ -63,6 +64,20 @@ const (
 	ServiceIntegrationTypeExternalLogsAWS  = "external_aws_cloudwatch_logs"
 	ServiceIntegrationTypeExternalLogsOS   = "external_opensearch_logs"
 	ServiceIntegrationTypeExternalMetrics  = "external_aws_cloudwatch_metrics"
+
+	ServiceIntegrationEndpointTypeDatadog                      = "datadog"
+	ServiceIntegrationEndpointTypeExternalAwsCloudwatchLogs    = "external_aws_cloudwatch_logs"
+	ServiceIntegrationEndpointTypeExternalAwsCloudwatchMetrics = "external_aws_cloudwatch_metrics"
+	ServiceIntegrationEndpointTypeExternalElasticsearchLogs    = "external_elasticsearch_logs"
+	ServiceIntegrationEndpointTypeExternalGoogleCloudBigquery  = "external_google_cloud_bigquery"
+	ServiceIntegrationEndpointTypeExternalGoogleCloudLogging   = "external_google_cloud_logging"
+	ServiceIntegrationEndpointTypeExternalKafka                = "external_kafka"
+	ServiceIntegrationEndpointTypeExternalOpensearchLogs       = "external_opensearch_logs"
+	ServiceIntegrationEndpointTypeExternalPostgresql           = "external_postgresql"
+	ServiceIntegrationEndpointTypeExternalSchemaRegistry       = "external_schema_registry"
+	ServiceIntegrationEndpointTypeJolokia                      = "jolokia"
+	ServiceIntegrationEndpointTypePrometheus                   = "prometheus"
+	ServiceIntegrationEndpointTypeRsyslog                      = "rsyslog"
 )
 
 var TechEmailsResourceSchema = &schema.Resource{
@@ -922,6 +937,8 @@ func FlattenService(kind string, d *schema.ResourceData, dto map[string]any) ([]
 }
 
 func FlattenServiceIntegration(kind string, d *schema.ResourceData, dto map[string]any) ([]map[string]any, error) {
+	// Many service integration types have the empty user_config, and GetUserConfig returns panic for empty user_config's
+	// So we need to handle this case separately
 	defer func() {
 		if err := recover(); err != nil {
 			log.Printf("[WARN] Recovered from panic in FlattenServiceIntegration: %v", err)
@@ -931,10 +948,20 @@ func FlattenServiceIntegration(kind string, d *schema.ResourceData, dto map[stri
 }
 
 func ExpandServiceIntegration(kind string, d *schema.ResourceData) (map[string]any, error) {
+	// Many service integration types have the empty user_config, and GetUserConfig returns panic for empty user_config's
+	// So we need to handle this case separately
 	defer func() {
 		if err := recover(); err != nil {
 			log.Printf("[WARN] Recovered from panic in ExpandServiceIntegration: %v", err)
 		}
 	}()
 	return converters.Expand(kind, integration.GetUserConfig(kind), d)
+}
+
+func FlattenServiceIntegrationEndpoint(kind string, d *schema.ResourceData, dto map[string]any) ([]map[string]any, error) {
+	return converters.Flatten(kind, integration_endpoint.GetUserConfig(kind), d, dto)
+}
+
+func ExpandServiceIntegrationEndpoint(kind string, d *schema.ResourceData) (map[string]any, error) {
+	return converters.Expand(kind, integration_endpoint.GetUserConfig(kind), d)
 }

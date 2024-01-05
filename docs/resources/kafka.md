@@ -89,28 +89,27 @@ resource "aiven_kafka" "kafka1" {
 
 Optional:
 
-- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
+- `additional_backup_regions` (Set of String) Additional Cloud Regions for Backup Replication.
 - `aiven_kafka_topic_messages` (Boolean) Allow access to read Kafka topic messages in the Aiven Console and REST API.
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
-- `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'. (see [below for nested schema](#nestedblock--kafka_user_config--ip_filter_object))
-- `ip_filter_string` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `kafka` (Block List, Max: 1) Kafka broker configuration values. (see [below for nested schema](#nestedblock--kafka_user_config--kafka))
-- `kafka_authentication_methods` (Block List, Max: 1) Kafka authentication methods. (see [below for nested schema](#nestedblock--kafka_user_config--kafka_authentication_methods))
+- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--kafka_user_config--ip_filter_object))
+- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `kafka` (Block List, Max: 1) Kafka broker configuration values (see [below for nested schema](#nestedblock--kafka_user_config--kafka))
+- `kafka_authentication_methods` (Block List, Max: 1) Kafka authentication methods (see [below for nested schema](#nestedblock--kafka_user_config--kafka_authentication_methods))
 - `kafka_connect` (Boolean) Enable Kafka Connect service. The default value is `false`.
-- `kafka_connect_config` (Block List, Max: 1) Kafka Connect configuration values. (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_config))
+- `kafka_connect_config` (Block List, Max: 1) Kafka Connect configuration values (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_config))
 - `kafka_rest` (Boolean) Enable Kafka-REST service. The default value is `false`.
 - `kafka_rest_authorization` (Boolean) Enable authorization in Kafka-REST service.
-- `kafka_rest_config` (Block List, Max: 1) Kafka REST configuration. (see [below for nested schema](#nestedblock--kafka_user_config--kafka_rest_config))
+- `kafka_rest_config` (Block List, Max: 1) Kafka REST configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_rest_config))
 - `kafka_version` (String) Kafka major version.
-- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks. (see [below for nested schema](#nestedblock--kafka_user_config--private_access))
-- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink. (see [below for nested schema](#nestedblock--kafka_user_config--privatelink_access))
-- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet. (see [below for nested schema](#nestedblock--kafka_user_config--public_access))
+- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--kafka_user_config--private_access))
+- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--kafka_user_config--privatelink_access))
+- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--kafka_user_config--public_access))
 - `schema_registry` (Boolean) Enable Schema-Registry service. The default value is `false`.
-- `schema_registry_config` (Block List, Max: 1) Schema Registry configuration. (see [below for nested schema](#nestedblock--kafka_user_config--schema_registry_config))
-- `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
+- `schema_registry_config` (Block List, Max: 1) Schema Registry configuration (see [below for nested schema](#nestedblock--kafka_user_config--schema_registry_config))
 - `static_ips` (Boolean) Use static public IP addresses.
-- `tiered_storage` (Block List, Max: 1) Tiered storage configuration. (see [below for nested schema](#nestedblock--kafka_user_config--tiered_storage))
+- `tiered_storage` (Block List, Max: 1) Tiered storage configuration (see [below for nested schema](#nestedblock--kafka_user_config--tiered_storage))
 
 <a id="nestedblock--kafka_user_config--ip_filter_object"></a>
 ### Nested Schema for `kafka_user_config.ip_filter_object`
@@ -136,7 +135,7 @@ Optional:
 - `group_initial_rebalance_delay_ms` (Number) The amount of time, in milliseconds, the group coordinator will wait for more consumers to join a new group before performing the first rebalance. A longer delay means potentially fewer rebalances, but increases the time until processing begins. The default value for this is 3 seconds. During development and testing it might be desirable to set this to 0 in order to not delay test execution time.
 - `group_max_session_timeout_ms` (Number) The maximum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures.
 - `group_min_session_timeout_ms` (Number) The minimum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures.
-- `log_cleaner_delete_retention_ms` (Number) How long are delete records retained?.
+- `log_cleaner_delete_retention_ms` (Number) How long are delete records retained?
 - `log_cleaner_max_compaction_lag_ms` (Number) The maximum amount of time message will remain uncompacted. Only applicable for logs that are being compacted.
 - `log_cleaner_min_cleanable_ratio` (Number) Controls log compactor frequency. Larger value means more frequent compactions but also more space wasted for logs. Consider setting log.cleaner.max.compaction.lag.ms to enforce compactions sooner, instead of setting a very high value for this option.
 - `log_cleaner_min_compaction_lag_ms` (Number) The minimum time a message will remain uncompacted in the log. Only applicable for logs that are being compacted.
@@ -150,7 +149,7 @@ Optional:
 - `log_message_downconversion_enable` (Boolean) This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. .
 - `log_message_timestamp_difference_max_ms` (Number) The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message.
 - `log_message_timestamp_type` (String) Define whether the timestamp in the message is message create time or log append time.
-- `log_preallocate` (Boolean) Should pre allocate file when create new segment?.
+- `log_preallocate` (Boolean) Should pre allocate file when create new segment?
 - `log_retention_bytes` (Number) The maximum size of the log before deleting messages.
 - `log_retention_hours` (Number) The number of hours to keep a log file before deleting it.
 - `log_retention_ms` (Number) The number of milliseconds to keep a log file before deleting it (in milliseconds), If not set, the value in log.retention.minutes is used. If set to -1, no time limit is applied.
@@ -217,7 +216,6 @@ Optional:
 - `consumer_enable_auto_commit` (Boolean) If true the consumer's offset will be periodically committed to Kafka in the background. The default value is `true`.
 - `consumer_request_max_bytes` (Number) Maximum number of bytes in unencoded message keys and values by a single request. The default value is `67108864`.
 - `consumer_request_timeout_ms` (Number) The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached. The default value is `1000`.
-- `name_strategy_validation` (Boolean) If true, validate that given schema is registered under expected subject name by the used name strategy when producing messages. The default value is `true`.
 - `producer_acks` (String) The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to 'all' or '-1', the leader will wait for the full set of in-sync replicas to acknowledge the record. The default value is `1`.
 - `producer_compression_type` (String) Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.
 - `producer_linger_ms` (Number) Wait for up to the given delay to allow batching records together. The default value is `0`.
@@ -277,14 +275,14 @@ Optional:
 Optional:
 
 - `enabled` (Boolean) Whether to enable the tiered storage functionality.
-- `local_cache` (Block List, Max: 1) Local cache configuration. (see [below for nested schema](#nestedblock--kafka_user_config--tiered_storage--local_cache))
+- `local_cache` (Block List, Max: 1, Deprecated) Local cache configuration (see [below for nested schema](#nestedblock--kafka_user_config--tiered_storage--local_cache))
 
 <a id="nestedblock--kafka_user_config--tiered_storage--local_cache"></a>
 ### Nested Schema for `kafka_user_config.tiered_storage.local_cache`
 
 Optional:
 
-- `size` (Number) Local cache size in bytes.
+- `size` (Number, Deprecated) Local cache size in bytes.
 
 
 

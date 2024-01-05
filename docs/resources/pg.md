@@ -116,35 +116,33 @@ Read-Only:
 
 Optional:
 
-- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
+- `additional_backup_regions` (Set of String) Additional Cloud Regions for Backup Replication.
 - `admin_password` (String, Sensitive) Custom password for admin user. Defaults to random string. This must be set only when a new service is being created.
 - `admin_username` (String) Custom username for admin user. This must be set only when a new service is being created.
 - `backup_hour` (Number) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.
 - `backup_minute` (Number) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.
 - `enable_ipv6` (Boolean) Register AAAA DNS records for the service, and allow IPv6 packets to service ports.
-- `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'. (see [below for nested schema](#nestedblock--pg_user_config--ip_filter_object))
-- `ip_filter_string` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `migration` (Block List, Max: 1) Migrate data from existing server. (see [below for nested schema](#nestedblock--pg_user_config--migration))
-- `pg` (Block List, Max: 1) postgresql.conf configuration values. (see [below for nested schema](#nestedblock--pg_user_config--pg))
-- `pg_qualstats` (Block List, Max: 1) System-wide settings for the pg_qualstats extension. (see [below for nested schema](#nestedblock--pg_user_config--pg_qualstats))
-- `pg_read_replica` (Boolean, Deprecated) Use read_replica service integration instead.
-- `pg_service_to_fork_from` (String, Deprecated) Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created.
+- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--pg_user_config--ip_filter_object))
+- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `migration` (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--pg_user_config--migration))
+- `pg` (Block List, Max: 1) postgresql.conf configuration values (see [below for nested schema](#nestedblock--pg_user_config--pg))
+- `pg_read_replica` (Boolean) Should the service which is being forked be a read replica (deprecated, use read_replica service integration instead).
+- `pg_service_to_fork_from` (String) Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created.
 - `pg_stat_monitor_enable` (Boolean) Enable the pg_stat_monitor extension. Enabling this extension will cause the cluster to be restarted.When this extension is enabled, pg_stat_statements results for utility commands are unreliable. The default value is `false`.
 - `pg_version` (String) PostgreSQL major version.
-- `pgbouncer` (Block List, Max: 1) PGBouncer connection pooling settings. (see [below for nested schema](#nestedblock--pg_user_config--pgbouncer))
-- `pglookout` (Block List, Max: 1) System-wide settings for pglookout. (see [below for nested schema](#nestedblock--pg_user_config--pglookout))
-- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks. (see [below for nested schema](#nestedblock--pg_user_config--private_access))
-- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink. (see [below for nested schema](#nestedblock--pg_user_config--privatelink_access))
+- `pgbouncer` (Block List, Max: 1) PGBouncer connection pooling settings (see [below for nested schema](#nestedblock--pg_user_config--pgbouncer))
+- `pglookout` (Block List, Max: 1) PGLookout settings (see [below for nested schema](#nestedblock--pg_user_config--pglookout))
+- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--pg_user_config--private_access))
+- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--pg_user_config--privatelink_access))
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
-- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet. (see [below for nested schema](#nestedblock--pg_user_config--public_access))
+- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--pg_user_config--public_access))
 - `recovery_target_time` (String) Recovery target time when forking a service. This has effect only when a new service is being created.
-- `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
 - `shared_buffers_percentage` (Number) Percentage of total RAM that the database server uses for shared memory buffers. Valid range is 20-60 (float), which corresponds to 20% - 60%. This setting adjusts the shared_buffers configuration value.
 - `static_ips` (Boolean) Use static public IP addresses.
 - `synchronous_replication` (String) Synchronous replication type. Note that the service plan also needs to support synchronous replication.
-- `timescaledb` (Block List, Max: 1) System-wide settings for the timescaledb extension. (see [below for nested schema](#nestedblock--pg_user_config--timescaledb))
+- `timescaledb` (Block List, Max: 1) TimescaleDB extension configuration values (see [below for nested schema](#nestedblock--pg_user_config--timescaledb))
 - `variant` (String) Variant of the PostgreSQL service, may affect the features that are exposed by default.
 - `work_mem` (Number) Sets the maximum amount of memory to be used by a query operation (such as a sort or hash table) before writing to temporary disk files, in MB. Default is 1MB + 0.075% of total RAM (up to 32MB).
 
@@ -234,18 +232,6 @@ Optional:
 - `wal_writer_delay` (Number) WAL flush interval in milliseconds. Note that setting this value to lower than the default 200ms may negatively impact performance.
 
 
-<a id="nestedblock--pg_user_config--pg_qualstats"></a>
-### Nested Schema for `pg_user_config.pg_qualstats`
-
-Optional:
-
-- `enabled` (Boolean) Enable / Disable pg_qualstats. The default value is `false`.
-- `min_err_estimate_num` (Number) Error estimation num threshold to save quals. The default value is `0`.
-- `min_err_estimate_ratio` (Number) Error estimation ratio threshold to save quals. The default value is `0`.
-- `track_constants` (Boolean) Enable / Disable pg_qualstats constants tracking. The default value is `true`.
-- `track_pg_catalog` (Boolean) Track quals on system catalogs too. The default value is `false`.
-
-
 <a id="nestedblock--pg_user_config--pgbouncer"></a>
 ### Nested Schema for `pg_user_config.pgbouncer`
 
@@ -255,7 +241,7 @@ Optional:
 - `autodb_max_db_connections` (Number) Do not allow more than this many server connections per database (regardless of user). Setting it to 0 means unlimited.
 - `autodb_pool_mode` (String) PGBouncer pool mode.
 - `autodb_pool_size` (Number) If non-zero then create automatically a pool of that size per user when a pool doesn't exist.
-- `ignore_startup_parameters` (List of String) List of parameters to ignore when given in startup packet.
+- `ignore_startup_parameters` (Set of String) List of parameters to ignore when given in startup packet.
 - `min_pool_size` (Number) Add more server connections to pool if below this number. Improves behavior when usual load comes suddenly back after period of total inactivity. The value is effectively capped at the pool size.
 - `server_idle_timeout` (Number) If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. (seconds).
 - `server_lifetime` (Number) The pooler will close an unused server connection that has been connected longer than this. (seconds).
@@ -305,7 +291,7 @@ Optional:
 
 Optional:
 
-- `max_background_workers` (Number) The number of background workers for timescaledb operations. You should configure this setting to the sum of your number of databases and the total number of concurrent background workers you want running at any given point in time. The default value is `16`.
+- `max_background_workers` (Number) The number of background workers for timescaledb operations. You should configure this setting to the sum of your number of databases and the total number of concurrent background workers you want running at any given point in time.
 
 
 
