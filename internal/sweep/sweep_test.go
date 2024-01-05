@@ -10,6 +10,7 @@ import (
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/cassandra"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
+	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/connectionpool"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/flink"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/grafana"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/influxdb"
