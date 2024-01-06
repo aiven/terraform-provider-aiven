@@ -3,12 +3,12 @@
 page_title: "aiven_organization_group_project Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an organization group project relations in Aiven.
+  Creates and manages an organization group project relations in Aiven. Please note that this resource is in beta and may change without notice. To use this resource, please set the PROVIDERAIVENENABLE_BETA environment variable.
 ---
 
 # aiven_organization_group_project (Resource)
 
-Creates and manages an organization group project relations in Aiven.
+Creates and manages an organization group project relations in Aiven. Please note that this resource is in beta and may change without notice. To use this resource, please set the PROVIDER_AIVEN_ENABLE_BETA environment variable.
 
 
 
@@ -24,6 +24,10 @@ Creates and manages an organization group project relations in Aiven.
 ### Optional
 
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+
+### Read-Only
+
+- `id` (String) Compound identifier of the organization group project relation.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

@@ -53,6 +53,15 @@ func DiagErrorUpdatingResource(diagnostics diag.Diagnostics, typenameable TypeNa
 	return diagnostics
 }
 
+func DiagErrorUpdatingResourceNotSupported(diagnostics diag.Diagnostics, typenameable TypeNameable) diag.Diagnostics {
+	diagnostics.AddError(
+		errmsg.SummaryErrorUpdatingResource,
+		fmt.Sprintf(errmsg.DetailErrorUpdatingResourceNotSupported, typenameable.TypeName()),
+	)
+
+	return diagnostics
+}
+
 // DiagErrorDeletingResource is a function that adds a resource deleting error to the diagnostics and returns it.
 // It is used in the Delete method of the resource structs.
 func DiagErrorDeletingResource(diagnostics diag.Diagnostics, typenameable TypeNameable, err error) diag.Diagnostics {
