@@ -11,7 +11,12 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add organization application users support
 - Configure "insufficient broker" error retries timeout 
+
+## [4.12.1] - 2024-01-05
+
+- Temporarily disable `local_retention_*` fields in `aiven_kafka_topic` resource
 
 ## [4.12.0] - 2024-01-03
 

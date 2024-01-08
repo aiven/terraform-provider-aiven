@@ -108,17 +108,22 @@ func (p *AivenProvider) Configure(
 
 // Resources returns the resources supported by this provider.
 func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
-	isBeta := os.Getenv("PROVIDER_AIVEN_ENABLE_BETA") != ""
-
 	// List of resources that are currently available in the provider.
 	resources := []func() resource.Resource{
 		organization.NewOrganizationResource,
 	}
 
+	isBeta := os.Getenv("PROVIDER_AIVEN_ENABLE_BETA") != ""
+
 	// Add to a list of resources that are currently in beta.
 	if isBeta {
-		resources = append(resources, organization.NewOrganizationUserGroupMembersResource)
-		resources = append(resources, organization.NewOrganizationGroupProjectResource)
+		betaResources := []func() resource.Resource{
+			organization.NewOrganizationUserGroupMembersResource,
+			organization.NewOrganizationGroupProjectResource,
+			organization.NewOrganizationApplicationUser,
+		}
+
+		resources = append(resources, betaResources...)
 	}
 
 	return resources
@@ -126,9 +131,23 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 
 // DataSources returns the data sources supported by this provider.
 func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{
+	// List of data sources that are currently available in the provider.
+	dataSources := []func() datasource.DataSource{
 		organization.NewOrganizationDataSource,
 	}
+
+	isBeta := os.Getenv("PROVIDER_AIVEN_ENABLE_BETA") != ""
+
+	// Add to a list of data sources that are currently in beta.
+	if isBeta {
+		betaDataSources := []func() datasource.DataSource{
+			organization.NewOrganizationApplicationUserDataSource,
+		}
+
+		dataSources = append(dataSources, betaDataSources...)
+	}
+
+	return dataSources
 }
 
 // New returns a new provider factory for the Aiven provider.
