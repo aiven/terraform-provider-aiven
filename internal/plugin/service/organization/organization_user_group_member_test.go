@@ -17,12 +17,12 @@ func TestAccOrganizationUserGroupMember(t *testing.T) {
 	deps := acc.CommonTestDependencies(t)
 
 	if !deps.IsBeta() {
-		t.Skip("PROVIDER_AIVEN_ENABLE_BETA must be set for this test to run.")
+		t.Skip(acc.ErrMustSetBetaEnvVar)
 	}
 
 	userID := deps.OrganizationUserID()
 	if userID == nil {
-		t.Skip("AIVEN_ORGANIZATION_USER_ID must be set for this test to run.")
+		t.Skip(acc.ErrMustSetOrganizationUserIDEnvVar)
 	}
 
 	name := "aiven_organization_user_group_member.foo"

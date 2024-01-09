@@ -14,6 +14,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
 
 // AivenProvider is the provider implementation for Aiven.
@@ -113,10 +114,8 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 		organization.NewOrganizationResource,
 	}
 
-	isBeta := os.Getenv("PROVIDER_AIVEN_ENABLE_BETA") != ""
-
 	// Add to a list of resources that are currently in beta.
-	if isBeta {
+	if util.IsBeta() {
 		betaResources := []func() resource.Resource{
 			organization.NewOrganizationUserGroupMembersResource,
 			organization.NewOrganizationGroupProjectResource,
@@ -136,10 +135,8 @@ func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSou
 		organization.NewOrganizationDataSource,
 	}
 
-	isBeta := os.Getenv("PROVIDER_AIVEN_ENABLE_BETA") != ""
-
 	// Add to a list of data sources that are currently in beta.
-	if isBeta {
+	if util.IsBeta() {
 		betaDataSources := []func() datasource.DataSource{
 			organization.NewOrganizationApplicationUserDataSource,
 		}

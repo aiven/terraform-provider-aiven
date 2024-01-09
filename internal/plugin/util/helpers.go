@@ -1,6 +1,9 @@
 package util
 
-import "strings"
+import (
+	"os"
+	"strings"
+)
 
 // Ref is a helper function that returns a pointer to the value passed in.
 func Ref[T any](v T) *T {
@@ -16,6 +19,13 @@ func Deref[T any](p *T) T {
 	}
 
 	return result
+}
+
+// IsBeta is a helper function that returns a flag that indicates whether the provider is in beta mode.
+// This SHOULD NOT be used anywhere else except in the provider and acceptance tests initialization.
+// In case this functionality is needed in tests, please use the acctest.CommonTestDependencies.IsBeta() function.
+func IsBeta() bool {
+	return os.Getenv("PROVIDER_AIVEN_ENABLE_BETA") != ""
 }
 
 // ComposeID is a helper function that composes an ID from the parts passed in.
