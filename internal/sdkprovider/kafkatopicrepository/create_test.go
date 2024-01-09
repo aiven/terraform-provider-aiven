@@ -2,9 +2,11 @@ package kafkatopicrepository
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/stretchr/testify/assert"
@@ -69,7 +71,50 @@ func TestCreateRecreateMissing(t *testing.T) {
 	assert.True(t, rep.seenTopics["a/b/c"]) // cached again
 }
 
-func TestReInsufficientBrokers(t *testing.T) {
-	assert.True(t, reInsufficientBrokers.MatchString(`{"errors":[{"message":"Cluster only has 2 broker(s), cannot set replication factor to 3","status":409}`))
-	assert.False(t, reInsufficientBrokers.MatchString(`Cluster only has 2 ice creams`))
+func TestCreateRetries(t *testing.T) {
+	errInsufficientBrokers := fmt.Errorf(`{"errors":[{"message":"Cluster only has 2 broker(s), cannot set replication factor to 3","status":409}],"message":"Cluster only has 2 broker(s), cannot set replication factor to 3"}`)
+	cases := []struct {
+		name         string
+		createErr    []error
+		expectErr    error
+		expectCalled int32
+	}{
+		{
+			name:         "bad request error",
+			createErr:    []error{fmt.Errorf("invalid value")},
+			expectErr:    fmt.Errorf("topic create error: All attempts fail:\n#1: invalid value"),
+			expectCalled: 1, // exits on the first unknown error
+		},
+		{
+			name:         "emulates insufficient broker error when create topic",
+			createErr:    []error{errInsufficientBrokers, errInsufficientBrokers},
+			expectCalled: 3, // two errors, three calls, the last one successful
+		},
+		{
+			name: "emulates case when 501 retried in client and then 409 received (ignores 409)",
+			createErr: []error{
+				aiven.Error{Status: 409, Message: "already exists"},
+			},
+			expectCalled: 1, // exists on the first call as it means the topic is created
+		},
+	}
+
+	for _, opt := range cases {
+		t.Run(opt.name, func(t *testing.T) {
+			client := &fakeTopicClient{
+				createErr: opt.createErr,
+			}
+
+			ctx := context.Background()
+			rep := newRepository(client)
+			rep.workerCallInterval = time.Millisecond
+
+			req := aiven.CreateKafkaTopicRequest{
+				TopicName: "my-topic",
+			}
+			err := rep.Create(ctx, "foo", "bar", req)
+			assert.Equal(t, opt.expectErr, err)
+			assert.Equal(t, opt.expectCalled, client.createCalled)
+		})
+	}
 }
