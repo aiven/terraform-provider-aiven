@@ -1497,6 +1497,11 @@ func ServiceTypeGrafana() *schema.Schema {
 					Required:    true,
 					Type:        schema.TypeString,
 				},
+				"skip_org_role_sync": {
+					Description: "Automatically sync user roles.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
 				"team_ids": {
 					Description: "Require users to belong to one of given team IDs.",
 					Elem:        &schema.Schema{Type: schema.TypeInt},
@@ -1527,6 +1532,11 @@ func ServiceTypeGrafana() *schema.Schema {
 					Description: "Client secret from provider.",
 					Required:    true,
 					Type:        schema.TypeString,
+				},
+				"skip_org_role_sync": {
+					Description: "Automatically sync user roles.",
+					Optional:    true,
+					Type:        schema.TypeBool,
 				},
 				"team_ids": {
 					Description: "Require users to belong to one of given team IDs.",
