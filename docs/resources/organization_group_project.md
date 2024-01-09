@@ -3,12 +3,12 @@
 page_title: "aiven_organization_group_project Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an organization group project relations in Aiven. Please note that this resource is in beta and may change without notice. To use this resource, please set the PROVIDERAIVENENABLE_BETA environment variable.
+  Adds and manages a group of users as members of a project. Please note that this resource is in beta and may change without notice. To use this resource, please set the PROVIDERAIVENENABLE_BETA environment variable.
 ---
 
 # aiven_organization_group_project (Resource)
 
-Creates and manages an organization group project relations in Aiven. Please note that this resource is in beta and may change without notice. To use this resource, please set the PROVIDER_AIVEN_ENABLE_BETA environment variable.
+Adds and manages a group of users as members of a project. Please note that this resource is in beta and may change without notice. To use this resource, please set the PROVIDER_AIVEN_ENABLE_BETA environment variable.
 
 
 
@@ -17,9 +17,9 @@ Creates and manages an organization group project relations in Aiven. Please not
 
 ### Required
 
-- `group_id` (String) Organization group identifier of the organization group project relation.
-- `project` (String) Tenant identifier of the organization.
-- `role` (String) Role of the organization group project relation.
+- `group_id` (String) The ID of the user group.
+- `project` (String) The project that the users in the group are members of.
+- `role` (String) Role assigned to the users in the group for the project.
 
 ### Optional
 

@@ -16,39 +16,39 @@ var aivenOrganizationUserGroupSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: userconfig.Desc("The unique organization ID").ForceNew().Build(),
+		Description: userconfig.Desc("The ID of the organization.").ForceNew().Build(),
 	},
 	"name": {
 		Type:        schema.TypeString,
 		Optional:    true,
 		ForceNew:    true,
-		Description: userconfig.Desc("The organization user group name").ForceNew().Build(),
+		Description: userconfig.Desc("The name of the user group.").ForceNew().Build(),
 	},
 	"description": {
 		Type:        schema.TypeString,
 		Optional:    true,
-		Description: userconfig.Desc("The organization user group description").ForceNew().Build(),
+		Description: userconfig.Desc("The description of the user group.").ForceNew().Build(),
 	},
 	"create_time": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Time of creation",
+		Description: "Time of creation.",
 	},
 	"update_time": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Time of last update",
+		Description: "Time of last update.",
 	},
 	"group_id": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "The unique organization user group ID",
+		Description: "The ID of the user group.",
 	},
 }
 
 func ResourceOrganizationUserGroup() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Organization User Group resource allows the creation and management of an Aiven Organization Groups.",
+		Description:   "Creates and manages a user group in an organization.",
 		CreateContext: resourceOrganizationUserGroupCreate,
 		ReadContext:   resourceOrganizationUserGroupRead,
 		UpdateContext: resourceOrganizationUserGroupUpdate,

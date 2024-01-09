@@ -3,12 +3,12 @@
 page_title: "aiven_organization_user_group_member Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an organization user group members in Aiven. Please note that this resource is in beta and may change without notice. To use this resource, please set the PROVIDERAIVENENABLE_BETA environment variable.
+  Adds and manages users in a user group. Please note that this resource is in beta and may change without notice. To use this resource, please set the PROVIDERAIVENENABLE_BETA environment variable.
 ---
 
 # aiven_organization_user_group_member (Resource)
 
-Creates and manages an organization user group members in Aiven. Please note that this resource is in beta and may change without notice. To use this resource, please set the PROVIDER_AIVEN_ENABLE_BETA environment variable.
+Adds and manages users in a user group. Please note that this resource is in beta and may change without notice. To use this resource, please set the PROVIDER_AIVEN_ENABLE_BETA environment variable.
 
 
 
