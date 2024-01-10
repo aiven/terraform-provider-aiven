@@ -27,6 +27,7 @@ Adds and manages users in a user group. Please note that this resource is in bet
 
 ### Read-Only
 
+- `id` (String) Compound identifier of the organization user group member.
 - `last_activity_time` (String) Last activity time of the user group member.
 
 <a id="nestedblock--timeouts"></a>

@@ -19,7 +19,11 @@ func TestAccOrganizationApplicationUserResourceDataSource(t *testing.T) {
 
 	deps.IsBeta(true)
 
-	name := "aiven_organization_application_user.foo"
+	names := []string{
+		"aiven_organization_application_user.foo",
+		"aiven_organization_application_user_token.foo",
+	}
+
 	dname := "data.aiven_organization_application_user.foo"
 
 	suffix := acctest.RandStringFromCharSet(acc.DefaultRandomSuffixLength, acctest.CharSetAlphaNum)
@@ -41,19 +45,19 @@ resource "aiven_organization_application_user" "foo" {
 `, acc.DefaultResourceNamePrefix, suffix, deps.OrganizationName()),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						name,
+						names[0],
 						"name",
 						fmt.Sprintf("%s-org-appuser-%s", acc.DefaultResourceNamePrefix, suffix),
 					),
-					resource.TestCheckResourceAttrSet(name, "id"),
+					resource.TestCheckResourceAttrSet(names[0], "id"),
 				),
 			},
 			{
-				ResourceName:      name,
+				ResourceName:      names[0],
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateIdFunc: func(state *terraform.State) (string, error) {
-					rs, err := acc.ResourceFromState(state, name)
+					rs, err := acc.ResourceFromState(state, names[0])
 					if err != nil {
 						return "", err
 					}
@@ -76,7 +80,7 @@ resource "aiven_organization_application_user" "foo" {
 `, acc.DefaultResourceNamePrefix, suffix, deps.OrganizationName()),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						name,
+						names[0],
 						"name",
 						fmt.Sprintf("%s-org-appuser-%s-1", acc.DefaultResourceNamePrefix, suffix),
 					),
@@ -104,6 +108,33 @@ data "aiven_organization_application_user" "foo" {
 						"name",
 						fmt.Sprintf("%s-org-appuser-%s-1", acc.DefaultResourceNamePrefix, suffix),
 					),
+				),
+			},
+			{
+				Config: fmt.Sprintf(`
+data "aiven_organization" "foo" {
+  name = "%[3]s"
+}
+
+resource "aiven_organization_application_user" "foo" {
+  organization_id = data.aiven_organization.foo.id
+  name            = "%[1]s-org-appuser-%[2]s-1"
+}
+
+resource "aiven_organization_application_user_token" "foo" {
+  organization_id  = aiven_organization_application_user.foo.organization_id
+  user_id          = aiven_organization_application_user.foo.user_id
+  description      = "Terraform acceptance tests"
+  max_age_seconds  = 3600
+  extend_when_used = true
+  scopes           = ["user:read"]
+}
+`, acc.DefaultResourceNamePrefix, suffix, deps.OrganizationName()),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(names[1], "description", "Terraform acceptance tests"),
+					resource.TestCheckResourceAttr(names[1], "max_age_seconds", "3600"),
+					resource.TestCheckResourceAttr(names[1], "extend_when_used", "true"),
+					resource.TestCheckResourceAttr(names[1], "scopes.#", "1"),
 				),
 			},
 		},
