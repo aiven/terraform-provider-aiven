@@ -16,14 +16,9 @@ import (
 func TestAccOrganizationUserGroupMember(t *testing.T) {
 	deps := acc.CommonTestDependencies(t)
 
-	if !deps.IsBeta() {
-		t.Skip(acc.ErrMustSetBetaEnvVar)
-	}
+	_ = deps.IsBeta(true)
 
-	userID := deps.OrganizationUserID()
-	if userID == nil {
-		t.Skip(acc.ErrMustSetOrganizationUserIDEnvVar)
-	}
+	userID := deps.OrganizationUserID(true)
 
 	name := "aiven_organization_user_group_member.foo"
 

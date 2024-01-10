@@ -55,6 +55,9 @@ func GetTestAivenClient() *aiven.Client {
 
 // commonTestDependencies is a struct that contains common dependencies that are used by acceptance tests.
 type commonTestDependencies struct {
+	// t is the testing.T instance that is used for acceptance tests.
+	t *testing.T
+
 	// isBeta is a flag that indicates whether the provider is in beta mode.
 	isBeta bool
 	// organizationName is the name of the organization that is used for acceptance tests.
@@ -64,7 +67,12 @@ type commonTestDependencies struct {
 }
 
 // IsBeta returns a flag that indicates whether the provider is in beta mode.
-func (d *commonTestDependencies) IsBeta() bool {
+// If skip is true, then this function will skip the test if the provider is not in beta mode.
+func (d *commonTestDependencies) IsBeta(skip bool) bool {
+	if skip && !d.isBeta {
+		d.t.Skip(ErrMustSetBetaEnvVar)
+	}
+
 	return d.isBeta
 }
 
@@ -74,7 +82,12 @@ func (d *commonTestDependencies) OrganizationName() string {
 }
 
 // OrganizationUserID returns the ID of the organization user that is used for acceptance tests.
-func (d *commonTestDependencies) OrganizationUserID() *string {
+// If skip is true, then this function will skip the test if the organization user ID is not set.
+func (d *commonTestDependencies) OrganizationUserID(skip bool) *string {
+	if skip && d.organizationUserID == nil {
+		d.t.Skip(ErrMustSetOrganizationUserIDEnvVar)
+	}
+
 	return d.organizationUserID
 }
 
@@ -95,6 +108,8 @@ func CommonTestDependencies(t *testing.T) *commonTestDependencies {
 	}
 
 	deps := &commonTestDependencies{
+		t: t,
+
 		isBeta: util.IsBeta(),
 	}
 
