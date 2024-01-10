@@ -18,7 +18,7 @@ func TestAccOrganizationApplicationUserResourceDataSource(t *testing.T) {
 	deps := acc.CommonTestDependencies(t)
 
 	if !deps.IsBeta() {
-		t.Skip("PROVIDER_AIVEN_ENABLE_BETA must be set for this test to run.")
+		t.Skip(acc.ErrMustSetBetaEnvVar)
 	}
 
 	name := "aiven_organization_application_user.foo"

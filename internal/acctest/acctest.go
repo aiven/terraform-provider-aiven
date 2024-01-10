@@ -16,6 +16,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/server"
 )
@@ -28,6 +29,16 @@ var (
 			return server.NewMuxServer(context.Background(), "test")
 		},
 	}
+)
+
+var (
+	// ErrMustSetBetaEnvVar is an error that is returned when the PROVIDER_AIVEN_ENABLE_BETA environment variable is not
+	// set, but it is required for the concrete acceptance test to run.
+	ErrMustSetBetaEnvVar = "PROVIDER_AIVEN_ENABLE_BETA must be set for this test to run"
+
+	// ErrMustSetOrganizationUserIDEnvVar is an error that is returned when the AIVEN_ORGANIZATION_USER_ID environment
+	// variable is not set, but it is required for the concrete acceptance test to run.
+	ErrMustSetOrganizationUserIDEnvVar = "AIVEN_ORGANIZATION_USER_ID must be set for this test to run"
 )
 
 // GetTestAivenClient returns a new Aiven client that can be used for acceptance tests.
@@ -84,12 +95,12 @@ func CommonTestDependencies(t *testing.T) *commonTestDependencies {
 	}
 
 	deps := &commonTestDependencies{
-		isBeta: os.Getenv("PROVIDER_AIVEN_ENABLE_BETA") != "",
+		isBeta: util.IsBeta(),
 	}
 
 	organizationName, ok := os.LookupEnv("AIVEN_ORGANIZATION_NAME")
 	if !ok {
-		t.Fatal("AIVEN_ORGANIZATION_NAME environment variable must be set for acceptance tests.")
+		t.Fatal("AIVEN_ORGANIZATION_NAME environment variable must be set for acceptance tests")
 	}
 	deps.organizationName = organizationName
 
@@ -113,11 +124,11 @@ const (
 // It is used to perform any pre-test setup, such as environment variable validation.
 func TestAccPreCheck(t *testing.T) {
 	if _, ok := os.LookupEnv("AIVEN_TOKEN"); !ok {
-		t.Fatal("AIVEN_TOKEN environment variable must be set for acceptance tests.")
+		t.Fatal("AIVEN_TOKEN environment variable must be set for acceptance tests")
 	}
 
 	if _, ok := os.LookupEnv("AIVEN_PROJECT_NAME"); !ok {
-		t.Log("AIVEN_PROJECT_NAME environment variable is not set. Some acceptance tests will be skipped.")
+		t.Log("AIVEN_PROJECT_NAME environment variable is not set. Some acceptance tests will be skipped")
 	}
 }
 
