@@ -16,9 +16,7 @@ import (
 func TestAccOrganizationGroupProject(t *testing.T) {
 	deps := acc.CommonTestDependencies(t)
 
-	if !deps.IsBeta() {
-		t.Skip(acc.ErrMustSetBetaEnvVar)
-	}
+	_ = deps.IsBeta(true)
 
 	name := "aiven_organization_group_project.foo"
 

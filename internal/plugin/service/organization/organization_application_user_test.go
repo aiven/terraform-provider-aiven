@@ -17,9 +17,7 @@ import (
 func TestAccOrganizationApplicationUserResourceDataSource(t *testing.T) {
 	deps := acc.CommonTestDependencies(t)
 
-	if !deps.IsBeta() {
-		t.Skip(acc.ErrMustSetBetaEnvVar)
-	}
+	deps.IsBeta(true)
 
 	name := "aiven_organization_application_user.foo"
 	dname := "data.aiven_organization_application_user.foo"
