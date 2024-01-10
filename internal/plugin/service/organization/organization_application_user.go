@@ -43,10 +43,10 @@ type organizationApplicationUser struct {
 type organizationApplicationUserModel struct {
 	// ID is the identifier of the organization application user.
 	ID types.String `tfsdk:"id"`
-	// UserID is the identifier of the organization application user.
-	UserID types.String `tfsdk:"user_id"`
 	// OrganizationID is the identifier of the organization the application user belongs to.
 	OrganizationID types.String `tfsdk:"organization_id"`
+	// UserID is the identifier of the organization application user.
+	UserID types.String `tfsdk:"user_id"`
 	// Name is the name of the organization application user.
 	Name types.String `tfsdk:"name"`
 	// Email is the email of the organization application user.
@@ -87,16 +87,16 @@ func (r *organizationApplicationUser) Schema(
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"organization_id": schema.StringAttribute{
+				Description: "Identifier of the organization the application user belongs to.",
+				Required:    true,
+			},
 			"user_id": schema.StringAttribute{
 				Description: "Identifier of the organization application user.",
 				Computed:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-			},
-			"organization_id": schema.StringAttribute{
-				Description: "Identifier of the organization the application user belongs to.",
-				Required:    true,
 			},
 			"name": schema.StringAttribute{
 				Description: "Name of the organization application user.",

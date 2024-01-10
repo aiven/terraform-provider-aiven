@@ -94,8 +94,8 @@ resource "aiven_organization_application_user" "foo" {
 }
 
 data "aiven_organization_application_user" "foo" {
-  user_id         = aiven_organization_application_user.foo.user_id
   organization_id = data.aiven_organization.foo.id
+  user_id         = aiven_organization_application_user.foo.user_id
 }
 `, acc.DefaultResourceNamePrefix, suffix, deps.OrganizationName()),
 				Check: resource.ComposeAggregateTestCheckFunc(
