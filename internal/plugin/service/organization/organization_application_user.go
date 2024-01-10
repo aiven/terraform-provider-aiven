@@ -90,6 +90,9 @@ func (r *organizationApplicationUser) Schema(
 			"organization_id": schema.StringAttribute{
 				Description: "Identifier of the organization the application user belongs to.",
 				Required:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"user_id": schema.StringAttribute{
 				Description: "Identifier of the organization application user.",
