@@ -168,6 +168,7 @@ Read-Only:
 - `allowed_organizations` (List of String)
 - `client_id` (String)
 - `client_secret` (String)
+- `skip_org_role_sync` (Boolean)
 - `team_ids` (List of Number)
 
 
