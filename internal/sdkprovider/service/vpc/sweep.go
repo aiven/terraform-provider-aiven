@@ -108,7 +108,6 @@ func sweepVPCs(ctx context.Context, client *aiven.Client) func(string) error {
 		}
 
 		for _, vpc := range vpcs {
-
 			err := client.VPCs.Delete(ctx, projectName, vpc.ProjectVPCID)
 			if common.IsCritical(err) {
 				return fmt.Errorf("error deleting vpc %s: %s", vpc.ProjectVPCID, err)
