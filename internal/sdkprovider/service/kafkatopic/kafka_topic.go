@@ -2,8 +2,11 @@ package kafkatopic
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -15,6 +18,175 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/kafkatopicrepository"
 )
+
+var errLocalRetentionBytesOverflow = fmt.Errorf("local_retention_bytes must not be more than retention_bytes value")
+var errLocalRetentionBytesDependency = fmt.Errorf("local_retention_bytes can't be set without retention_bytes")
+
+var aivenKafkaTopicConfigSchema = map[string]*schema.Schema{
+	"cleanup_policy": {
+		Type:             schema.TypeString,
+		Description:      "cleanup.policy value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"compression_type": {
+		Type:             schema.TypeString,
+		Description:      "compression.type value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"delete_retention_ms": {
+		Type:             schema.TypeString,
+		Description:      "delete.retention.ms value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"file_delete_delay_ms": {
+		Type:             schema.TypeString,
+		Description:      "file.delete.delay.ms value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"flush_messages": {
+		Type:             schema.TypeString,
+		Description:      "flush.messages value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"flush_ms": {
+		Type:             schema.TypeString,
+		Description:      "flush.ms value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"index_interval_bytes": {
+		Type:             schema.TypeString,
+		Description:      "index.interval.bytes value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"max_compaction_lag_ms": {
+		Type:             schema.TypeString,
+		Description:      "max.compaction.lag.ms value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"max_message_bytes": {
+		Type:             schema.TypeString,
+		Description:      "max.message.bytes value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"message_downconversion_enable": {
+		Type:             schema.TypeBool,
+		Description:      "message.downconversion.enable value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"message_format_version": {
+		Type:             schema.TypeString,
+		Description:      "message.format.version value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"message_timestamp_difference_max_ms": {
+		Type:             schema.TypeString,
+		Description:      "message.timestamp.difference.max.ms value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"message_timestamp_type": {
+		Type:             schema.TypeString,
+		Description:      "message.timestamp.type value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"min_cleanable_dirty_ratio": {
+		Type:             schema.TypeFloat,
+		Description:      "min.cleanable.dirty.ratio value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"min_compaction_lag_ms": {
+		Type:             schema.TypeString,
+		Description:      "min.compaction.lag.ms value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"min_insync_replicas": {
+		Type:             schema.TypeString,
+		Description:      "min.insync.replicas value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"preallocate": {
+		Type:             schema.TypeBool,
+		Description:      "preallocate value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"retention_bytes": {
+		Type:             schema.TypeString,
+		Description:      "retention.bytes value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"retention_ms": {
+		Type:             schema.TypeString,
+		Description:      "retention.ms value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"segment_bytes": {
+		Type:             schema.TypeString,
+		Description:      "segment.bytes value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"segment_index_bytes": {
+		Type:             schema.TypeString,
+		Description:      "segment.index.bytes value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"segment_jitter_ms": {
+		Type:             schema.TypeString,
+		Description:      "segment.jitter.ms value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"segment_ms": {
+		Type:             schema.TypeString,
+		Description:      "segment.ms value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"unclean_leader_election_enable": {
+		Type:             schema.TypeBool,
+		Description:      "unclean.leader.election.enable value; This field is deprecated and no longer functional.",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+		Deprecated:       "This field is deprecated and no longer functional.",
+	},
+	"remote_storage_enable": {
+		Type:             schema.TypeBool,
+		Description:      "remote.storage.enable value",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"local_retention_bytes": {
+		Type:             schema.TypeString,
+		Description:      "local.retention.bytes value. This field is temporarily disabled.",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+	"local_retention_ms": {
+		Type:             schema.TypeString,
+		Description:      "local.retention.ms value. This field is temporarily disabled.",
+		Optional:         true,
+		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
+	},
+}
 
 var aivenKafkaTopicSchema = map[string]*schema.Schema{
 	"project":      schemautil.CommonSchemaProjectReference,
@@ -70,171 +242,7 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 		MaxItems:         1,
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"cleanup_policy": {
-					Type:             schema.TypeString,
-					Description:      "cleanup.policy value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"compression_type": {
-					Type:             schema.TypeString,
-					Description:      "compression.type value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"delete_retention_ms": {
-					Type:             schema.TypeString,
-					Description:      "delete.retention.ms value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"file_delete_delay_ms": {
-					Type:             schema.TypeString,
-					Description:      "file.delete.delay.ms value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"flush_messages": {
-					Type:             schema.TypeString,
-					Description:      "flush.messages value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"flush_ms": {
-					Type:             schema.TypeString,
-					Description:      "flush.ms value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"index_interval_bytes": {
-					Type:             schema.TypeString,
-					Description:      "index.interval.bytes value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"max_compaction_lag_ms": {
-					Type:             schema.TypeString,
-					Description:      "max.compaction.lag.ms value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"max_message_bytes": {
-					Type:             schema.TypeString,
-					Description:      "max.message.bytes value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"message_downconversion_enable": {
-					Type:             schema.TypeBool,
-					Description:      "message.downconversion.enable value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"message_format_version": {
-					Type:             schema.TypeString,
-					Description:      "message.format.version value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"message_timestamp_difference_max_ms": {
-					Type:             schema.TypeString,
-					Description:      "message.timestamp.difference.max.ms value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"message_timestamp_type": {
-					Type:             schema.TypeString,
-					Description:      "message.timestamp.type value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"min_cleanable_dirty_ratio": {
-					Type:             schema.TypeFloat,
-					Description:      "min.cleanable.dirty.ratio value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"min_compaction_lag_ms": {
-					Type:             schema.TypeString,
-					Description:      "min.compaction.lag.ms value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"min_insync_replicas": {
-					Type:             schema.TypeString,
-					Description:      "min.insync.replicas value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"preallocate": {
-					Type:             schema.TypeBool,
-					Description:      "preallocate value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"retention_bytes": {
-					Type:             schema.TypeString,
-					Description:      "retention.bytes value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"retention_ms": {
-					Type:             schema.TypeString,
-					Description:      "retention.ms value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"segment_bytes": {
-					Type:             schema.TypeString,
-					Description:      "segment.bytes value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"segment_index_bytes": {
-					Type:             schema.TypeString,
-					Description:      "segment.index.bytes value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"segment_jitter_ms": {
-					Type:             schema.TypeString,
-					Description:      "segment.jitter.ms value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"segment_ms": {
-					Type:             schema.TypeString,
-					Description:      "segment.ms value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"unclean_leader_election_enable": {
-					Type:             schema.TypeBool,
-					Description:      "unclean.leader.election.enable value; This field is deprecated and no longer functional.",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-					Deprecated:       "This field is deprecated and no longer functional.",
-				},
-				"remote_storage_enable": {
-					Type:             schema.TypeBool,
-					Description:      "remote.storage.enable value",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"local_retention_bytes": {
-					Type:             schema.TypeString,
-					Description:      "local.retention.bytes value. This field is temporarily disabled.",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-				"local_retention_ms": {
-					Type:             schema.TypeString,
-					Description:      "local.retention.ms value. This field is temporarily disabled.",
-					Optional:         true,
-					DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-				},
-			},
+			Schema: aivenKafkaTopicConfigSchema,
 		},
 	},
 }
@@ -268,6 +276,28 @@ func ResourceKafkaTopic() *schema.Resource {
 
 			if assertedOldPartitions > assertedNewPartitions {
 				return errors.New("number of partitions cannot be decreased")
+			}
+
+			retentionBytes, rOk := d.GetOk("config.0.retention_bytes")
+			localRetentionBytes, lOk := d.GetOk("config.0.local_retention_bytes")
+
+			switch {
+			case lOk && !rOk:
+				return errLocalRetentionBytesDependency
+			case lOk && rOk:
+				r, err := strconv.ParseInt(retentionBytes.(string), 10, 64)
+				if err != nil {
+					return err
+				}
+
+				l, err := strconv.ParseInt(localRetentionBytes.(string), 10, 64)
+				if err != nil {
+					return err
+				}
+
+				if r < l {
+					return errLocalRetentionBytesOverflow
+				}
 			}
 
 			return nil
@@ -356,8 +386,8 @@ func getKafkaTopicConfig(d *schema.ResourceData) aiven.KafkaTopicConfig {
 		SegmentMs:                       schemautil.ParseOptionalStringToInt64(configRaw["segment_ms"]),
 		UncleanLeaderElectionEnable:     schemautil.OptionalBoolPointer(d, "config.0.unclean_leader_election_enable"),
 		RemoteStorageEnable:             schemautil.OptionalBoolPointer(d, "config.0.remote_storage_enable"),
-		//LocalRetentionBytes:             schemautil.ParseOptionalStringToInt64(configRaw["local_retention_bytes"]),
-		//LocalRetentionMs:                schemautil.ParseOptionalStringToInt64(configRaw["local_retention_ms"]),
+		LocalRetentionBytes:             schemautil.ParseOptionalStringToInt64(configRaw["local_retention_bytes"]),
+		LocalRetentionMs:                schemautil.ParseOptionalStringToInt64(configRaw["local_retention_ms"]),
 	}
 }
 
@@ -404,7 +434,12 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 	if err := d.Set("replication", topic.Replication); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("config", flattenKafkaTopicConfig(topic)); err != nil {
+
+	config, err := FlattenKafkaTopicConfig(topic)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("config", config); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -484,36 +519,29 @@ func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, m int
 	return nil
 }
 
-func flattenKafkaTopicConfig(t *aiven.KafkaTopic) []map[string]interface{} {
-	return []map[string]interface{}{
-		{
-			"cleanup_policy":                      schemautil.ToOptionalString(t.Config.CleanupPolicy.Value),
-			"compression_type":                    schemautil.ToOptionalString(t.Config.CompressionType.Value),
-			"delete_retention_ms":                 schemautil.ToOptionalString(t.Config.DeleteRetentionMs.Value),
-			"file_delete_delay_ms":                schemautil.ToOptionalString(t.Config.FileDeleteDelayMs.Value),
-			"flush_messages":                      schemautil.ToOptionalString(t.Config.FlushMessages.Value),
-			"flush_ms":                            schemautil.ToOptionalString(t.Config.FlushMs.Value),
-			"index_interval_bytes":                schemautil.ToOptionalString(t.Config.IndexIntervalBytes.Value),
-			"max_compaction_lag_ms":               schemautil.ToOptionalString(t.Config.MaxCompactionLagMs.Value),
-			"max_message_bytes":                   schemautil.ToOptionalString(t.Config.MaxMessageBytes.Value),
-			"message_downconversion_enable":       t.Config.MessageDownconversionEnable.Value,
-			"message_format_version":              schemautil.ToOptionalString(t.Config.MessageFormatVersion.Value),
-			"message_timestamp_difference_max_ms": schemautil.ToOptionalString(t.Config.MessageTimestampDifferenceMaxMs.Value),
-			"message_timestamp_type":              schemautil.ToOptionalString(t.Config.MessageTimestampType.Value),
-			"min_cleanable_dirty_ratio":           t.Config.MinCleanableDirtyRatio.Value,
-			"min_compaction_lag_ms":               schemautil.ToOptionalString(t.Config.MinCompactionLagMs.Value),
-			"min_insync_replicas":                 schemautil.ToOptionalString(t.Config.MinInsyncReplicas.Value),
-			"preallocate":                         t.Config.Preallocate.Value,
-			"retention_bytes":                     schemautil.ToOptionalString(t.Config.RetentionBytes.Value),
-			"retention_ms":                        schemautil.ToOptionalString(t.Config.RetentionMs.Value),
-			"segment_bytes":                       schemautil.ToOptionalString(t.Config.SegmentBytes.Value),
-			"segment_index_bytes":                 schemautil.ToOptionalString(t.Config.SegmentIndexBytes.Value),
-			"segment_jitter_ms":                   schemautil.ToOptionalString(t.Config.SegmentJitterMs.Value),
-			"segment_ms":                          schemautil.ToOptionalString(t.Config.SegmentMs.Value),
-			"unclean_leader_election_enable":      t.Config.UncleanLeaderElectionEnable.Value,
-			"remote_storage_enable":               t.Config.RemoteStorageEnable.Value,
-			//"local_retention_bytes":               schemautil.ToOptionalString(t.Config.LocalRetentionBytes.Value),
-			//"local_retention_ms":                  schemautil.ToOptionalString(t.Config.LocalRetentionMs.Value),
-		},
+func FlattenKafkaTopicConfig(t *aiven.KafkaTopic) ([]map[string]interface{}, error) {
+	source := make(map[string]struct {
+		Value any `json:"value"`
+	})
+
+	data, err := json.Marshal(t.Config)
+	if err != nil {
+		return nil, err
 	}
+
+	err = json.Unmarshal(data, &source)
+	if err != nil {
+		return nil, err
+	}
+
+	config := make(map[string]any)
+	for k, v := range source {
+		if aivenKafkaTopicConfigSchema[k].Type == schema.TypeString {
+			config[k] = schemautil.ToOptionalString(v.Value)
+		} else {
+			config[k] = v.Value
+		}
+	}
+
+	return []map[string]interface{}{config}, nil
 }
