@@ -18,6 +18,7 @@ import (
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/m3db"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/mysql"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/opensearch"
+	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/organization"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/pg"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/project"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/redis"
