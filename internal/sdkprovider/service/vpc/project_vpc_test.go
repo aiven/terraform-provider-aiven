@@ -27,7 +27,7 @@ func TestAccAivenProjectVPC_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				PlanOnly:    true,
-				Config:      testAccProjectVPCResourceFail(rName),
+				Config:      testAccProjectVPCResourceFail(),
 				ExpectError: regexp.MustCompile("invalid resource id"),
 			},
 			{
@@ -154,21 +154,11 @@ resource "aiven_pg" "bar" {
 `, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
-func testAccProjectVPCResourceFail(name string) string {
-	return fmt.Sprintf(`
-resource "aiven_project" "foo" {
-  project = "test-acc-pr-%s"
-}
-
-resource "aiven_project_vpc" "bar" {
-  project      = aiven_project.foo.project
-  cloud_name   = "google-europe-west1"
-  network_cidr = "192.168.0.0/24"
-}
-
+func testAccProjectVPCResourceFail() string {
+	return `
 data "aiven_project_vpc" "vpc" {
   vpc_id = "some_wrong_id"
-}`, name)
+}`
 }
 
 func testAccProjectVPCResourceGetByID() string {

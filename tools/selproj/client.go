@@ -9,69 +9,34 @@ import (
 )
 
 // AivenClient defines the interface for Aiven client operations.
-// It is implemented by AivenClientAdapter.
+// It is implemented by aivenClientAdapter.
 type AivenClient interface {
-	Projects() ProjectsHandler
-	Services() ServicesHandler
+	ProjectList(ctx context.Context) ([]*aiven.Project, error)
+	ServiceList(ctx context.Context, projectName string) ([]*aiven.Service, error)
+	VPCList(ctx context.Context, projectName string) ([]*aiven.VPC, error)
 }
 
-// ProjectsHandler defines the interface for project handling operations.
-// It is implemented by ProjectsHandlerAdapter and MockProjectsHandler.
-type ProjectsHandler interface {
-	List(ctx context.Context) ([]*aiven.Project, error)
-}
-
-// ServicesHandler defines the interface for service handling operations.
-// It is implemented by ServicesHandlerAdapter and MockServicesHandler.
-type ServicesHandler interface {
-	List(ctx context.Context, projectName string) ([]*aiven.Service, error)
-}
+var _ AivenClient = (*aivenClientAdapter)(nil)
 
 // NewAivenClientAdapter creates a new adapter for the given aiven.Client.
 // This is needed because the aiven.Client does not implement an interface that is mockable.
 func NewAivenClientAdapter(client *aiven.Client) AivenClient {
-	return &AivenClientAdapter{client: client}
+	return &aivenClientAdapter{client: client}
 }
 
-// AivenClientAdapter adapts aiven.Client to AivenClient.
-type AivenClientAdapter struct {
+// aivenClientAdapter adapts aiven.Client to AivenClient.
+type aivenClientAdapter struct {
 	client *aiven.Client
 }
 
-// Projects returns the projects handler.
-func (a *AivenClientAdapter) Projects() ProjectsHandler {
-	return &ProjectsHandlerAdapter{handler: a.client.Projects}
+func (a *aivenClientAdapter) ProjectList(ctx context.Context) ([]*aiven.Project, error) {
+	return a.client.Projects.List(ctx)
 }
 
-// Services returns the services handler.
-func (a *AivenClientAdapter) Services() ServicesHandler {
-	return &ServicesHandlerAdapter{handler: a.client.Services}
+func (a *aivenClientAdapter) ServiceList(ctx context.Context, projectName string) ([]*aiven.Service, error) {
+	return a.client.Services.List(ctx, projectName)
 }
 
-// ProjectsHandlerAdapter adapts aiven.ProjectsHandler to ProjectsHandler.
-// This is needed because the aiven.ProjectsHandler does not implement an interface that is mockable.
-type ProjectsHandlerAdapter struct {
-	handler *aiven.ProjectsHandler
+func (a *aivenClientAdapter) VPCList(ctx context.Context, projectName string) ([]*aiven.VPC, error) {
+	return a.client.VPCs.List(ctx, projectName)
 }
-
-// List returns a list of projects.
-func (a *ProjectsHandlerAdapter) List(ctx context.Context) ([]*aiven.Project, error) {
-	return a.handler.List(ctx)
-}
-
-// ServicesHandlerAdapter adapts aiven.ServicesHandler to ServicesHandler.
-// This is needed because the aiven.ServicesHandler does not implement an interface that is mockable.
-type ServicesHandlerAdapter struct {
-	handler *aiven.ServicesHandler
-}
-
-// List returns a list of services.
-func (a *ServicesHandlerAdapter) List(ctx context.Context, projectName string) ([]*aiven.Service, error) {
-	return a.handler.List(ctx, projectName)
-}
-
-var _ AivenClient = (*AivenClientAdapter)(nil)
-
-var _ ProjectsHandler = (*ProjectsHandlerAdapter)(nil)
-
-var _ ServicesHandler = (*ServicesHandlerAdapter)(nil)
