@@ -43,7 +43,7 @@ func SweepServices(ctx context.Context, t string) error {
 	projectName := os.Getenv("AIVEN_PROJECT_NAME")
 
 	services, err := client.Services.List(ctx, projectName)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return fmt.Errorf("error retrieving a list of services for a project `%s`: %w", projectName, err)
 	}
 
@@ -75,7 +75,7 @@ func SweepServices(ctx context.Context, t string) error {
 		}
 
 		if err := client.Services.Delete(ctx, projectName, s.Name); err != nil {
-			if err != nil && !aiven.IsNotFound(err) {
+			if common.IsCritical(err) {
 				return fmt.Errorf("error destroying service %s during sweep: %s", s.Name, err)
 			}
 		}

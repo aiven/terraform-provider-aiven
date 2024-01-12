@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
 func TestAccAivenBillingGroup_basic(t *testing.T) {
@@ -55,7 +56,7 @@ func testAccCheckAivenBillingGroupResourceDestroy(s *terraform.State) error {
 		}
 
 		db, err := c.BillingGroup.Get(ctx, rs.Primary.ID)
-		if err != nil && !aiven.IsNotFound(err) && err.(aiven.Error).Status != 500 {
+		if common.IsCritical(err) && err.(aiven.Error).Status != 500 {
 			return fmt.Errorf("error getting a billing group by id: %w", err)
 		}
 

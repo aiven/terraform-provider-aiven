@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -116,7 +117,7 @@ func resourceAzureVPCPeeringConnectionCreate(ctx context.Context, d *schema.Reso
 		vnetName,
 		&peerResourceGroup,
 	)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.Errorf("error checking azure connection: %s", err)
 	}
 
@@ -229,7 +230,7 @@ func resourceAzureVPCPeeringConnectionDelete(ctx context.Context, d *schema.Reso
 		peerResourceGroup,
 		p.peerRegion,
 	)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.Errorf("Error deleting VPC peering connection with resource group: %s", err)
 	}
 

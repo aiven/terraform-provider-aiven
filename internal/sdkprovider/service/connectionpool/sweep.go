@@ -10,6 +10,7 @@ import (
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
@@ -34,7 +35,7 @@ func sweepConnectionPoll(ctx context.Context, client *aiven.Client) func(string)
 		projectName := os.Getenv("AIVEN_PROJECT_NAME")
 
 		services, err := client.Services.List(ctx, projectName)
-		if err != nil && !aiven.IsNotFound(err) {
+		if common.IsCritical(err) {
 			return fmt.Errorf("error retrieving a list of services for a project `%s`: %w", projectName, err)
 		}
 
@@ -44,13 +45,13 @@ func sweepConnectionPoll(ctx context.Context, client *aiven.Client) func(string)
 			}
 
 			l, err := client.ConnectionPools.List(ctx, projectName, s.Name)
-			if err != nil && !aiven.IsNotFound(err) {
+			if common.IsCritical(err) {
 				return err
 			}
 
 			for _, pool := range l {
 				err = client.ConnectionPools.Delete(ctx, projectName, s.Name, pool.PoolName)
-				if err != nil && !aiven.IsNotFound(err) {
+				if common.IsCritical(err) {
 					return err
 				}
 			}

@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -138,7 +139,7 @@ func resourceOpenSearchUserDelete(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	err = client.ServiceUsers.Delete(ctx, projectName, serviceName, username)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		var e aiven.Error
 
 		// This is a special case where the user is not managed by Aiven, but by the OpenSearch Security plugin.

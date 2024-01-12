@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -177,7 +178,7 @@ func WaitForDeletion(ctx context.Context, d *schema.ResourceData, m interface{})
 		ContinuousTargetOccurence: 5,
 		Refresh: func() (interface{}, string, error) {
 			_, err := client.Services.Get(ctx, projectName, serviceName)
-			if err != nil && !aiven.IsNotFound(err) {
+			if common.IsCritical(err) {
 				return nil, "", fmt.Errorf("unable to check if service is gone: %w", err)
 			}
 

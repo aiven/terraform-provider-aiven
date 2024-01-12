@@ -7,12 +7,12 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -475,7 +475,7 @@ func testAccCheckAivenServiceIntegrationResourceDestroy(s *terraform.State) erro
 		}
 
 		i, err := c.ServiceIntegrations.Get(ctx, projectName, integrationID)
-		if err != nil && !aiven.IsNotFound(err) {
+		if common.IsCritical(err) {
 			return err
 		}
 		if i != nil {

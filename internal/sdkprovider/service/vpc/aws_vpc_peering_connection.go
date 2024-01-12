@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -103,7 +104,7 @@ func resourceAWSVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 		awsVPCId,
 		&awsVPCRegion,
 	)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.Errorf("error checking aws peering connection: %s", err)
 	}
 
@@ -212,7 +213,7 @@ func resourceAWSVPCPeeringConnectionDelete(ctx context.Context, d *schema.Resour
 		p.peerVPC,
 		p.peerRegion,
 	)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.Errorf("Error deleting VPC peering connection: %s", err)
 	}
 

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
@@ -22,7 +23,7 @@ type DatabaseDeleteWaiter struct {
 func (w *DatabaseDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		err := w.Client.Databases.Delete(w.Context, w.ProjectName, w.ServiceName, w.Database)
-		if err != nil && !aiven.IsNotFound(err) {
+		if common.IsCritical(err) {
 			return nil, "REMOVING", nil
 		}
 

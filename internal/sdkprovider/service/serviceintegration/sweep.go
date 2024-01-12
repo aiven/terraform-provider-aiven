@@ -10,6 +10,7 @@ import (
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
 
@@ -37,7 +38,7 @@ func sweepServiceIntegrations(ctx context.Context, client *aiven.Client) func(re
 		projectName := os.Getenv("AIVEN_PROJECT_NAME")
 
 		services, err := client.Services.List(ctx, projectName)
-		if err != nil && !aiven.IsNotFound(err) {
+		if common.IsCritical(err) {
 			return fmt.Errorf("error retrieving a list of service for a project `%s`: %s", projectName, err)
 		}
 
@@ -82,7 +83,7 @@ func sweepServiceIntegrationEndpoints(ctx context.Context, client *aiven.Client)
 
 		for _, endpoint := range endpoints {
 			err = client.ServiceIntegrationEndpoints.Delete(ctx, projectName, endpoint.EndpointID)
-			if err != nil && !aiven.IsNotFound(err) {
+			if common.IsCritical(err) {
 				return err
 			}
 		}

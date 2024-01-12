@@ -6,12 +6,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -66,7 +66,7 @@ func testAccCheckAivenFlinkDestroy(s *terraform.State) error {
 		}
 
 		v, err := client.FlinkApplicationVersions.Get(ctx, project, serviceName, applicationID, version)
-		if err != nil && !aiven.IsNotFound(err) {
+		if common.IsCritical(err) {
 			return err
 		}
 

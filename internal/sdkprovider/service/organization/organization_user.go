@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -162,7 +163,7 @@ func resourceOrganizationUserDelete(ctx context.Context, d *schema.ResourceData,
 
 		if userInfo.UserEmail == userEmail {
 			err = client.OrganizationUser.Delete(ctx, organizationID, u.UserID)
-			if err != nil && !aiven.IsNotFound(err) {
+			if common.IsCritical(err) {
 				return diag.FromErr(err)
 			}
 			found = true
