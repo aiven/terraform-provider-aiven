@@ -3,12 +3,12 @@
 page_title: "aiven_organization_user_group Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Organization User Group resource allows the creation and management of an Aiven Organization Groups.
+  Creates and manages a user group in an organization.
 ---
 
 # aiven_organization_user_group (Resource)
 
-The Organization User Group resource allows the creation and management of an Aiven Organization Groups.
+Creates and manages a user group in an organization.
 
 
 
@@ -17,20 +17,20 @@ The Organization User Group resource allows the creation and management of an Ai
 
 ### Required
 
-- `organization_id` (String) The unique organization ID. This property cannot be changed, doing so forces recreation of the resource.
+- `organization_id` (String) The ID of the organization. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Optional
 
-- `description` (String) The organization user group description. This property cannot be changed, doing so forces recreation of the resource.
-- `name` (String) The organization user group name. This property cannot be changed, doing so forces recreation of the resource.
+- `description` (String) The description of the user group. This property cannot be changed, doing so forces recreation of the resource.
+- `name` (String) The name of the user group. This property cannot be changed, doing so forces recreation of the resource.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- `create_time` (String) Time of creation
-- `group_id` (String) The unique organization user group ID
+- `create_time` (String) Time of creation.
+- `group_id` (String) The ID of the user group.
 - `id` (String) The ID of this resource.
-- `update_time` (String) Time of last update
+- `update_time` (String) Time of last update.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

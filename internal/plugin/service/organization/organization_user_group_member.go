@@ -73,7 +73,7 @@ func (r *organizationUserGroupMembersResource) Schema(
 	resp *resource.SchemaResponse,
 ) {
 	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
-		Description: util.BetaDescription("Creates and manages an organization user group members in Aiven."),
+		Description: util.BetaDescription("Adds and manages users in a user group."),
 		Attributes: map[string]schema.Attribute{
 			"organization_id": schema.StringAttribute{
 				Description: "Identifier of the organization.",

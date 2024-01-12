@@ -78,7 +78,7 @@ func (r *organizationGroupProjectResource) Schema(
 	resp *resource.SchemaResponse) {
 	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
 		Description: util.BetaDescription(
-			"Creates and manages an organization group project relations in Aiven.",
+			"Adds and manages a group of users as members of a project.",
 		),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -89,21 +89,21 @@ func (r *organizationGroupProjectResource) Schema(
 				},
 			},
 			"project": schema.StringAttribute{
-				Description: "Tenant identifier of the organization.",
+				Description: "The project that the users in the group are members of.",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"group_id": schema.StringAttribute{
-				Description: "Organization group identifier of the organization group project relation.",
+				Description: "The ID of the user group.",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"role": schema.StringAttribute{
-				Description: "Role of the organization group project relation.",
+				Description: "Role assigned to the users in the group for the project.",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),

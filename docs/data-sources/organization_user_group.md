@@ -3,12 +3,12 @@
 page_title: "aiven_organization_user_group Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Organization User Groupe data source provides information about the existing Aiven Organization User Group.
+  Provides information about an existing user group in an organization.
 ---
 
 # aiven_organization_user_group (Data Source)
 
-The Organization User Groupe data source provides information about the existing Aiven Organization User Group.
+Provides information about an existing user group in an organization.
 
 
 
@@ -17,13 +17,13 @@ The Organization User Groupe data source provides information about the existing
 
 ### Required
 
-- `name` (String) The organization user group name. This property cannot be changed, doing so forces recreation of the resource.
-- `organization_id` (String) The unique organization ID. This property cannot be changed, doing so forces recreation of the resource.
+- `name` (String) The name of the user group. This property cannot be changed, doing so forces recreation of the resource.
+- `organization_id` (String) The ID of the organization. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Read-Only
 
-- `create_time` (String) Time of creation
-- `description` (String) The organization user group description. This property cannot be changed, doing so forces recreation of the resource.
-- `group_id` (String) The unique organization user group ID
+- `create_time` (String) Time of creation.
+- `description` (String) The description of the user group. This property cannot be changed, doing so forces recreation of the resource.
+- `group_id` (String) The ID of the user group.
 - `id` (String) The ID of this resource.
-- `update_time` (String) Time of last update
+- `update_time` (String) Time of last update.
