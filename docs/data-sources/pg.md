@@ -93,18 +93,17 @@ Read-Only:
 
 Read-Only:
 
-- `additional_backup_regions` (List of String)
+- `additional_backup_regions` (Set of String)
 - `admin_password` (String)
 - `admin_username` (String)
 - `backup_hour` (Number)
 - `backup_minute` (Number)
 - `enable_ipv6` (Boolean)
-- `ip_filter` (List of String)
+- `ip_filter` (Set of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--ip_filter_object))
-- `ip_filter_string` (List of String)
+- `ip_filter_string` (Set of String)
 - `migration` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--migration))
 - `pg` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pg))
-- `pg_qualstats` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pg_qualstats))
 - `pg_read_replica` (Boolean)
 - `pg_service_to_fork_from` (String)
 - `pg_stat_monitor_enable` (Boolean)
@@ -116,7 +115,6 @@ Read-Only:
 - `project_to_fork_from` (String)
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--public_access))
 - `recovery_target_time` (String)
-- `service_log` (Boolean)
 - `service_to_fork_from` (String)
 - `shared_buffers_percentage` (Number)
 - `static_ips` (Boolean)
@@ -205,18 +203,6 @@ Read-Only:
 - `wal_writer_delay` (Number)
 
 
-<a id="nestedobjatt--pg_user_config--pg_qualstats"></a>
-### Nested Schema for `pg_user_config.pg_qualstats`
-
-Read-Only:
-
-- `enabled` (Boolean)
-- `min_err_estimate_num` (Number)
-- `min_err_estimate_ratio` (Number)
-- `track_constants` (Boolean)
-- `track_pg_catalog` (Boolean)
-
-
 <a id="nestedobjatt--pg_user_config--pgbouncer"></a>
 ### Nested Schema for `pg_user_config.pgbouncer`
 
@@ -226,7 +212,7 @@ Read-Only:
 - `autodb_max_db_connections` (Number)
 - `autodb_pool_mode` (String)
 - `autodb_pool_size` (Number)
-- `ignore_startup_parameters` (List of String)
+- `ignore_startup_parameters` (Set of String)
 - `min_pool_size` (Number)
 - `server_idle_timeout` (Number)
 - `server_lifetime` (Number)

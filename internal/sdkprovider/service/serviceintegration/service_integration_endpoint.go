@@ -11,10 +11,8 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/integration_endpoint"
 )
 
 var integrationEndpointTypes = []string{
@@ -60,19 +58,19 @@ var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
 		Type:        schema.TypeMap,
 		Elem:        &schema.Schema{Type: schema.TypeString},
 	},
-	"datadog_user_config":                         dist.IntegrationEndpointTypeDatadog(),
-	"prometheus_user_config":                      dist.IntegrationEndpointTypePrometheus(),
-	"rsyslog_user_config":                         dist.IntegrationEndpointTypeRsyslog(),
-	"external_elasticsearch_logs_user_config":     dist.IntegrationEndpointTypeExternalElasticsearchLogs(),
-	"external_opensearch_logs_user_config":        dist.IntegrationEndpointTypeExternalOpensearchLogs(),
-	"external_aws_cloudwatch_logs_user_config":    dist.IntegrationEndpointTypeExternalAwsCloudwatchLogs(),
-	"external_google_cloud_logging_user_config":   dist.IntegrationEndpointTypeExternalGoogleCloudLogging(),
-	"external_kafka_user_config":                  dist.IntegrationEndpointTypeExternalKafka(),
-	"jolokia_user_config":                         dist.IntegrationEndpointTypeJolokia(),
-	"external_schema_registry_user_config":        dist.IntegrationEndpointTypeExternalSchemaRegistry(),
-	"external_aws_cloudwatch_metrics_user_config": dist.IntegrationEndpointTypeExternalAwsCloudwatchMetrics(),
-	"external_google_cloud_bigquery":              dist.IntegrationEndpointTypeExternalGoogleCloudBigquery(),
-	"external_postgresql":                         dist.IntegrationEndpointTypeExternalPostgresql(),
+	"datadog_user_config":                         integration_endpoint.GetUserConfig(schemautil.ServiceIntegrationEndpointTypeDatadog),
+	"prometheus_user_config":                      integration_endpoint.GetUserConfig(schemautil.ServiceIntegrationEndpointTypePrometheus),
+	"rsyslog_user_config":                         integration_endpoint.GetUserConfig(schemautil.ServiceIntegrationEndpointTypeRsyslog),
+	"external_elasticsearch_logs_user_config":     integration_endpoint.GetUserConfig(schemautil.ServiceIntegrationEndpointTypeExternalElasticsearchLogs),
+	"external_opensearch_logs_user_config":        integration_endpoint.GetUserConfig(schemautil.ServiceIntegrationEndpointTypeExternalOpensearchLogs),
+	"external_aws_cloudwatch_logs_user_config":    integration_endpoint.GetUserConfig(schemautil.ServiceIntegrationEndpointTypeExternalAwsCloudwatchLogs),
+	"external_google_cloud_logging_user_config":   integration_endpoint.GetUserConfig(schemautil.ServiceIntegrationEndpointTypeExternalGoogleCloudLogging),
+	"external_kafka_user_config":                  integration_endpoint.GetUserConfig(schemautil.ServiceIntegrationEndpointTypeExternalKafka),
+	"jolokia_user_config":                         integration_endpoint.GetUserConfig(schemautil.ServiceIntegrationEndpointTypeJolokia),
+	"external_schema_registry_user_config":        integration_endpoint.GetUserConfig(schemautil.ServiceIntegrationEndpointTypeExternalSchemaRegistry),
+	"external_aws_cloudwatch_metrics_user_config": integration_endpoint.GetUserConfig(schemautil.ServiceIntegrationEndpointTypeExternalAwsCloudwatchMetrics),
+	"external_google_cloud_bigquery":              integration_endpoint.GetUserConfig(schemautil.ServiceIntegrationEndpointTypeExternalGoogleCloudBigquery),
+	"external_postgresql":                         integration_endpoint.GetUserConfig(schemautil.ServiceIntegrationEndpointTypeExternalPostgresql),
 }
 
 func ResourceServiceIntegrationEndpoint() *schema.Resource {
@@ -98,7 +96,7 @@ func resourceServiceIntegrationEndpointCreate(ctx context.Context, d *schema.Res
 	projectName := d.Get("project").(string)
 	endpointType := d.Get("endpoint_type").(string)
 
-	userConfig, err := apiconvert.ToAPI(userconfig.IntegrationEndpointTypes, endpointType, d)
+	userConfig, err := schemautil.ExpandServiceIntegrationEndpoint(endpointType, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -153,7 +151,7 @@ func resourceServiceIntegrationEndpointUpdate(ctx context.Context, d *schema.Res
 
 	endpointType := d.Get("endpoint_type").(string)
 
-	userConfig, err := apiconvert.ToAPI(userconfig.IntegrationEndpointTypes, endpointType, d)
+	userConfig, err := schemautil.ExpandServiceIntegrationEndpoint(endpointType, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -205,7 +203,7 @@ func copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(
 		return err
 	}
 
-	userConfig, err := apiconvert.FromAPI(userconfig.IntegrationEndpointTypes, endpointType, endpoint.UserConfig)
+	userConfig, err := schemautil.FlattenServiceIntegrationEndpoint(endpointType, d, endpoint.UserConfig)
 	if err != nil {
 		return err
 	}
