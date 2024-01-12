@@ -11,6 +11,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.13.0] - 2024-01-12
+
 - Add organization application users support
 - Add organization application user tokens support
 - Configure "insufficient broker" error retries timeout 
