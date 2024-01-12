@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
@@ -256,7 +257,7 @@ func resourceServiceIntegrationDelete(ctx context.Context, d *schema.ResourceDat
 	}
 
 	err = client.ServiceIntegrations.Delete(ctx, projectName, integrationID)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.Errorf("cannot delete service integration: %s", err)
 	}
 
@@ -272,7 +273,7 @@ func resourceServiceIntegrationCheckForPreexistingResource(ctx context.Context, 
 	destinationServiceName := d.Get("destination_service_name").(string)
 
 	integrations, err := client.ServiceIntegrations.List(ctx, projectName, sourceServiceName)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return nil, fmt.Errorf("unable to get list of service integrations: %s", err)
 	}
 

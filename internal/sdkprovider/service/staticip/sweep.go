@@ -10,6 +10,7 @@ import (
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
 
@@ -60,7 +61,7 @@ func sweepStaticIPs(ctx context.Context, client *aiven.Client) func(region strin
 				aiven.DeleteStaticIPRequest{
 					StaticIPAddressID: ip.StaticIPAddressID,
 				})
-			if err != nil && !aiven.IsNotFound(err) {
+			if common.IsCritical(err) {
 				return fmt.Errorf("error deleting staticip: %w", err)
 			}
 		}

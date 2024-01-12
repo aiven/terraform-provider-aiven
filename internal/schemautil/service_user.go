@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -94,7 +95,7 @@ func ResourceServiceUserDelete(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	err = client.ServiceUsers.Delete(ctx, projectName, serviceName, username)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.FromErr(err)
 	}
 

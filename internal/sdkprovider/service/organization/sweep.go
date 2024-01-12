@@ -10,8 +10,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
+
+const defaultPrefix = "test-acc"
 
 func init() {
 	ctx := context.Background()
@@ -55,7 +58,7 @@ func init() {
 func sweepOrganizations(ctx context.Context, client *aiven.Client) func(string) error {
 	return func(id string) error {
 		organizations, err := client.Accounts.List(ctx)
-		if err != nil && !aiven.IsNotFound(err) {
+		if common.IsCritical(err) {
 			return fmt.Errorf("error retrieving a list of organizations: %w", err)
 		}
 
@@ -69,7 +72,7 @@ func sweepOrganizations(ctx context.Context, client *aiven.Client) func(string) 
 			}
 
 			err = client.Accounts.Delete(ctx, organization.Id)
-			if err != nil && !aiven.IsNotFound(err) {
+			if common.IsCritical(err) {
 				return fmt.Errorf("error deleting organization %s: %w", organization.Name, err)
 			}
 		}
@@ -81,7 +84,7 @@ func sweepOrganizations(ctx context.Context, client *aiven.Client) func(string) 
 func sweepOrganizationApplicationUsers(ctx context.Context, client *aiven.Client) func(string) error {
 	return func(id string) error {
 		organizationApplicationUsers, err := client.OrganizationApplicationUserHandler.List(ctx, id)
-		if err != nil && !aiven.IsNotFound(err) {
+		if common.IsCritical(err) {
 			return fmt.Errorf("error retrieving a list of organization application users: %w", err)
 		}
 
@@ -90,12 +93,12 @@ func sweepOrganizationApplicationUsers(ctx context.Context, client *aiven.Client
 		}
 
 		for _, organizationApplicationUser := range organizationApplicationUsers.Users {
-			if !strings.HasPrefix(organizationApplicationUser.Name, "test-acc") {
+			if !strings.HasPrefix(organizationApplicationUser.Name, defaultPrefix) {
 				continue
 			}
 
 			err = client.OrganizationApplicationUserHandler.Delete(ctx, id, organizationApplicationUser.UserID)
-			if err != nil && !aiven.IsNotFound(err) {
+			if common.IsCritical(err) {
 				return fmt.Errorf("error deleting organization application user %s: %w", organizationApplicationUser.Name, err)
 			}
 		}
@@ -107,7 +110,7 @@ func sweepOrganizationApplicationUsers(ctx context.Context, client *aiven.Client
 func sweepOrganizationUserGroups(ctx context.Context, client *aiven.Client) func(string) error {
 	return func(id string) error {
 		organizationUserGroups, err := client.OrganizationUserGroups.List(ctx, id)
-		if err != nil && !aiven.IsNotFound(err) {
+		if common.IsCritical(err) {
 			return fmt.Errorf("error retrieving a list of organization user groups: %w", err)
 		}
 
@@ -116,12 +119,12 @@ func sweepOrganizationUserGroups(ctx context.Context, client *aiven.Client) func
 		}
 
 		for _, organizationUserGroup := range organizationUserGroups.UserGroups {
-			if !strings.HasPrefix(organizationUserGroup.UserGroupName, "test-acc") {
+			if !strings.HasPrefix(organizationUserGroup.UserGroupName, defaultPrefix) {
 				continue
 			}
 
 			err = client.OrganizationUserGroups.Delete(ctx, id, organizationUserGroup.UserGroupID)
-			if err != nil && !aiven.IsNotFound(err) {
+			if common.IsCritical(err) {
 				return fmt.Errorf("error deleting organization user group %s: %w", organizationUserGroup.UserGroupName, err)
 			}
 		}
@@ -133,7 +136,7 @@ func sweepOrganizationUserGroups(ctx context.Context, client *aiven.Client) func
 func sweepOrganizationUsers(ctx context.Context, client *aiven.Client) func(string) error {
 	return func(id string) error {
 		organizationUsers, err := client.OrganizationUser.List(ctx, id)
-		if err != nil && !aiven.IsNotFound(err) {
+		if common.IsCritical(err) {
 			return fmt.Errorf("error retrieving a list of organization users: %w", err)
 		}
 
@@ -142,12 +145,12 @@ func sweepOrganizationUsers(ctx context.Context, client *aiven.Client) func(stri
 		}
 
 		for _, organizationUser := range organizationUsers.Users {
-			if !strings.Contains(organizationUser.UserInfo.UserEmail, "test-acc") {
+			if !strings.Contains(organizationUser.UserInfo.UserEmail, defaultPrefix) {
 				continue
 			}
 
 			err = client.OrganizationUser.Delete(ctx, id, organizationUser.UserID)
-			if err != nil && !aiven.IsNotFound(err) {
+			if common.IsCritical(err) {
 				return fmt.Errorf("error deleting organization user %s: %w", organizationUser.UserID, err)
 			}
 		}

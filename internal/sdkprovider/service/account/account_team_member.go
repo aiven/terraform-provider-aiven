@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -191,7 +192,7 @@ func resourceAccountTeamMemberDelete(ctx context.Context, d *schema.ResourceData
 
 	// delete account team user invitation
 	err = client.AccountTeamInvites.Delete(ctx, accountID, teamID, userEmail)
-	if err != nil && !aiven.IsNotFound(err) {
+	if common.IsCritical(err) {
 		return diag.FromErr(err)
 	}
 
@@ -208,7 +209,7 @@ func resourceAccountTeamMemberDelete(ctx context.Context, d *schema.ResourceData
 	for _, m := range r.Members {
 		if m.UserEmail == userEmail {
 			err = client.AccountTeamMembers.Delete(ctx, accountID, teamID, m.UserId)
-			if err != nil && !aiven.IsNotFound(err) {
+			if common.IsCritical(err) {
 				return diag.FromErr(err)
 			}
 			break

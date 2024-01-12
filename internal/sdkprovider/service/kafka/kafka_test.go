@@ -7,12 +7,12 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
 func TestAccAiven_kafka(t *testing.T) {
@@ -82,7 +82,7 @@ func TestAccAiven_kafka(t *testing.T) {
 						ctx := context.Background()
 
 						a, err := c.KafkaACLs.List(ctx, os.Getenv("AIVEN_PROJECT_NAME"), rName2)
-						if err != nil && !aiven.IsNotFound(err) {
+						if common.IsCritical(err) {
 							return fmt.Errorf("cannot get a list of kafka ACLs: %s", err)
 						}
 
@@ -91,7 +91,7 @@ func TestAccAiven_kafka(t *testing.T) {
 						}
 
 						s, err := c.KafkaSchemaRegistryACLs.List(ctx, os.Getenv("AIVEN_PROJECT_NAME"), rName2)
-						if err != nil && !aiven.IsNotFound(err) {
+						if common.IsCritical(err) {
 							return fmt.Errorf("cannot get a list of Kafka Schema ACLs: %s", err)
 						}
 
