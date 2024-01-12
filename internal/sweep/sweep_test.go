@@ -24,6 +24,7 @@ import (
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/redis"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/serviceintegration"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/staticip"
+	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/vpc"
 )
 
 func TestMain(m *testing.M) {
