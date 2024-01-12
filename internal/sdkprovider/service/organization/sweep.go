@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	"github.com/aiven/aiven-go-client/v2"
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )

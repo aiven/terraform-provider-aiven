@@ -9,9 +9,10 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
-	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
 
 const (
