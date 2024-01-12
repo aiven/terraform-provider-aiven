@@ -120,6 +120,7 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 			organization.NewOrganizationUserGroupMembersResource,
 			organization.NewOrganizationGroupProjectResource,
 			organization.NewOrganizationApplicationUser,
+			organization.NewOrganizationApplicationUserToken,
 		}
 
 		resources = append(resources, betaResources...)

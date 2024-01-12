@@ -53,6 +53,8 @@ func DiagErrorUpdatingResource(diagnostics diag.Diagnostics, typenameable TypeNa
 	return diagnostics
 }
 
+// DiagErrorUpdatingResourceNotSupported is a function that adds a resource updating not supported error to the
+// diagnostics and returns it. It is used in the Update method of the resource structs.
 func DiagErrorUpdatingResourceNotSupported(diagnostics diag.Diagnostics, typenameable TypeNameable) diag.Diagnostics {
 	diagnostics.AddError(
 		errmsg.SummaryErrorUpdatingResource,
@@ -68,6 +70,17 @@ func DiagErrorDeletingResource(diagnostics diag.Diagnostics, typenameable TypeNa
 	diagnostics.AddError(
 		errmsg.SummaryErrorDeletingResource,
 		fmt.Sprintf(errmsg.DetailErrorDeletingResource, typenameable.TypeName(), err.Error()),
+	)
+
+	return diagnostics
+}
+
+// DiagErrorImportingResourceNotSupported is a function that adds a resource importing not supported error to the
+// diagnostics and returns it. It is used in the ImportState method of the resource structs.
+func DiagErrorImportingResourceNotSupported(diagnostics diag.Diagnostics, typenameable TypeNameable) diag.Diagnostics {
+	diagnostics.AddError(
+		errmsg.SummaryErrorImportingResource,
+		fmt.Sprintf(errmsg.DetailErrorImportingResourceNotSupported, typenameable.TypeName()),
 	)
 
 	return diagnostics

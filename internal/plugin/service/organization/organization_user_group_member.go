@@ -6,6 +6,7 @@ import (
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -38,12 +39,14 @@ type organizationUserGroupMembersResource struct {
 
 // organizationUserGroupMembersResourceModel is the model for the organization user group member resource.
 type organizationUserGroupMembersResourceModel struct {
-	// ID is the identifier of the organization.
+	// ID is the compound identifier of the organization user group member.
+	ID types.String `tfsdk:"id"`
+	// OrganizationID is the identifier of the organization.
 	OrganizationID types.String `tfsdk:"organization_id"`
-	// ID is the identifier of the organization user group.
-	OrganizationGroupID types.String `tfsdk:"group_id"`
-	// ID is the identifier of the organization user group member.
-	OrganizationUserID types.String `tfsdk:"user_id"`
+	// GroupID is the identifier of the organization user group.
+	GroupID types.String `tfsdk:"group_id"`
+	// UserID is the identifier of the organization user group member.
+	UserID types.String `tfsdk:"user_id"`
 	// Last activity time of the user group member.
 	LastActivityTime types.String `tfsdk:"last_activity_time"`
 	// Timeouts is the configuration for resource-specific timeouts.
@@ -75,6 +78,13 @@ func (r *organizationUserGroupMembersResource) Schema(
 	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
 		Description: util.BetaDescription("Adds and manages users in a user group."),
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Description: "Compound identifier of the organization user group member.",
+				Computed:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"organization_id": schema.StringAttribute{
 				Description: "Identifier of the organization.",
 				Required:    true,
@@ -124,7 +134,7 @@ func (r *organizationUserGroupMembersResource) Configure(
 	r.client = client
 }
 
-// TimeoutSchema returns the schema for resource-specific timeouts.
+// fillModel fills the organization group project relation model from the Aiven API.
 func (r *organizationUserGroupMembersResource) fillModel(
 	ctx context.Context,
 	model *organizationUserGroupMembersResourceModel,
@@ -132,7 +142,7 @@ func (r *organizationUserGroupMembersResource) fillModel(
 	list, err := r.client.OrganizationUserGroupMembers.List(
 		ctx,
 		model.OrganizationID.ValueString(),
-		model.OrganizationGroupID.ValueString(),
+		model.GroupID.ValueString(),
 	)
 	if err != nil {
 		return err
@@ -145,7 +155,7 @@ func (r *organizationUserGroupMembersResource) fillModel(
 	var member *aiven.OrganizationUserGroupMember
 
 	for _, m := range list.Members {
-		if m.UserID == model.OrganizationUserID.ValueString() {
+		if m.UserID == model.UserID.ValueString() {
 			member = &m
 			break
 		}
@@ -157,8 +167,8 @@ func (r *organizationUserGroupMembersResource) fillModel(
 			r.TypeName(),
 			util.ComposeID(
 				model.OrganizationID.ValueString(),
-				model.OrganizationGroupID.ValueString(),
-				model.OrganizationUserID.ValueString(),
+				model.GroupID.ValueString(),
+				model.UserID.ValueString(),
 			),
 		)
 	}
@@ -183,11 +193,11 @@ func (r *organizationUserGroupMembersResource) Create(
 	err := r.client.OrganizationUserGroupMembers.Modify(
 		ctx,
 		plan.OrganizationID.ValueString(),
-		plan.OrganizationGroupID.ValueString(),
+		plan.GroupID.ValueString(),
 		aiven.OrganizationUserGroupMemberRequest{
 			Operation: "add_members",
 			MemberIDs: []string{
-				plan.OrganizationUserID.ValueString(),
+				plan.UserID.ValueString(),
 			},
 		},
 	)
@@ -196,6 +206,10 @@ func (r *organizationUserGroupMembersResource) Create(
 
 		return
 	}
+
+	plan.ID = types.StringValue(
+		util.ComposeID(plan.OrganizationID.ValueString(), plan.GroupID.ValueString(), plan.UserID.ValueString()),
+	)
 
 	err = r.fillModel(ctx, &plan)
 	if err != nil {
@@ -257,11 +271,11 @@ func (r *organizationUserGroupMembersResource) Delete(
 	if err := r.client.OrganizationUserGroupMembers.Modify(
 		ctx,
 		plan.OrganizationID.ValueString(),
-		plan.OrganizationGroupID.ValueString(),
+		plan.GroupID.ValueString(),
 		aiven.OrganizationUserGroupMemberRequest{
 			Operation: "remove_members",
 			MemberIDs: []string{
-				plan.OrganizationGroupID.ValueString(),
+				plan.GroupID.ValueString(),
 			},
 		},
 	); err != nil {
@@ -277,5 +291,7 @@ func (r *organizationUserGroupMembersResource) ImportState(
 	req resource.ImportStateRequest,
 	resp *resource.ImportStateResponse,
 ) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+
 	util.UnpackCompoundID(ctx, req, resp, "organization_id", "group_id", "user_id")
 }

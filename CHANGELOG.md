@@ -12,6 +12,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Add organization application users support
+- Add organization application user tokens support
 - Configure "insufficient broker" error retries timeout 
 - Enable `local_retention_*` fields in `aiven_kafka_topic` resource
 - Validate that `local_retention_bytes` is not bigger than `retention_bytes`

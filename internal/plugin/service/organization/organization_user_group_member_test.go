@@ -45,16 +45,15 @@ resource "aiven_organization_user_group_member" "foo" {
   group_id        = aiven_organization_user_group.foo.group_id
   user_id         = "%[4]s"
 }
-	`, acc.DefaultResourceNamePrefix, suffix, deps.OrganizationName(), util.Deref(userID)),
+	`, acc.DefaultResourceNamePrefix, suffix, deps.OrganizationName(), *userID),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(name, "last_activity_time"),
 				),
 			},
 			{
-				ResourceName:                         name,
-				ImportState:                          true,
-				ImportStateVerify:                    true,
-				ImportStateVerifyIdentifierAttribute: "user_id",
+				ResourceName:      name,
+				ImportState:       true,
+				ImportStateVerify: true,
 				ImportStateIdFunc: func(state *terraform.State) (string, error) {
 					rs, err := acc.ResourceFromState(state, name)
 					if err != nil {

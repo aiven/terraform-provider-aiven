@@ -43,6 +43,9 @@ const (
 	// SummaryErrorDeletingResource is the error summary for when a resource cannot be deleted.
 	SummaryErrorDeletingResource = "Error Deleting Resource"
 
+	// SummaryErrorImportingResource is the error summary for when a resource cannot be imported.
+	SummaryErrorImportingResource = "Error Importing Resource"
+
 	// SummaryDuplicateFoundByName is the error summary for when a duplicate resource is found by name.
 	SummaryDuplicateFoundByName = "Duplicate Found By Name"
 
@@ -86,6 +89,10 @@ var (
 	// DetailErrorDeletingResource is the detailed error message for when a resource cannot be deleted.
 	DetailErrorDeletingResource = "An unexpected error occurred while deleting the resource (%s): %s."
 
+	// DetailErrorImportingResourceNotSupported is the detailed error message for when a resource cannot be imported
+	// because it is not supported.
+	DetailErrorImportingResourceNotSupported = "Importing the resource (%s) is not supported."
+
 	// DetailDuplicateFoundByName is the detailed error message for when a duplicate resource is found by name.
 	DetailDuplicateFoundByName = "Multiple resources with the same name (%s) were found. Please use the ID to " +
 		"uniquely identify the resource."
@@ -108,4 +115,7 @@ var (
 
 	// AivenResourceNotFound is the error message for when an Aiven resource cannot be found.
 	AivenResourceNotFound = "aiven resource %s with compound ID %s not found"
+
+	// UnableToSetValueFrom is the error message for when a Set cannot be created from a value.
+	UnableToSetValueFrom = "unable to set value from %v"
 )

@@ -34,10 +34,10 @@ type organizationApplicationUserDataSource struct {
 
 // organizationApplicationUserDataSourceModel is the model for the organization application user data source.
 type organizationApplicationUserDataSourceModel struct {
-	// UserID is the identifier of the organization application user.
-	UserID types.String `tfsdk:"user_id"`
 	// OrganizationID is the identifier of the organization the application user belongs to.
 	OrganizationID types.String `tfsdk:"organization_id"`
+	// UserID is the identifier of the organization application user.
+	UserID types.String `tfsdk:"user_id"`
 	// Name is the name of the organization application user.
 	Name types.String `tfsdk:"name"`
 	// Email is the email of the organization application user.
@@ -69,12 +69,12 @@ func (r *organizationApplicationUserDataSource) Schema(
 	resp.Schema = schema.Schema{
 		Description: "Retrieves information about an organization application user from Aiven.",
 		Attributes: map[string]schema.Attribute{
-			"user_id": schema.StringAttribute{
-				Description: "Identifier of the organization application user.",
-				Required:    true,
-			},
 			"organization_id": schema.StringAttribute{
 				Description: "Identifier of the organization the application user belongs to.",
+				Required:    true,
+			},
+			"user_id": schema.StringAttribute{
+				Description: "Identifier of the organization application user.",
 				Required:    true,
 			},
 			"name": schema.StringAttribute{
