@@ -135,7 +135,7 @@ fmt-test: $(TERRAFMT)
 # It has to be added to PATH as `sed` command, to replace default BSD sed.
 # See `brew info gnu-sed` for more details on how to add it to PATH.
 fmt-imports:
-	find . -type f -name '*.go' -exec sed -zi 's/(?<== `\s+)"\n\+\t"/"\n"/g' {} +
+	find . -type f -name '*.go' -exec sed -zi 's/"[\r\n\t]\+"/"\n"/g' {} +
 	goimports -local "github.com/aiven/terraform-provider-aiven" -w .
 
 #################################################
