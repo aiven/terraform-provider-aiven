@@ -84,14 +84,15 @@ Read-Only:
 
 Read-Only:
 
-- `additional_backup_regions` (Set of String)
-- `ip_filter` (Set of String)
+- `additional_backup_regions` (List of String)
+- `ip_filter` (List of String)
 - `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--ip_filter_object))
-- `ip_filter_string` (Set of String)
+- `ip_filter_string` (List of String)
 - `kafka_connect` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--kafka_connect))
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--private_access))
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--privatelink_access))
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--public_access))
+- `service_log` (Boolean)
 - `static_ips` (Boolean)
 
 <a id="nestedobjatt--kafka_connect_user_config--ip_filter_object"></a>

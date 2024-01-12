@@ -10,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 func aivenKafkaSchema() map[string]*schema.Schema {
@@ -70,7 +70,7 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	aivenKafkaSchema[schemautil.ServiceTypeKafka+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypeKafka)
+	aivenKafkaSchema[schemautil.ServiceTypeKafka+"_user_config"] = dist.ServiceTypeKafka()
 
 	return aivenKafkaSchema
 }

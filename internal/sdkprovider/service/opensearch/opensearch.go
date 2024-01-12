@@ -5,8 +5,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 func opensearchSchema() map[string]*schema.Schema {
@@ -26,7 +26,7 @@ func opensearchSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	s[schemautil.ServiceTypeOpenSearch+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypeOpenSearch)
+	s[schemautil.ServiceTypeOpenSearch+"_user_config"] = dist.ServiceTypeOpensearch()
 
 	return s
 }

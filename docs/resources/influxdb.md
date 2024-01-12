@@ -76,17 +76,18 @@ resource "aiven_influxdb" "inf1" {
 
 Optional:
 
-- `additional_backup_regions` (Set of String) Additional Cloud Regions for Backup Replication.
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
-- `influxdb` (Block List, Max: 1) influxdb.conf configuration values (see [below for nested schema](#nestedblock--influxdb_user_config--influxdb))
-- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--influxdb_user_config--ip_filter_object))
-- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--influxdb_user_config--private_access))
-- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--influxdb_user_config--privatelink_access))
+- `influxdb` (Block List, Max: 1) influxdb.conf configuration values. (see [below for nested schema](#nestedblock--influxdb_user_config--influxdb))
+- `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'. (see [below for nested schema](#nestedblock--influxdb_user_config--ip_filter_object))
+- `ip_filter_string` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks. (see [below for nested schema](#nestedblock--influxdb_user_config--private_access))
+- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink. (see [below for nested schema](#nestedblock--influxdb_user_config--privatelink_access))
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
-- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--influxdb_user_config--public_access))
+- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet. (see [below for nested schema](#nestedblock--influxdb_user_config--public_access))
 - `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service.
+- `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
 - `static_ips` (Boolean) Use static public IP addresses.
 

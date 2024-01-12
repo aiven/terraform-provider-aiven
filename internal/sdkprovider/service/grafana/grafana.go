@@ -5,8 +5,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 func grafanaSchema() map[string]*schema.Schema {
@@ -19,7 +19,7 @@ func grafanaSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	s[schemautil.ServiceTypeGrafana+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypeGrafana)
+	s[schemautil.ServiceTypeGrafana+"_user_config"] = dist.ServiceTypeGrafana()
 	return s
 }
 

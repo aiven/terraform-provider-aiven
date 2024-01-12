@@ -78,11 +78,12 @@ resource "aiven_kafka_mirrormaker" "mm1" {
 
 Optional:
 
-- `additional_backup_regions` (Set of String) Additional Cloud Regions for Backup Replication.
-- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--ip_filter_object))
-- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `kafka_mirrormaker` (Block List, Max: 1) Kafka MirrorMaker configuration values (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker))
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
+- `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'. (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--ip_filter_object))
+- `ip_filter_string` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `kafka_mirrormaker` (Block List, Max: 1) Kafka MirrorMaker configuration values. (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker))
+- `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `static_ips` (Boolean) Use static public IP addresses.
 
 <a id="nestedblock--kafka_mirrormaker_user_config--ip_filter_object"></a>
