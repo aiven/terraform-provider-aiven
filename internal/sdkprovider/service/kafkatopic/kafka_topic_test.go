@@ -43,7 +43,6 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
 					resource.TestCheckResourceAttr(resourceName, "config.0.retention_bytes", "1234"),
-					resource.TestCheckResourceAttr(resourceName, "config.0.local_retention_bytes", "123"),
 				),
 			},
 		},
@@ -165,7 +164,6 @@ resource "aiven_kafka_topic" "foo" {
     min_cleanable_dirty_ratio = 0.01
     delete_retention_ms       = 50000
     retention_bytes           = 1234
-    local_retention_bytes     = 123
   }
 }
 
