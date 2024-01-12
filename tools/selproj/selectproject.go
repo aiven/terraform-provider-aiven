@@ -13,7 +13,7 @@ var errNoSuitableProjectFound = errors.New("no suitable project found")
 
 // selectProject selects a project with the given prefix.
 func selectProject(ctx context.Context, client AivenClient, prefix string) (string, error) {
-	projects, err := client.Projects().List(ctx)
+	projects, err := client.ProjectList(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -23,14 +23,25 @@ func selectProject(ctx context.Context, client AivenClient, prefix string) (stri
 			continue
 		}
 
-		services, err := client.Services().List(ctx, project.Name)
+		services, err := client.ServiceList(ctx, project.Name)
 		if err != nil {
 			return "", err
 		}
 
-		if len(services) == 0 {
-			return strings.TrimPrefix(project.Name, prefix), nil
+		if len(services) != 0 {
+			continue
 		}
+
+		vpcs, err := client.VPCList(ctx, project.Name)
+		if err != nil {
+			return "", err
+		}
+
+		if len(vpcs) != 0 {
+			continue
+		}
+
+		return strings.TrimPrefix(project.Name, prefix), nil
 	}
 
 	return "", errNoSuitableProjectFound
