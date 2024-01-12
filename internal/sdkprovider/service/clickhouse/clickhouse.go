@@ -5,7 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 )
 
 func clickhouseSchema() map[string]*schema.Schema {
@@ -18,7 +18,7 @@ func clickhouseSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	s[schemautil.ServiceTypeClickhouse+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypeClickhouse)
+	s[schemautil.ServiceTypeClickhouse+"_user_config"] = dist.ServiceTypeClickhouse()
 	s["service_integrations"] = &schema.Schema{
 		Type:        schema.TypeList,
 		Optional:    true,

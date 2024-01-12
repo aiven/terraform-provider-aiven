@@ -52,7 +52,7 @@ Required:
 
 Optional:
 
-- `datadog_tags` (Block List, Max: 32) Custom tags provided by user (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))
+- `datadog_tags` (Block List, Max: 32) Custom tags provided by user. (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))
 - `disable_consumer_stats` (Boolean) Disable consumer group metrics.
 - `kafka_consumer_check_instances` (Number) Number of separate instances to fetch kafka consumer statistics with.
 - `kafka_consumer_stats_timeout` (Number) Number of seconds that datadog will wait to get consumer statistics from brokers.

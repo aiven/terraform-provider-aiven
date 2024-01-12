@@ -78,15 +78,15 @@ resource "aiven_redis" "redis1" {
 
 Optional:
 
-- `additional_backup_regions` (Set of String) Additional Cloud Regions for Backup Replication.
-- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--redis_user_config--ip_filter_object))
-- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `migration` (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--redis_user_config--migration))
-- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--redis_user_config--private_access))
-- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--redis_user_config--privatelink_access))
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
+- `ip_filter` (List of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'. (see [below for nested schema](#nestedblock--redis_user_config--ip_filter_object))
+- `ip_filter_string` (List of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `migration` (Block List, Max: 1) Migrate data from existing server. (see [below for nested schema](#nestedblock--redis_user_config--migration))
+- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks. (see [below for nested schema](#nestedblock--redis_user_config--private_access))
+- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink. (see [below for nested schema](#nestedblock--redis_user_config--privatelink_access))
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
-- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--redis_user_config--public_access))
+- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet. (see [below for nested schema](#nestedblock--redis_user_config--public_access))
 - `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service.
 - `redis_acl_channels_default` (String) Determines default pub/sub channels' ACL for new users if ACL is not supplied. When this option is not defined, all_channels is assumed to keep backward compatibility. This option doesn't affect Redis configuration acl-pubsub-default.
 - `redis_io_threads` (Number) Set Redis IO thread count. Changing this will cause a restart of the Redis service.
@@ -99,6 +99,7 @@ Optional:
 - `redis_pubsub_client_output_buffer_limit` (Number) Set output buffer limit for pub / sub clients in MB. The value is the hard limit, the soft limit is 1/4 of the hard limit. When setting the limit, be mindful of the available memory in the selected service plan.
 - `redis_ssl` (Boolean) Require SSL to access Redis. The default value is `true`.
 - `redis_timeout` (Number) Redis idle connection timeout in seconds. The default value is `300`.
+- `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
 - `static_ips` (Boolean) Use static public IP addresses.
 

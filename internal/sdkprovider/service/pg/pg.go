@@ -12,8 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 func aivenPGSchema() map[string]*schema.Schema {
@@ -78,7 +80,7 @@ func aivenPGSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	schemaPG[schemautil.ServiceTypePG+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypePG)
+	schemaPG[schemautil.ServiceTypePG+"_user_config"] = dist.ServiceTypePg()
 
 	return schemaPG
 }
@@ -133,10 +135,11 @@ func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	userConfig, err := schemautil.ExpandService(schemautil.ServiceTypePG, d)
+	userConfig, err := apiconvert.ToAPI(userconfig.ServiceTypes, "pg", d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
 	if userConfig["pg_version"] != nil {
 		s, err := client.Services.Get(ctx, projectName, serviceName)
 		if err != nil {

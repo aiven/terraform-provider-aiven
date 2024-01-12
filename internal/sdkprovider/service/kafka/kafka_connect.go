@@ -5,8 +5,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 func aivenKafkaConnectSchema() map[string]*schema.Schema {
@@ -19,7 +19,7 @@ func aivenKafkaConnectSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	kafkaConnectSchema[schemautil.ServiceTypeKafkaConnect+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypeKafkaConnect)
+	kafkaConnectSchema[schemautil.ServiceTypeKafkaConnect+"_user_config"] = dist.ServiceTypeKafkaConnect()
 
 	return kafkaConnectSchema
 }

@@ -16,8 +16,6 @@ nav_order: 1
 - Configure "insufficient broker" error retries timeout 
 - Enable `local_retention_*` fields in `aiven_kafka_topic` resource
 - Validate that `local_retention_bytes` is not bigger than `retention_bytes`
-- Add new user config generator
-- Use `TypeSet` for arrays with scalar values
 
 ## [4.12.1] - 2024-01-05
 

@@ -113,3 +113,29 @@ func normalizeIPFilter(old, new map[string]interface{}) {
 
 	new[fieldToWrite] = append(normalizedIPFilters, nonexistentIPFilters...)
 }
+
+// stringSuffixForIPFilters adds a _string suffix to the IP filters.
+func stringSuffixForIPFilters(new map[string]interface{}) {
+	if new["ip_filter"] == nil {
+		return
+	}
+
+	ipFilters := new["ip_filter"].([]interface{})
+
+	new["ip_filter_string"] = ipFilters
+
+	new["ip_filter"] = nil
+}
+
+// stringSuffixForNamespaces adds a _string suffix to the namespaces.
+func stringSuffixForNamespaces(new map[string]interface{}) {
+	namespaces := new["namespaces"].([]interface{})
+
+	if namespaces == nil {
+		return
+	}
+
+	new["namespace_string"] = namespaces
+
+	new["namespaces"] = nil
+}
