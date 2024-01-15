@@ -202,6 +202,7 @@ Read-Only:
 - `format` (String)
 - `key` (String)
 - `logline` (String)
+- `max_message_size` (Number)
 - `port` (Number)
 - `sd` (String)
 - `server` (String)

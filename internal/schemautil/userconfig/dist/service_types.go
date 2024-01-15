@@ -1487,6 +1487,11 @@ func ServiceTypeGrafana() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeList,
 				},
+				"auto_login": {
+					Description: "Allow users to bypass the login screen and automatically log in.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
 				"client_id": {
 					Description: "Client ID from provider.",
 					Required:    true,
@@ -1498,7 +1503,7 @@ func ServiceTypeGrafana() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"skip_org_role_sync": {
-					Description: "Automatically sync user roles.",
+					Description: "Stop automatically syncing user roles.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -1523,6 +1528,11 @@ func ServiceTypeGrafana() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeList,
 				},
+				"auto_login": {
+					Description: "Allow users to bypass the login screen and automatically log in.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
 				"client_id": {
 					Description: "Client ID from provider.",
 					Required:    true,
@@ -1534,7 +1544,7 @@ func ServiceTypeGrafana() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"skip_org_role_sync": {
-					Description: "Automatically sync user roles.",
+					Description: "Stop automatically syncing user roles.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
@@ -3931,6 +3941,21 @@ func ServiceTypeKafkaMirrormaker() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
+				"groups": {
+					Description: "Consumer groups to replicate. Supports comma-separated group IDs and regexes.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"groups_exclude": {
+					Description: "Exclude groups. Supports comma-separated group IDs and regexes. Excludes take precedence over includes.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"offset_lag_max": {
+					Description: "How out-of-sync a remote partition can be before it is resynced.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
 				"refresh_groups_enabled": {
 					Description: "Whether to periodically check for new consumer groups. Defaults to 'true'.",
 					Optional:    true,
@@ -3981,6 +4006,21 @@ func ServiceTypeKafkaMirrormaker() *schema.Schema {
 				},
 				"emit_checkpoints_interval_seconds": {
 					Description: "Frequency at which consumer group offset checkpoints are emitted (default: 60, every minute).",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
+				"groups": {
+					Description: "Consumer groups to replicate. Supports comma-separated group IDs and regexes.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"groups_exclude": {
+					Description: "Exclude groups. Supports comma-separated group IDs and regexes. Excludes take precedence over includes.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"offset_lag_max": {
+					Description: "How out-of-sync a remote partition can be before it is resynced.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},

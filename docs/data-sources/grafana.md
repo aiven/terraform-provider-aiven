@@ -166,6 +166,7 @@ Read-Only:
 
 - `allow_sign_up` (Boolean)
 - `allowed_organizations` (List of String)
+- `auto_login` (Boolean)
 - `client_id` (String)
 - `client_secret` (String)
 - `skip_org_role_sync` (Boolean)

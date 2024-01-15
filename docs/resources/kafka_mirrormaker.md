@@ -105,6 +105,9 @@ Optional:
 
 - `emit_checkpoints_enabled` (Boolean) Whether to emit consumer group offset checkpoints to target cluster periodically (default: true).
 - `emit_checkpoints_interval_seconds` (Number) Frequency at which consumer group offset checkpoints are emitted (default: 60, every minute).
+- `groups` (String) Consumer groups to replicate. Supports comma-separated group IDs and regexes.
+- `groups_exclude` (String) Exclude groups. Supports comma-separated group IDs and regexes. Excludes take precedence over includes.
+- `offset_lag_max` (Number) How out-of-sync a remote partition can be before it is resynced.
 - `refresh_groups_enabled` (Boolean) Whether to periodically check for new consumer groups. Defaults to 'true'.
 - `refresh_groups_interval_seconds` (Number) Frequency of consumer group refresh in seconds. Defaults to 600 seconds (10 minutes).
 - `refresh_topics_enabled` (Boolean) Whether to periodically check for new topics and partitions. Defaults to 'true'.
