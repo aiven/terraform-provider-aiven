@@ -16,7 +16,6 @@ require (
 	github.com/hashicorp/terraform-plugin-mux v0.13.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.31.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/liip/sheriff v0.11.1
 	github.com/samber/lo v1.39.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/exp v0.0.0-20230809150735-7b3493d9a819
@@ -46,7 +45,7 @@ require (
 	cloud.google.com/go v0.110.8 // indirect
 	cloud.google.com/go/storage v1.30.1 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/aiven/go-api-schemas v1.52.0
+	github.com/aiven/go-api-schemas v1.53.0
 	github.com/aws/aws-sdk-go v1.44.122 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
