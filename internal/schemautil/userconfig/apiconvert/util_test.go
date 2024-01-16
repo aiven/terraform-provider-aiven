@@ -1,6 +1,7 @@
 package apiconvert
 
 import (
+	"math"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -60,7 +61,7 @@ func TestPropsReqs(t *testing.T) {
 							map[string]any{"value": "custom"},
 						},
 						"example": "rfc5424",
-						"title":   "message format",
+						"title":   "Message format",
 						"type":    "string",
 					},
 					"key": map[string]any{
@@ -77,15 +78,23 @@ func TestPropsReqs(t *testing.T) {
 						"max_length": 512,
 						"min_length": 1,
 						"pattern":    "^[ -~\\t]+$",
-						"title":      "custom syslog message format",
+						"title":      "Custom syslog message format",
 						"type":       "string",
+					},
+					"max_message_size": map[string]any{
+						"default": "8192",
+						"example": "8192",
+						"maximum": float64(math.MaxInt32),
+						"minimum": 2048,
+						"title":   "Rsyslog max message size",
+						"type":    "integer",
 					},
 					"port": map[string]any{
 						"default": "514",
 						"example": "514",
 						"maximum": 65535,
 						"minimum": 1,
-						"title":   "rsyslog server port",
+						"title":   "Rsyslog server port",
 						"type":    "integer",
 					},
 					"sd": map[string]any{
@@ -101,7 +110,7 @@ func TestPropsReqs(t *testing.T) {
 						"example":    "logs.example.com",
 						"max_length": 255,
 						"min_length": 4,
-						"title":      "rsyslog server IP address or hostname",
+						"title":      "Rsyslog server IP address or hostname",
 						"type":       "string",
 					},
 					"tls": map[string]any{

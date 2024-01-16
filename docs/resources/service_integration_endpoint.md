@@ -218,9 +218,9 @@ Optional:
 
 Required:
 
-- `format` (String) message format. The default value is `rfc5424`.
-- `port` (Number) rsyslog server port. The default value is `514`.
-- `server` (String) rsyslog server IP address or hostname.
+- `format` (String) Message format. The default value is `rfc5424`.
+- `port` (Number) Rsyslog server port. The default value is `514`.
+- `server` (String) Rsyslog server IP address or hostname.
 - `tls` (Boolean) Require TLS. The default value is `true`.
 
 Optional:
@@ -228,7 +228,8 @@ Optional:
 - `ca` (String) PEM encoded CA certificate.
 - `cert` (String) PEM encoded client certificate.
 - `key` (String) PEM encoded client key.
-- `logline` (String) custom syslog message format.
+- `logline` (String) Custom syslog message format.
+- `max_message_size` (Number) Rsyslog max message size. The default value is `8192`.
 - `sd` (String) Structured data block for log message.
 
 

@@ -108,6 +108,9 @@ Read-Only:
 
 - `emit_checkpoints_enabled` (Boolean)
 - `emit_checkpoints_interval_seconds` (Number)
+- `groups` (String)
+- `groups_exclude` (String)
+- `offset_lag_max` (Number)
 - `refresh_groups_enabled` (Boolean)
 - `refresh_groups_interval_seconds` (Number)
 - `refresh_topics_enabled` (Boolean)

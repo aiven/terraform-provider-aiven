@@ -171,7 +171,8 @@ Optional:
 
 - `allow_sign_up` (Boolean) Automatically sign-up users on successful sign-in.
 - `allowed_organizations` (List of String) Require users to belong to one of given organizations.
-- `skip_org_role_sync` (Boolean) Automatically sync user roles.
+- `auto_login` (Boolean) Allow users to bypass the login screen and automatically log in.
+- `skip_org_role_sync` (Boolean) Stop automatically syncing user roles.
 - `team_ids` (List of Number) Require users to belong to one of given team IDs.
 
 
