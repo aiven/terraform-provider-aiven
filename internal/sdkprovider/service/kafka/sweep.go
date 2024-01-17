@@ -1,5 +1,3 @@
-//go:build sweep
-
 package kafka
 
 import (
@@ -10,4 +8,5 @@ func init() {
 	sweep.AddServiceSweeper("kafka")
 	sweep.AddServiceSweeper("kafka_mirrormaker")
 	sweep.AddServiceSweeper("kafka_connect")
+	sweep.AddServiceSweeper("kafka_connector")
 }

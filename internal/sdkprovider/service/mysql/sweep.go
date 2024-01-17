@@ -1,5 +1,3 @@
-//go:build sweep
-
 package mysql
 
 import (

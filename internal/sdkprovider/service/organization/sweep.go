@@ -1,10 +1,9 @@
-//go:build sweep
-
 package organization
 
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -17,6 +16,10 @@ import (
 const defaultPrefix = "test-acc"
 
 func init() {
+	if os.Getenv("TF_SWEEP") == "" {
+		return
+	}
+
 	ctx := context.Background()
 
 	client, err := sweep.SharedClient()
@@ -24,12 +27,12 @@ func init() {
 		panic(fmt.Sprintf("error getting client: %s", err))
 	}
 
-	resource.AddTestSweepers("aiven_organization", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_organization", &resource.Sweeper{
 		Name: "aiven_organization",
 		F:    sweepOrganizations(ctx, client),
 	})
 
-	resource.AddTestSweepers("aiven_organization_application_user", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_organization_application_user", &resource.Sweeper{
 		Name: "aiven_organization_application_user",
 		F:    sweepOrganizationApplicationUsers(ctx, client),
 		Dependencies: []string{
@@ -37,7 +40,7 @@ func init() {
 		},
 	})
 
-	resource.AddTestSweepers("aiven_organization_user", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_organization_user", &resource.Sweeper{
 		Name: "aiven_organization_user",
 		F:    sweepOrganizationUsers(ctx, client),
 		Dependencies: []string{
@@ -45,7 +48,7 @@ func init() {
 		},
 	})
 
-	resource.AddTestSweepers("aiven_organization_user_group", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_organization_user_group", &resource.Sweeper{
 		Name: "aiven_organization_user_group",
 		F:    sweepOrganizationUserGroups(ctx, client),
 		Dependencies: []string{

@@ -1,10 +1,9 @@
-//go:build sweep
-
 package account
 
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -14,6 +13,10 @@ import (
 )
 
 func init() {
+	if os.Getenv("TF_SWEEP") == "" {
+		return
+	}
+
 	ctx := context.Background()
 
 	client, err := sweep.SharedClient()
@@ -21,30 +24,36 @@ func init() {
 		panic(fmt.Sprintf("error getting client: %s", err))
 	}
 
-	resource.AddTestSweepers("aiven_account_team_member", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_account_team_member", &resource.Sweeper{
 		Name:         "aiven_account_team_member",
 		F:            sweepAccountTeamMembers(ctx, client),
 		Dependencies: []string{"aiven_account_authentication"},
 	})
 
-	resource.AddTestSweepers("aiven_account_team_project", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_account_team_project", &resource.Sweeper{
 		Name:         "aiven_account_team_project",
 		F:            sweepAccountTeamProjects(ctx, client),
 		Dependencies: []string{"aiven_account_authentication"},
 	})
 
-	resource.AddTestSweepers("aiven_account_team", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_account_team", &resource.Sweeper{
 		Name:         "aiven_account_team",
 		F:            sweepAccountTeams(ctx, client),
 		Dependencies: []string{"aiven_account_team_member", "aiven_account_authentication"},
 	})
 
-	resource.AddTestSweepers("aiven_account", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_account", &resource.Sweeper{
 		Name:         "aiven_account",
 		F:            sweepAccounts(ctx, client),
 		Dependencies: []string{"aiven_project", "aiven_account_team", "aiven_account_team_project", "aiven_account_authentication"},
 	})
-	resource.AddTestSweepers("aiven_account_authentication", &resource.Sweeper{
+
+	sweep.AddTestSweepers("aiven_organizational_unit", &resource.Sweeper{
+		Name: "aiven_organizational_unit",
+		F:    sweepAccounts(ctx, client),
+	})
+
+	sweep.AddTestSweepers("aiven_account_authentication", &resource.Sweeper{
 		Name: "aiven_account_authentication",
 		F:    sweepAccountAuthentications(ctx, client),
 	})

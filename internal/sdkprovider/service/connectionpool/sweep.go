@@ -1,5 +1,3 @@
-//go:build sweep
-
 package connectionpool
 
 import (
@@ -16,6 +14,10 @@ import (
 )
 
 func init() {
+	if os.Getenv("TF_SWEEP") == "" {
+		return
+	}
+
 	ctx := context.Background()
 
 	client, err := sweep.SharedClient()
@@ -23,7 +25,7 @@ func init() {
 		panic(fmt.Sprintf("error getting client: %s", err))
 	}
 
-	resource.AddTestSweepers("aiven_connection_pool", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_connection_pool", &resource.Sweeper{
 		Name: "aiven_connection_pool",
 		F:    sweepConnectionPoll(ctx, client),
 	})
