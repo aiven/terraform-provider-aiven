@@ -157,7 +157,10 @@ SWEEP ?= global
 
 sweep:
 	@echo 'WARNING: This will destroy infrastructure. Use only in development accounts.'
-	$(GO) test ./internal/sweep -v -tags=sweep -sweep=$(SWEEP) $(SWEEP_ARGS) -timeout 15m
+	TF_SWEEP=1 $(GO) test ./internal/sweep -v -sweep=$(SWEEP) $(SWEEP_ARGS) -timeout 15m
+
+sweep-check:
+	TF_SWEEP=1 $(GO) test ./internal/sweep -v -run TestCheckSweepers
 
 #################################################
 # Generate

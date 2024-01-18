@@ -1,5 +1,3 @@
-//go:build sweep
-
 package serviceintegration
 
 import (
@@ -15,6 +13,10 @@ import (
 )
 
 func init() {
+	if os.Getenv("TF_SWEEP") == "" {
+		return
+	}
+
 	ctx := context.Background()
 
 	client, err := sweep.SharedClient()
@@ -22,12 +24,12 @@ func init() {
 		panic(fmt.Sprintf("error getting client: %s", err))
 	}
 
-	resource.AddTestSweepers("aiven_service_integration", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_service_integration", &resource.Sweeper{
 		Name: "aiven_service_integration",
 		F:    sweepServiceIntegrations(ctx, client),
 	})
 
-	resource.AddTestSweepers("aiven_service_integration_endpoint", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_service_integration_endpoint", &resource.Sweeper{
 		Name: "aiven_service_integration_endpoint",
 		F:    sweepServiceIntegrationEndpoints(ctx, client),
 	})

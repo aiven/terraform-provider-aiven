@@ -1,5 +1,3 @@
-//go:build sweep
-
 package redis
 
 import (

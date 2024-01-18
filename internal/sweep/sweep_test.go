@@ -1,12 +1,14 @@
-//go:build sweep
-
 package sweep_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/cassandra"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
@@ -25,8 +27,71 @@ import (
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/serviceintegration"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/staticip"
 	_ "github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/vpc"
+	"github.com/aiven/terraform-provider-aiven/internal/sweep"
 )
 
 func TestMain(m *testing.M) {
 	resource.TestMain(m)
+}
+
+// knownMissginSweepers returns a list of resources for which we don't have sweepers for a reason.
+func knownMissginSweepers() []string {
+	// These are resources for which we don't have sweepers.
+	// When a correcponding serivce will be deleted, for example Kafka,
+	// all the associated resources will be deleted as well, like Kafka ACLs, topics, etc.
+	// Therefore, we don't need to have sweepers for them.
+	return []string{
+		"aiven_pg_user",
+		"aiven_clickhouse_database",
+		"aiven_influxdb_user",
+		"aiven_influxdb_database",
+		"aiven_mysql_user",
+		"aiven_kafka_acl",
+		"aiven_pg_database",
+		"aiven_kafka_user",
+		"aiven_redis_user",
+		"aiven_opensearch_acl_config",
+		"aiven_mysql_database",
+		"aiven_m3db_user",
+		"aiven_kafka_topic",
+		"aiven_kafka_schema",
+		"aiven_azure_privatelink_connection_approval",
+		"aiven_flink_application_version",
+		"aiven_opensearch_acl_rule",
+		"aiven_mirrormaker_replication_flow",
+		"aiven_project_user",
+		"aiven_clickhouse_user",
+		"aiven_kafka_schema_registry_acl",
+		"aiven_clickhouse_role",
+		"aiven_cassandra_user",
+		"aiven_flink_application_deployment",
+		"aiven_gcp_privatelink_connection_approval",
+		"aiven_opensearch_user",
+		"aiven_kafka_schema_configuration",
+		"aiven_clickhouse_grant",
+		"aiven_opensearch_security_plugin_config",
+		"aiven_flink_application",
+	}
+}
+
+// TestCheckSweepers checks that we have sweepers for all the resources.
+func TestCheckSweepers(t *testing.T) {
+	if os.Getenv("TF_SWEEP") == "" {
+		return
+	}
+
+	resourceMap := provider.Provider("test").ResourcesMap
+	allResources := maps.Keys(resourceMap)
+	allSweepers := sweep.GetTestSweepersResources()
+
+	var missing []string
+	for _, r := range allResources {
+		if !slices.Contains(allSweepers, r) && !slices.Contains(knownMissginSweepers(), r) {
+			missing = append(missing, r)
+		}
+	}
+
+	if len(missing) > 0 {
+		t.Errorf("missing sweepers for resources: %v", missing)
+	}
 }

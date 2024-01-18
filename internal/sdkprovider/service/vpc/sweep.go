@@ -1,5 +1,3 @@
-//go:build sweep
-
 package vpc
 
 import (
@@ -16,6 +14,10 @@ import (
 )
 
 func init() {
+	if os.Getenv("TF_SWEEP") == "" {
+		return
+	}
+
 	ctx := context.Background()
 
 	client, err := sweep.SharedClient()
@@ -40,7 +42,7 @@ func init() {
 		"aiven_clickhouse",
 	}
 
-	resource.AddTestSweepers("aiven_project_vpc", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_project_vpc", &resource.Sweeper{
 		Name: "aiven_project_vpc",
 		F:    sweepVPCs(ctx, client),
 		Dependencies: []string{
@@ -48,7 +50,7 @@ func init() {
 		},
 	})
 
-	resource.AddTestSweepers("aiven_aws_vpc_peering_connection", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_aws_vpc_peering_connection", &resource.Sweeper{
 		Name: "aiven_aws_vpc_peering_connection",
 		F:    sweepVPCPeeringCons(ctx, client),
 		Dependencies: []string{
@@ -56,7 +58,7 @@ func init() {
 		},
 	})
 
-	resource.AddTestSweepers("aiven_azure_vpc_peering_connection", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_azure_vpc_peering_connection", &resource.Sweeper{
 		Name: "aiven_azure_vpc_peering_connection",
 		F:    sweepVPCPeeringCons(ctx, client),
 		Dependencies: []string{
@@ -64,7 +66,7 @@ func init() {
 		},
 	})
 
-	resource.AddTestSweepers("aiven_gcp_vpc_peering_connection", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_gcp_vpc_peering_connection", &resource.Sweeper{
 		Name: "aiven_gcp_vpc_peering_connection",
 		F:    sweepVPCPeeringCons(ctx, client),
 		Dependencies: []string{
@@ -72,7 +74,7 @@ func init() {
 		},
 	})
 
-	resource.AddTestSweepers("aiven_transit_gateway_vpc_attachment", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_transit_gateway_vpc_attachment", &resource.Sweeper{
 		Name: "aiven_transit_gateway_vpc_attachment",
 		F:    sweepVPCPeeringCons(ctx, client),
 		Dependencies: []string{
@@ -80,19 +82,19 @@ func init() {
 		},
 	})
 
-	resource.AddTestSweepers("aiven_aws_privatelink", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_aws_privatelink", &resource.Sweeper{
 		Name:         "aiven_aws_privatelink",
 		F:            sweepAWSPrivatelinks(ctx, client),
 		Dependencies: allServices,
 	})
 
-	resource.AddTestSweepers("aiven_azure_privatelink", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_azure_privatelink", &resource.Sweeper{
 		Name:         "aiven_azure_privatelink",
 		F:            sweepAzurePrivatelinks(ctx, client),
 		Dependencies: allServices,
 	})
 
-	resource.AddTestSweepers("aiven_gcp_privatelink", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_gcp_privatelink", &resource.Sweeper{
 		Name:         "aiven_gcp_privatelink",
 		F:            sweepGCPPrivatelinks(ctx, client),
 		Dependencies: allServices,
@@ -145,11 +147,11 @@ func sweepVPCPeeringCons(ctx context.Context, client *aiven.Client) func(string)
 						*peeringCon.PeerResourceGroup,
 						peeringCon.PeerRegion)
 					if common.IsCritical(err) {
-						return fmt.Errorf("error deleting vpc peering connection %s/%s/%s/%s: %s",
+						return fmt.Errorf("error deleting vpc peering connection %s/%s/%s/%s: %w",
 							vpc.ProjectVPCID,
 							peeringCon.PeerCloudAccount,
 							peeringCon.PeerVPC,
-							peeringCon.PeerResourceGroup,
+							*peeringCon.PeerResourceGroup,
 							err)
 					}
 				}
@@ -162,11 +164,11 @@ func sweepVPCPeeringCons(ctx context.Context, client *aiven.Client) func(string)
 					peeringCon.PeerVPC,
 					peeringCon.PeerRegion)
 				if common.IsCritical(err) {
-					return fmt.Errorf("error deleting vpc peering connection %s/%s/%s/%s: %s",
+					return fmt.Errorf("error deleting vpc peering connection %s/%s/%s/%s: %w",
 						vpc.ProjectVPCID,
 						peeringCon.PeerCloudAccount,
 						peeringCon.PeerVPC,
-						peeringCon.PeerRegion,
+						*peeringCon.PeerRegion,
 						err)
 				}
 			}

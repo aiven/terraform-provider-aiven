@@ -1,11 +1,10 @@
-//go:build sweep
-
 package project
 
 import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -15,6 +14,10 @@ import (
 )
 
 func init() {
+	if os.Getenv("TF_SWEEP") == "" {
+		return
+	}
+
 	ctx := context.Background()
 
 	client, err := sweep.SharedClient()
@@ -22,7 +25,7 @@ func init() {
 		panic(fmt.Sprintf("error getting client: %s", err))
 	}
 
-	resource.AddTestSweepers("aiven_project", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_project", &resource.Sweeper{
 		Name: "aiven_project",
 		F:    sweepProjects(ctx, client),
 		Dependencies: []string{
@@ -43,7 +46,7 @@ func init() {
 		},
 	})
 
-	resource.AddTestSweepers("aiven_billing_group", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_billing_group", &resource.Sweeper{
 		Name: "aiven_billing_group",
 		F:    sweepBillingGroups(ctx, client),
 		Dependencies: []string{

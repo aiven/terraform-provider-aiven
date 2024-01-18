@@ -1,5 +1,3 @@
-//go:build sweep
-
 package staticip
 
 import (
@@ -15,6 +13,10 @@ import (
 )
 
 func init() {
+	if os.Getenv("TF_SWEEP") == "" {
+		return
+	}
+
 	ctx := context.Background()
 
 	client, err := sweep.SharedClient()
@@ -22,7 +24,7 @@ func init() {
 		panic(fmt.Sprintf("error getting client: %s", err))
 	}
 
-	resource.AddTestSweepers("aiven_static_ip", &resource.Sweeper{
+	sweep.AddTestSweepers("aiven_static_ip", &resource.Sweeper{
 		Name: "aiven_static_ip",
 		F:    sweepStaticIPs(ctx, client),
 		Dependencies: []string{
