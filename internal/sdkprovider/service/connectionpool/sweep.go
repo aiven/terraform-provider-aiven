@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -14,26 +13,22 @@ import (
 )
 
 func init() {
-	if os.Getenv("TF_SWEEP") == "" {
-		return
-	}
-
 	ctx := context.Background()
-
-	client, err := sweep.SharedClient()
-	if err != nil {
-		panic(fmt.Sprintf("error getting client: %s", err))
-	}
 
 	sweep.AddTestSweepers("aiven_connection_pool", &resource.Sweeper{
 		Name: "aiven_connection_pool",
-		F:    sweepConnectionPoll(ctx, client),
+		F:    sweepConnectionPoll(ctx),
 	})
 
 }
 
-func sweepConnectionPoll(ctx context.Context, client *aiven.Client) func(string) error {
+func sweepConnectionPoll(ctx context.Context) func(string) error {
 	return func(id string) error {
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
+
 		projectName := os.Getenv("AIVEN_PROJECT_NAME")
 
 		services, err := client.Services.List(ctx, projectName)

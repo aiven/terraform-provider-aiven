@@ -39,10 +39,6 @@ func SharedClient() (*aiven.Client, error) {
 }
 
 func SweepServices(ctx context.Context, t string) error {
-	if os.Getenv("TF_SWEEP") == "" {
-		return nil
-	}
-
 	client, err := SharedClient()
 	if err != nil {
 		return fmt.Errorf("error getting client: %s", err)

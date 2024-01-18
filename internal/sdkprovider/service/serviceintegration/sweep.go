@@ -13,31 +13,26 @@ import (
 )
 
 func init() {
-	if os.Getenv("TF_SWEEP") == "" {
-		return
-	}
-
 	ctx := context.Background()
-
-	client, err := sweep.SharedClient()
-	if err != nil {
-		panic(fmt.Sprintf("error getting client: %s", err))
-	}
 
 	sweep.AddTestSweepers("aiven_service_integration", &resource.Sweeper{
 		Name: "aiven_service_integration",
-		F:    sweepServiceIntegrations(ctx, client),
+		F:    sweepServiceIntegrations(ctx),
 	})
 
 	sweep.AddTestSweepers("aiven_service_integration_endpoint", &resource.Sweeper{
 		Name: "aiven_service_integration_endpoint",
-		F:    sweepServiceIntegrationEndpoints(ctx, client),
+		F:    sweepServiceIntegrationEndpoints(ctx),
 	})
 }
 
-func sweepServiceIntegrations(ctx context.Context, client *aiven.Client) func(region string) error {
+func sweepServiceIntegrations(ctx context.Context) func(region string) error {
 	return func(region string) error {
 		projectName := os.Getenv("AIVEN_PROJECT_NAME")
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
 
 		services, err := client.Services.List(ctx, projectName)
 		if common.IsCritical(err) {
@@ -74,9 +69,13 @@ func sweepServiceIntegrations(ctx context.Context, client *aiven.Client) func(re
 	}
 }
 
-func sweepServiceIntegrationEndpoints(ctx context.Context, client *aiven.Client) func(region string) error {
+func sweepServiceIntegrationEndpoints(ctx context.Context) func(region string) error {
 	return func(region string) error {
 		projectName := os.Getenv("AIVEN_PROJECT_NAME")
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
 
 		endpoints, err := client.ServiceIntegrationEndpoints.List(ctx, projectName)
 		if err != nil {

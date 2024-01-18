@@ -3,7 +3,6 @@ package account
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -13,53 +12,49 @@ import (
 )
 
 func init() {
-	if os.Getenv("TF_SWEEP") == "" {
-		return
-	}
-
 	ctx := context.Background()
-
-	client, err := sweep.SharedClient()
-	if err != nil {
-		panic(fmt.Sprintf("error getting client: %s", err))
-	}
 
 	sweep.AddTestSweepers("aiven_account_team_member", &resource.Sweeper{
 		Name:         "aiven_account_team_member",
-		F:            sweepAccountTeamMembers(ctx, client),
+		F:            sweepAccountTeamMembers(ctx),
 		Dependencies: []string{"aiven_account_authentication"},
 	})
 
 	sweep.AddTestSweepers("aiven_account_team_project", &resource.Sweeper{
 		Name:         "aiven_account_team_project",
-		F:            sweepAccountTeamProjects(ctx, client),
+		F:            sweepAccountTeamProjects(ctx),
 		Dependencies: []string{"aiven_account_authentication"},
 	})
 
 	sweep.AddTestSweepers("aiven_account_team", &resource.Sweeper{
 		Name:         "aiven_account_team",
-		F:            sweepAccountTeams(ctx, client),
+		F:            sweepAccountTeams(ctx),
 		Dependencies: []string{"aiven_account_team_member", "aiven_account_authentication"},
 	})
 
 	sweep.AddTestSweepers("aiven_account", &resource.Sweeper{
 		Name:         "aiven_account",
-		F:            sweepAccounts(ctx, client),
+		F:            sweepAccounts(ctx),
 		Dependencies: []string{"aiven_project", "aiven_account_team", "aiven_account_team_project", "aiven_account_authentication"},
 	})
 
 	sweep.AddTestSweepers("aiven_organizational_unit", &resource.Sweeper{
 		Name: "aiven_organizational_unit",
-		F:    sweepAccounts(ctx, client),
+		F:    sweepAccounts(ctx),
 	})
 
 	sweep.AddTestSweepers("aiven_account_authentication", &resource.Sweeper{
 		Name: "aiven_account_authentication",
-		F:    sweepAccountAuthentications(ctx, client),
+		F:    sweepAccountAuthentications(ctx),
 	})
 }
 
-func listTestAccounts(ctx context.Context, client *aiven.Client) ([]aiven.Account, error) {
+func listTestAccounts(ctx context.Context) ([]aiven.Account, error) {
+	client, err := sweep.SharedClient()
+	if err != nil {
+		return nil, err
+	}
+
 	var testAccounts []aiven.Account
 
 	r, err := client.Accounts.List(ctx)
@@ -76,9 +71,14 @@ func listTestAccounts(ctx context.Context, client *aiven.Client) ([]aiven.Accoun
 	return testAccounts, nil
 }
 
-func sweepAccountAuthentications(ctx context.Context, client *aiven.Client) func(region string) error {
+func sweepAccountAuthentications(ctx context.Context) func(region string) error {
 	return func(region string) error {
-		accounts, err := listTestAccounts(ctx, client)
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
+
+		accounts, err := listTestAccounts(ctx)
 
 		if err != nil {
 			return fmt.Errorf("error retrieving a list of accounts : %w", err)
@@ -105,9 +105,14 @@ func sweepAccountAuthentications(ctx context.Context, client *aiven.Client) func
 	}
 }
 
-func sweepAccounts(ctx context.Context, client *aiven.Client) func(region string) error {
+func sweepAccounts(ctx context.Context) func(region string) error {
 	return func(region string) error {
-		accounts, err := listTestAccounts(ctx, client)
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
+
+		accounts, err := listTestAccounts(ctx)
 		if err != nil {
 			return fmt.Errorf("error retrieving a list of accounts : %w", err)
 		}
@@ -126,9 +131,14 @@ func sweepAccounts(ctx context.Context, client *aiven.Client) func(region string
 	}
 }
 
-func sweepAccountTeams(ctx context.Context, client *aiven.Client) func(region string) error {
+func sweepAccountTeams(ctx context.Context) func(region string) error {
 	return func(region string) error {
-		accounts, err := listTestAccounts(ctx, client)
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
+
+		accounts, err := listTestAccounts(ctx)
 		if err != nil {
 			return fmt.Errorf("error retrieving a list of accounts : %w", err)
 		}
@@ -153,9 +163,14 @@ func sweepAccountTeams(ctx context.Context, client *aiven.Client) func(region st
 		return nil
 	}
 }
-func sweepAccountTeamMembers(ctx context.Context, client *aiven.Client) func(region string) error {
+func sweepAccountTeamMembers(ctx context.Context) func(region string) error {
 	return func(region string) error {
-		accounts, err := listTestAccounts(ctx, client)
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
+
+		accounts, err := listTestAccounts(ctx)
 		if err != nil {
 			return fmt.Errorf("error retrieving a list of accounts : %s", err)
 		}
@@ -202,9 +217,14 @@ func sweepAccountTeamMembers(ctx context.Context, client *aiven.Client) func(reg
 	}
 }
 
-func sweepAccountTeamProjects(ctx context.Context, client *aiven.Client) func(region string) error {
+func sweepAccountTeamProjects(ctx context.Context) func(region string) error {
 	return func(region string) error {
-		accounts, err := listTestAccounts(ctx, client)
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
+
+		accounts, err := listTestAccounts(ctx)
 		if err != nil {
 			return fmt.Errorf("error retrieving a list of accounts : %s", err)
 		}

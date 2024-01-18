@@ -1,7 +1,6 @@
 package sweep_test
 
 import (
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -76,10 +75,6 @@ func knownMissginSweepers() []string {
 
 // TestCheckSweepers checks that we have sweepers for all the resources.
 func TestCheckSweepers(t *testing.T) {
-	if os.Getenv("TF_SWEEP") == "" {
-		return
-	}
-
 	resourceMap := provider.Provider("test").ResourcesMap
 	allResources := maps.Keys(resourceMap)
 	allSweepers := sweep.GetTestSweepersResources()

@@ -65,3 +65,16 @@ jobs:
 
       - run: make docs
       - run: git diff --exit-code
+  
+  sweep_check:
+    runs-on: ubuntu-latest
+    if: (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) || github.event_name == 'push'
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-go@v5
+      with:
+        go-version-file: go.mod
+        
+    - run: make sweep-check

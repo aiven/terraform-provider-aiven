@@ -3,10 +3,8 @@ package organization
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 
-	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -16,25 +14,16 @@ import (
 const defaultPrefix = "test-acc"
 
 func init() {
-	if os.Getenv("TF_SWEEP") == "" {
-		return
-	}
-
 	ctx := context.Background()
-
-	client, err := sweep.SharedClient()
-	if err != nil {
-		panic(fmt.Sprintf("error getting client: %s", err))
-	}
 
 	sweep.AddTestSweepers("aiven_organization", &resource.Sweeper{
 		Name: "aiven_organization",
-		F:    sweepOrganizations(ctx, client),
+		F:    sweepOrganizations(ctx),
 	})
 
 	sweep.AddTestSweepers("aiven_organization_application_user", &resource.Sweeper{
 		Name: "aiven_organization_application_user",
-		F:    sweepOrganizationApplicationUsers(ctx, client),
+		F:    sweepOrganizationApplicationUsers(ctx),
 		Dependencies: []string{
 			"aiven_organization",
 		},
@@ -42,7 +31,7 @@ func init() {
 
 	sweep.AddTestSweepers("aiven_organization_user", &resource.Sweeper{
 		Name: "aiven_organization_user",
-		F:    sweepOrganizationUsers(ctx, client),
+		F:    sweepOrganizationUsers(ctx),
 		Dependencies: []string{
 			"aiven_organization",
 		},
@@ -50,7 +39,7 @@ func init() {
 
 	sweep.AddTestSweepers("aiven_organization_user_group", &resource.Sweeper{
 		Name: "aiven_organization_user_group",
-		F:    sweepOrganizationUserGroups(ctx, client),
+		F:    sweepOrganizationUserGroups(ctx),
 		Dependencies: []string{
 			"aiven_organization",
 		},
@@ -58,8 +47,13 @@ func init() {
 
 }
 
-func sweepOrganizations(ctx context.Context, client *aiven.Client) func(string) error {
+func sweepOrganizations(ctx context.Context) func(string) error {
 	return func(id string) error {
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
+
 		organizations, err := client.Accounts.List(ctx)
 		if common.IsCritical(err) {
 			return fmt.Errorf("error retrieving a list of organizations: %w", err)
@@ -84,8 +78,13 @@ func sweepOrganizations(ctx context.Context, client *aiven.Client) func(string) 
 	}
 }
 
-func sweepOrganizationApplicationUsers(ctx context.Context, client *aiven.Client) func(string) error {
+func sweepOrganizationApplicationUsers(ctx context.Context) func(string) error {
 	return func(id string) error {
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
+
 		organizationApplicationUsers, err := client.OrganizationApplicationUserHandler.List(ctx, id)
 		if common.IsCritical(err) {
 			return fmt.Errorf("error retrieving a list of organization application users: %w", err)
@@ -110,8 +109,13 @@ func sweepOrganizationApplicationUsers(ctx context.Context, client *aiven.Client
 	}
 }
 
-func sweepOrganizationUserGroups(ctx context.Context, client *aiven.Client) func(string) error {
+func sweepOrganizationUserGroups(ctx context.Context) func(string) error {
 	return func(id string) error {
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
+
 		organizationUserGroups, err := client.OrganizationUserGroups.List(ctx, id)
 		if common.IsCritical(err) {
 			return fmt.Errorf("error retrieving a list of organization user groups: %w", err)
@@ -136,8 +140,13 @@ func sweepOrganizationUserGroups(ctx context.Context, client *aiven.Client) func
 	}
 }
 
-func sweepOrganizationUsers(ctx context.Context, client *aiven.Client) func(string) error {
+func sweepOrganizationUsers(ctx context.Context) func(string) error {
 	return func(id string) error {
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
+
 		organizationUsers, err := client.OrganizationUser.List(ctx, id)
 		if common.IsCritical(err) {
 			return fmt.Errorf("error retrieving a list of organization users: %w", err)
