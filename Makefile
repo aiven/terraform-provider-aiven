@@ -160,7 +160,7 @@ sweep:
 	TF_SWEEP=1 $(GO) test ./internal/sweep -v -sweep=$(SWEEP) $(SWEEP_ARGS) -timeout 15m
 
 sweep-check:
-	TF_SWEEP=1 $(GO) test ./internal/sweep -v -run TestCheckSweepers
+	$(GO) test ./internal/sweep -v -run TestCheckSweepers
 
 #################################################
 # Generate

@@ -6,7 +6,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -14,16 +13,7 @@ import (
 )
 
 func init() {
-	if os.Getenv("TF_SWEEP") == "" {
-		return
-	}
-
 	ctx := context.Background()
-
-	client, err := sweep.SharedClient()
-	if err != nil {
-		panic(fmt.Sprintf("error getting client: %s", err))
-	}
 
 	allServices := []string{
 		"aiven_pg",
@@ -44,7 +34,7 @@ func init() {
 
 	sweep.AddTestSweepers("aiven_project_vpc", &resource.Sweeper{
 		Name: "aiven_project_vpc",
-		F:    sweepVPCs(ctx, client),
+		F:    sweepVPCs(ctx),
 		Dependencies: []string{
 			"aiven_project",
 		},
@@ -52,7 +42,7 @@ func init() {
 
 	sweep.AddTestSweepers("aiven_aws_vpc_peering_connection", &resource.Sweeper{
 		Name: "aiven_aws_vpc_peering_connection",
-		F:    sweepVPCPeeringCons(ctx, client),
+		F:    sweepVPCPeeringCons(ctx),
 		Dependencies: []string{
 			"aiven_project_vpc",
 		},
@@ -60,7 +50,7 @@ func init() {
 
 	sweep.AddTestSweepers("aiven_azure_vpc_peering_connection", &resource.Sweeper{
 		Name: "aiven_azure_vpc_peering_connection",
-		F:    sweepVPCPeeringCons(ctx, client),
+		F:    sweepVPCPeeringCons(ctx),
 		Dependencies: []string{
 			"aiven_project_vpc",
 		},
@@ -68,7 +58,7 @@ func init() {
 
 	sweep.AddTestSweepers("aiven_gcp_vpc_peering_connection", &resource.Sweeper{
 		Name: "aiven_gcp_vpc_peering_connection",
-		F:    sweepVPCPeeringCons(ctx, client),
+		F:    sweepVPCPeeringCons(ctx),
 		Dependencies: []string{
 			"aiven_project_vpc",
 		},
@@ -76,7 +66,7 @@ func init() {
 
 	sweep.AddTestSweepers("aiven_transit_gateway_vpc_attachment", &resource.Sweeper{
 		Name: "aiven_transit_gateway_vpc_attachment",
-		F:    sweepVPCPeeringCons(ctx, client),
+		F:    sweepVPCPeeringCons(ctx),
 		Dependencies: []string{
 			"aiven_project_vpc",
 		},
@@ -84,26 +74,31 @@ func init() {
 
 	sweep.AddTestSweepers("aiven_aws_privatelink", &resource.Sweeper{
 		Name:         "aiven_aws_privatelink",
-		F:            sweepAWSPrivatelinks(ctx, client),
+		F:            sweepAWSPrivatelinks(ctx),
 		Dependencies: allServices,
 	})
 
 	sweep.AddTestSweepers("aiven_azure_privatelink", &resource.Sweeper{
 		Name:         "aiven_azure_privatelink",
-		F:            sweepAzurePrivatelinks(ctx, client),
+		F:            sweepAzurePrivatelinks(ctx),
 		Dependencies: allServices,
 	})
 
 	sweep.AddTestSweepers("aiven_gcp_privatelink", &resource.Sweeper{
 		Name:         "aiven_gcp_privatelink",
-		F:            sweepGCPPrivatelinks(ctx, client),
+		F:            sweepGCPPrivatelinks(ctx),
 		Dependencies: allServices,
 	})
 }
 
-func sweepVPCs(ctx context.Context, client *aiven.Client) func(string) error {
+func sweepVPCs(ctx context.Context) func(string) error {
 	return func(region string) error {
 		projectName := os.Getenv("AIVEN_PROJECT_NAME")
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
+
 		vpcs, err := client.VPCs.List(ctx, projectName)
 		if err != nil {
 			return fmt.Errorf("error retrieving a list of vpcs for a project : %s", err)
@@ -120,9 +115,14 @@ func sweepVPCs(ctx context.Context, client *aiven.Client) func(string) error {
 	}
 }
 
-func sweepVPCPeeringCons(ctx context.Context, client *aiven.Client) func(string) error {
+func sweepVPCPeeringCons(ctx context.Context) func(string) error {
 	return func(region string) error {
 		projectName := os.Getenv("AIVEN_PROJECT_NAME")
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
+
 		vpcs, err := client.VPCs.List(ctx, projectName)
 		if err != nil {
 			return fmt.Errorf("error retrieving a list of vpcs for a project : %s", err)
@@ -178,9 +178,14 @@ func sweepVPCPeeringCons(ctx context.Context, client *aiven.Client) func(string)
 	}
 }
 
-func sweepAWSPrivatelinks(ctx context.Context, client *aiven.Client) func(string) error {
+func sweepAWSPrivatelinks(ctx context.Context) func(string) error {
 	return func(region string) error {
 		projectName := os.Getenv("AIVEN_PROJECT_NAME")
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
+
 		serviceList, err := client.Services.List(ctx, projectName)
 		if err != nil {
 			return fmt.Errorf("error retrieving a list of services for a project : %s", err)
@@ -207,9 +212,14 @@ func sweepAWSPrivatelinks(ctx context.Context, client *aiven.Client) func(string
 	}
 }
 
-func sweepAzurePrivatelinks(ctx context.Context, client *aiven.Client) func(string) error {
+func sweepAzurePrivatelinks(ctx context.Context) func(string) error {
 	return func(region string) error {
 		projectName := os.Getenv("AIVEN_PROJECT_NAME")
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
+
 		serviceList, err := client.Services.List(ctx, projectName)
 		if err != nil {
 			return fmt.Errorf("error retrieving a list of services for a project : %s", err)
@@ -236,9 +246,14 @@ func sweepAzurePrivatelinks(ctx context.Context, client *aiven.Client) func(stri
 	}
 }
 
-func sweepGCPPrivatelinks(ctx context.Context, client *aiven.Client) func(string) error {
+func sweepGCPPrivatelinks(ctx context.Context) func(string) error {
 	return func(region string) error {
 		projectName := os.Getenv("AIVEN_PROJECT_NAME")
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
+
 		serviceList, err := client.Services.List(ctx, projectName)
 		if err != nil {
 			return fmt.Errorf("error retrieving a list of services for a project : %s", err)

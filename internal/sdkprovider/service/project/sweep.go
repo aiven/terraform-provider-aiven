@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -14,20 +13,11 @@ import (
 )
 
 func init() {
-	if os.Getenv("TF_SWEEP") == "" {
-		return
-	}
-
 	ctx := context.Background()
-
-	client, err := sweep.SharedClient()
-	if err != nil {
-		panic(fmt.Sprintf("error getting client: %s", err))
-	}
 
 	sweep.AddTestSweepers("aiven_project", &resource.Sweeper{
 		Name: "aiven_project",
-		F:    sweepProjects(ctx, client),
+		F:    sweepProjects(ctx),
 		Dependencies: []string{
 			"aiven_cassandra",
 			"aiven_clickhouse",
@@ -48,15 +38,20 @@ func init() {
 
 	sweep.AddTestSweepers("aiven_billing_group", &resource.Sweeper{
 		Name: "aiven_billing_group",
-		F:    sweepBillingGroups(ctx, client),
+		F:    sweepBillingGroups(ctx),
 		Dependencies: []string{
 			"aiven_project",
 		},
 	})
 }
 
-func sweepProjects(ctx context.Context, client *aiven.Client) func(region string) error {
+func sweepProjects(ctx context.Context) func(region string) error {
 	return func(region string) error {
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
+
 		projects, err := client.Projects.List(ctx)
 		if err != nil {
 			return fmt.Errorf("error retrieving a list of projects : %s", err)
@@ -87,8 +82,13 @@ func sweepProjects(ctx context.Context, client *aiven.Client) func(region string
 	}
 }
 
-func sweepBillingGroups(ctx context.Context, client *aiven.Client) func(region string) error {
+func sweepBillingGroups(ctx context.Context) func(region string) error {
 	return func(region string) error {
+		client, err := sweep.SharedClient()
+		if err != nil {
+			return err
+		}
+
 		billingGroups, err := client.BillingGroup.ListAll(ctx)
 		if err != nil {
 			return fmt.Errorf("error retrieving a list of billing groups : %s", err)
