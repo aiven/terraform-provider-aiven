@@ -59,15 +59,15 @@ func datasourceOrganizationUserRead(ctx context.Context, d *schema.ResourceData,
 
 	var found int
 
-	var user *aiven.OrganizationMemberInfo
+	var user aiven.OrganizationMemberInfo
 	for _, u := range rm.Users {
 		if userEmail != "" && u.UserInfo.UserEmail == userEmail {
-			user = &u
+			user = u
 			found++
 		}
 
 		if userID != "" && u.UserID == userID {
-			user = &u
+			user = u
 			found++
 		}
 	}
