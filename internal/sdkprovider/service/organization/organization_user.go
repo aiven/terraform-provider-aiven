@@ -57,6 +57,7 @@ var aivenOrganizationUserSchema = map[string]*schema.Schema{
 func ResourceOrganizationUser() *schema.Resource {
 	return &schema.Resource{
 		Description: `
+		This resource is deprecated; please use aiven_organization_user data source instead. 
 The Organization User resource allows the creation and management of an Aiven Organization User.
 
 During the creation of ` + "`aiven_organization_user`" + `resource, an email invitation will be sent
@@ -74,10 +75,10 @@ eliminate the member from the organization if one has accepted an invitation pre
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 		Schema:   aivenOrganizationUserSchema,
 		DeprecationMessage: `
-This resource is deprecated, please use aiven_organization_user datasource instead. 
+This resource is deprecated; please use aiven_organization_user data source instead. 
 Invitation of organization users is not supported anymore via Terraform. Therefore 
-creation of this resource is not supported anymore. We reccoemnd to use WebUI to create
-and organization user invitation. And upon receiving an invitation, a user can accept it 
+creation of this resource is not supported anymore. We recommend using WebUI to create
+and organization user invitations. Upon receiving an invitation, a user can accept it 
 using WebUI. Once accepted, the user will become a member of the organization and will 
 be able to access it via Terraform.
 		`,
