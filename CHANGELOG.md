@@ -11,6 +11,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `aiven_organization_group_memeber` fill model
+
 ## [4.13.1] - 2024-01-19
 
 - Fix `aiven_organization_user` datasource get method
