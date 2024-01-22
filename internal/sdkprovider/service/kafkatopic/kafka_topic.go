@@ -176,13 +176,13 @@ var aivenKafkaTopicConfigSchema = map[string]*schema.Schema{
 	},
 	"local_retention_bytes": {
 		Type:             schema.TypeString,
-		Description:      "local.retention.bytes value. This field is temporarily disabled.",
+		Description:      "local.retention.bytes value",
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 	},
 	"local_retention_ms": {
 		Type:             schema.TypeString,
-		Description:      "local.retention.ms value. This field is temporarily disabled.",
+		Description:      "local.retention.ms value",
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 	},
