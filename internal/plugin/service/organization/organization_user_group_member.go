@@ -173,7 +173,7 @@ func (r *organizationUserGroupMembersResource) fillModel(
 		)
 	}
 
-	model.LastActivityTime = types.StringValue(member.LastActivityTime.String())
+	model.LastActivityTime = util.ValueOrDefault(member.LastActivityTime, types.StringNull())
 
 	return nil
 }

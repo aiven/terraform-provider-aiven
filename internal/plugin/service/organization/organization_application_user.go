@@ -153,11 +153,13 @@ func (r *organizationApplicationUser) fillModel(
 	}
 
 	if appUser == nil {
-		return fmt.Errorf(errmsg.AivenResourceNotFound, r.TypeName(), model.ID.ValueString())
+		return fmt.Errorf(
+			errmsg.AivenResourceNotFound,
+			r.TypeName(),
+			model.ID.ValueString())
 	}
 
 	model.Name = types.StringValue(appUser.Name)
-
 	model.Email = types.StringValue(appUser.UserEmail)
 
 	return err
