@@ -1,9 +1,13 @@
 package flink
 
 import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/aiven-go-client/v2"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
@@ -42,7 +46,7 @@ func ResourceFlink() *schema.Resource {
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeFlink),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
-		DeleteContext: schemautil.ResourceServiceDelete,
+		DeleteContext: FlinkServiceDelete,
 		CustomizeDiff: customdiff.Sequence(
 			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeFlink),
 			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
@@ -76,4 +80,37 @@ func ResourceFlink() *schema.Resource {
 		SchemaVersion:  1,
 		StateUpgraders: stateupgrader.Flink(),
 	}
+}
+
+func FlinkServiceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*aiven.Client)
+
+	projectName, serviceName, err := schemautil.SplitResourceID2(d.Id())
+	if err != nil {
+		return diag.Errorf("error splitting service ID: %s", err)
+	}
+
+	apps, err := client.FlinkApplications.List(ctx, projectName, serviceName)
+	if err != nil && !aiven.IsNotFound(err) {
+		return diag.Errorf("error listing Flink service applications: %s", err)
+	}
+
+	for _, app := range apps.Applications {
+		deployments, err := client.FlinkApplicationDeployments.List(ctx, projectName, serviceName, app.ID)
+		if err != nil && !aiven.IsNotFound(err) {
+			return diag.Errorf("error listing Flink service deployments: %s", err)
+		}
+
+		for _, deployment := range deployments.Deployments {
+			if deployment.Status != "CANCELED" {
+				return diag.Errorf(
+					"cannot delete Flink service while there are running deployments: %s in state: %s; "+
+						"please delete the deployment first and try again",
+					deployment.ID,
+					deployment.Status)
+			}
+		}
+	}
+
+	return schemautil.ResourceServiceDelete(ctx, d, m)
 }

@@ -12,6 +12,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Fix `aiven_organization_group_memeber` fill model
+- Add `aiven_flink` service deletiong check
 
 ## [4.13.1] - 2024-01-19
 
