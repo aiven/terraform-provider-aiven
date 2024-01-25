@@ -3,12 +3,12 @@
 page_title: "aiven_billing_group Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Billing Group resource allows the creation and management of Aiven Billing Groups and association with the Projects.
+  Creates and manages billing groups and assigns them to projects.
 ---
 
 # aiven_billing_group (Resource)
 
-The Billing Group resource allows the creation and management of Aiven Billing Groups and association with the Projects.
+Creates and manages billing groups and assigns them to projects.
 
 ## Example Usage
 
@@ -30,25 +30,25 @@ resource "aiven_project" "pr1" {
 
 ### Required
 
-- `name` (String) Billing Group name
+- `name` (String) Name of the billing group.
 
 ### Optional
 
-- `account_id` (String, Deprecated) Account id
-- `address_lines` (Set of String) Address lines
-- `billing_currency` (String) Billing currency
-- `billing_emails` (Set of String) Billing contact emails
-- `billing_extra_text` (String) Billing extra text
-- `card_id` (String) Credit card id
-- `city` (String) City
-- `company` (String) Company name
-- `copy_from_billing_group` (String) ID of the billing group to copy from
-- `country_code` (String) Country code
-- `parent_id` (String) An optional property to link a billing group to an already existing organization or account by using its ID. To set up proper dependencies please refer to this variable as a reference.
-- `state` (String) State
+- `account_id` (String, Deprecated) Account ID.
+- `address_lines` (Set of String) Address lines 1 and 2. For example, street, PO box, or building.
+- `billing_currency` (String) Billing currency for the billing group. Supported currencies are: AUD, CAD, CHF, DKK, EUR, GBP, JPY, NOK, NZD, SEK, SGD, and USD.
+- `billing_emails` (Set of String) Email address of billing contacts. Invoices and other payment notifications are emailed to all billing contacts.
+- `billing_extra_text` (String) Additional information to include on your invoice (for example, a reference number).
+- `card_id` (String) Credit card ID.
+- `city` (String) City, district, suburb, town, or village.
+- `company` (String) Your company name.
+- `copy_from_billing_group` (String) ID of the billing group to copy the company name, address, currency, billing contacts, and extra text from.
+- `country_code` (String) Two-letter country code.
+- `parent_id` (String) Link a billing group to an existing organization or account by using its ID. To set up proper dependencies please refer to this variable as a reference.
+- `state` (String) State or province.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
-- `vat_id` (String) VAT id
-- `zip_code` (String) Zip Code
+- `vat_id` (String) The VAT identification number for your company.
+- `zip_code` (String) Zip or postal code.
 
 ### Read-Only
 
