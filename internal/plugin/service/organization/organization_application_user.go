@@ -78,7 +78,7 @@ func (r *organizationApplicationUser) Schema(
 	resp *resource.SchemaResponse,
 ) {
 	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
-		Description: util.BetaDescription("Creates and manages an organization application user in Aiven."),
+		Description: util.BetaDescription("Creates and manages an organization application user. Application users can be used for programmatic access to the platform. This features is in the limited availability stage. Contact sales@aiven.io to try this feature."),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description: "Compound identifier of the organization application user.",
