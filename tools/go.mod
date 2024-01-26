@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/aiven/terraform-provider-aiven/tools/selproj v0.0.0-00010101000000-000000000000
 	github.com/golangci/golangci-lint v1.55.2
-	github.com/hashicorp/terraform-plugin-docs v0.17.0
+	github.com/hashicorp/terraform-plugin-docs v0.18.0
 	github.com/katbyte/terrafmt v0.5.2
 )
 
@@ -106,7 +106,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.16.2 // indirect
 	github.com/hashicorp/terraform-exec v0.20.0 // indirect
-	github.com/hashicorp/terraform-json v0.20.0 // indirect
+	github.com/hashicorp/terraform-json v0.21.0 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
 	github.com/imdario/mergo v0.3.15 // indirect
