@@ -17,13 +17,13 @@ func DatasourceBillingGroup() *schema.Resource {
 		"billing_group_id": {
 			Type:        schema.TypeString,
 			Required:    true,
-			Description: userconfig.Desc("The id of the billing group.").Referenced().Build(),
+			Description: userconfig.Desc("The ID of the billing group.").Referenced().Build(),
 		},
 	})
 
 	return &schema.Resource{
 		ReadContext: datasourceBillingGroupRead,
-		Description: "The Billing Group data source provides information about the existing Aiven Account.",
+		Description: "Provides information about an existing billing group.",
 		Schema:      s,
 	}
 }
