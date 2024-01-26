@@ -465,7 +465,7 @@ func ConvertStateInfoToMap(s *map[string]interface{}) map[string]string {
 func isAzureVPCPeeringConnection(ctx context.Context, d *schema.ResourceData, c *aiven.Client) (bool, error) {
 	p, err := parsePeerVPCID(d.Id())
 	if err != nil {
-		return false, fmt.Errorf("error parsing Azure peering VPC ID: %s", err)
+		return false, fmt.Errorf("error parsing Azure peering VPC ID: %w", err)
 	}
 
 	// If peerRegion is nil the peered VPC is assumed to be in the same region and

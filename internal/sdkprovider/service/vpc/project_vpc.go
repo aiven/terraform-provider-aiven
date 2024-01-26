@@ -2,6 +2,7 @@ package vpc
 
 import (
 	"context"
+	"errors"
 	"log"
 	"time"
 
@@ -218,7 +219,8 @@ func (w *ProjectVPCDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 
 				// VPC cannot be deleted while there are services migrating from
 				// it or service deletion is still in progress
-				if err.(aiven.Error).Status != 409 {
+				var e *aiven.Error
+				if errors.As(err, &e) && e.Status != 409 {
 					return nil, "", err
 				}
 			}

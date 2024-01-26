@@ -140,7 +140,7 @@ func resourceOpenSearchUserDelete(ctx context.Context, d *schema.ResourceData, m
 
 	err = client.ServiceUsers.Delete(ctx, projectName, serviceName, username)
 	if common.IsCritical(err) {
-		var e aiven.Error
+		var e *aiven.Error
 
 		// This is a special case where the user is not managed by Aiven, but by the OpenSearch Security plugin.
 		// We don't want to fail on destroy operations if the OpenSearch Security Plugin is enabled,

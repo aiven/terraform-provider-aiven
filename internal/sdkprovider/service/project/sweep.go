@@ -2,6 +2,7 @@ package project
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -54,16 +55,16 @@ func sweepProjects(ctx context.Context) func(region string) error {
 
 		projects, err := client.Projects.List(ctx)
 		if err != nil {
-			return fmt.Errorf("error retrieving a list of projects : %s", err)
+			return fmt.Errorf("error retrieving a list of projects : %w", err)
 		}
 
 		for _, project := range projects {
 			if strings.Contains(project.Name, "test-acc-") {
 				if err := client.Projects.Delete(ctx, project.Name); err != nil {
-					e := err.(aiven.Error)
+					var e *aiven.Error
 
 					// project not found
-					if e.Status == 404 {
+					if errors.As(err, &e) && e.Status == 404 {
 						continue
 					}
 
@@ -73,7 +74,7 @@ func sweepProjects(ctx context.Context) func(region string) error {
 						continue
 					}
 
-					return fmt.Errorf("error destroying project %s during sweep: %s", project.Name, err)
+					return fmt.Errorf("error destroying project %s during sweep: %w", project.Name, err)
 				}
 			}
 		}
@@ -91,21 +92,20 @@ func sweepBillingGroups(ctx context.Context) func(region string) error {
 
 		billingGroups, err := client.BillingGroup.ListAll(ctx)
 		if err != nil {
-			return fmt.Errorf("error retrieving a list of billing groups : %s", err)
+			return fmt.Errorf("error retrieving a list of billing groups : %w", err)
 		}
 
 		for _, billingGroup := range billingGroups {
 			if strings.Contains(billingGroup.BillingGroupName, "test-acc-") {
 				if err := client.BillingGroup.Delete(ctx, billingGroup.Id); err != nil {
-					e := err.(aiven.Error)
-
 					// billing group not found
-					if e.Status == 404 {
+					var e *aiven.Error
+					if errors.As(err, &e) && e.Status == 404 {
 						continue
 					}
 
 					return fmt.Errorf(
-						"error destroying billing group %s during sweep: %s",
+						"error destroying billing group %s during sweep: %w",
 						billingGroup.BillingGroupName,
 						err,
 					)

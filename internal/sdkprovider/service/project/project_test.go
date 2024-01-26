@@ -2,6 +2,7 @@ package project_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"regexp"
@@ -255,8 +256,8 @@ func testAccCheckAivenProjectResourceDestroy(s *terraform.State) error {
 
 		p, err := c.Projects.Get(ctx, rs.Primary.ID)
 		if err != nil {
-			errStatus := err.(aiven.Error).Status
-			if errStatus != 404 && errStatus != 403 {
+			var e *aiven.Error
+			if errors.As(err, &e) && e.Status != 404 && e.Status != 403 {
 				return err
 			}
 		}

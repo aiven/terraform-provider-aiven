@@ -83,7 +83,7 @@ func TestAccAiven_kafka(t *testing.T) {
 
 						a, err := c.KafkaACLs.List(ctx, os.Getenv("AIVEN_PROJECT_NAME"), rName2)
 						if common.IsCritical(err) {
-							return fmt.Errorf("cannot get a list of kafka ACLs: %s", err)
+							return fmt.Errorf("cannot get a list of kafka ACLs: %w", err)
 						}
 
 						if len(a) > 0 {
@@ -92,7 +92,7 @@ func TestAccAiven_kafka(t *testing.T) {
 
 						s, err := c.KafkaSchemaRegistryACLs.List(ctx, os.Getenv("AIVEN_PROJECT_NAME"), rName2)
 						if common.IsCritical(err) {
-							return fmt.Errorf("cannot get a list of Kafka Schema ACLs: %s", err)
+							return fmt.Errorf("cannot get a list of Kafka Schema ACLs: %w", err)
 						}
 
 						if len(s) > 0 {

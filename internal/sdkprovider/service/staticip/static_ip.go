@@ -176,7 +176,7 @@ func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	if _, err := conf.WaitForStateContext(ctx); err != nil {
-		return fmt.Errorf("error waiting for static ip to be created: %s", err)
+		return fmt.Errorf("error waiting for static ip to be created: %w", err)
 	}
 
 	return nil
@@ -184,22 +184,22 @@ func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interfa
 
 func setStaticIPState(d *schema.ResourceData, project string, staticIP *aiven.StaticIP) error {
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("error setting static ips `project` for resource %s: %s", d.Id(), err)
+		return fmt.Errorf("error setting static ips `project` for resource %s: %w", d.Id(), err)
 	}
 	if err := d.Set("cloud_name", staticIP.CloudName); err != nil {
-		return fmt.Errorf("error setting static ips `cloud_name` for resource %s: %s", d.Id(), err)
+		return fmt.Errorf("error setting static ips `cloud_name` for resource %s: %w", d.Id(), err)
 	}
 	if err := d.Set("ip_address", staticIP.IPAddress); err != nil {
-		return fmt.Errorf("error setting static ips `ip_address` for resource %s: %s", d.Id(), err)
+		return fmt.Errorf("error setting static ips `ip_address` for resource %s: %w", d.Id(), err)
 	}
 	if err := d.Set("service_name", staticIP.ServiceName); err != nil {
-		return fmt.Errorf("error setting static ips `service_name` for resource %s: %s", d.Id(), err)
+		return fmt.Errorf("error setting static ips `service_name` for resource %s: %w", d.Id(), err)
 	}
 	if err := d.Set("state", staticIP.State); err != nil {
-		return fmt.Errorf("error setting static ips `state` for resource %s: %s", d.Id(), err)
+		return fmt.Errorf("error setting static ips `state` for resource %s: %w", d.Id(), err)
 	}
 	if err := d.Set("static_ip_address_id", staticIP.StaticIPAddressID); err != nil {
-		return fmt.Errorf("error setting static ips `static_ip_address_id` for resource %s: %s", d.Id(), err)
+		return fmt.Errorf("error setting static ips `static_ip_address_id` for resource %s: %w", d.Id(), err)
 	}
 	return nil
 }

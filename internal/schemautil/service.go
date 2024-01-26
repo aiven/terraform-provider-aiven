@@ -2,6 +2,7 @@ package schemautil
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -586,7 +587,7 @@ func getDefaultDiskSpaceIfNotSet(ctx context.Context, d *schema.ResourceData, cl
 			if aiven.IsNotFound(err) {
 				return 0, nil
 			}
-			return 0, fmt.Errorf("unable to get service plan parameters: %s", err)
+			return 0, fmt.Errorf("unable to get service plan parameters: %w", err)
 		}
 
 		if ads, ok := d.GetOk("additional_disk_space"); ok {
@@ -743,7 +744,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	}
 
 	if err := d.Set(serviceType+"_user_config", newUserConfig); err != nil {
-		return fmt.Errorf("cannot set `%s_user_config` : %s; Please make sure that all Aiven services have unique s names", serviceType, err)
+		return fmt.Errorf("cannot set `%s_user_config` : %w; Please make sure that all Aiven services have unique s names", serviceType, err)
 	}
 
 	params := s.URIParams
@@ -784,7 +785,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	}
 
 	if err := d.Set("components", FlattenServiceComponents(s)); err != nil {
-		return fmt.Errorf("cannot set `components` : %s", err)
+		return fmt.Errorf("cannot set `components` : %w", err)
 	}
 
 	return copyConnectionInfoFromAPIResponseToTerraform(d, serviceType, s.ConnectionInfo, s.Metadata)
@@ -872,11 +873,8 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 // IsUnknownRole checks if the database returned an error because of an unknown role
 // to make deletions idempotent
 func IsUnknownRole(err error) bool {
-	aivenError, ok := err.(aiven.Error)
-	if !ok {
-		return false
-	}
-	return strings.Contains(aivenError.Message, "Code: 511")
+	var e *aiven.Error
+	return errors.As(err, &e) && strings.Contains(e.Message, "Code: 511")
 }
 
 // IsUnknownResource is a function to handle errors that we want to treat as "Not Found"

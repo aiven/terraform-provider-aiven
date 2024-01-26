@@ -2,6 +2,7 @@ package kafkaschema_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -190,7 +191,8 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 
 		_, err = c.Services.Get(ctx, projectName, serviceName)
 		if err != nil {
-			if err.(aiven.Error).Status == 404 {
+			var e *aiven.Error
+			if errors.As(err, &e) && e.Status == 404 {
 				return nil
 			}
 
@@ -199,7 +201,8 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 
 		schemaList, err := c.KafkaSubjectSchemas.List(ctx, projectName, serviceName)
 		if err != nil {
-			if err.(aiven.Error).Status == 404 {
+			var e *aiven.Error
+			if errors.As(err, &e) && e.Status == 404 {
 				return nil
 			}
 
@@ -209,7 +212,8 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 		for _, s := range schemaList.KafkaSchemaSubjects.Subjects {
 			versions, err := c.KafkaSubjectSchemas.GetVersions(ctx, projectName, serviceName, s)
 			if err != nil {
-				if err.(aiven.Error).Status == 404 {
+				var e *aiven.Error
+				if errors.As(err, &e) && e.Status == 404 {
 					return nil
 				}
 

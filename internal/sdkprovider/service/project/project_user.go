@@ -2,6 +2,7 @@ package project
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -53,7 +54,8 @@ func ResourceProjectUser() *schema.Resource {
 
 // isProjectUserAlreadyInvited return true if user already been invited to the project
 func isProjectUserAlreadyInvited(err error) bool {
-	if e, ok := err.(aiven.Error); ok {
+	var e *aiven.Error
+	if errors.As(err, &e) {
 		if strings.Contains(e.Message, "already been invited to this project") && e.Status == 409 {
 			return true
 		}
@@ -166,9 +168,10 @@ func resourceProjectUserDelete(ctx context.Context, d *schema.ResourceData, m in
 	if user != nil {
 		err := client.ProjectUsers.DeleteUser(ctx, projectName, email)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 ||
-				!strings.Contains(err.(aiven.Error).Message, "User does not exist") ||
-				!strings.Contains(err.(aiven.Error).Message, "User not found") {
+			var e *aiven.Error
+			if errors.As(err, &e) && e.Status != 404 ||
+				!strings.Contains(e.Message, "User does not exist") ||
+				!strings.Contains(e.Message, "User not found") {
 
 				return diag.FromErr(err)
 			}

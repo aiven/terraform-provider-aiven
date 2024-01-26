@@ -954,7 +954,7 @@ func testAccCheckAivenServiceTerminationProtection(n string) resource.TestCheckF
 
 		service, err := c.Services.Get(ctx, projectName, serviceName)
 		if err != nil {
-			return fmt.Errorf("cannot get service %s err: %s", serviceName, err)
+			return fmt.Errorf("cannot get service %s err: %w", serviceName, err)
 		}
 
 		if service.TerminationProtection == false {
@@ -985,7 +985,7 @@ func testAccCheckAivenServiceTerminationProtection(n string) resource.TestCheckF
 		)
 
 		if err != nil {
-			return fmt.Errorf("unable to update Aiven service to set termination_protection=false err: %s", err)
+			return fmt.Errorf("unable to update Aiven service to set termination_protection=false err: %w", err)
 		}
 
 		return nil

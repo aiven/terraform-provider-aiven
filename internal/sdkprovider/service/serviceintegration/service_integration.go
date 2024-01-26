@@ -274,7 +274,7 @@ func resourceServiceIntegrationCheckForPreexistingResource(ctx context.Context, 
 
 	integrations, err := client.ServiceIntegrations.List(ctx, projectName, sourceServiceName)
 	if common.IsCritical(err) {
-		return nil, fmt.Errorf("unable to get list of service integrations: %s", err)
+		return nil, fmt.Errorf("unable to get list of service integrations: %w", err)
 	}
 
 	for i := range integrations {

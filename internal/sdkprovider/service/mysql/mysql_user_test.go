@@ -2,6 +2,7 @@ package mysql_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -56,7 +57,8 @@ func testAccCheckAivenMySQLUserResourceDestroy(s *terraform.State) error {
 
 		p, err := c.ServiceUsers.Get(ctx, projectName, serviceName, username)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var e *aiven.Error
+			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}
 		}
