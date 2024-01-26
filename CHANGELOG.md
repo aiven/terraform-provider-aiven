@@ -11,6 +11,9 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+<!-- TODO: uncomment when dragonfly is supported -->
+<!-- - Dragonfly support -->
+
 - Update example code in flink_application_version docs to be valid and not use deprecated schema members
 
 ## [4.13.2] - 2024-01-25

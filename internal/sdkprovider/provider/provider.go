@@ -141,6 +141,10 @@ func Provider(version string) *schema.Provider {
 			"aiven_clickhouse":          clickhouse.DatasourceClickhouse(),
 			"aiven_clickhouse_database": clickhouse.DatasourceClickhouseDatabase(),
 			"aiven_clickhouse_user":     clickhouse.DatasourceClickhouseUser(),
+
+			// dragonfly
+			// TODO: uncomment when dragonfly is supported
+			//"aiven_dragonfly": dragonfly.DatasourceDragonfly(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -243,6 +247,10 @@ func Provider(version string) *schema.Provider {
 			"aiven_clickhouse_user":     clickhouse.ResourceClickhouseUser(),
 			"aiven_clickhouse_role":     clickhouse.ResourceClickhouseRole(),
 			"aiven_clickhouse_grant":    clickhouse.ResourceClickhouseGrant(),
+
+			// dragonfly
+			// TODO: uncomment when dragonfly is supported
+			//"aiven_dragonfly": dragonfly.ResourceDragonfly(),
 		},
 	}
 
