@@ -18,7 +18,7 @@ nav_order: 1
 
 ## [4.13.2] - 2024-01-25
 
-- Fix `aiven_organization_group_memeber` fill model
+- Fix `aiven_organization_group_member` fill model
 - Add `aiven_flink` service deletiong check
 
 ## [4.13.1] - 2024-01-19
