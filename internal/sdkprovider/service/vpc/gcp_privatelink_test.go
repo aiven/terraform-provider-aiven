@@ -2,6 +2,7 @@ package vpc_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -54,7 +55,8 @@ func testAccCheckAivenGCPPrivatelinkResourceDestroy(s *terraform.State) error {
 		}
 
 		pv, err := c.GCPPrivatelink.Get(ctx, project, serviceName)
-		if common.IsCritical(err) && err.(aiven.Error).Status != 500 {
+		var e *aiven.Error
+		if common.IsCritical(err) && errors.As(err, &e) && e.Status != 500 {
 			return fmt.Errorf("error getting a GCP Privatelink: %w", err)
 		}
 

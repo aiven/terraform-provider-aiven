@@ -2,6 +2,7 @@ package vpc_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -124,8 +125,8 @@ func testAccCheckAivenProjectVPCResourceDestroy(s *terraform.State) error {
 
 		vpc, err := c.VPCs.Get(ctx, projectName, vpcID)
 		if err != nil {
-			errStatus := err.(aiven.Error).Status
-			if errStatus != 404 && errStatus != 403 {
+			var e *aiven.Error
+			if errors.As(err, &e) && e.Status != 404 && e.Status != 403 {
 				return err
 			}
 		}

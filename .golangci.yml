@@ -16,6 +16,7 @@ linters:
     - unconvert
     - unused
     - stylecheck
+    - errorlint
 
 issues:
   exclude:

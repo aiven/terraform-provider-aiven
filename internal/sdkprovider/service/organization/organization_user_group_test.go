@@ -2,6 +2,7 @@ package organization_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"testing"
@@ -76,7 +77,8 @@ func testAccCheckAivenOrganizationUserGroupResourceDestroy(s *terraform.State) e
 
 		r, err := c.OrganizationUserGroups.Get(ctx, orgID, userGroupID)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var e *aiven.Error
+			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}
 

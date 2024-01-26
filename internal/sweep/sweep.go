@@ -41,7 +41,7 @@ func SharedClient() (*aiven.Client, error) {
 func SweepServices(ctx context.Context, t string) error {
 	client, err := SharedClient()
 	if err != nil {
-		return fmt.Errorf("error getting client: %s", err)
+		return fmt.Errorf("error getting client: %w", err)
 	}
 
 	projectName := os.Getenv("AIVEN_PROJECT_NAME")
@@ -74,13 +74,13 @@ func SweepServices(ctx context.Context, t string) error {
 			})
 
 			if err != nil {
-				return fmt.Errorf("error disabling `termination_protection` for service '%s' during sweep: %s", s.Name, err)
+				return fmt.Errorf("error disabling `termination_protection` for service '%s' during sweep: %w", s.Name, err)
 			}
 		}
 
 		if err := client.Services.Delete(ctx, projectName, s.Name); err != nil {
 			if common.IsCritical(err) {
-				return fmt.Errorf("error destroying service %s during sweep: %s", s.Name, err)
+				return fmt.Errorf("error destroying service %s during sweep: %w", s.Name, err)
 			}
 		}
 	}

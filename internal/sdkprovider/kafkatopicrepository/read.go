@@ -147,7 +147,7 @@ func (rep *repository) fetch(ctx context.Context, queue map[string]*request) {
 			if err != nil {
 				// Send errors
 				// Flattens error to a string, because it might go really completed for testing
-				err = fmt.Errorf("topic read error: %s", err)
+				err = fmt.Errorf("topic read error: %w", err)
 				for _, r := range reqs {
 					r.send(nil, err)
 				}

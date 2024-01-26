@@ -2,6 +2,7 @@ package serviceintegration_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -248,7 +249,8 @@ func testAccCheckAivenServiceIntegraitonEndpointResourceDestroy(s *terraform.Sta
 
 		i, err := c.ServiceIntegrationEndpoints.Get(ctx, projectName, endpointID)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var e *aiven.Error
+			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}
 		}

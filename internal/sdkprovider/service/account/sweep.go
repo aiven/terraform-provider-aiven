@@ -2,6 +2,7 @@ package account
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -119,7 +120,8 @@ func sweepAccounts(ctx context.Context) func(region string) error {
 
 		for _, a := range accounts {
 			if err := client.Accounts.Delete(ctx, a.Id); err != nil {
-				if err.(aiven.Error).Status == 404 {
+				var e *aiven.Error
+				if errors.As(err, &e) && e.Status == 404 {
 					continue
 				}
 
@@ -172,13 +174,13 @@ func sweepAccountTeamMembers(ctx context.Context) func(region string) error {
 
 		accounts, err := listTestAccounts(ctx)
 		if err != nil {
-			return fmt.Errorf("error retrieving a list of accounts : %s", err)
+			return fmt.Errorf("error retrieving a list of accounts : %w", err)
 		}
 
 		for _, a := range accounts {
 			tr, err := client.AccountTeams.List(ctx, a.Id)
 			if err != nil {
-				return fmt.Errorf("error retrieving a list of account teams : %s", err)
+				return fmt.Errorf("error retrieving a list of account teams : %w", err)
 			}
 
 			for _, t := range tr.Teams {
@@ -186,26 +188,26 @@ func sweepAccountTeamMembers(ctx context.Context) func(region string) error {
 					// delete all account team invitations
 					mi, err := client.AccountTeamInvites.List(ctx, t.AccountId, t.Id)
 					if err != nil {
-						return fmt.Errorf("error retrieving a list of account team invitations : %s", err)
+						return fmt.Errorf("error retrieving a list of account team invitations : %w", err)
 					}
 
 					for _, i := range mi.Invites {
 						err := client.AccountTeamInvites.Delete(ctx, i.AccountId, i.TeamId, i.UserEmail)
 						if err != nil {
-							return fmt.Errorf("cannot delete account team invitation : %s", err)
+							return fmt.Errorf("cannot delete account team invitation : %w", err)
 						}
 					}
 
 					// delete all account team members
 					mr, err := client.AccountTeamMembers.List(ctx, t.AccountId, t.Id)
 					if err != nil {
-						return fmt.Errorf("error retrieving a list of account team members : %s", err)
+						return fmt.Errorf("error retrieving a list of account team members : %w", err)
 					}
 
 					for _, m := range mr.Members {
 						err := client.AccountTeamMembers.Delete(ctx, t.AccountId, t.Id, m.UserId)
 						if err != nil {
-							return fmt.Errorf("cannot delete account team member : %s", err)
+							return fmt.Errorf("cannot delete account team member : %w", err)
 						}
 					}
 				}
@@ -226,26 +228,26 @@ func sweepAccountTeamProjects(ctx context.Context) func(region string) error {
 
 		accounts, err := listTestAccounts(ctx)
 		if err != nil {
-			return fmt.Errorf("error retrieving a list of accounts : %s", err)
+			return fmt.Errorf("error retrieving a list of accounts : %w", err)
 		}
 
 		for _, a := range accounts {
 			tr, err := client.AccountTeams.List(ctx, a.Id)
 			if err != nil {
-				return fmt.Errorf("error retrieving a list of account teams : %s", err)
+				return fmt.Errorf("error retrieving a list of account teams : %w", err)
 			}
 
 			for _, t := range tr.Teams {
 				if strings.Contains(t.Name, "test-acc-team-") {
 					pr, err := client.AccountTeamProjects.List(ctx, t.AccountId, t.Id)
 					if err != nil {
-						return fmt.Errorf("error retrieving a list of account team projects : %s", err)
+						return fmt.Errorf("error retrieving a list of account team projects : %w", err)
 					}
 
 					for _, p := range pr.Projects {
 						err := client.AccountTeamProjects.Delete(ctx, t.AccountId, t.Id, p.ProjectName)
 						if err != nil {
-							return fmt.Errorf("cannot delete account team project : %s", err)
+							return fmt.Errorf("cannot delete account team project : %w", err)
 						}
 					}
 				}

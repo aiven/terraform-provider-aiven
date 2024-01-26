@@ -2,6 +2,7 @@ package kafka_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -60,7 +61,8 @@ func testAccCheckAivenMirrorMakerReplicationFlowResourceDestroy(s *terraform.Sta
 
 		s, err := c.Services.Get(ctx, project, serviceName)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var e *aiven.Error
+			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}
 			return nil
@@ -69,7 +71,8 @@ func testAccCheckAivenMirrorMakerReplicationFlowResourceDestroy(s *terraform.Sta
 		if s.Type == "kafka_mirrormaker" {
 			f, err := c.KafkaMirrorMakerReplicationFlow.Get(ctx, project, serviceName, sourceCluster, targetCluster)
 			if err != nil {
-				if err.(aiven.Error).Status != 404 {
+				var e *aiven.Error
+				if errors.As(err, &e) && e.Status != 404 {
 					return err
 				}
 			}

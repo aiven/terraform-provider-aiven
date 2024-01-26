@@ -2,6 +2,7 @@ package project_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
@@ -56,7 +57,8 @@ func testAccCheckAivenBillingGroupResourceDestroy(s *terraform.State) error {
 		}
 
 		db, err := c.BillingGroup.Get(ctx, rs.Primary.ID)
-		if common.IsCritical(err) && err.(aiven.Error).Status != 500 {
+		var e *aiven.Error
+		if common.IsCritical(err) && errors.As(err, &e) && e.Status != 500 {
 			return fmt.Errorf("error getting a billing group by id: %w", err)
 		}
 

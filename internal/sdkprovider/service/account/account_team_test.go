@@ -2,6 +2,7 @@ package account_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -79,7 +80,8 @@ func testAccCheckAivenAccountTeamResourceDestroy(s *terraform.State) error {
 
 		r, err := c.Accounts.List(ctx)
 		if err != nil {
-			if err.(aiven.Error).Status != 404 {
+			var e *aiven.Error
+			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}
 
@@ -90,7 +92,8 @@ func testAccCheckAivenAccountTeamResourceDestroy(s *terraform.State) error {
 			if ac.Id == accountID {
 				rl, err := c.AccountTeams.List(ctx, accountID)
 				if err != nil {
-					if err.(aiven.Error).Status != 404 {
+					var e *aiven.Error
+					if errors.As(err, &e) && e.Status != 404 {
 						return err
 					}
 

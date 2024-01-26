@@ -2,6 +2,7 @@ package kafkatopicrepository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -26,7 +27,7 @@ func (rep *repository) Create(ctx context.Context, project, service string, req 
 	}
 
 	// If this is not errNotFound, then something happened
-	if err != errNotFound {
+	if !errors.Is(err, errNotFound) {
 		return err
 	}
 
@@ -59,7 +60,7 @@ func (rep *repository) Create(ctx context.Context, project, service string, req 
 	// Retry lib returns a custom error object
 	// we can't compare in tests with
 	if err != nil {
-		return fmt.Errorf("topic create error: %s", err)
+		return fmt.Errorf("topic create error: %w", err)
 	}
 	return err
 }

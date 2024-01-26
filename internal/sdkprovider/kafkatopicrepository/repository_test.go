@@ -235,7 +235,12 @@ func TestRepositoryRead(t *testing.T) {
 					defer wg.Done()
 					topic, err := rep.Read(ctx, opt.requests[i].project, opt.requests[i].service, opt.requests[i].topic)
 					assert.Equal(t, opt.responses[i].topic, topic)
-					assert.Equal(t, opt.responses[i].err, err)
+					// Check the error message using EqualError because the error is wrapped
+					if opt.responses[i].err == nil {
+						assert.NoError(t, err)
+					} else {
+						assert.EqualError(t, err, opt.responses[i].err.Error())
+					}
 				}(i)
 			}
 

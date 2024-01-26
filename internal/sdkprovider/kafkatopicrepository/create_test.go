@@ -2,6 +2,7 @@ package kafkatopicrepository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"sync/atomic"
@@ -24,7 +25,7 @@ func TestCreateConflict(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			err := rep.Create(ctx, "a", "b", aiven.CreateKafkaTopicRequest{TopicName: "c"})
-			if err == errAlreadyExists {
+			if errors.Is(err, errAlreadyExists) {
 				atomic.AddInt32(&conflictErr, 1)
 			}
 			wg.Done()
@@ -113,7 +114,12 @@ func TestCreateRetries(t *testing.T) {
 				TopicName: "my-topic",
 			}
 			err := rep.Create(ctx, "foo", "bar", req)
-			assert.Equal(t, opt.expectErr, err)
+			// Check the error message using EqualError because the error is wrapped
+			if opt.expectErr == nil {
+				assert.NoError(t, err)
+			} else {
+				assert.EqualError(t, err, opt.expectErr.Error())
+			}
 			assert.Equal(t, opt.expectCalled, client.createCalled)
 		})
 	}

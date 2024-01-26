@@ -2,6 +2,7 @@ package clickhouse
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -10,11 +11,8 @@ import (
 )
 
 func isUnknownRole(err error) bool {
-	aivenError, ok := err.(aiven.Error)
-	if !ok {
-		return false
-	}
-	return strings.Contains(aivenError.Message, "Code: 511")
+	var e *aiven.Error
+	return errors.As(err, &e) && strings.Contains(e.Message, "Code: 511")
 }
 
 func CreateRole(ctx context.Context, client *aiven.Client, projectName, serviceName, roleName string) error {

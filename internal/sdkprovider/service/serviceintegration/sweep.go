@@ -36,7 +36,7 @@ func sweepServiceIntegrations(ctx context.Context) func(region string) error {
 
 		services, err := client.Services.List(ctx, projectName)
 		if common.IsCritical(err) {
-			return fmt.Errorf("error retrieving a list of service for a project `%s`: %s", projectName, err)
+			return fmt.Errorf("error retrieving a list of service for a project `%s`: %w", projectName, err)
 		}
 
 		for _, service := range services {
@@ -46,7 +46,7 @@ func sweepServiceIntegrations(ctx context.Context) func(region string) error {
 
 			serviceIntegrations, err := client.ServiceIntegrations.List(ctx, projectName, service.Name)
 			if err != nil {
-				return fmt.Errorf("error retrieving a list of service integration for service `%s`: %s", service.Name, err)
+				return fmt.Errorf("error retrieving a list of service integration for service `%s`: %w", service.Name, err)
 			}
 			for _, serviceIntegration := range serviceIntegrations {
 				if err := client.ServiceIntegrations.Delete(
@@ -56,7 +56,7 @@ func sweepServiceIntegrations(ctx context.Context) func(region string) error {
 				); err != nil {
 					if !aiven.IsNotFound(err) {
 						return fmt.Errorf(
-							"unable to delete service integration `%s`: %s",
+							"unable to delete service integration `%s`: %w",
 							serviceIntegration.ServiceIntegrationID,
 							err,
 						)

@@ -101,13 +101,13 @@ func sweepVPCs(ctx context.Context) func(string) error {
 
 		vpcs, err := client.VPCs.List(ctx, projectName)
 		if err != nil {
-			return fmt.Errorf("error retrieving a list of vpcs for a project : %s", err)
+			return fmt.Errorf("error retrieving a list of vpcs for a project : %w", err)
 		}
 
 		for _, vpc := range vpcs {
 			err := client.VPCs.Delete(ctx, projectName, vpc.ProjectVPCID)
 			if common.IsCritical(err) {
-				return fmt.Errorf("error deleting vpc %s: %s", vpc.ProjectVPCID, err)
+				return fmt.Errorf("error deleting vpc %s: %w", vpc.ProjectVPCID, err)
 			}
 		}
 
@@ -125,13 +125,13 @@ func sweepVPCPeeringCons(ctx context.Context) func(string) error {
 
 		vpcs, err := client.VPCs.List(ctx, projectName)
 		if err != nil {
-			return fmt.Errorf("error retrieving a list of vpcs for a project : %s", err)
+			return fmt.Errorf("error retrieving a list of vpcs for a project : %w", err)
 		}
 
 		for _, vpc := range vpcs {
 			peeringCons, err := client.VPCPeeringConnections.List(ctx, projectName, vpc.ProjectVPCID)
 			if err != nil {
-				return fmt.Errorf("error retrieving a list of vpc peering connections for a project : %s", err)
+				return fmt.Errorf("error retrieving a list of vpc peering connections for a project : %w", err)
 			}
 
 			for _, peeringCon := range peeringCons {
@@ -188,19 +188,19 @@ func sweepAWSPrivatelinks(ctx context.Context) func(string) error {
 
 		serviceList, err := client.Services.List(ctx, projectName)
 		if err != nil {
-			return fmt.Errorf("error retrieving a list of services for a project : %s", err)
+			return fmt.Errorf("error retrieving a list of services for a project : %w", err)
 		}
 
 		for _, service := range serviceList {
 			awsPrivetelink, err := client.AWSPrivatelink.Get(ctx, projectName, service.Name)
 			if common.IsCritical(err) {
-				return fmt.Errorf("error retrieving a list of aws privatelinks for a project : %s", err)
+				return fmt.Errorf("error retrieving a list of aws privatelinks for a project : %w", err)
 			}
 
 			if awsPrivetelink != nil {
 				err := client.AWSPrivatelink.Delete(ctx, projectName, service.Name)
 				if common.IsCritical(err) {
-					return fmt.Errorf("error deleting aws privatelink %s/%s: %s",
+					return fmt.Errorf("error deleting aws privatelink %s/%s: %w",
 						projectName,
 						service.Name,
 						err)
@@ -222,19 +222,19 @@ func sweepAzurePrivatelinks(ctx context.Context) func(string) error {
 
 		serviceList, err := client.Services.List(ctx, projectName)
 		if err != nil {
-			return fmt.Errorf("error retrieving a list of services for a project : %s", err)
+			return fmt.Errorf("error retrieving a list of services for a project : %w", err)
 		}
 
 		for _, service := range serviceList {
 			azurePrivetelink, err := client.AzurePrivatelink.Get(ctx, projectName, service.Name)
 			if common.IsCritical(err) {
-				return fmt.Errorf("error retrieving a list of azure privatelinks for a project : %s", err)
+				return fmt.Errorf("error retrieving a list of azure privatelinks for a project : %w", err)
 			}
 
 			if azurePrivetelink != nil {
 				err := client.AzurePrivatelink.Delete(ctx, projectName, service.Name)
 				if common.IsCritical(err) {
-					return fmt.Errorf("error deleting azure privatelink %s/%s: %s",
+					return fmt.Errorf("error deleting azure privatelink %s/%s: %w",
 						projectName,
 						service.Name,
 						err)
@@ -256,19 +256,19 @@ func sweepGCPPrivatelinks(ctx context.Context) func(string) error {
 
 		serviceList, err := client.Services.List(ctx, projectName)
 		if err != nil {
-			return fmt.Errorf("error retrieving a list of services for a project : %s", err)
+			return fmt.Errorf("error retrieving a list of services for a project : %w", err)
 		}
 
 		for _, service := range serviceList {
 			gcpPrivetelink, err := client.GCPPrivatelink.Get(ctx, projectName, service.Name)
 			if common.IsCritical(err) {
-				return fmt.Errorf("error retrieving a list of gcp privatelinks for a project : %s", err)
+				return fmt.Errorf("error retrieving a list of gcp privatelinks for a project : %w", err)
 			}
 
 			if gcpPrivetelink != nil {
 				err := client.GCPPrivatelink.Delete(ctx, projectName, service.Name)
 				if common.IsCritical(err) {
-					return fmt.Errorf("error deleting gcp privatelink %s/%s: %s",
+					return fmt.Errorf("error deleting gcp privatelink %s/%s: %w",
 						projectName,
 						service.Name,
 						err)
