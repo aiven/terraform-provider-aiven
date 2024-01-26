@@ -18,11 +18,11 @@ resource "aiven_flink_application_version" "foo" {
   service_name   = aiven_flink.foo.service_name
   application_id = aiven_flink_application.foo.application_id
   statement      = <<EOT
-   INSERT INTO kafka_known_pizza SELECT * FROM kafka_pizza WHERE shop LIKE '%Luigis Pizza%'"
+   INSERT INTO kafka_known_pizza SELECT * FROM kafka_pizza WHERE shop LIKE '%Luigis Pizza%'
   EOT
-  sinks {
+  sink {
     create_table   = <<EOT
-    "CREATE TABLE kafka_known_pizza (
+    CREATE TABLE kafka_known_pizza (
         shop STRING,
         name STRING
     ) WITH (
@@ -35,7 +35,7 @@ resource "aiven_flink_application_version" "foo" {
   EOT
     integration_id = aiven_service_integration.flink_to_kafka.integration_id
   }
-  sources {
+  source {
     create_table   = <<EOT
     CREATE TABLE kafka_pizza (
         shop STRING,
