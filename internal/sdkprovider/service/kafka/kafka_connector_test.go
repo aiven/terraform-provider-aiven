@@ -87,7 +87,7 @@ func testAccCheckAivenKafkaConnectorResourceDestroy(s *terraform.State) error {
 
 		_, err = c.Services.Get(ctx, projectName, serviceName)
 		if err != nil {
-			var e *aiven.Error
+			var e aiven.Error
 			if errors.As(err, &e) && e.Status == 404 {
 				return nil
 			}
@@ -97,7 +97,7 @@ func testAccCheckAivenKafkaConnectorResourceDestroy(s *terraform.State) error {
 
 		list, err := c.KafkaConnectors.List(ctx, projectName, serviceName)
 		if err != nil {
-			var e *aiven.Error
+			var e aiven.Error
 			if errors.As(err, &e) && e.Status == 404 {
 				return nil
 			}
@@ -108,7 +108,7 @@ func testAccCheckAivenKafkaConnectorResourceDestroy(s *terraform.State) error {
 		for _, connector := range list.Connectors {
 			res, err := c.KafkaConnectors.GetByName(ctx, projectName, serviceName, connector.Name)
 			if err != nil {
-				var e *aiven.Error
+				var e aiven.Error
 				if errors.As(err, &e) && e.Status == 404 {
 					return nil
 				}

@@ -249,7 +249,7 @@ func testAccCheckAivenServiceIntegraitonEndpointResourceDestroy(s *terraform.Sta
 
 		i, err := c.ServiceIntegrationEndpoints.Get(ctx, projectName, endpointID)
 		if err != nil {
-			var e *aiven.Error
+			var e aiven.Error
 			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}

@@ -350,7 +350,7 @@ func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interf
 	// to make long acceptance tests pass which generate some balance
 	re := regexp.MustCompile("Project with open balance cannot be deleted")
 	if err != nil && os.Getenv("TF_ACC") != "" {
-		var e *aiven.Error
+		var e aiven.Error
 		if re.MatchString(err.Error()) && errors.As(err, &e) && e.Status == 403 {
 			return nil
 		}
@@ -492,6 +492,6 @@ func setProjectTerraformProperties(
 
 // isNotProjectMember This happens right after project created
 func isNotProjectMember(err error) bool {
-	var e *aiven.Error
+	var e aiven.Error
 	return errors.As(err, &e) && e.Status == http.StatusForbidden && strings.Contains(e.Message, "Not a project member")
 }

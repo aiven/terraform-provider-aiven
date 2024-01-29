@@ -260,7 +260,7 @@ func testAccCheckAivenKafkaACLResourceDestroy(s *terraform.State) error {
 
 		p, err := c.KafkaACLs.Get(ctx, project, serviceName, aclID)
 		if err != nil {
-			var e *aiven.Error
+			var e aiven.Error
 			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}

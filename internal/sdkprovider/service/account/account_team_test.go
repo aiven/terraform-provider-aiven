@@ -80,7 +80,7 @@ func testAccCheckAivenAccountTeamResourceDestroy(s *terraform.State) error {
 
 		r, err := c.Accounts.List(ctx)
 		if err != nil {
-			var e *aiven.Error
+			var e aiven.Error
 			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}
@@ -92,7 +92,7 @@ func testAccCheckAivenAccountTeamResourceDestroy(s *terraform.State) error {
 			if ac.Id == accountID {
 				rl, err := c.AccountTeams.List(ctx, accountID)
 				if err != nil {
-					var e *aiven.Error
+					var e aiven.Error
 					if errors.As(err, &e) && e.Status != 404 {
 						return err
 					}

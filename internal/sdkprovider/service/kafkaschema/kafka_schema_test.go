@@ -191,7 +191,7 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 
 		_, err = c.Services.Get(ctx, projectName, serviceName)
 		if err != nil {
-			var e *aiven.Error
+			var e aiven.Error
 			if errors.As(err, &e) && e.Status == 404 {
 				return nil
 			}
@@ -201,7 +201,7 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 
 		schemaList, err := c.KafkaSubjectSchemas.List(ctx, projectName, serviceName)
 		if err != nil {
-			var e *aiven.Error
+			var e aiven.Error
 			if errors.As(err, &e) && e.Status == 404 {
 				return nil
 			}
@@ -212,7 +212,7 @@ func testAccCheckAivenKafkaSchemaResourceDestroy(s *terraform.State) error {
 		for _, s := range schemaList.KafkaSchemaSubjects.Subjects {
 			versions, err := c.KafkaSubjectSchemas.GetVersions(ctx, projectName, serviceName, s)
 			if err != nil {
-				var e *aiven.Error
+				var e aiven.Error
 				if errors.As(err, &e) && e.Status == 404 {
 					return nil
 				}

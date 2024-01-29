@@ -88,7 +88,7 @@ func testAccCheckAivenAccountTeamMemberResourceDestroy(s *terraform.State) error
 
 		r, err := c.Accounts.List(ctx)
 		if err != nil {
-			var e *aiven.Error
+			var e aiven.Error
 			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}
@@ -100,7 +100,7 @@ func testAccCheckAivenAccountTeamMemberResourceDestroy(s *terraform.State) error
 			if a.Id == accountID {
 				ri, err := c.AccountTeamInvites.List(ctx, accountID, teamID)
 				if err != nil {
-					var e *aiven.Error
+					var e aiven.Error
 					if errors.As(err, &e) && e.Status != 404 {
 						return err
 					}

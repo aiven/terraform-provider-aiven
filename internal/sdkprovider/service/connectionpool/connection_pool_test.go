@@ -198,7 +198,7 @@ func testAccCheckAivenConnectionPoolResourceDestroy(s *terraform.State) error {
 
 		pool, err := c.ConnectionPools.Get(ctx, projectName, serviceName, databaseName)
 		if err != nil {
-			var e *aiven.Error
+			var e aiven.Error
 			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}

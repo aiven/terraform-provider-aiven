@@ -61,7 +61,7 @@ func testAccCheckAivenMirrorMakerReplicationFlowResourceDestroy(s *terraform.Sta
 
 		s, err := c.Services.Get(ctx, project, serviceName)
 		if err != nil {
-			var e *aiven.Error
+			var e aiven.Error
 			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}
@@ -71,7 +71,7 @@ func testAccCheckAivenMirrorMakerReplicationFlowResourceDestroy(s *terraform.Sta
 		if s.Type == "kafka_mirrormaker" {
 			f, err := c.KafkaMirrorMakerReplicationFlow.Get(ctx, project, serviceName, sourceCluster, targetCluster)
 			if err != nil {
-				var e *aiven.Error
+				var e aiven.Error
 				if errors.As(err, &e) && e.Status != 404 {
 					return err
 				}

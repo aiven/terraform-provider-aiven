@@ -125,7 +125,7 @@ func testAccCheckAivenProjectVPCResourceDestroy(s *terraform.State) error {
 
 		vpc, err := c.VPCs.Get(ctx, projectName, vpcID)
 		if err != nil {
-			var e *aiven.Error
+			var e aiven.Error
 			if errors.As(err, &e) && e.Status != 404 && e.Status != 403 {
 				return err
 			}
