@@ -275,7 +275,7 @@ func (r *organizationUserGroupMembersResource) Delete(
 		aiven.OrganizationUserGroupMemberRequest{
 			Operation: "remove_members",
 			MemberIDs: []string{
-				plan.GroupID.ValueString(),
+				plan.UserID.ValueString(),
 			},
 		},
 	); err != nil {
