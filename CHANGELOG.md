@@ -14,6 +14,8 @@ nav_order: 1
 <!-- TODO: uncomment when dragonfly is supported -->
 <!-- - Dragonfly support -->
 
+## [4.13.3] - 2024-01-29
+
 - Update example code in flink_application_version docs to be valid and not use deprecated schema members
 - Fix `aiven_organization_user_group_member` deletion
 
