@@ -216,6 +216,7 @@ Read-Only:
 - `consumer_enable_auto_commit` (Boolean)
 - `consumer_request_max_bytes` (Number)
 - `consumer_request_timeout_ms` (Number)
+- `name_strategy` (String)
 - `name_strategy_validation` (Boolean)
 - `producer_acks` (String)
 - `producer_compression_type` (String)

@@ -69,7 +69,7 @@ func ServiceTypeCassandra() *schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"cassandra_version": {
-			Description: "Cassandra major version.",
+			Description: "Cassandra version.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
@@ -3413,6 +3413,12 @@ func ServiceTypeKafka() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
+				"name_strategy": {
+					Default:     "topic_name",
+					Description: "Name strategy to use when selecting subject for storing schemas. The default value is `topic_name`.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
 				"name_strategy_validation": {
 					Default:     true,
 					Description: "If true, validate that given schema is registered under expected subject name by the used name strategy when producing messages. The default value is `true`.",
@@ -3467,6 +3473,12 @@ func ServiceTypeKafka() *schema.Schema {
 					Description: "The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached. The default value is `1000`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
+				},
+				"name_strategy": {
+					Default:     "topic_name",
+					Description: "Name strategy to use when selecting subject for storing schemas. The default value is `topic_name`.",
+					Optional:    true,
+					Type:        schema.TypeString,
 				},
 				"name_strategy_validation": {
 					Default:     true,
@@ -8723,6 +8735,11 @@ func ServiceTypeRedis() *schema.Schema {
 			Description: "Redis idle connection timeout in seconds. The default value is `300`.",
 			Optional:    true,
 			Type:        schema.TypeInt,
+		},
+		"redis_version": {
+			Description: "Redis major version.",
+			Optional:    true,
+			Type:        schema.TypeString,
 		},
 		"service_log": {
 			Description: "Store logs for the service so that they are available in the HTTP API and console.",

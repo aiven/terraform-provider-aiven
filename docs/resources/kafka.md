@@ -217,6 +217,7 @@ Optional:
 - `consumer_enable_auto_commit` (Boolean) If true the consumer's offset will be periodically committed to Kafka in the background. The default value is `true`.
 - `consumer_request_max_bytes` (Number) Maximum number of bytes in unencoded message keys and values by a single request. The default value is `67108864`.
 - `consumer_request_timeout_ms` (Number) The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached. The default value is `1000`.
+- `name_strategy` (String) Name strategy to use when selecting subject for storing schemas. The default value is `topic_name`.
 - `name_strategy_validation` (Boolean) If true, validate that given schema is registered under expected subject name by the used name strategy when producing messages. The default value is `true`.
 - `producer_acks` (String) The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to 'all' or '-1', the leader will wait for the full set of in-sync replicas to acknowledge the record. The default value is `1`.
 - `producer_compression_type` (String) Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.
