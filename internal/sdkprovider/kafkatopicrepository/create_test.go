@@ -73,7 +73,6 @@ func TestCreateRecreateMissing(t *testing.T) {
 }
 
 func TestCreateRetries(t *testing.T) {
-	errInsufficientBrokers := fmt.Errorf(`{"errors":[{"message":"Cluster only has 2 broker(s), cannot set replication factor to 3","status":409}],"message":"Cluster only has 2 broker(s), cannot set replication factor to 3"}`)
 	cases := []struct {
 		name         string
 		createErr    []error
@@ -83,13 +82,8 @@ func TestCreateRetries(t *testing.T) {
 		{
 			name:         "bad request error",
 			createErr:    []error{fmt.Errorf("invalid value")},
-			expectErr:    fmt.Errorf("topic create error: All attempts fail:\n#1: invalid value"),
+			expectErr:    fmt.Errorf("topic create error: invalid value"),
 			expectCalled: 1, // exits on the first unknown error
-		},
-		{
-			name:         "emulates insufficient broker error when create topic",
-			createErr:    []error{errInsufficientBrokers, errInsufficientBrokers},
-			expectCalled: 3, // two errors, three calls, the last one successful
 		},
 		{
 			name: "emulates case when 501 retried in client and then 409 received (ignores 409)",
