@@ -260,7 +260,7 @@ func testAccCheckAivenKafkaSchemaRegistryACLResourceDestroy(s *terraform.State) 
 
 		p, err := c.KafkaSchemaRegistryACLs.Get(ctx, project, serviceName, aclID)
 		if err != nil {
-			var e *aiven.Error
+			var e aiven.Error
 			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}

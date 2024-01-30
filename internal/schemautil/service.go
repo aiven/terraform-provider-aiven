@@ -863,7 +863,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 // IsUnknownRole checks if the database returned an error because of an unknown role
 // to make deletions idempotent
 func IsUnknownRole(err error) bool {
-	var e *aiven.Error
+	var e aiven.Error
 	return errors.As(err, &e) && strings.Contains(e.Message, "Code: 511")
 }
 

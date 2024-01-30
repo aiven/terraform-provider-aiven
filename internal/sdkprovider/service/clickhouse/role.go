@@ -11,7 +11,7 @@ import (
 )
 
 func isUnknownRole(err error) bool {
-	var e *aiven.Error
+	var e aiven.Error
 	return errors.As(err, &e) && strings.Contains(e.Message, "Code: 511")
 }
 

@@ -61,7 +61,7 @@ func sweepProjects(ctx context.Context) func(region string) error {
 		for _, project := range projects {
 			if strings.Contains(project.Name, "test-acc-") {
 				if err := client.Projects.Delete(ctx, project.Name); err != nil {
-					var e *aiven.Error
+					var e aiven.Error
 
 					// project not found
 					if errors.As(err, &e) && e.Status == 404 {
@@ -99,7 +99,7 @@ func sweepBillingGroups(ctx context.Context) func(region string) error {
 			if strings.Contains(billingGroup.BillingGroupName, "test-acc-") {
 				if err := client.BillingGroup.Delete(ctx, billingGroup.Id); err != nil {
 					// billing group not found
-					var e *aiven.Error
+					var e aiven.Error
 					if errors.As(err, &e) && e.Status == 404 {
 						continue
 					}

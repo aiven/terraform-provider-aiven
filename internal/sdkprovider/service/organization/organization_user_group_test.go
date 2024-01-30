@@ -77,7 +77,7 @@ func testAccCheckAivenOrganizationUserGroupResourceDestroy(s *terraform.State) e
 
 		r, err := c.OrganizationUserGroups.Get(ctx, orgID, userGroupID)
 		if err != nil {
-			var e *aiven.Error
+			var e aiven.Error
 			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}

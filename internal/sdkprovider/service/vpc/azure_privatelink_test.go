@@ -61,7 +61,7 @@ func testAccCheckAivenAzurePrivatelinkResourceDestroy(s *terraform.State) error 
 		}
 
 		pv, err := c.AzurePrivatelink.Get(ctx, project, serviceName)
-		var e *aiven.Error
+		var e aiven.Error
 		if common.IsCritical(err) && errors.As(err, &e) && e.Status != 500 {
 			return fmt.Errorf("error getting a Azure Privatelink: %w", err)
 		}

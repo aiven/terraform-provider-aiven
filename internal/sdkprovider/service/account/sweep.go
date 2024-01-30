@@ -120,7 +120,7 @@ func sweepAccounts(ctx context.Context) func(region string) error {
 
 		for _, a := range accounts {
 			if err := client.Accounts.Delete(ctx, a.Id); err != nil {
-				var e *aiven.Error
+				var e aiven.Error
 				if errors.As(err, &e) && e.Status == 404 {
 					continue
 				}

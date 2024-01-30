@@ -91,7 +91,7 @@ func diffSuppressJSONObjectOrProtobufString(k, old, new string, d *schema.Resour
 		return normalizeProtobufString(old) == normalizeProtobufString(new)
 	}
 
-	return false
+	return true
 }
 
 // normalizeProtobufString returns normalized Protobuf string.

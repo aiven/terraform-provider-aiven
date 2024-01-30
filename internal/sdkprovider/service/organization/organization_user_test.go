@@ -70,7 +70,7 @@ func testAccCheckAivenOrganizationUserResourceDestroy(s *terraform.State) error 
 
 		r, err := c.Organization.Get(ctx, organizationID)
 		if err != nil {
-			var e *aiven.Error
+			var e aiven.Error
 			if errors.As(err, &e) && e.Status != 404 {
 				return err
 			}
@@ -81,7 +81,7 @@ func testAccCheckAivenOrganizationUserResourceDestroy(s *terraform.State) error 
 		if r.ID == organizationID {
 			ri, err := c.OrganizationUserInvitations.List(ctx, organizationID)
 			if err != nil {
-				var e *aiven.Error
+				var e aiven.Error
 				if errors.As(err, &e) && e.Status != 404 {
 					return err
 				}
