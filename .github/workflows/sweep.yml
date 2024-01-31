@@ -33,7 +33,7 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - uses: nick-invision/retry@v2
+      - uses: nick-invision/retry@v3
         if: always()
         with:
           timeout_minutes: 15
