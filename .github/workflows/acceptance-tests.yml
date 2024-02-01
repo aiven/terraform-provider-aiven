@@ -116,7 +116,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - uses: nick-invision/retry@v2
+      - uses: nick-invision/retry@v3
         if: always()
         with:
           timeout_minutes: 15
