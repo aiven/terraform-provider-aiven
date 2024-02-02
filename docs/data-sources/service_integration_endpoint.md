@@ -158,6 +158,8 @@ Read-Only:
 - `host` (String)
 - `password` (String)
 - `port` (Number)
+- `ssl_client_certificate` (String)
+- `ssl_client_key` (String)
 - `ssl_mode` (String)
 - `ssl_root_cert` (String)
 - `username` (String)

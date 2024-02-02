@@ -352,7 +352,7 @@ func IntegrationEndpointTypeExternalPostgresql() *schema.Schema {
 		},
 		"password": {
 			Description: "Password.",
-			Required:    true,
+			Optional:    true,
 			Sensitive:   true,
 			Type:        schema.TypeString,
 		},
@@ -360,6 +360,18 @@ func IntegrationEndpointTypeExternalPostgresql() *schema.Schema {
 			Description: "Port number of the server.",
 			Required:    true,
 			Type:        schema.TypeInt,
+		},
+		"ssl_client_certificate": {
+			Default:     "",
+			Description: "Client certificate.",
+			Optional:    true,
+			Type:        schema.TypeString,
+		},
+		"ssl_client_key": {
+			Default:     "",
+			Description: "Client key.",
+			Optional:    true,
+			Type:        schema.TypeString,
 		},
 		"ssl_mode": {
 			Default:     "verify-full",
