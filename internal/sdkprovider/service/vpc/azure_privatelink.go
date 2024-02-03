@@ -67,12 +67,14 @@ func ResourceAzurePrivatelink() *schema.Resource {
 func resourceAzurePrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	var subscriptionIDs []string
 	var project = d.Get("project").(string)
 	var serviceName = d.Get("service_name").(string)
 
-	for _, s := range d.Get("user_subscription_ids").(*schema.Set).List() {
-		subscriptionIDs = append(subscriptionIDs, s.(string))
+	var subscriptionIDsSet = d.Get("user_subscription_ids").(*schema.Set)
+	subscriptionIDs := make([]string, subscriptionIDsSet.Len())
+
+	for i, s := range subscriptionIDsSet.List() {
+		subscriptionIDs[i] = s.(string)
 	}
 
 	_, err := client.AzurePrivatelink.Create(
@@ -141,14 +143,16 @@ func resourceAzurePrivatelinkRead(ctx context.Context, d *schema.ResourceData, m
 func resourceAzurePrivatelinkUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	var subscriptionIDs []string
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	for _, s := range d.Get("user_subscription_ids").(*schema.Set).List() {
-		subscriptionIDs = append(subscriptionIDs, s.(string))
+	var subscriptionIDsSet = d.Get("user_subscription_ids").(*schema.Set)
+	subscriptionIDs := make([]string, subscriptionIDsSet.Len())
+
+	for i, s := range subscriptionIDsSet.List() {
+		subscriptionIDs[i] = s.(string)
 	}
 
 	_, err = client.AzurePrivatelink.Update(

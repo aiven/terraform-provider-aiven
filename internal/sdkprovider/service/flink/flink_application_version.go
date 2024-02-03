@@ -232,13 +232,13 @@ func resourceFlinkApplicationVersionCreate(ctx context.Context, d *schema.Resour
 
 // expandFlinkApplicationVersionSourcesOrSinks expands the sources or sinks from the Terraform schema to the Aiven API.
 func expandFlinkApplicationVersionSourcesOrSinks(sources []interface{}) []aiven.FlinkApplicationVersionRelation {
-	var result []aiven.FlinkApplicationVersionRelation
-	for _, source := range sources {
+	result := make([]aiven.FlinkApplicationVersionRelation, len(sources))
+	for i, source := range sources {
 		sourceMap := source.(map[string]interface{})
-		result = append(result, aiven.FlinkApplicationVersionRelation{
+		result[i] = aiven.FlinkApplicationVersionRelation{
 			CreateTable:   sourceMap["create_table"].(string),
 			IntegrationID: sourceMap["integration_id"].(string),
-		})
+		}
 	}
 
 	return result
@@ -325,12 +325,12 @@ func resourceFlinkApplicationVersionRead(ctx context.Context, d *schema.Resource
 
 // flattenFlinkApplicationVersionSourcesOrSinks is a helper function to flatten the sources and sinks fields.
 func flattenFlinkApplicationVersionSourcesOrSinks(sources []aiven.FlinkApplicationVersionRelation) []map[string]interface{} {
-	var result []map[string]interface{}
-	for _, source := range sources {
-		result = append(result, map[string]interface{}{
+	result := make([]map[string]interface{}, len(sources))
+	for i, source := range sources {
+		result[i] = map[string]interface{}{
 			"create_table":   source.CreateTable,
 			"integration_id": source.IntegrationID,
-		})
+		}
 	}
 
 	return result

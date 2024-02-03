@@ -78,7 +78,7 @@ func representationToMap(schemaType SchemaType, representation []byte) (map[stri
 
 // TerraformTypes converts schema representation types to Terraform types.
 func TerraformTypes(types []string) ([]string, []string, error) {
-	var terraformTypes, aivenTypes []string
+	var terraformTypes, aivenTypes []string // nolint:prealloc
 
 	for _, typeValue := range types {
 		switch typeValue {

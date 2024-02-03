@@ -135,15 +135,15 @@ func kafkaConnectorConfigNameShouldNotBeEmpty() func(ctx context.Context, oldVal
 }
 
 func flattenKafkaConnectorTasks(r *aiven.KafkaConnector) []map[string]interface{} {
-	var tasks []map[string]interface{}
+	tasks := make([]map[string]interface{}, len(r.Tasks))
 
-	for _, taskS := range r.Tasks {
+	for i, taskS := range r.Tasks {
 		task := map[string]interface{}{
 			"connector": taskS.Connector,
 			"task":      taskS.Task,
 		}
 
-		tasks = append(tasks, task)
+		tasks[i] = task
 	}
 
 	return tasks
