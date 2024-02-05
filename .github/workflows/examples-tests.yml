@@ -19,6 +19,8 @@ jobs:
       project_name_suffix: ${{ steps.selproj.outputs.project_name_suffix }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - id: selproj
         run: echo "project_name_suffix=$(make -s ci-selproj | tr -d '\n')" >> $GITHUB_OUTPUT
