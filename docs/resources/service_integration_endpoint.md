@@ -171,12 +171,14 @@ Optional:
 Required:
 
 - `host` (String) Hostname or IP address of the server.
-- `password` (String, Sensitive) Password.
 - `port` (Number) Port number of the server.
 - `username` (String) User name.
 
 Optional:
 
+- `password` (String, Sensitive) Password.
+- `ssl_client_certificate` (String) Client certificate.
+- `ssl_client_key` (String) Client key.
 - `ssl_mode` (String) SSL Mode. The default value is `verify-full`.
 - `ssl_root_cert` (String) SSL Root Cert.
 
