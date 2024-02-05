@@ -793,9 +793,9 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 }
 
 func FlattenServiceComponents(r *aiven.Service) []map[string]interface{} {
-	var components []map[string]interface{}
+	components := make([]map[string]interface{}, len(r.Components))
 
-	for _, c := range r.Components {
+	for i, c := range r.Components {
 		component := map[string]interface{}{
 			"component":                   c.Component,
 			"host":                        c.Host,
@@ -808,7 +808,7 @@ func FlattenServiceComponents(r *aiven.Service) []map[string]interface{} {
 			"ssl":   PointerValueOrDefault(c.Ssl, true),
 			"usage": c.Usage,
 		}
-		components = append(components, component)
+		components[i] = component
 	}
 
 	return components

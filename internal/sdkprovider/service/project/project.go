@@ -426,9 +426,9 @@ func contactEmailListForTerraform(d *schema.ResourceData, field string, contactE
 		return nil
 	}
 
-	var results []string
-	for _, contactEmail := range contactEmails {
-		results = append(results, contactEmail.Email)
+	results := make([]string, len(contactEmails))
+	for i, contactEmail := range contactEmails {
+		results[i] = contactEmail.Email
 	}
 
 	return d.Set(field, results)

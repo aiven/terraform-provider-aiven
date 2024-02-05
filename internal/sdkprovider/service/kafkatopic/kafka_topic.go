@@ -335,15 +335,16 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 }
 
 func getTags(d *schema.ResourceData) []aiven.KafkaTopicTag {
-	var tags []aiven.KafkaTopicTag
-	for _, tagD := range d.Get("tag").(*schema.Set).List() {
+	tagSet := d.Get("tag").(*schema.Set)
+	tags := make([]aiven.KafkaTopicTag, tagSet.Len())
+	for i, tagD := range tagSet.List() {
 		tagM := tagD.(map[string]interface{})
 		tag := aiven.KafkaTopicTag{
 			Key:   tagM["key"].(string),
 			Value: tagM["value"].(string),
 		}
 
-		tags = append(tags, tag)
+		tags[i] = tag
 	}
 
 	return tags
@@ -463,7 +464,7 @@ func resourceKafkaTopicReadDatasource(ctx context.Context, d *schema.ResourceDat
 }
 
 func flattenKafkaTopicTags(list []aiven.KafkaTopicTag) []map[string]interface{} {
-	var tags []map[string]interface{}
+	tags := make([]map[string]interface{}, 0, len(list))
 	for _, tagS := range list {
 		tags = append(tags, map[string]interface{}{
 			"key":   tagS.Key,

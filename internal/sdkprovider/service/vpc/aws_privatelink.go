@@ -54,12 +54,14 @@ func ResourceAWSPrivatelink() *schema.Resource {
 func resourceAWSPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	var principals []string
 	var project = d.Get("project").(string)
 	var serviceName = d.Get("service_name").(string)
 
-	for _, p := range d.Get("principals").(*schema.Set).List() {
-		principals = append(principals, p.(string))
+	var principalsSet = d.Get("principals").(*schema.Set)
+	principals := make([]string, principalsSet.Len())
+
+	for i, p := range principalsSet.List() {
+		principals[i] = p.(string)
 	}
 
 	_, err := client.AWSPrivatelink.Create(
@@ -130,9 +132,11 @@ func resourceAWSPrivatelinkUpdate(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	var principals []string
-	for _, p := range d.Get("principals").(*schema.Set).List() {
-		principals = append(principals, p.(string))
+	principalsSet := d.Get("principals").(*schema.Set)
+	principals := make([]string, principalsSet.Len())
+
+	for i, p := range principalsSet.List() {
+		principals[i] = p.(string)
 	}
 
 	_, err = client.AWSPrivatelink.Update(
