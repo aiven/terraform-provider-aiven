@@ -216,7 +216,7 @@ func resourceKafkaRead(ctx context.Context, d *schema.ResourceData, m interface{
 				"on Kafka v3.0. Please switch to Karapace, a drop-in open source replacement " +
 				"before proceeding with the upgrade. To do that use aiven_kafka.karapace=true " +
 				"that will switch the service to use Karapace for schema registry and REST proxy. " +
-				"For more information, please refer to our help article: https://help.aiven.io/en/articles/5651983",
+				"More information about Karpace is available in our documentation: https://aiven.io/docs/products/kafka/karapace",
 		})
 	}
 

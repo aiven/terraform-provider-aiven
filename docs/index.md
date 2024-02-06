@@ -2,7 +2,7 @@
 The Terraform provider for [Aiven](https://aiven.io/), an open source data platform as a service. 
 
 ## Authentication token
-[Signup at Aiven](https://console.aiven.io/signup?utm_source=terraformregistry&utm_medium=organic&utm_campaign=terraform&utm_content=signup) and see the [official instructions](https://docs.aiven.io/docs/platform/howto/create_authentication_token.html) to create an API Authentication Token.
+[Sign up for Aiven](https://console.aiven.io/signup?utm_source=terraformregistry&utm_medium=organic&utm_campaign=terraform&utm_content=signup) and [create an authentication token](https://aiven.io/docs/platform/howto/create_authentication_token).
 
 ## Example usage
 _Only available for Terraform v0.13 and above. For older versions, see [here](guides/install-terraform-v012.md)._
