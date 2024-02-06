@@ -6,7 +6,7 @@ page_title: "Creating static IP addresses"
 
 You can create static IP addresses for your services for an additional charge. Static IP addresses belong to a project and are created in the cloud you specify.
 
-For more information, see the article on [static IP addresses in Aiven](https://docs.aiven.io/docs/platform/concepts/static-ips).
+For more information, see the article on [static IP addresses in Aiven](https://aiven.io/docs/platform/concepts/static-ips).
 
 # Example
 

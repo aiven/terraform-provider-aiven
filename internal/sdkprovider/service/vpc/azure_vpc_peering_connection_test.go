@@ -85,7 +85,7 @@ func TestAccAivenAzureVPCPeeringConnection_basic(t *testing.T) {
 }
 
 // testAccVPCPeeringConnectionAzureResourcePartOne
-// Based on https://help.aiven.io/en/articles/3435096-azure-virtual-network-peering
+// Based on https://aiven.io/docs/platform/howto/vnet-peering-azure
 func testAccVPCPeeringConnectionAzureResourcePartOne(prefix string, s *azureSecrets) string {
 	return fmt.Sprintf(`
 provider "azurerm" {

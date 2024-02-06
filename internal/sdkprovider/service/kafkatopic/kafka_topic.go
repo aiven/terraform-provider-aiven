@@ -402,7 +402,7 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 	topic, err := kafkatopicrepository.New(client.KafkaTopics).Read(ctx, project, serviceName, topicName)
 
 	// Topics are destroyed when kafka is off
-	// https://docs.aiven.io/docs/platform/concepts/service-power-cycle
+	// https://aiven.io/docs/platform/concepts/service-power-cycle
 	// So it's better to recreate them, than make user to clear the state manually
 	// Recreates missing topics:
 	// 1. if server returns 404

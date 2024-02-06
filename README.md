@@ -7,7 +7,7 @@ The Terraform provider for [Aiven.io](https://aiven.io/), an open source data pl
 ## Quick start
 
 - [Signup for Aiven](https://console.aiven.io/signup?utm_source=github&utm_medium=organic&utm_campaign=terraform&utm_content=signup)
-- [Get your authentication token and project name](https://help.aiven.io/en/articles/2059201-authentication-tokens)
+- [Create your authentication token](https://aiven.io/docs/platform/howto/create_authentication_token)
 - Create a file named `main.tf` with the content below:
 
 ```hcl

@@ -37,33 +37,33 @@ resource "aiven_organizational_unit" "unit-fin" {
 # Create projects in units
 
 # Engineering projects
-resource "aiven_project" "staceys-prod-eng" {
+resource "aiven_project" "prod-eng" {
   project    = "${var.prod_project_name}-eng"
   parent_id = aiven_organizational_unit.unit-eng.id
 }
 
-resource "aiven_project" "staceys-qa-eng" {
+resource "aiven_project" "qa-eng" {
   project    = "${var.qa_project_name}-eng"
   parent_id = aiven_organizational_unit.unit-eng.id
 }
 
-resource "aiven_project" "staceys-dev-eng" {
+resource "aiven_project" "dev-eng" {
   project    = "${var.dev_project_name}-eng"
   parent_id = aiven_organizational_unit.unit-eng.id
 }
 
 # Finance projects
-resource "aiven_project" "staceys-prod-fin" {
+resource "aiven_project" "prod-fin" {
   project    = "${var.prod_project_name}-fin"
   parent_id = aiven_organizational_unit.unit-fin.id
 }
 
-resource "aiven_project" "staceys-qa-fin" {
+resource "aiven_project" "qa-fin" {
   project    = "${var.qa_project_name}-fin"
   parent_id = aiven_organizational_unit.unit-fin.id
 }
 
-resource "aiven_project" "staceys-dev-fin" {
+resource "aiven_project" "dev-fin" {
   project    = "${var.dev_project_name}-fin"
   parent_id = aiven_organizational_unit.unit-fin.id
 }

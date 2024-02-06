@@ -1,6 +1,6 @@
 # Aiven organizations, units, and projects example
 
-The Aiven platform uses [organizations, organizational units, and projects to organize services](https://docs.aiven.io/docs/platform/concepts/projects_accounts_access.html).
+The Aiven platform uses [organizations, organizational units, and projects](https://aiven.io/docs/platform/concepts/projects_accounts_access) to organize services.
 
 This example shows you how to use the Aiven Provider for Terraform to create an organization with two organizaitonal units, and add projects to those units. 
 
@@ -12,7 +12,7 @@ In each unit, three projects will be created for production, QA, and development
 
 * [Install Terraform](https://www.terraform.io/downloads)
 * [Sign up for Aiven](https://console.aiven.io/signup?utm_source=github&utm_medium=organic&utm_campaign=devportal&utm_content=repo)
-* [Create an authentication token](https://docs.aiven.io/docs/platform/howto/create_authentication_token.html)
+* [Create an authentication token](https://aiven.io/docs/platform/howto/create_authentication_token)
 
 ## Set up the Terraform project
 
