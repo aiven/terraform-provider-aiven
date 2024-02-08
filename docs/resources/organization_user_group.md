@@ -17,11 +17,11 @@ Creates and manages a user group in an organization.
 
 ### Required
 
+- `description` (String) The description of the user group. This property cannot be changed, doing so forces recreation of the resource.
 - `organization_id` (String) The ID of the organization. This property cannot be changed, doing so forces recreation of the resource.
 
 ### Optional
 
-- `description` (String) The description of the user group. This property cannot be changed, doing so forces recreation of the resource.
 - `name` (String) The name of the user group. This property cannot be changed, doing so forces recreation of the resource.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
