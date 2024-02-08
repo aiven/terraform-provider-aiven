@@ -3,9 +3,9 @@
 page_title: "aiven_organization_user Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  This resource is deprecated; please use aiven_organization_user data source instead. 
+  **This resource is deprecated**. Use the aiven_organization_user data source instead.
   
-  The Organization User resource allows the creation and management of an Aiven Organization User.
+  The organization user resource allows the creation and management of an Aiven organization user.
   During the creation of aiven_organization_userresource, an email invitation will be sent
   to a user using user_email address. If the user accepts an invitation, they will become
   a member of the organization. The deletion of aiven_organization_user will not only
@@ -15,8 +15,9 @@ description: |-
 
 # aiven_organization_user (Resource)
 
-This resource is deprecated; please use aiven_organization_user data source instead. 
-The Organization User resource allows the creation and management of an Aiven Organization User.
+**This resource is deprecated**. Use the aiven_organization_user data source instead.
+
+The organization user resource allows the creation and management of an Aiven organization user.
 
 During the creation of `aiven_organization_user`resource, an email invitation will be sent
 to a user using `user_email` address. If the user accepts an invitation, they will become
