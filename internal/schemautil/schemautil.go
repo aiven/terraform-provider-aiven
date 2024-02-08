@@ -14,9 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// errInvalidStateType is an error that is returned when an invalid state type is encountered.
-var errInvalidStateType = fmt.Errorf("invalid terraform state type")
-
 // OptionalStringPointer retrieves a string pointer to a field, empty string
 // will be converted to nil
 func OptionalStringPointer(d *schema.ResourceData, key string) *string {
@@ -333,26 +330,4 @@ func CopyServiceUserPropertiesFromAPIResponseToTerraform(
 	}
 
 	return nil
-}
-
-// unmarshalUserConfig unmarshals the user config from the state to []map[string]interface{} format.
-func unmarshalUserConfig(src interface{}) ([]map[string]interface{}, error) {
-	configList, ok := src.([]interface{})
-	if !ok {
-		return nil, fmt.Errorf("%w: expected []interface{}", errInvalidStateType)
-	}
-
-	// For some reason, it looks like this is never empty, even if the user config is not set.
-	// We will keep this check here just in case, but the actual check that breaks the code is
-	// the one where we check if the first element is nil.
-	if len(configList) == 0 || configList[0] == nil {
-		return nil, nil
-	}
-
-	config, ok := configList[0].(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("%w: expected map[string]interface{}", errInvalidStateType)
-	}
-
-	return []map[string]interface{}{config}, nil
 }
