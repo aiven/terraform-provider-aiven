@@ -26,7 +26,7 @@ var aivenOrganizationUserGroupSchema = map[string]*schema.Schema{
 	},
 	"description": {
 		Type:        schema.TypeString,
-		Optional:    true,
+		Required:    true,
 		Description: userconfig.Desc("The description of the user group.").ForceNew().Build(),
 	},
 	"create_time": {

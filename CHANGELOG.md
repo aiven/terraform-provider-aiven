@@ -16,7 +16,7 @@ nav_order: 1
 - Fix `aiven_kafka_schema` JSON object diff suppress function
 - Add new user config generator
 - Use `TypeSet` for `ip_filter`, `ip_filter_string` fields
-
+- Fix `aiven_organization_user_group` resource - `description` field is required
 
 ## [4.13.3] - 2024-01-29
 
