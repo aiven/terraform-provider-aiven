@@ -92,7 +92,7 @@ func init() {
 }
 
 func sweepVPCs(ctx context.Context) func(string) error {
-	return func(region string) error {
+	return func(_ string) error {
 		projectName := os.Getenv("AIVEN_PROJECT_NAME")
 		client, err := sweep.SharedClient()
 		if err != nil {
@@ -116,7 +116,7 @@ func sweepVPCs(ctx context.Context) func(string) error {
 }
 
 func sweepVPCPeeringCons(ctx context.Context) func(string) error {
-	return func(region string) error {
+	return func(_ string) error {
 		projectName := os.Getenv("AIVEN_PROJECT_NAME")
 		client, err := sweep.SharedClient()
 		if err != nil {
@@ -179,7 +179,7 @@ func sweepVPCPeeringCons(ctx context.Context) func(string) error {
 }
 
 func sweepAWSPrivatelinks(ctx context.Context) func(string) error {
-	return func(region string) error {
+	return func(_ string) error {
 		projectName := os.Getenv("AIVEN_PROJECT_NAME")
 		client, err := sweep.SharedClient()
 		if err != nil {
@@ -213,7 +213,7 @@ func sweepAWSPrivatelinks(ctx context.Context) func(string) error {
 }
 
 func sweepAzurePrivatelinks(ctx context.Context) func(string) error {
-	return func(region string) error {
+	return func(_ string) error {
 		projectName := os.Getenv("AIVEN_PROJECT_NAME")
 		client, err := sweep.SharedClient()
 		if err != nil {
@@ -247,7 +247,7 @@ func sweepAzurePrivatelinks(ctx context.Context) func(string) error {
 }
 
 func sweepGCPPrivatelinks(ctx context.Context) func(string) error {
-	return func(region string) error {
+	return func(_ string) error {
 		projectName := os.Getenv("AIVEN_PROJECT_NAME")
 		client, err := sweep.SharedClient()
 		if err != nil {

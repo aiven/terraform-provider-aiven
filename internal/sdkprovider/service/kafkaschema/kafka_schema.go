@@ -46,7 +46,7 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 			"and PROTOBUF.",
 		Default:      "AVRO",
 		ValidateFunc: validation.StringInSlice([]string{"AVRO", "JSON", "PROTOBUF"}, false),
-		DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+		DiffSuppressFunc: func(_, oldValue, _ string, d *schema.ResourceData) bool {
 			// This field can't be retrieved once resource is created.
 			// That produces a diff on plan on resource import.
 			// Ignores imported field.
@@ -62,7 +62,7 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 		Type:         schema.TypeString,
 		Optional:     true,
 		ValidateFunc: validation.StringInSlice(compatibilityLevels, false),
-		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+		DiffSuppressFunc: func(_, _, new string, _ *schema.ResourceData) bool {
 			// When a compatibility level is not set to any value and consequently is null (empty string).
 			// Allow ignoring those.
 			return new == ""

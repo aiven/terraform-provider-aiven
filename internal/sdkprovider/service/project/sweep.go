@@ -47,7 +47,7 @@ func init() {
 }
 
 func sweepProjects(ctx context.Context) func(region string) error {
-	return func(region string) error {
+	return func(_ string) error {
 		client, err := sweep.SharedClient()
 		if err != nil {
 			return err
@@ -84,7 +84,7 @@ func sweepProjects(ctx context.Context) func(region string) error {
 }
 
 func sweepBillingGroups(ctx context.Context) func(region string) error {
-	return func(region string) error {
+	return func(_ string) error {
 		client, err := sweep.SharedClient()
 		if err != nil {
 			return err
