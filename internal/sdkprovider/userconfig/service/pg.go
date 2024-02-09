@@ -466,7 +466,7 @@ func pgUserConfig() *schema.Schema {
 				Description: "PGBouncer connection pooling settings",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"autodb_idle_timeout": {
-						Description: "If the automatically created database pools have been unused this many seconds, they are freed. If 0 then timeout is disabled. (seconds).",
+						Description: "If the automatically created database pools have been unused this many seconds, they are freed. If 0 then timeout is disabled. (seconds). The default value is `3600`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -476,20 +476,19 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"autodb_pool_mode": {
-						Description:  "PGBouncer pool mode.",
+						Description:  "PGBouncer pool mode. The default value is `transaction`.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"session", "transaction", "statement"}, false),
 					},
 					"autodb_pool_size": {
-						Description: "If non-zero then create automatically a pool of that size per user when a pool doesn't exist.",
+						Description: "If non-zero then create automatically a pool of that size per user when a pool doesn't exist. The default value is `0`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"ignore_startup_parameters": {
 						Description: "List of parameters to ignore when given in startup packet.",
 						Elem: &schema.Schema{
-							Description:  "Enum of parameters to ignore when given in startup packet.",
 							Type:         schema.TypeString,
 							ValidateFunc: validation.StringInSlice([]string{"extra_float_digits", "search_path"}, false),
 						},
@@ -498,22 +497,22 @@ func pgUserConfig() *schema.Schema {
 						Type:     schema.TypeList,
 					},
 					"min_pool_size": {
-						Description: "Add more server connections to pool if below this number. Improves behavior when usual load comes suddenly back after period of total inactivity. The value is effectively capped at the pool size.",
+						Description: "Add more server connections to pool if below this number. Improves behavior when usual load comes suddenly back after period of total inactivity. The value is effectively capped at the pool size. The default value is `0`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"server_idle_timeout": {
-						Description: "If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. (seconds).",
+						Description: "If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. (seconds). The default value is `600`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"server_lifetime": {
-						Description: "The pooler will close an unused server connection that has been connected longer than this. (seconds).",
+						Description: "The pooler will close an unused server connection that has been connected longer than this. (seconds). The default value is `3600`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"server_reset_query_always": {
-						Description: "Run server_reset_query (DISCARD ALL) in all pooling modes.",
+						Description: "Run server_reset_query (DISCARD ALL) in all pooling modes. The default value is `false`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},

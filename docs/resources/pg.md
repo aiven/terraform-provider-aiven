@@ -251,15 +251,15 @@ Optional:
 
 Optional:
 
-- `autodb_idle_timeout` (Number) If the automatically created database pools have been unused this many seconds, they are freed. If 0 then timeout is disabled. (seconds).
+- `autodb_idle_timeout` (Number) If the automatically created database pools have been unused this many seconds, they are freed. If 0 then timeout is disabled. (seconds). The default value is `3600`.
 - `autodb_max_db_connections` (Number) Do not allow more than this many server connections per database (regardless of user). Setting it to 0 means unlimited.
-- `autodb_pool_mode` (String) PGBouncer pool mode.
-- `autodb_pool_size` (Number) If non-zero then create automatically a pool of that size per user when a pool doesn't exist.
+- `autodb_pool_mode` (String) PGBouncer pool mode. The default value is `transaction`.
+- `autodb_pool_size` (Number) If non-zero then create automatically a pool of that size per user when a pool doesn't exist. The default value is `0`.
 - `ignore_startup_parameters` (List of String) List of parameters to ignore when given in startup packet.
-- `min_pool_size` (Number) Add more server connections to pool if below this number. Improves behavior when usual load comes suddenly back after period of total inactivity. The value is effectively capped at the pool size.
-- `server_idle_timeout` (Number) If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. (seconds).
-- `server_lifetime` (Number) The pooler will close an unused server connection that has been connected longer than this. (seconds).
-- `server_reset_query_always` (Boolean) Run server_reset_query (DISCARD ALL) in all pooling modes.
+- `min_pool_size` (Number) Add more server connections to pool if below this number. Improves behavior when usual load comes suddenly back after period of total inactivity. The value is effectively capped at the pool size. The default value is `0`.
+- `server_idle_timeout` (Number) If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. (seconds). The default value is `600`.
+- `server_lifetime` (Number) The pooler will close an unused server connection that has been connected longer than this. (seconds). The default value is `3600`.
+- `server_reset_query_always` (Boolean) Run server_reset_query (DISCARD ALL) in all pooling modes. The default value is `false`.
 
 
 <a id="nestedblock--pg_user_config--pglookout"></a>
