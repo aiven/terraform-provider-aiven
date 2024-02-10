@@ -1,6 +1,6 @@
 module github.com/aiven/terraform-provider-aiven/tools
 
-go 1.21
+go 1.22
 
 require (
 	github.com/aiven/terraform-provider-aiven/tools/selproj v0.0.0-00010101000000-000000000000
