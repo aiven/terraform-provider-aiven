@@ -17,6 +17,7 @@ nav_order: 1
 - Add new user config generator
 - Use `TypeSet` for `ip_filter`, `ip_filter_string` fields
 - Fix `aiven_organization_user_group` resource - `description` field is required
+- Use golang 1.22
 
 ## [4.13.3] - 2024-01-29
 
