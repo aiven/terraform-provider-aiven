@@ -35,7 +35,7 @@ func DatasourceProjectVPC() *schema.Resource {
 			Description:   "ID of the VPC. This can be used to filter out the specific VPC if there are more than one datasource returned.",
 			Optional:      true,
 			ConflictsWith: []string{"project", "cloud_name"},
-			ValidateDiagFunc: func(i interface{}, path cty.Path) diag.Diagnostics {
+			ValidateDiagFunc: func(i interface{}, _ cty.Path) diag.Diagnostics {
 				_, err := schemautil.SplitResourceID(i.(string), 2)
 				if err != nil {
 					return diag.Errorf("invalid vpc_id, should have the following format {project_name}/{project_vpc_id}: %s", err)

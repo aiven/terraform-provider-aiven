@@ -108,7 +108,7 @@ func ResourceKafkaConnector() *schema.Resource {
 
 // customizeDiffKafkaConnectorConfigName `config.name` should be equal to `connector_name`
 func customizeDiffKafkaConnectorConfigName() func(ctx context.Context, diff *schema.ResourceDiff, i interface{}) error {
-	return func(ctx context.Context, diff *schema.ResourceDiff, i interface{}) error {
+	return func(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 		connectorName := diff.Get("connector_name").(string)
 		config := make(aiven.KafkaConnectorConfig)
 		for k, cS := range diff.Get("config").(map[string]interface{}) {
@@ -124,7 +124,7 @@ func customizeDiffKafkaConnectorConfigName() func(ctx context.Context, diff *sch
 
 // kafkaConnectorConfigNameShouldNotBeEmpty `config.name` should not be empty
 func kafkaConnectorConfigNameShouldNotBeEmpty() func(ctx context.Context, oldValue interface{}, newValue interface{}, meta interface{}) bool {
-	return func(ctx context.Context, oldValue, newValue, meta interface{}) bool {
+	return func(_ context.Context, _, newValue, _ interface{}) bool {
 		for k, cS := range newValue.(map[string]interface{}) {
 			if k == "name" && cS.(string) != "" {
 				return true

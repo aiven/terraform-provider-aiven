@@ -93,7 +93,7 @@ resource "aiven_static_ip" "foo" {
 				Config:       manifest,
 				ResourceName: resourceName,
 				ImportState:  true,
-				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+				ImportStateIdFunc: func(_ *terraform.State) (string, error) {
 					return "non-existent/identifier", nil
 				},
 				ExpectError: regexp.MustCompile(`Cannot import non-existent remote object`),

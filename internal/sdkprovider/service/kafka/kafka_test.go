@@ -76,7 +76,7 @@ func TestAccAiven_kafka(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "service_host"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_port"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_uri"),
-					func(state *terraform.State) error {
+					func(_ *terraform.State) error {
 						c := acc.GetTestAivenClient()
 
 						ctx := context.Background()

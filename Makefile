@@ -34,7 +34,7 @@ $(TERRAFMT): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
 SELPROJ := $(TOOLS_BIN_DIR)/selproj
 
 $(SELPROJ): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
-	cd $(TOOLS_DIR) && $(GO) build -tags tools -o bin/selproj github.com/aiven/terraform-provider-aiven/tools/selproj
+	cd $(TOOLS_DIR) && $(GO) build -tags tools -o bin/selproj github.com/aiven/go-utils/selproj
 
 
 # See https://github.com/hashicorp/terraform/blob/main/tools/protobuf-compile/protobuf-compile.go#L215

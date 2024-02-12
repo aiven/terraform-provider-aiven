@@ -38,7 +38,7 @@ var aivenAWSVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		ForceNew: true,
 		Required: true,
 		Type:     schema.TypeString,
-		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+		DiffSuppressFunc: func(_, _, new string, _ *schema.ResourceData) bool {
 			return new == ""
 		},
 		Description: userconfig.Desc("AWS region of the peered VPC (if not in the same region as Aiven VPC).").ForceNew().Build(),

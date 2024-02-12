@@ -410,7 +410,7 @@ func TestAccAivenKafkaTopic_recreate_missing(t *testing.T) {
 					// Saved in state
 					resource.TestCheckResourceAttr(kafkaResource, "id", kafkaID),
 					resource.TestCheckResourceAttr(topicResource, "id", topicID),
-					func(state *terraform.State) error {
+					func(_ *terraform.State) error {
 						// Topic exists and active
 						client := acc.GetTestAivenClient()
 						return retry.RetryContext(

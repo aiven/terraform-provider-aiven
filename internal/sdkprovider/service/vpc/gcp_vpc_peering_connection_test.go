@@ -54,7 +54,7 @@ func TestAccAivenGCPPeeringConnection_basic(t *testing.T) {
 			},
 			{
 				Config: testAccGCPVPCPeeringConnection(&s),
-				Check: func(state *terraform.State) error {
+				Check: func(_ *terraform.State) error {
 					c := acc.GetTestAivenClient()
 
 					ctx := context.Background()
