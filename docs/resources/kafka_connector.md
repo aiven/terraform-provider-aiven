@@ -23,7 +23,7 @@ resource "aiven_kafka_connector" "kafka-os-con1" {
     "connector.class" : "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
     "type.name"           = "os-connector"
     "name"                = "kafka-os-con1"
-    "connection.url"      = aiven_elasticsearch.os-service1.service_uri
+    "connection.url"      = aiven_opensearch.os-service1.service_uri
     "connection.username" = aiven_opensearch.os-service1.service_username
     "connection.password" = aiven_opensearch.os-service1.service_password
   }
