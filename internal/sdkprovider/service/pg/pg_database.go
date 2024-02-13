@@ -153,7 +153,6 @@ func resourcePGDatabaseDelete(ctx context.Context, d *schema.ResourceData, m int
 
 	timeout := d.Timeout(schema.TimeoutDelete)
 
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = waiter.Conf(timeout).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("error waiting for Aiven Database to be DELETED: %s", err)

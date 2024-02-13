@@ -13,6 +13,7 @@ nav_order: 1
 
 <!-- TODO: uncomment when dragonfly is supported -->
 <!-- - Dragonfly support -->
+- Refactor deprecated `resource.StateChangeConf`/`resource.StateRefreshFunc` usage to their equivalent with `retry`
 - Fix `aiven_kafka_schema` JSON object diff suppress function
 - Add new user config generator
 - Use `TypeSet` for `ip_filter`, `ip_filter_string` fields

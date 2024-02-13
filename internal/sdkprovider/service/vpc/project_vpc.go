@@ -8,8 +8,8 @@ import (
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
@@ -76,7 +76,6 @@ func resourceProjectVPCCreate(ctx context.Context, d *schema.ResourceData, m int
 		VPCID:   vpc.ProjectVPCID,
 	}
 
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = waiter.Conf(d.Timeout(schema.TimeoutCreate)).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("error waiting for Aiven project VPC to be ACTIVE: %s", err)
@@ -125,7 +124,6 @@ func resourceProjectVPCDelete(ctx context.Context, d *schema.ResourceData, m int
 
 	timeout := d.Timeout(schema.TimeoutDelete)
 
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = waiter.Conf(timeout).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("error waiting for Aiven project VPC to be DELETED: %s", err)
@@ -158,9 +156,8 @@ type ProjectVPCActiveWaiter struct {
 	VPCID   string
 }
 
-// RefreshFunc will call the Aiven client and refresh it's state.
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
-func (w *ProjectVPCActiveWaiter) RefreshFunc() resource.StateRefreshFunc {
+// RefreshFunc will call the Aiven client and refresh its state.
+func (w *ProjectVPCActiveWaiter) RefreshFunc() retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		vpc, err := w.Client.VPCs.Get(w.Context, w.Project, w.VPCID)
 		if err != nil {
@@ -174,11 +171,10 @@ func (w *ProjectVPCActiveWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 // Conf sets up the configuration to refresh.
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
-func (w *ProjectVPCActiveWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
+func (w *ProjectVPCActiveWaiter) Conf(timeout time.Duration) *retry.StateChangeConf {
 	log.Printf("[DEBUG] Active waiter timeout %.0f minutes", timeout.Minutes())
 
-	return &resource.StateChangeConf{
+	return &retry.StateChangeConf{
 		Pending:    []string{"APPROVED", "DELETING", "DELETED"},
 		Target:     []string{"ACTIVE"},
 		Refresh:    w.RefreshFunc(),
@@ -196,9 +192,8 @@ type ProjectVPCDeleteWaiter struct {
 	VPCID   string
 }
 
-// RefreshFunc will call the Aiven client and refresh it's state.
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
-func (w *ProjectVPCDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
+// RefreshFunc will call the Aiven client and refresh its state.
+func (w *ProjectVPCDeleteWaiter) RefreshFunc() retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		vpc, err := w.Client.VPCs.Get(w.Context, w.Project, w.VPCID)
 		if err != nil {
@@ -233,11 +228,10 @@ func (w *ProjectVPCDeleteWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 // Conf sets up the configuration to refresh.
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
-func (w *ProjectVPCDeleteWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
+func (w *ProjectVPCDeleteWaiter) Conf(timeout time.Duration) *retry.StateChangeConf {
 	log.Printf("[DEBUG] Delete waiter timeout %.0f minutes", timeout.Minutes())
 
-	return &resource.StateChangeConf{
+	return &retry.StateChangeConf{
 		Pending:    []string{"APPROVED", "DELETING", "ACTIVE"},
 		Target:     []string{"DELETED"},
 		Refresh:    w.RefreshFunc(),

@@ -8,8 +8,8 @@ import (
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
@@ -160,7 +160,6 @@ func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				TaskID:      t.Task.Id,
 			}
 
-			// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 			taskI, err := w.Conf(d.Timeout(schema.TimeoutDefault)).WaitForStateContext(ctx)
 			if err != nil {
 				return diag.Errorf("error waiting for Aiven service task to be DONE: %s", err)
@@ -191,8 +190,7 @@ type ServiceTaskWaiter struct {
 }
 
 // RefreshFunc will call the Aiven client and refresh its state.
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
-func (w *ServiceTaskWaiter) RefreshFunc() resource.StateRefreshFunc {
+func (w *ServiceTaskWaiter) RefreshFunc() retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		t, err := w.Client.ServiceTask.Get(
 			w.Context,
@@ -213,9 +211,8 @@ func (w *ServiceTaskWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 // Conf sets up the configuration to refresh.
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
-func (w *ServiceTaskWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
-	return &resource.StateChangeConf{
+func (w *ServiceTaskWaiter) Conf(timeout time.Duration) *retry.StateChangeConf {
+	return &retry.StateChangeConf{
 		Pending:                   []string{"IN_PROGRESS"},
 		Target:                    []string{"DONE"},
 		Refresh:                   w.RefreshFunc(),
