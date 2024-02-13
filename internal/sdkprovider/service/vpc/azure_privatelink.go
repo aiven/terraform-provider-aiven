@@ -7,8 +7,8 @@ import (
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -87,7 +87,6 @@ func resourceAzurePrivatelinkCreate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = waitForAzurePrivatelinkToBeActive(
 		ctx,
 		client,
@@ -165,7 +164,6 @@ func resourceAzurePrivatelinkUpdate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = waitForAzurePrivatelinkToBeActive(
 		ctx,
 		client,
@@ -181,15 +179,14 @@ func resourceAzurePrivatelinkUpdate(ctx context.Context, d *schema.ResourceData,
 }
 
 // waitForAzurePrivatelinkToBeActive waits until the Azure privatelink is active
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func waitForAzurePrivatelinkToBeActive(
 	ctx context.Context,
 	client *aiven.Client,
 	project string,
 	serviceName string,
 	t time.Duration,
-) *resource.StateChangeConf {
-	return &resource.StateChangeConf{
+) *retry.StateChangeConf {
+	return &retry.StateChangeConf{
 		Pending: []string{"creating"},
 		Target:  []string{"active"},
 		Refresh: func() (interface{}, string, error) {
@@ -208,7 +205,6 @@ func waitForAzurePrivatelinkToBeActive(
 	}
 }
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceAzurePrivatelinkDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
@@ -221,7 +217,7 @@ func resourceAzurePrivatelinkDelete(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	stateChangeConf := &resource.StateChangeConf{
+	stateChangeConf := &retry.StateChangeConf{
 		Pending: []string{"deleting"},
 		Target:  []string{"deleted"},
 		Refresh: func() (interface{}, string, error) {

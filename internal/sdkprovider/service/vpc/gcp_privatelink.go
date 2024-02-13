@@ -7,8 +7,8 @@ import (
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -62,7 +62,6 @@ func resourceGCPPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = waitForGCPPrivatelinkToBeActive(
 		ctx,
 		client,
@@ -112,15 +111,14 @@ func resourceGCPPrivatelinkRead(ctx context.Context, d *schema.ResourceData, m i
 }
 
 // waitForGCPPrivatelinkToBeActive waits until the GCP privatelink is active
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func waitForGCPPrivatelinkToBeActive(
 	ctx context.Context,
 	client *aiven.Client,
 	project string,
 	serviceName string,
 	t time.Duration,
-) *resource.StateChangeConf {
-	return &resource.StateChangeConf{
+) *retry.StateChangeConf {
+	return &retry.StateChangeConf{
 		Pending: []string{"creating"},
 		Target:  []string{"active"},
 		Refresh: func() (interface{}, string, error) {
@@ -139,7 +137,6 @@ func waitForGCPPrivatelinkToBeActive(
 	}
 }
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceGCPPrivatelinkDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	project, serviceName, err := schemautil.SplitResourceID2(d.Id())
@@ -152,7 +149,7 @@ func resourceGCPPrivatelinkDelete(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	stateChangeConf := &resource.StateChangeConf{
+	stateChangeConf := &retry.StateChangeConf{
 		Pending: []string{"deleting"},
 		Target:  []string{"deleted"},
 		Refresh: func() (interface{}, string, error) {
@@ -173,7 +170,6 @@ func resourceGCPPrivatelinkDelete(ctx context.Context, d *schema.ResourceData, m
 		MinTimeout: 2 * time.Second,
 	}
 
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = stateChangeConf.WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for GCP privatelink: %s", err)

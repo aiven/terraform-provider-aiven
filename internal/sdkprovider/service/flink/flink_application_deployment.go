@@ -7,9 +7,9 @@ import (
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
@@ -123,8 +123,6 @@ func resourceFlinkApplicationDeploymentCreate(
 }
 
 // resourceFlinkApplicationDeploymentDelete deletes an existing Flink Application Deployment resource.
-//
-//nolint:staticcheck // Ignore resource.StateChangeConf deprecation warning.
 func resourceFlinkApplicationDeploymentDelete(
 	ctx context.Context,
 	d *schema.ResourceData,
@@ -143,7 +141,7 @@ func resourceFlinkApplicationDeploymentDelete(
 	}
 
 	//goland:noinspection GoDeprecation
-	conf := &resource.StateChangeConf{
+	conf := &retry.StateChangeConf{
 		Pending: []string{
 			"CANCELLING",
 		},

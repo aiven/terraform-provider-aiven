@@ -7,8 +7,8 @@ import (
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -82,7 +82,6 @@ func resourceAWSPrivatelinkCreate(ctx context.Context, d *schema.ResourceData, m
 		ServiceName: serviceName,
 	}
 
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = w.Conf(d.Timeout(schema.TimeoutCreate)).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for AWS privatelink creation: %s", err)
@@ -157,7 +156,6 @@ func resourceAWSPrivatelinkUpdate(ctx context.Context, d *schema.ResourceData, m
 		ServiceName: serviceName,
 	}
 
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
 	_, err = w.Conf(d.Timeout(schema.TimeoutCreate)).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for AWS privatelink to be updated: %s", err)
@@ -190,9 +188,8 @@ type AWSPrivatelinkWaiter struct {
 	ServiceName string
 }
 
-// RefreshFunc will call the Aiven client and refresh it's state.
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
-func (w *AWSPrivatelinkWaiter) RefreshFunc() resource.StateRefreshFunc {
+// RefreshFunc will call the Aiven client and refresh its state.
+func (w *AWSPrivatelinkWaiter) RefreshFunc() retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		pc, err := w.Client.AWSPrivatelink.Get(w.Context, w.Project, w.ServiceName)
 		if err != nil {
@@ -206,11 +203,10 @@ func (w *AWSPrivatelinkWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 // Conf sets up the configuration to refresh.
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
-func (w *AWSPrivatelinkWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
+func (w *AWSPrivatelinkWaiter) Conf(timeout time.Duration) *retry.StateChangeConf {
 	log.Printf("[DEBUG] Create waiter timeout %.0f minutes", timeout.Minutes())
 
-	return &resource.StateChangeConf{
+	return &retry.StateChangeConf{
 		Pending: []string{"creating"},
 		Target:  []string{"active"},
 		Refresh: w.RefreshFunc(),
