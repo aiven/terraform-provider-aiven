@@ -1,7 +1,7 @@
 ClickHouse integration with a PostgreSQL source
 ===============================================
 
-The goal of the example is to show how to exposed PostgreSQL databases in ClickHouse.
+The goal of the example is to show how to expose PostgreSQL databases in ClickHouse.
 
 Imagine you're tackling an inventory analytics use case and your PostgreSQL service has three databases you'd like to access in ClickHouse:
 

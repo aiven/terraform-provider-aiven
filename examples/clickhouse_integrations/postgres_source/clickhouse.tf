@@ -1,4 +1,4 @@
-// ClickHouse service based in the same region
+# ClickHouse service based in the same region
 resource "aiven_clickhouse" "clickhouse" {
   project                 = aiven_project.clickhouse_postgres_source.project
   service_name            = "clickhouse-gcp-us"
@@ -9,8 +9,8 @@ resource "aiven_clickhouse" "clickhouse" {
 
 }
 
-// ClickHouse service integration for the PostgreSQL service as source
-// exposing three databases in the public schema
+# ClickHouse service integration for the PostgreSQL service as source
+# exposing three databases in the public schema
 resource "aiven_service_integration" "clickhouse_postgres_source" {
   project                  = aiven_project.clickhouse_postgres_source.project
   integration_type         = "clickhouse_postgresql"

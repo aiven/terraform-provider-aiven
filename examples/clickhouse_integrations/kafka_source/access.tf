@@ -1,18 +1,18 @@
-// ETL user with write permissions to the IoT measurements DB
+# Create an ETL user 
 resource "aiven_clickhouse_user" "etl" {
   project      = aiven_project.clickhouse_kafka_source.project
   service_name = aiven_clickhouse.clickhouse.service_name
   username     = "etl"
 }
 
-// Writer role that will be granted insert privilege to the measurements DB
+# Create a role named writer
 resource "aiven_clickhouse_role" "writer" {
   project      = aiven_project.clickhouse_kafka_source.project
   service_name = aiven_clickhouse.clickhouse.service_name
   role         = "writer"
 }
 
-// Writer role's privileges
+# Set the privileges for the writer role
 resource "aiven_clickhouse_grant" "writer_role" {
   project      = aiven_clickhouse.clickhouse.project
   service_name = aiven_clickhouse.clickhouse.service_name
@@ -31,7 +31,8 @@ resource "aiven_clickhouse_grant" "writer_role" {
   }
 }
 
-// Grant the writer role to the ETL user
+# Grant the writer role to the ETL user 
+# to give them write permissions to the IoT measurements database
 resource "aiven_clickhouse_grant" "etl_user" {
   project      = aiven_clickhouse.clickhouse.project
   service_name = aiven_clickhouse.clickhouse.service_name
@@ -42,21 +43,21 @@ resource "aiven_clickhouse_grant" "etl_user" {
   }
 }
 
-// Analyst user with read-only access to the IoT measurements DB
+# Create an analyst 
 resource "aiven_clickhouse_user" "analyst" {
   project      = aiven_project.clickhouse_kafka_source.project
   service_name = aiven_clickhouse.clickhouse.service_name
   username     = "analyst"
 }
 
-// Reader role that will be granted insert privilege to the measurements DB
+# Create a role named reader role 
 resource "aiven_clickhouse_role" "reader" {
   project      = aiven_project.clickhouse_kafka_source.project
   service_name = aiven_clickhouse.clickhouse.service_name
   role         = "reader"
 }
 
-// Reader role's privileges
+# Set the privileges for the reader role
 resource "aiven_clickhouse_grant" "reader_role" {
   project      = aiven_clickhouse.clickhouse.project
   service_name = aiven_clickhouse.clickhouse.service_name
@@ -69,7 +70,8 @@ resource "aiven_clickhouse_grant" "reader_role" {
   }
 }
 
-// Grant the reader role to the Analyst user
+# Grant the reader role to the analyst user
+# to give them insert privileges to the measurements database
 resource "aiven_clickhouse_grant" "analyst_user" {
   project      = aiven_clickhouse.clickhouse.project
   service_name = aiven_clickhouse.clickhouse.service_name

@@ -1,7 +1,6 @@
-// Initialize the provider
-// The only configuration option needed is the API token
-
+# Initialize the provider
 terraform {
+  required_version = ">=0.13"
   required_providers {
     aiven = {
       source  = "aiven/aiven"
@@ -15,6 +14,6 @@ provider "aiven" {
 }
 
 variable "aiven_api_token" {
-  description = "Aiven console API token"
+  description = "Aiven API token"
   type        = string
 }

@@ -1,9 +1,9 @@
-// Postgres service based in GCP US East
+# Postgres service based in GCP US East
 resource "aiven_pg" "postgres" {
   project                 = aiven_project.clickhouse_postgres_source.project
   service_name            = "postgres-gcp-us"
   cloud_name              = "google-us-east4"
-  plan                    = "business-8" // Primary + read replica
+  plan                    = "business-8" # Primary and read replica
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 }
