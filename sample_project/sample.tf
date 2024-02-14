@@ -69,27 +69,27 @@ resource "aiven_kafka_acl" "sample_acl" {
   topic        = "*"
 }
 
-# InfluxDB service
-resource "aiven_influxdb" "sampleinflux" {
+# M3DB service
+resource "aiven_m3db" "samplem3db" {
   project                 = data.aiven_project.sample.project
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-4"
-  service_name            = "sampleinflux"
+  plan                    = "startup-8"
+  service_name            = "samplem3db"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "11:00:00"
-  influxdb_user_config {
+  m3db_user_config {
     ip_filter_object {
       network = "0.0.0.0/0"
     }
   }
 }
 
-# Send metrics from Kafka to InfluxDB
+# Send metrics from Kafka to M3DB
 resource "aiven_service_integration" "samplekafka_metrics" {
   project                  = data.aiven_project.sample.project
   integration_type         = "metrics"
   source_service_name      = aiven_kafka.samplekafka.service_name
-  destination_service_name = aiven_influxdb.sampleinflux.service_name
+  destination_service_name = aiven_m3db.samplem3db.service_name
 }
 
 # PostgreSQL service
@@ -107,12 +107,12 @@ resource "aiven_pg" "samplepg" {
   }
 }
 
-# Send metrics from PostgreSQL to InfluxDB
+# Send metrics from PostgreSQL to M3DB
 resource "aiven_service_integration" "samplepg_metrics" {
   project                  = data.aiven_project.sample.project
   integration_type         = "metrics"
   source_service_name      = aiven_pg.samplepg.service_name
-  destination_service_name = aiven_influxdb.sampleinflux.service_name
+  destination_service_name = aiven_m3db.samplem3db.service_name
 }
 
 # PostgreSQL database
@@ -160,5 +160,5 @@ resource "aiven_service_integration" "samplegrafana_dashboards" {
   project                  = data.aiven_project.sample.project
   integration_type         = "dashboard"
   source_service_name      = aiven_grafana.samplegrafana.service_name
-  destination_service_name = aiven_influxdb.sampleinflux.service_name
+  destination_service_name = aiven_m3db.samplem3db.service_name
 }

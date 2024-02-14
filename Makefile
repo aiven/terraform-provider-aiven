@@ -176,6 +176,8 @@ gen-go:
 
 docs: $(TFPLUGINDOCS)
 	PROVIDER_AIVEN_ENABLE_BETA=true $(TFPLUGINDOCS) generate
+	rm -f docs/data-sources/influxdb*.md
+	rm -f docs/resources/influxdb*.md
 
 #################################################
 # CI

@@ -35,9 +35,9 @@ resource "aiven_project" "new_project" {
   account_id = data.aiven_account.test_account.id # This is required for new marketplace projects
 }
 
-resource "aiven_elasticsearch" "elasticsearch" {
+resource "aiven_opensearch" "opensearch" {
   project      = data.aiven_project.existing_project.id
   cloud_name   = "google-europe-north1"
   plan         = "gcp-marketplace-startup-4"
-  service_name = "elasticsearch"
+  service_name = "opensearch"
 }

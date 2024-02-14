@@ -10,9 +10,9 @@ The Service Integration resource allows the creation and management of Aiven Ser
 **Note** For services running on `hobbyist` plan service integrations are not supported.
 
 Service Integration defines an integration between two Aiven services or between Aiven service and an external
-integration endpoint. Integration could be for example sending metrics from Kafka service to an InfluxDB service,
-getting metrics from an InfluxDB service to a Grafana service to show dashboards, sending logs from any service to
-Elasticsearch, etc.
+integration endpoint. Integration could be for example sending metrics from Kafka service to an M3DB service,
+getting metrics from an M3DB service to a Grafana service to show dashboards, sending logs from any service to
+OpenSearch, etc.
 
 ## Example Usage
 ```terraform
