@@ -1,9 +1,8 @@
 # Get started with Aiven Provider for Terraform 
 
-Introduction
+Set up your organization on Aiven and create your first Aiven project and user group.
 
-
- 
+This example creates a project and user group in your organization, and gives the user group access to the project. You can add users who have already accepted the invite to your organization to the group. When you add groups to projects, you can give them the `admin` `developer`, `operator`, or `read_only` [project role](https://aiven.io/docs/platform/reference/project-member-privileges).
 
 ## Prerequisites
 

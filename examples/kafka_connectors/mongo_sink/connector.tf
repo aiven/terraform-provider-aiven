@@ -10,7 +10,7 @@ data "aiven_service_component" "schema_registry" {
 }
 
 locals {
-  schema_registry_uri = "https://${data.aiven_service_user.kafka_admin.username}:${data.aiven_service_user.kafka_admin.password}@${data.aiven_service_component.schema_registry.host}:${data.aiven_service_component.schema_registry.port}"
+  schema_registry_uri = "https://${data.aiven_kafka_user.username}:${data.aiven_kafka_user.password}@${data.aiven_service_component.schema_registry.host}:${data.aiven_service_component.schema_registry.port}"
 }
 
 # Kafka Mongo Sink connector

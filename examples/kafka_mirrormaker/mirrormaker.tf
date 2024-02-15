@@ -5,9 +5,7 @@ resource "aiven_kafka_mirrormaker" "mm" {
   service_name = "mm"
 
   kafka_mirrormaker_user_config {
-    ip_filter = [
-      "0.0.0.0/0"
-    ]
+    ip_filter_string = ["0.0.0.0/0"]
 
     kafka_mirrormaker {
       refresh_groups_interval_seconds = 600
