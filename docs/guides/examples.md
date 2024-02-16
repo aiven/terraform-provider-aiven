@@ -6,8 +6,7 @@ page_title: "Examples"
 
 Other examples can be found in the [examples](https://github.com/aiven/terraform-provider-aiven/tree/master/examples) folder that provides examples to:
 
-- [Getting Started](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/getting-started.tf)
-- [Account, projects, teams, and member management](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/account)
+- [Getting Started](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/get-started/get-started.tf)
 - [OpenSearch deployment and configuration](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/opensearch)
 - [Standalone Kafka connect deployment with custom config](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/kafka_connect)
 - [Deploying a ClickHouse service](https://github.com/aiven/terraform-provider-aiven/tree/master/examples/clickhouse)
