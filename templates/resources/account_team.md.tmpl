@@ -1,0 +1,25 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+# {{.Name}} ({{.Type}})
+{{ .Description | trimspace }}
+
+~> **Teams are becoming groups**
+Groups are an easier way to control access to your organization's projects and 
+services for a group of users. 
+[Migrate your teams](https://aiven.io/docs/tools/terraform/howto/migrate-from-teams-to-groups) to groups.
+
+
+{{ if .HasExample -}}
+## Example Usage
+{{ tffile .ExampleFile }}
+{{- end }}
+{{ .SchemaMarkdown | trimspace }}
+{{ if .HasImport -}}
+## Import
+Import is supported using the following syntax:
+{{ codefile "shell" .ImportFile }}
+{{- end }}

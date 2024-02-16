@@ -4,11 +4,10 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 var aivenAccountTeamSchema = map[string]*schema.Schema{
@@ -41,7 +40,7 @@ var aivenAccountTeamSchema = map[string]*schema.Schema{
 
 func ResourceAccountTeam() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Account Team resource allows the creation and management of an Account Team.",
+		Description:   `Creates and manages a team.`,
 		CreateContext: resourceAccountTeamCreate,
 		ReadContext:   resourceAccountTeamRead,
 		UpdateContext: resourceAccountTeamUpdate,
@@ -52,7 +51,7 @@ func ResourceAccountTeam() *schema.Resource {
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
 		Schema:             aivenAccountTeamSchema,
-		DeprecationMessage: "This resource is deprecated",
+		DeprecationMessage: "This resource is deprecated. Use aiven_organization_user_group instead.",
 	}
 }
 
