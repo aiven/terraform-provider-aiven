@@ -3285,7 +3285,7 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"scheduled_rebalance_max_delay_ms": {
-					Description: "The maximum delay that is scheduled in order to wait for the return of one or more departed workers before rebalancing and reassigning their connectors and tasks to the group. During this period the connectors and tasks of the departed workers remain unassigned.  Defaults to 5 minutes.",
+					Description: "The maximum delay that is scheduled in order to wait for the return of one or more departed workers before rebalancing and reassigning their connectors and tasks to the group. During this period the connectors and tasks of the departed workers remain unassigned. Defaults to 5 minutes.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -3367,7 +3367,7 @@ func ServiceTypeKafka() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"scheduled_rebalance_max_delay_ms": {
-					Description: "The maximum delay that is scheduled in order to wait for the return of one or more departed workers before rebalancing and reassigning their connectors and tasks to the group. During this period the connectors and tasks of the departed workers remain unassigned.  Defaults to 5 minutes.",
+					Description: "The maximum delay that is scheduled in order to wait for the return of one or more departed workers before rebalancing and reassigning their connectors and tasks to the group. During this period the connectors and tasks of the departed workers remain unassigned. Defaults to 5 minutes.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -3950,7 +3950,7 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"scheduled_rebalance_max_delay_ms": {
-					Description: "The maximum delay that is scheduled in order to wait for the return of one or more departed workers before rebalancing and reassigning their connectors and tasks to the group. During this period the connectors and tasks of the departed workers remain unassigned.  Defaults to 5 minutes.",
+					Description: "The maximum delay that is scheduled in order to wait for the return of one or more departed workers before rebalancing and reassigning their connectors and tasks to the group. During this period the connectors and tasks of the departed workers remain unassigned. Defaults to 5 minutes.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -4032,7 +4032,7 @@ func ServiceTypeKafkaConnect() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"scheduled_rebalance_max_delay_ms": {
-					Description: "The maximum delay that is scheduled in order to wait for the return of one or more departed workers before rebalancing and reassigning their connectors and tasks to the group. During this period the connectors and tasks of the departed workers remain unassigned.  Defaults to 5 minutes.",
+					Description: "The maximum delay that is scheduled in order to wait for the return of one or more departed workers before rebalancing and reassigning their connectors and tasks to the group. During this period the connectors and tasks of the departed workers remain unassigned. Defaults to 5 minutes.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -5282,7 +5282,7 @@ func ServiceTypeMysql() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"innodb_flush_neighbors": {
-					Description: "Specifies whether flushing a page from the InnoDB buffer pool also flushes other dirty pages in the same extent (default is 1): 0 - dirty pages in the same extent are not flushed,  1 - flush contiguous dirty pages in the same extent,  2 - flush dirty pages in the same extent.",
+					Description: "Specifies whether flushing a page from the InnoDB buffer pool also flushes other dirty pages in the same extent (default is 1): 0 - dirty pages in the same extent are not flushed, 1 - flush contiguous dirty pages in the same extent, 2 - flush dirty pages in the same extent.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -5434,7 +5434,7 @@ func ServiceTypeMysql() *schema.Schema {
 					Type:        schema.TypeInt,
 				},
 				"innodb_flush_neighbors": {
-					Description: "Specifies whether flushing a page from the InnoDB buffer pool also flushes other dirty pages in the same extent (default is 1): 0 - dirty pages in the same extent are not flushed,  1 - flush contiguous dirty pages in the same extent,  2 - flush dirty pages in the same extent.",
+					Description: "Specifies whether flushing a page from the InnoDB buffer pool also flushes other dirty pages in the same extent (default is 1): 0 - dirty pages in the same extent are not flushed, 1 - flush contiguous dirty pages in the same extent, 2 - flush dirty pages in the same extent.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -7524,7 +7524,7 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeFloat,
 				},
 				"autovacuum_analyze_threshold": {
-					Description: "Specifies the minimum number of inserted, updated or deleted tuples needed to trigger an  ANALYZE in any one table. The default is 50 tuples.",
+					Description: "Specifies the minimum number of inserted, updated or deleted tuples needed to trigger an ANALYZE in any one table. The default is 50 tuples.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
@@ -7771,7 +7771,7 @@ func ServiceTypePg() *schema.Schema {
 					Type:        schema.TypeFloat,
 				},
 				"autovacuum_analyze_threshold": {
-					Description: "Specifies the minimum number of inserted, updated or deleted tuples needed to trigger an  ANALYZE in any one table. The default is 50 tuples.",
+					Description: "Specifies the minimum number of inserted, updated or deleted tuples needed to trigger an ANALYZE in any one table. The default is 50 tuples.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
