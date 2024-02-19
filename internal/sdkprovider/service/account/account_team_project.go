@@ -40,11 +40,7 @@ var aivenAccountTeamProjectSchema = map[string]*schema.Schema{
 func ResourceAccountTeamProject() *schema.Resource {
 	return &schema.Resource{
 		Description: `
-The Account Team Project resource allows the creation and management of an Account Team Project.
-
-It is intended to link an existing project to the existing account team.
-It is important to note that the project should have an ` + "`account_id`" + ` property set equal to the
-account team you are trying to link to this project.
+Links an existing project to an existing team. Both the project and team should have the same ` + "`account_id`" + `.
 `,
 		CreateContext: resourceAccountTeamProjectCreate,
 		ReadContext:   resourceAccountTeamProjectRead,
@@ -56,6 +52,9 @@ account team you are trying to link to this project.
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
 		Schema: aivenAccountTeamProjectSchema,
+		DeprecationMessage: `
+This resource is deprecated. Use aiven_organization_group_project instead.
+`,
 	}
 }
 
