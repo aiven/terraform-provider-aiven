@@ -7,7 +7,6 @@ import (
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -135,42 +134,39 @@ func resourceFlinkApplicationDeploymentDelete(
 		return diag.Errorf("cannot read Flink Application Deployment resource ID: %v", err)
 	}
 
-	_, err = client.FlinkApplicationDeployments.Cancel(ctx, project, serviceName, applicationID, deploymentID)
-	if err != nil {
-		return diag.Errorf("error cancelling Flink Application Deployment: %v", err)
-	}
-
-	//goland:noinspection GoDeprecation
-	conf := &retry.StateChangeConf{
-		Pending: []string{
-			"CANCELLING",
-		},
-		Target: []string{
-			"CANCELED",
-		},
-		Refresh: func() (interface{}, string, error) {
-			r, err := client.FlinkApplicationDeployments.Get(ctx, project, serviceName, applicationID, deploymentID)
-			if err != nil {
-				return nil, "", err
+	// Flink Application Deployment has a quite complicated state machine
+	// https://api.aiven.io/doc/#tag/Service:_Flink/operation/ServiceFlinkDeleteApplicationDeployment
+	// Retries until succeeds or exceeds the timeout
+	status := "unknown"
+	var isCanceled, isDeleted bool
+	for {
+		select {
+		case <-ctx.Done():
+			// The context itself already comes with delete timeout
+			return diag.Errorf("can't delete Flink Application Deployment with status %q: %s", status, ctx.Err())
+		case <-time.After(time.Second):
+			res, err := client.FlinkApplicationDeployments.Get(ctx, project, serviceName, applicationID, deploymentID)
+			if aiven.IsNotFound(err) {
+				return nil
 			}
-			return r, r.Status, nil
-		},
-		Delay:      1 * time.Second,
-		Timeout:    d.Timeout(schema.TimeoutDelete),
-		MinTimeout: 1 * time.Second,
-	}
 
-	_, err = conf.WaitForStateContext(ctx)
-	if err != nil {
-		return diag.Errorf("error waiting for Flink Application Deployment to become canceled: %s", err)
-	}
+			if res != nil {
+				status = res.Status
+			}
 
-	_, err = client.FlinkApplicationDeployments.Delete(ctx, project, serviceName, applicationID, deploymentID)
-	if err != nil {
-		return diag.Errorf("error deleting Flink Application Deployment: %v", err)
-	}
+			// Must be canceled before deleted
+			if !(isCanceled || status == "CANCELED") {
+				_, err = client.FlinkApplicationDeployments.Cancel(ctx, project, serviceName, applicationID, deploymentID)
+				isCanceled = err == nil
+				continue
+			}
 
-	return nil
+			if !isDeleted {
+				_, err = client.FlinkApplicationDeployments.Delete(ctx, project, serviceName, applicationID, deploymentID)
+				isDeleted = err == nil
+			}
+		}
+	}
 }
 
 // resourceFlinkApplicationDeploymentRead reads an existing Flink Application Deployment resource.
