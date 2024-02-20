@@ -14,6 +14,8 @@ nav_order: 1
 <!-- TODO: uncomment when dragonfly is supported -->
 <!-- - Dragonfly support -->
 
+- Use new user config generator to generate service integration configs
+
 ## [4.14.0] - 2024-02-20
 
 - Refactor deprecated `resource.StateChangeConf`/`resource.StateRefreshFunc` usage to their equivalent with `retry`
