@@ -184,7 +184,7 @@ Optional:
 Optional:
 
 - `autovacuum_analyze_scale_factor` (Number) Specifies a fraction of the table size to add to autovacuum_analyze_threshold when deciding whether to trigger an ANALYZE. The default is 0.2 (20% of table size).
-- `autovacuum_analyze_threshold` (Number) Specifies the minimum number of inserted, updated or deleted tuples needed to trigger an  ANALYZE in any one table. The default is 50 tuples.
+- `autovacuum_analyze_threshold` (Number) Specifies the minimum number of inserted, updated or deleted tuples needed to trigger an ANALYZE in any one table. The default is 50 tuples.
 - `autovacuum_freeze_max_age` (Number) Specifies the maximum age (in transactions) that a table's pg_class.relfrozenxid field can attain before a VACUUM operation is forced to prevent transaction ID wraparound within the table. Note that the system will launch autovacuum processes to prevent wraparound even when autovacuum is otherwise disabled. This parameter will cause the server to be restarted.
 - `autovacuum_max_workers` (Number) Specifies the maximum number of autovacuum processes (other than the autovacuum launcher) that may be running at any one time. The default is three. This parameter can only be set at server start.
 - `autovacuum_naptime` (Number) Specifies the minimum delay between autovacuum runs on any given database. The delay is measured in seconds, and the default is one minute.

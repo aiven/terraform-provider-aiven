@@ -150,7 +150,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeFloat,
 					},
 					"autovacuum_analyze_threshold": {
-						Description: "Specifies the minimum number of inserted, updated or deleted tuples needed to trigger an  ANALYZE in any one table. The default is 50 tuples.",
+						Description: "Specifies the minimum number of inserted, updated or deleted tuples needed to trigger an ANALYZE in any one table. The default is 50 tuples.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
