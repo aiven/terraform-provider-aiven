@@ -13,9 +13,12 @@ nav_order: 1
 
 <!-- TODO: uncomment when dragonfly is supported -->
 <!-- - Dragonfly support -->
+
+## [4.14.0] - 2024-02-20
+
 - Refactor deprecated `resource.StateChangeConf`/`resource.StateRefreshFunc` usage to their equivalent with `retry`
 - Fix `aiven_kafka_schema` JSON object diff suppress function
-- Add new user config generator
+- Use new user config generator to generate service configs
 - Use `TypeSet` for `ip_filter`, `ip_filter_string` fields
 - Fix `aiven_organization_user_group` resource - `description` field is required
 - Use golang 1.22
