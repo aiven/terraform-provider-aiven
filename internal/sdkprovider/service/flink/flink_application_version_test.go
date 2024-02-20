@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -45,6 +46,22 @@ func TestAccAivenFlinkApplicationVersion_basic(t *testing.T) {
 						fmt.Sprintf("test-acc-flink-%s", rName),
 					),
 				),
+			},
+		},
+	})
+}
+
+func TestAccAivenFlinkApplicationVersion_restarting(t *testing.T) {
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenFlinkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccFlinkApplicationVersionRestartingResource(rName),
+				ExpectError: regexp.MustCompile("flink application deployment is restarting"),
 			},
 		},
 	})
@@ -121,6 +138,104 @@ resource "aiven_kafka_topic" "sink" {
   partitions   = 2
   replication  = 3
   topic_name   = "sink_topic"
+}
+
+resource "aiven_flink_application" "foo" {
+  project      = data.aiven_project.foo.project
+  service_name = aiven_flink.foo.service_name
+  name         = "test-acc-flink-application"
+}
+
+resource "aiven_flink_application_version" "foo" {
+  project        = data.aiven_project.foo.project
+  service_name   = aiven_flink.foo.service_name
+  application_id = aiven_flink_application.foo.application_id
+  statement      = "INSERT INTO kafka_known_pizza SELECT * FROM kafka_pizza WHERE shop LIKE 'Luigis Pizza'"
+  sink {
+    create_table   = <<EOT
+CREATE TABLE kafka_known_pizza (shop STRING, name STRING) WITH (
+  'connector' = 'kafka',
+  'properties.bootstrap.servers' = '',
+  'scan.startup.mode' = 'earliest-offset',
+  'topic' = 'sink_topic',
+  'value.format' = 'json'
+)
+EOT
+    integration_id = aiven_service_integration.flink_to_kafka.integration_id
+  }
+  source {
+    create_table   = <<EOT
+CREATE TABLE kafka_pizza (shop STRING, name STRING) WITH (
+  'connector' = 'kafka',
+  'properties.bootstrap.servers' = '',
+  'scan.startup.mode' = 'earliest-offset',
+  'topic' = 'source_topic',
+  'value.format' = 'json'
+)
+EOT
+    integration_id = aiven_service_integration.flink_to_kafka.integration_id
+  }
+}
+
+resource "aiven_flink_application_deployment" "foobar" {
+  project        = data.aiven_project.foo.project
+  service_name   = aiven_flink.foo.service_name
+  application_id = aiven_flink_application.foo.application_id
+  version_id     = data.aiven_flink_application_version.bar.application_version_id
+}
+
+data "aiven_flink_application_version" "bar" {
+  project                = data.aiven_project.foo.project
+  service_name           = aiven_flink.foo.service_name
+  application_id         = aiven_flink_application.foo.application_id
+  application_version_id = aiven_flink_application_version.foo.application_version_id
+}
+`, os.Getenv("AIVEN_PROJECT_NAME"), r)
+}
+
+func testAccFlinkApplicationVersionRestartingResource(r string) string {
+	return fmt.Sprintf(`
+data "aiven_project" "foo" {
+  project = "%[1]s"
+}
+
+resource "aiven_flink" "foo" {
+  project                 = data.aiven_project.foo.project
+  service_name            = "test-acc-flink-%[2]s"
+  cloud_name              = "google-europe-west1"
+  plan                    = "business-4"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "04:00:00"
+}
+
+resource "aiven_kafka" "kafka" {
+  project      = data.aiven_project.foo.project
+  cloud_name   = "google-europe-west1"
+  plan         = "business-4"
+  service_name = "test-acc-kafka-%[2]s"
+}
+
+resource "aiven_service_integration" "flink_to_kafka" {
+  project                  = data.aiven_project.foo.project
+  integration_type         = "flink"
+  destination_service_name = aiven_flink.foo.service_name
+  source_service_name      = aiven_kafka.kafka.service_name
+}
+
+resource "aiven_kafka_topic" "source" {
+  project      = aiven_kafka.kafka.project
+  service_name = aiven_kafka.kafka.service_name
+  partitions   = 2
+  replication  = 3
+  topic_name   = "non_existent_source_topic"
+}
+
+resource "aiven_kafka_topic" "sink" {
+  project      = aiven_kafka.kafka.project
+  service_name = aiven_kafka.kafka.service_name
+  partitions   = 2
+  replication  = 3
+  topic_name   = "non_existent_sink_topic"
 }
 
 resource "aiven_flink_application" "foo" {

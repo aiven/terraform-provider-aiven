@@ -20,6 +20,7 @@ const (
 	aivenPendingState          = "REBUILDING"
 	aivenRebalancingState      = "REBALANCING"
 	aivenServicesStartingState = "WAITING_FOR_SERVICES"
+	aivenInitializingState     = "INITIALIZING"
 )
 
 func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, m interface{}) (*aiven.Service, error) {
@@ -31,7 +32,7 @@ func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, m inter
 	log.Printf("[DEBUG] Service creation waiter timeout %.0f minutes", timeout.Minutes())
 
 	conf := &retry.StateChangeConf{
-		Pending:                   []string{aivenPendingState, aivenRebalancingState, aivenServicesStartingState},
+		Pending:                   []string{aivenPendingState, aivenRebalancingState, aivenServicesStartingState, aivenInitializingState},
 		Target:                    []string{aivenTargetState},
 		Delay:                     10 * time.Second,
 		Timeout:                   timeout,

@@ -13,6 +13,7 @@ nav_order: 1
 
 <!-- TODO: uncomment when dragonfly is supported -->
 <!-- - Dragonfly support -->
+- Wait for state on creation and deletion of `flink_application_deployment`
 
 - Use new user config generator to generate service integration configs
 - Fix `aiven_kafka_schema` version update
