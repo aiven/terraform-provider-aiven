@@ -14,6 +14,8 @@ nav_order: 1
 <!-- TODO: uncomment when dragonfly is supported -->
 <!-- - Dragonfly support -->
 
+- Fix `aiven_kafka_schema` version update
+
 ## [4.14.0] - 2024-02-20
 
 - Refactor deprecated `resource.StateChangeConf`/`resource.StateRefreshFunc` usage to their equivalent with `retry`

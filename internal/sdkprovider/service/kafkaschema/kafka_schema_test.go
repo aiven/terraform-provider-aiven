@@ -165,6 +165,15 @@ func TestAccAivenKafkaSchema_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "schema_type", "AVRO"),
 				),
 			},
+			// Reverts changes and gets version=1
+			{
+				Config: testAccKafkaSchemaResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenKafkaSchemaAttributes("data.aiven_kafka_schema.schema"),
+					resource.TestCheckResourceAttr(resourceName, "version", "1"),
+					resource.TestCheckResourceAttr(resourceName, "schema_type", "AVRO"),
+				),
+			},
 			{
 				Config:      testAccKafkaSchemaResourceInvalidUpdate(rName),
 				ExpectError: regexp.MustCompile("schema is not compatible with previous version"),
