@@ -140,7 +140,6 @@ func resourceFlinkApplicationDeploymentDelete(
 		return diag.Errorf("error cancelling Flink Application Deployment: %v", err)
 	}
 
-	//goland:noinspection GoDeprecation
 	conf := &retry.StateChangeConf{
 		Pending: []string{
 			"CANCELLING",
