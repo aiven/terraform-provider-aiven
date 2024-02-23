@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
+	codegenintegrations "github.com/aiven/go-client-codegen/handler/serviceintegration"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -27,40 +28,6 @@ const serviceIntegrationEndpointRegExp = "^[a-zA-Z0-9_-]*\\/{1}[a-zA-Z0-9_-]*$"
 
 func hasConfig(kind string) bool {
 	return slices.Contains(serviceintegration.UserConfigTypes(), kind)
-}
-
-// typesList integration type list
-func typesList() []string {
-	return []string{
-		"alertmanager",
-		"cassandra_cross_service_cluster",
-		"clickhouse_kafka",
-		"clickhouse_postgresql",
-		"dashboard",
-		"datadog",
-		"datasource",
-		"external_aws_cloudwatch_logs",
-		"external_aws_cloudwatch_metrics",
-		"external_elasticsearch_logs",
-		"external_google_cloud_logging",
-		"external_opensearch_logs",
-		"flink",
-		"internal_connectivity",
-		"jolokia",
-		"kafka_connect",
-		"kafka_logs",
-		"kafka_mirrormaker",
-		"logs",
-		"m3aggregator",
-		"m3coordinator",
-		"metrics",
-		"opensearch_cross_cluster_replication",
-		"opensearch_cross_cluster_search",
-		"prometheus",
-		"read_replica",
-		"rsyslog",
-		"schema_registry_proxy",
-	}
 }
 
 func aivenServiceIntegrationSchema() map[string]*schema.Schema {
@@ -85,11 +52,11 @@ func aivenServiceIntegrationSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"integration_type": {
-			Description:  "Type of the service integration. Possible values: " + schemautil.JoinQuoted(typesList(), ", ", "`"),
+			Description:  "Type of the service integration. Possible values: " + schemautil.JoinQuoted(codegenintegrations.IntegrationTypeChoices(), ", ", "`"),
 			ForceNew:     true,
 			Required:     true,
 			Type:         schema.TypeString,
-			ValidateFunc: validation.StringInSlice(typesList(), false),
+			ValidateFunc: validation.StringInSlice(codegenintegrations.IntegrationTypeChoices(), false),
 		},
 		"project": {
 			Description: "Project the integration belongs to",

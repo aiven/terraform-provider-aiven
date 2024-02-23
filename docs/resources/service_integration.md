@@ -28,7 +28,7 @@ resource "aiven_service_integration" "my_integration_metrics" {
 
 ### Required
 
-- `integration_type` (String) Type of the service integration. Possible values: `alertmanager`, `cassandra_cross_service_cluster`, `clickhouse_kafka`, `clickhouse_postgresql`, `dashboard`, `datadog`, `datasource`, `external_aws_cloudwatch_logs`, `external_aws_cloudwatch_metrics`, `external_elasticsearch_logs`, `external_google_cloud_logging`, `external_opensearch_logs`, `flink`, `internal_connectivity`, `jolokia`, `kafka_connect`, `kafka_logs`, `kafka_mirrormaker`, `logs`, `m3aggregator`, `m3coordinator`, `metrics`, `opensearch_cross_cluster_replication`, `opensearch_cross_cluster_search`, `prometheus`, `read_replica`, `rsyslog`, `schema_registry_proxy`
+- `integration_type` (String) Type of the service integration. Possible values: `alertmanager`, `autoscaler`, `caching`, `cassandra_cross_service_cluster`, `clickhouse_credentials`, `clickhouse_kafka`, `clickhouse_postgresql`, `dashboard`, `datadog`, `datasource`, `external_aws_cloudwatch_logs`, `external_aws_cloudwatch_metrics`, `external_elasticsearch_logs`, `external_google_cloud_logging`, `external_opensearch_logs`, `flink`, `flink_external_bigquery`, `flink_external_kafka`, `internal_connectivity`, `jolokia`, `kafka_connect`, `kafka_logs`, `kafka_mirrormaker`, `logs`, `m3aggregator`, `m3coordinator`, `metrics`, `opensearch_cross_cluster_replication`, `opensearch_cross_cluster_search`, `prometheus`, `read_replica`, `rsyslog`, `schema_registry_proxy`, `stresstester`, `thanoscompactor`, `thanosquery`, `thanosstore`, `vector`, `vmalert`
 - `project` (String) Project the integration belongs to
 
 ### Optional
@@ -38,12 +38,16 @@ resource "aiven_service_integration" "my_integration_metrics" {
 - `datadog_user_config` (Block List, Max: 1) Datadog user configurable settings (see [below for nested schema](#nestedblock--datadog_user_config))
 - `destination_endpoint_id` (String) Destination endpoint for the integration (if any)
 - `destination_service_name` (String) Destination service for the integration (if any)
+- `external_aws_cloudwatch_logs_user_config` (Block List, Max: 1) ExternalAwsCloudwatchLogs user configurable settings (see [below for nested schema](#nestedblock--external_aws_cloudwatch_logs_user_config))
 - `external_aws_cloudwatch_metrics_user_config` (Block List, Max: 1) ExternalAwsCloudwatchMetrics user configurable settings (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config))
+- `external_elasticsearch_logs_user_config` (Block List, Max: 1) ExternalElasticsearchLogs user configurable settings (see [below for nested schema](#nestedblock--external_elasticsearch_logs_user_config))
+- `external_opensearch_logs_user_config` (Block List, Max: 1) ExternalOpensearchLogs user configurable settings (see [below for nested schema](#nestedblock--external_opensearch_logs_user_config))
 - `kafka_connect_user_config` (Block List, Max: 1) KafkaConnect user configurable settings (see [below for nested schema](#nestedblock--kafka_connect_user_config))
 - `kafka_logs_user_config` (Block List, Max: 1) KafkaLogs user configurable settings (see [below for nested schema](#nestedblock--kafka_logs_user_config))
 - `kafka_mirrormaker_user_config` (Block List, Max: 1) KafkaMirrormaker user configurable settings (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config))
 - `logs_user_config` (Block List, Max: 1) Logs user configurable settings (see [below for nested schema](#nestedblock--logs_user_config))
 - `metrics_user_config` (Block List, Max: 1) Metrics user configurable settings (see [below for nested schema](#nestedblock--metrics_user_config))
+- `prometheus_user_config` (Block List, Max: 1) Prometheus user configurable settings (see [below for nested schema](#nestedblock--prometheus_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration (if any)
 - `source_service_name` (String) Source service for the integration (if any)
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
@@ -165,6 +169,14 @@ Optional:
 
 
 
+<a id="nestedblock--external_aws_cloudwatch_logs_user_config"></a>
+### Nested Schema for `external_aws_cloudwatch_logs_user_config`
+
+Optional:
+
+- `selected_log_fields` (List of String) The list of logging fields that will be sent to the integration logging service. The MESSAGE and timestamp fields are always sent.
+
+
 <a id="nestedblock--external_aws_cloudwatch_metrics_user_config"></a>
 ### Nested Schema for `external_aws_cloudwatch_metrics_user_config`
 
@@ -190,6 +202,22 @@ Required:
 - `field` (String) Identifier of a value in the metric.
 - `metric` (String) Identifier of the metric.
 
+
+
+<a id="nestedblock--external_elasticsearch_logs_user_config"></a>
+### Nested Schema for `external_elasticsearch_logs_user_config`
+
+Optional:
+
+- `selected_log_fields` (List of String) The list of logging fields that will be sent to the integration logging service. The MESSAGE and timestamp fields are always sent.
+
+
+<a id="nestedblock--external_opensearch_logs_user_config"></a>
+### Nested Schema for `external_opensearch_logs_user_config`
+
+Optional:
+
+- `selected_log_fields` (List of String) The list of logging fields that will be sent to the integration logging service. The MESSAGE and timestamp fields are always sent.
 
 
 <a id="nestedblock--kafka_connect_user_config"></a>
@@ -275,6 +303,43 @@ Optional:
 
 <a id="nestedblock--metrics_user_config--source_mysql--telegraf"></a>
 ### Nested Schema for `metrics_user_config.source_mysql.telegraf`
+
+Optional:
+
+- `gather_event_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS.
+- `gather_file_events_stats` (Boolean) gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME.
+- `gather_index_io_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE.
+- `gather_info_schema_auto_inc` (Boolean) Gather auto_increment columns and max values from information schema.
+- `gather_innodb_metrics` (Boolean) Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS.
+- `gather_perf_events_statements` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.EVENTS_STATEMENTS_SUMMARY_BY_DIGEST.
+- `gather_process_list` (Boolean) Gather thread state counts from INFORMATION_SCHEMA.PROCESSLIST.
+- `gather_slave_status` (Boolean) Gather metrics from SHOW SLAVE STATUS command output.
+- `gather_table_io_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE.
+- `gather_table_lock_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS.
+- `gather_table_schema` (Boolean) Gather metrics from INFORMATION_SCHEMA.TABLES.
+- `perf_events_statements_digest_text_limit` (Number) Truncates digest text from perf_events_statements into this many characters.
+- `perf_events_statements_limit` (Number) Limits metrics from perf_events_statements.
+- `perf_events_statements_time_limit` (Number) Only include perf_events_statements whose last seen is less than this many seconds.
+
+
+
+
+<a id="nestedblock--prometheus_user_config"></a>
+### Nested Schema for `prometheus_user_config`
+
+Optional:
+
+- `source_mysql` (Block List, Max: 1) Configuration options for metrics where source service is MySQL (see [below for nested schema](#nestedblock--prometheus_user_config--source_mysql))
+
+<a id="nestedblock--prometheus_user_config--source_mysql"></a>
+### Nested Schema for `prometheus_user_config.source_mysql`
+
+Optional:
+
+- `telegraf` (Block List, Max: 1) Configuration options for Telegraf MySQL input plugin (see [below for nested schema](#nestedblock--prometheus_user_config--source_mysql--telegraf))
+
+<a id="nestedblock--prometheus_user_config--source_mysql--telegraf"></a>
+### Nested Schema for `prometheus_user_config.source_mysql.telegraf`
 
 Optional:
 

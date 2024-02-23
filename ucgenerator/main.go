@@ -11,6 +11,7 @@ import (
 
 	"github.com/aiven/go-api-schemas/pkg/dist"
 	"github.com/dave/jennifer/jen"
+	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 	"golang.org/x/tools/imports"
 	"gopkg.in/yaml.v3"
@@ -27,35 +28,26 @@ const (
 
 func main() {
 	var serviceList, integrationList string
-	flag.StringVar(&serviceList, "services", "", "Comma separated service list of names")
-	flag.StringVar(&integrationList, "integrations", "", "Comma separated integrations list of names")
+	flag.StringVar(&serviceList, "excludeServices", "", "Comma separated list of names to exclude from generation")
+	flag.StringVar(&integrationList, "excludeIntegrations", "", "Comma separated list of names to exclude from generation")
 	flag.Parse()
 
-	if serviceList+integrationList == "" {
-		log.Fatal("--services or --integrations must be provided")
+	err := generate("service", dist.ServiceTypes, strings.Split(serviceList, ","))
+	if err != nil {
+		log.Fatalf("generating services: %s", err)
 	}
 
-	if serviceList != "" {
-		err := generate("service", dist.ServiceTypes, strings.Split(serviceList, ","))
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	if integrationList != "" {
-		err := generate("serviceintegration", dist.IntegrationTypes, strings.Split(integrationList, ","))
-		if err != nil {
-			log.Fatal(err)
-		}
+	err = generate("serviceintegration", dist.IntegrationTypes, strings.Split(integrationList, ","))
+	if err != nil {
+		log.Fatalf("generating integrations: %s", err)
 	}
 }
 
-func generate(kind string, data []byte, keys []string) error {
+func generate(kind string, data []byte, exclude []string) error {
 	// Fixes imports order
 	imports.LocalPrefix = localPrefix
 
 	var root map[string]*object
-
 	err := yaml.Unmarshal(data, &root)
 	if err != nil {
 		return err
@@ -67,14 +59,25 @@ func generate(kind string, data []byte, keys []string) error {
 		return err
 	}
 
+	keys := maps.Keys(root)
 	slices.Sort(keys)
 	doneKeys := make([]string, 0, len(keys))
 	doneNames := make([]string, 0, len(keys))
 
 	for _, key := range keys {
+		if slices.Contains(exclude, key) {
+			log.Printf("skipping %q: in exclude list", key)
+			continue
+		}
+
 		o, ok := root[key]
 		if !ok {
 			return fmt.Errorf("key %q not found in spec", key)
+		}
+
+		if len(o.Properties) == 0 {
+			log.Printf("skipping %q: empty root object", key)
+			continue
 		}
 
 		o.isRoot = true
@@ -91,7 +94,10 @@ func generate(kind string, data []byte, keys []string) error {
 		f.ImportName(importSchema, "schema")
 		f.ImportName(importDiff, "diff")
 		f.ImportName(importValidation, "validation")
-		genSchema(f, o)
+		err := genSchema(f, o)
+		if err != nil {
+			return fmt.Errorf("error generating %q: %w", key, err)
+		}
 
 		// Sorts imports
 		b, err := imports.Process("", []byte(f.GoString()), nil)
@@ -124,7 +130,7 @@ func generate(kind string, data []byte, keys []string) error {
 	)
 
 	configTypes := make([]jen.Code, 0)
-	for _, v := range keys {
+	for _, v := range doneKeys {
 		configTypes = append(configTypes, jen.Lit(v))
 	}
 	f.Func().Id("UserConfigTypes").Params().Index().String().Block(
@@ -133,13 +139,19 @@ func generate(kind string, data []byte, keys []string) error {
 	return f.Save(filepath.Join(dirPath, kind+".go"))
 }
 
-func genSchema(f *jen.File, o *object) {
+func genSchema(f *jen.File, o *object) error {
+	values, err := getSchemaValues(o)
+	if err != nil {
+		return err
+	}
+
 	f.Func().Id(o.camelName).Params().Op("*").Qual(importSchema, "Schema").Block(
-		jen.Return(jen.Op("&").Qual(importSchema, "Schema").Values(getSchemaValues(o))),
+		jen.Return(jen.Op("&").Qual(importSchema, "Schema").Values(values)),
 	)
+	return nil
 }
 
-func getSchemaValues(o *object) jen.Dict {
+func getSchemaValues(o *object) (jen.Dict, error) {
 	values := make(jen.Dict)
 
 	if d := getDescription(o); d != "" {
@@ -154,7 +166,7 @@ func getSchemaValues(o *object) jen.Dict {
 	case objectTypeObject, objectTypeArray:
 		if o.isSchemaless() {
 			// todo: handle schemaless if this happens
-			log.Fatalf("schemaless is not implemented: %q", o.jsonName)
+			return nil, fmt.Errorf("schemaless is not implemented: %q", o.jsonName)
 		}
 
 		t = "List"
@@ -177,13 +189,13 @@ func getSchemaValues(o *object) jen.Dict {
 	case objectTypeNumber:
 		t = "Float"
 	default:
-		log.Fatalf("unknown type %q for %q", o.Type, o.jsonName)
+		return nil, fmt.Errorf("unknown type %q for %q", o.Type, o.jsonName)
 	}
 
 	values[jen.Id("Type")] = jen.Qual(importSchema, "Type"+t)
 	if o.IsDeprecated {
 		if o.DeprecationNotice == "" {
-			log.Fatalf("missing deprecation notice for %q", o.jsonName)
+			return nil, fmt.Errorf("missing deprecation notice for %q", o.jsonName)
 		}
 		values[jen.Id("Deprecated")] = jen.Lit(o.DeprecationNotice)
 	}
@@ -212,24 +224,33 @@ func getSchemaValues(o *object) jen.Dict {
 				args = append(args, scalarLit(o, v.Value))
 			}
 
+			call, err := scalarArrayLit(o, args)
+			if err != nil {
+				return nil, err
+			}
+
 			// There are no other types functions.
 			// Bool and number won't compile
 			switch o.Type {
 			case objectTypeString:
-				values[jen.Id("ValidateFunc")] = jen.Qual(importValidation, "StringInSlice").Call(scalarArrayLit(o, args), jen.False())
+				values[jen.Id("ValidateFunc")] = jen.Qual(importValidation, "StringInSlice").Call(call, jen.False())
 			case objectTypeInteger:
-				values[jen.Id("ValidateFunc")] = jen.Qual(importValidation, "IntInSlice").Call(scalarArrayLit(o, args))
+				values[jen.Id("ValidateFunc")] = jen.Qual(importValidation, "IntInSlice").Call(call)
 			}
 		}
 
-		return values
+		return values, nil
 	}
 
 	if o.isArray() {
 		if o.ArrayItems.isScalar() {
-			fields := getSchemaValues(o.ArrayItems)
+			fields, err := getSchemaValues(o.ArrayItems)
+			if err != nil {
+				return nil, err
+			}
+
 			values[jen.Id("Elem")] = jen.Op("&").Qual(importSchema, "Schema").Values(fields)
-			return values
+			return values, nil
 		}
 
 		// Renders the array as an object
@@ -242,14 +263,19 @@ func getSchemaValues(o *object) jen.Dict {
 
 	fields := make(jen.Dict)
 	for _, p := range o.properties {
-		fields[jen.Lit(p.tfName)] = jen.Values(getSchemaValues(p))
+		vals, err := getSchemaValues(p)
+		if err != nil {
+			return nil, err
+		}
+
+		fields[jen.Lit(p.tfName)] = jen.Values(vals)
 	}
 
 	values[jen.Id("Elem")] = jen.Op("&").Qual(importSchema, "Resource").Values(jen.Dict{
 		jen.Id("Schema"): jen.Map(jen.String()).Op("*").Qual(importSchema, "Schema").Values(fields),
 	})
 
-	return values
+	return values, nil
 }
 
 func getDescription(o *object) string {
@@ -312,15 +338,14 @@ func scalarLit(o *object, value any) *jen.Statement {
 	return nil
 }
 
-func scalarArrayLit(o *object, args []jen.Code) *jen.Statement {
+func scalarArrayLit(o *object, args []jen.Code) (*jen.Statement, error) {
 	switch o.Type {
 	case objectTypeString:
-		return jen.Index().String().Values(args...)
+		return jen.Index().String().Values(args...), nil
 	case objectTypeInteger:
-		return jen.Index().Int().Values(args...)
+		return jen.Index().Int().Values(args...), nil
 	}
-	log.Fatalf("unexpected element type of array for default value: %q", o.Type)
-	return nil
+	return nil, fmt.Errorf("unexpected element type of array for default value: %q", o.Type)
 }
 
 func isTypeSet(o *object) bool {

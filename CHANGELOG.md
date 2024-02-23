@@ -16,6 +16,8 @@ nav_order: 1
 
 - Use new user config generator to generate service integration configs
 - Fix `aiven_kafka_schema` version update
+- Add `external_aws_cloudwatch_logs`, `external_elasticsearch_logs_user_config`, `external_opensearch_logs_user_config`,
+  `prometheus_user_config` service integration configs
 
 ## [4.14.0] - 2024-02-20
 

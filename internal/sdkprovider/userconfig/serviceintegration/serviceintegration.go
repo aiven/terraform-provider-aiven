@@ -12,8 +12,14 @@ func GetUserConfig(kind string) *schema.Schema {
 		return clickhousePostgresqlUserConfig()
 	case "datadog":
 		return datadogUserConfig()
+	case "external_aws_cloudwatch_logs":
+		return externalAwsCloudwatchLogsUserConfig()
 	case "external_aws_cloudwatch_metrics":
 		return externalAwsCloudwatchMetricsUserConfig()
+	case "external_elasticsearch_logs":
+		return externalElasticsearchLogsUserConfig()
+	case "external_opensearch_logs":
+		return externalOpensearchLogsUserConfig()
 	case "kafka_connect":
 		return kafkaConnectUserConfig()
 	case "kafka_logs":
@@ -24,10 +30,12 @@ func GetUserConfig(kind string) *schema.Schema {
 		return logsUserConfig()
 	case "metrics":
 		return metricsUserConfig()
+	case "prometheus":
+		return prometheusUserConfig()
 	default:
 		panic("unknown user config type: " + kind)
 	}
 }
 func UserConfigTypes() []string {
-	return []string{"clickhouse_kafka", "clickhouse_postgresql", "datadog", "external_aws_cloudwatch_metrics", "kafka_connect", "kafka_logs", "kafka_mirrormaker", "logs", "metrics"}
+	return []string{"clickhouse_kafka", "clickhouse_postgresql", "datadog", "external_aws_cloudwatch_logs", "external_aws_cloudwatch_metrics", "external_elasticsearch_logs", "external_opensearch_logs", "kafka_connect", "kafka_logs", "kafka_mirrormaker", "logs", "metrics", "prometheus"}
 }
