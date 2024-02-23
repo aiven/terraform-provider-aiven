@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -21,50 +20,50 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/converters"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/integration"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/serviceintegration"
 )
 
 const serviceIntegrationEndpointRegExp = "^[a-zA-Z0-9_-]*\\/{1}[a-zA-Z0-9_-]*$"
 
-// typesList integration type name as a key, and value is whether it has a config
-func typesList() map[string]bool {
-	return map[string]bool{
-		"alertmanager":                         false,
-		"cassandra_cross_service_cluster":      false,
-		"clickhouse_kafka":                     true,
-		"clickhouse_postgresql":                true,
-		"dashboard":                            false,
-		"datadog":                              true,
-		"datasource":                           false,
-		"external_aws_cloudwatch_logs":         false,
-		"external_aws_cloudwatch_metrics":      true,
-		"external_elasticsearch_logs":          false,
-		"external_google_cloud_logging":        false,
-		"external_opensearch_logs":             false,
-		"flink":                                false,
-		"internal_connectivity":                false,
-		"jolokia":                              false,
-		"kafka_connect":                        true,
-		"kafka_logs":                           true,
-		"kafka_mirrormaker":                    true,
-		"logs":                                 true,
-		"m3aggregator":                         false,
-		"m3coordinator":                        false,
-		"metrics":                              true,
-		"opensearch_cross_cluster_replication": false,
-		"opensearch_cross_cluster_search":      false,
-		"prometheus":                           false,
-		"read_replica":                         false,
-		"rsyslog":                              false,
-		"schema_registry_proxy":                false,
+func hasConfig(kind string) bool {
+	return slices.Contains(serviceintegration.UserConfigTypes(), kind)
+}
+
+// typesList integration type list
+func typesList() []string {
+	return []string{
+		"alertmanager",
+		"cassandra_cross_service_cluster",
+		"clickhouse_kafka",
+		"clickhouse_postgresql",
+		"dashboard",
+		"datadog",
+		"datasource",
+		"external_aws_cloudwatch_logs",
+		"external_aws_cloudwatch_metrics",
+		"external_elasticsearch_logs",
+		"external_google_cloud_logging",
+		"external_opensearch_logs",
+		"flink",
+		"internal_connectivity",
+		"jolokia",
+		"kafka_connect",
+		"kafka_logs",
+		"kafka_mirrormaker",
+		"logs",
+		"m3aggregator",
+		"m3coordinator",
+		"metrics",
+		"opensearch_cross_cluster_replication",
+		"opensearch_cross_cluster_search",
+		"prometheus",
+		"read_replica",
+		"rsyslog",
+		"schema_registry_proxy",
 	}
 }
 
 func aivenServiceIntegrationSchema() map[string]*schema.Schema {
-	types := typesList()
-	sortedTypes := maps.Keys(types)
-	slices.Sort(sortedTypes)
-
 	s := map[string]*schema.Schema{
 		"integration_id": {
 			Description: "Service Integration Id at aiven",
@@ -86,11 +85,11 @@ func aivenServiceIntegrationSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"integration_type": {
-			Description:  "Type of the service integration. Possible values: " + schemautil.JoinQuoted(sortedTypes, ", ", "`"),
+			Description:  "Type of the service integration. Possible values: " + schemautil.JoinQuoted(typesList(), ", ", "`"),
 			ForceNew:     true,
 			Required:     true,
 			Type:         schema.TypeString,
-			ValidateFunc: validation.StringInSlice(sortedTypes, false),
+			ValidateFunc: validation.StringInSlice(typesList(), false),
 		},
 		"project": {
 			Description: "Project the integration belongs to",
@@ -115,10 +114,8 @@ func aivenServiceIntegrationSchema() map[string]*schema.Schema {
 	}
 
 	// Adds user configs
-	for _, k := range sortedTypes {
-		if types[k] {
-			s[k+"_user_config"] = integration.GetUserConfig(k)
-		}
+	for _, k := range serviceintegration.UserConfigTypes() {
+		s[k+"_user_config"] = serviceintegration.GetUserConfig(k)
 	}
 	return s
 }
@@ -179,8 +176,8 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 		SourceService:         schemautil.OptionalStringPointer(d, "source_service_name"),
 	}
 
-	if typesList()[integrationType] {
-		uc, err := converters.Expand(integrationType, integration.GetUserConfig(integrationType), d)
+	if hasConfig(integrationType) {
+		uc, err := converters.Expand(integrationType, serviceintegration.GetUserConfig(integrationType), d)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -394,8 +391,8 @@ func resourceServiceIntegrationCopyAPIResponseToTerraform(
 		return err
 	}
 
-	if typesList()[integrationType] {
-		userConfig, err := converters.Flatten(integrationType, integration.GetUserConfig(integrationType), d, res.UserConfig)
+	if hasConfig(integrationType) {
+		userConfig, err := converters.Flatten(integrationType, serviceintegration.GetUserConfig(integrationType), d, res.UserConfig)
 		if err != nil {
 			return err
 		}

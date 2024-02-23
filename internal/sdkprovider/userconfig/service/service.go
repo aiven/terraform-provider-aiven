@@ -38,3 +38,6 @@ func GetUserConfig(kind string) *schema.Schema {
 		panic("unknown user config type: " + kind)
 	}
 }
+func UserConfigTypes() []string {
+	return []string{"cassandra", "clickhouse", "flink", "grafana", "influxdb", "kafka", "kafka_connect", "kafka_mirrormaker", "m3aggregator", "m3db", "mysql", "opensearch", "pg", "redis"}
+}
