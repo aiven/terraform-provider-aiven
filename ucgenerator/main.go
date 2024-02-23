@@ -27,12 +27,12 @@ const (
 
 func main() {
 	var serviceList, integrationList string
-	flag.StringVar(&serviceList, "services", "", "Comma separated service list of names to generate for")
-	flag.StringVar(&integrationList, "integrations", "", "Comma separated integrations list of names to generate for")
+	flag.StringVar(&serviceList, "services", "", "Comma separated service list of names")
+	flag.StringVar(&integrationList, "integrations", "", "Comma separated integrations list of names")
 	flag.Parse()
 
 	if serviceList+integrationList == "" {
-		log.Fatal("--service or --integrations must be provided")
+		log.Fatal("--services or --integrations must be provided")
 	}
 
 	if serviceList != "" {
@@ -43,7 +43,7 @@ func main() {
 	}
 
 	if integrationList != "" {
-		err := generate("integration", dist.IntegrationTypes, strings.Split(integrationList, ","))
+		err := generate("serviceintegration", dist.IntegrationTypes, strings.Split(integrationList, ","))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -51,7 +51,9 @@ func main() {
 }
 
 func generate(kind string, data []byte, keys []string) error {
-	slices.Sort(keys)
+	// Fixes imports order
+	imports.LocalPrefix = localPrefix
+
 	var root map[string]*object
 
 	err := yaml.Unmarshal(data, &root)
@@ -65,9 +67,7 @@ func generate(kind string, data []byte, keys []string) error {
 		return err
 	}
 
-	// Fixes imports order
-	imports.LocalPrefix = localPrefix
-
+	slices.Sort(keys)
 	doneKeys := make([]string, 0, len(keys))
 	doneNames := make([]string, 0, len(keys))
 
@@ -121,6 +121,14 @@ func generate(kind string, data []byte, keys []string) error {
 	f.ImportName(importSchema, "schema")
 	f.Func().Id("GetUserConfig").Params(jen.Id("kind").String()).Op("*").Qual(importSchema, "Schema").Block(
 		jen.Switch(jen.Id("kind")).Block(cases...),
+	)
+
+	configTypes := make([]jen.Code, 0)
+	for _, v := range keys {
+		configTypes = append(configTypes, jen.Lit(v))
+	}
+	f.Func().Id("UserConfigTypes").Params().Index().String().Block(
+		jen.Return(jen.Index().String().Values(configTypes...)),
 	)
 	return f.Save(filepath.Join(dirPath, kind+".go"))
 }
