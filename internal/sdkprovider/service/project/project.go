@@ -266,7 +266,6 @@ func resourceProjectAssignToBillingGroup(
 func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	//goland:noinspection GoDeprecation
 	conf := &retry.StateChangeConf{
 		Pending:    []string{"pending"},
 		Target:     []string{"target"},

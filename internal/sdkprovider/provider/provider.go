@@ -32,8 +32,6 @@ import (
 )
 
 // Provider returns terraform.ResourceProvider.
-//
-//goland:noinspection GoDeprecation
 func Provider(version string) *schema.Provider {
 	p := &schema.Provider{
 		Schema: map[string]*schema.Schema{
