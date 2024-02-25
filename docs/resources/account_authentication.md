@@ -3,12 +3,15 @@
 page_title: "aiven_account_authentication Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Account Authentication resource allows the creation and management of an Aiven Account Authentications.
+  This resource is deprecated.
+  Creates and manages an authentication method.
 ---
 
 # aiven_account_authentication (Resource)
 
-The Account Authentication resource allows the creation and management of an Aiven Account Authentications.
+**This resource is deprecated**. 
+		
+Creates and manages an authentication method.
 
 ## Example Usage
 
