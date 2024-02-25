@@ -13,10 +13,9 @@ The Project resource allows the creation and management of Aiven Projects.
 ## Example Usage
 
 ```terraform
-resource "aiven_project" "myproject" {
-  project    = "<PROJECT_NAME>"
-  card_id    = "<FULL_CARD_ID/LAST4_DIGITS>"
-  account_id = aiven_account_team.<ACCOUNT_RESOURCE>.account_id
+resource "aiven_project" "example_project" {
+  project    = "Example project"
+  parent_id = aiven_organization.main.id
 }
 ```
 

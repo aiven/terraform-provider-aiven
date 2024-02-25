@@ -17,11 +17,11 @@ The Data Source Kafka Schema Registry ACL data source provides information about
 
 ### Required
 
-- `permission` (String) Kafka Schema Registry permission to grant. The possible values are `schema_registry_read` and `schema_registry_write`. This property cannot be changed, doing so forces recreation of the resource.
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `resource` (String) Resource name pattern for the Schema Registry ACL entry. This property cannot be changed, doing so forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `username` (String) Username pattern for the ACL entry. This property cannot be changed, doing so forces recreation of the resource.
+- `permission` (String) Kafka Schema Registry permission to grant. The possible values are `schema_registry_read` and `schema_registry_write`. Changing this property forces recreation of the resource.
+- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `resource` (String) Resource name pattern for the Schema Registry ACL entry. Changing this property forces recreation of the resource.
+- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `username` (String) Username pattern for the ACL entry. Changing this property forces recreation of the resource.
 
 ### Read-Only
 

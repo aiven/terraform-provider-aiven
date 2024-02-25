@@ -25,16 +25,16 @@ data "aiven_redis_user" "user" {
 
 ### Required
 
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `username` (String) The actual name of the Redis User. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `username` (String) The actual name of the Redis User. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
 - `password` (String, Sensitive) The password of the Redis User.
-- `redis_acl_categories` (List of String) Defines command category rules. The field is required with`redis_acl_commands` and `redis_acl_keys`. This property cannot be changed, doing so forces recreation of the resource.
-- `redis_acl_channels` (List of String) Defines the permitted pub/sub channel patterns. This property cannot be changed, doing so forces recreation of the resource.
-- `redis_acl_commands` (List of String) Defines rules for individual commands. The field is required with`redis_acl_categories` and `redis_acl_keys`. This property cannot be changed, doing so forces recreation of the resource.
-- `redis_acl_keys` (List of String) Defines key access rules. The field is required with`redis_acl_categories` and `redis_acl_keys`. This property cannot be changed, doing so forces recreation of the resource.
+- `redis_acl_categories` (List of String) Defines command category rules. The field is required with`redis_acl_commands` and `redis_acl_keys`. Changing this property forces recreation of the resource.
+- `redis_acl_channels` (List of String) Defines the permitted pub/sub channel patterns. Changing this property forces recreation of the resource.
+- `redis_acl_commands` (List of String) Defines rules for individual commands. The field is required with`redis_acl_categories` and `redis_acl_keys`. Changing this property forces recreation of the resource.
+- `redis_acl_keys` (List of String) Defines key access rules. The field is required with`redis_acl_categories` and `redis_acl_keys`. Changing this property forces recreation of the resource.
 - `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.

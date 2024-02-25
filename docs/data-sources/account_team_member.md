@@ -25,9 +25,9 @@ data "aiven_account_team_member" "foo" {
 
 ### Required
 
-- `account_id` (String) The unique account id. This property cannot be changed, doing so forces recreation of the resource.
-- `team_id` (String) An account team id. This property cannot be changed, doing so forces recreation of the resource.
-- `user_email` (String) Is a user email address that first will be invited, and after accepting an invitation, he or she becomes a member of a team. Should be lowercase. This property cannot be changed, doing so forces recreation of the resource.
+- `account_id` (String) The unique account id. Changing this property forces recreation of the resource.
+- `team_id` (String) An account team id. Changing this property forces recreation of the resource.
+- `user_email` (String) Is a user email address that first will be invited, and after accepting an invitation, he or she becomes a member of a team. Should be lowercase. Changing this property forces recreation of the resource.
 
 ### Read-Only
 

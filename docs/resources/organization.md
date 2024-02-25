@@ -3,18 +3,18 @@
 page_title: "aiven_organization Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an organization in Aiven.
+  Creates and manages an organization https://aiven.io/docs/platform/concepts/projects_accounts_access.
 ---
 
 # aiven_organization (Resource)
 
-Creates and manages an organization in Aiven.
+Creates and manages an [organization](https://aiven.io/docs/platform/concepts/projects_accounts_access).
 
 ## Example Usage
 
 ```terraform
-resource "aiven_organization" "organization1" {
-  name = "<ORGANIZATION_NAME>"
+resource "aiven_organization" "main" {
+  name = "Example organization"
 }
 ```
 
@@ -32,8 +32,8 @@ resource "aiven_organization" "organization1" {
 ### Read-Only
 
 - `create_time` (String) Timestamp of the creation of the organization.
-- `id` (String) Identifier of the organization.
-- `tenant_id` (String) Tenant identifier of the organization.
+- `id` (String) ID of the organization.
+- `tenant_id` (String) Tenant ID of the organization.
 - `update_time` (String) Timestamp of the last update of the organization.
 
 <a id="nestedblock--timeouts"></a>
@@ -51,5 +51,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_organization.organization1 organization_id
+terraform import aiven_organization.main ORGANIZATION_ID
 ```

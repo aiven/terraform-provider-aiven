@@ -27,8 +27,11 @@ func ComposeID(parts ...string) string {
 
 // BetaDescription is a helper function that returns a description for beta resources.
 func BetaDescription(description string) string {
-	return description + " Please note that this resource is in beta and may change without notice. " +
-		"To use this resource, please set the PROVIDER_AIVEN_ENABLE_BETA environment variable."
+	return description + `
+
+**This resource is in beta and may change without notice.** To use this resource, 
+set the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to true.
+`
 }
 
 // ValueOrDefault returns the value if not nil, otherwise returns the default value. Value is converted to type

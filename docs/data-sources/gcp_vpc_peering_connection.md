@@ -25,9 +25,9 @@ data "aiven_gcp_vpc_peering_connection" "foo" {
 
 ### Required
 
-- `gcp_project_id` (String) GCP project ID. This property cannot be changed, doing so forces recreation of the resource.
-- `peer_vpc` (String) GCP VPC network name. This property cannot be changed, doing so forces recreation of the resource.
-- `vpc_id` (String) The VPC the peering connection belongs to. This property cannot be changed, doing so forces recreation of the resource.
+- `gcp_project_id` (String) GCP project ID. Changing this property forces recreation of the resource.
+- `peer_vpc` (String) GCP VPC network name. Changing this property forces recreation of the resource.
+- `vpc_id` (String) The VPC the peering connection belongs to. Changing this property forces recreation of the resource.
 
 ### Read-Only
 

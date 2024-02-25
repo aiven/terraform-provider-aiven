@@ -3,7 +3,7 @@
 page_title: "aiven_organization_user Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  **This resource is deprecated**. Use the aiven_organization_user data source instead.
+  **This resource is deprecated**. Use the `aiven_organization_user` data source instead.
   
   The organization user resource allows the creation and management of an Aiven organization user.
   During the creation of aiven_organization_userresource, an email invitation will be sent
@@ -15,7 +15,7 @@ description: |-
 
 # aiven_organization_user (Resource)
 
-**This resource is deprecated**. Use the aiven_organization_user data source instead.
+**This resource is deprecated**. Use the `aiven_organization_user` data source instead.
 
 The organization user resource allows the creation and management of an Aiven organization user.
 
@@ -32,8 +32,8 @@ eliminate the member from the organization if one has accepted an invitation pre
 
 ### Required
 
-- `organization_id` (String) The unique organization ID. This property cannot be changed, doing so forces recreation of the resource.
-- `user_email` (String) This is a user email address that first will be invited, and after accepting an invitation, they become a member of the organization. Should be lowercase. This property cannot be changed, doing so forces recreation of the resource.
+- `organization_id` (String) The unique organization ID. Changing this property forces recreation of the resource.
+- `user_email` (String) This is a user email address that first will be invited, and after accepting an invitation, they become a member of the organization. Should be lowercase. Changing this property forces recreation of the resource.
 
 ### Optional
 

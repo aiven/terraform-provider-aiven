@@ -25,10 +25,10 @@ data "aiven_aws_vpc_peering_connection" "foo" {
 
 ### Required
 
-- `aws_account_id` (String) AWS account ID. This property cannot be changed, doing so forces recreation of the resource.
-- `aws_vpc_id` (String) AWS VPC ID. This property cannot be changed, doing so forces recreation of the resource.
-- `aws_vpc_region` (String) AWS region of the peered VPC (if not in the same region as Aiven VPC). This property cannot be changed, doing so forces recreation of the resource.
-- `vpc_id` (String) The VPC the peering connection belongs to. This property cannot be changed, doing so forces recreation of the resource.
+- `aws_account_id` (String) AWS account ID. Changing this property forces recreation of the resource.
+- `aws_vpc_id` (String) AWS VPC ID. Changing this property forces recreation of the resource.
+- `aws_vpc_region` (String) AWS region of the peered VPC (if not in the same region as Aiven VPC). Changing this property forces recreation of the resource.
+- `vpc_id` (String) The VPC the peering connection belongs to. Changing this property forces recreation of the resource.
 
 ### Read-Only
 

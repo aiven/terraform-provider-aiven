@@ -17,12 +17,12 @@ The Azure VPC Peering Connection data source provides information about the exis
 
 ### Required
 
-- `azure_subscription_id` (String) Azure Subscription ID. This property cannot be changed, doing so forces recreation of the resource.
-- `peer_azure_app_id` (String) Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet. This property cannot be changed, doing so forces recreation of the resource.
-- `peer_azure_tenant_id` (String) Azure tenant id in UUID4 form. This property cannot be changed, doing so forces recreation of the resource.
-- `peer_resource_group` (String) Azure resource group name of the peered VPC. This property cannot be changed, doing so forces recreation of the resource.
-- `vnet_name` (String) Azure Network name. This property cannot be changed, doing so forces recreation of the resource.
-- `vpc_id` (String) The VPC the peering connection belongs to. This property cannot be changed, doing so forces recreation of the resource.
+- `azure_subscription_id` (String) Azure Subscription ID. Changing this property forces recreation of the resource.
+- `peer_azure_app_id` (String) Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet. Changing this property forces recreation of the resource.
+- `peer_azure_tenant_id` (String) Azure tenant id in UUID4 form. Changing this property forces recreation of the resource.
+- `peer_resource_group` (String) Azure resource group name of the peered VPC. Changing this property forces recreation of the resource.
+- `vnet_name` (String) Azure Network name. Changing this property forces recreation of the resource.
+- `vpc_id` (String) The VPC the peering connection belongs to. Changing this property forces recreation of the resource.
 
 ### Read-Only
 
