@@ -144,7 +144,10 @@ var aivenAccountAuthenticationSchema = map[string]*schema.Schema{
 
 func ResourceAccountAuthentication() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Account Authentication resource allows the creation and management of an Aiven Account Authentications.",
+		Description: `**This resource is deprecated**. 
+		
+Creates and manages an authentication method.
+		`,
 		CreateContext: resourceAccountAuthenticationCreate,
 		ReadContext:   resourceAccountAuthenticationRead,
 		UpdateContext: resourceAccountAuthenticationUpdate,
@@ -155,7 +158,7 @@ func ResourceAccountAuthentication() *schema.Resource {
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
 		Schema:             aivenAccountAuthenticationSchema,
-		DeprecationMessage: "This resource is deprecated",
+		DeprecationMessage: "This resource is deprecated.",
 	}
 }
 
