@@ -26,7 +26,7 @@ import (
 
 const serviceIntegrationEndpointRegExp = "^[a-zA-Z0-9_-]*\\/{1}[a-zA-Z0-9_-]*$"
 
-func hasConfig(kind string) bool {
+func hasIntegrationConfig(kind string) bool {
 	return slices.Contains(serviceintegration.UserConfigTypes(), kind)
 }
 
@@ -143,7 +143,7 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 		SourceService:         schemautil.OptionalStringPointer(d, "source_service_name"),
 	}
 
-	if hasConfig(integrationType) {
+	if hasIntegrationConfig(integrationType) {
 		uc, err := converters.Expand(integrationType, serviceintegration.GetUserConfig(integrationType), d)
 		if err != nil {
 			return diag.FromErr(err)
@@ -358,7 +358,7 @@ func resourceServiceIntegrationCopyAPIResponseToTerraform(
 		return err
 	}
 
-	if hasConfig(integrationType) {
+	if hasIntegrationConfig(integrationType) {
 		userConfig, err := converters.Flatten(integrationType, serviceintegration.GetUserConfig(integrationType), d, res.UserConfig)
 		if err != nil {
 			return err
