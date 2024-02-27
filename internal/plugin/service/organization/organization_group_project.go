@@ -78,11 +78,12 @@ func (r *organizationGroupProjectResource) Schema(
 	resp *resource.SchemaResponse) {
 	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
 		Description: util.BetaDescription(
-			"Adds and manages a group of users as members of a project.",
+			`Adds and manages a [group](https://aiven.io/docs/platform/concepts/projects_accounts_access#groups) 
+			of users as [members of a project](https://aiven.io/docs/platform/reference/project-member-privileges).`,
 		),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Description: "Compound identifier of the organization group project relation.",
+				Description: "A compound identifier of the resource in the format `project/group_id`.",
 				Computed:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -103,7 +104,7 @@ func (r *organizationGroupProjectResource) Schema(
 				},
 			},
 			"role": schema.StringAttribute{
-				Description: "Role assigned to the users in the group for the project.",
+				Description: "Role assigned to all users in the group for the project.",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),

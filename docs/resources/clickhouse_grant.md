@@ -80,16 +80,16 @@ resource "aiven_clickhouse_grant" "demo-user-grant" {
 
 ### Required
 
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
 
-- `privilege_grant` (Block Set) Configuration to grant a privilege. This property cannot be changed, doing so forces recreation of the resource. (see [below for nested schema](#nestedblock--privilege_grant))
-- `role` (String) The role to grant privileges or roles to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `role_grant` (Block Set) Configuration to grant a role. This property cannot be changed, doing so forces recreation of the resource. (see [below for nested schema](#nestedblock--role_grant))
+- `privilege_grant` (Block Set) Configuration to grant a privilege. Changing this property forces recreation of the resource. (see [below for nested schema](#nestedblock--privilege_grant))
+- `role` (String) The role to grant privileges or roles to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `role_grant` (Block Set) Configuration to grant a role. Changing this property forces recreation of the resource. (see [below for nested schema](#nestedblock--role_grant))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
-- `user` (String) The user to grant privileges or roles to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `user` (String) The user to grant privileges or roles to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Read-Only
 
@@ -100,14 +100,14 @@ resource "aiven_clickhouse_grant" "demo-user-grant" {
 
 Required:
 
-- `database` (String) The database that the grant refers to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `database` (String) The database that the grant refers to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 Optional:
 
-- `column` (String) The column that the grant refers to. This property cannot be changed, doing so forces recreation of the resource.
-- `privilege` (String) The privilege to grant, i.e. 'INSERT', 'SELECT', etc. This property cannot be changed, doing so forces recreation of the resource.
-- `table` (String) The table that the grant refers to. This property cannot be changed, doing so forces recreation of the resource.
-- `with_grant` (Boolean) If true then the grantee gets the ability to grant the privileges he received too. This property cannot be changed, doing so forces recreation of the resource.
+- `column` (String) The column that the grant refers to. Changing this property forces recreation of the resource.
+- `privilege` (String) The privilege to grant, i.e. 'INSERT', 'SELECT', etc. Changing this property forces recreation of the resource.
+- `table` (String) The table that the grant refers to. Changing this property forces recreation of the resource.
+- `with_grant` (Boolean) If true then the grantee gets the ability to grant the privileges he received too. Changing this property forces recreation of the resource.
 
 
 <a id="nestedblock--role_grant"></a>
@@ -115,7 +115,7 @@ Optional:
 
 Optional:
 
-- `role` (String) The role that is to be granted. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `role` (String) The role that is to be granted. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 
 <a id="nestedblock--timeouts"></a>

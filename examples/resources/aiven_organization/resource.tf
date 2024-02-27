@@ -1,3 +1,3 @@
-resource "aiven_organization" "organization1" {
-  name = "<ORGANIZATION_NAME>"
+resource "aiven_organization" "main" {
+  name = "Example organization"
 }

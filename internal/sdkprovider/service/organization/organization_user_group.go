@@ -48,7 +48,7 @@ var aivenOrganizationUserGroupSchema = map[string]*schema.Schema{
 
 func ResourceOrganizationUserGroup() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Creates and manages a user group in an organization.",
+		Description:   "Creates and manages a [user group](https://aiven.io/docs/platform/concepts/projects_accounts_access#groups) in an organization.",
 		CreateContext: resourceOrganizationUserGroupCreate,
 		ReadContext:   resourceOrganizationUserGroupRead,
 		UpdateContext: resourceOrganizationUserGroupUpdate,

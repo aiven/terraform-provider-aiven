@@ -57,7 +57,7 @@ var aivenOrganizationUserSchema = map[string]*schema.Schema{
 func ResourceOrganizationUser() *schema.Resource {
 	return &schema.Resource{
 		Description: `
-		**This resource is deprecated**. Use the aiven_organization_user data source instead.
+		**This resource is deprecated**. Use the ` + "`aiven_organization_user`" + ` data source instead.
 
 The organization user resource allows the creation and management of an Aiven organization user.
 

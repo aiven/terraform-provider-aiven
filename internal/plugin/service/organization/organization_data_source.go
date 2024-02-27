@@ -72,10 +72,10 @@ func (r *organizationDataSource) Schema(
 	resp *datasource.SchemaResponse,
 ) {
 	resp.Schema = schema.Schema{
-		Description: "Retrieves information about an organization from Aiven.",
+		Description: "Gets information about an organization.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Description: "Identifier of the organization.",
+				Description: "ID of the organization.",
 				Optional:    true,
 			},
 			"name": schema.StringAttribute{
@@ -83,7 +83,7 @@ func (r *organizationDataSource) Schema(
 				Optional:    true,
 			},
 			"tenant_id": schema.StringAttribute{
-				Description: "Tenant identifier of the organization.",
+				Description: "Tenant ID of the organization.",
 				Computed:    true,
 			},
 			"create_time": schema.StringAttribute{

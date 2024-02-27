@@ -130,7 +130,7 @@ func (db *DescriptionBuilder) Build() string {
 
 	if db.withForceNew {
 		builder.WriteRune(' ')
-		builder.WriteString("This property cannot be changed, doing so forces recreation of the resource.")
+		builder.WriteString("Changing this property forces recreation of the resource.")
 	}
 
 	return builder.String()

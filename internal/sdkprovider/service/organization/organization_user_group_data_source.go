@@ -13,7 +13,7 @@ import (
 func DatasourceOrganizationUserGroup() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceOrganizationUserGroupRead,
-		Description: "Provides information about an existing user group in an organization.",
+		Description: "Gets information about an existing user group in an organization.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(
 			aivenOrganizationUserGroupSchema, "organization_id", "name",
 		),
