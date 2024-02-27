@@ -1,0 +1,413 @@
+name: Incremental Acceptance Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+      - v*
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
+  push:
+    branches:
+      - main
+      - v*
+  workflow_dispatch: {}
+
+permissions: read-all
+
+concurrency:
+  group: ci-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  selproj:
+    name: Run selproj
+    runs-on: ubuntu-latest
+    if: >
+      (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) ||
+      github.event_name == 'push'
+
+    outputs:
+      suffix: ${{ steps.selproj.outputs.suffix }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - id: selproj
+        run: echo "suffix=$(make -s ci-selproj | tr -d '\n')" >> $GITHUB_OUTPUT
+        env:
+          AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
+          AIVEN_PROJECT_NAME_PREFIX: ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}
+
+  find_sdkv2_entities:
+    name: Find SDKv2 entities
+    runs-on: ubuntu-latest
+    if: >
+      (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) ||
+      github.event_name == 'push'
+
+    env:
+      SDKV2_IMPL_PATH: internal/sdkprovider
+
+    outputs:
+      entities: ${{ steps.find_entities.outputs.entities }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find provider.go file
+        id: find_provider_go_file
+        run: |
+          # Find the path to 'provider.go' within the specified directory and append it to the output
+          echo "path=$(find "$SDKV2_IMPL_PATH" -type f -name 'provider.go')" >> $GITHUB_OUTPUT
+
+      - name: Extract imports
+        id: extract_imports
+        run: |
+          # Capture the path of the Go file from a previous step's output
+          provider_go_file=${{ steps.find_provider_go_file.outputs.path }}
+
+          # Extract the import block from the Go file using awk
+          imports=$(awk '/^import \(/{flag=1;next}/^\)/{flag=0}flag' "$provider_go_file")
+
+          # Format the imports to a JSON array, removing spaces and quotes
+          imports=$(echo "$imports" | jq -R -s -c 'split("\n") | map(select(length > 0) | gsub("[[:space:]\"]";""))')
+
+          # Append the formatted imports to the output
+          echo "imports=$imports" >> $GITHUB_OUTPUT
+
+      - name: Build import map
+        id: build_import_map
+        run: |
+          # Extract the imports from the previous step's output and read line by line
+          import_lines=$(echo '${{ steps.extract_imports.outputs.imports }}' | jq -r '.[]')
+          import_map="{}"
+
+          # Process each line to extract package information
+          while IFS= read -r line; do
+            # Check if the line matches the expected format with SDKV2_IMPL_PATH
+            if [[ $line =~ ^(.*)"$SDKV2_IMPL_PATH"/(.*)$ ]]; then
+              package_path="${BASH_REMATCH[2]}"
+              package_name=$(basename "$package_path")
+
+              # Log the found package name and its path
+              echo "Found package $package_name in $SDKV2_IMPL_PATH/$package_path"
+
+              # Update the import_map with the new package
+              import_map=$(
+                echo "$import_map" | jq -c --arg key "$package_name" --arg value "$package_path" \
+                '. + {($key): $value}'
+              )
+            fi
+          done <<< "$import_lines"
+
+          # Store the final import_map in the output
+          echo "import_map=$import_map" >> $GITHUB_OUTPUT
+
+      - name: Find entities
+        id: find_entities
+        run: |
+          # Set up variables using outputs from previous steps
+          provider_go_file=${{ steps.find_provider_go_file.outputs.path }}
+          import_map='${{ steps.build_import_map.outputs.import_map }}'
+          entities="[]"
+
+          # Read each line from the awk command output
+          while read -r name type func_with_parentheses; do
+            # Skip if name or func_with_parentheses is empty
+            if [[ -z "$name" || -z "$func_with_parentheses" ]]; then
+              continue
+            fi
+
+            # Extract function name and package name from func_with_parentheses
+            func="${func_with_parentheses%)*}"
+            func="${func##*.}"
+            package_name="${func_with_parentheses%%.*}"
+            # Find the path using the package name from the import map
+            path=$(echo $import_map | jq -r --arg package_name "$package_name" '.[$package_name] // empty')
+
+            # If a path is found, proceed to find the .go file containing the function
+            if [[ -n "$path" ]]; then
+              path="$SDKV2_IMPL_PATH/$path"
+              file=$(find "$path" -type f -name '*.go' -exec grep -l "$func" {} +)
+
+              # If a file is found, add the entity to the entities list
+              if [[ -n "$file" ]]; then
+                echo "Found $type $name in $file"
+                entities=$(
+                  echo "$entities" | jq -c --arg name "$name" --arg type "$type" --arg file "$file" \
+                  '. + [{($name): {("type"): $type, ("file"): $file}}]'
+                )
+              fi
+            fi
+          done < <(awk -v file="$provider_go_file" '
+            # Begin capturing when encountering ResourcesMap or DataSourcesMap
+            /ResourcesMap: map\[string\]\*schema\.Resource{/ { type="resource"; capture = 1; next }
+            /DataSourcesMap: map\[string\]\*schema\.Resource{/ { type="datasource"; capture = 1; next }
+            # Stop capturing after a closing brace
+            capture && /\}/ { capture = 0 }
+            # For each captured line, parse and print the name, type, and function
+            capture && NF {
+                gsub(/[\t "]+/, "")
+                split($0, a, ":")
+                print a[1], type, a[2]
+            }
+          ' "$provider_go_file")
+
+          # Output the entities to the output
+          echo "entities=$entities" >> $GITHUB_OUTPUT
+
+  find_plugin_framework_entities:
+    name: Find Plugin Framework entities
+    runs-on: ubuntu-latest
+    if: >
+      (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip workflows')) ||
+      github.event_name == 'push'
+
+    env:
+      PLUGIN_FRAMEWORK_IMPL_PATH: internal/plugin
+
+    outputs:
+      entities: ${{ steps.find_entities.outputs.entities }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find entities
+        id: find_entities
+        run: |
+          entities="[]" # Initialize an empty JSON array to hold entity details
+
+          # Find all .go files in the specified directory and its subdirectories
+          while IFS= read -r file; do
+            # Extract relevant lines from the file and parse them
+            while IFS=, read -r name type file; do
+              echo "Found $type $name in $file" # Log the found entities
+              # Append the found entity to the entities JSON array
+              entities=$(
+                echo "$entities" | jq -c --arg name "$name" --arg type "$type" --arg file "$file" \
+                '. + [{($name): {("type"): $type, ("file"): $file}}]'
+              )
+            done < <(awk -v file="$file" '
+              /resp\.TypeName\s*=\s*req\.ProviderTypeName\s*\+\s*"/ {
+                match($0, /"(_[^"]+)"/, arr)
+                if (length(arr[1]) > 0) {
+                  type = "datasource"
+                  # Check for specific patterns to determine if the entity is a resource
+                  while((getline line < file) > 0) {
+                    if (line ~ /_ resource\.Resource/) {
+                      type = "resource"
+                      break
+                    }
+                  }
+                  close(file)
+                  # Output the entity name, type, and file in CSV format
+                  print "aiven" arr[1] "," type "," file
+                }
+              }
+            ' "$file")
+          done < <(find "$PLUGIN_FRAMEWORK_IMPL_PATH" -type f -name '*.go')
+
+          echo "entities=$entities" >> $GITHUB_OUTPUT # Output the final entities JSON array to the output
+
+  combine_entities:
+    name: Combine entities
+    runs-on: ubuntu-latest
+
+    needs:
+      - find_sdkv2_entities
+      - find_plugin_framework_entities
+
+    outputs:
+      entities: ${{ steps.combine_entities.outputs.entities }}
+
+    steps:
+      - name: Combine entities
+        id: combine_entities
+        run: |
+          # Initialize an empty JSON array to store entities
+          entities='[]'
+
+          # Read SDKv2 entities from a previous step's output and convert them into an array
+          mapfile -t sdkv2_entities < <(echo '${{ needs.find_sdkv2_entities.outputs.entities }}' | jq -c '.[]')
+
+          # Read plugin framework entities from a previous step's output and convert them into an array
+          mapfile -t plugin_framework_entities < <(
+            echo '${{ needs.find_plugin_framework_entities.outputs.entities }}' | jq -c '.[]'
+          )
+
+          # Define a function to add an entity to the 'entities' JSON array
+          add_entity_to_entities() {
+            local entity_json=$1
+            entities=$(
+              jq -c --argjson entities "$entities" --argjson entity_json "$entity_json" \
+              '$entities + [($entity_json | to_entries | .[0] | {key: .key, value: .value}) | {(.key): .value}]' \
+              <<< "{}"
+            )
+          }
+
+          # Iterate over all entities and add them to the 'entities' JSON array
+          for entity_json in "${sdkv2_entities[@]}" "${plugin_framework_entities[@]}"; do
+            add_entity_to_entities "$entity_json"
+          done
+
+          # Output the 'entities' JSON array
+          echo "entities=$entities" >> $GITHUB_OUTPUT
+
+  find_tests:
+    name: Find tests
+    runs-on: ubuntu-latest
+
+    needs:
+      - combine_entities
+
+    outputs:
+      tests: ${{ steps.find_tests.outputs.tests }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Find tests
+        id: find_tests
+        run: |
+          # Collect changed test files that match a specific pattern
+          mapfile -t changed_test_files < <(
+            git diff "origin/${{ github.base_ref || 'main' }}" --name-only | grep '_test\.go$'
+          )
+          # Collect entities from previous workflow step
+          mapfile -t entities < <(echo '${{ needs.combine_entities.outputs.entities }}' | jq -c '.[]')
+          # Declare an associative array to keep track of entity tests
+          declare -A entity_tests
+
+          # Iterate over changed test files to find related entities
+          for test_file in "${changed_test_files[@]}"; do
+            while IFS= read -r line; do
+              # Check if the line defines a resource or data entity
+              if [[ $line =~ resource\ \"([^\"]+)\" || $line =~ data\ \"([^\"]+)\" ]]; then
+                entity="${BASH_REMATCH[1]}"
+                echo "Found entity $entity in changed test file $test_file"
+                # Add the test file to the entity_tests array for the detected entity
+                entity_tests[$entity]+="$test_file "
+              fi
+            done < "$test_file"
+          done
+
+          # Iterate over entities to check for changes and dependencies
+          for entity in "${entities[@]}"; do
+            name=$(echo "$entity" | jq -r 'keys[0]')
+            type=$(echo "$entity" | jq -r --arg name "$name" '.[$name].type')
+            file=$(echo "$entity" | jq -r --arg name "$name" '.[$name].file')
+            dir=$(dirname "$file")
+
+            # Check if the entity definition file has changed
+            file_changed=$(
+              git diff "origin/${{ github.base_ref || 'main' }}" --name-only |
+              grep -q "^$file$" && echo true || echo false
+            )
+            dep_changed=false
+
+            # Check if there are changes in tests related to the entity
+            if [[ ${entity_tests[$name]+_} ]]; then
+              echo "Test involving $name $type was changed"
+            elif [[ $file_changed == true ]]; then
+              echo "Definition of $name $type was changed"
+            else
+              # Construct the repository URL
+              repo_url="${{ github.server_url }}/${{ github.repository }}"
+              repo_url="${repo_url/https:\/\/}"
+              # List dependencies of the entity and check for changes
+              deps=$(go list -json "./$dir" | jq -r '.Deps[]' | grep -oP "^$repo_url/\K.*")
+
+              for dep in $deps; do
+                if git diff "origin/${{ github.base_ref || 'main' }}" --name-only | grep -q "$dep"; then
+                  echo "Dependency $dep of $name $type changed"
+                  dep_changed=true
+                  break
+                fi
+              done
+            fi
+
+            # If there are changes in the file, dependencies, or related tests, find all relevant test files
+            if [[ $file_changed == true || $dep_changed == true || ${entity_tests[$name]+_} ]]; then
+              pattern=$([[ "$type" == "resource" ]] && echo "resource \"$name\"" || echo "data \"$name\"")
+              while IFS= read -r test_file; do
+                echo "Found test for $name $type in $test_file"
+                entity_tests[$name]+="$test_file "
+              done < <(find internal -type f -name '*_test.go' -exec grep -l "$pattern" {} +)
+            fi  
+          done
+
+          # Compile a unique list of test files to run
+          tests=()
+          for test_files in "${entity_tests[@]}"; do
+            for test_file in $test_files; do
+              [[ ! " ${tests[*]} " =~ " ${test_file} " ]] && tests+=("$test_file")
+            done
+          done
+
+          # Convert the list of tests into a JSON array and add it to the output
+          tests_json=$(printf '%s\n' "${tests[@]}" | jq -R . | jq -s -c .)
+          echo "tests=$tests_json" >> $GITHUB_OUTPUT
+
+  run_tests:
+    name: Run tests
+    runs-on: ubuntu-latest
+    if: ${{ needs.find_tests.outputs.tests != '[]' }}
+
+    needs:
+      - selproj
+      - find_tests
+
+    env:
+      COUNT: 1
+      PARALLEL: 10
+      TIMEOUT: 180m
+
+    strategy:
+      max-parallel: 5
+      matrix:
+        test: ${{ fromJson(needs.find_tests.outputs.tests) }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run tests
+        run: go test ${{ matrix.test }} -v -count $COUNT -parallel $PARALLEL -timeout $TIMEOUT
+        env:
+          TF_ACC: 1
+          CGO_ENABLED: 0
+          AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
+          AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}${{ needs.selproj.outputs.suffix }}
+          AIVEN_ORGANIZATION_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
+          AIVEN_ACCOUNT_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
