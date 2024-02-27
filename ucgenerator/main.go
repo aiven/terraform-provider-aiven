@@ -27,9 +27,10 @@ const (
 )
 
 func main() {
-	var serviceList, integrationList string
+	var serviceList, integrationList, endpointList string
 	flag.StringVar(&serviceList, "excludeServices", "", "Comma separated list of names to exclude from generation")
 	flag.StringVar(&integrationList, "excludeIntegrations", "", "Comma separated list of names to exclude from generation")
+	flag.StringVar(&endpointList, "excludeEndpoints", "", "Comma separated list of names to exclude from generation")
 	flag.Parse()
 
 	err := generate("service", dist.ServiceTypes, strings.Split(serviceList, ","))
@@ -40,6 +41,11 @@ func main() {
 	err = generate("serviceintegration", dist.IntegrationTypes, strings.Split(integrationList, ","))
 	if err != nil {
 		log.Fatalf("generating integrations: %s", err)
+	}
+
+	err = generate("serviceintegrationendpoint", dist.IntegrationEndpointTypes, strings.Split(endpointList, ","))
+	if err != nil {
+		log.Fatalf("generating integration endpoints: %s", err)
 	}
 }
 

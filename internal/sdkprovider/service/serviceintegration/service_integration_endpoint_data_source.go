@@ -14,7 +14,7 @@ func DatasourceServiceIntegrationEndpoint() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceServiceIntegrationEndpointRead,
 		Description: "The Service Integration Endpoint data source provides information about the existing Aiven Service Integration Endpoint.",
-		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenServiceIntegrationEndpointSchema,
+		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenServiceIntegrationEndpointSchema(),
 			"project", "endpoint_name"),
 	}
 }

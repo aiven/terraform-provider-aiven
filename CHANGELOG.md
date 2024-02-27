@@ -14,7 +14,7 @@ nav_order: 1
 <!-- TODO: uncomment when dragonfly is supported -->
 <!-- - Dragonfly support -->
 
-- Use new user config generator to generate service integration configs
+- Use new user config generator to generate service integration and service integration endpoint configs
 - Fix `aiven_kafka_schema` version update
 - Add `external_aws_cloudwatch_logs`, `external_elasticsearch_logs_user_config`, `external_opensearch_logs_user_config`,
   `prometheus_user_config` service integration configs
