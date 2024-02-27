@@ -18,6 +18,7 @@ nav_order: 1
 - Fix `aiven_kafka_schema` version update
 - Add `external_aws_cloudwatch_logs`, `external_elasticsearch_logs_user_config`, `external_opensearch_logs_user_config`,
   `prometheus_user_config` service integration configs
+- Fix `aiven_kafka_schema` Protobuf normalization
 
 ## [4.14.0] - 2024-02-20
 

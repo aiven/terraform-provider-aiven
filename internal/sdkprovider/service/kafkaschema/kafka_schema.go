@@ -20,8 +20,9 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
-// newlineRegExp is a regular expression that matches a newline.
-var newlineRegExp = regexp.MustCompile(`\r?\n`)
+// whitespaceRegExp is a regular expression to match a whitespace, a new line, or a carriage return
+// character in a string. This is used to normalize Protobuf strings to compare them for logical equivalence.
+var whitespaceRegExp = regexp.MustCompile(`\s`)
 
 var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 	"project":      schemautil.CommonSchemaProjectReference,
@@ -100,7 +101,7 @@ func diffSuppressJSONObjectOrProtobufString(k, old, new string, d *schema.Resour
 func normalizeProtobufString(i any) string {
 	v := i.(string)
 
-	return newlineRegExp.ReplaceAllString(v, "")
+	return whitespaceRegExp.ReplaceAllString(v, "")
 }
 
 // normalizeJSONOrProtobufString returns normalized JSON or Protobuf string.
