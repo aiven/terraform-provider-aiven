@@ -165,7 +165,7 @@ func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m inte
 			task := taskI.(*aiven.ServiceTaskResponse)
 			if !*task.Task.Success {
 				return diag.Errorf(
-					"PG service upgrade check error, version upgrade from %s to %s, result: %s",
+					"PG service upgrade task failed when checking version upgrade from %s to %s, result: %s",
 					task.Task.SourcePgVersion, task.Task.TargetPgVersion, task.Task.Result)
 			}
 
