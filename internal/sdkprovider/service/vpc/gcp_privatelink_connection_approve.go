@@ -19,30 +19,29 @@ var aivenGCPPrivatelinkConnectionApprovalSchema = map[string]*schema.Schema{
 	"user_ip_address": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "Privatelink connection user IP address",
+		Description: "The Private Service Connect connection user IP address.",
 	},
 
 	"privatelink_connection_id": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Privatelink connection id",
+		Description: "Aiven internal ID for the private link connection.",
 	},
 	"state": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Privatelink connection state",
+		Description: "The state of the connection.",
 	},
 	"psc_connection_id": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Privatelink connection PSC connection id",
+		Description: "The Google Private Service Connect connection ID.",
 	},
 }
 
 func ResourceGCPPrivatelinkConnectionApproval() *schema.Resource {
 	return &schema.Resource{
-		Description: "The GCP privatelink approve resource waits for an aiven privatelink connection on a " +
-			"service and approves it with associated endpoint IP",
+		Description:   "Approves a Google Private Service Connect connection to an Aiven service with an associated endpoint IP.",
 		CreateContext: resourceGCPPrivatelinkConnectionApprovalUpdate,
 		ReadContext:   resourceGCPPrivatelinkConnectionApprovalRead,
 		UpdateContext: resourceGCPPrivatelinkConnectionApprovalUpdate,

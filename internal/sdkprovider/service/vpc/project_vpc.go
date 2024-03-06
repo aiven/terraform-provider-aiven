@@ -22,13 +22,13 @@ var aivenProjectVPCSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: userconfig.Desc("Defines where the cloud provider and region where the service is hosted in. See the Service resource for additional information.").ForceNew().Build(),
+		Description: userconfig.Desc("The cloud provider and region where the service is hosted in the format `CLOUD_PROVIDER-REGION_NAME`. For example, `google-europe-west1` or `aws-us-east-2`.").ForceNew().Build(),
 	},
 	"network_cidr": {
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: "Network address range used by the VPC like 192.168.0.0/24",
+		Description: "Network address range used by the VPC. For example, `192.168.0.0/24`.",
 	},
 	"state": {
 		Computed:    true,
@@ -39,7 +39,7 @@ var aivenProjectVPCSchema = map[string]*schema.Schema{
 
 func ResourceProjectVPC() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Project VPC resource allows the creation and management of Aiven Project VPCs.",
+		Description:   "Creates and manages a VPC for an Aiven project.",
 		CreateContext: resourceProjectVPCCreate,
 		ReadContext:   resourceProjectVPCRead,
 		DeleteContext: resourceProjectVPCDelete,

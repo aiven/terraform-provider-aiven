@@ -13,10 +13,10 @@ The GCP VPC Peering Connection data source provides information about the existi
 ## Example Usage
 
 ```terraform
-data "aiven_gcp_vpc_peering_connection" "foo" {
+data "aiven_gcp_vpc_peering_connection" "main" {
   vpc_id         = data.aiven_project_vpc.vpc.id
-  gcp_project_id = "xxxx"
-  peer_vpc       = "xxxx"
+  gcp_project_id = "example-project"
+  peer_vpc       = "example-network"
 }
 ```
 
@@ -25,13 +25,13 @@ data "aiven_gcp_vpc_peering_connection" "foo" {
 
 ### Required
 
-- `gcp_project_id` (String) GCP project ID. Changing this property forces recreation of the resource.
-- `peer_vpc` (String) GCP VPC network name. Changing this property forces recreation of the resource.
+- `gcp_project_id` (String) Google Cloud project ID. Changing this property forces recreation of the resource.
+- `peer_vpc` (String) Google Cloud VPC network name. Changing this property forces recreation of the resource.
 - `vpc_id` (String) The VPC the peering connection belongs to. Changing this property forces recreation of the resource.
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `self_link` (String) Computed GCP network peering link
-- `state` (String) State of the peering connection
-- `state_info` (Map of String) State-specific help or error information
+- `self_link` (String) Computed Google Cloud network peering link.
+- `state` (String) State of the peering connection.
+- `state_info` (Map of String) State-specific help or error information.

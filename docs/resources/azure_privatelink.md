@@ -3,22 +3,23 @@
 page_title: "aiven_azure_privatelink Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Azure Privatelink resource allows the creation and management of Aiven Azure Privatelink for a services.
+  Creates and manages an Azure Private Link for selected Aiven services https://aiven.io/docs/platform/howto/use-azure-privatelink in a VPC.
 ---
 
 # aiven_azure_privatelink (Resource)
 
-The Azure Privatelink resource allows the creation and management of Aiven Azure Privatelink for a services.
+Creates and manages an Azure Private Link for [selected Aiven services](https://aiven.io/docs/platform/howto/use-azure-privatelink) in a VPC.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_azure_privatelink" "foo" {
-  project      = data.aiven_project.foo.project
-  service_name = aiven_kafka.bar.service_name
+resource "aiven_azure_privatelink" "main" {
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_kafka.example_kafka.service_name
+
 
   user_subscription_ids = [
-    "xxxxxx-xxxx-xxxx-xxxx-xxxxxxxx"
+    "00000000-0000-0000-0000-000000000000"
   ]
 }
 ```
@@ -30,7 +31,7 @@ resource "aiven_azure_privatelink" "foo" {
 
 - `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `user_subscription_ids` (Set of String) A List of allowed Subscription IDs. Maximum length: `16`.
+- `user_subscription_ids` (Set of String) A list of allowed subscription IDs. Maximum length: `16`.
 
 ### Optional
 
@@ -38,11 +39,11 @@ resource "aiven_azure_privatelink" "foo" {
 
 ### Read-Only
 
-- `azure_service_alias` (String) Azure Privatelink service alias
-- `azure_service_id` (String) Azure Privatelink service ID
+- `azure_service_alias` (String) The Azure Private Link service alias.
+- `azure_service_id` (String) The Azure Private Link service ID.
 - `id` (String) The ID of this resource.
-- `message` (String) Printable result of the Azure Privatelink request
-- `state` (String) Privatelink resource state
+- `message` (String) Printable result of the Azure Private Link request.
+- `state` (String) The state of the Private Link resource.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
@@ -60,5 +61,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_azure_privatelink.foo project/service_name
+terraform import aiven_azure_privatelink.main PROJECT/SERVICE_NAME
 ```

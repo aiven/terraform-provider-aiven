@@ -1,1 +1,1 @@
-terraform import aiven_project_vpc.myvpc project/id
+terraform import aiven_project_vpc.example_vpc PROJECT/ID

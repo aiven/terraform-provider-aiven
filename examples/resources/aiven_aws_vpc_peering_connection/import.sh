@@ -1,1 +1,1 @@
-terraform import aiven_aws_vpc_peering_connection.foo project_name/vpc_id/aws_account_id/aws_vpc_id/aws_vpc_region
+terraform import aiven_aws_vpc_peering_connection.aws_to_aiven_peering PROJECT/VPC_ID/AWS_ACCOUNT_ID/AWS_VPC_ID/AWS_VPC_REGION

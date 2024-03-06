@@ -21,24 +21,23 @@ var aivenGCPPrivatelinkSchema = map[string]*schema.Schema{
 	"message": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Printable result of the GCP Privatelink request",
+		Description: "Printable result of the Google Cloud Private Service Connect request.",
 	},
 	"state": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Privatelink resource state",
+		Description: "The state of the Private Service Connect resource.",
 	},
 	"google_service_attachment": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Privatelink resource Google Service Attachment",
+		Description: "Google Private Service Connect service attachment.",
 	},
 }
 
 func ResourceGCPPrivatelink() *schema.Resource {
 	return &schema.Resource{
-		Description: "The GCP Privatelink resource allows the creation and management of Aiven GCP Privatelink" +
-			" for a services.",
+		Description:   "Creates and manages a Google Private Service Connect for an Aiven service in a VPC.",
 		CreateContext: resourceGCPPrivatelinkCreate,
 		ReadContext:   resourceGCPPrivatelinkRead,
 		DeleteContext: resourceGCPPrivatelinkDelete,

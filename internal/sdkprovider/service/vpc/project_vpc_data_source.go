@@ -26,13 +26,13 @@ func DatasourceProjectVPC() *schema.Resource {
 		},
 		"cloud_name": {
 			Type:          schema.TypeString,
-			Description:   "Defines where the cloud provider and region where the service is hosted in. See the Service resource for additional information.",
+			Description:   "The cloud provider and region where the service is hosted in the format `CLOUD_PROVIDER-REGION_NAME`. For example, `google-europe-west1` or `aws-us-east-2`.",
 			Optional:      true,
 			ConflictsWith: []string{"vpc_id"},
 		},
 		"vpc_id": {
 			Type:          schema.TypeString,
-			Description:   "ID of the VPC. This can be used to filter out the specific VPC if there are more than one datasource returned.",
+			Description:   "The ID of the VPC. This can be used to filter out the other VPCs if there are more than one for the project and cloud.",
 			Optional:      true,
 			ConflictsWith: []string{"project", "cloud_name"},
 			ValidateDiagFunc: func(i interface{}, _ cty.Path) diag.Diagnostics {
@@ -46,7 +46,7 @@ func DatasourceProjectVPC() *schema.Resource {
 		"network_cidr": {
 			Computed:    true,
 			Type:        schema.TypeString,
-			Description: "Network address range used by the VPC like 192.168.0.0/24",
+			Description: "Network address range used by the VPC. For example, `192.168.0.0/24`.",
 		},
 		"state": {
 			Computed:    true,
@@ -57,7 +57,7 @@ func DatasourceProjectVPC() *schema.Resource {
 
 	return &schema.Resource{
 		ReadContext: datasourceProjectVPCRead,
-		Description: "The Project VPC data source provides information about the existing Aiven Project VPC.",
+		Description: "Gets information about the VPC for an Aiven project.",
 		Schema:      aivenProjectVPCDataSourceSchema,
 	}
 }

@@ -19,7 +19,7 @@ var aivenAWSVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		ForceNew:     true,
 		Required:     true,
 		Type:         schema.TypeString,
-		Description:  userconfig.Desc("The VPC the peering connection belongs to.").ForceNew().Build(),
+		Description:  userconfig.Desc("The ID of the Aiven VPC.").ForceNew().Build(),
 		ValidateFunc: validateVPCID,
 	},
 	"aws_account_id": {
@@ -41,28 +41,28 @@ var aivenAWSVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: func(_, _, new string, _ *schema.ResourceData) bool {
 			return new == ""
 		},
-		Description: userconfig.Desc("AWS region of the peered VPC (if not in the same region as Aiven VPC).").ForceNew().Build(),
+		Description: userconfig.Desc("The AWS region of the peered VPC, if different from the Aiven VPC region.").ForceNew().Build(),
 	},
 	"state": {
 		Computed:    true,
 		Type:        schema.TypeString,
-		Description: "State of the peering connection",
+		Description: "The state of the peering connection.",
 	},
 	"state_info": {
 		Computed:    true,
 		Type:        schema.TypeMap,
-		Description: "State-specific help or error information",
+		Description: "State-specific help or error information.",
 	},
 	"aws_vpc_peering_connection_id": {
 		Computed:    true,
 		Type:        schema.TypeString,
-		Description: "AWS VPC peering connection ID",
+		Description: "The ID of the AWS VPC peering connection.",
 	},
 }
 
 func ResourceAWSVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The AWS VPC Peering Connection resource allows the creation and management of Aiven AWS VPC Peering Connections.",
+		Description:   "Creates and manages an AWS VPC peering connection with an Aiven VPC.",
 		CreateContext: resourceAWSVPCPeeringConnectionCreate,
 		ReadContext:   resourceAWSVPCPeeringConnectionRead,
 		DeleteContext: resourceAWSVPCPeeringConnectionDelete,
