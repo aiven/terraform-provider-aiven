@@ -48,6 +48,12 @@ func Expand(kind string, s *schema.Schema, d *schema.ResourceData) (map[string]a
 	}
 
 	renameAliases(dto)
+
+if v, ok := dto["ip_filter"]; ok {
+list, ok := v.([]any)
+if ok && len(list) == 0 && os.Getenv("AIVEN_FORCE_IP_FILTER_CLEAN") != "" {
+return nil, fmt.Errorf("ip_filter will be deleted. If this is not expected, then please create an issue on GitHub. Otherwise provide AIVEN_FORCE_IP_FILTER_CLEAN=1")
+}
 	return dto, nil
 }
 
