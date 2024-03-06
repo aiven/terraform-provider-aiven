@@ -17,6 +17,7 @@ package converters
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -48,6 +49,13 @@ func Expand(kind string, s *schema.Schema, d *schema.ResourceData) (map[string]a
 	}
 
 	renameAliases(dto)
+
+	if v, ok := dto["ip_filter"]; ok {
+		list, ok := v.([]any)
+		if ok && len(list) == 0 && os.Getenv("AIVEN_FORCE_IP_FILTER_PURGE") != "1" {
+			return nil, fmt.Errorf("ip_filter list will be purged. If this is not expected, then please create an issue on GitHub. Otherwise provide AIVEN_FORCE_IP_FILTER_PURGE=1")
+		}
+	}
 	return dto, nil
 }
 
