@@ -189,6 +189,7 @@ Read-Only:
 - `ism_history_rollover_check_period` (Number)
 - `ism_history_rollover_retention_period` (Number)
 - `override_main_response_version` (Boolean)
+- `plugins_alerting_filter_by_backend_roles` (Boolean)
 - `reindex_remote_whitelist` (List of String)
 - `script_max_compilations_rate` (String)
 - `search_max_buckets` (Number)
