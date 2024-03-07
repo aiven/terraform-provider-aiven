@@ -424,6 +424,11 @@ func opensearchUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
+					"plugins_alerting_filter_by_backend_roles": {
+						Description: "Enable or disable filtering of alerting by backend roles. Requires Security plugin. Defaults to false.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"reindex_remote_whitelist": {
 						Description: "Whitelisted addresses for reindexing. Changing this value will cause all OpenSearch instances to restart.",
 						Elem: &schema.Schema{
