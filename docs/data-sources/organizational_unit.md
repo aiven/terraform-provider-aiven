@@ -3,19 +3,19 @@
 page_title: "aiven_organizational_unit Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Organizational Unit data source provides information about the existing Aiven Organizational Unit.
+  Gets information about an organizational unit.
 ---
 
 # aiven_organizational_unit (Data Source)
 
-The Organizational Unit data source provides information about the existing Aiven Organizational Unit.
+Gets information about an organizational unit.
 
 ## Example Usage
 
 ```terraform
-data "aiven_organizational_unit" "organizational_unit1" {
-  name      = "<ORGANIZATIONAL_UNIT_NAME>"
-  parent_id = "<ORGANIZATION_ID>"
+data "aiven_organizational_unit" "example_unit" {
+  name      = "Example organizational unit"
+  parent_id = aiven_organization.main.id
 }
 ```
 
@@ -24,12 +24,12 @@ data "aiven_organizational_unit" "organizational_unit1" {
 
 ### Required
 
-- `name` (String) Organizational Unit name
+- `name` (String) The name of the organizational unit.
 
 ### Read-Only
 
-- `create_time` (String) Time of creation
+- `create_time` (String) Time of creation.
 - `id` (String) The ID of this resource.
-- `parent_id` (String) Parent ID
-- `tenant_id` (String) Tenant ID
-- `update_time` (String) Time of last update
+- `parent_id` (String) The ID of the organization that the unit is created in.
+- `tenant_id` (String) Tenant ID.
+- `update_time` (String) Time of last update.

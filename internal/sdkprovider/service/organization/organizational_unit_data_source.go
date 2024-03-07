@@ -13,9 +13,8 @@ import (
 func DatasourceOrganizationalUnit() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceOrganizationalUnitRead,
-		Description: "The Organizational Unit data source provides information about the existing Aiven " +
-			"Organizational Unit.",
-		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenOrganizationalUnitSchema, "name"),
+		Description: "Gets information about an organizational unit.",
+		Schema:      schemautil.ResourceSchemaAsDatasourceSchema(aivenOrganizationalUnitSchema, "name"),
 	}
 }
 
