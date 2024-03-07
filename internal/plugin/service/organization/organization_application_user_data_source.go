@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 var (
@@ -67,22 +68,28 @@ func (r *organizationApplicationUserDataSource) Schema(
 	resp *datasource.SchemaResponse,
 ) {
 	resp.Schema = schema.Schema{
-		Description: "Retrieves information about an organization application user from Aiven.",
+		Description: userconfig.
+			Desc(
+				"Gets information about an application user.",
+			).
+			MarkAsDataSource().
+			AvailabilityType(userconfig.Limited).
+			Build(),
 		Attributes: map[string]schema.Attribute{
 			"organization_id": schema.StringAttribute{
-				Description: "Identifier of the organization the application user belongs to.",
+				Description: "The ID of the organization the application user belongs to.",
 				Required:    true,
 			},
 			"user_id": schema.StringAttribute{
-				Description: "Identifier of the organization application user.",
+				Description: "The ID of the application user.",
 				Required:    true,
 			},
 			"name": schema.StringAttribute{
-				Description: "Name of the organization application user.",
+				Description: "Name of the application user.",
 				Computed:    true,
 			},
 			"email": schema.StringAttribute{
-				Description: "Email of the organization application user.",
+				Description: "The auto-generated email address of the application user.",
 				Computed:    true,
 			},
 		},
