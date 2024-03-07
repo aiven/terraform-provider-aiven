@@ -6453,6 +6453,11 @@ func ServiceTypeOpensearch() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
+				"plugins_alerting_filter_by_backend_roles": {
+					Description: "Enable or disable filtering of alerting by backend roles. Requires Security plugin. Defaults to false.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
 				"reindex_remote_whitelist": {
 					Description: "Whitelisted addresses for reindexing. Changing this value will cause all OpenSearch instances to restart.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
@@ -6972,6 +6977,11 @@ func ServiceTypeOpensearch() *schema.Schema {
 				},
 				"override_main_response_version": {
 					Description: "Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				},
+				"plugins_alerting_filter_by_backend_roles": {
+					Description: "Enable or disable filtering of alerting by backend roles. Requires Security plugin. Defaults to false.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				},
