@@ -52,7 +52,7 @@ func Expand(kind string, s *schema.Schema, d *schema.ResourceData) (map[string]a
 
 	// TODO: Move to a validation part of the schema.
 	if v, ok := dto["ip_filter"].([]any); ok && len(v) == 0 {
-		if _, ok := os.LookupEnv("AIVEN_ALLOW_IP_FILTER_PURGE"); ok {
+		if _, ok := os.LookupEnv("AIVEN_ALLOW_IP_FILTER_PURGE"); !ok {
 			return nil, fmt.Errorf(
 				"ip_filter list is empty, but AIVEN_ALLOW_IP_FILTER_PURGE is not set. Please set " +
 					"AIVEN_ALLOW_IP_FILTER_PURGE to confirm that you want to remove all IP filters, which is going " +
