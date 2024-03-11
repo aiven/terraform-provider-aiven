@@ -50,10 +50,14 @@ func Expand(kind string, s *schema.Schema, d *schema.ResourceData) (map[string]a
 
 	renameAliases(dto)
 
-	if v, ok := dto["ip_filter"]; ok {
-		list, ok := v.([]any)
-		if ok && len(list) == 0 && os.Getenv("AIVEN_FORCE_IP_FILTER_PURGE") != "1" {
-			return nil, fmt.Errorf("ip_filter list will be purged. If this is not expected, then please create an issue on GitHub. Otherwise provide AIVEN_FORCE_IP_FILTER_PURGE=1")
+	// TODO: Move to a validation part of the schema.
+	if v, ok := dto["ip_filter"].([]any); ok && len(v) == 0 {
+		if _, ok := os.LookupEnv("AIVEN_ALLOW_IP_FILTER_PURGE"); ok {
+			return nil, fmt.Errorf(
+				"ip_filter list is empty, but AIVEN_ALLOW_IP_FILTER_PURGE is not set. Please set " +
+					"AIVEN_ALLOW_IP_FILTER_PURGE to confirm that you want to remove all IP filters, which is going " +
+					"to block all traffic to the service",
+			)
 		}
 	}
 	return dto, nil
