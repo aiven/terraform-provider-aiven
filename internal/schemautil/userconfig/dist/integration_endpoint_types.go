@@ -345,6 +345,11 @@ func IntegrationEndpointTypeExternalOpensearchLogs() *schema.Schema {
 // IntegrationEndpointTypeExternalPostgresql is a generated function returning the schema of the external_postgresql IntegrationEndpointType.
 func IntegrationEndpointTypeExternalPostgresql() *schema.Schema {
 	s := map[string]*schema.Schema{
+		"default_database": {
+			Description: "Default database.",
+			Optional:    true,
+			Type:        schema.TypeString,
+		},
 		"host": {
 			Description: "Hostname or IP address of the server.",
 			Required:    true,

@@ -176,6 +176,7 @@ Required:
 
 Optional:
 
+- `default_database` (String) Default database.
 - `password` (String, Sensitive) Password.
 - `ssl_client_certificate` (String) Client certificate.
 - `ssl_client_key` (String) Client key.
