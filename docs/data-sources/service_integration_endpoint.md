@@ -155,6 +155,7 @@ Read-Only:
 
 Read-Only:
 
+- `default_database` (String)
 - `host` (String)
 - `password` (String)
 - `port` (Number)

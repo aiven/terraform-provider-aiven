@@ -462,6 +462,89 @@ func pgUserConfig() *schema.Schema {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"11", "12", "13", "14", "15", "10", "16"}, false),
 			},
+			"pgaudit": {
+				Description: "System-wide settings for the pgaudit extension",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"feature_enabled": {
+						Description: "Enable pgaudit extension. When enabled, pgaudit extension will be automatically installed.Otherwise, extension will be uninstalled but auditing configurations will be preserved. The default value is `false`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"log": {
+						Description: "Specifies which classes of statements will be logged by session audit logging.",
+						Elem: &schema.Schema{
+							Type:         schema.TypeString,
+							ValidateFunc: validation.StringInSlice([]string{"all", "ddl", "function", "misc", "misc_set", "read", "role", "write"}, false),
+						},
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"log_catalog": {
+						Description: "Specifies that session logging should be enabled in the casewhere all relations in a statement are in pg_catalog. The default value is `true`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"log_client": {
+						Description: "Specifies whether log messages will be visible to a client process such as psql. The default value is `false`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"log_level": {
+						Description:  "Specifies the log level that will be used for log entries. The default value is `log`.",
+						Optional:     true,
+						Type:         schema.TypeString,
+						ValidateFunc: validation.StringInSlice([]string{"debug1", "debug2", "debug3", "debug4", "debug5", "info", "notice", "warning", "log"}, false),
+					},
+					"log_max_string_length": {
+						Description: "Crop parameters representation and whole statements if they exceed this threshold. A (default) value of -1 disable the truncation. The default value is `-1`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"log_nested_statements": {
+						Description: "This GUC allows to turn off logging nested statements, that is, statements that are executed as part of another ExecutorRun. The default value is `true`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"log_parameter": {
+						Description: "Specifies that audit logging should include the parameters that were passed with the statement. The default value is `false`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"log_parameter_max_size": {
+						Description: "Specifies that parameter values longer than this setting (in bytes) should not be logged, but replaced with <long param suppressed>. The default value is `0`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"log_relation": {
+						Description: "Specifies whether session audit logging should create a separate log entry for each relation (TABLE, VIEW, etc.) referenced in a SELECT or DML statement. The default value is `false`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"log_rows": {
+						Description: "Specifies that audit logging should include the rows retrieved or affected by a statement. When enabled the rows field will be included after the parameter field. The default value is `false`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"log_statement": {
+						Description: "Specifies whether logging will include the statement text and parameters (if enabled). The default value is `true`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"log_statement_once": {
+						Description: "Specifies whether logging will include the statement text and parameters with the first log entry for a statement/substatement combination or with every entry. The default value is `false`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"role": {
+						Description: "Specifies the master role to use for object audit logging.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+				}},
+				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
 			"pgbouncer": {
 				Description: "PGBouncer connection pooling settings",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{

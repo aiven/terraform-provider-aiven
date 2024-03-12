@@ -14,6 +14,11 @@ func externalPostgresqlUserConfig() *schema.Schema {
 		Description:      "ExternalPostgresql user configurable settings",
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+			"default_database": {
+				Description: "Default database.",
+				Optional:    true,
+				Type:        schema.TypeString,
+			},
 			"host": {
 				Description: "Hostname or IP address of the server.",
 				Required:    true,
