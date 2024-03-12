@@ -109,7 +109,7 @@ Read-Only:
 - `external_image_storage` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--external_image_storage))
 - `google_analytics_ua_id` (String)
 - `ip_filter` (Set of String)
-- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--ip_filter_object))
+- `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--grafana_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
 - `metrics_enabled` (Boolean)
 - `oauth_allow_insecure_email_lookup` (Boolean)

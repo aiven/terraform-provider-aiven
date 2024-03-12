@@ -22,6 +22,7 @@ nav_order: 1
 - Add `AIVEN_ALLOW_IP_FILTER_PURGE` environment variable to allow purging of IP filters. This is a safety feature to
   prevent accidental purging of IP filters, which can lead to loss of access to services. To enable purging, set the
   environment variable to any value before running Terraform commands.
+- Use `TypeSet` for `ip_filter_object`
 
 ## [4.14.0] - 2024-02-20
 

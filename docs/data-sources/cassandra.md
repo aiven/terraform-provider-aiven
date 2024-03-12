@@ -75,7 +75,7 @@ Read-Only:
 - `cassandra` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--cassandra))
 - `cassandra_version` (String)
 - `ip_filter` (Set of String)
-- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--ip_filter_object))
+- `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
 - `migrate_sstableloader` (Boolean)
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--private_access))
