@@ -15,6 +15,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 var (
@@ -78,7 +79,13 @@ func (r *organizationApplicationUser) Schema(
 	resp *resource.SchemaResponse,
 ) {
 	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
-		Description: util.BetaDescription("Creates and manages an organization application user. Application users can be used for programmatic access to the platform. This features is in the limited availability stage. Contact sales@aiven.io to try this feature."),
+		Description: userconfig.
+			Desc(
+				"Creates and manages an organization application user. Application users can be used for " +
+					"programmatic access to the platform.",
+			).
+			AvailabilityType(userconfig.Limited).
+			Build(),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description: "Compound identifier of the organization application user.",

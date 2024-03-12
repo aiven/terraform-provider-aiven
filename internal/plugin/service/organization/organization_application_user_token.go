@@ -17,6 +17,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 var (
@@ -108,7 +109,9 @@ func (r *organizationApplicationUserToken) Schema(
 	resp *resource.SchemaResponse,
 ) {
 	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
-		Description: util.BetaDescription("Creates and manages an organization application user token in Aiven."),
+		Description: userconfig.Desc("Creates and manages an organization application user token in Aiven.").
+			AvailabilityType(userconfig.Beta).
+			Build(),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description: "Compound identifier of the organization application user token.",

@@ -4,16 +4,15 @@ page_title: "aiven_organization_application_user_token Resource - terraform-prov
 subcategory: ""
 description: |-
   Creates and manages an organization application user token in Aiven.
-  This resource is in beta and may change without notice. To use this resource,
-  set the PROVIDER_AIVEN_ENABLE_BETA environment variable to true.
+  This resource is in the beta stage and may change without notice. Set
+  the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
 ---
 
 # aiven_organization_application_user_token (Resource)
 
-Creates and manages an organization application user token in Aiven.
-
-**This resource is in beta and may change without notice.** To use this resource, 
-set the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to true.
+Creates and manages an organization application user token in Aiven. 
+**This resource is in the beta stage and may change without notice.** Set
+the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 
 

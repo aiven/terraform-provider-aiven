@@ -5,21 +5,75 @@ import (
 	"strings"
 )
 
+// EntityType is a type that represents the type of an entity.
+type EntityType int
+
+const (
+	// Resource is a constant that represents the resource entity type.
+	Resource EntityType = iota
+	// DataSource is a constant that represents the data source entity type.
+	DataSource
+)
+
+// String is a function that returns the string representation of the entity type.
+func (et EntityType) String() string {
+	return [...]string{"resource", "datasource"}[et]
+}
+
+// AvailabilityType is a type that represents the availability type of an entity.
+type AvailabilityType int
+
+const (
+	// Beta is a constant that represents the beta availability type.
+	Beta AvailabilityType = iota + 1
+	// Limited is a constant that represents the limited availability type.
+	Limited
+)
+
 // DescriptionBuilder is a helper to build complex descriptions in a consistent way.
 type DescriptionBuilder struct {
-	base                                string
+	// entityType is the type of the entity that the description is for.
+	entityType EntityType
+	// base is the base of the description.
+	base string
+	// availabilityType is the availability type of the entity that the description is for.
+	availabilityType AvailabilityType
+	// withForcedFirstLetterCapitalization is a flag that indicates if the first letter should be capitalized.
 	withForcedFirstLetterCapitalization bool
-	withPossibleValues                  []any
-	withRequiredWith                    []string
-	withMaxLen                          int
-	withDefaultValue                    any
-	withUseReference                    bool
-	withForceNew                        bool
+	// withPossibleValues is a flag that indicates if the possible values should be included.
+	withPossibleValues []any
+	// withRequiredWith is a flag that indicates if the required with should be included.
+	withRequiredWith []string
+	// withMaxLen is a flag that indicates if the maximum length should be included.
+	withMaxLen int
+	// withDefaultValue is a flag that indicates if the default value should be included.
+	withDefaultValue any
+	// withUseReference is a flag that indicates if the reference should be used.
+	withUseReference bool
+	// withForceNew is a flag that indicates if the force new should be included.
+	withForceNew bool
 }
 
 // Desc is a function that creates a new DescriptionBuilder.
 func Desc(base string) *DescriptionBuilder {
 	return &DescriptionBuilder{base: base}
+}
+
+// MarkAsDataSource is a function that marks the entity whose description is being built as a data source.
+//
+// All entities are considered resources by default, so this function is only needed when the entity is a data source.
+//
+// If you want to mark the entity as a resource, you don't need to call any additional functions, and you can proceed
+// further with the description building.
+func (db *DescriptionBuilder) MarkAsDataSource() *DescriptionBuilder {
+	db.entityType = DataSource
+	return db
+}
+
+// AvailabilityType is a function that sets the availabilityType field.
+func (db *DescriptionBuilder) AvailabilityType(t AvailabilityType) *DescriptionBuilder {
+	db.availabilityType = t
+	return db
 }
 
 // ForceFirstLetterCapitalization is a function that sets the withForcedFirstLetterCapitalization flag.
@@ -81,6 +135,31 @@ func (db *DescriptionBuilder) Build() string {
 		builder.WriteString(".")
 	}
 
+	if db.availabilityType != 0 {
+		builder.WriteRune(' ')
+
+		const availabilityCommonPart = `
+**This %[1]s is in the %[2]s stage and may change without notice.** %[3]s
+the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s.`
+
+		switch db.availabilityType {
+		case Beta:
+			builder.WriteString(fmt.Sprintf(
+				availabilityCommonPart,
+				db.entityType.String(),
+				"beta",
+				"Set",
+			))
+		case Limited:
+			builder.WriteString(fmt.Sprintf(
+				availabilityCommonPart,
+				db.entityType.String(),
+				"limited availability",
+				"\nTo enable this feature, contact the [sales team](mailto:sales@aiven.io). After it's enabled, set",
+			))
+		}
+	}
+
 	if db.withPossibleValues != nil {
 		builder.WriteRune(' ')
 		builder.WriteString("The possible values are ")
@@ -130,7 +209,9 @@ func (db *DescriptionBuilder) Build() string {
 
 	if db.withForceNew {
 		builder.WriteRune(' ')
-		builder.WriteString("Changing this property forces recreation of the resource.")
+		builder.WriteString(fmt.Sprintf(
+			"Changing this property forces recreation of the %s.", db.entityType.String(),
+		))
 	}
 
 	return builder.String()
