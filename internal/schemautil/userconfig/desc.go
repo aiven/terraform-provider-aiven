@@ -17,7 +17,7 @@ const (
 
 // String is a function that returns the string representation of the entity type.
 func (et EntityType) String() string {
-	return [...]string{"resource", "datasource"}[et]
+	return [...]string{"resource", "data source"}[et]
 }
 
 // AvailabilityType is a type that represents the availability type of an entity.
