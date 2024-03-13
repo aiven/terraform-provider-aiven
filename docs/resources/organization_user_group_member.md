@@ -4,16 +4,15 @@ page_title: "aiven_organization_user_group_member Resource - terraform-provider-
 subcategory: ""
 description: |-
   Adds and manages users in a user group https://aiven.io/docs/platform/concepts/projects_accounts_access#groups.
-  This resource is in beta and may change without notice. To use this resource,
-  set the PROVIDER_AIVEN_ENABLE_BETA environment variable to true.
+  This resource is in the beta stage and may change without notice. Set
+  the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
 ---
 
 # aiven_organization_user_group_member (Resource)
 
-Adds and manages users in a [user group](https://aiven.io/docs/platform/concepts/projects_accounts_access#groups).
-
-**This resource is in beta and may change without notice.** To use this resource, 
-set the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to true.
+Adds and manages users in a [user group](https://aiven.io/docs/platform/concepts/projects_accounts_access#groups). 
+**This resource is in the beta stage and may change without notice.** Set
+the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 ## Example Usage
 

@@ -3,19 +3,16 @@
 page_title: "aiven_organization_group_project Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Adds and manages a group https://aiven.io/docs/platform/concepts/projects_accounts_access#groups
-              of users as members of a project https://aiven.io/docs/platform/reference/project-member-privileges.
-  This resource is in beta and may change without notice. To use this resource,
-  set the PROVIDER_AIVEN_ENABLE_BETA environment variable to true.
+  Adds and manages a group https://aiven.io/docs/platform/concepts/projects_accounts_access#groups of users as members of a project https://aiven.io/docs/platform/reference/project-member-privileges.
+  This resource is in the beta stage and may change without notice. Set
+  the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
 ---
 
 # aiven_organization_group_project (Resource)
 
-Adds and manages a [group](https://aiven.io/docs/platform/concepts/projects_accounts_access#groups) 
-			of users as [members of a project](https://aiven.io/docs/platform/reference/project-member-privileges).
-
-**This resource is in beta and may change without notice.** To use this resource, 
-set the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to true.
+Adds and manages a [group](https://aiven.io/docs/platform/concepts/projects_accounts_access#groups) of users as [members of a project](https://aiven.io/docs/platform/reference/project-member-privileges). 
+**This resource is in the beta stage and may change without notice.** Set
+the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 ## Example Usage
 

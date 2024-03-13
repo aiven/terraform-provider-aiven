@@ -3,17 +3,18 @@
 page_title: "aiven_organization_application_user Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an organization application user. Application users can be used for programmatic access to the platform. This features is in the limited availability stage. Contact sales@aiven.io to try this feature.
-  This resource is in beta and may change without notice. To use this resource,
-  set the PROVIDER_AIVEN_ENABLE_BETA environment variable to true.
+  Creates and manages an organization application user. Application users can be used for programmatic access to the platform.
+  This resource is in the limited availability stage and may change without notice.
+  To enable this feature, contact the sales team mailto:sales@aiven.io. After it's enabled, set
+  the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
 ---
 
 # aiven_organization_application_user (Resource)
 
-Creates and manages an organization application user. Application users can be used for programmatic access to the platform. This features is in the limited availability stage. Contact sales@aiven.io to try this feature.
-
-**This resource is in beta and may change without notice.** To use this resource, 
-set the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to true.
+Creates and manages an organization application user. Application users can be used for programmatic access to the platform. 
+**This resource is in the limited availability stage and may change without notice.** 
+To enable this feature, contact the [sales team](mailto:sales@aiven.io). After it's enabled, set
+the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 
 

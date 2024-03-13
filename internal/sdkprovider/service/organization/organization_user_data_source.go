@@ -18,9 +18,12 @@ func DatasourceOrganizationUser() *schema.Resource {
 			" Organization User.",
 		Schema: map[string]*schema.Schema{
 			"organization_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: userconfig.Desc("The unique organization ID").Build(),
+				Type:     schema.TypeString,
+				Required: true,
+				Description: userconfig.
+					Desc("The unique organization ID").
+					MarkAsDataSource().
+					Build(),
 			},
 			"user_id": {
 				Type:        schema.TypeString,
