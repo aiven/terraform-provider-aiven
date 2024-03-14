@@ -6,11 +6,10 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 func cassandraSchema() map[string]*schema.Schema {
-	s := schemautil.ServiceCommonSchema()
+	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeCassandra)
 	s[schemautil.ServiceTypeCassandra] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
@@ -19,8 +18,6 @@ func cassandraSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	s[schemautil.ServiceTypeCassandra+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypeCassandra)
-
 	return s
 }
 

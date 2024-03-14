@@ -6,11 +6,10 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 func aivenMySQLSchema() map[string]*schema.Schema {
-	schemaMySQL := schemautil.ServiceCommonSchema()
+	schemaMySQL := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeMySQL)
 	schemaMySQL[schemautil.ServiceTypeMySQL] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
@@ -19,8 +18,6 @@ func aivenMySQLSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	schemaMySQL[schemautil.ServiceTypeMySQL+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypeMySQL)
-
 	return schemaMySQL
 }
 func ResourceMySQL() *schema.Resource {

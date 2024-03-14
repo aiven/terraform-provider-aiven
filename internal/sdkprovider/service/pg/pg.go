@@ -13,12 +13,11 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 func aivenPGSchema() map[string]*schema.Schema {
-	schemaPG := schemautil.ServiceCommonSchema()
-	schemaPG[schemautil.ServiceTypePG] = &schema.Schema{
+	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypePG)
+	s[schemautil.ServiceTypePG] = &schema.Schema{
 		Type:        schema.TypeList,
 		MaxItems:    1,
 		Computed:    true,
@@ -78,9 +77,7 @@ func aivenPGSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	schemaPG[schemautil.ServiceTypePG+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypePG)
-
-	return schemaPG
+	return s
 }
 
 func ResourcePG() *schema.Resource {

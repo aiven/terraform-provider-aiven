@@ -13,8 +13,6 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/converters"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/serviceintegrationendpoint"
@@ -22,15 +20,6 @@ import (
 
 func hasEndpointConfig(kind string) bool {
 	return slices.Contains(serviceintegrationendpoint.UserConfigTypes(), kind)
-}
-
-func endpointUserConfigKey(kind string) string {
-	switch kind {
-	case "external_google_cloud_bigquery", "external_postgresql":
-		// legacy fields
-		return kind
-	}
-	return kind + "_user_config"
 }
 
 func aivenServiceIntegrationEndpointSchema() map[string]*schema.Schema {
@@ -65,7 +54,7 @@ func aivenServiceIntegrationEndpointSchema() map[string]*schema.Schema {
 
 	// Adds user configs
 	for _, k := range serviceintegrationendpoint.UserConfigTypes() {
-		s[endpointUserConfigKey(k)] = serviceintegrationendpoint.GetUserConfig(k)
+		converters.SetUserConfig(converters.ServiceIntegrationEndpointUserConfig, k, s)
 	}
 	return s
 }
@@ -96,14 +85,17 @@ func resourceServiceIntegrationEndpointCreate(ctx context.Context, d *schema.Res
 	req := aiven.CreateServiceIntegrationEndpointRequest{
 		EndpointName: d.Get("endpoint_name").(string),
 		EndpointType: endpointType,
+		UserConfig:   make(map[string]interface{}),
 	}
 
 	if hasEndpointConfig(endpointType) {
-		uc, err := converters.Expand(endpointType, serviceintegrationendpoint.GetUserConfig(endpointType), d)
+		uc, err := converters.Expand(converters.ServiceIntegrationEndpointUserConfig, endpointType, d)
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		req.UserConfig = uc
+		if uc != nil {
+			req.UserConfig = uc
+		}
 	}
 
 	endpoint, err := client.ServiceIntegrationEndpoints.Create(ctx, projectName, req)
@@ -147,20 +139,21 @@ func resourceServiceIntegrationEndpointUpdate(ctx context.Context, d *schema.Res
 	}
 
 	endpointType := d.Get("endpoint_type").(string)
-
-	userConfig, err := apiconvert.ToAPI(userconfig.IntegrationEndpointTypes, endpointType, d)
-	if err != nil {
-		return diag.FromErr(err)
+	req := aiven.UpdateServiceIntegrationEndpointRequest{
+		UserConfig: make(map[string]interface{}),
 	}
 
-	_, err = client.ServiceIntegrationEndpoints.Update(
-		ctx,
-		projectName,
-		endpointID,
-		aiven.UpdateServiceIntegrationEndpointRequest{
-			UserConfig: userConfig,
-		},
-	)
+	if hasEndpointConfig(endpointType) {
+		uc, err := converters.Expand(converters.ServiceIntegrationEndpointUserConfig, endpointType, d)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if uc != nil {
+			req.UserConfig = uc
+		}
+	}
+
+	_, err = client.ServiceIntegrationEndpoints.Update(ctx, projectName, endpointID, req)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -213,14 +206,9 @@ func copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(
 	}
 
 	if hasEndpointConfig(endpointType) {
-		userConfig, err := converters.Flatten(endpointType, serviceintegrationendpoint.GetUserConfig(endpointType), d, endpoint.UserConfig)
+		err := converters.Flatten(converters.ServiceIntegrationEndpointUserConfig, endpointType, d, endpoint.UserConfig)
 		if err != nil {
 			return err
-		}
-		if len(userConfig) > 0 {
-			if err := d.Set(endpointUserConfigKey(endpointType), userConfig); err != nil {
-				return err
-			}
 		}
 	}
 	return nil

@@ -82,7 +82,7 @@ func aivenServiceIntegrationSchema() map[string]*schema.Schema {
 
 	// Adds user configs
 	for _, k := range serviceintegration.UserConfigTypes() {
-		s[k+"_user_config"] = serviceintegration.GetUserConfig(k)
+		converters.SetUserConfig(converters.ServiceIntegrationUserConfig, k, s)
 	}
 	return s
 }
@@ -144,7 +144,7 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 	}
 
 	if hasIntegrationConfig(integrationType) {
-		uc, err := converters.Expand(integrationType, serviceintegration.GetUserConfig(integrationType), d)
+		uc, err := converters.Expand(converters.ServiceIntegrationUserConfig, integrationType, d)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -359,15 +359,9 @@ func resourceServiceIntegrationCopyAPIResponseToTerraform(
 	}
 
 	if hasIntegrationConfig(integrationType) {
-		userConfig, err := converters.Flatten(integrationType, serviceintegration.GetUserConfig(integrationType), d, res.UserConfig)
+		err := converters.Flatten(converters.ServiceIntegrationUserConfig, integrationType, d, res.UserConfig)
 		if err != nil {
 			return err
-		}
-		if len(userConfig) > 0 {
-			err := d.Set(integrationType+"_user_config", userConfig)
-			if err != nil {
-				return err
-			}
 		}
 	}
 

@@ -19,6 +19,7 @@ nav_order: 1
 - Add `external_aws_cloudwatch_logs`, `external_elasticsearch_logs_user_config`, `external_opensearch_logs_user_config`,
   `prometheus_user_config` service integration configs
 - Fix `aiven_kafka_schema` Protobuf normalization
+- Fix `aiven_service_integration_endpoint` for `external_postgresql` type
 - Add `AIVEN_ALLOW_IP_FILTER_PURGE` environment variable to allow purging of IP filters. This is a safety feature to
   prevent accidental purging of IP filters, which can lead to loss of access to services. To enable purging, set the
   environment variable to any value before running Terraform commands.

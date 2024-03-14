@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/converters"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 // defaultTimeout is the default timeout for service operations. This is not a const because it can be changed during
@@ -59,6 +58,12 @@ var TechEmailsResourceSchema = &schema.Resource{
 			Required:    true,
 		},
 	},
+}
+
+func ServiceCommonSchemaWithUserConfig(kind string) map[string]*schema.Schema {
+	s := ServiceCommonSchema()
+	converters.SetUserConfig(converters.ServiceUserConfig, kind, s)
+	return s
 }
 
 func ServiceCommonSchema() map[string]*schema.Schema {
@@ -713,13 +718,9 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		}
 	}
 
-	newUserConfig, err := FlattenService(serviceType, d, s.UserConfig)
+	err := FlattenService(serviceType, d, s.UserConfig)
 	if err != nil {
 		return err
-	}
-
-	if err := d.Set(serviceType+"_user_config", newUserConfig); err != nil {
-		return fmt.Errorf("cannot set `%s_user_config` : %w; Please make sure that all Aiven services have unique s names", serviceType, err)
 	}
 
 	params := s.URIParams
@@ -886,10 +887,10 @@ func getContactEmailListForAPI(d *schema.ResourceData, field string) *[]aiven.Co
 	return &results
 }
 
-func ExpandService(kind string, d *schema.ResourceData) (map[string]any, error) {
-	return converters.Expand(kind, service.GetUserConfig(kind), d)
+func ExpandService(name string, d *schema.ResourceData) (map[string]any, error) {
+	return converters.Expand(converters.ServiceUserConfig, name, d)
 }
 
-func FlattenService(kind string, d *schema.ResourceData, dto map[string]any) ([]map[string]any, error) {
-	return converters.Flatten(kind, service.GetUserConfig(kind), d, dto)
+func FlattenService(name string, d *schema.ResourceData, dto map[string]any) error {
+	return converters.Flatten(converters.ServiceUserConfig, name, d, dto)
 }
