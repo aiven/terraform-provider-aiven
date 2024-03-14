@@ -3,19 +3,19 @@
 page_title: "aiven_organizational_unit Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Organizational Unit resource allows the creation and management of Aiven Organizational Units.
+  Creates and manages an organizational unit https://aiven.io/docs/platform/concepts/projects_accounts_access in an Aiven organization.
 ---
 
 # aiven_organizational_unit (Resource)
 
-The Organizational Unit resource allows the creation and management of Aiven Organizational Units.
+Creates and manages an [organizational unit](https://aiven.io/docs/platform/concepts/projects_accounts_access) in an Aiven organization.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_organizational_unit" "organizational_unit1" {
-  name      = "<ORGANIZATIONAL_UNIT_NAME>"
-  parent_id = "<ORGANIZATION_ID>"
+resource "aiven_organizational_unit" "example_unit" {
+  name      = "Example organizational unit"
+  parent_id = aiven_organization.main.id
 }
 ```
 
@@ -24,8 +24,8 @@ resource "aiven_organizational_unit" "organizational_unit1" {
 
 ### Required
 
-- `name` (String) Organizational Unit name
-- `parent_id` (String) Parent ID
+- `name` (String) The name of the organizational unit.
+- `parent_id` (String) The ID of the organization that the unit is created in.
 
 ### Optional
 
@@ -33,10 +33,10 @@ resource "aiven_organizational_unit" "organizational_unit1" {
 
 ### Read-Only
 
-- `create_time` (String) Time of creation
+- `create_time` (String) Time of creation.
 - `id` (String) The ID of this resource.
-- `tenant_id` (String) Tenant ID
-- `update_time` (String) Time of last update
+- `tenant_id` (String) Tenant ID.
+- `update_time` (String) Time of last update.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
@@ -54,5 +54,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_organizational_unit.organizational_unit1 organizational_unit_id
+terraform import aiven_organizational_unit.example_unit ORGANIZATIONAL_UNIT_ID
 ```
