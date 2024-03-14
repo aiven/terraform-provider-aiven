@@ -445,9 +445,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	cuc, err := ExpandService(serviceType, d)
 	if err != nil {
-		return diag.Errorf(
-			"error converting user config options for service type %s to API format: %s", serviceType, err,
-		)
+		return diag.FromErr(err)
 	}
 
 	_, err = client.Services.Create(
@@ -534,9 +532,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	serviceType := d.Get("service_type").(string)
 	cuc, err := ExpandService(serviceType, d)
 	if err != nil {
-		return diag.Errorf(
-			"error converting user config options for service type %s to API format: %s", serviceType, err,
-		)
+		return diag.FromErr(err)
 	}
 
 	if _, err := client.Services.Update(
