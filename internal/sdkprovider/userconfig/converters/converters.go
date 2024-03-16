@@ -23,7 +23,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-const userConfigSuffix = "_user_config"
+const (
+	userConfigSuffix   = "_user_config"
+	AllowIPFilterPurge = "AIVEN_ALLOW_IP_FILTER_PURGE"
+)
 
 // Expand expands schema.ResourceData into a DTO map.
 // It takes schema.Schema to know how to turn a TF item into json.
@@ -48,15 +51,16 @@ func Expand(kind string, s *schema.Schema, d *schema.ResourceData) (map[string]a
 		return nil, err
 	}
 
+	// Renames ip_filter_object/string to ip_filter
 	renameAliases(dto)
 
-	// TODO: Move to a validation part of the schema.
 	if v, ok := dto["ip_filter"].([]any); ok && len(v) == 0 {
-		if _, ok := os.LookupEnv("AIVEN_ALLOW_IP_FILTER_PURGE"); !ok {
+		if _, ok := os.LookupEnv(AllowIPFilterPurge); !ok {
 			return nil, fmt.Errorf(
-				"ip_filter list is empty, but AIVEN_ALLOW_IP_FILTER_PURGE is not set. Please set " +
-					"AIVEN_ALLOW_IP_FILTER_PURGE to confirm that you want to remove all IP filters, which is going " +
+				"ip_filter list is empty, but %[1]s is not set. Please set "+
+					"%[1]s to confirm that you want to remove all IP filters, which is going "+
 					"to block all traffic to the service",
+				AllowIPFilterPurge,
 			)
 		}
 	}
@@ -65,41 +69,24 @@ func Expand(kind string, s *schema.Schema, d *schema.ResourceData) (map[string]a
 
 // stateCompose combines "raw state" and schema.ResourceData
 // With the state it is possible to say "if value is null", hence if it is defined by user.
-// With schema.ResourceData you get the value, that might be a zero-value.
+// With schema.ResourceData, you get the value that might be a zero-value.
 type stateCompose struct {
-	key      string // state attribute name or schema.ResourceData key
-	path     string // schema.ResourceData path, i.e. foo.0.bar.0.baz to get the value
-	schema   *schema.Schema
-	config   cty.Value
-	resource *schema.ResourceData
+	key      string               // state attribute name or schema.ResourceData key
+	path     string               // schema.ResourceData path, i.e., foo.0.bar.0.baz to get the value
+	schema   *schema.Schema       // tf schema
+	config   cty.Value            // tf file values
+	resource *schema.ResourceData // tf resource that has both tf state and data that is received from the API
 }
 
-// setItems returns schema.Set values that has state.
-// Supports int and float types only.
-func (s *stateCompose) setItems() []any {
+// setItems returns schema.Set values
+func (s *stateCompose) setItems() ([]any, error) {
 	result := make([]any, 0)
 	if s.config.IsNull() {
 		// Makes possible to send ip_filter=[] to clear the remote list.
-		return result
+		return result, nil
 	}
 
-	// Builds elements hash map
-	hashes := make(map[string]bool, s.config.LengthInt())
-	for _, item := range s.config.AsValueSlice() {
-		if item.Type() == cty.String {
-			hashes[item.AsString()] = true
-		} else {
-			hashes[item.AsBigFloat().String()] = true
-		}
-	}
-
-	// Picks up values with a state only
-	for _, v := range s.value().(*schema.Set).List() {
-		if hashes[fmt.Sprintf("%v", v)] {
-			result = append(result, v)
-		}
-	}
-	return result
+	return s.value().(*schema.Set).List(), nil
 }
 
 // listItems returns a list of object's states
@@ -113,7 +100,7 @@ func (s *stateCompose) listItems() (result []*stateCompose) {
 		c := &stateCompose{
 			key:      s.key,
 			path:     fmt.Sprintf("%s.%d", s.path, i),
-			schema:   s.schema, // object is a list with one item, hence same schema
+			schema:   s.schema, // object is a list with one item, hence the same schema
 			config:   v,
 			resource: s.resource,
 		}
@@ -153,11 +140,13 @@ func (s *stateCompose) value() any {
 	return s.resource.Get(s.path)
 }
 
-func (s *stateCompose) hasValue() bool {
+// isNull returns true if value exist in tf file
+func (s *stateCompose) isNull() bool {
 	// By some reason iterable values are always not null
 	return s.config.IsNull() || s.config.CanIterateElements() && s.config.LengthInt() == 0
 }
 
+// hasChange tells if the field has been changed
 func (s *stateCompose) hasChange() bool {
 	return s.resource.HasChange(s.path)
 }
@@ -177,7 +166,7 @@ func expandObj(state *stateCompose) (map[string]any, error) {
 }
 
 func expandScalar(state *stateCompose) (any, error) {
-	if state.hasValue() {
+	if state.isNull() {
 		// Null scalar, no value in the config
 		return nil, nil
 	}
@@ -192,14 +181,14 @@ func expandAttr(state *stateCompose) (any, error) {
 		return expandScalar(state)
 	}
 
-	if state.hasValue() && !state.hasChange() {
+	if state.isNull() && !state.hasChange() {
 		// A value that hasn't been sent by user yet.
-		// But has been received from the API.
+		// But have been received from the API.
 		return nil, nil
 	}
 
 	if state.schema.Type == schema.TypeSet {
-		return state.setItems(), nil
+		return state.setItems()
 	}
 
 	// schema.TypeList
@@ -238,6 +227,7 @@ func expandAttr(state *stateCompose) (any, error) {
 		}
 	}
 
+	// A list of scalars
 	return items, nil
 }
 
@@ -247,12 +237,12 @@ func Flatten(kind string, s *schema.Schema, d *schema.ResourceData, dto map[stri
 
 	// Renames ip_filter field
 	if _, ok := dto["ip_filter"]; ok {
-		assignAlias(d, prefix+"ip_filter", dto, "ip_filter", "network")
+		assignAlias(d, prefix+"ip_filter", dto, "ip_filter")
 	}
 
 	// Renames namespaces field
 	if mapping, ok := drillKey(dto, "rules.0.mapping"); ok {
-		assignAlias(d, prefix+"rules.0.mapping.0.namespaces", mapping.(map[string]any), "namespaces", "name")
+		assignAlias(d, prefix+"rules.0.mapping.0.namespaces", mapping.(map[string]any), "namespaces")
 	}
 
 	// Copies "create only" fields from the original config.
@@ -366,7 +356,7 @@ func flattenList(s map[string]*schema.Schema, list []any) ([]any, error) {
 }
 
 // assignAlias renames keys for multi-typed properties, i.e. ip_filter -> [ip_filter_string, ip_filter_object]
-func assignAlias(d *schema.ResourceData, path string, dto map[string]any, key, sortBy string) {
+func assignAlias(d *schema.ResourceData, path string, dto map[string]any, key string) {
 	values, ok := dto[key].([]any)
 	if !ok || len(values) == 0 {
 		return
@@ -381,12 +371,6 @@ func assignAlias(d *schema.ResourceData, path string, dto map[string]any, key, s
 	// If DTO has objects, then it is foo_object
 	if _, ok := values[0].(map[string]any); ok {
 		suffix = obj
-
-		// State objects have specific order.
-		// Must sort DTO objects, otherwise diff shows changes.
-		if inStateObjs, ok := d.GetOk(path + obj); ok {
-			dto[key] = sortByKey(sortBy, inStateObjs, dto[key])
-		}
 	}
 
 	// If the state has foo_string, the user has new key

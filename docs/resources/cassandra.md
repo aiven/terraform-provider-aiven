@@ -84,7 +84,7 @@ Optional:
 - `cassandra` (Block List, Max: 1) cassandra configuration values (see [below for nested schema](#nestedblock--cassandra_user_config--cassandra))
 - `cassandra_version` (String) Cassandra version.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--cassandra_user_config--ip_filter_object))
+- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--cassandra_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
 - `migrate_sstableloader` (Boolean) Sets the service into migration mode enabling the sstableloader utility to be used to upload Cassandra data files. Available only on service create.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--cassandra_user_config--private_access))

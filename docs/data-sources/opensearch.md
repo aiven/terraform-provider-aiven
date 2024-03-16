@@ -91,7 +91,7 @@ Read-Only:
 - `index_patterns` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--index_patterns))
 - `index_template` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--index_template))
 - `ip_filter` (Set of String)
-- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--ip_filter_object))
+- `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
 - `keep_index_refresh_interval` (Boolean)
 - `max_index_count` (Number)
