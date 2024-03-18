@@ -91,7 +91,7 @@ Read-Only:
 - `backup_minute` (Number)
 - `binlog_retention_period` (Number)
 - `ip_filter` (Set of String)
-- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--ip_filter_object))
+- `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
 - `migration` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--migration))
 - `mysql` (List of Object) (see [below for nested schema](#nestedobjatt--mysql_user_config--mysql))

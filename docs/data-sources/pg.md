@@ -100,7 +100,7 @@ Read-Only:
 - `backup_minute` (Number)
 - `enable_ipv6` (Boolean)
 - `ip_filter` (Set of String)
-- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--ip_filter_object))
+- `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
 - `migration` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--migration))
 - `pg` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pg))

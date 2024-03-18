@@ -355,25 +355,11 @@ func scalarArrayLit(o *object, args []jen.Code) (*jen.Statement, error) {
 }
 
 func isTypeSet(o *object) bool {
-	// Only scalars can be set type.
-	// Nested sets of objects do not work well in Terraform:
-	// - Changing a field shows diff for the whole object,
-	//   because hash is calculated for the object, not per field.
-	//   So no per-field updates, whole object replacement only.
-	//   https://discuss.hashicorp.com/t/provider-schema-typeset-detect-changes/32546
-	// - There is a bug that doesn't let you put a set deep inside ResourceData
-	//   https://github.com/hashicorp/terraform-plugin-sdk/issues/459
-	// - The diff itself is invalid for nested sets (not on the root level).
-	//   It just doesn't work as expected in all cases.
-	if !(o.isArray() && o.ArrayItems.isScalar()) {
-		return false
-	}
-
 	// Allowlist for set types
+	// Warning: test each type you add!
 	switch o.path() {
-	case "ip_filter", "ip_filter_string":
+	case "ip_filter", "ip_filter_string", "ip_filter_object":
 		return true
 	}
-
 	return false
 }

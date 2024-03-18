@@ -86,7 +86,7 @@ Read-Only:
 
 - `additional_backup_regions` (List of String)
 - `ip_filter` (Set of String)
-- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_mirrormaker_user_config--ip_filter_object))
+- `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--kafka_mirrormaker_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
 - `kafka_mirrormaker` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_mirrormaker_user_config--kafka_mirrormaker))
 - `service_log` (Boolean)

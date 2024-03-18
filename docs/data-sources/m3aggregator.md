@@ -86,7 +86,7 @@ Read-Only:
 
 - `custom_domain` (String)
 - `ip_filter` (Set of String)
-- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--m3aggregator_user_config--ip_filter_object))
+- `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--m3aggregator_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
 - `m3_version` (String)
 - `m3aggregator_version` (String)

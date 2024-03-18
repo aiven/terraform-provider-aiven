@@ -57,7 +57,7 @@ func m3dbUserConfig() *schema.Schema {
 				}},
 				MaxItems: 1024,
 				Optional: true,
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 			},
 			"ip_filter_string": {
 				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",

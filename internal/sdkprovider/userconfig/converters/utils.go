@@ -3,40 +3,8 @@ package converters
 import (
 	"fmt"
 	"reflect"
-	"sort"
 	"strings"
 )
-
-// sortByKey sorts the given array of objects by values in the original array by the given key.
-// For instance, when ip_filter_object list is sent, it is sorted on the backend.
-// That makes a diff, because user defined order is violated.
-func sortByKey(sortBy string, originalSrc, dtoSrc any) any {
-	original := asMapList(originalSrc)
-	dto := asMapList(dtoSrc)
-	if len(original) != len(dto) {
-		return dtoSrc
-	}
-
-	sortMap := make(map[string]int)
-	for i, v := range original {
-		sortMap[v[sortBy].(string)] = i
-	}
-
-	sort.Slice(dto, func(i, j int) bool {
-		ii := dto[i][sortBy].(string)
-		jj := dto[j][sortBy].(string)
-		return sortMap[ii] > sortMap[jj]
-	})
-
-	// Need to cast to "any",
-	// otherwise it might blow up in flattenObj function
-	// with type mismatch (map[string]any vs any)
-	result := make([]any, 0, len(dto))
-	for _, v := range dto {
-		result = append(result, v)
-	}
-	return result
-}
 
 // drillKey gets deep down key value
 func drillKey(dto map[string]any, path string) (any, bool) {
@@ -75,21 +43,6 @@ func drillKey(dto map[string]any, path string) (any, bool) {
 		}
 		dto = next
 	}
-}
-
-// asList converts "any" to specific typed list
-func asList[T any](v any) []T {
-	list := v.([]any)
-	result := make([]T, 0, len(list))
-	for _, item := range list {
-		result = append(result, item.(T))
-	}
-	return result
-}
-
-// asMapList converts "any" to a list of objects
-func asMapList(v any) []map[string]any {
-	return asList[map[string]any](v)
 }
 
 // castType returns an error on invalid type
