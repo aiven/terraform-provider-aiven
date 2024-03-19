@@ -11,11 +11,10 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 func aivenKafkaSchema() map[string]*schema.Schema {
-	aivenKafkaSchema := schemautil.ServiceCommonSchema()
+	aivenKafkaSchema := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeKafka)
 	aivenKafkaSchema["karapace"] = &schema.Schema{
 		Type:             schema.TypeBool,
 		Optional:         true,
@@ -70,7 +69,6 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	aivenKafkaSchema[schemautil.ServiceTypeKafka+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypeKafka)
 
 	return aivenKafkaSchema
 }

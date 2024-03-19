@@ -6,12 +6,11 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 func aivenKafkaConnectSchema() map[string]*schema.Schema {
-	kafkaConnectSchema := schemautil.ServiceCommonSchema()
-	kafkaConnectSchema[schemautil.ServiceTypeKafkaConnect] = &schema.Schema{
+	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeKafkaConnect)
+	s[schemautil.ServiceTypeKafkaConnect] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
 		Description: "Kafka Connect server provided values",
@@ -19,9 +18,7 @@ func aivenKafkaConnectSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	kafkaConnectSchema[schemautil.ServiceTypeKafkaConnect+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypeKafkaConnect)
-
-	return kafkaConnectSchema
+	return s
 }
 
 func ResourceKafkaConnect() *schema.Resource {

@@ -283,3 +283,51 @@ func testAccCheckAivenServiceEndpointIntegrationAttributes(n string) resource.Te
 		return nil
 	}
 }
+
+func TestAccAivenServiceIntegrationEndpointExternalPostgresql(t *testing.T) {
+	resourceName := "aiven_service_integration_endpoint.pg"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenServiceIntegraitonEndpointResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAivenServiceIntegrationEndpointExternalPostgresql(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAivenServiceEndpointIntegrationAttributes(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
+					resource.TestCheckResourceAttr(resourceName, "endpoint_type", "external_postgresql"),
+					resource.TestCheckResourceAttr(resourceName, "external_postgresql.0.port", "1234"),
+					resource.TestCheckResourceAttr(resourceName, "external_postgresql.0.ssl_mode", "disable"),
+				),
+			},
+		},
+	})
+}
+
+func testAccAivenServiceIntegrationEndpointExternalPostgresql(name string) string {
+	return fmt.Sprintf(`
+resource "aiven_pg" "pg" {
+  project      = %q
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = "test-acc-sr-pg-%s"
+}
+
+
+resource "aiven_service_integration_endpoint" "pg" {
+  project       = aiven_pg.pg.project
+  endpoint_name = "test-acc-external-postgresql-%s"
+  endpoint_type = "external_postgresql"
+
+  external_postgresql {
+    username = aiven_pg.pg.service_username
+    password = aiven_pg.pg.service_password
+    host     = aiven_pg.pg.service_host
+    port     = 1234
+    ssl_mode = "disable"
+  }
+}
+`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}

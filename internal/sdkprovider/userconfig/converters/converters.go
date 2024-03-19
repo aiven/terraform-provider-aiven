@@ -21,6 +21,10 @@ import (
 
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/serviceintegration"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/serviceintegrationendpoint"
 )
 
 const (
@@ -28,14 +32,61 @@ const (
 	AllowIPFilterPurge = "AIVEN_ALLOW_IP_FILTER_PURGE"
 )
 
-// Expand expands schema.ResourceData into a DTO map.
+type userConfigType string
+
+const (
+	ServiceUserConfig                    userConfigType = "service"
+	ServiceIntegrationUserConfig         userConfigType = "service integration"
+	ServiceIntegrationEndpointUserConfig userConfigType = "service integration endpoint"
+)
+
+// userConfigKey provides a single source of truth for a field naming
+func userConfigKey(kind userConfigType, name string) string {
+	switch kind {
+	case ServiceIntegrationEndpointUserConfig:
+		switch name {
+		case "external_google_cloud_bigquery", "external_postgresql":
+			// legacy fields
+			return name
+		}
+	}
+	return name + userConfigSuffix
+}
+
+// getUserConfig returns user config for the given kind and name
+func getUserConfig(kind userConfigType, name string) *schema.Schema {
+	switch kind {
+	case ServiceUserConfig:
+		return service.GetUserConfig(name)
+	case ServiceIntegrationUserConfig:
+		return serviceintegration.GetUserConfig(name)
+	case ServiceIntegrationEndpointUserConfig:
+		return serviceintegrationendpoint.GetUserConfig(name)
+	}
+	panic(fmt.Sprintf("unknown user config name %q with kind %q", name, kind))
+}
+
+// SetUserConfig sets user config schema for given kind and name
+func SetUserConfig(kind userConfigType, name string, s map[string]*schema.Schema) {
+	s[userConfigKey(kind, name)] = getUserConfig(kind, name)
+}
+
+func Expand(kind userConfigType, name string, d *schema.ResourceData) (map[string]any, error) {
+	m, err := expand(kind, name, d)
+	if err != nil {
+		return nil, fmt.Errorf("error converting user config options for %s type %q to API format: %w", kind, name, err)
+	}
+	return m, nil
+}
+
+// expand expands schema.ResourceData into a DTO map.
 // It takes schema.Schema to know how to turn a TF item into json.
-func Expand(kind string, s *schema.Schema, d *schema.ResourceData) (map[string]any, error) {
-	key := kind + userConfigSuffix
+func expand(kind userConfigType, name string, d *schema.ResourceData) (map[string]any, error) {
+	key := userConfigKey(kind, name)
 	state := &stateCompose{
 		key:      key,
 		path:     key + ".0", // starts from root user config
-		schema:   s,
+		schema:   getUserConfig(kind, name),
 		resource: d,
 	}
 
@@ -74,7 +125,7 @@ type stateCompose struct {
 	key      string               // state attribute name or schema.ResourceData key
 	path     string               // schema.ResourceData path, i.e., foo.0.bar.0.baz to get the value
 	schema   *schema.Schema       // tf schema
-	config   cty.Value            // tf file values
+	config   cty.Value            // tf file values, it knows if resource value is null
 	resource *schema.ResourceData // tf resource that has both tf state and data that is received from the API
 }
 
@@ -231,9 +282,18 @@ func expandAttr(state *stateCompose) (any, error) {
 	return items, nil
 }
 
-// Flatten flattens DTO into a terraform compatible object
-func Flatten(kind string, s *schema.Schema, d *schema.ResourceData, dto map[string]any) ([]map[string]any, error) {
-	prefix := fmt.Sprintf("%s%s.0.", kind, userConfigSuffix)
+func Flatten(kind userConfigType, name string, d *schema.ResourceData, dto map[string]any) error {
+	err := flatten(kind, name, d, dto)
+	if err != nil {
+		return fmt.Errorf("error converting user config options for %s type %q from API format: %w", kind, name, err)
+	}
+	return nil
+}
+
+// flatten flattens DTO into a terraform compatible object and sets value to the field
+func flatten(kind userConfigType, name string, d *schema.ResourceData, dto map[string]any) error {
+	key := userConfigKey(kind, name)
+	prefix := fmt.Sprintf("%s.0.", key)
 
 	// Renames ip_filter field
 	if _, ok := dto["ip_filter"]; ok {
@@ -254,12 +314,14 @@ func Flatten(kind string, s *schema.Schema, d *schema.ResourceData, dto map[stri
 		}
 	}
 
+	s := getUserConfig(kind, name)
 	r := s.Elem.(*schema.Resource)
 	tfo, err := flattenObj(r.Schema, dto)
 	if tfo == nil || err != nil {
-		return nil, err
+		return err
 	}
-	return []map[string]any{tfo}, nil
+
+	return d.Set(key, []map[string]any{tfo})
 }
 
 func flattenObj(s map[string]*schema.Schema, dto map[string]any) (map[string]any, error) {

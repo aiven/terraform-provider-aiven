@@ -6,11 +6,10 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 func aivenM3DBSchema() map[string]*schema.Schema {
-	schemaM3 := schemautil.ServiceCommonSchema()
+	schemaM3 := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeM3)
 	schemaM3[schemautil.ServiceTypeM3] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
@@ -19,8 +18,6 @@ func aivenM3DBSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	schemaM3[schemautil.ServiceTypeM3+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypeM3)
-
 	return schemaM3
 }
 func ResourceM3DB() *schema.Resource {
