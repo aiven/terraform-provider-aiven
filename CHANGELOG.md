@@ -11,9 +11,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
-<!-- TODO: uncomment when dragonfly is supported -->
-<!-- - Dragonfly support -->
-
+- Add Dragonfly resource (`aiven_dragonfly`) to allow for the creation and management of Dragonfly services
 - Use new user config generator to generate service integration and service integration endpoint configs
 - Fix `aiven_kafka_schema` version update
 - Add `external_aws_cloudwatch_logs`, `external_elasticsearch_logs_user_config`, `external_opensearch_logs_user_config`,

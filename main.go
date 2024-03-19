@@ -12,7 +12,7 @@ import (
 )
 
 //go:generate go test -tags userconfig ./internal/schemautil/userconfig
-//go:generate go run ./ucgenerator/... --excludeServices elasticsearch,dragonfly
+//go:generate go run ./ucgenerator/... --excludeServices elasticsearch
 
 // registryPrefix is the registry prefix for the provider.
 const registryPrefix = "registry.terraform.io/"

@@ -12,6 +12,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/cassandra"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/connectionpool"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/dragonfly"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/flink"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/grafana"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/influxdb"
@@ -141,8 +142,7 @@ func Provider(version string) *schema.Provider {
 			"aiven_clickhouse_user":     clickhouse.DatasourceClickhouseUser(),
 
 			// dragonfly
-			// TODO: uncomment when dragonfly is supported
-			//"aiven_dragonfly": dragonfly.DatasourceDragonfly(),
+			"aiven_dragonfly": dragonfly.DatasourceDragonfly(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -247,8 +247,7 @@ func Provider(version string) *schema.Provider {
 			"aiven_clickhouse_grant":    clickhouse.ResourceClickhouseGrant(),
 
 			// dragonfly
-			// TODO: uncomment when dragonfly is supported
-			//"aiven_dragonfly": dragonfly.ResourceDragonfly(),
+			"aiven_dragonfly": dragonfly.ResourceDragonfly(),
 		},
 	}
 

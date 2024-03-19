@@ -14,9 +14,6 @@ import (
 )
 
 func TestAccAiven_dragonfly(t *testing.T) {
-	// TODO: remove this once dragonfly is available
-	t.Skip("Dragonfly service is not available in Aiven")
-
 	resourceName := "aiven_dragonfly.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
@@ -180,9 +177,6 @@ data "aiven_dragonfly" "common" {
 
 // Dragonfly service tests
 func TestAccAivenService_dragonfly(t *testing.T) {
-	// TODO: remove this once dragonfly is available
-	t.Skip("Dragonfly service is not available in Aiven")
-
 	resourceName := "aiven_dragonfly.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
