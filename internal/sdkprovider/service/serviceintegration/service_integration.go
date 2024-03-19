@@ -13,22 +13,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"golang.org/x/exp/slices"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/converters"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/serviceintegration"
 )
 
 const serviceIntegrationEndpointRegExp = "^[a-zA-Z0-9_-]*\\/{1}[a-zA-Z0-9_-]*$"
-
-func hasIntegrationConfig(kind string) bool {
-	return slices.Contains(serviceintegration.UserConfigTypes(), kind)
-}
 
 func aivenServiceIntegrationSchema() map[string]*schema.Schema {
 	s := map[string]*schema.Schema{
@@ -143,13 +136,12 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 		SourceService:         schemautil.OptionalStringPointer(d, "source_service_name"),
 	}
 
-	if hasIntegrationConfig(integrationType) {
-		uc, err := converters.Expand(converters.ServiceIntegrationUserConfig, integrationType, d)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		req.UserConfig = uc
+	uc, err := converters.Expand(converters.ServiceIntegrationUserConfig, integrationType, d)
+	if err != nil {
+		return diag.FromErr(err)
 	}
+
+	req.UserConfig = uc
 
 	res, err := client.ServiceIntegrations.Create(ctx, projectName, req)
 	if err != nil {
@@ -195,7 +187,8 @@ func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	userConfig, err := resourceServiceIntegrationUserConfigFromSchemaToAPI(d)
+	integrationType := d.Get("integration_type").(string)
+	userConfig, err := converters.Expand(converters.ServiceIntegrationUserConfig, integrationType, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -318,11 +311,6 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 	return nil
 }
 
-func resourceServiceIntegrationUserConfigFromSchemaToAPI(d *schema.ResourceData) (map[string]interface{}, error) {
-	integrationType := d.Get("integration_type").(string)
-	return apiconvert.ToAPI(userconfig.IntegrationTypes, integrationType, d)
-}
-
 func resourceServiceIntegrationCopyAPIResponseToTerraform(
 	d *schema.ResourceData,
 	res *aiven.ServiceIntegration,
@@ -358,12 +346,5 @@ func resourceServiceIntegrationCopyAPIResponseToTerraform(
 		return err
 	}
 
-	if hasIntegrationConfig(integrationType) {
-		err := converters.Flatten(converters.ServiceIntegrationUserConfig, integrationType, d, res.UserConfig)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return converters.Flatten(converters.ServiceIntegrationUserConfig, integrationType, d, res.UserConfig)
 }
