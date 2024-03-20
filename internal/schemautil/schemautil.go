@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/docker/go-units"
@@ -196,15 +195,6 @@ func IPFilterValueDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) b
 
 func TrimSpaceDiffSuppressFunc(_, old, new string, _ *schema.ResourceData) bool {
 	return strings.TrimSpace(old) == strings.TrimSpace(new)
-}
-
-// ValidateDurationString is a ValidateFunc that ensures a string parses
-// as time.Duration format
-func ValidateDurationString(v interface{}, k string) (ws []string, errors []error) {
-	if _, err := time.ParseDuration(v.(string)); err != nil {
-		errors = append(errors, fmt.Errorf("%q: invalid duration", k))
-	}
-	return
 }
 
 // ValidateHumanByteSizeString is a ValidateFunc that ensures a string parses
