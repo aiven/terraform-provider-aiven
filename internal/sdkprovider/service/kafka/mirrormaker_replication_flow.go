@@ -66,10 +66,11 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 	},
 	"replication_policy_class": {
 		Type:         schema.TypeString,
-		Optional:     true,
-		Default:      defaultReplicationPolicy,
+		Required:     true,
 		ValidateFunc: validation.StringInSlice(replicationPolicies, false),
-		Description:  userconfig.Desc("Replication policy class.").DefaultValue(defaultReplicationPolicy).PossibleValues(schemautil.StringSliceToInterfaceSlice(replicationPolicies)...).Build(),
+		Description: userconfig.Desc("Replication policy class.").
+			DefaultValue(defaultReplicationPolicy).
+			PossibleValues(schemautil.StringSliceToInterfaceSlice(replicationPolicies)...).Build(),
 	},
 	"sync_group_offsets_enabled": {
 		Type:        schema.TypeBool,
@@ -102,7 +103,7 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 	},
 	"offset_syncs_topic_location": {
 		Type:         schema.TypeString,
-		Optional:     true,
+		Required:     true,
 		Description:  "Offset syncs topic location.",
 		ValidateFunc: validation.StringInSlice([]string{"source", "target"}, false),
 	},
@@ -144,10 +145,10 @@ func resourceMirrorMakerReplicationFlowCreate(ctx context.Context, d *schema.Res
 			Topics:                          schemautil.FlattenToString(d.Get("topics").([]interface{})),
 			TopicsBlacklist:                 schemautil.FlattenToString(d.Get("topics_blacklist").([]interface{})),
 			ReplicationPolicyClass:          d.Get("replication_policy_class").(string),
-			SyncGroupOffsetsEnabled:         d.Get("sync_group_offsets_enabled").(bool),
-			SyncGroupOffsetsIntervalSeconds: d.Get("sync_group_offsets_interval_seconds").(int),
-			EmitHeartbeatsEnabled:           d.Get("emit_heartbeats_enabled").(bool),
-			EmitBackwardHeartbeatsEnabled:   d.Get("emit_backward_heartbeats_enabled").(bool),
+			SyncGroupOffsetsEnabled:         schemautil.OptionalBoolPointer(d, "sync_group_offsets_enabled"),
+			SyncGroupOffsetsIntervalSeconds: schemautil.OptionalIntPointer(d, "sync_group_offsets_interval_seconds"),
+			EmitHeartbeatsEnabled:           schemautil.OptionalBoolPointer(d, "emit_heartbeats_enabled"),
+			EmitBackwardHeartbeatsEnabled:   schemautil.OptionalBoolPointer(d, "emit_backward_heartbeats_enabled"),
 			OffsetSyncsTopicLocation:        d.Get("offset_syncs_topic_location").(string),
 		},
 	})
@@ -168,7 +169,9 @@ func resourceMirrorMakerReplicationFlowRead(ctx context.Context, d *schema.Resou
 		return diag.FromErr(err)
 	}
 
-	replicationFlow, err := client.KafkaMirrorMakerReplicationFlow.Get(ctx, project, serviceName, sourceCluster, targetCluster)
+	replicationFlow, err := client.KafkaMirrorMakerReplicationFlow.Get(
+		ctx, project, serviceName, sourceCluster, targetCluster,
+	)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -194,21 +197,47 @@ func resourceMirrorMakerReplicationFlowRead(ctx context.Context, d *schema.Resou
 	if err := d.Set("topics_blacklist", replicationFlow.ReplicationFlow.TopicsBlacklist); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("replication_policy_class", replicationFlow.ReplicationFlow.ReplicationPolicyClass); err != nil {
+	if err := d.Set(
+		"replication_policy_class",
+		replicationFlow.ReplicationFlow.ReplicationPolicyClass,
+	); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("sync_group_offsets_enabled", replicationFlow.ReplicationFlow.SyncGroupOffsetsEnabled); err != nil {
-		return diag.FromErr(err)
+	if replicationFlow.ReplicationFlow.SyncGroupOffsetsEnabled != nil {
+		if err := d.Set(
+			"sync_group_offsets_enabled",
+			*replicationFlow.ReplicationFlow.SyncGroupOffsetsEnabled,
+		); err != nil {
+			return diag.FromErr(err)
+		}
 	}
-	if err := d.Set("sync_group_offsets_interval_seconds", replicationFlow.ReplicationFlow.SyncGroupOffsetsIntervalSeconds); err != nil {
-		return diag.FromErr(err)
+	if replicationFlow.ReplicationFlow.SyncGroupOffsetsIntervalSeconds != nil {
+		if err := d.Set(
+			"sync_group_offsets_interval_seconds",
+			*replicationFlow.ReplicationFlow.SyncGroupOffsetsIntervalSeconds,
+		); err != nil {
+			return diag.FromErr(err)
+		}
 	}
-	if err := d.Set("emit_heartbeats_enabled", replicationFlow.ReplicationFlow.EmitHeartbeatsEnabled); err != nil {
-		return diag.FromErr(err)
+	if replicationFlow.ReplicationFlow.EmitHeartbeatsEnabled != nil {
+		if err := d.Set(
+			"emit_heartbeats_enabled",
+			*replicationFlow.ReplicationFlow.EmitHeartbeatsEnabled,
+		); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+	if replicationFlow.ReplicationFlow.EmitBackwardHeartbeatsEnabled != nil {
+		if err := d.Set(
+			"emit_backward_heartbeats_enabled",
+			*replicationFlow.ReplicationFlow.EmitBackwardHeartbeatsEnabled,
+		); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 	if err := d.Set(
-		"emit_backward_heartbeats_enabled",
-		replicationFlow.ReplicationFlow.EmitBackwardHeartbeatsEnabled,
+		"offset_syncs_topic_location",
+		replicationFlow.ReplicationFlow.OffsetSyncsTopicLocation,
 	); err != nil {
 		return diag.FromErr(err)
 	}
@@ -239,10 +268,10 @@ func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.Res
 				Topics:                          schemautil.FlattenToString(d.Get("topics").([]interface{})),
 				TopicsBlacklist:                 schemautil.FlattenToString(d.Get("topics_blacklist").([]interface{})),
 				ReplicationPolicyClass:          d.Get("replication_policy_class").(string),
-				SyncGroupOffsetsEnabled:         d.Get("sync_group_offsets_enabled").(bool),
-				SyncGroupOffsetsIntervalSeconds: d.Get("sync_group_offsets_interval_seconds").(int),
-				EmitHeartbeatsEnabled:           d.Get("emit_heartbeats_enabled").(bool),
-				EmitBackwardHeartbeatsEnabled:   d.Get("emit_backward_heartbeats_enabled").(bool),
+				SyncGroupOffsetsEnabled:         schemautil.OptionalBoolPointer(d, "sync_group_offsets_enabled"),
+				SyncGroupOffsetsIntervalSeconds: schemautil.OptionalIntPointer(d, "sync_group_offsets_interval_seconds"),
+				EmitHeartbeatsEnabled:           schemautil.OptionalBoolPointer(d, "emit_heartbeats_enabled"),
+				EmitBackwardHeartbeatsEnabled:   schemautil.OptionalBoolPointer(d, "emit_backward_heartbeats_enabled"),
 				OffsetSyncsTopicLocation:        d.Get("offset_syncs_topic_location").(string),
 			},
 		},

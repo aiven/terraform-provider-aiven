@@ -10,6 +10,8 @@ func GetUserConfig(kind string) *schema.Schema {
 		return cassandraUserConfig()
 	case "clickhouse":
 		return clickhouseUserConfig()
+	case "dragonfly":
+		return dragonflyUserConfig()
 	case "flink":
 		return flinkUserConfig()
 	case "grafana":
@@ -35,9 +37,9 @@ func GetUserConfig(kind string) *schema.Schema {
 	case "redis":
 		return redisUserConfig()
 	default:
-		panic("unknown user config type: " + kind)
+		return nil
 	}
 }
 func UserConfigTypes() []string {
-	return []string{"cassandra", "clickhouse", "flink", "grafana", "influxdb", "kafka", "kafka_connect", "kafka_mirrormaker", "m3aggregator", "m3db", "mysql", "opensearch", "pg", "redis"}
+	return []string{"cassandra", "clickhouse", "dragonfly", "flink", "grafana", "influxdb", "kafka", "kafka_connect", "kafka_mirrormaker", "m3aggregator", "m3db", "mysql", "opensearch", "pg", "redis"}
 }

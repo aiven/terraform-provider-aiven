@@ -15,17 +15,6 @@ func Ref[T any](v T) *T {
 	return &v
 }
 
-// Deref is a helper function that dereferences any pointer type and returns the value.
-func Deref[T any](p *T) T {
-	var result T
-
-	if p != nil {
-		result = *p
-	}
-
-	return result
-}
-
 // First is a helper function that returns the first argument passed in out of two.
 func First[T any, U any](a T, _ U) T {
 	return a

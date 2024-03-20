@@ -29,34 +29,34 @@ var aivenGCPVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: userconfig.Desc("GCP project ID.").ForceNew().Build(),
+		Description: userconfig.Desc("Google Cloud project ID.").ForceNew().Build(),
 	},
 	"peer_vpc": {
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: userconfig.Desc("GCP VPC network name.").ForceNew().Build(),
+		Description: userconfig.Desc("Google Cloud VPC network name.").ForceNew().Build(),
 	},
 	"state": {
 		Computed:    true,
 		Type:        schema.TypeString,
-		Description: "State of the peering connection",
+		Description: "State of the peering connection.",
 	},
 	"state_info": {
 		Computed:    true,
 		Type:        schema.TypeMap,
-		Description: "State-specific help or error information",
+		Description: "State-specific help or error information.",
 	},
 	"self_link": {
 		Computed:    true,
 		Type:        schema.TypeString,
-		Description: "Computed GCP network peering link",
+		Description: "Computed Google Cloud network peering link.",
 	},
 }
 
 func ResourceGCPVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The GCP VPC Peering Connection resource allows the creation and management of Aiven GCP VPC Peering Connections.",
+		Description:   "Creates and manages a Google Cloud VPC peering connection.",
 		CreateContext: resourceGCPVPCPeeringConnectionCreate,
 		ReadContext:   resourceGCPVPCPeeringConnectionRead,
 		DeleteContext: resourceGCPVPCPeeringConnectionDelete,

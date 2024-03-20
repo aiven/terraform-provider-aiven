@@ -33,7 +33,7 @@ func GetUserConfig(kind string) *schema.Schema {
 	case "rsyslog":
 		return rsyslogUserConfig()
 	default:
-		panic("unknown user config type: " + kind)
+		return nil
 	}
 }
 func UserConfigTypes() []string {

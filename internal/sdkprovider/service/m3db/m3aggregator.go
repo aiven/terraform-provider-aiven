@@ -6,12 +6,11 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 func aivenM3AggregatorSchema() map[string]*schema.Schema {
-	schemaM3 := schemautil.ServiceCommonSchema()
-	schemaM3[schemautil.ServiceTypeM3Aggregator] = &schema.Schema{
+	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeM3Aggregator)
+	s[schemautil.ServiceTypeM3Aggregator] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
 		Description: "M3 aggregator specific server provided values",
@@ -19,9 +18,7 @@ func aivenM3AggregatorSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	schemaM3[schemautil.ServiceTypeM3Aggregator+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypeM3Aggregator)
-
-	return schemaM3
+	return s
 }
 func ResourceM3Aggregator() *schema.Resource {
 	return &schema.Resource{

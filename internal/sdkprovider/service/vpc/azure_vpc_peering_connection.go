@@ -19,26 +19,26 @@ var aivenAzureVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		ForceNew:     true,
 		Required:     true,
 		Type:         schema.TypeString,
-		Description:  userconfig.Desc("The VPC the peering connection belongs to.").ForceNew().Build(),
+		Description:  userconfig.Desc("The ID of the Aiven VPC.").ForceNew().Build(),
 		ValidateFunc: validateVPCID,
 	},
 	"azure_subscription_id": {
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: userconfig.Desc("Azure Subscription ID.").ForceNew().Build(),
+		Description: userconfig.Desc("The ID of the Azure subscription in UUID4 format.").ForceNew().Build(),
 	},
 	"vnet_name": {
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: userconfig.Desc("Azure Network name.").ForceNew().Build(),
+		Description: userconfig.Desc("The name of the Azure VNet.").ForceNew().Build(),
 	},
 	"peer_resource_group": {
 		Required:    true,
 		ForceNew:    true,
 		Type:        schema.TypeString,
-		Description: userconfig.Desc("Azure resource group name of the peered VPC.").ForceNew().Build(),
+		Description: userconfig.Desc("The name of the Azure resource group associated with the VNet.").ForceNew().Build(),
 	},
 	"state": {
 		Computed:    true,
@@ -48,30 +48,30 @@ var aivenAzureVPCPeeringConnectionSchema = map[string]*schema.Schema{
 	"state_info": {
 		Computed:    true,
 		Type:        schema.TypeMap,
-		Description: "State-specific help or error information",
+		Description: "State-specific help or error information.",
 	},
 	"peering_connection_id": {
 		Computed:    true,
 		Type:        schema.TypeString,
-		Description: "Cloud provider identifier for the peering connection if available",
+		Description: "The ID of the cloud provider for the peering connection.",
 	},
 	"peer_azure_app_id": {
 		Required:    true,
 		ForceNew:    true,
 		Type:        schema.TypeString,
-		Description: userconfig.Desc("Azure app registration id in UUID4 form that is allowed to create a peering to the peer vnet.").ForceNew().Build(),
+		Description: userconfig.Desc("The ID of the Azure app that is allowed to create a peering to the Azure Virtual Network (VNet) in UUID4 format.").ForceNew().Build(),
 	},
 	"peer_azure_tenant_id": {
 		Required:    true,
 		ForceNew:    true,
 		Type:        schema.TypeString,
-		Description: userconfig.Desc("Azure tenant id in UUID4 form.").ForceNew().Build(),
+		Description: userconfig.Desc("The Azure tenant ID in UUID4 format.").ForceNew().Build(),
 	},
 }
 
 func ResourceAzureVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Azure VPC Peering Connection resource allows the creation and management of Aiven VPC Peering Connections.",
+		Description:   "Creates and manages an Azure VPC peering connection with an Aiven VPC.",
 		CreateContext: resourceAzureVPCPeeringConnectionCreate,
 		ReadContext:   resourceAzureVPCPeeringConnectionRead,
 		DeleteContext: resourceAzureVPCPeeringConnectionDelete,

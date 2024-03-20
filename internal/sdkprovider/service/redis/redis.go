@@ -6,11 +6,10 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 func redisSchema() map[string]*schema.Schema {
-	s := schemautil.ServiceCommonSchema()
+	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeRedis)
 	s[schemautil.ServiceTypeRedis] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
@@ -19,8 +18,6 @@ func redisSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	s[schemautil.ServiceTypeRedis+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypeRedis)
-
 	return s
 }
 

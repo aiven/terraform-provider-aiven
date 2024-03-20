@@ -12,7 +12,7 @@ import (
 func DatasourceAzurePrivatelink() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceAzurePrivatelinkRead,
-		Description: "The Azure Privatelink resource allows the creation and management of Aiven Azure Privatelink for a services.",
+		Description: "Gets information about an Azure Private Link connection for an Aiven service.",
 		Schema:      schemautil.ResourceSchemaAsDatasourceSchema(aivenAzurePrivatelinkSchema, "project", "service_name"),
 	}
 }

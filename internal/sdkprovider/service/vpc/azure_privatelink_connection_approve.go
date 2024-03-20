@@ -20,23 +20,23 @@ var aivenAzurePrivatelinkConnectionApprovalSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 		ForceNew:    false,
-		Description: "IP address of Azure private endpoint",
+		Description: "IP address of Azure private endpoint.",
 	},
 	"state": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Privatelink connection state",
+		Description: "The state of the Private Link connection.",
 	},
 	"privatelink_connection_id": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Privatelink connection id",
+		Description: "The ID of the Private Link connection.",
 	},
 }
 
 func ResourceAzurePrivatelinkConnectionApproval() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Azure privatelink approve resource waits for an aiven privatelink connection on a service and approves it with associated endpoint IP",
+		Description:   "Approves an Azure Private Link connection to an Aiven service with an associated endpoint IP.",
 		CreateContext: resourceAzurePrivatelinkConnectionApprovalUpdate,
 		ReadContext:   resourceAzurePrivatelinkConnectionApprovalRead,
 		UpdateContext: resourceAzurePrivatelinkConnectionApprovalUpdate,

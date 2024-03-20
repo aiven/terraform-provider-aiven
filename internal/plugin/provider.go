@@ -112,13 +112,13 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 	// List of resources that are currently available in the provider.
 	resources := []func() resource.Resource{
 		organization.NewOrganizationResource,
+		organization.NewOrganizationUserGroupMembersResource,
+		organization.NewOrganizationGroupProjectResource,
 	}
 
 	// Add to a list of resources that are currently in beta.
 	if util.IsBeta() {
 		betaResources := []func() resource.Resource{
-			organization.NewOrganizationUserGroupMembersResource,
-			organization.NewOrganizationGroupProjectResource,
 			organization.NewOrganizationApplicationUser,
 			organization.NewOrganizationApplicationUserToken,
 		}

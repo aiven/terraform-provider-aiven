@@ -11,18 +11,24 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
-<!-- TODO: uncomment when dragonfly is supported -->
-<!-- - Dragonfly support -->
-
+- Add Dragonfly resource (`aiven_dragonfly`) to allow for the creation and management of Dragonfly services
 - Use new user config generator to generate service integration and service integration endpoint configs
 - Fix `aiven_kafka_schema` version update
 - Add `external_aws_cloudwatch_logs`, `external_elasticsearch_logs_user_config`, `external_opensearch_logs_user_config`,
   `prometheus_user_config` service integration configs
 - Fix `aiven_kafka_schema` Protobuf normalization
+- Fix `aiven_service_integration_endpoint` for `external_postgresql` type
 - Add `AIVEN_ALLOW_IP_FILTER_PURGE` environment variable to allow purging of IP filters. This is a safety feature to
   prevent accidental purging of IP filters, which can lead to loss of access to services. To enable purging, set the
   environment variable to any value before running Terraform commands.
 - Use `TypeSet` for `ip_filter_object`
+- Fix incorrect behavior of `aiven_mirrormaker_replication_flow` schema fields:
+  - `sync_group_offsets_enabled`
+  - `sync_group_offsets_interval_seconds`
+  - `emit_backward_heartbeats_enabled`
+  - `offset_syncs_topic_location`
+  - `replication_policy_class`
+- Remove the beta flag for `aiven_organization_user_group_member` and `aiven_organization_group_project` resources 
 
 ## [4.14.0] - 2024-02-20
 

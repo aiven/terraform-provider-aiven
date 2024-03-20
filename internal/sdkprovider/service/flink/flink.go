@@ -10,11 +10,10 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 func aivenFlinkSchema() map[string]*schema.Schema {
-	aivenFlinkSchema := schemautil.ServiceCommonSchema()
+	aivenFlinkSchema := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeFlink)
 	aivenFlinkSchema[schemautil.ServiceTypeFlink] = &schema.Schema{
 		Type:        schema.TypeList,
 		MaxItems:    1,
@@ -35,8 +34,6 @@ func aivenFlinkSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	aivenFlinkSchema[schemautil.ServiceTypeFlink+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypeFlink)
-
 	return aivenFlinkSchema
 }
 

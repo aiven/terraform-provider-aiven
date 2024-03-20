@@ -24,33 +24,33 @@ var aivenAzurePrivatelinkSchema = map[string]*schema.Schema{
 		Required:    true,
 		Elem:        &schema.Schema{Type: schema.TypeString},
 		MaxItems:    16,
-		Description: userconfig.Desc("A List of allowed Subscription IDs").MaxLen(16).Build(),
+		Description: userconfig.Desc("A list of allowed subscription IDs.").MaxLen(16).Build(),
 	},
 	"azure_service_id": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Azure Privatelink service ID",
+		Description: "The Azure Private Link service ID.",
 	},
 	"azure_service_alias": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Azure Privatelink service alias",
+		Description: "The Azure Private Link service alias.",
 	},
 	"message": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Printable result of the Azure Privatelink request",
+		Description: "Printable result of the Azure Private Link request.",
 	},
 	"state": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Privatelink resource state",
+		Description: "The state of the Private Link resource.",
 	},
 }
 
 func ResourceAzurePrivatelink() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Azure Privatelink resource allows the creation and management of Aiven Azure Privatelink for a services.",
+		Description:   "Creates and manages an Azure Private Link for [selected Aiven services](https://aiven.io/docs/platform/howto/use-azure-privatelink) in a VPC.",
 		CreateContext: resourceAzurePrivatelinkCreate,
 		ReadContext:   resourceAzurePrivatelinkRead,
 		UpdateContext: resourceAzurePrivatelinkUpdate,

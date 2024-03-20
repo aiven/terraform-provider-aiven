@@ -126,7 +126,7 @@ func generate(kind string, data []byte, exclude []string) error {
 	}
 
 	// Panics if unknown kind requested
-	cases = append(cases, jen.Default().Block(jen.Panic(jen.Lit("unknown user config type: ").Op("+").Id("kind"))))
+	cases = append(cases, jen.Default().Block(jen.Return(jen.Nil())))
 
 	f := jen.NewFile(kind)
 	f.HeaderComment(codeGenerated)

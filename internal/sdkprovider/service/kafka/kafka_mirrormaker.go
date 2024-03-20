@@ -6,12 +6,11 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
-	kafkaMMSchema := schemautil.ServiceCommonSchema()
-	kafkaMMSchema[schemautil.ServiceTypeKafkaMirrormaker] = &schema.Schema{
+	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeKafkaMirrormaker)
+	s[schemautil.ServiceTypeKafkaMirrormaker] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
 		Description: "Kafka MirrorMaker 2 server provided values",
@@ -19,9 +18,7 @@ func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
 			Schema: map[string]*schema.Schema{},
 		},
 	}
-	kafkaMMSchema[schemautil.ServiceTypeKafkaMirrormaker+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypeKafkaMirrormaker)
-
-	return kafkaMMSchema
+	return s
 }
 func ResourceKafkaMirrormaker() *schema.Resource {
 	return &schema.Resource{
