@@ -20,24 +20,24 @@ var aivenAWSPrivatelinkSchema = map[string]*schema.Schema{
 	"principals": {
 		Type:        schema.TypeSet,
 		Required:    true,
-		Description: "List of allowed principals",
+		Description: "List of the ARNs of the AWS accounts or IAM users allowed to connect to the VPC endpoint.",
 		Elem:        &schema.Schema{Type: schema.TypeString},
 	},
 	"aws_service_id": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "AWS service ID",
+		Description: "AWS service ID.",
 	},
 	"aws_service_name": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "AWS service name",
+		Description: "AWS service name.",
 	},
 }
 
 func ResourceAWSPrivatelink() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The AWS Privatelink resource allows the creation and management of Aiven AWS Privatelink for a services.",
+		Description:   "Creates and manages an [AWS PrivateLink for Aiven services](https://aiven.io/docs/platform/howto/use-aws-privatelinks) in a VPC.",
 		CreateContext: resourceAWSPrivatelinkCreate,
 		ReadContext:   resourceAWSPrivatelinkRead,
 		UpdateContext: resourceAWSPrivatelinkUpdate,

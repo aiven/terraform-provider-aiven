@@ -3,12 +3,12 @@
 page_title: "aiven_gcp_vpc_peering_connection Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The GCP VPC Peering Connection resource allows the creation and management of Aiven GCP VPC Peering Connections.
+  Creates and manages a Google Cloud VPC peering connection.
 ---
 
 # aiven_gcp_vpc_peering_connection (Resource)
 
-The GCP VPC Peering Connection resource allows the creation and management of Aiven GCP VPC Peering Connections.
+Creates and manages a Google Cloud VPC peering connection.
 
 ## Example Usage
 
@@ -25,8 +25,8 @@ resource "aiven_gcp_vpc_peering_connection" "foo" {
 
 ### Required
 
-- `gcp_project_id` (String) GCP project ID. Changing this property forces recreation of the resource.
-- `peer_vpc` (String) GCP VPC network name. Changing this property forces recreation of the resource.
+- `gcp_project_id` (String) Google Cloud project ID. Changing this property forces recreation of the resource.
+- `peer_vpc` (String) Google Cloud VPC network name. Changing this property forces recreation of the resource.
 - `vpc_id` (String) The VPC the peering connection belongs to. Changing this property forces recreation of the resource.
 
 ### Optional
@@ -36,9 +36,9 @@ resource "aiven_gcp_vpc_peering_connection" "foo" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `self_link` (String) Computed GCP network peering link
-- `state` (String) State of the peering connection
-- `state_info` (Map of String) State-specific help or error information
+- `self_link` (String) Computed Google Cloud network peering link.
+- `state` (String) State of the peering connection.
+- `state_info` (Map of String) State-specific help or error information.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

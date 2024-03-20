@@ -1,1 +1,1 @@
-terraform import aiven_azure_privatelink.foo project/service_name
+terraform import aiven_azure_privatelink.main PROJECT/SERVICE_NAME

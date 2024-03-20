@@ -3,18 +3,18 @@
 page_title: "aiven_project_vpc Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Project VPC resource allows the creation and management of Aiven Project VPCs.
+  Creates and manages a VPC for an Aiven project.
 ---
 
 # aiven_project_vpc (Resource)
 
-The Project VPC resource allows the creation and management of Aiven Project VPCs.
+Creates and manages a VPC for an Aiven project.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_project_vpc" "myvpc" {
-  project      = aiven_project.myproject.project
+resource "aiven_project_vpc" "example_vpc" {
+  project      = data.aiven_project.example_project.project
   cloud_name   = "google-europe-west1"
   network_cidr = "192.168.1.0/24"
 
@@ -29,8 +29,8 @@ resource "aiven_project_vpc" "myvpc" {
 
 ### Required
 
-- `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. See the Service resource for additional information. Changing this property forces recreation of the resource.
-- `network_cidr` (String) Network address range used by the VPC like 192.168.0.0/24
+- `cloud_name` (String) The cloud provider and region where the service is hosted in the format `CLOUD_PROVIDER-REGION_NAME`. For example, `google-europe-west1` or `aws-us-east-2`. Changing this property forces recreation of the resource.
+- `network_cidr` (String) Network address range used by the VPC. For example, `192.168.0.0/24`.
 - `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
@@ -58,5 +58,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_project_vpc.myvpc project/id
+terraform import aiven_project_vpc.example_vpc PROJECT/ID
 ```
