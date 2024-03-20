@@ -63,12 +63,16 @@ func getUserConfig(kind userConfigType, name string) *schema.Schema {
 	case ServiceIntegrationEndpointUserConfig:
 		return serviceintegrationendpoint.GetUserConfig(name)
 	}
-	panic(fmt.Sprintf("unknown user config name %q with kind %q", name, kind))
+	return nil
 }
 
 // SetUserConfig sets user config schema for given kind and name
 func SetUserConfig(kind userConfigType, name string, s map[string]*schema.Schema) {
-	s[userConfigKey(kind, name)] = getUserConfig(kind, name)
+	userConfig := getUserConfig(kind, name)
+	if userConfig == nil {
+		panic(fmt.Sprintf("unknown user config for %s type %q", kind, name))
+	}
+	s[userConfigKey(kind, name)] = userConfig
 }
 
 func Expand(kind userConfigType, name string, d *schema.ResourceData) (map[string]any, error) {
@@ -82,6 +86,11 @@ func Expand(kind userConfigType, name string, d *schema.ResourceData) (map[strin
 // expand expands schema.ResourceData into a DTO map.
 // It takes schema.Schema to know how to turn a TF item into json.
 func expand(kind userConfigType, name string, d *schema.ResourceData) (map[string]any, error) {
+	if getUserConfig(kind, name) == nil {
+		// does not have a user config for given kind and name
+		return nil, nil
+	}
+
 	key := userConfigKey(kind, name)
 	state := &stateCompose{
 		key:      key,
@@ -292,6 +301,11 @@ func Flatten(kind userConfigType, name string, d *schema.ResourceData, dto map[s
 
 // flatten flattens DTO into a terraform compatible object and sets value to the field
 func flatten(kind userConfigType, name string, d *schema.ResourceData, dto map[string]any) error {
+	if getUserConfig(kind, name) == nil {
+		// does not have a user config for given kind and name
+		return nil
+	}
+
 	key := userConfigKey(kind, name)
 	prefix := fmt.Sprintf("%s.0.", key)
 

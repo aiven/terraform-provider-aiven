@@ -11,7 +11,6 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/server"
 )
 
-//go:generate go test -tags userconfig ./internal/schemautil/userconfig
 //go:generate go run ./ucgenerator/... --excludeServices elasticsearch
 
 // registryPrefix is the registry prefix for the provider.

@@ -37,7 +37,7 @@ func GetUserConfig(kind string) *schema.Schema {
 	case "redis":
 		return redisUserConfig()
 	default:
-		panic("unknown user config type: " + kind)
+		return nil
 	}
 }
 func UserConfigTypes() []string {
