@@ -28,6 +28,7 @@ nav_order: 1
   - `emit_backward_heartbeats_enabled`
   - `offset_syncs_topic_location`
   - `replication_policy_class`
+- Remove the beta flag for `aiven_organization_user_group_member` and `aiven_organization_group_project` resources 
 
 ## [4.14.0] - 2024-02-20
 

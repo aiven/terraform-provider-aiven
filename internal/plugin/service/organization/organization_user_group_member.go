@@ -81,7 +81,6 @@ func (r *organizationUserGroupMembersResource) Schema(
 			"Adds and manages users in a " +
 				"[user group](https://aiven.io/docs/platform/concepts/projects_accounts_access#groups).",
 		).
-			AvailabilityType(userconfig.Beta).
 			Build(),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{

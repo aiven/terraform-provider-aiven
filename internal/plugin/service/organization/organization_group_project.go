@@ -83,7 +83,6 @@ func (r *organizationGroupProjectResource) Schema(
 				"[group](https://aiven.io/docs/platform/concepts/projects_accounts_access#groups) of users as " +
 				"[members of a project](https://aiven.io/docs/platform/reference/project-member-privileges).",
 		).
-			AvailabilityType(userconfig.Beta).
 			Build(),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
