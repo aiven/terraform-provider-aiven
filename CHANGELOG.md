@@ -11,6 +11,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.15.0] - 2024-03-21
+
 - Add Dragonfly resource (`aiven_dragonfly`) to allow for the creation and management of Dragonfly services
 - Use new user config generator to generate service integration and service integration endpoint configs
 - Fix `aiven_kafka_schema` version update
