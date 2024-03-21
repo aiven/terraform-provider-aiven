@@ -17,7 +17,7 @@ resource "aiven_opensearch_user" "foo" {
   username     = "user-example"
 }
 
-resource "aiven_opensearch_security_config" "foo" {
+resource "aiven_opensearch_security_plugin_config" "foo" {
   project        = data.aiven_project.foo.project
   service_name   = aiven_opensearch.bar.service_name
   admin_password = "ThisIsATest123^=^"
