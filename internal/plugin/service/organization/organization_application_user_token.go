@@ -109,26 +109,27 @@ func (r *organizationApplicationUserToken) Schema(
 	resp *resource.SchemaResponse,
 ) {
 	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
-		Description: userconfig.Desc("Creates and manages an organization application user token in Aiven.").
+		Description: userconfig.Desc("Creates and manages an application user token. Review the" +
+			" [best practices](https://aiven.io/docs/platform/concepts/application-users#security-best-practices) for securing application users and their tokens.").
 			AvailabilityType(userconfig.Beta).
 			Build(),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Description: "Compound identifier of the organization application user token.",
+				Description: "Compound identifier of the application user token.",
 				Computed:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"organization_id": schema.StringAttribute{
-				Description: "Identifier of the organization the application user token belongs to.",
+				Description: "The ID of the organization the application user belongs to.",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"user_id": schema.StringAttribute{
-				Description: "Identifier of the application user the token belongs to.",
+				Description: "The ID of the application user the token is created for.",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -154,23 +155,22 @@ func (r *organizationApplicationUserToken) Schema(
 				},
 			},
 			"max_age_seconds": schema.NumberAttribute{
-				Description: "Time the token remains valid since creation (or since last use if " +
-					"extend_when_used is true).",
-				Optional: true,
+				Description: "The number of hours after which a token expires. Default session duration is 10 hours.",
+				Optional:    true,
 				PlanModifiers: []planmodifier.Number{
 					numberplanmodifier.RequiresReplace(),
 				},
 			},
 			"extend_when_used": schema.BoolAttribute{
-				Description: "True to extend token expiration time when token is used. Only applicable if " +
-					"max_age_seconds is specified.",
+				Description: "Extends the token session duration when the token is used. Only applicable if " +
+					"a value is set for `max_age_seconds`.",
 				Optional: true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.RequiresReplace(),
 				},
 			},
 			"scopes": schema.SetAttribute{
-				Description: "Scopes this token is restricted to if specified.",
+				Description: "Restricts the scopes for this token.",
 				Optional:    true,
 				ElementType: types.StringType,
 				PlanModifiers: []planmodifier.Set{
@@ -178,7 +178,7 @@ func (r *organizationApplicationUserToken) Schema(
 				},
 			},
 			"currently_active": schema.BoolAttribute{
-				Description: "True if API request was made with this access token.",
+				Description: "True if the API request was made with this token.",
 				Computed:    true,
 			},
 			"create_time": schema.StringAttribute{
@@ -186,12 +186,12 @@ func (r *organizationApplicationUserToken) Schema(
 				Computed:    true,
 			},
 			"created_manually": schema.BoolAttribute{
-				Description: "True for tokens explicitly created via the access_tokens API, false for tokens created " +
-					"via login.",
+				Description: "True for tokens explicitly created using the `access_tokens` API. False for tokens created " +
+					"when a user logs in.",
 				Computed: true,
 			},
 			"expiry_time": schema.StringAttribute{
-				Description: "Timestamp when the access token will expire unless extended, if ever.",
+				Description: "Timestamp when the access token will expire unless extended.",
 				Computed:    true,
 			},
 			"last_ip": schema.StringAttribute{
@@ -199,7 +199,7 @@ func (r *organizationApplicationUserToken) Schema(
 				Computed:    true,
 			},
 			"last_used_time": schema.StringAttribute{
-				Description: "Timestamp when the access token was last used, if ever.",
+				Description: "Timestamp when the access token was last used.",
 				Computed:    true,
 			},
 			"last_user_agent": schema.StringAttribute{

@@ -139,6 +139,7 @@ func (db *DescriptionBuilder) Build() string {
 		builder.WriteRune(' ')
 
 		const availabilityCommonPart = `
+
 **This %[1]s is in the %[2]s stage and may change without notice.** %[3]s
 the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s.`
 
@@ -155,7 +156,7 @@ the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s
 				availabilityCommonPart,
 				db.entityType.String(),
 				"limited availability",
-				"\nTo enable this feature, contact the [sales team](mailto:sales@aiven.io). After it's enabled, set",
+				" To enable this feature, contact the [sales team](mailto:sales@aiven.io). After it's enabled, set",
 			))
 		}
 	}
