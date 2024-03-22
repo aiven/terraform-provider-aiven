@@ -94,6 +94,11 @@ func datadogUserConfig() *schema.Schema {
 			"opensearch": {
 				Description: "Datadog Opensearch Options",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"cluster_stats_enabled": {
+						Description: "Enable Datadog Opensearch Cluster Monitoring.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"index_stats_enabled": {
 						Description: "Enable Datadog Opensearch Index Monitoring.",
 						Optional:    true,

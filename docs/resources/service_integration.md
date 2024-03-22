@@ -155,6 +155,7 @@ Optional:
 
 Optional:
 
+- `cluster_stats_enabled` (Boolean) Enable Datadog Opensearch Cluster Monitoring.
 - `index_stats_enabled` (Boolean) Enable Datadog Opensearch Index Monitoring.
 - `pending_task_stats_enabled` (Boolean) Enable Datadog Opensearch Pending Task Monitoring.
 - `pshard_stats_enabled` (Boolean) Enable Datadog Opensearch Primary Shard Monitoring.
