@@ -5,7 +5,7 @@ resource "aiven_organization_user_group" "example" {
   name = "Example group"
 }
 
-resource "aiven_organization_user_group_project" "example" {
+resource "aiven_organization_group_project" "example" {
   group_id = aiven_organization_user_group.example.group_id
   project = aiven_project.example.project
   role = "admin"
