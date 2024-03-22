@@ -22,7 +22,7 @@ func dragonflySchema() map[string]*schema.Schema {
 
 func ResourceDragonfly() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Dragonfly resource allows the creation and management of Aiven Dragonfly services.",
+		Description:   "Creates and manages an [Aiven for Dragonfly®](https://aiven.io/docs/products/dragonfly/concepts/overview) service.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeDragonfly),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
