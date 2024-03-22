@@ -143,6 +143,7 @@ Read-Only:
 
 Read-Only:
 
+- `cluster_stats_enabled` (Boolean)
 - `index_stats_enabled` (Boolean)
 - `pending_task_stats_enabled` (Boolean)
 - `pshard_stats_enabled` (Boolean)

@@ -197,12 +197,10 @@ github.com/ProtonMail/go-crypto v1.1.0-alpha.0/go.mod h1:rA3QumHc/FZ8pAHreoekgiA
 github.com/agext/levenshtein v1.2.1/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
-github.com/aiven/aiven-go-client/v2 v2.13.0 h1:N2c+EdRh9gg2PBKAwII6vMy9+WnDnbVU4Uy1mQGmMKg=
-github.com/aiven/aiven-go-client/v2 v2.13.0/go.mod h1:x0xhzxWEKAwKv0xY5FvECiI6tesWshcPHvjwl0B/1SU=
 github.com/aiven/aiven-go-client/v2 v2.14.0 h1:4FEbB3baj+jA3Gd3vXpzoN6Vi9lGLCcIAYo75vSnx4k=
 github.com/aiven/aiven-go-client/v2 v2.14.0/go.mod h1:x0xhzxWEKAwKv0xY5FvECiI6tesWshcPHvjwl0B/1SU=
-github.com/aiven/go-api-schemas v1.65.0 h1:r4ooY83kWwkQQPCq55W4oHitNv+SZ2fzVDxuY3KwU28=
-github.com/aiven/go-api-schemas v1.65.0/go.mod h1:/bPxBUHza/2Aeer6hIIdB++GxKiw9K1KCBtRa2rtZ5I=
+github.com/aiven/go-api-schemas v1.66.0 h1:Bn7E4CLcV9GMOdwmVtPEPud/9AKh/1fw7qT3epV+LXE=
+github.com/aiven/go-api-schemas v1.66.0/go.mod h1:/bPxBUHza/2Aeer6hIIdB++GxKiw9K1KCBtRa2rtZ5I=
 github.com/aiven/go-client-codegen v0.3.0 h1:RoIHSjMpJ+adYDJPfu9TBHaikQzMPocp1bwD2gqritc=
 github.com/aiven/go-client-codegen v0.3.0/go.mod h1:qQ5dwRfNnGS4eAYk7JdC5htQI85g7eA/e71ZLyY8pQw=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
@@ -265,8 +263,6 @@ github.com/envoyproxy/go-control-plane v0.10.2-0.20220325020618-49ff273808a1/go.
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
 github.com/envoyproxy/protoc-gen-validate v1.0.4 h1:gVPz/FMfvh57HdSJQyvBtF00j8JU4zdyUgIUNhlgg0A=
 github.com/envoyproxy/protoc-gen-validate v1.0.4/go.mod h1:qys6tmnRsYrQqIhm2bvKZH4Blx/1gTIZ2UKVY1M+Yew=
-github.com/ettle/strcase v0.2.0 h1:fGNiVF21fHXpX1niBgk0aROov1LagYsOwV/xqKDKR/Q=
-github.com/ettle/strcase v0.2.0/go.mod h1:DajmHElDSaX76ITe3/VHVyMin4LWSJN5Z909Wp+ED1A=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
 github.com/fatih/color v1.13.0/go.mod h1:kLAiJbzzSOZDVNGyDpeOxJ47H46qBXwg5ILebYFFOfk=
 github.com/fatih/color v1.16.0 h1:zmkK9Ngbjj+K0yRhTVONQh1p/HknKYSlNT+vZCzyokM=
@@ -394,8 +390,8 @@ github.com/googleapis/gax-go/v2 v2.12.0 h1:A+gCJKdRfqXkr+BIRGtZLibNXf0m1f9E4HG56
 github.com/googleapis/gax-go/v2 v2.12.0/go.mod h1:y+aIqrI5eb1YGMVJfuV3185Ts/D7qKpsEkdD5+I6QGU=
 github.com/googleapis/go-type-adapters v1.0.0/go.mod h1:zHW75FOG2aur7gAO2B+MLby+cLsWGBF62rFAi7WjWO4=
 github.com/grpc-ecosystem/grpc-gateway v1.16.0/go.mod h1:BDjrQk3hbvj6Nolgz8mAMFbcEtjT1g+wF4CSlocrBnw=
-github.com/gruntwork-io/terratest v0.46.12 h1:yz2mFk0GKnkn2Cofb587mePBkATl9HFMOlfRzZbO4D8=
-github.com/gruntwork-io/terratest v0.46.12/go.mod h1:8jNhyxN3JLlzE6rmqJZa7R7UFYtUumt0NkCeJQOtxt4=
+github.com/gruntwork-io/terratest v0.46.13 h1:FDaEoZ7DtkomV8pcwLdBV/VsytdjnPRqJkIriYEYwjs=
+github.com/gruntwork-io/terratest v0.46.13/go.mod h1:8sxu3Qup8TxtbzOHzq0MUrQffJj/G61/OwlsReaCwpo=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/errwrap v1.1.0 h1:OxrOeh75EUXMY8TBjag2fzXGZ40LB6IKw45YeGUDY2I=
 github.com/hashicorp/errwrap v1.1.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
@@ -437,8 +433,8 @@ github.com/hashicorp/terraform-exec v0.20.0 h1:DIZnPsqzPGuUnq6cH8jWcPunBfY+C+M8J
 github.com/hashicorp/terraform-exec v0.20.0/go.mod h1:ckKGkJWbsNqFKV1itgMnE0hY9IYf1HoiekpuN0eWoDw=
 github.com/hashicorp/terraform-json v0.21.0 h1:9NQxbLNqPbEMze+S6+YluEdXgJmhQykRyRNd+zTI05U=
 github.com/hashicorp/terraform-json v0.21.0/go.mod h1:qdeBs11ovMzo5puhrRibdD6d2Dq6TyE/28JiU4tIQxk=
-github.com/hashicorp/terraform-plugin-framework v1.6.1 h1:hw2XrmUu8d8jVL52ekxim2IqDc+2Kpekn21xZANARLU=
-github.com/hashicorp/terraform-plugin-framework v1.6.1/go.mod h1:aJI+n/hBPhz1J+77GdgNfk5svW12y7fmtxe/5L5IuwI=
+github.com/hashicorp/terraform-plugin-framework v1.7.0 h1:wOULbVmfONnJo9iq7/q+iBOBJul5vRovaYJIu2cY/Pw=
+github.com/hashicorp/terraform-plugin-framework v1.7.0/go.mod h1:jY9Id+3KbZ17OMpulgnWLSfwxNVYSoYBQFTgsx044CI=
 github.com/hashicorp/terraform-plugin-framework-timeouts v0.4.1 h1:gm5b1kHgFFhaKFhm4h2TgvMUlNzFAtUqlcOWnWPm+9E=
 github.com/hashicorp/terraform-plugin-framework-timeouts v0.4.1/go.mod h1:MsjL1sQ9L7wGwzJ5RjcI6FzEMdyoBnw+XK8ZnOvQOLY=
 github.com/hashicorp/terraform-plugin-framework-validators v0.12.0 h1:HOjBuMbOEzl7snOdOoUfE2Jgeto6JOjLVQ39Ls2nksc=
