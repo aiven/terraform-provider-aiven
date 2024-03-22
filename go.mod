@@ -8,9 +8,8 @@ require (
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/dave/jennifer v1.7.0
 	github.com/docker/go-units v0.5.0
-	github.com/ettle/strcase v0.2.0
 	github.com/google/go-cmp v0.6.0
-	github.com/gruntwork-io/terratest v0.46.12
+	github.com/gruntwork-io/terratest v0.46.13
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/terraform-plugin-framework v1.6.1
 	github.com/hashicorp/terraform-plugin-go v0.22.1
