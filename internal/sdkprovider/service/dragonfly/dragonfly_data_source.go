@@ -9,7 +9,7 @@ import (
 func DatasourceDragonfly() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: schemautil.DatasourceServiceRead,
-		Description: "The Dragonfly data source provides information about the existing Aiven Dragonfly service.",
+		Description: "Gets information about an Aiven for Dragonfly® service.",
 		Schema:      schemautil.ResourceSchemaAsDatasourceSchema(dragonflySchema(), "project", "service_name"),
 	}
 }
