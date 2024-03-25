@@ -23,7 +23,7 @@ func DatasourceBillingGroup() *schema.Resource {
 
 	return &schema.Resource{
 		ReadContext: datasourceBillingGroupRead,
-		Description: "Provides information about an existing billing group.",
+		Description: "Gets information about a billing group.",
 		Schema:      s,
 	}
 }

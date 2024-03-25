@@ -297,7 +297,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Type:        schema.TypeSet,
 			Elem:        TechEmailsResourceSchema,
 			Optional:    true,
-			Description: "Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability.",
+			Description: " The email addresses for [service contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this service. You can also set email contacts at the project level.",
 		},
 	}
 }

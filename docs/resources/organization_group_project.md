@@ -14,7 +14,7 @@ Adds and manages a [group](https://aiven.io/docs/platform/concepts/projects_acco
 
 ```terraform
 resource "aiven_project" "example_project" {
-  project    = "Example project"
+  project    = "example-project"
   parent_id = aiven_organization.main.id
 }
 
