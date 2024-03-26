@@ -1,4 +1,4 @@
-data "aiven_project" "myproject" {
-  project = "<PROJECT_NAME>"
+data "aiven_project" "example_project" {
+  project = "example-project"
 }
 

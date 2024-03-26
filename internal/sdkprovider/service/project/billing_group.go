@@ -112,7 +112,7 @@ var aivenBillingGroupSchema = map[string]*schema.Schema{
 
 func ResourceBillingGroup() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Creates and manages billing groups and assigns them to projects.",
+		Description:   "Creates and manages [billing groups](https://aiven.io/docs/platform/concepts/billing-groups) and assigns them to projects.",
 		CreateContext: resourceBillingGroupCreate,
 		ReadContext:   resourceBillingGroupRead,
 		UpdateContext: resourceBillingGroupUpdate,

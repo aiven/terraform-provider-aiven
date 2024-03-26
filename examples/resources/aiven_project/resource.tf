@@ -1,4 +1,4 @@
 resource "aiven_project" "example_project" {
-  project    = "Example project"
+  project    = "example-project"
   parent_id = aiven_organization.main.id
 }
