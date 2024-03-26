@@ -1,1 +1,1 @@
-terraform import aiven_clickhouse_role.foo project/service_name/role
+terraform import aiven_clickhouse_role.foo PROJECT/SERVICE_NAME/ROLE

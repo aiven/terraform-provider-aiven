@@ -1,1 +1,1 @@
-terraform import aiven_pg.pg project/service_name
+terraform import aiven_pg.pg PROJECT/SERVICE_NAME

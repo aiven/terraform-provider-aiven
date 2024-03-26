@@ -87,5 +87,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_account_authentication.foo account_id/authentication_id
+terraform import aiven_account_authentication.foo ACCOUNT_ID/AUTHENTICATION_ID
 ```

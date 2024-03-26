@@ -61,5 +61,5 @@ Optional:
 ## Import
 Import is supported using the following syntax:
 ```shell
-terraform import aiven_account_team_member.foo account_id/team_id/user_email
+terraform import aiven_account_team_member.foo ACCOUNT_ID/TEAM_ID/USER_EMAIL
 ```

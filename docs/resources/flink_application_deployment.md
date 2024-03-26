@@ -27,8 +27,8 @@ resource "aiven_flink_application_deployment" "deployment" {
 ### Required
 
 - `application_id` (String) Application ID
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `version_id` (String) ApplicationVersion ID
 
 ### Optional
@@ -60,5 +60,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_flink_application_deployment.foo_deploy project/service/application_id/application_version_id/deployment_id
+terraform import aiven_flink_application_deployment.foo_deploy PROJECT/SERVICE/APPLICATION_ID/APPLICATION_VERSION_ID/DEPLOYMENT_ID
 ```

@@ -24,11 +24,11 @@ data "aiven_project_user" "mytestuser" {
 
 ### Required
 
-- `email` (String) Email address of the user. Should be lowercase. Changing this property forces recreation of the resource.
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `email` (String) Email address of the user in lowercase. Changing this property forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Read-Only
 
-- `accepted` (Boolean) Whether the user has accepted the request to join the project; adding user to a project sends an invitation to the target user and the actual membership is only created once the user accepts the invitation.
+- `accepted` (Boolean) Whether the user has accepted the request to join the project. Users get an invite and become project members after accepting the invite.
 - `id` (String) The ID of this resource.
 - `member_type` (String) Project membership type. The possible values are `admin`, `developer` and `operator`.

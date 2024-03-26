@@ -28,8 +28,8 @@ resource "aiven_kafka_acl" "mytestacl" {
 ### Required
 
 - `permission` (String) Kafka permission to grant. The possible values are `admin`, `read`, `readwrite` and `write`. Changing this property forces recreation of the resource.
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `topic` (String) Topic name pattern for the ACL entry. Changing this property forces recreation of the resource.
 - `username` (String) Username pattern for the ACL entry. Changing this property forces recreation of the resource.
 
@@ -58,5 +58,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_kafka_acl.mytestacl project/service_name/id
+terraform import aiven_kafka_acl.mytestacl PROJECT/SERVICE_NAME/ID
 ```

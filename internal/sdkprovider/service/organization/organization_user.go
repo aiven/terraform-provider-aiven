@@ -57,15 +57,15 @@ var aivenOrganizationUserSchema = map[string]*schema.Schema{
 func ResourceOrganizationUser() *schema.Resource {
 	return &schema.Resource{
 		Description: `
-		**This resource is deprecated**. Use the ` + "`aiven_organization_user`" + ` data source instead.
+		**This resource is deprecated**. Users cannot be invited to an organization using Terraform.
+		Use the [Aiven Console](https://console.aiven.io/) to [invite users](https://aiven.io/docs/platform/howto/manage-org-users)
+		to your organization. 
+		
+After the user accepts the invite you can get their information using the ` + "`aiven_organization_user`" + `
+data source. You can manage user access to projects with the ` + "`aiven_organization_user_group`" + `, 
+` + "`aiven_organization_user_group_member`" + `, and ` + "`aiven_organization_group_project`" + ` resources.
 
 The organization user resource allows the creation and management of an Aiven organization user.
-
-During the creation of ` + "`aiven_organization_user`" + `resource, an email invitation will be sent
-to a user using ` + "`user_email`" + ` address. If the user accepts an invitation, they will become
-a member of the organization. The deletion of ` + "`aiven_organization_user`" + ` will not only
-delete the invitation if one was sent but not yet accepted by the user, it will also 
-eliminate the member from the organization if one has accepted an invitation previously.
 `,
 		CreateContext: resourceOrganizationUserCreate,
 		ReadContext:   resourceOrganizationUserRead,
@@ -76,12 +76,11 @@ eliminate the member from the organization if one has accepted an invitation pre
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 		Schema:   aivenOrganizationUserSchema,
 		DeprecationMessage: `
-This resource is deprecated; please use aiven_organization_user data source instead. 
-Invitation of organization users is not supported anymore via Terraform. Therefore 
-creation of this resource is not supported anymore. We recommend using WebUI to create
-and organization user invitations. Upon receiving an invitation, a user can accept it 
-using WebUI. Once accepted, the user will become a member of the organization and will 
-be able to access it via Terraform.
+This resource is deprecated. Users cannot be invited to an organization using Terraform.
+Use the Aiven Console to invite users to your organization. After the user accepts the invite
+you can get their information using the aiven_organization_user data source. You can manage
+user access to projects with the aiven_organization_user_group, aiven_organization_user_group_member,
+and aiven_organization_group_project resources.
 		`,
 	}
 }

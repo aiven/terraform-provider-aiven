@@ -14,7 +14,7 @@ import (
 func GetACLUserValidateFunc() schema.SchemaValidateFunc { //nolint:staticcheck
 	return validation.StringMatch(
 		regexp.MustCompile(`^[-._*?A-Za-z0-9]+$`),
-		"Must consist of alpha-numeric characters, underscores, dashes, dots and glob characters '*' and '?'")
+		"Must consist of alpha-numeric characters, underscores, dashes, dots, and glob characters '*' and '?'")
 }
 
 //goland:noinspection GoDeprecation
@@ -30,7 +30,7 @@ var (
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringMatch(regexp.MustCompile("^[a-zA-Z0-9_-]*$"), "project name should be alphanumeric"),
-		Description:  userconfig.Desc("Identifies the project this resource belongs to.").ForceNew().Referenced().Build(),
+		Description:  userconfig.Desc("The name of the project this resource belongs to.").ForceNew().Referenced().Build(),
 	}
 
 	CommonSchemaServiceNameReference = &schema.Schema{
@@ -38,7 +38,7 @@ var (
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringMatch(regexp.MustCompile("^[a-zA-Z0-9_-]*$"), "common name should be alphanumeric"),
-		Description:  userconfig.Desc("Specifies the name of the service that this resource belongs to.").ForceNew().Referenced().Build(),
+		Description:  userconfig.Desc("The name of the service that this resource belongs to.").ForceNew().Referenced().Build(),
 	}
 )
 

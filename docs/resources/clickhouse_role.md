@@ -34,9 +34,9 @@ resource "aiven_clickhouse_role" "foo" {
 
 ### Required
 
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `role` (String) The role that is to be created. Changing this property forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
 
@@ -62,5 +62,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_clickhouse_role.foo project/service_name/role
+terraform import aiven_clickhouse_role.foo PROJECT/SERVICE_NAME/ROLE
 ```

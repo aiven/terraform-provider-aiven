@@ -1,1 +1,1 @@
-terraform import aiven_influxdb_user.foo project/service_name/username
+terraform import aiven_influxdb_user.foo PROJECT/SERVICE_NAME/USERNAME

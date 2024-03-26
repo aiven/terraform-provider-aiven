@@ -17,6 +17,6 @@ resource "aiven_organization_user_group_member" "project_admin" {
 
 resource "aiven_organization_group_project" "example" {
   group_id = aiven_organization_user_group.example.group_id
-  project = aiven_project.example_project.project
+  project = data.aiven_project.example_project.project
   role = "admin"
 }
