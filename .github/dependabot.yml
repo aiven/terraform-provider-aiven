@@ -8,11 +8,11 @@ updates:
       main:
         applies-to: version-updates
         patterns:
-          - '*'
+          - "*"
       sec:
         applies-to: security-updates
         patterns:
-          - '*'
+          - "*"
   - package-ecosystem: gomod
     directory: /
     schedule:
@@ -24,11 +24,11 @@ updates:
       main:
         applies-to: version-updates
         patterns:
-          - '*'
+          - "*"
       sec:
         applies-to: security-updates
         patterns:
-          - '*'
+          - "*"
   - package-ecosystem: gomod
     directory: /tools
     schedule:
@@ -40,8 +40,8 @@ updates:
       main:
         applies-to: version-updates
         patterns:
-          - '*'
+          - "*"
       sec:
         applies-to: security-updates
         patterns:
-          - '*'
+          - "*"
