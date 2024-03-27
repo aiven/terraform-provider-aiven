@@ -31,8 +31,8 @@ resource "aiven_connection_pool" "mytestpool" {
 
 - `database_name` (String) The name of the database the pool connects to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `pool_name` (String) The name of the created pool. Changing this property forces recreation of the resource.
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
 
@@ -62,5 +62,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_connection_pool.mytestpool project/service_name/pool_name
+terraform import aiven_connection_pool.mytestpool PROJECT/SERVICE_NAME/POOL_NAME
 ```

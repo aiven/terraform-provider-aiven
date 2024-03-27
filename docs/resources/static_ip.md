@@ -18,7 +18,7 @@ The aiven_static_ip resource allows the creation and deletion of static ips. Ple
 ### Required
 
 - `cloud_name` (String) Specifies the cloud that the static ip belongs to. Changing this property forces recreation of the resource.
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
 

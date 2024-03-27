@@ -40,9 +40,9 @@ resource "aiven_kafka_topic" "mytesttopic" {
 ### Required
 
 - `partitions` (Number) The number of partitions to create in the topic.
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `replication` (Number) The replication factor for the topic.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `topic_name` (String) The name of the topic. Changing this property forces recreation of the resource.
 
 ### Optional
@@ -118,5 +118,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_kafka_topic.mytesttopic project/service_name/topic_name
+terraform import aiven_kafka_topic.mytesttopic PROJECT/SERVICE_NAME/TOPIC_NAME
 ```
