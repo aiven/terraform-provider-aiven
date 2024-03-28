@@ -156,7 +156,7 @@ func resourceAWSPrivatelinkUpdate(ctx context.Context, d *schema.ResourceData, m
 		ServiceName: serviceName,
 	}
 
-	_, err = w.Conf(d.Timeout(schema.TimeoutCreate)).WaitForStateContext(ctx)
+	_, err = w.Conf(d.Timeout(schema.TimeoutUpdate)).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for AWS privatelink to be updated: %s", err)
 	}
@@ -207,10 +207,11 @@ func (w *AWSPrivatelinkWaiter) Conf(timeout time.Duration) *retry.StateChangeCon
 	log.Printf("[DEBUG] Create waiter timeout %.0f minutes", timeout.Minutes())
 
 	return &retry.StateChangeConf{
-		Pending: []string{"creating"},
-		Target:  []string{"active"},
-		Refresh: w.RefreshFunc(),
-		Delay:   10 * time.Second,
-		Timeout: timeout,
+		Pending:    []string{"creating"},
+		Target:     []string{"active"},
+		Refresh:    w.RefreshFunc(),
+		Delay:      common.DefaultStateChangeDelay,
+		Timeout:    timeout,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 }

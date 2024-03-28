@@ -130,9 +130,9 @@ func waitForGCPPrivatelinkToBeActive(
 
 			return pl, pl.State, nil
 		},
-		Delay:      10 * time.Second,
+		Delay:      common.DefaultStateChangeDelay,
 		Timeout:    t,
-		MinTimeout: 2 * time.Second,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 }
 
@@ -164,9 +164,9 @@ func resourceGCPPrivatelinkDelete(ctx context.Context, d *schema.ResourceData, m
 
 			return pl, pl.State, nil
 		},
-		Delay:      10 * time.Second,
+		Delay:      common.DefaultStateChangeDelay,
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		MinTimeout: 2 * time.Second,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 
 	_, err = stateChangeConf.WaitForStateContext(ctx)

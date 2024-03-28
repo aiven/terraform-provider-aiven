@@ -170,9 +170,9 @@ func resourceKafkaConnectorRead(ctx context.Context, d *schema.ResourceData, m i
 
 			return list, "OK", nil
 		},
-		Delay:      10 * time.Second,
+		Delay:      common.DefaultStateChangeDelay,
 		Timeout:    d.Timeout(schema.TimeoutRead),
-		MinTimeout: 2 * time.Second,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 	res, err := stateChangeConf.WaitForStateContext(ctx)
 	if err != nil {

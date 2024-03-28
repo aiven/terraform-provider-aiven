@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -83,9 +84,9 @@ func waitForAzureConnectionState(
 
 			return plConnection, plConnection.State, nil
 		},
-		Delay:      10 * time.Second,
+		Delay:      common.DefaultStateChangeDelay,
 		Timeout:    t,
-		MinTimeout: 2 * time.Second,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 }
 
@@ -104,7 +105,14 @@ func resourceAzurePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *sc
 	pending := []string{""}
 	target := []string{"pending-user-approval", "user-approved", "connected", "active"}
 
-	_, err = waitForAzureConnectionState(ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target).WaitForStateContext(ctx)
+	timeout := d.Timeout(schema.TimeoutUpdate)
+	if d.IsNewResource() {
+		timeout = d.Timeout(schema.TimeoutCreate)
+	}
+
+	_, err = waitForAzureConnectionState(
+		ctx, client, project, serviceName, timeout, pending, target,
+	).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for privatelink connection after refresh: %s", err)
 	}
@@ -131,7 +139,9 @@ func resourceAzurePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *sc
 	pending = []string{"user-approved"}
 	target = []string{"connected"}
 
-	_, err = waitForAzureConnectionState(ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target).WaitForStateContext(ctx)
+	_, err = waitForAzureConnectionState(
+		ctx, client, project, serviceName, timeout, pending, target,
+	).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for privatelink connection after approval: %s", err)
 	}
@@ -147,7 +157,9 @@ func resourceAzurePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *sc
 	pending = []string{"connected"}
 	target = []string{"active"}
 
-	_, err = waitForAzureConnectionState(ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target).WaitForStateContext(ctx)
+	_, err = waitForAzureConnectionState(
+		ctx, client, project, serviceName, timeout, pending, target,
+	).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for privatelink connection after update: %s", err)
 	}
