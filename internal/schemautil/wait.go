@@ -33,9 +33,9 @@ func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, m inter
 	conf := &retry.StateChangeConf{
 		Pending:                   []string{aivenPendingState, aivenRebalancingState, aivenServicesStartingState},
 		Target:                    []string{aivenTargetState},
-		Delay:                     10 * time.Second,
+		Delay:                     common.DefaultStateChangeDelay,
 		Timeout:                   timeout,
-		MinTimeout:                2 * time.Second,
+		MinTimeout:                common.DefaultStateChangeMinTimeout,
 		ContinuousTargetOccurence: 5,
 		Refresh: func() (interface{}, string, error) {
 			service, err := client.Services.Get(ctx, projectName, serviceName)
@@ -83,15 +83,15 @@ func WaitForServiceUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
 
-	timeout := d.Timeout(schema.TimeoutCreate)
+	timeout := d.Timeout(schema.TimeoutUpdate)
 	log.Printf("[DEBUG] Service update waiter timeout %.0f minutes", timeout.Minutes())
 
 	conf := &retry.StateChangeConf{
 		Pending:                   []string{"updating"},
 		Target:                    []string{"updated"},
-		Delay:                     10 * time.Second,
+		Delay:                     common.DefaultStateChangeDelay,
 		Timeout:                   timeout,
-		MinTimeout:                2 * time.Second,
+		MinTimeout:                common.DefaultStateChangeMinTimeout,
 		ContinuousTargetOccurence: 5,
 		Refresh: func() (interface{}, string, error) {
 			service, err := client.Services.Get(ctx, projectName, serviceName)
@@ -136,9 +136,9 @@ func WaitStaticIpsDissassociation(ctx context.Context, d *schema.ResourceData, m
 	conf := &retry.StateChangeConf{
 		Pending:                   []string{"doing"},
 		Target:                    []string{"done"},
-		Delay:                     10 * time.Second,
+		Delay:                     common.DefaultStateChangeDelay,
 		Timeout:                   timeout,
-		MinTimeout:                2 * time.Second,
+		MinTimeout:                common.DefaultStateChangeMinTimeout,
 		ContinuousTargetOccurence: 5,
 		Refresh: func() (interface{}, string, error) {
 			if dis, err := staticIpsAreDisassociated(ctx, d, m); err != nil {
@@ -169,9 +169,9 @@ func WaitForDeletion(ctx context.Context, d *schema.ResourceData, m interface{})
 	conf := &retry.StateChangeConf{
 		Pending:                   []string{"deleting"},
 		Target:                    []string{"deleted"},
-		Delay:                     10 * time.Second,
+		Delay:                     common.DefaultStateChangeDelay,
 		Timeout:                   timeout,
-		MinTimeout:                20 * time.Second,
+		MinTimeout:                common.DefaultStateChangeMinTimeout,
 		ContinuousTargetOccurence: 5,
 		Refresh: func() (interface{}, string, error) {
 			_, err := client.Services.Get(ctx, projectName, serviceName)

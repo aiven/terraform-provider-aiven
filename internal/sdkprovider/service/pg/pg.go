@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 )
@@ -157,7 +158,7 @@ func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				TaskID:      t.Task.Id,
 			}
 
-			taskI, err := w.Conf(d.Timeout(schema.TimeoutDefault)).WaitForStateContext(ctx)
+			taskI, err := w.Conf(d.Timeout(schema.TimeoutUpdate)).WaitForStateContext(ctx)
 			if err != nil {
 				return diag.Errorf("error waiting for Aiven service task to be DONE: %s", err)
 			}
@@ -213,9 +214,9 @@ func (w *ServiceTaskWaiter) Conf(timeout time.Duration) *retry.StateChangeConf {
 		Pending:                   []string{"IN_PROGRESS"},
 		Target:                    []string{"DONE"},
 		Refresh:                   w.RefreshFunc(),
-		Delay:                     10 * time.Second,
+		Delay:                     common.DefaultStateChangeDelay,
 		Timeout:                   timeout,
-		MinTimeout:                2 * time.Second,
+		MinTimeout:                common.DefaultStateChangeMinTimeout,
 		ContinuousTargetOccurence: 3,
 	}
 }

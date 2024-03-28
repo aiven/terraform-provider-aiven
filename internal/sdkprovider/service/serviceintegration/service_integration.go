@@ -149,7 +149,7 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 	}
 	d.SetId(schemautil.BuildResourceID(projectName, res.ServiceIntegrationID))
 
-	if err = resourceServiceIntegrationWaitUntilActive(ctx, d, m); err != nil {
+	if err = resourceServiceIntegrationWaitUntilActive(ctx, d, m, d.Timeout(schema.TimeoutCreate)); err != nil {
 		return diag.Errorf("unable to wait for service integration to become active: %s", err)
 	}
 	return resourceServiceIntegrationRead(ctx, d, m)
@@ -209,7 +209,7 @@ func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		return diag.Errorf("unable to update service integration: %s", err)
 	}
-	if err = resourceServiceIntegrationWaitUntilActive(ctx, d, m); err != nil {
+	if err = resourceServiceIntegrationWaitUntilActive(ctx, d, m, d.Timeout(schema.TimeoutUpdate)); err != nil {
 		return diag.Errorf("unable to wait for service integration to become active: %s", err)
 	}
 
@@ -260,7 +260,7 @@ func resourceServiceIntegrationCheckForPreexistingResource(ctx context.Context, 
 	return nil, nil
 }
 
-func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.ResourceData, m interface{}) error {
+func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.ResourceData, m interface{}, timeout time.Duration) error {
 	const (
 		active    = "ACTIVE"
 		notActive = "NOTACTIVE"
@@ -300,9 +300,9 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 			}
 			return ii, active, nil
 		},
-		Delay:                     2 * time.Second,
-		Timeout:                   d.Timeout(schema.TimeoutCreate),
-		MinTimeout:                2 * time.Second,
+		Delay:                     common.DefaultStateChangeDelay,
+		Timeout:                   timeout,
+		MinTimeout:                common.DefaultStateChangeMinTimeout,
 		ContinuousTargetOccurence: 10,
 	}
 	if _, err := stateChangeConf.WaitForStateContext(ctx); err != nil {

@@ -8,7 +8,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -16,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -269,9 +269,9 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	conf := &retry.StateChangeConf{
 		Pending:    []string{"pending"},
 		Target:     []string{"target"},
-		Timeout:    time.Minute,
-		MinTimeout: time.Second,
-		Delay:      time.Second,
+		Timeout:    d.Timeout(schema.TimeoutRead),
+		MinTimeout: common.DefaultStateChangeMinTimeout,
+		Delay:      common.DefaultStateChangeDelay,
 		Refresh: func() (result interface{}, state string, err error) {
 			p, err := client.Projects.Get(ctx, d.Id())
 			if isNotProjectMember(err) {
