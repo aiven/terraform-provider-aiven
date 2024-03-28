@@ -84,7 +84,7 @@ resource "aiven_opensearch" "os1" {
 
 Optional:
 
-- `additional_backup_regions` (List of String, Deprecated) Additional Cloud Regions for Backup Replication.
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
 - `disable_replication_factor_adjustment` (Boolean) Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can no longer be activated.
 - `index_patterns` (Block List, Max: 512) Index patterns (see [below for nested schema](#nestedblock--opensearch_user_config--index_patterns))

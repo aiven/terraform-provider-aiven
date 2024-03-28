@@ -79,7 +79,7 @@ resource "aiven_m3db" "m3" {
 
 Optional:
 
-- `additional_backup_regions` (List of String, Deprecated) Additional Cloud Regions for Backup Replication.
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
 - `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--m3db_user_config--ip_filter_object))
