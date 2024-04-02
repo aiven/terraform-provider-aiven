@@ -3,8 +3,17 @@ package common
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
+)
+
+const (
+	// DefaultStateChangeDelay is the default delay between state change checks.
+	DefaultStateChangeDelay = 10 * time.Second
+
+	// DefaultStateChangeMinTimeout is the default minimum timeout for state change checks.
+	DefaultStateChangeMinTimeout = 5 * time.Second
 )
 
 func NewAivenClient() (*aiven.Client, error) {

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -178,9 +179,9 @@ func (w *ProjectVPCActiveWaiter) Conf(timeout time.Duration) *retry.StateChangeC
 		Pending:    []string{"APPROVED", "DELETING", "DELETED"},
 		Target:     []string{"ACTIVE"},
 		Refresh:    w.RefreshFunc(),
-		Delay:      10 * time.Second,
+		Delay:      common.DefaultStateChangeDelay,
 		Timeout:    timeout,
-		MinTimeout: 2 * time.Second,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 }
 
@@ -235,8 +236,8 @@ func (w *ProjectVPCDeleteWaiter) Conf(timeout time.Duration) *retry.StateChangeC
 		Pending:    []string{"APPROVED", "DELETING", "ACTIVE"},
 		Target:     []string{"DELETED"},
 		Refresh:    w.RefreshFunc(),
-		Delay:      10 * time.Second,
+		Delay:      common.DefaultStateChangeDelay,
 		Timeout:    timeout,
-		MinTimeout: 2 * time.Second,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 }

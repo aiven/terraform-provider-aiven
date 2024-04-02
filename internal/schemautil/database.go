@@ -37,8 +37,8 @@ func (w *DatabaseDeleteWaiter) Conf(timeout time.Duration) *retry.StateChangeCon
 		Pending:    []string{"REMOVING"},
 		Target:     []string{"DELETED"},
 		Refresh:    w.RefreshFunc(),
-		Delay:      5 * time.Second,
+		Delay:      common.DefaultStateChangeDelay,
 		Timeout:    timeout,
-		MinTimeout: 5 * time.Second,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 }

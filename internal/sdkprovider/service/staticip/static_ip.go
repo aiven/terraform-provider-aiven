@@ -172,6 +172,8 @@ func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interfa
 			log.Println("[DEBUG] static ip", staticIPAddressID, "not found in project")
 			return struct{}{}, "waiting", nil
 		},
+		Delay:      common.DefaultStateChangeDelay,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 
 	if _, err := conf.WaitForStateContext(ctx); err != nil {
