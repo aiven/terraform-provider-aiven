@@ -12,6 +12,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Fix incorrect timeout values used in certain cases
+- Fix `aiven_kafka_topic`: ignore config default values
 
 ## [4.15.0] - 2024-03-21
 
