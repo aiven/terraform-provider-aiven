@@ -199,8 +199,8 @@ github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7l
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/aiven/aiven-go-client/v2 v2.15.0 h1:/XTtxtLmwmf9Sd0vPquj8ayLR+iCvFs4AbqS9RE1CM0=
 github.com/aiven/aiven-go-client/v2 v2.15.0/go.mod h1:gfx03bbgWlhYlrpHOHLeGKLhfjMyzX/sPvXHUsnfkc0=
-github.com/aiven/go-api-schemas v1.67.0 h1:cxnxUwXjncGTOsploEq5NsNpKa1d+GMP2/oxwzYxiU8=
-github.com/aiven/go-api-schemas v1.67.0/go.mod h1:/bPxBUHza/2Aeer6hIIdB++GxKiw9K1KCBtRa2rtZ5I=
+github.com/aiven/go-api-schemas v1.68.0 h1:I6IgE4ICSVUgY+RIQ7FDrtLn20N4swJOgNijUwMtrnU=
+github.com/aiven/go-api-schemas v1.68.0/go.mod h1:DnYTV2K5j1Jb6PkiTDvOxk4M2Gh3q0PHS9yLEAg1L0w=
 github.com/aiven/go-client-codegen v0.4.0 h1:8wY+JjcrFY0KvlRc0pwKEwY/JYAaxmtePkzi8reXX+A=
 github.com/aiven/go-client-codegen v0.4.0/go.mod h1:R6nTHRxO0+R6vy6eOMYa2TVy2Ma3zewE/aeogV9NGuo=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
@@ -700,8 +700,8 @@ golang.org/x/net v0.0.0-20220722155237-a158d28d115b/go.mod h1:XRhObCWvk6IyKnWLug
 golang.org/x/net v0.0.0-20220909164309-bea034e7d591/go.mod h1:YDH+HFinaLZZlnHAfSS6ZXJJ9M9t4Dl22yv3iI2vPwk=
 golang.org/x/net v0.0.0-20221014081412-f15817d10f9b/go.mod h1:YDH+HFinaLZZlnHAfSS6ZXJJ9M9t4Dl22yv3iI2vPwk=
 golang.org/x/net v0.1.0/go.mod h1:Cx3nUiGt4eDBEyega/BKRp+/AlGL8hYe7U9odMt2Cco=
-golang.org/x/net v0.21.0 h1:AQyQV4dYCvJ7vGmJyKki9+PBdyvhkSd8EIx/qb0AYv4=
-golang.org/x/net v0.21.0/go.mod h1:bIjVDfnllIU7BJ2DNgfnXvpSvtn8VRwhlsaeUTyUS44=
+golang.org/x/net v0.22.0 h1:9sGLhx7iRIHEiX0oAJ3MRZMUCElJgy7Br1nO+AMN3Tc=
+golang.org/x/net v0.22.0/go.mod h1:JKghWKKOSdJwpW2GEx0Ja7fmaKnMsbu+MWVZTokSYmg=
 golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
 golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
