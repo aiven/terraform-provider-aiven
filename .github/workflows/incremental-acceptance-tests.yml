@@ -35,15 +35,18 @@ jobs:
       suffix: ${{ steps.selproj.outputs.suffix }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-go@v5
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
 
-      - id: selproj
+      - name: Run selproj
+        id: selproj
         run: echo "suffix=$(make -s ci-selproj | tr -d '\n')" >> $GITHUB_OUTPUT
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
@@ -393,7 +396,8 @@ jobs:
         test: ${{ fromJson(needs.find_tests.outputs.tests) }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -407,6 +411,38 @@ jobs:
         env:
           TF_ACC: 1
           CGO_ENABLED: 0
+          AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
+          AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}${{ needs.selproj.outputs.suffix }}
+          AIVEN_ORGANIZATION_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
+          AIVEN_ACCOUNT_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
+
+  sweep:
+    name: Sweep
+    runs-on: ubuntu-latest
+    if: always()
+
+    needs:
+      - selproj
+      - run_tests
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Sweep
+        uses: nick-invision/retry@v3
+        with:
+          timeout_minutes: 15
+          max_attempts: 15
+          command: make sweep
+        env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
           AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}${{ needs.selproj.outputs.suffix }}
           AIVEN_ORGANIZATION_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
