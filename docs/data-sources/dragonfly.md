@@ -85,6 +85,7 @@ Read-Only:
 Read-Only:
 
 - `cache_mode` (Boolean)
+- `dragonfly_persistence` (String)
 - `dragonfly_ssl` (Boolean)
 - `ip_filter` (Set of String)
 - `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--dragonfly_user_config--ip_filter_object))
