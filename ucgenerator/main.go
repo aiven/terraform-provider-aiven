@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -164,7 +165,7 @@ func getSchemaValues(o *object) (jen.Dict, error) {
 		for old, n := range replaceDescriptionSubStrings {
 			d = strings.ReplaceAll(d, old, n)
 		}
-		values[jen.Id("Description")] = jen.Lit(d)
+		values[jen.Id("Description")] = jen.Lit(toTitle(d))
 	}
 
 	var t string
@@ -362,4 +363,15 @@ func isTypeSet(o *object) bool {
 		return true
 	}
 	return false
+}
+
+// toTitleRegex finds words with a leading lowercase letter,
+// ignores dotted and underscored literals
+var toTitleRegex = regexp.MustCompile(`^[a-z]\w+[\s,$]`)
+
+func toTitle(s string) string {
+	if !strings.HasPrefix(s, "fnmatch") && toTitleRegex.MatchString(s) {
+		return toUpperFirst(s)
+	}
+	return s
 }

@@ -23,7 +23,7 @@ func prometheusUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"gather_file_events_stats": {
-						Description: "gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME.",
+						Description: "Gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},

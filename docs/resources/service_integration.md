@@ -308,7 +308,7 @@ Optional:
 Optional:
 
 - `gather_event_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS.
-- `gather_file_events_stats` (Boolean) gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME.
+- `gather_file_events_stats` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME.
 - `gather_index_io_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE.
 - `gather_info_schema_auto_inc` (Boolean) Gather auto_increment columns and max values from information schema.
 - `gather_innodb_metrics` (Boolean) Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS.
@@ -345,7 +345,7 @@ Optional:
 Optional:
 
 - `gather_event_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.EVENT_WAITS.
-- `gather_file_events_stats` (Boolean) gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME.
+- `gather_file_events_stats` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.FILE_SUMMARY_BY_EVENT_NAME.
 - `gather_index_io_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_INDEX_USAGE.
 - `gather_info_schema_auto_inc` (Boolean) Gather auto_increment columns and max values from information schema.
 - `gather_innodb_metrics` (Boolean) Gather metrics from INFORMATION_SCHEMA.INNODB_METRICS.
