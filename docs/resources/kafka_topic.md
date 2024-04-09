@@ -3,20 +3,20 @@
 page_title: "aiven_kafka_topic Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Kafka Topic resource allows the creation and management of Aiven Kafka Topics.
+  Creates and manages an Aiven for Apache Kafka® topic.
 ---
 
 # aiven_kafka_topic (Resource)
 
-The Kafka Topic resource allows the creation and management of Aiven Kafka Topics.
+Creates and manages an Aiven for Apache Kafka® topic.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_kafka_topic" "mytesttopic" {
-  project                = aiven_project.myproject.project
-  service_name           = aiven_kafka.myservice.service_name
-  topic_name             = "<TOPIC_NAME>"
+resource "aiven_kafka_topic" "example_topic" {
+  project                = data.aiven_project.example_project.project
+  service_name           = aiven_kafka.example_kafka.service_name
+  topic_name             = "example-topic"
   partitions             = 5
   replication            = 3
   termination_protection = true
@@ -47,9 +47,9 @@ resource "aiven_kafka_topic" "mytesttopic" {
 
 ### Optional
 
-- `config` (Block List, Max: 1) Kafka topic configuration (see [below for nested schema](#nestedblock--config))
-- `tag` (Block Set) Kafka Topic tag. (see [below for nested schema](#nestedblock--tag))
-- `termination_protection` (Boolean) It is a Terraform client-side deletion protection, which prevents a Kafka topic from being deleted. It is recommended to enable this for any production Kafka topic containing critical data.
+- `config` (Block List, Max: 1) Kafka topic configuration. (see [below for nested schema](#nestedblock--config))
+- `tag` (Block Set) Tags for the Kafka topic. (see [below for nested schema](#nestedblock--tag))
+- `termination_protection` (Boolean) Prevents topics from being deleted by Terraform. It's recommended for topics containing critical data. **Topics can still be deleted in the Aiven Console.**
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
@@ -118,5 +118,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_kafka_topic.mytesttopic PROJECT/SERVICE_NAME/TOPIC_NAME
+terraform import aiven_kafka_topic.example_topic PROJECT/SERVICE_NAME/TOPIC_NAME
 ```

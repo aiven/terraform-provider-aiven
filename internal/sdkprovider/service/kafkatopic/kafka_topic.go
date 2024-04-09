@@ -212,11 +212,11 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     false,
-		Description: "It is a Terraform client-side deletion protection, which prevents a Kafka topic from being deleted. It is recommended to enable this for any production Kafka topic containing critical data.",
+		Description: "Prevents topics from being deleted by Terraform. It's recommended for topics containing critical data. **Topics can still be deleted in the Aiven Console.**",
 	},
 	"tag": {
 		Type:        schema.TypeSet,
-		Description: "Kafka Topic tag.",
+		Description: "Tags for the Kafka topic.",
 		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
@@ -237,7 +237,7 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 	},
 	"config": {
 		Type:             schema.TypeList,
-		Description:      "Kafka topic configuration",
+		Description:      "Kafka topic configuration.",
 		Optional:         true,
 		MaxItems:         1,
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
@@ -249,7 +249,7 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 
 func ResourceKafkaTopic() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Kafka Topic resource allows the creation and management of Aiven Kafka Topics.",
+		Description:   "Creates and manages an Aiven for Apache Kafka® topic.",
 		CreateContext: resourceKafkaTopicCreate,
 		ReadContext:   resourceKafkaTopicReadResource,
 		UpdateContext: resourceKafkaTopicUpdate,

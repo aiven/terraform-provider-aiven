@@ -1,8 +1,8 @@
-resource "aiven_kafka" "kafka1" {
-  project                 = data.aiven_project.pr1.project
+resource "aiven_kafka" "example_kafka" {
+  project                 = data.aiven_project.example_project.project
   cloud_name              = "google-europe-west1"
   plan                    = "business-4"
-  service_name            = "my-kafka1"
+  service_name            = "example-kafka"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 

@@ -1,7 +1,7 @@
-resource "aiven_kafka_topic" "mytesttopic" {
-  project                = aiven_project.myproject.project
-  service_name           = aiven_kafka.myservice.service_name
-  topic_name             = "<TOPIC_NAME>"
+resource "aiven_kafka_topic" "example_topic" {
+  project                = data.aiven_project.example_project.project
+  service_name           = aiven_kafka.example_kafka.service_name
+  topic_name             = "example-topic"
   partitions             = 5
   replication            = 3
   termination_protection = true
