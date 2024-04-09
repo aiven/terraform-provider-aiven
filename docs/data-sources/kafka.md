@@ -3,19 +3,19 @@
 page_title: "aiven_kafka Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Kafka data source provides information about the existing Aiven Kafka services.
+  Gets information about an Aiven for Apache Kafka® service.
 ---
 
 # aiven_kafka (Data Source)
 
-The Kafka data source provides information about the existing Aiven Kafka services.
+Gets information about an Aiven for Apache Kafka® service.
 
 ## Example Usage
 
 ```terraform
-data "aiven_kafka" "kafka1" {
-  project      = data.aiven_project.pr1.project
-  service_name = "my-kafka1"
+data "aiven_kafka" "example_kafka" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-kafka"
 }
 ```
 
@@ -32,16 +32,16 @@ data "aiven_kafka" "kafka1" {
 - `additional_disk_space` (String) Additional disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 - `components` (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
-- `default_acl` (Boolean) Create default wildcard Kafka ACL
+- `default_acl` (Boolean) Create a default wildcard Kafka ACL.
 - `disk_space` (String) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `disk_space_cap` (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
 - `disk_space_default` (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) Disk space that service is currently using
 - `id` (String) The ID of this resource.
-- `kafka` (List of Object) Kafka server provided values (see [below for nested schema](#nestedatt--kafka))
+- `kafka` (List of Object) Kafka server connection details. (see [below for nested schema](#nestedatt--kafka))
 - `kafka_user_config` (List of Object) Kafka user configurable settings (see [below for nested schema](#nestedatt--kafka_user_config))
-- `karapace` (Boolean) Switch the service to use Karapace for schema registry and REST proxy
+- `karapace` (Boolean) Switch the service to use [Karapace](https://aiven.io/docs/products/kafka/karapace) for schema registry and REST proxy.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
 - `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).

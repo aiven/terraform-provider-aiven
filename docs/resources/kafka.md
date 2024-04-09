@@ -3,21 +3,21 @@
 page_title: "aiven_kafka Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Kafka resource allows the creation and management of Aiven Kafka services.
+  Creates and manages an Aiven for Apache Kafka® https://aiven.io/docs/products/kafka service.
 ---
 
 # aiven_kafka (Resource)
 
-The Kafka resource allows the creation and management of Aiven Kafka services.
+Creates and manages an [Aiven for Apache Kafka®](https://aiven.io/docs/products/kafka) service.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_kafka" "kafka1" {
-  project                 = data.aiven_project.pr1.project
+resource "aiven_kafka" "example_kafka" {
+  project                 = data.aiven_project.example_project.project
   cloud_name              = "google-europe-west1"
   plan                    = "business-4"
-  service_name            = "my-kafka1"
+  service_name            = "example-kafka"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 
@@ -53,10 +53,10 @@ resource "aiven_kafka" "kafka1" {
 
 - `additional_disk_space` (String) Additional disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
-- `default_acl` (Boolean) Create default wildcard Kafka ACL
+- `default_acl` (Boolean) Create a default wildcard Kafka ACL.
 - `disk_space` (String, Deprecated) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `kafka_user_config` (Block List, Max: 1) Kafka user configurable settings (see [below for nested schema](#nestedblock--kafka_user_config))
-- `karapace` (Boolean, Deprecated) Switch the service to use Karapace for schema registry and REST proxy
+- `karapace` (Boolean, Deprecated) Switch the service to use [Karapace](https://aiven.io/docs/products/kafka/karapace) for schema registry and REST proxy.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
 - `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
@@ -75,7 +75,7 @@ resource "aiven_kafka" "kafka1" {
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) Disk space that service is currently using
 - `id` (String) The ID of this resource.
-- `kafka` (List of Object) Kafka server provided values (see [below for nested schema](#nestedatt--kafka))
+- `kafka` (List of Object) Kafka server connection details. (see [below for nested schema](#nestedatt--kafka))
 - `service_host` (String) The hostname of the service.
 - `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
 - `service_port` (Number) The port of the service
@@ -359,5 +359,5 @@ Read-Only:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_kafka.kafka1 project/service_name
+terraform import aiven_kafka.example_kafka PROJECT/SERVICE_NAME
 ```

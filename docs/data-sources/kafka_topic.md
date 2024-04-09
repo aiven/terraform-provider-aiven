@@ -3,20 +3,20 @@
 page_title: "aiven_kafka_topic Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Kafka Topic data source provides information about the existing Aiven Kafka Topic.
+  Gets information about an Aiven for Apache Kafka® topic.
 ---
 
 # aiven_kafka_topic (Data Source)
 
-The Kafka Topic data source provides information about the existing Aiven Kafka Topic.
+Gets information about an Aiven for Apache Kafka® topic.
 
 ## Example Usage
 
 ```terraform
-data "aiven_kafka_topic" "mytesttopic" {
-  project      = aiven_project.myproject.project
-  service_name = aiven_kafka.myservice.service_name
-  topic_name   = "<TOPIC_NAME>"
+data "aiven_kafka_topic" "example_topic" {
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_kafka.example_kafka.service_name
+  topic_name   = "example-topic"
 }
 ```
 
@@ -31,12 +31,12 @@ data "aiven_kafka_topic" "mytesttopic" {
 
 ### Read-Only
 
-- `config` (List of Object) Kafka topic configuration (see [below for nested schema](#nestedatt--config))
+- `config` (List of Object) Kafka topic configuration. (see [below for nested schema](#nestedatt--config))
 - `id` (String) The ID of this resource.
 - `partitions` (Number) The number of partitions to create in the topic.
 - `replication` (Number) The replication factor for the topic.
-- `tag` (Set of Object) Kafka Topic tag. (see [below for nested schema](#nestedatt--tag))
-- `termination_protection` (Boolean) It is a Terraform client-side deletion protection, which prevents a Kafka topic from being deleted. It is recommended to enable this for any production Kafka topic containing critical data.
+- `tag` (Set of Object) Tags for the Kafka topic. (see [below for nested schema](#nestedatt--tag))
+- `termination_protection` (Boolean) Prevents topics from being deleted by Terraform. It's recommended for topics containing critical data. **Topics can still be deleted in the Aiven Console.**
 
 <a id="nestedatt--config"></a>
 ### Nested Schema for `config`
