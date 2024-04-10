@@ -36,7 +36,7 @@ func cassandraUserConfig() *schema.Schema {
 				Type:        schema.TypeInt,
 			},
 			"cassandra": {
-				Description: "cassandra configuration values",
+				Description: "Cassandra configuration values",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"batch_size_fail_threshold_in_kb": {
 						Description: "Fail any multiple-partition batch exceeding this value. 50kb (10x warn threshold) by default.",

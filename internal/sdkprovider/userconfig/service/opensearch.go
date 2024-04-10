@@ -126,7 +126,7 @@ func opensearchUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"max_index_count": {
-				Description: "use index_patterns instead. The default value is `0`.",
+				Description: "Use index_patterns instead. The default value is `0`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
