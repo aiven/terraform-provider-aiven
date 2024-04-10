@@ -26,20 +26,20 @@ const serviceIntegrationEndpointRegExp = "^[a-zA-Z0-9_-]*\\/{1}[a-zA-Z0-9_-]*$"
 func aivenServiceIntegrationSchema() map[string]*schema.Schema {
 	s := map[string]*schema.Schema{
 		"integration_id": {
-			Description: "Service Integration Id at aiven",
+			Description: "The ID of the Aiven service integration.",
 			Computed:    true,
 			Type:        schema.TypeString,
 		},
 		"destination_endpoint_id": {
-			Description: "Destination endpoint for the integration (if any)",
+			Description: "Destination endpoint for the integration.",
 			ForceNew:    true,
 			Optional:    true,
 			Type:        schema.TypeString,
 			ValidateFunc: validation.StringMatch(regexp.MustCompile(serviceIntegrationEndpointRegExp),
-				"endpoint id should have the following format: project_name/endpoint_id"),
+				"endpoint ID should have the following format: project_name/endpoint_id"),
 		},
 		"destination_service_name": {
-			Description: "Destination service for the integration (if any)",
+			Description: "Destination service for the integration.",
 			ForceNew:    true,
 			Optional:    true,
 			Type:        schema.TypeString,
@@ -52,13 +52,13 @@ func aivenServiceIntegrationSchema() map[string]*schema.Schema {
 			ValidateFunc: validation.StringInSlice(codegenintegrations.IntegrationTypeChoices(), false),
 		},
 		"project": {
-			Description: "Project the integration belongs to",
+			Description: "Project the integration belongs to.",
 			ForceNew:    true,
 			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"source_endpoint_id": {
-			Description: "Source endpoint for the integration (if any)",
+			Description: "Source endpoint for the integration.",
 			ForceNew:    true,
 			Optional:    true,
 			Type:        schema.TypeString,
@@ -82,7 +82,7 @@ func aivenServiceIntegrationSchema() map[string]*schema.Schema {
 
 func ResourceServiceIntegration() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Service Integration resource allows the creation and management of Aiven Service Integrations.",
+		Description:   "Creates and manages an Aiven [service integration](https://aiven.io/docs/platform/concepts/service-integration).",
 		CreateContext: resourceServiceIntegrationCreate,
 		ReadContext:   resourceServiceIntegrationRead,
 		UpdateContext: resourceServiceIntegrationUpdate,
