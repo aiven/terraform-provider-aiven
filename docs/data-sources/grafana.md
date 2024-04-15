@@ -128,7 +128,7 @@ Read-Only:
 - `viewers_can_edit` (Boolean)
 
 <a id="nestedobjatt--grafana_user_config--auth_azuread"></a>
-### Nested Schema for `grafana_user_config.auth_azuread`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -142,7 +142,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--grafana_user_config--auth_generic_oauth"></a>
-### Nested Schema for `grafana_user_config.auth_generic_oauth`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -160,7 +160,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--grafana_user_config--auth_github"></a>
-### Nested Schema for `grafana_user_config.auth_github`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -174,7 +174,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--grafana_user_config--auth_gitlab"></a>
-### Nested Schema for `grafana_user_config.auth_gitlab`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -188,7 +188,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--grafana_user_config--auth_google"></a>
-### Nested Schema for `grafana_user_config.auth_google`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -199,7 +199,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--grafana_user_config--date_formats"></a>
-### Nested Schema for `grafana_user_config.date_formats`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -214,7 +214,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--grafana_user_config--external_image_storage"></a>
-### Nested Schema for `grafana_user_config.external_image_storage`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -225,7 +225,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--grafana_user_config--ip_filter_object"></a>
-### Nested Schema for `grafana_user_config.ip_filter_object`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -234,7 +234,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--grafana_user_config--private_access"></a>
-### Nested Schema for `grafana_user_config.private_access`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -242,7 +242,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--grafana_user_config--privatelink_access"></a>
-### Nested Schema for `grafana_user_config.privatelink_access`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -250,7 +250,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--grafana_user_config--public_access"></a>
-### Nested Schema for `grafana_user_config.public_access`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -258,7 +258,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--grafana_user_config--smtp_server"></a>
-### Nested Schema for `grafana_user_config.smtp_server`
+### Nested Schema for ``
 
 Read-Only:
 

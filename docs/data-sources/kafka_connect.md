@@ -96,7 +96,7 @@ Read-Only:
 - `static_ips` (Boolean)
 
 <a id="nestedobjatt--kafka_connect_user_config--ip_filter_object"></a>
-### Nested Schema for `kafka_connect_user_config.ip_filter_object`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -105,7 +105,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--kafka_connect_user_config--kafka_connect"></a>
-### Nested Schema for `kafka_connect_user_config.kafka_connect`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -128,7 +128,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--kafka_connect_user_config--private_access"></a>
-### Nested Schema for `kafka_connect_user_config.private_access`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -137,7 +137,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--kafka_connect_user_config--privatelink_access"></a>
-### Nested Schema for `kafka_connect_user_config.privatelink_access`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -147,7 +147,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--kafka_connect_user_config--public_access"></a>
-### Nested Schema for `kafka_connect_user_config.public_access`
+### Nested Schema for ``
 
 Read-Only:
 

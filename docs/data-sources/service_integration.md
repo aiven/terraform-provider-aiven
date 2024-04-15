@@ -59,7 +59,7 @@ Read-Only:
 - `tables` (List of Object) (see [below for nested schema](#nestedobjatt--clickhouse_kafka_user_config--tables))
 
 <a id="nestedobjatt--clickhouse_kafka_user_config--tables"></a>
-### Nested Schema for `clickhouse_kafka_user_config.tables`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -78,7 +78,7 @@ Read-Only:
 - `topics` (List of Object) (see [below for nested schema](#nestedobjatt--clickhouse_kafka_user_config--tables--topics))
 
 <a id="nestedobjatt--clickhouse_kafka_user_config--tables--columns"></a>
-### Nested Schema for `clickhouse_kafka_user_config.tables.columns`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -87,7 +87,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--clickhouse_kafka_user_config--tables--topics"></a>
-### Nested Schema for `clickhouse_kafka_user_config.tables.topics`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -104,7 +104,7 @@ Read-Only:
 - `databases` (List of Object) (see [below for nested schema](#nestedobjatt--clickhouse_postgresql_user_config--databases))
 
 <a id="nestedobjatt--clickhouse_postgresql_user_config--databases"></a>
-### Nested Schema for `clickhouse_postgresql_user_config.databases`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -130,7 +130,7 @@ Read-Only:
 - `redis` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--redis))
 
 <a id="nestedobjatt--datadog_user_config--datadog_tags"></a>
-### Nested Schema for `datadog_user_config.datadog_tags`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -139,7 +139,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--datadog_user_config--opensearch"></a>
-### Nested Schema for `datadog_user_config.opensearch`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -150,7 +150,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--datadog_user_config--redis"></a>
-### Nested Schema for `datadog_user_config.redis`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -175,7 +175,7 @@ Read-Only:
 - `extra_metrics` (List of Object) (see [below for nested schema](#nestedobjatt--external_aws_cloudwatch_metrics_user_config--extra_metrics))
 
 <a id="nestedobjatt--external_aws_cloudwatch_metrics_user_config--dropped_metrics"></a>
-### Nested Schema for `external_aws_cloudwatch_metrics_user_config.dropped_metrics`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -184,7 +184,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--external_aws_cloudwatch_metrics_user_config--extra_metrics"></a>
-### Nested Schema for `external_aws_cloudwatch_metrics_user_config.extra_metrics`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -217,7 +217,7 @@ Read-Only:
 - `kafka_connect` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--kafka_connect))
 
 <a id="nestedobjatt--kafka_connect_user_config--kafka_connect"></a>
-### Nested Schema for `kafka_connect_user_config.kafka_connect`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -246,7 +246,7 @@ Read-Only:
 - `kafka_mirrormaker` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_mirrormaker_user_config--kafka_mirrormaker))
 
 <a id="nestedobjatt--kafka_mirrormaker_user_config--kafka_mirrormaker"></a>
-### Nested Schema for `kafka_mirrormaker_user_config.kafka_mirrormaker`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -281,14 +281,14 @@ Read-Only:
 - `username` (String)
 
 <a id="nestedobjatt--metrics_user_config--source_mysql"></a>
-### Nested Schema for `metrics_user_config.source_mysql`
+### Nested Schema for ``
 
 Read-Only:
 
 - `telegraf` (List of Object) (see [below for nested schema](#nestedobjatt--metrics_user_config--source_mysql--telegraf))
 
 <a id="nestedobjatt--metrics_user_config--source_mysql--telegraf"></a>
-### Nested Schema for `metrics_user_config.source_mysql.telegraf`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -318,14 +318,14 @@ Read-Only:
 - `source_mysql` (List of Object) (see [below for nested schema](#nestedobjatt--prometheus_user_config--source_mysql))
 
 <a id="nestedobjatt--prometheus_user_config--source_mysql"></a>
-### Nested Schema for `prometheus_user_config.source_mysql`
+### Nested Schema for ``
 
 Read-Only:
 
 - `telegraf` (List of Object) (see [below for nested schema](#nestedobjatt--prometheus_user_config--source_mysql--telegraf))
 
 <a id="nestedobjatt--prometheus_user_config--source_mysql--telegraf"></a>
-### Nested Schema for `prometheus_user_config.source_mysql.telegraf`
+### Nested Schema for ``
 
 Read-Only:
 

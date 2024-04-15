@@ -96,7 +96,7 @@ Read-Only:
 - `static_ips` (Boolean)
 
 <a id="nestedobjatt--flink_user_config--ip_filter_object"></a>
-### Nested Schema for `flink_user_config.ip_filter_object`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -105,7 +105,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--flink_user_config--privatelink_access"></a>
-### Nested Schema for `flink_user_config.privatelink_access`
+### Nested Schema for ``
 
 Read-Only:
 

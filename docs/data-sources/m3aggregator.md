@@ -94,7 +94,7 @@ Read-Only:
 - `static_ips` (Boolean)
 
 <a id="nestedobjatt--m3aggregator_user_config--ip_filter_object"></a>
-### Nested Schema for `m3aggregator_user_config.ip_filter_object`
+### Nested Schema for ``
 
 Read-Only:
 

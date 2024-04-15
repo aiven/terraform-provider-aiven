@@ -127,7 +127,7 @@ Read-Only:
 - `work_mem` (Number)
 
 <a id="nestedobjatt--pg_user_config--ip_filter_object"></a>
-### Nested Schema for `pg_user_config.ip_filter_object`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -136,7 +136,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--pg_user_config--migration"></a>
-### Nested Schema for `pg_user_config.migration`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -151,7 +151,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--pg_user_config--pg"></a>
-### Nested Schema for `pg_user_config.pg`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -207,7 +207,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--pg_user_config--pg_qualstats"></a>
-### Nested Schema for `pg_user_config.pg_qualstats`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -219,7 +219,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--pg_user_config--pgaudit"></a>
-### Nested Schema for `pg_user_config.pgaudit`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -240,7 +240,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--pg_user_config--pgbouncer"></a>
-### Nested Schema for `pg_user_config.pgbouncer`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -256,7 +256,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--pg_user_config--pglookout"></a>
-### Nested Schema for `pg_user_config.pglookout`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -264,7 +264,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--pg_user_config--private_access"></a>
-### Nested Schema for `pg_user_config.private_access`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -274,7 +274,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--pg_user_config--privatelink_access"></a>
-### Nested Schema for `pg_user_config.privatelink_access`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -284,7 +284,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--pg_user_config--public_access"></a>
-### Nested Schema for `pg_user_config.public_access`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -294,7 +294,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--pg_user_config--timescaledb"></a>
-### Nested Schema for `pg_user_config.timescaledb`
+### Nested Schema for ``
 
 Read-Only:
 

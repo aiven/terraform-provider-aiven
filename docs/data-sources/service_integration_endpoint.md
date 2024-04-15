@@ -60,7 +60,7 @@ Read-Only:
 - `site` (String)
 
 <a id="nestedobjatt--datadog_user_config--datadog_tags"></a>
-### Nested Schema for `datadog_user_config.datadog_tags`
+### Nested Schema for ``
 
 Read-Only:
 

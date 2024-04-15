@@ -115,7 +115,7 @@ Read-Only:
 - `tiered_storage` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--tiered_storage))
 
 <a id="nestedobjatt--kafka_user_config--ip_filter_object"></a>
-### Nested Schema for `kafka_user_config.ip_filter_object`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -124,7 +124,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--kafka_user_config--kafka"></a>
-### Nested Schema for `kafka_user_config.kafka`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -177,7 +177,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--kafka_user_config--kafka_authentication_methods"></a>
-### Nested Schema for `kafka_user_config.kafka_authentication_methods`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -186,7 +186,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--kafka_user_config--kafka_connect_config"></a>
-### Nested Schema for `kafka_user_config.kafka_connect_config`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -209,7 +209,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--kafka_user_config--kafka_rest_config"></a>
-### Nested Schema for `kafka_user_config.kafka_rest_config`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -226,7 +226,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--kafka_user_config--private_access"></a>
-### Nested Schema for `kafka_user_config.private_access`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -238,7 +238,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--kafka_user_config--privatelink_access"></a>
-### Nested Schema for `kafka_user_config.privatelink_access`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -251,7 +251,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--kafka_user_config--public_access"></a>
-### Nested Schema for `kafka_user_config.public_access`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -263,7 +263,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--kafka_user_config--schema_registry_config"></a>
-### Nested Schema for `kafka_user_config.schema_registry_config`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -272,7 +272,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--kafka_user_config--tiered_storage"></a>
-### Nested Schema for `kafka_user_config.tiered_storage`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -280,7 +280,7 @@ Read-Only:
 - `local_cache` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--tiered_storage--local_cache))
 
 <a id="nestedobjatt--kafka_user_config--tiered_storage--local_cache"></a>
-### Nested Schema for `kafka_user_config.tiered_storage.local_cache`
+### Nested Schema for ``
 
 Read-Only:
 

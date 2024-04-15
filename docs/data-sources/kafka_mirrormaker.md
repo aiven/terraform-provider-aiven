@@ -93,7 +93,7 @@ Read-Only:
 - `static_ips` (Boolean)
 
 <a id="nestedobjatt--kafka_mirrormaker_user_config--ip_filter_object"></a>
-### Nested Schema for `kafka_mirrormaker_user_config.ip_filter_object`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -102,7 +102,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--kafka_mirrormaker_user_config--kafka_mirrormaker"></a>
-### Nested Schema for `kafka_mirrormaker_user_config.kafka_mirrormaker`
+### Nested Schema for ``
 
 Read-Only:
 

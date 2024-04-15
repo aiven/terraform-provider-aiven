@@ -4,8 +4,8 @@ page_title: "aiven_organization_user Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
   **This resource is deprecated**. Users cannot be invited to an organization using Terraform.
-      Use the [Aiven Console](https://console.aiven.io/) to [invite users](https://aiven.io/docs/platform/howto/manage-org-users)
-      to your organization. 
+  	Use the [Aiven Console](https://console.aiven.io/) to [invite users](https://aiven.io/docs/platform/howto/manage-org-users)
+  	to your organization. 
   
   After the user accepts the invite you can get their information using the aiven_organization_user
   data source. You can manage user access to projects with the aiven_organization_user_group,

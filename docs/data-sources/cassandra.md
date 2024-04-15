@@ -87,7 +87,7 @@ Read-Only:
 - `static_ips` (Boolean)
 
 <a id="nestedobjatt--cassandra_user_config--cassandra"></a>
-### Nested Schema for `cassandra_user_config.cassandra`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -97,7 +97,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--cassandra_user_config--ip_filter_object"></a>
-### Nested Schema for `cassandra_user_config.ip_filter_object`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -106,7 +106,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--cassandra_user_config--private_access"></a>
-### Nested Schema for `cassandra_user_config.private_access`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -114,7 +114,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--cassandra_user_config--public_access"></a>
-### Nested Schema for `cassandra_user_config.public_access`
+### Nested Schema for ``
 
 Read-Only:
 

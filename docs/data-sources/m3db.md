@@ -104,7 +104,7 @@ Read-Only:
 - `static_ips` (Boolean)
 
 <a id="nestedobjatt--m3db_user_config--ip_filter_object"></a>
-### Nested Schema for `m3db_user_config.ip_filter_object`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -113,7 +113,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--m3db_user_config--limits"></a>
-### Nested Schema for `m3db_user_config.limits`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -126,14 +126,14 @@ Read-Only:
 
 
 <a id="nestedobjatt--m3db_user_config--m3"></a>
-### Nested Schema for `m3db_user_config.m3`
+### Nested Schema for ``
 
 Read-Only:
 
 - `tag_options` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--m3--tag_options))
 
 <a id="nestedobjatt--m3db_user_config--m3--tag_options"></a>
-### Nested Schema for `m3db_user_config.m3.tag_options`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -143,7 +143,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--m3db_user_config--namespaces"></a>
-### Nested Schema for `m3db_user_config.namespaces`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -153,7 +153,7 @@ Read-Only:
 - `type` (String)
 
 <a id="nestedobjatt--m3db_user_config--namespaces--options"></a>
-### Nested Schema for `m3db_user_config.namespaces.options`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -162,7 +162,7 @@ Read-Only:
 - `writes_to_commitlog` (Boolean)
 
 <a id="nestedobjatt--m3db_user_config--namespaces--options--retention_options"></a>
-### Nested Schema for `m3db_user_config.namespaces.options.writes_to_commitlog`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -176,7 +176,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--m3db_user_config--private_access"></a>
-### Nested Schema for `m3db_user_config.private_access`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -184,7 +184,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--m3db_user_config--public_access"></a>
-### Nested Schema for `m3db_user_config.public_access`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -192,14 +192,14 @@ Read-Only:
 
 
 <a id="nestedobjatt--m3db_user_config--rules"></a>
-### Nested Schema for `m3db_user_config.rules`
+### Nested Schema for ``
 
 Read-Only:
 
 - `mapping` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--rules--mapping))
 
 <a id="nestedobjatt--m3db_user_config--rules--mapping"></a>
-### Nested Schema for `m3db_user_config.rules.mapping`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -213,7 +213,7 @@ Read-Only:
 - `tags` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--rules--mapping--tags))
 
 <a id="nestedobjatt--m3db_user_config--rules--mapping--namespaces_object"></a>
-### Nested Schema for `m3db_user_config.rules.mapping.tags`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -222,7 +222,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--m3db_user_config--rules--mapping--tags"></a>
-### Nested Schema for `m3db_user_config.rules.mapping.tags`
+### Nested Schema for ``
 
 Read-Only:
 

@@ -110,7 +110,7 @@ Read-Only:
 - `static_ips` (Boolean)
 
 <a id="nestedobjatt--opensearch_user_config--index_patterns"></a>
-### Nested Schema for `opensearch_user_config.index_patterns`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -120,7 +120,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--opensearch_user_config--index_template"></a>
-### Nested Schema for `opensearch_user_config.index_template`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -130,7 +130,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--opensearch_user_config--ip_filter_object"></a>
-### Nested Schema for `opensearch_user_config.ip_filter_object`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -139,7 +139,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--opensearch_user_config--openid"></a>
-### Nested Schema for `opensearch_user_config.openid`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -158,7 +158,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--opensearch_user_config--opensearch"></a>
-### Nested Schema for `opensearch_user_config.opensearch`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -206,7 +206,7 @@ Read-Only:
 - `thread_pool_write_size` (Number)
 
 <a id="nestedobjatt--opensearch_user_config--opensearch--auth_failure_listeners"></a>
-### Nested Schema for `opensearch_user_config.opensearch.auth_failure_listeners`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -214,7 +214,7 @@ Read-Only:
 - `ip_rate_limiting` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--auth_failure_listeners--ip_rate_limiting))
 
 <a id="nestedobjatt--opensearch_user_config--opensearch--auth_failure_listeners--internal_authentication_backend_limiting"></a>
-### Nested Schema for `opensearch_user_config.opensearch.auth_failure_listeners.ip_rate_limiting`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -228,7 +228,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--opensearch_user_config--opensearch--auth_failure_listeners--ip_rate_limiting"></a>
-### Nested Schema for `opensearch_user_config.opensearch.auth_failure_listeners.ip_rate_limiting`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -243,7 +243,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--opensearch_user_config--opensearch_dashboards"></a>
-### Nested Schema for `opensearch_user_config.opensearch_dashboards`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -253,7 +253,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--opensearch_user_config--private_access"></a>
-### Nested Schema for `opensearch_user_config.private_access`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -263,7 +263,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--opensearch_user_config--privatelink_access"></a>
-### Nested Schema for `opensearch_user_config.privatelink_access`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -273,7 +273,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--opensearch_user_config--public_access"></a>
-### Nested Schema for `opensearch_user_config.public_access`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -283,7 +283,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--opensearch_user_config--saml"></a>
-### Nested Schema for `opensearch_user_config.saml`
+### Nested Schema for ``
 
 Read-Only:
 

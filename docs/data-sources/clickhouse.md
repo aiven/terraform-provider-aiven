@@ -82,7 +82,7 @@ Read-Only:
 - `static_ips` (Boolean)
 
 <a id="nestedobjatt--clickhouse_user_config--ip_filter_object"></a>
-### Nested Schema for `clickhouse_user_config.ip_filter_object`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -91,7 +91,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--clickhouse_user_config--private_access"></a>
-### Nested Schema for `clickhouse_user_config.private_access`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -102,7 +102,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--clickhouse_user_config--privatelink_access"></a>
-### Nested Schema for `clickhouse_user_config.privatelink_access`
+### Nested Schema for ``
 
 Read-Only:
 
@@ -113,7 +113,7 @@ Read-Only:
 
 
 <a id="nestedobjatt--clickhouse_user_config--public_access"></a>
-### Nested Schema for `clickhouse_user_config.public_access`
+### Nested Schema for ``
 
 Read-Only:
 
