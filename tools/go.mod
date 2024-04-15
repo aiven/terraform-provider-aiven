@@ -5,7 +5,7 @@ go 1.22
 require (
 	github.com/aiven/go-utils/selproj v0.1.0
 	github.com/golangci/golangci-lint v1.57.2
-	github.com/hashicorp/terraform-plugin-docs v0.18.0
+	github.com/hashicorp/terraform-plugin-docs v0.19.0
 	github.com/katbyte/terrafmt v0.5.3
 )
 
@@ -41,6 +41,7 @@ require (
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/bkielbasa/cyclop v1.2.1 // indirect
 	github.com/blizzy78/varnamelen v0.8.0 // indirect
+	github.com/bmatcuk/doublestar/v4 v4.6.1 // indirect
 	github.com/bombsimon/wsl/v4 v4.2.1 // indirect
 	github.com/breml/bidichk v0.2.7 // indirect
 	github.com/breml/errchkjson v0.3.6 // indirect
@@ -98,7 +99,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.5 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
-	github.com/hashicorp/hc-install v0.6.3 // indirect
+	github.com/hashicorp/hc-install v0.6.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.20.0 // indirect
 	github.com/hashicorp/terraform-exec v0.20.0 // indirect
@@ -157,7 +158,6 @@ require (
 	github.com/quasilyte/regex/syntax v0.0.0-20210819130434-b3f0c404a727 // indirect
 	github.com/quasilyte/stdinfo v0.0.0-20220114132959-f7386bf02567 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	github.com/russross/blackfriday v1.6.0 // indirect
 	github.com/ryancurrah/gomodguard v1.3.1 // indirect
 	github.com/ryanrolds/sqlclosecheck v0.5.1 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
@@ -202,14 +202,15 @@ require (
 	github.com/ykadowak/zerologlint v0.1.5 // indirect
 	github.com/yuin/goldmark v1.7.0 // indirect
 	github.com/yuin/goldmark-meta v1.1.0 // indirect
-	github.com/zclconf/go-cty v1.14.3 // indirect
+	github.com/zclconf/go-cty v1.14.4 // indirect
 	gitlab.com/bosi/decorder v0.4.1 // indirect
 	go-simpler.org/musttag v0.9.0 // indirect
 	go-simpler.org/sloglint v0.5.0 // indirect
+	go.abhg.dev/goldmark/frontmatter v0.2.0 // indirect
 	go.uber.org/automaxprocs v1.5.3 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
-	golang.org/x/crypto v0.19.0 // indirect
+	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20240314144324-c7f7c6466f7f // indirect
 	golang.org/x/mod v0.16.0 // indirect
