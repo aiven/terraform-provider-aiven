@@ -21,8 +21,11 @@ import (
 
 const configField = "config"
 
-var errLocalRetentionBytesOverflow = fmt.Errorf("local_retention_bytes must not be more than retention_bytes value")
-var errLocalRetentionBytesDependency = fmt.Errorf("local_retention_bytes can't be set without retention_bytes")
+var (
+	errTopicAlreadyExists            = fmt.Errorf("topic conflict, already exists")
+	errLocalRetentionBytesOverflow   = fmt.Errorf("local_retention_bytes must not be more than retention_bytes value")
+	errLocalRetentionBytesDependency = fmt.Errorf("local_retention_bytes can't be set without retention_bytes")
+)
 
 var aivenKafkaTopicConfigSchema = map[string]*schema.Schema{
 	"cleanup_policy": {
@@ -236,7 +239,7 @@ func ResourceKafkaTopic() *schema.Resource {
 		Schema:         aivenKafkaTopicSchema,
 		SchemaVersion:  1,
 		StateUpgraders: stateupgrader.KafkaTopic(),
-		CustomizeDiff: func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
 			oldPartitions, newPartitions := d.GetChange("partitions")
 
 			assertedOldPartitions, ok := oldPartitions.(int)
@@ -273,6 +276,25 @@ func ResourceKafkaTopic() *schema.Resource {
 				if r < l {
 					return errLocalRetentionBytesOverflow
 				}
+			}
+
+			// Validates topic conflict for new topics
+			if d.Id() != "" {
+				return nil
+			}
+
+			// A new topic
+			client := m.(*aiven.Client)
+			project := d.Get("project").(string)
+			serviceName := d.Get("service_name").(string)
+			topicName := d.Get("topic_name").(string)
+			exists, err := kafkatopicrepository.New(client.KafkaTopics).Exists(ctx, project, serviceName, topicName)
+			if err != nil {
+				return err
+			}
+
+			if exists {
+				return fmt.Errorf("%w: %q", errTopicAlreadyExists, topicName)
 			}
 
 			return nil

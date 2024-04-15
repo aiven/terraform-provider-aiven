@@ -14,6 +14,7 @@ nav_order: 1
 - Fix incorrect timeout values used in certain cases
 - Doesn't submit kafka topic config default values 
 - Fix sending `false` values in kafka topic config
+- Validate `aiven_kafka_topic` conflict on `terraform plan`
 
 ## [4.15.0] - 2024-03-21
 
