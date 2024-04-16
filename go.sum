@@ -197,12 +197,12 @@ github.com/ProtonMail/go-crypto v1.1.0-alpha.0/go.mod h1:rA3QumHc/FZ8pAHreoekgiA
 github.com/agext/levenshtein v1.2.1/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
-github.com/aiven/aiven-go-client/v2 v2.15.0 h1:/XTtxtLmwmf9Sd0vPquj8ayLR+iCvFs4AbqS9RE1CM0=
-github.com/aiven/aiven-go-client/v2 v2.15.0/go.mod h1:gfx03bbgWlhYlrpHOHLeGKLhfjMyzX/sPvXHUsnfkc0=
+github.com/aiven/aiven-go-client/v2 v2.16.0 h1:JoO2csO44/fwHoy3a/URfDnPghaeKoGGH1bCOt8pzBU=
+github.com/aiven/aiven-go-client/v2 v2.16.0/go.mod h1:gfx03bbgWlhYlrpHOHLeGKLhfjMyzX/sPvXHUsnfkc0=
 github.com/aiven/go-api-schemas v1.68.0 h1:I6IgE4ICSVUgY+RIQ7FDrtLn20N4swJOgNijUwMtrnU=
 github.com/aiven/go-api-schemas v1.68.0/go.mod h1:DnYTV2K5j1Jb6PkiTDvOxk4M2Gh3q0PHS9yLEAg1L0w=
-github.com/aiven/go-client-codegen v0.4.0 h1:8wY+JjcrFY0KvlRc0pwKEwY/JYAaxmtePkzi8reXX+A=
-github.com/aiven/go-client-codegen v0.4.0/go.mod h1:R6nTHRxO0+R6vy6eOMYa2TVy2Ma3zewE/aeogV9NGuo=
+github.com/aiven/go-client-codegen v0.5.0 h1:Ee9gyK8BdqPG1SQ0NKHavWS0RHbGs81phgNXhH72eLQ=
+github.com/aiven/go-client-codegen v0.5.0/go.mod h1:R6nTHRxO0+R6vy6eOMYa2TVy2Ma3zewE/aeogV9NGuo=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/apparentlymart/go-dump v0.0.0-20180507223929-23540a00eaa3/go.mod h1:oL81AME2rN47vu18xqj1S1jPIPuN7afo62yKTNn3XMM=
 github.com/apparentlymart/go-textseg v1.0.0/go.mod h1:z96Txxhf3xSFMPmb5X/1W05FF/Nj9VFpLOpjS5yuumk=
