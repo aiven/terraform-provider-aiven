@@ -12,6 +12,8 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Fix incorrect timeout values used in certain cases
+- Doesn't submit kafka topic config default values 
+- Fix sending `false` values in kafka topic config
 
 ## [4.15.0] - 2024-03-21
 
