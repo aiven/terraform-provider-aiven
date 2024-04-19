@@ -33,6 +33,7 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 	aivenKafkaSchema[schemautil.ServiceTypeKafka] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
+		Sensitive:   true,
 		Description: "Kafka server connection details.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{

@@ -18,8 +18,8 @@ func aivenFlinkSchema() map[string]*schema.Schema {
 		Type:        schema.TypeList,
 		MaxItems:    1,
 		Computed:    true,
+		Sensitive:   true,
 		Description: "Flink server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"host_ports": {

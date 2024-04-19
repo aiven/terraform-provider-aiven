@@ -15,6 +15,7 @@ nav_order: 1
 - Doesn't submit kafka topic config default values 
 - Fix sending `false` values in kafka topic config
 - Validate `aiven_kafka_topic` conflict on `terraform plan`
+- Mark service connection info blocks as `sensitive`. See SDK [bug](https://github.com/hashicorp/terraform-plugin-sdk/issues/201).
 
 ## [4.15.0] - 2024-03-21
 

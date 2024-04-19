@@ -75,7 +75,7 @@ resource "aiven_kafka" "example_kafka" {
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) Disk space that service is currently using
 - `id` (String) The ID of this resource.
-- `kafka` (List of Object) Kafka server connection details. (see [below for nested schema](#nestedatt--kafka))
+- `kafka` (List of Object, Sensitive) Kafka server connection details. (see [below for nested schema](#nestedatt--kafka))
 - `service_host` (String) The hostname of the service.
 - `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
 - `service_port` (Number) The port of the service
