@@ -30,7 +30,7 @@ data "aiven_clickhouse" "clickhouse" {
 ### Read-Only
 
 - `additional_disk_space` (String) Additional disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
-- `clickhouse` (List of Object) Clickhouse server provided values (see [below for nested schema](#nestedatt--clickhouse))
+- `clickhouse` (List of Object, Sensitive) Clickhouse server provided values (see [below for nested schema](#nestedatt--clickhouse))
 - `clickhouse_user_config` (List of Object) Clickhouse user configurable settings (see [below for nested schema](#nestedatt--clickhouse_user_config))
 - `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 - `components` (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))

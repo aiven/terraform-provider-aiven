@@ -17,6 +17,7 @@ func aivenM3DBSchema() map[string]*schema.Schema {
 	schemaM3[schemautil.ServiceTypeM3] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
+		Sensitive:   true,
 		Description: "M3 specific server provided values",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},

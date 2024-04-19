@@ -17,6 +17,7 @@ func grafanaSchema() map[string]*schema.Schema {
 	s[schemautil.ServiceTypeGrafana] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
+		Sensitive:   true,
 		Description: "Grafana server provided values",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},

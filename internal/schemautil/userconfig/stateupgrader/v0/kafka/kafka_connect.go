@@ -17,6 +17,7 @@ func aivenKafkaConnectSchema() map[string]*schema.Schema {
 	kafkaConnectSchema[schemautil.ServiceTypeKafkaConnect] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
+		Sensitive:   true,
 		Description: "Kafka Connect server provided values",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},

@@ -17,6 +17,7 @@ func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
 	kafkaMMSchema[schemautil.ServiceTypeKafkaMirrormaker] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
+		Sensitive:   true,
 		Description: "Kafka MirrorMaker 2 server provided values",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},
