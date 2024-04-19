@@ -539,7 +539,7 @@ func TestAccAivenKafkaTopic_conflicts_if_exists(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccAivenKafkaTopicConflictsIfExists(prefix, project),
-				ExpectError: regexp.MustCompile(`Topic conflict, already exists`),
+				ExpectError: regexp.MustCompile(`(?i)topic conflict, already exists`),
 			},
 		},
 	})
