@@ -34,7 +34,6 @@ func DefaultResourceTimeouts() *schema.ResourceTimeout {
 const (
 	ServiceTypePG               = "pg"
 	ServiceTypeCassandra        = "cassandra"
-	ServiceTypeElasticsearch    = "elasticsearch"
 	ServiceTypeOpenSearch       = "opensearch"
 	ServiceTypeGrafana          = "grafana"
 	ServiceTypeInfluxDB         = "influxdb"
@@ -303,53 +302,6 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 }
 
 func ResourceServiceCreateWrapper(serviceType string) schema.CreateContextFunc {
-	if serviceType == "service" {
-		return func(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-			// Need to set empty value for all services or all Terraform keeps on showing there's
-			// a change in the computed values that don't match actual service type
-			if err := d.Set(ServiceTypeCassandra, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeElasticsearch, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeGrafana, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeInfluxDB, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeKafka, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeKafkaConnect, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeKafkaMirrormaker, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeMySQL, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypePG, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeRedis, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeOpenSearch, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeFlink, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeClickhouse, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			return resourceServiceCreate(ctx, d, m)
-		}
-	}
-
 	return func(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 		if err := d.Set("service_type", serviceType); err != nil {
 			return diag.Errorf("error setting service_type: %s", err)
@@ -796,8 +748,6 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	switch serviceType {
 	case "opensearch":
 		props["opensearch_dashboards_uri"] = connectionInfo.OpensearchDashboardsURI
-	case "elasticsearch":
-		props["kibana_uri"] = connectionInfo.KibanaURI
 	case "influxdb":
 		props["database_name"] = connectionInfo.InfluxDBDatabaseName
 	case "kafka":
