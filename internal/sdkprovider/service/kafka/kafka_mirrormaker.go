@@ -9,16 +9,7 @@ import (
 )
 
 func aivenKafkaMirrormakerSchema() map[string]*schema.Schema {
-	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeKafkaMirrormaker)
-	s[schemautil.ServiceTypeKafkaMirrormaker] = &schema.Schema{
-		Type:        schema.TypeList,
-		Computed:    true,
-		Description: "Kafka MirrorMaker 2 server provided values",
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{},
-		},
-	}
-	return s
+	return schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeKafkaMirrormaker)
 }
 func ResourceKafkaMirrormaker() *schema.Resource {
 	return &schema.Resource{

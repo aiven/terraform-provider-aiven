@@ -746,17 +746,17 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	props := make(map[string]interface{})
 
 	switch serviceType {
-	case "opensearch":
+	case ServiceTypeOpenSearch:
 		props["opensearch_dashboards_uri"] = connectionInfo.OpensearchDashboardsURI
-	case "influxdb":
+	case ServiceTypeInfluxDB:
 		props["database_name"] = connectionInfo.InfluxDBDatabaseName
-	case "kafka":
+	case ServiceTypeKafka:
 		props["access_cert"] = connectionInfo.KafkaAccessCert
 		props["access_key"] = connectionInfo.KafkaAccessKey
 		props["connect_uri"] = connectionInfo.KafkaConnectURI
 		props["rest_uri"] = connectionInfo.KafkaRestURI
 		props["schema_registry_uri"] = connectionInfo.SchemaRegistryURI
-	case "pg":
+	case ServiceTypePG:
 		if connectionInfo.PostgresURIs != nil && len(connectionInfo.PostgresURIs) > 0 {
 			props["uri"] = connectionInfo.PostgresURIs[0]
 		}
@@ -774,8 +774,11 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 		}
 		props["replica_uri"] = connectionInfo.PostgresReplicaURI
 		props["max_connections"] = metadata.(map[string]interface{})["max_connections"]
-	case "flink":
+	case ServiceTypeFlink:
 		props["host_ports"] = connectionInfo.FlinkHostPorts
+	default:
+		// Doesn't have connection info
+		return nil
 	}
 
 	return d.Set(serviceType, []map[string]interface{}{props})

@@ -9,16 +9,7 @@ import (
 )
 
 func redisSchema() map[string]*schema.Schema {
-	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeRedis)
-	s[schemautil.ServiceTypeRedis] = &schema.Schema{
-		Type:        schema.TypeList,
-		Computed:    true,
-		Description: "Redis server provided values",
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{},
-		},
-	}
-	return s
+	return schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeRedis)
 }
 
 func ResourceRedis() *schema.Resource {

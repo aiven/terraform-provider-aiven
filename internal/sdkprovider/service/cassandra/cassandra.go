@@ -9,16 +9,7 @@ import (
 )
 
 func cassandraSchema() map[string]*schema.Schema {
-	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeCassandra)
-	s[schemautil.ServiceTypeCassandra] = &schema.Schema{
-		Type:        schema.TypeList,
-		Computed:    true,
-		Description: "Cassandra server provided values",
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{},
-		},
-	}
-	return s
+	return schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeCassandra)
 }
 
 func ResourceCassandra() *schema.Resource {

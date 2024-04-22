@@ -38,7 +38,6 @@ data "aiven_kafka_mirrormaker" "mm1" {
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) Disk space that service is currently using
 - `id` (String) The ID of this resource.
-- `kafka_mirrormaker` (List of Object) Kafka MirrorMaker 2 server provided values (see [below for nested schema](#nestedatt--kafka_mirrormaker))
 - `kafka_mirrormaker_user_config` (List of Object) KafkaMirrormaker user configurable settings (see [below for nested schema](#nestedatt--kafka_mirrormaker_user_config))
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
@@ -70,13 +69,6 @@ Read-Only:
 - `route` (String)
 - `ssl` (Boolean)
 - `usage` (String)
-
-
-<a id="nestedatt--kafka_mirrormaker"></a>
-### Nested Schema for `kafka_mirrormaker`
-
-Read-Only:
-
 
 
 <a id="nestedatt--kafka_mirrormaker_user_config"></a>

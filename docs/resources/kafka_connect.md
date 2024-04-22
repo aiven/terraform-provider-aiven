@@ -66,7 +66,6 @@ resource "aiven_kafka_connect" "kc1" {
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) Disk space that service is currently using
 - `id` (String) The ID of this resource.
-- `kafka_connect` (List of Object) Kafka Connect server provided values (see [below for nested schema](#nestedatt--kafka_connect))
 - `service_host` (String) The hostname of the service.
 - `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
 - `service_port` (Number) The port of the service
@@ -206,12 +205,6 @@ Read-Only:
 - `route` (String)
 - `ssl` (Boolean)
 - `usage` (String)
-
-
-<a id="nestedatt--kafka_connect"></a>
-### Nested Schema for `kafka_connect`
-
-Read-Only:
 
 ## Import
 
