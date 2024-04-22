@@ -47,6 +47,7 @@ const (
 	ServiceTypeFlink            = "flink"
 	ServiceTypeClickhouse       = "clickhouse"
 	ServiceTypeDragonfly        = "dragonfly"
+	ServiceTypeThanos           = "thanos"
 )
 
 var TechEmailsResourceSchema = &schema.Resource{
@@ -772,6 +773,12 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 		props["max_connections"] = metadata.(map[string]interface{})["max_connections"]
 	case ServiceTypeFlink:
 		props["host_ports"] = connectionInfo.FlinkHostPorts
+	case ServiceTypeThanos:
+		props["query_frontend_uri"] = connectionInfo.QueryFrontendURI
+		props["query_uri"] = connectionInfo.QueryURI
+		props["receiver_ingesting_remote_write_uri"] = connectionInfo.ReceiverIngestingRemoteWriteURI
+		props["receiver_remote_write_uri"] = connectionInfo.ReceiverRemoteWriteURI
+		props["store_uri"] = connectionInfo.StoreURI
 	default:
 		// Doesn't have connection info
 		return nil

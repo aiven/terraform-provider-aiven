@@ -412,6 +412,7 @@ jobs:
           $(grep -oP 'func \KTest\w+' ${{ matrix.test }} | xargs | sed 's/ /|/g')
         env:
           TF_ACC: 1
+          PROVIDER_AIVEN_ENABLE_BETA: 1
           CGO_ENABLED: 0
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
           AIVEN_PROJECT_NAME: ${{ secrets.AIVEN_PROJECT_NAME_PREFIX }}${{ needs.selproj.outputs.suffix }}

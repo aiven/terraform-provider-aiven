@@ -18,6 +18,7 @@ nav_order: 1
 - Validate `aiven_kafka_topic` topic name conflict on `terraform plan`
 - Mark service connection info blocks as `sensitive`. See SDK [bug](https://github.com/hashicorp/terraform-plugin-sdk/issues/201).
 - Remove redundant service connection info fields 
+- Add Thanos resource (`aiven_thanos`) to allow for the creation and management of Thanos services (currently available as beta)
 
 ## [4.15.0] - 2024-03-21
 
