@@ -506,7 +506,7 @@ func kafkaUserConfig() *schema.Schema {
 				Description:  "Kafka major version.",
 				Optional:     true,
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"3.2", "3.3", "3.1", "3.4", "3.5", "3.6"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"3.2", "3.3", "3.1", "3.4", "3.5", "3.6", "3.7"}, false),
 			},
 			"private_access": {
 				Description: "Allow access to selected service ports from private networks",

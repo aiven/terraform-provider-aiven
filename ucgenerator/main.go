@@ -172,20 +172,19 @@ func getSchemaValues(o *object) (jen.Dict, error) {
 	switch o.Type {
 	case objectTypeObject, objectTypeArray:
 		if o.isSchemaless() {
-			// todo: handle schemaless if this happens
-			return nil, fmt.Errorf("schemaless is not implemented: %q", o.jsonName)
-		}
+			t = "Map"
+		} else {
+			t = "List"
+			if isTypeSet(o) {
+				t = "Set"
+			}
 
-		t = "List"
-		if isTypeSet(o) {
-			t = "Set"
-		}
-
-		if o.MinItems != nil {
-			values[jen.Id("MinItems")] = jen.Lit(*o.MinItems)
-		}
-		if o.MaxItems != nil {
-			values[jen.Id("MaxItems")] = jen.Lit(*o.MaxItems)
+			if o.MinItems != nil {
+				values[jen.Id("MinItems")] = jen.Lit(*o.MinItems)
+			}
+			if o.MaxItems != nil {
+				values[jen.Id("MaxItems")] = jen.Lit(*o.MaxItems)
+			}
 		}
 	case objectTypeBoolean:
 		t = "Bool"
@@ -278,9 +277,11 @@ func getSchemaValues(o *object) (jen.Dict, error) {
 		fields[jen.Lit(p.tfName)] = jen.Values(vals)
 	}
 
-	values[jen.Id("Elem")] = jen.Op("&").Qual(importSchema, "Resource").Values(jen.Dict{
-		jen.Id("Schema"): jen.Map(jen.String()).Op("*").Qual(importSchema, "Schema").Values(fields),
-	})
+	if len(fields) > 0 {
+		values[jen.Id("Elem")] = jen.Op("&").Qual(importSchema, "Resource").Values(jen.Dict{
+			jen.Id("Schema"): jen.Map(jen.String()).Op("*").Qual(importSchema, "Schema").Values(fields),
+		})
+	}
 
 	return values, nil
 }
