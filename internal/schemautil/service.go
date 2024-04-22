@@ -306,10 +306,6 @@ func ResourceServiceCreateWrapper(serviceType string) schema.CreateContextFunc {
 		if err := d.Set("service_type", serviceType); err != nil {
 			return diag.Errorf("error setting service_type: %s", err)
 		}
-		if err := d.Set(serviceType, []map[string]interface{}{}); err != nil {
-			return diag.Errorf("error setting an empty %s field: %s", serviceType, err)
-		}
-
 		return resourceServiceCreate(ctx, d, m)
 	}
 }
