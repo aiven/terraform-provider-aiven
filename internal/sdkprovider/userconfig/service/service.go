@@ -36,10 +36,12 @@ func GetUserConfig(kind string) *schema.Schema {
 		return pgUserConfig()
 	case "redis":
 		return redisUserConfig()
+	case "thanos":
+		return thanosUserConfig()
 	default:
 		return nil
 	}
 }
 func UserConfigTypes() []string {
-	return []string{"cassandra", "clickhouse", "dragonfly", "flink", "grafana", "influxdb", "kafka", "kafka_connect", "kafka_mirrormaker", "m3aggregator", "m3db", "mysql", "opensearch", "pg", "redis"}
+	return []string{"cassandra", "clickhouse", "dragonfly", "flink", "grafana", "influxdb", "kafka", "kafka_connect", "kafka_mirrormaker", "m3aggregator", "m3db", "mysql", "opensearch", "pg", "redis", "thanos"}
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 
 	"github.com/stoewer/go-strcase"
@@ -70,6 +71,8 @@ type object struct {
 	Nullable       bool               `yaml:"-"`
 }
 
+var reCleanTFName = regexp.MustCompile(`[^a-z0-9_]`)
+
 func (o *object) init(name string) {
 	o.camelName = toCamelCase(name)
 	o.varName = o.camelName + "Var"
@@ -77,7 +80,13 @@ func (o *object) init(name string) {
 	o.tfoStructName = "tfo" + o.camelName
 	o.dtoStructName = "dto" + o.camelName
 	o.jsonName = name
-	o.tfName = strings.ReplaceAll(name, ".", "__dot__")
+
+	if strings.HasPrefix(name, "pg_partman_bgw") || strings.HasPrefix(name, "pg_stat_") {
+		// Legacy fields
+		o.tfName = strings.ReplaceAll(name, ".", "__dot__")
+	} else {
+		o.tfName = reCleanTFName.ReplaceAllString(name, "_")
+	}
 
 	unwrapArrayMultipleTypes(o)
 

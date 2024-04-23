@@ -376,6 +376,8 @@ func flattenAttr(s *schema.Schema, data any) (any, error) {
 		return int(i), err
 	case schema.TypeFloat:
 		return data.(json.Number).Float64()
+	case schema.TypeMap:
+		return data, nil
 	}
 
 	// A set can contain scalars only
