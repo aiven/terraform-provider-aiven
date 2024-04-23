@@ -58,7 +58,6 @@ resource "aiven_cassandra" "bar" {
 
 ### Read-Only
 
-- `cassandra` (List of Object) Cassandra server provided values (see [below for nested schema](#nestedatt--cassandra))
 - `components` (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
 - `disk_space_cap` (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
 - `disk_space_default` (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
@@ -170,13 +169,6 @@ Optional:
 - `delete` (String)
 - `read` (String)
 - `update` (String)
-
-
-<a id="nestedatt--cassandra"></a>
-### Nested Schema for `cassandra`
-
-Read-Only:
-
 
 
 <a id="nestedatt--components"></a>

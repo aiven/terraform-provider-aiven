@@ -9,16 +9,7 @@ import (
 )
 
 func aivenKafkaConnectSchema() map[string]*schema.Schema {
-	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeKafkaConnect)
-	s[schemautil.ServiceTypeKafkaConnect] = &schema.Schema{
-		Type:        schema.TypeList,
-		Computed:    true,
-		Description: "Kafka Connect server provided values",
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{},
-		},
-	}
-	return s
+	return schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeKafkaConnect)
 }
 
 func ResourceKafkaConnect() *schema.Resource {

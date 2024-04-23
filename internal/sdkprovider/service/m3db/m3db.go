@@ -9,16 +9,7 @@ import (
 )
 
 func aivenM3DBSchema() map[string]*schema.Schema {
-	schemaM3 := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeM3)
-	schemaM3[schemautil.ServiceTypeM3] = &schema.Schema{
-		Type:        schema.TypeList,
-		Computed:    true,
-		Description: "M3 specific server provided values",
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{},
-		},
-	}
-	return schemaM3
+	return schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeM3)
 }
 func ResourceM3DB() *schema.Resource {
 	return &schema.Resource{

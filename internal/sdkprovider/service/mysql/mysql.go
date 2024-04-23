@@ -9,16 +9,7 @@ import (
 )
 
 func aivenMySQLSchema() map[string]*schema.Schema {
-	schemaMySQL := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeMySQL)
-	schemaMySQL[schemautil.ServiceTypeMySQL] = &schema.Schema{
-		Type:        schema.TypeList,
-		Computed:    true,
-		Description: "MySQL specific server provided values",
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{},
-		},
-	}
-	return schemaMySQL
+	return schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeMySQL)
 }
 func ResourceMySQL() *schema.Resource {
 	return &schema.Resource{

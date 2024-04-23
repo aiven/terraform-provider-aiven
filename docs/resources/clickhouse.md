@@ -50,7 +50,6 @@ resource "aiven_clickhouse" "clickhouse" {
 
 ### Read-Only
 
-- `clickhouse` (List of Object, Sensitive) Clickhouse server provided values (see [below for nested schema](#nestedatt--clickhouse))
 - `components` (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
 - `disk_space_cap` (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
 - `disk_space_default` (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
@@ -164,13 +163,6 @@ Optional:
 - `delete` (String)
 - `read` (String)
 - `update` (String)
-
-
-<a id="nestedatt--clickhouse"></a>
-### Nested Schema for `clickhouse`
-
-Read-Only:
-
 
 
 <a id="nestedatt--components"></a>

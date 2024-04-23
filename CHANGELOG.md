@@ -16,6 +16,7 @@ nav_order: 1
 - Fix sending `false` values in `aiven_kafka_topic` config
 - Validate `aiven_kafka_topic` topic name conflict on `terraform plan`
 - Mark service connection info blocks as `sensitive`. See SDK [bug](https://github.com/hashicorp/terraform-plugin-sdk/issues/201).
+- Remove redundant service connection info fields 
 
 ## [4.15.0] - 2024-03-21
 

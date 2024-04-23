@@ -65,7 +65,6 @@ resource "aiven_m3db" "m3" {
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) Disk space that service is currently using
 - `id` (String) The ID of this resource.
-- `m3db` (List of Object) M3 specific server provided values (see [below for nested schema](#nestedatt--m3db))
 - `service_host` (String) The hostname of the service.
 - `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
 - `service_port` (Number) The port of the service
@@ -294,12 +293,6 @@ Read-Only:
 - `route` (String)
 - `ssl` (Boolean)
 - `usage` (String)
-
-
-<a id="nestedatt--m3db"></a>
-### Nested Schema for `m3db`
-
-Read-Only:
 
 ## Import
 
