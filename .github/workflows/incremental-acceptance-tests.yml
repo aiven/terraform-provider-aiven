@@ -379,7 +379,7 @@ jobs:
   run_tests:
     name: Run tests
     runs-on: ubuntu-latest
-    if: ${{ needs.find_tests.outputs.tests != '[]' }}
+    if: needs.find_tests.outputs.tests != '[""]'
 
     needs:
       - selproj
@@ -407,7 +407,9 @@ jobs:
           go-version-file: go.mod
 
       - name: Run tests
-        run: go test ${{ matrix.test }} -v -count $COUNT -parallel $PARALLEL -timeout $TIMEOUT
+        run: >
+          go test ./$(dirname '${{ matrix.test }}') -v -count 1 -parallel 10 -timeout 180m -run
+          $(grep -oP 'func \KTest\w+' ${{ matrix.test }} | xargs | sed 's/ /|/g')
         env:
           TF_ACC: 1
           CGO_ENABLED: 0
