@@ -5,9 +5,7 @@ subcategory: ""
 description: |-
   The Clickhouse Grant resource allows the creation and management of Grants in Aiven Clickhouse services.
   Notes:
-  * Due to a ambiguity in the GRANT syntax in clickhouse you should not have users and roles with the same name. It is not clear if a grant refers to the user or the role.
-  * To grant a privilege on all tables of a database, do not write table = "*". Instead, omit the table and only keep the database.
-  * Currently changes will first revoke all grants and then reissue the remaining grants for convergence.
+  Due to a ambiguity in the GRANT syntax in clickhouse you should not have users and roles with the same name. It is not clear if a grant refers to the user or the role.To grant a privilege on all tables of a database, do not write table = "*". Instead, omit the table and only keep the database.Currently changes will first revoke all grants and then reissue the remaining grants for convergence.
 ---
 
 # aiven_clickhouse_grant (Resource)

@@ -214,7 +214,7 @@ Read-Only:
 - `ip_rate_limiting` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--auth_failure_listeners--ip_rate_limiting))
 
 <a id="nestedobjatt--opensearch_user_config--opensearch--auth_failure_listeners--internal_authentication_backend_limiting"></a>
-### Nested Schema for `opensearch_user_config.opensearch.auth_failure_listeners.ip_rate_limiting`
+### Nested Schema for `opensearch_user_config.opensearch.auth_failure_listeners.internal_authentication_backend_limiting`
 
 Read-Only:
 

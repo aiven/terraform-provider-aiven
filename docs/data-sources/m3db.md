@@ -162,7 +162,7 @@ Read-Only:
 - `writes_to_commitlog` (Boolean)
 
 <a id="nestedobjatt--m3db_user_config--namespaces--options--retention_options"></a>
-### Nested Schema for `m3db_user_config.namespaces.options.writes_to_commitlog`
+### Nested Schema for `m3db_user_config.namespaces.options.retention_options`
 
 Read-Only:
 
@@ -213,7 +213,7 @@ Read-Only:
 - `tags` (List of Object) (see [below for nested schema](#nestedobjatt--m3db_user_config--rules--mapping--tags))
 
 <a id="nestedobjatt--m3db_user_config--rules--mapping--namespaces_object"></a>
-### Nested Schema for `m3db_user_config.rules.mapping.tags`
+### Nested Schema for `m3db_user_config.rules.mapping.namespaces_object`
 
 Read-Only:
 
