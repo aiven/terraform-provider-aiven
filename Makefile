@@ -118,7 +118,13 @@ lint-test: $(TERRAFMT)
 
 
 lint-docs: $(TFPLUGINDOCS)
-	PROVIDER_AIVEN_ENABLE_BETA=true $(TFPLUGINDOCS) validate
+	PROVIDER_AIVEN_ENABLE_BETA=true $(TFPLUGINDOCS) generate --rendered-website-dir tmp
+	mv tmp/data-sources/influxdb*.md docs/data-sources/
+	mv tmp/resources/influxdb*.md docs/resources/
+	rm -rf tmp
+	PROVIDER_AIVEN_ENABLE_BETA=true $(TFPLUGINDOCS) validate --provider-name aiven
+	rm -f docs/data-sources/influxdb*.md
+	rm -f docs/resources/influxdb*.md
 
 #################################################
 # Format
