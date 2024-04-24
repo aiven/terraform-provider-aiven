@@ -418,6 +418,21 @@ jobs:
           AIVEN_ORGANIZATION_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
           AIVEN_ACCOUNT_NAME: ${{ secrets.AIVEN_ORGANIZATION_NAME }}
 
+  result:
+    # Because we use a matrix strategy, we need to check the results of all jobs, and if any of them failed or were
+    # cancelled, we should fail the workflow. This is used to set up a status check on the pull request.
+
+    name: Result
+    runs-on: ubuntu-latest
+    if: always()
+
+    needs:
+      - run_tests
+
+    steps:
+      - if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1
+
   sweep:
     name: Sweep
     runs-on: ubuntu-latest
@@ -425,7 +440,7 @@ jobs:
 
     needs:
       - selproj
-      - run_tests
+      - result
 
     steps:
       - name: Checkout
