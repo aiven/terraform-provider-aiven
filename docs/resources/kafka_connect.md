@@ -111,7 +111,7 @@ Optional:
 - `consumer_auto_offset_reset` (String) What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest.
 - `consumer_fetch_max_bytes` (Number) Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum.
 - `consumer_isolation_level` (String) Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.
-- `consumer_max_partition_fetch_bytes` (Number) Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. .
+- `consumer_max_partition_fetch_bytes` (Number) Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress.
 - `consumer_max_poll_interval_ms` (Number) The maximum delay in milliseconds between invocations of poll() when using consumer group management (defaults to 300000).
 - `consumer_max_poll_records` (Number) The maximum number of records returned in a single call to poll() (defaults to 500).
 - `offset_flush_interval_ms` (Number) The interval at which to try committing offsets for tasks (defaults to 60000).

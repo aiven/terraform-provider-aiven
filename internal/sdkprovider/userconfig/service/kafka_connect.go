@@ -91,7 +91,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"read_uncommitted", "read_committed"}, false),
 					},
 					"consumer_max_partition_fetch_bytes": {
-						Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. .",
+						Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},

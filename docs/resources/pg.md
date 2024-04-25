@@ -223,7 +223,7 @@ Optional:
 - `pg_partman_bgw__dot__interval` (Number) Sets the time interval to run pg_partman's scheduled tasks.
 - `pg_partman_bgw__dot__role` (String) Controls which role to use for pg_partman's scheduled background tasks.
 - `pg_stat_monitor__dot__pgsm_enable_query_plan` (Boolean) Enables or disables query plan monitoring.
-- `pg_stat_monitor__dot__pgsm_max_buckets` (Number) Sets the maximum number of buckets .
+- `pg_stat_monitor__dot__pgsm_max_buckets` (Number) Sets the maximum number of buckets.
 - `pg_stat_statements__dot__track` (String) Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default value is top.
 - `temp_file_limit` (Number) PostgreSQL temporary file limit in KiB, -1 for unlimited.
 - `timezone` (String) PostgreSQL service timezone.

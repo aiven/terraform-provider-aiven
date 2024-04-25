@@ -16,8 +16,13 @@ var (
 // SuppressUnchanged suppresses diff for unchanged fields.
 // Applied for all nested values: both for objects and arrays.
 func SuppressUnchanged(k, old, new string, d *schema.ResourceData) bool {
+	// schema.TypeMap
+	if strings.HasSuffix(k, ".%") {
+		return old == new
+	}
+
 	// Lists, sets and objects (object is list with one item).
-	if k[len(k)-1:] == "#" {
+	if strings.HasSuffix(k, ".#") {
 		if d.HasChange(k) {
 			// By some reason terraform might mark objects as "changed".
 			// In that case, terraform returns a list with a nil value.

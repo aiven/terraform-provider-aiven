@@ -118,7 +118,7 @@ Optional:
 Required:
 
 - `project_id` (String) GCP project id.
-- `service_account_credentials` (String) This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys .
+- `service_account_credentials` (String) This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys.
 
 
 <a id="nestedblock--external_google_cloud_logging_user_config"></a>
@@ -128,7 +128,7 @@ Required:
 
 - `log_id` (String) Google Cloud Logging log id.
 - `project_id` (String) GCP project id.
-- `service_account_credentials` (String) This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys .
+- `service_account_credentials` (String) This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys.
 
 
 <a id="nestedblock--external_kafka_user_config"></a>

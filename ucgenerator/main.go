@@ -19,6 +19,7 @@ import (
 )
 
 const (
+	userConfigSuffix = "_user_config"
 	destPath         = "./internal/sdkprovider/userconfig/"
 	localPrefix      = "github.com/aiven/terraform-provider-aiven"
 	importSchema     = "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -54,8 +55,8 @@ func generate(kind string, data []byte, exclude []string) error {
 	// Fixes imports order
 	imports.LocalPrefix = localPrefix
 
-	var root map[string]*object
-	err := yaml.Unmarshal(data, &root)
+	var sch map[string]*object
+	err := yaml.Unmarshal(data, &sch)
 	if err != nil {
 		return err
 	}
@@ -66,18 +67,19 @@ func generate(kind string, data []byte, exclude []string) error {
 		return err
 	}
 
-	keys := maps.Keys(root)
+	keys := maps.Keys(sch)
 	slices.Sort(keys)
 	doneKeys := make([]string, 0, len(keys))
 	doneNames := make([]string, 0, len(keys))
 
+	fieldMapping := jen.Dict{}
 	for _, key := range keys {
 		if slices.Contains(exclude, key) {
 			log.Printf("skipping %q: in exclude list", key)
 			continue
 		}
 
-		o, ok := root[key]
+		o, ok := sch[key]
 		if !ok {
 			return fmt.Errorf("key %q not found in spec", key)
 		}
@@ -87,8 +89,9 @@ func generate(kind string, data []byte, exclude []string) error {
 			continue
 		}
 
+		root := key + userConfigSuffix
 		o.isRoot = true
-		o.init(key + "_user_config")
+		o.init(root)
 		if o.Description == "" {
 			o.Description = toUpperFirst(o.camelName) + " user configurable settings"
 		}
@@ -104,6 +107,13 @@ func generate(kind string, data []byte, exclude []string) error {
 		err := genSchema(f, o)
 		if err != nil {
 			return fmt.Errorf("error generating %q: %w", key, err)
+		}
+
+		// Some fields have dots and dashes in naming
+		thisMapping := jen.Dict{}
+		genFieldMapping(thisMapping, o)
+		if len(thisMapping) > 0 {
+			fieldMapping[jen.Lit(key)] = jen.Values(thisMapping)
 		}
 
 		// Sorts imports
@@ -136,6 +146,12 @@ func generate(kind string, data []byte, exclude []string) error {
 		jen.Switch(jen.Id("kind")).Block(cases...),
 	)
 
+	mappingFunc := "GetFieldMapping"
+	f.Comment(mappingFunc + " returns TF fields to Json fields mapping (in unix-path way)")
+	f.Func().Id(mappingFunc).Params(jen.Id("kind").String()).Map(jen.String()).String().Block(
+		jen.Return(jen.Map(jen.String()).Map(jen.String()).String().Values(fieldMapping).Index(jen.Id("kind"))),
+	)
+
 	configTypes := make([]jen.Code, 0)
 	for _, v := range doneKeys {
 		configTypes = append(configTypes, jen.Lit(v))
@@ -144,6 +160,20 @@ func generate(kind string, data []byte, exclude []string) error {
 		jen.Return(jen.Index().String().Values(configTypes...)),
 	)
 	return f.Save(filepath.Join(dirPath, kind+".go"))
+}
+
+func genFieldMapping(mapping jen.Dict, o *object) {
+	for _, p := range o.Properties {
+		if p.tfName != p.jsonName {
+			mapping[jen.Lit(p.path())] = jen.Lit(p.jsonPath())
+		}
+		if p.isObject() {
+			genFieldMapping(mapping, p)
+		}
+		if p.isArray() && p.ArrayItems.isObject() {
+			genFieldMapping(mapping, p.ArrayItems)
+		}
+	}
 }
 
 func genSchema(f *jen.File, o *object) error {
@@ -312,8 +342,12 @@ func getDescription(o *object) string {
 	return strings.Join(desc, " ")
 }
 
+// reFixDot some descriptions have issues with multiple dots or ending spaces
+var reFixDot = regexp.MustCompile(`[\s.]+$`)
+
 func addDot(s string) string {
 	if s != "" {
+		s = reFixDot.ReplaceAllString(s, ".")
 		switch s[len(s)-1:] {
 		case ".", "!", "?":
 		default:
