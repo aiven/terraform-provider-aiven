@@ -170,7 +170,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"log_message_downconversion_enable": {
-						Description: "This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. .",
+						Description: "This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -281,7 +281,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"sasl_oauthbearer_jwks_endpoint_url": {
-						Description: "OIDC JWKS endpoint URL. By setting this the SASL SSL OAuth2/OIDC authentication is enabled. See also other options for SASL OAuth2/OIDC. .",
+						Description: "OIDC JWKS endpoint URL. By setting this the SASL SSL OAuth2/OIDC authentication is enabled. See also other options for SASL OAuth2/OIDC.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
@@ -365,7 +365,7 @@ func kafkaUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"read_uncommitted", "read_committed"}, false),
 					},
 					"consumer_max_partition_fetch_bytes": {
-						Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. .",
+						Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},

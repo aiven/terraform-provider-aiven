@@ -66,6 +66,19 @@ func getUserConfig(kind userConfigType, name string) *schema.Schema {
 	return nil
 }
 
+// getFieldMapping json field for tf field might be different, returns the mapping
+func getFieldMapping(kind userConfigType, name string) map[string]string {
+	switch kind {
+	case ServiceUserConfig:
+		return service.GetFieldMapping(name)
+	case ServiceIntegrationUserConfig:
+		return serviceintegration.GetFieldMapping(name)
+	case ServiceIntegrationEndpointUserConfig:
+		return serviceintegrationendpoint.GetFieldMapping(name)
+	}
+	return nil
+}
+
 // SetUserConfig sets user config schema for given kind and name
 func SetUserConfig(kind userConfigType, name string, s map[string]*schema.Schema) {
 	userConfig := getUserConfig(kind, name)
@@ -112,7 +125,7 @@ func expand(kind userConfigType, name string, d *schema.ResourceData) (map[strin
 	}
 
 	// Renames ip_filter_object/string to ip_filter
-	renameAliases(dto)
+	renameAliasesToDto(kind, name, dto)
 
 	if v, ok := dto["ip_filter"].([]any); ok && len(v) == 0 {
 		if _, ok := os.LookupEnv(AllowIPFilterPurge); !ok {
@@ -134,19 +147,8 @@ type stateCompose struct {
 	key      string               // state attribute name or schema.ResourceData key
 	path     string               // schema.ResourceData path, i.e., foo.0.bar.0.baz to get the value
 	schema   *schema.Schema       // tf schema
-	config   cty.Value            // tf file values, it knows if resource value is null
+	config   cty.Value            // tf file state, it knows if resource value is null
 	resource *schema.ResourceData // tf resource that has both tf state and data that is received from the API
-}
-
-// setItems returns schema.Set values
-func (s *stateCompose) setItems() ([]any, error) {
-	result := make([]any, 0)
-	if s.config.IsNull() {
-		// Makes possible to send ip_filter=[] to clear the remote list.
-		return result, nil
-	}
-
-	return s.value().(*schema.Set).List(), nil
 }
 
 // listItems returns a list of object's states
@@ -196,6 +198,10 @@ func (s *stateCompose) objectProperties() map[string]*stateCompose {
 	}
 	return props
 }
+func (s *stateCompose) valueType() schema.ValueType {
+	return s.schema.Type
+}
+
 func (s *stateCompose) value() any {
 	return s.resource.Get(s.path)
 }
@@ -211,9 +217,9 @@ func (s *stateCompose) hasChange() bool {
 	return s.resource.HasChange(s.path)
 }
 
-func expandObj(state *stateCompose) (map[string]any, error) {
+func expandObj(s *stateCompose) (map[string]any, error) {
 	m := make(map[string]any)
-	for k, v := range state.objectProperties() {
+	for k, v := range s.objectProperties() {
 		value, err := expandAttr(v)
 		if err != nil {
 			return nil, fmt.Errorf("%q field conversion error: %w", k, err)
@@ -225,35 +231,82 @@ func expandObj(state *stateCompose) (map[string]any, error) {
 	return m, nil
 }
 
-func expandScalar(state *stateCompose) (any, error) {
-	if state.isNull() {
+func expandScalar(s *stateCompose) (any, error) {
+	if s.isNull() {
 		// Null scalar, no value in the config
 		return nil, nil
 	}
-	return state.value(), nil
+	return s.value(), nil
 }
 
 // expandAttr returns go value
-func expandAttr(state *stateCompose) (any, error) {
-	switch state.schema.Type {
+func expandAttr(s *stateCompose) (any, error) {
+	// Scalar values
+	switch s.valueType() {
 	case schema.TypeSet, schema.TypeList:
+		// See below
+	case schema.TypeMap:
+		return expandMap(s)
 	default:
-		return expandScalar(state)
+		return expandScalar(s)
 	}
 
-	if state.isNull() && !state.hasChange() {
+	// Here go schema.TypeMap, schema.TypeSet, schema.TypeList
+	if s.isNull() && !s.hasChange() {
 		// A value that hasn't been sent by user yet.
 		// But have been received from the API.
 		return nil, nil
 	}
 
-	if state.schema.Type == schema.TypeSet {
-		return state.setItems()
+	if s.valueType() == schema.TypeSet {
+		return expandSet(s)
 	}
 
+	return expandList(s)
+}
+
+// expandMap must return "any" type to discern "nil" and empty "map"
+// to send empty "map" and skip "nil"
+func expandMap(s *stateCompose) (any, error) {
+	if s.config.IsNull() {
+		return nil, nil
+	}
+
+	value := s.value()
+	m, ok := value.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("%q expected to be map, but got %T", s.path, value)
+	}
+
+	// Sends map fields which are in config
+	result := make(map[string]any)
+	for k, v := range s.config.AsValueMap() {
+		if !v.IsNull() {
+			result[k] = m[k]
+		}
+	}
+	return result, nil
+}
+
+func expandSet(s *stateCompose) ([]any, error) {
+	// If the value was removed, sends an empty set
+	// Warning: can't handle nested (complex) objects.
+	// Use schema.TypeList instead
+	result := make([]any, 0)
+	if s.config.IsNull() {
+		// Makes possible to send ip_filter=[] to clear the remote list.
+		return result, nil
+	}
+
+	return s.value().(*schema.Set).List(), nil
+}
+
+// expandList returns a list of elements or a single object,
+// because in TF an object is a list with a single element
+func expandList(s *stateCompose) (any, error) {
 	// schema.TypeList
-	_, isObjList := state.schema.Elem.(*schema.Resource)
-	states := state.listItems()
+	_, isObjList := s.schema.Elem.(*schema.Resource)
+	states := s.listItems()
 	items := make([]any, 0, len(states))
 	for i := range states {
 		var exp any
@@ -275,7 +328,7 @@ func expandAttr(state *stateCompose) (any, error) {
 	}
 
 	// If schema.TypeList && MaxItems == 1, then it is an object
-	if isObjList && state.schema.MaxItems == 1 {
+	if isObjList && s.schema.MaxItems == 1 {
 		switch len(items) {
 		case 1:
 			// A plain object (in TF a list with one object is an object)
@@ -309,15 +362,8 @@ func flatten(kind userConfigType, name string, d *schema.ResourceData, dto map[s
 	key := userConfigKey(kind, name)
 	prefix := fmt.Sprintf("%s.0.", key)
 
-	// Renames ip_filter field
-	if _, ok := dto["ip_filter"]; ok {
-		assignAlias(d, prefix+"ip_filter", dto, "ip_filter")
-	}
-
-	// Renames namespaces field
-	if mapping, ok := drillKey(dto, "rules.0.mapping"); ok {
-		assignAlias(d, prefix+"rules.0.mapping.0.namespaces", mapping.(map[string]any), "namespaces")
-	}
+	// Renames ip_filter to ip_filter_object
+	renameAliasesToTfo(kind, name, dto, d)
 
 	// Copies "create only" fields from the original config.
 	// Like admin_password, that is received only on POST request when service is created.
@@ -433,48 +479,10 @@ func flattenList(s map[string]*schema.Schema, list []any) ([]any, error) {
 	return items, nil
 }
 
-// assignAlias renames keys for multi-typed properties, i.e. ip_filter -> [ip_filter_string, ip_filter_object]
-func assignAlias(d *schema.ResourceData, path string, dto map[string]any, key string) {
-	values, ok := dto[key].([]any)
-	if !ok || len(values) == 0 {
-		return
-	}
-
-	var suffix string
-	const (
-		str = "_string"
-		obj = "_object"
-	)
-
-	// If DTO has objects, then it is foo_object
-	if _, ok := values[0].(map[string]any); ok {
-		suffix = obj
-	}
-
-	// If the state has foo_string, the user has new key
-	if _, ok := d.GetOk(path + str); ok {
-		suffix = str
-	}
-
-	if suffix != "" {
-		dto[key+suffix] = dto[key]
-		delete(dto, key)
-	}
-}
-
 // createOnlyFields these fields are received on POST request only
 func createOnlyFields() []string {
 	return []string{
 		"admin_username",
 		"admin_password",
-	}
-}
-
-func aliasFieldsMap() map[string]string {
-	return map[string]string{
-		"ip_filter_string":                    "ip_filter",
-		"ip_filter_object":                    "ip_filter",
-		"rules.0.mapping.0.namespaces_string": "namespaces",
-		"rules.0.mapping.0.namespaces_object": "namespaces",
 	}
 }

@@ -343,7 +343,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"pg_stat_monitor__dot__pgsm_max_buckets": {
-						Description: "Sets the maximum number of buckets .",
+						Description: "Sets the maximum number of buckets.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},

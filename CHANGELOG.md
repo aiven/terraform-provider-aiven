@@ -14,6 +14,7 @@ nav_order: 1
 - Fix incorrect timeout values used in certain cases
 - Fix sending `aiven_kafka_topic` config default values 
 - Fix sending `false` values in `aiven_kafka_topic` config
+- Fix `aiven_pg` user config fields with `__dot__` substring in name
 - Validate `aiven_kafka_topic` topic name conflict on `terraform plan`
 - Mark service connection info blocks as `sensitive`. See SDK [bug](https://github.com/hashicorp/terraform-plugin-sdk/issues/201).
 - Remove redundant service connection info fields 

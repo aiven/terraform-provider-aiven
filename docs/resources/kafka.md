@@ -147,7 +147,7 @@ Optional:
 - `log_index_size_max_bytes` (Number) The maximum size in bytes of the offset index.
 - `log_local_retention_bytes` (Number) The maximum size of local log segments that can grow for a partition before it gets eligible for deletion. If set to -2, the value of log.retention.bytes is used. The effective value should always be less than or equal to log.retention.bytes value.
 - `log_local_retention_ms` (Number) The number of milliseconds to keep the local log segments before it gets eligible for deletion. If set to -2, the value of log.retention.ms is used. The effective value should always be less than or equal to log.retention.ms value.
-- `log_message_downconversion_enable` (Boolean) This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests. .
+- `log_message_downconversion_enable` (Boolean) This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests.
 - `log_message_timestamp_difference_max_ms` (Number) The maximum difference allowed between the timestamp when a broker receives a message and the timestamp specified in the message.
 - `log_message_timestamp_type` (String) Define whether the timestamp in the message is message create time or log append time.
 - `log_preallocate` (Boolean) Should pre allocate file when create new segment?
@@ -169,7 +169,7 @@ Optional:
 - `replica_fetch_response_max_bytes` (Number) Maximum bytes expected for the entire fetch response (defaults to 10485760). Records are fetched in batches, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that progress can be made. As such, this is not an absolute maximum.
 - `sasl_oauthbearer_expected_audience` (String) The (optional) comma-delimited setting for the broker to use to verify that the JWT was issued for one of the expected audiences.
 - `sasl_oauthbearer_expected_issuer` (String) Optional setting for the broker to use to verify that the JWT was created by the expected issuer.
-- `sasl_oauthbearer_jwks_endpoint_url` (String) OIDC JWKS endpoint URL. By setting this the SASL SSL OAuth2/OIDC authentication is enabled. See also other options for SASL OAuth2/OIDC. .
+- `sasl_oauthbearer_jwks_endpoint_url` (String) OIDC JWKS endpoint URL. By setting this the SASL SSL OAuth2/OIDC authentication is enabled. See also other options for SASL OAuth2/OIDC.
 - `sasl_oauthbearer_sub_claim_name` (String) Name of the scope from which to extract the subject claim from the JWT. Defaults to sub.
 - `socket_request_max_bytes` (Number) The maximum number of bytes in a socket request (defaults to 104857600).
 - `transaction_partition_verification_enable` (Boolean) Enable verification that checks that the partition has been added to the transaction before writing transactional records to the partition.
@@ -195,7 +195,7 @@ Optional:
 - `consumer_auto_offset_reset` (String) What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest.
 - `consumer_fetch_max_bytes` (Number) Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum.
 - `consumer_isolation_level` (String) Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.
-- `consumer_max_partition_fetch_bytes` (Number) Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. .
+- `consumer_max_partition_fetch_bytes` (Number) Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress.
 - `consumer_max_poll_interval_ms` (Number) The maximum delay in milliseconds between invocations of poll() when using consumer group management (defaults to 300000).
 - `consumer_max_poll_records` (Number) The maximum number of records returned in a single call to poll() (defaults to 500).
 - `offset_flush_interval_ms` (Number) The interval at which to try committing offsets for tasks (defaults to 60000).

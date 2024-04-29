@@ -36,6 +36,11 @@ func GetUserConfig(kind string) *schema.Schema {
 		return nil
 	}
 }
+
+// GetFieldMapping returns TF fields to Json fields mapping (in unix-path way)
+func GetFieldMapping(kind string) map[string]string {
+	return map[string]map[string]string{}[kind]
+}
 func UserConfigTypes() []string {
 	return []string{"datadog", "external_aws_cloudwatch_logs", "external_aws_cloudwatch_metrics", "external_elasticsearch_logs", "external_google_cloud_bigquery", "external_google_cloud_logging", "external_kafka", "external_opensearch_logs", "external_postgresql", "external_schema_registry", "jolokia", "prometheus", "rsyslog"}
 }

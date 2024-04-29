@@ -4,46 +4,10 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+
+	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 )
-
-// drillKey gets deep down key value
-func drillKey(dto map[string]any, path string) (any, bool) {
-	if dto == nil {
-		return nil, false
-	}
-
-	keys := strings.Split(path, ".0.")
-	keysLen := len(keys) - 1
-	for i := 0; ; i++ {
-		v, ok := dto[keys[i]]
-		if !ok {
-			return nil, false
-		}
-
-		isLast := i == keysLen
-		if isLast {
-			return v, true
-		}
-
-		next, ok := v.(map[string]any)
-		if ok {
-			dto = next
-			continue
-		}
-
-		// Gets the first element of an array
-		list, ok := v.([]any)
-		if !ok || len(list) == 0 {
-			return nil, false
-		}
-
-		next, ok = list[0].(map[string]any)
-		if !ok {
-			return nil, false
-		}
-		dto = next
-	}
-}
 
 // castType returns an error on invalid type
 func castType[T any](v any) (T, error) {
@@ -55,15 +19,46 @@ func castType[T any](v any) (T, error) {
 	return t, nil
 }
 
-func renameAliases(dto map[string]any) {
-	for k, v := range aliasFieldsMap() {
-		renameAlias(dto, k, v)
+// renameAliasesToDto renames aliases to DTO object
+// Must sort keys to rename from bottom to top.
+// Otherwise, might not find the deepest key if parent key is renamed
+func renameAliasesToDto(kind userConfigType, name string, dto map[string]any) {
+	m := getFieldMapping(kind, name)
+	for _, from := range sortKeys(m) {
+		renameAlias(dto, from, m[from])
+	}
+}
+
+// resourceData to test schema.ResourceData with unit tests
+type resourceData interface {
+	GetOk(string) (any, bool)
+}
+
+// renameAliasesToTfo renames aliases to TF object
+// Must sort keys to rename from bottom to top.
+// Otherwise, might not find the deepest key if parent key is renamed
+func renameAliasesToTfo(kind userConfigType, name string, dto map[string]any, d resourceData) {
+	m := getFieldMapping(kind, name)
+	for _, to := range sortKeys(m) {
+		from := m[to]
+
+		if strings.HasSuffix(to, "_string") || strings.HasSuffix(to, "_object") {
+			// If resource doesn't have this field, then ignores (uses original)
+			path := strings.ReplaceAll(to, "/", ".0.")
+			_, ok := d.GetOk(fmt.Sprintf("%s.0.%s", userConfigKey(kind, name), path))
+			if !ok {
+				continue
+			}
+		}
+
+		renameAlias(dto, from, to)
 	}
 }
 
 // renameAlias renames ip_filter_string to ip_filter
-func renameAlias(dto map[string]any, path, orig string) {
-	keys := strings.Split(path, ".0.")
+func renameAlias(dto map[string]any, from, to string) {
+	keys := strings.Split(from, "/")
+	orig := strings.Split(to, "/")[len(keys)-1]
 	for i, k := range keys {
 		v, ok := dto[k]
 		if !ok {
@@ -87,7 +82,7 @@ func renameAlias(dto map[string]any, path, orig string) {
 
 		if a, ok := v.([]any); ok {
 			for _, j := range a {
-				renameAlias(j.(map[string]any), strings.Join(keys[i+1:], ".0."), orig)
+				renameAlias(j.(map[string]any), strings.Join(keys[i+1:], "/"), orig)
 			}
 			return
 		}
@@ -106,4 +101,12 @@ func isZero(v any) bool {
 		return value.Len() == 0
 	}
 	return value.IsZero()
+}
+
+func sortKeys[T any](m map[string]T) []string {
+	keys := maps.Keys(m)
+	slices.SortFunc(keys, func(a, b string) int {
+		return len(b) - len(a)
+	})
+	return keys
 }

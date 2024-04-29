@@ -79,7 +79,11 @@ func (o *object) init(name string) {
 	o.attrsName = o.camelName + "Attrs"
 	o.tfoStructName = "tfo" + o.camelName
 	o.dtoStructName = "dto" + o.camelName
-	o.jsonName = name
+
+	// If this one is a clone, it inherits the original jsonName
+	if o.jsonName == "" {
+		o.jsonName = name
+	}
 
 	if strings.HasPrefix(name, "pg_partman_bgw") || strings.HasPrefix(name, "pg_stat_") {
 		// Legacy fields
@@ -199,7 +203,19 @@ func (o *object) path() string {
 		// because technically they are indexes: foo.0.bar <- 0 is array item
 		return o.parent.path()
 	}
-	return fmt.Sprintf("%s.0.%s", o.parent.path(), o.tfName)
+	return fmt.Sprintf("%s/%s", o.parent.path(), o.tfName)
+}
+
+// jsonPath same as path() but for jsonName
+func (o *object) jsonPath() string {
+	if o.isRoot || o.parent.isRoot {
+		return o.jsonName
+	}
+
+	if o.parent.isArray() {
+		return o.parent.jsonPath()
+	}
+	return fmt.Sprintf("%s/%s", o.parent.jsonPath(), o.jsonName)
 }
 
 // toCamelCase some fields have dots within, makes cleaner camelCase
@@ -256,6 +272,7 @@ func unwrapArrayMultipleTypes(o *object) {
 			// So it just copies it and sets type explicitly.
 			for _, s := range strTypes {
 				clone := deepcopy(p)
+				clone.jsonName = key
 				clone.ArrayItems.OrigType = s
 				fields[prefix+s] = clone
 			}
@@ -270,6 +287,7 @@ func unwrapArrayMultipleTypes(o *object) {
 			for i := range p.ArrayItems.OneOf {
 				t := p.ArrayItems.OneOf[i]
 				clone := deepcopy(p)
+				clone.jsonName = key
 				clone.ArrayItems = t
 				clone.Description = fmt.Sprintf("%s %s", addDot(p.Description), t.Description)
 				fields[prefix+t.OrigType.(string)] = clone
