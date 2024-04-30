@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -238,12 +239,18 @@ func resourceKafkaConnectorCreate(ctx context.Context, d *schema.ResourceData, m
 		config[k] = cS.(string)
 	}
 
-	// Sometimes this method returns 404: Not Found
+	// Sometimes this method returns 404: Not Found for the given serviceName
 	// Since the aiven.Client has own retries for various scenarios
 	// we retry here 404 only
 	err := retry.RetryContext(ctx, time.Minute, func() *retry.RetryError {
 		err := m.(*aiven.Client).KafkaConnectors.Create(ctx, project, serviceName, config)
 		if err != nil {
+			var e aiven.Error
+			if errors.As(err, &e) && e.Status == 201 {
+				// 201: Created
+				return nil
+			}
+
 			return &retry.RetryError{
 				Err:       err,
 				Retryable: aiven.IsNotFound(err), // retries 404 only

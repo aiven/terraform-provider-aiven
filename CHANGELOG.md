@@ -11,6 +11,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `aiven_kafka_connector` fails to create resource with 201 error
+
 ## [4.16.0] - 2024-04-30
 
 - Fix incorrect timeout values used in certain cases
