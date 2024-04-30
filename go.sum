@@ -197,10 +197,10 @@ github.com/ProtonMail/go-crypto v1.1.0-alpha.0/go.mod h1:rA3QumHc/FZ8pAHreoekgiA
 github.com/agext/levenshtein v1.2.1/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
-github.com/aiven/aiven-go-client/v2 v2.17.0 h1:fDLGxshpwCXPegearFkb1Y9wSFj/TPu8qh0IoipGmx8=
-github.com/aiven/aiven-go-client/v2 v2.17.0/go.mod h1:249zsD8JqWXJtp51jzH8lLOzITn88JmVyGztyujM6nA=
-github.com/aiven/go-api-schemas v1.69.0 h1:mxFLMcMVS9lVoRgIzPEnn1GR2HFR2d7A8egSWdY8hp0=
-github.com/aiven/go-api-schemas v1.69.0/go.mod h1:gC2RQPbdJuZkwBKQk7Cis3u4YFivUNS9D1TKAY0qt0c=
+github.com/aiven/aiven-go-client/v2 v2.18.0 h1:hvFJiP3z4+KjDqi9oZiT3TqphRuXdcPDWwx4CfxT23s=
+github.com/aiven/aiven-go-client/v2 v2.18.0/go.mod h1:249zsD8JqWXJtp51jzH8lLOzITn88JmVyGztyujM6nA=
+github.com/aiven/go-api-schemas v1.70.0 h1:KZAo2J+vUfyJ5Pq8PenRfDehsQ8q40kSU27G6/ezxus=
+github.com/aiven/go-api-schemas v1.70.0/go.mod h1:gC2RQPbdJuZkwBKQk7Cis3u4YFivUNS9D1TKAY0qt0c=
 github.com/aiven/go-client-codegen v0.5.0 h1:Ee9gyK8BdqPG1SQ0NKHavWS0RHbGs81phgNXhH72eLQ=
 github.com/aiven/go-client-codegen v0.5.0/go.mod h1:R6nTHRxO0+R6vy6eOMYa2TVy2Ma3zewE/aeogV9NGuo=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
@@ -390,8 +390,8 @@ github.com/googleapis/gax-go/v2 v2.12.0 h1:A+gCJKdRfqXkr+BIRGtZLibNXf0m1f9E4HG56
 github.com/googleapis/gax-go/v2 v2.12.0/go.mod h1:y+aIqrI5eb1YGMVJfuV3185Ts/D7qKpsEkdD5+I6QGU=
 github.com/googleapis/go-type-adapters v1.0.0/go.mod h1:zHW75FOG2aur7gAO2B+MLby+cLsWGBF62rFAi7WjWO4=
 github.com/grpc-ecosystem/grpc-gateway v1.16.0/go.mod h1:BDjrQk3hbvj6Nolgz8mAMFbcEtjT1g+wF4CSlocrBnw=
-github.com/gruntwork-io/terratest v0.46.13 h1:FDaEoZ7DtkomV8pcwLdBV/VsytdjnPRqJkIriYEYwjs=
-github.com/gruntwork-io/terratest v0.46.13/go.mod h1:8sxu3Qup8TxtbzOHzq0MUrQffJj/G61/OwlsReaCwpo=
+github.com/gruntwork-io/terratest v0.46.14 h1:nVT2JpOPLr7KbwOSNDP0GJffljH+Yu5833cwLorxRjs=
+github.com/gruntwork-io/terratest v0.46.14/go.mod h1:L/IHbj195wnjfIFpZYWUhjwA3jm4O6ehO//xz7NxN8o=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/errwrap v1.1.0 h1:OxrOeh75EUXMY8TBjag2fzXGZ40LB6IKw45YeGUDY2I=
 github.com/hashicorp/errwrap v1.1.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
