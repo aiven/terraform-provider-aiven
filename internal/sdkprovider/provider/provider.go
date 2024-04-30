@@ -6,8 +6,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"golang.org/x/exp/maps"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/cassandra"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
@@ -29,6 +31,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/servicecomponent"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/serviceintegration"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/staticip"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/thanos"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/vpc"
 )
 
@@ -249,6 +252,23 @@ func Provider(version string) *schema.Provider {
 			// dragonfly
 			"aiven_dragonfly": dragonfly.ResourceDragonfly(),
 		},
+	}
+
+	// beta resources and data sources
+	// incremental acceptance tests expects this structure below to function, DON'T CHANGE IT
+	if util.IsBeta() {
+		bp := &schema.Provider{
+			DataSourcesMap: map[string]*schema.Resource{
+				"aiven_thanos": thanos.DatasourceThanos(),
+			},
+
+			ResourcesMap: map[string]*schema.Resource{
+				"aiven_thanos": thanos.ResourceThanos(),
+			},
+		}
+
+		maps.Copy(p.DataSourcesMap, bp.DataSourcesMap)
+		maps.Copy(p.ResourcesMap, bp.ResourcesMap)
 	}
 
 	p.ConfigureContextFunc = func(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {

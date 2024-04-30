@@ -123,8 +123,6 @@ func GetFieldMapping(kind string) map[string]string {
 			"query/query_timeout":                              "query/query.timeout",
 			"query_frontend":                                   "query-frontend",
 			"query_frontend/query_range_align_range_with_step": "query-frontend/query-range.align-range-with-step",
-			"receiver_ingesting":                               "receiver-ingesting",
-			"receiver_routing":                                 "receiver-routing",
 		},
 	}[kind]
 }
