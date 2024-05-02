@@ -111,7 +111,6 @@ func (r *organizationApplicationUserToken) Schema(
 	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
 		Description: userconfig.Desc("Creates and manages an application user token. Review the" +
 			" [best practices](https://aiven.io/docs/platform/concepts/application-users#security-best-practices) for securing application users and their tokens.").
-			AvailabilityType(userconfig.Beta).
 			Build(),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{

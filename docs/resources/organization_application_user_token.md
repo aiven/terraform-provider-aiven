@@ -4,16 +4,11 @@ page_title: "aiven_organization_application_user_token Resource - terraform-prov
 subcategory: ""
 description: |-
   Creates and manages an application user token. Review the best practices https://aiven.io/docs/platform/concepts/application-users#security-best-practices for securing application users and their tokens.
-  This resource is in the beta stage and may change without notice. Set
-  the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
 ---
 
 # aiven_organization_application_user_token (Resource)
 
-Creates and manages an application user token. Review the [best practices](https://aiven.io/docs/platform/concepts/application-users#security-best-practices) for securing application users and their tokens. 
-
-**This resource is in the beta stage and may change without notice.** Set
-the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
+Creates and manages an application user token. Review the [best practices](https://aiven.io/docs/platform/concepts/application-users#security-best-practices) for securing application users and their tokens.
 
 ## Example Usage
 
