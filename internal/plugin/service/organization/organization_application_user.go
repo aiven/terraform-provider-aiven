@@ -84,7 +84,6 @@ func (r *organizationApplicationUser) Schema(
 				"Creates and manages an organization application user. [Application users](https://aiven.io/docs/platform/howto/manage-application-users) can be used for " +
 					"programmatic access to the platform.",
 			).
-			AvailabilityType(userconfig.Limited).
 			Build(),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
