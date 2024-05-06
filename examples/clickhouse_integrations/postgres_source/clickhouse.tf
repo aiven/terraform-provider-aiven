@@ -3,7 +3,7 @@ resource "aiven_clickhouse" "clickhouse" {
   project                 = aiven_project.clickhouse_postgres_source.project
   service_name            = "clickhouse-gcp-us"
   cloud_name              = "google-us-east4"
-  plan                    = "startup-beta-16"
+  plan                    = "startup-16"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 

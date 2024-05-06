@@ -2,7 +2,7 @@
 resource "aiven_clickhouse" "clickhouse" {
   project                 = aiven_project.clickhouse_kafka_source.project
   cloud_name              = "google-europe-west1"
-  plan                    = "startup-beta-16"
+  plan                    = "startup-16"
   service_name            = "clickhouse-gcp-eu"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
