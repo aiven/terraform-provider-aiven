@@ -11,6 +11,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+## [4.17.0] - 2024-05-07
+
 - Fix `aiven_kafka_connector` fails to create resource with 201 error
 - Remove the beta flag from `aiven_organization_application_user` and `aiven_organization_application_user_token` resources
 - Fix incorrect token string used in Plugin Framework version of the provider
