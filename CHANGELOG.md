@@ -11,6 +11,8 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Fix `ip_filter`, `ip_filter_string`, and `ip_filter_object` crash when receive an unexpected type
+
 ## [4.17.0] - 2024-05-07
 
 - Fix `aiven_kafka_connector` fails to create resource with 201 error

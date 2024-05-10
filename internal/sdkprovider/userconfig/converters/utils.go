@@ -1,6 +1,7 @@
 package converters
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
@@ -37,15 +38,17 @@ type resourceData interface {
 // renameAliasesToTfo renames aliases to TF object
 // Must sort keys to rename from bottom to top.
 // Otherwise, might not find the deepest key if parent key is renamed
-func renameAliasesToTfo(kind userConfigType, name string, dto map[string]any, d resourceData) {
+func renameAliasesToTfo(kind userConfigType, name string, dto map[string]any, d resourceData) error {
+	prefix := userConfigKey(kind, name) + ".0."
 	m := getFieldMapping(kind, name)
+
 	for _, to := range sortKeys(m) {
 		from := m[to]
 
 		if strings.HasSuffix(to, "_string") || strings.HasSuffix(to, "_object") {
 			// If resource doesn't have this field, then ignores (uses original)
 			path := strings.ReplaceAll(to, "/", ".0.")
-			_, ok := d.GetOk(fmt.Sprintf("%s.0.%s", userConfigKey(kind, name), path))
+			_, ok := d.GetOk(prefix + path)
 			if !ok {
 				continue
 			}
@@ -53,6 +56,67 @@ func renameAliasesToTfo(kind userConfigType, name string, dto map[string]any, d 
 
 		renameAlias(dto, from, to)
 	}
+
+	// Converts ip_filter list into an expected by the config type
+	return convertIPFilter(dto)
+}
+
+// ipFilterMistyped reverse types: string to map, map to string
+// Unmarshalled with no errors when ip_filter has type missmatch
+type ipFilterMistyped struct {
+	IPFilter       []map[string]string `json:"ip_filter"`
+	IPFilterString []map[string]string `json:"ip_filter_string"`
+	IPFilterObject []string            `json:"ip_filter_object"`
+}
+
+// convertIPFilter converts a list of ip_filter objects into a list of strings and vice versa
+func convertIPFilter(dto map[string]any) error {
+	b, err := json.Marshal(dto)
+	if err != nil {
+		return err
+	}
+
+	var r ipFilterMistyped
+	err = json.Unmarshal(b, &r)
+	if err != nil {
+		// nolint: nilerr
+		// Marshaling went wrong, nothing to fix
+		return nil
+	}
+
+	// Converting went smooth.
+	// Which means either there is no ip_filter at all, or it has an invalid type
+
+	// Converts strings into objects
+	if len(r.IPFilterObject) > 0 {
+		mapList := make([]map[string]string, 0)
+		for _, v := range r.IPFilterObject {
+			mapList = append(mapList, map[string]string{"network": v})
+		}
+
+		dto["ip_filter_object"] = mapList
+		return nil
+	}
+
+	// Converts objects into strings
+	strList := make([]string, 0)
+	for _, v := range append(r.IPFilter, r.IPFilterString...) {
+		strList = append(strList, v["network"])
+	}
+
+	if len(strList) == 0 {
+		// Nothing to do here
+		return nil
+	}
+
+	// Chooses which key to set values to
+	strKey := "ip_filter"
+	if len(r.IPFilterString) > 0 {
+		strKey = "ip_filter_string"
+	}
+
+	dto[strKey] = strList
+	return nil
 }
 
 // renameAlias renames ip_filter_string to ip_filter

@@ -172,6 +172,60 @@ func TestRenameAliasesToTfo(t *testing.T) {
 			dto:         `{"pg": {"pg_stat_statements.track": 0}}`,
 			tfo:         newResourceDataMock(),
 		},
+		{
+			serviceType: "thanos",
+			name:        "ip_filter gets a list of objects",
+			expected:    `{"ip_filter": ["0.0.0.0/0"]}`,
+			dto:         `{"ip_filter": [{"network": "0.0.0.0/0"}]}`,
+			tfo: newResourceDataMock(
+				newResourceDataKV("thanos_user_config.0.ip_filter", []string{"0.0.0.0/0"}),
+			),
+		},
+		{
+			serviceType: "thanos",
+			name:        "ip_filter_string gets a list of objects",
+			expected:    `{"ip_filter_string": ["0.0.0.0/0"]}`,
+			dto:         `{"ip_filter": [{"network": "0.0.0.0/0"}]}`,
+			tfo: newResourceDataMock(
+				newResourceDataKV("thanos_user_config.0.ip_filter_string", []string{"0.0.0.0/0"}),
+			),
+		},
+		{
+			serviceType: "thanos",
+			name:        "ip_filter_object gets a list of strings",
+			expected:    `{"ip_filter_object": [{"network": "0.0.0.0/0"}]}`,
+			dto:         `{"ip_filter": ["0.0.0.0/0"]}`,
+			tfo: newResourceDataMock(
+				newResourceDataKV("thanos_user_config.0.ip_filter_object", []map[string]string{{"network": "0.0.0.0/0"}}),
+			),
+		},
+		{
+			serviceType: "thanos",
+			name:        "ip_filter_object empty list",
+			expected:    `{"ip_filter_object": []}`,
+			dto:         `{"ip_filter": []}`,
+			tfo: newResourceDataMock(
+				newResourceDataKV("thanos_user_config.0.ip_filter_object", []map[string]string{}),
+			),
+		},
+		{
+			serviceType: "thanos",
+			name:        "ip_filter_string empty list",
+			expected:    `{"ip_filter_string": []}`,
+			dto:         `{"ip_filter": []}`,
+			tfo: newResourceDataMock(
+				newResourceDataKV("thanos_user_config.0.ip_filter_string", []string{}),
+			),
+		},
+		{
+			serviceType: "thanos",
+			name:        "ip_filter empty list",
+			expected:    `{"ip_filter": []}`,
+			dto:         `{"ip_filter": []}`,
+			tfo: newResourceDataMock(
+				newResourceDataKV("thanos_user_config.0.ip_filter", []string{}),
+			),
+		},
 	}
 
 	reSpaces := regexp.MustCompile(`\s+`)
@@ -181,7 +235,9 @@ func TestRenameAliasesToTfo(t *testing.T) {
 			err := json.Unmarshal([]byte(opt.dto), &m)
 			require.NoError(t, err)
 
-			renameAliasesToTfo(ServiceUserConfig, opt.serviceType, m, opt.tfo)
+			err = renameAliasesToTfo(ServiceUserConfig, opt.serviceType, m, opt.tfo)
+			require.NoError(t, err)
+
 			b, err := json.Marshal(&m)
 			require.NoError(t, err)
 			assert.Equal(t, reSpaces.ReplaceAllString(opt.expected, ""), string(b))
