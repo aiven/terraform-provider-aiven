@@ -62,7 +62,7 @@ func datadogUserConfig() *schema.Schema {
 				Description:  "Datadog intake site. Defaults to datadoghq.com.",
 				Optional:     true,
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"datadoghq.com", "datadoghq.eu", "us3.datadoghq.com", "us5.datadoghq.com", "ddog-gov.com"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"datadoghq.com", "datadoghq.eu", "us3.datadoghq.com", "us5.datadoghq.com", "ddog-gov.com", "ap1.datadoghq.com"}, false),
 			},
 		}},
 		MaxItems: 1,

@@ -18,6 +18,11 @@ func datadogUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
+			"datadog_pgbouncer_enabled": {
+				Description: "Enable Datadog PgBouncer Metric Tracking.",
+				Optional:    true,
+				Type:        schema.TypeBool,
+			},
 			"datadog_tags": {
 				Description: "Custom tags provided by user",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
