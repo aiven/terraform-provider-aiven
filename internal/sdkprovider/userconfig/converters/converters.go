@@ -363,7 +363,10 @@ func flatten(kind userConfigType, name string, d *schema.ResourceData, dto map[s
 	prefix := fmt.Sprintf("%s.0.", key)
 
 	// Renames ip_filter to ip_filter_object
-	renameAliasesToTfo(kind, name, dto, d)
+	err := renameAliasesToTfo(kind, name, dto, d)
+	if err != nil {
+		return err
+	}
 
 	// Copies "create only" fields from the original config.
 	// Like admin_password, that is received only on POST request when service is created.
