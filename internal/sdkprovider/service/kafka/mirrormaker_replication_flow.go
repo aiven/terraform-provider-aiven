@@ -104,7 +104,7 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 	"offset_syncs_topic_location": {
 		Type:         schema.TypeString,
 		Required:     true,
-		Description:  "Offset syncs topic location.",
+		Description:  "Offset syncs topic location. Possible values are `source` & `target`. There is no default value.",
 		ValidateFunc: validation.StringInSlice([]string{"source", "target"}, false),
 	},
 }
