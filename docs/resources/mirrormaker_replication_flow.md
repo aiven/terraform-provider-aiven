@@ -38,7 +38,7 @@ resource "aiven_mirrormaker_replication_flow" "f1" {
 ### Required
 
 - `enable` (Boolean) Enable of disable replication flows for a service.
-- `offset_syncs_topic_location` (String) Offset syncs topic location. Possible values are `source` & `target`. There is no default value. 
+- `offset_syncs_topic_location` (String) Offset syncs topic location. Possible values are `source` & `target`. There is no default value.
 - `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `replication_policy_class` (String) Replication policy class. The possible values are `org.apache.kafka.connect.mirror.DefaultReplicationPolicy` and `org.apache.kafka.connect.mirror.IdentityReplicationPolicy`. The default value is `org.apache.kafka.connect.mirror.DefaultReplicationPolicy`.
 - `service_name` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
