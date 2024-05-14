@@ -1,4 +1,5 @@
 name: Incremental Acceptance Tests
+# THIS IS TEMPORARILY DISABLED UNTIL THE TEAM EXPANDS, PLEASE ENABLE ONCE THE TEAM EXPANDS
 
 on:
   pull_request:
