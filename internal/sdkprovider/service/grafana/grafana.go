@@ -9,7 +9,29 @@ import (
 )
 
 func grafanaSchema() map[string]*schema.Schema {
-	return schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeGrafana)
+	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeGrafana)
+	s[schemautil.ServiceTypeGrafana] = &schema.Schema{
+		Type:        schema.TypeList,
+		Computed:    true,
+		Description: "Grafana server provided values",
+		MaxItems:    1,
+		Optional:    true,
+		Sensitive:   true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "Grafana server URIs.",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+			},
+		},
+	}
+	return s
 }
 
 func ResourceGrafana() *schema.Resource {

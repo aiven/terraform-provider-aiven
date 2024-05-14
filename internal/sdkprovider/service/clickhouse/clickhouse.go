@@ -9,6 +9,27 @@ import (
 
 func clickhouseSchema() map[string]*schema.Schema {
 	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeClickhouse)
+	s[schemautil.ServiceTypeClickhouse] = &schema.Schema{
+		Type:        schema.TypeList,
+		Computed:    true,
+		Description: "Clickhouse server provided values",
+		MaxItems:    1,
+		Optional:    true,
+		Sensitive:   true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "Clickhouse server URIs.",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+			},
+		},
+	}
 	s["service_integrations"] = &schema.Schema{
 		Type:        schema.TypeList,
 		Optional:    true,

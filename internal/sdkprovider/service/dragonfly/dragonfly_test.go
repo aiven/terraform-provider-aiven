@@ -294,6 +294,22 @@ func testAccCheckAivenServiceDragonflyAttributes(n string) resource.TestCheckFun
 			return fmt.Errorf("expected to get a correct public_access.prometheus from Aiven")
 		}
 
+		if a["dragonfly.0.uris.#"] == "" {
+			return fmt.Errorf("expected to get correct uris from Aiven")
+		}
+
+		if a["dragonfly.0.slave_uris.#"] == "" {
+			return fmt.Errorf("expected to get correct slave_uris from Aiven")
+		}
+
+		if a["dragonfly.0.replica_uri"] != "" {
+			return fmt.Errorf("expected to get correct replica_uri from Aiven")
+		}
+
+		if a["dragonfly.0.password"] == "" {
+			return fmt.Errorf("expected to get correct password from Aiven")
+		}
+
 		return nil
 	}
 }

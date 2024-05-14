@@ -150,6 +150,10 @@ func testAccCheckAivenServiceCassandraAttributes(n string) resource.TestCheckFun
 			return fmt.Errorf("expected to get a correct migrate_sstableloader from Aiven")
 		}
 
+		if a["cassandra.0.uris.#"] == "" {
+			return fmt.Errorf("expected to get correct uris from Aiven")
+		}
+
 		return nil
 	}
 }

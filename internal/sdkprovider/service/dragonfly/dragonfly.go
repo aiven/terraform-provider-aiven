@@ -8,7 +8,49 @@ import (
 )
 
 func dragonflySchema() map[string]*schema.Schema {
-	return schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeDragonfly)
+	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeDragonfly)
+	s[schemautil.ServiceTypeDragonfly] = &schema.Schema{
+		Type:        schema.TypeList,
+		Computed:    true,
+		Description: "Dragonfly server provided values",
+		MaxItems:    1,
+		Optional:    true,
+		Sensitive:   true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "Dragonfly server URIs.",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				"slave_uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "Dragonfly slave server URIs.",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				"replica_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "Dragonfly replica server URI.",
+				},
+				"password": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "Dragonfly password.",
+					Sensitive:   true,
+				},
+			},
+		},
+	}
+	return s
 }
 
 func ResourceDragonfly() *schema.Resource {

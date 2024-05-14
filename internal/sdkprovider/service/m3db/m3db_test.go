@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
@@ -158,6 +159,7 @@ resource "aiven_m3db" "bar" {
 				Config: testAccM3DBResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_m3db.common"),
+					testAccCheckAivenServiceM3DBAttributes("data.aiven_m3db.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "service_type", "m3db"),
@@ -323,4 +325,37 @@ data "aiven_m3db" "common" {
 
   depends_on = [aiven_m3db.bar]
 }`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name)
+}
+
+func testAccCheckAivenServiceM3DBAttributes(n string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		r := s.RootModule().Resources[n]
+		a := r.Primary.Attributes
+
+		if a["m3db.0.uris.#"] == "" {
+			return fmt.Errorf("expected to get correct uris from Aiven")
+		}
+
+		if a["m3db.0.http_cluster_uri"] == "" {
+			return fmt.Errorf("expected to get correct http_cluster_uri from Aiven")
+		}
+
+		if a["m3db.0.http_node_uri"] == "" {
+			return fmt.Errorf("expected to get correct http_node_uri from Aiven")
+		}
+
+		if a["m3db.0.influxdb_uri"] == "" {
+			return fmt.Errorf("expected to get correct influxdb_uri from Aiven")
+		}
+
+		if a["m3db.0.prometheus_remote_read_uri"] == "" {
+			return fmt.Errorf("expected to get correct prometheus_remote_read_uri from Aiven")
+		}
+
+		if a["m3db.0.prometheus_remote_write_uri"] == "" {
+			return fmt.Errorf("expected to get correct prometheus_remote_write_uri from Aiven")
+		}
+
+		return nil
+	}
 }

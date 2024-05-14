@@ -37,6 +37,7 @@ data "aiven_grafana" "gr1" {
 - `disk_space_default` (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) Disk space that service is currently using
+- `grafana` (List of Object, Sensitive) Grafana server provided values (see [below for nested schema](#nestedatt--grafana))
 - `grafana_user_config` (List of Object) Grafana user configurable settings (see [below for nested schema](#nestedatt--grafana_user_config))
 - `id` (String) The ID of this resource.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
@@ -69,6 +70,14 @@ Read-Only:
 - `route` (String)
 - `ssl` (Boolean)
 - `usage` (String)
+
+
+<a id="nestedatt--grafana"></a>
+### Nested Schema for `grafana`
+
+Read-Only:
+
+- `uris` (List of String)
 
 
 <a id="nestedatt--grafana_user_config"></a>

@@ -427,6 +427,10 @@ func testAccCheckAivenServiceGrafanaAttributes(n string) resource.TestCheckFunc 
 			return fmt.Errorf("expected to get an public_access.grafana from Aiven")
 		}
 
+		if a["grafana.0.uris.#"] == "" {
+			return fmt.Errorf("expected to get correct uris from Aiven")
+		}
+
 		return nil
 	}
 }

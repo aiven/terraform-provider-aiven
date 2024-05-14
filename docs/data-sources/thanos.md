@@ -106,6 +106,7 @@ Read-Only:
 - `receiver_ingesting_remote_write_uri` (String)
 - `receiver_remote_write_uri` (String)
 - `store_uri` (String)
+- `uris` (List of String)
 
 
 <a id="nestedatt--thanos_user_config"></a>

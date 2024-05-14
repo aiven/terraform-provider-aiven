@@ -9,7 +9,29 @@ import (
 )
 
 func cassandraSchema() map[string]*schema.Schema {
-	return schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeCassandra)
+	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeCassandra)
+	s[schemautil.ServiceTypeCassandra] = &schema.Schema{
+		Type:        schema.TypeList,
+		Computed:    true,
+		Description: "Cassandra server provided values",
+		MaxItems:    1,
+		Optional:    true,
+		Sensitive:   true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "Cassandra server URIs.",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+			},
+		},
+	}
+	return s
 }
 
 func ResourceCassandra() *schema.Resource {

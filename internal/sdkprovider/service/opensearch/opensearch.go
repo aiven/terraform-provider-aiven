@@ -14,12 +14,40 @@ func opensearchSchema() map[string]*schema.Schema {
 		Type:        schema.TypeList,
 		Computed:    true,
 		Description: "OpenSearch server provided values",
+		MaxItems:    1,
+		Optional:    true,
+		Sensitive:   true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
+				"uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "OpenSearch server URIs.",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
 				"opensearch_dashboards_uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
 					Description: "URI for OpenSearch dashboard frontend",
+					Sensitive:   true,
+				},
+				"kibana_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "URI for Kibana dashboard frontend",
+				},
+				"username": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "OpenSearch username",
+				},
+				"password": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "OpenSearch password",
 					Sensitive:   true,
 				},
 			},

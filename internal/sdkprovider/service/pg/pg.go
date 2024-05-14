@@ -24,14 +24,10 @@ func aivenPGSchema() map[string]*schema.Schema {
 		Computed:    true,
 		Description: "PostgreSQL specific server provided values",
 		Optional:    true,
+		Sensitive:   true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"replica_uri": {
-					Type:        schema.TypeString,
-					Computed:    true,
-					Description: "PostgreSQL replica URI for services with a replica",
-					Sensitive:   true,
-				},
+				// TODO: Remove `uri` in the next major version.
 				"uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
@@ -39,37 +35,124 @@ func aivenPGSchema() map[string]*schema.Schema {
 					Optional:    true,
 					Sensitive:   true,
 				},
-				"dbname": {
+				"uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "PostgreSQL master connection URIs",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				"bouncer": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "Primary PostgreSQL database name",
+					Description: "Bouncer connection details",
 				},
+				// TODO: Remove `host` in the next major version.
 				"host": {
 					Type:        schema.TypeString,
 					Computed:    true,
 					Description: "PostgreSQL master node host IP or name",
 				},
+				// TODO: Remove `port` in the next major version.
+				"port": {
+					Type:        schema.TypeInt,
+					Computed:    true,
+					Description: "PostgreSQL port",
+				},
+				// TODO: Remove `sslmode` in the next major version.
+				"sslmode": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "PostgreSQL sslmode setting (currently always \"require\")",
+				},
+				// TODO: Remove `user` in the next major version.
+				"user": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "PostgreSQL admin user name",
+				},
+				// TODO: Remove `password` in the next major version.
 				"password": {
 					Type:        schema.TypeString,
 					Computed:    true,
 					Description: "PostgreSQL admin user password",
 					Sensitive:   true,
 				},
-				"port": {
-					Type:        schema.TypeInt,
-					Computed:    true,
-					Description: "PostgreSQL port",
-				},
-				"sslmode": {
+				// TODO: Remove `dbname` in the next major version.
+				"dbname": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "PostgreSQL sslmode setting (currently always \"require\")",
+					Description: "Primary PostgreSQL database name",
 				},
-				"user": {
+				"params": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "PostgreSQL connection parameters",
+					Optional:    true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"host": {
+								Type:        schema.TypeString,
+								Computed:    true,
+								Description: "PostgreSQL host IP or name",
+							},
+							"port": {
+								Type:        schema.TypeInt,
+								Computed:    true,
+								Description: "PostgreSQL port",
+							},
+							"sslmode": {
+								Type:        schema.TypeString,
+								Computed:    true,
+								Description: "PostgreSQL sslmode setting (currently always \"require\")",
+							},
+							"user": {
+								Type:        schema.TypeString,
+								Computed:    true,
+								Description: "PostgreSQL admin user name",
+							},
+							"password": {
+								Type:        schema.TypeString,
+								Computed:    true,
+								Sensitive:   true,
+								Description: "PostgreSQL admin user password",
+							},
+							"database_name": {
+								Type:        schema.TypeString,
+								Computed:    true,
+								Description: "Primary PostgreSQL database name",
+							},
+						},
+					},
+				},
+				"replica_uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "PostgreSQL admin user name",
+					Description: "PostgreSQL replica URI for services with a replica",
+					Sensitive:   true,
 				},
+				"standby_uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "PostgreSQL standby connection URIs",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				"syncing_uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "PostgreSQL syncing connection URIs",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				// TODO: This isn't in the connection info, but it's in the metadata.
+				//  We should move this to the other part of the schema in the next major version.
 				"max_connections": {
 					Type:        schema.TypeInt,
 					Computed:    true,

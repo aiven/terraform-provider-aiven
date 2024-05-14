@@ -1025,16 +1025,12 @@ func testAccCheckAivenServicePGAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a correct uri from Aiven")
 		}
 
-		if a["pg.0.dbname"] != "defaultdb" {
-			return fmt.Errorf("expected to get a correct dbname from Aiven")
+		if a["pg.0.uris.#"] == "" {
+			return fmt.Errorf("expected to get uris from Aiven")
 		}
 
 		if a["pg.0.host"] == "" {
 			return fmt.Errorf("expected to get a correct host from Aiven")
-		}
-
-		if a["pg.0.password"] == "" {
-			return fmt.Errorf("expected to get a correct password from Aiven")
 		}
 
 		if a["pg.0.port"] == "" {
@@ -1047,6 +1043,42 @@ func testAccCheckAivenServicePGAttributes(n string) resource.TestCheckFunc {
 
 		if a["pg.0.user"] != "avnadmin" {
 			return fmt.Errorf("expected to get a correct user from Aiven")
+		}
+
+		if a["pg.0.password"] == "" {
+			return fmt.Errorf("expected to get a correct password from Aiven")
+		}
+
+		if a["pg.0.dbname"] != "defaultdb" {
+			return fmt.Errorf("expected to get a correct dbname from Aiven")
+		}
+
+		if a["pg.0.params.#"] == "" {
+			return fmt.Errorf("expected to get params from Aiven")
+		}
+
+		if a["pg.0.params.0.host"] == "" {
+			return fmt.Errorf("expected to get a correct host from Aiven")
+		}
+
+		if a["pg.0.params.0.port"] == "" {
+			return fmt.Errorf("expected to get a correct port from Aiven")
+		}
+
+		if a["pg.0.params.0.sslmode"] != "require" {
+			return fmt.Errorf("expected to get a correct sslmode from Aiven")
+		}
+
+		if a["pg.0.params.0.user"] != "avnadmin" {
+			return fmt.Errorf("expected to get a correct user from Aiven")
+		}
+
+		if a["pg.0.params.0.password"] == "" {
+			return fmt.Errorf("expected to get a correct password from Aiven")
+		}
+
+		if a["pg.0.params.0.database_name"] != "defaultdb" {
+			return fmt.Errorf("expected to get a correct database_name from Aiven")
 		}
 
 		if a["pg.0.max_connections"] != "100" && a["pg.0.max_connections"] != "200" {

@@ -13,10 +13,21 @@ func thanosSchema() map[string]*schema.Schema {
 	s[schemautil.ServiceTypeThanos] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
-		Sensitive:   true,
 		Description: "Thanos server connection details.",
+		MaxItems:    1,
+		Optional:    true,
+		Sensitive:   true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
+				"uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "Thanos server URIs.",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
 				"query_frontend_uri": {
 					Type:        schema.TypeString,
 					Computed:    true,

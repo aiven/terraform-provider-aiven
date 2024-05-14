@@ -37,6 +37,7 @@ data "aiven_dragonfly" "example_dragonfly" {
 - `disk_space_default` (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) Disk space that service is currently using
+- `dragonfly` (List of Object, Sensitive) Dragonfly server provided values (see [below for nested schema](#nestedatt--dragonfly))
 - `dragonfly_user_config` (List of Object) Dragonfly user configurable settings (see [below for nested schema](#nestedatt--dragonfly_user_config))
 - `id` (String) The ID of this resource.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
@@ -69,6 +70,17 @@ Read-Only:
 - `route` (String)
 - `ssl` (Boolean)
 - `usage` (String)
+
+
+<a id="nestedatt--dragonfly"></a>
+### Nested Schema for `dragonfly`
+
+Read-Only:
+
+- `password` (String)
+- `replica_uri` (String)
+- `slave_uris` (List of String)
+- `uris` (List of String)
 
 
 <a id="nestedatt--dragonfly_user_config"></a>

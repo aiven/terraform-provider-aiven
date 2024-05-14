@@ -9,7 +9,34 @@ import (
 )
 
 func aivenM3AggregatorSchema() map[string]*schema.Schema {
-	return schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeM3Aggregator)
+	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeM3Aggregator)
+	s[schemautil.ServiceTypeM3Aggregator] = &schema.Schema{
+		Type:        schema.TypeList,
+		Computed:    true,
+		Description: "M3 Aggregator server provided values",
+		MaxItems:    1,
+		Optional:    true,
+		Sensitive:   true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "M3 Aggregator server URIs.",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				"aggregator_http_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "M3 Aggregator HTTP URI.",
+				},
+			},
+		},
+	}
+	return s
 }
 func ResourceM3Aggregator() *schema.Resource {
 	return &schema.Resource{

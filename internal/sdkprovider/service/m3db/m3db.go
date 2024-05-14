@@ -9,7 +9,54 @@ import (
 )
 
 func aivenM3DBSchema() map[string]*schema.Schema {
-	return schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeM3)
+	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeM3)
+	s[schemautil.ServiceTypeM3] = &schema.Schema{
+		Type:        schema.TypeList,
+		Computed:    true,
+		Description: "M3DB server provided values",
+		MaxItems:    1,
+		Optional:    true,
+		Sensitive:   true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "M3DB server URIs.",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				"http_cluster_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "M3DB cluster URI.",
+				},
+				"http_node_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "M3DB node URI.",
+				},
+				"influxdb_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "InfluxDB URI.",
+				},
+				"prometheus_remote_read_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "Prometheus remote read URI.",
+				},
+				"prometheus_remote_write_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "Prometheus remote write URI.",
+				},
+			},
+		},
+	}
+	return s
 }
 func ResourceM3DB() *schema.Resource {
 	return &schema.Resource{

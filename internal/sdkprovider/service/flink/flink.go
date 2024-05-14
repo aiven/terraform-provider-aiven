@@ -20,8 +20,10 @@ func aivenFlinkSchema() map[string]*schema.Schema {
 		Computed:    true,
 		Description: "Flink server provided values",
 		Optional:    true,
+		Sensitive:   true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
+				// TODO: Rename `host_ports` to `uris` in the next major version.
 				"host_ports": {
 					Type:        schema.TypeList,
 					Computed:    true,

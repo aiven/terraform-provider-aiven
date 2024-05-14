@@ -734,6 +734,9 @@ func FlattenServiceComponents(r *aiven.Service) []map[string]interface{} {
 	return components
 }
 
+// TODO: This uses an untyped map in the final resource's schema, which might be unclear to the end users.
+//
+//	We should change this in the next major version.
 func copyConnectionInfoFromAPIResponseToTerraform(
 	d *schema.ResourceData,
 	serviceType string,
@@ -743,42 +746,140 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	props := make(map[string]interface{})
 
 	switch serviceType {
-	case ServiceTypeOpenSearch:
-		props["opensearch_dashboards_uri"] = connectionInfo.OpensearchDashboardsURI
-	case ServiceTypeInfluxDB:
-		props["database_name"] = connectionInfo.InfluxDBDatabaseName
 	case ServiceTypeKafka:
+		// KafkaHosts will be renamed to KafkaURIs in the next major version of the Go client.
+		// That's why we name the props key `uris` here.
+		props["uris"] = connectionInfo.KafkaHosts
 		props["access_cert"] = connectionInfo.KafkaAccessCert
 		props["access_key"] = connectionInfo.KafkaAccessKey
 		props["connect_uri"] = connectionInfo.KafkaConnectURI
 		props["rest_uri"] = connectionInfo.KafkaRestURI
 		props["schema_registry_uri"] = connectionInfo.SchemaRegistryURI
 	case ServiceTypePG:
+		// For compatibility with the old schema, we only set the first URI.
+		// TODO: Remove this block in the next major version. Keep `uris` key only, see below.
 		if connectionInfo.PostgresURIs != nil && len(connectionInfo.PostgresURIs) > 0 {
 			props["uri"] = connectionInfo.PostgresURIs[0]
 		}
+
+		props["uris"] = connectionInfo.PostgresURIs // Keep this instead of `uri` key.
+		props["bouncer"] = connectionInfo.PostgresBouncer
+
+		// For compatibility with the old schema, we only set the first params.
+		// TODO: Remove this block in the next major version. Keep `params` key only, see below.
 		if connectionInfo.PostgresParams != nil && len(connectionInfo.PostgresParams) > 0 {
 			params := connectionInfo.PostgresParams[0]
-			props["dbname"] = params.DatabaseName
+
 			props["host"] = params.Host
-			props["password"] = params.Password
+
 			port, err := strconv.ParseInt(params.Port, 10, 32)
 			if err == nil {
 				props["port"] = int(port)
 			}
+
 			props["sslmode"] = params.SSLMode
 			props["user"] = params.User
+			props["password"] = params.Password
+			props["dbname"] = params.DatabaseName
+
 		}
+
+		// Keep this instead of the above block.
+		params := make([]map[string]interface{}, len(connectionInfo.PostgresParams))
+		for i, p := range connectionInfo.PostgresParams {
+			port, err := strconv.ParseInt(p.Port, 10, 32)
+			if err != nil {
+				return err
+			}
+
+			params[i] = map[string]interface{}{
+				"host":          p.Host,
+				"port":          port,
+				"sslmode":       p.SSLMode,
+				"user":          p.User,
+				"password":      p.Password,
+				"database_name": p.DatabaseName,
+			}
+		}
+
+		props["params"] = params
 		props["replica_uri"] = connectionInfo.PostgresReplicaURI
+		props["standby_uris"] = connectionInfo.PostgresStandbyURIs
+		props["syncing_uris"] = connectionInfo.PostgresSyncingURIs
+
+		// TODO: This isn't in the connection info, but it's in the metadata.
+		//  We should move this to the other part of the schema in the next major version.
 		props["max_connections"] = metadata.(map[string]interface{})["max_connections"]
-	case ServiceTypeFlink:
-		props["host_ports"] = connectionInfo.FlinkHostPorts
 	case ServiceTypeThanos:
+		props["uris"] = connectionInfo.ThanosURIs
 		props["query_frontend_uri"] = connectionInfo.QueryFrontendURI
 		props["query_uri"] = connectionInfo.QueryURI
 		props["receiver_ingesting_remote_write_uri"] = connectionInfo.ReceiverIngestingRemoteWriteURI
 		props["receiver_remote_write_uri"] = connectionInfo.ReceiverRemoteWriteURI
 		props["store_uri"] = connectionInfo.StoreURI
+	case ServiceTypeMySQL:
+		props["uris"] = connectionInfo.MySQLURIs
+
+		params := make([]map[string]interface{}, len(connectionInfo.MySQLParams))
+		for i, p := range connectionInfo.MySQLParams {
+			port, err := strconv.ParseInt(p.Port, 10, 32)
+			if err != nil {
+				return err
+			}
+
+			params[i] = map[string]interface{}{
+				"host":          p.Host,
+				"port":          port,
+				"sslmode":       p.SSLMode,
+				"user":          p.User,
+				"password":      p.Password,
+				"database_name": p.DatabaseName,
+			}
+		}
+
+		props["params"] = params
+		props["replica_uri"] = connectionInfo.MySQLReplicaURI
+		props["standby_uris"] = connectionInfo.MySQLStandbyURIs
+	case ServiceTypeOpenSearch:
+		props["uris"] = connectionInfo.OpensearchURIs
+
+		// TODO: Remove `opensearch_` prefix in the next major version.
+		props["opensearch_dashboards_uri"] = connectionInfo.OpensearchDashboardsURI
+
+		props["kibana_uri"] = connectionInfo.KibanaURI
+		props["username"] = connectionInfo.OpensearchUsername
+		props["password"] = connectionInfo.OpensearchPassword
+	case ServiceTypeCassandra:
+		// CassandraHosts will be renamed to CassandraURIs in the next major version of the Go client.
+		// That's why we name the props key `uris` here.
+		props["uris"] = connectionInfo.CassandraHosts
+	case ServiceTypeRedis, ServiceTypeDragonfly:
+		props["uris"] = connectionInfo.RedisURIs
+		props["slave_uris"] = connectionInfo.RedisSlaveURIs
+		props["replica_uri"] = connectionInfo.RedisReplicaURI
+		props["password"] = connectionInfo.RedisPassword
+	case ServiceTypeInfluxDB:
+		props["uris"] = connectionInfo.InfluxDBURIs
+		props["username"] = connectionInfo.InfluxDBUsername
+		props["password"] = connectionInfo.InfluxDBPassword
+		props["database_name"] = connectionInfo.InfluxDBDatabaseName
+	case ServiceTypeGrafana:
+		props["uris"] = connectionInfo.GrafanaURIs
+	case ServiceTypeM3:
+		props["uris"] = connectionInfo.M3DBURIs
+		props["http_cluster_uri"] = connectionInfo.HTTPClusterURI
+		props["http_node_uri"] = connectionInfo.HTTPNodeURI
+		props["influxdb_uri"] = connectionInfo.InfluxDBURI
+		props["prometheus_remote_read_uri"] = connectionInfo.PrometheusRemoteReadURI
+		props["prometheus_remote_write_uri"] = connectionInfo.PrometheusRemoteWriteURI
+	case ServiceTypeM3Aggregator:
+		props["uris"] = connectionInfo.M3AggregatorURIs
+		props["aggregator_http_uri"] = connectionInfo.AggregatorHTTPURI
+	case ServiceTypeClickhouse:
+		props["uris"] = connectionInfo.ClickHouseURIs
+	case ServiceTypeFlink:
+		// TODO: Rename `host_ports` to `uris` in the next major version.
+		props["host_ports"] = connectionInfo.FlinkHostPorts
 	default:
 		// Doesn't have connection info
 		return nil

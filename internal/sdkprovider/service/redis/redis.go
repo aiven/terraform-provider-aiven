@@ -9,7 +9,49 @@ import (
 )
 
 func redisSchema() map[string]*schema.Schema {
-	return schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeRedis)
+	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeRedis)
+	s[schemautil.ServiceTypeRedis] = &schema.Schema{
+		Type:        schema.TypeList,
+		Computed:    true,
+		Description: "Redis server provided values",
+		MaxItems:    1,
+		Optional:    true,
+		Sensitive:   true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "Redis server URIs.",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				"slave_uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "Redis slave server URIs.",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				"replica_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "Redis replica server URI.",
+				},
+				"password": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "Redis password.",
+					Sensitive:   true,
+				},
+			},
+		},
+	}
+	return s
 }
 
 func ResourceRedis() *schema.Resource {

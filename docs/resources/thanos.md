@@ -39,6 +39,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 - `tag` (Block Set) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedblock--tag))
 - `tech_emails` (Block Set) The email addresses for [service contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this service. You can also set email contacts at the project level. (see [below for nested schema](#nestedblock--tech_emails))
 - `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
+- `thanos` (Block List, Max: 1) Thanos server connection details. (see [below for nested schema](#nestedblock--thanos))
 - `thanos_user_config` (Block List, Max: 1) Thanos user configurable settings (see [below for nested schema](#nestedblock--thanos_user_config))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -57,7 +58,6 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 - `service_uri` (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
 - `service_username` (String) Username used for connecting to the service, if applicable
 - `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
-- `thanos` (List of Object, Sensitive) Thanos server connection details. (see [below for nested schema](#nestedatt--thanos))
 
 <a id="nestedblock--service_integrations"></a>
 ### Nested Schema for `service_integrations`
@@ -83,6 +83,22 @@ Required:
 Required:
 
 - `email` (String) An email address to contact for technical issues
+
+
+<a id="nestedblock--thanos"></a>
+### Nested Schema for `thanos`
+
+Optional:
+
+- `uris` (List of String) Thanos server URIs.
+
+Read-Only:
+
+- `query_frontend_uri` (String, Sensitive) Query frontend URI.
+- `query_uri` (String, Sensitive) Query URI.
+- `receiver_ingesting_remote_write_uri` (String, Sensitive) Receiver ingesting remote write URI.
+- `receiver_remote_write_uri` (String, Sensitive) Receiver remote write URI.
+- `store_uri` (String, Sensitive) Store URI.
 
 
 <a id="nestedblock--thanos_user_config"></a>
@@ -179,15 +195,3 @@ Read-Only:
 - `route` (String)
 - `ssl` (Boolean)
 - `usage` (String)
-
-
-<a id="nestedatt--thanos"></a>
-### Nested Schema for `thanos`
-
-Read-Only:
-
-- `query_frontend_uri` (String)
-- `query_uri` (String)
-- `receiver_ingesting_remote_write_uri` (String)
-- `receiver_remote_write_uri` (String)
-- `store_uri` (String)
