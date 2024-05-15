@@ -307,7 +307,7 @@ func mysqlUserConfig() *schema.Schema {
 				ValidateFunc: validation.StringInSlice([]string{"8"}, false),
 			},
 			"private_access": {
-				Description: "Allow access to selected service ports from private networks",
+				Description: "Allow access to selected service ports from private networks. Projects that are in a VPC are private by default, so setting this for services in a project VPC will cause an error.",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"mysql": {
 						Description: "Allow clients to connect to mysql with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",

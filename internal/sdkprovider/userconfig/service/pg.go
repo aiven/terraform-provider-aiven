@@ -616,7 +616,7 @@ func pgUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"private_access": {
-				Description: "Allow access to selected service ports from private networks",
+				Description: "Allow access to selected service ports from private networks. Projects that are in a VPC are private by default, so setting this for services in a project VPC will cause an error.",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"pg": {
 						Description: "Allow clients to connect to pg with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
