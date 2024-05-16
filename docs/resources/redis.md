@@ -48,6 +48,7 @@ resource "aiven_redis" "redis1" {
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
 - `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
+- `redis` (Block List, Max: 1) Redis server provided values (see [below for nested schema](#nestedblock--redis))
 - `redis_user_config` (Block List, Max: 1) Redis user configurable settings (see [below for nested schema](#nestedblock--redis_user_config))
 - `service_integrations` (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
 - `static_ips` (Set of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
@@ -71,6 +72,20 @@ resource "aiven_redis" "redis1" {
 - `service_uri` (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
 - `service_username` (String) Username used for connecting to the service, if applicable
 - `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
+
+<a id="nestedblock--redis"></a>
+### Nested Schema for `redis`
+
+Optional:
+
+- `slave_uris` (List of String) Redis slave server URIs.
+- `uris` (List of String) Redis server URIs.
+
+Read-Only:
+
+- `password` (String, Sensitive) Redis password.
+- `replica_uri` (String) Redis replica server URI.
+
 
 <a id="nestedblock--redis_user_config"></a>
 ### Nested Schema for `redis_user_config`

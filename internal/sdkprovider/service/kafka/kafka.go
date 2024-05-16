@@ -35,8 +35,19 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 		Computed:    true,
 		Sensitive:   true,
 		Description: "Kafka server connection details.",
+		MaxItems:    1,
+		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
+				"uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "Kafka server URIs.",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
 				"access_cert": {
 					Type:        schema.TypeString,
 					Computed:    true,

@@ -9,7 +9,94 @@ import (
 )
 
 func aivenMySQLSchema() map[string]*schema.Schema {
-	return schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeMySQL)
+	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeMySQL)
+	s[schemautil.ServiceTypeMySQL] = &schema.Schema{
+		Type:        schema.TypeList,
+		MaxItems:    1,
+		Computed:    true,
+		Description: "MySQL specific server provided values",
+		Optional:    true,
+		Sensitive:   true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "MySQL master connection URIs",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				"params": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "MySQL connection parameters",
+					Optional:    true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"host": {
+								Type:        schema.TypeString,
+								Computed:    true,
+								Description: "MySQL host IP or name",
+							},
+							"port": {
+								Type:        schema.TypeInt,
+								Computed:    true,
+								Description: "MySQL port",
+							},
+							"sslmode": {
+								Type:        schema.TypeString,
+								Computed:    true,
+								Description: "MySQL sslmode setting (currently always \"require\")",
+							},
+							"user": {
+								Type:        schema.TypeString,
+								Computed:    true,
+								Description: "MySQL admin user name",
+							},
+							"password": {
+								Type:        schema.TypeString,
+								Computed:    true,
+								Sensitive:   true,
+								Description: "MySQL admin user password",
+							},
+							"database_name": {
+								Type:        schema.TypeString,
+								Computed:    true,
+								Description: "Primary MySQL database name",
+							},
+						},
+					},
+				},
+				"replica_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "MySQL replica URI for services with a replica",
+					Sensitive:   true,
+				},
+				"standby_uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "MySQL standby connection URIs",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				"syncing_uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "MySQL syncing connection URIs",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+			},
+		},
+	}
+	return s
 }
 func ResourceMySQL() *schema.Resource {
 	return &schema.Resource{

@@ -97,18 +97,36 @@ resource "aiven_pg" "pg" {
 
 Optional:
 
+- `standby_uris` (List of String) PostgreSQL standby connection URIs
+- `syncing_uris` (List of String) PostgreSQL syncing connection URIs
 - `uri` (String, Sensitive) PostgreSQL master connection URI
+- `uris` (List of String) PostgreSQL master connection URIs
 
 Read-Only:
 
+- `bouncer` (String) Bouncer connection details
 - `dbname` (String) Primary PostgreSQL database name
 - `host` (String) PostgreSQL master node host IP or name
 - `max_connections` (Number) Connection limit
+- `params` (Block List) PostgreSQL connection parameters (see [below for nested schema](#nestedblock--pg--params))
 - `password` (String, Sensitive) PostgreSQL admin user password
 - `port` (Number) PostgreSQL port
 - `replica_uri` (String, Sensitive) PostgreSQL replica URI for services with a replica
 - `sslmode` (String) PostgreSQL sslmode setting (currently always "require")
 - `user` (String) PostgreSQL admin user name
+
+<a id="nestedblock--pg--params"></a>
+### Nested Schema for `pg.params`
+
+Read-Only:
+
+- `database_name` (String) Primary PostgreSQL database name
+- `host` (String) PostgreSQL host IP or name
+- `password` (String, Sensitive) PostgreSQL admin user password
+- `port` (Number) PostgreSQL port
+- `sslmode` (String) PostgreSQL sslmode setting (currently always "require")
+- `user` (String) PostgreSQL admin user name
+
 
 
 <a id="nestedblock--pg_user_config"></a>

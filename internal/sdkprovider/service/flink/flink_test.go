@@ -237,6 +237,10 @@ func aivenFlinkApplicationAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("no updated by is set")
 		}
 
+		if rs.Primary.Attributes["flink.0.host_ports.#"] != "" {
+			return fmt.Errorf("expected to get correct host_ports from Aiven")
+		}
+
 		return nil
 	}
 }

@@ -215,6 +215,38 @@ func testAccCheckAivenServiceMysqlAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a correct public_access.prometheus from Aiven")
 		}
 
+		if a["mysql.0.uris.#"] == "" {
+			return fmt.Errorf("expected to get correct uris from Aiven")
+		}
+
+		if a["mysql.0.params.#"] == "" {
+			return fmt.Errorf("expected to get correct params from Aiven")
+		}
+
+		if a["mysql.0.params.0.host"] == "" {
+			return fmt.Errorf("expected to get correct host from Aiven")
+		}
+
+		if a["mysql.0.params.0.port"] == "" {
+			return fmt.Errorf("expected to get correct port from Aiven")
+		}
+
+		if a["mysql.0.params.0.sslmode"] == "" {
+			return fmt.Errorf("expected to get correct sslmode from Aiven")
+		}
+
+		if a["mysql.0.params.0.user"] != "avnadmin" {
+			return fmt.Errorf("expected to get correct user from Aiven")
+		}
+
+		if a["mysql.0.params.0.password"] == "" {
+			return fmt.Errorf("expected to get correct password from Aiven")
+		}
+
+		if a["mysql.0.params.0.database_name"] != "defaultdb" {
+			return fmt.Errorf("expected to get correct database_name from Aiven")
+		}
+
 		return nil
 	}
 }

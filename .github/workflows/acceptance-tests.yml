@@ -60,7 +60,9 @@ jobs:
           servicecomponent,
           staticip,
           serviceintegration,
-          vpc
+          vpc,
+          dragonfly,
+          thanos
         ]
 
     steps:

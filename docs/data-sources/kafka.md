@@ -84,6 +84,7 @@ Read-Only:
 - `connect_uri` (String)
 - `rest_uri` (String)
 - `schema_registry_uri` (String)
+- `uris` (List of String)
 
 
 <a id="nestedatt--kafka_user_config"></a>

@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
@@ -25,6 +26,7 @@ func TestAccAiven_clickhouse(t *testing.T) {
 				Config: testAccClickhouseResource(rName),
 				Check: resource.ComposeTestCheckFunc(
 					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_clickhouse.common"),
+					testAccCheckAivenServiceClickhouseAttributes("data.aiven_clickhouse.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
@@ -109,4 +111,17 @@ data "aiven_clickhouse" "common" {
 
   depends_on = [aiven_clickhouse.bar]
 }`, os.Getenv("AIVEN_PROJECT_NAME"), name)
+}
+
+func testAccCheckAivenServiceClickhouseAttributes(n string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		r := s.RootModule().Resources[n]
+		a := r.Primary.Attributes
+
+		if a["clickhouse.0.uris.#"] == "" {
+			return fmt.Errorf("expected to get correct uris from Aiven")
+		}
+
+		return nil
+	}
 }

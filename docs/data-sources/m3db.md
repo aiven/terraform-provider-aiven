@@ -38,6 +38,7 @@ data "aiven_m3db" "m3" {
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) Disk space that service is currently using
 - `id` (String) The ID of this resource.
+- `m3db` (List of Object, Sensitive) M3DB server provided values (see [below for nested schema](#nestedatt--m3db))
 - `m3db_user_config` (List of Object) M3db user configurable settings (see [below for nested schema](#nestedatt--m3db_user_config))
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
@@ -69,6 +70,19 @@ Read-Only:
 - `route` (String)
 - `ssl` (Boolean)
 - `usage` (String)
+
+
+<a id="nestedatt--m3db"></a>
+### Nested Schema for `m3db`
+
+Read-Only:
+
+- `http_cluster_uri` (String)
+- `http_node_uri` (String)
+- `influxdb_uri` (String)
+- `prometheus_remote_read_uri` (String)
+- `prometheus_remote_write_uri` (String)
+- `uris` (List of String)
 
 
 <a id="nestedatt--m3db_user_config"></a>

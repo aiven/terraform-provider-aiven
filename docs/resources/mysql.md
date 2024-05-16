@@ -52,6 +52,7 @@ resource "aiven_mysql" "mysql1" {
 - `disk_space` (String, Deprecated) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
+- `mysql` (Block List, Max: 1) MySQL specific server provided values (see [below for nested schema](#nestedblock--mysql))
 - `mysql_user_config` (Block List, Max: 1) Mysql user configurable settings (see [below for nested schema](#nestedblock--mysql_user_config))
 - `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
 - `service_integrations` (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
@@ -76,6 +77,34 @@ resource "aiven_mysql" "mysql1" {
 - `service_uri` (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
 - `service_username` (String) Username used for connecting to the service, if applicable
 - `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
+
+<a id="nestedblock--mysql"></a>
+### Nested Schema for `mysql`
+
+Optional:
+
+- `standby_uris` (List of String) MySQL standby connection URIs
+- `syncing_uris` (List of String) MySQL syncing connection URIs
+- `uris` (List of String) MySQL master connection URIs
+
+Read-Only:
+
+- `params` (Block List) MySQL connection parameters (see [below for nested schema](#nestedblock--mysql--params))
+- `replica_uri` (String, Sensitive) MySQL replica URI for services with a replica
+
+<a id="nestedblock--mysql--params"></a>
+### Nested Schema for `mysql.params`
+
+Read-Only:
+
+- `database_name` (String) Primary MySQL database name
+- `host` (String) MySQL host IP or name
+- `password` (String, Sensitive) MySQL admin user password
+- `port` (Number) MySQL port
+- `sslmode` (String) MySQL sslmode setting (currently always "require")
+- `user` (String) MySQL admin user name
+
+
 
 <a id="nestedblock--mysql_user_config"></a>
 ### Nested Schema for `mysql_user_config`

@@ -43,6 +43,7 @@ resource "aiven_cassandra" "bar" {
 ### Optional
 
 - `additional_disk_space` (String) Additional disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
+- `cassandra` (Block List, Max: 1) Cassandra server provided values (see [below for nested schema](#nestedblock--cassandra))
 - `cassandra_user_config` (Block List, Max: 1) Cassandra user configurable settings (see [below for nested schema](#nestedblock--cassandra_user_config))
 - `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 - `disk_space` (String, Deprecated) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
@@ -71,6 +72,14 @@ resource "aiven_cassandra" "bar" {
 - `service_uri` (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
 - `service_username` (String) Username used for connecting to the service, if applicable
 - `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
+
+<a id="nestedblock--cassandra"></a>
+### Nested Schema for `cassandra`
+
+Optional:
+
+- `uris` (List of String) Cassandra server URIs.
+
 
 <a id="nestedblock--cassandra_user_config"></a>
 ### Nested Schema for `cassandra_user_config`

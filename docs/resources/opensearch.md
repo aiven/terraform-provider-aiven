@@ -53,6 +53,7 @@ resource "aiven_opensearch" "os1" {
 - `disk_space` (String, Deprecated) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
+- `opensearch` (Block List, Max: 1) OpenSearch server provided values (see [below for nested schema](#nestedblock--opensearch))
 - `opensearch_user_config` (Block List, Max: 1) Opensearch user configurable settings (see [below for nested schema](#nestedblock--opensearch_user_config))
 - `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
 - `service_integrations` (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
@@ -70,7 +71,6 @@ resource "aiven_opensearch" "os1" {
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) Disk space that service is currently using
 - `id` (String) The ID of this resource.
-- `opensearch` (List of Object) OpenSearch server provided values (see [below for nested schema](#nestedatt--opensearch))
 - `service_host` (String) The hostname of the service.
 - `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
 - `service_port` (Number) The port of the service
@@ -78,6 +78,21 @@ resource "aiven_opensearch" "os1" {
 - `service_uri` (String, Sensitive) URI for connecting to the service. Service specific info is under "kafka", "pg", etc.
 - `service_username` (String) Username used for connecting to the service, if applicable
 - `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
+
+<a id="nestedblock--opensearch"></a>
+### Nested Schema for `opensearch`
+
+Optional:
+
+- `uris` (List of String) OpenSearch server URIs.
+
+Read-Only:
+
+- `kibana_uri` (String) URI for Kibana dashboard frontend
+- `opensearch_dashboards_uri` (String, Sensitive) URI for OpenSearch dashboard frontend
+- `password` (String, Sensitive) OpenSearch password
+- `username` (String) OpenSearch username
+
 
 <a id="nestedblock--opensearch_user_config"></a>
 ### Nested Schema for `opensearch_user_config`
@@ -359,14 +374,6 @@ Read-Only:
 - `route` (String)
 - `ssl` (Boolean)
 - `usage` (String)
-
-
-<a id="nestedatt--opensearch"></a>
-### Nested Schema for `opensearch`
-
-Read-Only:
-
-- `opensearch_dashboards_uri` (String)
 
 ## Import
 
