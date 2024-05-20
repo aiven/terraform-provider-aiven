@@ -223,7 +223,7 @@ func m3dbUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"private_access": {
-				Description: "Allow access to selected service ports from private networks. Projects that are in a VPC are private by default, so setting this for services in a project VPC will cause an error.",
+				Description: "Allow access to selected service ports from private networks",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"m3coordinator": {
 					Description: "Allow clients to connect to m3coordinator with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
 					Optional:    true,
