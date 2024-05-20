@@ -106,7 +106,7 @@ Optional:
 - `m3coordinator_enable_graphite_carbon_ingest` (Boolean) Enables access to Graphite Carbon plaintext metrics ingestion. It can be enabled only for services inside VPCs. The metrics are written to aggregated namespaces only.
 - `m3db_version` (String) M3 major version (the minimum compatible version).
 - `namespaces` (Block List, Max: 2147483647) List of M3 namespaces (see [below for nested schema](#nestedblock--m3db_user_config--namespaces))
-- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks. Projects that are in a VPC are private by default, so setting this for services in a project VPC will cause an error. (see [below for nested schema](#nestedblock--m3db_user_config--private_access))
+- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--m3db_user_config--private_access))
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--m3db_user_config--public_access))
 - `rules` (Block List, Max: 1) M3 rules (see [below for nested schema](#nestedblock--m3db_user_config--rules))

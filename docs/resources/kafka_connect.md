@@ -84,7 +84,7 @@ Optional:
 - `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--kafka_connect_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
 - `kafka_connect` (Block List, Max: 1) Kafka Connect configuration values (see [below for nested schema](#nestedblock--kafka_connect_user_config--kafka_connect))
-- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks. Projects that are in a VPC are private by default, so setting this for services in a project VPC will cause an error. (see [below for nested schema](#nestedblock--kafka_connect_user_config--private_access))
+- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--kafka_connect_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--kafka_connect_user_config--privatelink_access))
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--kafka_connect_user_config--public_access))
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
