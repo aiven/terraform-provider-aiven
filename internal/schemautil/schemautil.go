@@ -1,6 +1,7 @@
 package schemautil
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/mail"
 	"net/url"
@@ -38,21 +39,6 @@ func OptionalIntPointer(d *schema.ResourceData, key string) *int {
 		return nil
 	}
 	return &intValue
-}
-
-// OptionalFloatPointer retrieves a float pointer to a field, if the field is not set, returns nil.
-func OptionalFloatPointer(d *schema.ResourceData, key string) *float64 {
-	val, ok := d.GetOk(key)
-	if !ok {
-		return nil
-	}
-
-	floatValue, ok := val.(float64)
-	if !ok {
-		return nil
-	}
-
-	return &floatValue
 }
 
 // OptionalBoolPointer retrieves a bool pointer to a field, if the field is not set, returns nil.
@@ -320,4 +306,159 @@ func CopyServiceUserPropertiesFromAPIResponseToTerraform(
 	}
 
 	return nil
+}
+
+// ResourceDataGet Marshals schema.ResourceData into the given dto.
+// Instead of setting every field individually and dealing with pointers,
+// it creates a map of values using the schema keys,
+// and then marshals the result into given DTO.
+// Instead of for each field:
+//
+//	v, ok := d.GetOk("foo")
+//	if ok {
+//		dto.Foo = &v
+//	}
+//
+// Use:
+//
+//	err := ResourceDataGet(d, s, dto)
+//
+// Warning: doesn't support nested sets.
+// Warning: not tested with nested objects.
+func ResourceDataGet(d *schema.ResourceData, s map[string]*schema.Schema, dto any) error {
+	m := make(map[string]any)
+	for k, v := range s {
+		value, ok := d.GetOk(k)
+		if ok {
+			if v.Type == schema.TypeSet {
+				set, ok := value.(*schema.Set)
+				if !ok {
+					return fmt.Errorf("expected type Set, got %T", value)
+				}
+				m[k] = set.List()
+			} else {
+				m[k] = value
+			}
+		}
+	}
+
+	b, err := json.Marshal(&m)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(b, dto)
+}
+
+// ResourceDataSet Sets the given dto values to schema.ResourceData
+// Instead of setting every field individually and dealing with pointers,
+// it creates a map of values using the schema keys,
+// and then sets the result to schema.ResourceData.
+// Instead of for each field:
+//
+//	if dto.Foo != nil {
+//		if err := d.Set("foo", *dto.Foo); err != nil {
+//			return err
+//		}
+//	}
+//
+// Use:
+//
+//	err := ResourceDataSet(d, s, dto)
+func ResourceDataSet(d *schema.ResourceData, s map[string]*schema.Schema, dto any) error {
+	b, err := json.Marshal(dto)
+	if err != nil {
+		return err
+	}
+
+	var m map[string]any
+	err = json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	result, err := serializeMap(s, m)
+	if err != nil {
+		return err
+	}
+
+	for k, v := range result {
+		if err = d.Set(k, v); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func serializeMap(s map[string]*schema.Schema, m map[string]any) (map[string]any, error) {
+	result := make(map[string]any)
+	for name, field := range s {
+		value, ok := m[name]
+		if !ok {
+			continue
+		}
+
+		val, err := serialize(field, value)
+		if err != nil {
+			return nil, err
+		}
+		result[name] = val
+	}
+
+	return result, nil
+}
+
+func serialize(s *schema.Schema, value any) (any, error) {
+	switch s.Type {
+	case schema.TypeList, schema.TypeSet:
+	default:
+		return value, nil
+	}
+
+	var err error
+	list, isList := value.([]any)
+
+	switch elem := s.Elem.(type) {
+	case *schema.Schema:
+		// This branch converts a list of scalars
+		if !isList {
+			return nil, fmt.Errorf("expected a list, but %T", value)
+		}
+
+		result := make([]any, len(list))
+		for i, v := range list {
+			result[i], err = serialize(elem, v)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		return schema.NewSet(schema.HashSchema(elem), result), nil
+	case *schema.Resource:
+		// This branch converts a list of objects or a single object
+		if m, ok := value.(map[string]any); ok {
+			return serializeMap(elem.Schema, m)
+		}
+
+		if !isList {
+			return nil, fmt.Errorf("expected a map or a list, but %T", value)
+		}
+
+		result := make([]any, len(list))
+		for i, v := range list {
+			m, ok := v.(map[string]any)
+			if !ok {
+				return nil, fmt.Errorf("expected a map, got %T", v)
+			}
+
+			result[i], err = serializeMap(elem.Schema, m)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return result, nil
+	}
+
+	// It is either a schema.Resource or schema.Schema
+	panic(fmt.Errorf("invalid schema type %T", s.Elem))
 }

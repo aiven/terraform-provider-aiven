@@ -115,7 +115,6 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 		organization.NewOrganizationUserGroupMembersResource,
 		organization.NewOrganizationGroupProjectResource,
 		organization.NewOrganizationApplicationUser,
-		organization.NewOrganizationApplicationUserToken,
 	}
 
 	// Add to a list of resources that are currently in beta.

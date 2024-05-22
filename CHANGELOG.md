@@ -12,6 +12,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Fix `ip_filter` conversion issue
+- Fix `aiven_organization_application_user_token` crashes with empty optional fields
 
 ## [4.18.0] - 2024-05-22
 
