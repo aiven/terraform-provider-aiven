@@ -9,7 +9,7 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!-- [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+## [4.18.0] - 2024-05-22
 
 - Fix `ip_filter`, `ip_filter_string`, and `ip_filter_object` crash when receive an unexpected type
 - Add missing connection info fields to various service types
