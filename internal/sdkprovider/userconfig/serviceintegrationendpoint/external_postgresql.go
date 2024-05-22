@@ -46,7 +46,7 @@ func externalPostgresqlUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"ssl_mode": {
-				Description:  "SSL Mode. The default value is `verify-full`.",
+				Description:  "Enum: `disable`, `allow`, `prefer`, `require`, `verify-ca`, `verify-full`. SSL Mode. The default value is `verify-full`.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"disable", "allow", "prefer", "require", "verify-ca", "verify-full"}, false),

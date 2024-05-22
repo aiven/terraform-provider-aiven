@@ -83,7 +83,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"compression_type": {
-						Description:  "Specify the final compression type for a given topic. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'uncompressed' which is equivalent to no compression; and 'producer' which means retain the original compression codec set by the producer.",
+						Description:  "Enum: `gzip`, `snappy`, `lz4`, `zstd`, `uncompressed`, `producer`. Specify the final compression type for a given topic. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'uncompressed' which is equivalent to no compression; and 'producer' which means retain the original compression codec set by the producer.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"gzip", "snappy", "lz4", "zstd", "uncompressed", "producer"}, false),
@@ -134,7 +134,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"log_cleanup_policy": {
-						Description:  "The default cleanup policy for segments beyond the retention window.",
+						Description:  "Enum: `delete`, `compact`, `compact,delete`. The default cleanup policy for segments beyond the retention window.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"delete", "compact", "compact,delete"}, false),
@@ -180,7 +180,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"log_message_timestamp_type": {
-						Description:  "Define whether the timestamp in the message is message create time or log append time.",
+						Description:  "Enum: `CreateTime`, `LogAppendTime`. Define whether the timestamp in the message is message create time or log append time.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"CreateTime", "LogAppendTime"}, false),
@@ -342,13 +342,13 @@ func kafkaUserConfig() *schema.Schema {
 				Description: "Kafka Connect configuration values",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"connector_client_config_override_policy": {
-						Description:  "Defines what client configurations can be overridden by the connector. Default is None.",
+						Description:  "Enum: `None`, `All`. Defines what client configurations can be overridden by the connector. Default is None.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"None", "All"}, false),
 					},
 					"consumer_auto_offset_reset": {
-						Description:  "What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest.",
+						Description:  "Enum: `earliest`, `latest`. What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"earliest", "latest"}, false),
@@ -359,7 +359,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"consumer_isolation_level": {
-						Description:  "Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
+						Description:  "Enum: `read_uncommitted`, `read_committed`. Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"read_uncommitted", "read_committed"}, false),
@@ -400,7 +400,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"producer_compression_type": {
-						Description:  "Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.",
+						Description:  "Enum: `gzip`, `snappy`, `lz4`, `zstd`, `none`. Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"gzip", "snappy", "lz4", "zstd", "none"}, false),
@@ -454,13 +454,13 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"consumer_request_timeout_ms": {
-						Description:  "The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached. The default value is `1000`.",
+						Description:  "Enum: `1000`, `15000`, `30000`. The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached. The default value is `1000`.",
 						Optional:     true,
 						Type:         schema.TypeInt,
 						ValidateFunc: validation.IntInSlice([]int{1000, 15000, 30000}),
 					},
 					"name_strategy": {
-						Description:  "Name strategy to use when selecting subject for storing schemas. The default value is `topic_name`.",
+						Description:  "Enum: `topic_name`, `record_name`, `topic_record_name`. Name strategy to use when selecting subject for storing schemas. The default value is `topic_name`.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"topic_name", "record_name", "topic_record_name"}, false),
@@ -471,13 +471,13 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"producer_acks": {
-						Description:  "The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to 'all' or '-1', the leader will wait for the full set of in-sync replicas to acknowledge the record. The default value is `1`.",
+						Description:  "Enum: `all`, `-1`, `0`, `1`. The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to 'all' or '-1', the leader will wait for the full set of in-sync replicas to acknowledge the record. The default value is `1`.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"all", "-1", "0", "1"}, false),
 					},
 					"producer_compression_type": {
-						Description:  "Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.",
+						Description:  "Enum: `gzip`, `snappy`, `lz4`, `zstd`, `none`. Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"gzip", "snappy", "lz4", "zstd", "none"}, false),
@@ -503,10 +503,10 @@ func kafkaUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"kafka_version": {
-				Description:  "Kafka major version.",
+				Description:  "Enum: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`, `3.7`. Kafka major version.",
 				Optional:     true,
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"3.2", "3.3", "3.1", "3.4", "3.5", "3.6", "3.7"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"3.1", "3.2", "3.3", "3.4", "3.5", "3.6", "3.7"}, false),
 			},
 			"private_access": {
 				Description: "Allow access to selected service ports from private networks",

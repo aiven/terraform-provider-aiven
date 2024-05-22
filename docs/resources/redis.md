@@ -102,18 +102,18 @@ Optional:
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--redis_user_config--public_access))
 - `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service.
-- `redis_acl_channels_default` (String) Determines default pub/sub channels' ACL for new users if ACL is not supplied. When this option is not defined, all_channels is assumed to keep backward compatibility. This option doesn't affect Redis configuration acl-pubsub-default.
+- `redis_acl_channels_default` (String) Enum: `allchannels`, `resetchannels`. Determines default pub/sub channels' ACL for new users if ACL is not supplied. When this option is not defined, all_channels is assumed to keep backward compatibility. This option doesn't affect Redis configuration acl-pubsub-default.
 - `redis_io_threads` (Number) Set Redis IO thread count. Changing this will cause a restart of the Redis service.
 - `redis_lfu_decay_time` (Number) LFU maxmemory-policy counter decay time in minutes. The default value is `1`.
 - `redis_lfu_log_factor` (Number) Counter logarithm factor for volatile-lfu and allkeys-lfu maxmemory-policies. The default value is `10`.
-- `redis_maxmemory_policy` (String) Redis maxmemory-policy. The default value is `noeviction`.
+- `redis_maxmemory_policy` (String) Enum: `noeviction`, `allkeys-lru`, `volatile-lru`, `allkeys-random`, `volatile-random`, `volatile-ttl`, `volatile-lfu`, `allkeys-lfu`. Redis maxmemory-policy. The default value is `noeviction`.
 - `redis_notify_keyspace_events` (String) Set notify-keyspace-events option.
 - `redis_number_of_databases` (Number) Set number of Redis databases. Changing this will cause a restart of the Redis service.
-- `redis_persistence` (String) When persistence is 'rdb', Redis does RDB dumps each 10 minutes if any key is changed. Also RDB dumps are done according to backup schedule for backup purposes. When persistence is 'off', no RDB dumps and backups are done, so data can be lost at any moment if service is restarted for any reason, or if service is powered off. Also service can't be forked.
+- `redis_persistence` (String) Enum: `off`, `rdb`. When persistence is 'rdb', Redis does RDB dumps each 10 minutes if any key is changed. Also RDB dumps are done according to backup schedule for backup purposes. When persistence is 'off', no RDB dumps and backups are done, so data can be lost at any moment if service is restarted for any reason, or if service is powered off. Also service can't be forked.
 - `redis_pubsub_client_output_buffer_limit` (Number) Set output buffer limit for pub / sub clients in MB. The value is the hard limit, the soft limit is 1/4 of the hard limit. When setting the limit, be mindful of the available memory in the selected service plan.
 - `redis_ssl` (Boolean) Require SSL to access Redis. The default value is `true`.
 - `redis_timeout` (Number) Redis idle connection timeout in seconds. The default value is `300`.
-- `redis_version` (String) Redis major version.
+- `redis_version` (String) Enum: `7.0`. Redis major version.
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
 - `static_ips` (Boolean) Use static public IP addresses.
@@ -142,7 +142,7 @@ Optional:
 
 - `dbname` (String) Database name for bootstrapping the initial connection.
 - `ignore_dbs` (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment).
-- `method` (String) The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).
+- `method` (String) Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).
 - `password` (String, Sensitive) Password for authentication with the server where to migrate data from.
 - `ssl` (Boolean) The server where to migrate data from is secured with SSL. The default value is `true`.
 - `username` (String) User name for authentication with the server where to migrate data from.

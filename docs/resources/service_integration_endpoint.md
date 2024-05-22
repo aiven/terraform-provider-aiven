@@ -57,7 +57,7 @@ Optional:
 - `kafka_consumer_check_instances` (Number) Number of separate instances to fetch kafka consumer statistics with.
 - `kafka_consumer_stats_timeout` (Number) Number of seconds that datadog will wait to get consumer statistics from brokers.
 - `max_partition_contexts` (Number) Maximum number of partition contexts to send.
-- `site` (String) Datadog intake site. Defaults to datadoghq.com.
+- `site` (String) Enum: `datadoghq.com`, `datadoghq.eu`, `us3.datadoghq.com`, `us5.datadoghq.com`, `ddog-gov.com`, `ap1.datadoghq.com`. Datadog intake site. Defaults to datadoghq.com.
 
 <a id="nestedblock--datadog_user_config--datadog_tags"></a>
 ### Nested Schema for `datadog_user_config.datadog_tags`
@@ -137,17 +137,17 @@ Required:
 Required:
 
 - `bootstrap_servers` (String) Bootstrap servers.
-- `security_protocol` (String) Security protocol.
+- `security_protocol` (String) Enum: `PLAINTEXT`, `SSL`, `SASL_PLAINTEXT`, `SASL_SSL`. Security protocol.
 
 Optional:
 
-- `sasl_mechanism` (String) SASL mechanism used for connections to the Kafka server.
+- `sasl_mechanism` (String) Enum: `PLAIN`, `SCRAM-SHA-256`, `SCRAM-SHA-512`. SASL mechanism used for connections to the Kafka server.
 - `sasl_plain_password` (String, Sensitive) Password for SASL PLAIN mechanism in the Kafka server.
 - `sasl_plain_username` (String) Username for SASL PLAIN mechanism in the Kafka server.
 - `ssl_ca_cert` (String) PEM-encoded CA certificate.
 - `ssl_client_cert` (String) PEM-encoded client certificate.
 - `ssl_client_key` (String) PEM-encoded client key.
-- `ssl_endpoint_identification_algorithm` (String) The endpoint identification algorithm to validate server hostname using server certificate.
+- `ssl_endpoint_identification_algorithm` (String) Enum: `https`, ``. The endpoint identification algorithm to validate server hostname using server certificate.
 
 
 <a id="nestedblock--external_opensearch_logs_user_config"></a>
@@ -180,7 +180,7 @@ Optional:
 - `password` (String, Sensitive) Password.
 - `ssl_client_certificate` (String) Client certificate.
 - `ssl_client_key` (String) Client key.
-- `ssl_mode` (String) SSL Mode. The default value is `verify-full`.
+- `ssl_mode` (String) Enum: `disable`, `allow`, `prefer`, `require`, `verify-ca`, `verify-full`. SSL Mode. The default value is `verify-full`.
 - `ssl_root_cert` (String) SSL Root Cert.
 
 
@@ -189,7 +189,7 @@ Optional:
 
 Required:
 
-- `authentication` (String) Authentication method.
+- `authentication` (String) Enum: `none`, `basic`. Authentication method.
 - `url` (String) Schema Registry URL.
 
 Optional:
@@ -221,7 +221,7 @@ Optional:
 
 Required:
 
-- `format` (String) Message format. The default value is `rfc5424`.
+- `format` (String) Enum: `rfc5424`, `rfc3164`, `custom`. Message format. The default value is `rfc5424`.
 - `port` (Number) Rsyslog server port. The default value is `514`.
 - `server` (String) Rsyslog server IP address or hostname.
 - `tls` (Boolean) Require TLS. The default value is `true`.

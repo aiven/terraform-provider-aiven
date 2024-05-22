@@ -82,7 +82,7 @@ func redisUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"method": {
-						Description:  "The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).",
+						Description:  "Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"dump", "replication"}, false),
@@ -179,7 +179,7 @@ func redisUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"redis_acl_channels_default": {
-				Description:  "Determines default pub/sub channels' ACL for new users if ACL is not supplied. When this option is not defined, all_channels is assumed to keep backward compatibility. This option doesn't affect Redis configuration acl-pubsub-default.",
+				Description:  "Enum: `allchannels`, `resetchannels`. Determines default pub/sub channels' ACL for new users if ACL is not supplied. When this option is not defined, all_channels is assumed to keep backward compatibility. This option doesn't affect Redis configuration acl-pubsub-default.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"allchannels", "resetchannels"}, false),
@@ -200,7 +200,7 @@ func redisUserConfig() *schema.Schema {
 				Type:        schema.TypeInt,
 			},
 			"redis_maxmemory_policy": {
-				Description:  "Redis maxmemory-policy. The default value is `noeviction`.",
+				Description:  "Enum: `noeviction`, `allkeys-lru`, `volatile-lru`, `allkeys-random`, `volatile-random`, `volatile-ttl`, `volatile-lfu`, `allkeys-lfu`. Redis maxmemory-policy. The default value is `noeviction`.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"noeviction", "allkeys-lru", "volatile-lru", "allkeys-random", "volatile-random", "volatile-ttl", "volatile-lfu", "allkeys-lfu"}, false),
@@ -216,7 +216,7 @@ func redisUserConfig() *schema.Schema {
 				Type:        schema.TypeInt,
 			},
 			"redis_persistence": {
-				Description:  "When persistence is 'rdb', Redis does RDB dumps each 10 minutes if any key is changed. Also RDB dumps are done according to backup schedule for backup purposes. When persistence is 'off', no RDB dumps and backups are done, so data can be lost at any moment if service is restarted for any reason, or if service is powered off. Also service can't be forked.",
+				Description:  "Enum: `off`, `rdb`. When persistence is 'rdb', Redis does RDB dumps each 10 minutes if any key is changed. Also RDB dumps are done according to backup schedule for backup purposes. When persistence is 'off', no RDB dumps and backups are done, so data can be lost at any moment if service is restarted for any reason, or if service is powered off. Also service can't be forked.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"off", "rdb"}, false),
@@ -237,7 +237,7 @@ func redisUserConfig() *schema.Schema {
 				Type:        schema.TypeInt,
 			},
 			"redis_version": {
-				Description:  "Redis major version.",
+				Description:  "Enum: `7.0`. Redis major version.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"7.0"}, false),

@@ -90,8 +90,8 @@ Optional:
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
 - `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--m3aggregator_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `m3_version` (String) M3 major version (deprecated, use m3aggregator_version).
-- `m3aggregator_version` (String) M3 major version (the minimum compatible version).
+- `m3_version` (String) Enum: `1.1`, `1.2`, `1.5`. M3 major version (deprecated, use m3aggregator_version).
+- `m3aggregator_version` (String) Enum: `1.1`, `1.2`, `1.5`. M3 major version (the minimum compatible version).
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `static_ips` (Boolean) Use static public IP addresses.
 

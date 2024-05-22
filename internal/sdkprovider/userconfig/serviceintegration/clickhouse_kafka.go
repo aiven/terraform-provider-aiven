@@ -17,7 +17,7 @@ func clickhouseKafkaUserConfig() *schema.Schema {
 			Description: "Tables to create",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"auto_offset_reset": {
-					Description:  "Action to take when there is no initial offset in offset store or the desired offset is out of range. The default value is `earliest`.",
+					Description:  "Enum: `smallest`, `earliest`, `beginning`, `largest`, `latest`, `end`. Action to take when there is no initial offset in offset store or the desired offset is out of range. The default value is `earliest`.",
 					Optional:     true,
 					Type:         schema.TypeString,
 					ValidateFunc: validation.StringInSlice([]string{"smallest", "earliest", "beginning", "largest", "latest", "end"}, false),
@@ -41,13 +41,13 @@ func clickhouseKafkaUserConfig() *schema.Schema {
 					Type:     schema.TypeList,
 				},
 				"data_format": {
-					Description:  "Message data format. The default value is `JSONEachRow`.",
+					Description:  "Enum: `Avro`, `CSV`, `JSONAsString`, `JSONCompactEachRow`, `JSONCompactStringsEachRow`, `JSONEachRow`, `JSONStringsEachRow`, `MsgPack`, `TSKV`, `TSV`, `TabSeparated`, `RawBLOB`, `AvroConfluent`. Message data format. The default value is `JSONEachRow`.",
 					Required:     true,
 					Type:         schema.TypeString,
 					ValidateFunc: validation.StringInSlice([]string{"Avro", "CSV", "JSONAsString", "JSONCompactEachRow", "JSONCompactStringsEachRow", "JSONEachRow", "JSONStringsEachRow", "MsgPack", "TSKV", "TSV", "TabSeparated", "RawBLOB", "AvroConfluent"}, false),
 				},
 				"date_time_input_format": {
-					Description:  "Method to read DateTime from text input formats. The default value is `basic`.",
+					Description:  "Enum: `basic`, `best_effort`, `best_effort_us`. Method to read DateTime from text input formats. The default value is `basic`.",
 					Optional:     true,
 					Type:         schema.TypeString,
 					ValidateFunc: validation.StringInSlice([]string{"basic", "best_effort", "best_effort_us"}, false),
@@ -58,7 +58,7 @@ func clickhouseKafkaUserConfig() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"handle_error_mode": {
-					Description:  "How to handle errors for Kafka engine. The default value is `default`.",
+					Description:  "Enum: `default`, `stream`. How to handle errors for Kafka engine. The default value is `default`.",
 					Optional:     true,
 					Type:         schema.TypeString,
 					ValidateFunc: validation.StringInSlice([]string{"default", "stream"}, false),

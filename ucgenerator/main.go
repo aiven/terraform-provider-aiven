@@ -318,6 +318,14 @@ func getSchemaValues(o *object) (jen.Dict, error) {
 
 func getDescription(o *object) string {
 	desc := make([]string, 0)
+	if o.Enum != nil {
+		values := make([]string, 0)
+		for _, v := range o.Enum {
+			values = append(values, fmt.Sprintf("`%s`", v.Value))
+		}
+		desc = append(desc, fmt.Sprintf("Enum: %s.", strings.Join(values, ", ")))
+	}
+
 	d := o.Description
 	if len(d) < len(o.Title) {
 		d = o.Title

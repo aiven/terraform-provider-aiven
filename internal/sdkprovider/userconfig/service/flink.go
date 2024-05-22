@@ -26,7 +26,7 @@ func flinkUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"flink_version": {
-				Description:  "Flink major version.",
+				Description:  "Enum: `1.16`. Flink major version.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"1.16"}, false),

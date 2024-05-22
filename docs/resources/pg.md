@@ -149,7 +149,7 @@ Optional:
 - `pg_read_replica` (Boolean) Should the service which is being forked be a read replica (deprecated, use read_replica service integration instead).
 - `pg_service_to_fork_from` (String) Name of the PG Service from which to fork (deprecated, use service_to_fork_from). This has effect only when a new service is being created.
 - `pg_stat_monitor_enable` (Boolean) Enable the pg_stat_monitor extension. Enabling this extension will cause the cluster to be restarted.When this extension is enabled, pg_stat_statements results for utility commands are unreliable. The default value is `false`.
-- `pg_version` (String) PostgreSQL major version.
+- `pg_version` (String) Enum: `10`, `11`, `12`, `13`, `14`, `15`, `16`. PostgreSQL major version.
 - `pgaudit` (Block List, Max: 1) System-wide settings for the pgaudit extension (see [below for nested schema](#nestedblock--pg_user_config--pgaudit))
 - `pgbouncer` (Block List, Max: 1) PGBouncer connection pooling settings (see [below for nested schema](#nestedblock--pg_user_config--pgbouncer))
 - `pglookout` (Block List, Max: 1) System-wide settings for pglookout (see [below for nested schema](#nestedblock--pg_user_config--pglookout))
@@ -162,9 +162,9 @@ Optional:
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
 - `shared_buffers_percentage` (Number) Percentage of total RAM that the database server uses for shared memory buffers. Valid range is 20-60 (float), which corresponds to 20% - 60%. This setting adjusts the shared_buffers configuration value.
 - `static_ips` (Boolean) Use static public IP addresses.
-- `synchronous_replication` (String) Synchronous replication type. Note that the service plan also needs to support synchronous replication.
+- `synchronous_replication` (String) Enum: `quorum`, `off`. Synchronous replication type. Note that the service plan also needs to support synchronous replication.
 - `timescaledb` (Block List, Max: 1) System-wide settings for the timescaledb extension (see [below for nested schema](#nestedblock--pg_user_config--timescaledb))
-- `variant` (String) Variant of the PostgreSQL service, may affect the features that are exposed by default.
+- `variant` (String) Enum: `aiven`, `timescale`. Variant of the PostgreSQL service, may affect the features that are exposed by default.
 - `work_mem` (Number) Sets the maximum amount of memory to be used by a query operation (such as a sort or hash table) before writing to temporary disk files, in MB. Default is 1MB + 0.075% of total RAM (up to 32MB).
 
 <a id="nestedblock--pg_user_config--ip_filter_object"></a>
@@ -191,7 +191,7 @@ Optional:
 
 - `dbname` (String) Database name for bootstrapping the initial connection.
 - `ignore_dbs` (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment).
-- `method` (String) The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).
+- `method` (String) Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).
 - `password` (String, Sensitive) Password for authentication with the server where to migrate data from.
 - `ssl` (Boolean) The server where to migrate data from is secured with SSL. The default value is `true`.
 - `username` (String) User name for authentication with the server where to migrate data from.
@@ -216,12 +216,12 @@ Optional:
 - `bgwriter_lru_maxpages` (Number) In each round, no more than this many buffers will be written by the background writer. Setting this to zero disables background writing. Default is 100.
 - `bgwriter_lru_multiplier` (Number) The average recent need for new buffers is multiplied by bgwriter_lru_multiplier to arrive at an estimate of the number that will be needed during the next round, (up to bgwriter_lru_maxpages). 1.0 represents a “just in time” policy of writing exactly the number of buffers predicted to be needed. Larger values provide some cushion against spikes in demand, while smaller values intentionally leave writes to be done by server processes. The default is 2.0.
 - `deadlock_timeout` (Number) This is the amount of time, in milliseconds, to wait on a lock before checking to see if there is a deadlock condition.
-- `default_toast_compression` (String) Specifies the default TOAST compression method for values of compressible columns (the default is lz4).
+- `default_toast_compression` (String) Enum: `lz4`, `pglz`. Specifies the default TOAST compression method for values of compressible columns (the default is lz4).
 - `idle_in_transaction_session_timeout` (Number) Time out sessions with open transactions after this number of milliseconds.
 - `jit` (Boolean) Controls system-wide use of Just-in-Time Compilation (JIT).
 - `log_autovacuum_min_duration` (Number) Causes each action executed by autovacuum to be logged if it ran for at least the specified number of milliseconds. Setting this to zero logs all autovacuum actions. Minus-one (the default) disables logging autovacuum actions.
-- `log_error_verbosity` (String) Controls the amount of detail written in the server log for each message that is logged.
-- `log_line_prefix` (String) Choose from one of the available log-formats. These can support popular log analyzers like pgbadger, pganalyze etc.
+- `log_error_verbosity` (String) Enum: `TERSE`, `DEFAULT`, `VERBOSE`. Controls the amount of detail written in the server log for each message that is logged.
+- `log_line_prefix` (String) Enum: `'pid=%p,user=%u,db=%d,app=%a,client=%h '`, `'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '`, `'%m [%p] %q[user=%u,db=%d,app=%a] '`. Choose from one of the available log-formats. These can support popular log analyzers like pgbadger, pganalyze etc.
 - `log_min_duration_statement` (Number) Log statements that take more than this number of milliseconds to run, -1 disables.
 - `log_temp_files` (Number) Log statements for each temporary file created larger than this number of kilobytes, -1 disables.
 - `max_files_per_process` (Number) PostgreSQL maximum number of files that can be open per process.
@@ -242,13 +242,13 @@ Optional:
 - `pg_partman_bgw__dot__role` (String) Controls which role to use for pg_partman's scheduled background tasks.
 - `pg_stat_monitor__dot__pgsm_enable_query_plan` (Boolean) Enables or disables query plan monitoring.
 - `pg_stat_monitor__dot__pgsm_max_buckets` (Number) Sets the maximum number of buckets.
-- `pg_stat_statements__dot__track` (String) Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default value is top.
+- `pg_stat_statements__dot__track` (String) Enum: `all`, `top`, `none`. Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default value is top.
 - `temp_file_limit` (Number) PostgreSQL temporary file limit in KiB, -1 for unlimited.
 - `timezone` (String) PostgreSQL service timezone.
 - `track_activity_query_size` (Number) Specifies the number of bytes reserved to track the currently executing command for each active session.
-- `track_commit_timestamp` (String) Record commit time of transactions.
-- `track_functions` (String) Enables tracking of function call counts and time used.
-- `track_io_timing` (String) Enables timing of database I/O calls. This parameter is off by default, because it will repeatedly query the operating system for the current time, which may cause significant overhead on some platforms.
+- `track_commit_timestamp` (String) Enum: `off`, `on`. Record commit time of transactions.
+- `track_functions` (String) Enum: `all`, `pl`, `none`. Enables tracking of function call counts and time used.
+- `track_io_timing` (String) Enum: `off`, `on`. Enables timing of database I/O calls. This parameter is off by default, because it will repeatedly query the operating system for the current time, which may cause significant overhead on some platforms.
 - `wal_sender_timeout` (Number) Terminate replication connections that are inactive for longer than this amount of time, in milliseconds. Setting this value to zero disables the timeout.
 - `wal_writer_delay` (Number) WAL flush interval in milliseconds. Note that setting this value to lower than the default 200ms may negatively impact performance.
 
@@ -274,7 +274,7 @@ Optional:
 - `log` (List of String) Specifies which classes of statements will be logged by session audit logging.
 - `log_catalog` (Boolean) Specifies that session logging should be enabled in the casewhere all relations in a statement are in pg_catalog. The default value is `true`.
 - `log_client` (Boolean) Specifies whether log messages will be visible to a client process such as psql. The default value is `false`.
-- `log_level` (String) Specifies the log level that will be used for log entries. The default value is `log`.
+- `log_level` (String) Enum: `debug1`, `debug2`, `debug3`, `debug4`, `debug5`, `info`, `notice`, `warning`, `log`. Specifies the log level that will be used for log entries. The default value is `log`.
 - `log_max_string_length` (Number) Crop parameters representation and whole statements if they exceed this threshold. A (default) value of -1 disable the truncation. The default value is `-1`.
 - `log_nested_statements` (Boolean) This GUC allows to turn off logging nested statements, that is, statements that are executed as part of another ExecutorRun. The default value is `true`.
 - `log_parameter` (Boolean) Specifies that audit logging should include the parameters that were passed with the statement. The default value is `false`.
@@ -293,7 +293,7 @@ Optional:
 
 - `autodb_idle_timeout` (Number) If the automatically created database pools have been unused this many seconds, they are freed. If 0 then timeout is disabled. (seconds). The default value is `3600`.
 - `autodb_max_db_connections` (Number) Do not allow more than this many server connections per database (regardless of user). Setting it to 0 means unlimited.
-- `autodb_pool_mode` (String) PGBouncer pool mode. The default value is `transaction`.
+- `autodb_pool_mode` (String) Enum: `session`, `transaction`, `statement`. PGBouncer pool mode. The default value is `transaction`.
 - `autodb_pool_size` (Number) If non-zero then create automatically a pool of that size per user when a pool doesn't exist. The default value is `0`.
 - `ignore_startup_parameters` (List of String) List of parameters to ignore when given in startup packet.
 - `min_pool_size` (Number) Add more server connections to pool if below this number. Improves behavior when usual load comes suddenly back after period of total inactivity. The value is effectively capped at the pool size. The default value is `0`.

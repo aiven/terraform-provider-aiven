@@ -112,7 +112,7 @@ Optional:
 - `openid` (Block List, Max: 1) OpenSearch OpenID Connect Configuration (see [below for nested schema](#nestedblock--opensearch_user_config--openid))
 - `opensearch` (Block List, Max: 1) OpenSearch settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch))
 - `opensearch_dashboards` (Block List, Max: 1) OpenSearch Dashboards settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch_dashboards))
-- `opensearch_version` (String) OpenSearch major version.
+- `opensearch_version` (String) Enum: `1`, `2`. OpenSearch major version.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--opensearch_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--opensearch_user_config--privatelink_access))
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
@@ -133,7 +133,7 @@ Required:
 
 Optional:
 
-- `sorting_algorithm` (String) Deletion sorting algorithm. The default value is `creation_date`.
+- `sorting_algorithm` (String) Enum: `alphabetical`, `creation_date`. Deletion sorting algorithm. The default value is `creation_date`.
 
 
 <a id="nestedblock--opensearch_user_config--index_template"></a>
@@ -242,12 +242,12 @@ Optional:
 Optional:
 
 - `allowed_tries` (Number) The number of login attempts allowed before login is blocked.
-- `authentication_backend` (String) internal_authentication_backend_limiting.authentication_backend.
+- `authentication_backend` (String) Enum: `internal`. internal_authentication_backend_limiting.authentication_backend.
 - `block_expiry_seconds` (Number) The duration of time that login remains blocked after a failed login.
 - `max_blocked_clients` (Number) internal_authentication_backend_limiting.max_blocked_clients.
 - `max_tracked_clients` (Number) The maximum number of tracked IP addresses that have failed login.
 - `time_window_seconds` (Number) The window of time in which the value for `allowed_tries` is enforced.
-- `type` (String) internal_authentication_backend_limiting.type.
+- `type` (String) Enum: `username`. internal_authentication_backend_limiting.type.
 
 
 <a id="nestedblock--opensearch_user_config--opensearch--auth_failure_listeners--ip_rate_limiting"></a>
@@ -260,7 +260,7 @@ Optional:
 - `max_blocked_clients` (Number) The maximum number of blocked IP addresses.
 - `max_tracked_clients` (Number) The maximum number of tracked IP addresses that have failed login.
 - `time_window_seconds` (Number) The window of time in which the value for `allowed_tries` is enforced.
-- `type` (String) The type of rate limiting.
+- `type` (String) Enum: `ip`. The type of rate limiting.
 
 
 

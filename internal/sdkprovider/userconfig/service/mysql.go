@@ -110,7 +110,7 @@ func mysqlUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"method": {
-						Description:  "The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).",
+						Description:  "Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"dump", "replication"}, false),
@@ -230,7 +230,7 @@ func mysqlUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"internal_tmp_mem_storage_engine": {
-						Description:  "The storage engine for in-memory internal temporary tables.",
+						Description:  "Enum: `TempTable`, `MEMORY`. The storage engine for in-memory internal temporary tables.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"TempTable", "MEMORY"}, false),
@@ -301,7 +301,7 @@ func mysqlUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"mysql_version": {
-				Description:  "MySQL major version.",
+				Description:  "Enum: `8`. MySQL major version.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"8"}, false),

@@ -70,16 +70,16 @@ Optional:
 Required:
 
 - `columns` (Block List, Min: 1, Max: 100) Table columns (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--columns))
-- `data_format` (String) Message data format. The default value is `JSONEachRow`.
+- `data_format` (String) Enum: `Avro`, `CSV`, `JSONAsString`, `JSONCompactEachRow`, `JSONCompactStringsEachRow`, `JSONEachRow`, `JSONStringsEachRow`, `MsgPack`, `TSKV`, `TSV`, `TabSeparated`, `RawBLOB`, `AvroConfluent`. Message data format. The default value is `JSONEachRow`.
 - `group_name` (String) Kafka consumers group. The default value is `clickhouse`.
 - `name` (String) Name of the table.
 - `topics` (Block List, Min: 1, Max: 100) Kafka topics (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--topics))
 
 Optional:
 
-- `auto_offset_reset` (String) Action to take when there is no initial offset in offset store or the desired offset is out of range. The default value is `earliest`.
-- `date_time_input_format` (String) Method to read DateTime from text input formats. The default value is `basic`.
-- `handle_error_mode` (String) How to handle errors for Kafka engine. The default value is `default`.
+- `auto_offset_reset` (String) Enum: `smallest`, `earliest`, `beginning`, `largest`, `latest`, `end`. Action to take when there is no initial offset in offset store or the desired offset is out of range. The default value is `earliest`.
+- `date_time_input_format` (String) Enum: `basic`, `best_effort`, `best_effort_us`. Method to read DateTime from text input formats. The default value is `basic`.
+- `handle_error_mode` (String) Enum: `default`, `stream`. How to handle errors for Kafka engine. The default value is `default`.
 - `max_block_size` (Number) Number of row collected by poll(s) for flushing data from Kafka. The default value is `0`.
 - `max_rows_per_message` (Number) The maximum number of rows produced in one kafka message for row-based formats. The default value is `1`.
 - `num_consumers` (Number) The number of consumers per table per replica. The default value is `1`.
@@ -269,7 +269,7 @@ Optional:
 - `consumer_fetch_min_bytes` (Number) The minimum amount of data the server should return for a fetch request.
 - `producer_batch_size` (Number) The batch size in bytes producer will attempt to collect before publishing to broker.
 - `producer_buffer_memory` (Number) The amount of bytes producer can use for buffering data before publishing to broker.
-- `producer_compression_type` (String) Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.
+- `producer_compression_type` (String) Enum: `gzip`, `snappy`, `lz4`, `zstd`, `none`. Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.
 - `producer_linger_ms` (Number) The linger time (ms) for waiting new data to arrive for publishing.
 - `producer_max_request_size` (Number) The maximum request size in bytes.
 

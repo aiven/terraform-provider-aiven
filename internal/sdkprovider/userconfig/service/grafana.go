@@ -30,7 +30,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"alerting_error_or_timeout": {
-				Description:  "Default error or timeout setting for new alerting rules.",
+				Description:  "Enum: `alerting`, `keep_state`. Default error or timeout setting for new alerting rules.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"alerting", "keep_state"}, false),
@@ -41,7 +41,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:        schema.TypeInt,
 			},
 			"alerting_nodata_or_nullvalues": {
-				Description:  "Default value for 'no data or null values' for new alerting rules.",
+				Description:  "Enum: `alerting`, `no_data`, `keep_state`, `ok`. Default value for 'no data or null values' for new alerting rules.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"alerting", "no_data", "keep_state", "ok"}, false),
@@ -322,7 +322,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"cookie_samesite": {
-				Description:  "Cookie SameSite attribute: 'strict' prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. 'lax' is the default value.",
+				Description:  "Enum: `lax`, `strict`, `none`. Cookie SameSite attribute: 'strict' prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. 'lax' is the default value.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"lax", "strict", "none"}, false),
@@ -429,7 +429,7 @@ func grafanaUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"provider": {
-						Description:  "Provider type.",
+						Description:  "Enum: `s3`. Provider type.",
 						Required:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"s3"}, false),
@@ -588,7 +588,7 @@ func grafanaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"starttls_policy": {
-						Description:  "Either OpportunisticStartTLS, MandatoryStartTLS or NoStartTLS. Default is OpportunisticStartTLS.",
+						Description:  "Enum: `OpportunisticStartTLS`, `MandatoryStartTLS`, `NoStartTLS`. Either OpportunisticStartTLS, MandatoryStartTLS or NoStartTLS. Default is OpportunisticStartTLS.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"OpportunisticStartTLS", "MandatoryStartTLS", "NoStartTLS"}, false),
@@ -619,7 +619,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"user_auto_assign_org_role": {
-				Description:  "Set role for new signups. Defaults to Viewer.",
+				Description:  "Enum: `Viewer`, `Admin`, `Editor`. Set role for new signups. Defaults to Viewer.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"Viewer", "Admin", "Editor"}, false),

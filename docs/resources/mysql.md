@@ -122,7 +122,7 @@ Optional:
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
 - `migration` (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--mysql_user_config--migration))
 - `mysql` (Block List, Max: 1) mysql.conf configuration values (see [below for nested schema](#nestedblock--mysql_user_config--mysql))
-- `mysql_version` (String) MySQL major version.
+- `mysql_version` (String) Enum: `8`. MySQL major version.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--mysql_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--mysql_user_config--privatelink_access))
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
@@ -156,7 +156,7 @@ Optional:
 
 - `dbname` (String) Database name for bootstrapping the initial connection.
 - `ignore_dbs` (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment).
-- `method` (String) The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).
+- `method` (String) Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).
 - `password` (String, Sensitive) Password for authentication with the server where to migrate data from.
 - `ssl` (Boolean) The server where to migrate data from is secured with SSL. The default value is `true`.
 - `username` (String) User name for authentication with the server where to migrate data from.
@@ -184,7 +184,7 @@ Optional:
 - `innodb_thread_concurrency` (Number) Defines the maximum number of threads permitted inside of InnoDB. Default is 0 (infinite concurrency - no limit).
 - `innodb_write_io_threads` (Number) The number of I/O threads for write operations in InnoDB. Default is 4. Changing this parameter will lead to a restart of the MySQL service.
 - `interactive_timeout` (Number) The number of seconds the server waits for activity on an interactive connection before closing it.
-- `internal_tmp_mem_storage_engine` (String) The storage engine for in-memory internal temporary tables.
+- `internal_tmp_mem_storage_engine` (String) Enum: `TempTable`, `MEMORY`. The storage engine for in-memory internal temporary tables.
 - `long_query_time` (Number) The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Default is 10s.
 - `max_allowed_packet` (Number) Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M).
 - `max_heap_table_size` (Number) Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M).
