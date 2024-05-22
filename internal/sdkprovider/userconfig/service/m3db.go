@@ -131,7 +131,7 @@ func m3dbUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"m3_version": {
-				Description:  "M3 major version (deprecated, use m3db_version).",
+				Description:  "Enum: `1.1`, `1.2`, `1.5`. M3 major version (deprecated, use m3db_version).",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"1.1", "1.2", "1.5"}, false),
@@ -142,7 +142,7 @@ func m3dbUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"m3db_version": {
-				Description:  "M3 major version (the minimum compatible version).",
+				Description:  "Enum: `1.1`, `1.2`, `1.5`. M3 major version (the minimum compatible version).",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"1.1", "1.2", "1.5"}, false),
@@ -212,7 +212,7 @@ func m3dbUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"type": {
-						Description:  "The type of aggregation (aggregated/unaggregated).",
+						Description:  "Enum: `aggregated`, `unaggregated`. The type of aggregation (aggregated/unaggregated).",
 						Required:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"aggregated", "unaggregated"}, false),
@@ -258,7 +258,7 @@ func m3dbUserConfig() *schema.Schema {
 						"aggregations": {
 							Description: "List of aggregations to be applied.",
 							Elem: &schema.Schema{
-								Description:  "Aggregation to be applied.",
+								Description:  "Enum: `Count`, `Last`, `Max`, `Mean`, `Median`, `Min`, `P10`, `P20`, `P30`, `P40`, `P50`, `P60`, `P70`, `P80`, `P90`, `P95`, `P99`, `P999`, `P9999`, `Stdev`, `Sum`, `SumSq`. Aggregation to be applied.",
 								Type:         schema.TypeString,
 								ValidateFunc: validation.StringInSlice([]string{"Count", "Last", "Max", "Mean", "Median", "Min", "P10", "P20", "P30", "P40", "P50", "P60", "P70", "P80", "P90", "P95", "P99", "P999", "P9999", "Stdev", "Sum", "SumSq"}, false),
 							},

@@ -110,7 +110,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"method": {
-						Description:  "The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).",
+						Description:  "Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"dump", "replication"}, false),
@@ -215,7 +215,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"default_toast_compression": {
-						Description:  "Specifies the default TOAST compression method for values of compressible columns (the default is lz4).",
+						Description:  "Enum: `lz4`, `pglz`. Specifies the default TOAST compression method for values of compressible columns (the default is lz4).",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"lz4", "pglz"}, false),
@@ -236,13 +236,13 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"log_error_verbosity": {
-						Description:  "Controls the amount of detail written in the server log for each message that is logged.",
+						Description:  "Enum: `TERSE`, `DEFAULT`, `VERBOSE`. Controls the amount of detail written in the server log for each message that is logged.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"TERSE", "DEFAULT", "VERBOSE"}, false),
 					},
 					"log_line_prefix": {
-						Description:  "Choose from one of the available log-formats. These can support popular log analyzers like pgbadger, pganalyze etc.",
+						Description:  "Enum: `'pid=%p,user=%u,db=%d,app=%a,client=%h '`, `'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '`, `'%m [%p] %q[user=%u,db=%d,app=%a] '`. Choose from one of the available log-formats. These can support popular log analyzers like pgbadger, pganalyze etc.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"'pid=%p,user=%u,db=%d,app=%a,client=%h '", "'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '", "'%m [%p] %q[user=%u,db=%d,app=%a] '"}, false),
@@ -348,7 +348,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"pg_stat_statements__dot__track": {
-						Description:  "Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default value is top.",
+						Description:  "Enum: `all`, `top`, `none`. Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default value is top.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"all", "top", "none"}, false),
@@ -369,19 +369,19 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"track_commit_timestamp": {
-						Description:  "Record commit time of transactions.",
+						Description:  "Enum: `off`, `on`. Record commit time of transactions.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"off", "on"}, false),
 					},
 					"track_functions": {
-						Description:  "Enables tracking of function call counts and time used.",
+						Description:  "Enum: `all`, `pl`, `none`. Enables tracking of function call counts and time used.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"all", "pl", "none"}, false),
 					},
 					"track_io_timing": {
-						Description:  "Enables timing of database I/O calls. This parameter is off by default, because it will repeatedly query the operating system for the current time, which may cause significant overhead on some platforms.",
+						Description:  "Enum: `off`, `on`. Enables timing of database I/O calls. This parameter is off by default, because it will repeatedly query the operating system for the current time, which may cause significant overhead on some platforms.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"off", "on"}, false),
@@ -457,10 +457,10 @@ func pgUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"pg_version": {
-				Description:  "PostgreSQL major version.",
+				Description:  "Enum: `10`, `11`, `12`, `13`, `14`, `15`, `16`. PostgreSQL major version.",
 				Optional:     true,
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"11", "12", "13", "14", "15", "10", "16"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"10", "11", "12", "13", "14", "15", "16"}, false),
 			},
 			"pgaudit": {
 				Description: "System-wide settings for the pgaudit extension",
@@ -473,6 +473,7 @@ func pgUserConfig() *schema.Schema {
 					"log": {
 						Description: "Specifies which classes of statements will be logged by session audit logging.",
 						Elem: &schema.Schema{
+							Description:  "Enum: `all`, `ddl`, `function`, `misc`, `misc_set`, `read`, `role`, `write`.",
 							Type:         schema.TypeString,
 							ValidateFunc: validation.StringInSlice([]string{"all", "ddl", "function", "misc", "misc_set", "read", "role", "write"}, false),
 						},
@@ -490,7 +491,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"log_level": {
-						Description:  "Specifies the log level that will be used for log entries. The default value is `log`.",
+						Description:  "Enum: `debug1`, `debug2`, `debug3`, `debug4`, `debug5`, `info`, `notice`, `warning`, `log`. Specifies the log level that will be used for log entries. The default value is `log`.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"debug1", "debug2", "debug3", "debug4", "debug5", "info", "notice", "warning", "log"}, false),
@@ -559,7 +560,7 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"autodb_pool_mode": {
-						Description:  "PGBouncer pool mode. The default value is `transaction`.",
+						Description:  "Enum: `session`, `transaction`, `statement`. PGBouncer pool mode. The default value is `transaction`.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"session", "transaction", "statement"}, false),
@@ -572,6 +573,7 @@ func pgUserConfig() *schema.Schema {
 					"ignore_startup_parameters": {
 						Description: "List of parameters to ignore when given in startup packet.",
 						Elem: &schema.Schema{
+							Description:  "Enum: `extra_float_digits`, `search_path`.",
 							Type:         schema.TypeString,
 							ValidateFunc: validation.StringInSlice([]string{"extra_float_digits", "search_path"}, false),
 						},
@@ -718,7 +720,7 @@ func pgUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"synchronous_replication": {
-				Description:  "Synchronous replication type. Note that the service plan also needs to support synchronous replication.",
+				Description:  "Enum: `quorum`, `off`. Synchronous replication type. Note that the service plan also needs to support synchronous replication.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"quorum", "off"}, false),
@@ -735,7 +737,7 @@ func pgUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"variant": {
-				Description:  "Variant of the PostgreSQL service, may affect the features that are exposed by default.",
+				Description:  "Enum: `aiven`, `timescale`. Variant of the PostgreSQL service, may affect the features that are exposed by default.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"aiven", "timescale"}, false),

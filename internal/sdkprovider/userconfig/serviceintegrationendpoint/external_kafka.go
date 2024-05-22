@@ -20,7 +20,7 @@ func externalKafkaUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"sasl_mechanism": {
-				Description:  "SASL mechanism used for connections to the Kafka server.",
+				Description:  "Enum: `PLAIN`, `SCRAM-SHA-256`, `SCRAM-SHA-512`. SASL mechanism used for connections to the Kafka server.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"PLAIN", "SCRAM-SHA-256", "SCRAM-SHA-512"}, false),
@@ -37,7 +37,7 @@ func externalKafkaUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"security_protocol": {
-				Description:  "Security protocol.",
+				Description:  "Enum: `PLAINTEXT`, `SSL`, `SASL_PLAINTEXT`, `SASL_SSL`. Security protocol.",
 				Required:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"PLAINTEXT", "SSL", "SASL_PLAINTEXT", "SASL_SSL"}, false),
@@ -58,7 +58,7 @@ func externalKafkaUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"ssl_endpoint_identification_algorithm": {
-				Description:  "The endpoint identification algorithm to validate server hostname using server certificate.",
+				Description:  "Enum: `https`, ``. The endpoint identification algorithm to validate server hostname using server certificate.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"https", ""}, false),

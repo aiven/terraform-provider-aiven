@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/stoewer/go-strcase"
@@ -162,6 +163,13 @@ func (o *object) init(name string) {
 	// A fix that removes empty string default value
 	if o.Type == objectTypeString && o.Default != nil && o.Default.(string) == "" {
 		o.Default = nil
+	}
+
+	// Sorts version enum values
+	if o.Enum != nil && strings.HasSuffix(name, "version") {
+		sort.Slice(o.Enum, func(i, j int) bool {
+			return o.Enum[i].Value < o.Enum[j].Value
+		})
 	}
 }
 

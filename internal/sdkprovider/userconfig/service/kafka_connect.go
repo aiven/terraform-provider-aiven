@@ -68,13 +68,13 @@ func kafkaConnectUserConfig() *schema.Schema {
 				Description: "Kafka Connect configuration values",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"connector_client_config_override_policy": {
-						Description:  "Defines what client configurations can be overridden by the connector. Default is None.",
+						Description:  "Enum: `None`, `All`. Defines what client configurations can be overridden by the connector. Default is None.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"None", "All"}, false),
 					},
 					"consumer_auto_offset_reset": {
-						Description:  "What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest.",
+						Description:  "Enum: `earliest`, `latest`. What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"earliest", "latest"}, false),
@@ -85,7 +85,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"consumer_isolation_level": {
-						Description:  "Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
+						Description:  "Enum: `read_uncommitted`, `read_committed`. Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"read_uncommitted", "read_committed"}, false),
@@ -126,7 +126,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"producer_compression_type": {
-						Description:  "Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.",
+						Description:  "Enum: `gzip`, `snappy`, `lz4`, `zstd`, `none`. Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"gzip", "snappy", "lz4", "zstd", "none"}, false),

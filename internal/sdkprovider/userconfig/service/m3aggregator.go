@@ -59,13 +59,13 @@ func m3aggregatorUserConfig() *schema.Schema {
 				Type:     schema.TypeSet,
 			},
 			"m3_version": {
-				Description:  "M3 major version (deprecated, use m3aggregator_version).",
+				Description:  "Enum: `1.1`, `1.2`, `1.5`. M3 major version (deprecated, use m3aggregator_version).",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"1.1", "1.2", "1.5"}, false),
 			},
 			"m3aggregator_version": {
-				Description:  "M3 major version (the minimum compatible version).",
+				Description:  "Enum: `1.1`, `1.2`, `1.5`. M3 major version (the minimum compatible version).",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"1.1", "1.2", "1.5"}, false),

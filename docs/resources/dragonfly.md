@@ -87,7 +87,7 @@ Read-Only:
 Optional:
 
 - `cache_mode` (Boolean) Evict entries when getting close to maxmemory limit. The default value is `false`.
-- `dragonfly_persistence` (String) When persistence is 'rdb', Dragonfly does RDB dumps each 10 minutes. Also RDB dumps are done according to backup schedule for backup purposes. When persistence is 'off', no RDB dumps and backups are done, so data can be lost at any moment if service is restarted for any reason, or if service is powered off. Also service can't be forked.
+- `dragonfly_persistence` (String) Enum: `off`, `rdb`. When persistence is 'rdb', Dragonfly does RDB dumps each 10 minutes. Also RDB dumps are done according to backup schedule for backup purposes. When persistence is 'off', no RDB dumps and backups are done, so data can be lost at any moment if service is restarted for any reason, or if service is powered off. Also service can't be forked.
 - `dragonfly_ssl` (Boolean) Require SSL to access Dragonfly. The default value is `true`.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
 - `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--dragonfly_user_config--ip_filter_object))
@@ -126,7 +126,7 @@ Optional:
 
 - `dbname` (String) Database name for bootstrapping the initial connection.
 - `ignore_dbs` (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment).
-- `method` (String) The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).
+- `method` (String) Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).
 - `password` (String, Sensitive) Password for authentication with the server where to migrate data from.
 - `ssl` (Boolean) The server where to migrate data from is secured with SSL. The default value is `true`.
 - `username` (String) User name for authentication with the server where to migrate data from.

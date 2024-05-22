@@ -25,7 +25,7 @@ func rsyslogUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"format": {
-				Description:  "Message format. The default value is `rfc5424`.",
+				Description:  "Enum: `rfc5424`, `rfc3164`, `custom`. Message format. The default value is `rfc5424`.",
 				Required:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"rfc5424", "rfc3164", "custom"}, false),

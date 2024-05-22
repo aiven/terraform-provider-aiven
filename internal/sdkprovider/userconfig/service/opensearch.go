@@ -48,7 +48,7 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"sorting_algorithm": {
-						Description:  "Deletion sorting algorithm. The default value is `creation_date`.",
+						Description:  "Enum: `alphabetical`, `creation_date`. Deletion sorting algorithm. The default value is `creation_date`.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"alphabetical", "creation_date"}, false),
@@ -222,7 +222,7 @@ func opensearchUserConfig() *schema.Schema {
 										Type:        schema.TypeInt,
 									},
 									"authentication_backend": {
-										Description:  "internal_authentication_backend_limiting.authentication_backend.",
+										Description:  "Enum: `internal`. internal_authentication_backend_limiting.authentication_backend.",
 										Optional:     true,
 										Type:         schema.TypeString,
 										ValidateFunc: validation.StringInSlice([]string{"internal"}, false),
@@ -248,7 +248,7 @@ func opensearchUserConfig() *schema.Schema {
 										Type:        schema.TypeInt,
 									},
 									"type": {
-										Description:  "internal_authentication_backend_limiting.type.",
+										Description:  "Enum: `username`. internal_authentication_backend_limiting.type.",
 										Optional:     true,
 										Type:         schema.TypeString,
 										ValidateFunc: validation.StringInSlice([]string{"username"}, false),
@@ -287,7 +287,7 @@ func opensearchUserConfig() *schema.Schema {
 										Type:        schema.TypeInt,
 									},
 									"type": {
-										Description:  "The type of rate limiting.",
+										Description:  "Enum: `ip`. The type of rate limiting.",
 										Optional:     true,
 										Type:         schema.TypeString,
 										ValidateFunc: validation.StringInSlice([]string{"ip"}, false),
@@ -532,7 +532,7 @@ func opensearchUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"opensearch_version": {
-				Description:  "OpenSearch major version.",
+				Description:  "Enum: `1`, `2`. OpenSearch major version.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"1", "2"}, false),

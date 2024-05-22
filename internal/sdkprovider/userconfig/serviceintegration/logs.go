@@ -27,7 +27,7 @@ func logsUserConfig() *schema.Schema {
 			"selected_log_fields": {
 				Description: "The list of logging fields that will be sent to the integration logging service. The MESSAGE and timestamp fields are always sent.",
 				Elem: &schema.Schema{
-					Description:  "Log field name.",
+					Description:  "Enum: `HOSTNAME`, `PRIORITY`, `REALTIME_TIMESTAMP`, `service_name`, `SYSTEMD_UNIT`. Log field name.",
 					Type:         schema.TypeString,
 					ValidateFunc: validation.StringInSlice([]string{"HOSTNAME", "PRIORITY", "REALTIME_TIMESTAMP", "service_name", "SYSTEMD_UNIT"}, false),
 				},
