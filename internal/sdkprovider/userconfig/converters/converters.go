@@ -15,7 +15,6 @@
 package converters
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -379,12 +378,22 @@ func flatten(kind userConfigType, name string, d *schema.ResourceData, dto map[s
 
 	s := getUserConfig(kind, name)
 	r := s.Elem.(*schema.Resource)
-	tfo, err := flattenObj(r.Schema, dto)
+	tfo, err := flattenSafe(r.Schema, dto)
 	if tfo == nil || err != nil {
 		return err
 	}
 
 	return d.Set(key, []map[string]any{tfo})
+}
+
+func flattenSafe(s map[string]*schema.Schema, dto map[string]any) (map[string]any, error) {
+	// If dto has been typed, it might cause issues
+	var untyped map[string]any
+	err := remarshal(dto, &untyped)
+	if err != nil {
+		return nil, err
+	}
+	return flattenObj(s, untyped)
 }
 
 func flattenObj(s map[string]*schema.Schema, dto map[string]any) (map[string]any, error) {
@@ -420,24 +429,28 @@ func flattenAttr(s *schema.Schema, data any) (any, error) {
 		return castType[string](data)
 	case schema.TypeBool:
 		return castType[bool](data)
-	case schema.TypeInt:
-		i, err := data.(json.Number).Int64()
-		return int(i), err
-	case schema.TypeFloat:
-		return data.(json.Number).Float64()
+	case schema.TypeInt, schema.TypeFloat:
+		return castType[float64](data)
 	case schema.TypeMap:
 		return data, nil
 	}
 
+	// TypeList and TypeSet
+	list, isList := data.([]any)
+
 	// A set can contain scalars only
 	scalar, scalarOk := s.Elem.(*schema.Schema)
 	if scalarOk {
+		if !isList {
+			return nil, fmt.Errorf("expected []any, got %T", data)
+		}
+
 		switch s.Type {
 		case schema.TypeList:
-			return data.([]any), nil
+			return list, nil
 		case schema.TypeSet:
 			values := make([]any, 0)
-			for _, v := range data.([]any) {
+			for _, v := range list {
 				val, err := flattenAttr(scalar, v)
 				if err != nil {
 					return nil, err
@@ -450,15 +463,16 @@ func flattenAttr(s *schema.Schema, data any) (any, error) {
 
 	// Single object or list of objects
 	resource := s.Elem.(*schema.Resource)
-	var list []any
-	if o, isObject := data.(map[string]any); isObject {
+	if !isList {
+		o, ok := data.(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("expected map[string]any, got %T", data)
+		}
+
 		// Single object, but it is a list with one element for terraform
 		if len(o) != 0 {
 			list = append(list, o)
 		}
-	} else {
-		// List of objects
-		list = data.([]any)
 	}
 
 	return flattenList(resource.Schema, list)
