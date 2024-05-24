@@ -71,13 +71,8 @@ type ipFilterMistyped struct {
 
 // convertIPFilter converts a list of ip_filter objects into a list of strings and vice versa
 func convertIPFilter(dto map[string]any) error {
-	b, err := json.Marshal(dto)
-	if err != nil {
-		return err
-	}
-
 	var r ipFilterMistyped
-	err = json.Unmarshal(b, &r)
+	err := remarshal(dto, &r)
 	if err != nil {
 		// nolint: nilerr
 		// Marshaling went wrong, nothing to fix
@@ -85,26 +80,25 @@ func convertIPFilter(dto map[string]any) error {
 	}
 
 	// Converting went smooth.
-	// Which means either there is no ip_filter at all, or it has an invalid type
+	// Which means either there is no ip_filter at all, or it has an invalid type.
+	list := make([]any, 0)
 
 	// Converts strings into objects
 	if len(r.IPFilterObject) > 0 {
-		mapList := make([]map[string]string, 0)
 		for _, v := range r.IPFilterObject {
-			mapList = append(mapList, map[string]string{"network": v})
+			list = append(list, map[string]string{"network": v})
 		}
 
-		dto["ip_filter_object"] = mapList
+		dto["ip_filter_object"] = list
 		return nil
 	}
 
 	// Converts objects into strings
-	strList := make([]string, 0)
 	for _, v := range append(r.IPFilter, r.IPFilterString...) {
-		strList = append(strList, v["network"])
+		list = append(list, v["network"])
 	}
 
-	if len(strList) == 0 {
+	if len(list) == 0 {
 		// Nothing to do here
 		return nil
 	}
@@ -115,7 +109,7 @@ func convertIPFilter(dto map[string]any) error {
 		strKey = "ip_filter_string"
 	}
 
-	dto[strKey] = strList
+	dto[strKey] = list
 	return nil
 }
 
@@ -173,4 +167,14 @@ func sortKeys[T any](m map[string]T) []string {
 		return len(b) - len(a)
 	})
 	return keys
+}
+
+// remarshal Golang can't cast []string into []any
+// By converting value into json and back it drops types back to any
+func remarshal(from, to any) error {
+	b, err := json.Marshal(from)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, to)
 }
