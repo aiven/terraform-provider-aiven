@@ -48,7 +48,7 @@ resource "aiven_organization_application_user_token" "example" {
 - `currently_active` (Boolean) True if the API request was made with this token.
 - `expiry_time` (String) Timestamp when the access token will expire unless extended.
 - `full_token` (String, Sensitive) Full token.
-- `id` (String) Compound identifier of the application user token.
+- `id` (String) The ID of this resource.
 - `last_ip` (String) IP address of the last request made with this token.
 - `last_used_time` (String) Timestamp when the access token was last used.
 - `last_user_agent` (String) User agent of the last request made with this token.
@@ -60,10 +60,11 @@ resource "aiven_organization_application_user_token" "example" {
 
 Optional:
 
-- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
-- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
-- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
-- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `create` (String)
+- `default` (String)
+- `delete` (String)
+- `read` (String)
+- `update` (String)
 
 ## Import
 

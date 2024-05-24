@@ -12,6 +12,7 @@ import (
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -134,6 +135,10 @@ const (
 	// DefaultRandomSuffixLength is the default length of the random suffix used in acceptance tests.
 	DefaultRandomSuffixLength = 10
 )
+
+func RandStr() string {
+	return acctest.RandStringFromCharSet(DefaultRandomSuffixLength, acctest.CharSetAlphaNum)
+}
 
 // TestAccPreCheck is a helper function that is called by acceptance tests prior to any test case execution.
 // It is used to perform any pre-test setup, such as environment variable validation.
