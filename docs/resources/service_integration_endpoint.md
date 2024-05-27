@@ -147,7 +147,7 @@ Optional:
 - `ssl_ca_cert` (String) PEM-encoded CA certificate.
 - `ssl_client_cert` (String) PEM-encoded client certificate.
 - `ssl_client_key` (String) PEM-encoded client key.
-- `ssl_endpoint_identification_algorithm` (String) Enum: `https`, ``. The endpoint identification algorithm to validate server hostname using server certificate.
+- `ssl_endpoint_identification_algorithm` (String) Enum: `https`. The endpoint identification algorithm to validate server hostname using server certificate.
 
 
 <a id="nestedblock--external_opensearch_logs_user_config"></a>

@@ -20,10 +20,10 @@ func dragonflyUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"dragonfly_persistence": {
-				Description:  "Enum: `off`, `rdb`. When persistence is 'rdb', Dragonfly does RDB dumps each 10 minutes. Also RDB dumps are done according to backup schedule for backup purposes. When persistence is 'off', no RDB dumps and backups are done, so data can be lost at any moment if service is restarted for any reason, or if service is powered off. Also service can't be forked.",
+				Description:  "Enum: `off`, `rdb`, `dfs`. When persistence is 'rdb' or 'dfs', Dragonfly does RDB or DFS dumps every 10 minutes. Dumps are done according to the backup schedule for backup purposes. When persistence is 'off', no RDB/DFS dumps or backups are done, so data can be lost at any moment if the service is restarted for any reason, or if the service is powered off. Also, the service can't be forked.",
 				Optional:     true,
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"off", "rdb"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"off", "rdb", "dfs"}, false),
 			},
 			"dragonfly_ssl": {
 				Description: "Require SSL to access Dragonfly. The default value is `true`.",

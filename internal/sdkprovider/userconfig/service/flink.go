@@ -26,10 +26,10 @@ func flinkUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"flink_version": {
-				Description:  "Enum: `1.16`. Flink major version.",
+				Description:  "Enum: `1.16`, `1.19`. Flink major version.",
 				Optional:     true,
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"1.16"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"1.16", "1.19"}, false),
 			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",

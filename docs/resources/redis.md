@@ -109,7 +109,7 @@ Optional:
 - `redis_maxmemory_policy` (String) Enum: `noeviction`, `allkeys-lru`, `volatile-lru`, `allkeys-random`, `volatile-random`, `volatile-ttl`, `volatile-lfu`, `allkeys-lfu`. Redis maxmemory-policy. The default value is `noeviction`.
 - `redis_notify_keyspace_events` (String) Set notify-keyspace-events option.
 - `redis_number_of_databases` (Number) Set number of Redis databases. Changing this will cause a restart of the Redis service.
-- `redis_persistence` (String) Enum: `off`, `rdb`. When persistence is 'rdb', Redis does RDB dumps each 10 minutes if any key is changed. Also RDB dumps are done according to backup schedule for backup purposes. When persistence is 'off', no RDB dumps and backups are done, so data can be lost at any moment if service is restarted for any reason, or if service is powered off. Also service can't be forked.
+- `redis_persistence` (String) Enum: `off`, `rdb`. When persistence is 'rdb', Redis does RDB dumps each 10 minutes if any key is changed. Also RDB dumps are done according to the backup schedule for backup purposes. When persistence is 'off', no RDB dumps or backups are done, so data can be lost at any moment if the service is restarted for any reason, or if the service is powered off. Also, the service can't be forked.
 - `redis_pubsub_client_output_buffer_limit` (Number) Set output buffer limit for pub / sub clients in MB. The value is the hard limit, the soft limit is 1/4 of the hard limit. When setting the limit, be mindful of the available memory in the selected service plan.
 - `redis_ssl` (Boolean) Require SSL to access Redis. The default value is `true`.
 - `redis_timeout` (Number) Redis idle connection timeout in seconds. The default value is `300`.
