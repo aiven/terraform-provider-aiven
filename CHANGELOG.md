@@ -13,6 +13,8 @@ nav_order: 1
 
 - Fix `ip_filter` conversion issue
 - Fix `aiven_organization_application_user_token` crashes with empty optional fields
+- Add `aiven_mirrormaker_replication_flow` replication factor
+- Remove `aiven_mirrormaker_replication_flow` global mutex, the backend has been fixed
 
 ## [4.18.0] - 2024-05-22
 
