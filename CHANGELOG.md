@@ -15,6 +15,7 @@ nav_order: 1
 - Fix `aiven_organization_application_user_token` crashes with empty optional fields
 - Add `aiven_mirrormaker_replication_flow` replication factor
 - Remove `aiven_mirrormaker_replication_flow` global mutex, the backend has been fixed
+- Remove service version validation to allow running new service versions without the provider upgrade 
 
 ## [4.18.0] - 2024-05-22
 

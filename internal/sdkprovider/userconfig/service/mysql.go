@@ -301,10 +301,9 @@ func mysqlUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"mysql_version": {
-				Description:  "Enum: `8`. MySQL major version.",
-				Optional:     true,
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"8"}, false),
+				Description: "Enum: `8`, and newer. MySQL major version.",
+				Optional:    true,
+				Type:        schema.TypeString,
 			},
 			"private_access": {
 				Description: "Allow access to selected service ports from private networks",

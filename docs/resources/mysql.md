@@ -122,7 +122,7 @@ Optional:
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
 - `migration` (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--mysql_user_config--migration))
 - `mysql` (Block List, Max: 1) mysql.conf configuration values (see [below for nested schema](#nestedblock--mysql_user_config--mysql))
-- `mysql_version` (String) Enum: `8`. MySQL major version.
+- `mysql_version` (String) Enum: `8`, and newer. MySQL major version.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--mysql_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--mysql_user_config--privatelink_access))
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
