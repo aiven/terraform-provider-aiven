@@ -242,7 +242,7 @@ func pgUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"TERSE", "DEFAULT", "VERBOSE"}, false),
 					},
 					"log_line_prefix": {
-						Description:  "Enum: `'pid=%p,user=%u,db=%d,app=%a,client=%h '`, `'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '`, `'%m [%p] %q[user=%u,db=%d,app=%a] '`. Choose from one of the available log-formats. These can support popular log analyzers like pgbadger, pganalyze etc.",
+						Description:  "Enum: `'pid=%p,user=%u,db=%d,app=%a,client=%h '`, `'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '`, `'%m [%p] %q[user=%u,db=%d,app=%a] '`. Choose from one of the available log formats.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"'pid=%p,user=%u,db=%d,app=%a,client=%h '", "'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '", "'%m [%p] %q[user=%u,db=%d,app=%a] '"}, false),
