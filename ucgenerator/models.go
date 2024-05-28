@@ -226,6 +226,10 @@ func (o *object) jsonPath() string {
 	return fmt.Sprintf("%s/%s", o.parent.jsonPath(), o.jsonName)
 }
 
+func (o *object) isVersionField() bool {
+	return strings.HasSuffix(o.tfName, "_version")
+}
+
 // toCamelCase some fields have dots within, makes cleaner camelCase
 func toCamelCase(s string) string {
 	return strcase.LowerCamelCase(strings.ReplaceAll(s, ".", "_"))

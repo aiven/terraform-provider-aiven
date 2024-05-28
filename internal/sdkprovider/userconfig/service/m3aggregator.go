@@ -4,7 +4,6 @@ package service
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/diff"
 )
@@ -59,16 +58,14 @@ func m3aggregatorUserConfig() *schema.Schema {
 				Type:     schema.TypeSet,
 			},
 			"m3_version": {
-				Description:  "Enum: `1.1`, `1.2`, `1.5`. M3 major version (deprecated, use m3aggregator_version).",
-				Optional:     true,
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"1.1", "1.2", "1.5"}, false),
+				Description: "Enum: `1.1`, `1.2`, `1.5`, and newer. M3 major version (deprecated, use m3aggregator_version).",
+				Optional:    true,
+				Type:        schema.TypeString,
 			},
 			"m3aggregator_version": {
-				Description:  "Enum: `1.1`, `1.2`, `1.5`. M3 major version (the minimum compatible version).",
-				Optional:     true,
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"1.1", "1.2", "1.5"}, false),
+				Description: "Enum: `1.1`, `1.2`, `1.5`, and newer. M3 major version (the minimum compatible version).",
+				Optional:    true,
+				Type:        schema.TypeString,
 			},
 			"service_log": {
 				Description: "Store logs for the service so that they are available in the HTTP API and console.",

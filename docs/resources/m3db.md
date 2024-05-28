@@ -102,9 +102,9 @@ Optional:
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
 - `limits` (Block List, Max: 1) M3 limits (see [below for nested schema](#nestedblock--m3db_user_config--limits))
 - `m3` (Block List, Max: 1) M3 specific configuration options (see [below for nested schema](#nestedblock--m3db_user_config--m3))
-- `m3_version` (String) Enum: `1.1`, `1.2`, `1.5`. M3 major version (deprecated, use m3db_version).
+- `m3_version` (String) Enum: `1.1`, `1.2`, `1.5`, and newer. M3 major version (deprecated, use m3db_version).
 - `m3coordinator_enable_graphite_carbon_ingest` (Boolean) Enables access to Graphite Carbon plaintext metrics ingestion. It can be enabled only for services inside VPCs. The metrics are written to aggregated namespaces only.
-- `m3db_version` (String) Enum: `1.1`, `1.2`, `1.5`. M3 major version (the minimum compatible version).
+- `m3db_version` (String) Enum: `1.1`, `1.2`, `1.5`, and newer. M3 major version (the minimum compatible version).
 - `namespaces` (Block List, Max: 2147483647) List of M3 namespaces (see [below for nested schema](#nestedblock--m3db_user_config--namespaces))
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--m3db_user_config--private_access))
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.

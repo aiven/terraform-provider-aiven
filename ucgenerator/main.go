@@ -265,13 +265,16 @@ func getSchemaValues(o *object) (jen.Dict, error) {
 				return nil, err
 			}
 
-			// There are no other types functions.
-			// Bool and number won't compile
-			switch o.Type {
-			case objectTypeString:
-				values[jen.Id("ValidateFunc")] = jen.Qual(importValidation, "StringInSlice").Call(call, jen.False())
-			case objectTypeInteger:
-				values[jen.Id("ValidateFunc")] = jen.Qual(importValidation, "IntInSlice").Call(call)
+			// todo: allow version validation when we make automatic releases
+			if !o.isVersionField() {
+				// There are no other types functions.
+				// Bool and number won't compile
+				switch o.Type {
+				case objectTypeString:
+					values[jen.Id("ValidateFunc")] = jen.Qual(importValidation, "StringInSlice").Call(call, jen.False())
+				case objectTypeInteger:
+					values[jen.Id("ValidateFunc")] = jen.Qual(importValidation, "IntInSlice").Call(call)
+				}
 			}
 		}
 
@@ -323,6 +326,12 @@ func getDescription(o *object) string {
 		for _, v := range o.Enum {
 			values = append(values, fmt.Sprintf("`%s`", v.Value))
 		}
+
+		// todo: remove this block when we make automatic releases
+		if o.isVersionField() {
+			values = append(values, "and newer")
+		}
+
 		desc = append(desc, fmt.Sprintf("Enum: %s.", strings.Join(values, ", ")))
 	}
 

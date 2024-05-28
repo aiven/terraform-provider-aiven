@@ -4,7 +4,6 @@ package service
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/diff"
 )
@@ -59,10 +58,9 @@ func cassandraUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"cassandra_version": {
-				Description:  "Enum: `3`, `4`, `4.1`. Cassandra version.",
-				Optional:     true,
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"3", "4", "4.1"}, false),
+				Description: "Enum: `3`, `4`, `4.1`, and newer. Cassandra version.",
+				Optional:    true,
+				Type:        schema.TypeString,
 			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",

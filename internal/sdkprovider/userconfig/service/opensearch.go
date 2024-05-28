@@ -532,10 +532,9 @@ func opensearchUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"opensearch_version": {
-				Description:  "Enum: `1`, `2`. OpenSearch major version.",
-				Optional:     true,
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"1", "2"}, false),
+				Description: "Enum: `1`, `2`, and newer. OpenSearch major version.",
+				Optional:    true,
+				Type:        schema.TypeString,
 			},
 			"private_access": {
 				Description: "Allow access to selected service ports from private networks",

@@ -4,7 +4,6 @@ package service
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/diff"
 )
@@ -26,10 +25,9 @@ func flinkUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"flink_version": {
-				Description:  "Enum: `1.16`. Flink major version.",
-				Optional:     true,
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"1.16"}, false),
+				Description: "Enum: `1.16`, and newer. Flink major version.",
+				Optional:    true,
+				Type:        schema.TypeString,
 			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",

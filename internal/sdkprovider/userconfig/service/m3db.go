@@ -131,10 +131,9 @@ func m3dbUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"m3_version": {
-				Description:  "Enum: `1.1`, `1.2`, `1.5`. M3 major version (deprecated, use m3db_version).",
-				Optional:     true,
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"1.1", "1.2", "1.5"}, false),
+				Description: "Enum: `1.1`, `1.2`, `1.5`, and newer. M3 major version (deprecated, use m3db_version).",
+				Optional:    true,
+				Type:        schema.TypeString,
 			},
 			"m3coordinator_enable_graphite_carbon_ingest": {
 				Description: "Enables access to Graphite Carbon plaintext metrics ingestion. It can be enabled only for services inside VPCs. The metrics are written to aggregated namespaces only.",
@@ -142,10 +141,9 @@ func m3dbUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"m3db_version": {
-				Description:  "Enum: `1.1`, `1.2`, `1.5`. M3 major version (the minimum compatible version).",
-				Optional:     true,
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"1.1", "1.2", "1.5"}, false),
+				Description: "Enum: `1.1`, `1.2`, `1.5`, and newer. M3 major version (the minimum compatible version).",
+				Optional:    true,
+				Type:        schema.TypeString,
 			},
 			"namespaces": {
 				Description: "List of M3 namespaces",

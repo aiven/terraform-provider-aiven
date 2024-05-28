@@ -90,7 +90,7 @@ Optional:
 - `backup_hour` (Number) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.
 - `backup_minute` (Number) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.
 - `cassandra` (Block List, Max: 1) Cassandra configuration values (see [below for nested schema](#nestedblock--cassandra_user_config--cassandra))
-- `cassandra_version` (String) Enum: `3`, `4`, `4.1`. Cassandra version.
+- `cassandra_version` (String) Enum: `3`, `4`, `4.1`, and newer. Cassandra version.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
 - `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--cassandra_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.

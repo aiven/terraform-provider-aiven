@@ -237,10 +237,9 @@ func redisUserConfig() *schema.Schema {
 				Type:        schema.TypeInt,
 			},
 			"redis_version": {
-				Description:  "Enum: `7.0`. Redis major version.",
-				Optional:     true,
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"7.0"}, false),
+				Description: "Enum: `7.0`, and newer. Redis major version.",
+				Optional:    true,
+				Type:        schema.TypeString,
 			},
 			"service_log": {
 				Description: "Store logs for the service so that they are available in the HTTP API and console.",

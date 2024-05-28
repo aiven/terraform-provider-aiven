@@ -503,10 +503,9 @@ func kafkaUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"kafka_version": {
-				Description:  "Enum: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`, `3.7`. Kafka major version.",
-				Optional:     true,
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"3.1", "3.2", "3.3", "3.4", "3.5", "3.6", "3.7"}, false),
+				Description: "Enum: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`, `3.7`, and newer. Kafka major version.",
+				Optional:    true,
+				Type:        schema.TypeString,
 			},
 			"private_access": {
 				Description: "Allow access to selected service ports from private networks",
