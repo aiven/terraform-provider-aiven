@@ -58,10 +58,10 @@ func externalKafkaUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"ssl_endpoint_identification_algorithm": {
-				Description:  "Enum: `https`, ``. The endpoint identification algorithm to validate server hostname using server certificate.",
+				Description:  "Enum: `https`. The endpoint identification algorithm to validate server hostname using server certificate.",
 				Optional:     true,
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"https", ""}, false),
+				ValidateFunc: validation.StringInSlice([]string{"https"}, false),
 			},
 		}},
 		MaxItems: 1,
