@@ -86,9 +86,10 @@ func Provider(version string) *schema.Provider {
 			"aiven_account_authentication": account.DatasourceAccountAuthentication(),
 
 			// organization
-			"aiven_organizational_unit":     organization.DatasourceOrganizationalUnit(),
-			"aiven_organization_user":       organization.DatasourceOrganizationUser(),
-			"aiven_organization_user_group": organization.DatasourceOrganizationUserGroup(),
+			"aiven_organizational_unit":           organization.DatasourceOrganizationalUnit(),
+			"aiven_organization_user":             organization.DatasourceOrganizationUser(),
+			"aiven_organization_user_group":       organization.DatasourceOrganizationUserGroup(),
+			"aiven_organization_application_user": organization.DatasourceOrganizationApplicationUser(),
 
 			// project
 			"aiven_project":       project.DatasourceProject(),
@@ -189,6 +190,7 @@ func Provider(version string) *schema.Provider {
 			"aiven_organizational_unit":                 organization.ResourceOrganizationalUnit(),
 			"aiven_organization_user":                   organization.ResourceOrganizationUser(),
 			"aiven_organization_user_group":             organization.ResourceOrganizationUserGroup(),
+			"aiven_organization_application_user":       organization.ResourceOrganizationApplicationUser(),
 			"aiven_organization_application_user_token": organization.ResourceOrganizationApplicationUserToken(),
 
 			// project

@@ -326,19 +326,23 @@ func CopyServiceUserPropertiesFromAPIResponseToTerraform(
 // Warning: doesn't support nested sets.
 // Warning: not tested with nested objects.
 func ResourceDataGet(d *schema.ResourceData, s map[string]*schema.Schema, dto any) error {
+	config := d.GetRawConfig().AsValueMap()
 	m := make(map[string]any)
 	for k, v := range s {
-		value, ok := d.GetOk(k)
-		if ok {
-			if v.Type == schema.TypeSet {
-				set, ok := value.(*schema.Set)
-				if !ok {
-					return fmt.Errorf("expected type Set, got %T", value)
-				}
-				m[k] = set.List()
-			} else {
-				m[k] = value
+		// If the field in the tf config
+		if c, ok := config[k]; !ok || c.IsNull() {
+			continue
+		}
+
+		value := d.Get(k)
+		if v.Type == schema.TypeSet {
+			set, ok := value.(*schema.Set)
+			if !ok {
+				return fmt.Errorf("expected type Set, got %T", value)
 			}
+			m[k] = set.List()
+		} else {
+			m[k] = value
 		}
 	}
 
@@ -347,7 +351,8 @@ func ResourceDataGet(d *schema.ResourceData, s map[string]*schema.Schema, dto an
 		return err
 	}
 
-	return json.Unmarshal(b, dto)
+	err = json.Unmarshal(b, dto)
+	return err
 }
 
 // ResourceDataSet Sets the given dto values to schema.ResourceData

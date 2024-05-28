@@ -114,7 +114,6 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 		organization.NewOrganizationResource,
 		organization.NewOrganizationUserGroupMembersResource,
 		organization.NewOrganizationGroupProjectResource,
-		organization.NewOrganizationApplicationUser,
 	}
 
 	// Add to a list of resources that are currently in beta.
@@ -131,7 +130,6 @@ func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSou
 	// List of data sources that are currently available in the provider.
 	dataSources := []func() datasource.DataSource{
 		organization.NewOrganizationDataSource,
-		organization.NewOrganizationApplicationUserDataSource,
 	}
 
 	// Add to a list of data sources that are currently in beta.
