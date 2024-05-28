@@ -2,7 +2,6 @@ package kafka
 
 import (
 	"context"
-	"sync"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -14,12 +13,8 @@ import (
 )
 
 var (
-	// lockReplicationFlow a lock for any "write" operations.
-	// todo: remove the lock when API race is fixed
-	lockReplicationFlow      = sync.Mutex{}
 	defaultReplicationPolicy = "org.apache.kafka.connect.mirror.DefaultReplicationPolicy"
-
-	replicationPolicies = []string{
+	replicationPolicies      = []string{
 		"org.apache.kafka.connect.mirror.DefaultReplicationPolicy",
 		"org.apache.kafka.connect.mirror.IdentityReplicationPolicy",
 	}
@@ -107,6 +102,12 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 		Description:  "Offset syncs topic location. Possible values are `source` & `target`. There is no default value.",
 		ValidateFunc: validation.StringInSlice([]string{"source", "target"}, false),
 	},
+	"replication_factor": {
+		Type:         schema.TypeInt,
+		Optional:     true,
+		ValidateFunc: validation.IntAtLeast(1),
+		Description:  "Replication factor, `>= 1`.",
+	},
 }
 
 func ResourceMirrorMakerReplicationFlow() *schema.Resource {
@@ -126,9 +127,6 @@ func ResourceMirrorMakerReplicationFlow() *schema.Resource {
 }
 
 func resourceMirrorMakerReplicationFlowCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	lockReplicationFlow.Lock()
-	defer lockReplicationFlow.Unlock()
-
 	client := m.(*aiven.Client)
 
 	project := d.Get("project").(string)
@@ -150,6 +148,7 @@ func resourceMirrorMakerReplicationFlowCreate(ctx context.Context, d *schema.Res
 			EmitHeartbeatsEnabled:           schemautil.OptionalBoolPointer(d, "emit_heartbeats_enabled"),
 			EmitBackwardHeartbeatsEnabled:   schemautil.OptionalBoolPointer(d, "emit_backward_heartbeats_enabled"),
 			OffsetSyncsTopicLocation:        d.Get("offset_syncs_topic_location").(string),
+			ReplicationFactor:               schemautil.OptionalIntPointer(d, "replication_factor"),
 		},
 	})
 	if err != nil {
@@ -242,15 +241,20 @@ func resourceMirrorMakerReplicationFlowRead(ctx context.Context, d *schema.Resou
 		return diag.FromErr(err)
 	}
 
+	if replicationFlow.ReplicationFlow.ReplicationFactor != nil {
+		if err := d.Set(
+			"replication_factor",
+			*replicationFlow.ReplicationFlow.ReplicationFactor,
+		); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	return nil
 }
 
 func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	lockReplicationFlow.Lock()
-	defer lockReplicationFlow.Unlock()
-
 	client := m.(*aiven.Client)
-
 	project, serviceName, sourceCluster, targetCluster, err := schemautil.SplitResourceID4(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
@@ -273,6 +277,7 @@ func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.Res
 				EmitHeartbeatsEnabled:           schemautil.OptionalBoolPointer(d, "emit_heartbeats_enabled"),
 				EmitBackwardHeartbeatsEnabled:   schemautil.OptionalBoolPointer(d, "emit_backward_heartbeats_enabled"),
 				OffsetSyncsTopicLocation:        d.Get("offset_syncs_topic_location").(string),
+				ReplicationFactor:               schemautil.OptionalIntPointer(d, "replication_factor"),
 			},
 		},
 	)
@@ -284,11 +289,7 @@ func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.Res
 }
 
 func resourceMirrorMakerReplicationFlowDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	lockReplicationFlow.Lock()
-	defer lockReplicationFlow.Unlock()
-
 	client := m.(*aiven.Client)
-
 	project, serviceName, sourceCluster, targetCluster, err := schemautil.SplitResourceID4(d.Id())
 	if err != nil {
 		return diag.FromErr(err)

@@ -36,6 +36,7 @@ func TestAccAivenMirrorMakerReplicationFlow_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "target_cluster", "target"),
 					resource.TestCheckResourceAttr(resourceName, "enable", "true"),
 					resource.TestCheckResourceAttr(resourceName, "offset_syncs_topic_location", "source"),
+					resource.TestCheckResourceAttr(resourceName, "replication_factor", "2"),
 				),
 			},
 		},
@@ -186,6 +187,7 @@ resource "aiven_mirrormaker_replication_flow" "foo" {
   target_cluster                      = "target"
   enable                              = true
   replication_policy_class            = "org.apache.kafka.connect.mirror.IdentityReplicationPolicy"
+  replication_factor                  = 2
   sync_group_offsets_enabled          = true
   sync_group_offsets_interval_seconds = 10
   emit_heartbeats_enabled             = true

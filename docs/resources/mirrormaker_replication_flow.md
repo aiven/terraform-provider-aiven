@@ -49,6 +49,7 @@ resource "aiven_mirrormaker_replication_flow" "f1" {
 
 - `emit_backward_heartbeats_enabled` (Boolean) Whether to emit heartbeats to the direction opposite to the flow, i.e. to the source cluster. The default value is `false`.
 - `emit_heartbeats_enabled` (Boolean) Whether to emit heartbeats to the target cluster. The default value is `false`.
+- `replication_factor` (Number) Replication factor, `>= 1`.
 - `sync_group_offsets_enabled` (Boolean) Sync consumer group offsets. The default value is `false`.
 - `sync_group_offsets_interval_seconds` (Number) Frequency of consumer group offset sync. The default value is `1`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
