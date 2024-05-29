@@ -350,8 +350,14 @@ func getDescription(o *object) string {
 		desc = append(desc, addDot(d))
 	}
 
-	if o.isScalar() && o.Default != nil {
-		desc = append(desc, fmt.Sprintf("The default value is `%v`.", o.Default))
+	if o.isScalar() {
+		switch {
+		case o.Default != nil:
+			desc = append(desc, fmt.Sprintf("Default: `%v`.", o.Default))
+		case o.Example != nil && o.Type != objectTypeBoolean && o.Enum == nil && !strings.Contains(strings.ToLower(d), "defaults to"):
+			// Skips boolean (either true or false), enums, or if the field has default value in the description
+			desc = append(desc, fmt.Sprintf("Example: `%v`.", o.Example))
+		}
 	}
 
 	// Trims dot from description, so it doesn't look weird with link to nested schema

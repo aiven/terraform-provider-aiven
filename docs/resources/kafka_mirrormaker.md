@@ -90,11 +90,11 @@ Optional:
 
 Required:
 
-- `network` (String) CIDR address block.
+- `network` (String) CIDR address block. Example: `10.20.0.0/16`.
 
 Optional:
 
-- `description` (String) Description for IP filter list entry.
+- `description` (String) Description for IP filter list entry. Example: `Production service IP range`.
 
 
 <a id="nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker"></a>
@@ -103,18 +103,18 @@ Optional:
 Optional:
 
 - `emit_checkpoints_enabled` (Boolean) Whether to emit consumer group offset checkpoints to target cluster periodically (default: true).
-- `emit_checkpoints_interval_seconds` (Number) Frequency at which consumer group offset checkpoints are emitted (default: 60, every minute).
-- `groups` (String) Consumer groups to replicate. Supports comma-separated group IDs and regexes.
-- `groups_exclude` (String) Exclude groups. Supports comma-separated group IDs and regexes. Excludes take precedence over includes.
-- `offset_lag_max` (Number) How out-of-sync a remote partition can be before it is resynced.
+- `emit_checkpoints_interval_seconds` (Number) Frequency at which consumer group offset checkpoints are emitted (default: 60, every minute). Example: `60`.
+- `groups` (String) Consumer groups to replicate. Supports comma-separated group IDs and regexes. Example: `.*`.
+- `groups_exclude` (String) Exclude groups. Supports comma-separated group IDs and regexes. Excludes take precedence over includes. Example: `console-consumer-.*,connect-.*,__.*`.
+- `offset_lag_max` (Number) How out-of-sync a remote partition can be before it is resynced. Example: `100`.
 - `refresh_groups_enabled` (Boolean) Whether to periodically check for new consumer groups. Defaults to `true`.
 - `refresh_groups_interval_seconds` (Number) Frequency of consumer group refresh in seconds. Defaults to 600 seconds (10 minutes).
 - `refresh_topics_enabled` (Boolean) Whether to periodically check for new topics and partitions. Defaults to `true`.
 - `refresh_topics_interval_seconds` (Number) Frequency of topic and partitions refresh in seconds. Defaults to 600 seconds (10 minutes).
 - `sync_group_offsets_enabled` (Boolean) Whether to periodically write the translated offsets of replicated consumer groups (in the source cluster) to __consumer_offsets topic in target cluster, as long as no active consumers in that group are connected to the target cluster.
-- `sync_group_offsets_interval_seconds` (Number) Frequency at which consumer group offsets are synced (default: 60, every minute).
+- `sync_group_offsets_interval_seconds` (Number) Frequency at which consumer group offsets are synced (default: 60, every minute). Example: `60`.
 - `sync_topic_configs_enabled` (Boolean) Whether to periodically configure remote topics to match their corresponding upstream topics.
-- `tasks_max_per_cpu` (Number) `tasks.max` is set to this multiplied by the number of CPUs in the service. The default value is `1`.
+- `tasks_max_per_cpu` (Number) `tasks.max` is set to this multiplied by the number of CPUs in the service. Default: `1`.
 
 
 

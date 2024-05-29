@@ -14,7 +14,7 @@ func m3aggregatorUserConfig() *schema.Schema {
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"custom_domain": {
-				Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.",
+				Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. Example: `grafana.example.org`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -22,7 +22,7 @@ func m3aggregatorUserConfig() *schema.Schema {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -33,12 +33,12 @@ func m3aggregatorUserConfig() *schema.Schema {
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"description": {
-						Description: "Description for IP filter list entry.",
+						Description: "Description for IP filter list entry. Example: `Production service IP range`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"network": {
-						Description: "CIDR address block.",
+						Description: "CIDR address block. Example: `10.20.0.0/16`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -50,7 +50,7 @@ func m3aggregatorUserConfig() *schema.Schema {
 			"ip_filter_string": {
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,

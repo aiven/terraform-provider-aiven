@@ -18,7 +18,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 				Deprecated:  "This property is deprecated.",
 				Description: "Additional Cloud Regions for Backup Replication.",
 				Elem: &schema.Schema{
-					Description: "Target cloud.",
+					Description: "Target cloud. Example: `aws-eu-central-1`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1,
@@ -29,7 +29,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -40,12 +40,12 @@ func kafkaConnectUserConfig() *schema.Schema {
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"description": {
-						Description: "Description for IP filter list entry.",
+						Description: "Description for IP filter list entry. Example: `Production service IP range`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"network": {
-						Description: "CIDR address block.",
+						Description: "CIDR address block. Example: `10.20.0.0/16`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -57,7 +57,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 			"ip_filter_string": {
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -80,7 +80,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"earliest", "latest"}, false),
 					},
 					"consumer_fetch_max_bytes": {
-						Description: "Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum.",
+						Description: "Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum. Example: `52428800`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -91,7 +91,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"read_uncommitted", "read_committed"}, false),
 					},
 					"consumer_max_partition_fetch_bytes": {
-						Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress.",
+						Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. Example: `1048576`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -137,7 +137,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"producer_max_request_size": {
-						Description: "This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests.",
+						Description: "This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests. Example: `1048576`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},

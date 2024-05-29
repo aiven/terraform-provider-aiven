@@ -15,7 +15,7 @@ func dragonflyUserConfig() *schema.Schema {
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"cache_mode": {
-				Description: "Evict entries when getting close to maxmemory limit. The default value is `false`.",
+				Description: "Evict entries when getting close to maxmemory limit. Default: `false`.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
@@ -26,7 +26,7 @@ func dragonflyUserConfig() *schema.Schema {
 				ValidateFunc: validation.StringInSlice([]string{"off", "rdb", "dfs"}, false),
 			},
 			"dragonfly_ssl": {
-				Description: "Require SSL to access Dragonfly. The default value is `true`.",
+				Description: "Require SSL to access Dragonfly. Default: `true`.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
@@ -34,7 +34,7 @@ func dragonflyUserConfig() *schema.Schema {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -45,12 +45,12 @@ func dragonflyUserConfig() *schema.Schema {
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"description": {
-						Description: "Description for IP filter list entry.",
+						Description: "Description for IP filter list entry. Example: `Production service IP range`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"network": {
-						Description: "CIDR address block.",
+						Description: "CIDR address block. Example: `10.20.0.0/16`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -62,7 +62,7 @@ func dragonflyUserConfig() *schema.Schema {
 			"ip_filter_string": {
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -73,17 +73,17 @@ func dragonflyUserConfig() *schema.Schema {
 				Description: "Migrate data from existing server",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"dbname": {
-						Description: "Database name for bootstrapping the initial connection.",
+						Description: "Database name for bootstrapping the initial connection. Example: `defaultdb`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"host": {
-						Description: "Hostname or IP address of the server where to migrate data from.",
+						Description: "Hostname or IP address of the server where to migrate data from. Example: `my.server.com`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"ignore_dbs": {
-						Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment).",
+						Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment). Example: `db1,db2`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
@@ -94,23 +94,23 @@ func dragonflyUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"dump", "replication"}, false),
 					},
 					"password": {
-						Description: "Password for authentication with the server where to migrate data from.",
+						Description: "Password for authentication with the server where to migrate data from. Example: `jjKk45Nnd`.",
 						Optional:    true,
 						Sensitive:   true,
 						Type:        schema.TypeString,
 					},
 					"port": {
-						Description: "Port number of the server where to migrate data from.",
+						Description: "Port number of the server where to migrate data from. Example: `1234`.",
 						Required:    true,
 						Type:        schema.TypeInt,
 					},
 					"ssl": {
-						Description: "The server where to migrate data from is secured with SSL. The default value is `true`.",
+						Description: "The server where to migrate data from is secured with SSL. Default: `true`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"username": {
-						Description: "User name for authentication with the server where to migrate data from.",
+						Description: "User name for authentication with the server where to migrate data from. Example: `myname`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
@@ -156,7 +156,7 @@ func dragonflyUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"project_to_fork_from": {
-				Description: "Name of another project to fork a service from. This has effect only when a new service is being created.",
+				Description: "Name of another project to fork a service from. This has effect only when a new service is being created. Example: `anotherprojectname`.",
 				ForceNew:    true,
 				Optional:    true,
 				Type:        schema.TypeString,
@@ -180,7 +180,7 @@ func dragonflyUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"recovery_basebackup_name": {
-				Description: "Name of the basebackup to restore in forked service.",
+				Description: "Name of the basebackup to restore in forked service. Example: `backup-20191112t091354293891z`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -190,7 +190,7 @@ func dragonflyUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"service_to_fork_from": {
-				Description: "Name of another service to fork from. This has effect only when a new service is being created.",
+				Description: "Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.",
 				ForceNew:    true,
 				Optional:    true,
 				Type:        schema.TypeString,

@@ -14,27 +14,27 @@ func externalElasticsearchLogsUserConfig() *schema.Schema {
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"ca": {
-				Description: "PEM encoded CA certificate.",
+				Description: "PEM encoded CA certificate. Example: `-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"index_days_max": {
-				Description: "Maximum number of days of logs to keep. The default value is `3`.",
+				Description: "Maximum number of days of logs to keep. Default: `3`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
 			"index_prefix": {
-				Description: "Elasticsearch index prefix. The default value is `logs`.",
+				Description: "Elasticsearch index prefix. Default: `logs`.",
 				Required:    true,
 				Type:        schema.TypeString,
 			},
 			"timeout": {
-				Description: "Elasticsearch request timeout limit. The default value is `10.0`.",
+				Description: "Elasticsearch request timeout limit. Default: `10.0`.",
 				Optional:    true,
 				Type:        schema.TypeFloat,
 			},
 			"url": {
-				Description: "Elasticsearch connection URL.",
+				Description: "Elasticsearch connection URL. Example: `https://user:passwd@logs.example.com/`.",
 				Required:    true,
 				Type:        schema.TypeString,
 			},

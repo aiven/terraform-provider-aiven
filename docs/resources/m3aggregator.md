@@ -86,7 +86,7 @@ Read-Only:
 
 Optional:
 
-- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
+- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. Example: `grafana.example.org`.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--m3aggregator_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
@@ -100,11 +100,11 @@ Optional:
 
 Required:
 
-- `network` (String) CIDR address block.
+- `network` (String) CIDR address block. Example: `10.20.0.0/16`.
 
 Optional:
 
-- `description` (String) Description for IP filter list entry.
+- `description` (String) Description for IP filter list entry. Example: `Production service IP range`.
 
 
 

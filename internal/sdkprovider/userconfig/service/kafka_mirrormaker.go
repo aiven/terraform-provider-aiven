@@ -17,7 +17,7 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 				Deprecated:  "This property is deprecated.",
 				Description: "Additional Cloud Regions for Backup Replication.",
 				Elem: &schema.Schema{
-					Description: "Target cloud.",
+					Description: "Target cloud. Example: `aws-eu-central-1`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1,
@@ -28,7 +28,7 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -39,12 +39,12 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"description": {
-						Description: "Description for IP filter list entry.",
+						Description: "Description for IP filter list entry. Example: `Production service IP range`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"network": {
-						Description: "CIDR address block.",
+						Description: "CIDR address block. Example: `10.20.0.0/16`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -56,7 +56,7 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 			"ip_filter_string": {
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -72,22 +72,22 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"emit_checkpoints_interval_seconds": {
-						Description: "Frequency at which consumer group offset checkpoints are emitted (default: 60, every minute).",
+						Description: "Frequency at which consumer group offset checkpoints are emitted (default: 60, every minute). Example: `60`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"groups": {
-						Description: "Consumer groups to replicate. Supports comma-separated group IDs and regexes.",
+						Description: "Consumer groups to replicate. Supports comma-separated group IDs and regexes. Example: `.*`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"groups_exclude": {
-						Description: "Exclude groups. Supports comma-separated group IDs and regexes. Excludes take precedence over includes.",
+						Description: "Exclude groups. Supports comma-separated group IDs and regexes. Excludes take precedence over includes. Example: `console-consumer-.*,connect-.*,__.*`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"offset_lag_max": {
-						Description: "How out-of-sync a remote partition can be before it is resynced.",
+						Description: "How out-of-sync a remote partition can be before it is resynced. Example: `100`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -117,7 +117,7 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"sync_group_offsets_interval_seconds": {
-						Description: "Frequency at which consumer group offsets are synced (default: 60, every minute).",
+						Description: "Frequency at which consumer group offsets are synced (default: 60, every minute). Example: `60`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -127,7 +127,7 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"tasks_max_per_cpu": {
-						Description: "`tasks.max` is set to this multiplied by the number of CPUs in the service. The default value is `1`.",
+						Description: "`tasks.max` is set to this multiplied by the number of CPUs in the service. Default: `1`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},

@@ -89,17 +89,17 @@ func metricsUserConfig() *schema.Schema {
 							Type:        schema.TypeBool,
 						},
 						"perf_events_statements_digest_text_limit": {
-							Description: "Truncates digest text from perf_events_statements into this many characters.",
+							Description: "Truncates digest text from perf_events_statements into this many characters. Example: `120`.",
 							Optional:    true,
 							Type:        schema.TypeInt,
 						},
 						"perf_events_statements_limit": {
-							Description: "Limits metrics from perf_events_statements.",
+							Description: "Limits metrics from perf_events_statements. Example: `250`.",
 							Optional:    true,
 							Type:        schema.TypeInt,
 						},
 						"perf_events_statements_time_limit": {
-							Description: "Only include perf_events_statements whose last seen is less than this many seconds.",
+							Description: "Only include perf_events_statements whose last seen is less than this many seconds. Example: `86400`.",
 							Optional:    true,
 							Type:        schema.TypeInt,
 						},

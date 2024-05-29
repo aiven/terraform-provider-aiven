@@ -86,20 +86,20 @@ Read-Only:
 
 Optional:
 
-- `cache_mode` (Boolean) Evict entries when getting close to maxmemory limit. The default value is `false`.
+- `cache_mode` (Boolean) Evict entries when getting close to maxmemory limit. Default: `false`.
 - `dragonfly_persistence` (String) Enum: `off`, `rdb`, `dfs`. When persistence is `rdb` or `dfs`, Dragonfly does RDB or DFS dumps every 10 minutes. Dumps are done according to the backup schedule for backup purposes. When persistence is `off`, no RDB/DFS dumps or backups are done, so data can be lost at any moment if the service is restarted for any reason, or if the service is powered off. Also, the service can't be forked.
-- `dragonfly_ssl` (Boolean) Require SSL to access Dragonfly. The default value is `true`.
+- `dragonfly_ssl` (Boolean) Require SSL to access Dragonfly. Default: `true`.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--dragonfly_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `migration` (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--dragonfly_user_config--migration))
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--dragonfly_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--dragonfly_user_config--privatelink_access))
-- `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
+- `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created. Example: `anotherprojectname`.
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--dragonfly_user_config--public_access))
-- `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service.
+- `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service. Example: `backup-20191112t091354293891z`.
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
-- `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
+- `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.
 - `static_ips` (Boolean) Use static public IP addresses.
 
 <a id="nestedblock--dragonfly_user_config--ip_filter_object"></a>
@@ -107,11 +107,11 @@ Optional:
 
 Required:
 
-- `network` (String) CIDR address block.
+- `network` (String) CIDR address block. Example: `10.20.0.0/16`.
 
 Optional:
 
-- `description` (String) Description for IP filter list entry.
+- `description` (String) Description for IP filter list entry. Example: `Production service IP range`.
 
 
 <a id="nestedblock--dragonfly_user_config--migration"></a>
@@ -119,17 +119,17 @@ Optional:
 
 Required:
 
-- `host` (String) Hostname or IP address of the server where to migrate data from.
-- `port` (Number) Port number of the server where to migrate data from.
+- `host` (String) Hostname or IP address of the server where to migrate data from. Example: `my.server.com`.
+- `port` (Number) Port number of the server where to migrate data from. Example: `1234`.
 
 Optional:
 
-- `dbname` (String) Database name for bootstrapping the initial connection.
-- `ignore_dbs` (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment).
+- `dbname` (String) Database name for bootstrapping the initial connection. Example: `defaultdb`.
+- `ignore_dbs` (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment). Example: `db1,db2`.
 - `method` (String) Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).
-- `password` (String, Sensitive) Password for authentication with the server where to migrate data from.
-- `ssl` (Boolean) The server where to migrate data from is secured with SSL. The default value is `true`.
-- `username` (String) User name for authentication with the server where to migrate data from.
+- `password` (String, Sensitive) Password for authentication with the server where to migrate data from. Example: `jjKk45Nnd`.
+- `ssl` (Boolean) The server where to migrate data from is secured with SSL. Default: `true`.
+- `username` (String) User name for authentication with the server where to migrate data from. Example: `myname`.
 
 
 <a id="nestedblock--dragonfly_user_config--private_access"></a>

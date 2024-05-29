@@ -17,7 +17,7 @@ func grafanaUserConfig() *schema.Schema {
 			"additional_backup_regions": {
 				Description: "Additional Cloud Regions for Backup Replication.",
 				Elem: &schema.Schema{
-					Description: "Target cloud.",
+					Description: "Target cloud. Example: `aws-eu-central-1`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1,
@@ -36,7 +36,7 @@ func grafanaUserConfig() *schema.Schema {
 				ValidateFunc: validation.StringInSlice([]string{"alerting", "keep_state"}, false),
 			},
 			"alerting_max_annotations_to_keep": {
-				Description: "Max number of alert annotations that Grafana stores. 0 (default) keeps all alert annotations.",
+				Description: "Max number of alert annotations that Grafana stores. 0 (default) keeps all alert annotations. Example: `0`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
@@ -62,7 +62,7 @@ func grafanaUserConfig() *schema.Schema {
 					"allowed_domains": {
 						Description: "Allowed domains.",
 						Elem: &schema.Schema{
-							Description: "Allowed domain.",
+							Description: "Allowed domain. Example: `mycompany.com`.",
 							Type:        schema.TypeString,
 						},
 						MaxItems: 50,
@@ -72,7 +72,7 @@ func grafanaUserConfig() *schema.Schema {
 					"allowed_groups": {
 						Description: "Require users to belong to one of given groups.",
 						Elem: &schema.Schema{
-							Description: "Group Object ID from Azure AD.",
+							Description: "Group Object ID from Azure AD. Example: `c0ffee15-c01d-0000-1111-012345abcdef`.",
 							Type:        schema.TypeString,
 						},
 						MaxItems: 50,
@@ -80,22 +80,22 @@ func grafanaUserConfig() *schema.Schema {
 						Type:     schema.TypeList,
 					},
 					"auth_url": {
-						Description: "Authorization URL.",
+						Description: "Authorization URL. Example: `https://login.microsoftonline.com/<AZURE_TENANT_ID>/oauth2/v2.0/authorize`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"client_id": {
-						Description: "Client ID from provider.",
+						Description: "Client ID from provider. Example: `b1ba0bf54a4c2c0a1c29`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"client_secret": {
-						Description: "Client secret from provider.",
+						Description: "Client secret from provider. Example: `bfa6gea4f129076761dcba8ce5e1e406bd83af7b`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"token_url": {
-						Description: "Token URL.",
+						Description: "Token URL. Example: `https://login.microsoftonline.com/<AZURE_TENANT_ID>/oauth2/v2.0/token`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -120,7 +120,7 @@ func grafanaUserConfig() *schema.Schema {
 					"allowed_domains": {
 						Description: "Allowed domains.",
 						Elem: &schema.Schema{
-							Description: "Allowed domain.",
+							Description: "Allowed domain. Example: `mycompany.com`.",
 							Type:        schema.TypeString,
 						},
 						MaxItems: 50,
@@ -130,7 +130,7 @@ func grafanaUserConfig() *schema.Schema {
 					"allowed_organizations": {
 						Description: "Require user to be member of one of the listed organizations.",
 						Elem: &schema.Schema{
-							Description: "Allowed organization.",
+							Description: "Allowed organization. Example: `myorg`.",
 							Type:        schema.TypeString,
 						},
 						MaxItems: 50,
@@ -138,12 +138,12 @@ func grafanaUserConfig() *schema.Schema {
 						Type:     schema.TypeList,
 					},
 					"api_url": {
-						Description: "API URL.",
+						Description: "API URL. Example: `https://yourprovider.com/api`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"auth_url": {
-						Description: "Authorization URL.",
+						Description: "Authorization URL. Example: `https://yourprovider.com/oauth/authorize`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -153,24 +153,24 @@ func grafanaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"client_id": {
-						Description: "Client ID from provider.",
+						Description: "Client ID from provider. Example: `b1ba0bf54a4c2c0a1c29`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"client_secret": {
-						Description: "Client secret from provider.",
+						Description: "Client secret from provider. Example: `bfa6gea4f129076761dcba8ce5e1e406bd83af7b`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"name": {
-						Description: "Name of the OAuth integration.",
+						Description: "Name of the OAuth integration. Example: `My authentication`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"scopes": {
 						Description: "OAuth scopes.",
 						Elem: &schema.Schema{
-							Description: "OAuth scope.",
+							Description: "OAuth scope. Example: `email`.",
 							Type:        schema.TypeString,
 						},
 						MaxItems: 50,
@@ -178,7 +178,7 @@ func grafanaUserConfig() *schema.Schema {
 						Type:     schema.TypeList,
 					},
 					"token_url": {
-						Description: "Token URL.",
+						Description: "Token URL. Example: `https://yourprovider.com/oauth/token`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -198,7 +198,7 @@ func grafanaUserConfig() *schema.Schema {
 					"allowed_organizations": {
 						Description: "Require users to belong to one of given organizations.",
 						Elem: &schema.Schema{
-							Description: "Organization name.",
+							Description: "Organization name. Example: `aiven`.",
 							Type:        schema.TypeString,
 						},
 						MaxItems: 50,
@@ -211,12 +211,12 @@ func grafanaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"client_id": {
-						Description: "Client ID from provider.",
+						Description: "Client ID from provider. Example: `b1ba0bf54a4c2c0a1c29`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"client_secret": {
-						Description: "Client secret from provider.",
+						Description: "Client secret from provider. Example: `bfa6gea4f129076761dcba8ce5e1e406bd83af7b`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -228,7 +228,7 @@ func grafanaUserConfig() *schema.Schema {
 					"team_ids": {
 						Description: "Require users to belong to one of given team IDs.",
 						Elem: &schema.Schema{
-							Description: "Team ID.",
+							Description: "Team ID. Example: `150`.",
 							Type:        schema.TypeInt,
 						},
 						MaxItems: 50,
@@ -251,7 +251,7 @@ func grafanaUserConfig() *schema.Schema {
 					"allowed_groups": {
 						Description: "Require users to belong to one of given groups.",
 						Elem: &schema.Schema{
-							Description: "Group or subgroup name.",
+							Description: "Group or subgroup name. Example: `aiven/developers`.",
 							Type:        schema.TypeString,
 						},
 						MaxItems: 50,
@@ -259,27 +259,27 @@ func grafanaUserConfig() *schema.Schema {
 						Type:     schema.TypeList,
 					},
 					"api_url": {
-						Description: "API URL. This only needs to be set when using self hosted GitLab.",
+						Description: "API URL. This only needs to be set when using self hosted GitLab. Example: `https://gitlab.com/api/v4`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"auth_url": {
-						Description: "Authorization URL. This only needs to be set when using self hosted GitLab.",
+						Description: "Authorization URL. This only needs to be set when using self hosted GitLab. Example: `https://gitlab.com/oauth/authorize`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"client_id": {
-						Description: "Client ID from provider.",
+						Description: "Client ID from provider. Example: `b1ba0bf54a4c2c0a1c29`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"client_secret": {
-						Description: "Client secret from provider.",
+						Description: "Client secret from provider. Example: `bfa6gea4f129076761dcba8ce5e1e406bd83af7b`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"token_url": {
-						Description: "Token URL. This only needs to be set when using self hosted GitLab.",
+						Description: "Token URL. This only needs to be set when using self hosted GitLab. Example: `https://gitlab.com/oauth/token`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
@@ -299,7 +299,7 @@ func grafanaUserConfig() *schema.Schema {
 					"allowed_domains": {
 						Description: "Domains allowed to sign-in to this Grafana.",
 						Elem: &schema.Schema{
-							Description: "Domain.",
+							Description: "Domain. Example: `example.com`.",
 							Type:        schema.TypeString,
 						},
 						MaxItems: 64,
@@ -307,12 +307,12 @@ func grafanaUserConfig() *schema.Schema {
 						Type:     schema.TypeList,
 					},
 					"client_id": {
-						Description: "Client ID from provider.",
+						Description: "Client ID from provider. Example: `b1ba0bf54a4c2c0a1c29`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"client_secret": {
-						Description: "Client secret from provider.",
+						Description: "Client secret from provider. Example: `bfa6gea4f129076761dcba8ce5e1e406bd83af7b`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -328,7 +328,7 @@ func grafanaUserConfig() *schema.Schema {
 				ValidateFunc: validation.StringInSlice([]string{"lax", "strict", "none"}, false),
 			},
 			"custom_domain": {
-				Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.",
+				Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. Example: `grafana.example.org`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -338,12 +338,12 @@ func grafanaUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"dashboards_min_refresh_interval": {
-				Description: "Signed sequence of decimal numbers, followed by a unit suffix (ms, s, m, h, d), e.g. 30s, 1h.",
+				Description: "Signed sequence of decimal numbers, followed by a unit suffix (ms, s, m, h, d), e.g. 30s, 1h. Example: `5s`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"dashboards_versions_to_keep": {
-				Description: "Dashboard versions to keep per dashboard.",
+				Description: "Dashboard versions to keep per dashboard. Example: `20`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
@@ -353,7 +353,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"dataproxy_timeout": {
-				Description: "Timeout for data proxy requests in seconds.",
+				Description: "Timeout for data proxy requests in seconds. Example: `30`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
@@ -361,42 +361,42 @@ func grafanaUserConfig() *schema.Schema {
 				Description: "Grafana date format specifications",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"default_timezone": {
-						Description: "Default time zone for user preferences. Value `browser` uses browser local time zone.",
+						Description: "Default time zone for user preferences. Value `browser` uses browser local time zone. Example: `Europe/Helsinki`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"full_date": {
-						Description: "Moment.js style format string for cases where full date is shown.",
+						Description: "Moment.js style format string for cases where full date is shown. Example: `YYYY MM DD`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"interval_day": {
-						Description: "Moment.js style format string used when a time requiring day accuracy is shown.",
+						Description: "Moment.js style format string used when a time requiring day accuracy is shown. Example: `MM/DD`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"interval_hour": {
-						Description: "Moment.js style format string used when a time requiring hour accuracy is shown.",
+						Description: "Moment.js style format string used when a time requiring hour accuracy is shown. Example: `MM/DD HH:mm`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"interval_minute": {
-						Description: "Moment.js style format string used when a time requiring minute accuracy is shown.",
+						Description: "Moment.js style format string used when a time requiring minute accuracy is shown. Example: `HH:mm`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"interval_month": {
-						Description: "Moment.js style format string used when a time requiring month accuracy is shown.",
+						Description: "Moment.js style format string used when a time requiring month accuracy is shown. Example: `YYYY-MM`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"interval_second": {
-						Description: "Moment.js style format string used when a time requiring second accuracy is shown.",
+						Description: "Moment.js style format string used when a time requiring second accuracy is shown. Example: `HH:mm:ss`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"interval_year": {
-						Description: "Moment.js style format string used when a time requiring year accuracy is shown.",
+						Description: "Moment.js style format string used when a time requiring year accuracy is shown. Example: `YYYY`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
@@ -419,12 +419,12 @@ func grafanaUserConfig() *schema.Schema {
 				Description: "External image store settings",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"access_key": {
-						Description: "S3 access key. Requires permissions to the S3 bucket for the s3:PutObject and s3:PutObjectAcl actions.",
+						Description: "S3 access key. Requires permissions to the S3 bucket for the s3:PutObject and s3:PutObjectAcl actions. Example: `AAAAAAAAAAAAAAAAAAA`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"bucket_url": {
-						Description: "Bucket URL for S3.",
+						Description: "Bucket URL for S3. Example: `https://grafana.s3-ap-southeast-2.amazonaws.com/`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -435,7 +435,7 @@ func grafanaUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"s3"}, false),
 					},
 					"secret_key": {
-						Description: "S3 secret key.",
+						Description: "S3 secret key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -445,7 +445,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"google_analytics_ua_id": {
-				Description: "Google Analytics ID.",
+				Description: "Google Analytics ID. Example: `UA-123456-4`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -453,7 +453,7 @@ func grafanaUserConfig() *schema.Schema {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -464,12 +464,12 @@ func grafanaUserConfig() *schema.Schema {
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"description": {
-						Description: "Description for IP filter list entry.",
+						Description: "Description for IP filter list entry. Example: `Production service IP range`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"network": {
-						Description: "CIDR address block.",
+						Description: "CIDR address block. Example: `10.20.0.0/16`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -481,7 +481,7 @@ func grafanaUserConfig() *schema.Schema {
 			"ip_filter_string": {
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -521,7 +521,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"project_to_fork_from": {
-				Description: "Name of another project to fork a service from. This has effect only when a new service is being created.",
+				Description: "Name of another project to fork a service from. This has effect only when a new service is being created. Example: `anotherprojectname`.",
 				ForceNew:    true,
 				Optional:    true,
 				Type:        schema.TypeString,
@@ -538,7 +538,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"recovery_basebackup_name": {
-				Description: "Name of the basebackup to restore in forked service.",
+				Description: "Name of the basebackup to restore in forked service. Example: `backup-20191112t091354293891z`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -548,7 +548,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"service_to_fork_from": {
-				Description: "Name of another service to fork from. This has effect only when a new service is being created.",
+				Description: "Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.",
 				ForceNew:    true,
 				Optional:    true,
 				Type:        schema.TypeString,
@@ -557,7 +557,7 @@ func grafanaUserConfig() *schema.Schema {
 				Description: "SMTP server settings",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"from_address": {
-						Description: "Address used for sending emails.",
+						Description: "Address used for sending emails. Example: `yourgrafanauser@yourdomain.example.com`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -567,18 +567,18 @@ func grafanaUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"host": {
-						Description: "Server hostname or IP.",
+						Description: "Server hostname or IP. Example: `smtp.example.com`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"password": {
-						Description: "Password for SMTP authentication.",
+						Description: "Password for SMTP authentication. Example: `ein0eemeev5eeth3Ahfu`.",
 						Optional:    true,
 						Sensitive:   true,
 						Type:        schema.TypeString,
 					},
 					"port": {
-						Description: "SMTP server port.",
+						Description: "SMTP server port. Example: `25`.",
 						Required:    true,
 						Type:        schema.TypeInt,
 					},
@@ -594,7 +594,7 @@ func grafanaUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"OpportunisticStartTLS", "MandatoryStartTLS", "NoStartTLS"}, false),
 					},
 					"username": {
-						Description: "Username for SMTP authentication.",
+						Description: "Username for SMTP authentication. Example: `smtpuser`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},

@@ -49,7 +49,9 @@ type object struct {
 	// Because it makes things easier to control in diff suppressors.
 	Default any `yaml:"default"`
 
-	Enum []*struct {
+	// To make the default value flexible (to change it on the backend), it quite often comes as an "example"
+	Example any `yaml:"example"`
+	Enum    []*struct {
 		Value        string `yaml:"value"`
 		IsDeprecated bool   `yaml:"is_deprecated"`
 	} `yaml:"enum"`

@@ -87,8 +87,8 @@ Optional:
 Optional:
 
 - `additional_backup_regions` (List of String, Deprecated) Additional Cloud Regions for Backup Replication.
-- `backup_hour` (Number) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.
-- `backup_minute` (Number) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.
+- `backup_hour` (Number) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed. Example: `3`.
+- `backup_minute` (Number) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed. Example: `30`.
 - `cassandra` (Block List, Max: 1) Cassandra configuration values (see [below for nested schema](#nestedblock--cassandra_user_config--cassandra))
 - `cassandra_version` (String) Enum: `3`, `4`, `4.1`, and newer. Cassandra version.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
@@ -96,11 +96,11 @@ Optional:
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `migrate_sstableloader` (Boolean) Sets the service into migration mode enabling the sstableloader utility to be used to upload Cassandra data files. Available only on service create.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--cassandra_user_config--private_access))
-- `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
+- `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created. Example: `anotherprojectname`.
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--cassandra_user_config--public_access))
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
-- `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
-- `service_to_join_with` (String) When bootstrapping, instead of creating a new Cassandra cluster try to join an existing one from another service. Can only be set on service creation.
+- `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.
+- `service_to_join_with` (String) When bootstrapping, instead of creating a new Cassandra cluster try to join an existing one from another service. Can only be set on service creation. Example: `my-test-cassandra`.
 - `static_ips` (Boolean) Use static public IP addresses.
 
 <a id="nestedblock--cassandra_user_config--cassandra"></a>
@@ -108,9 +108,9 @@ Optional:
 
 Optional:
 
-- `batch_size_fail_threshold_in_kb` (Number) Fail any multiple-partition batch exceeding this value. 50kb (10x warn threshold) by default.
-- `batch_size_warn_threshold_in_kb` (Number) Log a warning message on any multiple-partition batch size exceeding this value.5kb per batch by default.Caution should be taken on increasing the size of this thresholdas it can lead to node instability.
-- `datacenter` (String) Name of the datacenter to which nodes of this service belong. Can be set only when creating the service.
+- `batch_size_fail_threshold_in_kb` (Number) Fail any multiple-partition batch exceeding this value. 50kb (10x warn threshold) by default. Example: `50`.
+- `batch_size_warn_threshold_in_kb` (Number) Log a warning message on any multiple-partition batch size exceeding this value.5kb per batch by default.Caution should be taken on increasing the size of this thresholdas it can lead to node instability. Example: `5`.
+- `datacenter` (String) Name of the datacenter to which nodes of this service belong. Can be set only when creating the service. Example: `my-service-google-west1`.
 
 
 <a id="nestedblock--cassandra_user_config--ip_filter_object"></a>
@@ -118,11 +118,11 @@ Optional:
 
 Required:
 
-- `network` (String) CIDR address block.
+- `network` (String) CIDR address block. Example: `10.20.0.0/16`.
 
 Optional:
 
-- `description` (String) Description for IP filter list entry.
+- `description` (String) Description for IP filter list entry. Example: `Production service IP range`.
 
 
 <a id="nestedblock--cassandra_user_config--private_access"></a>

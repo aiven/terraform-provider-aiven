@@ -100,7 +100,7 @@ Read-Only:
 Optional:
 
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
-- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
+- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. Example: `grafana.example.org`.
 - `disable_replication_factor_adjustment` (Boolean) Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can no longer be activated.
 - `index_patterns` (Block List, Max: 512) Index patterns (see [below for nested schema](#nestedblock--opensearch_user_config--index_patterns))
 - `index_template` (Block List, Max: 1) Template settings for all new indexes (see [below for nested schema](#nestedblock--opensearch_user_config--index_template))
@@ -108,19 +108,19 @@ Optional:
 - `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--opensearch_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `keep_index_refresh_interval` (Boolean) Aiven automation resets index.refresh_interval to default value for every index to be sure that indices are always visible to search. If it doesn't fit your case, you can disable this by setting up this flag to true.
-- `max_index_count` (Number) Use index_patterns instead. The default value is `0`.
+- `max_index_count` (Number) Use index_patterns instead. Default: `0`.
 - `openid` (Block List, Max: 1) OpenSearch OpenID Connect Configuration (see [below for nested schema](#nestedblock--opensearch_user_config--openid))
 - `opensearch` (Block List, Max: 1) OpenSearch settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch))
 - `opensearch_dashboards` (Block List, Max: 1) OpenSearch Dashboards settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch_dashboards))
 - `opensearch_version` (String) Enum: `1`, `2`, and newer. OpenSearch major version.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--opensearch_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--opensearch_user_config--privatelink_access))
-- `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
+- `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created. Example: `anotherprojectname`.
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--opensearch_user_config--public_access))
-- `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service.
+- `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service. Example: `backup-20191112t091354293891z`.
 - `saml` (Block List, Max: 1) OpenSearch SAML configuration (see [below for nested schema](#nestedblock--opensearch_user_config--saml))
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
-- `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
+- `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.
 - `static_ips` (Boolean) Use static public IP addresses.
 
 <a id="nestedblock--opensearch_user_config--index_patterns"></a>
@@ -128,12 +128,12 @@ Optional:
 
 Required:
 
-- `max_index_count` (Number) Maximum number of indexes to keep.
-- `pattern` (String) fnmatch pattern.
+- `max_index_count` (Number) Maximum number of indexes to keep. Example: `3`.
+- `pattern` (String) fnmatch pattern. Example: `logs_*_foo_*`.
 
 Optional:
 
-- `sorting_algorithm` (String) Enum: `alphabetical`, `creation_date`. Deletion sorting algorithm. The default value is `creation_date`.
+- `sorting_algorithm` (String) Enum: `alphabetical`, `creation_date`. Deletion sorting algorithm. Default: `creation_date`.
 
 
 <a id="nestedblock--opensearch_user_config--index_template"></a>
@@ -141,9 +141,9 @@ Optional:
 
 Optional:
 
-- `mapping_nested_objects_limit` (Number) The maximum number of nested JSON objects that a single document can contain across all nested types. This limit helps to prevent out of memory errors when a document contains too many nested objects. Default is 10000.
-- `number_of_replicas` (Number) The number of replicas each primary shard has.
-- `number_of_shards` (Number) The number of primary shards that an index should have.
+- `mapping_nested_objects_limit` (Number) The maximum number of nested JSON objects that a single document can contain across all nested types. This limit helps to prevent out of memory errors when a document contains too many nested objects. Default is 10000. Example: `10000`.
+- `number_of_replicas` (Number) The number of replicas each primary shard has. Example: `1`.
+- `number_of_shards` (Number) The number of primary shards that an index should have. Example: `1`.
 
 
 <a id="nestedblock--opensearch_user_config--ip_filter_object"></a>
@@ -151,11 +151,11 @@ Optional:
 
 Required:
 
-- `network` (String) CIDR address block.
+- `network` (String) CIDR address block. Example: `10.20.0.0/16`.
 
 Optional:
 
-- `description` (String) Description for IP filter list entry.
+- `description` (String) Description for IP filter list entry. Example: `Production service IP range`.
 
 
 <a id="nestedblock--opensearch_user_config--openid"></a>
@@ -163,21 +163,21 @@ Optional:
 
 Required:
 
-- `client_id` (String) The ID of the OpenID Connect client configured in your IdP. Required.
-- `client_secret` (String) The client secret of the OpenID Connect client configured in your IdP. Required.
-- `connect_url` (String) The URL of your IdP where the Security plugin can find the OpenID Connect metadata/configuration settings.
-- `enabled` (Boolean) Enables or disables OpenID Connect authentication for OpenSearch. When enabled, users can authenticate using OpenID Connect with an Identity Provider. The default value is `true`.
+- `client_id` (String) The ID of the OpenID Connect client configured in your IdP. Required. Example: ``.
+- `client_secret` (String) The client secret of the OpenID Connect client configured in your IdP. Required. Example: ``.
+- `connect_url` (String) The URL of your IdP where the Security plugin can find the OpenID Connect metadata/configuration settings. Example: `https://test-account.okta.com/app/exk491jujcVc83LEX697/sso/saml/metadata`.
+- `enabled` (Boolean) Enables or disables OpenID Connect authentication for OpenSearch. When enabled, users can authenticate using OpenID Connect with an Identity Provider. Default: `true`.
 
 Optional:
 
-- `header` (String) HTTP header name of the JWT token. Optional. Default is Authorization. The default value is `Authorization`.
-- `jwt_header` (String) The HTTP header that stores the token. Typically the Authorization header with the Bearer schema: Authorization: Bearer <token>. Optional. Default is Authorization.
-- `jwt_url_parameter` (String) If the token is not transmitted in the HTTP header, but as an URL parameter, define the name of the parameter here. Optional.
-- `refresh_rate_limit_count` (Number) The maximum number of unknown key IDs in the time frame. Default is 10. Optional. The default value is `10`.
-- `refresh_rate_limit_time_window_ms` (Number) The time frame to use when checking the maximum number of unknown key IDs, in milliseconds. Optional.Default is 10000 (10 seconds). The default value is `10000`.
-- `roles_key` (String) The key in the JSON payload that stores the user’s roles. The value of this key must be a comma-separated list of roles. Required only if you want to use roles in the JWT.
-- `scope` (String) The scope of the identity token issued by the IdP. Optional. Default is openid profile email address phone.
-- `subject_key` (String) The key in the JSON payload that stores the user’s name. If not defined, the subject registered claim is used. Most IdP providers use the preferred_username claim. Optional.
+- `header` (String) HTTP header name of the JWT token. Optional. Default is Authorization. Default: `Authorization`.
+- `jwt_header` (String) The HTTP header that stores the token. Typically the Authorization header with the Bearer schema: Authorization: Bearer <token>. Optional. Default is Authorization. Example: `preferred_username`.
+- `jwt_url_parameter` (String) If the token is not transmitted in the HTTP header, but as an URL parameter, define the name of the parameter here. Optional. Example: `preferred_username`.
+- `refresh_rate_limit_count` (Number) The maximum number of unknown key IDs in the time frame. Default is 10. Optional. Default: `10`.
+- `refresh_rate_limit_time_window_ms` (Number) The time frame to use when checking the maximum number of unknown key IDs, in milliseconds. Optional.Default is 10000 (10 seconds). Default: `10000`.
+- `roles_key` (String) The key in the JSON payload that stores the user’s roles. The value of this key must be a comma-separated list of roles. Required only if you want to use roles in the JWT. Example: `roles`.
+- `scope` (String) The scope of the identity token issued by the IdP. Optional. Default is openid profile email address phone. Example: ``.
+- `subject_key` (String) The key in the JSON payload that stores the user’s name. If not defined, the subject registered claim is used. Most IdP providers use the preferred_username claim. Optional. Example: `preferred_username`.
 
 
 <a id="nestedblock--opensearch_user_config--opensearch"></a>
@@ -188,15 +188,15 @@ Optional:
 - `action_auto_create_index_enabled` (Boolean) Explicitly allow or block automatic creation of indices. Defaults to true.
 - `action_destructive_requires_name` (Boolean) Require explicit index names when deleting.
 - `auth_failure_listeners` (Block List, Max: 1) Opensearch Security Plugin Settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--auth_failure_listeners))
-- `cluster_max_shards_per_node` (Number) Controls the number of shards allowed in the cluster per data node.
+- `cluster_max_shards_per_node` (Number) Controls the number of shards allowed in the cluster per data node. Example: `1000`.
 - `cluster_routing_allocation_node_concurrent_recoveries` (Number) How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to 2.
-- `email_sender_name` (String) Sender name placeholder to be used in Opensearch Dashboards and Opensearch keystore.
-- `email_sender_password` (String, Sensitive) Sender password for Opensearch alerts to authenticate with SMTP server.
-- `email_sender_username` (String) Sender username for Opensearch alerts.
-- `enable_security_audit` (Boolean) Enable/Disable security audit. The default value is `false`.
+- `email_sender_name` (String) Sender name placeholder to be used in Opensearch Dashboards and Opensearch keystore. Example: `alert-sender`.
+- `email_sender_password` (String, Sensitive) Sender password for Opensearch alerts to authenticate with SMTP server. Example: `very-secure-mail-password`.
+- `email_sender_username` (String) Sender username for Opensearch alerts. Example: `jane@example.com`.
+- `enable_security_audit` (Boolean) Enable/Disable security audit. Default: `false`.
 - `http_max_content_length` (Number) Maximum content length for HTTP requests to the OpenSearch HTTP API, in bytes.
-- `http_max_header_size` (Number) The max size of allowed headers, in bytes.
-- `http_max_initial_line_length` (Number) The max length of an HTTP URL, in bytes.
+- `http_max_header_size` (Number) The max size of allowed headers, in bytes. Example: `8192`.
+- `http_max_initial_line_length` (Number) The max length of an HTTP URL, in bytes. Example: `4096`.
 - `indices_fielddata_cache_size` (Number) Relative amount. Maximum amount of heap memory used for field data cache. This is an expert setting; decreasing the value too much will increase overhead of loading field data; too much memory used for field data cache will decrease amount of heap available for other operations.
 - `indices_memory_index_buffer_size` (Number) Percentage value. Default is 10%. Total amount of heap used for indexing buffer, before writing segments to disk. This is an expert setting. Too low value will slow down indexing; too high value will increase indexing performance but causes performance issues for query performance.
 - `indices_memory_max_index_buffer_size` (Number) Absolute value. Default is unbound. Doesn't work without indices.memory.index_buffer_size. Maximum amount of heap used for query cache, an absolute indices.memory.index_buffer_size maximum hard limit.
@@ -205,17 +205,17 @@ Optional:
 - `indices_query_bool_max_clause_count` (Number) Maximum number of clauses Lucene BooleanQuery can have. The default value (1024) is relatively high, and increasing it may cause performance issues. Investigate other approaches first before increasing this value.
 - `indices_recovery_max_bytes_per_sec` (Number) Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb.
 - `indices_recovery_max_concurrent_file_chunks` (Number) Number of file chunks sent in parallel for each recovery. Defaults to 2.
-- `ism_enabled` (Boolean) Specifies whether ISM is enabled or not. The default value is `true`.
-- `ism_history_enabled` (Boolean) Specifies whether audit history is enabled or not. The logs from ISM are automatically indexed to a logs document. The default value is `true`.
-- `ism_history_max_age` (Number) The maximum age before rolling over the audit history index in hours. The default value is `24`.
-- `ism_history_max_docs` (Number) The maximum number of documents before rolling over the audit history index. The default value is `2500000`.
-- `ism_history_rollover_check_period` (Number) The time between rollover checks for the audit history index in hours. The default value is `8`.
-- `ism_history_rollover_retention_period` (Number) How long audit history indices are kept in days. The default value is `30`.
+- `ism_enabled` (Boolean) Specifies whether ISM is enabled or not. Default: `true`.
+- `ism_history_enabled` (Boolean) Specifies whether audit history is enabled or not. The logs from ISM are automatically indexed to a logs document. Default: `true`.
+- `ism_history_max_age` (Number) The maximum age before rolling over the audit history index in hours. Default: `24`.
+- `ism_history_max_docs` (Number) The maximum number of documents before rolling over the audit history index. Default: `2500000`.
+- `ism_history_rollover_check_period` (Number) The time between rollover checks for the audit history index in hours. Default: `8`.
+- `ism_history_rollover_retention_period` (Number) How long audit history indices are kept in days. Default: `30`.
 - `override_main_response_version` (Boolean) Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false.
 - `plugins_alerting_filter_by_backend_roles` (Boolean) Enable or disable filtering of alerting by backend roles. Requires Security plugin. Defaults to false.
 - `reindex_remote_whitelist` (List of String) Whitelisted addresses for reindexing. Changing this value will cause all OpenSearch instances to restart.
-- `script_max_compilations_rate` (String) Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context.
-- `search_max_buckets` (Number) Maximum number of aggregation buckets allowed in a single response. OpenSearch default value is used when this is not defined.
+- `script_max_compilations_rate` (String) Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context. Example: `75/5m`.
+- `search_max_buckets` (Number) Maximum number of aggregation buckets allowed in a single response. OpenSearch default value is used when this is not defined. Example: `10000`.
 - `thread_pool_analyze_queue_size` (Number) Size for the thread pool queue. See documentation for exact details.
 - `thread_pool_analyze_size` (Number) Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
 - `thread_pool_force_merge_size` (Number) Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
@@ -241,12 +241,12 @@ Optional:
 
 Optional:
 
-- `allowed_tries` (Number) The number of login attempts allowed before login is blocked.
+- `allowed_tries` (Number) The number of login attempts allowed before login is blocked. Example: `10`.
 - `authentication_backend` (String) Enum: `internal`. internal_authentication_backend_limiting.authentication_backend.
-- `block_expiry_seconds` (Number) The duration of time that login remains blocked after a failed login.
-- `max_blocked_clients` (Number) internal_authentication_backend_limiting.max_blocked_clients.
-- `max_tracked_clients` (Number) The maximum number of tracked IP addresses that have failed login.
-- `time_window_seconds` (Number) The window of time in which the value for `allowed_tries` is enforced.
+- `block_expiry_seconds` (Number) The duration of time that login remains blocked after a failed login. Example: `600`.
+- `max_blocked_clients` (Number) internal_authentication_backend_limiting.max_blocked_clients. Example: `100000`.
+- `max_tracked_clients` (Number) The maximum number of tracked IP addresses that have failed login. Example: `100000`.
+- `time_window_seconds` (Number) The window of time in which the value for `allowed_tries` is enforced. Example: `3600`.
 - `type` (String) Enum: `username`. internal_authentication_backend_limiting.type.
 
 
@@ -255,11 +255,11 @@ Optional:
 
 Optional:
 
-- `allowed_tries` (Number) The number of login attempts allowed before login is blocked.
-- `block_expiry_seconds` (Number) The duration of time that login remains blocked after a failed login.
-- `max_blocked_clients` (Number) The maximum number of blocked IP addresses.
-- `max_tracked_clients` (Number) The maximum number of tracked IP addresses that have failed login.
-- `time_window_seconds` (Number) The window of time in which the value for `allowed_tries` is enforced.
+- `allowed_tries` (Number) The number of login attempts allowed before login is blocked. Example: `10`.
+- `block_expiry_seconds` (Number) The duration of time that login remains blocked after a failed login. Example: `600`.
+- `max_blocked_clients` (Number) The maximum number of blocked IP addresses. Example: `100000`.
+- `max_tracked_clients` (Number) The maximum number of tracked IP addresses that have failed login. Example: `100000`.
+- `time_window_seconds` (Number) The window of time in which the value for `allowed_tries` is enforced. Example: `3600`.
 - `type` (String) Enum: `ip`. The type of rate limiting.
 
 
@@ -270,9 +270,9 @@ Optional:
 
 Optional:
 
-- `enabled` (Boolean) Enable or disable OpenSearch Dashboards. The default value is `true`.
-- `max_old_space_size` (Number) Limits the maximum amount of memory (in MiB) the OpenSearch Dashboards process can use. This sets the max_old_space_size option of the nodejs running the OpenSearch Dashboards. Note: the memory reserved by OpenSearch Dashboards is not available for OpenSearch. The default value is `128`.
-- `opensearch_request_timeout` (Number) Timeout in milliseconds for requests made by OpenSearch Dashboards towards OpenSearch. The default value is `30000`.
+- `enabled` (Boolean) Enable or disable OpenSearch Dashboards. Default: `true`.
+- `max_old_space_size` (Number) Limits the maximum amount of memory (in MiB) the OpenSearch Dashboards process can use. This sets the max_old_space_size option of the nodejs running the OpenSearch Dashboards. Note: the memory reserved by OpenSearch Dashboards is not available for OpenSearch. Default: `128`.
+- `opensearch_request_timeout` (Number) Timeout in milliseconds for requests made by OpenSearch Dashboards towards OpenSearch. Default: `30000`.
 
 
 <a id="nestedblock--opensearch_user_config--private_access"></a>
@@ -310,16 +310,19 @@ Optional:
 
 Required:
 
-- `enabled` (Boolean) Enables or disables SAML-based authentication for OpenSearch. When enabled, users can authenticate using SAML with an Identity Provider. The default value is `true`.
-- `idp_entity_id` (String) The unique identifier for the Identity Provider (IdP) entity that is used for SAML authentication. This value is typically provided by the IdP.
-- `idp_metadata_url` (String) The URL of the SAML metadata for the Identity Provider (IdP). This is used to configure SAML-based authentication with the IdP.
-- `sp_entity_id` (String) The unique identifier for the Service Provider (SP) entity that is used for SAML authentication. This value is typically provided by the SP.
+- `enabled` (Boolean) Enables or disables SAML-based authentication for OpenSearch. When enabled, users can authenticate using SAML with an Identity Provider. Default: `true`.
+- `idp_entity_id` (String) The unique identifier for the Identity Provider (IdP) entity that is used for SAML authentication. This value is typically provided by the IdP. Example: `test-idp-entity-id`.
+- `idp_metadata_url` (String) The URL of the SAML metadata for the Identity Provider (IdP). This is used to configure SAML-based authentication with the IdP. Example: `https://test-account.okta.com/app/exk491jujcVc83LEX697/sso/saml/metadata`.
+- `sp_entity_id` (String) The unique identifier for the Service Provider (SP) entity that is used for SAML authentication. This value is typically provided by the SP. Example: `test-sp-entity-id`.
 
 Optional:
 
-- `idp_pemtrustedcas_content` (String) This parameter specifies the PEM-encoded root certificate authority (CA) content for the SAML identity provider (IdP) server verification. The root CA content is used to verify the SSL/TLS certificate presented by the server.
-- `roles_key` (String) Optional. Specifies the attribute in the SAML response where role information is stored, if available. Role attributes are not required for SAML authentication, but can be included in SAML assertions by most Identity Providers (IdPs) to determine user access levels or permissions.
-- `subject_key` (String) Optional. Specifies the attribute in the SAML response where the subject identifier is stored. If not configured, the NameID attribute is used by default.
+- `idp_pemtrustedcas_content` (String) This parameter specifies the PEM-encoded root certificate authority (CA) content for the SAML identity provider (IdP) server verification. The root CA content is used to verify the SSL/TLS certificate presented by the server. Example: `-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+`.
+- `roles_key` (String) Optional. Specifies the attribute in the SAML response where role information is stored, if available. Role attributes are not required for SAML authentication, but can be included in SAML assertions by most Identity Providers (IdPs) to determine user access levels or permissions. Example: `RoleName`.
+- `subject_key` (String) Optional. Specifies the attribute in the SAML response where the subject identifier is stored. If not configured, the NameID attribute is used by default. Example: `NameID`.
 
 
 

@@ -16,22 +16,22 @@ func kafkaConnectUserConfig() *schema.Schema {
 			Description: "Kafka Connect service configuration values",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"config_storage_topic": {
-					Description: "The name of the topic where connector and task configuration data are stored.This must be the same for all workers with the same group_id.",
+					Description: "The name of the topic where connector and task configuration data are stored.This must be the same for all workers with the same group_id. Example: `__connect_configs`.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"group_id": {
-					Description: "A unique string that identifies the Connect cluster group this worker belongs to.",
+					Description: "A unique string that identifies the Connect cluster group this worker belongs to. Example: `connect`.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"offset_storage_topic": {
-					Description: "The name of the topic where connector and task configuration offsets are stored.This must be the same for all workers with the same group_id.",
+					Description: "The name of the topic where connector and task configuration offsets are stored.This must be the same for all workers with the same group_id. Example: `__connect_offsets`.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"status_storage_topic": {
-					Description: "The name of the topic where connector and task configuration status updates are stored.This must be the same for all workers with the same group_id.",
+					Description: "The name of the topic where connector and task configuration status updates are stored.This must be the same for all workers with the same group_id. Example: `__connect_status`.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},

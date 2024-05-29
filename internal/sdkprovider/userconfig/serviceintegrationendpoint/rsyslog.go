@@ -15,53 +15,53 @@ func rsyslogUserConfig() *schema.Schema {
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"ca": {
-				Description: "PEM encoded CA certificate.",
+				Description: "PEM encoded CA certificate. Example: `-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"cert": {
-				Description: "PEM encoded client certificate.",
+				Description: "PEM encoded client certificate. Example: `-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"format": {
-				Description:  "Enum: `rfc5424`, `rfc3164`, `custom`. Message format. The default value is `rfc5424`.",
+				Description:  "Enum: `rfc5424`, `rfc3164`, `custom`. Message format. Default: `rfc5424`.",
 				Required:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"rfc5424", "rfc3164", "custom"}, false),
 			},
 			"key": {
-				Description: "PEM encoded client key.",
+				Description: "PEM encoded client key. Example: `-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"logline": {
-				Description: "Custom syslog message format.",
+				Description: "Custom syslog message format. Example: `<%pri%>%timestamp:::date-rfc3339% %HOSTNAME% %app-name% %msg%`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"max_message_size": {
-				Description: "Rsyslog max message size. The default value is `8192`.",
+				Description: "Rsyslog max message size. Default: `8192`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
 			"port": {
-				Description: "Rsyslog server port. The default value is `514`.",
+				Description: "Rsyslog server port. Default: `514`.",
 				Required:    true,
 				Type:        schema.TypeInt,
 			},
 			"sd": {
-				Description: "Structured data block for log message.",
+				Description: "Structured data block for log message. Example: `TOKEN tag=\"LiteralValue\"`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"server": {
-				Description: "Rsyslog server IP address or hostname.",
+				Description: "Rsyslog server IP address or hostname. Example: `logs.example.com`.",
 				Required:    true,
 				Type:        schema.TypeString,
 			},
 			"tls": {
-				Description: "Require TLS. The default value is `true`.",
+				Description: "Require TLS. Default: `true`.",
 				Required:    true,
 				Type:        schema.TypeBool,
 			},

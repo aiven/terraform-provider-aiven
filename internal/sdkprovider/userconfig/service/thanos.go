@@ -28,7 +28,7 @@ func thanosUserConfig() *schema.Schema {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -39,12 +39,12 @@ func thanosUserConfig() *schema.Schema {
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"description": {
-						Description: "Description for IP filter list entry.",
+						Description: "Description for IP filter list entry. Example: `Production service IP range`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"network": {
-						Description: "CIDR address block.",
+						Description: "CIDR address block. Example: `10.20.0.0/16`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -56,7 +56,7 @@ func thanosUserConfig() *schema.Schema {
 			"ip_filter_string": {
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -110,22 +110,22 @@ func thanosUserConfig() *schema.Schema {
 				Description: "ThanosQuery",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"query_default_evaluation_interval": {
-						Description: "Set the default evaluation interval for subqueries. The default value is `1m`.",
+						Description: "Set the default evaluation interval for subqueries. Default: `1m`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"query_lookback_delta": {
-						Description: "The maximum lookback duration for retrieving metrics during expression evaluations in PromQL. PromQL always evaluates the query for a certain timestamp, and it looks back for the given amount of time to get the latest sample. If it exceeds the maximum lookback delta, it assumes the series is stale and returns none (a gap). The lookback delta should be set to at least 2 times the slowest scrape interval. If unset, it will use the promql default of 5m. The default value is `5m`.",
+						Description: "The maximum lookback duration for retrieving metrics during expression evaluations in PromQL. PromQL always evaluates the query for a certain timestamp, and it looks back for the given amount of time to get the latest sample. If it exceeds the maximum lookback delta, it assumes the series is stale and returns none (a gap). The lookback delta should be set to at least 2 times the slowest scrape interval. If unset, it will use the promql default of 5m. Default: `5m`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"query_metadata_default_time_range": {
-						Description: "The default metadata time range duration for retrieving labels through Labels and Series API when the range parameters are not specified. The zero value means the range covers the time since the beginning. The default value is `0s`.",
+						Description: "The default metadata time range duration for retrieving labels through Labels and Series API when the range parameters are not specified. The zero value means the range covers the time since the beginning. Default: `0s`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"query_timeout": {
-						Description: "Maximum time to process a query by the query node. The default value is `2m`.",
+						Description: "Maximum time to process a query by the query node. Default: `2m`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
@@ -137,7 +137,7 @@ func thanosUserConfig() *schema.Schema {
 			"query_frontend": {
 				Description: "ThanosQueryFrontend",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"query_range_align_range_with_step": {
-					Description: "Whether to align the query range boundaries with the step. If enabled, the query range boundaries will be aligned to the step, providing more accurate results for queries with high-resolution data. The default value is `true`.",
+					Description: "Whether to align the query range boundaries with the step. If enabled, the query range boundaries will be aligned to the step, providing more accurate results for queries with high-resolution data. Default: `true`.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				}}},

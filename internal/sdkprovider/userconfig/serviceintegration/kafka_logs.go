@@ -15,7 +15,7 @@ func kafkaLogsUserConfig() *schema.Schema {
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"kafka_topic": {
-				Description: "Topic name.",
+				Description: "Topic name. Example: `mytopic`.",
 				Required:    true,
 				Type:        schema.TypeString,
 			},

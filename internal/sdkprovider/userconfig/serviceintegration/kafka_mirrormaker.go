@@ -15,7 +15,7 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"cluster_alias": {
-				Description: "The alias under which the Kafka cluster is known to MirrorMaker. Can contain the following symbols: ASCII alphanumerics, `.`, `_`, and `-`.",
+				Description: "The alias under which the Kafka cluster is known to MirrorMaker. Can contain the following symbols: ASCII alphanumerics, `.`, `_`, and `-`. Example: `kafka-abc`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -23,17 +23,17 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 				Description: "Kafka MirrorMaker configuration values",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"consumer_fetch_min_bytes": {
-						Description: "The minimum amount of data the server should return for a fetch request.",
+						Description: "The minimum amount of data the server should return for a fetch request. Example: `1024`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"producer_batch_size": {
-						Description: "The batch size in bytes producer will attempt to collect before publishing to broker.",
+						Description: "The batch size in bytes producer will attempt to collect before publishing to broker. Example: `1024`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"producer_buffer_memory": {
-						Description: "The amount of bytes producer can use for buffering data before publishing to broker.",
+						Description: "The amount of bytes producer can use for buffering data before publishing to broker. Example: `8388608`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -44,12 +44,12 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"gzip", "snappy", "lz4", "zstd", "none"}, false),
 					},
 					"producer_linger_ms": {
-						Description: "The linger time (ms) for waiting new data to arrive for publishing.",
+						Description: "The linger time (ms) for waiting new data to arrive for publishing. Example: `100`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"producer_max_request_size": {
-						Description: "The maximum request size in bytes.",
+						Description: "The maximum request size in bytes. Example: `1048576`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},

@@ -14,22 +14,22 @@ func externalAwsCloudwatchMetricsUserConfig() *schema.Schema {
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"access_key": {
-				Description: "AWS access key. Required permissions are cloudwatch:PutMetricData.",
+				Description: "AWS access key. Required permissions are cloudwatch:PutMetricData. Example: `AAAAAAAAAAAAAAAAAAAA`.",
 				Required:    true,
 				Type:        schema.TypeString,
 			},
 			"namespace": {
-				Description: "AWS CloudWatch Metrics Namespace.",
+				Description: "AWS CloudWatch Metrics Namespace. Example: `my-metrics-namespace`.",
 				Required:    true,
 				Type:        schema.TypeString,
 			},
 			"region": {
-				Description: "AWS region.",
+				Description: "AWS region. Example: `us-east-1`.",
 				Required:    true,
 				Type:        schema.TypeString,
 			},
 			"secret_key": {
-				Description: "AWS secret key.",
+				Description: "AWS secret key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.",
 				Required:    true,
 				Type:        schema.TypeString,
 			},

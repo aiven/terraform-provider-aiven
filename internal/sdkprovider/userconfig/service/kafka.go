@@ -18,7 +18,7 @@ func kafkaUserConfig() *schema.Schema {
 				Deprecated:  "This property is deprecated.",
 				Description: "Additional Cloud Regions for Backup Replication.",
 				Elem: &schema.Schema{
-					Description: "Target cloud.",
+					Description: "Target cloud. Example: `aws-eu-central-1`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1,
@@ -31,7 +31,7 @@ func kafkaUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"custom_domain": {
-				Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.",
+				Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. Example: `grafana.example.org`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -39,7 +39,7 @@ func kafkaUserConfig() *schema.Schema {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -50,12 +50,12 @@ func kafkaUserConfig() *schema.Schema {
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"description": {
-						Description: "Description for IP filter list entry.",
+						Description: "Description for IP filter list entry. Example: `Production service IP range`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"network": {
-						Description: "CIDR address block.",
+						Description: "CIDR address block. Example: `10.20.0.0/16`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -67,7 +67,7 @@ func kafkaUserConfig() *schema.Schema {
 			"ip_filter_string": {
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -89,7 +89,7 @@ func kafkaUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"gzip", "snappy", "lz4", "zstd", "uncompressed", "producer"}, false),
 					},
 					"connections_max_idle_ms": {
-						Description: "Idle connections timeout: the server socket processor threads close the connections that idle for longer than this.",
+						Description: "Idle connections timeout: the server socket processor threads close the connections that idle for longer than this. Example: `540000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -99,22 +99,22 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"group_initial_rebalance_delay_ms": {
-						Description: "The amount of time, in milliseconds, the group coordinator will wait for more consumers to join a new group before performing the first rebalance. A longer delay means potentially fewer rebalances, but increases the time until processing begins. The default value for this is 3 seconds. During development and testing it might be desirable to set this to 0 in order to not delay test execution time.",
+						Description: "The amount of time, in milliseconds, the group coordinator will wait for more consumers to join a new group before performing the first rebalance. A longer delay means potentially fewer rebalances, but increases the time until processing begins. The default value for this is 3 seconds. During development and testing it might be desirable to set this to 0 in order to not delay test execution time. Example: `3000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"group_max_session_timeout_ms": {
-						Description: "The maximum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures.",
+						Description: "The maximum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures. Example: `1800000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"group_min_session_timeout_ms": {
-						Description: "The minimum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures.",
+						Description: "The minimum allowed session timeout for registered consumers. Longer timeouts give consumers more time to process messages in between heartbeats at the cost of a longer time to detect failures. Example: `6000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"log_cleaner_delete_retention_ms": {
-						Description: "How long are delete records retained?",
+						Description: "How long are delete records retained? Example: `86400000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -124,7 +124,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"log_cleaner_min_cleanable_ratio": {
-						Description: "Controls log compactor frequency. Larger value means more frequent compactions but also more space wasted for logs. Consider setting log.cleaner.max.compaction.lag.ms to enforce compactions sooner, instead of setting a very high value for this option.",
+						Description: "Controls log compactor frequency. Larger value means more frequent compactions but also more space wasted for logs. Consider setting log.cleaner.max.compaction.lag.ms to enforce compactions sooner, instead of setting a very high value for this option. Example: `0.5`.",
 						Optional:    true,
 						Type:        schema.TypeFloat,
 					},
@@ -140,7 +140,7 @@ func kafkaUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"delete", "compact", "compact,delete"}, false),
 					},
 					"log_flush_interval_messages": {
-						Description: "The number of messages accumulated on a log partition before messages are flushed to disk.",
+						Description: "The number of messages accumulated on a log partition before messages are flushed to disk. Example: `9223372036854775807`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -150,12 +150,12 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"log_index_interval_bytes": {
-						Description: "The interval with which Kafka adds an entry to the offset index.",
+						Description: "The interval with which Kafka adds an entry to the offset index. Example: `4096`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"log_index_size_max_bytes": {
-						Description: "The maximum size in bytes of the offset index.",
+						Description: "The maximum size in bytes of the offset index. Example: `10485760`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -221,7 +221,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"log_segment_delete_delay_ms": {
-						Description: "The amount of time to wait before deleting a file from the filesystem.",
+						Description: "The amount of time to wait before deleting a file from the filesystem. Example: `60000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -231,17 +231,17 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"max_incremental_fetch_session_cache_slots": {
-						Description: "The maximum number of incremental fetch sessions that the broker will maintain.",
+						Description: "The maximum number of incremental fetch sessions that the broker will maintain. Example: `1000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"message_max_bytes": {
-						Description: "The maximum size of message that the server can receive.",
+						Description: "The maximum size of message that the server can receive. Example: `1048588`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"min_insync_replicas": {
-						Description: "When a producer sets acks to `all` (or `-1`), min.insync.replicas specifies the minimum number of replicas that must acknowledge a write for the write to be considered successful.",
+						Description: "When a producer sets acks to `all` (or `-1`), min.insync.replicas specifies the minimum number of replicas that must acknowledge a write for the write to be considered successful. Example: `1`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -251,7 +251,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"offsets_retention_minutes": {
-						Description: "Log retention window in minutes for offsets topic.",
+						Description: "Log retention window in minutes for offsets topic. Example: `10080`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -319,12 +319,12 @@ func kafkaUserConfig() *schema.Schema {
 				Description: "Kafka authentication methods",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"certificate": {
-						Description: "Enable certificate/SSL authentication. The default value is `true`.",
+						Description: "Enable certificate/SSL authentication. Default: `true`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"sasl": {
-						Description: "Enable SASL authentication. The default value is `false`.",
+						Description: "Enable SASL authentication. Default: `false`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -334,7 +334,7 @@ func kafkaUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"kafka_connect": {
-				Description: "Enable Kafka Connect service. The default value is `false`.",
+				Description: "Enable Kafka Connect service. Default: `false`.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
@@ -354,7 +354,7 @@ func kafkaUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"earliest", "latest"}, false),
 					},
 					"consumer_fetch_max_bytes": {
-						Description: "Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum.",
+						Description: "Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum. Example: `52428800`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -365,7 +365,7 @@ func kafkaUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"read_uncommitted", "read_committed"}, false),
 					},
 					"consumer_max_partition_fetch_bytes": {
-						Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress.",
+						Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. Example: `1048576`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -411,7 +411,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"producer_max_request_size": {
-						Description: "This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests.",
+						Description: "This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests. Example: `1048576`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -431,7 +431,7 @@ func kafkaUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"kafka_rest": {
-				Description: "Enable Kafka-REST service. The default value is `false`.",
+				Description: "Enable Kafka-REST service. Default: `false`.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
@@ -444,34 +444,34 @@ func kafkaUserConfig() *schema.Schema {
 				Description: "Kafka REST configuration",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"consumer_enable_auto_commit": {
-						Description: "If true the consumer's offset will be periodically committed to Kafka in the background. The default value is `true`.",
+						Description: "If true the consumer's offset will be periodically committed to Kafka in the background. Default: `true`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"consumer_request_max_bytes": {
-						Description: "Maximum number of bytes in unencoded message keys and values by a single request. The default value is `67108864`.",
+						Description: "Maximum number of bytes in unencoded message keys and values by a single request. Default: `67108864`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"consumer_request_timeout_ms": {
-						Description:  "Enum: `1000`, `15000`, `30000`. The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached. The default value is `1000`.",
+						Description:  "Enum: `1000`, `15000`, `30000`. The maximum total time to wait for messages for a request if the maximum number of messages has not yet been reached. Default: `1000`.",
 						Optional:     true,
 						Type:         schema.TypeInt,
 						ValidateFunc: validation.IntInSlice([]int{1000, 15000, 30000}),
 					},
 					"name_strategy": {
-						Description:  "Enum: `topic_name`, `record_name`, `topic_record_name`. Name strategy to use when selecting subject for storing schemas. The default value is `topic_name`.",
+						Description:  "Enum: `topic_name`, `record_name`, `topic_record_name`. Name strategy to use when selecting subject for storing schemas. Default: `topic_name`.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"topic_name", "record_name", "topic_record_name"}, false),
 					},
 					"name_strategy_validation": {
-						Description: "If true, validate that given schema is registered under expected subject name by the used name strategy when producing messages. The default value is `true`.",
+						Description: "If true, validate that given schema is registered under expected subject name by the used name strategy when producing messages. Default: `true`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"producer_acks": {
-						Description:  "Enum: `all`, `-1`, `0`, `1`. The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to `all` or `-1`, the leader will wait for the full set of in-sync replicas to acknowledge the record. The default value is `1`.",
+						Description:  "Enum: `all`, `-1`, `0`, `1`. The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to `all` or `-1`, the leader will wait for the full set of in-sync replicas to acknowledge the record. Default: `1`.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"all", "-1", "0", "1"}, false),
@@ -483,17 +483,17 @@ func kafkaUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"gzip", "snappy", "lz4", "zstd", "none"}, false),
 					},
 					"producer_linger_ms": {
-						Description: "Wait for up to the given delay to allow batching records together. The default value is `0`.",
+						Description: "Wait for up to the given delay to allow batching records together. Default: `0`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"producer_max_request_size": {
-						Description: "The maximum size of a request in bytes. Note that Kafka broker can also cap the record batch size. The default value is `1048576`.",
+						Description: "The maximum size of a request in bytes. Note that Kafka broker can also cap the record batch size. Default: `1048576`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"simpleconsumer_pool_size_max": {
-						Description: "Maximum number of SimpleConsumers that can be instantiated per broker. The default value is `25`.",
+						Description: "Maximum number of SimpleConsumers that can be instantiated per broker. Default: `25`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -612,7 +612,7 @@ func kafkaUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"schema_registry": {
-				Description: "Enable Schema-Registry service. The default value is `false`.",
+				Description: "Enable Schema-Registry service. Default: `false`.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
@@ -657,7 +657,7 @@ func kafkaUserConfig() *schema.Schema {
 						Description: "Local cache configuration",
 						Elem: &schema.Resource{Schema: map[string]*schema.Schema{"size": {
 							Deprecated:  "This property is deprecated.",
-							Description: "Local cache size in bytes.",
+							Description: "Local cache size in bytes. Example: `1073741824`.",
 							Optional:    true,
 							Type:        schema.TypeInt,
 						}}},
