@@ -78,9 +78,9 @@ resource "aiven_kafka_mirrormaker" "mm1" {
 Optional:
 
 - `additional_backup_regions` (List of String, Deprecated) Additional Cloud Regions for Backup Replication.
-- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--ip_filter_object))
-- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
+- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--ip_filter_object))
+- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `kafka_mirrormaker` (Block List, Max: 1) Kafka MirrorMaker configuration values (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker))
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `static_ips` (Boolean) Use static public IP addresses.
@@ -107,14 +107,14 @@ Optional:
 - `groups` (String) Consumer groups to replicate. Supports comma-separated group IDs and regexes.
 - `groups_exclude` (String) Exclude groups. Supports comma-separated group IDs and regexes. Excludes take precedence over includes.
 - `offset_lag_max` (Number) How out-of-sync a remote partition can be before it is resynced.
-- `refresh_groups_enabled` (Boolean) Whether to periodically check for new consumer groups. Defaults to 'true'.
+- `refresh_groups_enabled` (Boolean) Whether to periodically check for new consumer groups. Defaults to `true`.
 - `refresh_groups_interval_seconds` (Number) Frequency of consumer group refresh in seconds. Defaults to 600 seconds (10 minutes).
-- `refresh_topics_enabled` (Boolean) Whether to periodically check for new topics and partitions. Defaults to 'true'.
+- `refresh_topics_enabled` (Boolean) Whether to periodically check for new topics and partitions. Defaults to `true`.
 - `refresh_topics_interval_seconds` (Number) Frequency of topic and partitions refresh in seconds. Defaults to 600 seconds (10 minutes).
 - `sync_group_offsets_enabled` (Boolean) Whether to periodically write the translated offsets of replicated consumer groups (in the source cluster) to __consumer_offsets topic in target cluster, as long as no active consumers in that group are connected to the target cluster.
 - `sync_group_offsets_interval_seconds` (Number) Frequency at which consumer group offsets are synced (default: 60, every minute).
 - `sync_topic_configs_enabled` (Boolean) Whether to periodically configure remote topics to match their corresponding upstream topics.
-- `tasks_max_per_cpu` (Number) 'tasks.max' is set to this multiplied by the number of CPUs in the service. The default value is `1`.
+- `tasks_max_per_cpu` (Number) `tasks.max` is set to this multiplied by the number of CPUs in the service. The default value is `1`.
 
 
 

@@ -31,7 +31,7 @@ func flinkUserConfig() *schema.Schema {
 			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
 					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
 					Type:        schema.TypeString,
@@ -41,7 +41,7 @@ func flinkUserConfig() *schema.Schema {
 				Type:     schema.TypeSet,
 			},
 			"ip_filter_object": {
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"description": {
 						Description: "Description for IP filter list entry.",
@@ -59,7 +59,7 @@ func flinkUserConfig() *schema.Schema {
 				Type:     schema.TypeSet,
 			},
 			"ip_filter_string": {
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
 					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
 					Type:        schema.TypeString,

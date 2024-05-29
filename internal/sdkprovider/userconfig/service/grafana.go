@@ -322,7 +322,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"cookie_samesite": {
-				Description:  "Enum: `lax`, `strict`, `none`. Cookie SameSite attribute: 'strict' prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. 'lax' is the default value.",
+				Description:  "Enum: `lax`, `strict`, `none`. Cookie SameSite attribute: `strict` prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. `lax` is the default value.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"lax", "strict", "none"}, false),
@@ -348,7 +348,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:        schema.TypeInt,
 			},
 			"dataproxy_send_user_header": {
-				Description: "Send 'X-Grafana-User' header to data source.",
+				Description: "Send `X-Grafana-User` header to data source.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
@@ -361,7 +361,7 @@ func grafanaUserConfig() *schema.Schema {
 				Description: "Grafana date format specifications",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"default_timezone": {
-						Description: "Default time zone for user preferences. Value 'browser' uses browser local time zone.",
+						Description: "Default time zone for user preferences. Value `browser` uses browser local time zone.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
@@ -451,7 +451,7 @@ func grafanaUserConfig() *schema.Schema {
 			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
 					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
 					Type:        schema.TypeString,
@@ -461,7 +461,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:     schema.TypeSet,
 			},
 			"ip_filter_object": {
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"description": {
 						Description: "Description for IP filter list entry.",
@@ -479,7 +479,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:     schema.TypeSet,
 			},
 			"ip_filter_string": {
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
 					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
 					Type:        schema.TypeString,

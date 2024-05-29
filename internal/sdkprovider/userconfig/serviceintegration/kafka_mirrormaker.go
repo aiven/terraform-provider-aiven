@@ -15,7 +15,7 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"cluster_alias": {
-				Description: "The alias under which the Kafka cluster is known to MirrorMaker. Can contain the following symbols: ASCII alphanumerics, '.', '_', and '-'.",
+				Description: "The alias under which the Kafka cluster is known to MirrorMaker. Can contain the following symbols: ASCII alphanumerics, `.`, `_`, and `-`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -38,7 +38,7 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"producer_compression_type": {
-						Description:  "Enum: `gzip`, `snappy`, `lz4`, `zstd`, `none`. Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.",
+						Description:  "Enum: `gzip`, `snappy`, `lz4`, `zstd`, `none`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"gzip", "snappy", "lz4", "zstd", "none"}, false),

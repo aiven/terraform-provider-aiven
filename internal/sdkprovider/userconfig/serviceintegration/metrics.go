@@ -14,7 +14,7 @@ func metricsUserConfig() *schema.Schema {
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"database": {
-				Description: "Name of the database where to store metric datapoints. Only affects PostgreSQL destinations. Defaults to 'metrics'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.",
+				Description: "Name of the database where to store metric datapoints. Only affects PostgreSQL destinations. Defaults to `metrics`. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -24,7 +24,7 @@ func metricsUserConfig() *schema.Schema {
 				Type:        schema.TypeInt,
 			},
 			"ro_username": {
-				Description: "Name of a user that can be used to read metrics. This will be used for Grafana integration (if enabled) to prevent Grafana users from making undesired changes. Only affects PostgreSQL destinations. Defaults to 'metrics_reader'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.",
+				Description: "Name of a user that can be used to read metrics. This will be used for Grafana integration (if enabled) to prevent Grafana users from making undesired changes. Only affects PostgreSQL destinations. Defaults to `metrics_reader`. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -113,7 +113,7 @@ func metricsUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"username": {
-				Description: "Name of the user used to write metrics. Only affects PostgreSQL destinations. Defaults to 'metrics_writer'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.",
+				Description: "Name of the user used to write metrics. Only affects PostgreSQL destinations. Defaults to `metrics_writer`. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},

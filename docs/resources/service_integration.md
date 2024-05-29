@@ -144,7 +144,7 @@ Optional:
 
 Required:
 
-- `tag` (String) Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix 'aiven-' are reserved for Aiven.
+- `tag` (String) Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix `aiven-` are reserved for Aiven.
 
 Optional:
 
@@ -258,7 +258,7 @@ Optional:
 
 Optional:
 
-- `cluster_alias` (String) The alias under which the Kafka cluster is known to MirrorMaker. Can contain the following symbols: ASCII alphanumerics, '.', '_', and '-'.
+- `cluster_alias` (String) The alias under which the Kafka cluster is known to MirrorMaker. Can contain the following symbols: ASCII alphanumerics, `.`, `_`, and `-`.
 - `kafka_mirrormaker` (Block List, Max: 1) Kafka MirrorMaker configuration values (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker))
 
 <a id="nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker"></a>
@@ -269,7 +269,7 @@ Optional:
 - `consumer_fetch_min_bytes` (Number) The minimum amount of data the server should return for a fetch request.
 - `producer_batch_size` (Number) The batch size in bytes producer will attempt to collect before publishing to broker.
 - `producer_buffer_memory` (Number) The amount of bytes producer can use for buffering data before publishing to broker.
-- `producer_compression_type` (String) Enum: `gzip`, `snappy`, `lz4`, `zstd`, `none`. Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.
+- `producer_compression_type` (String) Enum: `gzip`, `snappy`, `lz4`, `zstd`, `none`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.
 - `producer_linger_ms` (Number) The linger time (ms) for waiting new data to arrive for publishing.
 - `producer_max_request_size` (Number) The maximum request size in bytes.
 
@@ -290,11 +290,11 @@ Optional:
 
 Optional:
 
-- `database` (String) Name of the database where to store metric datapoints. Only affects PostgreSQL destinations. Defaults to 'metrics'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
+- `database` (String) Name of the database where to store metric datapoints. Only affects PostgreSQL destinations. Defaults to `metrics`. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
 - `retention_days` (Number) Number of days to keep old metrics. Only affects PostgreSQL destinations. Set to 0 for no automatic cleanup. Defaults to 30 days.
-- `ro_username` (String) Name of a user that can be used to read metrics. This will be used for Grafana integration (if enabled) to prevent Grafana users from making undesired changes. Only affects PostgreSQL destinations. Defaults to 'metrics_reader'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
+- `ro_username` (String) Name of a user that can be used to read metrics. This will be used for Grafana integration (if enabled) to prevent Grafana users from making undesired changes. Only affects PostgreSQL destinations. Defaults to `metrics_reader`. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
 - `source_mysql` (Block List, Max: 1) Configuration options for metrics where source service is MySQL (see [below for nested schema](#nestedblock--metrics_user_config--source_mysql))
-- `username` (String) Name of the user used to write metrics. Only affects PostgreSQL destinations. Defaults to 'metrics_writer'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
+- `username` (String) Name of the user used to write metrics. Only affects PostgreSQL destinations. Defaults to `metrics_writer`. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
 
 <a id="nestedblock--metrics_user_config--source_mysql"></a>
 ### Nested Schema for `metrics_user_config.source_mysql`

@@ -37,7 +37,7 @@ func kafkaUserConfig() *schema.Schema {
 			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
 					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
 					Type:        schema.TypeString,
@@ -47,7 +47,7 @@ func kafkaUserConfig() *schema.Schema {
 				Type:     schema.TypeSet,
 			},
 			"ip_filter_object": {
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"description": {
 						Description: "Description for IP filter list entry.",
@@ -65,7 +65,7 @@ func kafkaUserConfig() *schema.Schema {
 				Type:     schema.TypeSet,
 			},
 			"ip_filter_string": {
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
 					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
 					Type:        schema.TypeString,
@@ -83,7 +83,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"compression_type": {
-						Description:  "Enum: `gzip`, `snappy`, `lz4`, `zstd`, `uncompressed`, `producer`. Specify the final compression type for a given topic. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'uncompressed' which is equivalent to no compression; and 'producer' which means retain the original compression codec set by the producer.",
+						Description:  "Enum: `gzip`, `snappy`, `lz4`, `zstd`, `uncompressed`, `producer`. Specify the final compression type for a given topic. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `uncompressed` which is equivalent to no compression; and `producer` which means retain the original compression codec set by the producer.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"gzip", "snappy", "lz4", "zstd", "uncompressed", "producer"}, false),
@@ -241,7 +241,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"min_insync_replicas": {
-						Description: "When a producer sets acks to 'all' (or '-1'), min.insync.replicas specifies the minimum number of replicas that must acknowledge a write for the write to be considered successful.",
+						Description: "When a producer sets acks to `all` (or `-1`), min.insync.replicas specifies the minimum number of replicas that must acknowledge a write for the write to be considered successful.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -390,7 +390,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"producer_batch_size": {
-						Description: "This setting gives the upper bound of the batch size to be sent. If there are fewer than this many bytes accumulated for this partition, the producer will 'linger' for the linger.ms time waiting for more records to show up. A batch size of zero will disable batching entirely (defaults to 16384).",
+						Description: "This setting gives the upper bound of the batch size to be sent. If there are fewer than this many bytes accumulated for this partition, the producer will `linger` for the linger.ms time waiting for more records to show up. A batch size of zero will disable batching entirely (defaults to 16384).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -400,13 +400,13 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"producer_compression_type": {
-						Description:  "Enum: `gzip`, `snappy`, `lz4`, `zstd`, `none`. Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.",
+						Description:  "Enum: `gzip`, `snappy`, `lz4`, `zstd`, `none`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"gzip", "snappy", "lz4", "zstd", "none"}, false),
 					},
 					"producer_linger_ms": {
-						Description: "This setting gives the upper bound on the delay for batching: once there is batch.size worth of records for a partition it will be sent immediately regardless of this setting, however if there are fewer than this many bytes accumulated for this partition the producer will 'linger' for the specified time waiting for more records to show up. Defaults to 0.",
+						Description: "This setting gives the upper bound on the delay for batching: once there is batch.size worth of records for a partition it will be sent immediately regardless of this setting, however if there are fewer than this many bytes accumulated for this partition the producer will `linger` for the specified time waiting for more records to show up. Defaults to 0.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -471,13 +471,13 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"producer_acks": {
-						Description:  "Enum: `all`, `-1`, `0`, `1`. The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to 'all' or '-1', the leader will wait for the full set of in-sync replicas to acknowledge the record. The default value is `1`.",
+						Description:  "Enum: `all`, `-1`, `0`, `1`. The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to `all` or `-1`, the leader will wait for the full set of in-sync replicas to acknowledge the record. The default value is `1`.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"all", "-1", "0", "1"}, false),
 					},
 					"producer_compression_type": {
-						Description:  "Enum: `gzip`, `snappy`, `lz4`, `zstd`, `none`. Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.",
+						Description:  "Enum: `gzip`, `snappy`, `lz4`, `zstd`, `none`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"gzip", "snappy", "lz4", "zstd", "none"}, false),

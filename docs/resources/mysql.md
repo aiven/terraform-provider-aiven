@@ -117,9 +117,9 @@ Optional:
 - `backup_hour` (Number) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.
 - `backup_minute` (Number) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.
 - `binlog_retention_period` (Number) The minimum amount of time in seconds to keep binlog entries before deletion. This may be extended for services that require binlog entries for longer than the default for example if using the MySQL Debezium Kafka connector.
-- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--mysql_user_config--ip_filter_object))
-- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
+- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--mysql_user_config--ip_filter_object))
+- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `migration` (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--mysql_user_config--migration))
 - `mysql` (Block List, Max: 1) mysql.conf configuration values (see [below for nested schema](#nestedblock--mysql_user_config--mysql))
 - `mysql_version` (String) Enum: `8`, and newer. MySQL major version.
@@ -168,7 +168,7 @@ Optional:
 Optional:
 
 - `connect_timeout` (Number) The number of seconds that the mysqld server waits for a connect packet before responding with Bad handshake.
-- `default_time_zone` (String) Default server time zone as an offset from UTC (from -12:00 to +12:00), a time zone name, or 'SYSTEM' to use the MySQL server default.
+- `default_time_zone` (String) Default server time zone as an offset from UTC (from -12:00 to +12:00), a time zone name, or `SYSTEM` to use the MySQL server default.
 - `group_concat_max_len` (Number) The maximum permitted result length in bytes for the GROUP_CONCAT() function.
 - `information_schema_stats_expiry` (Number) The time, in seconds, before cached statistics expire.
 - `innodb_change_buffer_max_size` (Number) Maximum size for the InnoDB change buffer, as a percentage of the total size of the buffer pool. Default is 25.

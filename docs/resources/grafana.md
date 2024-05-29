@@ -98,21 +98,21 @@ Optional:
 - `auth_github` (Block List, Max: 1) Github Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_github))
 - `auth_gitlab` (Block List, Max: 1) GitLab Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_gitlab))
 - `auth_google` (Block List, Max: 1) Google Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_google))
-- `cookie_samesite` (String) Enum: `lax`, `strict`, `none`. Cookie SameSite attribute: 'strict' prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. 'lax' is the default value.
+- `cookie_samesite` (String) Enum: `lax`, `strict`, `none`. Cookie SameSite attribute: `strict` prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. `lax` is the default value.
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
 - `dashboard_previews_enabled` (Boolean) This feature is new in Grafana 9 and is quite resource intensive. It may cause low-end plans to work more slowly while the dashboard previews are rendering.
 - `dashboards_min_refresh_interval` (String) Signed sequence of decimal numbers, followed by a unit suffix (ms, s, m, h, d), e.g. 30s, 1h.
 - `dashboards_versions_to_keep` (Number) Dashboard versions to keep per dashboard.
-- `dataproxy_send_user_header` (Boolean) Send 'X-Grafana-User' header to data source.
+- `dataproxy_send_user_header` (Boolean) Send `X-Grafana-User` header to data source.
 - `dataproxy_timeout` (Number) Timeout for data proxy requests in seconds.
 - `date_formats` (Block List, Max: 1) Grafana date format specifications (see [below for nested schema](#nestedblock--grafana_user_config--date_formats))
 - `disable_gravatar` (Boolean) Set to true to disable gravatar. Defaults to false (gravatar is enabled).
 - `editors_can_admin` (Boolean) Editors can manage folders, teams and dashboards created by them.
 - `external_image_storage` (Block List, Max: 1) External image store settings (see [below for nested schema](#nestedblock--grafana_user_config--external_image_storage))
 - `google_analytics_ua_id` (String) Google Analytics ID.
-- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--grafana_user_config--ip_filter_object))
-- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
+- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--grafana_user_config--ip_filter_object))
+- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `metrics_enabled` (Boolean) Enable Grafana /metrics endpoint.
 - `oauth_allow_insecure_email_lookup` (Boolean) Enforce user lookup based on email instead of the unique ID provided by the IdP.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--grafana_user_config--private_access))
@@ -220,7 +220,7 @@ Optional:
 
 Optional:
 
-- `default_timezone` (String) Default time zone for user preferences. Value 'browser' uses browser local time zone.
+- `default_timezone` (String) Default time zone for user preferences. Value `browser` uses browser local time zone.
 - `full_date` (String) Moment.js style format string for cases where full date is shown.
 - `interval_day` (String) Moment.js style format string used when a time requiring day accuracy is shown.
 - `interval_hour` (String) Moment.js style format string used when a time requiring hour accuracy is shown.

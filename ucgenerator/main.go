@@ -319,6 +319,8 @@ func getSchemaValues(o *object) (jen.Dict, error) {
 	return values, nil
 }
 
+var reCode = regexp.MustCompile(`'([^'\s]+)'`)
+
 func getDescription(o *object) string {
 	desc := make([]string, 0)
 	if o.Enum != nil {
@@ -340,9 +342,11 @@ func getDescription(o *object) string {
 		d = o.Title
 	}
 
-	// Comes from the schema, quite confusing
-	d = strings.TrimSuffix(d, "The default value is `map[]`.")
 	if d != "" {
+		// Wraps code chunks with backticks to render them as code blocks
+		d = reCode.ReplaceAllString(d, "`$1`")
+
+		// Adds a trailing dot if missing
 		desc = append(desc, addDot(d))
 	}
 

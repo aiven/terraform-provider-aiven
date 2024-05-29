@@ -26,7 +26,7 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
 					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
 					Type:        schema.TypeString,
@@ -36,7 +36,7 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 				Type:     schema.TypeSet,
 			},
 			"ip_filter_object": {
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"description": {
 						Description: "Description for IP filter list entry.",
@@ -54,7 +54,7 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 				Type:     schema.TypeSet,
 			},
 			"ip_filter_string": {
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
 					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
 					Type:        schema.TypeString,
@@ -92,7 +92,7 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"refresh_groups_enabled": {
-						Description: "Whether to periodically check for new consumer groups. Defaults to 'true'.",
+						Description: "Whether to periodically check for new consumer groups. Defaults to `true`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -102,7 +102,7 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"refresh_topics_enabled": {
-						Description: "Whether to periodically check for new topics and partitions. Defaults to 'true'.",
+						Description: "Whether to periodically check for new topics and partitions. Defaults to `true`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -127,7 +127,7 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"tasks_max_per_cpu": {
-						Description: "'tasks.max' is set to this multiplied by the number of CPUs in the service. The default value is `1`.",
+						Description: "`tasks.max` is set to this multiplied by the number of CPUs in the service. The default value is `1`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},

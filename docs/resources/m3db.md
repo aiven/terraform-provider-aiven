@@ -97,9 +97,9 @@ Optional:
 
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
-- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--m3db_user_config--ip_filter_object))
-- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
+- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--m3db_user_config--ip_filter_object))
+- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `limits` (Block List, Max: 1) M3 limits (see [below for nested schema](#nestedblock--m3db_user_config--limits))
 - `m3` (Block List, Max: 1) M3 specific configuration options (see [below for nested schema](#nestedblock--m3db_user_config--m3))
 - `m3_version` (String) Enum: `1.1`, `1.2`, `1.5`, and newer. M3 major version (deprecated, use m3db_version).
@@ -133,7 +133,7 @@ Optional:
 
 - `max_recently_queried_series_blocks` (Number) The maximum number of blocks that can be read in a given lookback period.
 - `max_recently_queried_series_disk_bytes_read` (Number) The maximum number of disk bytes that can be read in a given lookback period.
-- `max_recently_queried_series_lookback` (String) The lookback period for 'max_recently_queried_series_blocks' and 'max_recently_queried_series_disk_bytes_read'.
+- `max_recently_queried_series_lookback` (String) The lookback period for `max_recently_queried_series_blocks` and `max_recently_queried_series_disk_bytes_read`.
 - `query_docs` (Number) The maximum number of docs fetched in single query.
 - `query_require_exhaustive` (Boolean) When query limits are exceeded, whether to return error or return partial results.
 - `query_series` (Number) The maximum number of series fetched in single query.
