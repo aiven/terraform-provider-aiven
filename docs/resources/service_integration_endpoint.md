@@ -77,9 +77,9 @@ Optional:
 
 Required:
 
-- `access_key` (String) AWS access key. Required permissions are logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents and logs:DescribeLogStreams. Example: `AAAAAAAAAAAAAAAAAAAA`.
+- `access_key` (String, Sensitive) AWS access key. Required permissions are logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents and logs:DescribeLogStreams. Example: `AAAAAAAAAAAAAAAAAAAA`.
 - `region` (String) AWS region. Example: `us-east-1`.
-- `secret_key` (String) AWS secret key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.
+- `secret_key` (String, Sensitive) AWS secret key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.
 
 Optional:
 
@@ -91,10 +91,10 @@ Optional:
 
 Required:
 
-- `access_key` (String) AWS access key. Required permissions are cloudwatch:PutMetricData. Example: `AAAAAAAAAAAAAAAAAAAA`.
+- `access_key` (String, Sensitive) AWS access key. Required permissions are cloudwatch:PutMetricData. Example: `AAAAAAAAAAAAAAAAAAAA`.
 - `namespace` (String) AWS CloudWatch Metrics Namespace. Example: `my-metrics-namespace`.
 - `region` (String) AWS region. Example: `us-east-1`.
-- `secret_key` (String) AWS secret key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.
+- `secret_key` (String, Sensitive) AWS secret key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.
 
 
 <a id="nestedblock--external_elasticsearch_logs_user_config"></a>
