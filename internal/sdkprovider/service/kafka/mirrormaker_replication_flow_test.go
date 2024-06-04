@@ -37,6 +37,13 @@ func TestAccAivenMirrorMakerReplicationFlow_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "enable", "true"),
 					resource.TestCheckResourceAttr(resourceName, "offset_syncs_topic_location", "source"),
 					resource.TestCheckResourceAttr(resourceName, "replication_factor", "2"),
+					resource.TestCheckResourceAttr(resourceName, "config_properties_exclude.#", "6"),
+					resource.TestCheckResourceAttr(resourceName, "config_properties_exclude.0", "follower\\.replication\\.throttled\\.replicas"),
+					resource.TestCheckResourceAttr(resourceName, "config_properties_exclude.1", "leader\\.replication\\.throttled\\.replicas"),
+					resource.TestCheckResourceAttr(resourceName, "config_properties_exclude.2", "message\\.timestamp\\.difference\\.max\\.ms"),
+					resource.TestCheckResourceAttr(resourceName, "config_properties_exclude.3", "message\\.timestamp\\.type"),
+					resource.TestCheckResourceAttr(resourceName, "config_properties_exclude.4", "unclean\\.leader\\.election\\.enable"),
+					resource.TestCheckResourceAttr(resourceName, "config_properties_exclude.5", "min\\.insync\\.replicas"),
 				),
 			},
 		},
@@ -202,6 +209,15 @@ resource "aiven_mirrormaker_replication_flow" "foo" {
     ".*[\\-\\.]internal",
     ".*\\.replica",
     "__.*"
+  ]
+
+  config_properties_exclude = [
+    "follower\\.replication\\.throttled\\.replicas",
+    "leader\\.replication\\.throttled\\.replicas",
+    "message\\.timestamp\\.difference\\.max\\.ms",
+    "message\\.timestamp\\.type",
+    "unclean\\.leader\\.election\\.enable",
+    "min\\.insync\\.replicas"
   ]
 }
 

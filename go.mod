@@ -3,7 +3,7 @@ module github.com/aiven/terraform-provider-aiven
 go 1.22
 
 require (
-	github.com/aiven/aiven-go-client/v2 v2.23.1-0.20240528070039-95a025f600fc
+	github.com/aiven/aiven-go-client/v2 v2.23.1-0.20240604130233-51173641d413
 	github.com/aiven/go-client-codegen v0.10.0
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/dave/jennifer v1.7.0
