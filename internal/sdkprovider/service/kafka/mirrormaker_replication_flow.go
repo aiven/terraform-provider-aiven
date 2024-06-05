@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"context"
+	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -102,6 +103,15 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 		Description:  "Offset syncs topic location. Possible values are `source` & `target`. There is no default value.",
 		ValidateFunc: validation.StringInSlice([]string{"source", "target"}, false),
 	},
+	"config_properties_exclude": {
+		Type:        schema.TypeList,
+		Optional:    true,
+		Description: "List of topic configuration properties and/or regular expressions to not replicate. The properties that are not replicated by default are: `follower.replication.throttled.replicas`, `leader.replication.throttled.replicas`, `message.timestamp.difference.max.ms`, `message.timestamp.type`, `unclean.leader.election.enable`, and `min.insync.replicas`. Setting this overrides the defaults. For example, to enable replication for 'min.insync.replicas' and 'unclean.leader.election.enable' set this to: [\"follower\\\\\\\\.replication\\\\\\\\.throttled\\\\\\\\.replicas\", \"leader\\\\\\\\.replication\\\\\\\\.throttled\\\\\\\\.replicas\", \"message\\\\\\\\.timestamp\\\\\\\\.difference\\\\\\\\.max\\\\\\\\.ms\",  \"message\\\\\\\\.timestamp\\\\\\\\.type\"]",
+		Elem: &schema.Schema{
+			Type:     schema.TypeString,
+			MaxItems: 256,
+		},
+	},
 	"replication_factor": {
 		Type:         schema.TypeInt,
 		Optional:     true,
@@ -148,6 +158,7 @@ func resourceMirrorMakerReplicationFlowCreate(ctx context.Context, d *schema.Res
 			EmitHeartbeatsEnabled:           schemautil.OptionalBoolPointer(d, "emit_heartbeats_enabled"),
 			EmitBackwardHeartbeatsEnabled:   schemautil.OptionalBoolPointer(d, "emit_backward_heartbeats_enabled"),
 			OffsetSyncsTopicLocation:        d.Get("offset_syncs_topic_location").(string),
+			ConfigPropertiesExclude:         strings.Join(schemautil.FlattenToString(d.Get("config_properties_exclude").([]interface{})), ","),
 			ReplicationFactor:               schemautil.OptionalIntPointer(d, "replication_factor"),
 		},
 	})
@@ -240,7 +251,12 @@ func resourceMirrorMakerReplicationFlowRead(ctx context.Context, d *schema.Resou
 	); err != nil {
 		return diag.FromErr(err)
 	}
-
+	if replicationFlow.ReplicationFlow.ConfigPropertiesExclude != "" {
+		configPropertiesExclude := strings.Split(replicationFlow.ReplicationFlow.ConfigPropertiesExclude, ",")
+		if err := d.Set("config_properties_exclude", configPropertiesExclude); err != nil {
+			return diag.FromErr(err)
+		}
+	}
 	if replicationFlow.ReplicationFlow.ReplicationFactor != nil {
 		if err := d.Set(
 			"replication_factor",
@@ -277,6 +293,7 @@ func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.Res
 				EmitHeartbeatsEnabled:           schemautil.OptionalBoolPointer(d, "emit_heartbeats_enabled"),
 				EmitBackwardHeartbeatsEnabled:   schemautil.OptionalBoolPointer(d, "emit_backward_heartbeats_enabled"),
 				OffsetSyncsTopicLocation:        d.Get("offset_syncs_topic_location").(string),
+				ConfigPropertiesExclude:         strings.Join(schemautil.FlattenToString(d.Get("config_properties_exclude").([]interface{})), ","),
 				ReplicationFactor:               schemautil.OptionalIntPointer(d, "replication_factor"),
 			},
 		},
