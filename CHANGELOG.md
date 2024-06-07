@@ -9,6 +9,10 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!-- [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Fix aiven-go-client dependency version
+
 ## [4.19.1] - 2024-05-05
 
 - Add `config_properties_exclude` attribute to `aiven_mirrormaker_replication_flow` resource

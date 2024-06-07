@@ -197,12 +197,8 @@ github.com/ProtonMail/go-crypto v1.1.0-alpha.2/go.mod h1:rA3QumHc/FZ8pAHreoekgiA
 github.com/agext/levenshtein v1.2.1/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
-github.com/aiven/aiven-go-client/v2 v2.23.1-0.20240528070039-95a025f600fc h1:5TAA6P/znH5/rZYi2xvs+zUqZiPydUKrr478fjnG8nc=
-github.com/aiven/aiven-go-client/v2 v2.23.1-0.20240528070039-95a025f600fc/go.mod h1:Ox/NZj1lJPT8LQya3kYq6bjQ4GdHpcauB/f+6DJygEE=
-github.com/aiven/aiven-go-client/v2 v2.23.1-0.20240604104045-2b2e809cccb9 h1:rpjOrx1TkOIFtE6OCS0Rk9YaV/9kVBUpsss5HsndZ+s=
-github.com/aiven/aiven-go-client/v2 v2.23.1-0.20240604104045-2b2e809cccb9/go.mod h1:Ox/NZj1lJPT8LQya3kYq6bjQ4GdHpcauB/f+6DJygEE=
-github.com/aiven/aiven-go-client/v2 v2.23.1-0.20240604130233-51173641d413 h1:FIzPD/3lXFh6Yt2wgRFWcA6M4CuHZwEjSiWToNLJ+9E=
-github.com/aiven/aiven-go-client/v2 v2.23.1-0.20240604130233-51173641d413/go.mod h1:Ox/NZj1lJPT8LQya3kYq6bjQ4GdHpcauB/f+6DJygEE=
+github.com/aiven/aiven-go-client/v2 v2.23.1-0.20240605130503-0a97dd47f14a h1:Vz6Vhm6BW6KA5pV74CkqO7ILg/G1F9+/CjZGgPVhOfs=
+github.com/aiven/aiven-go-client/v2 v2.23.1-0.20240605130503-0a97dd47f14a/go.mod h1:KdHfLIlIRZIfCSEBd39j1Q81jlSb6Nd+oCQKqERfnuA=
 github.com/aiven/go-api-schemas v1.74.0 h1:QuzQ8gmhdIR3z3jn3INgJdkxB4r16KC6TFHR3nFoIWw=
 github.com/aiven/go-api-schemas v1.74.0/go.mod h1:q1aut0Kfpf1TAbL7Cum9kso9y/xvnNXnq79Sp3aAhzw=
 github.com/aiven/go-client-codegen v0.10.0 h1:lMFl4Vf1ChV590WQEo7a2ckG0uzBh0yNl+InzWndPLQ=
@@ -416,8 +412,8 @@ github.com/hashicorp/go-multierror v1.1.1 h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+l
 github.com/hashicorp/go-multierror v1.1.1/go.mod h1:iw975J/qwKPdAO1clOe2L8331t/9/fmwbPZ6JB6eMoM=
 github.com/hashicorp/go-plugin v1.6.0 h1:wgd4KxHJTVGGqWBq4QPB1i5BZNEx9BR8+OFmHDmTk8A=
 github.com/hashicorp/go-plugin v1.6.0/go.mod h1:lBS5MtSSBZk0SHc66KACcjjlU6WzEVP/8pwz68aMkCI=
-github.com/hashicorp/go-retryablehttp v0.7.6 h1:TwRYfx2z2C4cLbXmT8I5PgP/xmuqASDyiVuGYfs9GZM=
-github.com/hashicorp/go-retryablehttp v0.7.6/go.mod h1:pkQpWZeYWskR+D1tR2O5OcBFOxfA7DoAO6xtkuQnHTk=
+github.com/hashicorp/go-retryablehttp v0.7.7 h1:C8hUCYzor8PIfXHa4UrZkU4VvK8o9ISHxT2Q8+VepXU=
+github.com/hashicorp/go-retryablehttp v0.7.7/go.mod h1:pkQpWZeYWskR+D1tR2O5OcBFOxfA7DoAO6xtkuQnHTk=
 github.com/hashicorp/go-safetemp v1.0.0 h1:2HR189eFNrjHQyENnQMMpCiBAsRxzbTMIgBhEyExpmo=
 github.com/hashicorp/go-safetemp v1.0.0/go.mod h1:oaerMy3BhqiTbVye6QuFhFtIceqFoDHxNAB65b+Rj1I=
 github.com/hashicorp/go-uuid v1.0.0/go.mod h1:6SBZvOh/SIDV7/2o3Jml5SYk/TvGqwFJ/bN7x4byOro=
