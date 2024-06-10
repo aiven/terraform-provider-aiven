@@ -1,4 +1,4 @@
-# Create an ETL user 
+# Create an ETL user
 resource "aiven_clickhouse_user" "etl" {
   project      = aiven_project.clickhouse_kafka_source.project
   service_name = aiven_clickhouse.clickhouse.service_name
@@ -21,17 +21,15 @@ resource "aiven_clickhouse_grant" "writer_role" {
   privilege_grant {
     privilege = "INSERT"
     database  = aiven_clickhouse_database.iot_analytics.name
-    table     = "*"
   }
 
   privilege_grant {
     privilege = "SELECT"
     database  = aiven_clickhouse_database.iot_analytics.name
-    table     = "*"
   }
 }
 
-# Grant the writer role to the ETL user 
+# Grant the writer role to the ETL user
 # to give them write permissions to the IoT measurements database
 resource "aiven_clickhouse_grant" "etl_user" {
   project      = aiven_clickhouse.clickhouse.project
@@ -43,14 +41,14 @@ resource "aiven_clickhouse_grant" "etl_user" {
   }
 }
 
-# Create an analyst 
+# Create an analyst
 resource "aiven_clickhouse_user" "analyst" {
   project      = aiven_project.clickhouse_kafka_source.project
   service_name = aiven_clickhouse.clickhouse.service_name
   username     = "analyst"
 }
 
-# Create a role named reader role 
+# Create a role named reader role
 resource "aiven_clickhouse_role" "reader" {
   project      = aiven_project.clickhouse_kafka_source.project
   service_name = aiven_clickhouse.clickhouse.service_name
@@ -66,7 +64,6 @@ resource "aiven_clickhouse_grant" "reader_role" {
   privilege_grant {
     privilege = "SELECT"
     database  = aiven_clickhouse_database.iot_analytics.name
-    table     = "*"
   }
 }
 
