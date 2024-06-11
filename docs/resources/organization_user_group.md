@@ -26,11 +26,11 @@ resource "aiven_organization_user_group" "example" {
 ### Required
 
 - `description` (String) The description of the user group. Changing this property forces recreation of the resource.
+- `name` (String) The name of the user group. Changing this property forces recreation of the resource.
 - `organization_id` (String) The ID of the organization. Changing this property forces recreation of the resource.
 
 ### Optional
 
-- `name` (String) The name of the user group. Changing this property forces recreation of the resource.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

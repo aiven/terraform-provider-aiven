@@ -12,6 +12,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Fix aiven-go-client dependency version
+- Fix `aiven_organization_user_group` resource - `name` field is required
 
 ## [4.19.1] - 2024-05-05
 
