@@ -3,12 +3,12 @@
 page_title: "aiven_project Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an Aiven project https://aiven.io/docs/platform/concepts/projects_accounts_access#projects.
+  Creates and manages an Aiven project https://aiven.io/docs/platform/concepts/orgs-units-projects#projects.
 ---
 
 # aiven_project (Resource)
 
-Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/projects_accounts_access#projects).
+Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/orgs-units-projects#projects).
 
 ## Example Usage
 
@@ -33,7 +33,7 @@ resource "aiven_project" "example_project" {
 - `billing_group` (String) The ID of the billing group this project is assigned to. To set up proper dependencies please refer to this variable as a reference.
 - `copy_from_project` (String) The name of the project to copy billing information, technical contacts, and some other project attributes from. This is most useful to set up the same billing method when you use bank transfers to pay invoices for other projects. You can only do this when creating a project. You can't set the billing over the API for an existing. To set up proper dependencies please refer to this variable as a reference.
 - `default_cloud` (String) Default cloud provider and region where services are hosted. This can be changed after the project is created and will not affect existing services.
-- `parent_id` (String) Link a project to an [organization, organizational unit,](https://aiven.io/docs/platform/concepts/projects_accounts_access) or account by using its ID. To set up proper dependencies please refer to this variable as a reference.
+- `parent_id` (String) Link a project to an [organization, organizational unit,](https://aiven.io/docs/platform/concepts/orgs-units-projects) or account by using its ID. To set up proper dependencies please refer to this variable as a reference.
 - `tag` (Block Set) Tags are key-value pairs that allow you to categorize projects. (see [below for nested schema](#nestedblock--tag))
 - `technical_emails` (Set of String) The email addresses for [project contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this project and its services. You can also set email contacts at the service level. It's good practice to keep these up-to-date to be aware of any potential issues with your project.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))

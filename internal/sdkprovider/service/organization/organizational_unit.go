@@ -40,7 +40,7 @@ var aivenOrganizationalUnitSchema = map[string]*schema.Schema{
 
 func ResourceOrganizationalUnit() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Creates and manages an [organizational unit](https://aiven.io/docs/platform/concepts/projects_accounts_access) in an Aiven organization.",
+		Description:   "Creates and manages an [organizational unit](https://aiven.io/docs/platform/concepts/orgs-units-projects) in an Aiven organization.",
 		CreateContext: resourceOrganizationalUnitCreate,
 		ReadContext:   resourceOrganizationalUnitRead,
 		UpdateContext: resourceOrganizationalUnitUpdate,
