@@ -79,7 +79,7 @@ func (r *organizationUserGroupMembersResource) Schema(
 	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
 		Description: userconfig.Desc(
 			"Adds and manages users in a " +
-				"[user group](https://aiven.io/docs/platform/concepts/projects_accounts_access#groups).",
+				"[user group](https://aiven.io/docs/platform/howto/list-groups).",
 		).
 			Build(),
 		Attributes: map[string]schema.Attribute{

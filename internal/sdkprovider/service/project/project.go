@@ -41,7 +41,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 		Description: userconfig.Desc(
-			"Link a project to an [organization, organizational unit,](https://aiven.io/docs/platform/concepts/projects_accounts_access) or account by using its ID.",
+			"Link a project to an [organization, organizational unit,](https://aiven.io/docs/platform/concepts/orgs-units-projects) or account by using its ID.",
 		).Referenced().Build(),
 		DiffSuppressFunc: func(_, _, _ string, d *schema.ResourceData) bool {
 			_, ok := d.GetOk("account_id")
@@ -134,7 +134,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 
 func ResourceProject() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/projects_accounts_access#projects).",
+		Description:   "Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/orgs-units-projects#projects).",
 		CreateContext: resourceProjectCreate,
 		ReadContext:   resourceProjectRead,
 		UpdateContext: resourceProjectUpdate,

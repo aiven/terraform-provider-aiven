@@ -3,12 +3,12 @@
 page_title: "aiven_organization Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an organization https://aiven.io/docs/platform/concepts/projects_accounts_access.
+  Creates and manages an organization https://aiven.io/docs/platform/concepts/orgs-units-projects.
 ---
 
 # aiven_organization (Resource)
 
-Creates and manages an [organization](https://aiven.io/docs/platform/concepts/projects_accounts_access).
+Creates and manages an [organization](https://aiven.io/docs/platform/concepts/orgs-units-projects).
 
 ## Example Usage
 

@@ -3,12 +3,12 @@
 page_title: "aiven_organization_user_group_member Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Adds and manages users in a user group https://aiven.io/docs/platform/concepts/projects_accounts_access#groups.
+  Adds and manages users in a user group https://aiven.io/docs/platform/howto/list-groups.
 ---
 
 # aiven_organization_user_group_member (Resource)
 
-Adds and manages users in a [user group](https://aiven.io/docs/platform/concepts/projects_accounts_access#groups).
+Adds and manages users in a [user group](https://aiven.io/docs/platform/howto/list-groups).
 
 ## Example Usage
 
