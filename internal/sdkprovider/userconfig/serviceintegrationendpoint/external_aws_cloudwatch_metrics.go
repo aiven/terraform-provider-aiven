@@ -16,6 +16,7 @@ func externalAwsCloudwatchMetricsUserConfig() *schema.Schema {
 			"access_key": {
 				Description: "AWS access key. Required permissions are cloudwatch:PutMetricData. Example: `AAAAAAAAAAAAAAAAAAAA`.",
 				Required:    true,
+				Sensitive:   true,
 				Type:        schema.TypeString,
 			},
 			"namespace": {
@@ -31,6 +32,7 @@ func externalAwsCloudwatchMetricsUserConfig() *schema.Schema {
 			"secret_key": {
 				Description: "AWS secret key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.",
 				Required:    true,
+				Sensitive:   true,
 				Type:        schema.TypeString,
 			},
 		}},

@@ -7,7 +7,11 @@ nav_order: 1
 # Changelog
 
 <!-- Always keep the following header in place: -->
-<!-- [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
+<!-- ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
+
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Mark several sensitive user config fields as "sensitive"
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 

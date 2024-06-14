@@ -235,10 +235,10 @@ Optional:
 
 Required:
 
-- `access_key` (String) S3 access key. Requires permissions to the S3 bucket for the s3:PutObject and s3:PutObjectAcl actions. Example: `AAAAAAAAAAAAAAAAAAA`.
+- `access_key` (String, Sensitive) S3 access key. Requires permissions to the S3 bucket for the s3:PutObject and s3:PutObjectAcl actions. Example: `AAAAAAAAAAAAAAAAAAA`.
 - `bucket_url` (String) Bucket URL for S3. Example: `https://grafana.s3-ap-southeast-2.amazonaws.com/`.
 - `provider` (String) Enum: `s3`. Provider type.
-- `secret_key` (String) S3 secret key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.
+- `secret_key` (String, Sensitive) S3 secret key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.
 
 
 <a id="nestedblock--grafana_user_config--ip_filter_object"></a>
