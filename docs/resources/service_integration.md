@@ -135,6 +135,7 @@ Optional:
 - `include_consumer_groups` (List of String) List of custom metrics.
 - `include_topics` (List of String) List of topics to include.
 - `kafka_custom_metrics` (List of String) List of custom metrics.
+- `mirrormaker_custom_metrics` (List of String) List of custom metrics.
 - `max_jmx_metrics` (Number) Maximum number of JMX metrics to send.
 - `opensearch` (Block List, Max: 1) Datadog Opensearch Options (see [below for nested schema](#nestedblock--datadog_user_config--opensearch))
 - `redis` (Block List, Max: 1) Datadog Redis Options (see [below for nested schema](#nestedblock--datadog_user_config--redis))

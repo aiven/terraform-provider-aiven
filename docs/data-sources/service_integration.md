@@ -126,6 +126,7 @@ Read-Only:
 - `include_consumer_groups` (List of String)
 - `include_topics` (List of String)
 - `kafka_custom_metrics` (List of String)
+- `mirrormaker_custom_metrics` (List of String)
 - `max_jmx_metrics` (Number)
 - `opensearch` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--opensearch))
 - `redis` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--redis))
