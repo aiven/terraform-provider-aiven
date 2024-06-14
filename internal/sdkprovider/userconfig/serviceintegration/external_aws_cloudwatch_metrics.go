@@ -17,12 +17,12 @@ func externalAwsCloudwatchMetricsUserConfig() *schema.Schema {
 				Description: "Metrics to not send to AWS CloudWatch (takes precedence over extra_metrics)",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"field": {
-						Description: "Identifier of a value in the metric.",
+						Description: "Identifier of a value in the metric. Example: `used`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"metric": {
-						Description: "Identifier of the metric.",
+						Description: "Identifier of the metric. Example: `java.lang:Memory`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -35,12 +35,12 @@ func externalAwsCloudwatchMetricsUserConfig() *schema.Schema {
 				Description: "Metrics to allow through to AWS CloudWatch (in addition to default metrics)",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"field": {
-						Description: "Identifier of a value in the metric.",
+						Description: "Identifier of a value in the metric. Example: `used`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"metric": {
-						Description: "Identifier of the metric.",
+						Description: "Identifier of the metric. Example: `java.lang:Memory`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},

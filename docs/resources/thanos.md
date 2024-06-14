@@ -107,9 +107,9 @@ Read-Only:
 Optional:
 
 - `compactor` (Block List, Max: 1) ThanosCompactor (see [below for nested schema](#nestedblock--thanos_user_config--compactor))
-- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--thanos_user_config--ip_filter_object))
-- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
+- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--thanos_user_config--ip_filter_object))
+- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `object_storage_usage_alert_threshold_gb` (Number) After exceeding the limit a service alert is going to be raised (0 means not set).
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--thanos_user_config--public_access))
 - `query` (Block List, Max: 1) ThanosQuery (see [below for nested schema](#nestedblock--thanos_user_config--query))
@@ -130,11 +130,11 @@ Optional:
 
 Required:
 
-- `network` (String) CIDR address block.
+- `network` (String) CIDR address block. Example: `10.20.0.0/16`.
 
 Optional:
 
-- `description` (String) Description for IP filter list entry.
+- `description` (String) Description for IP filter list entry. Example: `Production service IP range`.
 
 
 <a id="nestedblock--thanos_user_config--public_access"></a>
@@ -155,10 +155,10 @@ Optional:
 
 Optional:
 
-- `query_default_evaluation_interval` (String) Set the default evaluation interval for subqueries. The default value is `1m`.
-- `query_lookback_delta` (String) The maximum lookback duration for retrieving metrics during expression evaluations in PromQL. PromQL always evaluates the query for a certain timestamp, and it looks back for the given amount of time to get the latest sample. If it exceeds the maximum lookback delta, it assumes the series is stale and returns none (a gap). The lookback delta should be set to at least 2 times the slowest scrape interval. If unset, it will use the promql default of 5m. The default value is `5m`.
-- `query_metadata_default_time_range` (String) The default metadata time range duration for retrieving labels through Labels and Series API when the range parameters are not specified. The zero value means the range covers the time since the beginning. The default value is `0s`.
-- `query_timeout` (String) Maximum time to process a query by the query node. The default value is `2m`.
+- `query_default_evaluation_interval` (String) Set the default evaluation interval for subqueries. Default: `1m`.
+- `query_lookback_delta` (String) The maximum lookback duration for retrieving metrics during expression evaluations in PromQL. PromQL always evaluates the query for a certain timestamp, and it looks back for the given amount of time to get the latest sample. If it exceeds the maximum lookback delta, it assumes the series is stale and returns none (a gap). The lookback delta should be set to at least 2 times the slowest scrape interval. If unset, it will use the promql default of 5m. Default: `5m`.
+- `query_metadata_default_time_range` (String) The default metadata time range duration for retrieving labels through Labels and Series API when the range parameters are not specified. The zero value means the range covers the time since the beginning. Default: `0s`.
+- `query_timeout` (String) Maximum time to process a query by the query node. Default: `2m`.
 
 
 <a id="nestedblock--thanos_user_config--query_frontend"></a>
@@ -166,7 +166,7 @@ Optional:
 
 Optional:
 
-- `query_range_align_range_with_step` (Boolean) Whether to align the query range boundaries with the step. If enabled, the query range boundaries will be aligned to the step, providing more accurate results for queries with high-resolution data. The default value is `true`.
+- `query_range_align_range_with_step` (Boolean) Whether to align the query range boundaries with the step. If enabled, the query range boundaries will be aligned to the step, providing more accurate results for queries with high-resolution data. Default: `true`.
 
 
 

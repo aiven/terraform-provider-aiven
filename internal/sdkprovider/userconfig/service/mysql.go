@@ -17,7 +17,7 @@ func mysqlUserConfig() *schema.Schema {
 			"additional_backup_regions": {
 				Description: "Additional Cloud Regions for Backup Replication.",
 				Elem: &schema.Schema{
-					Description: "Target cloud.",
+					Description: "Target cloud. Example: `aws-eu-central-1`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1,
@@ -32,31 +32,31 @@ func mysqlUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"admin_username": {
-				Description: "Custom username for admin user. This must be set only when a new service is being created.",
+				Description: "Custom username for admin user. This must be set only when a new service is being created. Example: `avnadmin`.",
 				ForceNew:    true,
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"backup_hour": {
-				Description: "The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.",
+				Description: "The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed. Example: `3`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
 			"backup_minute": {
-				Description: "The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.",
+				Description: "The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed. Example: `30`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
 			"binlog_retention_period": {
-				Description: "The minimum amount of time in seconds to keep binlog entries before deletion. This may be extended for services that require binlog entries for longer than the default for example if using the MySQL Debezium Kafka connector.",
+				Description: "The minimum amount of time in seconds to keep binlog entries before deletion. This may be extended for services that require binlog entries for longer than the default for example if using the MySQL Debezium Kafka connector. Example: `600`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -64,15 +64,15 @@ func mysqlUserConfig() *schema.Schema {
 				Type:     schema.TypeSet,
 			},
 			"ip_filter_object": {
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"description": {
-						Description: "Description for IP filter list entry.",
+						Description: "Description for IP filter list entry. Example: `Production service IP range`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"network": {
-						Description: "CIDR address block.",
+						Description: "CIDR address block. Example: `10.20.0.0/16`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -82,9 +82,9 @@ func mysqlUserConfig() *schema.Schema {
 				Type:     schema.TypeSet,
 			},
 			"ip_filter_string": {
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -95,17 +95,17 @@ func mysqlUserConfig() *schema.Schema {
 				Description: "Migrate data from existing server",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"dbname": {
-						Description: "Database name for bootstrapping the initial connection.",
+						Description: "Database name for bootstrapping the initial connection. Example: `defaultdb`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"host": {
-						Description: "Hostname or IP address of the server where to migrate data from.",
+						Description: "Hostname or IP address of the server where to migrate data from. Example: `my.server.com`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"ignore_dbs": {
-						Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment).",
+						Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment). Example: `db1,db2`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
@@ -116,23 +116,23 @@ func mysqlUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"dump", "replication"}, false),
 					},
 					"password": {
-						Description: "Password for authentication with the server where to migrate data from.",
+						Description: "Password for authentication with the server where to migrate data from. Example: `jjKk45Nnd`.",
 						Optional:    true,
 						Sensitive:   true,
 						Type:        schema.TypeString,
 					},
 					"port": {
-						Description: "Port number of the server where to migrate data from.",
+						Description: "Port number of the server where to migrate data from. Example: `1234`.",
 						Required:    true,
 						Type:        schema.TypeInt,
 					},
 					"ssl": {
-						Description: "The server where to migrate data from is secured with SSL. The default value is `true`.",
+						Description: "The server where to migrate data from is secured with SSL. Default: `true`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"username": {
-						Description: "User name for authentication with the server where to migrate data from.",
+						Description: "User name for authentication with the server where to migrate data from. Example: `myname`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
@@ -145,57 +145,57 @@ func mysqlUserConfig() *schema.Schema {
 				Description: "mysql.conf configuration values",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"connect_timeout": {
-						Description: "The number of seconds that the mysqld server waits for a connect packet before responding with Bad handshake.",
+						Description: "The number of seconds that the mysqld server waits for a connect packet before responding with Bad handshake. Example: `10`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"default_time_zone": {
-						Description: "Default server time zone as an offset from UTC (from -12:00 to +12:00), a time zone name, or 'SYSTEM' to use the MySQL server default.",
+						Description: "Default server time zone as an offset from UTC (from -12:00 to +12:00), a time zone name, or `SYSTEM` to use the MySQL server default. Example: `+03:00`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"group_concat_max_len": {
-						Description: "The maximum permitted result length in bytes for the GROUP_CONCAT() function.",
+						Description: "The maximum permitted result length in bytes for the GROUP_CONCAT() function. Example: `1024`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"information_schema_stats_expiry": {
-						Description: "The time, in seconds, before cached statistics expire.",
+						Description: "The time, in seconds, before cached statistics expire. Example: `86400`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"innodb_change_buffer_max_size": {
-						Description: "Maximum size for the InnoDB change buffer, as a percentage of the total size of the buffer pool. Default is 25.",
+						Description: "Maximum size for the InnoDB change buffer, as a percentage of the total size of the buffer pool. Default is 25. Example: `30`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"innodb_flush_neighbors": {
-						Description: "Specifies whether flushing a page from the InnoDB buffer pool also flushes other dirty pages in the same extent (default is 1): 0 - dirty pages in the same extent are not flushed, 1 - flush contiguous dirty pages in the same extent, 2 - flush dirty pages in the same extent.",
+						Description: "Specifies whether flushing a page from the InnoDB buffer pool also flushes other dirty pages in the same extent (default is 1): 0 - dirty pages in the same extent are not flushed, 1 - flush contiguous dirty pages in the same extent, 2 - flush dirty pages in the same extent. Example: `0`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"innodb_ft_min_token_size": {
-						Description: "Minimum length of words that are stored in an InnoDB FULLTEXT index. Changing this parameter will lead to a restart of the MySQL service.",
+						Description: "Minimum length of words that are stored in an InnoDB FULLTEXT index. Changing this parameter will lead to a restart of the MySQL service. Example: `3`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"innodb_ft_server_stopword_table": {
-						Description: "This option is used to specify your own InnoDB FULLTEXT index stopword list for all InnoDB tables.",
+						Description: "This option is used to specify your own InnoDB FULLTEXT index stopword list for all InnoDB tables. Example: `db_name/table_name`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"innodb_lock_wait_timeout": {
-						Description: "The length of time in seconds an InnoDB transaction waits for a row lock before giving up. Default is 120.",
+						Description: "The length of time in seconds an InnoDB transaction waits for a row lock before giving up. Default is 120. Example: `50`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"innodb_log_buffer_size": {
-						Description: "The size in bytes of the buffer that InnoDB uses to write to the log files on disk.",
+						Description: "The size in bytes of the buffer that InnoDB uses to write to the log files on disk. Example: `16777216`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"innodb_online_alter_log_max_size": {
-						Description: "The upper limit in bytes on the size of the temporary log files used during online DDL operations for InnoDB tables.",
+						Description: "The upper limit in bytes on the size of the temporary log files used during online DDL operations for InnoDB tables. Example: `134217728`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -205,7 +205,7 @@ func mysqlUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"innodb_read_io_threads": {
-						Description: "The number of I/O threads for read operations in InnoDB. Default is 4. Changing this parameter will lead to a restart of the MySQL service.",
+						Description: "The number of I/O threads for read operations in InnoDB. Default is 4. Changing this parameter will lead to a restart of the MySQL service. Example: `10`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -215,17 +215,17 @@ func mysqlUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"innodb_thread_concurrency": {
-						Description: "Defines the maximum number of threads permitted inside of InnoDB. Default is 0 (infinite concurrency - no limit).",
+						Description: "Defines the maximum number of threads permitted inside of InnoDB. Default is 0 (infinite concurrency - no limit). Example: `10`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"innodb_write_io_threads": {
-						Description: "The number of I/O threads for write operations in InnoDB. Default is 4. Changing this parameter will lead to a restart of the MySQL service.",
+						Description: "The number of I/O threads for write operations in InnoDB. Default is 4. Changing this parameter will lead to a restart of the MySQL service. Example: `10`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"interactive_timeout": {
-						Description: "The number of seconds the server waits for activity on an interactive connection before closing it.",
+						Description: "The number of seconds the server waits for activity on an interactive connection before closing it. Example: `3600`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -236,32 +236,32 @@ func mysqlUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"TempTable", "MEMORY"}, false),
 					},
 					"long_query_time": {
-						Description: "The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Default is 10s.",
+						Description: "The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Default is 10s. Example: `10`.",
 						Optional:    true,
 						Type:        schema.TypeFloat,
 					},
 					"max_allowed_packet": {
-						Description: "Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M).",
+						Description: "Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M). Example: `67108864`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"max_heap_table_size": {
-						Description: "Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M).",
+						Description: "Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M). Example: `16777216`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"net_buffer_length": {
-						Description: "Start sizes of connection buffer and result buffer. Default is 16384 (16K). Changing this parameter will lead to a restart of the MySQL service.",
+						Description: "Start sizes of connection buffer and result buffer. Default is 16384 (16K). Changing this parameter will lead to a restart of the MySQL service. Example: `16384`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"net_read_timeout": {
-						Description: "The number of seconds to wait for more data from a connection before aborting the read.",
+						Description: "The number of seconds to wait for more data from a connection before aborting the read. Example: `30`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"net_write_timeout": {
-						Description: "The number of seconds to wait for a block to be written to a connection before aborting the write.",
+						Description: "The number of seconds to wait for a block to be written to a connection before aborting the write. Example: `30`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -271,12 +271,12 @@ func mysqlUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"sort_buffer_size": {
-						Description: "Sort buffer size in bytes for ORDER BY optimization. Default is 262144 (256K).",
+						Description: "Sort buffer size in bytes for ORDER BY optimization. Default is 262144 (256K). Example: `262144`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"sql_mode": {
-						Description: "Global SQL mode. Set to empty to use MySQL server defaults. When creating a new service and not setting this field Aiven default SQL mode (strict, SQL standard compliant) will be assigned.",
+						Description: "Global SQL mode. Set to empty to use MySQL server defaults. When creating a new service and not setting this field Aiven default SQL mode (strict, SQL standard compliant) will be assigned. Example: `ANSI,TRADITIONAL`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
@@ -286,12 +286,12 @@ func mysqlUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"tmp_table_size": {
-						Description: "Limits the size of internal in-memory tables. Also set max_heap_table_size. Default is 16777216 (16M).",
+						Description: "Limits the size of internal in-memory tables. Also set max_heap_table_size. Default is 16777216 (16M). Example: `16777216`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"wait_timeout": {
-						Description: "The number of seconds the server waits for activity on a noninteractive connection before closing it.",
+						Description: "The number of seconds the server waits for activity on a noninteractive connection before closing it. Example: `28800`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -352,7 +352,7 @@ func mysqlUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"project_to_fork_from": {
-				Description: "Name of another project to fork a service from. This has effect only when a new service is being created.",
+				Description: "Name of another project to fork a service from. This has effect only when a new service is being created. Example: `anotherprojectname`.",
 				ForceNew:    true,
 				Optional:    true,
 				Type:        schema.TypeString,
@@ -381,7 +381,7 @@ func mysqlUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"recovery_target_time": {
-				Description: "Recovery target time when forking a service. This has effect only when a new service is being created.",
+				Description: "Recovery target time when forking a service. This has effect only when a new service is being created. Example: `2019-01-01 23:34:45`.",
 				ForceNew:    true,
 				Optional:    true,
 				Type:        schema.TypeString,
@@ -392,7 +392,7 @@ func mysqlUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"service_to_fork_from": {
-				Description: "Name of another service to fork from. This has effect only when a new service is being created.",
+				Description: "Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.",
 				ForceNew:    true,
 				Optional:    true,
 				Type:        schema.TypeString,

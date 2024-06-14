@@ -113,23 +113,23 @@ Optional:
 
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
 - `admin_password` (String, Sensitive) Custom password for admin user. Defaults to random string. This must be set only when a new service is being created.
-- `admin_username` (String) Custom username for admin user. This must be set only when a new service is being created.
-- `backup_hour` (Number) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.
-- `backup_minute` (Number) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.
-- `binlog_retention_period` (Number) The minimum amount of time in seconds to keep binlog entries before deletion. This may be extended for services that require binlog entries for longer than the default for example if using the MySQL Debezium Kafka connector.
-- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--mysql_user_config--ip_filter_object))
-- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `admin_username` (String) Custom username for admin user. This must be set only when a new service is being created. Example: `avnadmin`.
+- `backup_hour` (Number) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed. Example: `3`.
+- `backup_minute` (Number) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed. Example: `30`.
+- `binlog_retention_period` (Number) The minimum amount of time in seconds to keep binlog entries before deletion. This may be extended for services that require binlog entries for longer than the default for example if using the MySQL Debezium Kafka connector. Example: `600`.
+- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
+- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--mysql_user_config--ip_filter_object))
+- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `migration` (Block List, Max: 1) Migrate data from existing server (see [below for nested schema](#nestedblock--mysql_user_config--migration))
 - `mysql` (Block List, Max: 1) mysql.conf configuration values (see [below for nested schema](#nestedblock--mysql_user_config--mysql))
 - `mysql_version` (String) Enum: `8`, and newer. MySQL major version.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--mysql_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--mysql_user_config--privatelink_access))
-- `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
+- `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created. Example: `anotherprojectname`.
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--mysql_user_config--public_access))
-- `recovery_target_time` (String) Recovery target time when forking a service. This has effect only when a new service is being created.
+- `recovery_target_time` (String) Recovery target time when forking a service. This has effect only when a new service is being created. Example: `2019-01-01 23:34:45`.
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
-- `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
+- `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.
 - `static_ips` (Boolean) Use static public IP addresses.
 
 <a id="nestedblock--mysql_user_config--ip_filter_object"></a>
@@ -137,11 +137,11 @@ Optional:
 
 Required:
 
-- `network` (String) CIDR address block.
+- `network` (String) CIDR address block. Example: `10.20.0.0/16`.
 
 Optional:
 
-- `description` (String) Description for IP filter list entry.
+- `description` (String) Description for IP filter list entry. Example: `Production service IP range`.
 
 
 <a id="nestedblock--mysql_user_config--migration"></a>
@@ -149,17 +149,17 @@ Optional:
 
 Required:
 
-- `host` (String) Hostname or IP address of the server where to migrate data from.
-- `port` (Number) Port number of the server where to migrate data from.
+- `host` (String) Hostname or IP address of the server where to migrate data from. Example: `my.server.com`.
+- `port` (Number) Port number of the server where to migrate data from. Example: `1234`.
 
 Optional:
 
-- `dbname` (String) Database name for bootstrapping the initial connection.
-- `ignore_dbs` (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment).
+- `dbname` (String) Database name for bootstrapping the initial connection. Example: `defaultdb`.
+- `ignore_dbs` (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment). Example: `db1,db2`.
 - `method` (String) Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).
-- `password` (String, Sensitive) Password for authentication with the server where to migrate data from.
-- `ssl` (Boolean) The server where to migrate data from is secured with SSL. The default value is `true`.
-- `username` (String) User name for authentication with the server where to migrate data from.
+- `password` (String, Sensitive) Password for authentication with the server where to migrate data from. Example: `jjKk45Nnd`.
+- `ssl` (Boolean) The server where to migrate data from is secured with SSL. Default: `true`.
+- `username` (String) User name for authentication with the server where to migrate data from. Example: `myname`.
 
 
 <a id="nestedblock--mysql_user_config--mysql"></a>
@@ -167,36 +167,36 @@ Optional:
 
 Optional:
 
-- `connect_timeout` (Number) The number of seconds that the mysqld server waits for a connect packet before responding with Bad handshake.
-- `default_time_zone` (String) Default server time zone as an offset from UTC (from -12:00 to +12:00), a time zone name, or 'SYSTEM' to use the MySQL server default.
-- `group_concat_max_len` (Number) The maximum permitted result length in bytes for the GROUP_CONCAT() function.
-- `information_schema_stats_expiry` (Number) The time, in seconds, before cached statistics expire.
-- `innodb_change_buffer_max_size` (Number) Maximum size for the InnoDB change buffer, as a percentage of the total size of the buffer pool. Default is 25.
-- `innodb_flush_neighbors` (Number) Specifies whether flushing a page from the InnoDB buffer pool also flushes other dirty pages in the same extent (default is 1): 0 - dirty pages in the same extent are not flushed, 1 - flush contiguous dirty pages in the same extent, 2 - flush dirty pages in the same extent.
-- `innodb_ft_min_token_size` (Number) Minimum length of words that are stored in an InnoDB FULLTEXT index. Changing this parameter will lead to a restart of the MySQL service.
-- `innodb_ft_server_stopword_table` (String) This option is used to specify your own InnoDB FULLTEXT index stopword list for all InnoDB tables.
-- `innodb_lock_wait_timeout` (Number) The length of time in seconds an InnoDB transaction waits for a row lock before giving up. Default is 120.
-- `innodb_log_buffer_size` (Number) The size in bytes of the buffer that InnoDB uses to write to the log files on disk.
-- `innodb_online_alter_log_max_size` (Number) The upper limit in bytes on the size of the temporary log files used during online DDL operations for InnoDB tables.
+- `connect_timeout` (Number) The number of seconds that the mysqld server waits for a connect packet before responding with Bad handshake. Example: `10`.
+- `default_time_zone` (String) Default server time zone as an offset from UTC (from -12:00 to +12:00), a time zone name, or `SYSTEM` to use the MySQL server default. Example: `+03:00`.
+- `group_concat_max_len` (Number) The maximum permitted result length in bytes for the GROUP_CONCAT() function. Example: `1024`.
+- `information_schema_stats_expiry` (Number) The time, in seconds, before cached statistics expire. Example: `86400`.
+- `innodb_change_buffer_max_size` (Number) Maximum size for the InnoDB change buffer, as a percentage of the total size of the buffer pool. Default is 25. Example: `30`.
+- `innodb_flush_neighbors` (Number) Specifies whether flushing a page from the InnoDB buffer pool also flushes other dirty pages in the same extent (default is 1): 0 - dirty pages in the same extent are not flushed, 1 - flush contiguous dirty pages in the same extent, 2 - flush dirty pages in the same extent. Example: `0`.
+- `innodb_ft_min_token_size` (Number) Minimum length of words that are stored in an InnoDB FULLTEXT index. Changing this parameter will lead to a restart of the MySQL service. Example: `3`.
+- `innodb_ft_server_stopword_table` (String) This option is used to specify your own InnoDB FULLTEXT index stopword list for all InnoDB tables. Example: `db_name/table_name`.
+- `innodb_lock_wait_timeout` (Number) The length of time in seconds an InnoDB transaction waits for a row lock before giving up. Default is 120. Example: `50`.
+- `innodb_log_buffer_size` (Number) The size in bytes of the buffer that InnoDB uses to write to the log files on disk. Example: `16777216`.
+- `innodb_online_alter_log_max_size` (Number) The upper limit in bytes on the size of the temporary log files used during online DDL operations for InnoDB tables. Example: `134217728`.
 - `innodb_print_all_deadlocks` (Boolean) When enabled, information about all deadlocks in InnoDB user transactions is recorded in the error log. Disabled by default.
-- `innodb_read_io_threads` (Number) The number of I/O threads for read operations in InnoDB. Default is 4. Changing this parameter will lead to a restart of the MySQL service.
+- `innodb_read_io_threads` (Number) The number of I/O threads for read operations in InnoDB. Default is 4. Changing this parameter will lead to a restart of the MySQL service. Example: `10`.
 - `innodb_rollback_on_timeout` (Boolean) When enabled a transaction timeout causes InnoDB to abort and roll back the entire transaction. Changing this parameter will lead to a restart of the MySQL service.
-- `innodb_thread_concurrency` (Number) Defines the maximum number of threads permitted inside of InnoDB. Default is 0 (infinite concurrency - no limit).
-- `innodb_write_io_threads` (Number) The number of I/O threads for write operations in InnoDB. Default is 4. Changing this parameter will lead to a restart of the MySQL service.
-- `interactive_timeout` (Number) The number of seconds the server waits for activity on an interactive connection before closing it.
+- `innodb_thread_concurrency` (Number) Defines the maximum number of threads permitted inside of InnoDB. Default is 0 (infinite concurrency - no limit). Example: `10`.
+- `innodb_write_io_threads` (Number) The number of I/O threads for write operations in InnoDB. Default is 4. Changing this parameter will lead to a restart of the MySQL service. Example: `10`.
+- `interactive_timeout` (Number) The number of seconds the server waits for activity on an interactive connection before closing it. Example: `3600`.
 - `internal_tmp_mem_storage_engine` (String) Enum: `TempTable`, `MEMORY`. The storage engine for in-memory internal temporary tables.
-- `long_query_time` (Number) The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Default is 10s.
-- `max_allowed_packet` (Number) Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M).
-- `max_heap_table_size` (Number) Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M).
-- `net_buffer_length` (Number) Start sizes of connection buffer and result buffer. Default is 16384 (16K). Changing this parameter will lead to a restart of the MySQL service.
-- `net_read_timeout` (Number) The number of seconds to wait for more data from a connection before aborting the read.
-- `net_write_timeout` (Number) The number of seconds to wait for a block to be written to a connection before aborting the write.
+- `long_query_time` (Number) The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Default is 10s. Example: `10`.
+- `max_allowed_packet` (Number) Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M). Example: `67108864`.
+- `max_heap_table_size` (Number) Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M). Example: `16777216`.
+- `net_buffer_length` (Number) Start sizes of connection buffer and result buffer. Default is 16384 (16K). Changing this parameter will lead to a restart of the MySQL service. Example: `16384`.
+- `net_read_timeout` (Number) The number of seconds to wait for more data from a connection before aborting the read. Example: `30`.
+- `net_write_timeout` (Number) The number of seconds to wait for a block to be written to a connection before aborting the write. Example: `30`.
 - `slow_query_log` (Boolean) Slow query log enables capturing of slow queries. Setting slow_query_log to false also truncates the mysql.slow_log table. Default is off.
-- `sort_buffer_size` (Number) Sort buffer size in bytes for ORDER BY optimization. Default is 262144 (256K).
-- `sql_mode` (String) Global SQL mode. Set to empty to use MySQL server defaults. When creating a new service and not setting this field Aiven default SQL mode (strict, SQL standard compliant) will be assigned.
+- `sort_buffer_size` (Number) Sort buffer size in bytes for ORDER BY optimization. Default is 262144 (256K). Example: `262144`.
+- `sql_mode` (String) Global SQL mode. Set to empty to use MySQL server defaults. When creating a new service and not setting this field Aiven default SQL mode (strict, SQL standard compliant) will be assigned. Example: `ANSI,TRADITIONAL`.
 - `sql_require_primary_key` (Boolean) Require primary key to be defined for new tables or old tables modified with ALTER TABLE and fail if missing. It is recommended to always have primary keys because various functionality may break if any large table is missing them.
-- `tmp_table_size` (Number) Limits the size of internal in-memory tables. Also set max_heap_table_size. Default is 16777216 (16M).
-- `wait_timeout` (Number) The number of seconds the server waits for activity on a noninteractive connection before closing it.
+- `tmp_table_size` (Number) Limits the size of internal in-memory tables. Also set max_heap_table_size. Default is 16777216 (16M). Example: `16777216`.
+- `wait_timeout` (Number) The number of seconds the server waits for activity on a noninteractive connection before closing it. Example: `28800`.
 
 
 <a id="nestedblock--mysql_user_config--private_access"></a>

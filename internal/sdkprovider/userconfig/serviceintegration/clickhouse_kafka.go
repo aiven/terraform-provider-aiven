@@ -17,7 +17,7 @@ func clickhouseKafkaUserConfig() *schema.Schema {
 			Description: "Tables to create",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"auto_offset_reset": {
-					Description:  "Enum: `smallest`, `earliest`, `beginning`, `largest`, `latest`, `end`. Action to take when there is no initial offset in offset store or the desired offset is out of range. The default value is `earliest`.",
+					Description:  "Enum: `smallest`, `earliest`, `beginning`, `largest`, `latest`, `end`. Action to take when there is no initial offset in offset store or the desired offset is out of range. Default: `earliest`.",
 					Optional:     true,
 					Type:         schema.TypeString,
 					ValidateFunc: validation.StringInSlice([]string{"smallest", "earliest", "beginning", "largest", "latest", "end"}, false),
@@ -26,12 +26,12 @@ func clickhouseKafkaUserConfig() *schema.Schema {
 					Description: "Table columns",
 					Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 						"name": {
-							Description: "Column name.",
+							Description: "Column name. Example: `key`.",
 							Required:    true,
 							Type:        schema.TypeString,
 						},
 						"type": {
-							Description: "Column type.",
+							Description: "Column type. Example: `UInt64`.",
 							Required:    true,
 							Type:        schema.TypeString,
 						},
@@ -41,62 +41,62 @@ func clickhouseKafkaUserConfig() *schema.Schema {
 					Type:     schema.TypeList,
 				},
 				"data_format": {
-					Description:  "Enum: `Avro`, `CSV`, `JSONAsString`, `JSONCompactEachRow`, `JSONCompactStringsEachRow`, `JSONEachRow`, `JSONStringsEachRow`, `MsgPack`, `TSKV`, `TSV`, `TabSeparated`, `RawBLOB`, `AvroConfluent`. Message data format. The default value is `JSONEachRow`.",
+					Description:  "Enum: `Avro`, `CSV`, `JSONAsString`, `JSONCompactEachRow`, `JSONCompactStringsEachRow`, `JSONEachRow`, `JSONStringsEachRow`, `MsgPack`, `TSKV`, `TSV`, `TabSeparated`, `RawBLOB`, `AvroConfluent`. Message data format. Default: `JSONEachRow`.",
 					Required:     true,
 					Type:         schema.TypeString,
 					ValidateFunc: validation.StringInSlice([]string{"Avro", "CSV", "JSONAsString", "JSONCompactEachRow", "JSONCompactStringsEachRow", "JSONEachRow", "JSONStringsEachRow", "MsgPack", "TSKV", "TSV", "TabSeparated", "RawBLOB", "AvroConfluent"}, false),
 				},
 				"date_time_input_format": {
-					Description:  "Enum: `basic`, `best_effort`, `best_effort_us`. Method to read DateTime from text input formats. The default value is `basic`.",
+					Description:  "Enum: `basic`, `best_effort`, `best_effort_us`. Method to read DateTime from text input formats. Default: `basic`.",
 					Optional:     true,
 					Type:         schema.TypeString,
 					ValidateFunc: validation.StringInSlice([]string{"basic", "best_effort", "best_effort_us"}, false),
 				},
 				"group_name": {
-					Description: "Kafka consumers group. The default value is `clickhouse`.",
+					Description: "Kafka consumers group. Default: `clickhouse`.",
 					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"handle_error_mode": {
-					Description:  "Enum: `default`, `stream`. How to handle errors for Kafka engine. The default value is `default`.",
+					Description:  "Enum: `default`, `stream`. How to handle errors for Kafka engine. Default: `default`.",
 					Optional:     true,
 					Type:         schema.TypeString,
 					ValidateFunc: validation.StringInSlice([]string{"default", "stream"}, false),
 				},
 				"max_block_size": {
-					Description: "Number of row collected by poll(s) for flushing data from Kafka. The default value is `0`.",
+					Description: "Number of row collected by poll(s) for flushing data from Kafka. Default: `0`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"max_rows_per_message": {
-					Description: "The maximum number of rows produced in one kafka message for row-based formats. The default value is `1`.",
+					Description: "The maximum number of rows produced in one kafka message for row-based formats. Default: `1`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"name": {
-					Description: "Name of the table.",
+					Description: "Name of the table. Example: `events`.",
 					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"num_consumers": {
-					Description: "The number of consumers per table per replica. The default value is `1`.",
+					Description: "The number of consumers per table per replica. Default: `1`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"poll_max_batch_size": {
-					Description: "Maximum amount of messages to be polled in a single Kafka poll. The default value is `0`.",
+					Description: "Maximum amount of messages to be polled in a single Kafka poll. Default: `0`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"skip_broken_messages": {
-					Description: "Skip at least this number of broken messages from Kafka topic per block. The default value is `0`.",
+					Description: "Skip at least this number of broken messages from Kafka topic per block. Default: `0`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
 				"topics": {
 					Description: "Kafka topics",
 					Elem: &schema.Resource{Schema: map[string]*schema.Schema{"name": {
-						Description: "Name of the topic.",
+						Description: "Name of the topic. Example: `topic_name`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					}}},

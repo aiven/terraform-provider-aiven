@@ -15,7 +15,7 @@ func datadogUserConfig() *schema.Schema {
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"datadog_api_key": {
-				Description: "Datadog API key.",
+				Description: "Datadog API key. Example: `848f30907c15c55d601fe45487cce9b6`.",
 				Required:    true,
 				Sensitive:   true,
 				Type:        schema.TypeString,
@@ -24,12 +24,12 @@ func datadogUserConfig() *schema.Schema {
 				Description: "Custom tags provided by user",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"comment": {
-						Description: "Optional tag explanation.",
+						Description: "Optional tag explanation. Example: `Used to tag primary replica metrics`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"tag": {
-						Description: "Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix 'aiven-' are reserved for Aiven.",
+						Description: "Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix `aiven-` are reserved for Aiven. Example: `replica:primary`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -44,17 +44,17 @@ func datadogUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"kafka_consumer_check_instances": {
-				Description: "Number of separate instances to fetch kafka consumer statistics with.",
+				Description: "Number of separate instances to fetch kafka consumer statistics with. Example: `8`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
 			"kafka_consumer_stats_timeout": {
-				Description: "Number of seconds that datadog will wait to get consumer statistics from brokers.",
+				Description: "Number of seconds that datadog will wait to get consumer statistics from brokers. Example: `60`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
 			"max_partition_contexts": {
-				Description: "Maximum number of partition contexts to send.",
+				Description: "Maximum number of partition contexts to send. Example: `32000`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},

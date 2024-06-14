@@ -14,13 +14,13 @@ func jolokiaUserConfig() *schema.Schema {
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"basic_auth_password": {
-				Description: "Jolokia basic authentication password.",
+				Description: "Jolokia basic authentication password. Example: `yhfBNFii4C`.",
 				Optional:    true,
 				Sensitive:   true,
 				Type:        schema.TypeString,
 			},
 			"basic_auth_username": {
-				Description: "Jolokia basic authentication username.",
+				Description: "Jolokia basic authentication username. Example: `jol48k51`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},

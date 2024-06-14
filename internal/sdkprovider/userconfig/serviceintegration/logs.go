@@ -15,12 +15,12 @@ func logsUserConfig() *schema.Schema {
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"elasticsearch_index_days_max": {
-				Description: "Elasticsearch index retention limit. The default value is `3`.",
+				Description: "Elasticsearch index retention limit. Default: `3`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
 			"elasticsearch_index_prefix": {
-				Description: "Elasticsearch index prefix. The default value is `logs`.",
+				Description: "Elasticsearch index prefix. Default: `logs`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},

@@ -14,22 +14,22 @@ func externalAwsCloudwatchLogsUserConfig() *schema.Schema {
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"access_key": {
-				Description: "AWS access key. Required permissions are logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents and logs:DescribeLogStreams.",
+				Description: "AWS access key. Required permissions are logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents and logs:DescribeLogStreams. Example: `AAAAAAAAAAAAAAAAAAAA`.",
 				Required:    true,
 				Type:        schema.TypeString,
 			},
 			"log_group_name": {
-				Description: "AWS CloudWatch log group name.",
+				Description: "AWS CloudWatch log group name. Example: `my-log-group`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"region": {
-				Description: "AWS region.",
+				Description: "AWS region. Example: `us-east-1`.",
 				Required:    true,
 				Type:        schema.TypeString,
 			},
 			"secret_key": {
-				Description: "AWS secret key.",
+				Description: "AWS secret key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.",
 				Required:    true,
 				Type:        schema.TypeString,
 			},

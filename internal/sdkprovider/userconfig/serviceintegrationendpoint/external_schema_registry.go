@@ -21,18 +21,18 @@ func externalSchemaRegistryUserConfig() *schema.Schema {
 				ValidateFunc: validation.StringInSlice([]string{"none", "basic"}, false),
 			},
 			"basic_auth_password": {
-				Description: "Basic authentication password.",
+				Description: "Basic authentication password. Example: `Zm9vYg==`.",
 				Optional:    true,
 				Sensitive:   true,
 				Type:        schema.TypeString,
 			},
 			"basic_auth_username": {
-				Description: "Basic authentication user name.",
+				Description: "Basic authentication user name. Example: `avnadmin`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"url": {
-				Description: "Schema Registry URL.",
+				Description: "Schema Registry URL. Example: `https://schema-registry.kafka.company.com:28419`.",
 				Required:    true,
 				Type:        schema.TypeString,
 			},

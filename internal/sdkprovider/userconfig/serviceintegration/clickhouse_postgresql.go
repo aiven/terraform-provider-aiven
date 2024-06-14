@@ -16,12 +16,12 @@ func clickhousePostgresqlUserConfig() *schema.Schema {
 			Description: "Databases to expose",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"database": {
-					Description: "PostgreSQL database to expose. The default value is `defaultdb`.",
+					Description: "PostgreSQL database to expose. Default: `defaultdb`.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
 				"schema": {
-					Description: "PostgreSQL schema to expose. The default value is `public`.",
+					Description: "PostgreSQL schema to expose. Default: `public`.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},

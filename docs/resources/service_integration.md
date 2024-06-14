@@ -70,29 +70,29 @@ Optional:
 Required:
 
 - `columns` (Block List, Min: 1, Max: 100) Table columns (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--columns))
-- `data_format` (String) Enum: `Avro`, `CSV`, `JSONAsString`, `JSONCompactEachRow`, `JSONCompactStringsEachRow`, `JSONEachRow`, `JSONStringsEachRow`, `MsgPack`, `TSKV`, `TSV`, `TabSeparated`, `RawBLOB`, `AvroConfluent`. Message data format. The default value is `JSONEachRow`.
-- `group_name` (String) Kafka consumers group. The default value is `clickhouse`.
-- `name` (String) Name of the table.
+- `data_format` (String) Enum: `Avro`, `CSV`, `JSONAsString`, `JSONCompactEachRow`, `JSONCompactStringsEachRow`, `JSONEachRow`, `JSONStringsEachRow`, `MsgPack`, `TSKV`, `TSV`, `TabSeparated`, `RawBLOB`, `AvroConfluent`. Message data format. Default: `JSONEachRow`.
+- `group_name` (String) Kafka consumers group. Default: `clickhouse`.
+- `name` (String) Name of the table. Example: `events`.
 - `topics` (Block List, Min: 1, Max: 100) Kafka topics (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--topics))
 
 Optional:
 
-- `auto_offset_reset` (String) Enum: `smallest`, `earliest`, `beginning`, `largest`, `latest`, `end`. Action to take when there is no initial offset in offset store or the desired offset is out of range. The default value is `earliest`.
-- `date_time_input_format` (String) Enum: `basic`, `best_effort`, `best_effort_us`. Method to read DateTime from text input formats. The default value is `basic`.
-- `handle_error_mode` (String) Enum: `default`, `stream`. How to handle errors for Kafka engine. The default value is `default`.
-- `max_block_size` (Number) Number of row collected by poll(s) for flushing data from Kafka. The default value is `0`.
-- `max_rows_per_message` (Number) The maximum number of rows produced in one kafka message for row-based formats. The default value is `1`.
-- `num_consumers` (Number) The number of consumers per table per replica. The default value is `1`.
-- `poll_max_batch_size` (Number) Maximum amount of messages to be polled in a single Kafka poll. The default value is `0`.
-- `skip_broken_messages` (Number) Skip at least this number of broken messages from Kafka topic per block. The default value is `0`.
+- `auto_offset_reset` (String) Enum: `smallest`, `earliest`, `beginning`, `largest`, `latest`, `end`. Action to take when there is no initial offset in offset store or the desired offset is out of range. Default: `earliest`.
+- `date_time_input_format` (String) Enum: `basic`, `best_effort`, `best_effort_us`. Method to read DateTime from text input formats. Default: `basic`.
+- `handle_error_mode` (String) Enum: `default`, `stream`. How to handle errors for Kafka engine. Default: `default`.
+- `max_block_size` (Number) Number of row collected by poll(s) for flushing data from Kafka. Default: `0`.
+- `max_rows_per_message` (Number) The maximum number of rows produced in one kafka message for row-based formats. Default: `1`.
+- `num_consumers` (Number) The number of consumers per table per replica. Default: `1`.
+- `poll_max_batch_size` (Number) Maximum amount of messages to be polled in a single Kafka poll. Default: `0`.
+- `skip_broken_messages` (Number) Skip at least this number of broken messages from Kafka topic per block. Default: `0`.
 
 <a id="nestedblock--clickhouse_kafka_user_config--tables--columns"></a>
 ### Nested Schema for `clickhouse_kafka_user_config.tables.columns`
 
 Required:
 
-- `name` (String) Column name.
-- `type` (String) Column type.
+- `name` (String) Column name. Example: `key`.
+- `type` (String) Column type. Example: `UInt64`.
 
 
 <a id="nestedblock--clickhouse_kafka_user_config--tables--topics"></a>
@@ -100,7 +100,7 @@ Required:
 
 Required:
 
-- `name` (String) Name of the topic.
+- `name` (String) Name of the topic. Example: `topic_name`.
 
 
 
@@ -117,8 +117,8 @@ Optional:
 
 Optional:
 
-- `database` (String) PostgreSQL database to expose. The default value is `defaultdb`.
-- `schema` (String) PostgreSQL schema to expose. The default value is `public`.
+- `database` (String) PostgreSQL database to expose. Default: `defaultdb`.
+- `schema` (String) PostgreSQL schema to expose. Default: `public`.
 
 
 
@@ -135,7 +135,7 @@ Optional:
 - `include_consumer_groups` (List of String) List of custom metrics.
 - `include_topics` (List of String) List of topics to include.
 - `kafka_custom_metrics` (List of String) List of custom metrics.
-- `max_jmx_metrics` (Number) Maximum number of JMX metrics to send.
+- `max_jmx_metrics` (Number) Maximum number of JMX metrics to send. Example: `2000`.
 - `opensearch` (Block List, Max: 1) Datadog Opensearch Options (see [below for nested schema](#nestedblock--datadog_user_config--opensearch))
 - `redis` (Block List, Max: 1) Datadog Redis Options (see [below for nested schema](#nestedblock--datadog_user_config--redis))
 
@@ -144,11 +144,11 @@ Optional:
 
 Required:
 
-- `tag` (String) Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix 'aiven-' are reserved for Aiven.
+- `tag` (String) Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix `aiven-` are reserved for Aiven. Example: `replica:primary`.
 
 Optional:
 
-- `comment` (String) Optional tag explanation.
+- `comment` (String) Optional tag explanation. Example: `Used to tag primary replica metrics`.
 
 
 <a id="nestedblock--datadog_user_config--opensearch"></a>
@@ -167,7 +167,7 @@ Optional:
 
 Optional:
 
-- `command_stats_enabled` (Boolean) Enable command_stats option in the agent's configuration. The default value is `false`.
+- `command_stats_enabled` (Boolean) Enable command_stats option in the agent's configuration. Default: `false`.
 
 
 
@@ -192,8 +192,8 @@ Optional:
 
 Required:
 
-- `field` (String) Identifier of a value in the metric.
-- `metric` (String) Identifier of the metric.
+- `field` (String) Identifier of a value in the metric. Example: `used`.
+- `metric` (String) Identifier of the metric. Example: `java.lang:Memory`.
 
 
 <a id="nestedblock--external_aws_cloudwatch_metrics_user_config--extra_metrics"></a>
@@ -201,8 +201,8 @@ Required:
 
 Required:
 
-- `field` (String) Identifier of a value in the metric.
-- `metric` (String) Identifier of the metric.
+- `field` (String) Identifier of a value in the metric. Example: `used`.
+- `metric` (String) Identifier of the metric. Example: `java.lang:Memory`.
 
 
 
@@ -234,10 +234,10 @@ Optional:
 
 Optional:
 
-- `config_storage_topic` (String) The name of the topic where connector and task configuration data are stored.This must be the same for all workers with the same group_id.
-- `group_id` (String) A unique string that identifies the Connect cluster group this worker belongs to.
-- `offset_storage_topic` (String) The name of the topic where connector and task configuration offsets are stored.This must be the same for all workers with the same group_id.
-- `status_storage_topic` (String) The name of the topic where connector and task configuration status updates are stored.This must be the same for all workers with the same group_id.
+- `config_storage_topic` (String) The name of the topic where connector and task configuration data are stored.This must be the same for all workers with the same group_id. Example: `__connect_configs`.
+- `group_id` (String) A unique string that identifies the Connect cluster group this worker belongs to. Example: `connect`.
+- `offset_storage_topic` (String) The name of the topic where connector and task configuration offsets are stored.This must be the same for all workers with the same group_id. Example: `__connect_offsets`.
+- `status_storage_topic` (String) The name of the topic where connector and task configuration status updates are stored.This must be the same for all workers with the same group_id. Example: `__connect_status`.
 
 
 
@@ -246,7 +246,7 @@ Optional:
 
 Required:
 
-- `kafka_topic` (String) Topic name.
+- `kafka_topic` (String) Topic name. Example: `mytopic`.
 
 Optional:
 
@@ -258,7 +258,7 @@ Optional:
 
 Optional:
 
-- `cluster_alias` (String) The alias under which the Kafka cluster is known to MirrorMaker. Can contain the following symbols: ASCII alphanumerics, '.', '_', and '-'.
+- `cluster_alias` (String) The alias under which the Kafka cluster is known to MirrorMaker. Can contain the following symbols: ASCII alphanumerics, `.`, `_`, and `-`. Example: `kafka-abc`.
 - `kafka_mirrormaker` (Block List, Max: 1) Kafka MirrorMaker configuration values (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker))
 
 <a id="nestedblock--kafka_mirrormaker_user_config--kafka_mirrormaker"></a>
@@ -266,12 +266,12 @@ Optional:
 
 Optional:
 
-- `consumer_fetch_min_bytes` (Number) The minimum amount of data the server should return for a fetch request.
-- `producer_batch_size` (Number) The batch size in bytes producer will attempt to collect before publishing to broker.
-- `producer_buffer_memory` (Number) The amount of bytes producer can use for buffering data before publishing to broker.
-- `producer_compression_type` (String) Enum: `gzip`, `snappy`, `lz4`, `zstd`, `none`. Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.
-- `producer_linger_ms` (Number) The linger time (ms) for waiting new data to arrive for publishing.
-- `producer_max_request_size` (Number) The maximum request size in bytes.
+- `consumer_fetch_min_bytes` (Number) The minimum amount of data the server should return for a fetch request. Example: `1024`.
+- `producer_batch_size` (Number) The batch size in bytes producer will attempt to collect before publishing to broker. Example: `1024`.
+- `producer_buffer_memory` (Number) The amount of bytes producer can use for buffering data before publishing to broker. Example: `8388608`.
+- `producer_compression_type` (String) Enum: `gzip`, `snappy`, `lz4`, `zstd`, `none`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.
+- `producer_linger_ms` (Number) The linger time (ms) for waiting new data to arrive for publishing. Example: `100`.
+- `producer_max_request_size` (Number) The maximum request size in bytes. Example: `1048576`.
 
 
 
@@ -280,8 +280,8 @@ Optional:
 
 Optional:
 
-- `elasticsearch_index_days_max` (Number) Elasticsearch index retention limit. The default value is `3`.
-- `elasticsearch_index_prefix` (String) Elasticsearch index prefix. The default value is `logs`.
+- `elasticsearch_index_days_max` (Number) Elasticsearch index retention limit. Default: `3`.
+- `elasticsearch_index_prefix` (String) Elasticsearch index prefix. Default: `logs`.
 - `selected_log_fields` (List of String) The list of logging fields that will be sent to the integration logging service. The MESSAGE and timestamp fields are always sent.
 
 
@@ -290,11 +290,11 @@ Optional:
 
 Optional:
 
-- `database` (String) Name of the database where to store metric datapoints. Only affects PostgreSQL destinations. Defaults to 'metrics'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
+- `database` (String) Name of the database where to store metric datapoints. Only affects PostgreSQL destinations. Defaults to `metrics`. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
 - `retention_days` (Number) Number of days to keep old metrics. Only affects PostgreSQL destinations. Set to 0 for no automatic cleanup. Defaults to 30 days.
-- `ro_username` (String) Name of a user that can be used to read metrics. This will be used for Grafana integration (if enabled) to prevent Grafana users from making undesired changes. Only affects PostgreSQL destinations. Defaults to 'metrics_reader'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
+- `ro_username` (String) Name of a user that can be used to read metrics. This will be used for Grafana integration (if enabled) to prevent Grafana users from making undesired changes. Only affects PostgreSQL destinations. Defaults to `metrics_reader`. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
 - `source_mysql` (Block List, Max: 1) Configuration options for metrics where source service is MySQL (see [below for nested schema](#nestedblock--metrics_user_config--source_mysql))
-- `username` (String) Name of the user used to write metrics. Only affects PostgreSQL destinations. Defaults to 'metrics_writer'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
+- `username` (String) Name of the user used to write metrics. Only affects PostgreSQL destinations. Defaults to `metrics_writer`. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.
 
 <a id="nestedblock--metrics_user_config--source_mysql"></a>
 ### Nested Schema for `metrics_user_config.source_mysql`
@@ -319,9 +319,9 @@ Optional:
 - `gather_table_io_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE.
 - `gather_table_lock_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS.
 - `gather_table_schema` (Boolean) Gather metrics from INFORMATION_SCHEMA.TABLES.
-- `perf_events_statements_digest_text_limit` (Number) Truncates digest text from perf_events_statements into this many characters.
-- `perf_events_statements_limit` (Number) Limits metrics from perf_events_statements.
-- `perf_events_statements_time_limit` (Number) Only include perf_events_statements whose last seen is less than this many seconds.
+- `perf_events_statements_digest_text_limit` (Number) Truncates digest text from perf_events_statements into this many characters. Example: `120`.
+- `perf_events_statements_limit` (Number) Limits metrics from perf_events_statements. Example: `250`.
+- `perf_events_statements_time_limit` (Number) Only include perf_events_statements whose last seen is less than this many seconds. Example: `86400`.
 
 
 
@@ -356,9 +356,9 @@ Optional:
 - `gather_table_io_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_IO_WAITS_SUMMARY_BY_TABLE.
 - `gather_table_lock_waits` (Boolean) Gather metrics from PERFORMANCE_SCHEMA.TABLE_LOCK_WAITS.
 - `gather_table_schema` (Boolean) Gather metrics from INFORMATION_SCHEMA.TABLES.
-- `perf_events_statements_digest_text_limit` (Number) Truncates digest text from perf_events_statements into this many characters.
-- `perf_events_statements_limit` (Number) Limits metrics from perf_events_statements.
-- `perf_events_statements_time_limit` (Number) Only include perf_events_statements whose last seen is less than this many seconds.
+- `perf_events_statements_digest_text_limit` (Number) Truncates digest text from perf_events_statements into this many characters. Example: `120`.
+- `perf_events_statements_limit` (Number) Limits metrics from perf_events_statements. Example: `250`.
+- `perf_events_statements_time_limit` (Number) Only include perf_events_statements whose last seen is less than this many seconds. Example: `86400`.
 
 
 

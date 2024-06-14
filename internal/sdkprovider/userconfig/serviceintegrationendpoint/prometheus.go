@@ -14,13 +14,13 @@ func prometheusUserConfig() *schema.Schema {
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"basic_auth_password": {
-				Description: "Prometheus basic authentication password.",
+				Description: "Prometheus basic authentication password. Example: `fhyFNBjj3R`.",
 				Optional:    true,
 				Sensitive:   true,
 				Type:        schema.TypeString,
 			},
 			"basic_auth_username": {
-				Description: "Prometheus basic authentication username.",
+				Description: "Prometheus basic authentication username. Example: `prom4851`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},

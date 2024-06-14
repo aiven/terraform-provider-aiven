@@ -15,7 +15,7 @@ func externalKafkaUserConfig() *schema.Schema {
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"bootstrap_servers": {
-				Description: "Bootstrap servers.",
+				Description: "Bootstrap servers. Example: `10.0.0.1:9092,10.0.0.2:9092`.",
 				Required:    true,
 				Type:        schema.TypeString,
 			},
@@ -26,13 +26,13 @@ func externalKafkaUserConfig() *schema.Schema {
 				ValidateFunc: validation.StringInSlice([]string{"PLAIN", "SCRAM-SHA-256", "SCRAM-SHA-512"}, false),
 			},
 			"sasl_plain_password": {
-				Description: "Password for SASL PLAIN mechanism in the Kafka server.",
+				Description: "Password for SASL PLAIN mechanism in the Kafka server. Example: `admin`.",
 				Optional:    true,
 				Sensitive:   true,
 				Type:        schema.TypeString,
 			},
 			"sasl_plain_username": {
-				Description: "Username for SASL PLAIN mechanism in the Kafka server.",
+				Description: "Username for SASL PLAIN mechanism in the Kafka server. Example: `admin`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -43,17 +43,17 @@ func externalKafkaUserConfig() *schema.Schema {
 				ValidateFunc: validation.StringInSlice([]string{"PLAINTEXT", "SSL", "SASL_PLAINTEXT", "SASL_SSL"}, false),
 			},
 			"ssl_ca_cert": {
-				Description: "PEM-encoded CA certificate.",
+				Description: "PEM-encoded CA certificate. Example: `-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"ssl_client_cert": {
-				Description: "PEM-encoded client certificate.",
+				Description: "PEM-encoded client certificate. Example: `-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"ssl_client_key": {
-				Description: "PEM-encoded client key.",
+				Description: "PEM-encoded client key. Example: `-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},

@@ -27,12 +27,12 @@ func datadogUserConfig() *schema.Schema {
 				Description: "Custom tags provided by user",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"comment": {
-						Description: "Optional tag explanation.",
+						Description: "Optional tag explanation. Example: `Used to tag primary replica metrics`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"tag": {
-						Description: "Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix 'aiven-' are reserved for Aiven.",
+						Description: "Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix `aiven-` are reserved for Aiven. Example: `replica:primary`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -44,7 +44,7 @@ func datadogUserConfig() *schema.Schema {
 			"exclude_consumer_groups": {
 				Description: "List of custom metrics.",
 				Elem: &schema.Schema{
-					Description: "Consumer groups to exclude.",
+					Description: "Consumer groups to exclude. Example: `[ group_a, group_b ]`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -54,7 +54,7 @@ func datadogUserConfig() *schema.Schema {
 			"exclude_topics": {
 				Description: "List of topics to exclude.",
 				Elem: &schema.Schema{
-					Description: "Topics to exclude.",
+					Description: "Topics to exclude. Example: `[ topic_x, topic_y ]`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -64,7 +64,7 @@ func datadogUserConfig() *schema.Schema {
 			"include_consumer_groups": {
 				Description: "List of custom metrics.",
 				Elem: &schema.Schema{
-					Description: "Consumer groups to include.",
+					Description: "Consumer groups to include. Example: `[ group_a, group_b ]`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -74,7 +74,7 @@ func datadogUserConfig() *schema.Schema {
 			"include_topics": {
 				Description: "List of topics to include.",
 				Elem: &schema.Schema{
-					Description: "Topics to include.",
+					Description: "Topics to include. Example: `[ topic_x, topic_y ]`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -84,7 +84,7 @@ func datadogUserConfig() *schema.Schema {
 			"kafka_custom_metrics": {
 				Description: "List of custom metrics.",
 				Elem: &schema.Schema{
-					Description: "Metric name.",
+					Description: "Metric name. Example: `kafka.log.log_size`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -92,7 +92,7 @@ func datadogUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"max_jmx_metrics": {
-				Description: "Maximum number of JMX metrics to send.",
+				Description: "Maximum number of JMX metrics to send. Example: `2000`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
@@ -127,7 +127,7 @@ func datadogUserConfig() *schema.Schema {
 			"redis": {
 				Description: "Datadog Redis Options",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"command_stats_enabled": {
-					Description: "Enable command_stats option in the agent's configuration. The default value is `false`.",
+					Description: "Enable command_stats option in the agent's configuration. Default: `false`.",
 					Optional:    true,
 					Type:        schema.TypeBool,
 				}}},

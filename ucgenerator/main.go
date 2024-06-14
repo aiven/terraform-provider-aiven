@@ -319,6 +319,8 @@ func getSchemaValues(o *object) (jen.Dict, error) {
 	return values, nil
 }
 
+var reCode = regexp.MustCompile(`'([^'\s]+)'`)
+
 func getDescription(o *object) string {
 	desc := make([]string, 0)
 	if o.Enum != nil {
@@ -340,14 +342,22 @@ func getDescription(o *object) string {
 		d = o.Title
 	}
 
-	// Comes from the schema, quite confusing
-	d = strings.TrimSuffix(d, "The default value is `map[]`.")
 	if d != "" {
+		// Wraps code chunks with backticks to render them as code blocks
+		d = reCode.ReplaceAllString(d, "`$1`")
+
+		// Adds a trailing dot if missing
 		desc = append(desc, addDot(d))
 	}
 
-	if o.isScalar() && o.Default != nil {
-		desc = append(desc, fmt.Sprintf("The default value is `%v`.", o.Default))
+	if o.isScalar() {
+		switch {
+		case o.Default != nil:
+			desc = append(desc, fmt.Sprintf("Default: `%v`.", o.Default))
+		case o.Example != nil && o.Type != objectTypeBoolean && o.Enum == nil && !strings.Contains(strings.ToLower(d), "defaults to"):
+			// Skips boolean (either true or false), enums, or if the field has default value in the description
+			desc = append(desc, fmt.Sprintf("Example: `%v`.", o.Example))
+		}
 	}
 
 	// Trims dot from description, so it doesn't look weird with link to nested schema

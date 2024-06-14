@@ -14,7 +14,7 @@ func metricsUserConfig() *schema.Schema {
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"database": {
-				Description: "Name of the database where to store metric datapoints. Only affects PostgreSQL destinations. Defaults to 'metrics'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.",
+				Description: "Name of the database where to store metric datapoints. Only affects PostgreSQL destinations. Defaults to `metrics`. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -24,7 +24,7 @@ func metricsUserConfig() *schema.Schema {
 				Type:        schema.TypeInt,
 			},
 			"ro_username": {
-				Description: "Name of a user that can be used to read metrics. This will be used for Grafana integration (if enabled) to prevent Grafana users from making undesired changes. Only affects PostgreSQL destinations. Defaults to 'metrics_reader'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.",
+				Description: "Name of a user that can be used to read metrics. This will be used for Grafana integration (if enabled) to prevent Grafana users from making undesired changes. Only affects PostgreSQL destinations. Defaults to `metrics_reader`. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -89,17 +89,17 @@ func metricsUserConfig() *schema.Schema {
 							Type:        schema.TypeBool,
 						},
 						"perf_events_statements_digest_text_limit": {
-							Description: "Truncates digest text from perf_events_statements into this many characters.",
+							Description: "Truncates digest text from perf_events_statements into this many characters. Example: `120`.",
 							Optional:    true,
 							Type:        schema.TypeInt,
 						},
 						"perf_events_statements_limit": {
-							Description: "Limits metrics from perf_events_statements.",
+							Description: "Limits metrics from perf_events_statements. Example: `250`.",
 							Optional:    true,
 							Type:        schema.TypeInt,
 						},
 						"perf_events_statements_time_limit": {
-							Description: "Only include perf_events_statements whose last seen is less than this many seconds.",
+							Description: "Only include perf_events_statements whose last seen is less than this many seconds. Example: `86400`.",
 							Optional:    true,
 							Type:        schema.TypeInt,
 						},
@@ -113,7 +113,7 @@ func metricsUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"username": {
-				Description: "Name of the user used to write metrics. Only affects PostgreSQL destinations. Defaults to 'metrics_writer'. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.",
+				Description: "Name of the user used to write metrics. Only affects PostgreSQL destinations. Defaults to `metrics_writer`. Note that this must be the same for all metrics integrations that write data to the same PostgreSQL service.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
