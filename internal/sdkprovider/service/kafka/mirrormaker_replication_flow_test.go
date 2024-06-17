@@ -27,7 +27,8 @@ func TestAccAivenMirrorMakerReplicationFlow_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckAivenMirrorMakerReplicationFlowResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMirrorMakerReplicationFlowResource(rName),
+
+				Config: testAccMirrorMakerReplicationFlowResource(rName, ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAivenMirrorMakerReplicationFlowAttributes("data.aiven_mirrormaker_replication_flow.flow"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
@@ -41,13 +42,34 @@ func TestAccAivenMirrorMakerReplicationFlow_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "topics_blacklist.0", ".*[\\-\\.]internal"),
 					resource.TestCheckResourceAttr(resourceName, "topics_blacklist.1", ".*\\.replica"),
 					resource.TestCheckResourceAttr(resourceName, "topics_blacklist.2", "__.*"),
+					resource.TestCheckResourceAttr(resourceName, "config_properties_exclude.#", "0"),
+				),
+			},
+			{
+				Config: testAccMirrorMakerReplicationFlowResource(rName, `	
+				config_properties_exclude = [
+					"follower\\.replication\\.throttled\\.replicas",
+					"leader\\.replication\\.throttled\\.replicas",
+					"message\\.timestamp\\.difference\\.max\\.ms",
+					"message\\.timestamp\\.type",
+					"unclean\\.leader\\.election\\.enable",
+					"min\\.insync\\.replicas"
+				]`),
+				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "config_properties_exclude.#", "6"),
-					resource.TestCheckResourceAttr(resourceName, "config_properties_exclude.0", "follower\\.replication\\.throttled\\.replicas"),
-					resource.TestCheckResourceAttr(resourceName, "config_properties_exclude.1", "leader\\.replication\\.throttled\\.replicas"),
-					resource.TestCheckResourceAttr(resourceName, "config_properties_exclude.2", "message\\.timestamp\\.difference\\.max\\.ms"),
-					resource.TestCheckResourceAttr(resourceName, "config_properties_exclude.3", "message\\.timestamp\\.type"),
-					resource.TestCheckResourceAttr(resourceName, "config_properties_exclude.4", "unclean\\.leader\\.election\\.enable"),
-					resource.TestCheckResourceAttr(resourceName, "config_properties_exclude.5", "min\\.insync\\.replicas"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "config_properties_exclude.*", "follower\\.replication\\.throttled\\.replicas"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "config_properties_exclude.*", "leader\\.replication\\.throttled\\.replicas"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "config_properties_exclude.*", "message\\.timestamp\\.difference\\.max\\.ms"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "config_properties_exclude.*", "message\\.timestamp\\.type"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "config_properties_exclude.*", "unclean\\.leader\\.election\\.enable"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "config_properties_exclude.*", "min\\.insync\\.replicas"),
+				),
+			},
+			{
+				// Removes the config
+				Config: testAccMirrorMakerReplicationFlowResource(rName, ``),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "config_properties_exclude.#", "0"),
 				),
 			},
 		},
@@ -98,17 +120,17 @@ func testAccCheckAivenMirrorMakerReplicationFlowResourceDestroy(s *terraform.Sta
 	return nil
 }
 
-func testAccMirrorMakerReplicationFlowResource(name string) string {
+func testAccMirrorMakerReplicationFlowResource(name, configExclude string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
-  project = "%s"
+  project = "%[1]s"
 }
 
 resource "aiven_kafka" "source" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
   plan                    = "startup-2"
-  service_name            = "test-acc-sr-source-%s"
+  service_name            = "test-acc-sr-source-%[2]s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 
@@ -123,7 +145,7 @@ resource "aiven_kafka" "source" {
 resource "aiven_kafka_topic" "source" {
   project      = data.aiven_project.foo.project
   service_name = aiven_kafka.source.service_name
-  topic_name   = "test-acc-topic-a-%s"
+  topic_name   = "test-acc-topic-a-%[2]s"
   partitions   = 3
   replication  = 2
 }
@@ -132,7 +154,7 @@ resource "aiven_kafka" "target" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
   plan                    = "startup-2"
-  service_name            = "test-acc-sr-target-%s"
+  service_name            = "test-acc-sr-target-%[2]s"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 
@@ -147,7 +169,7 @@ resource "aiven_kafka" "target" {
 resource "aiven_kafka_topic" "target" {
   project      = data.aiven_project.foo.project
   service_name = aiven_kafka.target.service_name
-  topic_name   = "test-acc-topic-b-%s"
+  topic_name   = "test-acc-topic-b-%[2]s"
   partitions   = 3
   replication  = 2
 }
@@ -156,7 +178,7 @@ resource "aiven_kafka_mirrormaker" "mm" {
   project      = data.aiven_project.foo.project
   cloud_name   = "google-europe-west1"
   plan         = "startup-4"
-  service_name = "test-acc-sr-mm-%s"
+  service_name = "test-acc-sr-mm-%[2]s"
 
   kafka_mirrormaker_user_config {
     ip_filter = ["0.0.0.0/0"]
@@ -215,14 +237,7 @@ resource "aiven_mirrormaker_replication_flow" "foo" {
     "__.*"
   ]
 
-  config_properties_exclude = [
-    "follower\\.replication\\.throttled\\.replicas",
-    "leader\\.replication\\.throttled\\.replicas",
-    "message\\.timestamp\\.difference\\.max\\.ms",
-    "message\\.timestamp\\.type",
-    "unclean\\.leader\\.election\\.enable",
-    "min\\.insync\\.replicas"
-  ]
+  %[3]s
 }
 
 data "aiven_mirrormaker_replication_flow" "flow" {
@@ -232,7 +247,7 @@ data "aiven_mirrormaker_replication_flow" "flow" {
   target_cluster = aiven_mirrormaker_replication_flow.foo.target_cluster
 
   depends_on = [aiven_mirrormaker_replication_flow.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name, name)
+}`, os.Getenv("AIVEN_PROJECT_NAME"), name, configExclude)
 }
 
 func testAccCheckAivenMirrorMakerReplicationFlowAttributes(n string) resource.TestCheckFunc {

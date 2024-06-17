@@ -63,7 +63,7 @@ func ResourceOrganizationApplicationUser() *schema.Resource {
 
 func resourceOrganizationApplicationUserCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	var req applicationuser.ApplicationUserCreateIn
-	err := schemautil.ResourceDataGet(d, aivenOrganizationApplicationUserSchema, &req)
+	err := schemautil.ResourceDataGet(d, &req)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -103,7 +103,7 @@ func resourceOrganizationApplicationUserRead(ctx context.Context, d *schema.Reso
 	}
 
 	// Sets name and user_id
-	err = schemautil.ResourceDataSet(d, aivenOrganizationApplicationUserSchema, user)
+	err = schemautil.ResourceDataSet(aivenOrganizationApplicationUserSchema, d, user)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -128,7 +128,7 @@ func resourceOrganizationApplicationUserUpdate(ctx context.Context, d *schema.Re
 	}
 
 	var req applicationuser.ApplicationUserUpdateIn
-	err = schemautil.ResourceDataGet(d, aivenOrganizationApplicationUserSchema, &req)
+	err = schemautil.ResourceDataGet(d, &req)
 	if err != nil {
 		return diag.FromErr(err)
 	}

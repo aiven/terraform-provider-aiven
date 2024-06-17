@@ -126,7 +126,7 @@ func ResourceOrganizationApplicationUserToken() *schema.Resource {
 
 func resourceOrganizationApplicationUserTokenCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	var req applicationuser.ApplicationUserAccessTokenCreateIn
-	err := schemautil.ResourceDataGet(d, aivenOrganizationApplicationUserTokenSchema, &req)
+	err := schemautil.ResourceDataGet(d, &req)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -139,7 +139,7 @@ func resourceOrganizationApplicationUserTokenCreate(ctx context.Context, d *sche
 		return diag.FromErr(err)
 	}
 
-	err = schemautil.ResourceDataSet(d, aivenOrganizationApplicationUserTokenSchema, token)
+	err = schemautil.ResourceDataSet(aivenOrganizationApplicationUserTokenSchema, d, token)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -171,7 +171,7 @@ func resourceOrganizationApplicationUserTokenRead(ctx context.Context, d *schema
 		return diag.Errorf("application user token not found")
 	}
 
-	err = schemautil.ResourceDataSet(d, aivenOrganizationApplicationUserTokenSchema, token)
+	err = schemautil.ResourceDataSet(aivenOrganizationApplicationUserTokenSchema, d, token)
 	if err != nil {
 		return diag.FromErr(err)
 	}

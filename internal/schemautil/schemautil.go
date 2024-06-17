@@ -325,25 +325,26 @@ func CopyServiceUserPropertiesFromAPIResponseToTerraform(
 //
 // Warning: doesn't support nested sets.
 // Warning: not tested with nested objects.
-func ResourceDataGet(d *schema.ResourceData, s map[string]*schema.Schema, dto any) error {
+func ResourceDataGet(d *schema.ResourceData, dto any, fns ...KVModifier) error {
 	config := d.GetRawConfig().AsValueMap()
 	m := make(map[string]any)
-	for k, v := range s {
-		// If the field in the tf config
-		if c, ok := config[k]; !ok || c.IsNull() {
+	for k, c := range config {
+		// If the field in the tf config, or array doesn't have changes
+		if c.IsNull() && !d.HasChange(k) {
 			continue
 		}
 
 		value := d.Get(k)
-		if v.Type == schema.TypeSet {
-			set, ok := value.(*schema.Set)
-			if !ok {
-				return fmt.Errorf("expected type Set, got %T", value)
-			}
-			m[k] = set.List()
-		} else {
-			m[k] = value
+		set, ok := value.(*schema.Set)
+		if ok {
+			value = set.List()
 		}
+
+		for _, f := range fns {
+			k, value = f(k, value)
+		}
+
+		m[k] = value
 	}
 
 	b, err := json.Marshal(&m)
@@ -354,6 +355,9 @@ func ResourceDataGet(d *schema.ResourceData, s map[string]*schema.Schema, dto an
 	err = json.Unmarshal(b, dto)
 	return err
 }
+
+// KVModifier modifier for key/value pair
+type KVModifier func(k string, v any) (string, any)
 
 // ResourceDataSet Sets the given dto values to schema.ResourceData
 // Instead of setting every field individually and dealing with pointers,
@@ -369,8 +373,8 @@ func ResourceDataGet(d *schema.ResourceData, s map[string]*schema.Schema, dto an
 //
 // Use:
 //
-//	err := ResourceDataSet(d, s, dto)
-func ResourceDataSet(d *schema.ResourceData, s map[string]*schema.Schema, dto any) error {
+//	err := ResourceDataSet(s, d, dto)
+func ResourceDataSet(s map[string]*schema.Schema, d *schema.ResourceData, dto any, fns ...KVModifier) error {
 	b, err := json.Marshal(dto)
 	if err != nil {
 		return err
@@ -382,88 +386,40 @@ func ResourceDataSet(d *schema.ResourceData, s map[string]*schema.Schema, dto an
 		return err
 	}
 
-	result, err := serializeMap(s, m)
-	if err != nil {
-		return err
+	for _, f := range fns {
+		for k, v := range m {
+			delete(m, k) // remove the old key in case it is replaced
+			k, v = f(k, v)
+			m[k] = v
+		}
 	}
 
-	for k, v := range result {
-		if err = d.Set(k, v); err != nil {
-			return err
+	for k := range s {
+		if v, ok := m[k]; ok {
+			if err = d.Set(k, v); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
 }
 
-func serializeMap(s map[string]*schema.Schema, m map[string]any) (map[string]any, error) {
-	result := make(map[string]any)
-	for name, field := range s {
-		value, ok := m[name]
-		if !ok {
-			continue
+// RenameAliases renames field names on object top level
+func RenameAliases(aliases map[string]string) KVModifier {
+	return func(k string, v any) (string, any) {
+		alias, ok := aliases[k]
+		if ok {
+			return alias, v
 		}
-
-		val, err := serialize(field, value)
-		if err != nil {
-			return nil, err
-		}
-		result[name] = val
+		return k, v
 	}
-
-	return result, nil
 }
 
-func serialize(s *schema.Schema, value any) (any, error) {
-	switch s.Type {
-	case schema.TypeList, schema.TypeSet:
-	default:
-		return value, nil
+// RenameAliasesReverse reverse version of RenameAliases
+func RenameAliasesReverse(aliases map[string]string) KVModifier {
+	m := make(map[string]string, len(aliases))
+	for k, v := range aliases {
+		m[v] = k
 	}
-
-	var err error
-	list, isList := value.([]any)
-
-	switch elem := s.Elem.(type) {
-	case *schema.Schema:
-		// This branch converts a list of scalars
-		if !isList {
-			return nil, fmt.Errorf("expected a list, but %T", value)
-		}
-
-		result := make([]any, len(list))
-		for i, v := range list {
-			result[i], err = serialize(elem, v)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		return schema.NewSet(schema.HashSchema(elem), result), nil
-	case *schema.Resource:
-		// This branch converts a list of objects or a single object
-		if m, ok := value.(map[string]any); ok {
-			return serializeMap(elem.Schema, m)
-		}
-
-		if !isList {
-			return nil, fmt.Errorf("expected a map or a list, but %T", value)
-		}
-
-		result := make([]any, len(list))
-		for i, v := range list {
-			m, ok := v.(map[string]any)
-			if !ok {
-				return nil, fmt.Errorf("expected a map, got %T", v)
-			}
-
-			result[i], err = serializeMap(elem.Schema, m)
-			if err != nil {
-				return nil, err
-			}
-		}
-		return result, nil
-	}
-
-	// It is either a schema.Resource or schema.Schema
-	panic(fmt.Errorf("invalid schema type %T", s.Elem))
+	return RenameAliases(m)
 }
