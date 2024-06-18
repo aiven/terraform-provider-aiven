@@ -70,7 +70,7 @@ Optional:
 Required:
 
 - `columns` (Block List, Min: 1, Max: 100) Table columns (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--columns))
-- `data_format` (String) Enum: `Avro`, `CSV`, `JSONAsString`, `JSONCompactEachRow`, `JSONCompactStringsEachRow`, `JSONEachRow`, `JSONStringsEachRow`, `MsgPack`, `TSKV`, `TSV`, `TabSeparated`, `RawBLOB`, `AvroConfluent`. Message data format. Default: `JSONEachRow`.
+- `data_format` (String) Enum: `Avro`, `CSV`, `JSONAsString`, `JSONCompactEachRow`, `JSONCompactStringsEachRow`, `JSONEachRow`, `JSONStringsEachRow`, `MsgPack`, `TSKV`, `TSV`, `TabSeparated`, `RawBLOB`, `AvroConfluent`, `Parquet`. Message data format. Default: `JSONEachRow`.
 - `group_name` (String) Kafka consumers group. Default: `clickhouse`.
 - `name` (String) Name of the table. Example: `events`.
 - `topics` (Block List, Min: 1, Max: 100) Kafka topics (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--topics))
@@ -136,6 +136,7 @@ Optional:
 - `include_topics` (List of String) List of topics to include.
 - `kafka_custom_metrics` (List of String) List of custom metrics.
 - `max_jmx_metrics` (Number) Maximum number of JMX metrics to send. Example: `2000`.
+- `mirrormaker_custom_metrics` (List of String) List of custom metrics.
 - `opensearch` (Block List, Max: 1) Datadog Opensearch Options (see [below for nested schema](#nestedblock--datadog_user_config--opensearch))
 - `redis` (Block List, Max: 1) Datadog Redis Options (see [below for nested schema](#nestedblock--datadog_user_config--redis))
 
@@ -266,7 +267,9 @@ Optional:
 
 Optional:
 
+- `consumer_auto_offset_reset` (String) Enum: `earliest`, `latest`. Set where consumer starts to consume data. Value `earliest`: Start replication from the earliest offset. Value `latest`: Start replication from the latest offset. Default is `earliest`.
 - `consumer_fetch_min_bytes` (Number) The minimum amount of data the server should return for a fetch request. Example: `1024`.
+- `consumer_max_poll_records` (Number) Set consumer max.poll.records. The default is 500. Example: `500`.
 - `producer_batch_size` (Number) The batch size in bytes producer will attempt to collect before publishing to broker. Example: `1024`.
 - `producer_buffer_memory` (Number) The amount of bytes producer can use for buffering data before publishing to broker. Example: `8388608`.
 - `producer_compression_type` (String) Enum: `gzip`, `snappy`, `lz4`, `zstd`, `none`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.

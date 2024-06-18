@@ -4,6 +4,7 @@ package serviceintegration
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/diff"
 )
@@ -95,6 +96,17 @@ func datadogUserConfig() *schema.Schema {
 				Description: "Maximum number of JMX metrics to send. Example: `2000`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
+			},
+			"mirrormaker_custom_metrics": {
+				Description: "List of custom metrics.",
+				Elem: &schema.Schema{
+					Description:  "Enum: `kafka_mirrormaker_summary.replication_lag`. Metric name.",
+					Type:         schema.TypeString,
+					ValidateFunc: validation.StringInSlice([]string{"kafka_mirrormaker_summary.replication_lag"}, false),
+				},
+				MaxItems: 1024,
+				Optional: true,
+				Type:     schema.TypeList,
 			},
 			"opensearch": {
 				Description: "Datadog Opensearch Options",

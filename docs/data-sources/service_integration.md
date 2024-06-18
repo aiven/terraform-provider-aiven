@@ -127,6 +127,7 @@ Read-Only:
 - `include_topics` (List of String)
 - `kafka_custom_metrics` (List of String)
 - `max_jmx_metrics` (Number)
+- `mirrormaker_custom_metrics` (List of String)
 - `opensearch` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--opensearch))
 - `redis` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--redis))
 
@@ -251,7 +252,9 @@ Read-Only:
 
 Read-Only:
 
+- `consumer_auto_offset_reset` (String)
 - `consumer_fetch_min_bytes` (Number)
+- `consumer_max_poll_records` (Number)
 - `producer_batch_size` (Number)
 - `producer_buffer_memory` (Number)
 - `producer_compression_type` (String)

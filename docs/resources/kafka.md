@@ -115,10 +115,12 @@ Optional:
 - `kafka_authentication_methods` (Block List, Max: 1) Kafka authentication methods (see [below for nested schema](#nestedblock--kafka_user_config--kafka_authentication_methods))
 - `kafka_connect` (Boolean) Enable Kafka Connect service. Default: `false`.
 - `kafka_connect_config` (Block List, Max: 1) Kafka Connect configuration values (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_config))
+- `kafka_connect_secret_providers` (Block List) Configure external secret providers in order to reference external secrets in connector configuration. Currently Hashicorp Vault (provider: vault, auth_method: token) and AWS Secrets Manager (provider: aws, auth_method: credentials) are supported. Secrets can be referenced in connector config with ${<provider_name>:<secret_path>:<key_name>} (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_secret_providers))
 - `kafka_rest` (Boolean) Enable Kafka-REST service. Default: `false`.
 - `kafka_rest_authorization` (Boolean) Enable authorization in Kafka-REST service.
 - `kafka_rest_config` (Block List, Max: 1) Kafka REST configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_rest_config))
 - `kafka_version` (String) Enum: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`, `3.7`, and newer. Kafka major version.
+- `letsencrypt_sasl_privatelink` (Boolean) Use Letsencrypt CA for Kafka SASL via Privatelink.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--kafka_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--kafka_user_config--privatelink_access))
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--kafka_user_config--public_access))
@@ -223,6 +225,47 @@ Optional:
 - `producer_max_request_size` (Number) This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests. Example: `1048576`.
 - `scheduled_rebalance_max_delay_ms` (Number) The maximum delay that is scheduled in order to wait for the return of one or more departed workers before rebalancing and reassigning their connectors and tasks to the group. During this period the connectors and tasks of the departed workers remain unassigned. Defaults to 5 minutes.
 - `session_timeout_ms` (Number) The timeout in milliseconds used to detect failures when using Kafka’s group management facilities (defaults to 10000).
+
+
+<a id="nestedblock--kafka_user_config--kafka_connect_secret_providers"></a>
+### Nested Schema for `kafka_user_config.kafka_connect_secret_providers`
+
+Required:
+
+- `name` (String) Name of the secret provider. Used to reference secrets in connector config.
+
+Optional:
+
+- `aws` (Block List, Max: 1) AWS config for Secret Provider (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_secret_providers--aws))
+- `vault` (Block List, Max: 1) Vault Config for Secret Provider (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_secret_providers--vault))
+
+<a id="nestedblock--kafka_user_config--kafka_connect_secret_providers--aws"></a>
+### Nested Schema for `kafka_user_config.kafka_connect_secret_providers.aws`
+
+Required:
+
+- `auth_method` (String) Enum: `credentials`. Auth method of the vault secret provider.
+- `region` (String) Region used to lookup secrets with AWS SecretManager.
+
+Optional:
+
+- `access_key` (String, Sensitive) Access key used to authenticate with aws.
+- `secret_key` (String, Sensitive) Secret key used to authenticate with aws.
+
+
+<a id="nestedblock--kafka_user_config--kafka_connect_secret_providers--vault"></a>
+### Nested Schema for `kafka_user_config.kafka_connect_secret_providers.vault`
+
+Required:
+
+- `address` (String) Address of the Vault server.
+- `auth_method` (String) Enum: `token`. Auth method of the vault secret provider.
+
+Optional:
+
+- `engine_version` (Number) Enum: `1`, `2`, and newer. KV Secrets Engine version of the Vault server instance.
+- `token` (String, Sensitive) Token used to authenticate with vault and auth method `token`.
+
 
 
 <a id="nestedblock--kafka_user_config--kafka_rest_config"></a>

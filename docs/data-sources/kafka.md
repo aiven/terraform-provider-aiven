@@ -102,10 +102,12 @@ Read-Only:
 - `kafka_authentication_methods` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_authentication_methods))
 - `kafka_connect` (Boolean)
 - `kafka_connect_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_config))
+- `kafka_connect_secret_providers` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_secret_providers))
 - `kafka_rest` (Boolean)
 - `kafka_rest_authorization` (Boolean)
 - `kafka_rest_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_rest_config))
 - `kafka_version` (String)
+- `letsencrypt_sasl_privatelink` (Boolean)
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--private_access))
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--privatelink_access))
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--public_access))
@@ -207,6 +209,38 @@ Read-Only:
 - `producer_max_request_size` (Number)
 - `scheduled_rebalance_max_delay_ms` (Number)
 - `session_timeout_ms` (Number)
+
+
+<a id="nestedobjatt--kafka_user_config--kafka_connect_secret_providers"></a>
+### Nested Schema for `kafka_user_config.kafka_connect_secret_providers`
+
+Read-Only:
+
+- `aws` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_secret_providers--aws))
+- `name` (String)
+- `vault` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_secret_providers--vault))
+
+<a id="nestedobjatt--kafka_user_config--kafka_connect_secret_providers--aws"></a>
+### Nested Schema for `kafka_user_config.kafka_connect_secret_providers.aws`
+
+Read-Only:
+
+- `access_key` (String)
+- `auth_method` (String)
+- `region` (String)
+- `secret_key` (String)
+
+
+<a id="nestedobjatt--kafka_user_config--kafka_connect_secret_providers--vault"></a>
+### Nested Schema for `kafka_user_config.kafka_connect_secret_providers.vault`
+
+Read-Only:
+
+- `address` (String)
+- `auth_method` (String)
+- `engine_version` (Number)
+- `token` (String)
+
 
 
 <a id="nestedobjatt--kafka_user_config--kafka_rest_config"></a>
