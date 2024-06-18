@@ -84,6 +84,7 @@ Read-Only:
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--private_access))
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--privatelink_access))
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--public_access))
+- `secret_providers` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--secret_providers))
 - `service_log` (Boolean)
 - `static_ips` (Boolean)
 
@@ -145,6 +146,38 @@ Read-Only:
 
 - `kafka_connect` (Boolean)
 - `prometheus` (Boolean)
+
+
+<a id="nestedobjatt--kafka_connect_user_config--secret_providers"></a>
+### Nested Schema for `kafka_connect_user_config.secret_providers`
+
+Read-Only:
+
+- `aws` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--secret_providers--aws))
+- `name` (String)
+- `vault` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--secret_providers--vault))
+
+<a id="nestedobjatt--kafka_connect_user_config--secret_providers--aws"></a>
+### Nested Schema for `kafka_connect_user_config.secret_providers.aws`
+
+Read-Only:
+
+- `access_key` (String)
+- `auth_method` (String)
+- `region` (String)
+- `secret_key` (String)
+
+
+<a id="nestedobjatt--kafka_connect_user_config--secret_providers--vault"></a>
+### Nested Schema for `kafka_connect_user_config.secret_providers.vault`
+
+Read-Only:
+
+- `address` (String)
+- `auth_method` (String)
+- `engine_version` (Number)
+- `token` (String)
+
 
 
 

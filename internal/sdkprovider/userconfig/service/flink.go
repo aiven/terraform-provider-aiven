@@ -26,6 +26,7 @@ func flinkUserConfig() *schema.Schema {
 			},
 			"flink_version": {
 				Description: "Enum: `1.16`, `1.19`, and newer. Flink major version.",
+				ForceNew:    true,
 				Optional:    true,
 				Type:        schema.TypeString,
 			},

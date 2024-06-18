@@ -41,10 +41,10 @@ func clickhouseKafkaUserConfig() *schema.Schema {
 					Type:     schema.TypeList,
 				},
 				"data_format": {
-					Description:  "Enum: `Avro`, `CSV`, `JSONAsString`, `JSONCompactEachRow`, `JSONCompactStringsEachRow`, `JSONEachRow`, `JSONStringsEachRow`, `MsgPack`, `TSKV`, `TSV`, `TabSeparated`, `RawBLOB`, `AvroConfluent`. Message data format. Default: `JSONEachRow`.",
+					Description:  "Enum: `Avro`, `CSV`, `JSONAsString`, `JSONCompactEachRow`, `JSONCompactStringsEachRow`, `JSONEachRow`, `JSONStringsEachRow`, `MsgPack`, `TSKV`, `TSV`, `TabSeparated`, `RawBLOB`, `AvroConfluent`, `Parquet`. Message data format. Default: `JSONEachRow`.",
 					Required:     true,
 					Type:         schema.TypeString,
-					ValidateFunc: validation.StringInSlice([]string{"Avro", "CSV", "JSONAsString", "JSONCompactEachRow", "JSONCompactStringsEachRow", "JSONEachRow", "JSONStringsEachRow", "MsgPack", "TSKV", "TSV", "TabSeparated", "RawBLOB", "AvroConfluent"}, false),
+					ValidateFunc: validation.StringInSlice([]string{"Avro", "CSV", "JSONAsString", "JSONCompactEachRow", "JSONCompactStringsEachRow", "JSONEachRow", "JSONStringsEachRow", "MsgPack", "TSKV", "TSV", "TabSeparated", "RawBLOB", "AvroConfluent", "Parquet"}, false),
 				},
 				"date_time_input_format": {
 					Description:  "Enum: `basic`, `best_effort`, `best_effort_us`. Method to read DateTime from text input formats. Default: `basic`.",

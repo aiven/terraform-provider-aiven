@@ -215,6 +215,79 @@ func kafkaConnectUserConfig() *schema.Schema {
 				Optional: true,
 				Type:     schema.TypeList,
 			},
+			"secret_providers": {
+				Description: "Configure external secret providers in order to reference external secrets in connector configuration. Currently Hashicorp Vault (provider: vault, auth_method: token) and AWS Secrets Manager (provider: aws, auth_method: credentials) are supported. Secrets can be referenced in connector config with ${<provider_name>:<secret_path>:<key_name>}",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"aws": {
+						Description: "AWS config for Secret Provider",
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+							"access_key": {
+								Description: "Access key used to authenticate with aws.",
+								Optional:    true,
+								Sensitive:   true,
+								Type:        schema.TypeString,
+							},
+							"auth_method": {
+								Description:  "Enum: `credentials`. Auth method of the vault secret provider.",
+								Required:     true,
+								Type:         schema.TypeString,
+								ValidateFunc: validation.StringInSlice([]string{"credentials"}, false),
+							},
+							"region": {
+								Description: "Region used to lookup secrets with AWS SecretManager.",
+								Required:    true,
+								Type:        schema.TypeString,
+							},
+							"secret_key": {
+								Description: "Secret key used to authenticate with aws.",
+								Optional:    true,
+								Sensitive:   true,
+								Type:        schema.TypeString,
+							},
+						}},
+						MaxItems: 1,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"name": {
+						Description: "Name of the secret provider. Used to reference secrets in connector config.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+					"vault": {
+						Description: "Vault Config for Secret Provider",
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+							"address": {
+								Description: "Address of the Vault server.",
+								Required:    true,
+								Type:        schema.TypeString,
+							},
+							"auth_method": {
+								Description:  "Enum: `token`. Auth method of the vault secret provider.",
+								Required:     true,
+								Type:         schema.TypeString,
+								ValidateFunc: validation.StringInSlice([]string{"token"}, false),
+							},
+							"engine_version": {
+								Description: "Enum: `1`, `2`, and newer. KV Secrets Engine version of the Vault server instance.",
+								Optional:    true,
+								Type:        schema.TypeInt,
+							},
+							"token": {
+								Description: "Token used to authenticate with vault and auth method `token`.",
+								Optional:    true,
+								Sensitive:   true,
+								Type:        schema.TypeString,
+							},
+						}},
+						MaxItems: 1,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+				}},
+				Optional: true,
+				Type:     schema.TypeList,
+			},
 			"service_log": {
 				Description: "Store logs for the service so that they are available in the HTTP API and console.",
 				Optional:    true,

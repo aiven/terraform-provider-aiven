@@ -22,8 +22,19 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 			"kafka_mirrormaker": {
 				Description: "Kafka MirrorMaker configuration values",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"consumer_auto_offset_reset": {
+						Description:  "Enum: `earliest`, `latest`. Set where consumer starts to consume data. Value `earliest`: Start replication from the earliest offset. Value `latest`: Start replication from the latest offset. Default is `earliest`.",
+						Optional:     true,
+						Type:         schema.TypeString,
+						ValidateFunc: validation.StringInSlice([]string{"earliest", "latest"}, false),
+					},
 					"consumer_fetch_min_bytes": {
 						Description: "The minimum amount of data the server should return for a fetch request. Example: `1024`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"consumer_max_poll_records": {
+						Description: "Set consumer max.poll.records. The default is 500. Example: `500`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},

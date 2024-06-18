@@ -87,6 +87,7 @@ Optional:
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--kafka_connect_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--kafka_connect_user_config--privatelink_access))
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--kafka_connect_user_config--public_access))
+- `secret_providers` (Block List) Configure external secret providers in order to reference external secrets in connector configuration. Currently Hashicorp Vault (provider: vault, auth_method: token) and AWS Secrets Manager (provider: aws, auth_method: credentials) are supported. Secrets can be referenced in connector config with ${<provider_name>:<secret_path>:<key_name>} (see [below for nested schema](#nestedblock--kafka_connect_user_config--secret_providers))
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `static_ips` (Boolean) Use static public IP addresses.
 
@@ -151,6 +152,47 @@ Optional:
 
 - `kafka_connect` (Boolean) Allow clients to connect to kafka_connect from the public internet for service nodes that are in a project VPC or another type of private network.
 - `prometheus` (Boolean) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.
+
+
+<a id="nestedblock--kafka_connect_user_config--secret_providers"></a>
+### Nested Schema for `kafka_connect_user_config.secret_providers`
+
+Required:
+
+- `name` (String) Name of the secret provider. Used to reference secrets in connector config.
+
+Optional:
+
+- `aws` (Block List, Max: 1) AWS config for Secret Provider (see [below for nested schema](#nestedblock--kafka_connect_user_config--secret_providers--aws))
+- `vault` (Block List, Max: 1) Vault Config for Secret Provider (see [below for nested schema](#nestedblock--kafka_connect_user_config--secret_providers--vault))
+
+<a id="nestedblock--kafka_connect_user_config--secret_providers--aws"></a>
+### Nested Schema for `kafka_connect_user_config.secret_providers.aws`
+
+Required:
+
+- `auth_method` (String) Enum: `credentials`. Auth method of the vault secret provider.
+- `region` (String) Region used to lookup secrets with AWS SecretManager.
+
+Optional:
+
+- `access_key` (String, Sensitive) Access key used to authenticate with aws.
+- `secret_key` (String, Sensitive) Secret key used to authenticate with aws.
+
+
+<a id="nestedblock--kafka_connect_user_config--secret_providers--vault"></a>
+### Nested Schema for `kafka_connect_user_config.secret_providers.vault`
+
+Required:
+
+- `address` (String) Address of the Vault server.
+- `auth_method` (String) Enum: `token`. Auth method of the vault secret provider.
+
+Optional:
+
+- `engine_version` (Number) Enum: `1`, `2`, and newer. KV Secrets Engine version of the Vault server instance.
+- `token` (String, Sensitive) Token used to authenticate with vault and auth method `token`.
+
 
 
 
