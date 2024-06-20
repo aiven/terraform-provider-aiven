@@ -11,6 +11,8 @@ import (
 )
 
 func TestAccAivenAccountTeamDataSource_basic(t *testing.T) {
+	t.Skip(accountTeamDeprecated)
+
 	if _, ok := os.LookupEnv("AIVEN_ACCOUNT_NAME"); !ok {
 		t.Skip("AIVEN_ACCOUNT_NAME env variable is required to run this test")
 	}
