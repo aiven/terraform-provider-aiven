@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/aiven/aiven-go-client/v2 v2.23.1-0.20240605130503-0a97dd47f14a
-	github.com/aiven/go-client-codegen v0.10.0
+	github.com/aiven/go-client-codegen v0.12.0
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/dave/jennifer v1.7.0
 	github.com/docker/go-units v0.5.0
@@ -38,7 +38,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect
-	github.com/rs/zerolog v1.32.0 // indirect
+	github.com/rs/zerolog v1.33.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.47.0 // indirect

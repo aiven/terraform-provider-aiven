@@ -12,11 +12,9 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Mark several sensitive user config fields as "sensitive"
-
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
-
 - Fix aiven-go-client dependency version
 - Fix `aiven_organization_user_group` resource - `name` field is required
+- Use `TypeSet` for `config_properties_exclude`  
 
 ## [4.19.1] - 2024-05-05
 

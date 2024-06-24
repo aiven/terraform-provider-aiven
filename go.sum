@@ -201,8 +201,8 @@ github.com/aiven/aiven-go-client/v2 v2.23.1-0.20240605130503-0a97dd47f14a h1:Vz6
 github.com/aiven/aiven-go-client/v2 v2.23.1-0.20240605130503-0a97dd47f14a/go.mod h1:KdHfLIlIRZIfCSEBd39j1Q81jlSb6Nd+oCQKqERfnuA=
 github.com/aiven/go-api-schemas v1.77.0 h1:tfOjAExKOk3sZjVkltbVvY402GIOMHV1POCas6Hiys8=
 github.com/aiven/go-api-schemas v1.77.0/go.mod h1:FYR22WcKLisZ1CYqyyGk6XqNSyxfAUtaQd+P2ydwc5A=
-github.com/aiven/go-client-codegen v0.10.0 h1:lMFl4Vf1ChV590WQEo7a2ckG0uzBh0yNl+InzWndPLQ=
-github.com/aiven/go-client-codegen v0.10.0/go.mod h1:6fa3VkprxBFcWZQnxFs6hYMUmzoE/o+Phgq8i36l7sk=
+github.com/aiven/go-client-codegen v0.12.0 h1:n1quEHKf7fAvz0ium7FRquA8vKGXUi9epsstPJ/Va8A=
+github.com/aiven/go-client-codegen v0.12.0/go.mod h1:Sajbdpjn1/m5g2D6EDfiSnxl9pj9hxe8+hpG1CkCkhs=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/apparentlymart/go-dump v0.0.0-20180507223929-23540a00eaa3/go.mod h1:oL81AME2rN47vu18xqj1S1jPIPuN7afo62yKTNn3XMM=
 github.com/apparentlymart/go-textseg v1.0.0/go.mod h1:z96Txxhf3xSFMPmb5X/1W05FF/Nj9VFpLOpjS5yuumk=
@@ -531,8 +531,8 @@ github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rs/xid v1.5.0/go.mod h1:trrq9SKmegXys3aeAKXMUTdJsYXVwGY3RLcfgqegfbg=
-github.com/rs/zerolog v1.32.0 h1:keLypqrlIjaFsbmJOBdB/qvyF8KEtCWHwobLp5l/mQ0=
-github.com/rs/zerolog v1.32.0/go.mod h1:/7mN4D5sKwJLZQ2b/znpjC3/GQWY/xaDXUM0kKWRHss=
+github.com/rs/zerolog v1.33.0 h1:1cU2KZkvPxNyfgEmhHAz/1A9Bz+llsdYzklWFzgp0r8=
+github.com/rs/zerolog v1.33.0/go.mod h1:/7mN4D5sKwJLZQ2b/znpjC3/GQWY/xaDXUM0kKWRHss=
 github.com/samber/lo v1.39.0 h1:4gTz1wUhNYLhFSKl6O+8peW0v2F4BCY034GRpU9WnuA=
 github.com/samber/lo v1.39.0/go.mod h1:+m/ZKRl6ClXCE2Lgf3MsQlWfh4bn1bz6CXEOxnEXnEA=
 github.com/sergi/go-diff v1.0.0/go.mod h1:0CfEIISq7TuYL3j771MWULgwwjU+GofnZX9QAmXWZgo=
