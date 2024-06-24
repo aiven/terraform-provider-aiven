@@ -144,10 +144,7 @@ var aivenAccountAuthenticationSchema = map[string]*schema.Schema{
 
 func ResourceAccountAuthentication() *schema.Resource {
 	return &schema.Resource{
-		Description: `**This resource is deprecated**. 
-		
-Creates and manages an authentication method.
-		`,
+		Description:   "Creates and manages an authentication method.",
 		CreateContext: resourceAccountAuthenticationCreate,
 		ReadContext:   resourceAccountAuthenticationRead,
 		UpdateContext: resourceAccountAuthenticationUpdate,
@@ -158,7 +155,7 @@ Creates and manages an authentication method.
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
 		Schema:             aivenAccountAuthenticationSchema,
-		DeprecationMessage: "This resource is deprecated.",
+		DeprecationMessage: "This resource is deprecated. Use the Aiven Console instead. View the documentation for more information: https://aiven.io/docs/platform/howto/saml/add-identity-providers",
 	}
 }
 
