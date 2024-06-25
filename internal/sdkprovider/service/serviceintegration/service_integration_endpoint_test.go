@@ -299,7 +299,7 @@ func TestAccAivenServiceIntegrationEndpointExternalPostgresql(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
 					resource.TestCheckResourceAttr(resourceName, "endpoint_type", "external_postgresql"),
 					resource.TestCheckResourceAttr(resourceName, "external_postgresql.0.port", "1234"),
-					resource.TestCheckResourceAttr(resourceName, "external_postgresql.0.ssl_mode", "disable"),
+					resource.TestCheckResourceAttr(resourceName, "external_postgresql.0.ssl_mode", "require"),
 				),
 			},
 		},
@@ -326,7 +326,7 @@ resource "aiven_service_integration_endpoint" "pg" {
     password = aiven_pg.pg.service_password
     host     = aiven_pg.pg.service_host
     port     = 1234
-    ssl_mode = "disable"
+    ssl_mode = "require"
   }
 }
 `, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
