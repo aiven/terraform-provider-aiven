@@ -3,20 +3,20 @@
 page_title: "aiven_clickhouse_user Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Clickhouse User resource allows the creation and management of Aiven Clikhouse Users.
+  Creates and manages a ClickHouse user.
 ---
 
 # aiven_clickhouse_user (Resource)
 
-The Clickhouse User resource allows the creation and management of Aiven Clikhouse Users.
+Creates and manages a ClickHouse user.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_clickhouse_user" "ch-user" {
-  project      = aiven_project.myproject.project
-  service_name = aiven_clickhouse.myservice.service_name
-  username     = "<USERNAME>"
+resource "aiven_clickhouse_user" "example_user" {
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_clickhouse.example_service.service_name
+  username     = "analyst"
 }
 ```
 
@@ -27,7 +27,7 @@ resource "aiven_clickhouse_user" "ch-user" {
 
 - `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `username` (String) The actual name of the Clickhouse user. Changing this property forces recreation of the resource.
+- `username` (String) The name of the ClickHouse user. Changing this property forces recreation of the resource.
 
 ### Optional
 
@@ -36,9 +36,9 @@ resource "aiven_clickhouse_user" "ch-user" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `password` (String, Sensitive) The password of the clickhouse user.
-- `required` (Boolean) Indicates if a clickhouse user is required
-- `uuid` (String) UUID of the clickhouse user.
+- `password` (String, Sensitive) The password of the ClickHouse user.
+- `required` (Boolean) Indicates if a ClickHouse user is required.
+- `uuid` (String) UUID of the ClickHouse user.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
@@ -56,5 +56,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_clickhouse_user.ch-user project/service_name/username
+terraform import aiven_clickhouse_user.example_user PROJECT/SERVICE_NAME/USERNAME
 ```

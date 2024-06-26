@@ -12,7 +12,7 @@ func clickhouseSchema() map[string]*schema.Schema {
 	s[schemautil.ServiceTypeClickhouse] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
-		Description: "Clickhouse server provided values",
+		Description: "Values provided by the ClickHouse server.",
 		MaxItems:    1,
 		Optional:    true,
 		Sensitive:   true,
@@ -21,7 +21,7 @@ func clickhouseSchema() map[string]*schema.Schema {
 				"uris": {
 					Type:        schema.TypeList,
 					Computed:    true,
-					Description: "Clickhouse server URIs.",
+					Description: "ClickHouse server URIs.",
 					Optional:    true,
 					Elem: &schema.Schema{
 						Type: schema.TypeString,
@@ -33,18 +33,18 @@ func clickhouseSchema() map[string]*schema.Schema {
 	s["service_integrations"] = &schema.Schema{
 		Type:        schema.TypeList,
 		Optional:    true,
-		Description: "Service integrations to specify when creating a service. Not applied after initial service creation",
+		Description: "Integrations with other services. Service integrations are only applied at service creation.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"source_service_name": {
 					Type:        schema.TypeString,
 					Required:    true,
-					Description: "Name of the source service",
+					Description: "Name of the source service.",
 				},
 				"integration_type": {
 					Type:        schema.TypeString,
 					Required:    true,
-					Description: "Type of the service integration. The only supported values at the moment are `clickhouse_kafka` and `clickhouse_postgresql`.",
+					Description: "Type of the service integration. Supported integrations are `clickhouse_kafka` and `clickhouse_postgresql`.",
 				},
 			},
 		},
@@ -55,7 +55,7 @@ func clickhouseSchema() map[string]*schema.Schema {
 
 func ResourceClickhouse() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Clickhouse resource allows the creation and management of Aiven Clickhouse services.",
+		Description:   "Creates and manages an [Aiven for ClickHouse®](https://aiven.io/docs/products/clickhouse/concepts/features-overview) service.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeClickhouse),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,

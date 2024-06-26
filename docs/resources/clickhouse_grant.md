@@ -3,72 +3,61 @@
 page_title: "aiven_clickhouse_grant Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Clickhouse Grant resource allows the creation and management of Grants in Aiven Clickhouse services.
-  Notes:
-  Due to a ambiguity in the GRANT syntax in clickhouse you should not have users and roles with the same name. It is not clear if a grant refers to the user or the role.To grant a privilege on all tables of a database, do not write table = "*". Instead, omit the table and only keep the database.Currently changes will first revoke all grants and then reissue the remaining grants for convergence.
+  Creates and manages ClickHouse grants to give users and roles privileges to a ClickHouse service.
+  Note:
+  Users cannot have the same name as roles.To grant a privilege on all tables of a database, omit the table and only keep the database. Don't use table="*".Changes first revoke all grants and then reissue the remaining grants for convergence.
 ---
 
 # aiven_clickhouse_grant (Resource)
 
-The Clickhouse Grant resource allows the creation and management of Grants in Aiven Clickhouse services.
+Creates and manages ClickHouse grants to give users and roles privileges to a ClickHouse service.
 
-Notes:
-* Due to a ambiguity in the GRANT syntax in clickhouse you should not have users and roles with the same name. It is not clear if a grant refers to the user or the role.
-* To grant a privilege on all tables of a database, do not write table = "*". Instead, omit the table and only keep the database.
-* Currently changes will first revoke all grants and then reissue the remaining grants for convergence.
+**Note:**
+* Users cannot have the same name as roles.
+* To grant a privilege on all tables of a database, omit the table and only keep the database. Don't use `table="*"`.
+* Changes first revoke all grants and then reissue the remaining grants for convergence.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_clickhouse" "clickhouse" {
-  project      = var.aiven_project_name
-  cloud_name   = "google-europe-west1"
-  plan         = "startup-8"
-  service_name = "exapmle-clickhouse"
+resource "aiven_clickhouse_role" "example_role" {
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_clickhouse.example_clickhouse.service_name
+  role         = "example-role"
 }
 
-resource "aiven_clickhouse_database" "demodb" {
-  project      = aiven_clickhouse.clickhouse.project
-  service_name = aiven_clickhouse.clickhouse.service_name
-  name         = "demo"
-}
-
-resource "aiven_clickhouse_role" "demo" {
-  project      = aiven_clickhouse.clickhouse.project
-  service_name = aiven_clickhouse.clickhouse.service_name
-  role         = "demo-role"
-}
-
-resource "aiven_clickhouse_grant" "demo-role-grant" {
-  project      = aiven_clickhouse.clickhouse.project
-  service_name = aiven_clickhouse.clickhouse.service_name
-  role         = aiven_clickhouse_role.demo.role
+# Grant privileges to the example role.
+resource "aiven_clickhouse_grant" "role_privileges" {
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_clickhouse.example_clickhouse.service_name
+  role         = aiven_clickhouse_role.example_role.role
 
   privilege_grant {
     privilege = "INSERT"
-    database  = aiven_clickhouse_database.demodb.name
-    table     = "demo-table"
+    database  = aiven_clickhouse_database.example_db.name
+    table     = "example-table"
   }
 
   privilege_grant {
     privilege = "SELECT"
-    database  = aiven_clickhouse_database.demodb.name
+    database  = aiven_clickhouse_database.example_db.name
   }
 }
 
-resource "aiven_clickhouse_user" "demo" {
-  project      = aiven_clickhouse.clickhouse.project
-  service_name = aiven_clickhouse.clickhouse.service_name
-  username     = "demo-user"
+# Grant the role to the user.
+resource "aiven_clickhouse_user" "example_user" {
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_clickhouse.example_clickhouse.service_name
+  username     = "example-user"
 }
 
-resource "aiven_clickhouse_grant" "demo-user-grant" {
-  project      = aiven_clickhouse.clickhouse.project
-  service_name = aiven_clickhouse.clickhouse.service_name
-  user         = aiven_clickhouse_user.demo.username
+resource "aiven_clickhouse_grant" "user_role_assignment" {
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_clickhouse.example_clickhouse.service_name
+  user         = aiven_clickhouse_user.example_user.username
 
   role_grant {
-    role = aiven_clickhouse_role.demo.role
+    role = aiven_clickhouse_role.example_role.role
   }
 }
 ```
@@ -83,9 +72,9 @@ resource "aiven_clickhouse_grant" "demo-user-grant" {
 
 ### Optional
 
-- `privilege_grant` (Block Set) Configuration to grant a privilege. Changing this property forces recreation of the resource. (see [below for nested schema](#nestedblock--privilege_grant))
+- `privilege_grant` (Block Set) Grant privileges. Changing this property forces recreation of the resource. (see [below for nested schema](#nestedblock--privilege_grant))
 - `role` (String) The role to grant privileges or roles to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `role_grant` (Block Set) Configuration to grant a role. Changing this property forces recreation of the resource. (see [below for nested schema](#nestedblock--role_grant))
+- `role_grant` (Block Set) Grant roles. Changing this property forces recreation of the resource. (see [below for nested schema](#nestedblock--role_grant))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `user` (String) The user to grant privileges or roles to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
@@ -98,14 +87,14 @@ resource "aiven_clickhouse_grant" "demo-user-grant" {
 
 Required:
 
-- `database` (String) The database that the grant refers to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `database` (String) The database to grant access to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 Optional:
 
-- `column` (String) The column that the grant refers to. Changing this property forces recreation of the resource.
-- `privilege` (String) The privilege to grant, i.e. 'INSERT', 'SELECT', etc. Changing this property forces recreation of the resource.
-- `table` (String) The table that the grant refers to. Changing this property forces recreation of the resource.
-- `with_grant` (Boolean) If true then the grantee gets the ability to grant the privileges he received too. Changing this property forces recreation of the resource.
+- `column` (String) The column to grant access to. Changing this property forces recreation of the resource.
+- `privilege` (String) The privileges to grant. For example: 'INSERT', 'SELECT', `CREATE`. A complete list is available in the [ClickHouse documentation](https://clickhouse.com/docs/en/sql-reference/statements/grant). Changing this property forces recreation of the resource.
+- `table` (String) The table to grant access to. Changing this property forces recreation of the resource.
+- `with_grant` (Boolean) Allow grantees to grant their privileges to other grantees. Changing this property forces recreation of the resource.
 
 
 <a id="nestedblock--role_grant"></a>
@@ -113,7 +102,7 @@ Optional:
 
 Optional:
 
-- `role` (String) The role that is to be granted. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `role` (String) The roles to grant. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 
 <a id="nestedblock--timeouts"></a>
@@ -126,3 +115,11 @@ Optional:
 - `delete` (String)
 - `read` (String)
 - `update` (String)
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import aiven_clickhouse_grant.example_grant PROJECT/SERVICE_NAME/ID
+```

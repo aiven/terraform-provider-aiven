@@ -3,28 +3,19 @@
 page_title: "aiven_clickhouse_role Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Clickhouse Role resource allows the creation and management of Roles in Aiven Clickhouse services
+  Creates and manages ClickHouse roles.
 ---
 
 # aiven_clickhouse_role (Resource)
 
-The Clickhouse Role resource allows the creation and management of Roles in Aiven Clickhouse services
+Creates and manages ClickHouse roles.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_clickhouse" "bar" {
-  project                 = "example-project"
-  cloud_name              = "google-europe-west1"
-  plan                    = "startup-8"
-  service_name            = "example-service"
-  maintenance_window_dow  = "monday"
-  maintenance_window_time = "10:00:00"
-}
-			
-resource "aiven_clickhouse_role" "foo" {
-  service_name = aiven_clickhouse.bar.service_name
-  project      = aiven_clickhouse.bar.project
+resource "aiven_clickhouse_role" "example_role" {
+  service_name = aiven_clickhouse.example_clickhouse.service_name
+  project      = data.aiven_project.example_project.project
   role         = "writer"
 }
 ```
@@ -35,7 +26,7 @@ resource "aiven_clickhouse_role" "foo" {
 ### Required
 
 - `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `role` (String) The role that is to be created. Changing this property forces recreation of the resource.
+- `role` (String) The name of role. Changing this property forces recreation of the resource.
 - `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
@@ -62,5 +53,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_clickhouse_role.foo PROJECT/SERVICE_NAME/ROLE
+terraform import aiven_clickhouse_role.example_role PROJECT/SERVICE_NAME/ROLE
 ```

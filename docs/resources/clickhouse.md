@@ -3,21 +3,21 @@
 page_title: "aiven_clickhouse Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Clickhouse resource allows the creation and management of Aiven Clickhouse services.
+  Creates and manages an Aiven for ClickHouse® https://aiven.io/docs/products/clickhouse/concepts/features-overview service.
 ---
 
 # aiven_clickhouse (Resource)
 
-The Clickhouse resource allows the creation and management of Aiven Clickhouse services.
+Creates and manages an [Aiven for ClickHouse®](https://aiven.io/docs/products/clickhouse/concepts/features-overview) service.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_clickhouse" "clickhouse" {
-  project                 = data.aiven_project.pr1.project
+resource "aiven_clickhouse" "example_clickhouse" {
+  project                 = data.aiven_project.example_project.project
   cloud_name              = "google-europe-west1"
   plan                    = "business-4"
-  service_name            = "my-clickhouse"
+  service_name            = "example-clickhouse-service"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 }
@@ -35,14 +35,14 @@ resource "aiven_clickhouse" "clickhouse" {
 ### Optional
 
 - `additional_disk_space` (String) Additional disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
-- `clickhouse` (Block List, Max: 1) Clickhouse server provided values (see [below for nested schema](#nestedblock--clickhouse))
+- `clickhouse` (Block List, Max: 1) Values provided by the ClickHouse server. (see [below for nested schema](#nestedblock--clickhouse))
 - `clickhouse_user_config` (Block List, Max: 1) Clickhouse user configurable settings (see [below for nested schema](#nestedblock--clickhouse_user_config))
 - `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 - `disk_space` (String, Deprecated) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
 - `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
-- `service_integrations` (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
+- `service_integrations` (Block List) Integrations with other services. Service integrations are only applied at service creation. (see [below for nested schema](#nestedblock--service_integrations))
 - `static_ips` (Set of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 - `tag` (Block Set) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedblock--tag))
 - `tech_emails` (Block Set) The email addresses for [service contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this service. You can also set email contacts at the project level. (see [below for nested schema](#nestedblock--tech_emails))
@@ -70,7 +70,7 @@ resource "aiven_clickhouse" "clickhouse" {
 
 Optional:
 
-- `uris` (List of String) Clickhouse server URIs.
+- `uris` (List of String) ClickHouse server URIs.
 
 
 <a id="nestedblock--clickhouse_user_config"></a>
@@ -141,8 +141,8 @@ Optional:
 
 Required:
 
-- `integration_type` (String) Type of the service integration. The only supported values at the moment are `clickhouse_kafka` and `clickhouse_postgresql`.
-- `source_service_name` (String) Name of the source service
+- `integration_type` (String) Type of the service integration. Supported integrations are `clickhouse_kafka` and `clickhouse_postgresql`.
+- `source_service_name` (String) Name of the source service.
 
 
 <a id="nestedblock--tag"></a>

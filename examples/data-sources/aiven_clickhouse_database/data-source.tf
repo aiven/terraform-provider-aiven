@@ -1,5 +1,5 @@
-data "aiven_clickhouse_database" "clickhouse_db" {
-  project      = aiven_clickhouse.ch.project
-  service_name = aiven_clickhouse.ch.service_name
-  name         = "my-ch-db"
+data "aiven_clickhouse_database" "example_clickhouse_db" {
+  project      = data.aiven_clickhouse.example_project.project
+  service_name = aiven_clickhouse.example_clickhouse.service_name
+  name         = "example-database"
 }
