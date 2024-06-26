@@ -9,7 +9,7 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!-- ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+## [4.20.0] - 2024-06-26
 
 - Mark several sensitive user config fields as "sensitive"
 - Fix aiven-go-client dependency version
