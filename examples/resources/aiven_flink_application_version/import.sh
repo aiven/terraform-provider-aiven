@@ -1,1 +1,1 @@
-terraform import aiven_flink_application_version.v1 project/service/application_id/application_version_id
+terraform import aiven_flink_application_version.main PROJECT/SERVICE_NAME/APPLICATION_ID/APPLICATION_VERSION_ID

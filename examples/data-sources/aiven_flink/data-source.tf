@@ -1,4 +1,4 @@
-data "aiven_flink" "flink" {
-  project      = data.aiven_project.pr1.project
-  service_name = "<SERVICE_NAME>"
+data "aiven_flink" "example_flink" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-flink-service"
 }

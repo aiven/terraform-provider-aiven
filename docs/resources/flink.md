@@ -3,26 +3,26 @@
 page_title: "aiven_flink Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Flink resource allows the creation and management of Aiven Flink services.
+  Creates and manages an Aiven for Apache Flink® service https://aiven.io/docs/products/flink/concepts/flink-features.
 ---
 
 # aiven_flink (Resource)
 
-The Flink resource allows the creation and management of Aiven Flink services.
+Creates and manages an [Aiven for Apache Flink® service](https://aiven.io/docs/products/flink/concepts/flink-features).
 
 ## Example Usage
 
 ```terraform
-resource "aiven_flink" "flink" {
-  project                 = data.aiven_project.pr1.project
+resource "aiven_flink" "example_flink" {
+  project                 = data.aiven_project.example_project.project
   cloud_name              = "google-europe-west1"
   plan                    = "business-4"
-  service_name            = "my-flink"
+  service_name            = "example-flink-service"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 
   flink_user_config {
-    flink_version = 1.16
+    flink_version = 1.19
   }
 }
 ```
@@ -41,7 +41,7 @@ resource "aiven_flink" "flink" {
 - `additional_disk_space` (String) Additional disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 - `disk_space` (String, Deprecated) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
-- `flink` (Block List, Max: 1) Flink server provided values (see [below for nested schema](#nestedblock--flink))
+- `flink` (Block List, Max: 1) Values provided by the Flink server. (see [below for nested schema](#nestedblock--flink))
 - `flink_user_config` (Block List, Max: 1) Flink user configurable settings (see [below for nested schema](#nestedblock--flink_user_config))
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
@@ -74,7 +74,7 @@ resource "aiven_flink" "flink" {
 
 Optional:
 
-- `host_ports` (List of String) Host and Port of a Flink server
+- `host_ports` (List of String) The host and port of a Flink server.
 
 
 <a id="nestedblock--flink_user_config"></a>
@@ -171,5 +171,5 @@ Read-Only:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_flink.flink PROJECT/SERVICE_NAME
+terraform import aiven_flink.example_flink PROJECT/SERVICE_NAME
 ```

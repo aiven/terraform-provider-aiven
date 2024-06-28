@@ -3,20 +3,20 @@
 page_title: "aiven_flink_application Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Flink Application resource allows the creation and management of Aiven Flink Applications.
+  Creates and manages an Aiven for Apache Flink® application https://aiven.io/docs/products/flink/concepts/flink-applications.
 ---
 
 # aiven_flink_application (Resource)
 
-The Flink Application resource allows the creation and management of Aiven Flink Applications.
+Creates and manages an [Aiven for Apache Flink® application](https://aiven.io/docs/products/flink/concepts/flink-applications).
 
 ## Example Usage
 
 ```terraform
-resource "aiven_flink_application" "foo" {
-  project = aiven_project.foo.project
-  service_name = "flink-service-1"
-  name = "my-flink-app"
+resource "aiven_flink_application" "example_app" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-flink-service"
+  name         = "example-app"
 }
 ```
 
@@ -25,7 +25,7 @@ resource "aiven_flink_application" "foo" {
 
 ### Required
 
-- `name` (String) Application name
+- `name` (String) The name of the application.
 - `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
@@ -35,12 +35,12 @@ resource "aiven_flink_application" "foo" {
 
 ### Read-Only
 
-- `application_id` (String) Application ID
-- `created_at` (String) Application creation time
-- `created_by` (String) Application creator
+- `application_id` (String) Application ID.
+- `created_at` (String) Application creation time.
+- `created_by` (String) The user who created the application.
 - `id` (String) The ID of this resource.
-- `updated_at` (String) Application update time
-- `updated_by` (String) Application updater
+- `updated_at` (String) When the application was updated.
+- `updated_by` (String) The user who updated the application.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
@@ -58,5 +58,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_flink_application.myapp PROJECT/SERVICE/APPLICATION_NAME
+terraform import aiven_flink_application.example_app PROJECT/SERVICE_NAME/APPLICATION_NAME
 ```
