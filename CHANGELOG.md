@@ -9,6 +9,10 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!-- ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Fix `aiven_transit_gateway_vpc_attachment`: remove `peer_region` deprecation, mark the field as create only.
+
 ## [4.20.0] - 2024-06-26
 
 - Mark several sensitive user config fields as "sensitive"

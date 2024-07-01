@@ -36,7 +36,7 @@ resource "aiven_transit_gateway_vpc_attachment" "attachment" {
 
 ### Optional
 
-- `peer_region` (String, Deprecated) AWS region of the peered VPC (if not in the same region as Aiven VPC)
+- `peer_region` (String) AWS region of the peered VPC (if not in the same region as Aiven VPC). This value can't be changed.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
