@@ -32,7 +32,7 @@ data "aiven_transit_gateway_vpc_attachment" "attachment" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `peer_region` (String) AWS region of the peered VPC (if not in the same region as Aiven VPC)
+- `peer_region` (String) AWS region of the peered VPC (if not in the same region as Aiven VPC). This value can't be changed.
 - `peering_connection_id` (String) Cloud provider identifier for the peering connection if available
 - `state` (String) State of the peering connection
 - `state_info` (Map of String) State-specific help or error information
