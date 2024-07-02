@@ -3,12 +3,21 @@
 page_title: "aiven_organization_application_user Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an organization application user. Application users https://aiven.io/docs/platform/howto/manage-application-users can be used for programmatic access to the platform.
+  Creates and manages an organization application user. Application users https://aiven.io/docs/platform/concepts/application-users can be used for
+  programmatic access to the platform.
+  You give application users access to projects by adding them as members of a group using aiven_organization_user_group_member
+  and assigning the group to a project with aiven_organization_group_project. You can give an application user access to all
+  resources in your organization by setting is_super_admin = true .
 ---
 
 # aiven_organization_application_user (Resource)
 
-Creates and manages an organization application user. [Application users](https://aiven.io/docs/platform/howto/manage-application-users) can be used for programmatic access to the platform.
+Creates and manages an organization application user. [Application users](https://aiven.io/docs/platform/concepts/application-users) can be used for
+programmatic access to the platform.
+
+You give application users access to projects by adding them as members of a group using `aiven_organization_user_group_member`
+and assigning the group to a project with `aiven_organization_group_project`. You can give an application user access to all
+resources in your organization by setting `is_super_admin = true` .
 
 ## Example Usage
 

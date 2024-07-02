@@ -3,12 +3,12 @@
 page_title: "aiven_organization_group_project Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Adds and manages a group https://aiven.io/docs/platform/howto/list-groups of users as members of a project https://aiven.io/docs/platform/reference/project-member-privileges.
+  Adds and manages a group https://aiven.io/docs/platform/howto/list-groups of users as members of a project.
 ---
 
 # aiven_organization_group_project (Resource)
 
-Adds and manages a [group](https://aiven.io/docs/platform/howto/list-groups) of users as [members of a project](https://aiven.io/docs/platform/reference/project-member-privileges).
+Adds and manages a [group](https://aiven.io/docs/platform/howto/list-groups) of users as members of a project.
 
 ## Example Usage
 
@@ -44,7 +44,7 @@ resource "aiven_organization_group_project" "example" {
 
 - `group_id` (String) The ID of the user group.
 - `project` (String) The project that the users in the group are members of.
-- `role` (String) Role assigned to all users in the group for the project.
+- `role` (String) [Project-level role](https://aiven.io/docs/platform/reference/project-member-privileges) assigned to all users in the group. The possible values are `admin`, `operator`, `developer` and `read_only`.
 
 ### Optional
 
