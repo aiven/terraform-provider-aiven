@@ -1,1 +1,1 @@
-terraform import aiven_kafka_schema_registry_acl.foo PROJECT/SERVICE_NAME
+terraform import aiven_kafka_schema_registry_acl.foo PROJECT/SERVICE_NAME/ACL_ID
