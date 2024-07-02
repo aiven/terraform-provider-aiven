@@ -9,14 +9,14 @@ require (
 	github.com/dave/jennifer v1.7.0
 	github.com/docker/go-units v0.5.0
 	github.com/google/go-cmp v0.6.0
-	github.com/gruntwork-io/terratest v0.46.15
+	github.com/gruntwork-io/terratest v0.46.16
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/terraform-plugin-framework v1.9.0
 	github.com/hashicorp/terraform-plugin-go v0.23.0
 	github.com/hashicorp/terraform-plugin-mux v0.16.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.34.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/samber/lo v1.39.0
+	github.com/samber/lo v1.44.0
 	github.com/stoewer/go-strcase v1.3.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/exp v0.0.0-20240604190554-fc45aab8b7f8
