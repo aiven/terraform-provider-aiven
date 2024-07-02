@@ -19,13 +19,13 @@ var aivenClickhouseRoleSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: userconfig.Desc("The role that is to be created.").ForceNew().Build(),
+		Description: userconfig.Desc("The name of role.").ForceNew().Build(),
 	},
 }
 
 func ResourceClickhouseRole() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Clickhouse Role resource allows the creation and management of Roles in Aiven Clickhouse services",
+		Description:   "Creates and manages ClickHouse roles.",
 		CreateContext: resourceClickhouseRoleCreate,
 		ReadContext:   resourceClickhouseRoleRead,
 		DeleteContext: resourceClickhouseRoleDelete,

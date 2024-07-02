@@ -1,1 +1,1 @@
-terraform import aiven_clickhouse_user.ch-user project/service_name/username
+terraform import aiven_clickhouse_user.example_user PROJECT/SERVICE_NAME/USERNAME

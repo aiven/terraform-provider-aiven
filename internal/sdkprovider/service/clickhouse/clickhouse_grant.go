@@ -34,39 +34,39 @@ var aivenClickhouseGrantSchema = map[string]*schema.Schema{
 		ConflictsWith: []string{"user"},
 	},
 	"privilege_grant": {
-		Description: userconfig.Desc("Configuration to grant a privilege.").ForceNew().Build(),
+		Description: userconfig.Desc("Grant privileges.").ForceNew().Build(),
 		Type:        schema.TypeSet,
 		Optional:    true,
 		ForceNew:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"privilege": {
-					Description:  userconfig.Desc("The privilege to grant, i.e. 'INSERT', 'SELECT', etc.").ForceNew().Build(),
+					Description:  userconfig.Desc("The privileges to grant. For example: 'INSERT', 'SELECT', `CREATE`. A complete list is available in the [ClickHouse documentation](https://clickhouse.com/docs/en/sql-reference/statements/grant).").ForceNew().Build(),
 					Type:         schema.TypeString,
 					Optional:     true,
 					ForceNew:     true,
 					ValidateFunc: validation.StringMatch(regexp.MustCompile("^[A-Z ]+$"), "Must be a phrase of words that contain only uppercase letters."),
 				},
 				"database": {
-					Description: userconfig.Desc("The database that the grant refers to.").Referenced().ForceNew().Build(),
+					Description: userconfig.Desc("The database to grant access to.").Referenced().ForceNew().Build(),
 					Type:        schema.TypeString,
 					Required:    true,
 					ForceNew:    true,
 				},
 				"table": {
-					Description: userconfig.Desc("The table that the grant refers to.").ForceNew().Build(),
+					Description: userconfig.Desc("The table to grant access to.").ForceNew().Build(),
 					Type:        schema.TypeString,
 					Optional:    true,
 					ForceNew:    true,
 				},
 				"column": {
-					Description: userconfig.Desc("The column that the grant refers to.").ForceNew().Build(),
+					Description: userconfig.Desc("The column to grant access to.").ForceNew().Build(),
 					Type:        schema.TypeString,
 					Optional:    true,
 					ForceNew:    true,
 				},
 				"with_grant": {
-					Description: userconfig.Desc("If true then the grantee gets the ability to grant the privileges he received too").ForceNew().Build(),
+					Description: userconfig.Desc("Allow grantees to grant their privileges to other grantees.").ForceNew().Build(),
 					Type:        schema.TypeBool,
 					Optional:    true,
 					ForceNew:    true,
@@ -76,14 +76,14 @@ var aivenClickhouseGrantSchema = map[string]*schema.Schema{
 		},
 	},
 	"role_grant": {
-		Description: userconfig.Desc("Configuration to grant a role.").ForceNew().Build(),
+		Description: userconfig.Desc("Grant roles.").ForceNew().Build(),
 		Type:        schema.TypeSet,
 		Optional:    true,
 		ForceNew:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"role": {
-					Description: userconfig.Desc("The role that is to be granted.").Referenced().ForceNew().Build(),
+					Description: userconfig.Desc("The roles to grant.").Referenced().ForceNew().Build(),
 					Type:        schema.TypeString,
 					Optional:    true,
 					ForceNew:    true,
@@ -95,12 +95,12 @@ var aivenClickhouseGrantSchema = map[string]*schema.Schema{
 
 func ResourceClickhouseGrant() *schema.Resource {
 	return &schema.Resource{
-		Description: `The Clickhouse Grant resource allows the creation and management of Grants in Aiven Clickhouse services.
+		Description: `Creates and manages ClickHouse grants to give users and roles privileges to a ClickHouse service.
 
-Notes:
-* Due to a ambiguity in the GRANT syntax in clickhouse you should not have users and roles with the same name. It is not clear if a grant refers to the user or the role.
-* To grant a privilege on all tables of a database, do not write table = "*". Instead, omit the table and only keep the database.
-* Currently changes will first revoke all grants and then reissue the remaining grants for convergence.
+**Note:**
+* Users cannot have the same name as roles.
+* To grant a privilege on all tables of a database, omit the table and only keep the database. Don't use ` + "`table=\"*\"`" + `.
+* Changes first revoke all grants and then reissue the remaining grants for convergence.
 `,
 		CreateContext: resourceClickhouseGrantCreate,
 		ReadContext:   resourceClickhouseGrantRead,
