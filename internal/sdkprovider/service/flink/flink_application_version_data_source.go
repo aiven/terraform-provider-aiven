@@ -13,7 +13,7 @@ import (
 func DatasourceFlinkApplicationVersion() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceFlinkApplicationVersionRead,
-		Description: "The Flink Application Version data source provides information about the existing Aiven Flink Application Version.",
+		Description: "Gets information about an Aiven for Apache Flink® application version.",
 		Schema:      schemautil.ResourceSchemaAsDatasourceSchema(aivenFlinkApplicationVersionSchema, "project", "service_name", "application_id", "application_version_id"),
 	}
 }

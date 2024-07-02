@@ -3,21 +3,66 @@
 page_title: "aiven_flink_application_deployment Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Flink Application Deployment resource allows the creation and management of Aiven Flink Application Deployments.
+  Creates and manages the deployment of an Aiven for Apache Flink® application.
 ---
 
 # aiven_flink_application_deployment (Resource)
 
-The Flink Application Deployment resource allows the creation and management of Aiven Flink Application Deployments.
+Creates and manages the deployment of an Aiven for Apache Flink® application.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_flink_application_deployment" "deployment" {
-  project = data.aiven_project.foo.project
-  service_name = aiven_flink.foo.service_name
-  application_id = aiven_flink_application.foo_app.application_id
-  version_id = aiven_flink_application_version.foo_app_version.application_version_id
+resource "aiven_flink_application" "example_app" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-flink-service"
+  name         = "example-app"
+}
+
+resource "aiven_flink_application_version" "main" {
+  project        = data.aiven_project.example_project.project
+  service_name   = aiven_flink.example_flink.service_name
+  application_id = aiven_flink_application.example_app.application_id
+  statement      = <<EOT
+    INSERT INTO kafka_known_pizza SELECT * FROM kafka_pizza WHERE shop LIKE '%Luigis Pizza%'
+  EOT
+  sink {
+    create_table   = <<EOT
+      CREATE TABLE kafka_known_pizza (
+        shop STRING,
+        name STRING
+      ) WITH (
+        'connector' = 'kafka',
+        'properties.bootstrap.servers' = '',
+        'scan.startup.mode' = 'earliest-offset',
+        'topic' = 'sink_topic',
+        'value.format' = 'json'
+      )
+    EOT
+    integration_id = aiven_service_integration.flink_to_kafka.integration_id
+  }
+  source {
+    create_table   = <<EOT
+      CREATE TABLE kafka_pizza (
+        shop STRING,
+        name STRING
+      ) WITH (
+        'connector' = 'kafka',
+        'properties.bootstrap.servers' = '',
+        'scan.startup.mode' = 'earliest-offset',
+        'topic' = 'source_topic',
+        'value.format' = 'json'
+      )
+    EOT
+    integration_id = aiven_service_integration.flink_to_kafka.integration_id
+  }
+}
+
+resource "aiven_flink_application_deployment" "main" {
+  project        = data.aiven_project.example_project.project
+  service_name   = aiven_flink.example_flink.service_name
+  application_id = aiven_flink_application.example_app.application_id
+  version_id     = aiven_flink_application_version.main.application_version_id
 }
 ```
 
@@ -26,22 +71,22 @@ resource "aiven_flink_application_deployment" "deployment" {
 
 ### Required
 
-- `application_id` (String) Application ID
+- `application_id` (String) Application ID.
 - `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `version_id` (String) ApplicationVersion ID
+- `version_id` (String) Application version ID.
 
 ### Optional
 
-- `parallelism` (Number) Flink Job parallelism
-- `restart_enabled` (Boolean) Specifies whether a Flink Job is restarted in case it fails
-- `starting_savepoint` (String) Job savepoint
+- `parallelism` (Number) The number of parallel instances for the task.
+- `restart_enabled` (Boolean) Restart a Flink job if it fails.
+- `starting_savepoint` (String) The savepoint to deploy from.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- `created_at` (String) Application deployment creation time
-- `created_by` (String) Application deployment creator
+- `created_at` (String) Application deployment creation time.
+- `created_by` (String) The user who deployed the application.
 - `id` (String) The ID of this resource.
 
 <a id="nestedblock--timeouts"></a>
@@ -60,5 +105,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_flink_application_deployment.foo_deploy PROJECT/SERVICE/APPLICATION_ID/APPLICATION_VERSION_ID/DEPLOYMENT_ID
+terraform import aiven_flink_application_deployment.main PROJECT/SERVICE_NAME/APPLICATION_ID/APPLICATION_VERSION_ID/DEPLOYMENT_ID
 ```

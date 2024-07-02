@@ -18,7 +18,7 @@ func aivenFlinkSchema() map[string]*schema.Schema {
 		Type:        schema.TypeList,
 		MaxItems:    1,
 		Computed:    true,
-		Description: "Flink server provided values",
+		Description: "Values provided by the Flink server.",
 		Optional:    true,
 		Sensitive:   true,
 		Elem: &schema.Resource{
@@ -27,7 +27,7 @@ func aivenFlinkSchema() map[string]*schema.Schema {
 				"host_ports": {
 					Type:        schema.TypeList,
 					Computed:    true,
-					Description: "Host and Port of a Flink server",
+					Description: "The host and port of a Flink server.",
 					Optional:    true,
 					Elem: &schema.Schema{
 						Type: schema.TypeString,
@@ -41,7 +41,7 @@ func aivenFlinkSchema() map[string]*schema.Schema {
 
 func ResourceFlink() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Flink resource allows the creation and management of Aiven Flink services.",
+		Description:   "Creates and manages an [Aiven for Apache Flink® service](https://aiven.io/docs/products/flink/concepts/flink-features).",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeFlink),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,

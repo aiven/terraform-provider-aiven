@@ -1,7 +1,13 @@
-resource "aiven_flink_application_version" "foo" {
-  project        = data.aiven_project.foo.project
-  service_name   = aiven_flink.foo.service_name
-  application_id = aiven_flink_application.foo.application_id
+resource "aiven_flink_application" "example_app" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-flink-service"
+  name         = "example-app"
+}
+
+resource "aiven_flink_application_version" "main" {
+  project        = data.aiven_project.example_project.project
+  service_name   = aiven_flink.example_flink.service_name
+  application_id = aiven_flink_application.example_app.application_id
   statement      = <<EOT
     INSERT INTO kafka_known_pizza SELECT * FROM kafka_pizza WHERE shop LIKE '%Luigis Pizza%'
   EOT

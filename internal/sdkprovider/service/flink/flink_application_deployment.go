@@ -21,13 +21,13 @@ var aivenFlinkApplicationDeploymentSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: "Application ID",
+		Description: "Application ID.",
 	},
 	// Request fields.
 	"parallelism": {
 		Type:         schema.TypeInt,
 		Optional:     true,
-		Description:  "Flink Job parallelism",
+		Description:  "The number of parallel instances for the task.",
 		ValidateFunc: validation.IntBetween(1, 128),
 		ForceNew:     true,
 		Default:      1,
@@ -35,41 +35,40 @@ var aivenFlinkApplicationDeploymentSchema = map[string]*schema.Schema{
 	"restart_enabled": {
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Description: "Specifies whether a Flink Job is restarted in case it fails",
+		Description: "Restart a Flink job if it fails.",
 		ForceNew:    true,
 		Default:     true,
 	},
 	"starting_savepoint": {
 		Type:         schema.TypeString,
 		Optional:     true,
-		Description:  "Job savepoint",
+		Description:  "The savepoint to deploy from.",
 		ValidateFunc: validation.StringLenBetween(1, 2048),
 		ForceNew:     true,
 	},
 	"version_id": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "ApplicationVersion ID",
+		Description: "Application version ID.",
 		ForceNew:    true,
 	},
 	// Computed fields.
 	"created_at": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Application deployment creation time",
+		Description: "Application deployment creation time.",
 	},
 	"created_by": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Application deployment creator",
+		Description: "The user who deployed the application.",
 	},
 }
 
 // ResourceFlinkApplicationDeployment returns the schema for the Flink Application Deployment resource.
 func ResourceFlinkApplicationDeployment() *schema.Resource {
 	return &schema.Resource{
-		Description: "The Flink Application Deployment resource allows the creation and management of Aiven Flink " +
-			"Application Deployments.",
+		Description:   "Creates and manages the deployment of an Aiven for Apache Flink® application.",
 		CreateContext: resourceFlinkApplicationDeploymentCreate,
 		ReadContext:   resourceFlinkApplicationDeploymentRead,
 		DeleteContext: resourceFlinkApplicationDeploymentDelete,
