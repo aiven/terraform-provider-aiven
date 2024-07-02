@@ -45,9 +45,13 @@ var aivenOrganizationApplicationUserSchema = map[string]*schema.Schema{
 
 func ResourceOrganizationApplicationUser() *schema.Resource {
 	return &schema.Resource{
-		Description: userconfig.Desc(
-			"Creates and manages an organization application user. [Application users](https://aiven.io/docs/platform/howto/manage-application-users) can be used for " +
-				"programmatic access to the platform.",
+		Description: userconfig.Desc(`
+Creates and manages an organization application user. [Application users](https://aiven.io/docs/platform/concepts/application-users) can be used for
+programmatic access to the platform.
+
+You give application users access to projects by adding them as members of a group using ` + "`aiven_organization_user_group_member`" + `
+and assigning the group to a project with ` + "`aiven_organization_group_project`" + `. You can give an application user access to all
+resources in your organization by setting ` + "`is_super_admin = true`" + ` .`,
 		).Build(),
 		CreateContext: common.WithGenClient(resourceOrganizationApplicationUserCreate),
 		ReadContext:   common.WithGenClient(resourceOrganizationApplicationUserRead),

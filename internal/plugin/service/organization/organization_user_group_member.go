@@ -77,9 +77,10 @@ func (r *organizationUserGroupMembersResource) Schema(
 	resp *resource.SchemaResponse,
 ) {
 	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
-		Description: userconfig.Desc(
-			"Adds and manages users in a " +
-				"[user group](https://aiven.io/docs/platform/howto/list-groups).",
+		Description: userconfig.Desc(`
+Adds and manages users in a [user group](https://aiven.io/docs/platform/howto/list-groups). You can add organization users and application users to groups.
+
+Groups are given access to projects using the ` + "`aiven_organization_group_project`" + ` resource.`,
 		).
 			Build(),
 		Attributes: map[string]schema.Attribute{
@@ -105,7 +106,7 @@ func (r *organizationUserGroupMembersResource) Schema(
 				},
 			},
 			"user_id": schema.StringAttribute{
-				Description: "The ID of the organization user.",
+				Description: "The ID of the organization user or application user.",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),

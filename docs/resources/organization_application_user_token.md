@@ -38,7 +38,7 @@ resource "aiven_organization_application_user_token" "example" {
 - `description` (String) Description of the token.
 - `extend_when_used` (Boolean) Extends the token session duration when the token is used. Only applicable if a value is set for `max_age_seconds`.
 - `max_age_seconds` (Number) The number of hours after which a token expires. Default session duration is 10 hours.
-- `scopes` (Set of String) Restricts the scopes for this token.
+- `scopes` (Set of String) Limits access to specific resources by granting read or write privileges to them. For example: `billing:read`. Available scopes are: `authentication`, `billing`, `payments` for [payment methods](https://aiven.io/docs/platform/howto/list-billing), `privatelink`, `projects`, `services`, `static_ips`, and `user`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

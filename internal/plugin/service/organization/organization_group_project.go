@@ -79,9 +79,7 @@ func (r *organizationGroupProjectResource) Schema(
 	resp *resource.SchemaResponse) {
 	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
 		Description: userconfig.Desc(
-			"Adds and manages a " +
-				"[group](https://aiven.io/docs/platform/howto/list-groups) of users as " +
-				"[members of a project](https://aiven.io/docs/platform/reference/project-member-privileges).",
+			"Adds and manages a [group](https://aiven.io/docs/platform/howto/list-groups) of users as members of a project.",
 		).
 			Build(),
 		Attributes: map[string]schema.Attribute{
@@ -107,7 +105,7 @@ func (r *organizationGroupProjectResource) Schema(
 				},
 			},
 			"role": schema.StringAttribute{
-				Description: "Role assigned to all users in the group for the project.",
+				Description: userconfig.Desc("[Project-level role](https://aiven.io/docs/platform/reference/project-member-privileges) assigned to all users in the group.").PossibleValues("admin", "operator", "developer", "read_only").Build(),
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),

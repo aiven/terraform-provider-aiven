@@ -3,12 +3,15 @@
 page_title: "aiven_organization_user_group_member Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Adds and manages users in a user group https://aiven.io/docs/platform/howto/list-groups.
+  Adds and manages users in a user group https://aiven.io/docs/platform/howto/list-groups. You can add organization users and application users to groups.
+  Groups are given access to projects using the aiven_organization_group_project resource.
 ---
 
 # aiven_organization_user_group_member (Resource)
 
-Adds and manages users in a [user group](https://aiven.io/docs/platform/howto/list-groups).
+Adds and manages users in a [user group](https://aiven.io/docs/platform/howto/list-groups). You can add organization users and application users to groups.
+
+Groups are given access to projects using the `aiven_organization_group_project` resource.
 
 ## Example Usage
 
@@ -33,7 +36,7 @@ resource "aiven_organization_user_group_member" "project_admin" {
 
 - `group_id` (String) The ID of the user group.
 - `organization_id` (String) The ID of the organization.
-- `user_id` (String) The ID of the organization user.
+- `user_id` (String) The ID of the organization user or application user.
 
 ### Optional
 

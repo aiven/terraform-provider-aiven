@@ -62,8 +62,10 @@ var aivenOrganizationApplicationUserTokenSchema = map[string]*schema.Schema{
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
-		Description: "Restricts the scopes for this token.",
-		Optional:    true,
+		Description: "Limits access to specific resources by granting read or write privileges to them. For example: `billing:read`. " +
+			"Available scopes are: `authentication`, `billing`, `payments` for [payment methods](https://aiven.io/docs/platform/howto/list-billing), " +
+			"`privatelink`, `projects`, `services`, `static_ips`, and `user`.",
+		Optional: true,
 	},
 	"currently_active": {
 		Type:        schema.TypeBool,
