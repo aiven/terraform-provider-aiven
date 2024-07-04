@@ -92,7 +92,7 @@ Required:
 Optional:
 
 - `column` (String) The column to grant access to. Changing this property forces recreation of the resource.
-- `privilege` (String) The privileges to grant. For example: 'INSERT', 'SELECT', `CREATE`. A complete list is available in the [ClickHouse documentation](https://clickhouse.com/docs/en/sql-reference/statements/grant). Changing this property forces recreation of the resource.
+- `privilege` (String) The privileges to grant. For example: `INSERT`, `SELECT`, `CREATE TABLE`. A complete list is available in the [ClickHouse documentation](https://clickhouse.com/docs/en/sql-reference/statements/grant). Changing this property forces recreation of the resource.
 - `table` (String) The table to grant access to. Changing this property forces recreation of the resource.
 - `with_grant` (Boolean) Allow grantees to grant their privileges to other grantees. Changing this property forces recreation of the resource.
 
