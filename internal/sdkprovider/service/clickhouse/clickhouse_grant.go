@@ -41,7 +41,7 @@ var aivenClickhouseGrantSchema = map[string]*schema.Schema{
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"privilege": {
-					Description:  userconfig.Desc("The privileges to grant. For example: 'INSERT', 'SELECT', `CREATE`. A complete list is available in the [ClickHouse documentation](https://clickhouse.com/docs/en/sql-reference/statements/grant).").ForceNew().Build(),
+					Description:  userconfig.Desc("The privileges to grant. For example: `INSERT`, `SELECT`, `CREATE TABLE`. A complete list is available in the [ClickHouse documentation](https://clickhouse.com/docs/en/sql-reference/statements/grant).").ForceNew().Build(),
 					Type:         schema.TypeString,
 					Optional:     true,
 					ForceNew:     true,
