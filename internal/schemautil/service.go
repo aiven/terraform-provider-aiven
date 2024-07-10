@@ -48,6 +48,7 @@ const (
 	ServiceTypeClickhouse       = "clickhouse"
 	ServiceTypeDragonfly        = "dragonfly"
 	ServiceTypeThanos           = "thanos"
+	ServiceTypeValkey           = "valkey"
 )
 
 var TechEmailsResourceSchema = &schema.Resource{
@@ -858,6 +859,11 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 		props["slave_uris"] = connectionInfo.RedisSlaveURIs
 		props["replica_uri"] = connectionInfo.RedisReplicaURI
 		props["password"] = connectionInfo.RedisPassword
+    case ServiceTypeValkey:
+		props["uris"] = connectionInfo.ValkeyURIs
+		props["slave_uris"] = connectionInfo.ValkeySlaveURIs
+		props["replica_uri"] = connectionInfo.ValkeyReplicaURI
+		props["password"] = connectionInfo.ValkeyPassword
 	case ServiceTypeInfluxDB:
 		props["uris"] = connectionInfo.InfluxDBURIs
 		props["username"] = connectionInfo.InfluxDBUsername
