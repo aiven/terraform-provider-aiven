@@ -25,7 +25,7 @@ var aivenKafkaConnectorSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: userconfig.Desc("The kafka connector name.").ForceNew().Build(),
+		Description: userconfig.Desc("The Kafka connector name.").ForceNew().Build(),
 	},
 	"config": {
 		Type:     schema.TypeMap,
@@ -33,7 +33,7 @@ var aivenKafkaConnectorSchema = map[string]*schema.Schema{
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
-		Description: "The Kafka Connector configuration parameters.",
+		Description: "The Kafka connector configuration parameters.",
 	},
 	"plugin_author": {
 		Type:        schema.TypeString,
@@ -63,7 +63,7 @@ var aivenKafkaConnectorSchema = map[string]*schema.Schema{
 	"plugin_version": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "The version of the kafka connector.",
+		Description: "The version of the Kafka connector.",
 	},
 	"task": {
 		Type:        schema.TypeSet,
@@ -78,7 +78,7 @@ var aivenKafkaConnectorSchema = map[string]*schema.Schema{
 				},
 				"task": {
 					Type:        schema.TypeInt,
-					Description: "The task id of the task.",
+					Description: "The task ID of the task.",
 					Computed:    true,
 				},
 			},
@@ -88,7 +88,12 @@ var aivenKafkaConnectorSchema = map[string]*schema.Schema{
 
 func ResourceKafkaConnector() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Kafka connectors resource allows the creation and management of Aiven Kafka connectors.",
+		Description: `
+Creates and manages Aiven for Apache Kafka® [connectors](https://aiven.io/docs/products/kafka/kafka-connect/concepts/list-of-connector-plugins).
+Source connectors let you import data from an external system into a Kafka topic. Sink connectors let you export data from a topic to an external system.
+
+You can use connectors with any Aiven for Apache Kafka® service that is integrated with an Aiven for Apache Kafka® Connect service.
+`,
 		CreateContext: resourceKafkaConnectorCreate,
 		ReadContext:   resourceKafkaConnectorRead,
 		UpdateContext: resourceKafkaTConnectorUpdate,

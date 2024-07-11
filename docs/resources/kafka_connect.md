@@ -3,23 +3,41 @@
 page_title: "aiven_kafka_connect Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Kafka Connect resource allows the creation and management of Aiven Kafka Connect services.
+  Creates and manages an Aiven for Apache Kafka® Connect https://aiven.io/docs/products/kafka/kafka-connect service.
+  Kafka Connect lets you integrate an Aiven for Apache Kafka® service with external data sources using connectors.
+  To set up and integrate Kafka Connect:
+  Create a Kafka service in the same Aiven project using the aiven_kafka resource.Create topics for importing and exporting data using aiven_kafka_topic.Create the Kafka Connect service.Use the aiven_service_integration resource to integrate the Kafka and Kafka Connect services.Add source and sink connectors using aiven_kafka_connector resource.
 ---
 
 # aiven_kafka_connect (Resource)
 
-The Kafka Connect resource allows the creation and management of Aiven Kafka Connect services.
+Creates and manages an [Aiven for Apache Kafka® Connect](https://aiven.io/docs/products/kafka/kafka-connect) service.
+Kafka Connect lets you integrate an Aiven for Apache Kafka® service with external data sources using connectors.
+
+To set up and integrate Kafka Connect:
+1. Create a Kafka service in the same Aiven project using the `aiven_kafka` resource.
+2. Create topics for importing and exporting data using `aiven_kafka_topic`.
+3. Create the Kafka Connect service.
+4. Use the `aiven_service_integration` resource to integrate the Kafka and Kafka Connect services.
+5. Add source and sink connectors using `aiven_kafka_connector` resource.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_kafka_connect" "kc1" {
-  project                 = data.aiven_project.pr1.project
-  cloud_name              = "google-europe-west1"
-  plan                    = "startup-4"
-  service_name            = "my-kc1"
-  maintenance_window_dow  = "monday"
-  maintenance_window_time = "10:00:00"
+# Create a Kafka service.
+resource "aiven_kafka" "example_kafka" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-kafka-service"
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-2"
+}
+
+# Create a Kafka Connect service.
+resource "aiven_kafka_connect" "example_kafka_connect" {
+  project      = data.aiven_project.example_project.project
+  cloud_name   = "google-europe-west1"
+  plan         = "startup-4"
+  service_name = "example-connect-service"
 
   kafka_connect_user_config {
     kafka_connect {
@@ -28,6 +46,22 @@ resource "aiven_kafka_connect" "kc1" {
 
     public_access {
       kafka_connect = true
+    }
+  }
+}
+
+# Integrate the Kafka and Kafka Connect services.
+resource "aiven_service_integration" "kafka_connect_integration" {
+  project                  = data.aiven_project.example_project.project
+  integration_type         = "kafka_connect"
+  source_service_name      = aiven_kafka.example_kafka.service_name
+  destination_service_name = aiven_kafka_connect.example_kafka_connect.service_name
+
+  kafka_connect_user_config {
+    kafka_connect {
+      group_id             = "connect"
+      status_storage_topic = "__connect_status"
+      offset_storage_topic = "__connect_offsets"
     }
   }
 }
@@ -253,5 +287,5 @@ Read-Only:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_kafka_connect.kc1 project/service_name
+terraform import aiven_kafka_connect.example_kafka_connect PROJECT/SERVICE_NAME
 ```

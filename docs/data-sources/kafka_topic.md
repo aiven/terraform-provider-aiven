@@ -31,11 +31,11 @@ data "aiven_kafka_topic" "example_topic" {
 
 ### Read-Only
 
-- `config` (List of Object) Kafka topic configuration. (see [below for nested schema](#nestedatt--config))
+- `config` (List of Object) [Advanced parameters](https://aiven.io/docs/products/kafka/reference/advanced-params) to configure topics. (see [below for nested schema](#nestedatt--config))
 - `id` (String) The ID of this resource.
 - `partitions` (Number) The number of partitions to create in the topic.
 - `replication` (Number) The replication factor for the topic.
-- `tag` (Set of Object) Tags for the Kafka topic. (see [below for nested schema](#nestedatt--tag))
+- `tag` (Set of Object) Tags for the topic. (see [below for nested schema](#nestedatt--tag))
 - `termination_protection` (Boolean) Prevents topics from being deleted by Terraform. It's recommended for topics containing critical data. **Topics can still be deleted in the Aiven Console.**
 
 <a id="nestedatt--config"></a>

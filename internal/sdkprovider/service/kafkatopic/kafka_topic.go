@@ -194,7 +194,7 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 	},
 	"tag": {
 		Type:        schema.TypeSet,
-		Description: "Tags for the Kafka topic.",
+		Description: "Tags for the topic.",
 		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
@@ -202,20 +202,20 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 					Type:         schema.TypeString,
 					Required:     true,
 					ValidateFunc: validation.StringLenBetween(1, 64),
-					Description:  userconfig.Desc("Topic tag key.").MaxLen(64).Build(),
+					Description:  userconfig.Desc("Tag key.").MaxLen(64).Build(),
 				},
 				"value": {
 					Type:         schema.TypeString,
 					Optional:     true,
 					ValidateFunc: validation.StringLenBetween(0, 256),
-					Description:  userconfig.Desc("Topic tag value.").MaxLen(256).Build(),
+					Description:  userconfig.Desc("Tag value.").MaxLen(256).Build(),
 				},
 			},
 		},
 	},
 	configField: {
 		Type:             schema.TypeList,
-		Description:      "Kafka topic configuration.",
+		Description:      "[Advanced parameters](https://aiven.io/docs/products/kafka/reference/advanced-params) to configure topics.",
 		Optional:         true,
 		MaxItems:         1,
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
@@ -227,7 +227,7 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 
 func ResourceKafkaTopic() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Creates and manages an Aiven for Apache Kafka® topic.",
+		Description:   "Creates and manages an Aiven for Apache Kafka® [topic](https://aiven.io/docs/products/kafka/concepts).",
 		CreateContext: resourceKafkaTopicCreate,
 		ReadContext:   resourceKafkaTopicReadResource,
 		UpdateContext: resourceKafkaTopicUpdate,

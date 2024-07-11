@@ -1,8 +1,7 @@
-data "aiven_kafka_acl" "mytestacl" {
-  project      = aiven_project.myproject.project
-  service_name = aiven_kafka.mykafka.service_name
-  topic        = "<TOPIC_NAME_PATTERN>"
-  permission   = "<PERMISSON>"
-  username     = "<USERNAME_PATTERN>"
+data "aiven_kafka_acl" "example_acl" {
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_kafka.example_kafka.service_name
+  topic        = "example-topic"
+  permission   = "admin"
+  username     = "example-user"
 }
-

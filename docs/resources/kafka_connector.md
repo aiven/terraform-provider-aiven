@@ -3,29 +3,34 @@
 page_title: "aiven_kafka_connector Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Kafka connectors resource allows the creation and management of Aiven Kafka connectors.
+  Creates and manages Aiven for Apache Kafka® connectors https://aiven.io/docs/products/kafka/kafka-connect/concepts/list-of-connector-plugins.
+  Source connectors let you import data from an external system into a Kafka topic. Sink connectors let you export data from a topic to an external system.
+  You can use connectors with any Aiven for Apache Kafka® service that is integrated with an Aiven for Apache Kafka® Connect service.
 ---
 
 # aiven_kafka_connector (Resource)
 
-The Kafka connectors resource allows the creation and management of Aiven Kafka connectors.
+Creates and manages Aiven for Apache Kafka® [connectors](https://aiven.io/docs/products/kafka/kafka-connect/concepts/list-of-connector-plugins).
+Source connectors let you import data from an external system into a Kafka topic. Sink connectors let you export data from a topic to an external system.
+
+You can use connectors with any Aiven for Apache Kafka® service that is integrated with an Aiven for Apache Kafka® Connect service.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_kafka_connector" "kafka-os-con1" {
-  project        = aiven_project.kafka-con-project1.project
-  service_name   = aiven_kafka.kafka-service1.service_name
-  connector_name = "kafka-os-con1"
+resource "aiven_kafka_connector" "kafka-os-connector" {
+  project        = data.aiven_project.example_project.project
+  service_name   = aiven_kafka.example_kafka.service_name
+  connector_name = "kafka-opensearch-connector"
 
   config = {
-    "topics"              = aiven_kafka_topic.kafka-topic1.topic_name
-    "connector.class" : "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
+    "name"                = "kafka-opensearch-connector" # Must be the same as the connector_name. 
+    "topics"              = aiven_kafka_topic.example_topic.topic_name
+    "connector.class"     = "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector"
     "type.name"           = "os-connector"
-    "name"                = "kafka-os-con1"
-    "connection.url"      = aiven_opensearch.os-service1.service_uri
-    "connection.username" = aiven_opensearch.os-service1.service_username
-    "connection.password" = aiven_opensearch.os-service1.service_password
+    "connection.url"      = aiven_opensearch.example_os.service_uri
+    "connection.username" = aiven_opensearch.example_os.service_username
+    "connection.password" = aiven_opensearch.example_os.service_password
   }
 }
 ```
@@ -35,8 +40,8 @@ resource "aiven_kafka_connector" "kafka-os-con1" {
 
 ### Required
 
-- `config` (Map of String) The Kafka Connector configuration parameters.
-- `connector_name` (String) The kafka connector name. Changing this property forces recreation of the resource.
+- `config` (Map of String) The Kafka connector configuration parameters.
+- `connector_name` (String) The Kafka connector name. Changing this property forces recreation of the resource.
 - `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
@@ -52,7 +57,7 @@ resource "aiven_kafka_connector" "kafka-os-con1" {
 - `plugin_doc_url` (String) The Kafka connector documentation URL.
 - `plugin_title` (String) The Kafka connector title.
 - `plugin_type` (String) The Kafka connector type.
-- `plugin_version` (String) The version of the kafka connector.
+- `plugin_version` (String) The version of the Kafka connector.
 - `task` (Set of Object) List of tasks of a connector. (see [below for nested schema](#nestedatt--task))
 
 <a id="nestedblock--timeouts"></a>
@@ -80,5 +85,5 @@ Read-Only:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_kafka_connector.kafka-os-con1 project/service_name/connector_name
+terraform import aiven_kafka_connector.kafka-os-connector PROJECT/SERVICE_NAME/CONNECTOR_NAME
 ```
