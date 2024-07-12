@@ -62,7 +62,8 @@ jobs:
           serviceintegration,
           vpc,
           dragonfly,
-          thanos
+          thanos,
+          valkey
         ]
 
     steps:

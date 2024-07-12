@@ -859,7 +859,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 		props["slave_uris"] = connectionInfo.RedisSlaveURIs
 		props["replica_uri"] = connectionInfo.RedisReplicaURI
 		props["password"] = connectionInfo.RedisPassword
-    case ServiceTypeValkey:
+	case ServiceTypeValkey:
 		props["uris"] = connectionInfo.ValkeyURIs
 		props["slave_uris"] = connectionInfo.ValkeySlaveURIs
 		props["replica_uri"] = connectionInfo.ValkeyReplicaURI

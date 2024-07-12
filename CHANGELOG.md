@@ -13,6 +13,7 @@ nav_order: 1
 
 - Fix `aiven_transit_gateway_vpc_attachment`: remove `peer_region` deprecation, mark the field as create only.
 - Add `aiven_valkey` resource
+- Add `aiven_valkey_user` resource
 
 ## [4.20.0] - 2024-06-26
 
