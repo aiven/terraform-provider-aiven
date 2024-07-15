@@ -211,6 +211,8 @@ Optional:
 - `ism_history_max_docs` (Number) The maximum number of documents before rolling over the audit history index. Default: `2500000`.
 - `ism_history_rollover_check_period` (Number) The time between rollover checks for the audit history index in hours. Default: `8`.
 - `ism_history_rollover_retention_period` (Number) How long audit history indices are kept in days. Default: `30`.
+- `knn_memory_circuit_breaker_enabled` (Boolean) Enable or disable KNN memory circuit breaker. Defaults to true. Default: `true`.
+- `knn_memory_circuit_breaker_limit` (Number) Maximum amount of memory that can be used for KNN index. Defaults to 50% of the JVM heap size. Default: `50`.
 - `override_main_response_version` (Boolean) Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false.
 - `plugins_alerting_filter_by_backend_roles` (Boolean) Enable or disable filtering of alerting by backend roles. Requires Security plugin. Defaults to false.
 - `reindex_remote_whitelist` (List of String) Whitelisted addresses for reindexing. Changing this value will cause all OpenSearch instances to restart.

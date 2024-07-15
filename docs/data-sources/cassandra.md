@@ -95,6 +95,8 @@ Read-Only:
 - `batch_size_fail_threshold_in_kb` (Number)
 - `batch_size_warn_threshold_in_kb` (Number)
 - `datacenter` (String)
+- `read_request_timeout_in_ms` (Number)
+- `write_request_timeout_in_ms` (Number)
 
 
 <a id="nestedobjatt--cassandra_user_config--ip_filter_object"></a>

@@ -111,6 +111,8 @@ Optional:
 - `batch_size_fail_threshold_in_kb` (Number) Fail any multiple-partition batch exceeding this value. 50kb (10x warn threshold) by default. Example: `50`.
 - `batch_size_warn_threshold_in_kb` (Number) Log a warning message on any multiple-partition batch size exceeding this value.5kb per batch by default.Caution should be taken on increasing the size of this thresholdas it can lead to node instability. Example: `5`.
 - `datacenter` (String) Name of the datacenter to which nodes of this service belong. Can be set only when creating the service. Example: `my-service-google-west1`.
+- `read_request_timeout_in_ms` (Number) How long the coordinator waits for read operations to complete before timing it out. 5 seconds by default. Example: `5000`.
+- `write_request_timeout_in_ms` (Number) How long the coordinator waits for write requests to complete with at least one node in the local datacenter. 2 seconds by default. Example: `2000`.
 
 
 <a id="nestedblock--cassandra_user_config--ip_filter_object"></a>

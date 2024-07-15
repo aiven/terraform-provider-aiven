@@ -52,6 +52,16 @@ func cassandraUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
+					"read_request_timeout_in_ms": {
+						Description: "How long the coordinator waits for read operations to complete before timing it out. 5 seconds by default. Example: `5000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"write_request_timeout_in_ms": {
+						Description: "How long the coordinator waits for write requests to complete with at least one node in the local datacenter. 2 seconds by default. Example: `2000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 				}},
 				MaxItems: 1,
 				Optional: true,
