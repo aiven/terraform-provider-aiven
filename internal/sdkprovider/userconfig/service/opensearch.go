@@ -418,6 +418,16 @@ func opensearchUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"knn_memory_circuit_breaker_enabled": {
+						Description: "Enable or disable KNN memory circuit breaker. Defaults to true. Default: `true`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"knn_memory_circuit_breaker_limit": {
+						Description: "Maximum amount of memory that can be used for KNN index. Defaults to 50% of the JVM heap size. Default: `50`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"override_main_response_version": {
 						Description: "Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false.",
 						Optional:    true,

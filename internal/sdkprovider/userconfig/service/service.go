@@ -38,6 +38,8 @@ func GetUserConfig(kind string) *schema.Schema {
 		return redisUserConfig()
 	case "thanos":
 		return thanosUserConfig()
+	case "valkey":
+		return valkeyUserConfig()
 	default:
 		return nil
 	}
@@ -124,8 +126,12 @@ func GetFieldMapping(kind string) map[string]string {
 			"query_frontend":                                   "query-frontend",
 			"query_frontend/query_range_align_range_with_step": "query-frontend/query-range.align-range-with-step",
 		},
+		"valkey": {
+			"ip_filter_object": "ip_filter",
+			"ip_filter_string": "ip_filter",
+		},
 	}[kind]
 }
 func UserConfigTypes() []string {
-	return []string{"cassandra", "clickhouse", "dragonfly", "flink", "grafana", "influxdb", "kafka", "kafka_connect", "kafka_mirrormaker", "m3aggregator", "m3db", "mysql", "opensearch", "pg", "redis", "thanos"}
+	return []string{"cassandra", "clickhouse", "dragonfly", "flink", "grafana", "influxdb", "kafka", "kafka_connect", "kafka_mirrormaker", "m3aggregator", "m3db", "mysql", "opensearch", "pg", "redis", "thanos", "valkey"}
 }

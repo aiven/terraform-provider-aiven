@@ -192,6 +192,8 @@ Read-Only:
 - `ism_history_max_docs` (Number)
 - `ism_history_rollover_check_period` (Number)
 - `ism_history_rollover_retention_period` (Number)
+- `knn_memory_circuit_breaker_enabled` (Boolean)
+- `knn_memory_circuit_breaker_limit` (Number)
 - `override_main_response_version` (Boolean)
 - `plugins_alerting_filter_by_backend_roles` (Boolean)
 - `reindex_remote_whitelist` (List of String)
