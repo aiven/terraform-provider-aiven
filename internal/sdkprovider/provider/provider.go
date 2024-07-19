@@ -3,10 +3,10 @@ package provider
 import (
 	"context"
 	"os"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"golang.org/x/exp/maps"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
@@ -147,6 +147,9 @@ func Provider(version string) *schema.Provider {
 
 			// dragonfly
 			"aiven_dragonfly": dragonfly.DatasourceDragonfly(),
+
+			// thanos
+			"aiven_thanos": thanos.DatasourceThanos(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -254,24 +257,16 @@ func Provider(version string) *schema.Provider {
 
 			// dragonfly
 			"aiven_dragonfly": dragonfly.ResourceDragonfly(),
+
+			// thanos
+			"aiven_thanos": thanos.ResourceThanos(),
 		},
 	}
 
-	// beta resources and data sources
-	// incremental acceptance tests expects this structure below to function, DON'T CHANGE IT
-	if util.IsBeta() {
-		bp := &schema.Provider{
-			DataSourcesMap: map[string]*schema.Resource{
-				"aiven_thanos": thanos.DatasourceThanos(),
-			},
-
-			ResourcesMap: map[string]*schema.Resource{
-				"aiven_thanos": thanos.ResourceThanos(),
-			},
-		}
-
-		maps.Copy(p.DataSourcesMap, bp.DataSourcesMap)
-		maps.Copy(p.ResourcesMap, bp.ResourcesMap)
+	// Removes beta resources when the beta flag is missing
+	if !util.IsBeta() {
+		removeBetaResources(p.ResourcesMap)
+		removeBetaResources(p.DataSourcesMap)
 	}
 
 	p.ConfigureContextFunc = func(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
@@ -295,4 +290,13 @@ func Provider(version string) *schema.Provider {
 	}
 
 	return p
+}
+
+// removeBetaResources removes resources marked as beta
+func removeBetaResources(m map[string]*schema.Resource) {
+	for k, v := range m {
+		if strings.Contains(v.Description, util.AivenEnableBeta) {
+			delete(m, k)
+		}
+	}
 }

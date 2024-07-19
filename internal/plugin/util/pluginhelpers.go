@@ -11,13 +11,14 @@ import (
 const (
 	// errTerraformTypeAssertionFailed is an error that is returned when a Terraform type assertion fails.
 	errTerraformTypeAssertionFailed = "terraform type assertion failed"
+	AivenEnableBeta                 = "PROVIDER_AIVEN_ENABLE_BETA"
 )
 
 // IsBeta is a helper function that returns a flag that indicates whether the provider is in beta mode.
 // This SHOULD NOT be used anywhere else except in the provider and acceptance tests initialization.
 // In case this functionality is needed in tests, please use the acctest.CommonTestDependencies.IsBeta() function.
 func IsBeta() bool {
-	return os.Getenv("PROVIDER_AIVEN_ENABLE_BETA") != ""
+	return os.Getenv(AivenEnableBeta) != ""
 }
 
 // ComposeID is a helper function that composes an ID from the parts passed in.
