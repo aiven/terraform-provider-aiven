@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/serviceuser"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -300,6 +301,42 @@ func CopyServiceUserPropertiesFromAPIResponseToTerraform(
 		}
 	}
 	if len(user.AccessKey) > 0 {
+		if err := d.Set("access_key", user.AccessKey); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func CopyServiceUserGenPropertiesFromAPIResponseToTerraform(
+	d *schema.ResourceData,
+	user *serviceuser.ServiceUserGetOut,
+	projectName string,
+	serviceName string,
+) error {
+	if err := d.Set("project", projectName); err != nil {
+		return err
+	}
+	if err := d.Set("service_name", serviceName); err != nil {
+		return err
+	}
+	if err := d.Set("username", user.Username); err != nil {
+		return err
+	}
+	if err := d.Set("password", user.Password); err != nil {
+		return err
+	}
+	if err := d.Set("type", user.Type); err != nil {
+		return err
+	}
+
+	if user.AccessCert != nil {
+		if err := d.Set("access_cert", user.AccessCert); err != nil {
+			return err
+		}
+	}
+	if user.AccessKey != nil {
 		if err := d.Set("access_key", user.AccessKey); err != nil {
 			return err
 		}

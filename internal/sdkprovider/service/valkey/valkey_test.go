@@ -1,4 +1,4 @@
-package redis_test
+package valkey_test
 
 import (
 	"fmt"
@@ -13,8 +13,8 @@ import (
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
 
-func TestAccAiven_redis(t *testing.T) {
-	resourceName := "aiven_redis.bar"
+func TestAccAiven_valkey(t *testing.T) {
+	resourceName := "aiven_valkey.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -23,17 +23,17 @@ func TestAccAiven_redis(t *testing.T) {
 		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRedisResource(rName),
+				Config: testAccValkeyResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_redis.common"),
-					testAccCheckAivenServiceRedisAttributes("data.aiven_redis.common"),
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_valkey.common"),
+					testAccCheckAivenServiceValkeyAttributes("data.aiven_valkey.common"),
 					resource.TestCheckResourceAttr(resourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "tech_emails.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "tech_emails.0.email", "techsupport@company.com"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "state", "RUNNING"),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "service_type", "redis"),
+					resource.TestCheckResourceAttr(resourceName, "service_type", "valkey"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
@@ -47,22 +47,22 @@ func TestAccAiven_redis(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccRedisRemoveEmailsResource(rName),
+				Config: testAccValkeyRemoveEmailsResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_redis.common"),
-					testAccCheckAivenServiceRedisAttributes("data.aiven_redis.common"),
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_valkey.common"),
+					testAccCheckAivenServiceValkeyAttributes("data.aiven_valkey.common"),
 					resource.TestCheckResourceAttr(resourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "tech_emails.#", "0"),
 				),
 			},
 			{
-				Config: testAccRedisServiceResourceWithPersistenceOff(rName),
+				Config: testAccValkeyServiceResourceWithPersistenceOff(rName),
 				Check: resource.ComposeTestCheckFunc(
-					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_redis.common"),
-					testAccCheckAivenServiceRedisAttributes("data.aiven_redis.common"),
+					acc.TestAccCheckAivenServiceCommonAttributes("data.aiven_valkey.common"),
+					testAccCheckAivenServiceValkeyAttributes("data.aiven_valkey.common"),
 					resource.TestCheckResourceAttr(resourceName, "service_name", fmt.Sprintf("test-acc-sr-%s", rName)),
 					resource.TestCheckResourceAttr(resourceName, "project", os.Getenv("AIVEN_PROJECT_NAME")),
-					resource.TestCheckResourceAttr(resourceName, "service_type", "redis"),
+					resource.TestCheckResourceAttr(resourceName, "service_type", "valkey"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_name", "google-europe-west1"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
@@ -71,7 +71,7 @@ func TestAccAiven_redis(t *testing.T) {
 				),
 			},
 			{
-				Config:             testAccRedisDoubleTagResource(rName),
+				Config:             testAccValkeyDoubleTagResource(rName),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
 				ExpectError:        regexp.MustCompile("tag keys should be unique"),
@@ -80,13 +80,13 @@ func TestAccAiven_redis(t *testing.T) {
 	})
 }
 
-func testAccRedisResource(name string) string {
+func testAccValkeyResource(name string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
   project = "%s"
 }
 
-resource "aiven_redis" "bar" {
+resource "aiven_valkey" "bar" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
   plan                    = "startup-4"
@@ -103,30 +103,30 @@ resource "aiven_redis" "bar" {
     email = "techsupport@company.com"
   }
 
-  redis_user_config {
-    redis_maxmemory_policy = "allkeys-random"
+  valkey_user_config {
+    valkey_maxmemory_policy = "allkeys-random"
 
     public_access {
-      redis = true
+      valkey = true
     }
   }
 }
 
-data "aiven_redis" "common" {
-  service_name = aiven_redis.bar.service_name
+data "aiven_valkey" "common" {
+  service_name = aiven_valkey.bar.service_name
   project      = data.aiven_project.foo.project
 
-  depends_on = [aiven_redis.bar]
+  depends_on = [aiven_valkey.bar]
 }`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
-func testAccRedisRemoveEmailsResource(name string) string {
+func testAccValkeyRemoveEmailsResource(name string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
   project = "%s"
 }
 
-resource "aiven_redis" "bar" {
+resource "aiven_valkey" "bar" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
   plan                    = "startup-4"
@@ -139,30 +139,30 @@ resource "aiven_redis" "bar" {
     value = "val"
   }
 
-  redis_user_config {
-    redis_maxmemory_policy = "allkeys-random"
+  valkey_user_config {
+    valkey_maxmemory_policy = "allkeys-random"
 
     public_access {
-      redis = true
+      valkey = true
     }
   }
 }
 
-data "aiven_redis" "common" {
-  service_name = aiven_redis.bar.service_name
+data "aiven_valkey" "common" {
+  service_name = aiven_valkey.bar.service_name
   project      = data.aiven_project.foo.project
 
-  depends_on = [aiven_redis.bar]
+  depends_on = [aiven_valkey.bar]
 }`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
-func testAccRedisServiceResourceWithPersistenceOff(name string) string {
+func testAccValkeyServiceResourceWithPersistenceOff(name string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
   project = "%s"
 }
 
-resource "aiven_redis" "bar" {
+resource "aiven_valkey" "bar" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
   plan                    = "startup-4"
@@ -170,31 +170,31 @@ resource "aiven_redis" "bar" {
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 
-  redis_user_config {
-    redis_persistence      = "off"
-    redis_maxmemory_policy = "allkeys-random"
+  valkey_user_config {
+    valkey_persistence      = "off"
+    valkey_maxmemory_policy = "allkeys-random"
 
     public_access {
-      redis = true
+      valkey = true
     }
   }
 }
 
-data "aiven_redis" "common" {
-  service_name = aiven_redis.bar.service_name
-  project      = aiven_redis.bar.project
+data "aiven_valkey" "common" {
+  service_name = aiven_valkey.bar.service_name
+  project      = aiven_valkey.bar.project
 
-  depends_on = [aiven_redis.bar]
+  depends_on = [aiven_valkey.bar]
 }`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
-func testAccRedisDoubleTagResource(name string) string {
+func testAccValkeyDoubleTagResource(name string) string {
 	return fmt.Sprintf(`
 data "aiven_project" "foo" {
   project = "%s"
 }
 
-resource "aiven_redis" "bar" {
+resource "aiven_valkey" "bar" {
   project                 = data.aiven_project.foo.project
   cloud_name              = "google-europe-west1"
   plan                    = "startup-4"
@@ -211,57 +211,57 @@ resource "aiven_redis" "bar" {
     value = "val2"
   }
 
-  redis_user_config {
-    redis_maxmemory_policy = "allkeys-random"
+  valkey_user_config {
+    valkey_maxmemory_policy = "allkeys-random"
 
     public_access {
-      redis = true
+      valkey = true
     }
   }
 }
 
-data "aiven_redis" "common" {
-  service_name = aiven_redis.bar.service_name
+data "aiven_valkey" "common" {
+  service_name = aiven_valkey.bar.service_name
   project      = data.aiven_project.foo.project
 
-  depends_on = [aiven_redis.bar]
+  depends_on = [aiven_valkey.bar]
 }`, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }
 
-func testAccCheckAivenServiceRedisAttributes(n string) resource.TestCheckFunc {
+func testAccCheckAivenServiceValkeyAttributes(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		r := s.RootModule().Resources[n]
 		a := r.Primary.Attributes
 
-		if a["service_type"] != "redis" {
+		if a["service_type"] != "valkey" {
 			return fmt.Errorf("expected to get a correct service type from Aiven, got :%s", a["service_type"])
 		}
 
-		if a["redis_user_config.0.redis_maxmemory_policy"] != "allkeys-random" {
-			return fmt.Errorf("expected to get a correct redis_maxmemory_policy from Aiven")
+		if a["valkey_user_config.0.valkey_maxmemory_policy"] != "allkeys-random" {
+			return fmt.Errorf("expected to get a correct valkey_maxmemory_policy from Aiven")
 		}
 
-		if a["redis_user_config.0.public_access.0.redis"] != "true" {
-			return fmt.Errorf("expected to get a correct public_access.redis from Aiven")
+		if a["valkey_user_config.0.public_access.0.valkey"] != "true" {
+			return fmt.Errorf("expected to get a correct public_access.valkey from Aiven")
 		}
 
-		if a["redis_user_config.0.public_access.0.prometheus"] != "false" {
+		if a["valkey_user_config.0.public_access.0.prometheus"] != "false" {
 			return fmt.Errorf("expected to get a correct public_access.prometheus from Aiven")
 		}
 
-		if a["redis.0.uris.#"] == "" {
+		if a["valkey.0.uris.#"] == "" {
 			return fmt.Errorf("expected to get correct uris from Aiven")
 		}
 
-		if a["redis.0.slave_uris.#"] == "" {
+		if a["valkey.0.slave_uris.#"] == "" {
 			return fmt.Errorf("expected to get correct slave_uris from Aiven")
 		}
 
-		if a["redis.0.replica_uri"] != "" {
+		if a["valkey.0.replica_uri"] != "" {
 			return fmt.Errorf("expected to get correct replica_uri from Aiven")
 		}
 
-		if a["redis.0.password"] == "" {
+		if a["valkey.0.password"] == "" {
 			return fmt.Errorf("expected to get correct password from Aiven")
 		}
 

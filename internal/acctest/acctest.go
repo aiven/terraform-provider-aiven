@@ -171,6 +171,7 @@ func TestAccCheckAivenServiceResourceDestroy(s *terraform.State) error {
 				"aiven_grafana",
 				"aiven_mysql",
 				"aiven_redis",
+				"aiven_valkey",
 				"aiven_pg",
 				"aiven_cassandra",
 				"aiven_m3db",
