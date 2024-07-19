@@ -10,7 +10,7 @@ import (
 func DatasourceValkey() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: schemautil.DatasourceServiceRead,
-		Description: userconfig.Desc("The Valkey data source provides information about the existing Aiven for Valkey service.").
+		Description: userconfig.Desc("Gets information about an Aiven for Valkey service.").
 			AvailabilityType(userconfig.Beta).
 			Build(),
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(valkeySchema(), "project", "service_name"),
