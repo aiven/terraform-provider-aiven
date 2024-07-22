@@ -9,7 +9,7 @@ import (
 func DatasourceKafkaUser() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: schemautil.DatasourceServiceUserRead,
-		Description: "The Kafka User data source provides information about the existing Aiven Kafka User.",
+		Description: "Gets information about an Aiven for Apache Kafka® service user.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenKafkaUserSchema,
 			"project", "service_name", "username"),
 	}

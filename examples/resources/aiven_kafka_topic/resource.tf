@@ -7,10 +7,9 @@ resource "aiven_kafka_topic" "example_topic" {
   termination_protection = true
 
   config {
-    flush_ms                       = 10
-    cleanup_policy                 = "compact,delete"
+    flush_ms       = 10
+    cleanup_policy = "compact,delete"
   }
-
 
   timeouts {
     create = "1m"

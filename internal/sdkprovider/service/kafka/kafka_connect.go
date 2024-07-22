@@ -14,7 +14,17 @@ func aivenKafkaConnectSchema() map[string]*schema.Schema {
 
 func ResourceKafkaConnect() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Kafka Connect resource allows the creation and management of Aiven Kafka Connect services.",
+		Description: `
+Creates and manages an [Aiven for Apache Kafka® Connect](https://aiven.io/docs/products/kafka/kafka-connect) service.
+Kafka Connect lets you integrate an Aiven for Apache Kafka® service with external data sources using connectors.
+
+To set up and integrate Kafka Connect:
+1. Create a Kafka service in the same Aiven project using the ` + "`aiven_kafka`" + ` resource.
+2. Create topics for importing and exporting data using ` + "`aiven_kafka_topic`" + `.
+3. Create the Kafka Connect service.
+4. Use the ` + "`aiven_service_integration`" + ` resource to integrate the Kafka and Kafka Connect services.
+5. Add source and sink connectors using ` + "`aiven_kafka_connector`" + ` resource.
+`,
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeKafkaConnect),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,

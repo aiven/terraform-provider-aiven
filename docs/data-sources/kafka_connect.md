@@ -3,19 +3,19 @@
 page_title: "aiven_kafka_connect Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Kafka Connect data source provides information about the existing Aiven Kafka Connect service.
+  Gets information about an Aiven for Apache Kafka® Connect service.
 ---
 
 # aiven_kafka_connect (Data Source)
 
-The Kafka Connect data source provides information about the existing Aiven Kafka Connect service.
+Gets information about an Aiven for Apache Kafka® Connect service.
 
 ## Example Usage
 
 ```terraform
-data "aiven_kafka_connect" "kc1" {
-  project      = data.aiven_project.pr1.project
-  service_name = "my-kc1"
+data "aiven_kafka_connect" "example_kafka_connect" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-connect-service"
 }
 ```
 

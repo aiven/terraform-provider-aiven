@@ -21,33 +21,37 @@ var aivenKafkaACLSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringInSlice([]string{"admin", "read", "readwrite", "write"}, false),
-		Description:  userconfig.Desc("Kafka permission to grant.").ForceNew().PossibleValues("admin", "read", "readwrite", "write").Build(),
+		Description:  userconfig.Desc("Permissions to grant.").ForceNew().PossibleValues("admin", "read", "readwrite", "write").Build(),
 	},
 	"topic": {
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: userconfig.Desc("Topic name pattern for the ACL entry.").ForceNew().Build(),
+		Description: userconfig.Desc("Topics that the permissions apply to.").ForceNew().Build(),
 	},
 	"username": {
 		Type:         schema.TypeString,
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: schemautil.GetACLUserValidateFunc(),
-		Description:  userconfig.Desc("Username pattern for the ACL entry.").ForceNew().Build(),
+		Description:  userconfig.Desc("Usernames to grant permissions to.").ForceNew().Build(),
 	},
 
 	// computed
 	"acl_id": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Kafka ACL ID",
+		Description: "Kafka ACL ID.",
 	},
 }
 
 func ResourceKafkaACL() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Resource Kafka ACL resource allows the creation and management of ACLs for an Aiven Kafka service.",
+		Description: `
+Creates and manages an [access control list](https://aiven.io/docs/products/kafka/concepts/acl) (ACL) entry for an Aiven for Apache Kafka® service.
+
+ACL entries grant users rights to produce, consume, and manage Kafka topics.
+`,
 		CreateContext: resourceKafkaACLCreate,
 		ReadContext:   resourceKafkaACLRead,
 		DeleteContext: resourceKafkaACLDelete,

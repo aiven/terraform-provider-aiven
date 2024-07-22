@@ -1,1 +1,1 @@
-terraform import aiven_kafka_acl.mytestacl PROJECT/SERVICE_NAME/ID
+terraform import aiven_kafka_acl.example_acl PROJECT/SERVICE_NAME/ID

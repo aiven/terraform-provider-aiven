@@ -1,1 +1,1 @@
-terraform import aiven_kafka_user.foo PROJECT/SERVICE_NAME/USERNAME
+terraform import aiven_kafka_user.example_user PROJECT/SERVICE_NAME/USERNAME

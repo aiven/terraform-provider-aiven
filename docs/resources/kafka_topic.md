@@ -3,12 +3,12 @@
 page_title: "aiven_kafka_topic Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an Aiven for Apache Kafka® topic.
+  Creates and manages an Aiven for Apache Kafka® topic https://aiven.io/docs/products/kafka/concepts.
 ---
 
 # aiven_kafka_topic (Resource)
 
-Creates and manages an Aiven for Apache Kafka® topic.
+Creates and manages an Aiven for Apache Kafka® [topic](https://aiven.io/docs/products/kafka/concepts).
 
 ## Example Usage
 
@@ -22,10 +22,9 @@ resource "aiven_kafka_topic" "example_topic" {
   termination_protection = true
 
   config {
-    flush_ms                       = 10
-    cleanup_policy                 = "compact,delete"
+    flush_ms       = 10
+    cleanup_policy = "compact,delete"
   }
-
 
   timeouts {
     create = "1m"
@@ -47,8 +46,8 @@ resource "aiven_kafka_topic" "example_topic" {
 
 ### Optional
 
-- `config` (Block List, Max: 1) Kafka topic configuration. (see [below for nested schema](#nestedblock--config))
-- `tag` (Block Set) Tags for the Kafka topic. (see [below for nested schema](#nestedblock--tag))
+- `config` (Block List, Max: 1) [Advanced parameters](https://aiven.io/docs/products/kafka/reference/advanced-params) to configure topics. (see [below for nested schema](#nestedblock--config))
+- `tag` (Block Set) Tags for the topic. (see [below for nested schema](#nestedblock--tag))
 - `termination_protection` (Boolean) Prevents topics from being deleted by Terraform. It's recommended for topics containing critical data. **Topics can still be deleted in the Aiven Console.**
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -95,11 +94,11 @@ Optional:
 
 Required:
 
-- `key` (String) Topic tag key. Maximum length: `64`.
+- `key` (String) Tag key. Maximum length: `64`.
 
 Optional:
 
-- `value` (String) Topic tag value. Maximum length: `256`.
+- `value` (String) Tag value. Maximum length: `256`.
 
 
 <a id="nestedblock--timeouts"></a>
