@@ -5,7 +5,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 func valkeySchema() map[string]*schema.Schema {
@@ -56,12 +55,7 @@ func valkeySchema() map[string]*schema.Schema {
 
 func ResourceValkey() *schema.Resource {
 	return &schema.Resource{
-		Description: userconfig.Desc(
-			"Creates and manages an " +
-				"[Aiven for Valkey](https://aiven.io/docs/products/valkey) service.",
-		).
-			AvailabilityType(userconfig.Beta).
-			Build(),
+		Description:   "Creates and manages an [Aiven for Valkey](https://aiven.io/docs/products/valkey) service.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeValkey),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,

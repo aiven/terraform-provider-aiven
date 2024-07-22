@@ -5,7 +5,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 func thanosSchema() map[string]*schema.Schema {
@@ -66,12 +65,7 @@ func thanosSchema() map[string]*schema.Schema {
 
 func ResourceThanos() *schema.Resource {
 	return &schema.Resource{
-		Description: userconfig.Desc(
-			"Creates and manages an " +
-				"[Aiven for Metrics®](https://aiven.io/docs/products/metrics/concepts/metrics-overview) service.",
-		).
-			AvailabilityType(userconfig.Beta).
-			Build(),
+		Description:   "Creates and manages an [Aiven for Metrics®](https://aiven.io/docs/products/metrics/concepts/metrics-overview) service.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeThanos),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
