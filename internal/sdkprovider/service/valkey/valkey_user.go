@@ -82,12 +82,7 @@ var aivenValkeyUserSchema = map[string]*schema.Schema{
 
 func ResourceValkeyUser() *schema.Resource {
 	return &schema.Resource{
-		Description: userconfig.Desc(
-			"Creates and manages an " +
-				"[Aiven for Valkey](https://aiven.io/docs/products/valkey) user.",
-		).
-			AvailabilityType(userconfig.Beta).
-			Build(),
+		Description:   "Creates and manages an [Aiven for Valkey](https://aiven.io/docs/products/valkey) user.",
 		CreateContext: common.WithGenClient(resourceValkeyUserCreate),
 		UpdateContext: common.WithGenClient(resourceValkeyUserUpdate),
 		ReadContext:   common.WithGenClient(resourceValkeyUserRead),

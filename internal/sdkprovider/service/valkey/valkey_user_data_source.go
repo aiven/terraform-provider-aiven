@@ -9,15 +9,12 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 func DatasourceValkeyUser() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: common.WithGenClient(datasourceValkeyUserRead),
-		Description: userconfig.Desc("The Valkey User data source provides information about the existing Aiven for Valkey user.").
-			AvailabilityType(userconfig.Beta).
-			Build(),
+		Description: "The Valkey User data source provides information about the existing Aiven for Valkey user.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenValkeyUserSchema,
 			"project", "service_name", "username"),
 	}

@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strings"
 
@@ -10,6 +11,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/cassandra"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
@@ -272,10 +274,20 @@ func Provider(version string) *schema.Provider {
 		},
 	}
 
-	// Removes beta resources when the beta flag is missing
-	if !util.IsBeta() {
-		removeBetaResources(p.ResourcesMap)
-		removeBetaResources(p.DataSourcesMap)
+	// Adds "beta" warning to the description
+	betaResources := []string{
+		"aiven_thanos",
+		"aiven_valkey",
+		"aiven_valkey_user",
+	}
+
+	missing := append(
+		addBeta(p.ResourcesMap, betaResources...),
+		addBeta(p.DataSourcesMap, betaResources...)...,
+	)
+
+	if missing != nil {
+		panic(fmt.Errorf("not all beta resources/datasources are found: %s", strings.Join(missing, ", ")))
 	}
 
 	p.ConfigureContextFunc = func(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
@@ -301,11 +313,21 @@ func Provider(version string) *schema.Provider {
 	return p
 }
 
-// removeBetaResources removes resources marked as beta
-func removeBetaResources(m map[string]*schema.Resource) {
-	for k, v := range m {
-		if strings.Contains(v.Description, util.AivenEnableBeta) {
+// addBeta adds resources as beta or removes them
+func addBeta(m map[string]*schema.Resource, keys ...string) (missing []string) {
+	isBeta := util.IsBeta()
+	for _, k := range keys {
+		v, ok := m[k]
+		if !ok {
+			missing = append(missing, k)
+			continue
+		}
+
+		if isBeta {
+			v.Description = userconfig.Desc(v.Description).AvailabilityType(userconfig.Beta).Build()
+		} else {
 			delete(m, k)
 		}
 	}
+	return missing
 }

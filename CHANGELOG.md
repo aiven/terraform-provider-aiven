@@ -12,8 +12,8 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Fix `aiven_transit_gateway_vpc_attachment`: remove `peer_region` deprecation, mark the field as create only.
-- Add `aiven_valkey` resource
-- Add `aiven_valkey_user` resource
+- Add `aiven_valkey` resource as a beta resource
+- Add `aiven_valkey_user` resource as a beta resource
 - Temporarily remove the `aiven_project_user` deprecation until we find a suitable alternative.  
 
 ## [4.20.0] - 2024-06-26
