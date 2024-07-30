@@ -87,6 +87,11 @@ func dragonflyUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
+					"ignore_roles": {
+						Description: "Comma-separated list of database roles, which should be ignored during migration (supported by PostgreSQL only at the moment). Example: `role1,role2`.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
 					"method": {
 						Description:  "Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).",
 						Optional:     true,

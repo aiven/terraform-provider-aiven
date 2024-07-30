@@ -191,6 +191,7 @@ Optional:
 
 - `dbname` (String) Database name for bootstrapping the initial connection. Example: `defaultdb`.
 - `ignore_dbs` (String) Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment). Example: `db1,db2`.
+- `ignore_roles` (String) Comma-separated list of database roles, which should be ignored during migration (supported by PostgreSQL only at the moment). Example: `role1,role2`.
 - `method` (String) Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).
 - `password` (String, Sensitive) Password for authentication with the server where to migrate data from. Example: `jjKk45Nnd`.
 - `ssl` (Boolean) The server where to migrate data from is secured with SSL. Default: `true`.
@@ -296,6 +297,7 @@ Optional:
 - `autodb_pool_mode` (String) Enum: `session`, `transaction`, `statement`. PGBouncer pool mode. Default: `transaction`.
 - `autodb_pool_size` (Number) If non-zero then create automatically a pool of that size per user when a pool doesn't exist. Default: `0`.
 - `ignore_startup_parameters` (List of String) List of parameters to ignore when given in startup packet.
+- `max_prepared_statements` (Number) PgBouncer tracks protocol-level named prepared statements related commands sent by the client in transaction and statement pooling modes when max_prepared_statements is set to a non-zero value. Setting it to 0 disables prepared statements. max_prepared_statements defaults to 100, and its maximum is 3000. Default: `100`.
 - `min_pool_size` (Number) Add more server connections to pool if below this number. Improves behavior when usual load comes suddenly back after period of total inactivity. The value is effectively capped at the pool size. Default: `0`.
 - `server_idle_timeout` (Number) If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. (seconds). Default: `600`.
 - `server_lifetime` (Number) The pooler will close an unused server connection that has been connected longer than this. (seconds). Default: `3600`.

@@ -109,6 +109,11 @@ func pgUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
+					"ignore_roles": {
+						Description: "Comma-separated list of database roles, which should be ignored during migration (supported by PostgreSQL only at the moment). Example: `role1,role2`.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
 					"method": {
 						Description:  "Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).",
 						Optional:     true,
@@ -594,6 +599,11 @@ func pgUserConfig() *schema.Schema {
 						MaxItems: 32,
 						Optional: true,
 						Type:     schema.TypeList,
+					},
+					"max_prepared_statements": {
+						Description: "PgBouncer tracks protocol-level named prepared statements related commands sent by the client in transaction and statement pooling modes when max_prepared_statements is set to a non-zero value. Setting it to 0 disables prepared statements. max_prepared_statements defaults to 100, and its maximum is 3000. Default: `100`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
 					},
 					"min_pool_size": {
 						Description: "Add more server connections to pool if below this number. Improves behavior when usual load comes suddenly back after period of total inactivity. The value is effectively capped at the pool size. Default: `0`.",

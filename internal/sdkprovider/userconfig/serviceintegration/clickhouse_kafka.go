@@ -88,10 +88,20 @@ func clickhouseKafkaUserConfig() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeInt,
 				},
+				"poll_max_timeout_ms": {
+					Description: "Timeout in milliseconds for a single poll from Kafka. Takes the value of the stream_flush_interval_ms server setting by default (500ms). Default: `0`.",
+					Optional:    true,
+					Type:        schema.TypeInt,
+				},
 				"skip_broken_messages": {
 					Description: "Skip at least this number of broken messages from Kafka topic per block. Default: `0`.",
 					Optional:    true,
 					Type:        schema.TypeInt,
+				},
+				"thread_per_consumer": {
+					Description: "Provide an independent thread for each consumer. All consumers run in the same thread by default. Default: `false`.",
+					Optional:    true,
+					Type:        schema.TypeBool,
 				},
 				"topics": {
 					Description: "Kafka topics",

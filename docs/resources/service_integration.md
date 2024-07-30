@@ -84,7 +84,9 @@ Optional:
 - `max_rows_per_message` (Number) The maximum number of rows produced in one kafka message for row-based formats. Default: `1`.
 - `num_consumers` (Number) The number of consumers per table per replica. Default: `1`.
 - `poll_max_batch_size` (Number) Maximum amount of messages to be polled in a single Kafka poll. Default: `0`.
+- `poll_max_timeout_ms` (Number) Timeout in milliseconds for a single poll from Kafka. Takes the value of the stream_flush_interval_ms server setting by default (500ms). Default: `0`.
 - `skip_broken_messages` (Number) Skip at least this number of broken messages from Kafka topic per block. Default: `0`.
+- `thread_per_consumer` (Boolean) Provide an independent thread for each consumer. All consumers run in the same thread by default. Default: `false`.
 
 <a id="nestedblock--clickhouse_kafka_user_config--tables--columns"></a>
 ### Nested Schema for `clickhouse_kafka_user_config.tables.columns`
