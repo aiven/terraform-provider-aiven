@@ -95,6 +95,7 @@ Read-Only:
 - `additional_backup_regions` (List of String)
 - `aiven_kafka_topic_messages` (Boolean)
 - `custom_domain` (String)
+- `follower_fetching` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--follower_fetching))
 - `ip_filter` (Set of String)
 - `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
@@ -116,6 +117,14 @@ Read-Only:
 - `service_log` (Boolean)
 - `static_ips` (Boolean)
 - `tiered_storage` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--tiered_storage))
+
+<a id="nestedobjatt--kafka_user_config--follower_fetching"></a>
+### Nested Schema for `kafka_user_config.follower_fetching`
+
+Read-Only:
+
+- `enabled` (Boolean)
+
 
 <a id="nestedobjatt--kafka_user_config--ip_filter_object"></a>
 ### Nested Schema for `kafka_user_config.ip_filter_object`

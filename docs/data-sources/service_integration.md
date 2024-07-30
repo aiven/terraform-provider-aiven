@@ -74,7 +74,9 @@ Read-Only:
 - `name` (String)
 - `num_consumers` (Number)
 - `poll_max_batch_size` (Number)
+- `poll_max_timeout_ms` (Number)
 - `skip_broken_messages` (Number)
+- `thread_per_consumer` (Boolean)
 - `topics` (List of Object) (see [below for nested schema](#nestedobjatt--clickhouse_kafka_user_config--tables--topics))
 
 <a id="nestedobjatt--clickhouse_kafka_user_config--tables--columns"></a>

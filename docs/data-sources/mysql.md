@@ -140,6 +140,7 @@ Read-Only:
 - `dbname` (String)
 - `host` (String)
 - `ignore_dbs` (String)
+- `ignore_roles` (String)
 - `method` (String)
 - `password` (String)
 - `port` (Number)
