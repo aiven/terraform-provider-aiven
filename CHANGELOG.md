@@ -9,9 +9,10 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!-- ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+## [4.22.0] - 2024-08-02
 
 - Show "create" plan for missing `aiven_kafka_schema`
+- Update to the latest user configuration settings [b4f7493](https://github.com/aiven/terraform-provider-aiven/commit/b4f7493fd642dfd5eb96ba3768a5d1fbebd8af78)
 
 ## [4.21.0] - 2024-07-23
 
