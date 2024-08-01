@@ -233,7 +233,7 @@ func resourceKafkaSchemaRead(ctx context.Context, d *schema.ResourceData, m inte
 
 	s, err := client.KafkaSubjectSchemas.Get(ctx, project, serviceName, subjectName, version)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
 	if err := d.Set("schema", s.Version.Schema); err != nil {
