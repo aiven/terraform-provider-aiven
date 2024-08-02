@@ -26,7 +26,7 @@ var aivenProjectUserSchema = map[string]*schema.Schema{
 	"member_type": {
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: userconfig.Desc("Project membership type.").PossibleValues("admin", "developer", "operator").Build(),
+		Description: userconfig.Desc("Project membership type.").PossibleValues("admin", "developer", "operator", "read_only").Build(),
 	},
 	"accepted": {
 		Computed:    true,
