@@ -1,6 +1,6 @@
 # Aiven organizations, units, and projects example
 
-The Aiven platform uses [organizations, organizational units, and projects](https://aiven.io/docs/platform/concepts/projects_accounts_access) to organize services.
+The Aiven platform uses [organizations, organizational units, and projects](https://aiven.io/docs/platform/concepts/orgs-units-projects) to organize services.
 
 This example shows you how to use the Aiven Provider for Terraform to create an organization with two organizaitonal units, and add projects to those units. 
 
