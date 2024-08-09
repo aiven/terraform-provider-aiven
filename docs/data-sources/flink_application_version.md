@@ -3,21 +3,21 @@
 page_title: "aiven_flink_application_version Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Flink Application Version data source provides information about the existing Aiven Flink Application Version.
+  Gets information about an Aiven for Apache Flink® application version.
 ---
 
 # aiven_flink_application_version (Data Source)
 
-The Flink Application Version data source provides information about the existing Aiven Flink Application Version.
+Gets information about an Aiven for Apache Flink® application version.
 
 ## Example Usage
 
 ```terraform
-data "aiven_flink_application_version" "app1" {
-  project      = data.aiven_project.pr1.project
-  service_name = "<SERVICE_NAME>"
-  application_id = "<APPLICATION_ID>"
-  application_version_id = "<APPLICATION_VERSION_ID>"
+data "aiven_flink_application_version" "main" {
+  project                = data.aiven_project.example_project.project
+  service_name           = aiven_flink.example_flink.service_name
+  application_id         = aiven_flink_application.example_app.application_id
+  application_version_id = "d6e7f71c-cadf-49b5-a4ad-126c805fe684"
 }
 ```
 
@@ -26,22 +26,22 @@ data "aiven_flink_application_version" "app1" {
 
 ### Required
 
-- `application_id` (String) Application ID
-- `application_version_id` (String) Application version ID
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `application_id` (String) Application ID.
+- `application_version_id` (String) Application version ID.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Read-Only
 
-- `created_at` (String) Application version creation time
-- `created_by` (String) Application version creator
+- `created_at` (String) Application version creation time.
+- `created_by` (String) The user who created the application.
 - `id` (String) The ID of this resource.
-- `sink` (Set of Object) Application sink (see [below for nested schema](#nestedatt--sink))
+- `sink` (Set of Object) The sink table for the application. (see [below for nested schema](#nestedatt--sink))
 - `sinks` (Set of Object) Application sinks (see [below for nested schema](#nestedatt--sinks))
-- `source` (Set of Object) Application source (see [below for nested schema](#nestedatt--source))
+- `source` (Set of Object) The source table for the application. (see [below for nested schema](#nestedatt--source))
 - `sources` (Set of Object) Application sources (see [below for nested schema](#nestedatt--sources))
-- `statement` (String) Job SQL statement
-- `version` (Number) Application version number
+- `statement` (String) Job SQL statement.
+- `version` (Number) Application version number.
 
 <a id="nestedatt--sink"></a>
 ### Nested Schema for `sink`

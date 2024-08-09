@@ -3,29 +3,28 @@
 page_title: "aiven_kafka_topic Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Kafka Topic resource allows the creation and management of Aiven Kafka Topics.
+  Creates and manages an Aiven for Apache Kafka® topic https://aiven.io/docs/products/kafka/concepts.
 ---
 
 # aiven_kafka_topic (Resource)
 
-The Kafka Topic resource allows the creation and management of Aiven Kafka Topics.
+Creates and manages an Aiven for Apache Kafka® [topic](https://aiven.io/docs/products/kafka/concepts).
 
 ## Example Usage
 
 ```terraform
-resource "aiven_kafka_topic" "mytesttopic" {
-  project                = aiven_project.myproject.project
-  service_name           = aiven_kafka.myservice.service_name
-  topic_name             = "<TOPIC_NAME>"
+resource "aiven_kafka_topic" "example_topic" {
+  project                = data.aiven_project.example_project.project
+  service_name           = aiven_kafka.example_kafka.service_name
+  topic_name             = "example-topic"
   partitions             = 5
   replication            = 3
   termination_protection = true
 
   config {
-    flush_ms                       = 10
-    cleanup_policy                 = "compact,delete"
+    flush_ms       = 10
+    cleanup_policy = "compact,delete"
   }
-
 
   timeouts {
     create = "1m"
@@ -40,16 +39,16 @@ resource "aiven_kafka_topic" "mytesttopic" {
 ### Required
 
 - `partitions` (Number) The number of partitions to create in the topic.
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `replication` (Number) The replication factor for the topic.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `topic_name` (String) The name of the topic. This property cannot be changed, doing so forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `topic_name` (String) The name of the topic. Changing this property forces recreation of the resource.
 
 ### Optional
 
-- `config` (Block List, Max: 1) Kafka topic configuration (see [below for nested schema](#nestedblock--config))
-- `tag` (Block Set) Kafka Topic tag. (see [below for nested schema](#nestedblock--tag))
-- `termination_protection` (Boolean) It is a Terraform client-side deletion protection, which prevents a Kafka topic from being deleted. It is recommended to enable this for any production Kafka topic containing critical data.
+- `config` (Block List, Max: 1) [Advanced parameters](https://aiven.io/docs/products/kafka/reference/advanced-params) to configure topics. (see [below for nested schema](#nestedblock--config))
+- `tag` (Block Set) Tags for the topic. (see [below for nested schema](#nestedblock--tag))
+- `termination_protection` (Boolean) Prevents topics from being deleted by Terraform. It's recommended for topics containing critical data. **Topics can still be deleted in the Aiven Console.**
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
@@ -95,11 +94,11 @@ Optional:
 
 Required:
 
-- `key` (String) Topic tag key. Maximum length: `64`.
+- `key` (String) Tag key. Maximum length: `64`.
 
 Optional:
 
-- `value` (String) Topic tag value. Maximum length: `256`.
+- `value` (String) Tag value. Maximum length: `256`.
 
 
 <a id="nestedblock--timeouts"></a>
@@ -118,5 +117,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_kafka_topic.mytesttopic project/service_name/topic_name
+terraform import aiven_kafka_topic.example_topic PROJECT/SERVICE_NAME/TOPIC_NAME
 ```

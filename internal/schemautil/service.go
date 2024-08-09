@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/converters"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 // defaultTimeout is the default timeout for service operations. This is not a const because it can be changed during
@@ -35,7 +34,6 @@ func DefaultResourceTimeouts() *schema.ResourceTimeout {
 const (
 	ServiceTypePG               = "pg"
 	ServiceTypeCassandra        = "cassandra"
-	ServiceTypeElasticsearch    = "elasticsearch"
 	ServiceTypeOpenSearch       = "opensearch"
 	ServiceTypeGrafana          = "grafana"
 	ServiceTypeInfluxDB         = "influxdb"
@@ -49,6 +47,8 @@ const (
 	ServiceTypeFlink            = "flink"
 	ServiceTypeClickhouse       = "clickhouse"
 	ServiceTypeDragonfly        = "dragonfly"
+	ServiceTypeThanos           = "thanos"
+	ServiceTypeValkey           = "valkey"
 )
 
 var TechEmailsResourceSchema = &schema.Resource{
@@ -61,6 +61,12 @@ var TechEmailsResourceSchema = &schema.Resource{
 	},
 }
 
+func ServiceCommonSchemaWithUserConfig(kind string) map[string]*schema.Schema {
+	s := ServiceCommonSchema()
+	converters.SetUserConfig(converters.ServiceUserConfig, kind, s)
+	return s
+}
+
 func ServiceCommonSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"project": CommonSchemaProjectReference,
@@ -69,7 +75,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).",
-			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			DiffSuppressFunc: func(_, _, new string, _ *schema.ResourceData) bool {
 				// This is a workaround for a bug when migrating from V3 to V4 Aiven Provider.
 				// The bug is that the cloud_name is not set in the state file, but it is set
 				// on the API side. This causes a diff during plan, and it will not disappear
@@ -103,7 +109,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.",
-			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			DiffSuppressFunc: func(_, _, new string, _ *schema.ResourceData) bool {
 				return new == ""
 			},
 			// There is also `never` value, which can't be set, but can be received from the backend.
@@ -115,13 +121,14 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.",
-			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			DiffSuppressFunc: func(_, _, new string, _ *schema.ResourceData) bool {
 				return new == ""
 			},
 		},
 		"termination_protection": {
 			Type:        schema.TypeBool,
 			Optional:    true,
+			Default:     false,
 			Description: "Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.",
 		},
 		"disk_space": {
@@ -291,67 +298,16 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Type:        schema.TypeSet,
 			Elem:        TechEmailsResourceSchema,
 			Optional:    true,
-			Description: "Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability.",
+			Description: " The email addresses for [service contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this service. You can also set email contacts at the project level.",
 		},
 	}
 }
 
 func ResourceServiceCreateWrapper(serviceType string) schema.CreateContextFunc {
-	if serviceType == "service" {
-		return func(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-			// Need to set empty value for all services or all Terraform keeps on showing there's
-			// a change in the computed values that don't match actual service type
-			if err := d.Set(ServiceTypeCassandra, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeElasticsearch, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeGrafana, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeInfluxDB, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeKafka, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeKafkaConnect, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeKafkaMirrormaker, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeMySQL, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypePG, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeRedis, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeOpenSearch, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeFlink, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			if err := d.Set(ServiceTypeClickhouse, []map[string]interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
-			return resourceServiceCreate(ctx, d, m)
-		}
-	}
-
 	return func(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 		if err := d.Set("service_type", serviceType); err != nil {
 			return diag.Errorf("error setting service_type: %s", err)
 		}
-		if err := d.Set(serviceType, []map[string]interface{}{}); err != nil {
-			return diag.Errorf("error setting an empty %s field: %s", serviceType, err)
-		}
-
 		return resourceServiceCreate(ctx, d, m)
 	}
 }
@@ -439,9 +395,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	cuc, err := ExpandService(serviceType, d)
 	if err != nil {
-		return diag.Errorf(
-			"error converting user config options for service type %s to API format: %s", serviceType, err,
-		)
+		return diag.FromErr(err)
 	}
 
 	_, err = client.Services.Create(
@@ -528,9 +482,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	serviceType := d.Get("service_type").(string)
 	cuc, err := ExpandService(serviceType, d)
 	if err != nil {
-		return diag.Errorf(
-			"error converting user config options for service type %s to API format: %s", serviceType, err,
-		)
+		return diag.FromErr(err)
 	}
 
 	if _, err := client.Services.Update(
@@ -712,13 +664,9 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		}
 	}
 
-	newUserConfig, err := FlattenService(serviceType, d, s.UserConfig)
+	err := FlattenService(serviceType, d, s.UserConfig)
 	if err != nil {
 		return err
-	}
-
-	if err := d.Set(serviceType+"_user_config", newUserConfig); err != nil {
-		return fmt.Errorf("cannot set `%s_user_config` : %w; Please make sure that all Aiven services have unique s names", serviceType, err)
 	}
 
 	params := s.URIParams
@@ -787,6 +735,9 @@ func FlattenServiceComponents(r *aiven.Service) []map[string]interface{} {
 	return components
 }
 
+// TODO: This uses an untyped map in the final resource's schema, which might be unclear to the end users.
+//
+//	We should change this in the next major version.
 func copyConnectionInfoFromAPIResponseToTerraform(
 	d *schema.ResourceData,
 	serviceType string,
@@ -796,38 +747,148 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 	props := make(map[string]interface{})
 
 	switch serviceType {
-	case "opensearch":
-		props["opensearch_dashboards_uri"] = connectionInfo.OpensearchDashboardsURI
-	case "elasticsearch":
-		props["kibana_uri"] = connectionInfo.KibanaURI
-	case "influxdb":
-		props["database_name"] = connectionInfo.InfluxDBDatabaseName
-	case "kafka":
+	case ServiceTypeKafka:
+		// KafkaHosts will be renamed to KafkaURIs in the next major version of the Go client.
+		// That's why we name the props key `uris` here.
+		props["uris"] = connectionInfo.KafkaHosts
 		props["access_cert"] = connectionInfo.KafkaAccessCert
 		props["access_key"] = connectionInfo.KafkaAccessKey
 		props["connect_uri"] = connectionInfo.KafkaConnectURI
 		props["rest_uri"] = connectionInfo.KafkaRestURI
 		props["schema_registry_uri"] = connectionInfo.SchemaRegistryURI
-	case "pg":
+	case ServiceTypePG:
+		// For compatibility with the old schema, we only set the first URI.
+		// TODO: Remove this block in the next major version. Keep `uris` key only, see below.
 		if connectionInfo.PostgresURIs != nil && len(connectionInfo.PostgresURIs) > 0 {
 			props["uri"] = connectionInfo.PostgresURIs[0]
 		}
+
+		props["uris"] = connectionInfo.PostgresURIs // Keep this instead of `uri` key.
+		props["bouncer"] = connectionInfo.PostgresBouncer
+
+		// For compatibility with the old schema, we only set the first params.
+		// TODO: Remove this block in the next major version. Keep `params` key only, see below.
 		if connectionInfo.PostgresParams != nil && len(connectionInfo.PostgresParams) > 0 {
 			params := connectionInfo.PostgresParams[0]
-			props["dbname"] = params.DatabaseName
+
 			props["host"] = params.Host
-			props["password"] = params.Password
+
 			port, err := strconv.ParseInt(params.Port, 10, 32)
 			if err == nil {
 				props["port"] = int(port)
 			}
+
 			props["sslmode"] = params.SSLMode
 			props["user"] = params.User
+			props["password"] = params.Password
+			props["dbname"] = params.DatabaseName
+
 		}
+
+		// Keep this instead of the above block.
+		params := make([]map[string]interface{}, len(connectionInfo.PostgresParams))
+		for i, p := range connectionInfo.PostgresParams {
+			port, err := strconv.ParseInt(p.Port, 10, 32)
+			if err != nil {
+				return err
+			}
+
+			params[i] = map[string]interface{}{
+				"host":          p.Host,
+				"port":          port,
+				"sslmode":       p.SSLMode,
+				"user":          p.User,
+				"password":      p.Password,
+				"database_name": p.DatabaseName,
+			}
+		}
+
+		props["params"] = params
 		props["replica_uri"] = connectionInfo.PostgresReplicaURI
+		props["standby_uris"] = connectionInfo.PostgresStandbyURIs
+		props["syncing_uris"] = connectionInfo.PostgresSyncingURIs
+
+		// TODO: This isn't in the connection info, but it's in the metadata.
+		//  We should move this to the other part of the schema in the next major version.
 		props["max_connections"] = metadata.(map[string]interface{})["max_connections"]
-	case "flink":
+	case ServiceTypeThanos:
+		props["uris"] = connectionInfo.ThanosURIs
+		props["query_frontend_uri"] = connectionInfo.QueryFrontendURI
+		props["query_uri"] = connectionInfo.QueryURI
+		props["receiver_ingesting_remote_write_uri"] = connectionInfo.ReceiverIngestingRemoteWriteURI
+		props["receiver_remote_write_uri"] = connectionInfo.ReceiverRemoteWriteURI
+		props["store_uri"] = connectionInfo.StoreURI
+	case ServiceTypeMySQL:
+		props["uris"] = connectionInfo.MySQLURIs
+
+		params := make([]map[string]interface{}, len(connectionInfo.MySQLParams))
+		for i, p := range connectionInfo.MySQLParams {
+			port, err := strconv.ParseInt(p.Port, 10, 32)
+			if err != nil {
+				return err
+			}
+
+			params[i] = map[string]interface{}{
+				"host":          p.Host,
+				"port":          port,
+				"sslmode":       p.SSLMode,
+				"user":          p.User,
+				"password":      p.Password,
+				"database_name": p.DatabaseName,
+			}
+		}
+
+		props["params"] = params
+		props["replica_uri"] = connectionInfo.MySQLReplicaURI
+		props["standby_uris"] = connectionInfo.MySQLStandbyURIs
+	case ServiceTypeOpenSearch:
+		props["uris"] = connectionInfo.OpensearchURIs
+
+		// TODO: Remove `opensearch_` prefix in the next major version.
+		props["opensearch_dashboards_uri"] = connectionInfo.OpensearchDashboardsURI
+
+		props["kibana_uri"] = connectionInfo.KibanaURI
+		props["username"] = connectionInfo.OpensearchUsername
+		props["password"] = connectionInfo.OpensearchPassword
+	case ServiceTypeCassandra:
+		// CassandraHosts will be renamed to CassandraURIs in the next major version of the Go client.
+		// That's why we name the props key `uris` here.
+		props["uris"] = connectionInfo.CassandraHosts
+	case ServiceTypeRedis, ServiceTypeDragonfly:
+		props["uris"] = connectionInfo.RedisURIs
+		props["slave_uris"] = connectionInfo.RedisSlaveURIs
+		props["replica_uri"] = connectionInfo.RedisReplicaURI
+		props["password"] = connectionInfo.RedisPassword
+	case ServiceTypeValkey:
+		props["uris"] = connectionInfo.ValkeyURIs
+		props["slave_uris"] = connectionInfo.ValkeySlaveURIs
+		props["replica_uri"] = connectionInfo.ValkeyReplicaURI
+		props["password"] = connectionInfo.ValkeyPassword
+	case ServiceTypeInfluxDB:
+		props["uris"] = connectionInfo.InfluxDBURIs
+		props["username"] = connectionInfo.InfluxDBUsername
+		props["password"] = connectionInfo.InfluxDBPassword
+		props["database_name"] = connectionInfo.InfluxDBDatabaseName
+	case ServiceTypeGrafana:
+		props["uris"] = connectionInfo.GrafanaURIs
+	case ServiceTypeM3:
+		props["uris"] = connectionInfo.M3DBURIs
+		props["http_cluster_uri"] = connectionInfo.HTTPClusterURI
+		props["http_node_uri"] = connectionInfo.HTTPNodeURI
+		props["influxdb_uri"] = connectionInfo.InfluxDBURI
+		props["prometheus_remote_read_uri"] = connectionInfo.PrometheusRemoteReadURI
+		props["prometheus_remote_write_uri"] = connectionInfo.PrometheusRemoteWriteURI
+	case ServiceTypeM3Aggregator:
+		props["uris"] = connectionInfo.M3AggregatorURIs
+		props["aggregator_http_uri"] = connectionInfo.AggregatorHTTPURI
+	case ServiceTypeClickhouse:
+		props["uris"] = connectionInfo.ClickHouseURIs
+	case ServiceTypeFlink:
+		// TODO: Rename `host_ports` to `uris` in the next major version.
 		props["host_ports"] = connectionInfo.FlinkHostPorts
+	default:
+		// Doesn't have connection info
+		return nil
 	}
 
 	return d.Set(serviceType, []map[string]interface{}{props})
@@ -885,10 +946,10 @@ func getContactEmailListForAPI(d *schema.ResourceData, field string) *[]aiven.Co
 	return &results
 }
 
-func ExpandService(kind string, d *schema.ResourceData) (map[string]any, error) {
-	return converters.Expand(kind, service.GetUserConfig(kind), d)
+func ExpandService(name string, d *schema.ResourceData) (map[string]any, error) {
+	return converters.Expand(converters.ServiceUserConfig, name, d)
 }
 
-func FlattenService(kind string, d *schema.ResourceData, dto map[string]any) ([]map[string]any, error) {
-	return converters.Flatten(kind, service.GetUserConfig(kind), d, dto)
+func FlattenService(name string, d *schema.ResourceData, dto map[string]any) error {
+	return converters.Flatten(converters.ServiceUserConfig, name, d, dto)
 }

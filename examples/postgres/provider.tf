@@ -1,4 +1,5 @@
 terraform {
+  required_version = ">=0.13"
   required_providers {
     aiven = {
       source  = "aiven/aiven"
@@ -9,5 +10,5 @@ terraform {
 
 # Initialize provider. No other config options than api_token
 provider "aiven" {
-  api_token = var.avn_token
+  api_token = var.aiven_token
 }

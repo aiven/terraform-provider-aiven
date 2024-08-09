@@ -6,7 +6,7 @@ resource "aiven_kafka" "kafka-service" {
   service_name            = "privatelink-kafka1"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
-  project_vpc_id          = "YOUR-AWS-PROJECT-VPC-ID"
+  project_vpc_id          = "AWS_PROJECT_VPC_ID"
 
   kafka_user_config {
     privatelink_access {
@@ -32,16 +32,12 @@ resource "aiven_aws_privatelink" "aws_pl" {
   ]
 }
 
-data "aiven_aws_privatelink" "pl" {
-  project      = aiven_aws_privatelink.aws_pl.project
-  service_name = aiven_aws_privatelink.aws_pl.service_name
-}
-
 output "aws_privatelink" {
   value = aiven_aws_privatelink.aws_pl
 }
 
-// After connecting to a VPC Endpoint from your an AWS account new service component is available
+# After connecting to a VPC endpoint from your AWS account
+# a new service component is available
 data "aiven_service_component" "kafka_privatelink" {
   project                     = aiven_aws_privatelink.aws_pl.project
   service_name                = aiven_aws_privatelink.aws_pl.service_name

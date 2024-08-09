@@ -1,1 +1,1 @@
-terraform import aiven_project.myproject project
+terraform import aiven_project.example_project PROJECT

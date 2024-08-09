@@ -24,7 +24,7 @@ data "aiven_m3aggregator" "m3a" {
 
 ### Required
 
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Read-Only
@@ -38,7 +38,7 @@ data "aiven_m3aggregator" "m3a" {
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) Disk space that service is currently using
 - `id` (String) The ID of this resource.
-- `m3aggregator` (List of Object) M3 aggregator specific server provided values (see [below for nested schema](#nestedatt--m3aggregator))
+- `m3aggregator` (List of Object, Sensitive) M3 Aggregator server provided values (see [below for nested schema](#nestedatt--m3aggregator))
 - `m3aggregator_user_config` (List of Object) M3aggregator user configurable settings (see [below for nested schema](#nestedatt--m3aggregator_user_config))
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
@@ -54,7 +54,7 @@ data "aiven_m3aggregator" "m3a" {
 - `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
 - `static_ips` (Set of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 - `tag` (Set of Object) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedatt--tag))
-- `tech_emails` (Set of Object) Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability. (see [below for nested schema](#nestedatt--tech_emails))
+- `tech_emails` (Set of Object) The email addresses for [service contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this service. You can also set email contacts at the project level. (see [below for nested schema](#nestedatt--tech_emails))
 - `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
 
 <a id="nestedatt--components"></a>
@@ -77,6 +77,8 @@ Read-Only:
 
 Read-Only:
 
+- `aggregator_http_uri` (String)
+- `uris` (List of String)
 
 
 <a id="nestedatt--m3aggregator_user_config"></a>
@@ -86,7 +88,7 @@ Read-Only:
 
 - `custom_domain` (String)
 - `ip_filter` (Set of String)
-- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--m3aggregator_user_config--ip_filter_object))
+- `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--m3aggregator_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
 - `m3_version` (String)
 - `m3aggregator_version` (String)

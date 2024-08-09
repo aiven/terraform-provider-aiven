@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/stoewer/go-strcase"
@@ -47,7 +49,9 @@ type object struct {
 	// Because it makes things easier to control in diff suppressors.
 	Default any `yaml:"default"`
 
-	Enum []*struct {
+	// To make the default value flexible (to change it on the backend), it quite often comes as an "example"
+	Example any `yaml:"example"`
+	Enum    []*struct {
 		Value        string `yaml:"value"`
 		IsDeprecated bool   `yaml:"is_deprecated"`
 	} `yaml:"enum"`
@@ -70,14 +74,26 @@ type object struct {
 	Nullable       bool               `yaml:"-"`
 }
 
+var reCleanTFName = regexp.MustCompile(`[^a-z0-9_]`)
+
 func (o *object) init(name string) {
 	o.camelName = toCamelCase(name)
 	o.varName = o.camelName + "Var"
 	o.attrsName = o.camelName + "Attrs"
 	o.tfoStructName = "tfo" + o.camelName
 	o.dtoStructName = "dto" + o.camelName
-	o.jsonName = name
-	o.tfName = strings.ReplaceAll(name, ".", "__dot__")
+
+	// If this one is a clone, it inherits the original jsonName
+	if o.jsonName == "" {
+		o.jsonName = name
+	}
+
+	if strings.HasPrefix(name, "pg_partman_bgw") || strings.HasPrefix(name, "pg_stat_") {
+		// Legacy fields
+		o.tfName = strings.ReplaceAll(name, ".", "__dot__")
+	} else {
+		o.tfName = reCleanTFName.ReplaceAllString(name, "_")
+	}
 
 	unwrapArrayMultipleTypes(o)
 
@@ -150,6 +166,13 @@ func (o *object) init(name string) {
 	if o.Type == objectTypeString && o.Default != nil && o.Default.(string) == "" {
 		o.Default = nil
 	}
+
+	// Sorts version enum values
+	if o.Enum != nil && strings.HasSuffix(name, "version") {
+		sort.Slice(o.Enum, func(i, j int) bool {
+			return o.Enum[i].Value < o.Enum[j].Value
+		})
+	}
 }
 
 func (o *object) isNestedBlock() bool {
@@ -190,7 +213,23 @@ func (o *object) path() string {
 		// because technically they are indexes: foo.0.bar <- 0 is array item
 		return o.parent.path()
 	}
-	return fmt.Sprintf("%s.0.%s", o.parent.path(), o.tfName)
+	return fmt.Sprintf("%s/%s", o.parent.path(), o.tfName)
+}
+
+// jsonPath same as path() but for jsonName
+func (o *object) jsonPath() string {
+	if o.isRoot || o.parent.isRoot {
+		return o.jsonName
+	}
+
+	if o.parent.isArray() {
+		return o.parent.jsonPath()
+	}
+	return fmt.Sprintf("%s/%s", o.parent.jsonPath(), o.jsonName)
+}
+
+func (o *object) isVersionField() bool {
+	return strings.HasSuffix(o.tfName, "_version")
 }
 
 // toCamelCase some fields have dots within, makes cleaner camelCase
@@ -247,6 +286,7 @@ func unwrapArrayMultipleTypes(o *object) {
 			// So it just copies it and sets type explicitly.
 			for _, s := range strTypes {
 				clone := deepcopy(p)
+				clone.jsonName = key
 				clone.ArrayItems.OrigType = s
 				fields[prefix+s] = clone
 			}
@@ -261,6 +301,7 @@ func unwrapArrayMultipleTypes(o *object) {
 			for i := range p.ArrayItems.OneOf {
 				t := p.ArrayItems.OneOf[i]
 				clone := deepcopy(p)
+				clone.jsonName = key
 				clone.ArrayItems = t
 				clone.Description = fmt.Sprintf("%s %s", addDot(p.Description), t.Description)
 				fields[prefix+t.OrigType.(string)] = clone

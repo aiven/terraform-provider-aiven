@@ -17,6 +17,7 @@ func redisSchema() map[string]*schema.Schema {
 	s[schemautil.ServiceTypeRedis] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
+		Sensitive:   true,
 		Description: "Redis server provided values",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},

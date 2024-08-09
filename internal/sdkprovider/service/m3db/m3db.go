@@ -6,22 +6,57 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 func aivenM3DBSchema() map[string]*schema.Schema {
-	schemaM3 := schemautil.ServiceCommonSchema()
-	schemaM3[schemautil.ServiceTypeM3] = &schema.Schema{
+	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeM3)
+	s[schemautil.ServiceTypeM3] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
-		Description: "M3 specific server provided values",
+		Description: "M3DB server provided values",
+		MaxItems:    1,
+		Optional:    true,
+		Sensitive:   true,
 		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{},
+			Schema: map[string]*schema.Schema{
+				"uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "M3DB server URIs.",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				"http_cluster_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "M3DB cluster URI.",
+				},
+				"http_node_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "M3DB node URI.",
+				},
+				"influxdb_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "InfluxDB URI.",
+				},
+				"prometheus_remote_read_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "Prometheus remote read URI.",
+				},
+				"prometheus_remote_write_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "Prometheus remote write URI.",
+				},
+			},
 		},
 	}
-	schemaM3[schemautil.ServiceTypeM3+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypeM3)
-
-	return schemaM3
+	return s
 }
 func ResourceM3DB() *schema.Resource {
 	return &schema.Resource{

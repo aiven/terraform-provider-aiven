@@ -3,76 +3,60 @@ package serviceintegration
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/aiven/aiven-go-client/v2"
+	codegenintegrations "github.com/aiven/go-client-codegen/handler/serviceintegration"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/converters"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/serviceintegrationendpoint"
 )
 
-var integrationEndpointTypes = []string{
-	"datadog",
-	"prometheus",
-	"rsyslog",
-	"external_elasticsearch_logs",
-	"external_opensearch_logs",
-	"external_aws_cloudwatch_logs",
-	"external_google_cloud_logging",
-	"external_kafka",
-	"jolokia",
-	"external_schema_registry",
-	"external_aws_cloudwatch_metrics",
-	"external_google_cloud_bigquery",
-	"external_postgresql",
+func hasEndpointConfig(kind string) bool {
+	return slices.Contains(serviceintegrationendpoint.UserConfigTypes(), kind)
 }
 
-var aivenServiceIntegrationEndpointSchema = map[string]*schema.Schema{
-	"project": {
-		Description: "Project the service integration endpoint belongs to",
-		ForceNew:    true,
-		Required:    true,
-		Type:        schema.TypeString,
-	},
-	"endpoint_name": {
-		ForceNew:    true,
-		Description: "Name of the service integration endpoint",
-		Required:    true,
-		Type:        schema.TypeString,
-	},
-	"endpoint_type": {
-		Description: "Type of the service integration endpoint. Possible values: " +
-			schemautil.JoinQuoted(integrationEndpointTypes, ", ", "`"),
-		ForceNew:     true,
-		Required:     true,
-		Type:         schema.TypeString,
-		ValidateFunc: validation.StringInSlice(integrationEndpointTypes, false),
-	},
-	"endpoint_config": {
-		Description: "Integration endpoint specific backend configuration",
-		Computed:    true,
-		Type:        schema.TypeMap,
-		Elem:        &schema.Schema{Type: schema.TypeString},
-	},
-	"datadog_user_config":                         dist.IntegrationEndpointTypeDatadog(),
-	"prometheus_user_config":                      dist.IntegrationEndpointTypePrometheus(),
-	"rsyslog_user_config":                         dist.IntegrationEndpointTypeRsyslog(),
-	"external_elasticsearch_logs_user_config":     dist.IntegrationEndpointTypeExternalElasticsearchLogs(),
-	"external_opensearch_logs_user_config":        dist.IntegrationEndpointTypeExternalOpensearchLogs(),
-	"external_aws_cloudwatch_logs_user_config":    dist.IntegrationEndpointTypeExternalAwsCloudwatchLogs(),
-	"external_google_cloud_logging_user_config":   dist.IntegrationEndpointTypeExternalGoogleCloudLogging(),
-	"external_kafka_user_config":                  dist.IntegrationEndpointTypeExternalKafka(),
-	"jolokia_user_config":                         dist.IntegrationEndpointTypeJolokia(),
-	"external_schema_registry_user_config":        dist.IntegrationEndpointTypeExternalSchemaRegistry(),
-	"external_aws_cloudwatch_metrics_user_config": dist.IntegrationEndpointTypeExternalAwsCloudwatchMetrics(),
-	"external_google_cloud_bigquery":              dist.IntegrationEndpointTypeExternalGoogleCloudBigquery(),
-	"external_postgresql":                         dist.IntegrationEndpointTypeExternalPostgresql(),
+func aivenServiceIntegrationEndpointSchema() map[string]*schema.Schema {
+	s := map[string]*schema.Schema{
+		"project": {
+			Description: "Project the service integration endpoint belongs to",
+			ForceNew:    true,
+			Required:    true,
+			Type:        schema.TypeString,
+		},
+		"endpoint_name": {
+			ForceNew:    true,
+			Description: "Name of the service integration endpoint",
+			Required:    true,
+			Type:        schema.TypeString,
+		},
+		"endpoint_type": {
+			Description: "Type of the service integration endpoint. Possible values: " +
+				schemautil.JoinQuoted(codegenintegrations.EndpointTypeChoices(), ", ", "`"),
+			ForceNew:     true,
+			Required:     true,
+			Type:         schema.TypeString,
+			ValidateFunc: validation.StringInSlice(codegenintegrations.EndpointTypeChoices(), false),
+		},
+		"endpoint_config": {
+			Description: "Integration endpoint specific backend configuration",
+			Computed:    true,
+			Type:        schema.TypeMap,
+			Elem:        &schema.Schema{Type: schema.TypeString},
+		},
+	}
+
+	// Adds user configs
+	for _, k := range serviceintegrationendpoint.UserConfigTypes() {
+		converters.SetUserConfig(converters.ServiceIntegrationEndpointUserConfig, k, s)
+	}
+	return s
 }
 
 func ResourceServiceIntegrationEndpoint() *schema.Resource {
@@ -87,7 +71,7 @@ func ResourceServiceIntegrationEndpoint() *schema.Resource {
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema:         aivenServiceIntegrationEndpointSchema,
+		Schema:         aivenServiceIntegrationEndpointSchema(),
 		SchemaVersion:  1,
 		StateUpgraders: stateupgrader.ServiceIntegrationEndpoint(),
 	}
@@ -98,20 +82,23 @@ func resourceServiceIntegrationEndpointCreate(ctx context.Context, d *schema.Res
 	projectName := d.Get("project").(string)
 	endpointType := d.Get("endpoint_type").(string)
 
-	userConfig, err := apiconvert.ToAPI(userconfig.IntegrationEndpointTypes, endpointType, d)
-	if err != nil {
-		return diag.FromErr(err)
+	req := aiven.CreateServiceIntegrationEndpointRequest{
+		EndpointName: d.Get("endpoint_name").(string),
+		EndpointType: endpointType,
+		UserConfig:   make(map[string]interface{}),
 	}
 
-	endpoint, err := client.ServiceIntegrationEndpoints.Create(
-		ctx,
-		projectName,
-		aiven.CreateServiceIntegrationEndpointRequest{
-			EndpointName: d.Get("endpoint_name").(string),
-			EndpointType: endpointType,
-			UserConfig:   userConfig,
-		},
-	)
+	if hasEndpointConfig(endpointType) {
+		uc, err := converters.Expand(converters.ServiceIntegrationEndpointUserConfig, endpointType, d)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if uc != nil {
+			req.UserConfig = uc
+		}
+	}
+
+	endpoint, err := client.ServiceIntegrationEndpoints.Create(ctx, projectName, req)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -152,20 +139,21 @@ func resourceServiceIntegrationEndpointUpdate(ctx context.Context, d *schema.Res
 	}
 
 	endpointType := d.Get("endpoint_type").(string)
-
-	userConfig, err := apiconvert.ToAPI(userconfig.IntegrationEndpointTypes, endpointType, d)
-	if err != nil {
-		return diag.FromErr(err)
+	req := aiven.UpdateServiceIntegrationEndpointRequest{
+		UserConfig: make(map[string]interface{}),
 	}
 
-	_, err = client.ServiceIntegrationEndpoints.Update(
-		ctx,
-		projectName,
-		endpointID,
-		aiven.UpdateServiceIntegrationEndpointRequest{
-			UserConfig: userConfig,
-		},
-	)
+	if hasEndpointConfig(endpointType) {
+		uc, err := converters.Expand(converters.ServiceIntegrationEndpointUserConfig, endpointType, d)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if uc != nil {
+			req.UserConfig = uc
+		}
+	}
+
+	_, err = client.ServiceIntegrationEndpoints.Update(ctx, projectName, endpointID, req)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -205,16 +193,6 @@ func copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(
 		return err
 	}
 
-	userConfig, err := apiconvert.FromAPI(userconfig.IntegrationEndpointTypes, endpointType, endpoint.UserConfig)
-	if err != nil {
-		return err
-	}
-
-	if len(userConfig) > 0 {
-		if err := d.Set(endpointType+"_user_config", userConfig); err != nil {
-			return err
-		}
-	}
 	// Must coerse all values into strings
 	endpointConfig := map[string]string{}
 	if len(endpoint.EndpointConfig) > 0 {
@@ -223,5 +201,15 @@ func copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(
 		}
 	}
 
-	return d.Set("endpoint_config", endpointConfig)
+	if err := d.Set("endpoint_config", endpointConfig); err != nil {
+		return err
+	}
+
+	if hasEndpointConfig(endpointType) {
+		err := converters.Flatten(converters.ServiceIntegrationEndpointUserConfig, endpointType, d, endpoint.UserConfig)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

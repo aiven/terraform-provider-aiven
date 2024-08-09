@@ -17,6 +17,7 @@ func cassandraSchema() map[string]*schema.Schema {
 	s[schemautil.ServiceTypeCassandra] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
+		Sensitive:   true,
 		Description: "Cassandra server provided values",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{},

@@ -1,15 +1,16 @@
 package schemautil
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/mail"
 	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/serviceuser"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -39,21 +40,6 @@ func OptionalIntPointer(d *schema.ResourceData, key string) *int {
 		return nil
 	}
 	return &intValue
-}
-
-// OptionalFloatPointer retrieves a float pointer to a field, if the field is not set, returns nil.
-func OptionalFloatPointer(d *schema.ResourceData, key string) *float64 {
-	val, ok := d.GetOk(key)
-	if !ok {
-		return nil
-	}
-
-	floatValue, ok := val.(float64)
-	if !ok {
-		return nil
-	}
-
-	return &floatValue
 }
 
 // OptionalBoolPointer retrieves a bool pointer to a field, if the field is not set, returns nil.
@@ -198,15 +184,6 @@ func TrimSpaceDiffSuppressFunc(_, old, new string, _ *schema.ResourceData) bool 
 	return strings.TrimSpace(old) == strings.TrimSpace(new)
 }
 
-// ValidateDurationString is a ValidateFunc that ensures a string parses
-// as time.Duration format
-func ValidateDurationString(v interface{}, k string) (ws []string, errors []error) {
-	if _, err := time.ParseDuration(v.(string)); err != nil {
-		errors = append(errors, fmt.Errorf("%q: invalid duration", k))
-	}
-	return
-}
-
 // ValidateHumanByteSizeString is a ValidateFunc that ensures a string parses
 // as units.Bytes format
 func ValidateHumanByteSizeString(v interface{}, k string) (ws []string, errors []error) {
@@ -330,4 +307,156 @@ func CopyServiceUserPropertiesFromAPIResponseToTerraform(
 	}
 
 	return nil
+}
+
+func CopyServiceUserGenPropertiesFromAPIResponseToTerraform(
+	d *schema.ResourceData,
+	user *serviceuser.ServiceUserGetOut,
+	projectName string,
+	serviceName string,
+) error {
+	if err := d.Set("project", projectName); err != nil {
+		return err
+	}
+	if err := d.Set("service_name", serviceName); err != nil {
+		return err
+	}
+	if err := d.Set("username", user.Username); err != nil {
+		return err
+	}
+	if err := d.Set("password", user.Password); err != nil {
+		return err
+	}
+	if err := d.Set("type", user.Type); err != nil {
+		return err
+	}
+
+	if user.AccessCert != nil {
+		if err := d.Set("access_cert", user.AccessCert); err != nil {
+			return err
+		}
+	}
+	if user.AccessKey != nil {
+		if err := d.Set("access_key", user.AccessKey); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ResourceDataGet Marshals schema.ResourceData into the given dto.
+// Instead of setting every field individually and dealing with pointers,
+// it creates a map of values using the schema keys,
+// and then marshals the result into given DTO.
+// Instead of for each field:
+//
+//	v, ok := d.GetOk("foo")
+//	if ok {
+//		dto.Foo = &v
+//	}
+//
+// Use:
+//
+//	err := ResourceDataGet(d, s, dto)
+//
+// Warning: doesn't support nested sets.
+// Warning: not tested with nested objects.
+func ResourceDataGet(d *schema.ResourceData, dto any, fns ...KVModifier) error {
+	config := d.GetRawConfig().AsValueMap()
+	m := make(map[string]any)
+	for k, c := range config {
+		// If the field in the tf config, or array doesn't have changes
+		if c.IsNull() && !d.HasChange(k) {
+			continue
+		}
+
+		value := d.Get(k)
+		set, ok := value.(*schema.Set)
+		if ok {
+			value = set.List()
+		}
+
+		for _, f := range fns {
+			k, value = f(k, value)
+		}
+
+		m[k] = value
+	}
+
+	b, err := json.Marshal(&m)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(b, dto)
+	return err
+}
+
+// KVModifier modifier for key/value pair
+type KVModifier func(k string, v any) (string, any)
+
+// ResourceDataSet Sets the given dto values to schema.ResourceData
+// Instead of setting every field individually and dealing with pointers,
+// it creates a map of values using the schema keys,
+// and then sets the result to schema.ResourceData.
+// Instead of for each field:
+//
+//	if dto.Foo != nil {
+//		if err := d.Set("foo", *dto.Foo); err != nil {
+//			return err
+//		}
+//	}
+//
+// Use:
+//
+//	err := ResourceDataSet(s, d, dto)
+func ResourceDataSet(s map[string]*schema.Schema, d *schema.ResourceData, dto any, fns ...KVModifier) error {
+	b, err := json.Marshal(dto)
+	if err != nil {
+		return err
+	}
+
+	var m map[string]any
+	err = json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	for _, f := range fns {
+		for k, v := range m {
+			delete(m, k) // remove the old key in case it is replaced
+			k, v = f(k, v)
+			m[k] = v
+		}
+	}
+
+	for k := range s {
+		if v, ok := m[k]; ok {
+			if err = d.Set(k, v); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// RenameAliases renames field names on object top level
+func RenameAliases(aliases map[string]string) KVModifier {
+	return func(k string, v any) (string, any) {
+		alias, ok := aliases[k]
+		if ok {
+			return alias, v
+		}
+		return k, v
+	}
+}
+
+// RenameAliasesReverse reverse version of RenameAliases
+func RenameAliasesReverse(aliases map[string]string) KVModifier {
+	m := make(map[string]string, len(aliases))
+	for k, v := range aliases {
+		m[v] = k
+	}
+	return RenameAliases(m)
 }

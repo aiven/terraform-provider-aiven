@@ -3,18 +3,18 @@
 page_title: "aiven_organization Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Retrieves information about an organization from Aiven.
+  Gets information about an organization.
 ---
 
 # aiven_organization (Data Source)
 
-Retrieves information about an organization from Aiven.
+Gets information about an organization.
 
 ## Example Usage
 
 ```terraform
-data "aiven_organization" "organization1" {
-  name = "<ORGANIZATION_NAME>"
+data "aiven_organization" "main" {
+  name = "Example organization"
 }
 ```
 
@@ -23,11 +23,11 @@ data "aiven_organization" "organization1" {
 
 ### Optional
 
-- `id` (String) Identifier of the organization.
+- `id` (String) ID of the organization.
 - `name` (String) Name of the organization.
 
 ### Read-Only
 
 - `create_time` (String) Timestamp of the creation of the organization.
-- `tenant_id` (String) Tenant identifier of the organization.
+- `tenant_id` (String) Tenant ID of the organization.
 - `update_time` (String) Timestamp of the last update of the organization.

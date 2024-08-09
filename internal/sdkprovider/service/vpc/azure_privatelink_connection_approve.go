@@ -7,9 +7,10 @@ import (
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -20,23 +21,23 @@ var aivenAzurePrivatelinkConnectionApprovalSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 		ForceNew:    false,
-		Description: "IP address of Azure private endpoint",
+		Description: "IP address of Azure private endpoint.",
 	},
 	"state": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Privatelink connection state",
+		Description: "The state of the Private Link connection.",
 	},
 	"privatelink_connection_id": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Privatelink connection id",
+		Description: "The ID of the Private Link connection.",
 	},
 }
 
 func ResourceAzurePrivatelinkConnectionApproval() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Azure privatelink approve resource waits for an aiven privatelink connection on a service and approves it with associated endpoint IP",
+		Description:   "Approves an Azure Private Link connection to an Aiven service with an associated endpoint IP.",
 		CreateContext: resourceAzurePrivatelinkConnectionApprovalUpdate,
 		ReadContext:   resourceAzurePrivatelinkConnectionApprovalRead,
 		UpdateContext: resourceAzurePrivatelinkConnectionApprovalUpdate,
@@ -50,7 +51,6 @@ func ResourceAzurePrivatelinkConnectionApproval() *schema.Resource {
 	}
 }
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func waitForAzureConnectionState(
 	ctx context.Context,
 	client *aiven.Client,
@@ -59,8 +59,8 @@ func waitForAzureConnectionState(
 	t time.Duration,
 	pending []string,
 	target []string,
-) *resource.StateChangeConf {
-	return &resource.StateChangeConf{
+) *retry.StateChangeConf {
+	return &retry.StateChangeConf{
 		Pending: pending,
 		Target:  target,
 		Refresh: func() (interface{}, string, error) {
@@ -84,9 +84,9 @@ func waitForAzureConnectionState(
 
 			return plConnection, plConnection.State, nil
 		},
-		Delay:      10 * time.Second,
+		Delay:      common.DefaultStateChangeDelay,
 		Timeout:    t,
-		MinTimeout: 2 * time.Second,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 }
 
@@ -105,8 +105,14 @@ func resourceAzurePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *sc
 	pending := []string{""}
 	target := []string{"pending-user-approval", "user-approved", "connected", "active"}
 
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
-	_, err = waitForAzureConnectionState(ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target).WaitForStateContext(ctx)
+	timeout := d.Timeout(schema.TimeoutUpdate)
+	if d.IsNewResource() {
+		timeout = d.Timeout(schema.TimeoutCreate)
+	}
+
+	_, err = waitForAzureConnectionState(
+		ctx, client, project, serviceName, timeout, pending, target,
+	).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for privatelink connection after refresh: %s", err)
 	}
@@ -133,8 +139,9 @@ func resourceAzurePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *sc
 	pending = []string{"user-approved"}
 	target = []string{"connected"}
 
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
-	_, err = waitForAzureConnectionState(ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target).WaitForStateContext(ctx)
+	_, err = waitForAzureConnectionState(
+		ctx, client, project, serviceName, timeout, pending, target,
+	).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for privatelink connection after approval: %s", err)
 	}
@@ -150,8 +157,9 @@ func resourceAzurePrivatelinkConnectionApprovalUpdate(ctx context.Context, d *sc
 	pending = []string{"connected"}
 	target = []string{"active"}
 
-	// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
-	_, err = waitForAzureConnectionState(ctx, client, project, serviceName, d.Timeout(schema.TimeoutCreate), pending, target).WaitForStateContext(ctx)
+	_, err = waitForAzureConnectionState(
+		ctx, client, project, serviceName, timeout, pending, target,
+	).WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("Error waiting for privatelink connection after update: %s", err)
 	}

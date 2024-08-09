@@ -5,27 +5,57 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 )
 
 func dragonflySchema() map[string]*schema.Schema {
-	s := schemautil.ServiceCommonSchema()
+	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeDragonfly)
 	s[schemautil.ServiceTypeDragonfly] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
 		Description: "Dragonfly server provided values",
+		MaxItems:    1,
+		Optional:    true,
+		Sensitive:   true,
 		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{},
+			Schema: map[string]*schema.Schema{
+				"uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "Dragonfly server URIs.",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				"slave_uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "Dragonfly slave server URIs.",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				"replica_uri": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "Dragonfly replica server URI.",
+				},
+				"password": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "Dragonfly password.",
+					Sensitive:   true,
+				},
+			},
 		},
 	}
-	s[schemautil.ServiceTypeDragonfly+"_user_config"] = dist.ServiceTypeDragonfly()
-
 	return s
 }
 
 func ResourceDragonfly() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Dragonfly resource allows the creation and management of Aiven Dragonfly services.",
+		Description:   "Creates and manages an [Aiven for Dragonfly®](https://aiven.io/docs/products/dragonfly/concepts/overview) service.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeDragonfly),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,

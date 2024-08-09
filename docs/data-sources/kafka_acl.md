@@ -3,22 +3,22 @@
 page_title: "aiven_kafka_acl Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Data Source Kafka ACL data source provides information about the existing Aiven Kafka ACL for a Kafka service.
+  Gets information about an ACL entry for an Aiven for Apache Kafka® service.
 ---
 
 # aiven_kafka_acl (Data Source)
 
-The Data Source Kafka ACL data source provides information about the existing Aiven Kafka ACL for a Kafka service.
+Gets information about an ACL entry for an Aiven for Apache Kafka® service.
 
 ## Example Usage
 
 ```terraform
-data "aiven_kafka_acl" "mytestacl" {
-  project      = aiven_project.myproject.project
-  service_name = aiven_kafka.mykafka.service_name
-  topic        = "<TOPIC_NAME_PATTERN>"
-  permission   = "<PERMISSON>"
-  username     = "<USERNAME_PATTERN>"
+data "aiven_kafka_acl" "example_acl" {
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_kafka.example_kafka.service_name
+  topic        = "example-topic"
+  permission   = "admin"
+  username     = "example-user"
 }
 ```
 
@@ -27,13 +27,13 @@ data "aiven_kafka_acl" "mytestacl" {
 
 ### Required
 
-- `permission` (String) Kafka permission to grant. The possible values are `admin`, `read`, `readwrite` and `write`. This property cannot be changed, doing so forces recreation of the resource.
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `topic` (String) Topic name pattern for the ACL entry. This property cannot be changed, doing so forces recreation of the resource.
-- `username` (String) Username pattern for the ACL entry. This property cannot be changed, doing so forces recreation of the resource.
+- `permission` (String) Permissions to grant. The possible values are `admin`, `read`, `readwrite` and `write`. Changing this property forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `topic` (String) Topics that the permissions apply to. Changing this property forces recreation of the resource.
+- `username` (String) Usernames to grant permissions to. Changing this property forces recreation of the resource.
 
 ### Read-Only
 
-- `acl_id` (String) Kafka ACL ID
+- `acl_id` (String) Kafka ACL ID.
 - `id` (String) The ID of this resource.

@@ -3,7 +3,7 @@
 page_title: "aiven_static_ip Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The aivenstaticip resource allows the creation and deletion of static ips. Please not that once a static ip is in the 'assigned' state it is bound to the node it is assigned to and cannot be deleted or disassociated until the node is recycled. Plans that would delete static ips that are in the assigned state will be blocked.
+  The aiven_static_ip resource allows the creation and deletion of static ips. Please not that once a static ip is in the 'assigned' state it is bound to the node it is assigned to and cannot be deleted or disassociated until the node is recycled. Plans that would delete static ips that are in the assigned state will be blocked.
 ---
 
 # aiven_static_ip (Resource)
@@ -17,8 +17,8 @@ The aiven_static_ip resource allows the creation and deletion of static ips. Ple
 
 ### Required
 
-- `cloud_name` (String) Specifies the cloud that the static ip belongs to. This property cannot be changed, doing so forces recreation of the resource.
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `cloud_name` (String) Specifies the cloud that the static ip belongs to. Changing this property forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
 

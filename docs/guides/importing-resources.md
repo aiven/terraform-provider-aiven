@@ -5,7 +5,7 @@ page_title: "Importing existing Aiven infrastructure"
 # Importing existing Aiven infrastructure
 If you have already manually created an Aiven environment, it is possible to import all resources and start managing them with Terraform.
 
-The ID format for each resource but typically it is `<project_name>/<resource_name>` for resources that are directly under project level and `<project_name>/<service_name>/<resource_name>` for resources that belong to specific service.
+The ID format typically is `<project_name>/<resource_name>` for resources that are directly under project level and `<project_name>/<service_name>/<resource_name>` for resources that belong to specific service.
 
 As example, to import a database called `mydb` belonging to the service `myservice` in the project `myproject`, you can run:
 ```bash 

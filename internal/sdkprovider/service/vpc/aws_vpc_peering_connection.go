@@ -2,12 +2,11 @@ package vpc
 
 import (
 	"context"
-	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -19,7 +18,7 @@ var aivenAWSVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		ForceNew:     true,
 		Required:     true,
 		Type:         schema.TypeString,
-		Description:  userconfig.Desc("The VPC the peering connection belongs to.").ForceNew().Build(),
+		Description:  userconfig.Desc("The ID of the Aiven VPC.").ForceNew().Build(),
 		ValidateFunc: validateVPCID,
 	},
 	"aws_account_id": {
@@ -38,31 +37,31 @@ var aivenAWSVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		ForceNew: true,
 		Required: true,
 		Type:     schema.TypeString,
-		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+		DiffSuppressFunc: func(_, _, new string, _ *schema.ResourceData) bool {
 			return new == ""
 		},
-		Description: userconfig.Desc("AWS region of the peered VPC (if not in the same region as Aiven VPC).").ForceNew().Build(),
+		Description: userconfig.Desc("The AWS region of the peered VPC, if different from the Aiven VPC region.").ForceNew().Build(),
 	},
 	"state": {
 		Computed:    true,
 		Type:        schema.TypeString,
-		Description: "State of the peering connection",
+		Description: "The state of the peering connection.",
 	},
 	"state_info": {
 		Computed:    true,
 		Type:        schema.TypeMap,
-		Description: "State-specific help or error information",
+		Description: "State-specific help or error information.",
 	},
 	"aws_vpc_peering_connection_id": {
 		Computed:    true,
 		Type:        schema.TypeString,
-		Description: "AWS VPC peering connection ID",
+		Description: "The ID of the AWS VPC peering connection.",
 	},
 }
 
 func ResourceAWSVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The AWS VPC Peering Connection resource allows the creation and management of Aiven AWS VPC Peering Connections.",
+		Description:   "Creates and manages an AWS VPC peering connection with an Aiven VPC.",
 		CreateContext: resourceAWSVPCPeeringConnectionCreate,
 		ReadContext:   resourceAWSVPCPeeringConnectionRead,
 		DeleteContext: resourceAWSVPCPeeringConnectionDelete,
@@ -75,7 +74,6 @@ func ResourceAWSVPCPeeringConnection() *schema.Resource {
 	}
 }
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceAWSVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var (
 		pc     *aiven.VPCPeeringConnection
@@ -125,7 +123,7 @@ func resourceAWSVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 		return diag.Errorf("Error waiting for AWS VPC peering connection creation: %s", err)
 	}
 
-	stateChangeConf := &resource.StateChangeConf{
+	stateChangeConf := &retry.StateChangeConf{
 		Pending: []string{"APPROVED"},
 		Target: []string{
 			"ACTIVE",
@@ -150,9 +148,9 @@ func resourceAWSVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 			}
 			return pc, pc.State, nil
 		},
-		Delay:      10 * time.Second,
+		Delay:      common.DefaultStateChangeDelay,
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		MinTimeout: 2 * time.Second,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 
 	res, err := stateChangeConf.WaitForStateContext(ctx)
@@ -196,7 +194,6 @@ func resourceAWSVPCPeeringConnectionRead(ctx context.Context, d *schema.Resource
 	return copyAWSVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, p.projectName, p.vpcID)
 }
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceAWSVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
@@ -217,7 +214,7 @@ func resourceAWSVPCPeeringConnectionDelete(ctx context.Context, d *schema.Resour
 		return diag.Errorf("Error deleting VPC peering connection: %s", err)
 	}
 
-	stateChangeConf := &resource.StateChangeConf{
+	stateChangeConf := &retry.StateChangeConf{
 		Pending: []string{
 			"ACTIVE",
 			"APPROVED",
@@ -245,9 +242,9 @@ func resourceAWSVPCPeeringConnectionDelete(ctx context.Context, d *schema.Resour
 			}
 			return pc, pc.State, nil
 		},
-		Delay:      10 * time.Second,
+		Delay:      common.DefaultStateChangeDelay,
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		MinTimeout: 2 * time.Second,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 	if _, err := stateChangeConf.WaitForStateContext(ctx); err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("Error waiting for AWS Aiven VPC Peering Connection to be DELETED: %s", err)

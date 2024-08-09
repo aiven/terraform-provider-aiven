@@ -1,1 +1,1 @@
-terraform import aiven_kafka_connector.kafka-os-con1 project/service_name/connector_name
+terraform import aiven_kafka_connector.kafka-os-connector PROJECT/SERVICE_NAME/CONNECTOR_NAME

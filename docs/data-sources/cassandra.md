@@ -24,13 +24,13 @@ data "aiven_cassandra" "bar" {
 
 ### Required
 
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Read-Only
 
 - `additional_disk_space` (String) Additional disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
-- `cassandra` (List of Object) Cassandra server provided values (see [below for nested schema](#nestedatt--cassandra))
+- `cassandra` (List of Object, Sensitive) Cassandra server provided values (see [below for nested schema](#nestedatt--cassandra))
 - `cassandra_user_config` (List of Object) Cassandra user configurable settings (see [below for nested schema](#nestedatt--cassandra_user_config))
 - `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 - `components` (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
@@ -54,7 +54,7 @@ data "aiven_cassandra" "bar" {
 - `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
 - `static_ips` (Set of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 - `tag` (Set of Object) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedatt--tag))
-- `tech_emails` (Set of Object) Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability. (see [below for nested schema](#nestedatt--tech_emails))
+- `tech_emails` (Set of Object) The email addresses for [service contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this service. You can also set email contacts at the project level. (see [below for nested schema](#nestedatt--tech_emails))
 - `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
 
 <a id="nestedatt--cassandra"></a>
@@ -62,6 +62,7 @@ data "aiven_cassandra" "bar" {
 
 Read-Only:
 
+- `uris` (List of String)
 
 
 <a id="nestedatt--cassandra_user_config"></a>
@@ -75,7 +76,7 @@ Read-Only:
 - `cassandra` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--cassandra))
 - `cassandra_version` (String)
 - `ip_filter` (Set of String)
-- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--ip_filter_object))
+- `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
 - `migrate_sstableloader` (Boolean)
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--cassandra_user_config--private_access))
@@ -94,6 +95,8 @@ Read-Only:
 - `batch_size_fail_threshold_in_kb` (Number)
 - `batch_size_warn_threshold_in_kb` (Number)
 - `datacenter` (String)
+- `read_request_timeout_in_ms` (Number)
+- `write_request_timeout_in_ms` (Number)
 
 
 <a id="nestedobjatt--cassandra_user_config--ip_filter_object"></a>

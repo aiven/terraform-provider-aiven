@@ -3,26 +3,26 @@
 page_title: "aiven_flink Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Flink resource allows the creation and management of Aiven Flink services.
+  Creates and manages an Aiven for Apache Flink® service https://aiven.io/docs/products/flink/concepts/flink-features.
 ---
 
 # aiven_flink (Resource)
 
-The Flink resource allows the creation and management of Aiven Flink services.
+Creates and manages an [Aiven for Apache Flink® service](https://aiven.io/docs/products/flink/concepts/flink-features).
 
 ## Example Usage
 
 ```terraform
-resource "aiven_flink" "flink" {
-  project                 = data.aiven_project.pr1.project
+resource "aiven_flink" "example_flink" {
+  project                 = data.aiven_project.example_project.project
   cloud_name              = "google-europe-west1"
   plan                    = "business-4"
-  service_name            = "my-flink"
+  service_name            = "example-flink-service"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 
   flink_user_config {
-    flink_version = 1.16
+    flink_version = 1.19
   }
 }
 ```
@@ -33,7 +33,7 @@ resource "aiven_flink" "flink" {
 ### Required
 
 - `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Optional
@@ -41,7 +41,7 @@ resource "aiven_flink" "flink" {
 - `additional_disk_space` (String) Additional disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 - `disk_space` (String, Deprecated) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
-- `flink` (Block List, Max: 1) Flink server provided values (see [below for nested schema](#nestedblock--flink))
+- `flink` (Block List, Max: 1) Values provided by the Flink server. (see [below for nested schema](#nestedblock--flink))
 - `flink_user_config` (Block List, Max: 1) Flink user configurable settings (see [below for nested schema](#nestedblock--flink_user_config))
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
@@ -49,7 +49,7 @@ resource "aiven_flink" "flink" {
 - `service_integrations` (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
 - `static_ips` (Set of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 - `tag` (Block Set) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedblock--tag))
-- `tech_emails` (Block Set) Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability. (see [below for nested schema](#nestedblock--tech_emails))
+- `tech_emails` (Block Set) The email addresses for [service contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this service. You can also set email contacts at the project level. (see [below for nested schema](#nestedblock--tech_emails))
 - `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -74,7 +74,7 @@ resource "aiven_flink" "flink" {
 
 Optional:
 
-- `host_ports` (List of String) Host and Port of a Flink server
+- `host_ports` (List of String) The host and port of a Flink server.
 
 
 <a id="nestedblock--flink_user_config"></a>
@@ -83,11 +83,11 @@ Optional:
 Optional:
 
 - `additional_backup_regions` (List of String, Deprecated) Additional Cloud Regions for Backup Replication.
-- `flink_version` (String) Flink major version.
-- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--flink_user_config--ip_filter_object))
-- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `number_of_task_slots` (Number) Task slots per node. For a 3 node plan, total number of task slots is 3x this value.
+- `flink_version` (String) Enum: `1.16`, `1.19`, and newer. Flink major version.
+- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
+- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--flink_user_config--ip_filter_object))
+- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
+- `number_of_task_slots` (Number) Task slots per node. For a 3 node plan, total number of task slots is 3x this value. Example: `1`.
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--flink_user_config--privatelink_access))
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `static_ips` (Boolean) Use static public IP addresses.
@@ -97,11 +97,11 @@ Optional:
 
 Required:
 
-- `network` (String) CIDR address block.
+- `network` (String) CIDR address block. Example: `10.20.0.0/16`.
 
 Optional:
 
-- `description` (String) Description for IP filter list entry.
+- `description` (String) Description for IP filter list entry. Example: `Production service IP range`.
 
 
 <a id="nestedblock--flink_user_config--privatelink_access"></a>
@@ -171,5 +171,5 @@ Read-Only:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_flink.flink project/service_name
+terraform import aiven_flink.example_flink PROJECT/SERVICE_NAME
 ```

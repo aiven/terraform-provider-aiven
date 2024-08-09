@@ -14,9 +14,6 @@ import (
 )
 
 func TestAccAiven_dragonfly(t *testing.T) {
-	// TODO: remove this once dragonfly is available
-	t.Skip("Dragonfly service is not available in Aiven")
-
 	resourceName := "aiven_dragonfly.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
@@ -180,9 +177,6 @@ data "aiven_dragonfly" "common" {
 
 // Dragonfly service tests
 func TestAccAivenService_dragonfly(t *testing.T) {
-	// TODO: remove this once dragonfly is available
-	t.Skip("Dragonfly service is not available in Aiven")
-
 	resourceName := "aiven_dragonfly.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
@@ -298,6 +292,22 @@ func testAccCheckAivenServiceDragonflyAttributes(n string) resource.TestCheckFun
 
 		if a["dragonfly_user_config.0.public_access.0.prometheus"] != "false" {
 			return fmt.Errorf("expected to get a correct public_access.prometheus from Aiven")
+		}
+
+		if a["dragonfly.0.uris.#"] == "" {
+			return fmt.Errorf("expected to get correct uris from Aiven")
+		}
+
+		if a["dragonfly.0.slave_uris.#"] == "" {
+			return fmt.Errorf("expected to get correct slave_uris from Aiven")
+		}
+
+		if a["dragonfly.0.replica_uri"] != "" {
+			return fmt.Errorf("expected to get correct replica_uri from Aiven")
+		}
+
+		if a["dragonfly.0.password"] == "" {
+			return fmt.Errorf("expected to get correct password from Aiven")
 		}
 
 		return nil

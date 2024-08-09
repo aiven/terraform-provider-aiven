@@ -1,12 +1,12 @@
 locals {
   acl_rules = [
     {
-      username   = aiven_service_user.os-user.username
+      username   = aiven_opensearch_user.os-user.username
       index      = "_*"
       permission = "admin"
     },
     {
-      username   = aiven_service_user.os-user.username
+      username   = aiven_opensearch_user.os-user.username
       index      = "*"
       permission = "admin"
     },

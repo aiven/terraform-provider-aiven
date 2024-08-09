@@ -3,20 +3,34 @@
 page_title: "aiven_clickhouse_database Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Clickhouse Database resource allows the creation and management of Aiven Clickhouse Databases.
+  Creates and manages an Aiven for ClickHouse® database.
+  -> Tables cannot be created using Aiven Operator. To create a table,
+  use the Aiven Console or CLI https://aiven.io/docs/products/clickhouse/howto/manage-databases-tables#create-a-table.
 ---
 
 # aiven_clickhouse_database (Resource)
 
-The Clickhouse Database resource allows the creation and management of Aiven Clickhouse Databases.
+Creates and manages an Aiven for ClickHouse® database.
+
+-> Tables cannot be created using Aiven Operator. To create a table,
+use the [Aiven Console or CLI](https://aiven.io/docs/products/clickhouse/howto/manage-databases-tables#create-a-table).
 
 ## Example Usage
 
 ```terraform
-resource "aiven_clickhouse_database" "clickhouse_db" {
-  project      = aiven_clickhouse.ch.project
-  service_name = aiven_clickhouse.ch.service_name
-  name         = "my-ch-db"
+resource "aiven_clickhouse" "example_clickhouse" {
+  project                 = data.aiven_project.example_project.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "business-4"
+  service_name            = "example-clickhouse-service"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_clickhouse_database" "example_db" {
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_clickhouse.example_clickhouse.service_name
+  name         = "example-database"
 }
 ```
 
@@ -25,13 +39,13 @@ resource "aiven_clickhouse_database" "clickhouse_db" {
 
 ### Required
 
-- `name` (String) The name of the Clickhouse database. This property cannot be changed, doing so forces recreation of the resource.
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `name` (String) The name of the ClickHouse database. Changing this property forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
 
-- `termination_protection` (Boolean) It is a Terraform client-side deletion protections, which prevents the Clickhouse database from being deleted by Terraform. It is recommended to enable this for any production Clickhouse databases containing critical data. The default value is `false`.
+- `termination_protection` (Boolean) Client-side deletion protection that prevents the ClickHouse database from being deleted by Terraform. Enable this for production databases containing critical data. The default value is `false`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
@@ -54,5 +68,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_clickhouse_database.clickhouse_db project/service_name/name
+terraform import aiven_clickhouse_database.example_db PROJECT/SERVICE_NAME/DATABASE_NAME
 ```

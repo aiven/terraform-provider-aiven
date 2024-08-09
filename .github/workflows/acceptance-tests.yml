@@ -22,6 +22,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
       - id: selproj
         run: echo "project_name_suffix=$(make -s ci-selproj | tr -d '\n')" >> $GITHUB_OUTPUT
         env:
@@ -56,11 +60,14 @@ jobs:
           servicecomponent,
           staticip,
           serviceintegration,
-          vpc
+          vpc,
+          dragonfly,
+          thanos,
+          valkey
         ]
 
     steps:
-      - uses: softprops/turnstyle@v1
+      - uses: softprops/turnstyle@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -69,6 +76,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
@@ -96,7 +104,7 @@ jobs:
     needs: [acceptance_tests, setup_aiven_project_suffix]
     runs-on: ubuntu-latest
     steps:
-      - uses: softprops/turnstyle@v1
+      - uses: softprops/turnstyle@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

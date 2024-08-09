@@ -8,7 +8,7 @@ resource "aiven_kafka" "kafka-service1" {
   maintenance_window_time = "10:00:00"
 
   kafka_user_config {
-    kafka_version = "2.4"
+    kafka_version = "3.5"
 
     // Enables Kafka Connectors
     kafka_connect = true

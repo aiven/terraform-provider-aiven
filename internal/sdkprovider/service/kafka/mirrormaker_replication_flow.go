@@ -2,26 +2,32 @@ package kafka
 
 import (
 	"context"
-	"sync"
+	"strings"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/kafkamirrormaker"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
-var (
-	// lockReplicationFlow a lock for any "write" operations.
-	// todo: remove the lock when API race is fixed
-	lockReplicationFlow      = sync.Mutex{}
-	defaultReplicationPolicy = "org.apache.kafka.connect.mirror.DefaultReplicationPolicy"
+const configPropsKey = "config_properties_exclude"
 
-	replicationPolicies = []string{
+var (
+	defaultReplicationPolicy = "org.apache.kafka.connect.mirror.DefaultReplicationPolicy"
+	replicationPolicies      = []string{
 		"org.apache.kafka.connect.mirror.DefaultReplicationPolicy",
 		"org.apache.kafka.connect.mirror.IdentityReplicationPolicy",
+	}
+
+	// dtoFieldsAliases stores DTO fields mapping: terraform -> json
+	dtoFieldsAliases = map[string]string{
+		"enable":           "enabled",
+		"topics_blacklist": "topics.blacklist",
 	}
 )
 
@@ -66,10 +72,11 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 	},
 	"replication_policy_class": {
 		Type:         schema.TypeString,
-		Optional:     true,
-		Default:      defaultReplicationPolicy,
+		Required:     true,
 		ValidateFunc: validation.StringInSlice(replicationPolicies, false),
-		Description:  userconfig.Desc("Replication policy class.").DefaultValue(defaultReplicationPolicy).PossibleValues(schemautil.StringSliceToInterfaceSlice(replicationPolicies)...).Build(),
+		Description: userconfig.Desc("Replication policy class.").
+			DefaultValue(defaultReplicationPolicy).
+			PossibleValues(schemautil.StringSliceToInterfaceSlice(replicationPolicies)...).Build(),
 	},
 	"sync_group_offsets_enabled": {
 		Type:        schema.TypeBool,
@@ -102,19 +109,34 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 	},
 	"offset_syncs_topic_location": {
 		Type:         schema.TypeString,
-		Optional:     true,
-		Description:  "Offset syncs topic location.",
+		Required:     true,
+		Description:  "Offset syncs topic location. Possible values are `source` & `target`. There is no default value.",
 		ValidateFunc: validation.StringInSlice([]string{"source", "target"}, false),
+	},
+	"config_properties_exclude": {
+		Type:        schema.TypeSet,
+		Optional:    true,
+		Description: "List of topic configuration properties and/or regular expressions to not replicate. The properties that are not replicated by default are: `follower.replication.throttled.replicas`, `leader.replication.throttled.replicas`, `message.timestamp.difference.max.ms`, `message.timestamp.type`, `unclean.leader.election.enable`, and `min.insync.replicas`. Setting this overrides the defaults. For example, to enable replication for 'min.insync.replicas' and 'unclean.leader.election.enable' set this to: [\"follower\\\\\\\\.replication\\\\\\\\.throttled\\\\\\\\.replicas\", \"leader\\\\\\\\.replication\\\\\\\\.throttled\\\\\\\\.replicas\", \"message\\\\\\\\.timestamp\\\\\\\\.difference\\\\\\\\.max\\\\\\\\.ms\",  \"message\\\\\\\\.timestamp\\\\\\\\.type\"]",
+		Elem: &schema.Schema{
+			Type:     schema.TypeString,
+			MaxItems: 256,
+		},
+	},
+	"replication_factor": {
+		Type:         schema.TypeInt,
+		Optional:     true,
+		ValidateFunc: validation.IntAtLeast(1),
+		Description:  "Replication factor, `>= 1`.",
 	},
 }
 
 func ResourceMirrorMakerReplicationFlow() *schema.Resource {
 	return &schema.Resource{
 		Description:   "The MirrorMaker 2 Replication Flow resource allows the creation and management of MirrorMaker 2 Replication Flows on Aiven Cloud.",
-		CreateContext: resourceMirrorMakerReplicationFlowCreate,
-		ReadContext:   resourceMirrorMakerReplicationFlowRead,
-		UpdateContext: resourceMirrorMakerReplicationFlowUpdate,
-		DeleteContext: resourceMirrorMakerReplicationFlowDelete,
+		CreateContext: common.WithGenClient(resourceMirrorMakerReplicationFlowCreate),
+		ReadContext:   common.WithGenClient(resourceMirrorMakerReplicationFlowRead),
+		UpdateContext: common.WithGenClient(resourceMirrorMakerReplicationFlowUpdate),
+		DeleteContext: common.WithGenClient(resourceMirrorMakerReplicationFlowDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -124,51 +146,35 @@ func ResourceMirrorMakerReplicationFlow() *schema.Resource {
 	}
 }
 
-func resourceMirrorMakerReplicationFlowCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	lockReplicationFlow.Lock()
-	defer lockReplicationFlow.Unlock()
-
-	client := m.(*aiven.Client)
-
+func resourceMirrorMakerReplicationFlowCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
-	enable := d.Get("enable").(bool)
 	sourceCluster := d.Get("source_cluster").(string)
 	targetCluster := d.Get("target_cluster").(string)
 
-	err := client.KafkaMirrorMakerReplicationFlow.Create(ctx, project, serviceName, aiven.MirrorMakerReplicationFlowRequest{
-		ReplicationFlow: aiven.ReplicationFlow{
-			Enabled:                         enable,
-			SourceCluster:                   sourceCluster,
-			TargetCluster:                   d.Get("target_cluster").(string),
-			Topics:                          schemautil.FlattenToString(d.Get("topics").([]interface{})),
-			TopicsBlacklist:                 schemautil.FlattenToString(d.Get("topics_blacklist").([]interface{})),
-			ReplicationPolicyClass:          d.Get("replication_policy_class").(string),
-			SyncGroupOffsetsEnabled:         d.Get("sync_group_offsets_enabled").(bool),
-			SyncGroupOffsetsIntervalSeconds: d.Get("sync_group_offsets_interval_seconds").(int),
-			EmitHeartbeatsEnabled:           d.Get("emit_heartbeats_enabled").(bool),
-			EmitBackwardHeartbeatsEnabled:   d.Get("emit_backward_heartbeats_enabled").(bool),
-			OffsetSyncsTopicLocation:        d.Get("offset_syncs_topic_location").(string),
-		},
-	})
+	dto := new(kafkamirrormaker.ServiceKafkaMirrorMakerCreateReplicationFlowIn)
+	err := marshalFlow(d, dto)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = client.ServiceKafkaMirrorMakerCreateReplicationFlow(ctx, project, serviceName, dto)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId(schemautil.BuildResourceID(project, serviceName, sourceCluster, targetCluster))
 
-	return resourceMirrorMakerReplicationFlowRead(ctx, d, m)
+	return resourceMirrorMakerReplicationFlowRead(ctx, d, client)
 }
 
-func resourceMirrorMakerReplicationFlowRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceMirrorMakerReplicationFlowRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	project, serviceName, sourceCluster, targetCluster, err := schemautil.SplitResourceID4(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	replicationFlow, err := client.KafkaMirrorMakerReplicationFlow.Get(ctx, project, serviceName, sourceCluster, targetCluster)
+	dto, err := client.ServiceKafkaMirrorMakerGetReplicationFlow(ctx, project, serviceName, sourceCluster, targetCluster)
 	if err != nil {
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
@@ -179,96 +185,64 @@ func resourceMirrorMakerReplicationFlowRead(ctx context.Context, d *schema.Resou
 	if err := d.Set("service_name", serviceName); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("enable", replicationFlow.ReplicationFlow.Enabled); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("source_cluster", sourceCluster); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("target_cluster", targetCluster); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("topics", replicationFlow.ReplicationFlow.Topics); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("topics_blacklist", replicationFlow.ReplicationFlow.TopicsBlacklist); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("replication_policy_class", replicationFlow.ReplicationFlow.ReplicationPolicyClass); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("sync_group_offsets_enabled", replicationFlow.ReplicationFlow.SyncGroupOffsetsEnabled); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("sync_group_offsets_interval_seconds", replicationFlow.ReplicationFlow.SyncGroupOffsetsIntervalSeconds); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("emit_heartbeats_enabled", replicationFlow.ReplicationFlow.EmitHeartbeatsEnabled); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set(
-		"emit_backward_heartbeats_enabled",
-		replicationFlow.ReplicationFlow.EmitBackwardHeartbeatsEnabled,
-	); err != nil {
-		return diag.FromErr(err)
-	}
 
-	return nil
-}
-
-func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	lockReplicationFlow.Lock()
-	defer lockReplicationFlow.Unlock()
-
-	client := m.(*aiven.Client)
-
-	project, serviceName, sourceCluster, targetCluster, err := schemautil.SplitResourceID4(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	_, err = client.KafkaMirrorMakerReplicationFlow.Update(
-		ctx,
-		project,
-		serviceName,
-		sourceCluster,
-		targetCluster,
-		aiven.MirrorMakerReplicationFlowRequest{
-			ReplicationFlow: aiven.ReplicationFlow{
-				Enabled:                         d.Get("enable").(bool),
-				Topics:                          schemautil.FlattenToString(d.Get("topics").([]interface{})),
-				TopicsBlacklist:                 schemautil.FlattenToString(d.Get("topics_blacklist").([]interface{})),
-				ReplicationPolicyClass:          d.Get("replication_policy_class").(string),
-				SyncGroupOffsetsEnabled:         d.Get("sync_group_offsets_enabled").(bool),
-				SyncGroupOffsetsIntervalSeconds: d.Get("sync_group_offsets_interval_seconds").(int),
-				EmitHeartbeatsEnabled:           d.Get("emit_heartbeats_enabled").(bool),
-				EmitBackwardHeartbeatsEnabled:   d.Get("emit_backward_heartbeats_enabled").(bool),
-				OffsetSyncsTopicLocation:        d.Get("offset_syncs_topic_location").(string),
-			},
+	err = schemautil.ResourceDataSet(
+		aivenMirrorMakerReplicationFlowSchema, d, dto, schemautil.RenameAliasesReverse(dtoFieldsAliases),
+		func(k string, v any) (string, any) {
+			if k == configPropsKey {
+				// This field is received as a string
+				s := v.(string)
+				v = make([]any, 0)
+				if s != "" {
+					v = strings.Split(s, ",")
+				}
+			}
+			return k, v
 		},
 	)
-	if err != nil {
-		return diag.FromErr(err)
-	}
 
-	return resourceMirrorMakerReplicationFlowRead(ctx, d, m)
+	return diag.FromErr(err)
 }
 
-func resourceMirrorMakerReplicationFlowDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	lockReplicationFlow.Lock()
-	defer lockReplicationFlow.Unlock()
-
-	client := m.(*aiven.Client)
-
+func resourceMirrorMakerReplicationFlowUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
 	project, serviceName, sourceCluster, targetCluster, err := schemautil.SplitResourceID4(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = client.KafkaMirrorMakerReplicationFlow.Delete(ctx, project, serviceName, sourceCluster, targetCluster)
+	dto := new(kafkamirrormaker.ServiceKafkaMirrorMakerPatchReplicationFlowIn)
+	err = marshalFlow(d, dto)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
-	return nil
+	_, err = client.ServiceKafkaMirrorMakerPatchReplicationFlow(ctx, project, serviceName, sourceCluster, targetCluster, dto)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return resourceMirrorMakerReplicationFlowRead(ctx, d, client)
+}
+
+func resourceMirrorMakerReplicationFlowDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
+	project, serviceName, sourceCluster, targetCluster, err := schemautil.SplitResourceID4(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = client.ServiceKafkaMirrorMakerDeleteReplicationFlow(ctx, project, serviceName, sourceCluster, targetCluster)
+	return diag.FromErr(err)
+}
+
+func marshalFlow(d *schema.ResourceData, dto any) error {
+	return schemautil.ResourceDataGet(
+		d, dto, schemautil.RenameAliases(dtoFieldsAliases),
+		func(k string, v any) (string, any) {
+			// This field is sent as a string
+			if k == configPropsKey {
+				v = strings.Join(schemautil.FlattenToString(v.([]any)), ",")
+			}
+			return k, v
+		},
+	)
 }

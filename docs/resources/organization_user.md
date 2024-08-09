@@ -3,27 +3,27 @@
 page_title: "aiven_organization_user Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  **This resource is deprecated**. Use the aiven_organization_user data source instead.
+  **This resource is deprecated**. Users cannot be invited to an organization using Terraform.
+  	Use the [Aiven Console](https://console.aiven.io/) to [invite users](https://aiven.io/docs/platform/howto/manage-org-users)
+  	to your organization. 
   
+  After the user accepts the invite you can get their information using the aiven_organization_user
+  data source. You can manage user access to projects with the aiven_organization_user_group,
+  aiven_organization_user_group_member, and aiven_organization_group_project resources.
   The organization user resource allows the creation and management of an Aiven organization user.
-  During the creation of aiven_organization_userresource, an email invitation will be sent
-  to a user using user_email address. If the user accepts an invitation, they will become
-  a member of the organization. The deletion of aiven_organization_user will not only
-  delete the invitation if one was sent but not yet accepted by the user, it will also
-  eliminate the member from the organization if one has accepted an invitation previously.
 ---
 
 # aiven_organization_user (Resource)
 
-**This resource is deprecated**. Use the aiven_organization_user data source instead.
+**This resource is deprecated**. Users cannot be invited to an organization using Terraform.
+		Use the [Aiven Console](https://console.aiven.io/) to [invite users](https://aiven.io/docs/platform/howto/manage-org-users)
+		to your organization. 
+		
+After the user accepts the invite you can get their information using the `aiven_organization_user`
+data source. You can manage user access to projects with the `aiven_organization_user_group`, 
+`aiven_organization_user_group_member`, and `aiven_organization_group_project` resources.
 
 The organization user resource allows the creation and management of an Aiven organization user.
-
-During the creation of `aiven_organization_user`resource, an email invitation will be sent
-to a user using `user_email` address. If the user accepts an invitation, they will become
-a member of the organization. The deletion of `aiven_organization_user` will not only
-delete the invitation if one was sent but not yet accepted by the user, it will also 
-eliminate the member from the organization if one has accepted an invitation previously.
 
 
 
@@ -32,8 +32,8 @@ eliminate the member from the organization if one has accepted an invitation pre
 
 ### Required
 
-- `organization_id` (String) The unique organization ID. This property cannot be changed, doing so forces recreation of the resource.
-- `user_email` (String) This is a user email address that first will be invited, and after accepting an invitation, they become a member of the organization. Should be lowercase. This property cannot be changed, doing so forces recreation of the resource.
+- `organization_id` (String) The unique organization ID. Changing this property forces recreation of the resource.
+- `user_email` (String) This is a user email address that first will be invited, and after accepting an invitation, they become a member of the organization. Should be lowercase. Changing this property forces recreation of the resource.
 
 ### Optional
 

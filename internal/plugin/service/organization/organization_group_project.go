@@ -17,6 +17,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 var (
@@ -77,12 +78,13 @@ func (r *organizationGroupProjectResource) Schema(
 	_ resource.SchemaRequest,
 	resp *resource.SchemaResponse) {
 	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
-		Description: util.BetaDescription(
-			"Adds and manages a group of users as members of a project.",
-		),
+		Description: userconfig.Desc(
+			"Adds and manages a [group](https://aiven.io/docs/platform/howto/list-groups) of users as members of a project.",
+		).
+			Build(),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Description: "Compound identifier of the organization group project relation.",
+				Description: "A compound identifier of the resource in the format `project/group_id`.",
 				Computed:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -103,7 +105,7 @@ func (r *organizationGroupProjectResource) Schema(
 				},
 			},
 			"role": schema.StringAttribute{
-				Description: "Role assigned to the users in the group for the project.",
+				Description: userconfig.Desc("[Project-level role](https://aiven.io/docs/platform/reference/project-member-privileges) assigned to all users in the group.").PossibleValues("admin", "operator", "developer", "read_only").Build(),
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),

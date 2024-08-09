@@ -1,6 +1,5 @@
-data "aiven_kafka_connector" "kafka-es-con1" {
-  project        = aiven_project.kafka-con-project1.project
-  service_name   = aiven_kafka.kafka-service1.service_name
-  connector_name = "kafka-es-con1"
+data "aiven_kafka_connector" "kafka-os-connector" {
+  project        = data.aiven_project.example_project.project
+  service_name   = aiven_kafka.example_kafka.service_name
+  connector_name = "kafka-opensearch-connector"
 }
-

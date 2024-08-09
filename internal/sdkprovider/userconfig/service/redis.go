@@ -15,10 +15,9 @@ func redisUserConfig() *schema.Schema {
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"additional_backup_regions": {
-				Deprecated:  "This property is deprecated.",
 				Description: "Additional Cloud Regions for Backup Replication.",
 				Elem: &schema.Schema{
-					Description: "Target cloud.",
+					Description: "Target cloud. Example: `aws-eu-central-1`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1,
@@ -27,9 +26,9 @@ func redisUserConfig() *schema.Schema {
 			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -37,27 +36,27 @@ func redisUserConfig() *schema.Schema {
 				Type:     schema.TypeSet,
 			},
 			"ip_filter_object": {
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"description": {
-						Description: "Description for IP filter list entry.",
+						Description: "Description for IP filter list entry. Example: `Production service IP range`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"network": {
-						Description: "CIDR address block.",
+						Description: "CIDR address block. Example: `10.20.0.0/16`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 				}},
 				MaxItems: 1024,
 				Optional: true,
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 			},
 			"ip_filter_string": {
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -68,44 +67,49 @@ func redisUserConfig() *schema.Schema {
 				Description: "Migrate data from existing server",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"dbname": {
-						Description: "Database name for bootstrapping the initial connection.",
+						Description: "Database name for bootstrapping the initial connection. Example: `defaultdb`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"host": {
-						Description: "Hostname or IP address of the server where to migrate data from.",
+						Description: "Hostname or IP address of the server where to migrate data from. Example: `my.server.com`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"ignore_dbs": {
-						Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment).",
+						Description: "Comma-separated list of databases, which should be ignored during migration (supported by MySQL and PostgreSQL only at the moment). Example: `db1,db2`.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"ignore_roles": {
+						Description: "Comma-separated list of database roles, which should be ignored during migration (supported by PostgreSQL only at the moment). Example: `role1,role2`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"method": {
-						Description:  "The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).",
+						Description:  "Enum: `dump`, `replication`. The migration method to be used (currently supported only by Redis, Dragonfly, MySQL and PostgreSQL service types).",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"dump", "replication"}, false),
 					},
 					"password": {
-						Description: "Password for authentication with the server where to migrate data from.",
+						Description: "Password for authentication with the server where to migrate data from. Example: `jjKk45Nnd`.",
 						Optional:    true,
 						Sensitive:   true,
 						Type:        schema.TypeString,
 					},
 					"port": {
-						Description: "Port number of the server where to migrate data from.",
+						Description: "Port number of the server where to migrate data from. Example: `1234`.",
 						Required:    true,
 						Type:        schema.TypeInt,
 					},
 					"ssl": {
-						Description: "The server where to migrate data from is secured with SSL. The default value is `true`.",
+						Description: "The server where to migrate data from is secured with SSL. Default: `true`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"username": {
-						Description: "User name for authentication with the server where to migrate data from.",
+						Description: "User name for authentication with the server where to migrate data from. Example: `myname`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
@@ -151,7 +155,7 @@ func redisUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"project_to_fork_from": {
-				Description: "Name of another project to fork a service from. This has effect only when a new service is being created.",
+				Description: "Name of another project to fork a service from. This has effect only when a new service is being created. Example: `anotherprojectname`.",
 				ForceNew:    true,
 				Optional:    true,
 				Type:        schema.TypeString,
@@ -175,33 +179,33 @@ func redisUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"recovery_basebackup_name": {
-				Description: "Name of the basebackup to restore in forked service.",
+				Description: "Name of the basebackup to restore in forked service. Example: `backup-20191112t091354293891z`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"redis_acl_channels_default": {
-				Description:  "Determines default pub/sub channels' ACL for new users if ACL is not supplied. When this option is not defined, all_channels is assumed to keep backward compatibility. This option doesn't affect Redis configuration acl-pubsub-default.",
+				Description:  "Enum: `allchannels`, `resetchannels`. Determines default pub/sub channels' ACL for new users if ACL is not supplied. When this option is not defined, all_channels is assumed to keep backward compatibility. This option doesn't affect Redis configuration acl-pubsub-default.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"allchannels", "resetchannels"}, false),
 			},
 			"redis_io_threads": {
-				Description: "Set Redis IO thread count. Changing this will cause a restart of the Redis service.",
+				Description: "Set Redis IO thread count. Changing this will cause a restart of the Redis service. Example: `1`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
 			"redis_lfu_decay_time": {
-				Description: "LFU maxmemory-policy counter decay time in minutes. The default value is `1`.",
+				Description: "LFU maxmemory-policy counter decay time in minutes. Default: `1`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
 			"redis_lfu_log_factor": {
-				Description: "Counter logarithm factor for volatile-lfu and allkeys-lfu maxmemory-policies. The default value is `10`.",
+				Description: "Counter logarithm factor for volatile-lfu and allkeys-lfu maxmemory-policies. Default: `10`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
 			"redis_maxmemory_policy": {
-				Description:  "Redis maxmemory-policy. The default value is `noeviction`.",
+				Description:  "Enum: `noeviction`, `allkeys-lru`, `volatile-lru`, `allkeys-random`, `volatile-random`, `volatile-ttl`, `volatile-lfu`, `allkeys-lfu`. Redis maxmemory-policy. Default: `noeviction`.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"noeviction", "allkeys-lru", "volatile-lru", "allkeys-random", "volatile-random", "volatile-ttl", "volatile-lfu", "allkeys-lfu"}, false),
@@ -212,36 +216,35 @@ func redisUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"redis_number_of_databases": {
-				Description: "Set number of Redis databases. Changing this will cause a restart of the Redis service.",
+				Description: "Set number of Redis databases. Changing this will cause a restart of the Redis service. Example: `16`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
 			"redis_persistence": {
-				Description:  "When persistence is 'rdb', Redis does RDB dumps each 10 minutes if any key is changed. Also RDB dumps are done according to backup schedule for backup purposes. When persistence is 'off', no RDB dumps and backups are done, so data can be lost at any moment if service is restarted for any reason, or if service is powered off. Also service can't be forked.",
+				Description:  "Enum: `off`, `rdb`. When persistence is `rdb`, Redis does RDB dumps each 10 minutes if any key is changed. Also RDB dumps are done according to the backup schedule for backup purposes. When persistence is `off`, no RDB dumps or backups are done, so data can be lost at any moment if the service is restarted for any reason, or if the service is powered off. Also, the service can't be forked.",
 				Optional:     true,
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"off", "rdb"}, false),
 			},
 			"redis_pubsub_client_output_buffer_limit": {
-				Description: "Set output buffer limit for pub / sub clients in MB. The value is the hard limit, the soft limit is 1/4 of the hard limit. When setting the limit, be mindful of the available memory in the selected service plan.",
+				Description: "Set output buffer limit for pub / sub clients in MB. The value is the hard limit, the soft limit is 1/4 of the hard limit. When setting the limit, be mindful of the available memory in the selected service plan. Example: `64`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
 			"redis_ssl": {
-				Description: "Require SSL to access Redis. The default value is `true`.",
+				Description: "Require SSL to access Redis. Default: `true`.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
 			"redis_timeout": {
-				Description: "Redis idle connection timeout in seconds. The default value is `300`.",
+				Description: "Redis idle connection timeout in seconds. Default: `300`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
 			"redis_version": {
-				Description:  "Redis major version.",
-				Optional:     true,
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"7.0"}, false),
+				Description: "Enum: `7.0`, and newer. Redis major version.",
+				Optional:    true,
+				Type:        schema.TypeString,
 			},
 			"service_log": {
 				Description: "Store logs for the service so that they are available in the HTTP API and console.",
@@ -249,7 +252,7 @@ func redisUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"service_to_fork_from": {
-				Description: "Name of another service to fork from. This has effect only when a new service is being created.",
+				Description: "Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.",
 				ForceNew:    true,
 				Optional:    true,
 				Type:        schema.TypeString,

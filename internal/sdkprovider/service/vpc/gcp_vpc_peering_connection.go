@@ -3,12 +3,11 @@ package vpc
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -29,34 +28,34 @@ var aivenGCPVPCPeeringConnectionSchema = map[string]*schema.Schema{
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: userconfig.Desc("GCP project ID.").ForceNew().Build(),
+		Description: userconfig.Desc("Google Cloud project ID.").ForceNew().Build(),
 	},
 	"peer_vpc": {
 		ForceNew:    true,
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: userconfig.Desc("GCP VPC network name.").ForceNew().Build(),
+		Description: userconfig.Desc("Google Cloud VPC network name.").ForceNew().Build(),
 	},
 	"state": {
 		Computed:    true,
 		Type:        schema.TypeString,
-		Description: "State of the peering connection",
+		Description: "State of the peering connection.",
 	},
 	"state_info": {
 		Computed:    true,
 		Type:        schema.TypeMap,
-		Description: "State-specific help or error information",
+		Description: "State-specific help or error information.",
 	},
 	"self_link": {
 		Computed:    true,
 		Type:        schema.TypeString,
-		Description: "Computed GCP network peering link",
+		Description: "Computed Google Cloud network peering link.",
 	},
 }
 
 func ResourceGCPVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The GCP VPC Peering Connection resource allows the creation and management of Aiven GCP VPC Peering Connections.",
+		Description:   "Creates and manages a Google Cloud VPC peering connection.",
 		CreateContext: resourceGCPVPCPeeringConnectionCreate,
 		ReadContext:   resourceGCPVPCPeeringConnectionRead,
 		DeleteContext: resourceGCPVPCPeeringConnectionDelete,
@@ -69,7 +68,6 @@ func ResourceGCPVPCPeeringConnection() *schema.Resource {
 	}
 }
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var (
 		pc  *aiven.VPCPeeringConnection
@@ -113,7 +111,7 @@ func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 		return diag.Errorf("Error waiting for VPC peering connection creation: %s", err)
 	}
 
-	stateChangeConf := &resource.StateChangeConf{
+	stateChangeConf := &retry.StateChangeConf{
 		Pending: []string{"APPROVED"},
 		Target: []string{
 			"ACTIVE",
@@ -138,9 +136,9 @@ func resourceGCPVPCPeeringConnectionCreate(ctx context.Context, d *schema.Resour
 			}
 			return pc, pc.State, nil
 		},
-		Delay:      10 * time.Second,
+		Delay:      common.DefaultStateChangeDelay,
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		MinTimeout: 2 * time.Second,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 
 	res, err := stateChangeConf.WaitForStateContext(ctx)
@@ -185,7 +183,6 @@ func resourceGCPVPCPeeringConnectionRead(ctx context.Context, d *schema.Resource
 	return copyGCPVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, p.projectName, p.vpcID)
 }
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceGCPVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 	p, err := parsePeerVPCID(d.Id())
@@ -204,7 +201,7 @@ func resourceGCPVPCPeeringConnectionDelete(ctx context.Context, d *schema.Resour
 		return diag.Errorf("Error deleting GCP VPC peering connection: %s", err)
 	}
 
-	stateChangeConf := &resource.StateChangeConf{
+	stateChangeConf := &retry.StateChangeConf{
 		Pending: []string{
 			"ACTIVE",
 			"APPROVED",
@@ -232,9 +229,9 @@ func resourceGCPVPCPeeringConnectionDelete(ctx context.Context, d *schema.Resour
 			}
 			return pc, pc.State, nil
 		},
-		Delay:      10 * time.Second,
+		Delay:      common.DefaultStateChangeDelay,
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		MinTimeout: 2 * time.Second,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 	if _, err := stateChangeConf.WaitForStateContext(ctx); err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("Error waiting for GCP Aiven VPC Peering Connection to be DELETED: %s", err)

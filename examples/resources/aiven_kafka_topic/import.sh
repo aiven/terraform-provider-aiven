@@ -1,1 +1,1 @@
-terraform import aiven_kafka_topic.mytesttopic project/service_name/topic_name
+terraform import aiven_kafka_topic.example_topic PROJECT/SERVICE_NAME/TOPIC_NAME

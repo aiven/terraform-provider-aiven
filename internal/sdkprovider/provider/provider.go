@@ -2,16 +2,21 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/cassandra"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/connectionpool"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/dragonfly"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/flink"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/grafana"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/influxdb"
@@ -28,12 +33,12 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/servicecomponent"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/serviceintegration"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/staticip"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/thanos"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/valkey"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/vpc"
 )
 
 // Provider returns terraform.ResourceProvider.
-//
-//goland:noinspection GoDeprecation
 func Provider(version string) *schema.Provider {
 	p := &schema.Provider{
 		Schema: map[string]*schema.Schema{
@@ -84,9 +89,10 @@ func Provider(version string) *schema.Provider {
 			"aiven_account_authentication": account.DatasourceAccountAuthentication(),
 
 			// organization
-			"aiven_organizational_unit":     organization.DatasourceOrganizationalUnit(),
-			"aiven_organization_user":       organization.DatasourceOrganizationUser(),
-			"aiven_organization_user_group": organization.DatasourceOrganizationUserGroup(),
+			"aiven_organizational_unit":           organization.DatasourceOrganizationalUnit(),
+			"aiven_organization_user":             organization.DatasourceOrganizationUser(),
+			"aiven_organization_user_group":       organization.DatasourceOrganizationUserGroup(),
+			"aiven_organization_application_user": organization.DatasourceOrganizationApplicationUser(),
 
 			// project
 			"aiven_project":       project.DatasourceProject(),
@@ -143,8 +149,14 @@ func Provider(version string) *schema.Provider {
 			"aiven_clickhouse_user":     clickhouse.DatasourceClickhouseUser(),
 
 			// dragonfly
-			// TODO: uncomment when dragonfly is supported
-			//"aiven_dragonfly": dragonfly.DatasourceDragonfly(),
+			"aiven_dragonfly": dragonfly.DatasourceDragonfly(),
+
+			// thanos
+			"aiven_thanos": thanos.DatasourceThanos(),
+
+			// valkey
+			"aiven_valkey":      valkey.DatasourceValkey(),
+			"aiven_valkey_user": valkey.DatasourceValkeyUser(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -185,9 +197,11 @@ func Provider(version string) *schema.Provider {
 			"aiven_account_authentication": account.ResourceAccountAuthentication(),
 
 			// organization
-			"aiven_organizational_unit":     organization.ResourceOrganizationalUnit(),
-			"aiven_organization_user":       organization.ResourceOrganizationUser(),
-			"aiven_organization_user_group": organization.ResourceOrganizationUserGroup(),
+			"aiven_organizational_unit":                 organization.ResourceOrganizationalUnit(),
+			"aiven_organization_user":                   organization.ResourceOrganizationUser(),
+			"aiven_organization_user_group":             organization.ResourceOrganizationUserGroup(),
+			"aiven_organization_application_user":       organization.ResourceOrganizationApplicationUser(),
+			"aiven_organization_application_user_token": organization.ResourceOrganizationApplicationUserToken(),
 
 			// project
 			"aiven_project":       project.ResourceProject(),
@@ -249,9 +263,31 @@ func Provider(version string) *schema.Provider {
 			"aiven_clickhouse_grant":    clickhouse.ResourceClickhouseGrant(),
 
 			// dragonfly
-			// TODO: uncomment when dragonfly is supported
-			//"aiven_dragonfly": dragonfly.ResourceDragonfly(),
+			"aiven_dragonfly": dragonfly.ResourceDragonfly(),
+
+			// thanos
+			"aiven_thanos": thanos.ResourceThanos(),
+
+			// valkey
+			"aiven_valkey":      valkey.ResourceValkey(),
+			"aiven_valkey_user": valkey.ResourceValkeyUser(),
 		},
+	}
+
+	// Adds "beta" warning to the description
+	betaResources := []string{
+		"aiven_thanos",
+		"aiven_valkey",
+		"aiven_valkey_user",
+	}
+
+	missing := append(
+		addBeta(p.ResourcesMap, betaResources...),
+		addBeta(p.DataSourcesMap, betaResources...)...,
+	)
+
+	if missing != nil {
+		panic(fmt.Errorf("not all beta resources/datasources are found: %s", strings.Join(missing, ", ")))
 	}
 
 	p.ConfigureContextFunc = func(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
@@ -265,8 +301,33 @@ func Provider(version string) *schema.Provider {
 			return nil, diag.FromErr(err)
 		}
 
+		// fixme: temporary solution
+		err = common.CacheGenAivenClient(token, p.TerraformVersion, version)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
 		return client, nil
 	}
 
 	return p
+}
+
+// addBeta adds resources as beta or removes them
+func addBeta(m map[string]*schema.Resource, keys ...string) (missing []string) {
+	isBeta := util.IsBeta()
+	for _, k := range keys {
+		v, ok := m[k]
+		if !ok {
+			missing = append(missing, k)
+			continue
+		}
+
+		if isBeta {
+			v.Description = userconfig.Desc(v.Description).AvailabilityType(userconfig.Beta).Build()
+		} else {
+			delete(m, k)
+		}
+	}
+	return missing
 }

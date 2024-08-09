@@ -4,7 +4,6 @@ package service
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/diff"
 )
@@ -18,7 +17,7 @@ func cassandraUserConfig() *schema.Schema {
 				Deprecated:  "This property is deprecated.",
 				Description: "Additional Cloud Regions for Backup Replication.",
 				Elem: &schema.Schema{
-					Description: "Target cloud.",
+					Description: "Target cloud. Example: `aws-eu-central-1`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1,
@@ -26,32 +25,42 @@ func cassandraUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"backup_hour": {
-				Description: "The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.",
+				Description: "The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed. Example: `3`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
 			"backup_minute": {
-				Description: "The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.",
+				Description: "The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed. Example: `30`.",
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
 			"cassandra": {
-				Description: "cassandra configuration values",
+				Description: "Cassandra configuration values",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"batch_size_fail_threshold_in_kb": {
-						Description: "Fail any multiple-partition batch exceeding this value. 50kb (10x warn threshold) by default.",
+						Description: "Fail any multiple-partition batch exceeding this value. 50kb (10x warn threshold) by default. Example: `50`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"batch_size_warn_threshold_in_kb": {
-						Description: "Log a warning message on any multiple-partition batch size exceeding this value.5kb per batch by default.Caution should be taken on increasing the size of this thresholdas it can lead to node instability.",
+						Description: "Log a warning message on any multiple-partition batch size exceeding this value.5kb per batch by default.Caution should be taken on increasing the size of this thresholdas it can lead to node instability. Example: `5`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"datacenter": {
-						Description: "Name of the datacenter to which nodes of this service belong. Can be set only when creating the service.",
+						Description: "Name of the datacenter to which nodes of this service belong. Can be set only when creating the service. Example: `my-service-google-west1`.",
 						Optional:    true,
 						Type:        schema.TypeString,
+					},
+					"read_request_timeout_in_ms": {
+						Description: "How long the coordinator waits for read operations to complete before timing it out. 5 seconds by default. Example: `5000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"write_request_timeout_in_ms": {
+						Description: "How long the coordinator waits for write requests to complete with at least one node in the local datacenter. 2 seconds by default. Example: `2000`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
 					},
 				}},
 				MaxItems: 1,
@@ -59,16 +68,15 @@ func cassandraUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"cassandra_version": {
-				Description:  "Cassandra version.",
-				Optional:     true,
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"4", "3", "4.1"}, false),
+				Description: "Enum: `3`, `4`, `4.1`, and newer. Cassandra version.",
+				Optional:    true,
+				Type:        schema.TypeString,
 			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -76,27 +84,27 @@ func cassandraUserConfig() *schema.Schema {
 				Type:     schema.TypeSet,
 			},
 			"ip_filter_object": {
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"description": {
-						Description: "Description for IP filter list entry.",
+						Description: "Description for IP filter list entry. Example: `Production service IP range`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"network": {
-						Description: "CIDR address block.",
+						Description: "CIDR address block. Example: `10.20.0.0/16`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 				}},
 				MaxItems: 1024,
 				Optional: true,
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 			},
 			"ip_filter_string": {
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -120,7 +128,7 @@ func cassandraUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"project_to_fork_from": {
-				Description: "Name of another project to fork a service from. This has effect only when a new service is being created.",
+				Description: "Name of another project to fork a service from. This has effect only when a new service is being created. Example: `anotherprojectname`.",
 				ForceNew:    true,
 				Optional:    true,
 				Type:        schema.TypeString,
@@ -142,13 +150,13 @@ func cassandraUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"service_to_fork_from": {
-				Description: "Name of another service to fork from. This has effect only when a new service is being created.",
+				Description: "Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.",
 				ForceNew:    true,
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"service_to_join_with": {
-				Description: "When bootstrapping, instead of creating a new Cassandra cluster try to join an existing one from another service. Can only be set on service creation.",
+				Description: "When bootstrapping, instead of creating a new Cassandra cluster try to join an existing one from another service. Can only be set on service creation. Example: `my-test-cassandra`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},

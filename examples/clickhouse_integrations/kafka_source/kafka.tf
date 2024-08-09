@@ -1,4 +1,4 @@
-// Kafka service on GCP eu-west
+# Kafka service on GCP eu-west
 resource "aiven_kafka" "kafka" {
   project                 = aiven_project.clickhouse_kafka_source.project
   cloud_name              = "google-europe-west1"
@@ -7,7 +7,7 @@ resource "aiven_kafka" "kafka" {
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 
-  // Enable kafka REST to view and send messages from the Console
+  # Enable kafka REST to view and send messages from the Console
   kafka_user_config {
     kafka_rest = true
 
@@ -17,7 +17,7 @@ resource "aiven_kafka" "kafka" {
   }
 }
 
-// Kafka topic used to ingest edge measurements from the IoT devices fleet
+# Kafka topic used to ingest edge measurements from the IoT devices fleet
 resource "aiven_kafka_topic" "edge_measurements" {
   project                = aiven_project.clickhouse_kafka_source.project
   service_name           = aiven_kafka.kafka.service_name
@@ -29,7 +29,7 @@ resource "aiven_kafka_topic" "edge_measurements" {
   config {
     flush_ms                       = 10
     cleanup_policy                 = "delete"
-    retention_bytes                = "134217728" // 10 GiB
-    retention_ms                   = "604800000" // 1 week
+    retention_bytes                = "134217728" # 10 GiB
+    retention_ms                   = "604800000" # 1 week
   }
 }

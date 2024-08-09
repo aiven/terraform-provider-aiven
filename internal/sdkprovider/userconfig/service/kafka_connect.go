@@ -18,7 +18,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 				Deprecated:  "This property is deprecated.",
 				Description: "Additional Cloud Regions for Backup Replication.",
 				Elem: &schema.Schema{
-					Description: "Target cloud.",
+					Description: "Target cloud. Example: `aws-eu-central-1`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1,
@@ -27,9 +27,9 @@ func kafkaConnectUserConfig() *schema.Schema {
 			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -37,27 +37,27 @@ func kafkaConnectUserConfig() *schema.Schema {
 				Type:     schema.TypeSet,
 			},
 			"ip_filter_object": {
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"description": {
-						Description: "Description for IP filter list entry.",
+						Description: "Description for IP filter list entry. Example: `Production service IP range`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"network": {
-						Description: "CIDR address block.",
+						Description: "CIDR address block. Example: `10.20.0.0/16`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 				}},
 				MaxItems: 1024,
 				Optional: true,
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 			},
 			"ip_filter_string": {
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -68,30 +68,30 @@ func kafkaConnectUserConfig() *schema.Schema {
 				Description: "Kafka Connect configuration values",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"connector_client_config_override_policy": {
-						Description:  "Defines what client configurations can be overridden by the connector. Default is None.",
+						Description:  "Enum: `None`, `All`. Defines what client configurations can be overridden by the connector. Default is None.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"None", "All"}, false),
 					},
 					"consumer_auto_offset_reset": {
-						Description:  "What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest.",
+						Description:  "Enum: `earliest`, `latest`. What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"earliest", "latest"}, false),
 					},
 					"consumer_fetch_max_bytes": {
-						Description: "Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum.",
+						Description: "Records are fetched in batches by the consumer, and if the first record batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be returned to ensure that the consumer can make progress. As such, this is not a absolute maximum. Example: `52428800`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"consumer_isolation_level": {
-						Description:  "Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
+						Description:  "Enum: `read_uncommitted`, `read_committed`. Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"read_uncommitted", "read_committed"}, false),
 					},
 					"consumer_max_partition_fetch_bytes": {
-						Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. .",
+						Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. Example: `1048576`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -116,7 +116,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"producer_batch_size": {
-						Description: "This setting gives the upper bound of the batch size to be sent. If there are fewer than this many bytes accumulated for this partition, the producer will 'linger' for the linger.ms time waiting for more records to show up. A batch size of zero will disable batching entirely (defaults to 16384).",
+						Description: "This setting gives the upper bound of the batch size to be sent. If there are fewer than this many bytes accumulated for this partition, the producer will `linger` for the linger.ms time waiting for more records to show up. A batch size of zero will disable batching entirely (defaults to 16384).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -126,23 +126,23 @@ func kafkaConnectUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"producer_compression_type": {
-						Description:  "Specify the default compression type for producers. This configuration accepts the standard compression codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'none' which is the default and equivalent to no compression.",
+						Description:  "Enum: `gzip`, `snappy`, `lz4`, `zstd`, `none`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.",
 						Optional:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"gzip", "snappy", "lz4", "zstd", "none"}, false),
 					},
 					"producer_linger_ms": {
-						Description: "This setting gives the upper bound on the delay for batching: once there is batch.size worth of records for a partition it will be sent immediately regardless of this setting, however if there are fewer than this many bytes accumulated for this partition the producer will 'linger' for the specified time waiting for more records to show up. Defaults to 0.",
+						Description: "This setting gives the upper bound on the delay for batching: once there is batch.size worth of records for a partition it will be sent immediately regardless of this setting, however if there are fewer than this many bytes accumulated for this partition the producer will `linger` for the specified time waiting for more records to show up. Defaults to 0.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"producer_max_request_size": {
-						Description: "This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests.",
+						Description: "This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests. Example: `1048576`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"scheduled_rebalance_max_delay_ms": {
-						Description: "The maximum delay that is scheduled in order to wait for the return of one or more departed workers before rebalancing and reassigning their connectors and tasks to the group. During this period the connectors and tasks of the departed workers remain unassigned.  Defaults to 5 minutes.",
+						Description: "The maximum delay that is scheduled in order to wait for the return of one or more departed workers before rebalancing and reassigning their connectors and tasks to the group. During this period the connectors and tasks of the departed workers remain unassigned. Defaults to 5 minutes.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -212,6 +212,79 @@ func kafkaConnectUserConfig() *schema.Schema {
 					},
 				}},
 				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
+			"secret_providers": {
+				Description: "Configure external secret providers in order to reference external secrets in connector configuration. Currently Hashicorp Vault (provider: vault, auth_method: token) and AWS Secrets Manager (provider: aws, auth_method: credentials) are supported. Secrets can be referenced in connector config with ${<provider_name>:<secret_path>:<key_name>}",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"aws": {
+						Description: "AWS config for Secret Provider",
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+							"access_key": {
+								Description: "Access key used to authenticate with aws.",
+								Optional:    true,
+								Sensitive:   true,
+								Type:        schema.TypeString,
+							},
+							"auth_method": {
+								Description:  "Enum: `credentials`. Auth method of the vault secret provider.",
+								Required:     true,
+								Type:         schema.TypeString,
+								ValidateFunc: validation.StringInSlice([]string{"credentials"}, false),
+							},
+							"region": {
+								Description: "Region used to lookup secrets with AWS SecretManager.",
+								Required:    true,
+								Type:        schema.TypeString,
+							},
+							"secret_key": {
+								Description: "Secret key used to authenticate with aws.",
+								Optional:    true,
+								Sensitive:   true,
+								Type:        schema.TypeString,
+							},
+						}},
+						MaxItems: 1,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"name": {
+						Description: "Name of the secret provider. Used to reference secrets in connector config.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+					"vault": {
+						Description: "Vault Config for Secret Provider",
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+							"address": {
+								Description: "Address of the Vault server.",
+								Required:    true,
+								Type:        schema.TypeString,
+							},
+							"auth_method": {
+								Description:  "Enum: `token`. Auth method of the vault secret provider.",
+								Required:     true,
+								Type:         schema.TypeString,
+								ValidateFunc: validation.StringInSlice([]string{"token"}, false),
+							},
+							"engine_version": {
+								Description: "Enum: `1`, `2`, and newer. KV Secrets Engine version of the Vault server instance.",
+								Optional:    true,
+								Type:        schema.TypeInt,
+							},
+							"token": {
+								Description: "Token used to authenticate with vault and auth method `token`.",
+								Optional:    true,
+								Sensitive:   true,
+								Type:        schema.TypeString,
+							},
+						}},
+						MaxItems: 1,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+				}},
 				Optional: true,
 				Type:     schema.TypeList,
 			},

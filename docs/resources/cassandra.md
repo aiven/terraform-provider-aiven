@@ -37,12 +37,13 @@ resource "aiven_cassandra" "bar" {
 ### Required
 
 - `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Optional
 
 - `additional_disk_space` (String) Additional disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
+- `cassandra` (Block List, Max: 1) Cassandra server provided values (see [below for nested schema](#nestedblock--cassandra))
 - `cassandra_user_config` (Block List, Max: 1) Cassandra user configurable settings (see [below for nested schema](#nestedblock--cassandra_user_config))
 - `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 - `disk_space` (String, Deprecated) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
@@ -52,13 +53,12 @@ resource "aiven_cassandra" "bar" {
 - `service_integrations` (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
 - `static_ips` (Set of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 - `tag` (Block Set) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedblock--tag))
-- `tech_emails` (Block Set) Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability. (see [below for nested schema](#nestedblock--tech_emails))
+- `tech_emails` (Block Set) The email addresses for [service contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this service. You can also set email contacts at the project level. (see [below for nested schema](#nestedblock--tech_emails))
 - `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- `cassandra` (List of Object) Cassandra server provided values (see [below for nested schema](#nestedatt--cassandra))
 - `components` (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
 - `disk_space_cap` (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
 - `disk_space_default` (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
@@ -73,26 +73,34 @@ resource "aiven_cassandra" "bar" {
 - `service_username` (String) Username used for connecting to the service, if applicable
 - `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
 
+<a id="nestedblock--cassandra"></a>
+### Nested Schema for `cassandra`
+
+Optional:
+
+- `uris` (List of String) Cassandra server URIs.
+
+
 <a id="nestedblock--cassandra_user_config"></a>
 ### Nested Schema for `cassandra_user_config`
 
 Optional:
 
 - `additional_backup_regions` (List of String, Deprecated) Additional Cloud Regions for Backup Replication.
-- `backup_hour` (Number) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed.
-- `backup_minute` (Number) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed.
-- `cassandra` (Block List, Max: 1) cassandra configuration values (see [below for nested schema](#nestedblock--cassandra_user_config--cassandra))
-- `cassandra_version` (String) Cassandra version.
-- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--cassandra_user_config--ip_filter_object))
-- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `backup_hour` (Number) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed. Example: `3`.
+- `backup_minute` (Number) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed. Example: `30`.
+- `cassandra` (Block List, Max: 1) Cassandra configuration values (see [below for nested schema](#nestedblock--cassandra_user_config--cassandra))
+- `cassandra_version` (String) Enum: `3`, `4`, `4.1`, and newer. Cassandra version.
+- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
+- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--cassandra_user_config--ip_filter_object))
+- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `migrate_sstableloader` (Boolean) Sets the service into migration mode enabling the sstableloader utility to be used to upload Cassandra data files. Available only on service create.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--cassandra_user_config--private_access))
-- `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
+- `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created. Example: `anotherprojectname`.
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--cassandra_user_config--public_access))
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
-- `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
-- `service_to_join_with` (String) When bootstrapping, instead of creating a new Cassandra cluster try to join an existing one from another service. Can only be set on service creation.
+- `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.
+- `service_to_join_with` (String) When bootstrapping, instead of creating a new Cassandra cluster try to join an existing one from another service. Can only be set on service creation. Example: `my-test-cassandra`.
 - `static_ips` (Boolean) Use static public IP addresses.
 
 <a id="nestedblock--cassandra_user_config--cassandra"></a>
@@ -100,9 +108,11 @@ Optional:
 
 Optional:
 
-- `batch_size_fail_threshold_in_kb` (Number) Fail any multiple-partition batch exceeding this value. 50kb (10x warn threshold) by default.
-- `batch_size_warn_threshold_in_kb` (Number) Log a warning message on any multiple-partition batch size exceeding this value.5kb per batch by default.Caution should be taken on increasing the size of this thresholdas it can lead to node instability.
-- `datacenter` (String) Name of the datacenter to which nodes of this service belong. Can be set only when creating the service.
+- `batch_size_fail_threshold_in_kb` (Number) Fail any multiple-partition batch exceeding this value. 50kb (10x warn threshold) by default. Example: `50`.
+- `batch_size_warn_threshold_in_kb` (Number) Log a warning message on any multiple-partition batch size exceeding this value.5kb per batch by default.Caution should be taken on increasing the size of this thresholdas it can lead to node instability. Example: `5`.
+- `datacenter` (String) Name of the datacenter to which nodes of this service belong. Can be set only when creating the service. Example: `my-service-google-west1`.
+- `read_request_timeout_in_ms` (Number) How long the coordinator waits for read operations to complete before timing it out. 5 seconds by default. Example: `5000`.
+- `write_request_timeout_in_ms` (Number) How long the coordinator waits for write requests to complete with at least one node in the local datacenter. 2 seconds by default. Example: `2000`.
 
 
 <a id="nestedblock--cassandra_user_config--ip_filter_object"></a>
@@ -110,11 +120,11 @@ Optional:
 
 Required:
 
-- `network` (String) CIDR address block.
+- `network` (String) CIDR address block. Example: `10.20.0.0/16`.
 
 Optional:
 
-- `description` (String) Description for IP filter list entry.
+- `description` (String) Description for IP filter list entry. Example: `Production service IP range`.
 
 
 <a id="nestedblock--cassandra_user_config--private_access"></a>
@@ -172,13 +182,6 @@ Optional:
 - `update` (String)
 
 
-<a id="nestedatt--cassandra"></a>
-### Nested Schema for `cassandra`
-
-Read-Only:
-
-
-
 <a id="nestedatt--components"></a>
 ### Nested Schema for `components`
 
@@ -198,5 +201,5 @@ Read-Only:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_cassandra.bar project/service_name
+terraform import aiven_cassandra.bar PROJECT/SERVICE_NAME
 ```

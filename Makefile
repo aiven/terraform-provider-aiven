@@ -34,7 +34,7 @@ $(TERRAFMT): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
 SELPROJ := $(TOOLS_BIN_DIR)/selproj
 
 $(SELPROJ): $(TOOLS_BIN_DIR) $(TOOLS_DIR)/go.mod
-	cd $(TOOLS_DIR) && $(GO) build -tags tools -o bin/selproj github.com/aiven/terraform-provider-aiven/tools/selproj
+	cd $(TOOLS_DIR) && $(GO) build -tags tools -o bin/selproj github.com/aiven/go-utils/selproj
 
 
 # See https://github.com/hashicorp/terraform/blob/main/tools/protobuf-compile/protobuf-compile.go#L215
@@ -94,7 +94,7 @@ ACC_TEST_TIMEOUT ?= 180m
 ACC_TEST_PARALLELISM ?= 10
 
 test-acc:
-	TF_ACC=1 $(GO) test ./$(PKG_PATH)/... \
+	TF_ACC=1 PROVIDER_AIVEN_ENABLE_BETA=1 $(GO) test ./$(PKG_PATH)/... \
 	-v -count $(TEST_COUNT) -parallel $(ACC_TEST_PARALLELISM) $(RUNARGS) $(TESTARGS) -timeout $(ACC_TEST_TIMEOUT)
 
 
@@ -118,7 +118,13 @@ lint-test: $(TERRAFMT)
 
 
 lint-docs: $(TFPLUGINDOCS)
-	PROVIDER_AIVEN_ENABLE_BETA=true $(TFPLUGINDOCS) validate
+	PROVIDER_AIVEN_ENABLE_BETA=1 $(TFPLUGINDOCS) generate --rendered-website-dir tmp
+	mv tmp/data-sources/influxdb*.md docs/data-sources/
+	mv tmp/resources/influxdb*.md docs/resources/
+	rm -rf tmp
+	PROVIDER_AIVEN_ENABLE_BETA=1 $(TFPLUGINDOCS) validate --provider-name aiven
+	rm -f docs/data-sources/influxdb*.md
+	rm -f docs/resources/influxdb*.md
 
 #################################################
 # Format
@@ -175,7 +181,9 @@ gen-go:
 
 
 docs: $(TFPLUGINDOCS)
-	PROVIDER_AIVEN_ENABLE_BETA=true $(TFPLUGINDOCS) generate
+	PROVIDER_AIVEN_ENABLE_BETA=1 $(TFPLUGINDOCS) generate
+	rm -f docs/data-sources/influxdb*.md
+	rm -f docs/resources/influxdb*.md
 
 #################################################
 # CI

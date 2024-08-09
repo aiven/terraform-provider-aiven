@@ -3,20 +3,20 @@
 page_title: "aiven_kafka_connector Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Kafka connector data source provides information about the existing Aiven Kafka connector.
+  Gets information about an Aiven for Apache Kafka® connector.
 ---
 
 # aiven_kafka_connector (Data Source)
 
-The Kafka connector data source provides information about the existing Aiven Kafka connector.
+Gets information about an Aiven for Apache Kafka® connector.
 
 ## Example Usage
 
 ```terraform
-data "aiven_kafka_connector" "kafka-es-con1" {
-  project        = aiven_project.kafka-con-project1.project
-  service_name   = aiven_kafka.kafka-service1.service_name
-  connector_name = "kafka-es-con1"
+data "aiven_kafka_connector" "kafka-os-connector" {
+  project        = data.aiven_project.example_project.project
+  service_name   = aiven_kafka.example_kafka.service_name
+  connector_name = "kafka-opensearch-connector"
 }
 ```
 
@@ -25,20 +25,20 @@ data "aiven_kafka_connector" "kafka-es-con1" {
 
 ### Required
 
-- `connector_name` (String) The kafka connector name. This property cannot be changed, doing so forces recreation of the resource.
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `connector_name` (String) The Kafka connector name. Changing this property forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Read-Only
 
-- `config` (Map of String) The Kafka Connector configuration parameters.
+- `config` (Map of String) The Kafka connector configuration parameters.
 - `id` (String) The ID of this resource.
 - `plugin_author` (String) The Kafka connector author.
 - `plugin_class` (String) The Kafka connector Java class.
 - `plugin_doc_url` (String) The Kafka connector documentation URL.
 - `plugin_title` (String) The Kafka connector title.
 - `plugin_type` (String) The Kafka connector type.
-- `plugin_version` (String) The version of the kafka connector.
+- `plugin_version` (String) The version of the Kafka connector.
 - `task` (Set of Object) List of tasks of a connector. (see [below for nested schema](#nestedatt--task))
 
 <a id="nestedatt--task"></a>

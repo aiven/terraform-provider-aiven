@@ -1,4 +1,4 @@
 variable "aiven_api_token" {
-  description = "Aiven console API token"
+  description = "Aiven API token"
   type        = string
 }

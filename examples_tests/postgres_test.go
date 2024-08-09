@@ -29,7 +29,7 @@ func (s *PostgresTestSuite) TestPostgres() {
 	opts := s.withDefaults(&terraform.Options{
 		TerraformDir: "../examples/postgres",
 		Vars: map[string]interface{}{
-			"avn_token":        s.config.Token,
+			"aiven_token":      s.config.Token,
 			"avn_project":      s.config.Project,
 			"postgres_eu_name": pgNameEU,
 			"postgres_us_name": pgNameUS,

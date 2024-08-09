@@ -8,14 +8,14 @@ import (
 	"os"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
@@ -25,12 +25,12 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Computed:    true,
 		Sensitive:   true,
-		Description: "The CA certificate of the project. This is required for configuring clients that connect to certain services like Kafka.",
+		Description: "The CA certificate for the project. This is required for configuring clients that connect to certain services like Kafka.",
 	},
 	"account_id": {
 		Type:        schema.TypeString,
 		Optional:    true,
-		Description: userconfig.Desc("An optional property to link a project to an already existing account by using account ID.").Referenced().Build(),
+		Description: userconfig.Desc("Link a project to an existing account using its account ID. This field is deprecated. Use `parent_id` instead.").Referenced().Build(),
 		Deprecated:  "Use parent_id instead. This field will be removed in the next major release.",
 		DiffSuppressFunc: func(_, _, _ string, d *schema.ResourceData) bool {
 			_, ok := d.GetOk("parent_id")
@@ -41,7 +41,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 		Description: userconfig.Desc(
-			"An optional property to link a project to an already existing organization or account by using its ID.",
+			"Link a project to an [organization, organizational unit,](https://aiven.io/docs/platform/concepts/orgs-units-projects) or account by using its ID.",
 		).Referenced().Build(),
 		DiffSuppressFunc: func(_, _, _ string, d *schema.ResourceData) bool {
 			_, ok := d.GetOk("account_id")
@@ -52,7 +52,7 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.CreateOnlyDiffSuppressFunc,
-		Description:      userconfig.Desc("is the name of another project used to copy billing information and some other project attributes like technical contacts from. This is mostly relevant when an existing project has billing type set to invoice and that needs to be copied over to a new project. (Setting billing is otherwise not allowed over the API.) This only has effect when the project is created.").Referenced().Build(),
+		Description:      userconfig.Desc("The name of the project to copy billing information, technical contacts, and some other project attributes from. This is most useful to set up the same billing method when you use bank transfers to pay invoices for other projects. You can only do this when creating a project. You can't set the billing over the API for an existing.").Referenced().Build(),
 	},
 	"use_source_project_billing_group": {
 		Type:             schema.TypeBool,
@@ -74,24 +74,24 @@ var aivenProjectSchema = map[string]*schema.Schema{
 	"project": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "Defines the name of the project. Name must be globally unique (between all Aiven customers) and cannot be changed later without destroying and re-creating the project, including all sub-resources.",
+		Description: "The name of the project. Names must be globally unique among all Aiven customers and cannot be changed later without destroying and re-creating the project, including all sub-resources.",
 	},
 	"technical_emails": {
 		Type:        schema.TypeSet,
 		Elem:        &schema.Schema{Type: schema.TypeString},
 		Optional:    true,
-		Description: "Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability. It is a good practice to keep this up-to-date to be aware of any potential issues with your project.",
+		Description: "The email addresses for [project contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this project and its services. You can also set email contacts at the service level. It's good practice to keep these up-to-date to be aware of any potential issues with your project.",
 	},
 	"default_cloud": {
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		Description:      "Defines the default cloud provider and region where services are hosted. This can be changed freely after the project is created. This will not affect existing services.",
+		Description:      "Default cloud provider and region where services are hosted. This can be changed after the project is created and will not affect existing services.",
 	},
 	"billing_group": {
 		Type:             schema.TypeString,
 		Optional:         true,
-		Description:      userconfig.Desc("The id of the billing group that is linked to this project.").Referenced().Build(),
+		Description:      userconfig.Desc("The ID of the billing group this project is assigned to.").Referenced().Build(),
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
 	},
 	"tag": {
@@ -101,12 +101,12 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"key": {
-					Description: "Project tag key",
+					Description: "Project tag key.",
 					Type:        schema.TypeString,
 					Required:    true,
 				},
 				"value": {
-					Description: "Project tag value",
+					Description: "Project tag value.",
 					Type:        schema.TypeString,
 					Required:    true,
 				},
@@ -118,23 +118,23 @@ var aivenProjectSchema = map[string]*schema.Schema{
 	"payment_method": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "The method of invoicing used for payments for this project, e.g. `card`.",
+		Description: "The payment type used for this project. For example,`card`.",
 	},
 	"available_credits": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "The amount of platform credits available to the project. This could be your free trial or other promotional credits.",
+		Description: "The number of trial or promotional credits remaining for this project.",
 	},
 	"estimated_balance": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "The current accumulated bill for this project in the current billing period.",
+		Description: "The monthly running estimate for this project for the current billing period.",
 	},
 }
 
 func ResourceProject() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Project resource allows the creation and management of Aiven Projects.",
+		Description:   "Creates and manages an [Aiven project](https://aiven.io/docs/platform/concepts/orgs-units-projects#projects).",
 		CreateContext: resourceProjectCreate,
 		ReadContext:   resourceProjectRead,
 		UpdateContext: resourceProjectUpdate,
@@ -263,17 +263,15 @@ func resourceProjectAssignToBillingGroup(
 	return nil
 }
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
-	//goland:noinspection GoDeprecation
-	conf := &resource.StateChangeConf{
+	conf := &retry.StateChangeConf{
 		Pending:    []string{"pending"},
 		Target:     []string{"target"},
-		Timeout:    time.Minute,
-		MinTimeout: time.Second,
-		Delay:      time.Second,
+		Timeout:    d.Timeout(schema.TimeoutRead),
+		MinTimeout: common.DefaultStateChangeMinTimeout,
+		Delay:      common.DefaultStateChangeDelay,
 		Refresh: func() (result interface{}, state string, err error) {
 			p, err := client.Projects.Get(ctx, d.Id())
 			if isNotProjectMember(err) {

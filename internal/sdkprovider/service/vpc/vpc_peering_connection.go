@@ -4,17 +4,16 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var (
 		pc     *aiven.VPCPeeringConnection
@@ -74,7 +73,7 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 		return diag.Errorf("error waiting for VPC peering connection creation: %s", err)
 	}
 
-	stateChangeConf := &resource.StateChangeConf{
+	stateChangeConf := &retry.StateChangeConf{
 		Pending: []string{"APPROVED"},
 		Target: []string{
 			"ACTIVE",
@@ -99,9 +98,9 @@ func resourceVPCPeeringConnectionCreate(ctx context.Context, d *schema.ResourceD
 			}
 			return pc, pc.State, nil
 		},
-		Delay:      10 * time.Second,
+		Delay:      common.DefaultStateChangeDelay,
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		MinTimeout: 2 * time.Second,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 
 	res, err := stateChangeConf.WaitForStateContext(ctx)
@@ -231,7 +230,6 @@ func resourceVPCPeeringConnectionRead(ctx context.Context, d *schema.ResourceDat
 	return copyVPCPeeringConnectionPropertiesFromAPIResponseToTerraform(d, pc, p.projectName, p.vpcID)
 }
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
@@ -273,7 +271,7 @@ func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceD
 		return diag.Errorf("Error deleting VPC peering connection: %s", err)
 	}
 
-	stateChangeConf := &resource.StateChangeConf{
+	stateChangeConf := &retry.StateChangeConf{
 		Pending: []string{
 			"ACTIVE",
 			"APPROVED",
@@ -315,9 +313,9 @@ func resourceVPCPeeringConnectionDelete(ctx context.Context, d *schema.ResourceD
 			}
 			return pc, pc.State, nil
 		},
-		Delay:      10 * time.Second,
+		Delay:      common.DefaultStateChangeDelay,
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		MinTimeout: 2 * time.Second,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 	if _, err := stateChangeConf.WaitForStateContext(ctx); err != nil && !aiven.IsNotFound(err) {
 		return diag.Errorf("Error waiting for Aiven VPC Peering Connection to be DELETED: %s", err)

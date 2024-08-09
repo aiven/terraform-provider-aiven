@@ -3,19 +3,19 @@
 page_title: "aiven_kafka Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Kafka data source provides information about the existing Aiven Kafka services.
+  Gets information about an Aiven for Apache Kafka® service.
 ---
 
 # aiven_kafka (Data Source)
 
-The Kafka data source provides information about the existing Aiven Kafka services.
+Gets information about an Aiven for Apache Kafka® service.
 
 ## Example Usage
 
 ```terraform
-data "aiven_kafka" "kafka1" {
-  project      = data.aiven_project.pr1.project
-  service_name = "my-kafka1"
+data "aiven_kafka" "example_kafka" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-kafka"
 }
 ```
 
@@ -24,7 +24,7 @@ data "aiven_kafka" "kafka1" {
 
 ### Required
 
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Read-Only
@@ -32,16 +32,16 @@ data "aiven_kafka" "kafka1" {
 - `additional_disk_space` (String) Additional disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 - `components` (List of Object) Service component information objects (see [below for nested schema](#nestedatt--components))
-- `default_acl` (Boolean) Create default wildcard Kafka ACL
+- `default_acl` (Boolean) Create a default wildcard Kafka ACL.
 - `disk_space` (String) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `disk_space_cap` (String) The maximum disk space of the service, possible values depend on the service type, the cloud provider and the project.
 - `disk_space_default` (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) Disk space that service is currently using
 - `id` (String) The ID of this resource.
-- `kafka` (List of Object) Kafka server provided values (see [below for nested schema](#nestedatt--kafka))
+- `kafka` (List of Object, Sensitive) Kafka server connection details. (see [below for nested schema](#nestedatt--kafka))
 - `kafka_user_config` (List of Object) Kafka user configurable settings (see [below for nested schema](#nestedatt--kafka_user_config))
-- `karapace` (Boolean) Switch the service to use Karapace for schema registry and REST proxy
+- `karapace` (Boolean) Switch the service to use [Karapace](https://aiven.io/docs/products/kafka/karapace) for schema registry and REST proxy.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
 - `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
@@ -56,7 +56,7 @@ data "aiven_kafka" "kafka1" {
 - `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
 - `static_ips` (Set of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 - `tag` (Set of Object) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedatt--tag))
-- `tech_emails` (Set of Object) Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability. (see [below for nested schema](#nestedatt--tech_emails))
+- `tech_emails` (Set of Object) The email addresses for [service contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this service. You can also set email contacts at the project level. (see [below for nested schema](#nestedatt--tech_emails))
 - `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
 
 <a id="nestedatt--components"></a>
@@ -84,6 +84,7 @@ Read-Only:
 - `connect_uri` (String)
 - `rest_uri` (String)
 - `schema_registry_uri` (String)
+- `uris` (List of String)
 
 
 <a id="nestedatt--kafka_user_config"></a>
@@ -94,17 +95,20 @@ Read-Only:
 - `additional_backup_regions` (List of String)
 - `aiven_kafka_topic_messages` (Boolean)
 - `custom_domain` (String)
+- `follower_fetching` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--follower_fetching))
 - `ip_filter` (Set of String)
-- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--ip_filter_object))
+- `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
 - `kafka` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka))
 - `kafka_authentication_methods` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_authentication_methods))
 - `kafka_connect` (Boolean)
 - `kafka_connect_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_config))
+- `kafka_connect_secret_providers` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_secret_providers))
 - `kafka_rest` (Boolean)
 - `kafka_rest_authorization` (Boolean)
 - `kafka_rest_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_rest_config))
 - `kafka_version` (String)
+- `letsencrypt_sasl_privatelink` (Boolean)
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--private_access))
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--privatelink_access))
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--public_access))
@@ -113,6 +117,14 @@ Read-Only:
 - `service_log` (Boolean)
 - `static_ips` (Boolean)
 - `tiered_storage` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--tiered_storage))
+
+<a id="nestedobjatt--kafka_user_config--follower_fetching"></a>
+### Nested Schema for `kafka_user_config.follower_fetching`
+
+Read-Only:
+
+- `enabled` (Boolean)
+
 
 <a id="nestedobjatt--kafka_user_config--ip_filter_object"></a>
 ### Nested Schema for `kafka_user_config.ip_filter_object`
@@ -206,6 +218,38 @@ Read-Only:
 - `producer_max_request_size` (Number)
 - `scheduled_rebalance_max_delay_ms` (Number)
 - `session_timeout_ms` (Number)
+
+
+<a id="nestedobjatt--kafka_user_config--kafka_connect_secret_providers"></a>
+### Nested Schema for `kafka_user_config.kafka_connect_secret_providers`
+
+Read-Only:
+
+- `aws` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_secret_providers--aws))
+- `name` (String)
+- `vault` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_connect_secret_providers--vault))
+
+<a id="nestedobjatt--kafka_user_config--kafka_connect_secret_providers--aws"></a>
+### Nested Schema for `kafka_user_config.kafka_connect_secret_providers.aws`
+
+Read-Only:
+
+- `access_key` (String)
+- `auth_method` (String)
+- `region` (String)
+- `secret_key` (String)
+
+
+<a id="nestedobjatt--kafka_user_config--kafka_connect_secret_providers--vault"></a>
+### Nested Schema for `kafka_user_config.kafka_connect_secret_providers.vault`
+
+Read-Only:
+
+- `address` (String)
+- `auth_method` (String)
+- `engine_version` (Number)
+- `token` (String)
+
 
 
 <a id="nestedobjatt--kafka_user_config--kafka_rest_config"></a>

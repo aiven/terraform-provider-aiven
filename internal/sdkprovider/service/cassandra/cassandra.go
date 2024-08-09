@@ -6,21 +6,31 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 func cassandraSchema() map[string]*schema.Schema {
-	s := schemautil.ServiceCommonSchema()
+	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeCassandra)
 	s[schemautil.ServiceTypeCassandra] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
 		Description: "Cassandra server provided values",
+		MaxItems:    1,
+		Optional:    true,
+		Sensitive:   true,
 		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{},
+			Schema: map[string]*schema.Schema{
+				"uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "Cassandra server URIs.",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+			},
 		},
 	}
-	s[schemautil.ServiceTypeCassandra+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypeCassandra)
-
 	return s
 }
 

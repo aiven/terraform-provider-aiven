@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
@@ -22,7 +22,6 @@ const (
 	aivenServicesStartingState = "WAITING_FOR_SERVICES"
 )
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, m interface{}) (*aiven.Service, error) {
 	client := m.(*aiven.Client)
 
@@ -31,12 +30,12 @@ func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, m inter
 	timeout := d.Timeout(schema.TimeoutCreate)
 	log.Printf("[DEBUG] Service creation waiter timeout %.0f minutes", timeout.Minutes())
 
-	conf := &resource.StateChangeConf{
+	conf := &retry.StateChangeConf{
 		Pending:                   []string{aivenPendingState, aivenRebalancingState, aivenServicesStartingState},
 		Target:                    []string{aivenTargetState},
-		Delay:                     10 * time.Second,
+		Delay:                     common.DefaultStateChangeDelay,
 		Timeout:                   timeout,
-		MinTimeout:                2 * time.Second,
+		MinTimeout:                common.DefaultStateChangeMinTimeout,
 		ContinuousTargetOccurence: 5,
 		Refresh: func() (interface{}, string, error) {
 			service, err := client.Services.Get(ctx, projectName, serviceName)
@@ -79,21 +78,20 @@ func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, m inter
 	return aux.(*aiven.Service), nil
 }
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func WaitForServiceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) (*aiven.Service, error) {
 	client := m.(*aiven.Client)
 
 	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
 
-	timeout := d.Timeout(schema.TimeoutCreate)
+	timeout := d.Timeout(schema.TimeoutUpdate)
 	log.Printf("[DEBUG] Service update waiter timeout %.0f minutes", timeout.Minutes())
 
-	conf := &resource.StateChangeConf{
+	conf := &retry.StateChangeConf{
 		Pending:                   []string{"updating"},
 		Target:                    []string{"updated"},
-		Delay:                     10 * time.Second,
+		Delay:                     common.DefaultStateChangeDelay,
 		Timeout:                   timeout,
-		MinTimeout:                2 * time.Second,
+		MinTimeout:                common.DefaultStateChangeMinTimeout,
 		ContinuousTargetOccurence: 5,
 		Refresh: func() (interface{}, string, error) {
 			service, err := client.Services.Get(ctx, projectName, serviceName)
@@ -131,17 +129,16 @@ func WaitForServiceUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	return aux.(*aiven.Service), nil
 }
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func WaitStaticIpsDissassociation(ctx context.Context, d *schema.ResourceData, m interface{}) error {
 	timeout := d.Timeout(schema.TimeoutDelete)
 	log.Printf("[DEBUG] Static Ip dissassociation timeout %.0f minutes", timeout.Minutes())
 
-	conf := &resource.StateChangeConf{
+	conf := &retry.StateChangeConf{
 		Pending:                   []string{"doing"},
 		Target:                    []string{"done"},
-		Delay:                     10 * time.Second,
+		Delay:                     common.DefaultStateChangeDelay,
 		Timeout:                   timeout,
-		MinTimeout:                2 * time.Second,
+		MinTimeout:                common.DefaultStateChangeMinTimeout,
 		ContinuousTargetOccurence: 5,
 		Refresh: func() (interface{}, string, error) {
 			if dis, err := staticIpsAreDisassociated(ctx, d, m); err != nil {
@@ -161,7 +158,6 @@ func WaitStaticIpsDissassociation(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func WaitForDeletion(ctx context.Context, d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
@@ -170,12 +166,12 @@ func WaitForDeletion(ctx context.Context, d *schema.ResourceData, m interface{})
 	timeout := d.Timeout(schema.TimeoutDelete)
 	log.Printf("[DEBUG] Service deletion waiter timeout %.0f minutes", timeout.Minutes())
 
-	conf := &resource.StateChangeConf{
+	conf := &retry.StateChangeConf{
 		Pending:                   []string{"deleting"},
 		Target:                    []string{"deleted"},
-		Delay:                     10 * time.Second,
+		Delay:                     common.DefaultStateChangeDelay,
 		Timeout:                   timeout,
-		MinTimeout:                20 * time.Second,
+		MinTimeout:                common.DefaultStateChangeMinTimeout,
 		ContinuousTargetOccurence: 5,
 		Refresh: func() (interface{}, string, error) {
 			_, err := client.Services.Get(ctx, projectName, serviceName)

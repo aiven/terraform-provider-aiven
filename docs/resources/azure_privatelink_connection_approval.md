@@ -3,12 +3,12 @@
 page_title: "aiven_azure_privatelink_connection_approval Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Azure privatelink approve resource waits for an aiven privatelink connection on a service and approves it with associated endpoint IP
+  Approves an Azure Private Link connection to an Aiven service with an associated endpoint IP.
 ---
 
 # aiven_azure_privatelink_connection_approval (Resource)
 
-The Azure privatelink approve resource waits for an aiven privatelink connection on a service and approves it with associated endpoint IP
+Approves an Azure Private Link connection to an Aiven service with an associated endpoint IP.
 
 ## Example Usage
 
@@ -74,19 +74,19 @@ resource "aiven_azure_privatelink_connection_approval" "approval" {
 
 ### Required
 
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
 
-- `endpoint_ip_address` (String) IP address of Azure private endpoint
+- `endpoint_ip_address` (String) IP address of Azure private endpoint.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `privatelink_connection_id` (String) Privatelink connection id
-- `state` (String) Privatelink connection state
+- `privatelink_connection_id` (String) The ID of the Private Link connection.
+- `state` (String) The state of the Private Link connection.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
@@ -104,5 +104,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_azure_privatelink_connection_approval.approval project/service_name
+terraform import aiven_azure_privatelink_connection_approval.approval PROJECT/SERVICE_NAME
 ```

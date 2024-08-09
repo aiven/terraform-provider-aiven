@@ -7,14 +7,22 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// reIsSetElement Set item ends with a 9-length hash int.
-var reIsSetElement = regexp.MustCompile(`\.[0-9]{9}$`)
+var (
+	// reIsSetElement Set item ends with a 9-length hash int.
+	reIsSetElement      = regexp.MustCompile(`\.[0-9]{9}$`)
+	reIsIPFilterStrings = regexp.MustCompile(`\.(ip_filter|ip_filter_string)\.`)
+)
 
 // SuppressUnchanged suppresses diff for unchanged fields.
 // Applied for all nested values: both for objects and arrays.
 func SuppressUnchanged(k, old, new string, d *schema.ResourceData) bool {
+	// schema.TypeMap
+	if strings.HasSuffix(k, ".%") {
+		return old == new
+	}
+
 	// Lists, sets and objects (object is list with one item).
-	if k[len(k)-1:] == "#" {
+	if strings.HasSuffix(k, ".#") {
 		if d.HasChange(k) {
 			// By some reason terraform might mark objects as "changed".
 			// In that case, terraform returns a list with a nil value.
@@ -24,12 +32,18 @@ func SuppressUnchanged(k, old, new string, d *schema.ResourceData) bool {
 			return ok && len(v) == 1 && v[0] == nil
 		}
 
-		// Suppress empty objects and empty arrays
-		return true
+		// Suppresses object diff, because it might have been received as default value from the API.
+		// So the diff happens when the object's field is changed.
+		// Object is a list, and both set and list end with "#".
+		// So set == list == object (by type).
+		// A set of objects is different.
+		// Because hash is calculated for the whole object, not per field.
+		return !isObjectSet(k, d)
 	}
 
+	// SuppressUnchanged is applied to each nested field.
 	// Ip filter items handled with a special suppressor.
-	if strings.Contains(k, ".ip_filter.") || strings.Contains(k, ".ip_filter_string.") {
+	if reIsIPFilterStrings.MatchString(k) {
 		return suppressIPFilterSet(k, old, new, d)
 	}
 
@@ -63,4 +77,25 @@ func suppressIPFilterSet(k, old, new string, d *schema.ResourceData) bool {
 	v, ok := d.GetOk(strings.Join(path[:len(path)-1], ".") + ".#")
 	// Literally, if the value is "0.0.0.0/0" and the parent's length is "1"
 	return old == "0.0.0.0/0" && new == "" && ok && v.(int) == 1
+}
+
+// isObjectSet returns true if given k is for collection of objects
+func isObjectSet(k string, d *schema.ResourceData) bool {
+	path := strings.Split(strings.TrimSuffix(k, ".#"), ".")
+	value := d.GetRawState().AsValueMap()[path[0]]
+
+	// user_config field
+	path = path[1:]
+
+	// Drills down the field
+	for _, v := range path {
+		if v == "0" {
+			value = value.AsValueSlice()[0]
+			continue
+		}
+		value = value.GetAttr(v)
+	}
+
+	t := value.Type()
+	return t.IsSetType() && t.ElementType().IsObjectType()
 }

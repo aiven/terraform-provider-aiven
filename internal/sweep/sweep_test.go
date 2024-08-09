@@ -49,6 +49,7 @@ func knownMissginSweepers() []string {
 		"aiven_pg_database",
 		"aiven_kafka_user",
 		"aiven_redis_user",
+		"aiven_valkey_user",
 		"aiven_opensearch_acl_config",
 		"aiven_mysql_database",
 		"aiven_m3db_user",
@@ -70,6 +71,7 @@ func knownMissginSweepers() []string {
 		"aiven_clickhouse_grant",
 		"aiven_opensearch_security_plugin_config",
 		"aiven_flink_application",
+		"aiven_organization_application_user_token",
 	}
 }
 

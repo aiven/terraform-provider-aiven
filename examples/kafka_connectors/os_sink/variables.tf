@@ -1,4 +1,4 @@
-variable "avn_token" {}
+variable "aiven_token" {}
 variable "avn_project" {}
 variable "kafka_name" {}
 variable "kafka_connector_name" {}

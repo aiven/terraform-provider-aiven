@@ -24,7 +24,7 @@ data "aiven_redis" "redis1" {
 
 ### Required
 
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Read-Only
@@ -42,7 +42,7 @@ data "aiven_redis" "redis1" {
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
 - `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
 - `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
-- `redis` (List of Object) Redis server provided values (see [below for nested schema](#nestedatt--redis))
+- `redis` (List of Object, Sensitive) Redis server provided values (see [below for nested schema](#nestedatt--redis))
 - `redis_user_config` (List of Object) Redis user configurable settings (see [below for nested schema](#nestedatt--redis_user_config))
 - `service_host` (String) The hostname of the service.
 - `service_integrations` (List of Object) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedatt--service_integrations))
@@ -54,7 +54,7 @@ data "aiven_redis" "redis1" {
 - `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
 - `static_ips` (Set of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 - `tag` (Set of Object) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedatt--tag))
-- `tech_emails` (Set of Object) Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability. (see [below for nested schema](#nestedatt--tech_emails))
+- `tech_emails` (Set of Object) The email addresses for [service contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this service. You can also set email contacts at the project level. (see [below for nested schema](#nestedatt--tech_emails))
 - `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
 
 <a id="nestedatt--components"></a>
@@ -77,6 +77,10 @@ Read-Only:
 
 Read-Only:
 
+- `password` (String)
+- `replica_uri` (String)
+- `slave_uris` (List of String)
+- `uris` (List of String)
 
 
 <a id="nestedatt--redis_user_config"></a>
@@ -86,7 +90,7 @@ Read-Only:
 
 - `additional_backup_regions` (List of String)
 - `ip_filter` (Set of String)
-- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--redis_user_config--ip_filter_object))
+- `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--redis_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
 - `migration` (List of Object) (see [below for nested schema](#nestedobjatt--redis_user_config--migration))
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--redis_user_config--private_access))
@@ -127,6 +131,7 @@ Read-Only:
 - `dbname` (String)
 - `host` (String)
 - `ignore_dbs` (String)
+- `ignore_roles` (String)
 - `method` (String)
 - `password` (String)
 - `port` (Number)

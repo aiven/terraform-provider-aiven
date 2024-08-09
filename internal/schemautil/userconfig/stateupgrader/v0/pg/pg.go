@@ -18,8 +18,8 @@ func aivenPGSchema() map[string]*schema.Schema {
 		Type:        schema.TypeList,
 		MaxItems:    1,
 		Computed:    true,
+		Sensitive:   true,
 		Description: "PostgreSQL specific server provided values",
-		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"replica_uri": {

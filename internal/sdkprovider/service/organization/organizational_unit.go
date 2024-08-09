@@ -14,34 +14,33 @@ var aivenOrganizationalUnitSchema = map[string]*schema.Schema{
 	"name": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "Organizational Unit name",
+		Description: "The name of the organizational unit.",
 	},
 	"parent_id": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "Parent ID",
+		Description: "The ID of the organization that the unit is created in.",
 	},
 	"tenant_id": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Tenant ID",
+		Description: "Tenant ID.",
 	},
 	"create_time": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Time of creation",
+		Description: "Time of creation.",
 	},
 	"update_time": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Time of last update",
+		Description: "Time of last update.",
 	},
 }
 
 func ResourceOrganizationalUnit() *schema.Resource {
 	return &schema.Resource{
-		Description: "The Organizational Unit resource allows the creation and management of Aiven Organizational " +
-			"Units.",
+		Description:   "Creates and manages an [organizational unit](https://aiven.io/docs/platform/concepts/orgs-units-projects) in an Aiven organization.",
 		CreateContext: resourceOrganizationalUnitCreate,
 		ReadContext:   resourceOrganizationalUnitRead,
 		UpdateContext: resourceOrganizationalUnitUpdate,

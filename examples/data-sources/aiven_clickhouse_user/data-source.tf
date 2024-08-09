@@ -1,5 +1,5 @@
-data "aiven_clickhouse_user" "ch-user" {
-  project      = aiven_project.myproject.project
-  service_name = aiven_clickhouse.myservice.service_name
-  username     = "<USERNAME>"
+data "aiven_clickhouse_user" "example_user" {
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_clickhouse.example_clickhouse.service_name
+  username     = "analyst"
 }

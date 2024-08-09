@@ -23,7 +23,7 @@ func init() {
 }
 
 func sweepConnectionPoll(ctx context.Context) func(string) error {
-	return func(id string) error {
+	return func(_ string) error {
 		client, err := sweep.SharedClient()
 		if err != nil {
 			return err

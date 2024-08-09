@@ -3,25 +3,26 @@
 page_title: "aiven_billing_group Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages billing groups and assigns them to projects.
+  Creates and manages billing groups https://aiven.io/docs/platform/concepts/billing-groups and assigns them to projects.
 ---
 
 # aiven_billing_group (Resource)
 
-Creates and manages billing groups and assigns them to projects.
+Creates and manages [billing groups](https://aiven.io/docs/platform/concepts/billing-groups) and assigns them to projects.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_billing_group" "bybg1" {
-  name             = "bybg1"
+resource "aiven_billing_group" "example_billing_group" {
+  name             = "example-billing-group"
   billing_currency = "USD"
   vat_id           = "123ABC"
+  parent_id        =  data.aiven_organization.main.id
 }
 
-resource "aiven_project" "pr1" {
-  project       = "pr1"
-  billing_group = aiven_billing_group.bybg1.id
+resource "aiven_project" "example_project" {
+  project       = "example-project"
+  billing_group = aiven_billing_group.example_billing_group.id
 }
 ```
 
@@ -70,5 +71,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_billing_group.bybg1 id
+terraform import aiven_billing_group.example_billing_group ID
 ```

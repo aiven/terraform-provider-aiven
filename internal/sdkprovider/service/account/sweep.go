@@ -73,7 +73,7 @@ func listTestAccounts(ctx context.Context) ([]aiven.Account, error) {
 }
 
 func sweepAccountAuthentications(ctx context.Context) func(region string) error {
-	return func(region string) error {
+	return func(_ string) error {
 		client, err := sweep.SharedClient()
 		if err != nil {
 			return err
@@ -107,7 +107,7 @@ func sweepAccountAuthentications(ctx context.Context) func(region string) error 
 }
 
 func sweepAccounts(ctx context.Context) func(region string) error {
-	return func(region string) error {
+	return func(_ string) error {
 		client, err := sweep.SharedClient()
 		if err != nil {
 			return err
@@ -134,7 +134,7 @@ func sweepAccounts(ctx context.Context) func(region string) error {
 }
 
 func sweepAccountTeams(ctx context.Context) func(region string) error {
-	return func(region string) error {
+	return func(_ string) error {
 		client, err := sweep.SharedClient()
 		if err != nil {
 			return err
@@ -166,7 +166,7 @@ func sweepAccountTeams(ctx context.Context) func(region string) error {
 	}
 }
 func sweepAccountTeamMembers(ctx context.Context) func(region string) error {
-	return func(region string) error {
+	return func(_ string) error {
 		client, err := sweep.SharedClient()
 		if err != nil {
 			return err
@@ -220,7 +220,7 @@ func sweepAccountTeamMembers(ctx context.Context) func(region string) error {
 }
 
 func sweepAccountTeamProjects(ctx context.Context) func(region string) error {
-	return func(region string) error {
+	return func(_ string) error {
 		client, err := sweep.SharedClient()
 		if err != nil {
 			return err

@@ -3,19 +3,19 @@
 page_title: "aiven_kafka_connect Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Kafka Connect data source provides information about the existing Aiven Kafka Connect service.
+  Gets information about an Aiven for Apache Kafka® Connect service.
 ---
 
 # aiven_kafka_connect (Data Source)
 
-The Kafka Connect data source provides information about the existing Aiven Kafka Connect service.
+Gets information about an Aiven for Apache Kafka® Connect service.
 
 ## Example Usage
 
 ```terraform
-data "aiven_kafka_connect" "kc1" {
-  project      = data.aiven_project.pr1.project
-  service_name = "my-kc1"
+data "aiven_kafka_connect" "example_kafka_connect" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-connect-service"
 }
 ```
 
@@ -24,7 +24,7 @@ data "aiven_kafka_connect" "kc1" {
 
 ### Required
 
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Read-Only
@@ -38,7 +38,6 @@ data "aiven_kafka_connect" "kc1" {
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) Disk space that service is currently using
 - `id` (String) The ID of this resource.
-- `kafka_connect` (List of Object) Kafka Connect server provided values (see [below for nested schema](#nestedatt--kafka_connect))
 - `kafka_connect_user_config` (List of Object) KafkaConnect user configurable settings (see [below for nested schema](#nestedatt--kafka_connect_user_config))
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
@@ -54,7 +53,7 @@ data "aiven_kafka_connect" "kc1" {
 - `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
 - `static_ips` (Set of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 - `tag` (Set of Object) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedatt--tag))
-- `tech_emails` (Set of Object) Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability. (see [below for nested schema](#nestedatt--tech_emails))
+- `tech_emails` (Set of Object) The email addresses for [service contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this service. You can also set email contacts at the project level. (see [below for nested schema](#nestedatt--tech_emails))
 - `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
 
 <a id="nestedatt--components"></a>
@@ -72,13 +71,6 @@ Read-Only:
 - `usage` (String)
 
 
-<a id="nestedatt--kafka_connect"></a>
-### Nested Schema for `kafka_connect`
-
-Read-Only:
-
-
-
 <a id="nestedatt--kafka_connect_user_config"></a>
 ### Nested Schema for `kafka_connect_user_config`
 
@@ -86,12 +78,13 @@ Read-Only:
 
 - `additional_backup_regions` (List of String)
 - `ip_filter` (Set of String)
-- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--ip_filter_object))
+- `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
 - `kafka_connect` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--kafka_connect))
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--private_access))
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--privatelink_access))
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--public_access))
+- `secret_providers` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--secret_providers))
 - `service_log` (Boolean)
 - `static_ips` (Boolean)
 
@@ -153,6 +146,38 @@ Read-Only:
 
 - `kafka_connect` (Boolean)
 - `prometheus` (Boolean)
+
+
+<a id="nestedobjatt--kafka_connect_user_config--secret_providers"></a>
+### Nested Schema for `kafka_connect_user_config.secret_providers`
+
+Read-Only:
+
+- `aws` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--secret_providers--aws))
+- `name` (String)
+- `vault` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_connect_user_config--secret_providers--vault))
+
+<a id="nestedobjatt--kafka_connect_user_config--secret_providers--aws"></a>
+### Nested Schema for `kafka_connect_user_config.secret_providers.aws`
+
+Read-Only:
+
+- `access_key` (String)
+- `auth_method` (String)
+- `region` (String)
+- `secret_key` (String)
+
+
+<a id="nestedobjatt--kafka_connect_user_config--secret_providers--vault"></a>
+### Nested Schema for `kafka_connect_user_config.secret_providers.vault`
+
+Read-Only:
+
+- `address` (String)
+- `auth_method` (String)
+- `engine_version` (Number)
+- `token` (String)
+
 
 
 

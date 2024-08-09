@@ -15,10 +15,9 @@ func m3dbUserConfig() *schema.Schema {
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"additional_backup_regions": {
-				Deprecated:  "This property is deprecated.",
 				Description: "Additional Cloud Regions for Backup Replication.",
 				Elem: &schema.Schema{
-					Description: "Target cloud.",
+					Description: "Target cloud. Example: `aws-eu-central-1`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1,
@@ -26,15 +25,15 @@ func m3dbUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"custom_domain": {
-				Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.",
+				Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. Example: `grafana.example.org`.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -42,27 +41,27 @@ func m3dbUserConfig() *schema.Schema {
 				Type:     schema.TypeSet,
 			},
 			"ip_filter_object": {
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"description": {
-						Description: "Description for IP filter list entry.",
+						Description: "Description for IP filter list entry. Example: `Production service IP range`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"network": {
-						Description: "CIDR address block.",
+						Description: "CIDR address block. Example: `10.20.0.0/16`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 				}},
 				MaxItems: 1024,
 				Optional: true,
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 			},
 			"ip_filter_string": {
-				Description: "Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.",
+				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
 				Elem: &schema.Schema{
-					Description: "CIDR address block, either as a string, or in a dict with an optional description field.",
+					Description: "CIDR address block, either as a string, or in a dict with an optional description field. Example: `10.20.0.0/16`.",
 					Type:        schema.TypeString,
 				},
 				MaxItems: 1024,
@@ -73,22 +72,22 @@ func m3dbUserConfig() *schema.Schema {
 				Description: "M3 limits",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"max_recently_queried_series_blocks": {
-						Description: "The maximum number of blocks that can be read in a given lookback period.",
+						Description: "The maximum number of blocks that can be read in a given lookback period. Example: `20000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"max_recently_queried_series_disk_bytes_read": {
-						Description: "The maximum number of disk bytes that can be read in a given lookback period.",
+						Description: "The maximum number of disk bytes that can be read in a given lookback period. Example: `104857600`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"max_recently_queried_series_lookback": {
-						Description: "The lookback period for 'max_recently_queried_series_blocks' and 'max_recently_queried_series_disk_bytes_read'.",
+						Description: "The lookback period for `max_recently_queried_series_blocks` and `max_recently_queried_series_disk_bytes_read`. Example: `15s`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"query_docs": {
-						Description: "The maximum number of docs fetched in single query.",
+						Description: "The maximum number of docs fetched in single query. Example: `100000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -98,7 +97,7 @@ func m3dbUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"query_series": {
-						Description: "The maximum number of series fetched in single query.",
+						Description: "The maximum number of series fetched in single query. Example: `100000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -132,10 +131,9 @@ func m3dbUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"m3_version": {
-				Description:  "M3 major version (deprecated, use m3db_version).",
-				Optional:     true,
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"1.1", "1.2", "1.5"}, false),
+				Description: "Enum: `1.1`, `1.2`, `1.5`, and newer. M3 major version (deprecated, use m3db_version).",
+				Optional:    true,
+				Type:        schema.TypeString,
 			},
 			"m3coordinator_enable_graphite_carbon_ingest": {
 				Description: "Enables access to Graphite Carbon plaintext metrics ingestion. It can be enabled only for services inside VPCs. The metrics are written to aggregated namespaces only.",
@@ -143,16 +141,15 @@ func m3dbUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"m3db_version": {
-				Description:  "M3 major version (the minimum compatible version).",
-				Optional:     true,
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"1.1", "1.2", "1.5"}, false),
+				Description: "Enum: `1.1`, `1.2`, `1.5`, and newer. M3 major version (the minimum compatible version).",
+				Optional:    true,
+				Type:        schema.TypeString,
 			},
 			"namespaces": {
 				Description: "List of M3 namespaces",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"name": {
-						Description: "The name of the namespace.",
+						Description: "The name of the namespace. Example: `default`.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -163,27 +160,27 @@ func m3dbUserConfig() *schema.Schema {
 								Description: "Retention options",
 								Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 									"block_data_expiry_duration": {
-										Description: "Controls how long we wait before expiring stale data.",
+										Description: "Controls how long we wait before expiring stale data. Example: `5m`.",
 										Optional:    true,
 										Type:        schema.TypeString,
 									},
 									"blocksize_duration": {
-										Description: "Controls how long to keep a block in memory before flushing to a fileset on disk.",
+										Description: "Controls how long to keep a block in memory before flushing to a fileset on disk. Example: `2h`.",
 										Optional:    true,
 										Type:        schema.TypeString,
 									},
 									"buffer_future_duration": {
-										Description: "Controls how far into the future writes to the namespace will be accepted.",
+										Description: "Controls how far into the future writes to the namespace will be accepted. Example: `10m`.",
 										Optional:    true,
 										Type:        schema.TypeString,
 									},
 									"buffer_past_duration": {
-										Description: "Controls how far into the past writes to the namespace will be accepted.",
+										Description: "Controls how far into the past writes to the namespace will be accepted. Example: `10m`.",
 										Optional:    true,
 										Type:        schema.TypeString,
 									},
 									"retention_period_duration": {
-										Description: "Controls the duration of time that M3DB will retain data for the namespace.",
+										Description: "Controls the duration of time that M3DB will retain data for the namespace. Example: `48h`.",
 										Optional:    true,
 										Type:        schema.TypeString,
 									},
@@ -208,12 +205,12 @@ func m3dbUserConfig() *schema.Schema {
 						Type:     schema.TypeList,
 					},
 					"resolution": {
-						Description: "The resolution for an aggregated namespace.",
+						Description: "The resolution for an aggregated namespace. Example: `30s`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"type": {
-						Description:  "The type of aggregation (aggregated/unaggregated).",
+						Description:  "Enum: `aggregated`, `unaggregated`. The type of aggregation (aggregated/unaggregated).",
 						Required:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"aggregated", "unaggregated"}, false),
@@ -235,7 +232,7 @@ func m3dbUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"project_to_fork_from": {
-				Description: "Name of another project to fork a service from. This has effect only when a new service is being created.",
+				Description: "Name of another project to fork a service from. This has effect only when a new service is being created. Example: `anotherprojectname`.",
 				ForceNew:    true,
 				Optional:    true,
 				Type:        schema.TypeString,
@@ -259,7 +256,7 @@ func m3dbUserConfig() *schema.Schema {
 						"aggregations": {
 							Description: "List of aggregations to be applied.",
 							Elem: &schema.Schema{
-								Description:  "Aggregation to be applied.",
+								Description:  "Enum: `Count`, `Last`, `Max`, `Mean`, `Median`, `Min`, `P10`, `P20`, `P30`, `P40`, `P50`, `P60`, `P70`, `P80`, `P90`, `P95`, `P99`, `P999`, `P9999`, `Stdev`, `Sum`, `SumSq`. Aggregation to be applied.",
 								Type:         schema.TypeString,
 								ValidateFunc: validation.StringInSlice([]string{"Count", "Last", "Max", "Mean", "Median", "Min", "P10", "P20", "P30", "P40", "P50", "P60", "P70", "P80", "P90", "P95", "P99", "P999", "P9999", "Stdev", "Sum", "SumSq"}, false),
 							},
@@ -273,12 +270,12 @@ func m3dbUserConfig() *schema.Schema {
 							Type:        schema.TypeBool,
 						},
 						"filter": {
-							Description: "Matching metric names with wildcards (using __name__:wildcard) or matching tags and their (optionally wildcarded) values. For value, ! can be used at start of value for negation, and multiple filters can be supplied using space as separator.",
+							Description: "Matching metric names with wildcards (using __name__:wildcard) or matching tags and their (optionally wildcarded) values. For value, ! can be used at start of value for negation, and multiple filters can be supplied using space as separator. Example: `__name__:disk_* host:important-42 mount:!*/sda`.",
 							Required:    true,
 							Type:        schema.TypeString,
 						},
 						"name": {
-							Description: "The (optional) name of the rule.",
+							Description: "The (optional) name of the rule. Example: `important disk metrics`.",
 							Optional:    true,
 							Type:        schema.TypeString,
 						},
@@ -286,7 +283,7 @@ func m3dbUserConfig() *schema.Schema {
 							Deprecated:  "Deprecated. Use `namespaces_string` instead.",
 							Description: "This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by glob (=wildcards).",
 							Elem: &schema.Schema{
-								Description: "Filter the namespace by glob (=wildcards).",
+								Description: "Filter the namespace by glob (=wildcards). Example: `aggregated_*`.",
 								Type:        schema.TypeString,
 							},
 							MaxItems: 10,
@@ -297,12 +294,12 @@ func m3dbUserConfig() *schema.Schema {
 							Description: "This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by exact match of retention period and resolution",
 							Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 								"resolution": {
-									Description: "The resolution for the matching namespace.",
+									Description: "The resolution for the matching namespace. Example: `30s`.",
 									Required:    true,
 									Type:        schema.TypeString,
 								},
 								"retention": {
-									Description: "The retention period of the matching namespace.",
+									Description: "The retention period of the matching namespace. Example: `48h`.",
 									Optional:    true,
 									Type:        schema.TypeString,
 								},
@@ -314,7 +311,7 @@ func m3dbUserConfig() *schema.Schema {
 						"namespaces_string": {
 							Description: "This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by glob (=wildcards).",
 							Elem: &schema.Schema{
-								Description: "Filter the namespace by glob (=wildcards).",
+								Description: "Filter the namespace by glob (=wildcards). Example: `aggregated_*`.",
 								Type:        schema.TypeString,
 							},
 							MaxItems: 10,
@@ -325,12 +322,12 @@ func m3dbUserConfig() *schema.Schema {
 							Description: "List of tags to be appended to matching metrics",
 							Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 								"name": {
-									Description: "Name of the tag.",
+									Description: "Name of the tag. Example: `my_tag`.",
 									Required:    true,
 									Type:        schema.TypeString,
 								},
 								"value": {
-									Description: "Value of the tag.",
+									Description: "Value of the tag. Example: `my_value`.",
 									Required:    true,
 									Type:        schema.TypeString,
 								},
@@ -354,7 +351,7 @@ func m3dbUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"service_to_fork_from": {
-				Description: "Name of another service to fork from. This has effect only when a new service is being created.",
+				Description: "Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.",
 				ForceNew:    true,
 				Optional:    true,
 				Type:        schema.TypeString,

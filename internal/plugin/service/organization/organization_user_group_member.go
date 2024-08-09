@@ -15,6 +15,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 var (
@@ -76,31 +77,36 @@ func (r *organizationUserGroupMembersResource) Schema(
 	resp *resource.SchemaResponse,
 ) {
 	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
-		Description: util.BetaDescription("Adds and manages users in a user group."),
+		Description: userconfig.Desc(`
+Adds and manages users in a [user group](https://aiven.io/docs/platform/howto/list-groups). You can add organization users and application users to groups.
+
+Groups are given access to projects using the ` + "`aiven_organization_group_project`" + ` resource.`,
+		).
+			Build(),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Description: "Compound identifier of the organization user group member.",
+				Description: "A compound identifier of the group member in the format `organization_id/group_id/user_id`.",
 				Computed:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"organization_id": schema.StringAttribute{
-				Description: "Identifier of the organization.",
+				Description: "The ID of the organization.",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"group_id": schema.StringAttribute{
-				Description: "Identifier of the organization user group.",
+				Description: "The ID of the user group.",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"user_id": schema.StringAttribute{
-				Description: "Identifier of the organization user group member.",
+				Description: "The ID of the organization user or application user.",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),

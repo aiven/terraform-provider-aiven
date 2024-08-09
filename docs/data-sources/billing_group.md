@@ -3,18 +3,18 @@
 page_title: "aiven_billing_group Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Provides information about an existing billing group.
+  Gets information about a billing group.
 ---
 
 # aiven_billing_group (Data Source)
 
-Provides information about an existing billing group.
+Gets information about a billing group.
 
 ## Example Usage
 
 ```terraform
-data "aiven_billing_group" "foo" {
-  name = "<BILLING_GROUP_NAME>"
+data "aiven_billing_group" "example_billing_group" {
+  name = "example-billing-group"
 }
 ```
 

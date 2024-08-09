@@ -10,23 +10,24 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 func aivenFlinkSchema() map[string]*schema.Schema {
-	aivenFlinkSchema := schemautil.ServiceCommonSchema()
+	aivenFlinkSchema := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeFlink)
 	aivenFlinkSchema[schemautil.ServiceTypeFlink] = &schema.Schema{
 		Type:        schema.TypeList,
 		MaxItems:    1,
 		Computed:    true,
-		Description: "Flink server provided values",
+		Description: "Values provided by the Flink server.",
 		Optional:    true,
+		Sensitive:   true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
+				// TODO: Rename `host_ports` to `uris` in the next major version.
 				"host_ports": {
 					Type:        schema.TypeList,
 					Computed:    true,
-					Description: "Host and Port of a Flink server",
+					Description: "The host and port of a Flink server.",
 					Optional:    true,
 					Elem: &schema.Schema{
 						Type: schema.TypeString,
@@ -35,14 +36,12 @@ func aivenFlinkSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	aivenFlinkSchema[schemautil.ServiceTypeFlink+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypeFlink)
-
 	return aivenFlinkSchema
 }
 
 func ResourceFlink() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Flink resource allows the creation and management of Aiven Flink services.",
+		Description:   "Creates and manages an [Aiven for Apache Flink® service](https://aiven.io/docs/products/flink/concepts/flink-features).",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeFlink),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,

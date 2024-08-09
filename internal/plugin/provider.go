@@ -95,7 +95,7 @@ func (p *AivenProvider) Configure(
 		data.APIToken = types.StringValue(token)
 	}
 
-	client, err := common.NewCustomAivenClient(data.APIToken.String(), req.TerraformVersion, p.version)
+	client, err := common.NewCustomAivenClient(data.APIToken.ValueString(), req.TerraformVersion, p.version)
 	if err != nil {
 		resp.Diagnostics.AddError(errmsg.SummaryConstructingClient, err.Error())
 
@@ -112,17 +112,13 @@ func (p *AivenProvider) Resources(context.Context) []func() resource.Resource {
 	// List of resources that are currently available in the provider.
 	resources := []func() resource.Resource{
 		organization.NewOrganizationResource,
+		organization.NewOrganizationUserGroupMembersResource,
+		organization.NewOrganizationGroupProjectResource,
 	}
 
 	// Add to a list of resources that are currently in beta.
 	if util.IsBeta() {
-		betaResources := []func() resource.Resource{
-			organization.NewOrganizationUserGroupMembersResource,
-			organization.NewOrganizationGroupProjectResource,
-			organization.NewOrganizationApplicationUser,
-			organization.NewOrganizationApplicationUserToken,
-		}
-
+		var betaResources []func() resource.Resource
 		resources = append(resources, betaResources...)
 	}
 
@@ -138,10 +134,7 @@ func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSou
 
 	// Add to a list of data sources that are currently in beta.
 	if util.IsBeta() {
-		betaDataSources := []func() datasource.DataSource{
-			organization.NewOrganizationApplicationUserDataSource,
-		}
-
+		var betaDataSources []func() datasource.DataSource
 		dataSources = append(dataSources, betaDataSources...)
 	}
 

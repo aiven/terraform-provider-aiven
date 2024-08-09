@@ -20,7 +20,7 @@ var aivenOrganizationUserGroupSchema = map[string]*schema.Schema{
 	},
 	"name": {
 		Type:        schema.TypeString,
-		Optional:    true,
+		Required:    true,
 		ForceNew:    true,
 		Description: userconfig.Desc("The name of the user group.").ForceNew().Build(),
 	},
@@ -48,7 +48,7 @@ var aivenOrganizationUserGroupSchema = map[string]*schema.Schema{
 
 func ResourceOrganizationUserGroup() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Creates and manages a user group in an organization.",
+		Description:   "Creates and manages a [user group](https://aiven.io/docs/platform/howto/list-groups) in an organization.",
 		CreateContext: resourceOrganizationUserGroupCreate,
 		ReadContext:   resourceOrganizationUserGroupRead,
 		UpdateContext: resourceOrganizationUserGroupUpdate,

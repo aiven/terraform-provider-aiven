@@ -8,30 +8,26 @@ import (
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
-	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/service"
 )
 
 func aivenPGSchema() map[string]*schema.Schema {
-	schemaPG := schemautil.ServiceCommonSchema()
-	schemaPG[schemautil.ServiceTypePG] = &schema.Schema{
+	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypePG)
+	s[schemautil.ServiceTypePG] = &schema.Schema{
 		Type:        schema.TypeList,
 		MaxItems:    1,
 		Computed:    true,
 		Description: "PostgreSQL specific server provided values",
 		Optional:    true,
+		Sensitive:   true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"replica_uri": {
-					Type:        schema.TypeString,
-					Computed:    true,
-					Description: "PostgreSQL replica URI for services with a replica",
-					Sensitive:   true,
-				},
+				// TODO: Remove `uri` in the next major version.
 				"uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
@@ -39,37 +35,124 @@ func aivenPGSchema() map[string]*schema.Schema {
 					Optional:    true,
 					Sensitive:   true,
 				},
-				"dbname": {
+				"uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "PostgreSQL master connection URIs",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				"bouncer": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "Primary PostgreSQL database name",
+					Description: "Bouncer connection details",
 				},
+				// TODO: Remove `host` in the next major version.
 				"host": {
 					Type:        schema.TypeString,
 					Computed:    true,
 					Description: "PostgreSQL master node host IP or name",
 				},
+				// TODO: Remove `port` in the next major version.
+				"port": {
+					Type:        schema.TypeInt,
+					Computed:    true,
+					Description: "PostgreSQL port",
+				},
+				// TODO: Remove `sslmode` in the next major version.
+				"sslmode": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "PostgreSQL sslmode setting (currently always \"require\")",
+				},
+				// TODO: Remove `user` in the next major version.
+				"user": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "PostgreSQL admin user name",
+				},
+				// TODO: Remove `password` in the next major version.
 				"password": {
 					Type:        schema.TypeString,
 					Computed:    true,
 					Description: "PostgreSQL admin user password",
 					Sensitive:   true,
 				},
-				"port": {
-					Type:        schema.TypeInt,
-					Computed:    true,
-					Description: "PostgreSQL port",
-				},
-				"sslmode": {
+				// TODO: Remove `dbname` in the next major version.
+				"dbname": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "PostgreSQL sslmode setting (currently always \"require\")",
+					Description: "Primary PostgreSQL database name",
 				},
-				"user": {
+				"params": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "PostgreSQL connection parameters",
+					Optional:    true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"host": {
+								Type:        schema.TypeString,
+								Computed:    true,
+								Description: "PostgreSQL host IP or name",
+							},
+							"port": {
+								Type:        schema.TypeInt,
+								Computed:    true,
+								Description: "PostgreSQL port",
+							},
+							"sslmode": {
+								Type:        schema.TypeString,
+								Computed:    true,
+								Description: "PostgreSQL sslmode setting (currently always \"require\")",
+							},
+							"user": {
+								Type:        schema.TypeString,
+								Computed:    true,
+								Description: "PostgreSQL admin user name",
+							},
+							"password": {
+								Type:        schema.TypeString,
+								Computed:    true,
+								Sensitive:   true,
+								Description: "PostgreSQL admin user password",
+							},
+							"database_name": {
+								Type:        schema.TypeString,
+								Computed:    true,
+								Description: "Primary PostgreSQL database name",
+							},
+						},
+					},
+				},
+				"replica_uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "PostgreSQL admin user name",
+					Description: "PostgreSQL replica URI for services with a replica",
+					Sensitive:   true,
 				},
+				"standby_uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "PostgreSQL standby connection URIs",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				"syncing_uris": {
+					Type:        schema.TypeList,
+					Computed:    true,
+					Description: "PostgreSQL syncing connection URIs",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				// TODO: This isn't in the connection info, but it's in the metadata.
+				//  We should move this to the other part of the schema in the next major version.
 				"max_connections": {
 					Type:        schema.TypeInt,
 					Computed:    true,
@@ -78,9 +161,7 @@ func aivenPGSchema() map[string]*schema.Schema {
 			},
 		},
 	}
-	schemaPG[schemautil.ServiceTypePG+"_user_config"] = service.GetUserConfig(schemautil.ServiceTypePG)
-
-	return schemaPG
+	return s
 }
 
 func ResourcePG() *schema.Resource {
@@ -160,8 +241,7 @@ func resourceServicePGUpdate(ctx context.Context, d *schema.ResourceData, m inte
 				TaskID:      t.Task.Id,
 			}
 
-			// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated WaitForStateContext.
-			taskI, err := w.Conf(d.Timeout(schema.TimeoutDefault)).WaitForStateContext(ctx)
+			taskI, err := w.Conf(d.Timeout(schema.TimeoutUpdate)).WaitForStateContext(ctx)
 			if err != nil {
 				return diag.Errorf("error waiting for Aiven service task to be DONE: %s", err)
 			}
@@ -191,8 +271,7 @@ type ServiceTaskWaiter struct {
 }
 
 // RefreshFunc will call the Aiven client and refresh its state.
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
-func (w *ServiceTaskWaiter) RefreshFunc() resource.StateRefreshFunc {
+func (w *ServiceTaskWaiter) RefreshFunc() retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		t, err := w.Client.ServiceTask.Get(
 			w.Context,
@@ -213,15 +292,14 @@ func (w *ServiceTaskWaiter) RefreshFunc() resource.StateRefreshFunc {
 }
 
 // Conf sets up the configuration to refresh.
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
-func (w *ServiceTaskWaiter) Conf(timeout time.Duration) *resource.StateChangeConf {
-	return &resource.StateChangeConf{
+func (w *ServiceTaskWaiter) Conf(timeout time.Duration) *retry.StateChangeConf {
+	return &retry.StateChangeConf{
 		Pending:                   []string{"IN_PROGRESS"},
 		Target:                    []string{"DONE"},
 		Refresh:                   w.RefreshFunc(),
-		Delay:                     10 * time.Second,
+		Delay:                     common.DefaultStateChangeDelay,
 		Timeout:                   timeout,
-		MinTimeout:                2 * time.Second,
+		MinTimeout:                common.DefaultStateChangeMinTimeout,
 		ContinuousTargetOccurence: 3,
 	}
 }

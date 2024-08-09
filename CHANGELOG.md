@@ -7,16 +7,93 @@ nav_order: 1
 # Changelog
 
 <!-- Always keep the following header in place: -->
-<!-- [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
+<!-- ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+## [4.22.0] - 2024-08-02
 
-<!-- TODO: uncomment when dragonfly is supported -->
-<!-- - Dragonfly support -->
+- Show "create" plan for missing `aiven_kafka_schema`
+- Update to the latest user configuration settings [b4f7493](https://github.com/aiven/terraform-provider-aiven/commit/b4f7493fd642dfd5eb96ba3768a5d1fbebd8af78)
+
+## [4.21.0] - 2024-07-23
+
+- Fix `aiven_transit_gateway_vpc_attachment`: remove `peer_region` deprecation, mark the field as create only.
+- Add `aiven_valkey` resource as a beta resource
+- Add `aiven_valkey_user` resource as a beta resource
+- Temporarily remove the `aiven_project_user` deprecation until we find a suitable alternative.  
+
+## [4.20.0] - 2024-06-26
+
+- Mark several sensitive user config fields as "sensitive"
+- Fix aiven-go-client dependency version
+- Fix `aiven_organization_user_group` resource - `name` field is required
+- Use `TypeSet` for `config_properties_exclude`  
+
+## [4.19.1] - 2024-05-05
+
+- Add `config_properties_exclude` attribute to `aiven_mirrormaker_replication_flow` resource
+
+## [4.19.0] - 2024-05-28
+
+- Add `is_super_admin` flag to `aiven_organization_application_user` resource
+- Add `aiven_mirrormaker_replication_flow` replication factor
+- Remove `aiven_mirrormaker_replication_flow` global mutex, the backend has been fixed
+- Remove service version validation to allow running new service versions without the provider upgrade 
+- Fix `aiven_organization_application_user_token` crashes with empty optional fields
+- Fix `ip_filter` conversion issue
+
+## [4.18.0] - 2024-05-22
+
+- Fix `ip_filter`, `ip_filter_string`, and `ip_filter_object` crash when receive an unexpected type
+- Add missing connection info fields to various service types
+
+## [4.17.0] - 2024-05-07
+
+- Fix `aiven_kafka_connector` fails to create resource with 201 error
+- Remove the beta flag from `aiven_organization_application_user` and `aiven_organization_application_user_token` resources
+- Fix incorrect token string used in Plugin Framework version of the provider
+
+## [4.16.0] - 2024-04-30
+
+- Fix incorrect timeout values used in certain cases
+- Fix sending `aiven_kafka_topic` config default values 
+- Fix sending `false` values in `aiven_kafka_topic` config
+- Fix `aiven_pg` user config fields with `__dot__` substring in name
+- Validate `aiven_kafka_topic` topic name conflict on `terraform plan`
+- Mark service connection info blocks as `sensitive`. See SDK [bug](https://github.com/hashicorp/terraform-plugin-sdk/issues/201).
+- Remove redundant service connection info fields 
+- Add Thanos resource (`aiven_thanos`) to allow for the creation and management of Thanos services (currently available as beta)
+
+## [4.15.0] - 2024-03-21
+
+- Add Dragonfly resource (`aiven_dragonfly`) to allow for the creation and management of Dragonfly services
+- Use new user config generator to generate service integration and service integration endpoint configs
+- Fix `aiven_kafka_schema` version update
+- Add `external_aws_cloudwatch_logs`, `external_elasticsearch_logs_user_config`, `external_opensearch_logs_user_config`,
+  `prometheus_user_config` service integration configs
+- Fix `aiven_kafka_schema` Protobuf normalization
+- Fix `aiven_service_integration_endpoint` for `external_postgresql` type
+- Add `AIVEN_ALLOW_IP_FILTER_PURGE` environment variable to allow purging of IP filters. This is a safety feature to
+  prevent accidental purging of IP filters, which can lead to loss of access to services. To enable purging, set the
+  environment variable to any value before running Terraform commands.
+- Use `TypeSet` for `ip_filter_object`
+- Fix incorrect behavior of `aiven_mirrormaker_replication_flow` schema fields:
+  - `sync_group_offsets_enabled`
+  - `sync_group_offsets_interval_seconds`
+  - `emit_backward_heartbeats_enabled`
+  - `offset_syncs_topic_location`
+  - `replication_policy_class`
+- Remove the beta flag for `aiven_organization_user_group_member` and `aiven_organization_group_project` resources 
+
+## [4.14.0] - 2024-02-20
+
+- Refactor deprecated `resource.StateChangeConf`/`resource.StateRefreshFunc` usage to their equivalent with `retry`
 - Fix `aiven_kafka_schema` JSON object diff suppress function
-- Add new user config generator
+- Use new user config generator to generate service configs
 - Use `TypeSet` for `ip_filter`, `ip_filter_string` fields
 - Fix `aiven_organization_user_group` resource - `description` field is required
+- Use golang 1.22
+- Output explicitly `termination_protection = true -> false` when service property is removed
+- Fix `aiven_flink_application_deployment` deletion 
 
 ## [4.13.3] - 2024-01-29
 

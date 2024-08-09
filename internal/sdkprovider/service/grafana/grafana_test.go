@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/converters"
 )
 
 func TestAccAiven_grafana(t *testing.T) {
@@ -49,9 +50,11 @@ func TestAccAiven_grafana(t *testing.T) {
 }
 
 func TestAccAiven_grafana_user_config(t *testing.T) {
+	// Parallel tests share os env, can't isolate this one
+	os.Setenv(converters.AllowIPFilterPurge, "1")
+
 	resourceName := "aiven_grafana.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
@@ -424,6 +427,10 @@ func testAccCheckAivenServiceGrafanaAttributes(n string) resource.TestCheckFunc 
 			return fmt.Errorf("expected to get an public_access.grafana from Aiven")
 		}
 
+		if a["grafana.0.uris.#"] == "" {
+			return fmt.Errorf("expected to get correct uris from Aiven")
+		}
+
 		return nil
 	}
 }
@@ -560,4 +567,131 @@ data "aiven_grafana" "common" {
 
   depends_on = [aiven_grafana.bar]
 }`, os.Getenv("AIVEN_PROJECT_NAME"), name, teamIDs)
+}
+
+func TestAccAiven_grafana_user_config_ip_filter_object(t *testing.T) {
+	// Parallel tests share os env, can't isolate this one
+	os.Setenv(converters.AllowIPFilterPurge, "1")
+
+	resourceName := "aiven_grafana.bar"
+	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	ipCount := "grafana_user_config.0.ip_filter_object.#"
+	ipValue := "grafana_user_config.0.ip_filter_object.*"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				// Creates a service with one ip_filter_object
+				Config: testAccAivenGrafanaUserConfigIPFilterObject(rName, `["10.0.0.0/8"]`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, ipCount, "1"),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						resourceName,
+						ipValue,
+						map[string]string{"network": "10.0.0.0/8", "description": "my 10.0.0.0/8"},
+					),
+				),
+			},
+			{
+				// Adds two more
+				Config: testAccAivenGrafanaUserConfigIPFilterObject(rName, `["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, ipCount, "3"),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						resourceName,
+						ipValue,
+						map[string]string{
+							"network":     "10.0.0.0/8",
+							"description": "my 10.0.0.0/8",
+						},
+					),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						resourceName,
+						ipValue,
+						map[string]string{
+							"network":     "172.16.0.0/12",
+							"description": "my 172.16.0.0/12",
+						},
+					),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						resourceName,
+						ipValue,
+						map[string]string{
+							"network":     "192.168.0.0/16",
+							"description": "my 192.168.0.0/16",
+						},
+					),
+				),
+			},
+			{
+				// Removes one
+				Config: testAccAivenGrafanaUserConfigIPFilterObject(rName, `["10.0.0.0/8", "192.168.0.0/16"]`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, ipCount, "2"),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						resourceName,
+						ipValue,
+						map[string]string{
+							"network":     "10.0.0.0/8",
+							"description": "my 10.0.0.0/8",
+						},
+					),
+					resource.TestCheckResourceAttr(resourceName, ipCount, "2"),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						resourceName,
+						ipValue,
+						map[string]string{
+							"network":     "192.168.0.0/16",
+							"description": "my 192.168.0.0/16",
+						},
+					),
+				),
+			},
+			{
+				// Reorders ip_filter_objects, but the plan is empty because it is set type
+				Config:   testAccAivenGrafanaUserConfigIPFilterObject(rName, `["192.168.0.0/16", "10.0.0.0/8"]`),
+				PlanOnly: true,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, ipCount, "2"),
+				),
+			},
+			{
+				// Removes entries
+				Config: testAccAivenGrafanaUserConfigIPFilterObject(rName, `[]`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, ipCount, "0"),
+				),
+			},
+		},
+	})
+}
+
+func testAccAivenGrafanaUserConfigIPFilterObject(name, networks string) string {
+	return fmt.Sprintf(`
+variable "networks" {
+  type    = list(string)
+  default = %s
+}
+
+resource "aiven_grafana" "bar" {
+  project                 = %q
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-1"
+  service_name            = "test-acc-sr-%s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  grafana_user_config {
+    dynamic "ip_filter_object" {
+      for_each = var.networks
+      content {
+        network     = ip_filter_object.value
+        description = "my ${ip_filter_object.value}"
+      }
+    }
+  }
+}
+`, networks, os.Getenv("AIVEN_PROJECT_NAME"), name)
 }

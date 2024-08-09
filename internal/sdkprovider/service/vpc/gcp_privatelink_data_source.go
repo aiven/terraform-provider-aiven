@@ -12,7 +12,7 @@ import (
 func DatasourceGCPPrivatelink() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceGCPPrivatelinkRead,
-		Description: "The GCP Privatelink resource allows the creation and management of Aiven GCP Privatelink for a services.",
+		Description: "Gets information about a Google Private Service Connect connection for an Aiven service.",
 		Schema:      schemautil.ResourceSchemaAsDatasourceSchema(aivenGCPPrivatelinkSchema, "project", "service_name"),
 	}
 }

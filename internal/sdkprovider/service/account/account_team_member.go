@@ -56,13 +56,11 @@ var aivenAccountTeamMemberSchema = map[string]*schema.Schema{
 func ResourceAccountTeamMember() *schema.Resource {
 	return &schema.Resource{
 		Description: `
-The Account Team Member resource allows the creation and management of an Aiven Account Team Member.
+Adds a user as a team member.
 
-During the creation of ` + "`aiven_account_team_member`" + `resource, an email invitation will be sent
-to a user using ` + "`user_email`" + ` address. If the user accepts an invitation, he or she will become
-a member of the account team. The deletion of ` + "`aiven_account_team_member`" + ` will not only
-delete the invitation if one was sent but not yet accepted by the user, it will also 
-eliminate an account team member if one has accepted an invitation previously.
+During the creation of this resource, an invite is sent to the address specified in ` + "`user_email`" + `. 
+The user is added to the team after they accept the invite. Deleting ` + "`aiven_account_team_member`" + ` 
+deletes the pending invite if not accepted or removes the user from the team if they already accepted the invite.
 `,
 		CreateContext: resourceAccountTeamMemberCreate,
 		ReadContext:   resourceAccountTeamMemberRead,
@@ -72,8 +70,15 @@ eliminate an account team member if one has accepted an invitation previously.
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema:             aivenAccountTeamMemberSchema,
-		DeprecationMessage: "This resource is deprecated",
+		Schema: aivenAccountTeamMemberSchema,
+		DeprecationMessage: `
+This resource is deprecated. Use aiven_organization_user_group instead.
+
+You can't delete the Account Owners team. Deleting all other teams in your organization will disable the teams feature. You won't be able to create new teams or access your Account Owners team.
+
+On 2 December 2024 all teams will be deleted and the teams feature will be completely removed. View the
+migration guide for more information: https://aiven.io/docs/tools/terraform/howto/migrate-from-teams-to-groups.
+`,
 	}
 }
 

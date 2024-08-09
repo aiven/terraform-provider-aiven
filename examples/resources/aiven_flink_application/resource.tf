@@ -1,6 +1,6 @@
-resource "aiven_flink_application" "foo" {
-  project = aiven_project.foo.project
-  service_name = "flink-service-1"
-  name = "my-flink-app"
+resource "aiven_flink_application" "example_app" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-flink-service"
+  name         = "example-app"
 }
 

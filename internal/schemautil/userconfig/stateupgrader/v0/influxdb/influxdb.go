@@ -17,6 +17,7 @@ func influxDBSchema() map[string]*schema.Schema {
 	s[schemautil.ServiceTypeInfluxDB] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
+		Sensitive:   true,
 		Description: "InfluxDB server provided values",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{

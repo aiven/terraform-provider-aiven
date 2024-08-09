@@ -39,6 +39,16 @@ func (rep *repository) Read(ctx context.Context, project, service, topic string)
 	}
 }
 
+// Exists omits service not found
+func (rep *repository) Exists(ctx context.Context, project, service, topic string) (bool, error) {
+	err := rep.exists(ctx, project, service, topic, false)
+	if aiven.IsNotFound(err) {
+		// Either topic or service or project does not exist
+		return false, nil
+	}
+	return err == nil, err
+}
+
 // exists returns nil if topic exists, or errNotFound if doesn't:
 // 1. checks repository.seenTopics for known topics
 // 2. calls v1List for the remote state for the given service and marks it in repository.seenServices

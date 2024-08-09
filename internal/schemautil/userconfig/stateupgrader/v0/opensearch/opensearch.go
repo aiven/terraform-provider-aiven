@@ -17,6 +17,7 @@ func opensearchSchema() map[string]*schema.Schema {
 	s[schemautil.ServiceTypeOpenSearch] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
+		Sensitive:   true,
 		Description: "OpenSearch server provided values",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{

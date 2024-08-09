@@ -39,7 +39,7 @@ func init() {
 }
 
 func sweepStaticIPs(ctx context.Context) func(region string) error {
-	return func(region string) error {
+	return func(_ string) error {
 		projectName := os.Getenv("AIVEN_PROJECT_NAME")
 		client, err := sweep.SharedClient()
 		if err != nil {

@@ -7,8 +7,8 @@ import (
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -145,7 +145,6 @@ func resourceStaticIPDelete(ctx context.Context, d *schema.ResourceData, m inter
 	return nil
 }
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
 func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interface{}) error {
 	client := m.(*aiven.Client)
 
@@ -154,7 +153,7 @@ func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interfa
 		return err
 	}
 
-	conf := resource.StateChangeConf{
+	conf := retry.StateChangeConf{
 		Target:  []string{schemautil.StaticIPCreated},
 		Pending: []string{"waiting", schemautil.StaticIPCreating},
 		Timeout: d.Timeout(schema.TimeoutCreate),
@@ -173,6 +172,8 @@ func resourceStaticIPWait(ctx context.Context, d *schema.ResourceData, m interfa
 			log.Println("[DEBUG] static ip", staticIPAddressID, "not found in project")
 			return struct{}{}, "waiting", nil
 		},
+		Delay:      common.DefaultStateChangeDelay,
+		MinTimeout: common.DefaultStateChangeMinTimeout,
 	}
 
 	if _, err := conf.WaitForStateContext(ctx); err != nil {

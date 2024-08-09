@@ -5,7 +5,7 @@ builds:
     flags:
       - -trimpath
     ldflags:
-      - '-s -w -X github.com/aiven/terraform-provider-aiven/main.version={{.Version}}'
+      - '-s -w -X main.version={{.Version}}'
     goos:
       - freebsd
       - windows
@@ -39,4 +39,4 @@ signs:
 release:
   draft: true
 changelog:
-  skip: true
+  disable: true

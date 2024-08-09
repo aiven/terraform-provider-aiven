@@ -30,7 +30,7 @@ var aivenKafkaSchemaConfigurationSchema = map[string]*schema.Schema{
 		Type:         schema.TypeString,
 		Optional:     true,
 		ValidateFunc: validation.StringInSlice(compatibilityLevels, false),
-		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+		DiffSuppressFunc: func(_, _, new string, _ *schema.ResourceData) bool {
 			// When a compatibility level is not set to any value and consequently is null (empty string).
 			// Allow ignoring those.
 			return new == ""

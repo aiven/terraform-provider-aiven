@@ -30,7 +30,7 @@ func (s *KafkaConnectorTestSuite) TestKafkaConnectorOS() {
 	opts := s.withDefaults(&terraform.Options{
 		TerraformDir: "../examples/kafka_connectors/os_sink",
 		Vars: map[string]interface{}{
-			"avn_token":            s.config.Token,
+			"aiven_token":          s.config.Token,
 			"avn_project":          s.config.Project,
 			"kafka_name":           kafkaServiceName,
 			"kafka_connector_name": kafkaConnectorName,

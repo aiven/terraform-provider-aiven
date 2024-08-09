@@ -38,7 +38,7 @@ resource "aiven_m3db" "m3" {
 ### Required
 
 - `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Optional
@@ -46,6 +46,7 @@ resource "aiven_m3db" "m3" {
 - `additional_disk_space` (String) Additional disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 - `disk_space` (String, Deprecated) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
+- `m3db` (Block List, Max: 1) M3DB server provided values (see [below for nested schema](#nestedblock--m3db))
 - `m3db_user_config` (Block List, Max: 1) M3db user configurable settings (see [below for nested schema](#nestedblock--m3db_user_config))
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
@@ -53,7 +54,7 @@ resource "aiven_m3db" "m3" {
 - `service_integrations` (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
 - `static_ips` (Set of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 - `tag` (Block Set) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedblock--tag))
-- `tech_emails` (Block Set) Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability. (see [below for nested schema](#nestedblock--tech_emails))
+- `tech_emails` (Block Set) The email addresses for [service contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this service. You can also set email contacts at the project level. (see [below for nested schema](#nestedblock--tech_emails))
 - `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -65,7 +66,6 @@ resource "aiven_m3db" "m3" {
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) Disk space that service is currently using
 - `id` (String) The ID of this resource.
-- `m3db` (List of Object) M3 specific server provided values (see [below for nested schema](#nestedatt--m3db))
 - `service_host` (String) The hostname of the service.
 - `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
 - `service_port` (Number) The port of the service
@@ -74,28 +74,44 @@ resource "aiven_m3db" "m3" {
 - `service_username` (String) Username used for connecting to the service, if applicable
 - `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
 
+<a id="nestedblock--m3db"></a>
+### Nested Schema for `m3db`
+
+Optional:
+
+- `uris` (List of String) M3DB server URIs.
+
+Read-Only:
+
+- `http_cluster_uri` (String) M3DB cluster URI.
+- `http_node_uri` (String) M3DB node URI.
+- `influxdb_uri` (String) InfluxDB URI.
+- `prometheus_remote_read_uri` (String) Prometheus remote read URI.
+- `prometheus_remote_write_uri` (String) Prometheus remote write URI.
+
+
 <a id="nestedblock--m3db_user_config"></a>
 ### Nested Schema for `m3db_user_config`
 
 Optional:
 
-- `additional_backup_regions` (List of String, Deprecated) Additional Cloud Regions for Backup Replication.
-- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name.
-- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
-- `ip_filter_object` (Block List, Max: 1024) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16' (see [below for nested schema](#nestedblock--m3db_user_config--ip_filter_object))
-- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. '10.20.0.0/16'.
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
+- `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. Example: `grafana.example.org`.
+- `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
+- `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--m3db_user_config--ip_filter_object))
+- `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `limits` (Block List, Max: 1) M3 limits (see [below for nested schema](#nestedblock--m3db_user_config--limits))
 - `m3` (Block List, Max: 1) M3 specific configuration options (see [below for nested schema](#nestedblock--m3db_user_config--m3))
-- `m3_version` (String) M3 major version (deprecated, use m3db_version).
+- `m3_version` (String) Enum: `1.1`, `1.2`, `1.5`, and newer. M3 major version (deprecated, use m3db_version).
 - `m3coordinator_enable_graphite_carbon_ingest` (Boolean) Enables access to Graphite Carbon plaintext metrics ingestion. It can be enabled only for services inside VPCs. The metrics are written to aggregated namespaces only.
-- `m3db_version` (String) M3 major version (the minimum compatible version).
+- `m3db_version` (String) Enum: `1.1`, `1.2`, `1.5`, and newer. M3 major version (the minimum compatible version).
 - `namespaces` (Block List, Max: 2147483647) List of M3 namespaces (see [below for nested schema](#nestedblock--m3db_user_config--namespaces))
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--m3db_user_config--private_access))
-- `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created.
+- `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created. Example: `anotherprojectname`.
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--m3db_user_config--public_access))
 - `rules` (Block List, Max: 1) M3 rules (see [below for nested schema](#nestedblock--m3db_user_config--rules))
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
-- `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created.
+- `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.
 - `static_ips` (Boolean) Use static public IP addresses.
 
 <a id="nestedblock--m3db_user_config--ip_filter_object"></a>
@@ -103,11 +119,11 @@ Optional:
 
 Required:
 
-- `network` (String) CIDR address block.
+- `network` (String) CIDR address block. Example: `10.20.0.0/16`.
 
 Optional:
 
-- `description` (String) Description for IP filter list entry.
+- `description` (String) Description for IP filter list entry. Example: `Production service IP range`.
 
 
 <a id="nestedblock--m3db_user_config--limits"></a>
@@ -115,12 +131,12 @@ Optional:
 
 Optional:
 
-- `max_recently_queried_series_blocks` (Number) The maximum number of blocks that can be read in a given lookback period.
-- `max_recently_queried_series_disk_bytes_read` (Number) The maximum number of disk bytes that can be read in a given lookback period.
-- `max_recently_queried_series_lookback` (String) The lookback period for 'max_recently_queried_series_blocks' and 'max_recently_queried_series_disk_bytes_read'.
-- `query_docs` (Number) The maximum number of docs fetched in single query.
+- `max_recently_queried_series_blocks` (Number) The maximum number of blocks that can be read in a given lookback period. Example: `20000`.
+- `max_recently_queried_series_disk_bytes_read` (Number) The maximum number of disk bytes that can be read in a given lookback period. Example: `104857600`.
+- `max_recently_queried_series_lookback` (String) The lookback period for `max_recently_queried_series_blocks` and `max_recently_queried_series_disk_bytes_read`. Example: `15s`.
+- `query_docs` (Number) The maximum number of docs fetched in single query. Example: `100000`.
 - `query_require_exhaustive` (Boolean) When query limits are exceeded, whether to return error or return partial results.
-- `query_series` (Number) The maximum number of series fetched in single query.
+- `query_series` (Number) The maximum number of series fetched in single query. Example: `100000`.
 
 
 <a id="nestedblock--m3db_user_config--m3"></a>
@@ -145,13 +161,13 @@ Optional:
 
 Required:
 
-- `name` (String) The name of the namespace.
-- `type` (String) The type of aggregation (aggregated/unaggregated).
+- `name` (String) The name of the namespace. Example: `default`.
+- `type` (String) Enum: `aggregated`, `unaggregated`. The type of aggregation (aggregated/unaggregated).
 
 Optional:
 
 - `options` (Block List, Max: 1) Namespace options (see [below for nested schema](#nestedblock--m3db_user_config--namespaces--options))
-- `resolution` (String) The resolution for an aggregated namespace.
+- `resolution` (String) The resolution for an aggregated namespace. Example: `30s`.
 
 <a id="nestedblock--m3db_user_config--namespaces--options"></a>
 ### Nested Schema for `m3db_user_config.namespaces.options`
@@ -170,11 +186,11 @@ Optional:
 
 Optional:
 
-- `block_data_expiry_duration` (String) Controls how long we wait before expiring stale data.
-- `blocksize_duration` (String) Controls how long to keep a block in memory before flushing to a fileset on disk.
-- `buffer_future_duration` (String) Controls how far into the future writes to the namespace will be accepted.
-- `buffer_past_duration` (String) Controls how far into the past writes to the namespace will be accepted.
-- `retention_period_duration` (String) Controls the duration of time that M3DB will retain data for the namespace.
+- `block_data_expiry_duration` (String) Controls how long we wait before expiring stale data. Example: `5m`.
+- `blocksize_duration` (String) Controls how long to keep a block in memory before flushing to a fileset on disk. Example: `2h`.
+- `buffer_future_duration` (String) Controls how far into the future writes to the namespace will be accepted. Example: `10m`.
+- `buffer_past_duration` (String) Controls how far into the past writes to the namespace will be accepted. Example: `10m`.
+- `retention_period_duration` (String) Controls the duration of time that M3DB will retain data for the namespace. Example: `48h`.
 
 
 
@@ -207,13 +223,13 @@ Optional:
 
 Required:
 
-- `filter` (String) Matching metric names with wildcards (using __name__:wildcard) or matching tags and their (optionally wildcarded) values. For value, ! can be used at start of value for negation, and multiple filters can be supplied using space as separator.
+- `filter` (String) Matching metric names with wildcards (using __name__:wildcard) or matching tags and their (optionally wildcarded) values. For value, ! can be used at start of value for negation, and multiple filters can be supplied using space as separator. Example: `__name__:disk_* host:important-42 mount:!*/sda`.
 
 Optional:
 
 - `aggregations` (List of String) List of aggregations to be applied.
 - `drop` (Boolean) Only store the derived metric (as specified in the roll-up rules), if any.
-- `name` (String) The (optional) name of the rule.
+- `name` (String) The (optional) name of the rule. Example: `important disk metrics`.
 - `namespaces` (List of String, Deprecated) This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by glob (=wildcards).
 - `namespaces_object` (Block List, Max: 10) This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by exact match of retention period and resolution (see [below for nested schema](#nestedblock--m3db_user_config--rules--mapping--namespaces_object))
 - `namespaces_string` (List of String) This rule will be used to store the metrics in the given namespace(s). If a namespace is target of rules, the global default aggregation will be automatically disabled. Note that specifying filters that match no namespaces whatsoever will be returned as an error. Filter the namespace by glob (=wildcards).
@@ -224,11 +240,11 @@ Optional:
 
 Required:
 
-- `resolution` (String) The resolution for the matching namespace.
+- `resolution` (String) The resolution for the matching namespace. Example: `30s`.
 
 Optional:
 
-- `retention` (String) The retention period of the matching namespace.
+- `retention` (String) The retention period of the matching namespace. Example: `48h`.
 
 
 <a id="nestedblock--m3db_user_config--rules--mapping--tags"></a>
@@ -236,8 +252,8 @@ Optional:
 
 Required:
 
-- `name` (String) Name of the tag.
-- `value` (String) Value of the tag.
+- `name` (String) Name of the tag. Example: `my_tag`.
+- `value` (String) Value of the tag. Example: `my_value`.
 
 
 
@@ -294,12 +310,6 @@ Read-Only:
 - `route` (String)
 - `ssl` (Boolean)
 - `usage` (String)
-
-
-<a id="nestedatt--m3db"></a>
-### Nested Schema for `m3db`
-
-Read-Only:
 
 ## Import
 

@@ -1,96 +1,14 @@
 package converters
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
-	"sort"
 	"strings"
+
+	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 )
-
-// sortByKey sorts the given array of objects by values in the original array by the given key.
-// For instance, when ip_filter_object list is sent, it is sorted on the backend.
-// That makes a diff, because user defined order is violated.
-func sortByKey(sortBy string, originalSrc, dtoSrc any) any {
-	original := asMapList(originalSrc)
-	dto := asMapList(dtoSrc)
-	if len(original) != len(dto) {
-		return dtoSrc
-	}
-
-	sortMap := make(map[string]int)
-	for i, v := range original {
-		sortMap[v[sortBy].(string)] = i
-	}
-
-	sort.Slice(dto, func(i, j int) bool {
-		ii := dto[i][sortBy].(string)
-		jj := dto[j][sortBy].(string)
-		return sortMap[ii] > sortMap[jj]
-	})
-
-	// Need to cast to "any",
-	// otherwise it might blow up in flattenObj function
-	// with type mismatch (map[string]any vs any)
-	result := make([]any, 0, len(dto))
-	for _, v := range dto {
-		result = append(result, v)
-	}
-	return result
-}
-
-// drillKey gets deep down key value
-func drillKey(dto map[string]any, path string) (any, bool) {
-	if dto == nil {
-		return nil, false
-	}
-
-	keys := strings.Split(path, ".0.")
-	keysLen := len(keys) - 1
-	for i := 0; ; i++ {
-		v, ok := dto[keys[i]]
-		if !ok {
-			return nil, false
-		}
-
-		isLast := i == keysLen
-		if isLast {
-			return v, true
-		}
-
-		next, ok := v.(map[string]any)
-		if ok {
-			dto = next
-			continue
-		}
-
-		// Gets the first element of an array
-		list, ok := v.([]any)
-		if !ok || len(list) == 0 {
-			return nil, false
-		}
-
-		next, ok = list[0].(map[string]any)
-		if !ok {
-			return nil, false
-		}
-		dto = next
-	}
-}
-
-// asList converts "any" to specific typed list
-func asList[T any](v any) []T {
-	list := v.([]any)
-	result := make([]T, 0, len(list))
-	for _, item := range list {
-		result = append(result, item.(T))
-	}
-	return result
-}
-
-// asMapList converts "any" to a list of objects
-func asMapList(v any) []map[string]any {
-	return asList[map[string]any](v)
-}
 
 // castType returns an error on invalid type
 func castType[T any](v any) (T, error) {
@@ -102,15 +20,103 @@ func castType[T any](v any) (T, error) {
 	return t, nil
 }
 
-func renameAliases(dto map[string]any) {
-	for k, v := range aliasFieldsMap() {
-		renameAlias(dto, k, v)
+// renameAliasesToDto renames aliases to DTO object
+// Must sort keys to rename from bottom to top.
+// Otherwise, might not find the deepest key if parent key is renamed
+func renameAliasesToDto(kind userConfigType, name string, dto map[string]any) {
+	m := getFieldMapping(kind, name)
+	for _, from := range sortKeys(m) {
+		renameAlias(dto, from, m[from])
 	}
 }
 
+// resourceData to test schema.ResourceData with unit tests
+type resourceData interface {
+	GetOk(string) (any, bool)
+}
+
+// renameAliasesToTfo renames aliases to TF object
+// Must sort keys to rename from bottom to top.
+// Otherwise, might not find the deepest key if parent key is renamed
+func renameAliasesToTfo(kind userConfigType, name string, dto map[string]any, d resourceData) error {
+	prefix := userConfigKey(kind, name) + ".0."
+	m := getFieldMapping(kind, name)
+
+	for _, to := range sortKeys(m) {
+		from := m[to]
+
+		if strings.HasSuffix(to, "_string") || strings.HasSuffix(to, "_object") {
+			// If resource doesn't have this field, then ignores (uses original)
+			path := strings.ReplaceAll(to, "/", ".0.")
+			_, ok := d.GetOk(prefix + path)
+			if !ok {
+				continue
+			}
+		}
+
+		renameAlias(dto, from, to)
+	}
+
+	// Converts ip_filter list into an expected by the config type
+	return convertIPFilter(dto)
+}
+
+// ipFilterMistyped reverse types: string to map, map to string
+// Unmarshalled with no errors when ip_filter has type missmatch
+type ipFilterMistyped struct {
+	IPFilter       []map[string]string `json:"ip_filter"`
+	IPFilterString []map[string]string `json:"ip_filter_string"`
+	IPFilterObject []string            `json:"ip_filter_object"`
+}
+
+// convertIPFilter converts a list of ip_filter objects into a list of strings and vice versa
+func convertIPFilter(dto map[string]any) error {
+	var r ipFilterMistyped
+	err := remarshal(dto, &r)
+	if err != nil {
+		// nolint: nilerr
+		// Marshaling went wrong, nothing to fix
+		return nil
+	}
+
+	// Converting went smooth.
+	// Which means either there is no ip_filter at all, or it has an invalid type.
+	list := make([]any, 0)
+
+	// Converts strings into objects
+	if len(r.IPFilterObject) > 0 {
+		for _, v := range r.IPFilterObject {
+			list = append(list, map[string]string{"network": v})
+		}
+
+		dto["ip_filter_object"] = list
+		return nil
+	}
+
+	// Converts objects into strings
+	for _, v := range append(r.IPFilter, r.IPFilterString...) {
+		list = append(list, v["network"])
+	}
+
+	if len(list) == 0 {
+		// Nothing to do here
+		return nil
+	}
+
+	// Chooses which key to set values to
+	strKey := "ip_filter"
+	if len(r.IPFilterString) > 0 {
+		strKey = "ip_filter_string"
+	}
+
+	dto[strKey] = list
+	return nil
+}
+
 // renameAlias renames ip_filter_string to ip_filter
-func renameAlias(dto map[string]any, path, orig string) {
-	keys := strings.Split(path, ".0.")
+func renameAlias(dto map[string]any, from, to string) {
+	keys := strings.Split(from, "/")
+	orig := strings.Split(to, "/")[len(keys)-1]
 	for i, k := range keys {
 		v, ok := dto[k]
 		if !ok {
@@ -134,7 +140,7 @@ func renameAlias(dto map[string]any, path, orig string) {
 
 		if a, ok := v.([]any); ok {
 			for _, j := range a {
-				renameAlias(j.(map[string]any), strings.Join(keys[i+1:], ".0."), orig)
+				renameAlias(j.(map[string]any), strings.Join(keys[i+1:], "/"), orig)
 			}
 			return
 		}
@@ -153,4 +159,22 @@ func isZero(v any) bool {
 		return value.Len() == 0
 	}
 	return value.IsZero()
+}
+
+func sortKeys[T any](m map[string]T) []string {
+	keys := maps.Keys(m)
+	slices.SortFunc(keys, func(a, b string) int {
+		return len(b) - len(a)
+	})
+	return keys
+}
+
+// remarshal Golang can't cast []string into []any
+// By converting value into json and back it drops types back to any
+func remarshal(from, to any) error {
+	b, err := json.Marshal(from)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, to)
 }

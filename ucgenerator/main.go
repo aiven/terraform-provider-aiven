@@ -6,17 +6,20 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/aiven/go-api-schemas/pkg/dist"
 	"github.com/dave/jennifer/jen"
+	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 	"golang.org/x/tools/imports"
 	"gopkg.in/yaml.v3"
 )
 
 const (
+	userConfigSuffix = "_user_config"
 	destPath         = "./internal/sdkprovider/userconfig/"
 	localPrefix      = "github.com/aiven/terraform-provider-aiven"
 	importSchema     = "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -26,35 +29,34 @@ const (
 )
 
 func main() {
-	var serviceList, integrationList string
-	flag.StringVar(&serviceList, "services", "", "Comma separated service list of names to generate for")
-	flag.StringVar(&integrationList, "integrations", "", "Comma separated integrations list of names to generate for")
+	var serviceList, integrationList, endpointList string
+	flag.StringVar(&serviceList, "excludeServices", "", "Comma separated list of names to exclude from generation")
+	flag.StringVar(&integrationList, "excludeIntegrations", "", "Comma separated list of names to exclude from generation")
+	flag.StringVar(&endpointList, "excludeEndpoints", "", "Comma separated list of names to exclude from generation")
 	flag.Parse()
 
-	if serviceList+integrationList == "" {
-		log.Fatal("--service or --integrations must be provided")
+	err := generate("service", dist.ServiceTypes, strings.Split(serviceList, ","))
+	if err != nil {
+		log.Fatalf("generating services: %s", err)
 	}
 
-	if serviceList != "" {
-		err := generate("service", dist.ServiceTypes, strings.Split(serviceList, ","))
-		if err != nil {
-			log.Fatal(err)
-		}
+	err = generate("serviceintegration", dist.IntegrationTypes, strings.Split(integrationList, ","))
+	if err != nil {
+		log.Fatalf("generating integrations: %s", err)
 	}
 
-	if integrationList != "" {
-		err := generate("integration", dist.IntegrationTypes, strings.Split(integrationList, ","))
-		if err != nil {
-			log.Fatal(err)
-		}
+	err = generate("serviceintegrationendpoint", dist.IntegrationEndpointTypes, strings.Split(endpointList, ","))
+	if err != nil {
+		log.Fatalf("generating integration endpoints: %s", err)
 	}
 }
 
-func generate(kind string, data []byte, keys []string) error {
-	slices.Sort(keys)
-	var root map[string]*object
+func generate(kind string, data []byte, exclude []string) error {
+	// Fixes imports order
+	imports.LocalPrefix = localPrefix
 
-	err := yaml.Unmarshal(data, &root)
+	var sch map[string]*object
+	err := yaml.Unmarshal(data, &sch)
 	if err != nil {
 		return err
 	}
@@ -65,20 +67,31 @@ func generate(kind string, data []byte, keys []string) error {
 		return err
 	}
 
-	// Fixes imports order
-	imports.LocalPrefix = localPrefix
-
+	keys := maps.Keys(sch)
+	slices.Sort(keys)
 	doneKeys := make([]string, 0, len(keys))
 	doneNames := make([]string, 0, len(keys))
 
+	fieldMapping := jen.Dict{}
 	for _, key := range keys {
-		o, ok := root[key]
+		if slices.Contains(exclude, key) {
+			log.Printf("skipping %q: in exclude list", key)
+			continue
+		}
+
+		o, ok := sch[key]
 		if !ok {
 			return fmt.Errorf("key %q not found in spec", key)
 		}
 
+		if len(o.Properties) == 0 {
+			log.Printf("skipping %q: empty root object", key)
+			continue
+		}
+
+		root := key + userConfigSuffix
 		o.isRoot = true
-		o.init(key + "_user_config")
+		o.init(root)
 		if o.Description == "" {
 			o.Description = toUpperFirst(o.camelName) + " user configurable settings"
 		}
@@ -91,7 +104,17 @@ func generate(kind string, data []byte, keys []string) error {
 		f.ImportName(importSchema, "schema")
 		f.ImportName(importDiff, "diff")
 		f.ImportName(importValidation, "validation")
-		genSchema(f, o)
+		err := genSchema(f, o)
+		if err != nil {
+			return fmt.Errorf("error generating %q: %w", key, err)
+		}
+
+		// Some fields have dots and dashes in naming
+		thisMapping := jen.Dict{}
+		genFieldMapping(thisMapping, o)
+		if len(thisMapping) > 0 {
+			fieldMapping[jen.Lit(key)] = jen.Values(thisMapping)
+		}
 
 		// Sorts imports
 		b, err := imports.Process("", []byte(f.GoString()), nil)
@@ -114,7 +137,7 @@ func generate(kind string, data []byte, keys []string) error {
 	}
 
 	// Panics if unknown kind requested
-	cases = append(cases, jen.Default().Block(jen.Panic(jen.Lit("unknown user config type: ").Op("+").Id("kind"))))
+	cases = append(cases, jen.Default().Block(jen.Return(jen.Nil())))
 
 	f := jen.NewFile(kind)
 	f.HeaderComment(codeGenerated)
@@ -122,43 +145,76 @@ func generate(kind string, data []byte, keys []string) error {
 	f.Func().Id("GetUserConfig").Params(jen.Id("kind").String()).Op("*").Qual(importSchema, "Schema").Block(
 		jen.Switch(jen.Id("kind")).Block(cases...),
 	)
+
+	mappingFunc := "GetFieldMapping"
+	f.Comment(mappingFunc + " returns TF fields to Json fields mapping (in unix-path way)")
+	f.Func().Id(mappingFunc).Params(jen.Id("kind").String()).Map(jen.String()).String().Block(
+		jen.Return(jen.Map(jen.String()).Map(jen.String()).String().Values(fieldMapping).Index(jen.Id("kind"))),
+	)
+
+	configTypes := make([]jen.Code, 0)
+	for _, v := range doneKeys {
+		configTypes = append(configTypes, jen.Lit(v))
+	}
+	f.Func().Id("UserConfigTypes").Params().Index().String().Block(
+		jen.Return(jen.Index().String().Values(configTypes...)),
+	)
 	return f.Save(filepath.Join(dirPath, kind+".go"))
 }
 
-func genSchema(f *jen.File, o *object) {
-	f.Func().Id(o.camelName).Params().Op("*").Qual(importSchema, "Schema").Block(
-		jen.Return(jen.Op("&").Qual(importSchema, "Schema").Values(getSchemaValues(o))),
-	)
+func genFieldMapping(mapping jen.Dict, o *object) {
+	for _, p := range o.Properties {
+		if p.tfName != p.jsonName {
+			mapping[jen.Lit(p.path())] = jen.Lit(p.jsonPath())
+		}
+		if p.isObject() {
+			genFieldMapping(mapping, p)
+		}
+		if p.isArray() && p.ArrayItems.isObject() {
+			genFieldMapping(mapping, p.ArrayItems)
+		}
+	}
 }
 
-func getSchemaValues(o *object) jen.Dict {
+func genSchema(f *jen.File, o *object) error {
+	values, err := getSchemaValues(o)
+	if err != nil {
+		return err
+	}
+
+	f.Func().Id(o.camelName).Params().Op("*").Qual(importSchema, "Schema").Block(
+		jen.Return(jen.Op("&").Qual(importSchema, "Schema").Values(values)),
+	)
+	return nil
+}
+
+func getSchemaValues(o *object) (jen.Dict, error) {
 	values := make(jen.Dict)
 
 	if d := getDescription(o); d != "" {
 		for old, n := range replaceDescriptionSubStrings {
 			d = strings.ReplaceAll(d, old, n)
 		}
-		values[jen.Id("Description")] = jen.Lit(d)
+		values[jen.Id("Description")] = jen.Lit(toTitle(d))
 	}
 
 	var t string
 	switch o.Type {
 	case objectTypeObject, objectTypeArray:
 		if o.isSchemaless() {
-			// todo: handle schemaless if this happens
-			log.Fatalf("schemaless is not implemented: %q", o.jsonName)
-		}
+			t = "Map"
+		} else {
+			t = "List"
+			if isTypeSet(o) {
+				t = "Set"
+			}
 
-		t = "List"
-		if isTypeSet(o) {
-			t = "Set"
-		}
-
-		if o.MinItems != nil {
-			values[jen.Id("MinItems")] = jen.Lit(*o.MinItems)
-		}
-		if o.MaxItems != nil {
-			values[jen.Id("MaxItems")] = jen.Lit(*o.MaxItems)
+			if o.MinItems != nil {
+				values[jen.Id("MinItems")] = jen.Lit(*o.MinItems)
+			}
+			if o.MaxItems != nil {
+				values[jen.Id("MaxItems")] = jen.Lit(*o.MaxItems)
+			}
 		}
 	case objectTypeBoolean:
 		t = "Bool"
@@ -169,13 +225,13 @@ func getSchemaValues(o *object) jen.Dict {
 	case objectTypeNumber:
 		t = "Float"
 	default:
-		log.Fatalf("unknown type %q for %q", o.Type, o.jsonName)
+		return nil, fmt.Errorf("unknown type %q for %q", o.Type, o.jsonName)
 	}
 
 	values[jen.Id("Type")] = jen.Qual(importSchema, "Type"+t)
 	if o.IsDeprecated {
 		if o.DeprecationNotice == "" {
-			log.Fatalf("missing deprecation notice for %q", o.jsonName)
+			return nil, fmt.Errorf("missing deprecation notice for %q", o.jsonName)
 		}
 		values[jen.Id("Deprecated")] = jen.Lit(o.DeprecationNotice)
 	}
@@ -194,7 +250,7 @@ func getSchemaValues(o *object) jen.Dict {
 	}
 
 	if o.isScalar() {
-		if strings.Contains(o.jsonName, "api_key") || strings.Contains(o.jsonName, "password") {
+		if reSensitive.MatchString(o.jsonName) {
 			values[jen.Id("Sensitive")] = jen.True()
 		}
 
@@ -204,24 +260,36 @@ func getSchemaValues(o *object) jen.Dict {
 				args = append(args, scalarLit(o, v.Value))
 			}
 
-			// There are no other types functions.
-			// Bool and number won't compile
-			switch o.Type {
-			case objectTypeString:
-				values[jen.Id("ValidateFunc")] = jen.Qual(importValidation, "StringInSlice").Call(scalarArrayLit(o, args), jen.False())
-			case objectTypeInteger:
-				values[jen.Id("ValidateFunc")] = jen.Qual(importValidation, "IntInSlice").Call(scalarArrayLit(o, args))
+			call, err := scalarArrayLit(o, args)
+			if err != nil {
+				return nil, err
+			}
+
+			// todo: allow version validation when we make automatic releases
+			if !o.isVersionField() {
+				// There are no other types functions.
+				// Bool and number won't compile
+				switch o.Type {
+				case objectTypeString:
+					values[jen.Id("ValidateFunc")] = jen.Qual(importValidation, "StringInSlice").Call(call, jen.False())
+				case objectTypeInteger:
+					values[jen.Id("ValidateFunc")] = jen.Qual(importValidation, "IntInSlice").Call(call)
+				}
 			}
 		}
 
-		return values
+		return values, nil
 	}
 
 	if o.isArray() {
 		if o.ArrayItems.isScalar() {
-			fields := getSchemaValues(o.ArrayItems)
+			fields, err := getSchemaValues(o.ArrayItems)
+			if err != nil {
+				return nil, err
+			}
+
 			values[jen.Id("Elem")] = jen.Op("&").Qual(importSchema, "Schema").Values(fields)
-			return values
+			return values, nil
 		}
 
 		// Renders the array as an object
@@ -234,31 +302,62 @@ func getSchemaValues(o *object) jen.Dict {
 
 	fields := make(jen.Dict)
 	for _, p := range o.properties {
-		fields[jen.Lit(p.tfName)] = jen.Values(getSchemaValues(p))
+		vals, err := getSchemaValues(p)
+		if err != nil {
+			return nil, err
+		}
+
+		fields[jen.Lit(p.tfName)] = jen.Values(vals)
 	}
 
-	values[jen.Id("Elem")] = jen.Op("&").Qual(importSchema, "Resource").Values(jen.Dict{
-		jen.Id("Schema"): jen.Map(jen.String()).Op("*").Qual(importSchema, "Schema").Values(fields),
-	})
+	if len(fields) > 0 {
+		values[jen.Id("Elem")] = jen.Op("&").Qual(importSchema, "Resource").Values(jen.Dict{
+			jen.Id("Schema"): jen.Map(jen.String()).Op("*").Qual(importSchema, "Schema").Values(fields),
+		})
+	}
 
-	return values
+	return values, nil
 }
+
+var reCode = regexp.MustCompile(`'([^'\s]+)'`)
 
 func getDescription(o *object) string {
 	desc := make([]string, 0)
+	if o.Enum != nil {
+		values := make([]string, 0)
+		for _, v := range o.Enum {
+			values = append(values, fmt.Sprintf("`%s`", v.Value))
+		}
+
+		// todo: remove this block when we make automatic releases
+		if o.isVersionField() {
+			values = append(values, "and newer")
+		}
+
+		desc = append(desc, fmt.Sprintf("Enum: %s.", strings.Join(values, ", ")))
+	}
+
 	d := o.Description
 	if len(d) < len(o.Title) {
 		d = o.Title
 	}
 
-	// Comes from the schema, quite confusing
-	d = strings.TrimSuffix(d, "The default value is `map[]`.")
 	if d != "" {
+		// Wraps code chunks with backticks to render them as code blocks
+		d = reCode.ReplaceAllString(d, "`$1`")
+
+		// Adds a trailing dot if missing
 		desc = append(desc, addDot(d))
 	}
 
-	if o.isScalar() && o.Default != nil {
-		desc = append(desc, fmt.Sprintf("The default value is `%v`.", o.Default))
+	if o.isScalar() {
+		switch {
+		case o.Default != nil:
+			desc = append(desc, fmt.Sprintf("Default: `%v`.", o.Default))
+		case o.Example != nil && o.Type != objectTypeBoolean && o.Enum == nil && !strings.Contains(strings.ToLower(d), "defaults to"):
+			// Skips boolean (either true or false), enums, or if the field has default value in the description
+			desc = append(desc, fmt.Sprintf("Example: `%v`.", o.Example))
+		}
 	}
 
 	// Trims dot from description, so it doesn't look weird with link to nested schema
@@ -270,8 +369,12 @@ func getDescription(o *object) string {
 	return strings.Join(desc, " ")
 }
 
+// reFixDot some descriptions have issues with multiple dots or ending spaces
+var reFixDot = regexp.MustCompile(`[\s.]+$`)
+
 func addDot(s string) string {
 	if s != "" {
+		s = reFixDot.ReplaceAllString(s, ".")
 		switch s[len(s)-1:] {
 		case ".", "!", "?":
 		default:
@@ -304,37 +407,36 @@ func scalarLit(o *object, value any) *jen.Statement {
 	return nil
 }
 
-func scalarArrayLit(o *object, args []jen.Code) *jen.Statement {
+func scalarArrayLit(o *object, args []jen.Code) (*jen.Statement, error) {
 	switch o.Type {
 	case objectTypeString:
-		return jen.Index().String().Values(args...)
+		return jen.Index().String().Values(args...), nil
 	case objectTypeInteger:
-		return jen.Index().Int().Values(args...)
+		return jen.Index().Int().Values(args...), nil
 	}
-	log.Fatalf("unexpected element type of array for default value: %q", o.Type)
-	return nil
+	return nil, fmt.Errorf("unexpected element type of array for default value: %q", o.Type)
 }
 
 func isTypeSet(o *object) bool {
-	// Only scalars can be set type.
-	// Nested sets of objects do not work well in Terraform:
-	// - Changing a field shows diff for the whole object,
-	//   because hash is calculated for the object, not per field.
-	//   So no per-field updates, whole object replacement only.
-	//   https://discuss.hashicorp.com/t/provider-schema-typeset-detect-changes/32546
-	// - There is a bug that doesn't let you put a set deep inside ResourceData
-	//   https://github.com/hashicorp/terraform-plugin-sdk/issues/459
-	// - The diff itself is invalid for nested sets (not on the root level).
-	//   It just doesn't work as expected in all cases.
-	if !(o.isArray() && o.ArrayItems.isScalar()) {
-		return false
-	}
-
 	// Allowlist for set types
+	// Warning: test each type you add!
 	switch o.path() {
-	case "ip_filter", "ip_filter_string":
+	case "ip_filter", "ip_filter_string", "ip_filter_object":
 		return true
 	}
-
 	return false
 }
+
+// toTitleRegex finds words with a leading lowercase letter,
+// ignores dotted and underscored literals
+var toTitleRegex = regexp.MustCompile(`^[a-z]\w+[\s,$]`)
+
+func toTitle(s string) string {
+	if !strings.HasPrefix(s, "fnmatch") && toTitleRegex.MatchString(s) {
+		return toUpperFirst(s)
+	}
+	return s
+}
+
+// reSensitive finds sensitive fields
+var reSensitive = regexp.MustCompile(`(secret_key|access_key|api_key|token|password)$`)

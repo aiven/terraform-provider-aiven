@@ -20,7 +20,7 @@ var aivenProjectUserSchema = map[string]*schema.Schema{
 		ForceNew:     true,
 		Required:     true,
 		Type:         schema.TypeString,
-		Description:  userconfig.Desc("Email address of the user. Should be lowercase.").ForceNew().Build(),
+		Description:  userconfig.Desc("Email address of the user in lowercase.").ForceNew().Build(),
 		ValidateFunc: schemautil.ValidateEmailAddress,
 	},
 	"member_type": {
@@ -31,13 +31,13 @@ var aivenProjectUserSchema = map[string]*schema.Schema{
 	"accepted": {
 		Computed:    true,
 		Type:        schema.TypeBool,
-		Description: "Whether the user has accepted the request to join the project; adding user to a project sends an invitation to the target user and the actual membership is only created once the user accepts the invitation.",
+		Description: "Whether the user has accepted the request to join the project. Users get an invite and become project members after accepting the invite.",
 	},
 }
 
 func ResourceProjectUser() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Project User resource allows the creation and management of Aiven Project Users.",
+		Description:   "Creates and manages an Aiven project member.",
 		CreateContext: resourceProjectUserCreate,
 		ReadContext:   resourceProjectUserRead,
 		UpdateContext: resourceProjectUserUpdate,
@@ -47,8 +47,7 @@ func ResourceProjectUser() *schema.Resource {
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema:             aivenProjectUserSchema,
-		DeprecationMessage: "This resource is deprecated",
+		Schema: aivenProjectUserSchema,
 	}
 }
 

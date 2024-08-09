@@ -168,6 +168,22 @@ func testAccCheckAivenServiceInfluxdbAttributes(n string) resource.TestCheckFunc
 			return fmt.Errorf("expected to get a correct public_access.influxdb from Aiven")
 		}
 
+		if a["influxdb.0.uris.#"] == "" {
+			return fmt.Errorf("expected to get correct uris from Aiven")
+		}
+
+		if a["influxdb.0.username"] == "" {
+			return fmt.Errorf("expected to get correct username from Aiven")
+		}
+
+		if a["influxdb.0.password"] == "" {
+			return fmt.Errorf("expected to get correct password from Aiven")
+		}
+
+		if a["influxdb.0.database_name"] == "" {
+			return fmt.Errorf("expected to get correct database_name from Aiven")
+		}
+
 		return nil
 	}
 }

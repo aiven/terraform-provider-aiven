@@ -18,7 +18,7 @@ The Service Integration Endpoint resource allows the creation and management of 
 ### Required
 
 - `endpoint_name` (String) Name of the service integration endpoint
-- `endpoint_type` (String) Type of the service integration endpoint. Possible values: `datadog`, `prometheus`, `rsyslog`, `external_elasticsearch_logs`, `external_opensearch_logs`, `external_aws_cloudwatch_logs`, `external_google_cloud_logging`, `external_kafka`, `jolokia`, `external_schema_registry`, `external_aws_cloudwatch_metrics`, `external_google_cloud_bigquery`, `external_postgresql`
+- `endpoint_type` (String) Type of the service integration endpoint. Possible values: `autoscaler`, `datadog`, `external_aws_cloudwatch_logs`, `external_aws_cloudwatch_metrics`, `external_aws_s3`, `external_clickhouse`, `external_elasticsearch_logs`, `external_google_cloud_bigquery`, `external_google_cloud_logging`, `external_kafka`, `external_mysql`, `external_opensearch_logs`, `external_postgresql`, `external_redis`, `external_schema_registry`, `external_sumologic_logs`, `jolokia`, `prometheus`, `rsyslog`
 - `project` (String) Project the service integration endpoint belongs to
 
 ### Optional
@@ -48,27 +48,27 @@ The Service Integration Endpoint resource allows the creation and management of 
 
 Required:
 
-- `datadog_api_key` (String, Sensitive) Datadog API key.
+- `datadog_api_key` (String, Sensitive) Datadog API key. Example: `848f30907c15c55d601fe45487cce9b6`.
 
 Optional:
 
-- `datadog_tags` (Block List, Max: 32) Custom tags provided by user. (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))
+- `datadog_tags` (Block List, Max: 32) Custom tags provided by user (see [below for nested schema](#nestedblock--datadog_user_config--datadog_tags))
 - `disable_consumer_stats` (Boolean) Disable consumer group metrics.
-- `kafka_consumer_check_instances` (Number) Number of separate instances to fetch kafka consumer statistics with.
-- `kafka_consumer_stats_timeout` (Number) Number of seconds that datadog will wait to get consumer statistics from brokers.
-- `max_partition_contexts` (Number) Maximum number of partition contexts to send.
-- `site` (String) Datadog intake site. Defaults to datadoghq.com.
+- `kafka_consumer_check_instances` (Number) Number of separate instances to fetch kafka consumer statistics with. Example: `8`.
+- `kafka_consumer_stats_timeout` (Number) Number of seconds that datadog will wait to get consumer statistics from brokers. Example: `60`.
+- `max_partition_contexts` (Number) Maximum number of partition contexts to send. Example: `32000`.
+- `site` (String) Enum: `datadoghq.com`, `datadoghq.eu`, `us3.datadoghq.com`, `us5.datadoghq.com`, `ddog-gov.com`, `ap1.datadoghq.com`. Datadog intake site. Defaults to datadoghq.com.
 
 <a id="nestedblock--datadog_user_config--datadog_tags"></a>
 ### Nested Schema for `datadog_user_config.datadog_tags`
 
 Required:
 
-- `tag` (String) Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix 'aiven-' are reserved for Aiven.
+- `tag` (String) Tag format and usage are described here: https://docs.datadoghq.com/getting_started/tagging. Tags with prefix `aiven-` are reserved for Aiven. Example: `replica:primary`.
 
 Optional:
 
-- `comment` (String) Optional tag explanation.
+- `comment` (String) Optional tag explanation. Example: `Used to tag primary replica metrics`.
 
 
 
@@ -77,13 +77,13 @@ Optional:
 
 Required:
 
-- `access_key` (String) AWS access key. Required permissions are logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents and logs:DescribeLogStreams.
-- `region` (String) AWS region.
-- `secret_key` (String) AWS secret key.
+- `access_key` (String, Sensitive) AWS access key. Required permissions are logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents and logs:DescribeLogStreams. Example: `AAAAAAAAAAAAAAAAAAAA`.
+- `region` (String) AWS region. Example: `us-east-1`.
+- `secret_key` (String, Sensitive) AWS secret key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.
 
 Optional:
 
-- `log_group_name` (String) AWS CloudWatch log group name.
+- `log_group_name` (String) AWS CloudWatch log group name. Example: `my-log-group`.
 
 
 <a id="nestedblock--external_aws_cloudwatch_metrics_user_config"></a>
@@ -91,10 +91,10 @@ Optional:
 
 Required:
 
-- `access_key` (String) AWS access key. Required permissions are cloudwatch:PutMetricData.
-- `namespace` (String) AWS CloudWatch Metrics Namespace.
-- `region` (String) AWS region.
-- `secret_key` (String) AWS secret key.
+- `access_key` (String, Sensitive) AWS access key. Required permissions are cloudwatch:PutMetricData. Example: `AAAAAAAAAAAAAAAAAAAA`.
+- `namespace` (String) AWS CloudWatch Metrics Namespace. Example: `my-metrics-namespace`.
+- `region` (String) AWS region. Example: `us-east-1`.
+- `secret_key` (String, Sensitive) AWS secret key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.
 
 
 <a id="nestedblock--external_elasticsearch_logs_user_config"></a>
@@ -102,14 +102,17 @@ Required:
 
 Required:
 
-- `index_prefix` (String) Elasticsearch index prefix. The default value is `logs`.
-- `url` (String) Elasticsearch connection URL.
+- `index_prefix` (String) Elasticsearch index prefix. Default: `logs`.
+- `url` (String) Elasticsearch connection URL. Example: `https://user:passwd@logs.example.com/`.
 
 Optional:
 
-- `ca` (String) PEM encoded CA certificate.
-- `index_days_max` (Number) Maximum number of days of logs to keep. The default value is `3`.
-- `timeout` (Number) Elasticsearch request timeout limit. The default value is `10.0`.
+- `ca` (String) PEM encoded CA certificate. Example: `-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+`.
+- `index_days_max` (Number) Maximum number of days of logs to keep. Default: `3`.
+- `timeout` (Number) Elasticsearch request timeout limit. Default: `10.0`.
 
 
 <a id="nestedblock--external_google_cloud_bigquery"></a>
@@ -117,8 +120,8 @@ Optional:
 
 Required:
 
-- `project_id` (String) GCP project id.
-- `service_account_credentials` (String) This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys .
+- `project_id` (String) GCP project id. Example: `snappy-photon-12345`.
+- `service_account_credentials` (String) This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys. Example: `{"type": "service_account", ...`.
 
 
 <a id="nestedblock--external_google_cloud_logging_user_config"></a>
@@ -126,9 +129,9 @@ Required:
 
 Required:
 
-- `log_id` (String) Google Cloud Logging log id.
-- `project_id` (String) GCP project id.
-- `service_account_credentials` (String) This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys .
+- `log_id` (String) Google Cloud Logging log id. Example: `syslog`.
+- `project_id` (String) GCP project id. Example: `snappy-photon-12345`.
+- `service_account_credentials` (String) This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys. Example: `{"type": "service_account", ...`.
 
 
 <a id="nestedblock--external_kafka_user_config"></a>
@@ -136,18 +139,27 @@ Required:
 
 Required:
 
-- `bootstrap_servers` (String) Bootstrap servers.
-- `security_protocol` (String) Security protocol.
+- `bootstrap_servers` (String) Bootstrap servers. Example: `10.0.0.1:9092,10.0.0.2:9092`.
+- `security_protocol` (String) Enum: `PLAINTEXT`, `SSL`, `SASL_PLAINTEXT`, `SASL_SSL`. Security protocol.
 
 Optional:
 
-- `sasl_mechanism` (String) SASL mechanism used for connections to the Kafka server.
-- `sasl_plain_password` (String, Sensitive) Password for SASL PLAIN mechanism in the Kafka server.
-- `sasl_plain_username` (String) Username for SASL PLAIN mechanism in the Kafka server.
-- `ssl_ca_cert` (String) PEM-encoded CA certificate.
-- `ssl_client_cert` (String) PEM-encoded client certificate.
-- `ssl_client_key` (String) PEM-encoded client key.
-- `ssl_endpoint_identification_algorithm` (String) The endpoint identification algorithm to validate server hostname using server certificate.
+- `sasl_mechanism` (String) Enum: `PLAIN`, `SCRAM-SHA-256`, `SCRAM-SHA-512`. SASL mechanism used for connections to the Kafka server.
+- `sasl_plain_password` (String, Sensitive) Password for SASL PLAIN mechanism in the Kafka server. Example: `admin`.
+- `sasl_plain_username` (String) Username for SASL PLAIN mechanism in the Kafka server. Example: `admin`.
+- `ssl_ca_cert` (String) PEM-encoded CA certificate. Example: `-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+`.
+- `ssl_client_cert` (String) PEM-encoded client certificate. Example: `-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+`.
+- `ssl_client_key` (String) PEM-encoded client key. Example: `-----BEGIN PRIVATE KEY-----
+...
+-----END PRIVATE KEY-----
+`.
+- `ssl_endpoint_identification_algorithm` (String) Enum: `https`. The endpoint identification algorithm to validate server hostname using server certificate.
 
 
 <a id="nestedblock--external_opensearch_logs_user_config"></a>
@@ -155,14 +167,17 @@ Optional:
 
 Required:
 
-- `index_prefix` (String) OpenSearch index prefix. The default value is `logs`.
-- `url` (String) OpenSearch connection URL.
+- `index_prefix` (String) OpenSearch index prefix. Default: `logs`.
+- `url` (String) OpenSearch connection URL. Example: `https://user:passwd@logs.example.com/`.
 
 Optional:
 
-- `ca` (String) PEM encoded CA certificate.
-- `index_days_max` (Number) Maximum number of days of logs to keep. The default value is `3`.
-- `timeout` (Number) OpenSearch request timeout limit. The default value is `10.0`.
+- `ca` (String) PEM encoded CA certificate. Example: `-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+`.
+- `index_days_max` (Number) Maximum number of days of logs to keep. Default: `3`.
+- `timeout` (Number) OpenSearch request timeout limit. Default: `10.0`.
 
 
 <a id="nestedblock--external_postgresql"></a>
@@ -170,17 +185,26 @@ Optional:
 
 Required:
 
-- `host` (String) Hostname or IP address of the server.
-- `port` (Number) Port number of the server.
-- `username` (String) User name.
+- `host` (String) Hostname or IP address of the server. Example: `my.server.com`.
+- `port` (Number) Port number of the server. Example: `5432`.
+- `username` (String) User name. Example: `myname`.
 
 Optional:
 
-- `password` (String, Sensitive) Password.
-- `ssl_client_certificate` (String) Client certificate.
-- `ssl_client_key` (String) Client key.
-- `ssl_mode` (String) SSL Mode. The default value is `verify-full`.
-- `ssl_root_cert` (String) SSL Root Cert.
+- `default_database` (String) Default database. Example: `testdb`.
+- `password` (String, Sensitive) Password. Example: `jjKk45Nnd`.
+- `ssl_client_certificate` (String) Client certificate. Example: `-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+`.
+- `ssl_client_key` (String) Client key. Example: `-----BEGIN PRIVATE KEY-----
+...
+-----END PRIVATE KEY-----`.
+- `ssl_mode` (String) Enum: `disable`, `allow`, `prefer`, `require`, `verify-ca`, `verify-full`. SSL mode to use for the connection.  Please note that Aiven requires TLS for all connections to external PostgreSQL services. Default: `verify-full`.
+- `ssl_root_cert` (String) SSL Root Cert. Example: `-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+`.
 
 
 <a id="nestedblock--external_schema_registry_user_config"></a>
@@ -188,13 +212,13 @@ Optional:
 
 Required:
 
-- `authentication` (String) Authentication method.
-- `url` (String) Schema Registry URL.
+- `authentication` (String) Enum: `none`, `basic`. Authentication method.
+- `url` (String) Schema Registry URL. Example: `https://schema-registry.kafka.company.com:28419`.
 
 Optional:
 
-- `basic_auth_password` (String, Sensitive) Basic authentication password.
-- `basic_auth_username` (String) Basic authentication user name.
+- `basic_auth_password` (String, Sensitive) Basic authentication password. Example: `Zm9vYg==`.
+- `basic_auth_username` (String) Basic authentication user name. Example: `avnadmin`.
 
 
 <a id="nestedblock--jolokia_user_config"></a>
@@ -202,8 +226,8 @@ Optional:
 
 Optional:
 
-- `basic_auth_password` (String, Sensitive) Jolokia basic authentication password.
-- `basic_auth_username` (String) Jolokia basic authentication username.
+- `basic_auth_password` (String, Sensitive) Jolokia basic authentication password. Example: `yhfBNFii4C`.
+- `basic_auth_username` (String) Jolokia basic authentication username. Example: `jol48k51`.
 
 
 <a id="nestedblock--prometheus_user_config"></a>
@@ -211,8 +235,8 @@ Optional:
 
 Optional:
 
-- `basic_auth_password` (String, Sensitive) Prometheus basic authentication password.
-- `basic_auth_username` (String) Prometheus basic authentication username.
+- `basic_auth_password` (String, Sensitive) Prometheus basic authentication password. Example: `fhyFNBjj3R`.
+- `basic_auth_username` (String) Prometheus basic authentication username. Example: `prom4851`.
 
 
 <a id="nestedblock--rsyslog_user_config"></a>
@@ -220,19 +244,28 @@ Optional:
 
 Required:
 
-- `format` (String) Message format. The default value is `rfc5424`.
-- `port` (Number) Rsyslog server port. The default value is `514`.
-- `server` (String) Rsyslog server IP address or hostname.
-- `tls` (Boolean) Require TLS. The default value is `true`.
+- `format` (String) Enum: `rfc5424`, `rfc3164`, `custom`. Message format. Default: `rfc5424`.
+- `port` (Number) Rsyslog server port. Default: `514`.
+- `server` (String) Rsyslog server IP address or hostname. Example: `logs.example.com`.
+- `tls` (Boolean) Require TLS. Default: `true`.
 
 Optional:
 
-- `ca` (String) PEM encoded CA certificate.
-- `cert` (String) PEM encoded client certificate.
-- `key` (String) PEM encoded client key.
-- `logline` (String) Custom syslog message format.
-- `max_message_size` (Number) Rsyslog max message size. The default value is `8192`.
-- `sd` (String) Structured data block for log message.
+- `ca` (String) PEM encoded CA certificate. Example: `-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+`.
+- `cert` (String) PEM encoded client certificate. Example: `-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+`.
+- `key` (String) PEM encoded client key. Example: `-----BEGIN PRIVATE KEY-----
+...
+-----END PRIVATE KEY-----
+`.
+- `logline` (String) Custom syslog message format. Example: `<%pri%>%timestamp:::date-rfc3339% %HOSTNAME% %app-name% %msg%`.
+- `max_message_size` (Number) Rsyslog max message size. Default: `8192`.
+- `sd` (String) Structured data block for log message. Example: `TOKEN tag="LiteralValue"`.
 
 
 <a id="nestedblock--timeouts"></a>

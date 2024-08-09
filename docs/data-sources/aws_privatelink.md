@@ -3,19 +3,19 @@
 page_title: "aiven_aws_privatelink Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The AWS Privatelink resource allows the creation and management of Aiven AWS Privatelink for a services.
+  Gets information about an AWS PrivateLink connection for an Aiven service.
 ---
 
 # aiven_aws_privatelink (Data Source)
 
-The AWS Privatelink resource allows the creation and management of Aiven AWS Privatelink for a services.
+Gets information about an AWS PrivateLink connection for an Aiven service.
 
 ## Example Usage
 
 ```terraform
-data "aiven_aws_privatelink" "foo" {
-  project      = data.aiven_project.foo.project
-  service_name = aiven_kafka.bar.service_name
+data "aiven_aws_privatelink" "main" {
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_kafka.example_kafka.service_name
 }
 ```
 
@@ -24,12 +24,12 @@ data "aiven_aws_privatelink" "foo" {
 
 ### Required
 
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
-- `service_name` (String) Specifies the name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Read-Only
 
-- `aws_service_id` (String) AWS service ID
-- `aws_service_name` (String) AWS service name
+- `aws_service_id` (String) AWS service ID.
+- `aws_service_name` (String) AWS service name.
 - `id` (String) The ID of this resource.
-- `principals` (Set of String) List of allowed principals
+- `principals` (Set of String) List of the ARNs of the AWS accounts or IAM users allowed to connect to the VPC endpoint.

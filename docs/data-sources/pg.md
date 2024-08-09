@@ -24,7 +24,7 @@ data "aiven_pg" "pg" {
 
 ### Required
 
-- `project` (String) Identifies the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. This property cannot be changed, doing so forces recreation of the resource.
+- `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) Specifies the actual name of the service. The name cannot be changed later without destroying and re-creating the service so name should be picked based on intended service usage rather than current attributes.
 
 ### Read-Only
@@ -40,7 +40,7 @@ data "aiven_pg" "pg" {
 - `id` (String) The ID of this resource.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
-- `pg` (List of Object) PostgreSQL specific server provided values (see [below for nested schema](#nestedatt--pg))
+- `pg` (List of Object, Sensitive) PostgreSQL specific server provided values (see [below for nested schema](#nestedatt--pg))
 - `pg_user_config` (List of Object) Pg user configurable settings (see [below for nested schema](#nestedatt--pg_user_config))
 - `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
 - `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
@@ -54,7 +54,7 @@ data "aiven_pg" "pg" {
 - `state` (String) Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`
 - `static_ips` (Set of String) Static IPs that are going to be associated with this service. Please assign a value using the 'toset' function. Once a static ip resource is in the 'assigned' state it cannot be unbound from the node again
 - `tag` (Set of Object) Tags are key-value pairs that allow you to categorize services. (see [below for nested schema](#nestedatt--tag))
-- `tech_emails` (Set of Object) Defines the email addresses that will receive alerts about upcoming maintenance updates or warnings about service instability. (see [below for nested schema](#nestedatt--tech_emails))
+- `tech_emails` (Set of Object) The email addresses for [service contacts](https://aiven.io/docs/platform/howto/technical-emails), who will receive important alerts and updates about this service. You can also set email contacts at the project level. (see [below for nested schema](#nestedatt--tech_emails))
 - `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
 
 <a id="nestedatt--components"></a>
@@ -77,15 +77,33 @@ Read-Only:
 
 Read-Only:
 
+- `bouncer` (String)
 - `dbname` (String)
 - `host` (String)
 - `max_connections` (Number)
+- `params` (List of Object) (see [below for nested schema](#nestedobjatt--pg--params))
 - `password` (String)
 - `port` (Number)
 - `replica_uri` (String)
 - `sslmode` (String)
+- `standby_uris` (List of String)
+- `syncing_uris` (List of String)
 - `uri` (String)
+- `uris` (List of String)
 - `user` (String)
+
+<a id="nestedobjatt--pg--params"></a>
+### Nested Schema for `pg.params`
+
+Read-Only:
+
+- `database_name` (String)
+- `host` (String)
+- `password` (String)
+- `port` (Number)
+- `sslmode` (String)
+- `user` (String)
+
 
 
 <a id="nestedatt--pg_user_config"></a>
@@ -100,7 +118,7 @@ Read-Only:
 - `backup_minute` (Number)
 - `enable_ipv6` (Boolean)
 - `ip_filter` (Set of String)
-- `ip_filter_object` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--ip_filter_object))
+- `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
 - `migration` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--migration))
 - `pg` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pg))
@@ -109,6 +127,7 @@ Read-Only:
 - `pg_service_to_fork_from` (String)
 - `pg_stat_monitor_enable` (Boolean)
 - `pg_version` (String)
+- `pgaudit` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pgaudit))
 - `pgbouncer` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pgbouncer))
 - `pglookout` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--pglookout))
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--pg_user_config--private_access))
@@ -142,6 +161,7 @@ Read-Only:
 - `dbname` (String)
 - `host` (String)
 - `ignore_dbs` (String)
+- `ignore_roles` (String)
 - `method` (String)
 - `password` (String)
 - `port` (Number)
@@ -217,6 +237,27 @@ Read-Only:
 - `track_pg_catalog` (Boolean)
 
 
+<a id="nestedobjatt--pg_user_config--pgaudit"></a>
+### Nested Schema for `pg_user_config.pgaudit`
+
+Read-Only:
+
+- `feature_enabled` (Boolean)
+- `log` (List of String)
+- `log_catalog` (Boolean)
+- `log_client` (Boolean)
+- `log_level` (String)
+- `log_max_string_length` (Number)
+- `log_nested_statements` (Boolean)
+- `log_parameter` (Boolean)
+- `log_parameter_max_size` (Number)
+- `log_relation` (Boolean)
+- `log_rows` (Boolean)
+- `log_statement` (Boolean)
+- `log_statement_once` (Boolean)
+- `role` (String)
+
+
 <a id="nestedobjatt--pg_user_config--pgbouncer"></a>
 ### Nested Schema for `pg_user_config.pgbouncer`
 
@@ -227,6 +268,7 @@ Read-Only:
 - `autodb_pool_mode` (String)
 - `autodb_pool_size` (Number)
 - `ignore_startup_parameters` (List of String)
+- `max_prepared_statements` (Number)
 - `min_pool_size` (Number)
 - `server_idle_timeout` (Number)
 - `server_lifetime` (Number)

@@ -8,113 +8,81 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
+	codegenintegrations "github.com/aiven/go-client-codegen/handler/serviceintegration"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/apiconvert"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/dist"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/converters"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/serviceintegration"
 )
 
 const serviceIntegrationEndpointRegExp = "^[a-zA-Z0-9_-]*\\/{1}[a-zA-Z0-9_-]*$"
 
-var integrationTypes = []string{
-	"alertmanager",
-	"cassandra_cross_service_cluster",
-	"clickhouse_kafka",
-	"clickhouse_postgresql",
-	"dashboard",
-	"datadog",
-	"datasource",
-	"external_aws_cloudwatch_logs",
-	"external_aws_cloudwatch_metrics",
-	"external_elasticsearch_logs",
-	"external_google_cloud_logging",
-	"external_opensearch_logs",
-	"flink",
-	"internal_connectivity",
-	"jolokia",
-	"kafka_connect",
-	"kafka_logs",
-	"kafka_mirrormaker",
-	"logs",
-	"m3aggregator",
-	"m3coordinator",
-	"metrics",
-	"opensearch_cross_cluster_replication",
-	"opensearch_cross_cluster_search",
-	"prometheus",
-	"read_replica",
-	"rsyslog",
-	"schema_registry_proxy",
-}
+func aivenServiceIntegrationSchema() map[string]*schema.Schema {
+	s := map[string]*schema.Schema{
+		"integration_id": {
+			Description: "The ID of the Aiven service integration.",
+			Computed:    true,
+			Type:        schema.TypeString,
+		},
+		"destination_endpoint_id": {
+			Description: "Destination endpoint for the integration.",
+			ForceNew:    true,
+			Optional:    true,
+			Type:        schema.TypeString,
+			ValidateFunc: validation.StringMatch(regexp.MustCompile(serviceIntegrationEndpointRegExp),
+				"endpoint ID should have the following format: project_name/endpoint_id"),
+		},
+		"destination_service_name": {
+			Description: "Destination service for the integration.",
+			ForceNew:    true,
+			Optional:    true,
+			Type:        schema.TypeString,
+		},
+		"integration_type": {
+			Description:  "Type of the service integration. Possible values: " + schemautil.JoinQuoted(codegenintegrations.IntegrationTypeChoices(), ", ", "`"),
+			ForceNew:     true,
+			Required:     true,
+			Type:         schema.TypeString,
+			ValidateFunc: validation.StringInSlice(codegenintegrations.IntegrationTypeChoices(), false),
+		},
+		"project": {
+			Description: "Project the integration belongs to.",
+			ForceNew:    true,
+			Required:    true,
+			Type:        schema.TypeString,
+		},
+		"source_endpoint_id": {
+			Description: "Source endpoint for the integration.",
+			ForceNew:    true,
+			Optional:    true,
+			Type:        schema.TypeString,
+			ValidateFunc: validation.StringMatch(regexp.MustCompile(serviceIntegrationEndpointRegExp),
+				"endpoint id should have the following format: project_name/endpoint_id"),
+		},
+		"source_service_name": {
+			Description: "Source service for the integration (if any)",
+			ForceNew:    true,
+			Optional:    true,
+			Type:        schema.TypeString,
+		},
+	}
 
-var aivenServiceIntegrationSchema = map[string]*schema.Schema{
-	"integration_id": {
-		Description: "Service Integration Id at aiven",
-		Computed:    true,
-		Type:        schema.TypeString,
-	},
-	"destination_endpoint_id": {
-		Description: "Destination endpoint for the integration (if any)",
-		ForceNew:    true,
-		Optional:    true,
-		Type:        schema.TypeString,
-		ValidateFunc: validation.StringMatch(regexp.MustCompile(serviceIntegrationEndpointRegExp),
-			"endpoint id should have the following format: project_name/endpoint_id"),
-	},
-	"destination_service_name": {
-		Description: "Destination service for the integration (if any)",
-		ForceNew:    true,
-		Optional:    true,
-		Type:        schema.TypeString,
-	},
-	"integration_type": {
-		Description:  "Type of the service integration. Possible values: " + schemautil.JoinQuoted(integrationTypes, ", ", "`"),
-		ForceNew:     true,
-		Required:     true,
-		Type:         schema.TypeString,
-		ValidateFunc: validation.StringInSlice(integrationTypes, false),
-	},
-	"project": {
-		Description: "Project the integration belongs to",
-		ForceNew:    true,
-		Required:    true,
-		Type:        schema.TypeString,
-	},
-	"source_endpoint_id": {
-		Description: "Source endpoint for the integration (if any)",
-		ForceNew:    true,
-		Optional:    true,
-		Type:        schema.TypeString,
-		ValidateFunc: validation.StringMatch(regexp.MustCompile(serviceIntegrationEndpointRegExp),
-			"endpoint id should have the following format: project_name/endpoint_id"),
-	},
-	"source_service_name": {
-		Description: "Source service for the integration (if any)",
-		ForceNew:    true,
-		Optional:    true,
-		Type:        schema.TypeString,
-	},
-	"logs_user_config":                            dist.IntegrationTypeLogs(),
-	"kafka_mirrormaker_user_config":               dist.IntegrationTypeKafkaMirrormaker(),
-	"kafka_connect_user_config":                   dist.IntegrationTypeKafkaConnect(),
-	"kafka_logs_user_config":                      dist.IntegrationTypeKafkaLogs(),
-	"metrics_user_config":                         dist.IntegrationTypeMetrics(),
-	"datadog_user_config":                         dist.IntegrationTypeDatadog(),
-	"clickhouse_kafka_user_config":                dist.IntegrationTypeClickhouseKafka(),
-	"clickhouse_postgresql_user_config":           dist.IntegrationTypeClickhousePostgresql(),
-	"external_aws_cloudwatch_metrics_user_config": dist.IntegrationTypeExternalAwsCloudwatchMetrics(),
+	// Adds user configs
+	for _, k := range serviceintegration.UserConfigTypes() {
+		converters.SetUserConfig(converters.ServiceIntegrationUserConfig, k, s)
+	}
+	return s
 }
 
 func ResourceServiceIntegration() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Service Integration resource allows the creation and management of Aiven Service Integrations.",
+		Description:   "Creates and manages an Aiven [service integration](https://aiven.io/docs/platform/concepts/service-integration).",
 		CreateContext: resourceServiceIntegrationCreate,
 		ReadContext:   resourceServiceIntegrationRead,
 		UpdateContext: resourceServiceIntegrationUpdate,
@@ -124,7 +92,7 @@ func ResourceServiceIntegration() *schema.Resource {
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema:         aivenServiceIntegrationSchema,
+		Schema:         aivenServiceIntegrationSchema(),
 		SchemaVersion:  1,
 		StateUpgraders: stateupgrader.ServiceIntegration(),
 	}
@@ -160,29 +128,28 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 		}
 	}
 
-	uc, err := resourceServiceIntegrationUserConfigFromSchemaToAPI(d)
+	req := aiven.CreateServiceIntegrationRequest{
+		DestinationEndpointID: plainEndpointID(schemautil.OptionalStringPointer(d, "destination_endpoint_id")),
+		DestinationService:    schemautil.OptionalStringPointer(d, "destination_service_name"),
+		IntegrationType:       integrationType,
+		SourceEndpointID:      plainEndpointID(schemautil.OptionalStringPointer(d, "source_endpoint_id")),
+		SourceService:         schemautil.OptionalStringPointer(d, "source_service_name"),
+	}
+
+	uc, err := converters.Expand(converters.ServiceIntegrationUserConfig, integrationType, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	integration, err := client.ServiceIntegrations.Create(
-		ctx,
-		projectName,
-		aiven.CreateServiceIntegrationRequest{
-			DestinationEndpointID: plainEndpointID(schemautil.OptionalStringPointer(d, "destination_endpoint_id")),
-			DestinationService:    schemautil.OptionalStringPointer(d, "destination_service_name"),
-			IntegrationType:       integrationType,
-			SourceEndpointID:      plainEndpointID(schemautil.OptionalStringPointer(d, "source_endpoint_id")),
-			SourceService:         schemautil.OptionalStringPointer(d, "source_service_name"),
-			UserConfig:            uc,
-		},
-	)
-	if err != nil {
-		return diag.Errorf("error creating serivce integration: %s", err)
-	}
-	d.SetId(schemautil.BuildResourceID(projectName, integration.ServiceIntegrationID))
+	req.UserConfig = uc
 
-	if err = resourceServiceIntegrationWaitUntilActive(ctx, d, m); err != nil {
+	res, err := client.ServiceIntegrations.Create(ctx, projectName, req)
+	if err != nil {
+		return diag.Errorf("error creating service integration: %s", err)
+	}
+	d.SetId(schemautil.BuildResourceID(projectName, res.ServiceIntegrationID))
+
+	if err = resourceServiceIntegrationWaitUntilActive(ctx, d, m, d.Timeout(schema.TimeoutCreate)); err != nil {
 		return diag.Errorf("unable to wait for service integration to become active: %s", err)
 	}
 	return resourceServiceIntegrationRead(ctx, d, m)
@@ -196,7 +163,7 @@ func resourceServiceIntegrationRead(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	integration, err := client.ServiceIntegrations.Get(ctx, projectName, integrationID)
+	res, err := client.ServiceIntegrations.Get(ctx, projectName, integrationID)
 	if err != nil {
 		err = schemautil.ResourceReadHandleNotFound(err, d)
 		if err != nil {
@@ -205,7 +172,7 @@ func resourceServiceIntegrationRead(ctx context.Context, d *schema.ResourceData,
 		return nil
 	}
 
-	if err = resourceServiceIntegrationCopyAPIResponseToTerraform(d, integration, projectName); err != nil {
+	if err = resourceServiceIntegrationCopyAPIResponseToTerraform(d, res, projectName); err != nil {
 		return diag.Errorf("cannot copy api response into terraform schema: %s", err)
 	}
 
@@ -220,7 +187,8 @@ func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	userConfig, err := resourceServiceIntegrationUserConfigFromSchemaToAPI(d)
+	integrationType := d.Get("integration_type").(string)
+	userConfig, err := converters.Expand(converters.ServiceIntegrationUserConfig, integrationType, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -241,7 +209,7 @@ func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		return diag.Errorf("unable to update service integration: %s", err)
 	}
-	if err = resourceServiceIntegrationWaitUntilActive(ctx, d, m); err != nil {
+	if err = resourceServiceIntegrationWaitUntilActive(ctx, d, m, d.Timeout(schema.TimeoutUpdate)); err != nil {
 		return diag.Errorf("unable to wait for service integration to become active: %s", err)
 	}
 
@@ -292,8 +260,7 @@ func resourceServiceIntegrationCheckForPreexistingResource(ctx context.Context, 
 	return nil, nil
 }
 
-// nolint:staticcheck // TODO: Migrate to helper/retry package to avoid deprecated resource.StateRefreshFunc.
-func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.ResourceData, m interface{}) error {
+func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.ResourceData, m interface{}, timeout time.Duration) error {
 	const (
 		active    = "ACTIVE"
 		notActive = "NOTACTIVE"
@@ -305,7 +272,7 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 		return err
 	}
 
-	stateChangeConf := &resource.StateChangeConf{
+	stateChangeConf := &retry.StateChangeConf{
 		Pending: []string{notActive},
 		Target:  []string{active},
 		Refresh: func() (interface{}, string, error) {
@@ -333,9 +300,9 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 			}
 			return ii, active, nil
 		},
-		Delay:                     2 * time.Second,
-		Timeout:                   d.Timeout(schema.TimeoutCreate),
-		MinTimeout:                2 * time.Second,
+		Delay:                     common.DefaultStateChangeDelay,
+		Timeout:                   timeout,
+		MinTimeout:                common.DefaultStateChangeMinTimeout,
 		ContinuousTargetOccurence: 10,
 	}
 	if _, err := stateChangeConf.WaitForStateContext(ctx); err != nil {
@@ -344,56 +311,40 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 	return nil
 }
 
-func resourceServiceIntegrationUserConfigFromSchemaToAPI(d *schema.ResourceData) (map[string]interface{}, error) {
-	integrationType := d.Get("integration_type").(string)
-	return apiconvert.ToAPI(userconfig.IntegrationTypes, integrationType, d)
-}
-
 func resourceServiceIntegrationCopyAPIResponseToTerraform(
 	d *schema.ResourceData,
-	integration *aiven.ServiceIntegration,
+	res *aiven.ServiceIntegration,
 	project string,
 ) error {
 	if err := d.Set("project", project); err != nil {
 		return err
 	}
 
-	if integration.DestinationEndpointID != nil {
-		if err := d.Set("destination_endpoint_id", schemautil.BuildResourceID(project, *integration.DestinationEndpointID)); err != nil {
+	if res.DestinationEndpointID != nil {
+		if err := d.Set("destination_endpoint_id", schemautil.BuildResourceID(project, *res.DestinationEndpointID)); err != nil {
 			return err
 		}
-	} else if integration.DestinationService != nil {
-		if err := d.Set("destination_service_name", *integration.DestinationService); err != nil {
-			return err
-		}
-	}
-	if integration.SourceEndpointID != nil {
-		if err := d.Set("source_endpoint_id", schemautil.BuildResourceID(project, *integration.SourceEndpointID)); err != nil {
-			return err
-		}
-	} else if integration.SourceService != nil {
-		if err := d.Set("source_service_name", *integration.SourceService); err != nil {
+	} else if res.DestinationService != nil {
+		if err := d.Set("destination_service_name", *res.DestinationService); err != nil {
 			return err
 		}
 	}
-	if err := d.Set("integration_id", integration.ServiceIntegrationID); err != nil {
+	if res.SourceEndpointID != nil {
+		if err := d.Set("source_endpoint_id", schemautil.BuildResourceID(project, *res.SourceEndpointID)); err != nil {
+			return err
+		}
+	} else if res.SourceService != nil {
+		if err := d.Set("source_service_name", *res.SourceService); err != nil {
+			return err
+		}
+	}
+	if err := d.Set("integration_id", res.ServiceIntegrationID); err != nil {
 		return err
 	}
-	integrationType := integration.IntegrationType
+	integrationType := res.IntegrationType
 	if err := d.Set("integration_type", integrationType); err != nil {
 		return err
 	}
 
-	userConfig, err := apiconvert.FromAPI(userconfig.IntegrationTypes, integrationType, integration.UserConfig)
-	if err != nil {
-		return err
-	}
-
-	if len(userConfig) > 0 {
-		if err := d.Set(integrationType+"_user_config", userConfig); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return converters.Flatten(converters.ServiceIntegrationUserConfig, integrationType, d, res.UserConfig)
 }

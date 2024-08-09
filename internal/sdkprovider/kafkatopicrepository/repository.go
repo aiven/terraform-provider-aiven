@@ -48,6 +48,7 @@ type Repository interface {
 	Read(ctx context.Context, project, service, topic string) (*aiven.KafkaTopic, error)
 	Update(ctx context.Context, project, service, topic string, req aiven.UpdateKafkaTopicRequest) error
 	Delete(ctx context.Context, project, service, topic string) error
+	Exists(ctx context.Context, project, service, topic string) (bool, error)
 }
 
 // topicsClient interface for unit tests

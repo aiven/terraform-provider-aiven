@@ -76,7 +76,7 @@ func TestAccAiven_kafka(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "service_host"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_port"),
 					resource.TestCheckResourceAttrSet(resourceName, "service_uri"),
-					func(state *terraform.State) error {
+					func(_ *terraform.State) error {
 						c := acc.GetTestAivenClient()
 
 						ctx := context.Background()
@@ -327,20 +327,24 @@ func testAccCheckAivenServiceKafkaAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a correct ip_filter from Aiven")
 		}
 
-		if a["kafka.0.rest_uri"] == "" {
-			return fmt.Errorf("expected to get a rest_uri from Aiven")
+		if a["kafka.0.uris.#"] == "" {
+			return fmt.Errorf("expected to get uris from Aiven")
 		}
 
-		if a["kafka.0.schema_registry_uri"] == "" {
-			return fmt.Errorf("expected to get a schema_registry_uri from Aiven")
+		if a["kafka.0.access_cert"] == "" {
+			return fmt.Errorf("expected to get an access_cert from Aiven")
 		}
 
 		if a["kafka.0.access_key"] == "" {
 			return fmt.Errorf("expected to get an access_key from Aiven")
 		}
 
-		if a["kafka.0.access_cert"] == "" {
-			return fmt.Errorf("expected to get an access_cert from Aiven")
+		if a["kafka.0.rest_uri"] == "" {
+			return fmt.Errorf("expected to get a rest_uri from Aiven")
+		}
+
+		if a["kafka.0.schema_registry_uri"] == "" {
+			return fmt.Errorf("expected to get a schema_registry_uri from Aiven")
 		}
 
 		return nil
