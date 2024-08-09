@@ -50,13 +50,13 @@ var aivenPGDatabaseSchema = map[string]*schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     false,
-		Description: userconfig.Desc(`It is a Terraform client-side deletion protections, which prevents the database from being deleted by Terraform. It is recommended to enable this for any production databases containing critical data.`).DefaultValue(false).Build(),
+		Description: userconfig.Desc(`Terraform client-side deletion protection, which prevents the database from being deleted by Terraform. It's recommended to enable this for any production databases containing critical data.`).DefaultValue(false).Build(),
 	},
 }
 
 func ResourcePGDatabase() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The PG Database resource allows the creation and management of Aiven PostgreSQL Databases.",
+		Description:   "Creates and manages a database in an Aiven for PostgreSQL® service.",
 		CreateContext: resourcePGDatabaseCreate,
 		ReadContext:   resourcePGDatabaseRead,
 		DeleteContext: resourcePGDatabaseDelete,

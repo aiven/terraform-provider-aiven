@@ -3,20 +3,20 @@
 page_title: "aiven_pg_database Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The PG Database resource allows the creation and management of Aiven PostgreSQL Databases.
+  Creates and manages a database in an Aiven for PostgreSQL® service.
 ---
 
 # aiven_pg_database (Resource)
 
-The PG Database resource allows the creation and management of Aiven PostgreSQL Databases.
+Creates and manages a database in an Aiven for PostgreSQL® service.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_pg_database" "mydatabase" {
-  project       = aiven_project.myproject.project
-  service_name  = aiven_pg.mypg.service_name
-  database_name = "<DATABASE_NAME>"
+resource "aiven_pg_database" "main" {
+  project       = aiven_project.example_project.project
+  service_name  = aiven_pg.example_postgres.service_name
+  database_name = "example-database"
 }
 ```
 
@@ -33,7 +33,7 @@ resource "aiven_pg_database" "mydatabase" {
 
 - `lc_collate` (String) Default string sort order (`LC_COLLATE`) of the database. The default value is `en_US.UTF-8`. Changing this property forces recreation of the resource.
 - `lc_ctype` (String) Default character classification (`LC_CTYPE`) of the database. The default value is `en_US.UTF-8`. Changing this property forces recreation of the resource.
-- `termination_protection` (Boolean) It is a Terraform client-side deletion protections, which prevents the database from being deleted by Terraform. It is recommended to enable this for any production databases containing critical data. The default value is `false`.
+- `termination_protection` (Boolean) Terraform client-side deletion protection, which prevents the database from being deleted by Terraform. It's recommended to enable this for any production databases containing critical data. The default value is `false`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
@@ -56,5 +56,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_pg_database.mydatabase PROJECT/SERVICE_NAME/DATABASE_NAME
+terraform import aiven_pg_database.main PROJECT/SERVICE_NAME/DATABASE_NAME
 ```
