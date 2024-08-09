@@ -1,5 +1,5 @@
-data "aiven_pg_user" "user" {
-  service_name = "my-service"
-  project      = "my-project"
-  username     = "user1"
+data "aiven_pg_user" "example_user" {
+  service_name = aiven_pg.example_postgres.service_name
+  project      = data.aiven_project.example_project.project
+  username     = "example-service-user"
 }

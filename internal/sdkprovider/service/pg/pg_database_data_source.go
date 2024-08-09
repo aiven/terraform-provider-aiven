@@ -13,7 +13,7 @@ import (
 func DatasourcePGDatabase() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceDatabaseRead,
-		Description: "The PG Database data source provides information about the existing Aiven PostgreSQL Database.",
+		Description: "Gets information about a database in an Aiven for PostgreSQL® service.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenPGDatabaseSchema,
 			"project", "service_name", "database_name"),
 	}
