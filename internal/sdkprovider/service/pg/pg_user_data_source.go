@@ -13,7 +13,7 @@ import (
 func DatasourcePGUser() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourcePGUserRead,
-		Description: "The PG User data source provides information about the existing Aiven PG User.",
+		Description: "Gets information about an Aiven for PostgreSQL® service user.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenPGUserSchema,
 			"project", "service_name", "username"),
 	}

@@ -3,21 +3,21 @@
 page_title: "aiven_pg Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The PG resource allows the creation and management of Aiven PostgreSQL services.
+  Creates and manages an Aiven for PostgreSQL® service.
 ---
 
 # aiven_pg (Resource)
 
-The PG resource allows the creation and management of Aiven PostgreSQL services.
+Creates and manages an Aiven for PostgreSQL® service.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_pg" "pg" {
-  project                 = data.aiven_project.pr1.project
+resource "aiven_pg" "example_postgres" {
+  project                 = data.aiven_project.example_project.project
   cloud_name              = "google-europe-west1"
   plan                    = "startup-4"
-  service_name            = "my-pg1"
+  service_name            = "example-postgres-service"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 
@@ -29,7 +29,6 @@ resource "aiven_pg" "pg" {
   ])
 
   pg_user_config {
-    pg_version = 11
     static_ips = true
 
     public_access {
@@ -66,7 +65,7 @@ resource "aiven_pg" "pg" {
 - `disk_space` (String, Deprecated) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
-- `pg` (Block List, Max: 1) PostgreSQL specific server provided values (see [below for nested schema](#nestedblock--pg))
+- `pg` (Block List, Max: 1) Values provided by the PostgreSQL server. (see [below for nested schema](#nestedblock--pg))
 - `pg_user_config` (Block List, Max: 1) Pg user configurable settings (see [below for nested schema](#nestedblock--pg_user_config))
 - `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.
 - `service_integrations` (Block List) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedblock--service_integrations))
@@ -97,35 +96,35 @@ resource "aiven_pg" "pg" {
 
 Optional:
 
-- `standby_uris` (List of String) PostgreSQL standby connection URIs
-- `syncing_uris` (List of String) PostgreSQL syncing connection URIs
-- `uri` (String, Sensitive) PostgreSQL master connection URI
-- `uris` (List of String) PostgreSQL master connection URIs
+- `standby_uris` (List of String) PostgreSQL standby connection URIs.
+- `syncing_uris` (List of String) PostgreSQL syncing connection URIs.
+- `uri` (String, Sensitive) PostgreSQL primary connection URI.
+- `uris` (List of String) PostgreSQL primary connection URIs.
 
 Read-Only:
 
-- `bouncer` (String) Bouncer connection details
-- `dbname` (String) Primary PostgreSQL database name
-- `host` (String) PostgreSQL master node host IP or name
-- `max_connections` (Number) Connection limit
-- `params` (Block List) PostgreSQL connection parameters (see [below for nested schema](#nestedblock--pg--params))
-- `password` (String, Sensitive) PostgreSQL admin user password
-- `port` (Number) PostgreSQL port
-- `replica_uri` (String, Sensitive) PostgreSQL replica URI for services with a replica
-- `sslmode` (String) PostgreSQL sslmode setting (currently always "require")
-- `user` (String) PostgreSQL admin user name
+- `bouncer` (String) PgBouncer connection details for [connection pooling](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling).
+- `dbname` (String) Primary PostgreSQL database name.
+- `host` (String) PostgreSQL primary node host IP or name.
+- `max_connections` (Number) The [number of allowed connections](https://aiven.io/docs/products/postgresql/reference/pg-connection-limits). Varies based on the service plan.
+- `params` (Block List) PostgreSQL connection parameters. (see [below for nested schema](#nestedblock--pg--params))
+- `password` (String, Sensitive) PostgreSQL admin user password.
+- `port` (Number) PostgreSQL port.
+- `replica_uri` (String, Sensitive) PostgreSQL replica URI for services with a replica.
+- `sslmode` (String) PostgreSQL SSL mode setting.
+- `user` (String) PostgreSQL admin user name.
 
 <a id="nestedblock--pg--params"></a>
 ### Nested Schema for `pg.params`
 
 Read-Only:
 
-- `database_name` (String) Primary PostgreSQL database name
-- `host` (String) PostgreSQL host IP or name
-- `password` (String, Sensitive) PostgreSQL admin user password
-- `port` (Number) PostgreSQL port
-- `sslmode` (String) PostgreSQL sslmode setting (currently always "require")
-- `user` (String) PostgreSQL admin user name
+- `database_name` (String) Primary PostgreSQL database name.
+- `host` (String) PostgreSQL host IP or name.
+- `password` (String, Sensitive) PostgreSQL admin user password.
+- `port` (Number) PostgreSQL port.
+- `sslmode` (String) PostgreSQL SSL mode setting.
+- `user` (String) PostgreSQL admin user name.
 
 
 
@@ -408,5 +407,5 @@ Read-Only:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_pg.pg PROJECT/SERVICE_NAME
+terraform import aiven_pg.example_postgres PROJECT/SERVICE_NAME
 ```

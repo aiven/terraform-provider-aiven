@@ -1,8 +1,8 @@
-resource "aiven_pg" "pg" {
-  project                 = data.aiven_project.pr1.project
+resource "aiven_pg" "example_postgres" {
+  project                 = data.aiven_project.example_project.project
   cloud_name              = "google-europe-west1"
   plan                    = "startup-4"
-  service_name            = "my-pg1"
+  service_name            = "example-postgres-service"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 
@@ -14,7 +14,6 @@ resource "aiven_pg" "pg" {
   ])
 
   pg_user_config {
-    pg_version = 11
     static_ips = true
 
     public_access {

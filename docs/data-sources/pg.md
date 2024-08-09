@@ -3,19 +3,19 @@
 page_title: "aiven_pg Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The PG data source provides information about the existing Aiven PostgreSQL service.
+  Gets information about an Aiven for PostgreSQL® service.
 ---
 
 # aiven_pg (Data Source)
 
-The PG data source provides information about the existing Aiven PostgreSQL service.
+Gets information about an Aiven for PostgreSQL® service.
 
 ## Example Usage
 
 ```terraform
-data "aiven_pg" "pg" {
-  project      = data.aiven_project.pr1.project
-  service_name = "my-pg1"
+data "aiven_pg" "example_postgres" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-postgres-service"
 }
 ```
 
@@ -40,7 +40,7 @@ data "aiven_pg" "pg" {
 - `id` (String) The ID of this resource.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
-- `pg` (List of Object, Sensitive) PostgreSQL specific server provided values (see [below for nested schema](#nestedatt--pg))
+- `pg` (List of Object, Sensitive) Values provided by the PostgreSQL server. (see [below for nested schema](#nestedatt--pg))
 - `pg_user_config` (List of Object) Pg user configurable settings (see [below for nested schema](#nestedatt--pg_user_config))
 - `plan` (String) Defines what kind of computing resources are allocated for the service. It can be changed after creation, though there are some restrictions when going to a smaller plan such as the new plan must have sufficient amount of disk space to store all current data and switching to a plan with fewer nodes might not be supported. The basic plan names are `hobbyist`, `startup-x`, `business-x` and `premium-x` where `x` is (roughly) the amount of memory on each node (also other attributes like number of CPUs and amount of disk space varies but naming is based on memory). The available options can be seem from the [Aiven pricing page](https://aiven.io/pricing).
 - `project_vpc_id` (String) Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.

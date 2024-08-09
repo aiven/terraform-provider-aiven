@@ -1,5 +1,5 @@
-resource "aiven_pg_database" "mydatabase" {
-  project       = aiven_project.myproject.project
-  service_name  = aiven_pg.mypg.service_name
-  database_name = "<DATABASE_NAME>"
+resource "aiven_pg_database" "main" {
+  project       = aiven_project.example_project.project
+  service_name  = aiven_pg.example_postgres.service_name
+  database_name = "example-database"
 }

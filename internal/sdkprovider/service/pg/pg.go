@@ -22,7 +22,7 @@ func aivenPGSchema() map[string]*schema.Schema {
 		Type:        schema.TypeList,
 		MaxItems:    1,
 		Computed:    true,
-		Description: "PostgreSQL specific server provided values",
+		Description: "Values provided by the PostgreSQL server.",
 		Optional:    true,
 		Sensitive:   true,
 		Elem: &schema.Resource{
@@ -31,14 +31,14 @@ func aivenPGSchema() map[string]*schema.Schema {
 				"uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "PostgreSQL master connection URI",
+					Description: "PostgreSQL primary connection URI.",
 					Optional:    true,
 					Sensitive:   true,
 				},
 				"uris": {
 					Type:        schema.TypeList,
 					Computed:    true,
-					Description: "PostgreSQL master connection URIs",
+					Description: "PostgreSQL primary connection URIs.",
 					Optional:    true,
 					Elem: &schema.Schema{
 						Type: schema.TypeString,
@@ -47,82 +47,82 @@ func aivenPGSchema() map[string]*schema.Schema {
 				"bouncer": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "Bouncer connection details",
+					Description: "PgBouncer connection details for [connection pooling](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling).",
 				},
 				// TODO: Remove `host` in the next major version.
 				"host": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "PostgreSQL master node host IP or name",
+					Description: "PostgreSQL primary node host IP or name.",
 				},
 				// TODO: Remove `port` in the next major version.
 				"port": {
 					Type:        schema.TypeInt,
 					Computed:    true,
-					Description: "PostgreSQL port",
+					Description: "PostgreSQL port.",
 				},
 				// TODO: Remove `sslmode` in the next major version.
 				"sslmode": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "PostgreSQL sslmode setting (currently always \"require\")",
+					Description: "PostgreSQL SSL mode setting.",
 				},
 				// TODO: Remove `user` in the next major version.
 				"user": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "PostgreSQL admin user name",
+					Description: "PostgreSQL admin user name.",
 				},
 				// TODO: Remove `password` in the next major version.
 				"password": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "PostgreSQL admin user password",
+					Description: "PostgreSQL admin user password.",
 					Sensitive:   true,
 				},
 				// TODO: Remove `dbname` in the next major version.
 				"dbname": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "Primary PostgreSQL database name",
+					Description: "Primary PostgreSQL database name.",
 				},
 				"params": {
 					Type:        schema.TypeList,
 					Computed:    true,
-					Description: "PostgreSQL connection parameters",
+					Description: "PostgreSQL connection parameters.",
 					Optional:    true,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"host": {
 								Type:        schema.TypeString,
 								Computed:    true,
-								Description: "PostgreSQL host IP or name",
+								Description: "PostgreSQL host IP or name.",
 							},
 							"port": {
 								Type:        schema.TypeInt,
 								Computed:    true,
-								Description: "PostgreSQL port",
+								Description: "PostgreSQL port.",
 							},
 							"sslmode": {
 								Type:        schema.TypeString,
 								Computed:    true,
-								Description: "PostgreSQL sslmode setting (currently always \"require\")",
+								Description: "PostgreSQL SSL mode setting.",
 							},
 							"user": {
 								Type:        schema.TypeString,
 								Computed:    true,
-								Description: "PostgreSQL admin user name",
+								Description: "PostgreSQL admin user name.",
 							},
 							"password": {
 								Type:        schema.TypeString,
 								Computed:    true,
 								Sensitive:   true,
-								Description: "PostgreSQL admin user password",
+								Description: "PostgreSQL admin user password.",
 							},
 							"database_name": {
 								Type:        schema.TypeString,
 								Computed:    true,
-								Description: "Primary PostgreSQL database name",
+								Description: "Primary PostgreSQL database name.",
 							},
 						},
 					},
@@ -130,13 +130,13 @@ func aivenPGSchema() map[string]*schema.Schema {
 				"replica_uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "PostgreSQL replica URI for services with a replica",
+					Description: "PostgreSQL replica URI for services with a replica.",
 					Sensitive:   true,
 				},
 				"standby_uris": {
 					Type:        schema.TypeList,
 					Computed:    true,
-					Description: "PostgreSQL standby connection URIs",
+					Description: "PostgreSQL standby connection URIs.",
 					Optional:    true,
 					Elem: &schema.Schema{
 						Type: schema.TypeString,
@@ -145,7 +145,7 @@ func aivenPGSchema() map[string]*schema.Schema {
 				"syncing_uris": {
 					Type:        schema.TypeList,
 					Computed:    true,
-					Description: "PostgreSQL syncing connection URIs",
+					Description: "PostgreSQL syncing connection URIs.",
 					Optional:    true,
 					Elem: &schema.Schema{
 						Type: schema.TypeString,
@@ -156,7 +156,7 @@ func aivenPGSchema() map[string]*schema.Schema {
 				"max_connections": {
 					Type:        schema.TypeInt,
 					Computed:    true,
-					Description: "Connection limit",
+					Description: "The [number of allowed connections](https://aiven.io/docs/products/postgresql/reference/pg-connection-limits). Varies based on the service plan.",
 				},
 			},
 		},
@@ -166,7 +166,7 @@ func aivenPGSchema() map[string]*schema.Schema {
 
 func ResourcePG() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The PG resource allows the creation and management of Aiven PostgreSQL services.",
+		Description:   "Creates and manages an Aiven for PostgreSQL® service.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypePG),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: resourceServicePGUpdate,

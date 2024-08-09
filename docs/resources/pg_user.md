@@ -3,21 +3,21 @@
 page_title: "aiven_pg_user Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The PG User resource allows the creation and management of Aiven PG Users.
+  Creates and manages an Aiven for PostgreSQL® service user.
 ---
 
 # aiven_pg_user (Resource)
 
-The PG User resource allows the creation and management of Aiven PG Users.
+Creates and manages an Aiven for PostgreSQL® service user.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_pg_user" "foo" {
-  service_name = aiven_pg.bar.service_name
-  project      = "my-project"
-  username     = "user-1"
-  password     = "Test$1234"
+resource "aiven_pg_user" "example_user" {
+  service_name = aiven_pg.example_postgres.service_name
+  project      = data.aiven_project.example_project.project
+  username     = "example-service-user"
+  password     = var.service_user_password
 }
 ```
 
@@ -28,20 +28,20 @@ resource "aiven_pg_user" "foo" {
 
 - `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `username` (String) The actual name of the PG User. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `username` (String) The name of the service user for this service. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
 
-- `password` (String, Sensitive) The password of the PG User (not applicable for all services).
-- `pg_allow_replication` (Boolean) Defines whether replication is allowed.
+- `password` (String, Sensitive) The password of the service user.
+- `pg_allow_replication` (Boolean) Allows replication.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- `access_cert` (String, Sensitive) Access certificate for the user
-- `access_key` (String, Sensitive) Access certificate key for the user
+- `access_cert` (String, Sensitive) The access certificate for the servie user.
+- `access_key` (String, Sensitive) The access certificate key for the service user.
 - `id` (String) The ID of this resource.
-- `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.
+- `type` (String) The service user account type, either primary or regular.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
@@ -59,5 +59,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_pg_user.user PROJECT/SERVICE_NAME/USERNAME
+terraform import aiven_pg_user.example_user PROJECT/SERVICE_NAME/USERNAME
 ```

@@ -1,6 +1,6 @@
-resource "aiven_pg_user" "foo" {
-  service_name = aiven_pg.bar.service_name
-  project      = "my-project"
-  username     = "user-1"
-  password     = "Test$1234"
+resource "aiven_pg_user" "example_user" {
+  service_name = aiven_pg.example_postgres.service_name
+  project      = data.aiven_project.example_project.project
+  username     = "example-service-user"
+  password     = var.service_user_password
 }
