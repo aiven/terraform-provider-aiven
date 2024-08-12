@@ -307,7 +307,7 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"transaction_partition_verification_enable": {
-						Description: "Enable verification that checks that the partition has been added to the transaction before writing transactional records to the partition. (Default: false).",
+						Description: "Enable verification that checks that the partition has been added to the transaction before writing transactional records to the partition. (Default: true).",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -580,6 +580,29 @@ func kafkaUserConfig() *schema.Schema {
 						Description: "Maximum number of SimpleConsumers that can be instantiated per broker. Default: `25`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
+					},
+				}},
+				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
+			"kafka_sasl_mechanisms": {
+				Description: "Kafka SASL mechanisms",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"plain": {
+						Description: "Enable PLAIN mechanism. Default: `true`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"scram_sha_256": {
+						Description: "Enable SCRAM-SHA-256 mechanism. Default: `true`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"scram_sha_512": {
+						Description: "Enable SCRAM-SHA-512 mechanism. Default: `true`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
 					},
 				}},
 				MaxItems: 1,

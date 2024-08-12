@@ -98,6 +98,7 @@ Read-Only:
 
 Read-Only:
 
+- `admin_timeout_ms` (Number)
 - `emit_checkpoints_enabled` (Boolean)
 - `emit_checkpoints_interval_seconds` (Number)
 - `groups` (String)

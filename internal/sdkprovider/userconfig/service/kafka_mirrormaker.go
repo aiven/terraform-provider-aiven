@@ -66,6 +66,11 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 			"kafka_mirrormaker": {
 				Description: "Kafka MirrorMaker configuration values",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"admin_timeout_ms": {
+						Description: "Timeout for administrative tasks, e.g. detecting new topics, loading of consumer group and offsets. Defaults to 60000 milliseconds (1 minute).",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
 					"emit_checkpoints_enabled": {
 						Description: "Whether to emit consumer group offset checkpoints to target cluster periodically (default: true).",
 						Optional:    true,
