@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/kafka"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -21,7 +22,7 @@ var aivenKafkaACLSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringInSlice([]string{"admin", "read", "readwrite", "write"}, false),
-		Description:  userconfig.Desc("Permissions to grant.").ForceNew().PossibleValues("admin", "read", "readwrite", "write").Build(),
+		Description:  userconfig.Desc("Permissions to grant.").ForceNew().PossibleValuesString(kafka.PermissionTypeChoices()...).Build(),
 	},
 	"topic": {
 		Type:        schema.TypeString,

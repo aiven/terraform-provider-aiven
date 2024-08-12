@@ -6,6 +6,7 @@ import (
 	"regexp"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/vpc"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -51,7 +52,7 @@ func DatasourceProjectVPC() *schema.Resource {
 		"state": {
 			Computed:    true,
 			Type:        schema.TypeString,
-			Description: userconfig.Desc("State of the VPC.").PossibleValues("APPROVED", "ACTIVE", "DELETING", "DELETED").Build(),
+			Description: userconfig.Desc("State of the VPC.").PossibleValuesString(vpc.VpcStateTypeChoices()...).Build(),
 		},
 	}
 

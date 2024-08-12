@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -28,7 +29,7 @@ var aivenConnectionPoolSchema = map[string]*schema.Schema{
 		Optional:     true,
 		Default:      "transaction",
 		ValidateFunc: validation.StringInSlice([]string{"session", "transaction", "statement"}, false),
-		Description:  userconfig.Desc("The mode the pool operates in").DefaultValue("transaction").PossibleValues("session", "transaction", "statement").Build(),
+		Description:  userconfig.Desc("The mode the pool operates in").DefaultValue("transaction").PossibleValuesString(service.PoolModeTypeChoices()...).Build(),
 	},
 	"pool_name": {
 		Type:        schema.TypeString,

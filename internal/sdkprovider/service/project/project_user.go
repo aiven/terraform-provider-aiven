@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/account"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -26,7 +27,7 @@ var aivenProjectUserSchema = map[string]*schema.Schema{
 	"member_type": {
 		Required:    true,
 		Type:        schema.TypeString,
-		Description: userconfig.Desc("Project membership type.").PossibleValues("admin", "developer", "operator").Build(),
+		Description: userconfig.Desc("Project membership type.").PossibleValuesString(account.MemberTypeChoices()...).Build(),
 	},
 	"accepted": {
 		Computed:    true,

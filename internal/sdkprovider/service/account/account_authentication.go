@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/accountauthentication"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -29,7 +30,7 @@ var aivenAccountAuthenticationSchema = map[string]*schema.Schema{
 		Type:         schema.TypeString,
 		Required:     true,
 		ValidateFunc: validation.StringInSlice([]string{"internal", "saml"}, false),
-		Description:  userconfig.Desc("The account authentication type.").PossibleValues("internal", "saml").Build(),
+		Description:  userconfig.Desc("The account authentication type.").PossibleValuesString(accountauthentication.AuthenticationMethodTypeChoices()...).Build(),
 	},
 	"enabled": {
 		Type:        schema.TypeBool,

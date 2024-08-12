@@ -33,7 +33,7 @@ data "aiven_mysql_user" "user" {
 
 - `access_cert` (String, Sensitive) Access certificate for the user
 - `access_key` (String, Sensitive) Access certificate key for the user
-- `authentication` (String) Authentication details. The possible values are `caching_sha2_password` and `mysql_native_password`.
+- `authentication` (String) Authentication details. The possible values are `null`, `caching_sha2_password` and `mysql_native_password`.
 - `id` (String) The ID of this resource.
 - `password` (String, Sensitive) The password of the MySQL User ( not applicable for all services ).
 - `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.

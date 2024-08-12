@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/account"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -105,13 +106,13 @@ func (r *organizationGroupProjectResource) Schema(
 				},
 			},
 			"role": schema.StringAttribute{
-				Description: userconfig.Desc("[Project-level role](https://aiven.io/docs/platform/reference/project-member-privileges) assigned to all users in the group.").PossibleValues("admin", "operator", "developer", "read_only").Build(),
+				Description: userconfig.Desc("[Project-level role](https://aiven.io/docs/platform/reference/project-member-privileges) assigned to all users in the group.").PossibleValuesString(account.TeamTypeChoices()...).Build(),
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					stringvalidator.OneOf("admin", "developer", "operator", "read_only"),
+					stringvalidator.OneOf(account.TeamTypeChoices()...),
 				},
 			},
 		},
