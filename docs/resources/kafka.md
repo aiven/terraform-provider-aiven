@@ -120,6 +120,7 @@ Optional:
 - `kafka_rest` (Boolean) Enable Kafka-REST service. Default: `false`.
 - `kafka_rest_authorization` (Boolean) Enable authorization in Kafka-REST service.
 - `kafka_rest_config` (Block List, Max: 1) Kafka REST configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_rest_config))
+- `kafka_sasl_mechanisms` (Block List, Max: 1) Kafka SASL mechanisms (see [below for nested schema](#nestedblock--kafka_user_config--kafka_sasl_mechanisms))
 - `kafka_version` (String) Enum: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`, `3.7`, and newer. Kafka major version.
 - `letsencrypt_sasl_privatelink` (Boolean) Use Letsencrypt CA for Kafka SASL via Privatelink.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--kafka_user_config--private_access))
@@ -199,7 +200,7 @@ Optional:
 - `sasl_oauthbearer_jwks_endpoint_url` (String) OIDC JWKS endpoint URL. By setting this the SASL SSL OAuth2/OIDC authentication is enabled. See also other options for SASL OAuth2/OIDC. (Default: null).
 - `sasl_oauthbearer_sub_claim_name` (String) Name of the scope from which to extract the subject claim from the JWT.(Default: sub).
 - `socket_request_max_bytes` (Number) The maximum number of bytes in a socket request (Default: 104857600 bytes).
-- `transaction_partition_verification_enable` (Boolean) Enable verification that checks that the partition has been added to the transaction before writing transactional records to the partition. (Default: false).
+- `transaction_partition_verification_enable` (Boolean) Enable verification that checks that the partition has been added to the transaction before writing transactional records to the partition. (Default: true).
 - `transaction_remove_expired_transaction_cleanup_interval_ms` (Number) The interval at which to remove transactions that have expired due to transactional.id.expiration.ms passing (Default: 3600000 ms (1 hour)). Example: `3600000`.
 - `transaction_state_log_segment_bytes` (Number) The transaction topic segment bytes should be kept relatively small in order to facilitate faster log compaction and cache loads (Default: 104857600 bytes (100 mebibytes)). Example: `104857600`.
 
@@ -292,6 +293,16 @@ Optional:
 - `producer_linger_ms` (Number) Wait for up to the given delay to allow batching records together. Default: `0`.
 - `producer_max_request_size` (Number) The maximum size of a request in bytes. Note that Kafka broker can also cap the record batch size. Default: `1048576`.
 - `simpleconsumer_pool_size_max` (Number) Maximum number of SimpleConsumers that can be instantiated per broker. Default: `25`.
+
+
+<a id="nestedblock--kafka_user_config--kafka_sasl_mechanisms"></a>
+### Nested Schema for `kafka_user_config.kafka_sasl_mechanisms`
+
+Optional:
+
+- `plain` (Boolean) Enable PLAIN mechanism. Default: `true`.
+- `scram_sha_256` (Boolean) Enable SCRAM-SHA-256 mechanism. Default: `true`.
+- `scram_sha_512` (Boolean) Enable SCRAM-SHA-512 mechanism. Default: `true`.
 
 
 <a id="nestedblock--kafka_user_config--private_access"></a>

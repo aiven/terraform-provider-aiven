@@ -107,6 +107,7 @@ Read-Only:
 - `kafka_rest` (Boolean)
 - `kafka_rest_authorization` (Boolean)
 - `kafka_rest_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_rest_config))
+- `kafka_sasl_mechanisms` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--kafka_sasl_mechanisms))
 - `kafka_version` (String)
 - `letsencrypt_sasl_privatelink` (Boolean)
 - `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--private_access))
@@ -267,6 +268,16 @@ Read-Only:
 - `producer_linger_ms` (Number)
 - `producer_max_request_size` (Number)
 - `simpleconsumer_pool_size_max` (Number)
+
+
+<a id="nestedobjatt--kafka_user_config--kafka_sasl_mechanisms"></a>
+### Nested Schema for `kafka_user_config.kafka_sasl_mechanisms`
+
+Read-Only:
+
+- `plain` (Boolean)
+- `scram_sha_256` (Boolean)
+- `scram_sha_512` (Boolean)
 
 
 <a id="nestedobjatt--kafka_user_config--private_access"></a>

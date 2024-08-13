@@ -102,6 +102,7 @@ Optional:
 
 Optional:
 
+- `admin_timeout_ms` (Number) Timeout for administrative tasks, e.g. detecting new topics, loading of consumer group and offsets. Defaults to 60000 milliseconds (1 minute).
 - `emit_checkpoints_enabled` (Boolean) Whether to emit consumer group offset checkpoints to target cluster periodically (default: true).
 - `emit_checkpoints_interval_seconds` (Number) Frequency at which consumer group offset checkpoints are emitted (default: 60, every minute). Example: `60`.
 - `groups` (String) Consumer groups to replicate. Supports comma-separated group IDs and regexes. Example: `.*`.
