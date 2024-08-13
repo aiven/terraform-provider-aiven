@@ -134,13 +134,14 @@ func opensearchUserConfig() *schema.Schema {
 				Description: "OpenSearch OpenID Connect Configuration",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"client_id": {
-						Description: "The ID of the OpenID Connect client configured in your IdP. Required. Example: ``.",
+						Description: "The ID of the OpenID Connect client configured in your IdP. Required.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"client_secret": {
-						Description: "The client secret of the OpenID Connect client configured in your IdP. Required. Example: ``.",
+						Description: "The client secret of the OpenID Connect client configured in your IdP. Required.",
 						Required:    true,
+						Sensitive:   true,
 						Type:        schema.TypeString,
 					},
 					"connect_url": {
@@ -184,7 +185,7 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"scope": {
-						Description: "The scope of the identity token issued by the IdP. Optional. Default is openid profile email address phone. Example: ``.",
+						Description: "The scope of the identity token issued by the IdP. Optional. Default is openid profile email address phone.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},

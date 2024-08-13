@@ -250,7 +250,7 @@ func getSchemaValues(o *object) (jen.Dict, error) {
 	}
 
 	if o.isScalar() {
-		if reSensitive.MatchString(o.jsonName) {
+		if o.IsSensitive || reSensitive.MatchString(o.jsonName) {
 			values[jen.Id("Sensitive")] = jen.True()
 		}
 
@@ -439,4 +439,5 @@ func toTitle(s string) string {
 }
 
 // reSensitive finds sensitive fields
-var reSensitive = regexp.MustCompile(`(secret_key|access_key|api_key|token|password)$`)
+// ignores token_url
+var reSensitive = regexp.MustCompile(`(secret|access_key|api_key|^token$|password)`)

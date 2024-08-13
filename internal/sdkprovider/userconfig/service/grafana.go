@@ -92,6 +92,7 @@ func grafanaUserConfig() *schema.Schema {
 					"client_secret": {
 						Description: "Client secret from provider. Example: `bfa6gea4f129076761dcba8ce5e1e406bd83af7b`.",
 						Required:    true,
+						Sensitive:   true,
 						Type:        schema.TypeString,
 					},
 					"token_url": {
@@ -160,6 +161,7 @@ func grafanaUserConfig() *schema.Schema {
 					"client_secret": {
 						Description: "Client secret from provider. Example: `bfa6gea4f129076761dcba8ce5e1e406bd83af7b`.",
 						Required:    true,
+						Sensitive:   true,
 						Type:        schema.TypeString,
 					},
 					"name": {
@@ -218,6 +220,7 @@ func grafanaUserConfig() *schema.Schema {
 					"client_secret": {
 						Description: "Client secret from provider. Example: `bfa6gea4f129076761dcba8ce5e1e406bd83af7b`.",
 						Required:    true,
+						Sensitive:   true,
 						Type:        schema.TypeString,
 					},
 					"skip_org_role_sync": {
@@ -276,6 +279,7 @@ func grafanaUserConfig() *schema.Schema {
 					"client_secret": {
 						Description: "Client secret from provider. Example: `bfa6gea4f129076761dcba8ce5e1e406bd83af7b`.",
 						Required:    true,
+						Sensitive:   true,
 						Type:        schema.TypeString,
 					},
 					"token_url": {
@@ -314,6 +318,7 @@ func grafanaUserConfig() *schema.Schema {
 					"client_secret": {
 						Description: "Client secret from provider. Example: `bfa6gea4f129076761dcba8ce5e1e406bd83af7b`.",
 						Required:    true,
+						Sensitive:   true,
 						Type:        schema.TypeString,
 					},
 				}},

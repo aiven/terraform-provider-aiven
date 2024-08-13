@@ -13,6 +13,7 @@ nav_order: 1
 
 - Use enum choices from [code-generated client](https://github.com/aiven/go-client-codegen)
 - Add missing enum choices to resource descriptions: `aiven_project_user` and `aiven_mysql_user`
+- Mark more `aiven_grafana`, `aiven_opensearch` and `aiven_service_integration_endpoint` sensitive fields
 
 ## [4.22.0] - 2024-08-02
 

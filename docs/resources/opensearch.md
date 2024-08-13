@@ -163,8 +163,8 @@ Optional:
 
 Required:
 
-- `client_id` (String) The ID of the OpenID Connect client configured in your IdP. Required. Example: ``.
-- `client_secret` (String) The client secret of the OpenID Connect client configured in your IdP. Required. Example: ``.
+- `client_id` (String) The ID of the OpenID Connect client configured in your IdP. Required.
+- `client_secret` (String, Sensitive) The client secret of the OpenID Connect client configured in your IdP. Required.
 - `connect_url` (String) The URL of your IdP where the Security plugin can find the OpenID Connect metadata/configuration settings. Example: `https://test-account.okta.com/app/exk491jujcVc83LEX697/sso/saml/metadata`.
 - `enabled` (Boolean) Enables or disables OpenID Connect authentication for OpenSearch. When enabled, users can authenticate using OpenID Connect with an Identity Provider. Default: `true`.
 
@@ -176,7 +176,7 @@ Optional:
 - `refresh_rate_limit_count` (Number) The maximum number of unknown key IDs in the time frame. Default is 10. Optional. Default: `10`.
 - `refresh_rate_limit_time_window_ms` (Number) The time frame to use when checking the maximum number of unknown key IDs, in milliseconds. Optional.Default is 10000 (10 seconds). Default: `10000`.
 - `roles_key` (String) The key in the JSON payload that stores the user’s roles. The value of this key must be a comma-separated list of roles. Required only if you want to use roles in the JWT. Example: `roles`.
-- `scope` (String) The scope of the identity token issued by the IdP. Optional. Default is openid profile email address phone. Example: ``.
+- `scope` (String) The scope of the identity token issued by the IdP. Optional. Default is openid profile email address phone.
 - `subject_key` (String) The key in the JSON payload that stores the user’s name. If not defined, the subject registered claim is used. Most IdP providers use the preferred_username claim. Optional. Example: `preferred_username`.
 
 

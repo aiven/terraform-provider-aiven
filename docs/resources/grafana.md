@@ -136,7 +136,7 @@ Required:
 
 - `auth_url` (String) Authorization URL. Example: `https://login.microsoftonline.com/<AZURE_TENANT_ID>/oauth2/v2.0/authorize`.
 - `client_id` (String) Client ID from provider. Example: `b1ba0bf54a4c2c0a1c29`.
-- `client_secret` (String) Client secret from provider. Example: `bfa6gea4f129076761dcba8ce5e1e406bd83af7b`.
+- `client_secret` (String, Sensitive) Client secret from provider. Example: `bfa6gea4f129076761dcba8ce5e1e406bd83af7b`.
 - `token_url` (String) Token URL. Example: `https://login.microsoftonline.com/<AZURE_TENANT_ID>/oauth2/v2.0/token`.
 
 Optional:
@@ -154,7 +154,7 @@ Required:
 - `api_url` (String) API URL. Example: `https://yourprovider.com/api`.
 - `auth_url` (String) Authorization URL. Example: `https://yourprovider.com/oauth/authorize`.
 - `client_id` (String) Client ID from provider. Example: `b1ba0bf54a4c2c0a1c29`.
-- `client_secret` (String) Client secret from provider. Example: `bfa6gea4f129076761dcba8ce5e1e406bd83af7b`.
+- `client_secret` (String, Sensitive) Client secret from provider. Example: `bfa6gea4f129076761dcba8ce5e1e406bd83af7b`.
 - `token_url` (String) Token URL. Example: `https://yourprovider.com/oauth/token`.
 
 Optional:
@@ -173,7 +173,7 @@ Optional:
 Required:
 
 - `client_id` (String) Client ID from provider. Example: `b1ba0bf54a4c2c0a1c29`.
-- `client_secret` (String) Client secret from provider. Example: `bfa6gea4f129076761dcba8ce5e1e406bd83af7b`.
+- `client_secret` (String, Sensitive) Client secret from provider. Example: `bfa6gea4f129076761dcba8ce5e1e406bd83af7b`.
 
 Optional:
 
@@ -191,7 +191,7 @@ Required:
 
 - `allowed_groups` (List of String) Require users to belong to one of given groups.
 - `client_id` (String) Client ID from provider. Example: `b1ba0bf54a4c2c0a1c29`.
-- `client_secret` (String) Client secret from provider. Example: `bfa6gea4f129076761dcba8ce5e1e406bd83af7b`.
+- `client_secret` (String, Sensitive) Client secret from provider. Example: `bfa6gea4f129076761dcba8ce5e1e406bd83af7b`.
 
 Optional:
 
@@ -208,7 +208,7 @@ Required:
 
 - `allowed_domains` (List of String) Domains allowed to sign-in to this Grafana.
 - `client_id` (String) Client ID from provider. Example: `b1ba0bf54a4c2c0a1c29`.
-- `client_secret` (String) Client secret from provider. Example: `bfa6gea4f129076761dcba8ce5e1e406bd83af7b`.
+- `client_secret` (String, Sensitive) Client secret from provider. Example: `bfa6gea4f129076761dcba8ce5e1e406bd83af7b`.
 
 Optional:
 
