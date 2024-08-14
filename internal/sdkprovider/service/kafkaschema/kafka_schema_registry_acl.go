@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/kafkaschemaregistry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -21,7 +22,7 @@ var aivenKafkaSchemaRegistryACLSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringInSlice([]string{"schema_registry_read", "schema_registry_write"}, false),
-		Description:  userconfig.Desc("Kafka Schema Registry permission to grant.").ForceNew().PossibleValues("schema_registry_read", "schema_registry_write").Build(),
+		Description:  userconfig.Desc("Kafka Schema Registry permission to grant.").ForceNew().PossibleValuesString(kafkaschemaregistry.PermissionTypeChoices()...).Build(),
 	},
 	"resource": {
 		Type:        schema.TypeString,

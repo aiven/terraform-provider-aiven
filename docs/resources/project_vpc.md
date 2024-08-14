@@ -40,7 +40,7 @@ resource "aiven_project_vpc" "example_vpc" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `state` (String) State of the VPC. The possible values are `APPROVED`, `ACTIVE`, `DELETING` and `DELETED`.
+- `state` (String) State of the VPC. The possible values are `ACTIVE`, `APPROVED`, `DELETED` and `DELETING`.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

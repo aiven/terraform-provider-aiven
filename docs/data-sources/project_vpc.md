@@ -32,4 +32,4 @@ data "aiven_project_vpc" "example_vpc" {
 
 - `id` (String) The ID of this resource.
 - `network_cidr` (String) Network address range used by the VPC. For example, `192.168.0.0/24`.
-- `state` (String) State of the VPC. The possible values are `APPROVED`, `ACTIVE`, `DELETING` and `DELETED`.
+- `state` (String) State of the VPC. The possible values are `ACTIVE`, `APPROVED`, `DELETED` and `DELETING`.

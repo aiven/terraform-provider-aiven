@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/kafkaschemaregistry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
@@ -64,13 +65,13 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 	"compatibility_level": {
 		Type:         schema.TypeString,
 		Optional:     true,
-		ValidateFunc: validation.StringInSlice(compatibilityLevels, false),
+		ValidateFunc: validation.StringInSlice(kafkaschemaregistry.CompatibilityTypeChoices(), false),
 		DiffSuppressFunc: func(_, _, new string, _ *schema.ResourceData) bool {
 			// When a compatibility level is not set to any value and consequently is null (empty string).
 			// Allow ignoring those.
 			return new == ""
 		},
-		Description: userconfig.Desc("Kafka Schemas compatibility level.").PossibleValues(schemautil.StringSliceToInterfaceSlice(compatibilityLevels)...).Build(),
+		Description: userconfig.Desc("Kafka Schemas compatibility level.").PossibleValuesString(kafkaschemaregistry.CompatibilityTypeChoices()...).Build(),
 	},
 }
 

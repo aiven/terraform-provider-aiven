@@ -41,7 +41,7 @@ type DescriptionBuilder struct {
 	// withForcedFirstLetterCapitalization is a flag that indicates if the first letter should be capitalized.
 	withForcedFirstLetterCapitalization bool
 	// withPossibleValues is a flag that indicates if the possible values should be included.
-	withPossibleValues []any
+	withPossibleValues []string
 	// withRequiredWith is a flag that indicates if the required with should be included.
 	withRequiredWith []string
 	// withMaxLen is a flag that indicates if the maximum length should be included.
@@ -82,8 +82,7 @@ func (db *DescriptionBuilder) ForceFirstLetterCapitalization() *DescriptionBuild
 	return db
 }
 
-// PossibleValues is a function that sets the withPossibleValues flag.
-func (db *DescriptionBuilder) PossibleValues(values ...any) *DescriptionBuilder {
+func (db *DescriptionBuilder) PossibleValuesString(values ...string) *DescriptionBuilder {
 	db.withPossibleValues = values
 	return db
 }

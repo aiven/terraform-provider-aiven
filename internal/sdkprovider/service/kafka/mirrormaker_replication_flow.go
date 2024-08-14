@@ -19,11 +19,6 @@ const configPropsKey = "config_properties_exclude"
 
 var (
 	defaultReplicationPolicy = "org.apache.kafka.connect.mirror.DefaultReplicationPolicy"
-	replicationPolicies      = []string{
-		"org.apache.kafka.connect.mirror.DefaultReplicationPolicy",
-		"org.apache.kafka.connect.mirror.IdentityReplicationPolicy",
-	}
-
 	// dtoFieldsAliases stores DTO fields mapping: terraform -> json
 	dtoFieldsAliases = map[string]string{
 		"enable":           "enabled",
@@ -73,10 +68,10 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 	"replication_policy_class": {
 		Type:         schema.TypeString,
 		Required:     true,
-		ValidateFunc: validation.StringInSlice(replicationPolicies, false),
+		ValidateFunc: validation.StringInSlice(kafkamirrormaker.ReplicationPolicyClassTypeChoices(), false),
 		Description: userconfig.Desc("Replication policy class.").
 			DefaultValue(defaultReplicationPolicy).
-			PossibleValues(schemautil.StringSliceToInterfaceSlice(replicationPolicies)...).Build(),
+			PossibleValuesString(kafkamirrormaker.ReplicationPolicyClassTypeChoices()...).Build(),
 	},
 	"sync_group_offsets_enabled": {
 		Type:        schema.TypeBool,

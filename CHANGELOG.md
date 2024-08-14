@@ -9,6 +9,11 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!-- ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Use enum choices from [code-generated client](https://github.com/aiven/go-client-codegen)
+- Add missing enum choices to resource descriptions: `aiven_project_user` and `aiven_mysql_user`
+
 ## [4.22.0] - 2024-08-02
 
 - Show "create" plan for missing `aiven_kafka_schema`

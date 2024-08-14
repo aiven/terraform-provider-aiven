@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/opensearch"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -33,7 +34,7 @@ var aivenOpenSearchACLRuleSchema = map[string]*schema.Schema{
 		Type:         schema.TypeString,
 		Required:     true,
 		ValidateFunc: validation.StringInSlice([]string{"deny", "admin", "read", "readwrite", "write"}, false),
-		Description:  userconfig.Desc("The permissions for this ACL entry").PossibleValues("deny", "admin", "read", "readwrite", "write").Build(),
+		Description:  userconfig.Desc("The permissions for this ACL entry").PossibleValuesString(opensearch.PermissionTypeChoices()...).Build(),
 	},
 }
 

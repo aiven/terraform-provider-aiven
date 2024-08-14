@@ -32,7 +32,7 @@ resource "aiven_mysql_user" "foo" {
 
 ### Optional
 
-- `authentication` (String) Authentication details. The possible values are `caching_sha2_password` and `mysql_native_password`.
+- `authentication` (String) Authentication details. The possible values are `null`, `caching_sha2_password` and `mysql_native_password`.
 - `password` (String, Sensitive) The password of the MySQL User ( not applicable for all services ).
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
