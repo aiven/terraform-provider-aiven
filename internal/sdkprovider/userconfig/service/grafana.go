@@ -636,6 +636,11 @@ func grafanaUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
+			"wal": {
+				Description: "Setting to enable/disable Write-Ahead Logging. The default value is false (disabled).",
+				Optional:    true,
+				Type:        schema.TypeBool,
+			},
 		}},
 		MaxItems: 1,
 		Optional: true,

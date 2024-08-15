@@ -128,6 +128,7 @@ Optional:
 - `user_auto_assign_org` (Boolean) Auto-assign new users on signup to main organization. Defaults to false.
 - `user_auto_assign_org_role` (String) Enum: `Viewer`, `Admin`, `Editor`. Set role for new signups. Defaults to Viewer.
 - `viewers_can_edit` (Boolean) Users with view-only permission can edit but not save dashboards.
+- `wal` (Boolean) Setting to enable/disable Write-Ahead Logging. The default value is false (disabled).
 
 <a id="nestedblock--grafana_user_config--auth_azuread"></a>
 ### Nested Schema for `grafana_user_config.auth_azuread`

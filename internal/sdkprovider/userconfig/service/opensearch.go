@@ -24,6 +24,58 @@ func opensearchUserConfig() *schema.Schema {
 				Optional: true,
 				Type:     schema.TypeList,
 			},
+			"azure_migration": {
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"account": {
+						Description: "Azure account name.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+					"base_path": {
+						Description: "The path to the repository data within its container. The value of this setting should not start or end with a /.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+					"chunk_size": {
+						Description: "Big files can be broken down into chunks during snapshotting if needed. Should be the same as for the 3rd party repository.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"compress": {
+						Description: "When set to true metadata files are stored in compressed format.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"container": {
+						Description: "Azure container name.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+					"endpoint_suffix": {
+						Description: "Defines the DNS suffix for Azure Storage endpoints.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"key": {
+						Description: "Azure account secret key. One of key or sas_token should be specified.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"sas_token": {
+						Description: "A shared access signatures (SAS) token. One of key or sas_token should be specified.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"snapshot_name": {
+						Description: "The snapshot name to restore from.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+				}},
+				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
 			"custom_domain": {
 				Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. Example: `grafana.example.org`.",
 				Optional:    true,
@@ -33,6 +85,43 @@ func opensearchUserConfig() *schema.Schema {
 				Description: "Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can no longer be activated.",
 				Optional:    true,
 				Type:        schema.TypeBool,
+			},
+			"gcs_migration": {
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"base_path": {
+						Description: "The path to the repository data within its container. The value of this setting should not start or end with a /.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+					"bucket": {
+						Description: "The path to the repository data within its container.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+					"chunk_size": {
+						Description: "Big files can be broken down into chunks during snapshotting if needed. Should be the same as for the 3rd party repository.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"compress": {
+						Description: "When set to true metadata files are stored in compressed format.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"credentials": {
+						Description: "Google Cloud Storage credentials file content.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+					"snapshot_name": {
+						Description: "The snapshot name to restore from.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+				}},
+				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
 			},
 			"index_patterns": {
 				Description: "Index patterns",
@@ -55,6 +144,39 @@ func opensearchUserConfig() *schema.Schema {
 					},
 				}},
 				MaxItems: 512,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
+			"index_rollup": {
+				Description: "Index rollup settings",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"rollup_dashboards_enabled": {
+						Description: "Whether rollups are enabled in OpenSearch Dashboards. Defaults to true.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"rollup_enabled": {
+						Description: "Whether the rollup plugin is enabled. Defaults to true.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"rollup_search_backoff_count": {
+						Description: "How many retries the plugin should attempt for failed rollup jobs. Defaults to 5.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"rollup_search_backoff_millis": {
+						Description: "The backoff time between retries for failed rollup jobs. Defaults to 1000ms.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"rollup_search_search_all_jobs": {
+						Description: "Whether OpenSearch should return all jobs that match all specified search terms. If disabled, OpenSearch returns just one, as opposed to all, of the jobs that matches the search terms. Defaults to false.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+				}},
+				MaxItems: 1,
 				Optional: true,
 				Type:     schema.TypeList,
 			},
@@ -330,7 +452,7 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"enable_security_audit": {
-						Description: "Enable/Disable security audit. Default: `false`.",
+						Description: "Enable/Disable security audit.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
@@ -390,42 +512,42 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"ism_enabled": {
-						Description: "Specifies whether ISM is enabled or not. Default: `true`.",
+						Description: "Specifies whether ISM is enabled or not.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"ism_history_enabled": {
-						Description: "Specifies whether audit history is enabled or not. The logs from ISM are automatically indexed to a logs document. Default: `true`.",
+						Description: "Specifies whether audit history is enabled or not. The logs from ISM are automatically indexed to a logs document.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"ism_history_max_age": {
-						Description: "The maximum age before rolling over the audit history index in hours. Default: `24`.",
+						Description: "The maximum age before rolling over the audit history index in hours. Example: `24`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"ism_history_max_docs": {
-						Description: "The maximum number of documents before rolling over the audit history index. Default: `2500000`.",
+						Description: "The maximum number of documents before rolling over the audit history index. Example: `2500000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"ism_history_rollover_check_period": {
-						Description: "The time between rollover checks for the audit history index in hours. Default: `8`.",
+						Description: "The time between rollover checks for the audit history index in hours. Example: `8`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"ism_history_rollover_retention_period": {
-						Description: "How long audit history indices are kept in days. Default: `30`.",
+						Description: "How long audit history indices are kept in days. Example: `30`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
 					"knn_memory_circuit_breaker_enabled": {
-						Description: "Enable or disable KNN memory circuit breaker. Defaults to true. Default: `true`.",
+						Description: "Enable or disable KNN memory circuit breaker. Defaults to true.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
 					"knn_memory_circuit_breaker_limit": {
-						Description: "Maximum amount of memory that can be used for KNN index. Defaults to 50% of the JVM heap size. Default: `50`.",
+						Description: "Maximum amount of memory that can be used for KNN index. Defaults to 50% of the JVM heap size.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
@@ -626,6 +748,65 @@ func opensearchUserConfig() *schema.Schema {
 				Description: "Name of the basebackup to restore in forked service. Example: `backup-20191112t091354293891z`.",
 				Optional:    true,
 				Type:        schema.TypeString,
+			},
+			"s3_migration": {
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"access_key": {
+						Description: "AWS Access key.",
+						Required:    true,
+						Sensitive:   true,
+						Type:        schema.TypeString,
+					},
+					"base_path": {
+						Description: "The path to the repository data within its container. The value of this setting should not start or end with a /.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+					"bucket": {
+						Description: "S3 bucket name.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+					"chunk_size": {
+						Description: "Big files can be broken down into chunks during snapshotting if needed. Should be the same as for the 3rd party repository.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"compress": {
+						Description: "When set to true metadata files are stored in compressed format.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"endpoint": {
+						Description: "The S3 service endpoint to connect to. If you are using an S3-compatible service then you should set this to the service’s endpoint.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"region": {
+						Description: "S3 region.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+					"secret_key": {
+						Description: "AWS secret key.",
+						Required:    true,
+						Sensitive:   true,
+						Type:        schema.TypeString,
+					},
+					"server_side_encryption": {
+						Description: "When set to true files are encrypted on server side.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"snapshot_name": {
+						Description: "The snapshot name to restore from.",
+						Required:    true,
+						Type:        schema.TypeString,
+					},
+				}},
+				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
 			},
 			"saml": {
 				Description: "OpenSearch SAML configuration",
