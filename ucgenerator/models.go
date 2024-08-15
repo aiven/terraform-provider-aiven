@@ -72,6 +72,7 @@ type object struct {
 	RequiredFields []string           `yaml:"required"`
 	CreateOnly     bool               `yaml:"create_only"`
 	Nullable       bool               `yaml:"-"`
+	IsSensitive    bool               `yaml:"_secure"`
 }
 
 var reCleanTFName = regexp.MustCompile(`[^a-z0-9_]`)

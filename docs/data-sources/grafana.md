@@ -127,6 +127,7 @@ Read-Only:
 - `user_auto_assign_org` (Boolean)
 - `user_auto_assign_org_role` (String)
 - `viewers_can_edit` (Boolean)
+- `wal` (Boolean)
 
 <a id="nestedobjatt--grafana_user_config--auth_azuread"></a>
 ### Nested Schema for `grafana_user_config.auth_azuread`

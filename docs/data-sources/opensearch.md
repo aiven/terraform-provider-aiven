@@ -90,9 +90,12 @@ Read-Only:
 Read-Only:
 
 - `additional_backup_regions` (List of String)
+- `azure_migration` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--azure_migration))
 - `custom_domain` (String)
 - `disable_replication_factor_adjustment` (Boolean)
+- `gcs_migration` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--gcs_migration))
 - `index_patterns` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--index_patterns))
+- `index_rollup` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--index_rollup))
 - `index_template` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--index_template))
 - `ip_filter` (Set of String)
 - `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--ip_filter_object))
@@ -108,10 +111,40 @@ Read-Only:
 - `project_to_fork_from` (String)
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--public_access))
 - `recovery_basebackup_name` (String)
+- `s3_migration` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--s3_migration))
 - `saml` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--saml))
 - `service_log` (Boolean)
 - `service_to_fork_from` (String)
 - `static_ips` (Boolean)
+
+<a id="nestedobjatt--opensearch_user_config--azure_migration"></a>
+### Nested Schema for `opensearch_user_config.azure_migration`
+
+Read-Only:
+
+- `account` (String)
+- `base_path` (String)
+- `chunk_size` (String)
+- `compress` (Boolean)
+- `container` (String)
+- `endpoint_suffix` (String)
+- `key` (String)
+- `sas_token` (String)
+- `snapshot_name` (String)
+
+
+<a id="nestedobjatt--opensearch_user_config--gcs_migration"></a>
+### Nested Schema for `opensearch_user_config.gcs_migration`
+
+Read-Only:
+
+- `base_path` (String)
+- `bucket` (String)
+- `chunk_size` (String)
+- `compress` (Boolean)
+- `credentials` (String)
+- `snapshot_name` (String)
+
 
 <a id="nestedobjatt--opensearch_user_config--index_patterns"></a>
 ### Nested Schema for `opensearch_user_config.index_patterns`
@@ -121,6 +154,18 @@ Read-Only:
 - `max_index_count` (Number)
 - `pattern` (String)
 - `sorting_algorithm` (String)
+
+
+<a id="nestedobjatt--opensearch_user_config--index_rollup"></a>
+### Nested Schema for `opensearch_user_config.index_rollup`
+
+Read-Only:
+
+- `rollup_dashboards_enabled` (Boolean)
+- `rollup_enabled` (Boolean)
+- `rollup_search_backoff_count` (Number)
+- `rollup_search_backoff_millis` (Number)
+- `rollup_search_search_all_jobs` (Boolean)
 
 
 <a id="nestedobjatt--opensearch_user_config--index_template"></a>
@@ -286,6 +331,23 @@ Read-Only:
 - `opensearch` (Boolean)
 - `opensearch_dashboards` (Boolean)
 - `prometheus` (Boolean)
+
+
+<a id="nestedobjatt--opensearch_user_config--s3_migration"></a>
+### Nested Schema for `opensearch_user_config.s3_migration`
+
+Read-Only:
+
+- `access_key` (String)
+- `base_path` (String)
+- `bucket` (String)
+- `chunk_size` (String)
+- `compress` (Boolean)
+- `endpoint` (String)
+- `region` (String)
+- `secret_key` (String)
+- `server_side_encryption` (Boolean)
+- `snapshot_name` (String)
 
 
 <a id="nestedobjatt--opensearch_user_config--saml"></a>

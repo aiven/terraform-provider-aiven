@@ -100,9 +100,12 @@ Read-Only:
 Optional:
 
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
+- `azure_migration` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--azure_migration))
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. Example: `grafana.example.org`.
 - `disable_replication_factor_adjustment` (Boolean) Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can no longer be activated.
+- `gcs_migration` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--gcs_migration))
 - `index_patterns` (Block List, Max: 512) Index patterns (see [below for nested schema](#nestedblock--opensearch_user_config--index_patterns))
+- `index_rollup` (Block List, Max: 1) Index rollup settings (see [below for nested schema](#nestedblock--opensearch_user_config--index_rollup))
 - `index_template` (Block List, Max: 1) Template settings for all new indexes (see [below for nested schema](#nestedblock--opensearch_user_config--index_template))
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--opensearch_user_config--ip_filter_object))
@@ -118,10 +121,46 @@ Optional:
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created. Example: `anotherprojectname`.
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--opensearch_user_config--public_access))
 - `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service. Example: `backup-20191112t091354293891z`.
+- `s3_migration` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--s3_migration))
 - `saml` (Block List, Max: 1) OpenSearch SAML configuration (see [below for nested schema](#nestedblock--opensearch_user_config--saml))
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.
 - `static_ips` (Boolean) Use static public IP addresses.
+
+<a id="nestedblock--opensearch_user_config--azure_migration"></a>
+### Nested Schema for `opensearch_user_config.azure_migration`
+
+Required:
+
+- `account` (String) Azure account name.
+- `base_path` (String) The path to the repository data within its container. The value of this setting should not start or end with a /.
+- `container` (String) Azure container name.
+- `snapshot_name` (String) The snapshot name to restore from.
+
+Optional:
+
+- `chunk_size` (String) Big files can be broken down into chunks during snapshotting if needed. Should be the same as for the 3rd party repository.
+- `compress` (Boolean) When set to true metadata files are stored in compressed format.
+- `endpoint_suffix` (String) Defines the DNS suffix for Azure Storage endpoints.
+- `key` (String) Azure account secret key. One of key or sas_token should be specified.
+- `sas_token` (String) A shared access signatures (SAS) token. One of key or sas_token should be specified.
+
+
+<a id="nestedblock--opensearch_user_config--gcs_migration"></a>
+### Nested Schema for `opensearch_user_config.gcs_migration`
+
+Required:
+
+- `base_path` (String) The path to the repository data within its container. The value of this setting should not start or end with a /.
+- `bucket` (String) The path to the repository data within its container.
+- `credentials` (String) Google Cloud Storage credentials file content.
+- `snapshot_name` (String) The snapshot name to restore from.
+
+Optional:
+
+- `chunk_size` (String) Big files can be broken down into chunks during snapshotting if needed. Should be the same as for the 3rd party repository.
+- `compress` (Boolean) When set to true metadata files are stored in compressed format.
+
 
 <a id="nestedblock--opensearch_user_config--index_patterns"></a>
 ### Nested Schema for `opensearch_user_config.index_patterns`
@@ -134,6 +173,18 @@ Required:
 Optional:
 
 - `sorting_algorithm` (String) Enum: `alphabetical`, `creation_date`. Deletion sorting algorithm. Default: `creation_date`.
+
+
+<a id="nestedblock--opensearch_user_config--index_rollup"></a>
+### Nested Schema for `opensearch_user_config.index_rollup`
+
+Optional:
+
+- `rollup_dashboards_enabled` (Boolean) Whether rollups are enabled in OpenSearch Dashboards. Defaults to true.
+- `rollup_enabled` (Boolean) Whether the rollup plugin is enabled. Defaults to true.
+- `rollup_search_backoff_count` (Number) How many retries the plugin should attempt for failed rollup jobs. Defaults to 5.
+- `rollup_search_backoff_millis` (Number) The backoff time between retries for failed rollup jobs. Defaults to 1000ms.
+- `rollup_search_search_all_jobs` (Boolean) Whether OpenSearch should return all jobs that match all specified search terms. If disabled, OpenSearch returns just one, as opposed to all, of the jobs that matches the search terms. Defaults to false.
 
 
 <a id="nestedblock--opensearch_user_config--index_template"></a>
@@ -163,8 +214,8 @@ Optional:
 
 Required:
 
-- `client_id` (String) The ID of the OpenID Connect client configured in your IdP. Required. Example: ``.
-- `client_secret` (String) The client secret of the OpenID Connect client configured in your IdP. Required. Example: ``.
+- `client_id` (String) The ID of the OpenID Connect client configured in your IdP. Required.
+- `client_secret` (String, Sensitive) The client secret of the OpenID Connect client configured in your IdP. Required.
 - `connect_url` (String) The URL of your IdP where the Security plugin can find the OpenID Connect metadata/configuration settings. Example: `https://test-account.okta.com/app/exk491jujcVc83LEX697/sso/saml/metadata`.
 - `enabled` (Boolean) Enables or disables OpenID Connect authentication for OpenSearch. When enabled, users can authenticate using OpenID Connect with an Identity Provider. Default: `true`.
 
@@ -176,7 +227,7 @@ Optional:
 - `refresh_rate_limit_count` (Number) The maximum number of unknown key IDs in the time frame. Default is 10. Optional. Default: `10`.
 - `refresh_rate_limit_time_window_ms` (Number) The time frame to use when checking the maximum number of unknown key IDs, in milliseconds. Optional.Default is 10000 (10 seconds). Default: `10000`.
 - `roles_key` (String) The key in the JSON payload that stores the user’s roles. The value of this key must be a comma-separated list of roles. Required only if you want to use roles in the JWT. Example: `roles`.
-- `scope` (String) The scope of the identity token issued by the IdP. Optional. Default is openid profile email address phone. Example: ``.
+- `scope` (String) The scope of the identity token issued by the IdP. Optional. Default is openid profile email address phone.
 - `subject_key` (String) The key in the JSON payload that stores the user’s name. If not defined, the subject registered claim is used. Most IdP providers use the preferred_username claim. Optional. Example: `preferred_username`.
 
 
@@ -193,7 +244,7 @@ Optional:
 - `email_sender_name` (String) Sender name placeholder to be used in Opensearch Dashboards and Opensearch keystore. Example: `alert-sender`.
 - `email_sender_password` (String, Sensitive) Sender password for Opensearch alerts to authenticate with SMTP server. Example: `very-secure-mail-password`.
 - `email_sender_username` (String) Sender username for Opensearch alerts. Example: `jane@example.com`.
-- `enable_security_audit` (Boolean) Enable/Disable security audit. Default: `false`.
+- `enable_security_audit` (Boolean) Enable/Disable security audit.
 - `http_max_content_length` (Number) Maximum content length for HTTP requests to the OpenSearch HTTP API, in bytes.
 - `http_max_header_size` (Number) The max size of allowed headers, in bytes. Example: `8192`.
 - `http_max_initial_line_length` (Number) The max length of an HTTP URL, in bytes. Example: `4096`.
@@ -205,14 +256,14 @@ Optional:
 - `indices_query_bool_max_clause_count` (Number) Maximum number of clauses Lucene BooleanQuery can have. The default value (1024) is relatively high, and increasing it may cause performance issues. Investigate other approaches first before increasing this value.
 - `indices_recovery_max_bytes_per_sec` (Number) Limits total inbound and outbound recovery traffic for each node. Applies to both peer recoveries as well as snapshot recoveries (i.e., restores from a snapshot). Defaults to 40mb.
 - `indices_recovery_max_concurrent_file_chunks` (Number) Number of file chunks sent in parallel for each recovery. Defaults to 2.
-- `ism_enabled` (Boolean) Specifies whether ISM is enabled or not. Default: `true`.
-- `ism_history_enabled` (Boolean) Specifies whether audit history is enabled or not. The logs from ISM are automatically indexed to a logs document. Default: `true`.
-- `ism_history_max_age` (Number) The maximum age before rolling over the audit history index in hours. Default: `24`.
-- `ism_history_max_docs` (Number) The maximum number of documents before rolling over the audit history index. Default: `2500000`.
-- `ism_history_rollover_check_period` (Number) The time between rollover checks for the audit history index in hours. Default: `8`.
-- `ism_history_rollover_retention_period` (Number) How long audit history indices are kept in days. Default: `30`.
-- `knn_memory_circuit_breaker_enabled` (Boolean) Enable or disable KNN memory circuit breaker. Defaults to true. Default: `true`.
-- `knn_memory_circuit_breaker_limit` (Number) Maximum amount of memory that can be used for KNN index. Defaults to 50% of the JVM heap size. Default: `50`.
+- `ism_enabled` (Boolean) Specifies whether ISM is enabled or not.
+- `ism_history_enabled` (Boolean) Specifies whether audit history is enabled or not. The logs from ISM are automatically indexed to a logs document.
+- `ism_history_max_age` (Number) The maximum age before rolling over the audit history index in hours. Example: `24`.
+- `ism_history_max_docs` (Number) The maximum number of documents before rolling over the audit history index. Example: `2500000`.
+- `ism_history_rollover_check_period` (Number) The time between rollover checks for the audit history index in hours. Example: `8`.
+- `ism_history_rollover_retention_period` (Number) How long audit history indices are kept in days. Example: `30`.
+- `knn_memory_circuit_breaker_enabled` (Boolean) Enable or disable KNN memory circuit breaker. Defaults to true.
+- `knn_memory_circuit_breaker_limit` (Number) Maximum amount of memory that can be used for KNN index. Defaults to 50% of the JVM heap size.
 - `override_main_response_version` (Boolean) Compatibility mode sets OpenSearch to report its version as 7.10 so clients continue to work. Default is false.
 - `plugins_alerting_filter_by_backend_roles` (Boolean) Enable or disable filtering of alerting by backend roles. Requires Security plugin. Defaults to false.
 - `reindex_remote_whitelist` (List of String) Whitelisted addresses for reindexing. Changing this value will cause all OpenSearch instances to restart.
@@ -305,6 +356,26 @@ Optional:
 - `opensearch` (Boolean) Allow clients to connect to opensearch from the public internet for service nodes that are in a project VPC or another type of private network.
 - `opensearch_dashboards` (Boolean) Allow clients to connect to opensearch_dashboards from the public internet for service nodes that are in a project VPC or another type of private network.
 - `prometheus` (Boolean) Allow clients to connect to prometheus from the public internet for service nodes that are in a project VPC or another type of private network.
+
+
+<a id="nestedblock--opensearch_user_config--s3_migration"></a>
+### Nested Schema for `opensearch_user_config.s3_migration`
+
+Required:
+
+- `access_key` (String, Sensitive) AWS Access key.
+- `base_path` (String) The path to the repository data within its container. The value of this setting should not start or end with a /.
+- `bucket` (String) S3 bucket name.
+- `region` (String) S3 region.
+- `secret_key` (String, Sensitive) AWS secret key.
+- `snapshot_name` (String) The snapshot name to restore from.
+
+Optional:
+
+- `chunk_size` (String) Big files can be broken down into chunks during snapshotting if needed. Should be the same as for the 3rd party repository.
+- `compress` (Boolean) When set to true metadata files are stored in compressed format.
+- `endpoint` (String) The S3 service endpoint to connect to. If you are using an S3-compatible service then you should set this to the service’s endpoint.
+- `server_side_encryption` (Boolean) When set to true files are encrypted on server side.
 
 
 <a id="nestedblock--opensearch_user_config--saml"></a>

@@ -43,6 +43,7 @@ func externalPostgresqlUserConfig() *schema.Schema {
 			"ssl_client_key": {
 				Description: "Client key. Example: `-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----`.",
 				Optional:    true,
+				Sensitive:   true,
 				Type:        schema.TypeString,
 			},
 			"ssl_mode": {
