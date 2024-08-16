@@ -1,5 +1,5 @@
-data "aiven_pg" "pg" {
-  project      = data.aiven_project.pr1.project
-  service_name = "my-pg1"
+data "aiven_pg" "example_postgres" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-postgres-service"
 }
 
