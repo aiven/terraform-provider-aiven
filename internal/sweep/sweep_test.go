@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 
@@ -77,7 +78,10 @@ func knownMissginSweepers() []string {
 
 // TestCheckSweepers checks that we have sweepers for all the resources.
 func TestCheckSweepers(t *testing.T) {
-	resourceMap := provider.Provider("test").ResourcesMap
+	p, err := provider.Provider("test")
+	require.NoError(t, err)
+
+	resourceMap := p.ResourcesMap
 	allResources := maps.Keys(resourceMap)
 	allSweepers := sweep.GetTestSweepersResources()
 

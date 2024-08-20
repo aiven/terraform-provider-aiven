@@ -39,7 +39,7 @@ import (
 )
 
 // Provider returns terraform.ResourceProvider.
-func Provider(version string) *schema.Provider {
+func Provider(version string) (*schema.Provider, error) {
 	p := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"api_token": {
@@ -286,8 +286,18 @@ func Provider(version string) *schema.Provider {
 		addBeta(p.DataSourcesMap, betaResources...)...,
 	)
 
+	// Marks sensitive fields recursively
+	err := validateSensitive(p.ResourcesMap, false)
+	if err != nil {
+		return nil, fmt.Errorf("resource map error: %w", err)
+	}
+	err = validateSensitive(p.DataSourcesMap, false)
+	if err != nil {
+		return nil, fmt.Errorf("datasource map error: %w", err)
+	}
+
 	if missing != nil {
-		panic(fmt.Errorf("not all beta resources/datasources are found: %s", strings.Join(missing, ", ")))
+		return nil, fmt.Errorf("not all beta resources/datasources are found: %s", strings.Join(missing, ", "))
 	}
 
 	p.ConfigureContextFunc = func(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
@@ -310,7 +320,7 @@ func Provider(version string) *schema.Provider {
 		return client, nil
 	}
 
-	return p
+	return p, nil
 }
 
 // addBeta adds resources as beta or removes them
@@ -330,4 +340,40 @@ func addBeta(m map[string]*schema.Resource, keys ...string) (missing []string) {
 		}
 	}
 	return missing
+}
+
+var errSensitiveField = fmt.Errorf("must mark `Sensitive: true`")
+
+// validateSensitive All attributes of sensitive blocks must be sensitive due to an issue in Terraform
+// https://github.com/hashicorp/terraform-plugin-sdk/issues/201
+func validateSensitive(m map[string]*schema.Resource, sensitive bool) error {
+	for k, v := range m {
+		err := validateSensitiveResource(v, sensitive)
+		if err != nil {
+			return fmt.Errorf("%w: %s: %w", errSensitiveField, k, err)
+		}
+	}
+	return nil
+}
+
+func validateSensitiveResource(r *schema.Resource, sensitive bool) error {
+	for k, parent := range r.Schema {
+		if sensitive && !parent.Sensitive {
+			return fmt.Errorf("schema %s", k)
+		}
+
+		switch child := parent.Elem.(type) {
+		case *schema.Resource:
+			err := validateSensitiveResource(child, parent.Sensitive)
+			if err != nil {
+				return err
+			}
+
+		case *schema.Schema:
+			if parent.Sensitive && !child.Sensitive {
+				return fmt.Errorf("element %s", k)
+			}
+		}
+	}
+	return nil
 }

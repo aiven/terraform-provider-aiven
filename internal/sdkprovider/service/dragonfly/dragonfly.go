@@ -23,8 +23,10 @@ func dragonflySchema() map[string]*schema.Schema {
 					Computed:    true,
 					Description: "Dragonfly server URIs.",
 					Optional:    true,
+					Sensitive:   true,
 					Elem: &schema.Schema{
-						Type: schema.TypeString,
+						Type:      schema.TypeString,
+						Sensitive: true,
 					},
 				},
 				"slave_uris": {
@@ -32,13 +34,16 @@ func dragonflySchema() map[string]*schema.Schema {
 					Computed:    true,
 					Description: "Dragonfly slave server URIs.",
 					Optional:    true,
+					Sensitive:   true,
 					Elem: &schema.Schema{
-						Type: schema.TypeString,
+						Type:      schema.TypeString,
+						Sensitive: true,
 					},
 				},
 				"replica_uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
+					Sensitive:   true,
 					Description: "Dragonfly replica server URI.",
 				},
 				"password": {

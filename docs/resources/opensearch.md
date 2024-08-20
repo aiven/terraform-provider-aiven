@@ -84,14 +84,14 @@ resource "aiven_opensearch" "os1" {
 
 Optional:
 
-- `uris` (List of String) OpenSearch server URIs.
+- `uris` (List of String, Sensitive) OpenSearch server URIs.
 
 Read-Only:
 
-- `kibana_uri` (String) URI for Kibana dashboard frontend
+- `kibana_uri` (String, Sensitive) URI for Kibana dashboard frontend
 - `opensearch_dashboards_uri` (String, Sensitive) URI for OpenSearch dashboard frontend
 - `password` (String, Sensitive) OpenSearch password
-- `username` (String) OpenSearch username
+- `username` (String, Sensitive) OpenSearch username
 
 
 <a id="nestedblock--opensearch_user_config"></a>

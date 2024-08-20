@@ -24,13 +24,16 @@ func influxDBSchema() map[string]*schema.Schema {
 					Computed:    true,
 					Description: "InfluxDB server URIs.",
 					Optional:    true,
+					Sensitive:   true,
 					Elem: &schema.Schema{
-						Type: schema.TypeString,
+						Type:      schema.TypeString,
+						Sensitive: true,
 					},
 				},
 				"username": {
 					Type:        schema.TypeString,
 					Computed:    true,
+					Sensitive:   true,
 					Description: "InfluxDB username",
 				},
 				"password": {
@@ -42,6 +45,7 @@ func influxDBSchema() map[string]*schema.Schema {
 				"database_name": {
 					Type:        schema.TypeString,
 					Computed:    true,
+					Sensitive:   true,
 					Description: "Name of the default InfluxDB database",
 				},
 			},

@@ -9,6 +9,10 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!-- ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Recursively mark attributes of sensitive blocks as sensitive due to an [issue in Terraform](https://github.com/hashicorp/terraform-plugin-sdk/issues/201)
+
 ## [4.23.0] - 2024-08-19
 
 - Use enum choices from [code-generated client](https://github.com/aiven/go-client-codegen)

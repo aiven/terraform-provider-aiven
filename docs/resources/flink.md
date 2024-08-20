@@ -74,7 +74,7 @@ resource "aiven_flink" "example_flink" {
 
 Optional:
 
-- `host_ports` (List of String) The host and port of a Flink server.
+- `host_ports` (List of String, Sensitive) The host and port of a Flink server.
 
 
 <a id="nestedblock--flink_user_config"></a>

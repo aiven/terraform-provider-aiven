@@ -70,7 +70,7 @@ resource "aiven_clickhouse" "example_clickhouse" {
 
 Optional:
 
-- `uris` (List of String) ClickHouse server URIs.
+- `uris` (List of String, Sensitive) ClickHouse server URIs.
 
 
 <a id="nestedblock--clickhouse_user_config"></a>

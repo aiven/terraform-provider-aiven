@@ -78,13 +78,13 @@ resource "aiven_redis" "redis1" {
 
 Optional:
 
-- `slave_uris` (List of String) Redis slave server URIs.
-- `uris` (List of String) Redis server URIs.
+- `slave_uris` (List of String, Sensitive) Redis slave server URIs.
+- `uris` (List of String, Sensitive) Redis server URIs.
 
 Read-Only:
 
 - `password` (String, Sensitive) Redis password.
-- `replica_uri` (String) Redis replica server URI.
+- `replica_uri` (String, Sensitive) Redis replica server URI.
 
 
 <a id="nestedblock--redis_user_config"></a>

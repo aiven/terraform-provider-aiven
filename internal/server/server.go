@@ -13,11 +13,12 @@ import (
 )
 
 func NewMuxServer(ctx context.Context, version string) (tfprotov6.ProviderServer, error) {
-	sdkProvider, err := tf5to6server.UpgradeServer(
-		ctx,
-		sdk.Provider(version).GRPCProvider,
-	)
+	p, err := sdk.Provider(version)
+	if err != nil {
+		return nil, err
+	}
 
+	sdkProvider, err := tf5to6server.UpgradeServer(ctx, p.GRPCProvider)
 	if err != nil {
 		return nil, err
 	}

@@ -83,9 +83,9 @@ resource "aiven_mysql" "mysql1" {
 
 Optional:
 
-- `standby_uris` (List of String) MySQL standby connection URIs
-- `syncing_uris` (List of String) MySQL syncing connection URIs
-- `uris` (List of String) MySQL master connection URIs
+- `standby_uris` (List of String, Sensitive) MySQL standby connection URIs
+- `syncing_uris` (List of String, Sensitive) MySQL syncing connection URIs
+- `uris` (List of String, Sensitive) MySQL master connection URIs
 
 Read-Only:
 
@@ -97,12 +97,12 @@ Read-Only:
 
 Read-Only:
 
-- `database_name` (String) Primary MySQL database name
-- `host` (String) MySQL host IP or name
+- `database_name` (String, Sensitive) Primary MySQL database name
+- `host` (String, Sensitive) MySQL host IP or name
 - `password` (String, Sensitive) MySQL admin user password
-- `port` (Number) MySQL port
-- `sslmode` (String) MySQL sslmode setting (currently always "require")
-- `user` (String) MySQL admin user name
+- `port` (Number, Sensitive) MySQL port
+- `sslmode` (String, Sensitive) MySQL sslmode setting (currently always "require")
+- `user` (String, Sensitive) MySQL admin user name
 
 
 

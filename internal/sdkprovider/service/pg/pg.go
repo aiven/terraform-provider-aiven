@@ -40,37 +40,44 @@ func aivenPGSchema() map[string]*schema.Schema {
 					Computed:    true,
 					Description: "PostgreSQL primary connection URIs.",
 					Optional:    true,
+					Sensitive:   true,
 					Elem: &schema.Schema{
-						Type: schema.TypeString,
+						Type:      schema.TypeString,
+						Sensitive: true,
 					},
 				},
 				"bouncer": {
 					Type:        schema.TypeString,
 					Computed:    true,
+					Sensitive:   true,
 					Description: "PgBouncer connection details for [connection pooling](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling).",
 				},
 				// TODO: Remove `host` in the next major version.
 				"host": {
 					Type:        schema.TypeString,
 					Computed:    true,
+					Sensitive:   true,
 					Description: "PostgreSQL primary node host IP or name.",
 				},
 				// TODO: Remove `port` in the next major version.
 				"port": {
 					Type:        schema.TypeInt,
 					Computed:    true,
+					Sensitive:   true,
 					Description: "PostgreSQL port.",
 				},
 				// TODO: Remove `sslmode` in the next major version.
 				"sslmode": {
 					Type:        schema.TypeString,
 					Computed:    true,
+					Sensitive:   true,
 					Description: "PostgreSQL SSL mode setting.",
 				},
 				// TODO: Remove `user` in the next major version.
 				"user": {
 					Type:        schema.TypeString,
 					Computed:    true,
+					Sensitive:   true,
 					Description: "PostgreSQL admin user name.",
 				},
 				// TODO: Remove `password` in the next major version.
@@ -84,6 +91,7 @@ func aivenPGSchema() map[string]*schema.Schema {
 				"dbname": {
 					Type:        schema.TypeString,
 					Computed:    true,
+					Sensitive:   true,
 					Description: "Primary PostgreSQL database name.",
 				},
 				"params": {
@@ -91,26 +99,31 @@ func aivenPGSchema() map[string]*schema.Schema {
 					Computed:    true,
 					Description: "PostgreSQL connection parameters.",
 					Optional:    true,
+					Sensitive:   true,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"host": {
 								Type:        schema.TypeString,
 								Computed:    true,
+								Sensitive:   true,
 								Description: "PostgreSQL host IP or name.",
 							},
 							"port": {
 								Type:        schema.TypeInt,
 								Computed:    true,
+								Sensitive:   true,
 								Description: "PostgreSQL port.",
 							},
 							"sslmode": {
 								Type:        schema.TypeString,
 								Computed:    true,
+								Sensitive:   true,
 								Description: "PostgreSQL SSL mode setting.",
 							},
 							"user": {
 								Type:        schema.TypeString,
 								Computed:    true,
+								Sensitive:   true,
 								Description: "PostgreSQL admin user name.",
 							},
 							"password": {
@@ -122,6 +135,7 @@ func aivenPGSchema() map[string]*schema.Schema {
 							"database_name": {
 								Type:        schema.TypeString,
 								Computed:    true,
+								Sensitive:   true,
 								Description: "Primary PostgreSQL database name.",
 							},
 						},
@@ -138,8 +152,10 @@ func aivenPGSchema() map[string]*schema.Schema {
 					Computed:    true,
 					Description: "PostgreSQL standby connection URIs.",
 					Optional:    true,
+					Sensitive:   true,
 					Elem: &schema.Schema{
-						Type: schema.TypeString,
+						Type:      schema.TypeString,
+						Sensitive: true,
 					},
 				},
 				"syncing_uris": {
@@ -147,8 +163,10 @@ func aivenPGSchema() map[string]*schema.Schema {
 					Computed:    true,
 					Description: "PostgreSQL syncing connection URIs.",
 					Optional:    true,
+					Sensitive:   true,
 					Elem: &schema.Schema{
-						Type: schema.TypeString,
+						Type:      schema.TypeString,
+						Sensitive: true,
 					},
 				},
 				// TODO: This isn't in the connection info, but it's in the metadata.
@@ -156,6 +174,7 @@ func aivenPGSchema() map[string]*schema.Schema {
 				"max_connections": {
 					Type:        schema.TypeInt,
 					Computed:    true,
+					Sensitive:   true,
 					Description: "The [number of allowed connections](https://aiven.io/docs/products/postgresql/reference/pg-connection-limits). Varies based on the service plan.",
 				},
 			},

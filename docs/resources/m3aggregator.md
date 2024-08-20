@@ -74,11 +74,11 @@ resource "aiven_m3aggregator" "m3a" {
 
 Optional:
 
-- `uris` (List of String) M3 Aggregator server URIs.
+- `uris` (List of String, Sensitive) M3 Aggregator server URIs.
 
 Read-Only:
 
-- `aggregator_http_uri` (String) M3 Aggregator HTTP URI.
+- `aggregator_http_uri` (String, Sensitive) M3 Aggregator HTTP URI.
 
 
 <a id="nestedblock--m3aggregator_user_config"></a>

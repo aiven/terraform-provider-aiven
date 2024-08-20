@@ -24,13 +24,16 @@ func aivenM3AggregatorSchema() map[string]*schema.Schema {
 					Computed:    true,
 					Description: "M3 Aggregator server URIs.",
 					Optional:    true,
+					Sensitive:   true,
 					Elem: &schema.Schema{
-						Type: schema.TypeString,
+						Type:      schema.TypeString,
+						Sensitive: true,
 					},
 				},
 				"aggregator_http_uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
+					Sensitive:   true,
 					Description: "M3 Aggregator HTTP URI.",
 				},
 			},

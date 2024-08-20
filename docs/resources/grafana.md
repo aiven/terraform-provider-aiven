@@ -78,7 +78,7 @@ resource "aiven_grafana" "gr1" {
 
 Optional:
 
-- `uris` (List of String) Grafana server URIs.
+- `uris` (List of String, Sensitive) Grafana server URIs.
 
 
 <a id="nestedblock--grafana_user_config"></a>

@@ -27,10 +27,12 @@ func aivenFlinkSchema() map[string]*schema.Schema {
 				"host_ports": {
 					Type:        schema.TypeList,
 					Computed:    true,
-					Description: "The host and port of a Flink server.",
 					Optional:    true,
+					Sensitive:   true,
+					Description: "The host and port of a Flink server.",
 					Elem: &schema.Schema{
-						Type: schema.TypeString,
+						Type:      schema.TypeString,
+						Sensitive: true,
 					},
 				},
 			},

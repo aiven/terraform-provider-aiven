@@ -89,7 +89,7 @@ resource "aiven_kafka" "example_kafka" {
 
 Optional:
 
-- `uris` (List of String) Kafka server URIs.
+- `uris` (List of String, Sensitive) Kafka server URIs.
 
 Read-Only:
 
