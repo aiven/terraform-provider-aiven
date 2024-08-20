@@ -2,10 +2,10 @@ package organization
 
 import (
 	"context"
+	"fmt"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/applicationuser"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -65,33 +65,33 @@ resources in your organization by setting ` + "`is_super_admin = true`" + ` .`,
 	}
 }
 
-func resourceOrganizationApplicationUserCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
+func resourceOrganizationApplicationUserCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	var req applicationuser.ApplicationUserCreateIn
 	err := schemautil.ResourceDataGet(d, &req)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	orgID := d.Get("organization_id").(string)
 	user, err := client.ApplicationUserCreate(ctx, orgID, &req)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	d.SetId(schemautil.BuildResourceID(orgID, user.UserId))
 	return resourceOrganizationApplicationUserRead(ctx, d, client)
 }
 
-func resourceOrganizationApplicationUserRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
+func resourceOrganizationApplicationUserRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	orgID, usrID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	// First gets app user info, then regular user info
 	users, err := client.ApplicationUsersList(ctx, orgID)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	var user *applicationuser.ApplicationUserOut
@@ -103,57 +103,57 @@ func resourceOrganizationApplicationUserRead(ctx context.Context, d *schema.Reso
 	}
 
 	if user == nil {
-		return diag.Errorf(`application user not found`)
+		return fmt.Errorf(`application user not found`)
 	}
 
 	// Sets name and user_id
 	err = schemautil.ResourceDataSet(aivenOrganizationApplicationUserSchema, d, user)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	// This field has "email" in the schema and "user_email" in the request
 	if err = d.Set("email", user.UserEmail); err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	// This is for import command
 	if err = d.Set("organization_id", orgID); err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	return nil
 }
 
-func resourceOrganizationApplicationUserUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
+func resourceOrganizationApplicationUserUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	orgID, userID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	var req applicationuser.ApplicationUserUpdateIn
 	err = schemautil.ResourceDataGet(d, &req)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	_, err = client.ApplicationUserUpdate(ctx, orgID, userID, &req)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	return resourceOrganizationApplicationUserRead(ctx, d, client)
 }
 
-func resourceOrganizationApplicationUserDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
+func resourceOrganizationApplicationUserDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	orgID, userID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	err = client.ApplicationUserDelete(ctx, orgID, userID)
 	if err != nil {
-		return diag.Errorf("failed to delete application user %s/%s: %s", orgID, userID, err)
+		return fmt.Errorf("failed to delete application user %s/%s: %w", orgID, userID, err)
 	}
 	return nil
 }

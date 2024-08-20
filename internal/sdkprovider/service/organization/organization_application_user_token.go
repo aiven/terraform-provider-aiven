@@ -2,10 +2,10 @@ package organization
 
 import (
 	"context"
+	"fmt"
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/applicationuser"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -126,11 +126,11 @@ func ResourceOrganizationApplicationUserToken() *schema.Resource {
 	}
 }
 
-func resourceOrganizationApplicationUserTokenCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
+func resourceOrganizationApplicationUserTokenCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	var req applicationuser.ApplicationUserAccessTokenCreateIn
 	err := schemautil.ResourceDataGet(d, &req)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	orgID := d.Get("organization_id").(string)
@@ -138,27 +138,27 @@ func resourceOrganizationApplicationUserTokenCreate(ctx context.Context, d *sche
 
 	token, err := client.ApplicationUserAccessTokenCreate(ctx, orgID, userID, &req)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	err = schemautil.ResourceDataSet(aivenOrganizationApplicationUserTokenSchema, d, token)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	d.SetId(schemautil.BuildResourceID(orgID, userID, token.TokenPrefix))
 	return resourceOrganizationApplicationUserTokenRead(ctx, d, client)
 }
 
-func resourceOrganizationApplicationUserTokenRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
+func resourceOrganizationApplicationUserTokenRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	orgID, userID, tokenPrefix, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	tokens, err := client.ApplicationUserAccessTokensList(ctx, orgID, userID)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	var token *applicationuser.TokenOut
@@ -170,26 +170,26 @@ func resourceOrganizationApplicationUserTokenRead(ctx context.Context, d *schema
 	}
 
 	if token == nil {
-		return diag.Errorf("application user token not found")
+		return fmt.Errorf("application user token not found")
 	}
 
 	err = schemautil.ResourceDataSet(aivenOrganizationApplicationUserTokenSchema, d, token)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	return nil
 }
 
-func resourceOrganizationApplicationUserTokenDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
+func resourceOrganizationApplicationUserTokenDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	orgID, userID, tokenPrefix, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	err = client.ApplicationUserAccessTokenDelete(ctx, orgID, userID, tokenPrefix)
 	if err != nil {
-		return diag.Errorf("failed to delete application user token: %s", err)
+		return fmt.Errorf("failed to delete application user token: %w", err)
 	}
 	return nil
 }

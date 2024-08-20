@@ -73,11 +73,11 @@ func CacheGenAivenClient(token, tfVersion, buildVersion string) error {
 	return nil
 }
 
-type crudHandler func(context.Context, *schema.ResourceData, avngen.Client) diag.Diagnostics
+type crudHandler func(context.Context, *schema.ResourceData, avngen.Client) error
 
 // WithGenClient wraps CRUD handlers and runs with avngen.Client
 func WithGenClient(handler crudHandler) func(context.Context, *schema.ResourceData, any) diag.Diagnostics {
 	return func(ctx context.Context, d *schema.ResourceData, _ any) diag.Diagnostics {
-		return handler(ctx, d, clientCache)
+		return diag.FromErr(handler(ctx, d, clientCache))
 	}
 }
