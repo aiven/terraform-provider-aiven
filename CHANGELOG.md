@@ -9,7 +9,7 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!-- ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+## [4.24.0] - 2024-08-21
 
 - Recursively mark attributes of sensitive blocks as sensitive due to an [issue in Terraform](https://github.com/hashicorp/terraform-plugin-sdk/issues/201)
 
