@@ -24,8 +24,10 @@ func redisSchema() map[string]*schema.Schema {
 					Computed:    true,
 					Description: "Redis server URIs.",
 					Optional:    true,
+					Sensitive:   true,
 					Elem: &schema.Schema{
-						Type: schema.TypeString,
+						Type:      schema.TypeString,
+						Sensitive: true,
 					},
 				},
 				"slave_uris": {
@@ -33,13 +35,16 @@ func redisSchema() map[string]*schema.Schema {
 					Computed:    true,
 					Description: "Redis slave server URIs.",
 					Optional:    true,
+					Sensitive:   true,
 					Elem: &schema.Schema{
-						Type: schema.TypeString,
+						Type:      schema.TypeString,
+						Sensitive: true,
 					},
 				},
 				"replica_uri": {
 					Type:        schema.TypeString,
 					Computed:    true,
+					Sensitive:   true,
 					Description: "Redis replica server URI.",
 				},
 				"password": {

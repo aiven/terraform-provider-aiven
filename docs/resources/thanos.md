@@ -90,7 +90,7 @@ Required:
 
 Optional:
 
-- `uris` (List of String) Thanos server URIs.
+- `uris` (List of String, Sensitive) Thanos server URIs.
 
 Read-Only:
 

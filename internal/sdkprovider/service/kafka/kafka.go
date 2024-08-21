@@ -44,8 +44,10 @@ func aivenKafkaSchema() map[string]*schema.Schema {
 					Computed:    true,
 					Description: "Kafka server URIs.",
 					Optional:    true,
+					Sensitive:   true,
 					Elem: &schema.Schema{
-						Type: schema.TypeString,
+						Type:      schema.TypeString,
+						Sensitive: true,
 					},
 				},
 				"access_cert": {

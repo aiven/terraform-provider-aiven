@@ -72,13 +72,13 @@ resource "aiven_dragonfly" "example_dragonfly" {
 
 Optional:
 
-- `slave_uris` (List of String) Dragonfly slave server URIs.
-- `uris` (List of String) Dragonfly server URIs.
+- `slave_uris` (List of String, Sensitive) Dragonfly slave server URIs.
+- `uris` (List of String, Sensitive) Dragonfly server URIs.
 
 Read-Only:
 
 - `password` (String, Sensitive) Dragonfly password.
-- `replica_uri` (String) Dragonfly replica server URI.
+- `replica_uri` (String, Sensitive) Dragonfly replica server URI.
 
 
 <a id="nestedblock--dragonfly_user_config"></a>

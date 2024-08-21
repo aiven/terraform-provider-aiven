@@ -24,8 +24,10 @@ func aivenMySQLSchema() map[string]*schema.Schema {
 					Computed:    true,
 					Description: "MySQL master connection URIs",
 					Optional:    true,
+					Sensitive:   true,
 					Elem: &schema.Schema{
-						Type: schema.TypeString,
+						Type:      schema.TypeString,
+						Sensitive: true,
 					},
 				},
 				"params": {
@@ -33,26 +35,31 @@ func aivenMySQLSchema() map[string]*schema.Schema {
 					Computed:    true,
 					Description: "MySQL connection parameters",
 					Optional:    true,
+					Sensitive:   true,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"host": {
 								Type:        schema.TypeString,
 								Computed:    true,
+								Sensitive:   true,
 								Description: "MySQL host IP or name",
 							},
 							"port": {
 								Type:        schema.TypeInt,
 								Computed:    true,
+								Sensitive:   true,
 								Description: "MySQL port",
 							},
 							"sslmode": {
 								Type:        schema.TypeString,
 								Computed:    true,
+								Sensitive:   true,
 								Description: "MySQL sslmode setting (currently always \"require\")",
 							},
 							"user": {
 								Type:        schema.TypeString,
 								Computed:    true,
+								Sensitive:   true,
 								Description: "MySQL admin user name",
 							},
 							"password": {
@@ -64,6 +71,7 @@ func aivenMySQLSchema() map[string]*schema.Schema {
 							"database_name": {
 								Type:        schema.TypeString,
 								Computed:    true,
+								Sensitive:   true,
 								Description: "Primary MySQL database name",
 							},
 						},
@@ -80,8 +88,10 @@ func aivenMySQLSchema() map[string]*schema.Schema {
 					Computed:    true,
 					Description: "MySQL standby connection URIs",
 					Optional:    true,
+					Sensitive:   true,
 					Elem: &schema.Schema{
-						Type: schema.TypeString,
+						Type:      schema.TypeString,
+						Sensitive: true,
 					},
 				},
 				"syncing_uris": {
@@ -89,8 +99,10 @@ func aivenMySQLSchema() map[string]*schema.Schema {
 					Computed:    true,
 					Description: "MySQL syncing connection URIs",
 					Optional:    true,
+					Sensitive:   true,
 					Elem: &schema.Schema{
-						Type: schema.TypeString,
+						Type:      schema.TypeString,
+						Sensitive: true,
 					},
 				},
 			},

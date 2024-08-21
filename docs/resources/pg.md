@@ -96,35 +96,35 @@ resource "aiven_pg" "example_postgres" {
 
 Optional:
 
-- `standby_uris` (List of String) PostgreSQL standby connection URIs.
-- `syncing_uris` (List of String) PostgreSQL syncing connection URIs.
+- `standby_uris` (List of String, Sensitive) PostgreSQL standby connection URIs.
+- `syncing_uris` (List of String, Sensitive) PostgreSQL syncing connection URIs.
 - `uri` (String, Sensitive) PostgreSQL primary connection URI.
-- `uris` (List of String) PostgreSQL primary connection URIs.
+- `uris` (List of String, Sensitive) PostgreSQL primary connection URIs.
 
 Read-Only:
 
-- `bouncer` (String) PgBouncer connection details for [connection pooling](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling).
-- `dbname` (String) Primary PostgreSQL database name.
-- `host` (String) PostgreSQL primary node host IP or name.
-- `max_connections` (Number) The [number of allowed connections](https://aiven.io/docs/products/postgresql/reference/pg-connection-limits). Varies based on the service plan.
+- `bouncer` (String, Sensitive) PgBouncer connection details for [connection pooling](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling).
+- `dbname` (String, Sensitive) Primary PostgreSQL database name.
+- `host` (String, Sensitive) PostgreSQL primary node host IP or name.
+- `max_connections` (Number, Sensitive) The [number of allowed connections](https://aiven.io/docs/products/postgresql/reference/pg-connection-limits). Varies based on the service plan.
 - `params` (Block List) PostgreSQL connection parameters. (see [below for nested schema](#nestedblock--pg--params))
 - `password` (String, Sensitive) PostgreSQL admin user password.
-- `port` (Number) PostgreSQL port.
+- `port` (Number, Sensitive) PostgreSQL port.
 - `replica_uri` (String, Sensitive) PostgreSQL replica URI for services with a replica.
-- `sslmode` (String) PostgreSQL SSL mode setting.
-- `user` (String) PostgreSQL admin user name.
+- `sslmode` (String, Sensitive) PostgreSQL SSL mode setting.
+- `user` (String, Sensitive) PostgreSQL admin user name.
 
 <a id="nestedblock--pg--params"></a>
 ### Nested Schema for `pg.params`
 
 Read-Only:
 
-- `database_name` (String) Primary PostgreSQL database name.
-- `host` (String) PostgreSQL host IP or name.
+- `database_name` (String, Sensitive) Primary PostgreSQL database name.
+- `host` (String, Sensitive) PostgreSQL host IP or name.
 - `password` (String, Sensitive) PostgreSQL admin user password.
-- `port` (Number) PostgreSQL port.
-- `sslmode` (String) PostgreSQL SSL mode setting.
-- `user` (String) PostgreSQL admin user name.
+- `port` (Number, Sensitive) PostgreSQL port.
+- `sslmode` (String, Sensitive) PostgreSQL SSL mode setting.
+- `user` (String, Sensitive) PostgreSQL admin user name.
 
 
 

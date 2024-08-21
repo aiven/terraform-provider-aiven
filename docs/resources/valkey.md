@@ -115,13 +115,13 @@ Optional:
 
 Optional:
 
-- `slave_uris` (List of String) Valkey slave server URIs.
-- `uris` (List of String) Valkey server URIs.
+- `slave_uris` (List of String, Sensitive) Valkey slave server URIs.
+- `uris` (List of String, Sensitive) Valkey server URIs.
 
 Read-Only:
 
 - `password` (String, Sensitive) Valkey password.
-- `replica_uri` (String) Valkey replica server URI.
+- `replica_uri` (String, Sensitive) Valkey replica server URI.
 
 
 <a id="nestedblock--valkey_user_config"></a>

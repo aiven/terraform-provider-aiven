@@ -70,7 +70,6 @@ func ServiceCommonSchemaWithUserConfig(kind string) map[string]*schema.Schema {
 func ServiceCommonSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"project": CommonSchemaProjectReference,
-
 		"cloud_name": {
 			Type:        schema.TypeString,
 			Optional:    true,

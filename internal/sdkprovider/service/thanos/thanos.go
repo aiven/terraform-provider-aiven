@@ -23,8 +23,10 @@ func thanosSchema() map[string]*schema.Schema {
 					Computed:    true,
 					Description: "Thanos server URIs.",
 					Optional:    true,
+					Sensitive:   true,
 					Elem: &schema.Schema{
-						Type: schema.TypeString,
+						Type:      schema.TypeString,
+						Sensitive: true,
 					},
 				},
 				"query_frontend_uri": {

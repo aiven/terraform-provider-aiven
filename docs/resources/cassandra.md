@@ -78,7 +78,7 @@ resource "aiven_cassandra" "bar" {
 
 Optional:
 
-- `uris` (List of String) Cassandra server URIs.
+- `uris` (List of String, Sensitive) Cassandra server URIs.
 
 
 <a id="nestedblock--cassandra_user_config"></a>

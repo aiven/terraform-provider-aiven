@@ -26,7 +26,7 @@ func main() {
 	ctx := context.Background()
 	muxServer, err := server.NewMuxServer(ctx, version)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	var serveOpts []tf6server.ServeOpt
@@ -50,6 +50,6 @@ func main() {
 	)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 }

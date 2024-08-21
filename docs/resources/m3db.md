@@ -79,15 +79,15 @@ resource "aiven_m3db" "m3" {
 
 Optional:
 
-- `uris` (List of String) M3DB server URIs.
+- `uris` (List of String, Sensitive) M3DB server URIs.
 
 Read-Only:
 
-- `http_cluster_uri` (String) M3DB cluster URI.
-- `http_node_uri` (String) M3DB node URI.
-- `influxdb_uri` (String) InfluxDB URI.
-- `prometheus_remote_read_uri` (String) Prometheus remote read URI.
-- `prometheus_remote_write_uri` (String) Prometheus remote write URI.
+- `http_cluster_uri` (String, Sensitive) M3DB cluster URI.
+- `http_node_uri` (String, Sensitive) M3DB node URI.
+- `influxdb_uri` (String, Sensitive) InfluxDB URI.
+- `prometheus_remote_read_uri` (String, Sensitive) Prometheus remote read URI.
+- `prometheus_remote_write_uri` (String, Sensitive) Prometheus remote write URI.
 
 
 <a id="nestedblock--m3db_user_config"></a>
