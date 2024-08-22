@@ -4,7 +4,6 @@ import (
 	"context"
 
 	avngen "github.com/aiven/go-client-codegen"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -19,7 +18,7 @@ func DatasourceOrganizationApplicationUser() *schema.Resource {
 	}
 }
 
-func datasourceOrganizationApplicationUserRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
+func datasourceOrganizationApplicationUserRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	// The id used to read the resource
 	d.SetId(schemautil.BuildResourceID(d.Get("organization_id").(string), d.Get("user_id").(string)))
 	return resourceOrganizationApplicationUserRead(ctx, d, client)

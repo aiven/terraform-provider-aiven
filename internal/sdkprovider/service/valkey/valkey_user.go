@@ -5,7 +5,6 @@ import (
 
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/serviceuser"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -96,7 +95,7 @@ func ResourceValkeyUser() *schema.Resource {
 	}
 }
 
-func resourceValkeyUserCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
+func resourceValkeyUserCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
 	username := d.Get("username").(string)
@@ -121,7 +120,7 @@ func resourceValkeyUserCreate(ctx context.Context, d *schema.ResourceData, clien
 		&req,
 	)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	if _, ok := d.GetOk("password"); ok {
@@ -129,7 +128,7 @@ func resourceValkeyUserCreate(ctx context.Context, d *schema.ResourceData, clien
 			Operation: serviceuser.OperationTypeResetCredentials}
 		_, err := client.ServiceUserCredentialsModify(ctx, projectName, serviceName, username, &req)
 		if err != nil {
-			return diag.FromErr(err)
+			return err
 		}
 	}
 
@@ -138,49 +137,49 @@ func resourceValkeyUserCreate(ctx context.Context, d *schema.ResourceData, clien
 	return resourceValkeyUserRead(ctx, d, client)
 }
 
-func resourceValkeyUserUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
+func resourceValkeyUserUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	_, err = client.ServiceUserCredentialsModify(ctx, projectName, serviceName, username, &serviceuser.ServiceUserCredentialsModifyIn{
 		NewPassword: schemautil.OptionalStringPointer(d, "password"),
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	return resourceValkeyUserRead(ctx, d, client)
 }
 
-func resourceValkeyUserRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) diag.Diagnostics {
+func resourceValkeyUserRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName, serviceName, username, err := schemautil.SplitResourceID3(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	user, err := client.ServiceUserGet(ctx, projectName, serviceName, username)
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
 
 	err = schemautil.CopyServiceUserGenPropertiesFromAPIResponseToTerraform(d, user, projectName, serviceName)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	if err := d.Set("valkey_acl_keys", user.AccessControl.ValkeyAclKeys); err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 	if err := d.Set("valkey_acl_categories", user.AccessControl.ValkeyAclCategories); err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 	if err := d.Set("valkey_acl_commands", user.AccessControl.ValkeyAclCommands); err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 	if err := d.Set("valkey_acl_channels", user.AccessControl.ValkeyAclChannels); err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	return nil
