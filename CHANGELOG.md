@@ -9,6 +9,10 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!-- ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Add ClickHouse examples for managed credentials integrations with an S3 bucket and remote Postgres, MySQL & ClickHouse clusters
+
 ## [4.25.0] - 2024-09-17
 
 - Fix `aiven_kafka_connector`: increase create polling timeout
