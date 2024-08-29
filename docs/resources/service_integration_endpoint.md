@@ -26,10 +26,13 @@ The Service Integration Endpoint resource allows the creation and management of 
 - `datadog_user_config` (Block List, Max: 1) Datadog user configurable settings (see [below for nested schema](#nestedblock--datadog_user_config))
 - `external_aws_cloudwatch_logs_user_config` (Block List, Max: 1) ExternalAwsCloudwatchLogs user configurable settings (see [below for nested schema](#nestedblock--external_aws_cloudwatch_logs_user_config))
 - `external_aws_cloudwatch_metrics_user_config` (Block List, Max: 1) ExternalAwsCloudwatchMetrics user configurable settings (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config))
+- `external_aws_s3_user_config` (Block List, Max: 1) ExternalAwsS3 user configurable settings (see [below for nested schema](#nestedblock--external_aws_s3_user_config))
+- `external_clickhouse_user_config` (Block List, Max: 1) ExternalClickhouse user configurable settings (see [below for nested schema](#nestedblock--external_clickhouse_user_config))
 - `external_elasticsearch_logs_user_config` (Block List, Max: 1) ExternalElasticsearchLogs user configurable settings (see [below for nested schema](#nestedblock--external_elasticsearch_logs_user_config))
 - `external_google_cloud_bigquery` (Block List, Max: 1) ExternalGoogleCloudBigquery user configurable settings (see [below for nested schema](#nestedblock--external_google_cloud_bigquery))
 - `external_google_cloud_logging_user_config` (Block List, Max: 1) ExternalGoogleCloudLogging user configurable settings (see [below for nested schema](#nestedblock--external_google_cloud_logging_user_config))
 - `external_kafka_user_config` (Block List, Max: 1) ExternalKafka user configurable settings (see [below for nested schema](#nestedblock--external_kafka_user_config))
+- `external_mysql_user_config` (Block List, Max: 1) ExternalMysql user configurable settings (see [below for nested schema](#nestedblock--external_mysql_user_config))
 - `external_opensearch_logs_user_config` (Block List, Max: 1) ExternalOpensearchLogs user configurable settings (see [below for nested schema](#nestedblock--external_opensearch_logs_user_config))
 - `external_postgresql` (Block List, Max: 1) ExternalPostgresql user configurable settings (see [below for nested schema](#nestedblock--external_postgresql))
 - `external_schema_registry_user_config` (Block List, Max: 1) ExternalSchemaRegistry user configurable settings (see [below for nested schema](#nestedblock--external_schema_registry_user_config))
@@ -97,6 +100,27 @@ Required:
 - `secret_key` (String, Sensitive) AWS secret key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.
 
 
+<a id="nestedblock--external_aws_s3_user_config"></a>
+### Nested Schema for `external_aws_s3_user_config`
+
+Required:
+
+- `access_key_id` (String, Sensitive) Access Key Id. Example: `AAAAAAAAAAAAAAAAAAA`.
+- `secret_access_key` (String, Sensitive) Secret Access Key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.
+- `url` (String) S3-compatible bucket URL. Example: `https://mybucket.s3-myregion.amazonaws.com/mydataset/`.
+
+
+<a id="nestedblock--external_clickhouse_user_config"></a>
+### Nested Schema for `external_clickhouse_user_config`
+
+Required:
+
+- `host` (String) Hostname or IP address of the server. Example: `my.server.com`.
+- `password` (String, Sensitive) Password. Example: `jjKk45Nnd`.
+- `port` (Number) Secure TCP server port. Example: `9440`.
+- `username` (String) User name. Example: `default`.
+
+
 <a id="nestedblock--external_elasticsearch_logs_user_config"></a>
 ### Nested Schema for `external_elasticsearch_logs_user_config`
 
@@ -160,6 +184,25 @@ Optional:
 -----END PRIVATE KEY-----
 `.
 - `ssl_endpoint_identification_algorithm` (String) Enum: `https`. The endpoint identification algorithm to validate server hostname using server certificate.
+
+
+<a id="nestedblock--external_mysql_user_config"></a>
+### Nested Schema for `external_mysql_user_config`
+
+Required:
+
+- `host` (String) Hostname or IP address of the server. Example: `my.server.com`.
+- `password` (String, Sensitive) Password. Example: `jjKk45Nnd`.
+- `port` (Number) Port number of the server. Example: `5432`.
+- `username` (String) User name. Example: `myname`.
+
+Optional:
+
+- `ssl_mode` (String) Enum: `verify-full`. SSL Mode. Default: `verify-full`.
+- `ssl_root_cert` (String) SSL Root Cert. Example: `-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+`.
 
 
 <a id="nestedblock--external_opensearch_logs_user_config"></a>

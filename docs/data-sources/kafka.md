@@ -249,6 +249,7 @@ Read-Only:
 - `address` (String)
 - `auth_method` (String)
 - `engine_version` (Number)
+- `prefix_path_depth` (Number)
 - `token` (String)
 
 

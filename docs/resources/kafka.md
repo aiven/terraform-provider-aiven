@@ -274,6 +274,7 @@ Required:
 Optional:
 
 - `engine_version` (Number) Enum: `1`, `2`, and newer. KV Secrets Engine version of the Vault server instance.
+- `prefix_path_depth` (Number) Prefix path depth of the secrets Engine. Default is 1. If the secrets engine path has more than one segment it has to be increased to the number of segments.
 - `token` (String, Sensitive) Token used to authenticate with vault and auth method `token`.
 
 

@@ -120,6 +120,8 @@ Read-Only:
 Read-Only:
 
 - `additional_backup_regions` (List of String)
+- `backup_hour` (Number)
+- `backup_minute` (Number)
 - `ip_filter` (Set of String)
 - `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--valkey_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)

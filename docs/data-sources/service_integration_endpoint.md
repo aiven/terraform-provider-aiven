@@ -34,10 +34,13 @@ data "aiven_service_integration_endpoint" "myendpoint" {
 - `endpoint_type` (String) Type of the service integration endpoint. Possible values: `autoscaler`, `datadog`, `external_aws_cloudwatch_logs`, `external_aws_cloudwatch_metrics`, `external_aws_s3`, `external_clickhouse`, `external_elasticsearch_logs`, `external_google_cloud_bigquery`, `external_google_cloud_logging`, `external_kafka`, `external_mysql`, `external_opensearch_logs`, `external_postgresql`, `external_redis`, `external_schema_registry`, `external_sumologic_logs`, `jolokia`, `prometheus`, `rsyslog`
 - `external_aws_cloudwatch_logs_user_config` (List of Object) ExternalAwsCloudwatchLogs user configurable settings (see [below for nested schema](#nestedatt--external_aws_cloudwatch_logs_user_config))
 - `external_aws_cloudwatch_metrics_user_config` (List of Object) ExternalAwsCloudwatchMetrics user configurable settings (see [below for nested schema](#nestedatt--external_aws_cloudwatch_metrics_user_config))
+- `external_aws_s3_user_config` (List of Object) ExternalAwsS3 user configurable settings (see [below for nested schema](#nestedatt--external_aws_s3_user_config))
+- `external_clickhouse_user_config` (List of Object) ExternalClickhouse user configurable settings (see [below for nested schema](#nestedatt--external_clickhouse_user_config))
 - `external_elasticsearch_logs_user_config` (List of Object) ExternalElasticsearchLogs user configurable settings (see [below for nested schema](#nestedatt--external_elasticsearch_logs_user_config))
 - `external_google_cloud_bigquery` (List of Object) ExternalGoogleCloudBigquery user configurable settings (see [below for nested schema](#nestedatt--external_google_cloud_bigquery))
 - `external_google_cloud_logging_user_config` (List of Object) ExternalGoogleCloudLogging user configurable settings (see [below for nested schema](#nestedatt--external_google_cloud_logging_user_config))
 - `external_kafka_user_config` (List of Object) ExternalKafka user configurable settings (see [below for nested schema](#nestedatt--external_kafka_user_config))
+- `external_mysql_user_config` (List of Object) ExternalMysql user configurable settings (see [below for nested schema](#nestedatt--external_mysql_user_config))
 - `external_opensearch_logs_user_config` (List of Object) ExternalOpensearchLogs user configurable settings (see [below for nested schema](#nestedatt--external_opensearch_logs_user_config))
 - `external_postgresql` (List of Object) ExternalPostgresql user configurable settings (see [below for nested schema](#nestedatt--external_postgresql))
 - `external_schema_registry_user_config` (List of Object) ExternalSchemaRegistry user configurable settings (see [below for nested schema](#nestedatt--external_schema_registry_user_config))
@@ -91,6 +94,27 @@ Read-Only:
 - `secret_key` (String)
 
 
+<a id="nestedatt--external_aws_s3_user_config"></a>
+### Nested Schema for `external_aws_s3_user_config`
+
+Read-Only:
+
+- `access_key_id` (String)
+- `secret_access_key` (String)
+- `url` (String)
+
+
+<a id="nestedatt--external_clickhouse_user_config"></a>
+### Nested Schema for `external_clickhouse_user_config`
+
+Read-Only:
+
+- `host` (String)
+- `password` (String)
+- `port` (Number)
+- `username` (String)
+
+
 <a id="nestedatt--external_elasticsearch_logs_user_config"></a>
 ### Nested Schema for `external_elasticsearch_logs_user_config`
 
@@ -136,6 +160,19 @@ Read-Only:
 - `ssl_client_cert` (String)
 - `ssl_client_key` (String)
 - `ssl_endpoint_identification_algorithm` (String)
+
+
+<a id="nestedatt--external_mysql_user_config"></a>
+### Nested Schema for `external_mysql_user_config`
+
+Read-Only:
+
+- `host` (String)
+- `password` (String)
+- `port` (Number)
+- `ssl_mode` (String)
+- `ssl_root_cert` (String)
+- `username` (String)
 
 
 <a id="nestedatt--external_opensearch_logs_user_config"></a>
