@@ -13,7 +13,7 @@ func cassandraSchema() map[string]*schema.Schema {
 	s[schemautil.ServiceTypeCassandra] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
-		Description: "Cassandra server provided values",
+		Description: "Values provided by the Cassandra server.",
 		MaxItems:    1,
 		Optional:    true,
 		Sensitive:   true,
@@ -38,7 +38,7 @@ func cassandraSchema() map[string]*schema.Schema {
 
 func ResourceCassandra() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Cassandra resource allows the creation and management of Aiven Cassandra services.",
+		Description:   "Creates and manages an [Aiven for Apache Cassandra®](https://aiven.io/docs/products/cassandra) service.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeCassandra),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,

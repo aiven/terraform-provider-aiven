@@ -9,7 +9,7 @@ import (
 func DatasourceCassandra() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: schemautil.DatasourceServiceRead,
-		Description: "The Cassandra data source provides information about the existing Aiven Cassandra service.",
+		Description: "Gets information about an Aiven for Apache Cassandra® service.",
 		Schema:      schemautil.ResourceSchemaAsDatasourceSchema(cassandraSchema(), "project", "service_name"),
 	}
 }
