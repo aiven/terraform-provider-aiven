@@ -9,7 +9,7 @@ import (
 func DatasourceGrafana() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: schemautil.DatasourceServiceRead,
-		Description: "The Grafana data source provides information about the existing Aiven Grafana service.",
+		Description: "Gets information about an Aiven for Grafana® service.",
 		Schema:      schemautil.ResourceSchemaAsDatasourceSchema(grafanaSchema(), "project", "service_name"),
 	}
 }

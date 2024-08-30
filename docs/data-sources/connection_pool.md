@@ -3,20 +3,20 @@
 page_title: "aiven_connection_pool Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Connection Pool data source provides information about the existing Aiven Connection Pool.
+  Gets information about a connection pool in an Aiven for PostgreSQL® service.
 ---
 
 # aiven_connection_pool (Data Source)
 
-The Connection Pool data source provides information about the existing Aiven Connection Pool.
+Gets information about a connection pool in an Aiven for PostgreSQL® service.
 
 ## Example Usage
 
 ```terraform
-data "aiven_connection_pool" "mytestpool" {
-  project      = aiven_project.myproject.project
-  service_name = aiven_pg.mypg.service_name
-  pool_name    = "mypool"
+data "aiven_connection_pool" "main" {
+  project      = data.aiven_project.example_project.project
+  service_name = aiven_pg.example_postgres.service_name
+  pool_name    = "example-pool"
 }
 ```
 
@@ -25,15 +25,15 @@ data "aiven_connection_pool" "mytestpool" {
 
 ### Required
 
-- `pool_name` (String) The name of the created pool. Changing this property forces recreation of the resource.
+- `pool_name` (String) Name of the pool. Changing this property forces recreation of the resource.
 - `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Read-Only
 
-- `connection_uri` (String, Sensitive) The URI for connecting to the pool
+- `connection_uri` (String, Sensitive) The URI for connecting to the pool.
 - `database_name` (String) The name of the database the pool connects to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `id` (String) The ID of this resource.
-- `pool_mode` (String) The mode the pool operates in. The possible values are `session`, `transaction` and `statement`. The default value is `transaction`.
-- `pool_size` (Number) The number of connections the pool may create towards the backend server. This does not affect the number of incoming connections, which is always a much larger number. The default value is `10`.
+- `pool_mode` (String) The [operational mode](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling#pooling-modes). The possible values are `session`, `transaction` and `statement`. The default value is `transaction`.
+- `pool_size` (Number) The number of PostgreSQL server connections this pool can use at a time. This does not affect the number of incoming connections. Each pool can handle a minimum of 5000 client connections. The default value is `10`.
 - `username` (String) The name of the service user used to connect to the database. To set up proper dependencies please refer to this variable as a reference.

@@ -3,20 +3,20 @@
 page_title: "aiven_m3db_user Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The M3DB User data source provides information about the existing Aiven M3DB User.
+  Gets information about an Aiven for M3DB service user.
 ---
 
 # aiven_m3db_user (Data Source)
 
-The M3DB User data source provides information about the existing Aiven M3DB User.
+Gets information about an Aiven for M3DB service user.
 
 ## Example Usage
 
 ```terraform
-data "aiven_m3db_user" "user" {
-  service_name = "my-service"
-  project      = "my-project"
-  username     = "user1"
+data "aiven_m3db_user" "example_service_user" {
+  service_name = aiven_m3db.example_m3db.service_name
+  project      = data.aiven_project.example_project.project
+  username     = "example-m3db-user"
 }
 ```
 
@@ -27,10 +27,10 @@ data "aiven_m3db_user" "user" {
 
 - `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `username` (String) The actual name of the M3DB User. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `username` (String) Name of the M3DB service user. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `password` (String, Sensitive) The password of the M3DB User.
-- `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.
+- `password` (String, Sensitive) The M3DB service user's password.
+- `type` (String) User account type, such as primary or regular account.

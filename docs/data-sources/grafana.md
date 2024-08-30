@@ -3,19 +3,19 @@
 page_title: "aiven_grafana Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Grafana data source provides information about the existing Aiven Grafana service.
+  Gets information about an Aiven for Grafana® service.
 ---
 
 # aiven_grafana (Data Source)
 
-The Grafana data source provides information about the existing Aiven Grafana service.
+Gets information about an Aiven for Grafana® service.
 
 ## Example Usage
 
 ```terraform
-data "aiven_grafana" "gr1" {
-  project      = data.aiven_project.ps1.project
-  service_name = "my-gr1"
+data "aiven_grafana" "example_grafana" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-grafana-service"
 }
 ```
 
@@ -37,7 +37,7 @@ data "aiven_grafana" "gr1" {
 - `disk_space_default` (String) The default disk space of the service, possible values depend on the service type, the cloud provider and the project. Its also the minimum value for `disk_space`
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) Disk space that service is currently using
-- `grafana` (List of Object, Sensitive) Grafana server provided values (see [below for nested schema](#nestedatt--grafana))
+- `grafana` (List of Object, Sensitive) Values provided by the Grafana server. (see [below for nested schema](#nestedatt--grafana))
 - `grafana_user_config` (List of Object) Grafana user configurable settings (see [below for nested schema](#nestedatt--grafana_user_config))
 - `id` (String) The ID of this resource.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.

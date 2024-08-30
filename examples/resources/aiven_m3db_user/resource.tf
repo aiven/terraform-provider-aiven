@@ -1,6 +1,6 @@
-resource "aiven_m3db_user" "foo" {
-  service_name = aiven_m3db.bar.service_name
-  project      = "my-project"
-  username     = "user-1"
-  password     = "Test$1234"
+resource "aiven_m3db_user" "example_service_user" {
+  service_name = aiven_m3db.example_m3db.service_name
+  project      = data.aiven_project.example_project.project
+  username     = "example-m3db-user"
+  password     = var.service_user_pw
 }

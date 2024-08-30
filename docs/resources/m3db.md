@@ -3,21 +3,21 @@
 page_title: "aiven_m3db Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The M3 DB resource allows the creation and management of Aiven M3 services.
+  Creates and manages an Aiven for M3DB https://aiven.io/docs/products/m3db service.
 ---
 
 # aiven_m3db (Resource)
 
-The M3 DB resource allows the creation and management of Aiven M3 services.
+Creates and manages an [Aiven for M3DB](https://aiven.io/docs/products/m3db) service.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_m3db" "m3" {
-  project                 = data.aiven_project.foo.project
+resource "aiven_m3db" "example_m3db" {
+  project                 = data.aiven_project.example_project.project
   cloud_name              = "google-europe-west1"
   plan                    = "business-8"
-  service_name            = "my-m3db"
+  service_name            = "example-m3db-service"
   maintenance_window_dow  = "monday"
   maintenance_window_time = "10:00:00"
 
@@ -25,7 +25,7 @@ resource "aiven_m3db" "m3" {
     m3db_version = 1.1
 
     namespaces {
-      name = "my_ns1"
+      name = "example-namespace"
       type = "unaggregated"
     }
   }
@@ -46,7 +46,7 @@ resource "aiven_m3db" "m3" {
 - `additional_disk_space` (String) Add [disk storage](https://aiven.io/docs/platform/howto/add-storage-space) in increments of 30  GiB to scale your service. The maximum value depends on the service type and cloud provider. Removing additional storage causes the service nodes to go through a rolling restart and there might be a short downtime for services with no HA capabilities.
 - `cloud_name` (String) Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 - `disk_space` (String, Deprecated) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
-- `m3db` (Block List, Max: 1) M3DB server provided values (see [below for nested schema](#nestedblock--m3db))
+- `m3db` (Block List, Max: 1) Values provided by the M3DB server. (see [below for nested schema](#nestedblock--m3db))
 - `m3db_user_config` (Block List, Max: 1) M3db user configurable settings (see [below for nested schema](#nestedblock--m3db_user_config))
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
@@ -316,5 +316,5 @@ Read-Only:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_m3db.m3 project/service_name
+terraform import aiven_m3db.example_m3db PROJECT/SERVICE_NAME
 ```

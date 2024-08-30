@@ -3,21 +3,21 @@
 page_title: "aiven_m3db_user Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The M3DB User resource allows the creation and management of Aiven M3DB Users.
+  Creates and manages an Aiven for M3DB service user.
 ---
 
 # aiven_m3db_user (Resource)
 
-The M3DB User resource allows the creation and management of Aiven M3DB Users.
+Creates and manages an Aiven for M3DB service user.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_m3db_user" "foo" {
-  service_name = aiven_m3db.bar.service_name
-  project      = "my-project"
-  username     = "user-1"
-  password     = "Test$1234"
+resource "aiven_m3db_user" "example_service_user" {
+  service_name = aiven_m3db.example_m3db.service_name
+  project      = data.aiven_project.example_project.project
+  username     = "example-m3db-user"
+  password     = var.service_user_pw
 }
 ```
 
@@ -28,17 +28,17 @@ resource "aiven_m3db_user" "foo" {
 
 - `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `username` (String) The actual name of the M3DB User. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `username` (String) Name of the M3DB service user. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
 
-- `password` (String, Sensitive) The password of the M3DB User.
+- `password` (String, Sensitive) The M3DB service user's password.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.
+- `type` (String) User account type, such as primary or regular account.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
@@ -56,5 +56,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_m3db_user.foo project/service_name/username
+terraform import aiven_m3db_user.example_service_user PROJECT/SERVICE_NAME/USERNAME
 ```
