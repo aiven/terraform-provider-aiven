@@ -9,11 +9,13 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/converters"
 )
 
@@ -319,7 +321,8 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.Errorf("error splitting service ID: %s", err)
 	}
 
-	s, err := client.Services.Get(ctx, projectName, serviceName)
+	avnGen := common.GenClient()
+	s, err := avnGen.ServiceGet(ctx, projectName, serviceName, service.ServiceGetIncludeSecrets(true))
 	if err != nil {
 		if err = ResourceReadHandleNotFound(err, d); err != nil {
 			return diag.Errorf("unable to GET service %s: %s", d.Id(), err)
@@ -554,14 +557,14 @@ func getDefaultDiskSpaceIfNotSet(ctx context.Context, d *schema.ResourceData, cl
 	return diskSpace, nil
 }
 
-func getTechnicalEmailsForTerraform(d *schema.ResourceData, field string, s *aiven.Service) *schema.Set {
+func getTechnicalEmailsForTerraform(d *schema.ResourceData, field string, s *service.ServiceGetOut) *schema.Set {
 	_, ok := d.GetOk(field)
-	if !ok && len(s.TechnicalEmails) == 0 {
+	if !ok && len(s.TechEmails) == 0 {
 		return nil
 	}
 
-	techEmails := make([]interface{}, len(s.TechnicalEmails))
-	for i, e := range s.TechnicalEmails {
+	techEmails := make([]interface{}, len(s.TechEmails))
+	for i, e := range s.TechEmails {
 		techEmails[i] = map[string]interface{}{"email": e.Email}
 	}
 
@@ -590,19 +593,19 @@ func ResourceServiceDelete(ctx context.Context, d *schema.ResourceData, m interf
 
 func copyServicePropertiesFromAPIResponseToTerraform(
 	d *schema.ResourceData,
-	s *aiven.Service,
+	s *service.ServiceGetOut,
 	servicePlanParams PlanParameters,
 	project string,
 ) error {
 	serviceType := d.Get("service_type").(string)
 	if _, ok := d.GetOk("service_type"); !ok {
-		serviceType = s.Type
+		serviceType = s.ServiceType
 	}
 
 	if err := d.Set("cloud_name", s.CloudName); err != nil {
 		return err
 	}
-	if err := d.Set("service_name", s.Name); err != nil {
+	if err := d.Set("service_name", s.ServiceName); err != nil {
 		return err
 	}
 	if err := d.Set("state", s.State); err != nil {
@@ -617,24 +620,30 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	if err := d.Set("termination_protection", s.TerminationProtection); err != nil {
 		return err
 	}
-	if err := d.Set("maintenance_window_dow", s.MaintenanceWindow.DayOfWeek); err != nil {
+	if err := d.Set("maintenance_window_dow", s.Maintenance.Dow); err != nil {
 		return err
 	}
-	if err := d.Set("maintenance_window_time", s.MaintenanceWindow.TimeOfDay); err != nil {
+	if err := d.Set("maintenance_window_time", s.Maintenance.Time); err != nil {
 		return err
 	}
-	if _, ok := d.GetOk("disk_space"); ok && s.DiskSpaceMB != 0 {
-		if err := d.Set("disk_space", HumanReadableByteSize(s.DiskSpaceMB*units.MiB)); err != nil {
+
+	diskSpace := 0
+	if s.DiskSpaceMb != nil {
+		diskSpace = int(*s.DiskSpaceMb)
+	}
+
+	if _, ok := d.GetOk("disk_space"); ok && diskSpace != 0 {
+		if err := d.Set("disk_space", HumanReadableByteSize(diskSpace*units.MiB)); err != nil {
 			return err
 		}
 	}
-	if _, ok := d.GetOk("additional_disk_space"); ok && s.DiskSpaceMB != 0 {
-		if err := d.Set("additional_disk_space", HumanReadableByteSize((s.DiskSpaceMB-servicePlanParams.DiskSizeMBDefault)*units.MiB)); err != nil {
+	if _, ok := d.GetOk("additional_disk_space"); ok && diskSpace != 0 {
+		if err := d.Set("additional_disk_space", HumanReadableByteSize((diskSpace-servicePlanParams.DiskSizeMBDefault)*units.MiB)); err != nil {
 			return err
 		}
 	}
 
-	if err := d.Set("disk_space_used", HumanReadableByteSize(s.DiskSpaceMB*units.MiB)); err != nil {
+	if err := d.Set("disk_space_used", HumanReadableByteSize(diskSpace*units.MiB)); err != nil {
 		return err
 	}
 	if err := d.Set("disk_space_default", HumanReadableByteSize(servicePlanParams.DiskSizeMBDefault*units.MiB)); err != nil {
@@ -646,7 +655,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	if err := d.Set("disk_space_cap", HumanReadableByteSize(servicePlanParams.DiskSizeMBMax*units.MiB)); err != nil {
 		return err
 	}
-	if err := d.Set("service_uri", s.URI); err != nil {
+	if err := d.Set("service_uri", s.ServiceUri); err != nil {
 		return err
 	}
 	if err := d.Set("project", project); err != nil {
@@ -657,8 +666,8 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		return err
 	}
 
-	if s.ProjectVPCID != nil {
-		if err := d.Set("project_vpc_id", BuildResourceID(project, *s.ProjectVPCID)); err != nil {
+	if s.ProjectVpcId != "" {
+		if err := d.Set("project_vpc_id", BuildResourceID(project, s.ProjectVpcId)); err != nil {
 			return err
 		}
 	}
@@ -668,12 +677,12 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		return err
 	}
 
-	params := s.URIParams
+	params := s.ServiceUriParams
 	if err := d.Set("service_host", params["host"]); err != nil {
 		return err
 	}
 
-	port, _ := strconv.ParseInt(params["port"], 10, 32)
+	port, _ := strconv.ParseInt(fmt.Sprintf("%v", params["port"]), 10, 32)
 	if err := d.Set("service_port", port); err != nil {
 		return err
 	}
@@ -712,7 +721,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	return copyConnectionInfoFromAPIResponseToTerraform(d, serviceType, s.ConnectionInfo, s.Metadata)
 }
 
-func FlattenServiceComponents(r *aiven.Service) []map[string]interface{} {
+func FlattenServiceComponents(r *service.ServiceGetOut) []map[string]interface{} {
 	components := make([]map[string]interface{}, len(r.Components))
 
 	for i, c := range r.Components {
@@ -740,157 +749,149 @@ func FlattenServiceComponents(r *aiven.Service) []map[string]interface{} {
 func copyConnectionInfoFromAPIResponseToTerraform(
 	d *schema.ResourceData,
 	serviceType string,
-	connectionInfo aiven.ConnectionInfo,
-	metadata interface{},
+	connectionInfo *service.ConnectionInfoOut,
+	metadata map[string]any,
 ) error {
-	props := make(map[string]interface{})
+	props := make(map[string]any)
 
 	switch serviceType {
 	case ServiceTypeKafka:
 		// KafkaHosts will be renamed to KafkaURIs in the next major version of the Go client.
 		// That's why we name the props key `uris` here.
-		props["uris"] = connectionInfo.KafkaHosts
-		props["access_cert"] = connectionInfo.KafkaAccessCert
-		props["access_key"] = connectionInfo.KafkaAccessKey
-		props["connect_uri"] = connectionInfo.KafkaConnectURI
-		props["rest_uri"] = connectionInfo.KafkaRestURI
-		props["schema_registry_uri"] = connectionInfo.SchemaRegistryURI
+		props["uris"] = connectionInfo.Kafka
+		setProp(props, "access_cert", connectionInfo.KafkaAccessCert)
+		setProp(props, "access_key", connectionInfo.KafkaAccessKey)
+		setProp(props, "connect_uri", connectionInfo.KafkaConnectUri)
+		setProp(props, "rest_uri", connectionInfo.KafkaRestUri)
+		setProp(props, "schema_registry_uri", connectionInfo.SchemaRegistryUri)
 	case ServiceTypePG:
 		// For compatibility with the old schema, we only set the first URI.
 		// TODO: Remove this block in the next major version. Keep `uris` key only, see below.
-		if connectionInfo.PostgresURIs != nil && len(connectionInfo.PostgresURIs) > 0 {
-			props["uri"] = connectionInfo.PostgresURIs[0]
+		if len(connectionInfo.Pg) > 0 {
+			props["uri"] = connectionInfo.Pg[0]
 		}
 
-		props["uris"] = connectionInfo.PostgresURIs // Keep this instead of `uri` key.
-		props["bouncer"] = connectionInfo.PostgresBouncer
-
-		// For compatibility with the old schema, we only set the first params.
-		// TODO: Remove this block in the next major version. Keep `params` key only, see below.
-		if connectionInfo.PostgresParams != nil && len(connectionInfo.PostgresParams) > 0 {
-			params := connectionInfo.PostgresParams[0]
-
-			props["host"] = params.Host
-
-			port, err := strconv.ParseInt(params.Port, 10, 32)
-			if err == nil {
-				props["port"] = int(port)
-			}
-
-			props["sslmode"] = params.SSLMode
-			props["user"] = params.User
-			props["password"] = params.Password
-			props["dbname"] = params.DatabaseName
-
-		}
-
-		// Keep this instead of the above block.
-		params := make([]map[string]interface{}, len(connectionInfo.PostgresParams))
-		for i, p := range connectionInfo.PostgresParams {
+		props["uris"] = connectionInfo.Pg
+		params := make([]map[string]any, len(connectionInfo.PgParams))
+		for i, p := range connectionInfo.PgParams {
 			port, err := strconv.ParseInt(p.Port, 10, 32)
 			if err != nil {
 				return err
 			}
 
-			params[i] = map[string]interface{}{
+			if i == 0 {
+				// For compatibility with the old schema, we only set the first params.
+				// TODO: Remove this block in the next major version. Keep `params` key only.
+				props["host"] = p.Host
+				props["port"] = port
+				props["sslmode"] = p.Sslmode
+				props["user"] = p.User
+				props["password"] = p.Password
+				props["dbname"] = p.Dbname
+			}
+
+			params[i] = map[string]any{
 				"host":          p.Host,
 				"port":          port,
-				"sslmode":       p.SSLMode,
+				"sslmode":       p.Sslmode,
 				"user":          p.User,
 				"password":      p.Password,
-				"database_name": p.DatabaseName,
+				"database_name": p.Dbname,
 			}
 		}
 
 		props["params"] = params
-		props["replica_uri"] = connectionInfo.PostgresReplicaURI
-		props["standby_uris"] = connectionInfo.PostgresStandbyURIs
-		props["syncing_uris"] = connectionInfo.PostgresSyncingURIs
+		props["standby_uris"] = connectionInfo.PgStandby
+		props["syncing_uris"] = connectionInfo.PgSyncing
+		setProp(props, "replica_uri", connectionInfo.PgReplicaUri)
 
 		// TODO: This isn't in the connection info, but it's in the metadata.
 		//  We should move this to the other part of the schema in the next major version.
-		props["max_connections"] = metadata.(map[string]interface{})["max_connections"]
+		props["max_connections"] = metadata["max_connections"]
 	case ServiceTypeThanos:
-		props["uris"] = connectionInfo.ThanosURIs
-		props["query_frontend_uri"] = connectionInfo.QueryFrontendURI
-		props["query_uri"] = connectionInfo.QueryURI
-		props["receiver_ingesting_remote_write_uri"] = connectionInfo.ReceiverIngestingRemoteWriteURI
-		props["receiver_remote_write_uri"] = connectionInfo.ReceiverRemoteWriteURI
-		props["store_uri"] = connectionInfo.StoreURI
+		props["uris"] = connectionInfo.Thanos
+		setProp(props, "query_frontend_uri", connectionInfo.QueryFrontendUri)
+		setProp(props, "query_uri", connectionInfo.QueryUri)
+		setProp(props, "receiver_ingesting_remote_write_uri", connectionInfo.ReceiverIngestingRemoteWriteUri)
+		setProp(props, "receiver_remote_write_uri", connectionInfo.ReceiverRemoteWriteUri)
 	case ServiceTypeMySQL:
-		props["uris"] = connectionInfo.MySQLURIs
+		props["uris"] = connectionInfo.Mysql
 
-		params := make([]map[string]interface{}, len(connectionInfo.MySQLParams))
-		for i, p := range connectionInfo.MySQLParams {
+		params := make([]map[string]any, len(connectionInfo.MysqlParams))
+		for i, p := range connectionInfo.MysqlParams {
 			port, err := strconv.ParseInt(p.Port, 10, 32)
 			if err != nil {
 				return err
 			}
 
-			params[i] = map[string]interface{}{
+			params[i] = map[string]any{
 				"host":          p.Host,
 				"port":          port,
-				"sslmode":       p.SSLMode,
+				"sslmode":       p.SslMode,
 				"user":          p.User,
 				"password":      p.Password,
-				"database_name": p.DatabaseName,
+				"database_name": p.Dbname,
 			}
 		}
 
 		props["params"] = params
-		props["replica_uri"] = connectionInfo.MySQLReplicaURI
-		props["standby_uris"] = connectionInfo.MySQLStandbyURIs
+		props["standby_uris"] = connectionInfo.MysqlStandby
+		setProp(props, "replica_uri", connectionInfo.MysqlReplicaUri)
 	case ServiceTypeOpenSearch:
-		props["uris"] = connectionInfo.OpensearchURIs
+		props["uris"] = connectionInfo.Opensearch
 
 		// TODO: Remove `opensearch_` prefix in the next major version.
-		props["opensearch_dashboards_uri"] = connectionInfo.OpensearchDashboardsURI
-
-		props["kibana_uri"] = connectionInfo.KibanaURI
-		props["username"] = connectionInfo.OpensearchUsername
-		props["password"] = connectionInfo.OpensearchPassword
+		setProp(props, "opensearch_dashboards_uri", connectionInfo.OpensearchDashboardsUri)
+		setProp(props, "username", connectionInfo.OpensearchUsername)
+		setProp(props, "password", connectionInfo.OpensearchPassword)
 	case ServiceTypeCassandra:
 		// CassandraHosts will be renamed to CassandraURIs in the next major version of the Go client.
 		// That's why we name the props key `uris` here.
-		props["uris"] = connectionInfo.CassandraHosts
+		props["uris"] = connectionInfo.Cassandra
 	case ServiceTypeRedis, ServiceTypeDragonfly:
-		props["uris"] = connectionInfo.RedisURIs
-		props["slave_uris"] = connectionInfo.RedisSlaveURIs
-		props["replica_uri"] = connectionInfo.RedisReplicaURI
-		props["password"] = connectionInfo.RedisPassword
+		props["uris"] = connectionInfo.Redis
+		props["slave_uris"] = connectionInfo.RedisSlave
+		setProp(props, "replica_uri", connectionInfo.RedisReplicaUri)
+		setProp(props, "password", connectionInfo.RedisPassword)
 	case ServiceTypeValkey:
-		props["uris"] = connectionInfo.ValkeyURIs
-		props["slave_uris"] = connectionInfo.ValkeySlaveURIs
-		props["replica_uri"] = connectionInfo.ValkeyReplicaURI
-		props["password"] = connectionInfo.ValkeyPassword
+		props["uris"] = connectionInfo.Valkey
+		props["slave_uris"] = connectionInfo.ValkeySlave
+		setProp(props, "replica_uri", connectionInfo.ValkeyReplicaUri)
+		setProp(props, "password", connectionInfo.ValkeyPassword)
 	case ServiceTypeInfluxDB:
-		props["uris"] = connectionInfo.InfluxDBURIs
-		props["username"] = connectionInfo.InfluxDBUsername
-		props["password"] = connectionInfo.InfluxDBPassword
-		props["database_name"] = connectionInfo.InfluxDBDatabaseName
+		props["uris"] = connectionInfo.Influxdb
+		setProp(props, "username", connectionInfo.InfluxdbUsername)
+		setProp(props, "password", connectionInfo.InfluxdbPassword)
+		setProp(props, "database_name", connectionInfo.InfluxdbDbname)
 	case ServiceTypeGrafana:
-		props["uris"] = connectionInfo.GrafanaURIs
+		props["uris"] = connectionInfo.Grafana
 	case ServiceTypeM3:
-		props["uris"] = connectionInfo.M3DBURIs
-		props["http_cluster_uri"] = connectionInfo.HTTPClusterURI
-		props["http_node_uri"] = connectionInfo.HTTPNodeURI
-		props["influxdb_uri"] = connectionInfo.InfluxDBURI
-		props["prometheus_remote_read_uri"] = connectionInfo.PrometheusRemoteReadURI
-		props["prometheus_remote_write_uri"] = connectionInfo.PrometheusRemoteWriteURI
+		props["uris"] = connectionInfo.M3Db
+		setProp(props, "http_cluster_uri", connectionInfo.HttpClusterUri)
+		setProp(props, "http_node_uri", connectionInfo.HttpNodeUri)
+		setProp(props, "influxdb_uri", connectionInfo.InfluxdbUri)
+		setProp(props, "prometheus_remote_read_uri", connectionInfo.PrometheusRemoteReadUri)
+		setProp(props, "prometheus_remote_write_uri", connectionInfo.PrometheusRemoteWriteUri)
 	case ServiceTypeM3Aggregator:
-		props["uris"] = connectionInfo.M3AggregatorURIs
-		props["aggregator_http_uri"] = connectionInfo.AggregatorHTTPURI
+		props["uris"] = connectionInfo.M3Aggregator
+		setProp(props, "aggregator_http_uri", connectionInfo.AggregatorHttpUri)
 	case ServiceTypeClickhouse:
-		props["uris"] = connectionInfo.ClickHouseURIs
+		props["uris"] = connectionInfo.Clickhouse
 	case ServiceTypeFlink:
 		// TODO: Rename `host_ports` to `uris` in the next major version.
-		props["host_ports"] = connectionInfo.FlinkHostPorts
+		props["host_ports"] = connectionInfo.Flink
 	default:
 		// Doesn't have connection info
 		return nil
 	}
 
-	return d.Set(serviceType, []map[string]interface{}{props})
+	return d.Set(serviceType, []map[string]any{props})
+}
+
+func setProp[T comparable](m map[string]any, k string, v *T) {
+	if v != nil {
+		m[k] = *v
+	}
 }
 
 // IsUnknownRole checks if the database returned an error because of an unknown role
@@ -925,8 +926,8 @@ func DatasourceServiceRead(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.Errorf("error getting a list of services: %s", err)
 	}
 
-	for _, service := range services {
-		if service.Name == serviceName {
+	for _, s := range services {
+		if s.Name == serviceName {
 			return ResourceServiceRead(ctx, d, m)
 		}
 	}

@@ -98,7 +98,7 @@ Read-Only:
 - `query_uri` (String, Sensitive) Query URI.
 - `receiver_ingesting_remote_write_uri` (String, Sensitive) Receiver ingesting remote write URI.
 - `receiver_remote_write_uri` (String, Sensitive) Receiver remote write URI.
-- `store_uri` (String, Sensitive) Store URI.
+- `store_uri` (String, Sensitive, Deprecated) Store URI.
 
 
 <a id="nestedblock--thanos_user_config"></a>

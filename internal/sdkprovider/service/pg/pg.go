@@ -51,6 +51,7 @@ func aivenPGSchema() map[string]*schema.Schema {
 					Computed:    true,
 					Sensitive:   true,
 					Description: "PgBouncer connection details for [connection pooling](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling).",
+					Deprecated:  "This field was added by mistake and has never worked. It will be removed in future versions.",
 				},
 				// TODO: Remove `host` in the next major version.
 				"host": {
