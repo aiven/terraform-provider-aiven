@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccAivenProjectUserDataSource_basic(t *testing.T) {
+	t.Skip("Project invites are disabled")
 	datasourceName := "data.aiven_project_user.user"
 	resourceName := "aiven_project_user.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)

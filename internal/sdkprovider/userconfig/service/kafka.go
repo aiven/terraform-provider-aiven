@@ -499,6 +499,11 @@ func kafkaUserConfig() *schema.Schema {
 								Optional:    true,
 								Type:        schema.TypeInt,
 							},
+							"prefix_path_depth": {
+								Description: "Prefix path depth of the secrets Engine. Default is 1. If the secrets engine path has more than one segment it has to be increased to the number of segments.",
+								Optional:    true,
+								Type:        schema.TypeInt,
+							},
 							"token": {
 								Description: "Token used to authenticate with vault and auth method `token`.",
 								Optional:    true,

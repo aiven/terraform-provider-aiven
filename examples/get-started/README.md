@@ -1,14 +1,17 @@
 # Get started with Aiven Provider for Terraform 
 
-Set up your organization on Aiven and create your first Aiven project and user group.
+Set up your organization on Aiven, and create your first project and user group.
 
-This example creates a project and user group in your organization, and gives the user group access to the project. You can add users who have already accepted the invite to your organization to the group. When you add groups to projects, you can give them the `admin` `developer`, `operator`, or `read_only` [project role](https://aiven.io/docs/platform/reference/project-member-privileges).
+This example creates a project and user group in your organization, and gives the group access to the project. You can add users who are already part of your organization. Users can be added in the Aiven Console either manually by [sending them an invite](https://aiven.io/docs/platform/howto/manage-org-users), or you can [create managed users](https://aiven.io/docs/platform/concepts/managed-users) by verifying a domain and setting up an identity provider in the Aiven Console.
+
+When you add groups to projects, you can give them the `admin` `developer`, `operator`, or `read_only` [project role](https://aiven.io/docs/platform/reference/project-member-privileges).
 
 ## Prerequisites
 
 * [Install Terraform](https://www.terraform.io/downloads)
 * [Sign up for Aiven](https://console.aiven.io/signup?utm_source=github&utm_medium=organic&utm_campaign=devportal&utm_content=repo)
-* [Create an authentication token](https://docs.aiven.io/docs/platform/howto/create_authentication_token.html)
+* [Create a token](https://docs.aiven.io/docs/platform/howto/create_authentication_token.html)
+* Add users to your organization by [inviting them](https://aiven.io/docs/platform/howto/manage-org-users) or by [creating managed users](https://aiven.io/docs/platform/concepts/managed-users)
 
 ## Create your first Aiven resources
 
@@ -27,7 +30,7 @@ Terraform v1.6.2
 
 2. Clone this repository.
 
-3. Replace the placeholders in the `get-started.tf` file. It's recommended to use your organization name as a prefix for the project name.
+3. Replace the placeholders `ORGANIZATION_NAME` and `USER_ID` in the `get-started.tf` file. It's recommended to use your organization name as a prefix for the project name.
 
 4. Initialize Terraform:
 
@@ -93,7 +96,7 @@ Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
 
 ## Verify the changes in the Aiven Console 
 
-You can see your project and user group in the [Aiven Console](https://console.aiven.io/):
+To view your project and user group in the [Aiven Console](https://console.aiven.io/):
 
 1. In the organization, click **Projects** and select your project.
 

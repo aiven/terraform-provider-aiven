@@ -9,6 +9,12 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!-- ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Add `prefix_path_depth` to `kafka_user_config.kafka_connect_secret_providers.vault`
+- Add `backup_hour` and `backup_minute` to `redis_user_config` and `valkey_user_config`
+- Add user configuration options for `external_s3`, `external_clickhouse` and `external_mysql` integration endpoint types
+
 ## [4.24.0] - 2024-08-21
 
 - Recursively mark attributes of sensitive blocks as sensitive due to an [issue in Terraform](https://github.com/hashicorp/terraform-plugin-sdk/issues/201)
