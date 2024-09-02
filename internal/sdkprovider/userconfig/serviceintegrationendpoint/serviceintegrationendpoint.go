@@ -12,6 +12,10 @@ func GetUserConfig(kind string) *schema.Schema {
 		return externalAwsCloudwatchLogsUserConfig()
 	case "external_aws_cloudwatch_metrics":
 		return externalAwsCloudwatchMetricsUserConfig()
+	case "external_aws_s3":
+		return externalAwsS3UserConfig()
+	case "external_clickhouse":
+		return externalClickhouseUserConfig()
 	case "external_elasticsearch_logs":
 		return externalElasticsearchLogsUserConfig()
 	case "external_google_cloud_bigquery":
@@ -20,6 +24,8 @@ func GetUserConfig(kind string) *schema.Schema {
 		return externalGoogleCloudLoggingUserConfig()
 	case "external_kafka":
 		return externalKafkaUserConfig()
+	case "external_mysql":
+		return externalMysqlUserConfig()
 	case "external_opensearch_logs":
 		return externalOpensearchLogsUserConfig()
 	case "external_postgresql":
@@ -42,5 +48,5 @@ func GetFieldMapping(kind string) map[string]string {
 	return map[string]map[string]string{}[kind]
 }
 func UserConfigTypes() []string {
-	return []string{"datadog", "external_aws_cloudwatch_logs", "external_aws_cloudwatch_metrics", "external_elasticsearch_logs", "external_google_cloud_bigquery", "external_google_cloud_logging", "external_kafka", "external_opensearch_logs", "external_postgresql", "external_schema_registry", "jolokia", "prometheus", "rsyslog"}
+	return []string{"datadog", "external_aws_cloudwatch_logs", "external_aws_cloudwatch_metrics", "external_aws_s3", "external_clickhouse", "external_elasticsearch_logs", "external_google_cloud_bigquery", "external_google_cloud_logging", "external_kafka", "external_mysql", "external_opensearch_logs", "external_postgresql", "external_schema_registry", "jolokia", "prometheus", "rsyslog"}
 }
