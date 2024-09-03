@@ -16,6 +16,7 @@ import (
 )
 
 func TestAccAivenProjectUser_basic(t *testing.T) {
+	t.Skip("Project invites are disabled")
 	resourceName := "aiven_project_user.bar"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 
