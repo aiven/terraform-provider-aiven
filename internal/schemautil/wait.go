@@ -9,6 +9,9 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/service"
+	"github.com/aiven/go-client-codegen/handler/staticip"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -22,9 +25,7 @@ const (
 	aivenServicesStartingState = "WAITING_FOR_SERVICES"
 )
 
-func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, m interface{}) (*aiven.Service, error) {
-	client := m.(*aiven.Client)
-
+func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, client avngen.Client) (*service.ServiceGetOut, error) {
 	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
 
 	timeout := d.Timeout(schema.TimeoutCreate)
@@ -38,36 +39,35 @@ func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, m inter
 		MinTimeout:                common.DefaultStateChangeMinTimeout,
 		ContinuousTargetOccurence: 5,
 		Refresh: func() (interface{}, string, error) {
-			service, err := client.Services.Get(ctx, projectName, serviceName)
+			s, err := client.ServiceGet(ctx, projectName, serviceName)
 			if err != nil {
 				return nil, "", fmt.Errorf("unable to fetch service from api: %w", err)
 			}
 
-			state := service.State
-
+			state := string(s.State)
 			if state != aivenTargetState {
 				log.Printf("[DEBUG] service reports as %s, still for it to be in state %s", state, aivenTargetState)
-				return service, state, nil
+				return s, state, nil
 			}
 
-			if rdy := backupsReady(service); !rdy {
+			if rdy := backupsReady(s); !rdy {
 				log.Printf("[DEBUG] service reports as %s, still waiting for service backups", state)
-				return service, aivenServicesStartingState, nil
+				return s, aivenServicesStartingState, nil
 			}
 
-			if rdy := grafanaReady(service); !rdy {
+			if rdy := grafanaReady(s); !rdy {
 				log.Printf("[DEBUG] service reports as %s, still waiting for grafana", state)
-				return service, aivenServicesStartingState, nil
+				return s, aivenServicesStartingState, nil
 			}
 
-			if rdy, err := staticIpsReady(ctx, d, m); err != nil {
+			if rdy, err := staticIpsReady(ctx, d, client); err != nil {
 				return nil, "", fmt.Errorf("unable to check if static ips are ready: %w", err)
 			} else if !rdy {
 				log.Printf("[DEBUG] service reports as %s, still waiting for static ips", state)
-				return service, aivenServicesStartingState, nil
+				return s, aivenServicesStartingState, nil
 			}
 
-			return service, state, nil
+			return s, state, nil
 		},
 	}
 
@@ -75,12 +75,10 @@ func WaitForServiceCreation(ctx context.Context, d *schema.ResourceData, m inter
 	if err != nil {
 		return nil, fmt.Errorf("unable to wait for service state change: %w", err)
 	}
-	return aux.(*aiven.Service), nil
+	return aux.(*service.ServiceGetOut), nil
 }
 
-func WaitForServiceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) (*aiven.Service, error) {
-	client := m.(*aiven.Client)
-
+func WaitForServiceUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) (*service.ServiceGetOut, error) {
 	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
 
 	timeout := d.Timeout(schema.TimeoutUpdate)
@@ -94,31 +92,31 @@ func WaitForServiceUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		MinTimeout:                common.DefaultStateChangeMinTimeout,
 		ContinuousTargetOccurence: 5,
 		Refresh: func() (interface{}, string, error) {
-			service, err := client.Services.Get(ctx, projectName, serviceName)
+			s, err := client.ServiceGet(ctx, projectName, serviceName)
 			if err != nil {
 				return nil, "", fmt.Errorf("unable to fetch service from api: %w", err)
 			}
 
-			state := service.State
+			state := s.State
 
-			if rdy := backupsReady(service); !rdy {
+			if rdy := backupsReady(s); !rdy {
 				log.Printf("[DEBUG] service reports as %s, still waiting for service backups", state)
-				return service, "updating", nil
+				return s, "updating", nil
 			}
 
-			if rdy := grafanaReady(service); !rdy {
+			if rdy := grafanaReady(s); !rdy {
 				log.Printf("[DEBUG] service reports as %s, still waiting for grafana", state)
-				return service, "updating", nil
+				return s, "updating", nil
 			}
 
-			if rdy, err := staticIpsReady(ctx, d, m); err != nil {
+			if rdy, err := staticIpsReady(ctx, d, client); err != nil {
 				return nil, "", fmt.Errorf("unable to check if static ips are ready: %w", err)
 			} else if !rdy {
 				log.Printf("[DEBUG] service reports as %s, still waiting for static ips", state)
-				return service, "updating", nil
+				return s, "updating", nil
 			}
 
-			return service, "updated", nil
+			return s, "updated", nil
 		},
 	}
 
@@ -126,10 +124,10 @@ func WaitForServiceUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	if err != nil {
 		return nil, fmt.Errorf("unable to wait for service state change: %w", err)
 	}
-	return aux.(*aiven.Service), nil
+	return aux.(*service.ServiceGetOut), nil
 }
 
-func WaitStaticIpsDissassociation(ctx context.Context, d *schema.ResourceData, m interface{}) error {
+func WaitStaticIpsDissociation(ctx context.Context, d *schema.ResourceData, m interface{}) error {
 	timeout := d.Timeout(schema.TimeoutDelete)
 	log.Printf("[DEBUG] Static Ip dissassociation timeout %.0f minutes", timeout.Minutes())
 
@@ -197,25 +195,23 @@ func WaitForDeletion(ctx context.Context, d *schema.ResourceData, m interface{})
 	return nil
 }
 
-func grafanaReady(service *aiven.Service) bool {
-	if service.Type != "grafana" {
+func grafanaReady(s *service.ServiceGetOut) bool {
+	if s.ServiceType != "grafana" {
 		return true
 	}
 
 	// if IP filter is anything but 0.0.0.0/0 skip Grafana service availability checks
-	ipFilters, ok := service.UserConfig["ip_filter"]
+	ipFilters, ok := s.UserConfig["ip_filter"]
 	if ok {
 		f := ipFilters.([]interface{})
 		if len(f) > 1 {
 			log.Printf("[DEBUG] grafana serivce has `%+v` ip filters, and availability checks will be skipped", ipFilters)
-
 			return true
 		}
 
 		if len(f) == 1 {
 			if f[0] != "0.0.0.0/0" {
 				log.Printf("[DEBUG] grafana serivce has `%+v` ip filters, and availability checks will be skipped", ipFilters)
-
 				return true
 			}
 		}
@@ -224,7 +220,7 @@ func grafanaReady(service *aiven.Service) bool {
 	var publicGrafana string
 
 	// constructing grafana public address if available
-	for _, component := range service.Components {
+	for _, component := range s.Components {
 		if component.Route == "public" && component.Usage == "primary" {
 			publicGrafana = component.Host + ":" + strconv.Itoa(component.Port)
 			continue
@@ -246,54 +242,50 @@ func grafanaReady(service *aiven.Service) bool {
 	return true
 }
 
-func backupsReady(service *aiven.Service) bool {
-	if service.Type != "pg" && service.Type != "elasticsearch" &&
-		service.Type != "redis" && service.Type != "influxdb" {
+func backupsReady(s *service.ServiceGetOut) bool {
+	switch s.ServiceType {
+	case ServiceTypePG, ServiceTypeInfluxDB, ServiceTypeRedis, ServiceTypeDragonfly:
+		// See https://github.com/aiven/terraform-provider-aiven/issues/756
+		switch "off" {
+		case s.UserConfig["redis_persistence"], s.UserConfig["dragonfly_persistence"]:
+			return true
+		}
+	default:
 		return true
 	}
 
-	if service.Type == "redis" && service.UserConfig["redis_persistence"] == "off" {
-		return true
-	}
-
-	// no backups for read replicas type of service
-	for _, i := range service.Integrations {
-		if i.IntegrationType == "read_replica" && *i.DestinationService == service.Name {
+	// No backups for read replicas type of service
+	// See https://github.com/aiven/terraform-provider-aiven/pull/172
+	for _, i := range s.ServiceIntegrations {
+		if i.IntegrationType == "read_replica" && *i.DestService == s.ServiceName {
 			return true
 		}
 	}
 
-	return len(service.Backups) > 0
+	return len(s.Backups) > 0
 }
 
 // staticIpsReady checks that the static ips that are associated with the service are either
 // in state 'assigned' or 'available'
-func staticIpsReady(ctx context.Context, d *schema.ResourceData, m interface{}) (bool, error) {
-	expectedStaticIps := staticIpsForServiceFromSchema(d)
-	if len(expectedStaticIps) == 0 {
+func staticIpsReady(ctx context.Context, d *schema.ResourceData, client avngen.Client) (bool, error) {
+	resourceIPs := staticIpsForServiceFromSchema(d)
+	if len(resourceIPs) == 0 {
 		return true, nil
 	}
 
-	client := m.(*aiven.Client)
-	projectName, serviceName := d.Get("project").(string), d.Get("service_name").(string)
-
-	staticIpsList, err := client.StaticIPs.List(ctx, projectName)
+	projectName := d.Get("project").(string)
+	serviceName := d.Get("service_name").(string)
+	serviceIPs, err := ServiceStaticIps(ctx, client, projectName, serviceName)
 	if err != nil {
-		return false, fmt.Errorf("unable to fetch static ips for project '%s': '%w", projectName, err)
+		return false, err
 	}
 
-L:
-	for _, eip := range expectedStaticIps {
-		for _, sip := range staticIpsList.StaticIPs {
-			assignedOrAvailable := sip.State == StaticIPAssigned || sip.State == StaticIPAvailable
-			belongsToService := sip.ServiceName == serviceName
-			isExpectedIP := sip.StaticIPAddressID == eip
-
-			if isExpectedIP && belongsToService && assignedOrAvailable {
-				continue L
-			}
+	for _, v := range resourceIPs {
+		switch serviceIPs[v] {
+		case staticip.StaticIpStateTypeAvailable, staticip.StaticIpStateTypeAssigned:
+		default:
+			return false, nil
 		}
-		return false, nil
 	}
 
 	return true, nil
