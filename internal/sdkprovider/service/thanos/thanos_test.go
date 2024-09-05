@@ -324,10 +324,6 @@ func testAccCheckAivenServiceThanosAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get correct receiver_remote_write_uri from Aiven")
 		}
 
-		if a["thanos.0.store_uri"] == "" {
-			return fmt.Errorf("expected to get correct store_uri from Aiven")
-		}
-
 		return nil
 	}
 }

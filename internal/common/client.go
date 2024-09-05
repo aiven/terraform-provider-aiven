@@ -73,6 +73,11 @@ func CacheGenAivenClient(token, tfVersion, buildVersion string) error {
 	return nil
 }
 
+// GenClient returns cached client.
+func GenClient() avngen.Client {
+	return clientCache
+}
+
 type crudHandler func(context.Context, *schema.ResourceData, avngen.Client) error
 
 // WithGenClient wraps CRUD handlers and runs with avngen.Client

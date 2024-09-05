@@ -103,7 +103,7 @@ Optional:
 
 Read-Only:
 
-- `bouncer` (String, Sensitive) PgBouncer connection details for [connection pooling](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling).
+- `bouncer` (String, Sensitive, Deprecated) PgBouncer connection details for [connection pooling](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling).
 - `dbname` (String, Sensitive) Primary PostgreSQL database name.
 - `host` (String, Sensitive) PostgreSQL primary node host IP or name.
 - `max_connections` (Number, Sensitive) The [number of allowed connections](https://aiven.io/docs/products/postgresql/reference/pg-connection-limits). Varies based on the service plan.

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
@@ -79,8 +80,8 @@ func ConvertToDiskSpaceMB(b string) int {
 	return int(diskSizeMB / units.MiB)
 }
 
-func GetServicePlanParametersFromServiceResponse(ctx context.Context, client *aiven.Client, project string, service *aiven.Service) (PlanParameters, error) {
-	return getServicePlanParametersInternal(ctx, client, project, service.Type, service.Plan)
+func GetServicePlanParametersFromServiceResponse(ctx context.Context, client *aiven.Client, project string, s *service.ServiceGetOut) (PlanParameters, error) {
+	return getServicePlanParametersInternal(ctx, client, project, s.ServiceType, s.Plan)
 }
 
 func GetServicePlanParametersFromSchema(ctx context.Context, client *aiven.Client, d ResourceStateOrResourceDiff) (PlanParameters, error) {

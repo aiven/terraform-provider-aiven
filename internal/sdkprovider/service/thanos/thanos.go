@@ -58,6 +58,7 @@ func thanosSchema() map[string]*schema.Schema {
 					Computed:    true,
 					Description: "Store URI.",
 					Sensitive:   true,
+					Deprecated:  "This field was added by mistake and has never worked. It will be removed in future versions.",
 				},
 			},
 		},

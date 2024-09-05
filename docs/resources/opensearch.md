@@ -88,7 +88,7 @@ Optional:
 
 Read-Only:
 
-- `kibana_uri` (String, Sensitive) URI for Kibana dashboard frontend
+- `kibana_uri` (String, Sensitive, Deprecated) URI for Kibana dashboard frontend
 - `opensearch_dashboards_uri` (String, Sensitive) URI for OpenSearch dashboard frontend
 - `password` (String, Sensitive) OpenSearch password
 - `username` (String, Sensitive) OpenSearch username

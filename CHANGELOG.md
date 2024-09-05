@@ -14,6 +14,7 @@ nav_order: 1
 - Add `prefix_path_depth` to `kafka_user_config.kafka_connect_secret_providers.vault`
 - Add `backup_hour` and `backup_minute` to `redis_user_config` and `valkey_user_config`
 - Add user configuration options for `external_s3`, `external_clickhouse` and `external_mysql` integration endpoint types
+- Use `ServiceGet` from the code-generated client
 
 ## [4.24.0] - 2024-08-21
 

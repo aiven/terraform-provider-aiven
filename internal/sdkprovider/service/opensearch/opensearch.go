@@ -41,6 +41,7 @@ func opensearchSchema() map[string]*schema.Schema {
 					Computed:    true,
 					Sensitive:   true,
 					Description: "URI for Kibana dashboard frontend",
+					Deprecated:  "This field was added by mistake and has never worked. It will be removed in future versions.",
 				},
 				"username": {
 					Type:        schema.TypeString,
