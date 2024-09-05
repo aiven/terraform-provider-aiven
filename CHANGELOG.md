@@ -15,6 +15,7 @@ nav_order: 1
 - Add `backup_hour` and `backup_minute` to `redis_user_config` and `valkey_user_config`
 - Add user configuration options for `external_s3`, `external_clickhouse` and `external_mysql` integration endpoint types
 - Use `ServiceGet` from the code-generated client
+- Use Go 1.23
 
 ## [4.24.0] - 2024-08-21
 
