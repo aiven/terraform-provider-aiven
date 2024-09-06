@@ -321,7 +321,11 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.Errorf("error splitting service ID: %s", err)
 	}
 
-	avnGen := common.GenClient()
+	avnGen, err := common.GenClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	s, err := avnGen.ServiceGet(ctx, projectName, serviceName, service.ServiceGetIncludeSecrets(true))
 	if err != nil {
 		if err = ResourceReadHandleNotFound(err, d); err != nil {
@@ -340,20 +344,20 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.Errorf("unable to copy api response into terraform schema: %s", err)
 	}
 
-	allocatedStaticIps, err := CurrentlyAllocatedStaticIps(ctx, projectName, serviceName, m)
+	serviceIps, err := ServiceStaticIpsList(ctx, avnGen, projectName, serviceName)
 	if err != nil {
 		return diag.Errorf("unable to currently allocated static ips: %s", err)
 	}
-	if err = d.Set("static_ips", allocatedStaticIps); err != nil {
+	if err = d.Set("static_ips", serviceIps); err != nil {
 		return diag.Errorf("unable to set static ips field in schema: %s", err)
 	}
 
-	t, err := client.ServiceTags.Get(ctx, projectName, serviceName)
+	tags, err := avnGen.ProjectServiceTagsList(ctx, projectName, serviceName)
 	if err != nil {
 		return diag.Errorf("unable to get service tags: %s", err)
 	}
 
-	if err := d.Set("tag", SetTagsTerraformProperties(t.Tags)); err != nil {
+	if err := d.Set("tag", SetTagsTerraformProperties(tags)); err != nil {
 		return diag.Errorf("unable to set tag's in schema: %s", err)
 	}
 
@@ -366,6 +370,10 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 
 func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
+	avnGen, err := common.GenClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	serviceType := d.Get("service_type").(string)
 	project := d.Get("project").(string)
@@ -423,8 +431,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	// Create already takes care of static ip associations, no need to explictely associate them here
-
-	s, err := WaitForServiceCreation(ctx, d, m)
+	s, err := WaitForServiceCreation(ctx, d, avnGen)
 	if err != nil {
 		return diag.Errorf("error waiting for service creation: %s", err)
 	}
@@ -436,13 +443,17 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.Errorf("error setting service tags: %s", err)
 	}
 
-	d.SetId(BuildResourceID(project, s.Name))
+	d.SetId(BuildResourceID(project, s.ServiceName))
 
 	return ResourceServiceRead(ctx, d, m)
 }
 
 func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
+	avnGen, err := common.GenClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	var karapace *bool
 	if v := d.Get("karapace"); d.HasChange("karapace") && v != nil {
@@ -463,7 +474,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.Errorf("error splitting service id (%s): %s", d.Id(), err)
 	}
 
-	ass, dis, err := DiffStaticIps(ctx, d, m)
+	ass, dis, err := DiffStaticIps(ctx, d, avnGen)
 	if err != nil {
 		return diag.Errorf("error diff static ips: %s", err)
 	}
@@ -507,7 +518,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.Errorf("error updating (%s) service: %s", serviceName, err)
 	}
 
-	if _, err = WaitForServiceUpdate(ctx, d, m); err != nil {
+	if _, err = WaitForServiceUpdate(ctx, d, avnGen); err != nil {
 		return diag.Errorf("error waiting for service (%s) update: %s", serviceName, err)
 	}
 
@@ -517,7 +528,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 				return diag.Errorf("error dissociating Static IP (%s) from the service (%s): %s", dip, serviceName, err)
 			}
 		}
-		if err = WaitStaticIpsDissassociation(ctx, d, m); err != nil {
+		if err = WaitStaticIpsDissociation(ctx, d, m); err != nil {
 			return diag.Errorf("error waiting for Static IPs dissociation: %s", err)
 		}
 	}

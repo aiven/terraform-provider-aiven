@@ -3,8 +3,11 @@ package schemautil
 import (
 	"context"
 	"fmt"
+	"maps"
+	"slices"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/staticip"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -15,57 +18,40 @@ const (
 	StaticIPAssigned  = "assigned"
 )
 
-func CurrentlyAllocatedStaticIps(ctx context.Context, projectName, serviceName string, m interface{}) ([]string, error) {
-	client := m.(*aiven.Client)
-
-	// special handling for static ips
-	staticIPListResponse, err := client.StaticIPs.List(ctx, projectName)
+func ServiceStaticIps(ctx context.Context, client avngen.Client, projectName, serviceName string) (map[string]staticip.StaticIpStateType, error) {
+	projectIPs, err := client.StaticIPList(ctx, projectName)
 	if err != nil {
-		return nil, fmt.Errorf("unable to list static ips for project '%s': %w", projectName, err)
+		return nil, fmt.Errorf(`unable to fetch static ips for project %q: "%w"`, projectName, err)
 	}
-	allocatedStaticIps := make([]string, 0)
-	for _, sip := range staticIPListResponse.StaticIPs {
-		if sip.ServiceName == serviceName {
-			allocatedStaticIps = append(allocatedStaticIps, sip.StaticIPAddressID)
+
+	result := make(map[string]staticip.StaticIpStateType)
+	for _, v := range projectIPs {
+		if v.ServiceName == serviceName {
+			result[v.StaticIpAddressId] = v.State
 		}
 	}
-	return allocatedStaticIps, nil
+
+	return result, nil
+}
+
+func ServiceStaticIpsList(ctx context.Context, client avngen.Client, projectName, serviceName string) ([]string, error) {
+	hash, err := ServiceStaticIps(ctx, client, projectName, serviceName)
+	if err != nil {
+		return nil, err
+	}
+	return slices.Collect(maps.Keys(hash)), nil
 }
 
 // DiffStaticIps takes a service resource and computes which static ips to assign and which to disassociate
-func DiffStaticIps(ctx context.Context, d *schema.ResourceData, m interface{}) (ass, dis []string, err error) {
-	ipsFromSchema := staticIpsFromSchema(d)
-	ipsFromAPI, err := staticIpsFromAPI(ctx, d, m)
+func DiffStaticIps(ctx context.Context, d *schema.ResourceData, client avngen.Client) (ass, dis []string, err error) {
+	ipsFromSchema := FlattenToString(d.Get("static_ips").(*schema.Set).List())
+	ipsFromAPI, err := ServiceStaticIpsList(ctx, client, d.Get("project").(string), d.Get("service_name").(string))
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to get static ips from api: %w", err)
 	}
 
 	ass, dis = diffStaticIps(ipsFromSchema, ipsFromAPI)
 	return ass, dis, nil
-}
-
-func staticIpsFromSchema(d *schema.ResourceData) []string {
-	return FlattenToString(d.Get("static_ips").(*schema.Set).List())
-}
-
-func staticIpsFromAPI(ctx context.Context, d *schema.ResourceData, m interface{}) ([]string, error) {
-	client := m.(*aiven.Client)
-
-	project := d.Get("project").(string)
-	serviceName := d.Get("service_name").(string)
-
-	staticIpsForProject, err := client.StaticIPs.List(ctx, project)
-	if err != nil {
-		return nil, fmt.Errorf("unable to list static ips for project '%s': %w", project, err)
-	}
-
-	res := make([]string, 0)
-	for _, sip := range staticIpsForProject.StaticIPs {
-		if sip.ServiceName == serviceName {
-			res = append(res, sip.StaticIPAddressID)
-		}
-	}
-	return res, nil
 }
 
 func diffStaticIps(want, have []string) (add, del []string) {

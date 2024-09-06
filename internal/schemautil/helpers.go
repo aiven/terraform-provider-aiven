@@ -92,6 +92,7 @@ func GetServicePlanParametersFromSchema(ctx context.Context, client *aiven.Clien
 	return getServicePlanParametersInternal(ctx, client, project, serviceType, servicePlan)
 }
 
+// fixme: GetPlane is not available in the generated client
 func getServicePlanParametersInternal(ctx context.Context, client *aiven.Client, project, serviceType, servicePlan string) (PlanParameters, error) {
 	servicePlanResponse, err := client.ServiceTypes.GetPlan(ctx, project, serviceType, servicePlan)
 	if err != nil {
@@ -104,6 +105,7 @@ func getServicePlanParametersInternal(ctx context.Context, client *aiven.Client,
 	}, nil
 }
 
+// fixme: GetPlanPricing is not available in the generated client
 func dynamicDiskSpaceIsAllowedByPricing(ctx context.Context, client *aiven.Client, d ResourceStateOrResourceDiff) (bool, error) {
 	// to check if dynamic disk space is allowed, we currently have to check
 	// the pricing api to see if the `extra_disk_price_per_gb_usd` field is set

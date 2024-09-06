@@ -74,8 +74,11 @@ func CacheGenAivenClient(token, tfVersion, buildVersion string) error {
 }
 
 // GenClient returns cached client.
-func GenClient() avngen.Client {
-	return clientCache
+func GenClient() (avngen.Client, error) {
+	if clientCache == nil {
+		return nil, fmt.Errorf("the generated client is not ready")
+	}
+	return clientCache, nil
 }
 
 type crudHandler func(context.Context, *schema.ResourceData, avngen.Client) error
