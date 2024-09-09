@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	codegenintegrations "github.com/aiven/go-client-codegen/handler/serviceintegration"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -83,10 +83,10 @@ func aivenServiceIntegrationSchema() map[string]*schema.Schema {
 func ResourceServiceIntegration() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Creates and manages an Aiven [service integration](https://aiven.io/docs/platform/concepts/service-integration).",
-		CreateContext: resourceServiceIntegrationCreate,
-		ReadContext:   resourceServiceIntegrationRead,
-		UpdateContext: resourceServiceIntegrationUpdate,
-		DeleteContext: resourceServiceIntegrationDelete,
+		CreateContext: common.WithGenClient(resourceServiceIntegrationCreate),
+		ReadContext:   common.WithGenClient(resourceServiceIntegrationRead),
+		UpdateContext: common.WithGenClient(resourceServiceIntegrationUpdate),
+		DeleteContext: common.WithGenClient(resourceServiceIntegrationDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -109,9 +109,7 @@ func plainEndpointID(fullEndpointID *string) *string {
 	return &endpointID
 }
 
-func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName := d.Get("project").(string)
 	integrationType := d.Get("integration_type").(string)
 
@@ -120,77 +118,75 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 	// for now we support to seemlessly import preexisting 'read_replica' service integrations in the resource create
 	// all other integrations should be imported using `terraform import`
 	if integrationType == "read_replica" {
-		if preexisting, err := resourceServiceIntegrationCheckForPreexistingResource(ctx, d, m); err != nil {
-			return diag.Errorf("unable to search for possible preexisting 'read_replica' service integration: %s", err)
+		if preexisting, err := resourceServiceIntegrationCheckForPreexistingResource(ctx, d, client); err != nil {
+			return fmt.Errorf("unable to search for possible preexisting 'read_replica' service integration: %w", err)
 		} else if preexisting != nil {
-			d.SetId(schemautil.BuildResourceID(projectName, preexisting.ServiceIntegrationID))
-			return resourceServiceIntegrationRead(ctx, d, m)
+			d.SetId(schemautil.BuildResourceID(projectName, preexisting.ServiceIntegrationId))
+			return resourceServiceIntegrationRead(ctx, d, client)
 		}
 	}
 
-	req := aiven.CreateServiceIntegrationRequest{
-		DestinationEndpointID: plainEndpointID(schemautil.OptionalStringPointer(d, "destination_endpoint_id")),
-		DestinationService:    schemautil.OptionalStringPointer(d, "destination_service_name"),
-		IntegrationType:       integrationType,
-		SourceEndpointID:      plainEndpointID(schemautil.OptionalStringPointer(d, "source_endpoint_id")),
-		SourceService:         schemautil.OptionalStringPointer(d, "source_service_name"),
+	req := &codegenintegrations.ServiceIntegrationCreateIn{
+		DestEndpointId:   plainEndpointID(schemautil.OptionalStringPointer(d, "destination_endpoint_id")),
+		DestService:      schemautil.OptionalStringPointer(d, "destination_service_name"),
+		IntegrationType:  codegenintegrations.IntegrationType(integrationType),
+		SourceEndpointId: plainEndpointID(schemautil.OptionalStringPointer(d, "source_endpoint_id")),
+		SourceService:    schemautil.OptionalStringPointer(d, "source_service_name"),
 	}
 
 	uc, err := converters.Expand(converters.ServiceIntegrationUserConfig, integrationType, d)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	req.UserConfig = uc
+	if uc != nil {
+		req.UserConfig = &uc
+	}
 
-	res, err := client.ServiceIntegrations.Create(ctx, projectName, req)
+	res, err := client.ServiceIntegrationCreate(ctx, projectName, req)
 	if err != nil {
-		return diag.Errorf("error creating service integration: %s", err)
+		return fmt.Errorf("error creating service integration: %w", err)
 	}
-	d.SetId(schemautil.BuildResourceID(projectName, res.ServiceIntegrationID))
+	d.SetId(schemautil.BuildResourceID(projectName, res.ServiceIntegrationId))
 
-	if err = resourceServiceIntegrationWaitUntilActive(ctx, d, m, d.Timeout(schema.TimeoutCreate)); err != nil {
-		return diag.Errorf("unable to wait for service integration to become active: %s", err)
+	if err = resourceServiceIntegrationWaitUntilActive(ctx, d, client, d.Timeout(schema.TimeoutCreate)); err != nil {
+		return fmt.Errorf("unable to wait for service integration to become active: %w", err)
 	}
-	return resourceServiceIntegrationRead(ctx, d, m)
+	return resourceServiceIntegrationRead(ctx, d, client)
 }
 
-func resourceServiceIntegrationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceServiceIntegrationRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName, integrationID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	res, err := client.ServiceIntegrations.Get(ctx, projectName, integrationID)
+	res, err := client.ServiceIntegrationGet(ctx, projectName, integrationID)
 	if err != nil {
 		err = schemautil.ResourceReadHandleNotFound(err, d)
 		if err != nil {
-			return diag.Errorf("cannot get service integration: %s; id: %s", err, integrationID)
+			return fmt.Errorf("cannot get service integration: %w; id: %s", err, integrationID)
 		}
 		return nil
 	}
 
 	if err = resourceServiceIntegrationCopyAPIResponseToTerraform(d, res, projectName); err != nil {
-		return diag.Errorf("cannot copy api response into terraform schema: %s", err)
+		return fmt.Errorf("cannot copy api response into terraform schema: %w", err)
 	}
 
 	return nil
 }
 
-func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName, integrationID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	integrationType := d.Get("integration_type").(string)
 	userConfig, err := converters.Expand(converters.ServiceIntegrationUserConfig, integrationType, d)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
 	if userConfig == nil {
@@ -198,75 +194,69 @@ func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceDat
 		userConfig = make(map[string]interface{})
 	}
 
-	_, err = client.ServiceIntegrations.Update(
+	_, err = client.ServiceIntegrationUpdate(
 		ctx,
 		projectName,
 		integrationID,
-		aiven.UpdateServiceIntegrationRequest{
+		&codegenintegrations.ServiceIntegrationUpdateIn{
 			UserConfig: userConfig,
 		},
 	)
 	if err != nil {
-		return diag.Errorf("unable to update service integration: %s", err)
+		return fmt.Errorf("unable to update service integration: %w", err)
 	}
-	if err = resourceServiceIntegrationWaitUntilActive(ctx, d, m, d.Timeout(schema.TimeoutUpdate)); err != nil {
-		return diag.Errorf("unable to wait for service integration to become active: %s", err)
+	if err = resourceServiceIntegrationWaitUntilActive(ctx, d, client, d.Timeout(schema.TimeoutUpdate)); err != nil {
+		return fmt.Errorf("unable to wait for service integration to become active: %w", err)
 	}
 
-	return resourceServiceIntegrationRead(ctx, d, m)
+	return resourceServiceIntegrationRead(ctx, d, client)
 }
 
-func resourceServiceIntegrationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceServiceIntegrationDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName, integrationID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	err = client.ServiceIntegrations.Delete(ctx, projectName, integrationID)
+	err = client.ServiceIntegrationDelete(ctx, projectName, integrationID)
 	if common.IsCritical(err) {
-		return diag.Errorf("cannot delete service integration: %s", err)
+		return fmt.Errorf("cannot delete service integration: %w", err)
 	}
 
 	return nil
 }
 
-func resourceServiceIntegrationCheckForPreexistingResource(ctx context.Context, d *schema.ResourceData, m interface{}) (*aiven.ServiceIntegration, error) {
-	client := m.(*aiven.Client)
-
+func resourceServiceIntegrationCheckForPreexistingResource(ctx context.Context, d *schema.ResourceData, client avngen.Client) (*codegenintegrations.ServiceIntegrationOut, error) {
 	projectName := d.Get("project").(string)
 	integrationType := d.Get("integration_type").(string)
 	sourceServiceName := d.Get("source_service_name").(string)
 	destinationServiceName := d.Get("destination_service_name").(string)
 
-	integrations, err := client.ServiceIntegrations.List(ctx, projectName, sourceServiceName)
+	integrations, err := client.ServiceIntegrationList(ctx, projectName, sourceServiceName)
 	if common.IsCritical(err) {
 		return nil, fmt.Errorf("unable to get list of service integrations: %w", err)
 	}
 
 	for i := range integrations {
 		integration := integrations[i]
-		if integration.SourceService == nil || integration.DestinationService == nil || integration.ServiceIntegrationID == "" {
+		if integration.SourceService == "" || integration.DestService == nil || integration.ServiceIntegrationId == "" {
 			continue
 		}
 
 		if integration.IntegrationType == integrationType &&
-			*integration.SourceService == sourceServiceName &&
-			*integration.DestinationService == destinationServiceName {
-			return integration, nil
+			integration.SourceService == sourceServiceName &&
+			*integration.DestService == destinationServiceName {
+			return &integration, nil
 		}
 	}
 	return nil, nil
 }
 
-func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.ResourceData, m interface{}, timeout time.Duration) error {
+func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.ResourceData, client avngen.Client, timeout time.Duration) error {
 	const (
 		active    = "ACTIVE"
 		notActive = "NOTACTIVE"
 	)
-	client := m.(*aiven.Client)
-
 	projectName, integrationID, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
 		return err
@@ -278,7 +268,7 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 		Refresh: func() (interface{}, string, error) {
 			log.Println("[DEBUG] Service Integration: waiting until active")
 
-			ii, err := client.ServiceIntegrations.Get(ctx, projectName, integrationID)
+			ii, err := client.ServiceIntegrationGet(ctx, projectName, integrationID)
 			if err != nil {
 				// Sometimes Aiven API retrieves 404 error even when a successful service integration is created
 				if aiven.IsNotFound(err) {
@@ -292,8 +282,8 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 				return nil, notActive, nil
 			}
 
-			if ii.IntegrationType == "kafka_connect" && ii.DestinationService != nil {
-				if _, err := client.KafkaConnectors.List(ctx, projectName, *ii.DestinationService); err != nil {
+			if ii.IntegrationType == "kafka_connect" && ii.DestService != nil {
+				if _, err := client.ServiceKafkaConnectList(ctx, projectName, *ii.DestService); err != nil {
 					log.Println("[DEBUG] Service Integration: error listing kafka connectors: ", err)
 					return nil, notActive, nil
 				}
@@ -313,32 +303,32 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 
 func resourceServiceIntegrationCopyAPIResponseToTerraform(
 	d *schema.ResourceData,
-	res *aiven.ServiceIntegration,
+	res *codegenintegrations.ServiceIntegrationGetOut,
 	project string,
 ) error {
 	if err := d.Set("project", project); err != nil {
 		return err
 	}
 
-	if res.DestinationEndpointID != nil {
-		if err := d.Set("destination_endpoint_id", schemautil.BuildResourceID(project, *res.DestinationEndpointID)); err != nil {
+	if res.DestEndpointId != nil {
+		if err := d.Set("destination_endpoint_id", schemautil.BuildResourceID(project, *res.DestEndpointId)); err != nil {
 			return err
 		}
-	} else if res.DestinationService != nil {
-		if err := d.Set("destination_service_name", *res.DestinationService); err != nil {
-			return err
-		}
-	}
-	if res.SourceEndpointID != nil {
-		if err := d.Set("source_endpoint_id", schemautil.BuildResourceID(project, *res.SourceEndpointID)); err != nil {
-			return err
-		}
-	} else if res.SourceService != nil {
-		if err := d.Set("source_service_name", *res.SourceService); err != nil {
+	} else if res.DestService != nil {
+		if err := d.Set("destination_service_name", *res.DestService); err != nil {
 			return err
 		}
 	}
-	if err := d.Set("integration_id", res.ServiceIntegrationID); err != nil {
+	if res.SourceEndpointId != nil {
+		if err := d.Set("source_endpoint_id", schemautil.BuildResourceID(project, *res.SourceEndpointId)); err != nil {
+			return err
+		}
+	} else if res.SourceService != "" {
+		if err := d.Set("source_service_name", res.SourceService); err != nil {
+			return err
+		}
+	}
+	if err := d.Set("integration_id", res.ServiceIntegrationId); err != nil {
 		return err
 	}
 	integrationType := res.IntegrationType
