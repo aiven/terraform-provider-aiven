@@ -50,7 +50,7 @@ func (s *BaseTestSuite) setupSuite() error {
 	s.tfConfigPath = tfConfigPath
 
 	// Uses client to validates resources
-	client, err := newClient(s.config.Token)
+	client, err := common.NewAivenClient(common.TokenOpt(s.config.Token))
 	if err != nil {
 		return err
 	}
@@ -108,14 +108,6 @@ func examplesRandPrefix() func(string) string {
 	return func(s string) string {
 		return exampleTestsPrefix + format(s)
 	}
-}
-
-func newClient(token string) (*aiven.Client, error) {
-	client, err := common.NewAivenClientWithToken(token)
-	if err != nil {
-		return nil, err
-	}
-	return client, nil
 }
 
 // configTemplate forces terraform use dev build

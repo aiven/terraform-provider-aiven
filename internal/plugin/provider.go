@@ -95,7 +95,11 @@ func (p *AivenProvider) Configure(
 		data.APIToken = types.StringValue(token)
 	}
 
-	client, err := common.NewCustomAivenClient(data.APIToken.ValueString(), req.TerraformVersion, p.version)
+	client, err := common.NewAivenClient(
+		common.TokenOpt(data.APIToken.ValueString()),
+		common.TFVersionOpt(req.TerraformVersion),
+		common.BuildVersionOpt(p.version),
+	)
 	if err != nil {
 		resp.Diagnostics.AddError(errmsg.SummaryConstructingClient, err.Error())
 

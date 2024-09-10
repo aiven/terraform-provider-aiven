@@ -42,14 +42,6 @@ var (
 	}
 )
 
-func StringSliceToInterfaceSlice(s []string) []interface{} {
-	res := make([]interface{}, len(s))
-	for i := range s {
-		res[i] = s[i]
-	}
-	return res
-}
-
 func SetTagsTerraformProperties(t map[string]string) []map[string]interface{} {
 	tags := make([]map[string]interface{}, len(t))
 	var i int

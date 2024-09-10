@@ -21,64 +21,45 @@ const (
 	DefaultStateChangeMinTimeout = 5 * time.Second
 )
 
-func NewAivenClient() (*aiven.Client, error) {
-	return NewAivenClientWithToken(os.Getenv("AIVEN_TOKEN"))
+// NewAivenClient returns handwritten client
+func NewAivenClient(opts ...ClientOpt) (*aiven.Client, error) {
+	o, err := newClientOpts(opts...)
+	if err != nil {
+		return nil, err
+	}
+	return aiven.NewTokenClient(o.token, o.userAgent)
 }
 
-func NewAivenClientWithToken(token string) (*aiven.Client, error) {
-	return NewCustomAivenClient(token, "", "")
-}
-
-func NewCustomAivenClient(token, tfVersion, buildVersion string) (*aiven.Client, error) {
-	if token == "" {
-		return nil, fmt.Errorf("token is required for Aiven client")
+// NewAivenGenClient Returns generated client
+func NewAivenGenClient(opts ...ClientOpt) (avngen.Client, error) {
+	o, err := newClientOpts(opts...)
+	if err != nil {
+		return nil, err
 	}
-
-	return aiven.NewTokenClient(token, buildUserAgent(tfVersion, buildVersion))
-}
-
-func buildUserAgent(tfVersion, buildVersion string) string {
-	if tfVersion == "" {
-		// Terraform 0.12 introduced this field to the protocol
-		// We can therefore assume that if it's missing it's 0.10 or 0.11
-		tfVersion = "0.11+compatible"
-	}
-
-	if buildVersion == "" {
-		buildVersion = "dev"
-	}
-	return fmt.Sprintf("terraform-provider-aiven/%s/%s", tfVersion, buildVersion)
+	return avngen.NewClient(avngen.TokenOpt(o.token), avngen.UserAgentOpt(o.userAgent))
 }
 
 var (
-	clientCache     avngen.Client
-	clientCacheOnce sync.Once
+	genClientCache      avngen.Client
+	genClientCacheError error
+	genClientCacheOnce  sync.Once
+	errTokenRequired    = fmt.Errorf("token is required for Aiven client")
 )
 
-func CacheGenAivenClient(token, tfVersion, buildVersion string) error {
-	if token == "" {
-		return fmt.Errorf("token is required for Aiven client")
-	}
-
-	c, err := avngen.NewClient(avngen.TokenOpt(token), avngen.UserAgentOpt(buildUserAgent(tfVersion, buildVersion)))
-	if err != nil {
-		return err
-	}
-
-	// Runs once
-	clientCacheOnce.Do(func() {
-		clientCache = c
+// CachedGenAivenClient runs once
+func CachedGenAivenClient(opts ...ClientOpt) error {
+	genClientCacheOnce.Do(func() {
+		genClientCache, genClientCacheError = NewAivenGenClient(opts...)
 	})
-
-	return nil
+	return genClientCacheError
 }
 
 // GenClient returns cached client.
 func GenClient() (avngen.Client, error) {
-	if clientCache == nil {
+	if genClientCache == nil {
 		return nil, fmt.Errorf("the generated client is not ready")
 	}
-	return clientCache, nil
+	return genClientCache, nil
 }
 
 type crudHandler func(context.Context, *schema.ResourceData, avngen.Client) error
@@ -86,6 +67,55 @@ type crudHandler func(context.Context, *schema.ResourceData, avngen.Client) erro
 // WithGenClient wraps CRUD handlers and runs with avngen.Client
 func WithGenClient(handler crudHandler) func(context.Context, *schema.ResourceData, any) diag.Diagnostics {
 	return func(ctx context.Context, d *schema.ResourceData, _ any) diag.Diagnostics {
-		return diag.FromErr(handler(ctx, d, clientCache))
+		return diag.FromErr(handler(ctx, d, genClientCache))
+	}
+}
+
+type ClientOpt func(o *clientOpts)
+type clientOpts struct {
+	token        string
+	tfVersion    string // User-Agent part: TF CLI version
+	buildVersion string // User-Agent part: Aiven Provider build version
+	userAgent    string
+}
+
+func newClientOpts(opts ...ClientOpt) (*clientOpts, error) {
+	o := &clientOpts{
+		token: os.Getenv("AIVEN_TOKEN"),
+		// Terraform 0.12 introduced this field to the protocol
+		// We can therefore assume that if it's missing, it's 0.10 or 0.11
+		tfVersion:    "0.11+compatible",
+		buildVersion: "dev",
+	}
+
+	for _, v := range opts {
+		v(o)
+	}
+
+	if o.token == "" {
+		return nil, errTokenRequired
+	}
+
+	o.userAgent = fmt.Sprintf("terraform-provider-aiven/%s/%s", o.tfVersion, o.buildVersion)
+	return o, nil
+}
+
+// TFVersionOpt TF CLI version
+func TFVersionOpt(v string) ClientOpt {
+	return func(o *clientOpts) {
+		o.tfVersion = v
+	}
+}
+
+// BuildVersionOpt Aiven Provider build version
+func BuildVersionOpt(v string) ClientOpt {
+	return func(o *clientOpts) {
+		o.buildVersion = v
+	}
+}
+
+func TokenOpt(v string) ClientOpt {
+	return func(o *clientOpts) {
+		o.token = v
 	}
 }

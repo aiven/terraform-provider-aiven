@@ -306,13 +306,19 @@ func Provider(version string) (*schema.Provider, error) {
 			token = os.Getenv("AIVEN_TOKEN")
 		}
 
-		client, err := common.NewCustomAivenClient(token, p.TerraformVersion, version)
+		opts := []common.ClientOpt{
+			common.TokenOpt(token),
+			common.TFVersionOpt(p.TerraformVersion),
+			common.BuildVersionOpt(version),
+		}
+
+		client, err := common.NewAivenClient(opts...)
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
 
-		// fixme: temporary solution
-		err = common.CacheGenAivenClient(token, p.TerraformVersion, version)
+		// fixme: temporary solution, uses a singleton
+		err = common.CachedGenAivenClient(opts...)
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
