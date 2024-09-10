@@ -202,6 +202,7 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_organization_user_group":             organization.ResourceOrganizationUserGroup(),
 			"aiven_organization_application_user":       organization.ResourceOrganizationApplicationUser(),
 			"aiven_organization_application_user_token": organization.ResourceOrganizationApplicationUserToken(),
+			"aiven_organization_permission":             organization.ResourceOrganizationalPermission(),
 
 			// project
 			"aiven_project":       project.ResourceProject(),
@@ -279,11 +280,18 @@ func Provider(version string) (*schema.Provider, error) {
 		"aiven_thanos",
 		"aiven_valkey",
 		"aiven_valkey_user",
+		"aiven_organization_permission",
+	}
+
+	betaDataSources := []string{
+		"aiven_thanos",
+		"aiven_valkey",
+		"aiven_valkey_user",
 	}
 
 	missing := append(
 		addBeta(p.ResourcesMap, betaResources...),
-		addBeta(p.DataSourcesMap, betaResources...)...,
+		addBeta(p.DataSourcesMap, betaDataSources...)...,
 	)
 
 	// Marks sensitive fields recursively
