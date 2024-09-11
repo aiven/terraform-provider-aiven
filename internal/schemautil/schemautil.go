@@ -363,7 +363,12 @@ func CopyServiceUserGenPropertiesFromAPIResponseToTerraform(
 // Warning: doesn't support nested sets.
 // Warning: not tested with nested objects.
 func ResourceDataGet(d *schema.ResourceData, dto any, fns ...KVModifier) error {
-	config := d.GetRawConfig().AsValueMap()
+	rawConfig := d.GetRawConfig()
+	if rawConfig.IsNull() {
+		return nil
+	}
+
+	config := rawConfig.AsValueMap()
 	m := make(map[string]any)
 	for k, c := range config {
 		// If the field in the tf config, or array doesn't have changes
@@ -381,16 +386,27 @@ func ResourceDataGet(d *schema.ResourceData, dto any, fns ...KVModifier) error {
 			k, value = f(k, value)
 		}
 
-		m[k] = value
+		m[k] = serializeValue(value)
 	}
 
-	b, err := json.Marshal(&m)
-	if err != nil {
-		return err
-	}
+	return Remarshal(&m, dto)
+}
 
-	err = json.Unmarshal(b, dto)
-	return err
+func serializeValue(value any) any {
+	switch t := value.(type) {
+	case *schema.Set:
+		return serializeValue(t.List())
+	case []any:
+		for i, v := range t {
+			t[i] = serializeValue(v)
+		}
+		return t
+	case map[string]any:
+		for k, v := range t {
+			t[k] = serializeValue(v)
+		}
+	}
+	return value
 }
 
 // KVModifier modifier for key/value pair
@@ -412,13 +428,8 @@ type KVModifier func(k string, v any) (string, any)
 //
 //	err := ResourceDataSet(s, d, dto)
 func ResourceDataSet(s map[string]*schema.Schema, d *schema.ResourceData, dto any, fns ...KVModifier) error {
-	b, err := json.Marshal(dto)
-	if err != nil {
-		return err
-	}
-
 	var m map[string]any
-	err = json.Unmarshal(b, &m)
+	err := Remarshal(dto, &m)
 	if err != nil {
 		return err
 	}
@@ -459,4 +470,13 @@ func RenameAliasesReverse(aliases map[string]string) KVModifier {
 		m[v] = k
 	}
 	return RenameAliases(m)
+}
+
+// Remarshal marshals "in" object to "out" through json
+func Remarshal(in, out any) error {
+	b, err := json.Marshal(in)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, out)
 }
