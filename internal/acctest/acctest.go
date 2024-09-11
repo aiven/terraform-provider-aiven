@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -47,11 +48,19 @@ func GetTestAivenClient() *aiven.Client {
 	testAivenClientOnce.Do(func() {
 		client, err := common.NewAivenClient()
 		if err != nil {
-			log.Fatal(err)
+			log.Panicf("test client error: %s", err)
 		}
 		testAivenClient = client
 	})
 	return testAivenClient
+}
+
+func GetTestGenAivenClient() avngen.Client {
+	client, err := common.NewAivenGenClient()
+	if err != nil {
+		log.Panicf("test generated client error: %s", err)
+	}
+	return client
 }
 
 // commonTestDependencies is a struct that contains common dependencies that are used by acceptance tests.
