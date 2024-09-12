@@ -33,7 +33,7 @@ var aivenPGUserSchema = map[string]*schema.Schema{
 	"pg_allow_replication": {
 		Type:        schema.TypeBool,
 		Optional:    true,
-		Description: "Allows replication.",
+		Description: "Allows replication. For the default avnadmin user this attribute is required and is always `true`.",
 	},
 
 	// computed fields
