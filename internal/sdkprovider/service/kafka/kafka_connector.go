@@ -234,6 +234,8 @@ func resourceKafkaConnectorRead(ctx context.Context, d *schema.ResourceData, m i
 	return nil
 }
 
+const pollCreateTimeout = time.Minute * 2
+
 func resourceKafkaConnectorCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
@@ -245,23 +247,24 @@ func resourceKafkaConnectorCreate(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	// Sometimes this method returns 404: Not Found for the given serviceName
-	// Since the aiven.Client has own retries for various scenarios
+	// Since the aiven.Client has its own retries for various scenarios
 	// we retry here 404 only
-	err := retry.RetryContext(ctx, time.Minute, func() *retry.RetryError {
+	err := retry.RetryContext(ctx, pollCreateTimeout, func() *retry.RetryError {
 		err := m.(*aiven.Client).KafkaConnectors.Create(ctx, project, serviceName, config)
-		if err != nil {
-			var e aiven.Error
-			if errors.As(err, &e) && e.Status == 201 {
-				// 201: Created
-				return nil
-			}
-
-			return &retry.RetryError{
-				Err:       err,
-				Retryable: aiven.IsNotFound(err), // retries 404 only
-			}
+		if err == nil {
+			return nil
 		}
-		return nil
+
+		var e aiven.Error
+		if errors.As(err, &e) && e.Status == 201 {
+			// 201: Created
+			return nil
+		}
+
+		return &retry.RetryError{
+			Err:       err,
+			Retryable: aiven.IsNotFound(err), // retries 404 only
+		}
 	})
 
 	if err != nil {
