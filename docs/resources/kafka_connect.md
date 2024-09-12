@@ -210,7 +210,7 @@ Required:
 
 Optional:
 
-- `access_key` (String, Sensitive) Access key used to authenticate with aws.
+- `access_key` (String) Access key used to authenticate with aws.
 - `secret_key` (String, Sensitive) Secret key used to authenticate with aws.
 
 

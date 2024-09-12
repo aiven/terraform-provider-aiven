@@ -224,7 +224,6 @@ func kafkaConnectUserConfig() *schema.Schema {
 							"access_key": {
 								Description: "Access key used to authenticate with aws.",
 								Optional:    true,
-								Sensitive:   true,
 								Type:        schema.TypeString,
 							},
 							"auth_method": {

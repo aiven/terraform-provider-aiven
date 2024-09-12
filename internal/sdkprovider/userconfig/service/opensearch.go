@@ -770,7 +770,6 @@ func opensearchUserConfig() *schema.Schema {
 					"access_key": {
 						Description: "AWS Access key.",
 						Required:    true,
-						Sensitive:   true,
 						Type:        schema.TypeString,
 					},
 					"base_path": {
