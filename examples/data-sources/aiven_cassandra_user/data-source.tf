@@ -1,5 +1,5 @@
-data "aiven_cassandra_user" "user" {
-  service_name = "my-service"
-  project      = "my-project"
-  username     = "user1"
+data "aiven_cassandra_user" "example_service_user" {
+  service_name = aiven_cassandra.example_cassandra.service_name
+  project      = data.aiven_project.example_project.project
+  username     = "example-cassandra-user"
 }

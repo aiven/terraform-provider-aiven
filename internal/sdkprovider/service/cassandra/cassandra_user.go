@@ -16,7 +16,7 @@ var aivenCassandraUserSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: schemautil.GetServiceUserValidateFunc(),
-		Description:  userconfig.Desc("The actual name of the Cassandra User.").ForceNew().Referenced().Build(),
+		Description:  userconfig.Desc("Name of the Cassandra service user.").ForceNew().Referenced().Build(),
 	},
 	"password": {
 		Type:             schema.TypeString,
@@ -24,32 +24,32 @@ var aivenCassandraUserSchema = map[string]*schema.Schema{
 		Sensitive:        true,
 		Computed:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		Description:      "The password of the Cassandra User.",
+		Description:      "The Cassandra service user's password.",
 	},
 
 	// computed fields
 	"type": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Type of the user account. Tells whether the user is the primary account or a regular account.",
+		Description: "User account type, such as primary or regular account.",
 	},
 	"access_cert": {
 		Type:        schema.TypeString,
 		Sensitive:   true,
 		Computed:    true,
-		Description: "Access certificate for the user if applicable for the service in question",
+		Description: "Access certificate for the user.",
 	},
 	"access_key": {
 		Type:        schema.TypeString,
 		Sensitive:   true,
 		Computed:    true,
-		Description: "Access certificate key for the user if applicable for the service in question",
+		Description: "Access certificate key for the user.",
 	},
 }
 
 func ResourceCassandraUser() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Cassandra User resource allows the creation and management of Aiven Cassandra Users.",
+		Description:   "Creates and manages an Aiven for Apache Cassandra® service user.",
 		CreateContext: schemautil.ResourceServiceUserCreate,
 		UpdateContext: schemautil.ResourceServiceUserUpdate,
 		ReadContext:   schemautil.ResourceServiceUserRead,

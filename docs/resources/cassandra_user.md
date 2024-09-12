@@ -3,21 +3,21 @@
 page_title: "aiven_cassandra_user Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Cassandra User resource allows the creation and management of Aiven Cassandra Users.
+  Creates and manages an Aiven for Apache Cassandra® service user.
 ---
 
 # aiven_cassandra_user (Resource)
 
-The Cassandra User resource allows the creation and management of Aiven Cassandra Users.
+Creates and manages an Aiven for Apache Cassandra® service user.
 
 ## Example Usage
 
 ```terraform
-resource "aiven_cassandra_user" "foo" {
-  service_name = aiven_cassandra.bar.service_name
-  project      = "my-project"
-  username     = "user-1"
-  password     = "Test$1234"
+resource "aiven_cassandra_user" "example_service_user" {
+  service_name = aiven_cassandra.example_cassandra.service_name
+  project      = data.aiven_project.example_project.project
+  username     = "example-cassandra-user"
+  password     = var.service_user_pw
 }
 ```
 
@@ -28,19 +28,19 @@ resource "aiven_cassandra_user" "foo" {
 
 - `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 - `service_name` (String) The name of the service that this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
-- `username` (String) The actual name of the Cassandra User. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
+- `username` (String) Name of the Cassandra service user. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
 
-- `password` (String, Sensitive) The password of the Cassandra User.
+- `password` (String, Sensitive) The Cassandra service user's password.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- `access_cert` (String, Sensitive) Access certificate for the user if applicable for the service in question
-- `access_key` (String, Sensitive) Access certificate key for the user if applicable for the service in question
+- `access_cert` (String, Sensitive) Access certificate for the user.
+- `access_key` (String, Sensitive) Access certificate key for the user.
 - `id` (String) The ID of this resource.
-- `type` (String) Type of the user account. Tells whether the user is the primary account or a regular account.
+- `type` (String) User account type, such as primary or regular account.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
@@ -58,5 +58,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import aiven_cassandra_user.foo PROJECT/SERVICE_NAME/USERNAME
+terraform import aiven_cassandra_user.example_service_user PROJECT/SERVICE_NAME/USERNAME
 ```

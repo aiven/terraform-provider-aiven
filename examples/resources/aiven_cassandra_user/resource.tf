@@ -1,6 +1,6 @@
-resource "aiven_cassandra_user" "foo" {
-  service_name = aiven_cassandra.bar.service_name
-  project      = "my-project"
-  username     = "user-1"
-  password     = "Test$1234"
+resource "aiven_cassandra_user" "example_service_user" {
+  service_name = aiven_cassandra.example_cassandra.service_name
+  project      = data.aiven_project.example_project.project
+  username     = "example-cassandra-user"
+  password     = var.service_user_pw
 }
