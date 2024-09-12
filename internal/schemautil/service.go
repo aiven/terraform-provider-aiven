@@ -1,7 +1,9 @@
 package schemautil
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -332,6 +334,12 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 			return diag.Errorf("unable to GET service %s: %s", d.Id(), err)
 		}
 		return nil
+	}
+
+	// The GET with include_secrets=true must not return redacted creds
+	err = ContainsRedactedCreds(s.UserConfig)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	servicePlanParams, err := GetServicePlanParametersFromServiceResponse(ctx, client, projectName, s)
@@ -963,4 +971,21 @@ func ExpandService(name string, d *schema.ResourceData) (map[string]any, error) 
 
 func FlattenService(name string, d *schema.ResourceData, dto map[string]any) error {
 	return converters.Flatten(converters.ServiceUserConfig, name, d, dto)
+}
+
+const redactedSubstr = `\u003credacted\u003e`
+
+var errContainsRedactedCreds = fmt.Errorf("unexpected redacted credentials")
+
+// ContainsRedactedCreds looks for redactedSubstr in the given config
+func ContainsRedactedCreds(config map[string]any) error {
+	b, err := json.Marshal(&config)
+	if err != nil {
+		return err
+	}
+
+	if bytes.Contains(b, []byte(redactedSubstr)) {
+		return errContainsRedactedCreds
+	}
+	return nil
 }

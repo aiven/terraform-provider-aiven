@@ -116,6 +116,12 @@ func resourceServiceIntegrationEndpointRead(ctx context.Context, d *schema.Resou
 		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
 
+	// The GET with include_secrets=true must not return redacted creds
+	err = schemautil.ContainsRedactedCreds(endpoint.EndpointConfig)
+	if err != nil {
+		return err
+	}
+
 	err = copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(d, endpoint, projectName)
 	if err != nil {
 		return err
