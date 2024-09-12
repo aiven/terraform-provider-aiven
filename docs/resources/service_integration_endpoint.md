@@ -80,7 +80,7 @@ Optional:
 
 Required:
 
-- `access_key` (String, Sensitive) AWS access key. Required permissions are logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents and logs:DescribeLogStreams. Example: `AAAAAAAAAAAAAAAAAAAA`.
+- `access_key` (String) AWS access key. Required permissions are logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents and logs:DescribeLogStreams. Example: `AAAAAAAAAAAAAAAAAAAA`.
 - `region` (String) AWS region. Example: `us-east-1`.
 - `secret_key` (String, Sensitive) AWS secret key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.
 
@@ -94,7 +94,7 @@ Optional:
 
 Required:
 
-- `access_key` (String, Sensitive) AWS access key. Required permissions are cloudwatch:PutMetricData. Example: `AAAAAAAAAAAAAAAAAAAA`.
+- `access_key` (String) AWS access key. Required permissions are cloudwatch:PutMetricData. Example: `AAAAAAAAAAAAAAAAAAAA`.
 - `namespace` (String) AWS CloudWatch Metrics Namespace. Example: `my-metrics-namespace`.
 - `region` (String) AWS region. Example: `us-east-1`.
 - `secret_key` (String, Sensitive) AWS secret key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.
@@ -105,7 +105,7 @@ Required:
 
 Required:
 
-- `access_key_id` (String, Sensitive) Access Key Id. Example: `AAAAAAAAAAAAAAAAAAA`.
+- `access_key_id` (String) Access Key Id. Example: `AAAAAAAAAAAAAAAAAAA`.
 - `secret_access_key` (String, Sensitive) Secret Access Key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.
 - `url` (String) S3-compatible bucket URL. Example: `https://mybucket.s3-myregion.amazonaws.com/mydataset/`.
 
@@ -145,7 +145,7 @@ Optional:
 Required:
 
 - `project_id` (String) GCP project id. Example: `snappy-photon-12345`.
-- `service_account_credentials` (String) This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys. Example: `{"type": "service_account", ...`.
+- `service_account_credentials` (String, Sensitive) This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys. Example: `{"type": "service_account", ...`.
 
 
 <a id="nestedblock--external_google_cloud_logging_user_config"></a>
@@ -155,7 +155,7 @@ Required:
 
 - `log_id` (String) Google Cloud Logging log id. Example: `syslog`.
 - `project_id` (String) GCP project id. Example: `snappy-photon-12345`.
-- `service_account_credentials` (String) This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys. Example: `{"type": "service_account", ...`.
+- `service_account_credentials` (String, Sensitive) This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys. Example: `{"type": "service_account", ...`.
 
 
 <a id="nestedblock--external_kafka_user_config"></a>
@@ -179,7 +179,7 @@ Optional:
 ...
 -----END CERTIFICATE-----
 `.
-- `ssl_client_key` (String) PEM-encoded client key. Example: `-----BEGIN PRIVATE KEY-----
+- `ssl_client_key` (String, Sensitive) PEM-encoded client key. Example: `-----BEGIN PRIVATE KEY-----
 ...
 -----END PRIVATE KEY-----
 `.
@@ -302,7 +302,7 @@ Optional:
 ...
 -----END CERTIFICATE-----
 `.
-- `key` (String) PEM encoded client key. Example: `-----BEGIN PRIVATE KEY-----
+- `key` (String, Sensitive) PEM encoded client key. Example: `-----BEGIN PRIVATE KEY-----
 ...
 -----END PRIVATE KEY-----
 `.

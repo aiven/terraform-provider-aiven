@@ -16,7 +16,6 @@ func externalAwsS3UserConfig() *schema.Schema {
 			"access_key_id": {
 				Description: "Access Key Id. Example: `AAAAAAAAAAAAAAAAAAA`.",
 				Required:    true,
-				Sensitive:   true,
 				Type:        schema.TypeString,
 			},
 			"secret_access_key": {

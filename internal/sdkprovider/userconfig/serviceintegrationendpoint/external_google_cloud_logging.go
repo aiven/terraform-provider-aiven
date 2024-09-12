@@ -26,6 +26,7 @@ func externalGoogleCloudLoggingUserConfig() *schema.Schema {
 			"service_account_credentials": {
 				Description: "This is a JSON object with the fields documented in https://cloud.google.com/iam/docs/creating-managing-service-account-keys. Example: `{\"type\": \"service_account\", ...`.",
 				Required:    true,
+				Sensitive:   true,
 				Type:        schema.TypeString,
 			},
 		}},

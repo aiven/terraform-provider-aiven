@@ -270,7 +270,9 @@ Optional:
 - `plugins_alerting_filter_by_backend_roles` (Boolean) Enable or disable filtering of alerting by backend roles. Requires Security plugin. Defaults to false.
 - `reindex_remote_whitelist` (List of String) Whitelisted addresses for reindexing. Changing this value will cause all OpenSearch instances to restart.
 - `script_max_compilations_rate` (String) Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context. Example: `75/5m`.
+- `search_backpressure` (Block List, Max: 1) Search Backpressure Settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_backpressure))
 - `search_max_buckets` (Number) Maximum number of aggregation buckets allowed in a single response. OpenSearch default value is used when this is not defined. Example: `10000`.
+- `shard_indexing_pressure` (Block List, Max: 1) Shard indexing back pressure settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--shard_indexing_pressure))
 - `thread_pool_analyze_queue_size` (Number) Size for the thread pool queue. See documentation for exact details.
 - `thread_pool_analyze_size` (Number) Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
 - `thread_pool_force_merge_size` (Number) Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
@@ -316,6 +318,123 @@ Optional:
 - `max_tracked_clients` (Number) The maximum number of tracked IP addresses that have failed login. Example: `100000`.
 - `time_window_seconds` (Number) The window of time in which the value for `allowed_tries` is enforced. Example: `3600`.
 - `type` (String) Enum: `ip`. The type of rate limiting.
+
+
+
+<a id="nestedblock--opensearch_user_config--opensearch--search_backpressure"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_backpressure`
+
+Optional:
+
+- `mode` (String) Enum: `monitor_only`, `enforced`, `disabled`. The search backpressure mode. Valid values are monitor_only, enforced, or disabled. Default is monitor_only.
+- `node_duress` (Block List, Max: 1) Node duress settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_backpressure--node_duress))
+- `search_shard_task` (Block List, Max: 1) Search shard settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_backpressure--search_shard_task))
+- `search_task` (Block List, Max: 1) Search task settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_backpressure--search_task))
+
+<a id="nestedblock--opensearch_user_config--opensearch--search_backpressure--node_duress"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_backpressure.node_duress`
+
+Optional:
+
+- `cpu_threshold` (Number) The CPU usage threshold (as a percentage) required for a node to be considered to be under duress. Default is 0.9.
+- `heap_threshold` (Number) The heap usage threshold (as a percentage) required for a node to be considered to be under duress. Default is 0.7.
+- `num_successive_breaches` (Number) The number of successive limit breaches after which the node is considered to be under duress. Default is 3.
+
+
+<a id="nestedblock--opensearch_user_config--opensearch--search_backpressure--search_shard_task"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_backpressure.search_shard_task`
+
+Optional:
+
+- `cancellation_burst` (Number) The maximum number of search tasks to cancel in a single iteration of the observer thread. Default is 10.0.
+- `cancellation_rate` (Number) The maximum number of tasks to cancel per millisecond of elapsed time. Default is 0.003.
+- `cancellation_ratio` (Number) The maximum number of tasks to cancel, as a percentage of successful task completions. Default is 0.1.
+- `cpu_time_millis_threshold` (Number) The CPU usage threshold (in milliseconds) required for a single search shard task before it is considered for cancellation. Default is 15000.
+- `elapsed_time_millis_threshold` (Number) The elapsed time threshold (in milliseconds) required for a single search shard task before it is considered for cancellation. Default is 30000.
+- `heap_moving_average_window_size` (Number) The number of previously completed search shard tasks to consider when calculating the rolling average of heap usage. Default is 100.
+- `heap_percent_threshold` (Number) The heap usage threshold (as a percentage) required for a single search shard task before it is considered for cancellation. Default is 0.5.
+- `heap_variance` (Number) The minimum variance required for a single search shard task’s heap usage compared to the rolling average of previously completed tasks before it is considered for cancellation. Default is 2.0.
+- `total_heap_percent_threshold` (Number) The heap usage threshold (as a percentage) required for the sum of heap usages of all search shard tasks before cancellation is applied. Default is 0.5.
+
+
+<a id="nestedblock--opensearch_user_config--opensearch--search_backpressure--search_task"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_backpressure.search_task`
+
+Optional:
+
+- `cancellation_burst` (Number) The maximum number of search tasks to cancel in a single iteration of the observer thread. Default is 5.0.
+- `cancellation_rate` (Number) The maximum number of search tasks to cancel per millisecond of elapsed time. Default is 0.003.
+- `cancellation_ratio` (Number) The maximum number of search tasks to cancel, as a percentage of successful search task completions. Default is 0.1.
+- `cpu_time_millis_threshold` (Number) The CPU usage threshold (in milliseconds) required for an individual parent task before it is considered for cancellation. Default is 30000.
+- `elapsed_time_millis_threshold` (Number) The elapsed time threshold (in milliseconds) required for an individual parent task before it is considered for cancellation. Default is 45000.
+- `heap_moving_average_window_size` (Number) The window size used to calculate the rolling average of the heap usage for the completed parent tasks. Default is 10.
+- `heap_percent_threshold` (Number) The heap usage threshold (as a percentage) required for an individual parent task before it is considered for cancellation. Default is 0.2.
+- `heap_variance` (Number) The heap usage variance required for an individual parent task before it is considered for cancellation. A task is considered for cancellation when taskHeapUsage is greater than or equal to heapUsageMovingAverage * variance. Default is 2.0.
+- `total_heap_percent_threshold` (Number) The heap usage threshold (as a percentage) required for the sum of heap usages of all search tasks before cancellation is applied. Default is 0.5.
+
+
+
+<a id="nestedblock--opensearch_user_config--opensearch--shard_indexing_pressure"></a>
+### Nested Schema for `opensearch_user_config.opensearch.shard_indexing_pressure`
+
+Optional:
+
+- `enabled` (Boolean) Enable or disable shard indexing backpressure. Default is false.
+- `enforced` (Boolean) Run shard indexing backpressure in shadow mode or enforced mode.
+            In shadow mode (value set as false), shard indexing backpressure tracks all granular-level metrics,
+            but it doesn’t actually reject any indexing requests.
+            In enforced mode (value set as true),
+            shard indexing backpressure rejects any requests to the cluster that might cause a dip in its performance.
+            Default is false.
+- `operating_factor` (Block List, Max: 1) Operating factor (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--shard_indexing_pressure--operating_factor))
+- `primary_parameter` (Block List, Max: 1) Primary parameter (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter))
+
+<a id="nestedblock--opensearch_user_config--opensearch--shard_indexing_pressure--operating_factor"></a>
+### Nested Schema for `opensearch_user_config.opensearch.shard_indexing_pressure.operating_factor`
+
+Optional:
+
+- `lower` (Number) Specify the lower occupancy limit of the allocated quota of memory for the shard.
+                    If the total memory usage of a shard is below this limit,
+                    shard indexing backpressure decreases the current allocated memory for that shard.
+                    Default is 0.75.
+- `optimal` (Number) Specify the optimal occupancy of the allocated quota of memory for the shard.
+                    If the total memory usage of a shard is at this level,
+                    shard indexing backpressure doesn’t change the current allocated memory for that shard.
+                    Default is 0.85.
+- `upper` (Number) Specify the upper occupancy limit of the allocated quota of memory for the shard.
+                    If the total memory usage of a shard is above this limit,
+                    shard indexing backpressure increases the current allocated memory for that shard.
+                    Default is 0.95.
+
+
+<a id="nestedblock--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter"></a>
+### Nested Schema for `opensearch_user_config.opensearch.shard_indexing_pressure.primary_parameter`
+
+Optional:
+
+- `node` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter--node))
+- `shard` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter--shard))
+
+<a id="nestedblock--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter--node"></a>
+### Nested Schema for `opensearch_user_config.opensearch.shard_indexing_pressure.primary_parameter.node`
+
+Optional:
+
+- `soft_limit` (Number) Define the percentage of the node-level memory
+                            threshold that acts as a soft indicator for strain on a node.
+                            Default is 0.7.
+
+
+<a id="nestedblock--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter--shard"></a>
+### Nested Schema for `opensearch_user_config.opensearch.shard_indexing_pressure.primary_parameter.shard`
+
+Optional:
+
+- `min_limit` (Number) Specify the minimum assigned quota for a new shard in any role (coordinator, primary, or replica).
+                            Shard indexing backpressure increases or decreases this allocated quota based on the inflow of traffic for the shard.
+                            Default is 0.001.
+
 
 
 
@@ -365,7 +484,7 @@ Optional:
 
 Required:
 
-- `access_key` (String, Sensitive) AWS Access key.
+- `access_key` (String) AWS Access key.
 - `base_path` (String) The path to the repository data within its container. The value of this setting should not start or end with a /.
 - `bucket` (String) S3 bucket name.
 - `region` (String) S3 region.

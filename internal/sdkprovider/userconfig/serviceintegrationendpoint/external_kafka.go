@@ -55,6 +55,7 @@ func externalKafkaUserConfig() *schema.Schema {
 			"ssl_client_key": {
 				Description: "PEM-encoded client key. Example: `-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n`.",
 				Optional:    true,
+				Sensitive:   true,
 				Type:        schema.TypeString,
 			},
 			"ssl_endpoint_identification_algorithm": {

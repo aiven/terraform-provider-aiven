@@ -116,7 +116,7 @@ Read-Only:
 Optional:
 
 - `compactor` (Block List, Max: 1) ThanosCompactor (see [below for nested schema](#nestedblock--thanos_user_config--compactor))
-- `env` (Map of String) Environmental variables.
+- `env` (Map of String, Deprecated) Environmental variables.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--thanos_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
