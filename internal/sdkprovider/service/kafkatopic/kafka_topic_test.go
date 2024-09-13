@@ -26,6 +26,7 @@ import (
 
 func TestAccAivenKafkaTopic_basic(t *testing.T) {
 	resourceName := "aiven_kafka_topic.foo"
+	topic2ResourceName := "aiven_kafka_topic.topic2"
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -43,6 +44,8 @@ func TestAccAivenKafkaTopic_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "replication", "2"),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
 					resource.TestCheckResourceAttr(resourceName, "config.0.retention_bytes", "1234"),
+					resource.TestCheckResourceAttr(topic2ResourceName, "topic_description", fmt.Sprintf("test-acc-topic2-desc-%s", rName)),
+					resource.TestCheckResourceAttrSet(topic2ResourceName, "owner_user_group_id"),
 				),
 			},
 		},
@@ -138,6 +141,16 @@ resource "aiven_kafka_topic" "more" {
 
 func testAccKafkaTopicResource(name string) string {
 	return fmt.Sprintf(`
+data "aiven_organization" "foo" {
+  name = "%s"
+}
+
+resource "aiven_organization_user_group" "foo" {
+  name            = "test-acc-u-grp-%s"
+  organization_id = data.aiven_organization.foo.id
+  description     = "test"
+}
+
 data "aiven_project" "foo" {
   project = "%s"
 }
@@ -173,7 +186,17 @@ data "aiven_kafka_topic" "topic" {
   topic_name   = aiven_kafka_topic.foo.topic_name
 
   depends_on = [aiven_kafka_topic.foo]
-}`, os.Getenv("AIVEN_PROJECT_NAME"), name, name)
+}
+
+resource "aiven_kafka_topic" "topic2" {
+  project             = data.aiven_project.foo.project
+  service_name        = aiven_kafka.bar.service_name
+  topic_name          = "test-acc-topic2-%s"
+  topic_description   = "test-acc-topic2-desc-%s"
+  owner_user_group_id = aiven_organization_user_group.foo.group_id
+  partitions          = 3
+  replication         = 2
+}`, os.Getenv("AIVEN_ORGANIZATION_NAME"), name, os.Getenv("AIVEN_PROJECT_NAME"), name, name, name, name)
 }
 
 func testAccKafkaTopicCustomTimeoutsResource(name string) string {
@@ -294,35 +317,51 @@ func testAccCheckAivenKafkaTopicResourceDestroy(s *terraform.State) error {
 
 	ctx := context.Background()
 
-	// loop through the resources in state, verifying each kafka topic is destroyed
+	// loop through the resources in state, verifying each created resource is destroyed
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "aiven_kafka_topic" {
-			continue
-		}
-
-		project, serviceName, topicName, err := schemautil.SplitResourceID3(rs.Primary.ID)
-		if err != nil {
-			return err
-		}
-
-		_, err = c.Services.Get(ctx, project, serviceName)
-		if err != nil {
-			if aiven.IsNotFound(err) {
-				return nil
+		if rs.Type == "aiven_kafka_topic" {
+			project, serviceName, topicName, err := schemautil.SplitResourceID3(rs.Primary.ID)
+			if err != nil {
+				return err
 			}
-			return err
-		}
 
-		t, err := c.KafkaTopics.Get(ctx, project, serviceName, topicName)
-		if err != nil {
-			if aiven.IsNotFound(err) {
-				return nil
+			_, err = c.Services.Get(ctx, project, serviceName)
+			if err != nil {
+				if aiven.IsNotFound(err) {
+					return nil
+				}
+				return err
 			}
-			return err
-		}
 
-		if t != nil {
-			return fmt.Errorf("kafka topic (%s) still exists, id %s", topicName, rs.Primary.ID)
+			t, err := c.KafkaTopics.Get(ctx, project, serviceName, topicName)
+			if err != nil {
+				if aiven.IsNotFound(err) {
+					return nil
+				}
+				return err
+			}
+
+			if t != nil {
+				return fmt.Errorf("kafka topic (%s) still exists, id %s", topicName, rs.Primary.ID)
+			}
+		}
+		if rs.Type == "aiven_organization_user_group" {
+			orgID, userGroupID, err := schemautil.SplitResourceID2(rs.Primary.ID)
+			if err != nil {
+				return err
+			}
+
+			r, err := c.OrganizationUserGroups.Get(ctx, orgID, userGroupID)
+			if err != nil {
+				if aiven.IsNotFound(err) {
+					return nil
+				}
+				return err
+			}
+
+			if r != nil {
+				return fmt.Errorf("organization user group (%s) still exists", rs.Primary.ID)
+			}
 		}
 	}
 

@@ -47,9 +47,11 @@ resource "aiven_kafka_topic" "example_topic" {
 ### Optional
 
 - `config` (Block List, Max: 1) [Advanced parameters](https://aiven.io/docs/products/kafka/reference/advanced-params) to configure topics. (see [below for nested schema](#nestedblock--config))
+- `owner_user_group_id` (String) The user group that is the owner of the topic
 - `tag` (Block Set) Tags for the topic. (see [below for nested schema](#nestedblock--tag))
 - `termination_protection` (Boolean) Prevents topics from being deleted by Terraform. It's recommended for topics containing critical data. **Topics can still be deleted in the Aiven Console.**
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `topic_description` (String) The description of the topic
 
 ### Read-Only
 

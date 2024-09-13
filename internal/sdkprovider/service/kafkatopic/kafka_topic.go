@@ -186,6 +186,16 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 		Required:    true,
 		Description: "The replication factor for the topic.",
 	},
+	"topic_description": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "The description of the topic",
+	},
+	"owner_user_group_id": {
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "The user group that is the owner of the topic",
+	},
 	"termination_protection": {
 		Type:        schema.TypeBool,
 		Optional:    true,
@@ -308,6 +318,8 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 	topicName := d.Get("topic_name").(string)
 	partitions := d.Get("partitions").(int)
 	replication := d.Get("replication").(int)
+	topicDescription := d.Get("topic_description").(string)
+	ownerUserGroupID := d.Get("owner_user_group_id").(string)
 
 	config, err := getKafkaTopicConfig(d)
 	if err != nil {
@@ -320,6 +332,14 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, m int
 		TopicName:   topicName,
 		Config:      config,
 		Tags:        getTags(d),
+	}
+
+	if topicDescription != "" {
+		createRequest.TopicDescription = &topicDescription
+	}
+
+	if ownerUserGroupID != "" {
+		createRequest.OwnerUserGroupId = &ownerUserGroupID
 	}
 
 	client := m.(*aiven.Client)
@@ -464,6 +484,14 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.Errorf("error setting Kafka Topic Tags for resource %s: %s", d.Id(), err)
 	}
 
+	if err := d.Set("topic_description", topic.TopicDescription); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("owner_user_group_id", topic.OwnerUserGroupId); err != nil {
+		return diag.FromErr(err)
+	}
+
 	return nil
 }
 
@@ -499,18 +527,31 @@ func resourceKafkaTopicUpdate(ctx context.Context, d *schema.ResourceData, m int
 		return diag.Errorf("config to json error: %s", err)
 	}
 
+	topicDescription := d.Get("topic_description").(string)
+	ownerUserGroupID := d.Get("owner_user_group_id").(string)
+
+	updateRequest := aiven.UpdateKafkaTopicRequest{
+		Partitions:  &partitions,
+		Replication: schemautil.OptionalIntPointer(d, "replication"),
+		Config:      config,
+		Tags:        getTags(d),
+	}
+
+	if topicDescription != "" {
+		updateRequest.TopicDescription = &topicDescription
+	}
+
+	if ownerUserGroupID != "" {
+		updateRequest.OwnerUserGroupId = &ownerUserGroupID
+	}
+
 	client := m.(*aiven.Client)
 	err = kafkatopicrepository.New(client.KafkaTopics).Update(
 		ctx,
 		projectName,
 		serviceName,
 		topicName,
-		aiven.UpdateKafkaTopicRequest{
-			Partitions:  &partitions,
-			Replication: schemautil.OptionalIntPointer(d, "replication"),
-			Config:      config,
-			Tags:        getTags(d),
-		},
+		updateRequest,
 	)
 	if err != nil {
 		return diag.FromErr(err)
