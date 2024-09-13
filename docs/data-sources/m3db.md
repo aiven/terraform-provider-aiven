@@ -3,19 +3,19 @@
 page_title: "aiven_m3db Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The M3 DB data source provides information about the existing Aiven M3 services.
+  Gets information about an Aiven for M3DB service.
 ---
 
 # aiven_m3db (Data Source)
 
-The M3 DB data source provides information about the existing Aiven M3 services.
+Gets information about an Aiven for M3DB service.
 
 ## Example Usage
 
 ```terraform
-data "aiven_m3db" "m3" {
-  project      = data.aiven_project.foo.project
-  service_name = "my-m3db"
+data "aiven_m3db" "example_m3db" {
+  project      = data.aiven_project.example_project.project
+  service_name = "example-m3db-service"
 }
 ```
 
@@ -38,7 +38,7 @@ data "aiven_m3db" "m3" {
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) Disk space that service is currently using
 - `id` (String) The ID of this resource.
-- `m3db` (List of Object, Sensitive) M3DB server provided values (see [below for nested schema](#nestedatt--m3db))
+- `m3db` (List of Object, Sensitive) Values provided by the M3DB server. (see [below for nested schema](#nestedatt--m3db))
 - `m3db_user_config` (List of Object) M3db user configurable settings (see [below for nested schema](#nestedatt--m3db_user_config))
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.

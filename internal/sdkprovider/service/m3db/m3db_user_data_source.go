@@ -9,7 +9,7 @@ import (
 func DatasourceM3DBUser() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: schemautil.DatasourceServiceUserRead,
-		Description: "The M3DB User data source provides information about the existing Aiven M3DB User.",
+		Description: "Gets information about an Aiven for M3DB service user.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(aivenM3DBUserSchema,
 			"project", "service_name", "username"),
 	}

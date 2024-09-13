@@ -13,7 +13,7 @@ func grafanaSchema() map[string]*schema.Schema {
 	s[schemautil.ServiceTypeGrafana] = &schema.Schema{
 		Type:        schema.TypeList,
 		Computed:    true,
-		Description: "Grafana server provided values",
+		Description: "Values provided by the Grafana server.",
 		MaxItems:    1,
 		Optional:    true,
 		Sensitive:   true,
@@ -38,7 +38,7 @@ func grafanaSchema() map[string]*schema.Schema {
 
 func ResourceGrafana() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Grafana resource allows the creation and management of Aiven Grafana services.",
+		Description:   "Creates and manages an [Aiven for Grafana®](https://aiven.io/docs/products/grafana) service.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeGrafana),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
