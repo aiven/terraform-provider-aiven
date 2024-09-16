@@ -34,8 +34,8 @@ func TestMain(m *testing.M) {
 	resource.TestMain(m)
 }
 
-// knownMissginSweepers returns a list of resources for which we don't have sweepers for a reason.
-func knownMissginSweepers() []string {
+// knownMissingSweepers returns a list of resources for which we don't have sweepers for a reason.
+func knownMissingSweepers() []string {
 	// These are resources for which we don't have sweepers.
 	// When a correcponding serivce will be deleted, for example Kafka,
 	// all the associated resources will be deleted as well, like Kafka ACLs, topics, etc.
@@ -73,6 +73,7 @@ func knownMissginSweepers() []string {
 		"aiven_opensearch_security_plugin_config",
 		"aiven_flink_application",
 		"aiven_organization_application_user_token",
+		"aiven_organization_permission",
 	}
 }
 
@@ -87,7 +88,7 @@ func TestCheckSweepers(t *testing.T) {
 
 	var missing []string
 	for _, r := range allResources {
-		if !slices.Contains(allSweepers, r) && !slices.Contains(knownMissginSweepers(), r) {
+		if !slices.Contains(allSweepers, r) && !slices.Contains(knownMissingSweepers(), r) {
 			missing = append(missing, r)
 		}
 	}
