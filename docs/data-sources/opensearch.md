@@ -128,6 +128,7 @@ Read-Only:
 - `compress` (Boolean)
 - `container` (String)
 - `endpoint_suffix` (String)
+- `indices` (String)
 - `key` (String)
 - `sas_token` (String)
 - `snapshot_name` (String)
@@ -143,6 +144,7 @@ Read-Only:
 - `chunk_size` (String)
 - `compress` (Boolean)
 - `credentials` (String)
+- `indices` (String)
 - `snapshot_name` (String)
 
 
@@ -344,6 +346,7 @@ Read-Only:
 - `chunk_size` (String)
 - `compress` (Boolean)
 - `endpoint` (String)
+- `indices` (String)
 - `region` (String)
 - `secret_key` (String)
 - `server_side_encryption` (Boolean)

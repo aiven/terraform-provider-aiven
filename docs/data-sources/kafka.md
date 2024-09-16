@@ -324,6 +324,8 @@ Read-Only:
 Read-Only:
 
 - `leader_eligibility` (Boolean)
+- `retriable_errors_silenced` (Boolean)
+- `schema_reader_strict_mode` (Boolean)
 - `topic_name` (String)
 
 

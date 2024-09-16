@@ -56,6 +56,11 @@ func opensearchUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
+					"indices": {
+						Description: "A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. By default, a restore operation includes all data streams and indices in the snapshot. If this argument is provided, the restore operation only includes the data streams and indices that you specify. Example: `metrics*,logs*,data-20240823`.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
 					"key": {
 						Description: "Azure account secret key. One of key or sas_token should be specified.",
 						Optional:    true,
@@ -111,6 +116,11 @@ func opensearchUserConfig() *schema.Schema {
 					"credentials": {
 						Description: "Google Cloud Storage credentials file content.",
 						Required:    true,
+						Type:        schema.TypeString,
+					},
+					"indices": {
+						Description: "A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. By default, a restore operation includes all data streams and indices in the snapshot. If this argument is provided, the restore operation only includes the data streams and indices that you specify. Example: `metrics*,logs*,data-20240823`.",
+						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"snapshot_name": {
@@ -779,6 +789,11 @@ func opensearchUserConfig() *schema.Schema {
 					},
 					"endpoint": {
 						Description: "The S3 service endpoint to connect to. If you are using an S3-compatible service then you should set this to the service’s endpoint.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"indices": {
+						Description: "A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. By default, a restore operation includes all data streams and indices in the snapshot. If this argument is provided, the restore operation only includes the data streams and indices that you specify. Example: `metrics*,logs*,data-20240823`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
