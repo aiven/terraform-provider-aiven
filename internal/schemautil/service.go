@@ -416,6 +416,11 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
+	technicalEmails, err := getContactEmailListForAPI(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	_, err = client.Services.Create(
 		ctx,
 		project,
@@ -431,7 +436,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 			DiskSpaceMB:           diskSpace,
 			UserConfig:            cuc,
 			StaticIPs:             FlattenToString(d.Get("static_ips").(*schema.Set).List()),
-			TechnicalEmails:       getContactEmailListForAPI(d, "tech_emails"),
+			TechnicalEmails:       technicalEmails,
 		},
 	)
 	if err != nil {
@@ -505,6 +510,10 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	technicalEmails, err := getContactEmailListForAPI(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if _, err := client.Services.Update(
 		ctx,
@@ -520,7 +529,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 			DiskSpaceMB:           diskSpace,
 			Karapace:              karapace,
 			UserConfig:            cuc,
-			TechnicalEmails:       getContactEmailListForAPI(d, "tech_emails"),
+			TechnicalEmails:       technicalEmails,
 		},
 	); err != nil {
 		return diag.Errorf("error updating (%s) service: %s", serviceName, err)
@@ -953,15 +962,16 @@ func DatasourceServiceRead(ctx context.Context, d *schema.ResourceData, m interf
 	return diag.Errorf("common %s/%s not found", projectName, serviceName)
 }
 
-func getContactEmailListForAPI(d *schema.ResourceData, field string) *[]aiven.ContactEmail {
-	results := make([]aiven.ContactEmail, 0)
-	valuesInterface, ok := d.GetOk(field)
-	if ok {
-		for _, emailInterface := range valuesInterface.(*schema.Set).List() {
-			results = append(results, aiven.ContactEmail{Email: emailInterface.(map[string]interface{})["email"].(string)})
+func getContactEmailListForAPI(d *schema.ResourceData) (*[]aiven.ContactEmail, error) {
+	if valuesInterface, ok := d.GetOk("tech_emails"); ok {
+		var emails []aiven.ContactEmail
+		err := Remarshal(valuesInterface.(*schema.Set).List(), &emails)
+		if err != nil {
+			return nil, err // Handle error appropriately
 		}
+		return &emails, nil
 	}
-	return &results
+	return &[]aiven.ContactEmail{}, nil
 }
 
 func ExpandService(name string, d *schema.ResourceData) (map[string]any, error) {
