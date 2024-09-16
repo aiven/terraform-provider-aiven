@@ -18,6 +18,7 @@ nav_order: 1
 - Use `ServiceGet` from the code-generated client
 - Use the code-generated client to manage `aiven_service_integration` and `aiven_service_integration_endpoint`
 - Use Go 1.23
+- Add capability to set description and owner group per topic.
 
 ## [4.24.0] - 2024-08-21
 
