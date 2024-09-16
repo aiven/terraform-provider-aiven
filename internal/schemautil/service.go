@@ -598,6 +598,20 @@ func getTechnicalEmailsForTerraform(s *service.ServiceGetOut) *schema.Set {
 	return schema.NewSet(schema.HashResource(TechEmailsResourceSchema), techEmails)
 }
 
+func getReadReplicaIntegrationsForTerraform(integrations []service.ServiceIntegrationOut) ([]map[string]interface{}, error) {
+	var readReplicaIntegrations []map[string]interface{}
+	for _, integration := range integrations {
+		if integration.IntegrationType == "read_replica" {
+			integrationMap := map[string]interface{}{
+				"integration_type":    integration.IntegrationType,
+				"source_service_name": integration.SourceService,
+			}
+			readReplicaIntegrations = append(readReplicaIntegrations, integrationMap)
+		}
+	}
+	return readReplicaIntegrations, nil
+}
+
 func ResourceServiceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*aiven.Client)
 
@@ -743,6 +757,15 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 
 	if err := d.Set("components", FlattenServiceComponents(s)); err != nil {
 		return fmt.Errorf("cannot set `components` : %w", err)
+	}
+
+	// Handle read_replica service integrations
+	readReplicaIntegrations, err := getReadReplicaIntegrationsForTerraform(s.ServiceIntegrations)
+	if err != nil {
+		return err
+	}
+	if err := d.Set("service_integrations", readReplicaIntegrations); err != nil {
+		return err
 	}
 
 	return copyConnectionInfoFromAPIResponseToTerraform(d, serviceType, s.ConnectionInfo, s.Metadata)
