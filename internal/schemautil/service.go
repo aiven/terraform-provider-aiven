@@ -369,7 +369,7 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.Errorf("unable to set tag's in schema: %s", err)
 	}
 
-	if err := d.Set("tech_emails", getTechnicalEmailsForTerraform(d, "tech_emails", s)); err != nil {
+	if err := d.Set("tech_emails", getTechnicalEmailsForTerraform(s)); err != nil {
 		return diag.Errorf("unable to set tech_emails in schema: %s", err)
 	}
 
@@ -576,9 +576,8 @@ func getDefaultDiskSpaceIfNotSet(ctx context.Context, d *schema.ResourceData, cl
 	return diskSpace, nil
 }
 
-func getTechnicalEmailsForTerraform(d *schema.ResourceData, field string, s *service.ServiceGetOut) *schema.Set {
-	_, ok := d.GetOk(field)
-	if !ok && len(s.TechEmails) == 0 {
+func getTechnicalEmailsForTerraform(s *service.ServiceGetOut) *schema.Set {
+	if len(s.TechEmails) == 0 {
 		return nil
 	}
 
@@ -681,7 +680,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		return err
 	}
 
-	if err := d.Set("tech_emails", getTechnicalEmailsForTerraform(d, "tech_emails", s)); err != nil {
+	if err := d.Set("tech_emails", getTechnicalEmailsForTerraform(s)); err != nil {
 		return err
 	}
 
