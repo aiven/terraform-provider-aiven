@@ -651,12 +651,12 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		diskSpace = int(*s.DiskSpaceMb)
 	}
 
-	if _, ok := d.GetOk("disk_space"); ok && diskSpace != 0 {
+	if diskSpace != 0 {
 		if err := d.Set("disk_space", HumanReadableByteSize(diskSpace*units.MiB)); err != nil {
 			return err
 		}
 	}
-	if _, ok := d.GetOk("additional_disk_space"); ok && diskSpace != 0 {
+	if diskSpace != 0 {
 		if err := d.Set("additional_disk_space", HumanReadableByteSize((diskSpace-servicePlanParams.DiskSizeMBDefault)*units.MiB)); err != nil {
 			return err
 		}
