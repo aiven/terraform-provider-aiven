@@ -9,7 +9,7 @@ import (
 
 	"github.com/aiven/aiven-go-client/v2"
 	avngen "github.com/aiven/go-client-codegen"
-	codegenintegrations "github.com/aiven/go-client-codegen/handler/serviceintegration"
+	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -45,11 +45,11 @@ func aivenServiceIntegrationSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"integration_type": {
-			Description:  "Type of the service integration. Possible values: " + schemautil.JoinQuoted(codegenintegrations.IntegrationTypeChoices(), ", ", "`"),
+			Description:  "Type of the service integration. Possible values: " + schemautil.JoinQuoted(service.IntegrationTypeChoices(), ", ", "`"),
 			ForceNew:     true,
 			Required:     true,
 			Type:         schema.TypeString,
-			ValidateFunc: validation.StringInSlice(codegenintegrations.IntegrationTypeChoices(), false),
+			ValidateFunc: validation.StringInSlice(service.IntegrationTypeChoices(), false),
 		},
 		"project": {
 			Description: "Project the integration belongs to.",
@@ -126,10 +126,10 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 		}
 	}
 
-	req := &codegenintegrations.ServiceIntegrationCreateIn{
+	req := &service.ServiceIntegrationCreateIn{
 		DestEndpointId:   plainEndpointID(schemautil.OptionalStringPointer(d, "destination_endpoint_id")),
 		DestService:      schemautil.OptionalStringPointer(d, "destination_service_name"),
-		IntegrationType:  codegenintegrations.IntegrationType(integrationType),
+		IntegrationType:  service.IntegrationType(integrationType),
 		SourceEndpointId: plainEndpointID(schemautil.OptionalStringPointer(d, "source_endpoint_id")),
 		SourceService:    schemautil.OptionalStringPointer(d, "source_service_name"),
 	}
@@ -198,7 +198,7 @@ func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceDat
 		ctx,
 		projectName,
 		integrationID,
-		&codegenintegrations.ServiceIntegrationUpdateIn{
+		&service.ServiceIntegrationUpdateIn{
 			UserConfig: userConfig,
 		},
 	)
@@ -226,7 +226,7 @@ func resourceServiceIntegrationDelete(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourceServiceIntegrationCheckForPreexistingResource(ctx context.Context, d *schema.ResourceData, client avngen.Client) (*codegenintegrations.ServiceIntegrationOut, error) {
+func resourceServiceIntegrationCheckForPreexistingResource(ctx context.Context, d *schema.ResourceData, client avngen.Client) (*service.ServiceIntegrationOut, error) {
 	projectName := d.Get("project").(string)
 	integrationType := d.Get("integration_type").(string)
 	sourceServiceName := d.Get("source_service_name").(string)
@@ -303,7 +303,7 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 
 func resourceServiceIntegrationCopyAPIResponseToTerraform(
 	d *schema.ResourceData,
-	res *codegenintegrations.ServiceIntegrationGetOut,
+	res *service.ServiceIntegrationGetOut,
 	project string,
 ) error {
 	if err := d.Set("project", project); err != nil {

@@ -6,7 +6,7 @@ import (
 	"slices"
 
 	avngen "github.com/aiven/go-client-codegen"
-	codegenintegrations "github.com/aiven/go-client-codegen/handler/serviceintegration"
+	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -17,7 +17,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/serviceintegrationendpoint"
 )
 
-func hasEndpointConfig[T string | codegenintegrations.EndpointType](kind T) bool {
+func hasEndpointConfig[T string | service.EndpointType](kind T) bool {
 	return slices.Contains(serviceintegrationendpoint.UserConfigTypes(), string(kind))
 }
 
@@ -37,11 +37,11 @@ func aivenServiceIntegrationEndpointSchema() map[string]*schema.Schema {
 		},
 		"endpoint_type": {
 			Description: "Type of the service integration endpoint. Possible values: " +
-				schemautil.JoinQuoted(codegenintegrations.EndpointTypeChoices(), ", ", "`"),
+				schemautil.JoinQuoted(service.EndpointTypeChoices(), ", ", "`"),
 			ForceNew:     true,
 			Required:     true,
 			Type:         schema.TypeString,
-			ValidateFunc: validation.StringInSlice(codegenintegrations.EndpointTypeChoices(), false),
+			ValidateFunc: validation.StringInSlice(service.EndpointTypeChoices(), false),
 		},
 		"endpoint_config": {
 			Description: "Integration endpoint specific backend configuration",
@@ -80,9 +80,9 @@ func resourceServiceIntegrationEndpointCreate(ctx context.Context, d *schema.Res
 	projectName := d.Get("project").(string)
 	endpointType := d.Get("endpoint_type").(string)
 
-	req := &codegenintegrations.ServiceIntegrationEndpointCreateIn{
+	req := &service.ServiceIntegrationEndpointCreateIn{
 		EndpointName: d.Get("endpoint_name").(string),
-		EndpointType: codegenintegrations.EndpointType(endpointType),
+		EndpointType: service.EndpointType(endpointType),
 		UserConfig:   make(map[string]interface{}),
 	}
 
@@ -111,7 +111,7 @@ func resourceServiceIntegrationEndpointRead(ctx context.Context, d *schema.Resou
 		return err
 	}
 
-	endpoint, err := client.ServiceIntegrationEndpointGet(ctx, projectName, endpointID, codegenintegrations.ServiceIntegrationEndpointGetIncludeSecrets(true))
+	endpoint, err := client.ServiceIntegrationEndpointGet(ctx, projectName, endpointID, service.ServiceIntegrationEndpointGetIncludeSecrets(true))
 	if err != nil {
 		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
@@ -137,7 +137,7 @@ func resourceServiceIntegrationEndpointUpdate(ctx context.Context, d *schema.Res
 	}
 
 	endpointType := d.Get("endpoint_type").(string)
-	req := &codegenintegrations.ServiceIntegrationEndpointUpdateIn{
+	req := &service.ServiceIntegrationEndpointUpdateIn{
 		UserConfig: make(map[string]interface{}),
 	}
 
@@ -175,7 +175,7 @@ func resourceServiceIntegrationEndpointDelete(ctx context.Context, d *schema.Res
 
 func copyServiceIntegrationEndpointPropertiesFromAPIResponseToTerraform(
 	d *schema.ResourceData,
-	endpoint *codegenintegrations.ServiceIntegrationEndpointGetOut,
+	endpoint *service.ServiceIntegrationEndpointGetOut,
 	project string,
 ) error {
 	if err := d.Set("project", project); err != nil {
