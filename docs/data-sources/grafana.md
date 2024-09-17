@@ -159,6 +159,7 @@ Read-Only:
 - `name` (String)
 - `scopes` (List of String)
 - `token_url` (String)
+- `use_refresh_token` (Boolean)
 
 
 <a id="nestedobjatt--grafana_user_config--auth_github"></a>

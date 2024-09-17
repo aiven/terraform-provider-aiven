@@ -184,6 +184,11 @@ func grafanaUserConfig() *schema.Schema {
 						Required:    true,
 						Type:        schema.TypeString,
 					},
+					"use_refresh_token": {
+						Description: "Set to true to use refresh token and check access token expiration.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 				}},
 				MaxItems: 1,
 				Optional: true,

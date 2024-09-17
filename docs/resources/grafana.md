@@ -166,6 +166,7 @@ Optional:
 - `auto_login` (Boolean) Allow users to bypass the login screen and automatically log in.
 - `name` (String) Name of the OAuth integration. Example: `My authentication`.
 - `scopes` (List of String) OAuth scopes.
+- `use_refresh_token` (Boolean) Set to true to use refresh token and check access token expiration.
 
 
 <a id="nestedblock--grafana_user_config--auth_github"></a>

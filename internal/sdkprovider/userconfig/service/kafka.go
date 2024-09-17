@@ -615,7 +615,7 @@ func kafkaUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"kafka_version": {
-				Description: "Enum: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`, `3.7`, and newer. Kafka major version.",
+				Description: "Enum: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`, `3.7`, `3.8`, and newer. Kafka major version.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -738,6 +738,16 @@ func kafkaUserConfig() *schema.Schema {
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"leader_eligibility": {
 						Description: "If true, Karapace / Schema Registry on the service nodes can participate in leader election. It might be needed to disable this when the schemas topic is replicated to a secondary cluster and Karapace / Schema Registry there must not participate in leader election. Defaults to `true`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"retriable_errors_silenced": {
+						Description: "If enabled, kafka errors which can be retried or custom errors specified for the service will not be raised, instead, a warning log is emitted. This will denoise issue tracking systems, i.e. sentry. Defaults to `true`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"schema_reader_strict_mode": {
+						Description: "If enabled, causes the Karapace schema-registry service to shutdown when there are invalid schema records in the `_schemas` topic. Defaults to `false`.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
