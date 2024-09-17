@@ -672,14 +672,29 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	if s.DiskSpaceMb != nil {
 		diskSpace = int(*s.DiskSpaceMb)
 	}
+	additionalDiskSpace := diskSpace - servicePlanParams.DiskSizeMBDefault
 
-	if diskSpace != 0 {
-		if err := d.Set("disk_space", HumanReadableByteSize(diskSpace*units.MiB)); err != nil {
+	_, isAdditionalDiskSpaceSet := d.GetOk("additional_disk_space")
+	_, isDiskSpaceSet := d.GetOk("disk_space")
+
+	// Handles two different cases:
+	//
+	// 1. During import when neither `additional_disk_space` nor `disk_space` are set
+	// 2. During create / update when `additional_disk_space` is set
+	if additionalDiskSpace > 0 && (!isDiskSpaceSet || isAdditionalDiskSpaceSet) {
+		if err := d.Set("additional_disk_space", HumanReadableByteSize(additionalDiskSpace*units.MiB)); err != nil {
+			return err
+		}
+		if err := d.Set("disk_space", nil); err != nil {
 			return err
 		}
 	}
-	if diskSpace != 0 {
-		if err := d.Set("additional_disk_space", HumanReadableByteSize((diskSpace-servicePlanParams.DiskSizeMBDefault)*units.MiB)); err != nil {
+
+	if isDiskSpaceSet && diskSpace > 0 {
+		if err := d.Set("disk_space", HumanReadableByteSize(diskSpace*units.MiB)); err != nil {
+			return err
+		}
+		if err := d.Set("additional_disk_space", nil); err != nil {
 			return err
 		}
 	}
