@@ -9,7 +9,7 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!-- ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+## [4.25.0] - 2024-09-17
 
 - Fix `aiven_kafka_connector`: increase create polling timeout
 - Add experimental `aiven_organization_permission` resource
@@ -19,7 +19,7 @@ nav_order: 1
 - Use `ServiceGet` from the code-generated client
 - Use the code-generated client to manage `aiven_service_integration` and `aiven_service_integration_endpoint`
 - Use Go 1.23
-- Add capability to set description and owner group per topic.
+- Add capability to set description and owner group per `aiven_kafka_topic`
 
 ## [4.24.0] - 2024-08-21
 
