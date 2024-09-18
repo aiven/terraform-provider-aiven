@@ -205,6 +205,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 		"service_integrations": {
 			Type:        schema.TypeList,
 			Optional:    true,
+			Computed:    true,
 			Description: "Service integrations to specify when creating a service. Not applied after initial service creation",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
