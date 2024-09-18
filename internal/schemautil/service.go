@@ -12,6 +12,7 @@ import (
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/aiven/go-client-codegen/handler/service"
+	"github.com/aiven/go-client-codegen/handler/staticip"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -408,25 +409,33 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	_, err = client.Services.Create(
-		ctx,
-		project,
-		aiven.CreateServiceRequest{
-			Cloud:                 d.Get("cloud_name").(string),
-			Plan:                  d.Get("plan").(string),
-			ProjectVPCID:          vpcID,
-			ServiceIntegrations:   GetAPIServiceIntegrations(d),
-			MaintenanceWindow:     GetMaintenanceWindow(d),
-			ServiceName:           d.Get("service_name").(string),
-			ServiceType:           serviceType,
-			TerminationProtection: d.Get("termination_protection").(bool),
-			DiskSpaceMB:           diskSpace,
-			UserConfig:            cuc,
-			StaticIPs:             FlattenToString(d.Get("static_ips").(*schema.Set).List()),
-			TechnicalEmails:       technicalEmails,
-		},
-	)
-	if err != nil {
+	cloud := d.Get("cloud_name").(string)
+	terminationProtection := d.Get("termination_protection").(bool)
+	staticIps := FlattenToString(d.Get("static_ips").(*schema.Set).List())
+	serviceIntegrations := GetAPIServiceIntegrations(d)
+
+	diskSpaceFloat := float64(diskSpace)
+	var diskSpaceMb *float64
+	if diskSpaceFloat > 0 {
+		diskSpaceMb = &diskSpaceFloat
+	}
+
+	serviceCreate := &service.ServiceCreateIn{
+		Cloud:                 &cloud,
+		Plan:                  d.Get("plan").(string),
+		ProjectVpcId:          vpcID,
+		ServiceIntegrations:   &serviceIntegrations,
+		Maintenance:           GetMaintenanceWindow(d),
+		ServiceName:           d.Get("service_name").(string),
+		ServiceType:           serviceType,
+		TerminationProtection: &terminationProtection,
+		DiskSpaceMb:           diskSpaceMb,
+		UserConfig:            &cuc,
+		StaticIps:             &staticIps,
+		TechEmails:            technicalEmails,
+	}
+
+	if _, err = avnGen.ServiceCreate(ctx, project, serviceCreate); err != nil {
 		return diag.Errorf("error creating a service: %s", err)
 	}
 
@@ -481,7 +490,9 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	// associate first, so that we can enable `static_ips` for a preexisting common
 	for _, aip := range ass {
-		if err := client.StaticIPs.Associate(ctx, projectName, aip, aiven.AssociateStaticIPRequest{ServiceName: serviceName}); err != nil {
+		if _, err := avnGen.ProjectStaticIPAssociate(ctx, projectName, aip, &staticip.ProjectStaticIpassociateIn{
+			ServiceName: serviceName,
+		}); err != nil {
 			return diag.Errorf("error associating Static IP (%s) to a service: %s", aip, err)
 		}
 	}
@@ -502,23 +513,30 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	if _, err := client.Services.Update(
-		ctx,
-		projectName,
-		serviceName,
-		aiven.UpdateServiceRequest{
-			Cloud:                 d.Get("cloud_name").(string),
-			Plan:                  d.Get("plan").(string),
-			MaintenanceWindow:     GetMaintenanceWindow(d),
-			ProjectVPCID:          vpcID,
-			Powered:               true,
-			TerminationProtection: d.Get("termination_protection").(bool),
-			DiskSpaceMB:           diskSpace,
-			Karapace:              karapace,
-			UserConfig:            cuc,
-			TechnicalEmails:       technicalEmails,
-		},
-	); err != nil {
+	cloud := d.Get("cloud_name").(string)
+	plan := d.Get("plan").(string)
+	powered := true
+	terminationProtection := d.Get("termination_protection").(bool)
+
+	diskSpaceFloat := float64(diskSpace)
+	var diskSpaceMb *float64
+	if diskSpaceFloat > 0 {
+		diskSpaceMb = &diskSpaceFloat
+	}
+	serviceUpdate := &service.ServiceUpdateIn{
+		Cloud:                 &cloud,
+		Plan:                  &plan,
+		Maintenance:           GetMaintenanceWindow(d),
+		ProjectVpcId:          vpcID,
+		Powered:               &powered,
+		TerminationProtection: &terminationProtection,
+		DiskSpaceMb:           diskSpaceMb,
+		Karapace:              karapace,
+		UserConfig:            &cuc,
+		TechEmails:            technicalEmails,
+	}
+
+	if _, err := avnGen.ServiceUpdate(ctx, projectName, serviceName, serviceUpdate); err != nil {
 		return diag.Errorf("error updating (%s) service: %s", serviceName, err)
 	}
 
@@ -528,7 +546,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	if len(dis) > 0 {
 		for _, dip := range dis {
-			if err := client.StaticIPs.Dissociate(ctx, projectName, dip); err != nil {
+			if _, err := avnGen.ProjectStaticIPDissociate(ctx, projectName, dip); err != nil {
 				return diag.Errorf("error dissociating Static IP (%s) from the service (%s): %s", dip, serviceName, err)
 			}
 		}
@@ -988,16 +1006,16 @@ func DatasourceServiceRead(ctx context.Context, d *schema.ResourceData, m interf
 	return diag.Errorf("common %s/%s not found", projectName, serviceName)
 }
 
-func getContactEmailListForAPI(d *schema.ResourceData) (*[]aiven.ContactEmail, error) {
+func getContactEmailListForAPI(d *schema.ResourceData) (*[]service.TechEmailIn, error) {
 	if valuesInterface, ok := d.GetOk("tech_emails"); ok {
-		var emails []aiven.ContactEmail
+		var emails []service.TechEmailIn
 		err := Remarshal(valuesInterface.(*schema.Set).List(), &emails)
 		if err != nil {
 			return nil, err // Handle error appropriately
 		}
 		return &emails, nil
 	}
-	return &[]aiven.ContactEmail{}, nil
+	return &[]service.TechEmailIn{}, nil
 }
 
 func ExpandService(name string, d *schema.ResourceData) (map[string]any, error) {
