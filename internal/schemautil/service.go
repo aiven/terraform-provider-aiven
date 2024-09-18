@@ -148,6 +148,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Computed:    true,
 			Description: "Disk space that service is currently using",
+			Deprecated:  "This will be removed in v5.0.0. Please use `additional_disk_space` to specify the space to be added to the default `disk_space` defined by the plan.",
 		},
 		"disk_space_default": {
 			Type:        schema.TypeString,
