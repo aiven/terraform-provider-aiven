@@ -60,14 +60,9 @@ func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m 
 		return fmt.Errorf("unable to get service plan parameters: %w", err)
 	}
 
-	var requestedDiskSpaceMB int
-
-	if ds, ok := d.GetOk("disk_space"); ok {
-		requestedDiskSpaceMB = ConvertToDiskSpaceMB(ds.(string))
-	} else {
-		if ads, ok := d.GetOk("additional_disk_space"); ok {
-			requestedDiskSpaceMB = servicePlanParams.DiskSizeMBDefault + ConvertToDiskSpaceMB(ads.(string))
-		}
+	requestedDiskSpaceMB, err := getDiskSpaceFromStateOrDiff(ctx, d, client)
+	if err != nil {
+		return err
 	}
 
 	if requestedDiskSpaceMB == 0 {

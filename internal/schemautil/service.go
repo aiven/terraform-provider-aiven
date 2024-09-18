@@ -386,24 +386,9 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 	serviceType := d.Get("service_type").(string)
 	project := d.Get("project").(string)
 
-	// During the creation of service, if disk_space is not set by a TF user,
-	// we transfer 0 values in API creation request, which makes Aiven provision
-	// a default disk space values for a common
-	var diskSpace int
-	if ds, ok := d.GetOk("disk_space"); ok {
-		diskSpace = ConvertToDiskSpaceMB(ds.(string))
-	} else {
-		// get service plan specific defaults
-		servicePlanParams, err := GetServicePlanParametersFromSchema(ctx, client, d)
-		if err != nil {
-			return diag.Errorf("error getting service default plan parameters: %s", err)
-		}
-
-		diskSpace = servicePlanParams.DiskSizeMBDefault
-
-		if ads, ok := d.GetOk("additional_disk_space"); ok {
-			diskSpace = servicePlanParams.DiskSizeMBDefault + ConvertToDiskSpaceMB(ads.(string))
-		}
+	diskSpace, err := getDiskSpaceFromStateOrDiff(ctx, d, client)
+	if err != nil {
+		return diag.Errorf("error getting default disc space: %s", err)
 	}
 
 	vpcID, err := GetProjectVPCIdPointer(d)
@@ -477,7 +462,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	// On service update, we send a default disc space value for a common
 	// if the TF user does not specify it
-	diskSpace, err := getDefaultDiskSpaceIfNotSet(ctx, d, client)
+	diskSpace, err := getDiskSpaceFromStateOrDiff(ctx, d, client)
 	if err != nil {
 		return diag.Errorf("error getting default disc space: %s", err)
 	}
@@ -560,26 +545,27 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	return ResourceServiceRead(ctx, d, m)
 }
 
-func getDefaultDiskSpaceIfNotSet(ctx context.Context, d *schema.ResourceData, client *aiven.Client) (int, error) {
+func getDiskSpaceFromStateOrDiff(ctx context.Context, d ResourceStateOrResourceDiff, client *aiven.Client) (int, error) {
 	var diskSpace int
-	if ds, ok := d.GetOk("disk_space"); !ok {
-		// get service plan specific defaults
-		servicePlanParams, err := GetServicePlanParametersFromSchema(ctx, client, d)
-		if err != nil {
-			if aiven.IsNotFound(err) {
-				return 0, nil
-			}
-			return 0, fmt.Errorf("unable to get service plan parameters: %w", err)
-		}
 
-		if ads, ok := d.GetOk("additional_disk_space"); ok {
-			diskSpace = servicePlanParams.DiskSizeMBDefault + ConvertToDiskSpaceMB(ads.(string))
-			return diskSpace, nil
+	// Get service plan specific defaults
+	servicePlanParams, err := GetServicePlanParametersFromSchema(ctx, client, d)
+	if err != nil {
+		if aiven.IsNotFound(err) {
+			return 0, nil
 		}
+		return 0, fmt.Errorf("unable to get service plan parameters: %w", err)
+	}
 
-		diskSpace = servicePlanParams.DiskSizeMBDefault
-	} else {
+	// Use `additional_disk_space` if set
+	if ads, ok := d.GetOk("additional_disk_space"); ok {
+		diskSpace = servicePlanParams.DiskSizeMBDefault + ConvertToDiskSpaceMB(ads.(string))
+	} else if ds, ok := d.GetOk("disk_space"); ok {
+		// Use `disk_space` if set...
 		diskSpace = ConvertToDiskSpaceMB(ds.(string))
+	} else {
+		// ... otherwise, use the default disk space
+		diskSpace = servicePlanParams.DiskSizeMBDefault
 	}
 
 	return diskSpace, nil
