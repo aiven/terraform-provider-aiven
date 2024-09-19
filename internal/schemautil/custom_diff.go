@@ -98,7 +98,7 @@ func CustomizeDiffCheckDiskSpace(ctx context.Context, d *schema.ResourceDiff, m 
 	}
 	if servicePlanParams.DiskSizeMBStep != 0 {
 		if (requestedDiskSpaceMB-servicePlanParams.DiskSizeMBDefault)%servicePlanParams.DiskSizeMBStep != 0 {
-			return fmt.Errorf("requested disk size has to increase from: '%s' in increments of '%s'", humanReadableDiskSpaceDefault, humanReadableDiskSpaceStep)
+			return fmt.Errorf("requested disk size has to increase from: '%s' in increments of '%s'. Got: '%s'", humanReadableDiskSpaceDefault, humanReadableDiskSpaceStep, humanReadableRequestedDiskSpace)
 		}
 	}
 	return nil
@@ -169,7 +169,6 @@ func CustomizeDiffDisallowMultipleManyToOneKeys(_ context.Context, d *schema.Res
 				return err
 			}
 		}
-
 	}
 
 	return nil
