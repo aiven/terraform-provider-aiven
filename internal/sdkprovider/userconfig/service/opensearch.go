@@ -441,7 +441,7 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"cluster_routing_allocation_node_concurrent_recoveries": {
-						Description: "How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to 2.",
+						Description: "How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to node cpu count * 2.",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},

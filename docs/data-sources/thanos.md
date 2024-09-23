@@ -115,6 +115,7 @@ Read-Only:
 Read-Only:
 
 - `compactor` (List of Object) (see [below for nested schema](#nestedobjatt--thanos_user_config--compactor))
+- `env` (Map of String)
 - `ip_filter` (Set of String)
 - `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--thanos_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
@@ -164,6 +165,8 @@ Read-Only:
 - `query_lookback_delta` (String)
 - `query_metadata_default_time_range` (String)
 - `query_timeout` (String)
+- `store_limits_request_samples` (Number)
+- `store_limits_request_series` (Number)
 
 
 <a id="nestedobjatt--thanos_user_config--query_frontend"></a>

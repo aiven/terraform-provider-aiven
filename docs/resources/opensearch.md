@@ -242,7 +242,7 @@ Optional:
 - `action_destructive_requires_name` (Boolean) Require explicit index names when deleting.
 - `auth_failure_listeners` (Block List, Max: 1) Opensearch Security Plugin Settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--auth_failure_listeners))
 - `cluster_max_shards_per_node` (Number) Controls the number of shards allowed in the cluster per data node. Example: `1000`.
-- `cluster_routing_allocation_node_concurrent_recoveries` (Number) How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to 2.
+- `cluster_routing_allocation_node_concurrent_recoveries` (Number) How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to node cpu count * 2.
 - `email_sender_name` (String) Sender name placeholder to be used in Opensearch Dashboards and Opensearch keystore. Example: `alert-sender`.
 - `email_sender_password` (String, Sensitive) Sender password for Opensearch alerts to authenticate with SMTP server. Example: `very-secure-mail-password`.
 - `email_sender_username` (String) Sender username for Opensearch alerts. Example: `jane@example.com`.

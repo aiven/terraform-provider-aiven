@@ -24,6 +24,11 @@ func thanosUserConfig() *schema.Schema {
 				Optional: true,
 				Type:     schema.TypeList,
 			},
+			"env": {
+				Description: "Environmental variables.",
+				Optional:    true,
+				Type:        schema.TypeMap,
+			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",
@@ -128,6 +133,16 @@ func thanosUserConfig() *schema.Schema {
 						Description: "Maximum time to process a query by the query node. Default: `2m`.",
 						Optional:    true,
 						Type:        schema.TypeString,
+					},
+					"store_limits_request_samples": {
+						Description: "The maximum samples allowed for a single Series request. The Series call fails if this limit is exceeded. Set to 0 for no limit. NOTE: For efficiency, the limit is internally implemented as 'chunks limit' considering each chunk contains a maximum of 120 samples. The default value is 100 * store.limits.request-series. Default: `0`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
+					},
+					"store_limits_request_series": {
+						Description: "The maximum series allowed for a single Series request. The Series call fails if this limit is exceeded. Set to 0 for no limit. The default value is 1000 * cpu_count. Default: `0`.",
+						Optional:    true,
+						Type:        schema.TypeInt,
 					},
 				}},
 				MaxItems: 1,
