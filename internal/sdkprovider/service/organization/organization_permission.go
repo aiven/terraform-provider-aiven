@@ -16,7 +16,7 @@ import (
 var aivenOrganizationalPermissionSchema = map[string]*schema.Schema{
 	"organization_id": {
 		Type:        schema.TypeString,
-		Description: "Organization ID",
+		Description: "Organization ID.",
 		Required:    true,
 	},
 	"resource_type": {
@@ -27,11 +27,11 @@ var aivenOrganizationalPermissionSchema = map[string]*schema.Schema{
 	"resource_id": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "Resource Id.",
+		Description: "Resource ID.",
 	},
 	"permissions": {
 		Type:        schema.TypeSet,
-		Description: "A permission to set",
+		Description: "Permissions to grant to principals.",
 		Required:    true,
 		Elem: &schema.Resource{
 			Schema: permissionFields,
@@ -43,12 +43,12 @@ var permissionFields = map[string]*schema.Schema{
 	"principal_type": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: userconfig.Desc("Type of the principal.").PossibleValuesString(organization.PrincipalTypeChoices()...).Build(),
+		Description: userconfig.Desc("The type of principal.").PossibleValuesString(organization.PrincipalTypeChoices()...).Build(),
 	},
 	"principal_id": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "ID of the principal.",
+		Description: "ID of the user or group.",
 	},
 	"permissions": {
 		Type:        schema.TypeSet,
@@ -58,12 +58,12 @@ var permissionFields = map[string]*schema.Schema{
 	},
 	"create_time": {
 		Type:        schema.TypeString,
-		Description: "Create Time",
+		Description: "Time created.",
 		Computed:    true,
 	},
 	"update_time": {
 		Type:        schema.TypeString,
-		Description: "Update Time",
+		Description: "Time updated.",
 		Computed:    true,
 	},
 }
