@@ -13,6 +13,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/errmsg"
+	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/externalidentity"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/service/organization"
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 )
@@ -138,7 +139,9 @@ func (p *AivenProvider) DataSources(context.Context) []func() datasource.DataSou
 
 	// Add to a list of data sources that are currently in beta.
 	if util.IsBeta() {
-		var betaDataSources []func() datasource.DataSource
+		betaDataSources := []func() datasource.DataSource{
+			externalidentity.NewExternalIdentityDataSource,
+		}
 		dataSources = append(dataSources, betaDataSources...)
 	}
 
