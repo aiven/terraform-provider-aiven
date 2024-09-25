@@ -107,6 +107,7 @@ Read-Only:
 Optional:
 
 - `compactor` (Block List, Max: 1) ThanosCompactor (see [below for nested schema](#nestedblock--thanos_user_config--compactor))
+- `env` (Map of String) Environmental variables.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--thanos_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
@@ -159,6 +160,8 @@ Optional:
 - `query_lookback_delta` (String) The maximum lookback duration for retrieving metrics during expression evaluations in PromQL. PromQL always evaluates the query for a certain timestamp, and it looks back for the given amount of time to get the latest sample. If it exceeds the maximum lookback delta, it assumes the series is stale and returns none (a gap). The lookback delta should be set to at least 2 times the slowest scrape interval. If unset, it will use the promql default of 5m. Default: `5m`.
 - `query_metadata_default_time_range` (String) The default metadata time range duration for retrieving labels through Labels and Series API when the range parameters are not specified. The zero value means the range covers the time since the beginning. Default: `0s`.
 - `query_timeout` (String) Maximum time to process a query by the query node. Default: `2m`.
+- `store_limits_request_samples` (Number) The maximum samples allowed for a single Series request. The Series call fails if this limit is exceeded. Set to 0 for no limit. NOTE: For efficiency, the limit is internally implemented as 'chunks limit' considering each chunk contains a maximum of 120 samples. The default value is 100 * store.limits.request-series. Default: `0`.
+- `store_limits_request_series` (Number) The maximum series allowed for a single Series request. The Series call fails if this limit is exceeded. Set to 0 for no limit. The default value is 1000 * cpu_count. Default: `0`.
 
 
 <a id="nestedblock--thanos_user_config--query_frontend"></a>

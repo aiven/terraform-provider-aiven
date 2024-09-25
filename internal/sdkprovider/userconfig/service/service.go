@@ -123,6 +123,8 @@ func GetFieldMapping(kind string) map[string]string {
 			"query/query_lookback_delta":                       "query/query.lookback-delta",
 			"query/query_metadata_default_time_range":          "query/query.metadata.default-time-range",
 			"query/query_timeout":                              "query/query.timeout",
+			"query/store_limits_request_samples":               "query/store.limits.request-samples",
+			"query/store_limits_request_series":                "query/store.limits.request-series",
 			"query_frontend":                                   "query-frontend",
 			"query_frontend/query_range_align_range_with_step": "query-frontend/query-range.align-range-with-step",
 		},
