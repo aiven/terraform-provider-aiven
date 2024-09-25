@@ -4,16 +4,11 @@ page_title: "aiven_valkey_user Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
   The Valkey User data source provides information about the existing Aiven for Valkey user.
-  This resource is in the beta stage and may change without notice. Set
-  the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
 ---
 
 # aiven_valkey_user (Data Source)
 
-The Valkey User data source provides information about the existing Aiven for Valkey user. 
-
-**This resource is in the beta stage and may change without notice.** Set
-the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
+The Valkey User data source provides information about the existing Aiven for Valkey user.
 
 
 
