@@ -9,6 +9,10 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!-- ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Remove `aiven_thanos` from beta resources
+
 ## [4.26.0] - 2024-09-25
 
 - Remove `aiven_valkey` from beta resources
