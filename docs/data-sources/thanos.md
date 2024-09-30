@@ -148,6 +148,7 @@ Read-Only:
 - `query_frontend` (Boolean)
 - `receiver_ingesting` (Boolean)
 - `receiver_routing` (Boolean)
+- `ruler` (Boolean)
 - `store` (Boolean)
 
 

@@ -74,6 +74,16 @@ func flinkUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
+			"pekko_ask_timeout_s": {
+				Description: "Timeout in seconds used for all futures and blocking Pekko requests. Example: `10`.",
+				Optional:    true,
+				Type:        schema.TypeInt,
+			},
+			"pekko_framesize_b": {
+				Description: "Maximum size in bytes for messages exchanged between the JobManager and the TaskManagers. Example: `10485760`.",
+				Optional:    true,
+				Type:        schema.TypeInt,
+			},
 			"privatelink_access": {
 				Description: "Allow access to selected service components through Privatelink",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{

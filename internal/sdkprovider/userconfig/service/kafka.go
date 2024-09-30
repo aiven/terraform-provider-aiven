@@ -766,6 +766,17 @@ func kafkaUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
+			"single_zone": {
+				Description: "Single-zone configuration",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"enabled": {
+					Description: "Whether to allocate nodes on the same Availability Zone or spread across zones available.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				}}},
+				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
 			"static_ips": {
 				Description: "Use static public IP addresses.",
 				Optional:    true,

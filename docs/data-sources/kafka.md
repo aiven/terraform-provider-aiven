@@ -116,6 +116,7 @@ Read-Only:
 - `schema_registry` (Boolean)
 - `schema_registry_config` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--schema_registry_config))
 - `service_log` (Boolean)
+- `single_zone` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--single_zone))
 - `static_ips` (Boolean)
 - `tiered_storage` (List of Object) (see [below for nested schema](#nestedobjatt--kafka_user_config--tiered_storage))
 
@@ -327,6 +328,14 @@ Read-Only:
 - `retriable_errors_silenced` (Boolean)
 - `schema_reader_strict_mode` (Boolean)
 - `topic_name` (String)
+
+
+<a id="nestedobjatt--kafka_user_config--single_zone"></a>
+### Nested Schema for `kafka_user_config.single_zone`
+
+Read-Only:
+
+- `enabled` (Boolean)
 
 
 <a id="nestedobjatt--kafka_user_config--tiered_storage"></a>
