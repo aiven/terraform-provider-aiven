@@ -14,6 +14,7 @@ nav_order: 1
 - Remove `aiven_valkey` from beta resources
 - Remove `aiven_valkey_user` from beta resources
 - Adds`aiven_organization_permission` example
+- Add capability to map external service user with internal aiven user with external_identity data source
 
 ## [4.25.0] - 2024-09-17
 
