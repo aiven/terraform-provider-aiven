@@ -4,11 +4,16 @@ page_title: "aiven_external_identity Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
   Maps an external service user to an Aiven user.
+  This resource is in the beta stage and may change without notice. Set
+  the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
 ---
 
 # aiven_external_identity (Data Source)
 
-Maps an external service user to an Aiven user.
+Maps an external service user to an Aiven user. 
+
+**This resource is in the beta stage and may change without notice.** Set
+the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 
 

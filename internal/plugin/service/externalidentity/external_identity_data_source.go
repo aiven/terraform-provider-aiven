@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"github.com/aiven/aiven-go-client/v2"
-	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 )
 
 var (
@@ -58,7 +58,7 @@ func (r *externalIdentityDataSource) Schema(
 	resp *datasource.SchemaResponse,
 ) {
 	resp.Schema = schema.Schema{
-		Description: "Maps an external service user to an Aiven user.",
+		Description: userconfig.Desc("Maps an external service user to an Aiven user.").AvailabilityType(userconfig.Beta).Build(),
 		Attributes: map[string]schema.Attribute{
 			"organization_id": schema.StringAttribute{
 				Description: "The ID of the Aiven organization that the user is part of.",
