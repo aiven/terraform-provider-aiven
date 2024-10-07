@@ -153,6 +153,11 @@ func clickhouseUserConfig() *schema.Schema {
 				Optional: true,
 				Type:     schema.TypeList,
 			},
+			"recovery_basebackup_name": {
+				Description: "Name of the basebackup to restore in forked service. Example: `backup-20191112t091354293891z`.",
+				Optional:    true,
+				Type:        schema.TypeString,
+			},
 			"service_log": {
 				Description: "Store logs for the service so that they are available in the HTTP API and console.",
 				Optional:    true,

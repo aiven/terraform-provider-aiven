@@ -100,10 +100,10 @@ Read-Only:
 Optional:
 
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
-- `azure_migration` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--azure_migration))
+- `azure_migration` (Block List, Max: 1) Azure migration settings (see [below for nested schema](#nestedblock--opensearch_user_config--azure_migration))
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. Example: `grafana.example.org`.
 - `disable_replication_factor_adjustment` (Boolean) Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can no longer be activated.
-- `gcs_migration` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--gcs_migration))
+- `gcs_migration` (Block List, Max: 1) Google Cloud Storage migration settings (see [below for nested schema](#nestedblock--opensearch_user_config--gcs_migration))
 - `index_patterns` (Block List, Max: 512) Index patterns (see [below for nested schema](#nestedblock--opensearch_user_config--index_patterns))
 - `index_rollup` (Block List, Max: 1) Index rollup settings (see [below for nested schema](#nestedblock--opensearch_user_config--index_rollup))
 - `index_template` (Block List, Max: 1) Template settings for all new indexes (see [below for nested schema](#nestedblock--opensearch_user_config--index_template))
@@ -121,7 +121,7 @@ Optional:
 - `project_to_fork_from` (String) Name of another project to fork a service from. This has effect only when a new service is being created. Example: `anotherprojectname`.
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--opensearch_user_config--public_access))
 - `recovery_basebackup_name` (String) Name of the basebackup to restore in forked service. Example: `backup-20191112t091354293891z`.
-- `s3_migration` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--s3_migration))
+- `s3_migration` (Block List, Max: 1) AWS S3 / AWS S3 compatible migration settings (see [below for nested schema](#nestedblock--opensearch_user_config--s3_migration))
 - `saml` (Block List, Max: 1) OpenSearch SAML configuration (see [below for nested schema](#nestedblock--opensearch_user_config--saml))
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.
@@ -143,8 +143,8 @@ Optional:
 - `compress` (Boolean) When set to true metadata files are stored in compressed format.
 - `endpoint_suffix` (String) Defines the DNS suffix for Azure Storage endpoints.
 - `indices` (String) A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. By default, a restore operation includes all data streams and indices in the snapshot. If this argument is provided, the restore operation only includes the data streams and indices that you specify. Example: `metrics*,logs*,data-20240823`.
-- `key` (String) Azure account secret key. One of key or sas_token should be specified.
-- `sas_token` (String) A shared access signatures (SAS) token. One of key or sas_token should be specified.
+- `key` (String, Sensitive) Azure account secret key. One of key or sas_token should be specified.
+- `sas_token` (String, Sensitive) A shared access signatures (SAS) token. One of key or sas_token should be specified.
 
 
 <a id="nestedblock--opensearch_user_config--gcs_migration"></a>
@@ -154,7 +154,7 @@ Required:
 
 - `base_path` (String) The path to the repository data within its container. The value of this setting should not start or end with a /.
 - `bucket` (String) The path to the repository data within its container.
-- `credentials` (String) Google Cloud Storage credentials file content.
+- `credentials` (String, Sensitive) Google Cloud Storage credentials file content.
 - `snapshot_name` (String) The snapshot name to restore from.
 
 Optional:

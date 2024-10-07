@@ -88,6 +88,8 @@ Optional:
 - `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--flink_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `number_of_task_slots` (Number) Task slots per node. For a 3 node plan, total number of task slots is 3x this value. Example: `1`.
+- `pekko_ask_timeout_s` (Number) Timeout in seconds used for all futures and blocking Pekko requests. Example: `10`.
+- `pekko_framesize_b` (Number) Maximum size in bytes for messages exchanged between the JobManager and the TaskManagers. Example: `10485760`.
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--flink_user_config--privatelink_access))
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `static_ips` (Boolean) Use static public IP addresses.

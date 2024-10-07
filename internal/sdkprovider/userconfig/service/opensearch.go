@@ -25,6 +25,7 @@ func opensearchUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"azure_migration": {
+				Description: "Azure migration settings",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"account": {
 						Description: "Azure account name.",
@@ -64,11 +65,13 @@ func opensearchUserConfig() *schema.Schema {
 					"key": {
 						Description: "Azure account secret key. One of key or sas_token should be specified.",
 						Optional:    true,
+						Sensitive:   true,
 						Type:        schema.TypeString,
 					},
 					"sas_token": {
 						Description: "A shared access signatures (SAS) token. One of key or sas_token should be specified.",
 						Optional:    true,
+						Sensitive:   true,
 						Type:        schema.TypeString,
 					},
 					"snapshot_name": {
@@ -92,6 +95,7 @@ func opensearchUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"gcs_migration": {
+				Description: "Google Cloud Storage migration settings",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"base_path": {
 						Description: "The path to the repository data within its container. The value of this setting should not start or end with a /.",
@@ -116,6 +120,7 @@ func opensearchUserConfig() *schema.Schema {
 					"credentials": {
 						Description: "Google Cloud Storage credentials file content.",
 						Required:    true,
+						Sensitive:   true,
 						Type:        schema.TypeString,
 					},
 					"indices": {
@@ -760,6 +765,7 @@ func opensearchUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"s3_migration": {
+				Description: "AWS S3 / AWS S3 compatible migration settings",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"access_key": {
 						Description: "AWS Access key.",

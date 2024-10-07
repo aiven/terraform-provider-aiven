@@ -143,6 +143,7 @@ Optional:
 - `query_frontend` (Boolean) Allow clients to connect to query_frontend from the public internet for service nodes that are in a project VPC or another type of private network.
 - `receiver_ingesting` (Boolean) Allow clients to connect to receiver_ingesting from the public internet for service nodes that are in a project VPC or another type of private network.
 - `receiver_routing` (Boolean) Allow clients to connect to receiver_routing from the public internet for service nodes that are in a project VPC or another type of private network.
+- `ruler` (Boolean) Allow clients to connect to ruler from the public internet for service nodes that are in a project VPC or another type of private network.
 - `store` (Boolean) Allow clients to connect to store from the public internet for service nodes that are in a project VPC or another type of private network.
 
 

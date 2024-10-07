@@ -101,6 +101,11 @@ func thanosUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},
+					"ruler": {
+						Description: "Allow clients to connect to ruler from the public internet for service nodes that are in a project VPC or another type of private network.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"store": {
 						Description: "Allow clients to connect to store from the public internet for service nodes that are in a project VPC or another type of private network.",
 						Optional:    true,

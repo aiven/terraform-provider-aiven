@@ -70,7 +70,7 @@ resource "aiven_organization_permission" "developers" {
 
 Required:
 
-- `permissions` (Set of String) List of permissions. The possible values are `admin`, `developer`, `operator` and `read_only`.
+- `permissions` (Set of String) List of permissions. The possible values are `admin`, `developer`, `operator`, `project:read_permissions` and `read_only`.
 - `principal_id` (String) ID of the user or group.
 - `principal_type` (String) The type of principal. The possible values are `user` and `user_group`.
 

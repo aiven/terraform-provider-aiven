@@ -129,6 +129,7 @@ Optional:
 - `schema_registry` (Boolean) Enable Schema-Registry service. Default: `false`.
 - `schema_registry_config` (Block List, Max: 1) Schema Registry configuration (see [below for nested schema](#nestedblock--kafka_user_config--schema_registry_config))
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
+- `single_zone` (Block List, Max: 1) Single-zone configuration (see [below for nested schema](#nestedblock--kafka_user_config--single_zone))
 - `static_ips` (Boolean) Use static public IP addresses.
 - `tiered_storage` (Block List, Max: 1) Tiered storage configuration (see [below for nested schema](#nestedblock--kafka_user_config--tiered_storage))
 
@@ -352,6 +353,14 @@ Optional:
 - `retriable_errors_silenced` (Boolean) If enabled, kafka errors which can be retried or custom errors specified for the service will not be raised, instead, a warning log is emitted. This will denoise issue tracking systems, i.e. sentry. Defaults to `true`.
 - `schema_reader_strict_mode` (Boolean) If enabled, causes the Karapace schema-registry service to shutdown when there are invalid schema records in the `_schemas` topic. Defaults to `false`.
 - `topic_name` (String) The durable single partition topic that acts as the durable log for the data. This topic must be compacted to avoid losing data due to retention policy. Please note that changing this configuration in an existing Schema Registry / Karapace setup leads to previous schemas being inaccessible, data encoded with them potentially unreadable and schema ID sequence put out of order. It's only possible to do the switch while Schema Registry / Karapace is disabled. Defaults to `_schemas`.
+
+
+<a id="nestedblock--kafka_user_config--single_zone"></a>
+### Nested Schema for `kafka_user_config.single_zone`
+
+Optional:
+
+- `enabled` (Boolean) Whether to allocate nodes on the same Availability Zone or spread across zones available.
 
 
 <a id="nestedblock--kafka_user_config--tiered_storage"></a>
