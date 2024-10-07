@@ -4,7 +4,7 @@ import (
 	"context"
 
 	avngen "github.com/aiven/go-client-codegen"
-	"github.com/aiven/go-client-codegen/handler/serviceuser"
+	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -103,9 +103,9 @@ func resourceValkeyUserCreate(ctx context.Context, d *schema.ResourceData, clien
 	commands := schemautil.FlattenToString(d.Get("valkey_acl_commands").([]interface{}))
 	keys := schemautil.FlattenToString(d.Get("valkey_acl_keys").([]interface{}))
 	channels := schemautil.FlattenToString(d.Get("valkey_acl_channels").([]interface{}))
-	var req = serviceuser.ServiceUserCreateIn{
+	var req = service.ServiceUserCreateIn{
 		Username: username,
-		AccessControl: &serviceuser.AccessControlIn{
+		AccessControl: &service.AccessControlIn{
 			ValkeyAclCategories: &categories,
 			ValkeyAclCommands:   &commands,
 			ValkeyAclKeys:       &keys,
@@ -124,8 +124,8 @@ func resourceValkeyUserCreate(ctx context.Context, d *schema.ResourceData, clien
 	}
 
 	if _, ok := d.GetOk("password"); ok {
-		var req = serviceuser.ServiceUserCredentialsModifyIn{NewPassword: schemautil.OptionalStringPointer(d, "password"),
-			Operation: serviceuser.OperationTypeResetCredentials}
+		var req = service.ServiceUserCredentialsModifyIn{NewPassword: schemautil.OptionalStringPointer(d, "password"),
+			Operation: service.OperationTypeResetCredentials}
 		_, err := client.ServiceUserCredentialsModify(ctx, projectName, serviceName, username, &req)
 		if err != nil {
 			return err
@@ -143,7 +143,7 @@ func resourceValkeyUserUpdate(ctx context.Context, d *schema.ResourceData, clien
 		return err
 	}
 
-	_, err = client.ServiceUserCredentialsModify(ctx, projectName, serviceName, username, &serviceuser.ServiceUserCredentialsModifyIn{
+	_, err = client.ServiceUserCredentialsModify(ctx, projectName, serviceName, username, &service.ServiceUserCredentialsModifyIn{
 		NewPassword: schemautil.OptionalStringPointer(d, "password"),
 	})
 	if err != nil {

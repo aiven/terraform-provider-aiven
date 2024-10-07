@@ -36,7 +36,7 @@ func datasourceServiceIntegrationRead(ctx context.Context, d *schema.ResourceDat
 			continue
 		}
 
-		if i.IntegrationType == integrationType &&
+		if string(i.IntegrationType) == integrationType &&
 			i.SourceService == sourceServiceName &&
 			*i.DestService == destinationServiceName {
 

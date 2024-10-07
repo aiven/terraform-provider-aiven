@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
-	"github.com/aiven/go-client-codegen/handler/serviceuser"
+	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -311,7 +311,7 @@ func CopyServiceUserPropertiesFromAPIResponseToTerraform(
 
 func CopyServiceUserGenPropertiesFromAPIResponseToTerraform(
 	d *schema.ResourceData,
-	user *serviceuser.ServiceUserGetOut,
+	user *service.ServiceUserGetOut,
 	projectName string,
 	serviceName string,
 ) error {

@@ -32,4 +32,4 @@ data "aiven_account_team_project" "account_team_project1" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `team_type` (String) The Account team project type. The possible values are `admin`, `operator`, `developer`, `read_only` and `project:read_permissions`.
+- `team_type` (String) The Account team project type. The possible values are `admin`, `operator`, `developer`, `read_only` and `project:permissions:read`.
