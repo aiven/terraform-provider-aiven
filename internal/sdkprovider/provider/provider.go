@@ -277,13 +277,10 @@ func Provider(version string) (*schema.Provider, error) {
 
 	// Adds "beta" warning to the description
 	betaResources := []string{
-		"aiven_thanos",
 		"aiven_organization_permission",
 	}
 
-	betaDataSources := []string{
-		"aiven_thanos",
-	}
+	betaDataSources := []string{}
 
 	missing := append(
 		addBeta(p.ResourcesMap, betaResources...),
