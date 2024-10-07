@@ -243,7 +243,7 @@ func resourceServiceIntegrationCheckForPreexistingResource(ctx context.Context, 
 			continue
 		}
 
-		if integration.IntegrationType == integrationType &&
+		if string(integration.IntegrationType) == integrationType &&
 			integration.SourceService == sourceServiceName &&
 			*integration.DestService == destinationServiceName {
 			return &integration, nil
@@ -336,5 +336,5 @@ func resourceServiceIntegrationCopyAPIResponseToTerraform(
 		return err
 	}
 
-	return converters.Flatten(converters.ServiceIntegrationUserConfig, integrationType, d, res.UserConfig)
+	return converters.Flatten(converters.ServiceIntegrationUserConfig, string(integrationType), d, res.UserConfig)
 }
