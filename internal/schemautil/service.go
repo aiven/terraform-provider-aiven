@@ -12,6 +12,7 @@ import (
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/aiven/go-client-codegen/handler/service"
+	"github.com/aiven/go-client-codegen/handler/staticip"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -106,6 +107,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 		"project_vpc_id": {
 			Type:        schema.TypeString,
 			Optional:    true,
+			Computed:    true,
 			Description: "Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.",
 		},
 		"maintenance_window_dow": {
@@ -146,6 +148,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Computed:    true,
 			Description: "Disk space that service is currently using",
+			Deprecated:  "This will be removed in v5.0.0. Please use `additional_disk_space` to specify the space to be added to the default `disk_space` defined by the plan.",
 		},
 		"disk_space_default": {
 			Type:        schema.TypeString,
@@ -204,6 +207,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 		"service_integrations": {
 			Type:        schema.TypeList,
 			Optional:    true,
+			Computed:    true,
 			Description: "Service integrations to specify when creating a service. Not applied after initial service creation",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
@@ -369,7 +373,7 @@ func ResourceServiceRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.Errorf("unable to set tag's in schema: %s", err)
 	}
 
-	if err := d.Set("tech_emails", getTechnicalEmailsForTerraform(d, "tech_emails", s)); err != nil {
+	if err := d.Set("tech_emails", getTechnicalEmailsForTerraform(s)); err != nil {
 		return diag.Errorf("unable to set tech_emails in schema: %s", err)
 	}
 
@@ -386,24 +390,9 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 	serviceType := d.Get("service_type").(string)
 	project := d.Get("project").(string)
 
-	// During the creation of service, if disk_space is not set by a TF user,
-	// we transfer 0 values in API creation request, which makes Aiven provision
-	// a default disk space values for a common
-	var diskSpace int
-	if ds, ok := d.GetOk("disk_space"); ok {
-		diskSpace = ConvertToDiskSpaceMB(ds.(string))
-	} else {
-		// get service plan specific defaults
-		servicePlanParams, err := GetServicePlanParametersFromSchema(ctx, client, d)
-		if err != nil {
-			return diag.Errorf("error getting service default plan parameters: %s", err)
-		}
-
-		diskSpace = servicePlanParams.DiskSizeMBDefault
-
-		if ads, ok := d.GetOk("additional_disk_space"); ok {
-			diskSpace = servicePlanParams.DiskSizeMBDefault + ConvertToDiskSpaceMB(ads.(string))
-		}
+	diskSpace, err := getDiskSpaceFromStateOrDiff(ctx, d, client)
+	if err != nil {
+		return diag.Errorf("error getting default disc space: %s", err)
 	}
 
 	vpcID, err := GetProjectVPCIdPointer(d)
@@ -416,25 +405,38 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	_, err = client.Services.Create(
-		ctx,
-		project,
-		aiven.CreateServiceRequest{
-			Cloud:                 d.Get("cloud_name").(string),
-			Plan:                  d.Get("plan").(string),
-			ProjectVPCID:          vpcID,
-			ServiceIntegrations:   GetAPIServiceIntegrations(d),
-			MaintenanceWindow:     GetMaintenanceWindow(d),
-			ServiceName:           d.Get("service_name").(string),
-			ServiceType:           serviceType,
-			TerminationProtection: d.Get("termination_protection").(bool),
-			DiskSpaceMB:           diskSpace,
-			UserConfig:            cuc,
-			StaticIPs:             FlattenToString(d.Get("static_ips").(*schema.Set).List()),
-			TechnicalEmails:       getContactEmailListForAPI(d, "tech_emails"),
-		},
-	)
+	technicalEmails, err := getContactEmailListForAPI(d)
 	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	cloud := d.Get("cloud_name").(string)
+	terminationProtection := d.Get("termination_protection").(bool)
+	staticIps := FlattenToString(d.Get("static_ips").(*schema.Set).List())
+	serviceIntegrations := GetAPIServiceIntegrations(d)
+
+	diskSpaceFloat := float64(diskSpace)
+	var diskSpaceMb *float64
+	if diskSpaceFloat > 0 {
+		diskSpaceMb = &diskSpaceFloat
+	}
+
+	serviceCreate := &service.ServiceCreateIn{
+		Cloud:                 &cloud,
+		Plan:                  d.Get("plan").(string),
+		ProjectVpcId:          vpcID,
+		ServiceIntegrations:   &serviceIntegrations,
+		Maintenance:           GetMaintenanceWindow(d),
+		ServiceName:           d.Get("service_name").(string),
+		ServiceType:           serviceType,
+		TerminationProtection: &terminationProtection,
+		DiskSpaceMb:           diskSpaceMb,
+		UserConfig:            &cuc,
+		StaticIps:             &staticIps,
+		TechEmails:            technicalEmails,
+	}
+
+	if _, err = avnGen.ServiceCreate(ctx, project, serviceCreate); err != nil {
 		return diag.Errorf("error creating a service: %s", err)
 	}
 
@@ -472,7 +474,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	// On service update, we send a default disc space value for a common
 	// if the TF user does not specify it
-	diskSpace, err := getDefaultDiskSpaceIfNotSet(ctx, d, client)
+	diskSpace, err := getDiskSpaceFromStateOrDiff(ctx, d, client)
 	if err != nil {
 		return diag.Errorf("error getting default disc space: %s", err)
 	}
@@ -489,7 +491,9 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	// associate first, so that we can enable `static_ips` for a preexisting common
 	for _, aip := range ass {
-		if err := client.StaticIPs.Associate(ctx, projectName, aip, aiven.AssociateStaticIPRequest{ServiceName: serviceName}); err != nil {
+		if _, err := avnGen.ProjectStaticIPAssociate(ctx, projectName, aip, &staticip.ProjectStaticIpassociateIn{
+			ServiceName: serviceName,
+		}); err != nil {
 			return diag.Errorf("error associating Static IP (%s) to a service: %s", aip, err)
 		}
 	}
@@ -505,24 +509,35 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	technicalEmails, err := getContactEmailListForAPI(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	if _, err := client.Services.Update(
-		ctx,
-		projectName,
-		serviceName,
-		aiven.UpdateServiceRequest{
-			Cloud:                 d.Get("cloud_name").(string),
-			Plan:                  d.Get("plan").(string),
-			MaintenanceWindow:     GetMaintenanceWindow(d),
-			ProjectVPCID:          vpcID,
-			Powered:               true,
-			TerminationProtection: d.Get("termination_protection").(bool),
-			DiskSpaceMB:           diskSpace,
-			Karapace:              karapace,
-			UserConfig:            cuc,
-			TechnicalEmails:       getContactEmailListForAPI(d, "tech_emails"),
-		},
-	); err != nil {
+	cloud := d.Get("cloud_name").(string)
+	plan := d.Get("plan").(string)
+	powered := true
+	terminationProtection := d.Get("termination_protection").(bool)
+
+	diskSpaceFloat := float64(diskSpace)
+	var diskSpaceMb *float64
+	if diskSpaceFloat > 0 {
+		diskSpaceMb = &diskSpaceFloat
+	}
+	serviceUpdate := &service.ServiceUpdateIn{
+		Cloud:                 &cloud,
+		Plan:                  &plan,
+		Maintenance:           GetMaintenanceWindow(d),
+		ProjectVpcId:          vpcID,
+		Powered:               &powered,
+		TerminationProtection: &terminationProtection,
+		DiskSpaceMb:           diskSpaceMb,
+		Karapace:              karapace,
+		UserConfig:            &cuc,
+		TechEmails:            technicalEmails,
+	}
+
+	if _, err := avnGen.ServiceUpdate(ctx, projectName, serviceName, serviceUpdate); err != nil {
 		return diag.Errorf("error updating (%s) service: %s", serviceName, err)
 	}
 
@@ -532,7 +547,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	if len(dis) > 0 {
 		for _, dip := range dis {
-			if err := client.StaticIPs.Dissociate(ctx, projectName, dip); err != nil {
+			if _, err := avnGen.ProjectStaticIPDissociate(ctx, projectName, dip); err != nil {
 				return diag.Errorf("error dissociating Static IP (%s) from the service (%s): %s", dip, serviceName, err)
 			}
 		}
@@ -551,34 +566,34 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	return ResourceServiceRead(ctx, d, m)
 }
 
-func getDefaultDiskSpaceIfNotSet(ctx context.Context, d *schema.ResourceData, client *aiven.Client) (int, error) {
+func getDiskSpaceFromStateOrDiff(ctx context.Context, d ResourceStateOrResourceDiff, client *aiven.Client) (int, error) {
 	var diskSpace int
-	if ds, ok := d.GetOk("disk_space"); !ok {
-		// get service plan specific defaults
-		servicePlanParams, err := GetServicePlanParametersFromSchema(ctx, client, d)
-		if err != nil {
-			if aiven.IsNotFound(err) {
-				return 0, nil
-			}
-			return 0, fmt.Errorf("unable to get service plan parameters: %w", err)
-		}
 
-		if ads, ok := d.GetOk("additional_disk_space"); ok {
-			diskSpace = servicePlanParams.DiskSizeMBDefault + ConvertToDiskSpaceMB(ads.(string))
-			return diskSpace, nil
+	// Get service plan specific defaults
+	servicePlanParams, err := GetServicePlanParametersFromSchema(ctx, client, d)
+	if err != nil {
+		if aiven.IsNotFound(err) {
+			return 0, nil
 		}
+		return 0, fmt.Errorf("unable to get service plan parameters: %w", err)
+	}
 
-		diskSpace = servicePlanParams.DiskSizeMBDefault
-	} else {
+	// Use `additional_disk_space` if set
+	if ads, ok := d.GetOk("additional_disk_space"); ok {
+		diskSpace = servicePlanParams.DiskSizeMBDefault + ConvertToDiskSpaceMB(ads.(string))
+	} else if ds, ok := d.GetOk("disk_space"); ok {
+		// Use `disk_space` if set...
 		diskSpace = ConvertToDiskSpaceMB(ds.(string))
+	} else {
+		// ... otherwise, use the default disk space
+		diskSpace = servicePlanParams.DiskSizeMBDefault
 	}
 
 	return diskSpace, nil
 }
 
-func getTechnicalEmailsForTerraform(d *schema.ResourceData, field string, s *service.ServiceGetOut) *schema.Set {
-	_, ok := d.GetOk(field)
-	if !ok && len(s.TechEmails) == 0 {
+func getTechnicalEmailsForTerraform(s *service.ServiceGetOut) *schema.Set {
+	if len(s.TechEmails) == 0 {
 		return nil
 	}
 
@@ -588,6 +603,20 @@ func getTechnicalEmailsForTerraform(d *schema.ResourceData, field string, s *ser
 	}
 
 	return schema.NewSet(schema.HashResource(TechEmailsResourceSchema), techEmails)
+}
+
+func getReadReplicaIntegrationsForTerraform(integrations []service.ServiceIntegrationOut) ([]map[string]interface{}, error) {
+	var readReplicaIntegrations []map[string]interface{}
+	for _, integration := range integrations {
+		if integration.IntegrationType == "read_replica" {
+			integrationMap := map[string]interface{}{
+				"integration_type":    integration.IntegrationType,
+				"source_service_name": integration.SourceService,
+			}
+			readReplicaIntegrations = append(readReplicaIntegrations, integrationMap)
+		}
+	}
+	return readReplicaIntegrations, nil
 }
 
 func ResourceServiceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -650,14 +679,29 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	if s.DiskSpaceMb != nil {
 		diskSpace = int(*s.DiskSpaceMb)
 	}
+	additionalDiskSpace := diskSpace - servicePlanParams.DiskSizeMBDefault
 
-	if _, ok := d.GetOk("disk_space"); ok && diskSpace != 0 {
-		if err := d.Set("disk_space", HumanReadableByteSize(diskSpace*units.MiB)); err != nil {
+	_, isAdditionalDiskSpaceSet := d.GetOk("additional_disk_space")
+	_, isDiskSpaceSet := d.GetOk("disk_space")
+
+	// Handles two different cases:
+	//
+	// 1. During import when neither `additional_disk_space` nor `disk_space` are set
+	// 2. During create / update when `additional_disk_space` is set
+	if additionalDiskSpace > 0 && (!isDiskSpaceSet || isAdditionalDiskSpaceSet) {
+		if err := d.Set("additional_disk_space", HumanReadableByteSize(additionalDiskSpace*units.MiB)); err != nil {
+			return err
+		}
+		if err := d.Set("disk_space", nil); err != nil {
 			return err
 		}
 	}
-	if _, ok := d.GetOk("additional_disk_space"); ok && diskSpace != 0 {
-		if err := d.Set("additional_disk_space", HumanReadableByteSize((diskSpace-servicePlanParams.DiskSizeMBDefault)*units.MiB)); err != nil {
+
+	if isDiskSpaceSet && diskSpace > 0 {
+		if err := d.Set("disk_space", HumanReadableByteSize(diskSpace*units.MiB)); err != nil {
+			return err
+		}
+		if err := d.Set("additional_disk_space", nil); err != nil {
 			return err
 		}
 	}
@@ -681,7 +725,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		return err
 	}
 
-	if err := d.Set("tech_emails", getTechnicalEmailsForTerraform(d, "tech_emails", s)); err != nil {
+	if err := d.Set("tech_emails", getTechnicalEmailsForTerraform(s)); err != nil {
 		return err
 	}
 
@@ -735,6 +779,15 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 
 	if err := d.Set("components", FlattenServiceComponents(s)); err != nil {
 		return fmt.Errorf("cannot set `components` : %w", err)
+	}
+
+	// Handle read_replica service integrations
+	readReplicaIntegrations, err := getReadReplicaIntegrationsForTerraform(s.ServiceIntegrations)
+	if err != nil {
+		return err
+	}
+	if err := d.Set("service_integrations", readReplicaIntegrations); err != nil {
+		return err
 	}
 
 	return copyConnectionInfoFromAPIResponseToTerraform(d, serviceType, s.ConnectionInfo, s.Metadata)
@@ -954,15 +1007,16 @@ func DatasourceServiceRead(ctx context.Context, d *schema.ResourceData, m interf
 	return diag.Errorf("common %s/%s not found", projectName, serviceName)
 }
 
-func getContactEmailListForAPI(d *schema.ResourceData, field string) *[]aiven.ContactEmail {
-	results := make([]aiven.ContactEmail, 0)
-	valuesInterface, ok := d.GetOk(field)
-	if ok {
-		for _, emailInterface := range valuesInterface.(*schema.Set).List() {
-			results = append(results, aiven.ContactEmail{Email: emailInterface.(map[string]interface{})["email"].(string)})
+func getContactEmailListForAPI(d *schema.ResourceData) (*[]service.TechEmailIn, error) {
+	if valuesInterface, ok := d.GetOk("tech_emails"); ok {
+		var emails []service.TechEmailIn
+		err := Remarshal(valuesInterface.(*schema.Set).List(), &emails)
+		if err != nil {
+			return nil, err // Handle error appropriately
 		}
+		return &emails, nil
 	}
-	return &results
+	return &[]service.TechEmailIn{}, nil
 }
 
 func ExpandService(name string, d *schema.ResourceData) (map[string]any, error) {

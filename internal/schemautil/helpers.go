@@ -24,18 +24,20 @@ type PlanParameters struct {
 	DiskSizeMBMax     int
 }
 
-func GetAPIServiceIntegrations(d ResourceStateOrResourceDiff) []aiven.NewServiceIntegration {
-	var apiServiceIntegrations []aiven.NewServiceIntegration
+func GetAPIServiceIntegrations(d ResourceStateOrResourceDiff) []service.ServiceIntegrationIn {
+	var apiServiceIntegrations []service.ServiceIntegrationIn
 	tfServiceIntegrations := d.Get("service_integrations")
 	if tfServiceIntegrations != nil {
 		tfServiceIntegrationList := tfServiceIntegrations.([]interface{})
 		for _, definition := range tfServiceIntegrationList {
 			definitionMap := definition.(map[string]interface{})
 			sourceService := definitionMap["source_service_name"].(string)
-			apiIntegration := aiven.NewServiceIntegration{
-				IntegrationType: definitionMap["integration_type"].(string),
+			userConfig := make(map[string]any)
+			integrationType := definitionMap["integration_type"].(string)
+			apiIntegration := service.ServiceIntegrationIn{
+				IntegrationType: service.IntegrationType(integrationType),
 				SourceService:   &sourceService,
-				UserConfig:      make(map[string]interface{}),
+				UserConfig:      &userConfig,
 			}
 			apiServiceIntegrations = append(apiServiceIntegrations, apiIntegration)
 		}
@@ -61,7 +63,7 @@ func GetProjectVPCIdPointer(d ResourceStateOrResourceDiff) (*string, error) {
 	return vpcIDPointer, nil
 }
 
-func GetMaintenanceWindow(d ResourceStateOrResourceDiff) *aiven.MaintenanceWindow {
+func GetMaintenanceWindow(d ResourceStateOrResourceDiff) *service.MaintenanceIn {
 	dow := d.Get("maintenance_window_dow").(string)
 	if dow == "never" {
 		// `never` is not available in the API, but can be set on the backend
@@ -70,7 +72,7 @@ func GetMaintenanceWindow(d ResourceStateOrResourceDiff) *aiven.MaintenanceWindo
 	}
 	t := d.Get("maintenance_window_time").(string)
 	if len(dow) > 0 && len(t) > 0 {
-		return &aiven.MaintenanceWindow{DayOfWeek: dow, TimeOfDay: t}
+		return &service.MaintenanceIn{Dow: service.DowType(dow), Time: &t}
 	}
 	return nil
 }
@@ -125,7 +127,7 @@ func dynamicDiskSpaceIsAllowedByPricing(ctx context.Context, client *aiven.Clien
 func HumanReadableByteSize(s int) string {
 	// we only allow GiB as unit and show decimal places to MiB precision, this should fix rounding issues
 	// when converting from mb to human readable and back
-	var suffixes = []string{"B", "KiB", "MiB", "GiB"}
+	suffixes := []string{"B", "KiB", "MiB", "GiB"}
 
 	return units.CustomSize("%.12g%s", float64(s), 1024.0, suffixes)
 }
