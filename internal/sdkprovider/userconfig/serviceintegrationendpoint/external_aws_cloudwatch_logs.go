@@ -16,7 +16,6 @@ func externalAwsCloudwatchLogsUserConfig() *schema.Schema {
 			"access_key": {
 				Description: "AWS access key. Required permissions are logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents and logs:DescribeLogStreams. Example: `AAAAAAAAAAAAAAAAAAAA`.",
 				Required:    true,
-				Sensitive:   true,
 				Type:        schema.TypeString,
 			},
 			"log_group_name": {

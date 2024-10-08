@@ -431,7 +431,6 @@ func grafanaUserConfig() *schema.Schema {
 					"access_key": {
 						Description: "S3 access key. Requires permissions to the S3 bucket for the s3:PutObject and s3:PutObjectAcl actions. Example: `AAAAAAAAAAAAAAAAAAA`.",
 						Required:    true,
-						Sensitive:   true,
 						Type:        schema.TypeString,
 					},
 					"bucket_url": {

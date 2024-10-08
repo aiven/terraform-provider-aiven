@@ -80,7 +80,7 @@ Optional:
 
 Required:
 
-- `access_key` (String, Sensitive) AWS access key. Required permissions are logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents and logs:DescribeLogStreams. Example: `AAAAAAAAAAAAAAAAAAAA`.
+- `access_key` (String) AWS access key. Required permissions are logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents and logs:DescribeLogStreams. Example: `AAAAAAAAAAAAAAAAAAAA`.
 - `region` (String) AWS region. Example: `us-east-1`.
 - `secret_key` (String, Sensitive) AWS secret key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.
 
@@ -94,7 +94,7 @@ Optional:
 
 Required:
 
-- `access_key` (String, Sensitive) AWS access key. Required permissions are cloudwatch:PutMetricData. Example: `AAAAAAAAAAAAAAAAAAAA`.
+- `access_key` (String) AWS access key. Required permissions are cloudwatch:PutMetricData. Example: `AAAAAAAAAAAAAAAAAAAA`.
 - `namespace` (String) AWS CloudWatch Metrics Namespace. Example: `my-metrics-namespace`.
 - `region` (String) AWS region. Example: `us-east-1`.
 - `secret_key` (String, Sensitive) AWS secret key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.
@@ -105,8 +105,8 @@ Required:
 
 Required:
 
-- `access_key_id` (String, Sensitive) Access Key Id. Example: `AAAAAAAAAAAAAAAAAAA`.
-- `secret_access_key` (String, Sensitive) Secret Access Key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.
+- `access_key_id` (String) Access Key Id. Example: `AAAAAAAAAAAAAAAAAAA`.
+- `secret_access_key` (String) Secret Access Key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.
 - `url` (String) S3-compatible bucket URL. Example: `https://mybucket.s3-myregion.amazonaws.com/mydataset/`.
 
 

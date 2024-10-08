@@ -365,7 +365,7 @@ Optional:
 
 Required:
 
-- `access_key` (String, Sensitive) AWS Access key.
+- `access_key` (String) AWS Access key.
 - `base_path` (String) The path to the repository data within its container. The value of this setting should not start or end with a /.
 - `bucket` (String) S3 bucket name.
 - `region` (String) S3 region.
