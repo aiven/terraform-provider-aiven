@@ -197,8 +197,8 @@ github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7l
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/aiven/aiven-go-client/v2 v2.27.0 h1:iTr85xDpD8td3Okj2+djUOfGLlVvngvUwaz/bla3Hzc=
 github.com/aiven/aiven-go-client/v2 v2.27.0/go.mod h1:KdHfLIlIRZIfCSEBd39j1Q81jlSb6Nd+oCQKqERfnuA=
-github.com/aiven/go-api-schemas v1.89.0 h1:YR2BMPMrp/UHhnP1qs4v0SHWn/Ebz+OTOpX+hD5UWN0=
-github.com/aiven/go-api-schemas v1.89.0/go.mod h1:V8xqp59BeC2ptwKjh6MnxkzKVRxCWJRo3t6GvqgmURQ=
+github.com/aiven/go-api-schemas v1.90.0 h1:arK2qa5x0PrT88aZwyp2trJCbpYLbho+R9boJvpYYls=
+github.com/aiven/go-api-schemas v1.90.0/go.mod h1:V8xqp59BeC2ptwKjh6MnxkzKVRxCWJRo3t6GvqgmURQ=
 github.com/aiven/go-client-codegen v0.38.0 h1:WnH9CEtVbolqqKr9PlIZZE9pG4lWkNK+H6iyHO/b010=
 github.com/aiven/go-client-codegen v0.38.0/go.mod h1:FfbH32Xb+Hx5zeKTIug1Y8SfMeB+AKNRzxgrzkts2oA=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
@@ -390,8 +390,8 @@ github.com/googleapis/gax-go/v2 v2.12.0 h1:A+gCJKdRfqXkr+BIRGtZLibNXf0m1f9E4HG56
 github.com/googleapis/gax-go/v2 v2.12.0/go.mod h1:y+aIqrI5eb1YGMVJfuV3185Ts/D7qKpsEkdD5+I6QGU=
 github.com/googleapis/go-type-adapters v1.0.0/go.mod h1:zHW75FOG2aur7gAO2B+MLby+cLsWGBF62rFAi7WjWO4=
 github.com/grpc-ecosystem/grpc-gateway v1.16.0/go.mod h1:BDjrQk3hbvj6Nolgz8mAMFbcEtjT1g+wF4CSlocrBnw=
-github.com/gruntwork-io/terratest v0.47.1 h1:qOaxnL7Su5+KpDHYUN/ek1jn8ImvCKtOkaY4OSMS4tI=
-github.com/gruntwork-io/terratest v0.47.1/go.mod h1:LnYX8BN5WxUMpDr8rtD39oToSL4CBERWSCusbJ0d/64=
+github.com/gruntwork-io/terratest v0.47.2 h1:t6iWwsqJH7Gx0RwXleU/vjc+2c0JXRMdj3DxYXTBssQ=
+github.com/gruntwork-io/terratest v0.47.2/go.mod h1:LnYX8BN5WxUMpDr8rtD39oToSL4CBERWSCusbJ0d/64=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/errwrap v1.1.0 h1:OxrOeh75EUXMY8TBjag2fzXGZ40LB6IKw45YeGUDY2I=
 github.com/hashicorp/errwrap v1.1.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=

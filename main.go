@@ -11,7 +11,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/server"
 )
 
-//go:generate go run ./ucgenerator/... --excludeServices elasticsearch --excludeEndpoints autoscaler
+//go:generate go run ./ucgenerator/... --excludeServices elasticsearch,alloydbomni --excludeEndpoints autoscaler
 
 // registryPrefix is the registry prefix for the provider.
 const registryPrefix = "registry.terraform.io/"
@@ -48,7 +48,6 @@ func main() {
 		},
 		serveOpts...,
 	)
-
 	if err != nil {
 		log.Panic(err)
 	}
