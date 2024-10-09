@@ -171,6 +171,7 @@ Read-Only:
 - `innodb_write_io_threads` (Number)
 - `interactive_timeout` (Number)
 - `internal_tmp_mem_storage_engine` (String)
+- `log_output` (String)
 - `long_query_time` (Number)
 - `max_allowed_packet` (Number)
 - `max_heap_table_size` (Number)

@@ -12,6 +12,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Remove `aiven_thanos` from beta resources
+- Adds `stringtype` to `flink_external_postgresql_user_config` service integration
 - Fix `terraform import` for services with additional disk space or read replica service integration
 
 ## [4.26.0] - 2024-09-25

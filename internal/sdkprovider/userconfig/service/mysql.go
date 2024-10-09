@@ -240,8 +240,14 @@ func mysqlUserConfig() *schema.Schema {
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"TempTable", "MEMORY"}, false),
 					},
+					"log_output": {
+						Description:  "Enum: `INSIGHTS`, `NONE`, `TABLE`, `INSIGHTS,TABLE`. The slow log output destination when slow_query_log is ON. To enable MySQL AI Insights, choose INSIGHTS. To use MySQL AI Insights and the mysql.slow_log table at the same time, choose INSIGHTS,TABLE. To only use the mysql.slow_log table, choose TABLE. To silence slow logs, choose NONE.",
+						Optional:     true,
+						Type:         schema.TypeString,
+						ValidateFunc: validation.StringInSlice([]string{"INSIGHTS", "NONE", "TABLE", "INSIGHTS,TABLE"}, false),
+					},
 					"long_query_time": {
-						Description: "The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Default is 10s. Example: `10`.",
+						Description: "The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Example: `10`.",
 						Optional:    true,
 						Type:        schema.TypeFloat,
 					},
@@ -271,7 +277,7 @@ func mysqlUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"slow_query_log": {
-						Description: "Slow query log enables capturing of slow queries. Setting slow_query_log to false also truncates the mysql.slow_log table. Default is off.",
+						Description: "Slow query log enables capturing of slow queries. Setting slow_query_log to false also truncates the mysql.slow_log table.",
 						Optional:    true,
 						Type:        schema.TypeBool,
 					},

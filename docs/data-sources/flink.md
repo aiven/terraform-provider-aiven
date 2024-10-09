@@ -94,6 +94,7 @@ Read-Only:
 - `pekko_ask_timeout_s` (Number)
 - `pekko_framesize_b` (Number)
 - `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--flink_user_config--privatelink_access))
+- `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--flink_user_config--public_access))
 - `service_log` (Boolean)
 - `static_ips` (Boolean)
 
@@ -113,6 +114,14 @@ Read-Only:
 
 - `flink` (Boolean)
 - `prometheus` (Boolean)
+
+
+<a id="nestedobjatt--flink_user_config--public_access"></a>
+### Nested Schema for `flink_user_config.public_access`
+
+Read-Only:
+
+- `flink` (Boolean)
 
 
 

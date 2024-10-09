@@ -42,6 +42,7 @@ resource "aiven_service_integration" "example_integration" {
 - `external_aws_cloudwatch_metrics_user_config` (Block List, Max: 1) ExternalAwsCloudwatchMetrics user configurable settings (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config))
 - `external_elasticsearch_logs_user_config` (Block List, Max: 1) ExternalElasticsearchLogs user configurable settings (see [below for nested schema](#nestedblock--external_elasticsearch_logs_user_config))
 - `external_opensearch_logs_user_config` (Block List, Max: 1) ExternalOpensearchLogs user configurable settings (see [below for nested schema](#nestedblock--external_opensearch_logs_user_config))
+- `flink_external_postgresql_user_config` (Block List, Max: 1) FlinkExternalPostgresql user configurable settings (see [below for nested schema](#nestedblock--flink_external_postgresql_user_config))
 - `kafka_connect_user_config` (Block List, Max: 1) KafkaConnect user configurable settings (see [below for nested schema](#nestedblock--kafka_connect_user_config))
 - `kafka_logs_user_config` (Block List, Max: 1) KafkaLogs user configurable settings (see [below for nested schema](#nestedblock--kafka_logs_user_config))
 - `kafka_mirrormaker_user_config` (Block List, Max: 1) KafkaMirrormaker user configurable settings (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config))
@@ -223,6 +224,14 @@ Optional:
 Optional:
 
 - `selected_log_fields` (List of String) The list of logging fields that will be sent to the integration logging service. The MESSAGE and timestamp fields are always sent.
+
+
+<a id="nestedblock--flink_external_postgresql_user_config"></a>
+### Nested Schema for `flink_external_postgresql_user_config`
+
+Optional:
+
+- `stringtype` (String) Enum: `unspecified`. If stringtype is set to unspecified, parameters will be sent to the server as untyped values.
 
 
 <a id="nestedblock--kafka_connect_user_config"></a>
