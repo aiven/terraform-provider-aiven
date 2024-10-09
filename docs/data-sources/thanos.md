@@ -98,9 +98,7 @@ Read-Only:
 
 - `query_frontend_uri` (String)
 - `query_uri` (String)
-- `receiver_ingesting_remote_write_uri` (String)
 - `receiver_remote_write_uri` (String)
-- `store_uri` (String)
 - `uris` (List of String)
 
 

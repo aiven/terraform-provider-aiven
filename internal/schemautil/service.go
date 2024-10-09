@@ -884,7 +884,6 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 		props["uris"] = connectionInfo.Thanos
 		setProp(props, "query_frontend_uri", connectionInfo.QueryFrontendUri)
 		setProp(props, "query_uri", connectionInfo.QueryUri)
-		setProp(props, "receiver_ingesting_remote_write_uri", connectionInfo.ReceiverIngestingRemoteWriteUri)
 		setProp(props, "receiver_remote_write_uri", connectionInfo.ReceiverRemoteWriteUri)
 	case ServiceTypeMySQL:
 		props["uris"] = connectionInfo.Mysql

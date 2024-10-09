@@ -300,10 +300,6 @@ func testAccCheckAivenServiceThanosAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("expected to get a correct public_access.query from Aiven")
 		}
 
-		if a["thanos_user_config.0.public_access.0.store"] != "false" {
-			return fmt.Errorf("expected to get a correct public_access.store from Aiven")
-		}
-
 		if a["thanos.0.uris.#"] == "" {
 			return fmt.Errorf("expected to get correct uris from Aiven")
 		}
@@ -314,10 +310,6 @@ func testAccCheckAivenServiceThanosAttributes(n string) resource.TestCheckFunc {
 
 		if a["thanos.0.query_uri"] == "" {
 			return fmt.Errorf("expected to get correct query_uri from Aiven")
-		}
-
-		if a["thanos.0.receiver_ingesting_remote_write_uri"] == "" {
-			return fmt.Errorf("expected to get correct receiver_ingesting_remote_write_uri from Aiven")
 		}
 
 		if a["thanos.0.receiver_remote_write_uri"] == "" {

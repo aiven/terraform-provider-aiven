@@ -12,6 +12,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Remove `aiven_thanos` from beta resources
+- Removes `receiver_ingesting_remote_write_uri` and `store_uri` Thanos connection info fields
 - Adds `stringtype` to `flink_external_postgresql_user_config` service integration
 - Fix `terraform import` for services with additional disk space or read replica service integration
 
