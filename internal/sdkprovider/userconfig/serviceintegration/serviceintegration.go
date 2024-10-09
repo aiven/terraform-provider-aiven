@@ -20,6 +20,8 @@ func GetUserConfig(kind string) *schema.Schema {
 		return externalElasticsearchLogsUserConfig()
 	case "external_opensearch_logs":
 		return externalOpensearchLogsUserConfig()
+	case "flink_external_postgresql":
+		return flinkExternalPostgresqlUserConfig()
 	case "kafka_connect":
 		return kafkaConnectUserConfig()
 	case "kafka_logs":
@@ -42,5 +44,5 @@ func GetFieldMapping(kind string) map[string]string {
 	return map[string]map[string]string{}[kind]
 }
 func UserConfigTypes() []string {
-	return []string{"clickhouse_kafka", "clickhouse_postgresql", "datadog", "external_aws_cloudwatch_logs", "external_aws_cloudwatch_metrics", "external_elasticsearch_logs", "external_opensearch_logs", "kafka_connect", "kafka_logs", "kafka_mirrormaker", "logs", "metrics", "prometheus"}
+	return []string{"clickhouse_kafka", "clickhouse_postgresql", "datadog", "external_aws_cloudwatch_logs", "external_aws_cloudwatch_metrics", "external_elasticsearch_logs", "external_opensearch_logs", "flink_external_postgresql", "kafka_connect", "kafka_logs", "kafka_mirrormaker", "logs", "metrics", "prometheus"}
 }

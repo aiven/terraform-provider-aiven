@@ -360,7 +360,7 @@ Optional:
 
 Optional:
 
-- `enabled` (Boolean) Whether to allocate nodes on the same Availability Zone or spread across zones available.
+- `enabled` (Boolean) Whether to allocate nodes on the same Availability Zone or spread across zones available. By default service nodes are spread across different AZs. The single AZ support is best-effort and may temporarily allocate nodes in different AZs e.g. in case of capacity limitations in one AZ.
 
 
 <a id="nestedblock--kafka_user_config--tiered_storage"></a>

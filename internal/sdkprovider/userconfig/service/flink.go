@@ -102,6 +102,17 @@ func flinkUserConfig() *schema.Schema {
 				Optional: true,
 				Type:     schema.TypeList,
 			},
+			"public_access": {
+				Description: "Allow access to selected service ports from the public Internet",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"flink": {
+					Description: "Allow clients to connect to flink from the public internet for service nodes that are in a project VPC or another type of private network.",
+					Optional:    true,
+					Type:        schema.TypeBool,
+				}}},
+				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
 			"service_log": {
 				Description: "Store logs for the service so that they are available in the HTTP API and console.",
 				Optional:    true,

@@ -91,6 +91,7 @@ Optional:
 - `pekko_ask_timeout_s` (Number) Timeout in seconds used for all futures and blocking Pekko requests. Example: `10`.
 - `pekko_framesize_b` (Number) Maximum size in bytes for messages exchanged between the JobManager and the TaskManagers. Example: `10485760`.
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--flink_user_config--privatelink_access))
+- `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--flink_user_config--public_access))
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `static_ips` (Boolean) Use static public IP addresses.
 
@@ -113,6 +114,14 @@ Optional:
 
 - `flink` (Boolean) Enable flink.
 - `prometheus` (Boolean) Enable prometheus.
+
+
+<a id="nestedblock--flink_user_config--public_access"></a>
+### Nested Schema for `flink_user_config.public_access`
+
+Optional:
+
+- `flink` (Boolean) Allow clients to connect to flink from the public internet for service nodes that are in a project VPC or another type of private network.
 
 
 

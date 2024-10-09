@@ -41,6 +41,7 @@ data "aiven_service_integration" "example_integration" {
 - `external_aws_cloudwatch_metrics_user_config` (List of Object) ExternalAwsCloudwatchMetrics user configurable settings (see [below for nested schema](#nestedatt--external_aws_cloudwatch_metrics_user_config))
 - `external_elasticsearch_logs_user_config` (List of Object) ExternalElasticsearchLogs user configurable settings (see [below for nested schema](#nestedatt--external_elasticsearch_logs_user_config))
 - `external_opensearch_logs_user_config` (List of Object) ExternalOpensearchLogs user configurable settings (see [below for nested schema](#nestedatt--external_opensearch_logs_user_config))
+- `flink_external_postgresql_user_config` (List of Object) FlinkExternalPostgresql user configurable settings (see [below for nested schema](#nestedatt--flink_external_postgresql_user_config))
 - `id` (String) The ID of this resource.
 - `integration_id` (String) The ID of the Aiven service integration.
 - `kafka_connect_user_config` (List of Object) KafkaConnect user configurable settings (see [below for nested schema](#nestedatt--kafka_connect_user_config))
@@ -211,6 +212,14 @@ Read-Only:
 Read-Only:
 
 - `selected_log_fields` (List of String)
+
+
+<a id="nestedatt--flink_external_postgresql_user_config"></a>
+### Nested Schema for `flink_external_postgresql_user_config`
+
+Read-Only:
+
+- `stringtype` (String)
 
 
 <a id="nestedatt--kafka_connect_user_config"></a>
