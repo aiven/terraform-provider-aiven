@@ -9,7 +9,7 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!-- ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+## [4.27.0] - 2024-10-09
 
 - Remove `aiven_thanos` from beta resources
 - Removes `receiver_ingesting_remote_write_uri` and `store_uri` Thanos connection info fields
