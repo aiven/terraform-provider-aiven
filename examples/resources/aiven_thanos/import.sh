@@ -1,0 +1,1 @@
+terraform import aiven_thanos.example_thanos PROJECT/SERVICE_NAME
