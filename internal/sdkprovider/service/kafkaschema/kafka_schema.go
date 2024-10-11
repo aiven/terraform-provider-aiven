@@ -10,6 +10,7 @@ import (
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/aiven/go-client-codegen/handler/kafkaschemaregistry"
+	"github.com/hamba/avro/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
@@ -46,10 +47,11 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 		ForceNew: true,
-		Description: "Kafka Schema configuration type. Defaults to AVRO. Possible values are AVRO, JSON, " +
-			"and PROTOBUF.",
-		Default:      "AVRO",
-		ValidateFunc: validation.StringInSlice([]string{"AVRO", "JSON", "PROTOBUF"}, false),
+		Description: userconfig.
+			Desc("Kafka Schema configuration type. Defaults to AVRO").
+			PossibleValuesString(kafkaschemaregistry.SchemaTypeChoices()...).Build(),
+		Default:      kafkaschemaregistry.SchemaTypeAvro,
+		ValidateFunc: validation.StringInSlice(kafkaschemaregistry.SchemaTypeChoices(), false),
 		DiffSuppressFunc: func(_, oldValue, _ string, d *schema.ResourceData) bool {
 			// This field can't be retrieved once resource is created.
 			// That produces a diff on plan on resource import.
@@ -279,27 +281,43 @@ func resourceKafkaSchemaDelete(ctx context.Context, d *schema.ResourceData, m in
 	return nil
 }
 
-func resourceKafkaSchemaCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-	client := m.(*aiven.Client)
+func resourceKafkaSchemaCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, _ any) error {
+	client, err := common.GenClient()
+	if err != nil {
+		return err
+	}
+
+	schemaType := kafkaschemaregistry.SchemaType(d.Get("schema_type").(string))
+	schemaPayload := d.Get("schema").(string)
+	if schemaType == kafkaschemaregistry.SchemaTypeAvro {
+		_, err = avro.Parse(schemaPayload)
+		if err != nil {
+			return fmt.Errorf("schema validation error: %w", err)
+		}
+	}
 
 	// no previous version: allow the diff, nothing to check compatibility against
 	if _, ok := d.GetOk("version"); !ok {
 		return nil
 	}
 
-	if compatible, err := client.KafkaSubjectSchemas.Validate(
+	compatible, err := client.ServiceSchemaRegistryCompatibility(
 		ctx,
 		d.Get("project").(string),
 		d.Get("service_name").(string),
 		d.Get("subject_name").(string),
 		d.Get("version").(int),
-		aiven.KafkaSchemaSubject{
-			Schema:     d.Get("schema").(string),
-			SchemaType: d.Get("schema_type").(string),
+		&kafkaschemaregistry.ServiceSchemaRegistryCompatibilityIn{
+			Schema:     schemaPayload,
+			SchemaType: schemaType,
 		},
-	); err != nil {
+	)
+
+	if err != nil {
 		return fmt.Errorf("unable to check schema validity: %w", err)
-	} else if !compatible {
+	}
+
+	if !compatible {
 		return fmt.Errorf("schema is not compatible with previous version")
 	}
 

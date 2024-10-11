@@ -548,3 +548,38 @@ func testAccCheckAivenKafkaSchemaAttributes(n string) resource.TestCheckFunc {
 		return nil
 	}
 }
+
+const invalidAvroSchemaConfig = `
+resource "aiven_kafka_schema" "foo" {
+  project      = "foo"
+  service_name = "bar"
+  subject_name = "baz"
+
+  schema = <<EOT
+    {
+	  "name": "foo",
+	  "type": "record",
+	  "fields": [
+		{
+		  "name": "foo",
+		  "type": "enum",
+		  "symbols": ["foo", "bar"]
+		}
+	  ]
+	}
+  EOT
+}`
+
+func TestAccAivenKafkaSchema_invalid_avro_schema(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenKafkaSchemaResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config:      invalidAvroSchemaConfig,
+				ExpectError: regexp.MustCompile(`Error: schema validation error: avro: unknown type: enum`),
+			},
+		},
+	})
+}
