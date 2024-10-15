@@ -26,7 +26,7 @@ resource "aiven_project_user" "mytestuser" {
 ### Required
 
 - `email` (String) Email address of the user in lowercase. Changing this property forces recreation of the resource.
-- `member_type` (String) Project membership type. The possible values are `admin`, `developer`, `operator`, `project:permissions:read` and `read_only`.
+- `member_type` (String) Project membership type. The possible values are `admin`, `developer`, `operator`, `project:permissions:read`, `read_only` and `service:logs:read`.
 - `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional
