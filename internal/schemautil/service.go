@@ -415,10 +415,9 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 	staticIps := FlattenToString(d.Get("static_ips").(*schema.Set).List())
 	serviceIntegrations := GetAPIServiceIntegrations(d)
 
-	diskSpaceFloat := float64(diskSpace)
-	var diskSpaceMb *float64
-	if diskSpaceFloat > 0 {
-		diskSpaceMb = &diskSpaceFloat
+	var diskSpaceMb *int
+	if diskSpace > 0 {
+		diskSpaceMb = &diskSpace
 	}
 
 	serviceCreate := &service.ServiceCreateIn{
@@ -519,10 +518,9 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	powered := true
 	terminationProtection := d.Get("termination_protection").(bool)
 
-	diskSpaceFloat := float64(diskSpace)
-	var diskSpaceMb *float64
-	if diskSpaceFloat > 0 {
-		diskSpaceMb = &diskSpaceFloat
+	var diskSpaceMb *int
+	if diskSpace > 0 {
+		diskSpaceMb = &diskSpace
 	}
 	serviceUpdate := &service.ServiceUpdateIn{
 		Cloud:                 &cloud,
@@ -677,7 +675,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 
 	diskSpace := 0
 	if s.DiskSpaceMb != nil {
-		diskSpace = int(*s.DiskSpaceMb)
+		diskSpace = *s.DiskSpaceMb
 	}
 	additionalDiskSpace := diskSpace - servicePlanParams.DiskSizeMBDefault
 
