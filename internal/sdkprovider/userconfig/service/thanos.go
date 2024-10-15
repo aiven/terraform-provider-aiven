@@ -25,6 +25,7 @@ func thanosUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"env": {
+				Deprecated:  "This property is deprecated.",
 				Description: "Environmental variables.",
 				Optional:    true,
 				Type:        schema.TypeMap,

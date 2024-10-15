@@ -245,7 +245,9 @@ Read-Only:
 - `plugins_alerting_filter_by_backend_roles` (Boolean)
 - `reindex_remote_whitelist` (List of String)
 - `script_max_compilations_rate` (String)
+- `search_backpressure` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_backpressure))
 - `search_max_buckets` (Number)
+- `shard_indexing_pressure` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure))
 - `thread_pool_analyze_queue_size` (Number)
 - `thread_pool_analyze_size` (Number)
 - `thread_pool_force_merge_size` (Number)
@@ -291,6 +293,105 @@ Read-Only:
 - `max_tracked_clients` (Number)
 - `time_window_seconds` (Number)
 - `type` (String)
+
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--search_backpressure"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_backpressure`
+
+Read-Only:
+
+- `mode` (String)
+- `node_duress` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_backpressure--node_duress))
+- `search_shard_task` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_backpressure--search_shard_task))
+- `search_task` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_backpressure--search_task))
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--search_backpressure--node_duress"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_backpressure.node_duress`
+
+Read-Only:
+
+- `cpu_threshold` (Number)
+- `heap_threshold` (Number)
+- `num_successive_breaches` (Number)
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--search_backpressure--search_shard_task"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_backpressure.search_shard_task`
+
+Read-Only:
+
+- `cancellation_burst` (Number)
+- `cancellation_rate` (Number)
+- `cancellation_ratio` (Number)
+- `cpu_time_millis_threshold` (Number)
+- `elapsed_time_millis_threshold` (Number)
+- `heap_moving_average_window_size` (Number)
+- `heap_percent_threshold` (Number)
+- `heap_variance` (Number)
+- `total_heap_percent_threshold` (Number)
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--search_backpressure--search_task"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_backpressure.search_task`
+
+Read-Only:
+
+- `cancellation_burst` (Number)
+- `cancellation_rate` (Number)
+- `cancellation_ratio` (Number)
+- `cpu_time_millis_threshold` (Number)
+- `elapsed_time_millis_threshold` (Number)
+- `heap_moving_average_window_size` (Number)
+- `heap_percent_threshold` (Number)
+- `heap_variance` (Number)
+- `total_heap_percent_threshold` (Number)
+
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure"></a>
+### Nested Schema for `opensearch_user_config.opensearch.shard_indexing_pressure`
+
+Read-Only:
+
+- `enabled` (Boolean)
+- `enforced` (Boolean)
+- `operating_factor` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure--operating_factor))
+- `primary_parameter` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter))
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure--operating_factor"></a>
+### Nested Schema for `opensearch_user_config.opensearch.shard_indexing_pressure.operating_factor`
+
+Read-Only:
+
+- `lower` (Number)
+- `optimal` (Number)
+- `upper` (Number)
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter"></a>
+### Nested Schema for `opensearch_user_config.opensearch.shard_indexing_pressure.primary_parameter`
+
+Read-Only:
+
+- `node` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter--node))
+- `shard` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter--shard))
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter--node"></a>
+### Nested Schema for `opensearch_user_config.opensearch.shard_indexing_pressure.primary_parameter.node`
+
+Read-Only:
+
+- `soft_limit` (Number)
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure--primary_parameter--shard"></a>
+### Nested Schema for `opensearch_user_config.opensearch.shard_indexing_pressure.primary_parameter.shard`
+
+Read-Only:
+
+- `min_limit` (Number)
+
 
 
 

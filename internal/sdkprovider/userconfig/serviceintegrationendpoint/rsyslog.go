@@ -33,6 +33,7 @@ func rsyslogUserConfig() *schema.Schema {
 			"key": {
 				Description: "PEM encoded client key. Example: `-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n`.",
 				Optional:    true,
+				Sensitive:   true,
 				Type:        schema.TypeString,
 			},
 			"logline": {
