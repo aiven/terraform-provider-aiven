@@ -386,24 +386,24 @@ func ResourceDataGet(d *schema.ResourceData, dto any, fns ...KVModifier) error {
 			k, value = f(k, value)
 		}
 
-		m[k] = serializeValue(value)
+		m[k] = serializeGet(value)
 	}
 
 	return Remarshal(&m, dto)
 }
 
-func serializeValue(value any) any {
+func serializeGet(value any) any {
 	switch t := value.(type) {
 	case *schema.Set:
-		return serializeValue(t.List())
+		return serializeGet(t.List())
 	case []any:
 		for i, v := range t {
-			t[i] = serializeValue(v)
+			t[i] = serializeGet(v)
 		}
 		return t
 	case map[string]any:
 		for k, v := range t {
-			t[k] = serializeValue(v)
+			t[k] = serializeGet(v)
 		}
 	}
 	return value
@@ -442,6 +442,7 @@ func ResourceDataSet(s map[string]*schema.Schema, d *schema.ResourceData, dto an
 		}
 	}
 
+	m = serializeSet(s, m)
 	for k := range s {
 		if v, ok := m[k]; ok {
 			if err = d.Set(k, v); err != nil {
@@ -450,6 +451,36 @@ func ResourceDataSet(s map[string]*schema.Schema, d *schema.ResourceData, dto an
 		}
 	}
 	return nil
+}
+
+func serializeSet(s map[string]*schema.Schema, m map[string]any) map[string]any {
+	for k, prop := range s {
+		value, ok := m[k]
+		if !ok {
+			continue
+		}
+
+		res, ok := prop.Elem.(*schema.Resource)
+		if !ok {
+			continue
+		}
+
+		// When we have an object, we need to convert it to a list.
+		// So there is no difference between a single object and a list of objects.
+		var items []any
+		switch element := value.(type) {
+		case map[string]any:
+			items = append(items, serializeSet(res.Schema, element))
+		case []any:
+			for _, v := range element {
+				items = append(items, serializeSet(res.Schema, v.(map[string]any)))
+			}
+		}
+
+		m[k] = items
+	}
+
+	return m
 }
 
 // RenameAliases renames field names on object top level
