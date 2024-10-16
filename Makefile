@@ -174,10 +174,14 @@ sweep-check:
 
 generate: gen-go docs
 
-
+OLD_SCHEMA ?= .oldSchema.json
+CHANGELOG := PROVIDER_AIVEN_ENABLE_BETA=1 go run ./changelog/...
 gen-go:
-	go generate ./...
+	$(CHANGELOG) --save > $(OLD_SCHEMA)
+	go generate ./...;
 	$(MAKE) fmt-imports
+	$(CHANGELOG) --diff < $(OLD_SCHEMA)
+	rm $(OLD_SCHEMA)
 
 
 docs: $(TFPLUGINDOCS)
