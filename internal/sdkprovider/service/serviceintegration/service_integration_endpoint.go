@@ -12,6 +12,7 @@ import (
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig/stateupgrader"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/converters"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/serviceintegrationendpoint"
@@ -36,8 +37,7 @@ func aivenServiceIntegrationEndpointSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"endpoint_type": {
-			Description: "Type of the service integration endpoint. Possible values: " +
-				schemautil.JoinQuoted(service.EndpointTypeChoices(), ", ", "`"),
+			Description:  userconfig.Desc("Type of the service integration endpoint").PossibleValuesString(service.EndpointTypeChoices()...).Build(),
 			ForceNew:     true,
 			Required:     true,
 			Type:         schema.TypeString,
