@@ -11,6 +11,8 @@ resource "aiven_kafka_topic" "example_topic" {
     cleanup_policy = "compact,delete"
   }
 
+  owner_user_group_id = aiven_organization_user_group.example.group_id
+
   timeouts {
     create = "1m"
     read   = "5m"
