@@ -194,7 +194,7 @@ var aivenKafkaTopicSchema = map[string]*schema.Schema{
 	"owner_user_group_id": {
 		Type:        schema.TypeString,
 		Optional:    true,
-		Description: "The user group that is the owner of the topic",
+		Description: "The ID of the user group that owns the topic. Assigning ownership to decentralize topic management is part of [Aiven for Apache Kafka® governance](https://aiven.io/docs/products/kafka/concepts/governance-overview).",
 	},
 	"termination_protection": {
 		Type:        schema.TypeBool,

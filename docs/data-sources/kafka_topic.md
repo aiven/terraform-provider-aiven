@@ -33,7 +33,7 @@ data "aiven_kafka_topic" "example_topic" {
 
 - `config` (List of Object) [Advanced parameters](https://aiven.io/docs/products/kafka/reference/advanced-params) to configure topics. (see [below for nested schema](#nestedatt--config))
 - `id` (String) The ID of this resource.
-- `owner_user_group_id` (String) The user group that is the owner of the topic
+- `owner_user_group_id` (String) The ID of the user group that owns the topic. Assigning ownership to decentralize topic management is part of [Aiven for Apache Kafka® governance](https://aiven.io/docs/products/kafka/concepts/governance-overview).
 - `partitions` (Number) The number of partitions to create in the topic.
 - `replication` (Number) The replication factor for the topic.
 - `tag` (Set of Object) Tags for the topic. (see [below for nested schema](#nestedatt--tag))
