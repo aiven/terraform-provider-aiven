@@ -17,8 +17,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/samber/lo"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/converters"
 )
 
@@ -70,6 +72,16 @@ func ServiceCommonSchemaWithUserConfig(kind string) map[string]*schema.Schema {
 	s := ServiceCommonSchema()
 	converters.SetUserConfig(converters.ServiceUserConfig, kind, s)
 	return s
+}
+
+func bootstrapIntegrationTypes() []string {
+	types := []service.IntegrationType{
+		service.IntegrationTypeReadReplica,
+		service.IntegrationTypeDisasterRecovery,
+	}
+	return lo.Map(types, func(item service.IntegrationType, _ int) string {
+		return string(item)
+	})
 }
 
 func ServiceCommonSchema() map[string]*schema.Schema {
@@ -217,9 +229,10 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 						Description: "Name of the source service",
 					},
 					"integration_type": {
-						Type:        schema.TypeString,
-						Required:    true,
-						Description: "Type of the service integration. The only supported value at the moment is `read_replica`",
+						Type:         schema.TypeString,
+						Required:     true,
+						Description:  userconfig.Desc("Type of the service integration").PossibleValuesString(bootstrapIntegrationTypes()...).Build(),
+						ValidateFunc: validation.StringInSlice(bootstrapIntegrationTypes(), false),
 					},
 				},
 			},
@@ -603,18 +616,19 @@ func getTechnicalEmailsForTerraform(s *service.ServiceGetOut) *schema.Set {
 	return schema.NewSet(schema.HashResource(TechEmailsResourceSchema), techEmails)
 }
 
-func getReadReplicaIntegrationsForTerraform(integrations []service.ServiceIntegrationOut) ([]map[string]interface{}, error) {
-	var readReplicaIntegrations []map[string]interface{}
+func getBootstrapIntegrationsForTerraform(integrations []service.ServiceIntegrationOut) ([]map[string]interface{}, error) {
+	var result []map[string]interface{}
 	for _, integration := range integrations {
-		if integration.IntegrationType == "read_replica" {
+		switch integration.IntegrationType {
+		case service.IntegrationTypeReadReplica, service.IntegrationTypeDisasterRecovery:
 			integrationMap := map[string]interface{}{
 				"integration_type":    integration.IntegrationType,
 				"source_service_name": integration.SourceService,
 			}
-			readReplicaIntegrations = append(readReplicaIntegrations, integrationMap)
+			result = append(result, integrationMap)
 		}
 	}
-	return readReplicaIntegrations, nil
+	return result, nil
 }
 
 func ResourceServiceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -779,12 +793,12 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		return fmt.Errorf("cannot set `components` : %w", err)
 	}
 
-	// Handle read_replica service integrations
-	readReplicaIntegrations, err := getReadReplicaIntegrationsForTerraform(s.ServiceIntegrations)
+	// Handle bootstrap service integrations
+	integrations, err := getBootstrapIntegrationsForTerraform(s.ServiceIntegrations)
 	if err != nil {
 		return err
 	}
-	if err := d.Set("service_integrations", readReplicaIntegrations); err != nil {
+	if err := d.Set("service_integrations", integrations); err != nil {
 		return err
 	}
 
