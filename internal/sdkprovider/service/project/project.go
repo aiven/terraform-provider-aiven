@@ -30,12 +30,9 @@ var aivenProjectSchema = map[string]*schema.Schema{
 	"account_id": {
 		Type:        schema.TypeString,
 		Optional:    true,
+		Computed:    true,
 		Description: userconfig.Desc("Link a project to an existing account using its account ID. This field is deprecated. Use `parent_id` instead.").Referenced().Build(),
 		Deprecated:  "Use parent_id instead. This field will be removed in the next major release.",
-		DiffSuppressFunc: func(_, _, _ string, d *schema.ResourceData) bool {
-			_, ok := d.GetOk("parent_id")
-			return ok
-		},
 	},
 	"parent_id": {
 		Type:     schema.TypeString,
@@ -43,10 +40,6 @@ var aivenProjectSchema = map[string]*schema.Schema{
 		Description: userconfig.Desc(
 			"Link a project to an [organization, organizational unit,](https://aiven.io/docs/platform/concepts/orgs-units-projects) or account by using its ID.",
 		).Referenced().Build(),
-		DiffSuppressFunc: func(_, _, _ string, d *schema.ResourceData) bool {
-			_, ok := d.GetOk("account_id")
-			return ok
-		},
 	},
 	"copy_from_project": {
 		Type:             schema.TypeString,
@@ -438,7 +431,7 @@ func setProjectTerraformProperties(
 	client *aiven.Client,
 	project *aiven.Project,
 ) diag.Diagnostics {
-	if stateID, ok := d.GetOk("parent_id"); ok {
+	if stateID := d.Get("parent_id"); stateID != "" {
 		idToSet, err := schemautil.DetermineMixedOrganizationConstraintIDToStore(
 			ctx,
 			client,
