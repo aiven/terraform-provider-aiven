@@ -9,6 +9,10 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!-- ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Fix `aiven_project`: can't migrate from `account_id` (deprecated) to `parent_id`
+
 ## [4.27.0] - 2024-10-09
 
 - Remove `aiven_thanos` from beta resources
