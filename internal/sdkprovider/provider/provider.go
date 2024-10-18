@@ -91,6 +91,7 @@ func Provider(version string) (*schema.Provider, error) {
 			// organization
 			"aiven_organizational_unit":           organization.DatasourceOrganizationalUnit(),
 			"aiven_organization_user":             organization.DatasourceOrganizationUser(),
+			"aiven_organization_user_list":        organization.DatasourceOrganizationUserList(),
 			"aiven_organization_user_group":       organization.DatasourceOrganizationUserGroup(),
 			"aiven_organization_application_user": organization.DatasourceOrganizationApplicationUser(),
 

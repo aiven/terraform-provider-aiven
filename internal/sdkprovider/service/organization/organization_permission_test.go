@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/stretchr/testify/require"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
 )
@@ -41,7 +42,8 @@ func TestAccAivenOrganizationPermission_basic(t *testing.T) {
 				Config: testAccOrganizationPermissionResource(rName, ""),
 				Check: func(s *terraform.State) error {
 					ctx := context.Background()
-					client := acc.GetTestGenAivenClient()
+					client, err := acc.GetTestGenAivenClient()
+					require.NoError(t, err)
 
 					for _, r := range s.RootModule().Resources {
 						if r.Type != "aiven_project" {

@@ -55,12 +55,12 @@ func GetTestAivenClient() *aiven.Client {
 	return testAivenClient
 }
 
-func GetTestGenAivenClient() avngen.Client {
+func GetTestGenAivenClient() (avngen.Client, error) {
 	client, err := common.NewAivenGenClient()
 	if err != nil {
-		log.Panicf("test generated client error: %s", err)
+		return nil, fmt.Errorf("test generated client error: %w", err)
 	}
-	return client
+	return client, nil
 }
 
 // commonTestDependencies is a struct that contains common dependencies that are used by acceptance tests.
