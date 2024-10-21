@@ -281,7 +281,9 @@ func Provider(version string) (*schema.Provider, error) {
 		"aiven_organization_permission",
 	}
 
-	betaDataSources := []string{}
+	betaDataSources := []string{
+		"aiven_organization_user_list",
+	}
 
 	missing := append(
 		addBeta(p.ResourcesMap, betaResources...),
