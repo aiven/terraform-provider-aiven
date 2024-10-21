@@ -130,6 +130,7 @@ Read-Only:
 - `endpoint_suffix` (String)
 - `indices` (String)
 - `key` (String)
+- `restore_global_state` (Boolean)
 - `sas_token` (String)
 - `snapshot_name` (String)
 
@@ -145,6 +146,7 @@ Read-Only:
 - `compress` (Boolean)
 - `credentials` (String)
 - `indices` (String)
+- `restore_global_state` (Boolean)
 - `snapshot_name` (String)
 
 
@@ -449,6 +451,7 @@ Read-Only:
 - `endpoint` (String)
 - `indices` (String)
 - `region` (String)
+- `restore_global_state` (Boolean)
 - `secret_key` (String)
 - `server_side_encryption` (Boolean)
 - `snapshot_name` (String)

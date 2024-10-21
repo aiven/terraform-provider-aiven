@@ -72,6 +72,11 @@ func influxdbUserConfig() *schema.Schema {
 				Optional: true,
 				Type:     schema.TypeList,
 			},
+			"influxdb_version": {
+				Description: "Enum: `1.8`, and newer. InfluxDB major version. Default: `1.8`.",
+				Optional:    true,
+				Type:        schema.TypeString,
+			},
 			"ip_filter": {
 				Deprecated:  "Deprecated. Use `ip_filter_string` instead.",
 				Description: "Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.",

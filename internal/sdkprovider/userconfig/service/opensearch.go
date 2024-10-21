@@ -68,6 +68,11 @@ func opensearchUserConfig() *schema.Schema {
 						Sensitive:   true,
 						Type:        schema.TypeString,
 					},
+					"restore_global_state": {
+						Description: "If true, restore the cluster state. Defaults to false.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"sas_token": {
 						Description: "A shared access signatures (SAS) token. One of key or sas_token should be specified.",
 						Optional:    true,
@@ -127,6 +132,11 @@ func opensearchUserConfig() *schema.Schema {
 						Description: "A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. By default, a restore operation includes all data streams and indices in the snapshot. If this argument is provided, the restore operation only includes the data streams and indices that you specify. Example: `metrics*,logs*,data-20240823`.",
 						Optional:    true,
 						Type:        schema.TypeString,
+					},
+					"restore_global_state": {
+						Description: "If true, restore the cluster state. Defaults to false.",
+						Optional:    true,
+						Type:        schema.TypeBool,
 					},
 					"snapshot_name": {
 						Description: "The snapshot name to restore from.",
@@ -1018,6 +1028,11 @@ func opensearchUserConfig() *schema.Schema {
 						Description: "S3 region.",
 						Required:    true,
 						Type:        schema.TypeString,
+					},
+					"restore_global_state": {
+						Description: "If true, restore the cluster state. Defaults to false.",
+						Optional:    true,
+						Type:        schema.TypeBool,
 					},
 					"secret_key": {
 						Description: "AWS secret key.",
