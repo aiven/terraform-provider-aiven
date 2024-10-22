@@ -144,6 +144,7 @@ Optional:
 - `endpoint_suffix` (String) Defines the DNS suffix for Azure Storage endpoints.
 - `indices` (String) A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. By default, a restore operation includes all data streams and indices in the snapshot. If this argument is provided, the restore operation only includes the data streams and indices that you specify. Example: `metrics*,logs*,data-20240823`.
 - `key` (String, Sensitive) Azure account secret key. One of key or sas_token should be specified.
+- `restore_global_state` (Boolean) If true, restore the cluster state. Defaults to false.
 - `sas_token` (String, Sensitive) A shared access signatures (SAS) token. One of key or sas_token should be specified.
 
 
@@ -162,6 +163,7 @@ Optional:
 - `chunk_size` (String) Big files can be broken down into chunks during snapshotting if needed. Should be the same as for the 3rd party repository.
 - `compress` (Boolean) When set to true metadata files are stored in compressed format.
 - `indices` (String) A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. By default, a restore operation includes all data streams and indices in the snapshot. If this argument is provided, the restore operation only includes the data streams and indices that you specify. Example: `metrics*,logs*,data-20240823`.
+- `restore_global_state` (Boolean) If true, restore the cluster state. Defaults to false.
 
 
 <a id="nestedblock--opensearch_user_config--index_patterns"></a>
@@ -497,6 +499,7 @@ Optional:
 - `compress` (Boolean) When set to true metadata files are stored in compressed format.
 - `endpoint` (String) The S3 service endpoint to connect to. If you are using an S3-compatible service then you should set this to the service’s endpoint.
 - `indices` (String) A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. By default, a restore operation includes all data streams and indices in the snapshot. If this argument is provided, the restore operation only includes the data streams and indices that you specify. Example: `metrics*,logs*,data-20240823`.
+- `restore_global_state` (Boolean) If true, restore the cluster state. Defaults to false.
 - `server_side_encryption` (Boolean) When set to true files are encrypted on server side.
 
 

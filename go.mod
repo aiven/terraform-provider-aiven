@@ -3,21 +3,20 @@ module github.com/aiven/terraform-provider-aiven
 go 1.23
 
 require (
-	github.com/aiven/aiven-go-client/v2 v2.28.0
-	github.com/aiven/go-client-codegen v0.41.0
+	github.com/aiven/aiven-go-client/v2 v2.30.0
+	github.com/aiven/go-client-codegen v0.45.0
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/dave/jennifer v1.7.1
 	github.com/docker/go-units v0.5.0
 	github.com/google/go-cmp v0.6.0
 	github.com/gruntwork-io/terratest v0.47.2
-	github.com/hamba/avro/v2 v2.26.0
+	github.com/hamba/avro/v2 v2.27.0
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/terraform-plugin-framework v1.12.0
 	github.com/hashicorp/terraform-plugin-go v0.24.0
 	github.com/hashicorp/terraform-plugin-mux v0.16.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.34.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/rs/zerolog v1.33.0
 	github.com/samber/lo v1.47.0
 	github.com/stoewer/go-strcase v1.3.0
 	github.com/stretchr/testify v1.9.0
@@ -42,6 +41,7 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/rs/zerolog v1.33.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.47.0 // indirect
@@ -59,7 +59,7 @@ require (
 	cloud.google.com/go v0.112.0 // indirect
 	cloud.google.com/go/storage v1.36.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/aiven/go-api-schemas v1.92.0
+	github.com/aiven/go-api-schemas v1.94.0
 	github.com/aws/aws-sdk-go v1.44.122 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -83,7 +83,7 @@ require (
 	github.com/hashicorp/terraform-exec v0.21.0 // indirect
 	github.com/hashicorp/terraform-json v0.22.1 // indirect
 	github.com/hashicorp/terraform-plugin-framework-timeouts v0.4.1
-	github.com/hashicorp/terraform-plugin-framework-validators v0.13.0
+	github.com/hashicorp/terraform-plugin-framework-validators v0.14.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0 // indirect
 	github.com/hashicorp/terraform-plugin-testing v1.10.0
 	github.com/hashicorp/terraform-registry-address v0.2.3 // indirect
@@ -91,7 +91,7 @@ require (
 	github.com/hashicorp/yamux v0.1.1 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
-	github.com/klauspost/compress v1.17.9 // indirect
+	github.com/klauspost/compress v1.17.10 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-zglob v0.0.2-0.20190814121620-e3c945676326 // indirect

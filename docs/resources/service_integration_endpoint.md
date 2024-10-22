@@ -18,7 +18,7 @@ The Service Integration Endpoint resource allows the creation and management of 
 ### Required
 
 - `endpoint_name` (String) Name of the service integration endpoint
-- `endpoint_type` (String) Type of the service integration endpoint. Possible values: `autoscaler`, `datadog`, `external_aws_cloudwatch_logs`, `external_aws_cloudwatch_metrics`, `external_aws_s3`, `external_clickhouse`, `external_elasticsearch_logs`, `external_google_cloud_bigquery`, `external_google_cloud_logging`, `external_kafka`, `external_mysql`, `external_opensearch_logs`, `external_postgresql`, `external_redis`, `external_schema_registry`, `external_sumologic_logs`, `jolokia`, `prometheus`, `rsyslog`
+- `endpoint_type` (String) Type of the service integration endpoint. Possible values: `autoscaler`, `datadog`, `external_aws_cloudwatch_logs`, `external_aws_cloudwatch_metrics`, `external_aws_s3`, `external_clickhouse`, `external_elasticsearch_logs`, `external_google_cloud_bigquery`, `external_google_cloud_logging`, `external_kafka`, `external_mysql`, `external_opensearch_logs`, `external_postgresql`, `external_prometheus`, `external_redis`, `external_schema_registry`, `external_sumologic_logs`, `jolokia`, `prometheus`, `rsyslog`
 - `project` (String) Project the service integration endpoint belongs to
 
 ### Optional
@@ -35,6 +35,7 @@ The Service Integration Endpoint resource allows the creation and management of 
 - `external_mysql_user_config` (Block List, Max: 1) ExternalMysql user configurable settings (see [below for nested schema](#nestedblock--external_mysql_user_config))
 - `external_opensearch_logs_user_config` (Block List, Max: 1) ExternalOpensearchLogs user configurable settings (see [below for nested schema](#nestedblock--external_opensearch_logs_user_config))
 - `external_postgresql` (Block List, Max: 1) ExternalPostgresql user configurable settings (see [below for nested schema](#nestedblock--external_postgresql))
+- `external_prometheus_user_config` (Block List, Max: 1) ExternalPrometheus user configurable settings (see [below for nested schema](#nestedblock--external_prometheus_user_config))
 - `external_schema_registry_user_config` (Block List, Max: 1) ExternalSchemaRegistry user configurable settings (see [below for nested schema](#nestedblock--external_schema_registry_user_config))
 - `jolokia_user_config` (Block List, Max: 1) Jolokia user configurable settings (see [below for nested schema](#nestedblock--jolokia_user_config))
 - `prometheus_user_config` (Block List, Max: 1) Prometheus user configurable settings (see [below for nested schema](#nestedblock--prometheus_user_config))
@@ -248,6 +249,16 @@ Optional:
 ...
 -----END CERTIFICATE-----
 `.
+
+
+<a id="nestedblock--external_prometheus_user_config"></a>
+### Nested Schema for `external_prometheus_user_config`
+
+Optional:
+
+- `basic_auth_password` (String, Sensitive) Prometheus basic authentication password. Example: `fhyFNBjj3R`.
+- `basic_auth_username` (String) Prometheus basic authentication username. Example: `prom4851`.
+- `service_uri` (String) Prometheus enabled write endpoint. Example: `https://write.example.com/`.
 
 
 <a id="nestedblock--external_schema_registry_user_config"></a>
