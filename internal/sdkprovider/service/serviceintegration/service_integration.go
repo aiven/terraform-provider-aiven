@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"regexp"
 	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -13,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/samber/lo"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -21,7 +21,12 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/serviceintegration"
 )
 
-const serviceIntegrationEndpointRegExp = "^[a-zA-Z0-9_-]*\\/{1}[a-zA-Z0-9_-]*$"
+// dtoFieldAliases values are DTO field names (json) mapped to terraform field names
+var dtoFieldAliases = map[string]string{
+	"destination_endpoint_id":  "dest_endpoint_id",
+	"destination_service_name": "dest_service_name",
+	"destination_project_name": "dest_project_name",
+}
 
 func aivenServiceIntegrationSchema() map[string]*schema.Schema {
 	s := map[string]*schema.Schema{
@@ -35,11 +40,15 @@ func aivenServiceIntegrationSchema() map[string]*schema.Schema {
 			ForceNew:    true,
 			Optional:    true,
 			Type:        schema.TypeString,
-			ValidateFunc: validation.StringMatch(regexp.MustCompile(serviceIntegrationEndpointRegExp),
-				"endpoint ID should have the following format: project_name/endpoint_id"),
 		},
 		"destination_service_name": {
 			Description: "Destination service for the integration.",
+			ForceNew:    true,
+			Optional:    true,
+			Type:        schema.TypeString,
+		},
+		"destination_project_name": {
+			Description: "Destination service project name.",
 			ForceNew:    true,
 			Optional:    true,
 			Type:        schema.TypeString,
@@ -62,11 +71,15 @@ func aivenServiceIntegrationSchema() map[string]*schema.Schema {
 			ForceNew:    true,
 			Optional:    true,
 			Type:        schema.TypeString,
-			ValidateFunc: validation.StringMatch(regexp.MustCompile(serviceIntegrationEndpointRegExp),
-				"endpoint id should have the following format: project_name/endpoint_id"),
 		},
 		"source_service_name": {
 			Description: "Source service for the integration (if any)",
+			ForceNew:    true,
+			Optional:    true,
+			Type:        schema.TypeString,
+		},
+		"source_project_name": {
+			Description: "Source service project name.",
 			ForceNew:    true,
 			Optional:    true,
 			Type:        schema.TypeString,
@@ -111,13 +124,14 @@ func plainEndpointID(fullEndpointID *string) *string {
 
 func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	projectName := d.Get("project").(string)
-	integrationType := d.Get("integration_type").(string)
+	integrationType := service.IntegrationType(d.Get("integration_type").(string))
 
-	// read_replicas can be only be created alongside the service. also the only way to promote the replica
-	// is to delete the service integration that was created so we should make it least painful to do so.
-	// for now we support to seemlessly import preexisting 'read_replica' service integrations in the resource create
+	// Read_replicas can only be created alongside the service.
+	// Also, the only way to promote the replica
+	// is to delete the service integration that was created, so we should make it least painful to do so.
+	// For now, we support to seamlessly import preexisting 'read_replica' service integrations in the resource create
 	// all other integrations should be imported using `terraform import`
-	if integrationType == "read_replica" {
+	if integrationType == service.IntegrationTypeReadReplica {
 		if preexisting, err := resourceServiceIntegrationCheckForPreexistingResource(ctx, d, client); err != nil {
 			return fmt.Errorf("unable to search for possible preexisting 'read_replica' service integration: %w", err)
 		} else if preexisting != nil {
@@ -127,14 +141,16 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 	}
 
 	req := &service.ServiceIntegrationCreateIn{
+		IntegrationType:  integrationType,
+		DestProject:      schemautil.OptionalStringPointer(d, "destination_project_name"),
 		DestEndpointId:   plainEndpointID(schemautil.OptionalStringPointer(d, "destination_endpoint_id")),
 		DestService:      schemautil.OptionalStringPointer(d, "destination_service_name"),
-		IntegrationType:  service.IntegrationType(integrationType),
-		SourceEndpointId: plainEndpointID(schemautil.OptionalStringPointer(d, "source_endpoint_id")),
+		SourceProject:    schemautil.OptionalStringPointer(d, "source_project_name"),
 		SourceService:    schemautil.OptionalStringPointer(d, "source_service_name"),
+		SourceEndpointId: plainEndpointID(schemautil.OptionalStringPointer(d, "source_endpoint_id")),
 	}
 
-	uc, err := converters.Expand(converters.ServiceIntegrationUserConfig, integrationType, d)
+	uc, err := converters.Expand(converters.ServiceIntegrationUserConfig, string(integrationType), d)
 	if err != nil {
 		return err
 	}
@@ -170,11 +186,24 @@ func resourceServiceIntegrationRead(ctx context.Context, d *schema.ResourceData,
 		return nil
 	}
 
-	if err = resourceServiceIntegrationCopyAPIResponseToTerraform(d, res, projectName); err != nil {
-		return fmt.Errorf("cannot copy api response into terraform schema: %w", err)
+	// By some reason, this resource was created with the full endpoint ID
+	// Tries to keep it compatible with the old version
+	oldSrcEndpointId := d.Get("source_endpoint_id").(string)
+	if oldSrcEndpointId == schemautil.BuildResourceID(projectName, lo.FromPtr(res.SourceEndpointId)) {
+		res.SourceProject = oldSrcEndpointId
 	}
 
-	return nil
+	oldDstEndpointId := d.Get("destination_endpoint_id").(string)
+	if oldDstEndpointId == schemautil.BuildResourceID(projectName, lo.FromPtr(res.DestEndpointId)) {
+		res.DestProject = oldDstEndpointId
+	}
+
+	err = schemautil.ResourceDataSet(aivenServiceIntegrationSchema(), d, res, schemautil.RenameAliasesSet(dtoFieldAliases))
+	if err != nil {
+		return err
+	}
+
+	return converters.Flatten(converters.ServiceIntegrationUserConfig, string(res.IntegrationType), d, res.UserConfig)
 }
 
 func resourceServiceIntegrationUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
@@ -299,42 +328,4 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 		return err
 	}
 	return nil
-}
-
-func resourceServiceIntegrationCopyAPIResponseToTerraform(
-	d *schema.ResourceData,
-	res *service.ServiceIntegrationGetOut,
-	project string,
-) error {
-	if err := d.Set("project", project); err != nil {
-		return err
-	}
-
-	if res.DestEndpointId != nil {
-		if err := d.Set("destination_endpoint_id", schemautil.BuildResourceID(project, *res.DestEndpointId)); err != nil {
-			return err
-		}
-	} else if res.DestService != nil {
-		if err := d.Set("destination_service_name", *res.DestService); err != nil {
-			return err
-		}
-	}
-	if res.SourceEndpointId != nil {
-		if err := d.Set("source_endpoint_id", schemautil.BuildResourceID(project, *res.SourceEndpointId)); err != nil {
-			return err
-		}
-	} else if res.SourceService != "" {
-		if err := d.Set("source_service_name", res.SourceService); err != nil {
-			return err
-		}
-	}
-	if err := d.Set("integration_id", res.ServiceIntegrationId); err != nil {
-		return err
-	}
-	integrationType := res.IntegrationType
-	if err := d.Set("integration_type", integrationType); err != nil {
-		return err
-	}
-
-	return converters.Flatten(converters.ServiceIntegrationUserConfig, string(integrationType), d, res.UserConfig)
 }

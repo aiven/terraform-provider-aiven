@@ -483,8 +483,10 @@ func serializeSet(s map[string]*schema.Schema, m map[string]any) map[string]any 
 	return m
 }
 
-// RenameAliases renames field names on object top level
-func RenameAliases(aliases map[string]string) KVModifier {
+// RenameAliasesGet renames field names on object top level
+// aliases is a map of TF field names to DTO field names
+// Use with ResourceDataGet
+func RenameAliasesGet(aliases map[string]string) KVModifier {
 	return func(k string, v any) (string, any) {
 		alias, ok := aliases[k]
 		if ok {
@@ -494,13 +496,13 @@ func RenameAliases(aliases map[string]string) KVModifier {
 	}
 }
 
-// RenameAliasesReverse reverse version of RenameAliases
-func RenameAliasesReverse(aliases map[string]string) KVModifier {
+// RenameAliasesSet reverse version of RenameAliasesGet, use with ResourceDataSet
+func RenameAliasesSet(aliases map[string]string) KVModifier {
 	m := make(map[string]string, len(aliases))
 	for k, v := range aliases {
 		m[v] = k
 	}
-	return RenameAliases(m)
+	return RenameAliasesGet(m)
 }
 
 // Remarshal marshals "in" object to "out" through json
