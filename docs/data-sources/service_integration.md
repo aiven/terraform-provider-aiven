@@ -37,6 +37,7 @@ data "aiven_service_integration" "example_integration" {
 - `clickhouse_postgresql_user_config` (List of Object) ClickhousePostgresql user configurable settings (see [below for nested schema](#nestedatt--clickhouse_postgresql_user_config))
 - `datadog_user_config` (List of Object) Datadog user configurable settings (see [below for nested schema](#nestedatt--datadog_user_config))
 - `destination_endpoint_id` (String) Destination endpoint for the integration.
+- `destination_project_name` (String) Destination service project name.
 - `external_aws_cloudwatch_logs_user_config` (List of Object) ExternalAwsCloudwatchLogs user configurable settings (see [below for nested schema](#nestedatt--external_aws_cloudwatch_logs_user_config))
 - `external_aws_cloudwatch_metrics_user_config` (List of Object) ExternalAwsCloudwatchMetrics user configurable settings (see [below for nested schema](#nestedatt--external_aws_cloudwatch_metrics_user_config))
 - `external_elasticsearch_logs_user_config` (List of Object) ExternalElasticsearchLogs user configurable settings (see [below for nested schema](#nestedatt--external_elasticsearch_logs_user_config))
@@ -51,6 +52,7 @@ data "aiven_service_integration" "example_integration" {
 - `metrics_user_config` (List of Object) Metrics user configurable settings (see [below for nested schema](#nestedatt--metrics_user_config))
 - `prometheus_user_config` (List of Object) Prometheus user configurable settings (see [below for nested schema](#nestedatt--prometheus_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration.
+- `source_project_name` (String) Source service project name.
 
 <a id="nestedatt--clickhouse_kafka_user_config"></a>
 ### Nested Schema for `clickhouse_kafka_user_config`

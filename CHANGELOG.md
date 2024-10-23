@@ -9,6 +9,12 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!-- ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Add `aiven_service_integration` resource, datasource `source_project_name` and `destination_project_name` fields
+- Change `aiven_service_integration` resource, datasource: 
+  remove project prefix from  `source_endpoint_id` and `destination_endpoint_id` fields
+
 ## [4.28.0] - 2024-10-21
 
 - Fix `aiven_project`: can't migrate from `account_id` (deprecated) to `parent_id`

@@ -37,6 +37,7 @@ resource "aiven_service_integration" "example_integration" {
 - `clickhouse_postgresql_user_config` (Block List, Max: 1) ClickhousePostgresql user configurable settings (see [below for nested schema](#nestedblock--clickhouse_postgresql_user_config))
 - `datadog_user_config` (Block List, Max: 1) Datadog user configurable settings (see [below for nested schema](#nestedblock--datadog_user_config))
 - `destination_endpoint_id` (String) Destination endpoint for the integration.
+- `destination_project_name` (String) Destination service project name.
 - `destination_service_name` (String) Destination service for the integration.
 - `external_aws_cloudwatch_logs_user_config` (Block List, Max: 1) ExternalAwsCloudwatchLogs user configurable settings (see [below for nested schema](#nestedblock--external_aws_cloudwatch_logs_user_config))
 - `external_aws_cloudwatch_metrics_user_config` (Block List, Max: 1) ExternalAwsCloudwatchMetrics user configurable settings (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config))
@@ -50,6 +51,7 @@ resource "aiven_service_integration" "example_integration" {
 - `metrics_user_config` (Block List, Max: 1) Metrics user configurable settings (see [below for nested schema](#nestedblock--metrics_user_config))
 - `prometheus_user_config` (Block List, Max: 1) Prometheus user configurable settings (see [below for nested schema](#nestedblock--prometheus_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration.
+- `source_project_name` (String) Source service project name.
 - `source_service_name` (String) Source service for the integration (if any)
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
