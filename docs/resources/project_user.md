@@ -4,11 +4,18 @@ page_title: "aiven_project_user Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
   Creates and manages an Aiven project member.
+  This resource is deprecated. Use aiven_organization_permission and
+  migrate existing aiven_project_user resources https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources
+  to the new resource.
 ---
 
 # aiven_project_user (Resource)
 
 Creates and manages an Aiven project member.
+
+**This resource is deprecated.** Use `aiven_organization_permission` and
+[migrate existing aiven_project_user resources](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources) 
+to the new resource.
 
 ## Example Usage
 

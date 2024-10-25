@@ -3,12 +3,19 @@
 page_title: "aiven_organization_group_project Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Adds and manages a group https://aiven.io/docs/platform/howto/list-groups of users as members of a project.
+  Adds and manages a group of users as members of a project.
+  This resource is deprecated. Use aiven_organization_permission and
+  migrate existing aiven_organization_group_project resources https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources
+  to the new resource.
 ---
 
 # aiven_organization_group_project (Resource)
 
-Adds and manages a [group](https://aiven.io/docs/platform/howto/list-groups) of users as members of a project.
+Adds and manages a group of users as members of a project.
+
+**This resource is deprecated.** Use `aiven_organization_permission` and
+[migrate existing aiven_organization_group_project resources](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources) 
+to the new resource.
 
 ## Example Usage
 
