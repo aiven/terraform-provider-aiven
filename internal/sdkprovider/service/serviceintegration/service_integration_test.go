@@ -455,7 +455,6 @@ resource "aiven_service_integration" "bar" {
     cluster_alias = "source"
   }
 }`
-
 }
 
 func testAccCheckAivenServiceIntegrationResourceDestroy(s *terraform.State) error {
@@ -686,6 +685,78 @@ func TestAccAivenServiceIntegration_clickhouse_postgres_user_config_creates(t *t
 					resource.TestCheckResourceAttr(resourceName, "source_service_name", prefix+"-pg"),
 					resource.TestCheckResourceAttr(resourceName, "destination_service_name", prefix+"-clickhouse"),
 				),
+			},
+		},
+	})
+}
+
+func testAccServiceIntegrationAutoscaler(prefix string, includeDiskSpace bool) string {
+	additionalDiskSpace := ""
+	if includeDiskSpace {
+		additionalDiskSpace = `additional_disk_space = "30GiB"`
+	}
+
+	return fmt.Sprintf(`
+data "aiven_project" "project" {
+  project = %[1]q
+}
+
+resource "aiven_pg" "test_pg" {
+  project      = data.aiven_project.project.project
+  cloud_name   = "google-europe-north1"
+  service_name = "%[2]s-pg"
+  plan         = "startup-4"
+  %[3]s
+}
+
+resource "aiven_service_integration_endpoint" "test_endpoint" {
+  project       = data.aiven_project.project.project
+  endpoint_name = "%[2]s-autoscaler"
+  endpoint_type = "autoscaler"
+
+  autoscaler_user_config {
+    autoscaling {
+      cap_gb = 200
+      type   = "autoscale_disk"
+    }
+  }
+}
+
+resource "aiven_service_integration" "test_autoscaler" {
+  project                 = data.aiven_project.project.project
+  integration_type        = "autoscaler"
+  source_service_name     = aiven_pg.test_pg.service_name
+  destination_endpoint_id = aiven_service_integration_endpoint.test_endpoint.id
+}
+`, os.Getenv("AIVEN_PROJECT_NAME"), prefix, additionalDiskSpace)
+}
+
+func TestAccAivenServiceIntegration_autoscaler(t *testing.T) {
+	project := os.Getenv("AIVEN_PROJECT_NAME")
+	prefix := "test-acc-" + acctest.RandString(7)
+	resourceName := "aiven_service_integration.test_autoscaler"
+	endpointResourceName := "aiven_service_integration_endpoint.test_endpoint"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { /* Add necessary pre-checks here */ },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenServiceIntegrationResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccServiceIntegrationAutoscaler(prefix, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "integration_type", "autoscaler"),
+					resource.TestCheckResourceAttr(resourceName, "project", project),
+					resource.TestCheckResourceAttr(resourceName, "source_service_name", fmt.Sprintf("%s-pg", prefix)),
+					resource.TestCheckResourceAttrSet(resourceName, "destination_endpoint_id"),
+					resource.TestCheckResourceAttr(endpointResourceName, "project", project),
+					resource.TestCheckResourceAttr(endpointResourceName, "endpoint_name", fmt.Sprintf("%s-autoscaler", prefix)),
+					resource.TestCheckResourceAttr(endpointResourceName, "endpoint_type", "autoscaler"),
+					resource.TestCheckResourceAttr(endpointResourceName, "autoscaler_user_config.0.autoscaling.0.cap_gb", "200"),
+				),
+			},
+			{
+				Config:      testAccServiceIntegrationAutoscaler(prefix, true),
+				ExpectError: regexp.MustCompile(schemautil.ErrAutoscalerConflict.Error()),
 			},
 		},
 	})

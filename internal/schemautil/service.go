@@ -56,6 +56,8 @@ const (
 	ServiceTypeValkey           = "valkey"
 )
 
+var ErrAutoscalerConflict = errors.New("autoscaler integration is enabled, additional_disk_space cannot be set")
+
 var TechEmailsResourceSchema = &schema.Resource{
 	Schema: map[string]*schema.Schema{
 		"email": {
@@ -514,6 +516,17 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
+	// Note: Only service_integrations are needed here, but no specific API exists yet.
+	s, err := avnGen.ServiceGet(ctx, projectName, serviceName, service.ServiceGetIncludeSecrets(true))
+	if err != nil {
+		return diag.Errorf("unable to GET service %s: %s", d.Id(), err)
+	}
+
+	autoscalerIntegrations := getIntegrationsForTerraform(s.ServiceIntegrations, service.IntegrationTypeAutoscaler)
+	if _, ok := d.GetOk("additional_disk_space"); ok && len(autoscalerIntegrations) > 0 {
+		return diag.FromErr(ErrAutoscalerConflict)
+	}
+
 	cloud := d.Get("cloud_name").(string)
 	plan := d.Get("plan").(string)
 	powered := true
@@ -604,18 +617,18 @@ func getTechnicalEmailsForTerraform(s *service.ServiceGetOut) *schema.Set {
 	return schema.NewSet(schema.HashResource(TechEmailsResourceSchema), techEmails)
 }
 
-func getReadReplicaIntegrationsForTerraform(integrations []service.ServiceIntegrationOut) ([]map[string]interface{}, error) {
-	var readReplicaIntegrations []map[string]interface{}
+func getIntegrationsForTerraform(integrations []service.ServiceIntegrationOut, integrationType service.IntegrationType) []map[string]interface{} {
+	var filteredIntegrations []map[string]interface{}
 	for _, integration := range integrations {
-		if integration.IntegrationType == "read_replica" {
+		if integration.IntegrationType == integrationType {
 			integrationMap := map[string]interface{}{
 				"integration_type":    integration.IntegrationType,
 				"source_service_name": integration.SourceService,
 			}
-			readReplicaIntegrations = append(readReplicaIntegrations, integrationMap)
+			filteredIntegrations = append(filteredIntegrations, integrationMap)
 		}
 	}
-	return readReplicaIntegrations, nil
+	return filteredIntegrations
 }
 
 func ResourceServiceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -781,10 +794,7 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	}
 
 	// Handle read_replica service integrations
-	readReplicaIntegrations, err := getReadReplicaIntegrationsForTerraform(s.ServiceIntegrations)
-	if err != nil {
-		return err
-	}
+	readReplicaIntegrations := getIntegrationsForTerraform(s.ServiceIntegrations, service.IntegrationTypeReadReplica)
 	if err := d.Set("service_integrations", readReplicaIntegrations); err != nil {
 		return err
 	}
