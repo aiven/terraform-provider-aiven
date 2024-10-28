@@ -1,7 +1,6 @@
 package schemautil
 
 import (
-	"fmt"
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -73,14 +72,4 @@ func PointerValueOrDefault[T comparable](v *T, d T) T {
 		return d
 	}
 	return *v
-}
-
-func JoinQuoted[T string | int](elems []T, sep, quote string) (result string) {
-	for i, v := range elems {
-		if i != 0 {
-			result += sep
-		}
-		result = fmt.Sprintf("%s%s%v%s", result, quote, v, quote)
-	}
-	return result
 }
