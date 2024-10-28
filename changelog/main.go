@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"os"
 
@@ -14,66 +13,140 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/provider"
 )
 
+type flags struct {
+	save          bool
+	diff          bool
+	schemaFile    string
+	changelogFile string
+}
+
 func main() {
-	err := exec()
-	if err != nil {
+	if err := exec(); err != nil {
 		log.Fatal(err)
 	}
 }
 
 func exec() error {
-	if !util.IsBeta() {
-		return fmt.Errorf("please enable beta mode, i.e. set %s=1", util.AivenEnableBeta)
+	if err := checkBetaMode(); err != nil {
+		return err
 	}
 
-	save := flag.Bool("save", false, "output current schema")
-	diff := flag.Bool("diff", false, "compare current schema with imported schema")
-	changelog := flag.String("changelog", "", "write changes to file")
-	flag.Parse()
-
-	if *save == *diff {
-		return fmt.Errorf("either --save or --diff must be set")
-	}
-
-	// Loads the current Provider schema
-	p, err := provider.Provider("dev")
+	flags, err := parseFlags()
 	if err != nil {
 		return err
+	}
+
+	p, err := loadProvider()
+	if err != nil {
+		return fmt.Errorf("failed to load provider: %w", err)
 	}
 
 	newMap, err := fromProvider(p)
 	if err != nil {
+		return fmt.Errorf("failed to process provider schema: %w", err)
+	}
+
+	if flags.save {
+		return saveSchema(flags.schemaFile, newMap)
+	}
+
+	return processDiff(flags, newMap)
+}
+
+func checkBetaMode() error {
+	if !util.IsBeta() {
+		return fmt.Errorf("please enable beta mode, i.e. set %s=1", util.AivenEnableBeta)
+	}
+	return nil
+}
+
+func parseFlags() (*flags, error) {
+	f := &flags{}
+	flag.BoolVar(&f.save, "save", false, "output current schema")
+	flag.BoolVar(&f.diff, "diff", false, "compare current schema with imported schema")
+	flag.StringVar(&f.schemaFile, "schema", "", "schema file path (for save/diff)")
+	flag.StringVar(&f.changelogFile, "changelog", "", "changelog output file path")
+	flag.Parse()
+
+	if f.save == f.diff {
+		return nil, fmt.Errorf("either --save or --diff must be set")
+	}
+
+	if f.diff && f.schemaFile == "" {
+		return nil, fmt.Errorf("schema file path is required when using --diff")
+	}
+
+	return f, nil
+}
+
+func loadProvider() (*schema.Provider, error) {
+	p, err := provider.Provider("dev")
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
+func saveSchema(filePath string, schema ItemMap) error {
+	if filePath == "" {
+		return json.NewEncoder(os.Stdout).Encode(&schema)
+	}
+
+	f, err := os.Create(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to create schema file: %w", err)
+	}
+	defer f.Close()
+
+	encoder := json.NewEncoder(f)
+	encoder.SetIndent("", "  ") // Pretty print the JSON
+	return encoder.Encode(&schema)
+}
+
+func processDiff(flags *flags, newMap ItemMap) error {
+	oldMap, err := loadSchemaFile(flags.schemaFile)
+	if err != nil {
 		return err
 	}
 
-	if *save {
-		return json.NewEncoder(os.Stdout).Encode(&newMap)
+	entries, err := diffItemMaps(oldMap, newMap)
+	if err != nil {
+		return fmt.Errorf("failed to generate diff: %w", err)
 	}
 
-	// Outputs diff with the current Provider schema
-	if *diff {
-		b, err := io.ReadAll(os.Stdin)
-		if err != nil {
-			return err
-		}
+	if flags.changelogFile == "" {
+		return printEntries(entries)
+	}
 
-		var oldMap ItemMap
-		err = json.Unmarshal(b, &oldMap)
-		if err != nil {
-			return err
-		}
+	return writeChangelog(flags.changelogFile, entries)
+}
 
-		entries, err := diffItemMaps(oldMap, newMap)
-		if err != nil {
-			return err
-		}
+func loadSchemaFile(path string) (ItemMap, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open schema file: %w", err)
+	}
+	defer f.Close()
 
-		// todo: write to file
-		if *changelog == "" {
-			for _, l := range entries {
-				fmt.Printf("-  %s\n", l)
-			}
-		}
+	var oldMap ItemMap
+	if err := json.NewDecoder(f).Decode(&oldMap); err != nil {
+		return nil, fmt.Errorf("failed to parse schema file: %w", err)
+	}
+
+	return oldMap, nil
+}
+
+func printEntries(entries []string) error {
+	for _, l := range entries {
+		fmt.Printf("-  %s\n", l)
+	}
+	return nil
+}
+
+func writeChangelog(_ string, entries []string) error {
+	// todo: write to file
+	for _, l := range entries {
+		fmt.Printf("-  %s\n", l)
 	}
 
 	return nil
@@ -107,30 +180,6 @@ func fromProvider(p *schema.Provider) (ItemMap, error) {
 		}
 	}
 	return items, nil
-}
-
-type ResourceType string
-
-const (
-	ResourceKind   ResourceType = "resource"
-	DataSourceKind ResourceType = "datasource"
-)
-
-type ItemMap map[ResourceType]map[string]*Item
-
-type Item struct {
-	Name string `json:"name"` // TF field name
-	Path string `json:"path"` // full path to the item, e.g. `aiven_project.project`
-
-	// TF schema fields
-	Description string           `json:"description"`
-	ForceNew    bool             `json:"forceNew"`
-	Optional    bool             `json:"optional"`
-	Sensitive   bool             `json:"sensitive"`
-	MaxItems    int              `json:"maxItems"`
-	Deprecated  string           `json:"deprecated"`
-	Type        schema.ValueType `json:"type"`
-	ElemType    schema.ValueType `json:"elemType"`
 }
 
 func walkSchema(name string, this *schema.Schema, parent *Item) []*Item {

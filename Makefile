@@ -177,10 +177,10 @@ generate: gen-go docs
 OLD_SCHEMA ?= .oldSchema.json
 CHANGELOG := PROVIDER_AIVEN_ENABLE_BETA=1 go run ./changelog/...
 gen-go:
-	$(CHANGELOG) --save > $(OLD_SCHEMA)
+	$(CHANGELOG) -save -schema=$(OLD_SCHEMA)
 	go generate ./...;
 	$(MAKE) fmt-imports
-	$(CHANGELOG) --diff < $(OLD_SCHEMA)
+	$(CHANGELOG) -diff -schema=$(OLD_SCHEMA) -changelog=CHANGELOG.md
 	rm $(OLD_SCHEMA)
 
 

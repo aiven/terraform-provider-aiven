@@ -130,46 +130,6 @@ func diffItemMaps(was, have ItemMap) ([]string, error) {
 	return result, nil
 }
 
-type DiffType string
-
-const (
-	ChangeTypeAdd    DiffType = "Add"
-	ChangeTypeRemove DiffType = "Remove"
-	ChangeTypeChange DiffType = "Change"
-)
-
-type Diff struct {
-	Type         DiffType
-	ResourceType ResourceType
-	Description  string
-	Item         *Item
-}
-
-func (c *Diff) String() string {
-	// resource name + field name
-	path := strings.SplitN(c.Item.Path, ".", 2)
-
-	// e.g.: "Add resource `aiven_project`"
-	msg := fmt.Sprintf("%s %s `%s`", c.Type, c.ResourceType, path[0])
-
-	// e.g.: "field `project`"
-	if len(path) > 1 {
-		msg = fmt.Sprintf("%s field `%s`", msg, path[1])
-	}
-
-	// Adds beta if needed
-	if hasBeta(c.Description) {
-		msg = fmt.Sprintf("%s _(beta)_", msg)
-	}
-
-	// Adds description
-	const maxSize = 120
-
-	msg += ": "
-	msg += shorten(maxSize-len(msg), c.Description)
-	return msg
-}
-
 func toMap(item *Item) (map[string]any, error) {
 	b, err := json.Marshal(item)
 	if err != nil {
