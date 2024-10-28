@@ -29,6 +29,7 @@ data "aiven_service_integration_endpoint" "myendpoint" {
 
 ### Read-Only
 
+- `autoscaler_user_config` (List of Object) Autoscaler user configurable settings (see [below for nested schema](#nestedatt--autoscaler_user_config))
 - `datadog_user_config` (List of Object) Datadog user configurable settings (see [below for nested schema](#nestedatt--datadog_user_config))
 - `endpoint_config` (Map of String) Integration endpoint specific backend configuration
 - `endpoint_type` (String) Type of the service integration endpoint. The possible values are `autoscaler`, `datadog`, `external_aws_cloudwatch_logs`, `external_aws_cloudwatch_metrics`, `external_aws_s3`, `external_clickhouse`, `external_elasticsearch_logs`, `external_google_cloud_bigquery`, `external_google_cloud_logging`, `external_kafka`, `external_mysql`, `external_opensearch_logs`, `external_postgresql`, `external_prometheus`, `external_redis`, `external_schema_registry`, `external_sumologic_logs`, `jolokia`, `prometheus` and `rsyslog`.
@@ -49,6 +50,23 @@ data "aiven_service_integration_endpoint" "myendpoint" {
 - `jolokia_user_config` (List of Object) Jolokia user configurable settings (see [below for nested schema](#nestedatt--jolokia_user_config))
 - `prometheus_user_config` (List of Object) Prometheus user configurable settings (see [below for nested schema](#nestedatt--prometheus_user_config))
 - `rsyslog_user_config` (List of Object) Rsyslog user configurable settings (see [below for nested schema](#nestedatt--rsyslog_user_config))
+
+<a id="nestedatt--autoscaler_user_config"></a>
+### Nested Schema for `autoscaler_user_config`
+
+Read-Only:
+
+- `autoscaling` (List of Object) (see [below for nested schema](#nestedobjatt--autoscaler_user_config--autoscaling))
+
+<a id="nestedobjatt--autoscaler_user_config--autoscaling"></a>
+### Nested Schema for `autoscaler_user_config.autoscaling`
+
+Read-Only:
+
+- `cap_gb` (Number)
+- `type` (String)
+
+
 
 <a id="nestedatt--datadog_user_config"></a>
 ### Nested Schema for `datadog_user_config`
