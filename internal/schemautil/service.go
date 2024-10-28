@@ -158,6 +158,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 		"additional_disk_space": {
 			Type:          schema.TypeString,
 			Optional:      true,
+			Computed:      true,
 			Description:   "Add [disk storage](https://aiven.io/docs/platform/howto/add-storage-space) in increments of 30  GiB to scale your service. The maximum value depends on the service type and cloud provider. Removing additional storage causes the service nodes to go through a rolling restart and there might be a short downtime for services with no HA capabilities.",
 			ValidateFunc:  ValidateHumanByteSizeString,
 			ConflictsWith: []string{"disk_space"},

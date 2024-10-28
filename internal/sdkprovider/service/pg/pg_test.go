@@ -265,7 +265,7 @@ func TestAccAivenPG_deleting_additional_disk_size(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_dow", "monday"),
 					resource.TestCheckResourceAttr(resourceName, "maintenance_window_time", "10:00:00"),
 					resource.TestCheckResourceAttr(resourceName, "disk_space_default", "80GiB"),
-					resource.TestCheckResourceAttr(resourceName, "disk_space_used", "80GiB"),
+					resource.TestCheckResourceAttr(resourceName, "disk_space_used", "100GiB"),
 					resource.TestCheckResourceAttr(resourceName, "termination_protection", "false"),
 				),
 			},
