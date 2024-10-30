@@ -8,9 +8,37 @@ import (
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"golang.org/x/exp/slices"
 )
+
+func CustomizeDiffGenericService(serviceType string) schema.CustomizeDiffFunc {
+	return customdiff.Sequence(
+		SetServiceTypeIfEmpty(serviceType),
+		CustomizeDiffDisallowMultipleManyToOneKeys,
+		customdiff.IfValueChange("tag",
+			TagsShouldNotBeEmpty,
+			CustomizeDiffCheckUniqueTag,
+		),
+		customdiff.IfValueChange("disk_space",
+			DiskSpaceShouldNotBeEmpty,
+			CustomizeDiffCheckDiskSpace,
+		),
+		customdiff.IfValueChange("additional_disk_space",
+			DiskSpaceShouldNotBeEmpty,
+			CustomizeDiffCheckDiskSpace,
+		),
+		customdiff.IfValueChange("service_integrations",
+			ServiceIntegrationShouldNotBeEmpty,
+			CustomizeDiffServiceIntegrationAfterCreation,
+		),
+		customdiff.Sequence(
+			CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
+			CustomizeDiffCheckStaticIPDisassociation,
+		),
+	)
+}
 
 func ServiceIntegrationShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
 	return len(new.([]interface{})) != 0
