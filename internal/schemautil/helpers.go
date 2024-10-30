@@ -8,13 +8,20 @@ import (
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/docker/go-units"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
 
 // ResourceStateOrResourceDiff either *schema.ResourceState or *schema.ResourceDiff
 type ResourceStateOrResourceDiff interface {
+	GetRawConfig() cty.Value
 	GetOk(key string) (interface{}, bool)
 	Get(key string) interface{}
+}
+
+func HasConfigValue(d ResourceStateOrResourceDiff, key string) bool {
+	c := d.GetRawConfig()
+	return !(c.IsNull() || c.AsValueMap()[key].IsNull())
 }
 
 // PlanParameters service plan aparameters

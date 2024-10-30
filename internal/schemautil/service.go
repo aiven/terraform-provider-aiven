@@ -56,8 +56,6 @@ const (
 	ServiceTypeValkey           = "valkey"
 )
 
-var ErrAutoscalerConflict = errors.New("autoscaler integration is enabled, additional_disk_space cannot be set")
-
 var TechEmailsResourceSchema = &schema.Resource{
 	Schema: map[string]*schema.Schema{
 		"email": {
@@ -474,13 +472,6 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		}
 	}
 
-	// On service update, we send a default disc space value for a common
-	// if the TF user does not specify it
-	diskSpace, err := getDiskSpaceFromStateOrDiff(ctx, d, client)
-	if err != nil {
-		return diag.Errorf("error getting default disc space: %s", err)
-	}
-
 	projectName, serviceName, err := SplitResourceID2(d.Id())
 	if err != nil {
 		return diag.Errorf("error splitting service id (%s): %s", d.Id(), err)
@@ -516,26 +507,29 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	// Note: Only service_integrations are needed here, but no specific API exists yet.
-	s, err := avnGen.ServiceGet(ctx, projectName, serviceName, service.ServiceGetIncludeSecrets(true))
-	if err != nil {
-		return diag.Errorf("unable to GET service %s: %s", d.Id(), err)
-	}
-
-	autoscalerIntegrations := getIntegrationsForTerraform(s.ServiceIntegrations, service.IntegrationTypeAutoscaler)
-	if _, ok := d.GetOk("additional_disk_space"); ok && len(autoscalerIntegrations) > 0 {
-		return diag.FromErr(ErrAutoscalerConflict)
-	}
-
 	cloud := d.Get("cloud_name").(string)
 	plan := d.Get("plan").(string)
 	powered := true
 	terminationProtection := d.Get("termination_protection").(bool)
 
+	// Sends disk size only when there is no autoscaler enabled
 	var diskSpaceMb *int
-	if diskSpace > 0 {
-		diskSpaceMb = &diskSpace
+	s, err := avnGen.ServiceGet(ctx, projectName, serviceName)
+	if err != nil {
+		return nil
 	}
+
+	if len(getIntegrationsForTerraform(s.ServiceIntegrations, service.IntegrationTypeAutoscaler)) == 0 {
+		diskSpace, err := getDiskSpaceFromStateOrDiff(ctx, d, client)
+		if err != nil {
+			return diag.Errorf("error getting default disc space: %s", err)
+		}
+
+		if diskSpace > 0 {
+			diskSpaceMb = &diskSpace
+		}
+	}
+
 	serviceUpdate := &service.ServiceUpdateIn{
 		Cloud:                 &cloud,
 		Plan:                  &plan,
@@ -578,11 +572,17 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	return ResourceServiceRead(ctx, d, m)
 }
 
+// getDiskSpaceFromStateOrDiff three cases:
+// 1. disk_space is set
+// 2. plan disk space
+// 3. plan disk space + additional_disk_space
 func getDiskSpaceFromStateOrDiff(ctx context.Context, d ResourceStateOrResourceDiff, client *aiven.Client) (int, error) {
-	var diskSpace int
+	if v, ok := d.GetOk("disk_space"); ok {
+		return ConvertToDiskSpaceMB(v.(string)), nil
+	}
 
 	// Get service plan specific defaults
-	servicePlanParams, err := GetServicePlanParametersFromSchema(ctx, client, d)
+	plan, err := GetServicePlanParametersFromSchema(ctx, client, d)
 	if err != nil {
 		if aiven.IsNotFound(err) {
 			return 0, nil
@@ -590,15 +590,10 @@ func getDiskSpaceFromStateOrDiff(ctx context.Context, d ResourceStateOrResourceD
 		return 0, fmt.Errorf("unable to get service plan parameters: %w", err)
 	}
 
-	// Use `additional_disk_space` if set
-	if ads, ok := d.GetOk("additional_disk_space"); ok {
-		diskSpace = servicePlanParams.DiskSizeMBDefault + ConvertToDiskSpaceMB(ads.(string))
-	} else if ds, ok := d.GetOk("disk_space"); ok {
-		// Use `disk_space` if set...
-		diskSpace = ConvertToDiskSpaceMB(ds.(string))
-	} else {
-		// ... otherwise, use the default disk space
-		diskSpace = servicePlanParams.DiskSizeMBDefault
+	// Adds additional_disk_space only if it is in the config
+	diskSpace := plan.DiskSizeMBDefault
+	if HasConfigValue(d, "additional_disk_space") {
+		diskSpace += ConvertToDiskSpaceMB(d.Get("additional_disk_space").(string))
 	}
 
 	return diskSpace, nil
@@ -691,29 +686,15 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 	if s.DiskSpaceMb != nil {
 		diskSpace = *s.DiskSpaceMb
 	}
+
 	additionalDiskSpace := diskSpace - servicePlanParams.DiskSizeMBDefault
-
-	_, isAdditionalDiskSpaceSet := d.GetOk("additional_disk_space")
-	_, isDiskSpaceSet := d.GetOk("disk_space")
-
-	// Handles two different cases:
-	//
-	// 1. During import when neither `additional_disk_space` nor `disk_space` are set
-	// 2. During create / update when `additional_disk_space` is set
-	if additionalDiskSpace > 0 && (!isDiskSpaceSet || isAdditionalDiskSpaceSet) {
-		if err := d.Set("additional_disk_space", HumanReadableByteSize(additionalDiskSpace*units.MiB)); err != nil {
-			return err
-		}
-		if err := d.Set("disk_space", nil); err != nil {
-			return err
-		}
+	if err := d.Set("additional_disk_space", HumanReadableByteSize(additionalDiskSpace*units.MiB)); err != nil {
+		return err
 	}
 
+	_, isDiskSpaceSet := d.GetOk("disk_space")
 	if isDiskSpaceSet && diskSpace > 0 {
 		if err := d.Set("disk_space", HumanReadableByteSize(diskSpace*units.MiB)); err != nil {
-			return err
-		}
-		if err := d.Set("additional_disk_space", nil); err != nil {
 			return err
 		}
 	}
