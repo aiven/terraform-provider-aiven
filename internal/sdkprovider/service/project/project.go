@@ -139,7 +139,7 @@ func ResourceProject() *schema.Resource {
 
 		Schema: aivenProjectSchema,
 		CustomizeDiff: customdiff.IfValueChange("tag",
-			schemautil.TagsShouldNotBeEmpty,
+			schemautil.ShouldNotBeEmpty,
 			schemautil.CustomizeDiffCheckUniqueTag,
 		),
 	}

@@ -18,19 +18,19 @@ func CustomizeDiffGenericService(serviceType string) schema.CustomizeDiffFunc {
 		SetServiceTypeIfEmpty(serviceType),
 		CustomizeDiffDisallowMultipleManyToOneKeys,
 		customdiff.IfValueChange("tag",
-			TagsShouldNotBeEmpty,
+			ShouldNotBeEmpty,
 			CustomizeDiffCheckUniqueTag,
 		),
 		customdiff.IfValueChange("disk_space",
-			DiskSpaceShouldNotBeEmpty,
+			ShouldNotBeEmpty,
 			CustomizeDiffCheckDiskSpace,
 		),
 		customdiff.IfValueChange("additional_disk_space",
-			DiskSpaceShouldNotBeEmpty,
+			ShouldNotBeEmpty,
 			CustomizeDiffCheckDiskSpace,
 		),
 		customdiff.IfValueChange("service_integrations",
-			ServiceIntegrationShouldNotBeEmpty,
+			ShouldNotBeEmpty,
 			CustomizeDiffServiceIntegrationAfterCreation,
 		),
 		customdiff.Sequence(
@@ -40,16 +40,17 @@ func CustomizeDiffGenericService(serviceType string) schema.CustomizeDiffFunc {
 	)
 }
 
-func ServiceIntegrationShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
-	return len(new.([]interface{})) != 0
-}
-
-func DiskSpaceShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
-	return new.(string) != ""
-}
-
-func TagsShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
-	return len(new.(*schema.Set).List()) != 0
+func ShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
+	switch t := new.(type) {
+	case string:
+		return t != ""
+	case []interface{}:
+		return len(t) != 0
+	case *schema.Set:
+		return t.Len() != 0
+	default:
+		panic(fmt.Sprintf("unexpected type: %T", t))
+	}
 }
 
 func CustomizeDiffServiceIntegrationAfterCreation(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
