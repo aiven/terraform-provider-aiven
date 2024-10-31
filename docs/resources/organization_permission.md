@@ -3,12 +3,12 @@
 page_title: "aiven_organization_permission Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Grants permissions to a principal for a resource.
+  Grants permissions https://aiven.io/docs/platform/concepts/permissions to a principal for a resource.
 ---
 
 # aiven_organization_permission (Resource)
 
-Grants permissions to a principal for a resource.
+Grants [permissions](https://aiven.io/docs/platform/concepts/permissions) to a principal for a resource.
 
 ## Example Usage
 

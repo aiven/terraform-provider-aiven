@@ -217,8 +217,7 @@ Teams have been deprecated and are being migrated to groups. Groups are an easie
 
   The Account Owners and super admin are synced, so the removal of the
   Account Owners team will have no impact on existing permissions.
-  [Super admin](/docs/platform/concepts/orgs-units-projects#users-and-roles)
-  have full access to organizations.
+  Super admin have full access to organizations.
 
 * **From November 4, 2024 you won't be able to create new teams or update existing ones.**
 

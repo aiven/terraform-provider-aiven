@@ -70,7 +70,7 @@ var permissionFields = map[string]*schema.Schema{
 
 func ResourceOrganizationalPermission() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Grants permissions to a principal for a resource.",
+		Description:   "Grants [permissions](https://aiven.io/docs/platform/concepts/permissions) to a principal for a resource.",
 		CreateContext: common.WithGenClient(resourceOrganizationalPermissionUpsert),
 		ReadContext:   common.WithGenClient(resourceOrganizationalPermissionRead),
 		UpdateContext: common.WithGenClient(resourceOrganizationalPermissionUpsert),
