@@ -7,7 +7,9 @@ nav_order: 1
 # Changelog
 
 <!-- Always keep the following header in place: -->
-<!-- ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Add support for `autoscaler` service integration
 
 ## [4.28.0] - 2024-10-21
 

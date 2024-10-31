@@ -23,6 +23,7 @@ The Service Integration Endpoint resource allows the creation and management of 
 
 ### Optional
 
+- `autoscaler_user_config` (Block List, Max: 1) Autoscaler user configurable settings (see [below for nested schema](#nestedblock--autoscaler_user_config))
 - `datadog_user_config` (Block List, Max: 1) Datadog user configurable settings (see [below for nested schema](#nestedblock--datadog_user_config))
 - `external_aws_cloudwatch_logs_user_config` (Block List, Max: 1) ExternalAwsCloudwatchLogs user configurable settings (see [below for nested schema](#nestedblock--external_aws_cloudwatch_logs_user_config))
 - `external_aws_cloudwatch_metrics_user_config` (Block List, Max: 1) ExternalAwsCloudwatchMetrics user configurable settings (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config))
@@ -46,6 +47,23 @@ The Service Integration Endpoint resource allows the creation and management of 
 
 - `endpoint_config` (Map of String) Integration endpoint specific backend configuration
 - `id` (String) The ID of this resource.
+
+<a id="nestedblock--autoscaler_user_config"></a>
+### Nested Schema for `autoscaler_user_config`
+
+Required:
+
+- `autoscaling` (Block List, Min: 1, Max: 64) Configure autoscaling thresholds for a service (see [below for nested schema](#nestedblock--autoscaler_user_config--autoscaling))
+
+<a id="nestedblock--autoscaler_user_config--autoscaling"></a>
+### Nested Schema for `autoscaler_user_config.autoscaling`
+
+Required:
+
+- `cap_gb` (Number) The maximum total disk size (in gb) to allow autoscaler to scale up to. Example: `300`.
+- `type` (String) Enum: `autoscale_disk`. Type of autoscale event.
+
+
 
 <a id="nestedblock--datadog_user_config"></a>
 ### Nested Schema for `datadog_user_config`

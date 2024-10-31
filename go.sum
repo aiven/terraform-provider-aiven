@@ -197,8 +197,8 @@ github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7l
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/aiven/aiven-go-client/v2 v2.30.0 h1:dj1nRuO1XglnwH2IwKmqEl3SGaqKebDoxnd+SRjxQRg=
 github.com/aiven/aiven-go-client/v2 v2.30.0/go.mod h1:Eyxa+fNgayObmUBW94uJuEkyOe1646cEpjFzhm/NETY=
-github.com/aiven/go-api-schemas v1.94.0 h1:kbszL56VLORPZ2jXmQBP6FJpihcmiLGdH051G8zBRd0=
-github.com/aiven/go-api-schemas v1.94.0/go.mod h1:qS3E/3R+aKQbHsqXzNHqlXATY1kbVNzhiJvk2IDmADI=
+github.com/aiven/go-api-schemas v1.95.0 h1:3xGqlX1dwixNDZkUEpm4sn+qjwq8yb0usKubCx3icVA=
+github.com/aiven/go-api-schemas v1.95.0/go.mod h1:ATdCq7aRp+URkFI4W4mVZaNZgoN5FRicXKH3c2fpgW4=
 github.com/aiven/go-client-codegen v0.45.0 h1:5+5eCN42Qb0QegJSYDw7WCi3z1IHemFyRxzJBN2TnaQ=
 github.com/aiven/go-client-codegen v0.45.0/go.mod h1:FfbH32Xb+Hx5zeKTIug1Y8SfMeB+AKNRzxgrzkts2oA=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
@@ -639,8 +639,8 @@ golang.org/x/exp v0.0.0-20191227195350-da58074b4299/go.mod h1:2RIsYlXP63K8oxa1u0
 golang.org/x/exp v0.0.0-20200119233911-0405dc783f0a/go.mod h1:2RIsYlXP63K8oxa1u096TMicItID8zy7Y6sNkU49FU4=
 golang.org/x/exp v0.0.0-20200207192155-f17229e696bd/go.mod h1:J/WKrq2StrnmMY6+EHIKF9dgMWnmCNThgcyBT1FY9mM=
 golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6/go.mod h1:3jZMyOhIsHpP37uCMkUooju7aAi5cS1Q23tOzKc+0MU=
-golang.org/x/exp v0.0.0-20241004190924-225e2abe05e6 h1:1wqE9dj9NpSm04INVsJhhEUzhuDVjbcyKH91sVyPATw=
-golang.org/x/exp v0.0.0-20241004190924-225e2abe05e6/go.mod h1:NQtJDoLvd6faHhE7m4T/1IY708gDefGGjR/iUW8yQQ8=
+golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c h1:7dEasQXItcW1xKJ2+gg5VOiBnqWrJc+rq0DPKyvvdbY=
+golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c/go.mod h1:NQtJDoLvd6faHhE7m4T/1IY708gDefGGjR/iUW8yQQ8=
 golang.org/x/image v0.0.0-20190227222117-0694c2d4d067/go.mod h1:kZ7UVZpmo3dzQBMxlp+ypCbDeSB+sBbTgSJuh5dn5js=
 golang.org/x/image v0.0.0-20190802002840-cff245a6509b/go.mod h1:FeLwcggjj3mMvU+oOTbSwawSJRM1uh48EjtB4UJZlP0=
 golang.org/x/lint v0.0.0-20181026193005-c67002cb31c3/go.mod h1:UVdnD1Gm6xHRNCYTkRU2/jEulfH38KcIWyp/GAMgvoE=

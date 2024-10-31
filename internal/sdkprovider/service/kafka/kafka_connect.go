@@ -1,7 +1,6 @@
 package kafka
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -29,26 +28,7 @@ To set up and integrate Kafka Connect:
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
 		DeleteContext: schemautil.ResourceServiceDelete,
-		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeKafkaConnect),
-			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
-			customdiff.IfValueChange("disk_space",
-				schemautil.DiskSpaceShouldNotBeEmpty,
-				schemautil.CustomizeDiffCheckDiskSpace,
-			),
-			customdiff.IfValueChange("additional_disk_space",
-				schemautil.DiskSpaceShouldNotBeEmpty,
-				schemautil.CustomizeDiffCheckDiskSpace,
-			),
-			customdiff.IfValueChange("service_integrations",
-				schemautil.ServiceIntegrationShouldNotBeEmpty,
-				schemautil.CustomizeDiffServiceIntegrationAfterCreation,
-			),
-			customdiff.Sequence(
-				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
-				schemautil.CustomizeDiffCheckStaticIPDisassociation,
-			),
-		),
+		CustomizeDiff: schemautil.CustomizeDiffGenericService(schemautil.ServiceTypeKafkaConnect),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

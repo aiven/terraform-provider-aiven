@@ -5,7 +5,6 @@ import (
 
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -48,35 +47,11 @@ func ResourceFlink() *schema.Resource {
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
 		DeleteContext: FlinkServiceDelete,
-		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeFlink),
-			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
-			customdiff.IfValueChange("tag",
-				schemautil.TagsShouldNotBeEmpty,
-				schemautil.CustomizeDiffCheckUniqueTag,
-			),
-			customdiff.IfValueChange("disk_space",
-				schemautil.DiskSpaceShouldNotBeEmpty,
-				schemautil.CustomizeDiffCheckDiskSpace,
-			),
-			customdiff.IfValueChange("additional_disk_space",
-				schemautil.DiskSpaceShouldNotBeEmpty,
-				schemautil.CustomizeDiffCheckDiskSpace,
-			),
-			customdiff.IfValueChange("service_integrations",
-				schemautil.ServiceIntegrationShouldNotBeEmpty,
-				schemautil.CustomizeDiffServiceIntegrationAfterCreation,
-			),
-			customdiff.Sequence(
-				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
-				schemautil.CustomizeDiffCheckStaticIPDisassociation,
-			),
-		),
+		CustomizeDiff: schemautil.CustomizeDiffGenericService(schemautil.ServiceTypeFlink),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Timeouts: schemautil.DefaultResourceTimeouts(),
-
+		Timeouts:       schemautil.DefaultResourceTimeouts(),
 		Schema:         aivenFlinkSchema(),
 		SchemaVersion:  1,
 		StateUpgraders: stateupgrader.Flink(),

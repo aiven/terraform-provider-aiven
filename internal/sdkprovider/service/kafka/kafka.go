@@ -101,28 +101,7 @@ func ResourceKafka() *schema.Resource {
 
 		Schema: aivenKafkaSchema(),
 		CustomizeDiff: customdiff.Sequence(
-			schemautil.SetServiceTypeIfEmpty(schemautil.ServiceTypeKafka),
-			schemautil.CustomizeDiffDisallowMultipleManyToOneKeys,
-			customdiff.IfValueChange("tag",
-				schemautil.TagsShouldNotBeEmpty,
-				schemautil.CustomizeDiffCheckUniqueTag,
-			),
-			customdiff.IfValueChange("disk_space",
-				schemautil.DiskSpaceShouldNotBeEmpty,
-				schemautil.CustomizeDiffCheckDiskSpace,
-			),
-			customdiff.IfValueChange("additional_disk_space",
-				schemautil.DiskSpaceShouldNotBeEmpty,
-				schemautil.CustomizeDiffCheckDiskSpace,
-			),
-			customdiff.IfValueChange("service_integrations",
-				schemautil.ServiceIntegrationShouldNotBeEmpty,
-				schemautil.CustomizeDiffServiceIntegrationAfterCreation,
-			),
-			customdiff.Sequence(
-				schemautil.CustomizeDiffCheckPlanAndStaticIpsCannotBeModifiedTogether,
-				schemautil.CustomizeDiffCheckStaticIPDisassociation,
-			),
+			schemautil.CustomizeDiffGenericService(schemautil.ServiceTypeKafka),
 
 			// if a kafka_version is >= 3.0 then this schema field is not applicable
 			customdiff.ComputedIf("karapace", func(ctx context.Context, d *schema.ResourceDiff, m interface{}) bool {

@@ -11,7 +11,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/server"
 )
 
-//go:generate go run ./ucgenerator/... --excludeServices elasticsearch,alloydbomni --excludeEndpoints autoscaler
+//go:generate go run ./ucgenerator/... --excludeServices elasticsearch,alloydbomni
 
 // registryPrefix is the registry prefix for the provider.
 const registryPrefix = "registry.terraform.io/"
