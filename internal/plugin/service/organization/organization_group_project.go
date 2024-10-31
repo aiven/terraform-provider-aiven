@@ -79,10 +79,13 @@ func (r *organizationGroupProjectResource) Schema(
 	_ resource.SchemaRequest,
 	resp *resource.SchemaResponse) {
 	resp.Schema = util.GeneralizeSchema(ctx, schema.Schema{
-		Description: userconfig.Desc(
-			"Adds and manages a [group](https://aiven.io/docs/platform/howto/list-groups) of users as members of a project.",
-		).
-			Build(),
+		Description: `Adds and manages a group of users as members of a project.
+
+**This resource is deprecated.** Use ` + "`aiven_organization_permission`" + ` and
+[migrate existing aiven_organization_group_project resources](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources) 
+to the new resource.
+			`,
+		DeprecationMessage: "This resource is deprecated. Use aiven_organization_permission instead.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description: "A compound identifier of the resource in the format `project/group_id`.",

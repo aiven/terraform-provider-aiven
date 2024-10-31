@@ -38,7 +38,12 @@ var aivenProjectUserSchema = map[string]*schema.Schema{
 
 func ResourceProjectUser() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Creates and manages an Aiven project member.",
+		Description: `Creates and manages an Aiven project member.
+
+**This resource is deprecated.** Use ` + "`aiven_organization_permission`" + ` and
+[migrate existing aiven_project_user resources](https://registry.terraform.io/providers/aiven/aiven/latest/docs/guides/update-deprecated-resources) 
+to the new resource.
+		`,
 		CreateContext: resourceProjectUserCreate,
 		ReadContext:   resourceProjectUserRead,
 		UpdateContext: resourceProjectUserUpdate,
@@ -48,7 +53,8 @@ func ResourceProjectUser() *schema.Resource {
 		},
 		Timeouts: schemautil.DefaultResourceTimeouts(),
 
-		Schema: aivenProjectUserSchema,
+		Schema:             aivenProjectUserSchema,
+		DeprecationMessage: "This resource is deprecated. Use aiven_organization_permission instead.",
 	}
 }
 

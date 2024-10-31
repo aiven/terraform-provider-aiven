@@ -277,9 +277,7 @@ func Provider(version string) (*schema.Provider, error) {
 	}
 
 	// Adds "beta" warning to the description
-	betaResources := []string{
-		"aiven_organization_permission",
-	}
+	betaResources := []string{}
 
 	betaDataSources := []string{
 		"aiven_organization_user_list",

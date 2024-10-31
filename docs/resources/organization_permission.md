@@ -4,16 +4,11 @@ page_title: "aiven_organization_permission Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
   Grants permissions to a principal for a resource.
-  This resource is in the beta stage and may change without notice. Set
-  the PROVIDER_AIVEN_ENABLE_BETA environment variable to use the resource.
 ---
 
 # aiven_organization_permission (Resource)
 
-Grants permissions to a principal for a resource. 
-
-**This resource is in the beta stage and may change without notice.** Set
-the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
+Grants permissions to a principal for a resource.
 
 ## Example Usage
 
