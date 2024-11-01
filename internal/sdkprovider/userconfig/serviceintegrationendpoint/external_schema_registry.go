@@ -15,10 +15,10 @@ func externalSchemaRegistryUserConfig() *schema.Schema {
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"authentication": {
-				Description:  "Enum: `none`, `basic`. Authentication method.",
+				Description:  "Enum: `basic`, `none`. Authentication method.",
 				Required:     true,
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"none", "basic"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"basic", "none"}, false),
 			},
 			"basic_auth_password": {
 				Description: "Basic authentication password. Example: `Zm9vYg==`.",

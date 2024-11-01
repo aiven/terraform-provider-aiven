@@ -51,7 +51,7 @@ resource "aiven_organization_group_project" "example" {
 
 - `group_id` (String) The ID of the user group.
 - `project` (String) The project that the users in the group are members of.
-- `role` (String) [Project-level role](https://aiven.io/docs/platform/reference/project-member-privileges) assigned to all users in the group. The possible values are `admin`, `operator`, `developer`, `read_only`, `project:integrations:read`, `project:networking:read`, `project:permissions:read`, `service:logs:read`, `project:services:read` and `project:audit_logs:read`.
+- `role` (String) [Project-level role](https://aiven.io/docs/platform/reference/project-member-privileges) assigned to all users in the group. The possible values are `admin`, `operator`, `developer`, `read_only`, `project:integrations:read`, `project:integrations:write`, `project:networking:read`, `project:networking:write`, `project:permissions:read`, `service:configuration:write`, `services:maintenance`, `service:logs:read`, `project:services:read` and `project:audit_logs:read`.
 
 ### Optional
 

@@ -108,7 +108,7 @@ Optional:
 - `kafka_consumer_check_instances` (Number) Number of separate instances to fetch kafka consumer statistics with. Example: `8`.
 - `kafka_consumer_stats_timeout` (Number) Number of seconds that datadog will wait to get consumer statistics from brokers. Example: `60`.
 - `max_partition_contexts` (Number) Maximum number of partition contexts to send. Example: `32000`.
-- `site` (String) Enum: `datadoghq.com`, `datadoghq.eu`, `us3.datadoghq.com`, `us5.datadoghq.com`, `ddog-gov.com`, `ap1.datadoghq.com`. Datadog intake site. Defaults to datadoghq.com.
+- `site` (String) Enum: `ap1.datadoghq.com`, `datadoghq.com`, `datadoghq.eu`, `ddog-gov.com`, `us3.datadoghq.com`, `us5.datadoghq.com`. Datadog intake site. Defaults to datadoghq.com.
 
 <a id="nestedblock--datadog_user_config--datadog_tags"></a>
 ### Nested Schema for `datadog_user_config.datadog_tags`
@@ -212,7 +212,7 @@ Required:
 Required:
 
 - `bootstrap_servers` (String) Bootstrap servers. Example: `10.0.0.1:9092,10.0.0.2:9092`.
-- `security_protocol` (String) Enum: `PLAINTEXT`, `SSL`, `SASL_PLAINTEXT`, `SASL_SSL`. Security protocol.
+- `security_protocol` (String) Enum: `PLAINTEXT`, `SASL_PLAINTEXT`, `SASL_SSL`, `SSL`. Security protocol.
 
 Optional:
 
@@ -291,7 +291,7 @@ Optional:
 - `ssl_client_key` (String, Sensitive) Client key. Example: `-----BEGIN PRIVATE KEY-----
 ...
 -----END PRIVATE KEY-----`.
-- `ssl_mode` (String) Enum: `disable`, `allow`, `prefer`, `require`, `verify-ca`, `verify-full`. SSL mode to use for the connection.  Please note that Aiven requires TLS for all connections to external PostgreSQL services. Default: `verify-full`.
+- `ssl_mode` (String) Enum: `allow`, `disable`, `prefer`, `require`, `verify-ca`, `verify-full`. SSL mode to use for the connection.  Please note that Aiven requires TLS for all connections to external PostgreSQL services. Default: `verify-full`.
 - `ssl_root_cert` (String) SSL Root Cert. Example: `-----BEGIN CERTIFICATE-----
 ...
 -----END CERTIFICATE-----
@@ -313,7 +313,7 @@ Optional:
 
 Required:
 
-- `authentication` (String) Enum: `none`, `basic`. Authentication method.
+- `authentication` (String) Enum: `basic`, `none`. Authentication method.
 - `url` (String) Schema Registry URL. Example: `https://schema-registry.kafka.company.com:28419`.
 
 Optional:
@@ -345,7 +345,7 @@ Optional:
 
 Required:
 
-- `format` (String) Enum: `rfc5424`, `rfc3164`, `custom`. Message format. Default: `rfc5424`.
+- `format` (String) Enum: `custom`, `rfc3164`, `rfc5424`. Message format. Default: `rfc5424`.
 - `port` (Number) Rsyslog server port. Default: `514`.
 - `server` (String) Rsyslog server IP address or hostname. Example: `logs.example.com`.
 - `tls` (Boolean) Require TLS. Default: `true`.

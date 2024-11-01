@@ -161,7 +161,7 @@ Optional:
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.
 - `shared_buffers_percentage` (Number) Percentage of total RAM that the database server uses for shared memory buffers. Valid range is 20-60 (float), which corresponds to 20% - 60%. This setting adjusts the shared_buffers configuration value. Example: `41.5`.
 - `static_ips` (Boolean) Use static public IP addresses.
-- `synchronous_replication` (String) Enum: `quorum`, `off`. Synchronous replication type. Note that the service plan also needs to support synchronous replication.
+- `synchronous_replication` (String) Enum: `off`, `quorum`. Synchronous replication type. Note that the service plan also needs to support synchronous replication.
 - `timescaledb` (Block List, Max: 1) System-wide settings for the timescaledb extension (see [below for nested schema](#nestedblock--pg_user_config--timescaledb))
 - `variant` (String) Enum: `aiven`, `timescale`. Variant of the PostgreSQL service, may affect the features that are exposed by default.
 - `work_mem` (Number) Sets the maximum amount of memory to be used by a query operation (such as a sort or hash table) before writing to temporary disk files, in MB. Default is 1MB + 0.075% of total RAM (up to 32MB). Example: `4`.
@@ -220,8 +220,8 @@ Optional:
 - `idle_in_transaction_session_timeout` (Number) Time out sessions with open transactions after this number of milliseconds.
 - `jit` (Boolean) Controls system-wide use of Just-in-Time Compilation (JIT).
 - `log_autovacuum_min_duration` (Number) Causes each action executed by autovacuum to be logged if it ran for at least the specified number of milliseconds. Setting this to zero logs all autovacuum actions. Minus-one (the default) disables logging autovacuum actions.
-- `log_error_verbosity` (String) Enum: `TERSE`, `DEFAULT`, `VERBOSE`. Controls the amount of detail written in the server log for each message that is logged.
-- `log_line_prefix` (String) Enum: `'pid=%p,user=%u,db=%d,app=%a,client=%h '`, `'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '`, `'%m [%p] %q[user=%u,db=%d,app=%a] '`, `'pid=%p,user=%u,db=%d,app=%a,client=%h,txid=%x,qid=%Q '`. Choose from one of the available log formats.
+- `log_error_verbosity` (String) Enum: `DEFAULT`, `TERSE`, `VERBOSE`. Controls the amount of detail written in the server log for each message that is logged.
+- `log_line_prefix` (String) Enum: `'%m [%p] %q[user=%u,db=%d,app=%a] '`, `'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '`, `'pid=%p,user=%u,db=%d,app=%a,client=%h '`, `'pid=%p,user=%u,db=%d,app=%a,client=%h,txid=%x,qid=%Q '`. Choose from one of the available log formats.
 - `log_min_duration_statement` (Number) Log statements that take more than this number of milliseconds to run, -1 disables.
 - `log_temp_files` (Number) Log statements for each temporary file created larger than this number of kilobytes, -1 disables.
 - `max_files_per_process` (Number) PostgreSQL maximum number of files that can be open per process.
@@ -242,12 +242,12 @@ Optional:
 - `pg_partman_bgw__dot__role` (String) Controls which role to use for pg_partman's scheduled background tasks. Example: `myrolename`.
 - `pg_stat_monitor__dot__pgsm_enable_query_plan` (Boolean) Enables or disables query plan monitoring.
 - `pg_stat_monitor__dot__pgsm_max_buckets` (Number) Sets the maximum number of buckets. Example: `10`.
-- `pg_stat_statements__dot__track` (String) Enum: `all`, `top`, `none`. Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default value is top.
+- `pg_stat_statements__dot__track` (String) Enum: `all`, `none`, `top`. Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default value is top.
 - `temp_file_limit` (Number) PostgreSQL temporary file limit in KiB, -1 for unlimited. Example: `5000000`.
 - `timezone` (String) PostgreSQL service timezone. Example: `Europe/Helsinki`.
 - `track_activity_query_size` (Number) Specifies the number of bytes reserved to track the currently executing command for each active session. Example: `1024`.
 - `track_commit_timestamp` (String) Enum: `off`, `on`. Record commit time of transactions.
-- `track_functions` (String) Enum: `all`, `pl`, `none`. Enables tracking of function call counts and time used.
+- `track_functions` (String) Enum: `all`, `none`, `pl`. Enables tracking of function call counts and time used.
 - `track_io_timing` (String) Enum: `off`, `on`. Enables timing of database I/O calls. This parameter is off by default, because it will repeatedly query the operating system for the current time, which may cause significant overhead on some platforms.
 - `wal_sender_timeout` (Number) Terminate replication connections that are inactive for longer than this amount of time, in milliseconds. Setting this value to zero disables the timeout. Example: `60000`.
 - `wal_writer_delay` (Number) WAL flush interval in milliseconds. Note that setting this value to lower than the default 200ms may negatively impact performance. Example: `50`.
@@ -293,7 +293,7 @@ Optional:
 
 - `autodb_idle_timeout` (Number) If the automatically created database pools have been unused this many seconds, they are freed. If 0 then timeout is disabled. (seconds). Default: `3600`.
 - `autodb_max_db_connections` (Number) Do not allow more than this many server connections per database (regardless of user). Setting it to 0 means unlimited. Example: `0`.
-- `autodb_pool_mode` (String) Enum: `session`, `transaction`, `statement`. PGBouncer pool mode. Default: `transaction`.
+- `autodb_pool_mode` (String) Enum: `session`, `statement`, `transaction`. PGBouncer pool mode. Default: `transaction`.
 - `autodb_pool_size` (Number) If non-zero then create automatically a pool of that size per user when a pool doesn't exist. Default: `0`.
 - `ignore_startup_parameters` (List of String) List of parameters to ignore when given in startup packet.
 - `max_prepared_statements` (Number) PgBouncer tracks protocol-level named prepared statements related commands sent by the client in transaction and statement pooling modes when max_prepared_statements is set to a non-zero value. Setting it to 0 disables prepared statements. max_prepared_statements defaults to 100, and its maximum is 3000. Default: `100`.

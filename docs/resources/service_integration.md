@@ -101,14 +101,14 @@ Optional:
 Required:
 
 - `columns` (Block List, Min: 1, Max: 100) Table columns (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--columns))
-- `data_format` (String) Enum: `Avro`, `CSV`, `JSONAsString`, `JSONCompactEachRow`, `JSONCompactStringsEachRow`, `JSONEachRow`, `JSONStringsEachRow`, `MsgPack`, `TSKV`, `TSV`, `TabSeparated`, `RawBLOB`, `AvroConfluent`, `Parquet`. Message data format. Default: `JSONEachRow`.
+- `data_format` (String) Enum: `Avro`, `AvroConfluent`, `CSV`, `JSONAsString`, `JSONCompactEachRow`, `JSONCompactStringsEachRow`, `JSONEachRow`, `JSONStringsEachRow`, `MsgPack`, `Parquet`, `RawBLOB`, `TSKV`, `TSV`, `TabSeparated`. Message data format. Default: `JSONEachRow`.
 - `group_name` (String) Kafka consumers group. Default: `clickhouse`.
 - `name` (String) Name of the table. Example: `events`.
 - `topics` (Block List, Min: 1, Max: 100) Kafka topics (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config--tables--topics))
 
 Optional:
 
-- `auto_offset_reset` (String) Enum: `smallest`, `earliest`, `beginning`, `largest`, `latest`, `end`. Action to take when there is no initial offset in offset store or the desired offset is out of range. Default: `earliest`.
+- `auto_offset_reset` (String) Enum: `beginning`, `earliest`, `end`, `largest`, `latest`, `smallest`. Action to take when there is no initial offset in offset store or the desired offset is out of range. Default: `earliest`.
 - `date_time_input_format` (String) Enum: `basic`, `best_effort`, `best_effort_us`. Method to read DateTime from text input formats. Default: `basic`.
 - `handle_error_mode` (String) Enum: `default`, `stream`. How to handle errors for Kafka engine. Default: `default`.
 - `max_block_size` (Number) Number of row collected by poll(s) for flushing data from Kafka. Default: `0`.
@@ -313,7 +313,7 @@ Optional:
 - `consumer_max_poll_records` (Number) Set consumer max.poll.records. The default is 500. Example: `500`.
 - `producer_batch_size` (Number) The batch size in bytes producer will attempt to collect before publishing to broker. Example: `1024`.
 - `producer_buffer_memory` (Number) The amount of bytes producer can use for buffering data before publishing to broker. Example: `8388608`.
-- `producer_compression_type` (String) Enum: `gzip`, `snappy`, `lz4`, `zstd`, `none`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.
+- `producer_compression_type` (String) Enum: `gzip`, `lz4`, `none`, `snappy`, `zstd`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.
 - `producer_linger_ms` (Number) The linger time (ms) for waiting new data to arrive for publishing. Example: `100`.
 - `producer_max_request_size` (Number) The maximum request size in bytes. Example: `1048576`.
 

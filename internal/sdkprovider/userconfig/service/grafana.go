@@ -41,10 +41,10 @@ func grafanaUserConfig() *schema.Schema {
 				Type:        schema.TypeInt,
 			},
 			"alerting_nodata_or_nullvalues": {
-				Description:  "Enum: `alerting`, `no_data`, `keep_state`, `ok`. Default value for 'no data or null values' for new alerting rules.",
+				Description:  "Enum: `alerting`, `keep_state`, `no_data`, `ok`. Default value for 'no data or null values' for new alerting rules.",
 				Optional:     true,
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"alerting", "no_data", "keep_state", "ok"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"alerting", "keep_state", "no_data", "ok"}, false),
 			},
 			"allow_embedding": {
 				Description: "Allow embedding Grafana dashboards with iframe/frame/object/embed tags. Disabled by default to limit impact of clickjacking.",
@@ -332,10 +332,10 @@ func grafanaUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"cookie_samesite": {
-				Description:  "Enum: `lax`, `strict`, `none`. Cookie SameSite attribute: `strict` prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. `lax` is the default value.",
+				Description:  "Enum: `lax`, `none`, `strict`. Cookie SameSite attribute: `strict` prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. `lax` is the default value.",
 				Optional:     true,
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"lax", "strict", "none"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"lax", "none", "strict"}, false),
 			},
 			"custom_domain": {
 				Description: "Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. Example: `grafana.example.org`.",
@@ -599,10 +599,10 @@ func grafanaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"starttls_policy": {
-						Description:  "Enum: `OpportunisticStartTLS`, `MandatoryStartTLS`, `NoStartTLS`. Either OpportunisticStartTLS, MandatoryStartTLS or NoStartTLS. Default is OpportunisticStartTLS.",
+						Description:  "Enum: `MandatoryStartTLS`, `NoStartTLS`, `OpportunisticStartTLS`. Either OpportunisticStartTLS, MandatoryStartTLS or NoStartTLS. Default is OpportunisticStartTLS.",
 						Optional:     true,
 						Type:         schema.TypeString,
-						ValidateFunc: validation.StringInSlice([]string{"OpportunisticStartTLS", "MandatoryStartTLS", "NoStartTLS"}, false),
+						ValidateFunc: validation.StringInSlice([]string{"MandatoryStartTLS", "NoStartTLS", "OpportunisticStartTLS"}, false),
 					},
 					"username": {
 						Description: "Username for SMTP authentication. Example: `smtpuser`.",
@@ -630,10 +630,10 @@ func grafanaUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"user_auto_assign_org_role": {
-				Description:  "Enum: `Viewer`, `Admin`, `Editor`. Set role for new signups. Defaults to Viewer.",
+				Description:  "Enum: `Admin`, `Editor`, `Viewer`. Set role for new signups. Defaults to Viewer.",
 				Optional:     true,
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"Viewer", "Admin", "Editor"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"Admin", "Editor", "Viewer"}, false),
 			},
 			"viewers_can_edit": {
 				Description: "Users with view-only permission can edit but not save dashboards.",

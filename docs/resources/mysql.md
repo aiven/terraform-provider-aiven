@@ -185,8 +185,8 @@ Optional:
 - `innodb_thread_concurrency` (Number) Defines the maximum number of threads permitted inside of InnoDB. Default is 0 (infinite concurrency - no limit). Example: `10`.
 - `innodb_write_io_threads` (Number) The number of I/O threads for write operations in InnoDB. Default is 4. Changing this parameter will lead to a restart of the MySQL service. Example: `10`.
 - `interactive_timeout` (Number) The number of seconds the server waits for activity on an interactive connection before closing it. Example: `3600`.
-- `internal_tmp_mem_storage_engine` (String) Enum: `TempTable`, `MEMORY`. The storage engine for in-memory internal temporary tables.
-- `log_output` (String) Enum: `INSIGHTS`, `NONE`, `TABLE`, `INSIGHTS,TABLE`. The slow log output destination when slow_query_log is ON. To enable MySQL AI Insights, choose INSIGHTS. To use MySQL AI Insights and the mysql.slow_log table at the same time, choose INSIGHTS,TABLE. To only use the mysql.slow_log table, choose TABLE. To silence slow logs, choose NONE.
+- `internal_tmp_mem_storage_engine` (String) Enum: `MEMORY`, `TempTable`. The storage engine for in-memory internal temporary tables.
+- `log_output` (String) Enum: `INSIGHTS`, `INSIGHTS,TABLE`, `NONE`, `TABLE`. The slow log output destination when slow_query_log is ON. To enable MySQL AI Insights, choose INSIGHTS. To use MySQL AI Insights and the mysql.slow_log table at the same time, choose INSIGHTS,TABLE. To only use the mysql.slow_log table, choose TABLE. To silence slow logs, choose NONE.
 - `long_query_time` (Number) The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Example: `10`.
 - `max_allowed_packet` (Number) Size of the largest message in bytes that can be received by the server. Default is 67108864 (64M). Example: `67108864`.
 - `max_heap_table_size` (Number) Limits the size of internal in-memory tables. Also set tmp_table_size. Default is 16777216 (16M). Example: `16777216`.

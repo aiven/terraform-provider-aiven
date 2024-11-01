@@ -25,10 +25,10 @@ func rsyslogUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"format": {
-				Description:  "Enum: `rfc5424`, `rfc3164`, `custom`. Message format. Default: `rfc5424`.",
+				Description:  "Enum: `custom`, `rfc3164`, `rfc5424`. Message format. Default: `rfc5424`.",
 				Required:     true,
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"rfc5424", "rfc3164", "custom"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"custom", "rfc3164", "rfc5424"}, false),
 			},
 			"key": {
 				Description: "PEM encoded client key. Example: `-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n`.",

@@ -49,10 +49,10 @@ func kafkaMirrormakerUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"producer_compression_type": {
-						Description:  "Enum: `gzip`, `snappy`, `lz4`, `zstd`, `none`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.",
+						Description:  "Enum: `gzip`, `lz4`, `none`, `snappy`, `zstd`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.",
 						Optional:     true,
 						Type:         schema.TypeString,
-						ValidateFunc: validation.StringInSlice([]string{"gzip", "snappy", "lz4", "zstd", "none"}, false),
+						ValidateFunc: validation.StringInSlice([]string{"gzip", "lz4", "none", "snappy", "zstd"}, false),
 					},
 					"producer_linger_ms": {
 						Description: "The linger time (ms) for waiting new data to arrive for publishing. Example: `100`.",

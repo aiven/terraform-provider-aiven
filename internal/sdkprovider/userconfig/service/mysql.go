@@ -235,16 +235,16 @@ func mysqlUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"internal_tmp_mem_storage_engine": {
-						Description:  "Enum: `TempTable`, `MEMORY`. The storage engine for in-memory internal temporary tables.",
+						Description:  "Enum: `MEMORY`, `TempTable`. The storage engine for in-memory internal temporary tables.",
 						Optional:     true,
 						Type:         schema.TypeString,
-						ValidateFunc: validation.StringInSlice([]string{"TempTable", "MEMORY"}, false),
+						ValidateFunc: validation.StringInSlice([]string{"MEMORY", "TempTable"}, false),
 					},
 					"log_output": {
-						Description:  "Enum: `INSIGHTS`, `NONE`, `TABLE`, `INSIGHTS,TABLE`. The slow log output destination when slow_query_log is ON. To enable MySQL AI Insights, choose INSIGHTS. To use MySQL AI Insights and the mysql.slow_log table at the same time, choose INSIGHTS,TABLE. To only use the mysql.slow_log table, choose TABLE. To silence slow logs, choose NONE.",
+						Description:  "Enum: `INSIGHTS`, `INSIGHTS,TABLE`, `NONE`, `TABLE`. The slow log output destination when slow_query_log is ON. To enable MySQL AI Insights, choose INSIGHTS. To use MySQL AI Insights and the mysql.slow_log table at the same time, choose INSIGHTS,TABLE. To only use the mysql.slow_log table, choose TABLE. To silence slow logs, choose NONE.",
 						Optional:     true,
 						Type:         schema.TypeString,
-						ValidateFunc: validation.StringInSlice([]string{"INSIGHTS", "NONE", "TABLE", "INSIGHTS,TABLE"}, false),
+						ValidateFunc: validation.StringInSlice([]string{"INSIGHTS", "INSIGHTS,TABLE", "NONE", "TABLE"}, false),
 					},
 					"long_query_time": {
 						Description: "The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Example: `10`.",

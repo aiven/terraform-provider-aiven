@@ -59,10 +59,10 @@ func datadogUserConfig() *schema.Schema {
 				Type:        schema.TypeInt,
 			},
 			"site": {
-				Description:  "Enum: `datadoghq.com`, `datadoghq.eu`, `us3.datadoghq.com`, `us5.datadoghq.com`, `ddog-gov.com`, `ap1.datadoghq.com`. Datadog intake site. Defaults to datadoghq.com.",
+				Description:  "Enum: `ap1.datadoghq.com`, `datadoghq.com`, `datadoghq.eu`, `ddog-gov.com`, `us3.datadoghq.com`, `us5.datadoghq.com`. Datadog intake site. Defaults to datadoghq.com.",
 				Optional:     true,
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"datadoghq.com", "datadoghq.eu", "us3.datadoghq.com", "us5.datadoghq.com", "ddog-gov.com", "ap1.datadoghq.com"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"ap1.datadoghq.com", "datadoghq.com", "datadoghq.eu", "ddog-gov.com", "us3.datadoghq.com", "us5.datadoghq.com"}, false),
 			},
 		}},
 		MaxItems: 1,

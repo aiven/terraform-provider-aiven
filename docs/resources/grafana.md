@@ -90,7 +90,7 @@ Optional:
 - `alerting_enabled` (Boolean) Enable or disable Grafana legacy alerting functionality. This should not be enabled with unified_alerting_enabled.
 - `alerting_error_or_timeout` (String) Enum: `alerting`, `keep_state`. Default error or timeout setting for new alerting rules.
 - `alerting_max_annotations_to_keep` (Number) Max number of alert annotations that Grafana stores. 0 (default) keeps all alert annotations. Example: `0`.
-- `alerting_nodata_or_nullvalues` (String) Enum: `alerting`, `no_data`, `keep_state`, `ok`. Default value for 'no data or null values' for new alerting rules.
+- `alerting_nodata_or_nullvalues` (String) Enum: `alerting`, `keep_state`, `no_data`, `ok`. Default value for 'no data or null values' for new alerting rules.
 - `allow_embedding` (Boolean) Allow embedding Grafana dashboards with iframe/frame/object/embed tags. Disabled by default to limit impact of clickjacking.
 - `auth_azuread` (Block List, Max: 1) Azure AD OAuth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_azuread))
 - `auth_basic_enabled` (Boolean) Enable or disable basic authentication form, used by Grafana built-in login.
@@ -98,7 +98,7 @@ Optional:
 - `auth_github` (Block List, Max: 1) Github Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_github))
 - `auth_gitlab` (Block List, Max: 1) GitLab Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_gitlab))
 - `auth_google` (Block List, Max: 1) Google Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_google))
-- `cookie_samesite` (String) Enum: `lax`, `strict`, `none`. Cookie SameSite attribute: `strict` prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. `lax` is the default value.
+- `cookie_samesite` (String) Enum: `lax`, `none`, `strict`. Cookie SameSite attribute: `strict` prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. `lax` is the default value.
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. Example: `grafana.example.org`.
 - `dashboard_previews_enabled` (Boolean) This feature is new in Grafana 9 and is quite resource intensive. It may cause low-end plans to work more slowly while the dashboard previews are rendering.
 - `dashboards_min_refresh_interval` (String) Signed sequence of decimal numbers, followed by a unit suffix (ms, s, m, h, d), e.g. 30s, 1h. Example: `5s`.
@@ -126,7 +126,7 @@ Optional:
 - `static_ips` (Boolean) Use static public IP addresses.
 - `unified_alerting_enabled` (Boolean) Enable or disable Grafana unified alerting functionality. By default this is enabled and any legacy alerts will be migrated on upgrade to Grafana 9+. To stay on legacy alerting, set unified_alerting_enabled to false and alerting_enabled to true. See https://grafana.com/docs/grafana/latest/alerting/set-up/migrating-alerts/ for more details.
 - `user_auto_assign_org` (Boolean) Auto-assign new users on signup to main organization. Defaults to false.
-- `user_auto_assign_org_role` (String) Enum: `Viewer`, `Admin`, `Editor`. Set role for new signups. Defaults to Viewer.
+- `user_auto_assign_org_role` (String) Enum: `Admin`, `Editor`, `Viewer`. Set role for new signups. Defaults to Viewer.
 - `viewers_can_edit` (Boolean) Users with view-only permission can edit but not save dashboards.
 - `wal` (Boolean) Setting to enable/disable Write-Ahead Logging. The default value is false (disabled).
 
@@ -293,7 +293,7 @@ Optional:
 - `from_name` (String) Name used in outgoing emails, defaults to Grafana.
 - `password` (String, Sensitive) Password for SMTP authentication. Example: `ein0eemeev5eeth3Ahfu`.
 - `skip_verify` (Boolean) Skip verifying server certificate. Defaults to false.
-- `starttls_policy` (String) Enum: `OpportunisticStartTLS`, `MandatoryStartTLS`, `NoStartTLS`. Either OpportunisticStartTLS, MandatoryStartTLS or NoStartTLS. Default is OpportunisticStartTLS.
+- `starttls_policy` (String) Enum: `MandatoryStartTLS`, `NoStartTLS`, `OpportunisticStartTLS`. Either OpportunisticStartTLS, MandatoryStartTLS or NoStartTLS. Default is OpportunisticStartTLS.
 - `username` (String) Username for SMTP authentication. Example: `smtpuser`.
 
 

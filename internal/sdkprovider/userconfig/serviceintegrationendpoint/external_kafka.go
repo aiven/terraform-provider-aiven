@@ -37,10 +37,10 @@ func externalKafkaUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"security_protocol": {
-				Description:  "Enum: `PLAINTEXT`, `SSL`, `SASL_PLAINTEXT`, `SASL_SSL`. Security protocol.",
+				Description:  "Enum: `PLAINTEXT`, `SASL_PLAINTEXT`, `SASL_SSL`, `SSL`. Security protocol.",
 				Required:     true,
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"PLAINTEXT", "SSL", "SASL_PLAINTEXT", "SASL_SSL"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"PLAINTEXT", "SASL_PLAINTEXT", "SASL_SSL", "SSL"}, false),
 			},
 			"ssl_ca_cert": {
 				Description: "PEM-encoded CA certificate. Example: `-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n`.",

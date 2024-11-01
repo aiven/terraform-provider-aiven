@@ -142,6 +142,7 @@ Optional:
 - `chunk_size` (String) Big files can be broken down into chunks during snapshotting if needed. Should be the same as for the 3rd party repository.
 - `compress` (Boolean) When set to true metadata files are stored in compressed format.
 - `endpoint_suffix` (String) Defines the DNS suffix for Azure Storage endpoints.
+- `include_aliases` (Boolean) Whether to restore aliases alongside their associated indexes. Default is true.
 - `indices` (String) A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. By default, a restore operation includes all data streams and indices in the snapshot. If this argument is provided, the restore operation only includes the data streams and indices that you specify. Example: `metrics*,logs*,data-20240823`.
 - `key` (String, Sensitive) Azure account secret key. One of key or sas_token should be specified.
 - `restore_global_state` (Boolean) If true, restore the cluster state. Defaults to false.
@@ -162,6 +163,7 @@ Optional:
 
 - `chunk_size` (String) Big files can be broken down into chunks during snapshotting if needed. Should be the same as for the 3rd party repository.
 - `compress` (Boolean) When set to true metadata files are stored in compressed format.
+- `include_aliases` (Boolean) Whether to restore aliases alongside their associated indexes. Default is true.
 - `indices` (String) A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. By default, a restore operation includes all data streams and indices in the snapshot. If this argument is provided, the restore operation only includes the data streams and indices that you specify. Example: `metrics*,logs*,data-20240823`.
 - `restore_global_state` (Boolean) If true, restore the cluster state. Defaults to false.
 
@@ -328,7 +330,7 @@ Optional:
 
 Optional:
 
-- `mode` (String) Enum: `monitor_only`, `enforced`, `disabled`. The search backpressure mode. Valid values are monitor_only, enforced, or disabled. Default is monitor_only.
+- `mode` (String) Enum: `disabled`, `enforced`, `monitor_only`. The search backpressure mode. Valid values are monitor_only, enforced, or disabled. Default is monitor_only.
 - `node_duress` (Block List, Max: 1) Node duress settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_backpressure--node_duress))
 - `search_shard_task` (Block List, Max: 1) Search shard settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_backpressure--search_shard_task))
 - `search_task` (Block List, Max: 1) Search task settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_backpressure--search_task))
@@ -498,6 +500,7 @@ Optional:
 - `chunk_size` (String) Big files can be broken down into chunks during snapshotting if needed. Should be the same as for the 3rd party repository.
 - `compress` (Boolean) When set to true metadata files are stored in compressed format.
 - `endpoint` (String) The S3 service endpoint to connect to. If you are using an S3-compatible service then you should set this to the service’s endpoint.
+- `include_aliases` (Boolean) Whether to restore aliases alongside their associated indexes. Default is true.
 - `indices` (String) A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. By default, a restore operation includes all data streams and indices in the snapshot. If this argument is provided, the restore operation only includes the data streams and indices that you specify. Example: `metrics*,logs*,data-20240823`.
 - `restore_global_state` (Boolean) If true, restore the cluster state. Defaults to false.
 - `server_side_encryption` (Boolean) When set to true files are encrypted on server side.

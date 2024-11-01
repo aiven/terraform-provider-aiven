@@ -242,16 +242,16 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"log_error_verbosity": {
-						Description:  "Enum: `TERSE`, `DEFAULT`, `VERBOSE`. Controls the amount of detail written in the server log for each message that is logged.",
+						Description:  "Enum: `DEFAULT`, `TERSE`, `VERBOSE`. Controls the amount of detail written in the server log for each message that is logged.",
 						Optional:     true,
 						Type:         schema.TypeString,
-						ValidateFunc: validation.StringInSlice([]string{"TERSE", "DEFAULT", "VERBOSE"}, false),
+						ValidateFunc: validation.StringInSlice([]string{"DEFAULT", "TERSE", "VERBOSE"}, false),
 					},
 					"log_line_prefix": {
-						Description:  "Enum: `'pid=%p,user=%u,db=%d,app=%a,client=%h '`, `'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '`, `'%m [%p] %q[user=%u,db=%d,app=%a] '`, `'pid=%p,user=%u,db=%d,app=%a,client=%h,txid=%x,qid=%Q '`. Choose from one of the available log formats.",
+						Description:  "Enum: `'%m [%p] %q[user=%u,db=%d,app=%a] '`, `'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '`, `'pid=%p,user=%u,db=%d,app=%a,client=%h '`, `'pid=%p,user=%u,db=%d,app=%a,client=%h,txid=%x,qid=%Q '`. Choose from one of the available log formats.",
 						Optional:     true,
 						Type:         schema.TypeString,
-						ValidateFunc: validation.StringInSlice([]string{"'pid=%p,user=%u,db=%d,app=%a,client=%h '", "'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '", "'%m [%p] %q[user=%u,db=%d,app=%a] '", "'pid=%p,user=%u,db=%d,app=%a,client=%h,txid=%x,qid=%Q '"}, false),
+						ValidateFunc: validation.StringInSlice([]string{"'%m [%p] %q[user=%u,db=%d,app=%a] '", "'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '", "'pid=%p,user=%u,db=%d,app=%a,client=%h '", "'pid=%p,user=%u,db=%d,app=%a,client=%h,txid=%x,qid=%Q '"}, false),
 					},
 					"log_min_duration_statement": {
 						Description: "Log statements that take more than this number of milliseconds to run, -1 disables.",
@@ -354,10 +354,10 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"pg_stat_statements__dot__track": {
-						Description:  "Enum: `all`, `top`, `none`. Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default value is top.",
+						Description:  "Enum: `all`, `none`, `top`. Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default value is top.",
 						Optional:     true,
 						Type:         schema.TypeString,
-						ValidateFunc: validation.StringInSlice([]string{"all", "top", "none"}, false),
+						ValidateFunc: validation.StringInSlice([]string{"all", "none", "top"}, false),
 					},
 					"temp_file_limit": {
 						Description: "PostgreSQL temporary file limit in KiB, -1 for unlimited. Example: `5000000`.",
@@ -381,10 +381,10 @@ func pgUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"off", "on"}, false),
 					},
 					"track_functions": {
-						Description:  "Enum: `all`, `pl`, `none`. Enables tracking of function call counts and time used.",
+						Description:  "Enum: `all`, `none`, `pl`. Enables tracking of function call counts and time used.",
 						Optional:     true,
 						Type:         schema.TypeString,
-						ValidateFunc: validation.StringInSlice([]string{"all", "pl", "none"}, false),
+						ValidateFunc: validation.StringInSlice([]string{"all", "none", "pl"}, false),
 					},
 					"track_io_timing": {
 						Description:  "Enum: `off`, `on`. Enables timing of database I/O calls. This parameter is off by default, because it will repeatedly query the operating system for the current time, which may cause significant overhead on some platforms.",
@@ -580,10 +580,10 @@ func pgUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"autodb_pool_mode": {
-						Description:  "Enum: `session`, `transaction`, `statement`. PGBouncer pool mode. Default: `transaction`.",
+						Description:  "Enum: `session`, `statement`, `transaction`. PGBouncer pool mode. Default: `transaction`.",
 						Optional:     true,
 						Type:         schema.TypeString,
-						ValidateFunc: validation.StringInSlice([]string{"session", "transaction", "statement"}, false),
+						ValidateFunc: validation.StringInSlice([]string{"session", "statement", "transaction"}, false),
 					},
 					"autodb_pool_size": {
 						Description: "If non-zero then create automatically a pool of that size per user when a pool doesn't exist. Default: `0`.",
@@ -745,10 +745,10 @@ func pgUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"synchronous_replication": {
-				Description:  "Enum: `quorum`, `off`. Synchronous replication type. Note that the service plan also needs to support synchronous replication.",
+				Description:  "Enum: `off`, `quorum`. Synchronous replication type. Note that the service plan also needs to support synchronous replication.",
 				Optional:     true,
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"quorum", "off"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"off", "quorum"}, false),
 			},
 			"timescaledb": {
 				Description: "System-wide settings for the timescaledb extension",
