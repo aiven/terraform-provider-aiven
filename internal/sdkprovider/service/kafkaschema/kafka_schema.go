@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
@@ -301,7 +302,7 @@ func resourceKafkaSchemaCustomizeDiff(ctx context.Context, d *schema.ResourceDif
 		return nil
 	}
 
-	compatible, err := client.ServiceSchemaRegistryCompatibility(
+	r, err := client.ServiceSchemaRegistryCompatibility(
 		ctx,
 		d.Get("project").(string),
 		d.Get("service_name").(string),
@@ -317,8 +318,8 @@ func resourceKafkaSchemaCustomizeDiff(ctx context.Context, d *schema.ResourceDif
 		return fmt.Errorf("unable to check schema validity: %w", err)
 	}
 
-	if !compatible {
-		return fmt.Errorf("schema is not compatible with previous version")
+	if !r.IsCompatible {
+		return fmt.Errorf("schema is not compatible with previous version: %s", strings.Join(r.Messages, ", "))
 	}
 
 	return nil
