@@ -25,26 +25,26 @@ func hasEndpointConfig[T string | service.EndpointType](kind T) bool {
 func aivenServiceIntegrationEndpointSchema() map[string]*schema.Schema {
 	s := map[string]*schema.Schema{
 		"project": {
-			Description: "Project the service integration endpoint belongs to",
+			Description: "Project the service integration endpoint is in.",
 			ForceNew:    true,
 			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"endpoint_name": {
 			ForceNew:    true,
-			Description: "Name of the service integration endpoint",
+			Description: "Name of the service integration endpoint.",
 			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"endpoint_type": {
-			Description:  userconfig.Desc("Type of the service integration endpoint").PossibleValuesString(service.EndpointTypeChoices()...).Build(),
+			Description:  userconfig.Desc("The type of service integration endpoint.").PossibleValuesString(service.EndpointTypeChoices()...).Build(),
 			ForceNew:     true,
 			Required:     true,
 			Type:         schema.TypeString,
 			ValidateFunc: validation.StringInSlice(service.EndpointTypeChoices(), false),
 		},
 		"endpoint_config": {
-			Description: "Integration endpoint specific backend configuration",
+			Description: "Backend configuration for the endpoint.",
 			Computed:    true,
 			Type:        schema.TypeMap,
 			Elem:        &schema.Schema{Type: schema.TypeString},
@@ -60,7 +60,12 @@ func aivenServiceIntegrationEndpointSchema() map[string]*schema.Schema {
 
 func ResourceServiceIntegrationEndpoint() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The Service Integration Endpoint resource allows the creation and management of Aiven Service Integration Endpoints.",
+		Description: `Creates and manages an integration endpoint.
+
+Integration endpoints let you send data like metrics and logs from Aiven services to external systems. The ` + "`autoscaler`" + ` endpoint lets you automatically scale the disk space on your services.
+
+After creating an endpoint, use the [service integration resource](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/service_integration) to connect it to a service.
+		`,
 		CreateContext: common.WithGenClient(resourceServiceIntegrationEndpointCreate),
 		ReadContext:   common.WithGenClient(resourceServiceIntegrationEndpointRead),
 		UpdateContext: common.WithGenClient(resourceServiceIntegrationEndpointUpdate),
