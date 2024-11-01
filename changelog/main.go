@@ -155,9 +155,9 @@ func writeChangelog(_ string, entries []string) error {
 func fromProvider(p *schema.Provider) (ItemMap, error) {
 	// Item names might clash between resources and data sources
 	// Splits into separate maps
-	sourceMaps := map[ResourceType]map[string]*schema.Resource{
-		ResourceKind:   p.ResourcesMap,
-		DataSourceKind: p.DataSourcesMap,
+	sourceMaps := map[RootType]map[string]*schema.Resource{
+		ResourceRootType:   p.ResourcesMap,
+		DataSourceRootType: p.DataSourcesMap,
 	}
 
 	items := make(ItemMap)
@@ -200,7 +200,7 @@ func walkSchema(name string, this *schema.Schema, parent *Item) []*Item {
 	// Properties
 	switch elem := this.Elem.(type) {
 	case *schema.Schema:
-		item.ElemType = elem.Type
+		item.ElementType = elem.Type
 	case *schema.Resource:
 		for k, child := range elem.Schema {
 			items = append(items, walkSchema(k, child, item)...)

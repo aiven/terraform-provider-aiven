@@ -7,25 +7,28 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-type (
-	ResourceType string
-	DiffType     string
-)
+type RootType string
 
 const (
-	ResourceKind   ResourceType = "resource"
-	DataSourceKind ResourceType = "datasource"
-
-	ChangeTypeAdd    DiffType = "Add"
-	ChangeTypeRemove DiffType = "Remove"
-	ChangeTypeChange DiffType = "Change"
+	ResourceRootType   RootType = "resource"
+	DataSourceRootType RootType = "datasource"
 )
 
-type ItemMap map[ResourceType]map[string]*Item
+type DiffAction string
+
+const (
+	AddDiffAction    DiffAction = "Add"
+	RemoveDiffAction DiffAction = "Remove"
+	ChangeDiffAction DiffAction = "Change"
+)
+
+type ItemMap map[RootType]map[string]*Item
 
 type Item struct {
-	Name        string           `json:"name"`
-	Path        string           `json:"path"`
+	Path string `json:"path"` // e.g. aiven_project.project
+	Name string `json:"name"` // e.g. project
+
+	// Terraform schema fields
 	Description string           `json:"description"`
 	ForceNew    bool             `json:"forceNew"`
 	Optional    bool             `json:"optional"`
@@ -33,22 +36,22 @@ type Item struct {
 	MaxItems    int              `json:"maxItems"`
 	Deprecated  string           `json:"deprecated"`
 	Type        schema.ValueType `json:"type"`
-	ElemType    schema.ValueType `json:"elemType"`
+	ElementType schema.ValueType `json:"elementType"`
 }
 
 type Diff struct {
-	Type         DiffType
-	ResourceType ResourceType
-	Description  string
-	Item         *Item
+	Action      DiffAction
+	RootType    RootType
+	Description string
+	Item        *Item
 }
 
 func (c *Diff) String() string {
 	// resource name + field name
 	path := strings.SplitN(c.Item.Path, ".", 2)
 
-	// e.g.: "Add resource `aiven_project`"
-	msg := fmt.Sprintf("%s %s `%s`", c.Type, c.ResourceType, path[0])
+	// e.g.: "Add `aiven_project` resource"
+	msg := fmt.Sprintf("%s `%s` %s", c.Action, path[0], c.RootType)
 
 	// e.g.: "field `project`"
 	if len(path) > 1 {

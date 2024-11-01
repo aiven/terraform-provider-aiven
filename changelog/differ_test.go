@@ -11,13 +11,13 @@ func TestCompare(t *testing.T) {
 	tests := []struct {
 		name     string
 		expect   string
-		kind     ResourceType
+		kind     RootType
 		old, new *Item
 	}{
 		{
 			name:   "change enums",
-			expect: "Change resource `foo` field `bar`: enum ~~`bar`, `baz`~~ -> `foo`, `baz`",
-			kind:   ResourceKind,
+			expect: "Change `foo` resource field `bar`: enum ~~`bar`, `baz`~~ -> `foo`, `baz`",
+			kind:   ResourceRootType,
 			old: &Item{
 				Type:        schema.TypeString,
 				Path:        "foo.bar",
@@ -31,8 +31,8 @@ func TestCompare(t *testing.T) {
 		},
 		{
 			name:   "add resource field",
-			expect: "Add resource `foo` field `bar`: Foo",
-			kind:   ResourceKind,
+			expect: "Add `foo` resource field `bar`: Foo",
+			kind:   ResourceRootType,
 			new: &Item{
 				Type:        schema.TypeString,
 				Path:        "foo.bar",
@@ -41,8 +41,8 @@ func TestCompare(t *testing.T) {
 		},
 		{
 			name:   "remove resource field",
-			expect: "Remove resource `foo` field `bar`: Foo",
-			kind:   ResourceKind,
+			expect: "Remove `foo` resource field `bar`: Foo",
+			kind:   ResourceRootType,
 			old: &Item{
 				Type:        schema.TypeString,
 				Path:        "foo.bar",
@@ -51,8 +51,8 @@ func TestCompare(t *testing.T) {
 		},
 		{
 			name:   "remove beta from the field",
-			expect: "Change resource `foo` field `bar`: no longer beta",
-			kind:   ResourceKind,
+			expect: "Change `foo` resource field `bar`: no longer beta",
+			kind:   ResourceRootType,
 			old: &Item{
 				Type:        schema.TypeString,
 				Path:        "foo.bar",
@@ -66,8 +66,8 @@ func TestCompare(t *testing.T) {
 		},
 		{
 			name:   "add beta resource",
-			expect: "Add resource `foo` _(beta)_: does stuff, PROVIDER_AIVEN_ENABLE_BETA",
-			kind:   ResourceKind,
+			expect: "Add `foo` resource _(beta)_: does stuff, PROVIDER_AIVEN_ENABLE_BETA",
+			kind:   ResourceRootType,
 			new: &Item{
 				Type:        schema.TypeString,
 				Path:        "foo",
@@ -76,8 +76,8 @@ func TestCompare(t *testing.T) {
 		},
 		{
 			name:   "change type",
-			expect: "Change resource `foo` field `bar`: type ~~`list`~~ -> `set`",
-			kind:   ResourceKind,
+			expect: "Change `foo` resource field `bar`: type ~~`list`~~ -> `set`",
+			kind:   ResourceRootType,
 			old: &Item{
 				Type: schema.TypeList,
 				Path: "foo.bar",
