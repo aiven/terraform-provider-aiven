@@ -3,19 +3,19 @@
 page_title: "aiven_service_integration_endpoint Data Source - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  The Service Integration Endpoint data source provides information about the existing Aiven Service Integration Endpoint.
+  Gets information about an integration endpoint.
 ---
 
 # aiven_service_integration_endpoint (Data Source)
 
-The Service Integration Endpoint data source provides information about the existing Aiven Service Integration Endpoint.
+Gets information about an integration endpoint.
 
 ## Example Usage
 
 ```terraform
-data "aiven_service_integration_endpoint" "myendpoint" {
-  project       = aiven_project.myproject.project
-  endpoint_name = "<ENDPOINT_NAME>"
+data "aiven_service_integration_endpoint" "example_datadog_endpoint" {
+  project       = aiven_project.example_project.project
+  endpoint_name = "Datadog endpoint"
 }
 ```
 
@@ -24,15 +24,15 @@ data "aiven_service_integration_endpoint" "myendpoint" {
 
 ### Required
 
-- `endpoint_name` (String) Name of the service integration endpoint
-- `project` (String) Project the service integration endpoint belongs to
+- `endpoint_name` (String) Name of the service integration endpoint.
+- `project` (String) Project the service integration endpoint is in.
 
 ### Read-Only
 
 - `autoscaler_user_config` (List of Object) Autoscaler user configurable settings (see [below for nested schema](#nestedatt--autoscaler_user_config))
 - `datadog_user_config` (List of Object) Datadog user configurable settings (see [below for nested schema](#nestedatt--datadog_user_config))
-- `endpoint_config` (Map of String) Integration endpoint specific backend configuration
-- `endpoint_type` (String) Type of the service integration endpoint. The possible values are `autoscaler`, `datadog`, `external_aws_cloudwatch_logs`, `external_aws_cloudwatch_metrics`, `external_aws_s3`, `external_clickhouse`, `external_elasticsearch_logs`, `external_google_cloud_bigquery`, `external_google_cloud_logging`, `external_kafka`, `external_mysql`, `external_opensearch_logs`, `external_postgresql`, `external_prometheus`, `external_redis`, `external_schema_registry`, `external_sumologic_logs`, `jolokia`, `prometheus` and `rsyslog`.
+- `endpoint_config` (Map of String) Backend configuration for the endpoint.
+- `endpoint_type` (String) The type of service integration endpoint. The possible values are `autoscaler`, `datadog`, `external_aws_cloudwatch_logs`, `external_aws_cloudwatch_metrics`, `external_aws_s3`, `external_clickhouse`, `external_elasticsearch_logs`, `external_google_cloud_bigquery`, `external_google_cloud_logging`, `external_kafka`, `external_mysql`, `external_opensearch_logs`, `external_postgresql`, `external_prometheus`, `external_redis`, `external_schema_registry`, `external_sumologic_logs`, `jolokia`, `prometheus` and `rsyslog`.
 - `external_aws_cloudwatch_logs_user_config` (List of Object) ExternalAwsCloudwatchLogs user configurable settings (see [below for nested schema](#nestedatt--external_aws_cloudwatch_logs_user_config))
 - `external_aws_cloudwatch_metrics_user_config` (List of Object) ExternalAwsCloudwatchMetrics user configurable settings (see [below for nested schema](#nestedatt--external_aws_cloudwatch_metrics_user_config))
 - `external_aws_s3_user_config` (List of Object) ExternalAwsS3 user configurable settings (see [below for nested schema](#nestedatt--external_aws_s3_user_config))

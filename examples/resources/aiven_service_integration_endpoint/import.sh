@@ -1,0 +1,1 @@
+terraform import aiven_service_integration_endpoint.example_endpoint PROJECT/ID
