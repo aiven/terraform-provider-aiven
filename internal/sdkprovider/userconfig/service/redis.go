@@ -215,10 +215,10 @@ func redisUserConfig() *schema.Schema {
 				Type:        schema.TypeInt,
 			},
 			"redis_maxmemory_policy": {
-				Description:  "Enum: `noeviction`, `allkeys-lru`, `volatile-lru`, `allkeys-random`, `volatile-random`, `volatile-ttl`, `volatile-lfu`, `allkeys-lfu`. Redis maxmemory-policy. Default: `noeviction`.",
+				Description:  "Enum: `allkeys-lfu`, `allkeys-lru`, `allkeys-random`, `noeviction`, `volatile-lfu`, `volatile-lru`, `volatile-random`, `volatile-ttl`. Redis maxmemory-policy. Default: `noeviction`.",
 				Optional:     true,
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"noeviction", "allkeys-lru", "volatile-lru", "allkeys-random", "volatile-random", "volatile-ttl", "volatile-lfu", "allkeys-lfu"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"allkeys-lfu", "allkeys-lru", "allkeys-random", "noeviction", "volatile-lfu", "volatile-lru", "volatile-random", "volatile-ttl"}, false),
 			},
 			"redis_notify_keyspace_events": {
 				Description: "Set notify-keyspace-events option.",

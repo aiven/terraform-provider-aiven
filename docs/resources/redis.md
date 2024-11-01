@@ -108,7 +108,7 @@ Optional:
 - `redis_io_threads` (Number) Set Redis IO thread count. Changing this will cause a restart of the Redis service. Example: `1`.
 - `redis_lfu_decay_time` (Number) LFU maxmemory-policy counter decay time in minutes. Default: `1`.
 - `redis_lfu_log_factor` (Number) Counter logarithm factor for volatile-lfu and allkeys-lfu maxmemory-policies. Default: `10`.
-- `redis_maxmemory_policy` (String) Enum: `noeviction`, `allkeys-lru`, `volatile-lru`, `allkeys-random`, `volatile-random`, `volatile-ttl`, `volatile-lfu`, `allkeys-lfu`. Redis maxmemory-policy. Default: `noeviction`.
+- `redis_maxmemory_policy` (String) Enum: `allkeys-lfu`, `allkeys-lru`, `allkeys-random`, `noeviction`, `volatile-lfu`, `volatile-lru`, `volatile-random`, `volatile-ttl`. Redis maxmemory-policy. Default: `noeviction`.
 - `redis_notify_keyspace_events` (String) Set notify-keyspace-events option.
 - `redis_number_of_databases` (Number) Set number of Redis databases. Changing this will cause a restart of the Redis service. Example: `16`.
 - `redis_persistence` (String) Enum: `off`, `rdb`. When persistence is `rdb`, Redis does RDB dumps each 10 minutes if any key is changed. Also RDB dumps are done according to the backup schedule for backup purposes. When persistence is `off`, no RDB dumps or backups are done, so data can be lost at any moment if the service is restarted for any reason, or if the service is powered off. Also, the service can't be forked.

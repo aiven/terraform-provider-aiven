@@ -47,10 +47,10 @@ func externalPostgresqlUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"ssl_mode": {
-				Description:  "Enum: `disable`, `allow`, `prefer`, `require`, `verify-ca`, `verify-full`. SSL mode to use for the connection.  Please note that Aiven requires TLS for all connections to external PostgreSQL services. Default: `verify-full`.",
+				Description:  "Enum: `allow`, `disable`, `prefer`, `require`, `verify-ca`, `verify-full`. SSL mode to use for the connection.  Please note that Aiven requires TLS for all connections to external PostgreSQL services. Default: `verify-full`.",
 				Optional:     true,
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"disable", "allow", "prefer", "require", "verify-ca", "verify-full"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"allow", "disable", "prefer", "require", "verify-ca", "verify-full"}, false),
 			},
 			"ssl_root_cert": {
 				Description: "SSL Root Cert. Example: `-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n`.",

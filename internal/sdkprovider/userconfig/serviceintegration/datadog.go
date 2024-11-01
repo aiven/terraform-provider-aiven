@@ -85,8 +85,9 @@ func datadogUserConfig() *schema.Schema {
 			"kafka_custom_metrics": {
 				Description: "List of custom metrics.",
 				Elem: &schema.Schema{
-					Description: "Metric name. Example: `kafka.log.log_size`.",
-					Type:        schema.TypeString,
+					Description:  "Enum: `kafka.log.log_end_offset`, `kafka.log.log_size`, `kafka.log.log_start_offset`. Metric name.",
+					Type:         schema.TypeString,
+					ValidateFunc: validation.StringInSlice([]string{"kafka.log.log_end_offset", "kafka.log.log_size", "kafka.log.log_start_offset"}, false),
 				},
 				MaxItems: 1024,
 				Optional: true,

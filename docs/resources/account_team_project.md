@@ -48,7 +48,7 @@ resource "aiven_account_team_project" "main" {
 ### Optional
 
 - `project_name` (String) The name of an already existing project
-- `team_type` (String) The Account team project type. The possible values are `admin`, `operator`, `developer`, `read_only`, `project:integrations:read`, `project:networking:read`, `project:permissions:read`, `service:logs:read`, `project:services:read` and `project:audit_logs:read`.
+- `team_type` (String) The Account team project type. The possible values are `admin`, `operator`, `developer`, `read_only`, `project:integrations:read`, `project:integrations:write`, `project:networking:read`, `project:networking:write`, `project:permissions:read`, `service:configuration:write`, `services:maintenance`, `service:logs:read`, `project:services:read` and `project:audit_logs:read`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

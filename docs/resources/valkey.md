@@ -143,7 +143,7 @@ Optional:
 - `valkey_io_threads` (Number) Set Valkey IO thread count. Changing this will cause a restart of the Valkey service. Example: `1`.
 - `valkey_lfu_decay_time` (Number) LFU maxmemory-policy counter decay time in minutes. Default: `1`.
 - `valkey_lfu_log_factor` (Number) Counter logarithm factor for volatile-lfu and allkeys-lfu maxmemory-policies. Default: `10`.
-- `valkey_maxmemory_policy` (String) Enum: `noeviction`, `allkeys-lru`, `volatile-lru`, `allkeys-random`, `volatile-random`, `volatile-ttl`, `volatile-lfu`, `allkeys-lfu`. Valkey maxmemory-policy. Default: `noeviction`.
+- `valkey_maxmemory_policy` (String) Enum: `allkeys-lfu`, `allkeys-lru`, `allkeys-random`, `noeviction`, `volatile-lfu`, `volatile-lru`, `volatile-random`, `volatile-ttl`. Valkey maxmemory-policy. Default: `noeviction`.
 - `valkey_notify_keyspace_events` (String) Set notify-keyspace-events option.
 - `valkey_number_of_databases` (Number) Set number of Valkey databases. Changing this will cause a restart of the Valkey service. Example: `16`.
 - `valkey_persistence` (String) Enum: `off`, `rdb`. When persistence is `rdb`, Valkey does RDB dumps each 10 minutes if any key is changed. Also RDB dumps are done according to backup schedule for backup purposes. When persistence is `off`, no RDB dumps and backups are done, so data can be lost at any moment if service is restarted for any reason, or if service is powered off. Also service can't be forked.

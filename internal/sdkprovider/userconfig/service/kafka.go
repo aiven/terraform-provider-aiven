@@ -94,10 +94,10 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"compression_type": {
-						Description:  "Enum: `gzip`, `snappy`, `lz4`, `zstd`, `uncompressed`, `producer`. Specify the final compression type for a given topic. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `uncompressed` which is equivalent to no compression; and `producer` which means retain the original compression codec set by the producer.(Default: producer).",
+						Description:  "Enum: `gzip`, `lz4`, `producer`, `snappy`, `uncompressed`, `zstd`. Specify the final compression type for a given topic. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `uncompressed` which is equivalent to no compression; and `producer` which means retain the original compression codec set by the producer.(Default: producer).",
 						Optional:     true,
 						Type:         schema.TypeString,
-						ValidateFunc: validation.StringInSlice([]string{"gzip", "snappy", "lz4", "zstd", "uncompressed", "producer"}, false),
+						ValidateFunc: validation.StringInSlice([]string{"gzip", "lz4", "producer", "snappy", "uncompressed", "zstd"}, false),
 					},
 					"connections_max_idle_ms": {
 						Description: "Idle connections timeout: the server socket processor threads close the connections that idle for longer than this. (Default: 600000 ms (10 minutes)). Example: `540000`.",
@@ -145,10 +145,10 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"log_cleanup_policy": {
-						Description:  "Enum: `delete`, `compact`, `compact,delete`. The default cleanup policy for segments beyond the retention window (Default: delete).",
+						Description:  "Enum: `compact`, `compact,delete`, `delete`. The default cleanup policy for segments beyond the retention window (Default: delete).",
 						Optional:     true,
 						Type:         schema.TypeString,
-						ValidateFunc: validation.StringInSlice([]string{"delete", "compact", "compact,delete"}, false),
+						ValidateFunc: validation.StringInSlice([]string{"compact", "compact,delete", "delete"}, false),
 					},
 					"log_flush_interval_messages": {
 						Description: "The number of messages accumulated on a log partition before messages are flushed to disk (Default: 9223372036854775807 (Long.MAX_VALUE)). Example: `9223372036854775807`.",
@@ -353,10 +353,10 @@ func kafkaUserConfig() *schema.Schema {
 				Description: "Kafka Connect configuration values",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"connector_client_config_override_policy": {
-						Description:  "Enum: `None`, `All`. Defines what client configurations can be overridden by the connector. Default is None.",
+						Description:  "Enum: `All`, `None`. Defines what client configurations can be overridden by the connector. Default is None.",
 						Optional:     true,
 						Type:         schema.TypeString,
-						ValidateFunc: validation.StringInSlice([]string{"None", "All"}, false),
+						ValidateFunc: validation.StringInSlice([]string{"All", "None"}, false),
 					},
 					"consumer_auto_offset_reset": {
 						Description:  "Enum: `earliest`, `latest`. What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. Default is earliest.",
@@ -370,10 +370,10 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"consumer_isolation_level": {
-						Description:  "Enum: `read_uncommitted`, `read_committed`. Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
+						Description:  "Enum: `read_committed`, `read_uncommitted`. Transaction read isolation level. read_uncommitted is the default, but read_committed can be used if consume-exactly-once behavior is desired.",
 						Optional:     true,
 						Type:         schema.TypeString,
-						ValidateFunc: validation.StringInSlice([]string{"read_uncommitted", "read_committed"}, false),
+						ValidateFunc: validation.StringInSlice([]string{"read_committed", "read_uncommitted"}, false),
 					},
 					"consumer_max_partition_fetch_bytes": {
 						Description: "Records are fetched in batches by the consumer.If the first record batch in the first non-empty partition of the fetch is larger than this limit, the batch will still be returned to ensure that the consumer can make progress. Example: `1048576`.",
@@ -411,10 +411,10 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeInt,
 					},
 					"producer_compression_type": {
-						Description:  "Enum: `gzip`, `snappy`, `lz4`, `zstd`, `none`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.",
+						Description:  "Enum: `gzip`, `lz4`, `none`, `snappy`, `zstd`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.",
 						Optional:     true,
 						Type:         schema.TypeString,
-						ValidateFunc: validation.StringInSlice([]string{"gzip", "snappy", "lz4", "zstd", "none"}, false),
+						ValidateFunc: validation.StringInSlice([]string{"gzip", "lz4", "none", "snappy", "zstd"}, false),
 					},
 					"producer_linger_ms": {
 						Description: "This setting gives the upper bound on the delay for batching: once there is batch.size worth of records for a partition it will be sent immediately regardless of this setting, however if there are fewer than this many bytes accumulated for this partition the producer will `linger` for the specified time waiting for more records to show up. Defaults to 0.",
@@ -548,10 +548,10 @@ func kafkaUserConfig() *schema.Schema {
 						ValidateFunc: validation.IntInSlice([]int{1000, 15000, 30000}),
 					},
 					"name_strategy": {
-						Description:  "Enum: `topic_name`, `record_name`, `topic_record_name`. Name strategy to use when selecting subject for storing schemas. Default: `topic_name`.",
+						Description:  "Enum: `record_name`, `topic_name`, `topic_record_name`. Name strategy to use when selecting subject for storing schemas. Default: `topic_name`.",
 						Optional:     true,
 						Type:         schema.TypeString,
-						ValidateFunc: validation.StringInSlice([]string{"topic_name", "record_name", "topic_record_name"}, false),
+						ValidateFunc: validation.StringInSlice([]string{"record_name", "topic_name", "topic_record_name"}, false),
 					},
 					"name_strategy_validation": {
 						Description: "If true, validate that given schema is registered under expected subject name by the used name strategy when producing messages. Default: `true`.",
@@ -559,16 +559,16 @@ func kafkaUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"producer_acks": {
-						Description:  "Enum: `all`, `-1`, `0`, `1`. The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to `all` or `-1`, the leader will wait for the full set of in-sync replicas to acknowledge the record. Default: `1`.",
+						Description:  "Enum: `-1`, `0`, `1`, `all`. The number of acknowledgments the producer requires the leader to have received before considering a request complete. If set to `all` or `-1`, the leader will wait for the full set of in-sync replicas to acknowledge the record. Default: `1`.",
 						Optional:     true,
 						Type:         schema.TypeString,
-						ValidateFunc: validation.StringInSlice([]string{"all", "-1", "0", "1"}, false),
+						ValidateFunc: validation.StringInSlice([]string{"-1", "0", "1", "all"}, false),
 					},
 					"producer_compression_type": {
-						Description:  "Enum: `gzip`, `snappy`, `lz4`, `zstd`, `none`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.",
+						Description:  "Enum: `gzip`, `lz4`, `none`, `snappy`, `zstd`. Specify the default compression type for producers. This configuration accepts the standard compression codecs (`gzip`, `snappy`, `lz4`, `zstd`). It additionally accepts `none` which is the default and equivalent to no compression.",
 						Optional:     true,
 						Type:         schema.TypeString,
-						ValidateFunc: validation.StringInSlice([]string{"gzip", "snappy", "lz4", "zstd", "none"}, false),
+						ValidateFunc: validation.StringInSlice([]string{"gzip", "lz4", "none", "snappy", "zstd"}, false),
 					},
 					"producer_linger_ms": {
 						Description: "Wait for up to the given delay to allow batching records together. Default: `0`.",

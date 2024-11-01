@@ -57,6 +57,11 @@ func opensearchUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
+					"include_aliases": {
+						Description: "Whether to restore aliases alongside their associated indexes. Default is true.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"indices": {
 						Description: "A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. By default, a restore operation includes all data streams and indices in the snapshot. If this argument is provided, the restore operation only includes the data streams and indices that you specify. Example: `metrics*,logs*,data-20240823`.",
 						Optional:    true,
@@ -127,6 +132,11 @@ func opensearchUserConfig() *schema.Schema {
 						Required:    true,
 						Sensitive:   true,
 						Type:        schema.TypeString,
+					},
+					"include_aliases": {
+						Description: "Whether to restore aliases alongside their associated indexes. Default is true.",
+						Optional:    true,
+						Type:        schema.TypeBool,
 					},
 					"indices": {
 						Description: "A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. By default, a restore operation includes all data streams and indices in the snapshot. If this argument is provided, the restore operation only includes the data streams and indices that you specify. Example: `metrics*,logs*,data-20240823`.",
@@ -605,10 +615,10 @@ func opensearchUserConfig() *schema.Schema {
 						Description: "Search Backpressure Settings",
 						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 							"mode": {
-								Description:  "Enum: `monitor_only`, `enforced`, `disabled`. The search backpressure mode. Valid values are monitor_only, enforced, or disabled. Default is monitor_only.",
+								Description:  "Enum: `disabled`, `enforced`, `monitor_only`. The search backpressure mode. Valid values are monitor_only, enforced, or disabled. Default is monitor_only.",
 								Optional:     true,
 								Type:         schema.TypeString,
-								ValidateFunc: validation.StringInSlice([]string{"monitor_only", "enforced", "disabled"}, false),
+								ValidateFunc: validation.StringInSlice([]string{"disabled", "enforced", "monitor_only"}, false),
 							},
 							"node_duress": {
 								Description: "Node duress settings",
@@ -1018,6 +1028,11 @@ func opensearchUserConfig() *schema.Schema {
 						Description: "The S3 service endpoint to connect to. If you are using an S3-compatible service then you should set this to the service’s endpoint.",
 						Optional:    true,
 						Type:        schema.TypeString,
+					},
+					"include_aliases": {
+						Description: "Whether to restore aliases alongside their associated indexes. Default is true.",
+						Optional:    true,
+						Type:        schema.TypeBool,
 					},
 					"indices": {
 						Description: "A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. By default, a restore operation includes all data streams and indices in the snapshot. If this argument is provided, the restore operation only includes the data streams and indices that you specify. Example: `metrics*,logs*,data-20240823`.",

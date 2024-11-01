@@ -4,26 +4,28 @@ import (
 	"encoding/json"
 	"fmt"
 	"slices"
+	"sort"
 	"strings"
 
+	"github.com/ettle/strcase"
 	"github.com/google/go-cmp/cmp"
 	"github.com/samber/lo"
 )
 
-func diffItems(resourceType ResourceType, was, have *Item) (*Diff, error) {
+func diffItems(resourceType RootType, was, have *Item) (*Diff, error) {
 	// Added or removed
 	if was == nil || have == nil {
-		action := ChangeTypeAdd
+		action := AddDiffAction
 		if have == nil {
-			action = ChangeTypeRemove
+			action = RemoveDiffAction
 			have = was
 		}
 
 		return &Diff{
-			Type:         action,
-			ResourceType: resourceType,
-			Description:  removeEnum(have.Description),
-			Item:         have,
+			Action:      action,
+			RootType:    resourceType,
+			Description: removeEnum(have.Description),
+			Item:        have,
 		}, nil
 	}
 
@@ -55,7 +57,7 @@ func diffItems(resourceType ResourceType, was, have *Item) (*Diff, error) {
 		case "deprecated":
 			entry = "remove deprecation"
 			if have.Deprecated != "" {
-				entry = fmt.Sprintf("deprecate: %s", have.Deprecated)
+				entry = fmt.Sprintf("deprecate: %s", strings.TrimRight(have.Deprecated, ". "))
 			}
 		case "beta":
 			entry = "marked as beta"
@@ -78,16 +80,16 @@ func diffItems(resourceType ResourceType, was, have *Item) (*Diff, error) {
 	}
 
 	return &Diff{
-		Type:         ChangeTypeChange,
-		ResourceType: resourceType,
-		Description:  strings.Join(entries, ", "),
-		Item:         have,
+		Action:      ChangeDiffAction,
+		RootType:    resourceType,
+		Description: strings.Join(entries, ", "),
+		Item:        have,
 	}, nil
 }
 
 func diffItemMaps(was, have ItemMap) ([]string, error) {
-	result := make([]string, 0)
-	kinds := []ResourceType{ResourceKind, DataSourceKind}
+	result := make([]*Diff, 0)
+	kinds := []RootType{ResourceRootType, DataSourceRootType}
 	for _, kind := range kinds {
 		wasItems := was[kind]
 		haveItems := have[kind]
@@ -105,6 +107,7 @@ func diffItemMaps(was, have ItemMap) ([]string, error) {
 			seen[k] = true
 
 			// When a resource added or removed, it skips all its fields until the next resource
+			// Otherwise, all its fields will appear as changes
 			if skipPrefix != "" && strings.HasPrefix(k, skipPrefix) {
 				continue
 			}
@@ -123,11 +126,32 @@ func diffItemMaps(was, have ItemMap) ([]string, error) {
 			}
 
 			if change != nil {
-				result = append(result, change.String())
+				result = append(result, change)
 			}
 		}
 	}
-	return result, nil
+
+	// Sorts changes by action, then by root type, then by root name
+	sort.Slice(result, func(i, j int) bool {
+		a, b := result[i], result[j]
+		if a.Action != b.Action {
+			return a.Action < b.Action
+		}
+
+		if a.Item.Path != b.Item.Path {
+			return a.Item.Path < b.Item.Path
+		}
+
+		// Resource comes first, then datasource
+		return a.RootType > b.RootType
+	})
+
+	strs := make([]string, len(result))
+	for i, r := range result {
+		strs[i] = r.String()
+	}
+
+	return strs, nil
 }
 
 func toMap(item *Item) (map[string]any, error) {
@@ -145,7 +169,15 @@ func toMap(item *Item) (map[string]any, error) {
 	m["enum"] = findEnums(item.Description)
 	m["beta"] = hasBeta(item.Description)
 	m["type"] = strValueType(item.Type)
-	m["elemType"] = strValueType(item.ElemType)
-	delete(m, "description") // Not needed to compare descriptions
+	m["elementType"] = strValueType(item.ElementType)
+
+	// Not needed to compare descriptions
+	delete(m, "description")
+
+	// Turns "maxItems" into "max items" for human readability
+	for k, v := range m {
+		delete(m, k)
+		m[strcase.ToCase(k, strcase.LowerCase, ' ')] = v
+	}
 	return m, err
 }

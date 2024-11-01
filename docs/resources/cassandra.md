@@ -86,7 +86,7 @@ Optional:
 
 Optional:
 
-- `additional_backup_regions` (List of String, Deprecated) Additional Cloud Regions for Backup Replication.
+- `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
 - `backup_hour` (Number) The hour of day (in UTC) when backup for the service is started. New backup is only started if previous backup has already completed. Example: `3`.
 - `backup_minute` (Number) The minute of an hour when backup for the service is started. New backup is only started if previous backup has already completed. Example: `30`.
 - `cassandra` (Block List, Max: 1) Cassandra configuration values (see [below for nested schema](#nestedblock--cassandra_user_config--cassandra))

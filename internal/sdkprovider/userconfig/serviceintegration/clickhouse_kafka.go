@@ -17,10 +17,10 @@ func clickhouseKafkaUserConfig() *schema.Schema {
 			Description: "Tables to create",
 			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 				"auto_offset_reset": {
-					Description:  "Enum: `smallest`, `earliest`, `beginning`, `largest`, `latest`, `end`. Action to take when there is no initial offset in offset store or the desired offset is out of range. Default: `earliest`.",
+					Description:  "Enum: `beginning`, `earliest`, `end`, `largest`, `latest`, `smallest`. Action to take when there is no initial offset in offset store or the desired offset is out of range. Default: `earliest`.",
 					Optional:     true,
 					Type:         schema.TypeString,
-					ValidateFunc: validation.StringInSlice([]string{"smallest", "earliest", "beginning", "largest", "latest", "end"}, false),
+					ValidateFunc: validation.StringInSlice([]string{"beginning", "earliest", "end", "largest", "latest", "smallest"}, false),
 				},
 				"columns": {
 					Description: "Table columns",
@@ -41,10 +41,10 @@ func clickhouseKafkaUserConfig() *schema.Schema {
 					Type:     schema.TypeList,
 				},
 				"data_format": {
-					Description:  "Enum: `Avro`, `CSV`, `JSONAsString`, `JSONCompactEachRow`, `JSONCompactStringsEachRow`, `JSONEachRow`, `JSONStringsEachRow`, `MsgPack`, `TSKV`, `TSV`, `TabSeparated`, `RawBLOB`, `AvroConfluent`, `Parquet`. Message data format. Default: `JSONEachRow`.",
+					Description:  "Enum: `Avro`, `AvroConfluent`, `CSV`, `JSONAsString`, `JSONCompactEachRow`, `JSONCompactStringsEachRow`, `JSONEachRow`, `JSONStringsEachRow`, `MsgPack`, `Parquet`, `RawBLOB`, `TSKV`, `TSV`, `TabSeparated`. Message data format. Default: `JSONEachRow`.",
 					Required:     true,
 					Type:         schema.TypeString,
-					ValidateFunc: validation.StringInSlice([]string{"Avro", "CSV", "JSONAsString", "JSONCompactEachRow", "JSONCompactStringsEachRow", "JSONEachRow", "JSONStringsEachRow", "MsgPack", "TSKV", "TSV", "TabSeparated", "RawBLOB", "AvroConfluent", "Parquet"}, false),
+					ValidateFunc: validation.StringInSlice([]string{"Avro", "AvroConfluent", "CSV", "JSONAsString", "JSONCompactEachRow", "JSONCompactStringsEachRow", "JSONEachRow", "JSONStringsEachRow", "MsgPack", "Parquet", "RawBLOB", "TSKV", "TSV", "TabSeparated"}, false),
 				},
 				"date_time_input_format": {
 					Description:  "Enum: `basic`, `best_effort`, `best_effort_us`. Method to read DateTime from text input formats. Default: `basic`.",

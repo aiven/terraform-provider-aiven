@@ -10,6 +10,14 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Add support for `autoscaler` service integration
+- Add `aiven_opensearch` resource field `opensearch_user_config.azure_migration.include_aliases`: Whether to restore aliases alongside their associated indexes
+- Add `aiven_opensearch` datasource field `opensearch_user_config.azure_migration.include_aliases`: Whether to restore aliases alongside their associated indexes
+- Add `aiven_opensearch` resource field `opensearch_user_config.gcs_migration.include_aliases`: Whether to restore aliases alongside their associated indexes
+- Add `aiven_opensearch` datasource field `opensearch_user_config.gcs_migration.include_aliases`: Whether to restore aliases alongside their associated indexes
+- Add `aiven_opensearch` resource field `opensearch_user_config.s3_migration.include_aliases`: Whether to restore aliases alongside their associated indexes
+- Add `aiven_opensearch` datasource field `opensearch_user_config.s3_migration.include_aliases`: Whether to restore aliases alongside their associated indexes
+- Change `aiven_cassandra` resource field `cassandra_user_config.additional_backup_regions`: remove deprecation
+- Change `aiven_cassandra` datasource field `cassandra_user_config.additional_backup_regions`: remove deprecation
 
 ## [4.28.0] - 2024-10-21
 
