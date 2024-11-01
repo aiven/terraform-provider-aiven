@@ -298,6 +298,14 @@ func unwrapArrayMultipleTypes(o *object) {
 			fields[key] = p
 
 		} else if len(p.ArrayItems.OneOf) != 0 {
+			// Usually it starts with a scalar type and then evolves to object
+			// Prioritizes scalar types
+			sort.Slice(p.ArrayItems.OneOf, func(i, j int) bool {
+				it := p.ArrayItems.OneOf[i].OrigType.(string)
+				jt := p.ArrayItems.OneOf[j].OrigType.(string)
+				return it != "object" || it < jt
+			})
+
 			// Unwraps multiple _type objects_, e.g. [{type:string}, {type: object}]
 			for i := range p.ArrayItems.OneOf {
 				t := p.ArrayItems.OneOf[i]
