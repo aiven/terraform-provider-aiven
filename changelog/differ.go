@@ -131,27 +131,7 @@ func diffItemMaps(was, have ItemMap) ([]string, error) {
 		}
 	}
 
-	// Sorts changes by action, then by root type, then by root name
-	sort.Slice(result, func(i, j int) bool {
-		a, b := result[i], result[j]
-		if a.Action != b.Action {
-			return a.Action < b.Action
-		}
-
-		if a.Item.Path != b.Item.Path {
-			return a.Item.Path < b.Item.Path
-		}
-
-		// Resource comes first, then datasource
-		return a.RootType > b.RootType
-	})
-
-	strs := make([]string, len(result))
-	for i, r := range result {
-		strs[i] = r.String()
-	}
-
-	return strs, nil
+	return serializeDiff(result), nil
 }
 
 func toMap(item *Item) (map[string]any, error) {
@@ -180,4 +160,26 @@ func toMap(item *Item) (map[string]any, error) {
 		m[strcase.ToCase(k, strcase.LowerCase, ' ')] = v
 	}
 	return m, err
+}
+
+func serializeDiff(list []*Diff) []string {
+	sort.Slice(list, func(i, j int) bool {
+		a, b := list[i], list[j]
+		if a.Action != b.Action {
+			return a.Action < b.Action
+		}
+
+		// Resource comes first, then datasource
+		if a.RootType != b.RootType {
+			return a.RootType > b.RootType
+		}
+
+		return a.Item.Path < b.Item.Path
+	})
+
+	strs := make([]string, len(list))
+	for i, r := range list {
+		strs[i] = r.String()
+	}
+	return strs
 }
