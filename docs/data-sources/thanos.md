@@ -123,8 +123,12 @@ Read-Only:
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--thanos_user_config--public_access))
 - `query` (List of Object) (see [below for nested schema](#nestedobjatt--thanos_user_config--query))
 - `query_frontend` (List of Object) (see [below for nested schema](#nestedobjatt--thanos_user_config--query_frontend))
+- `receiver_ingesting` (Map of String)
+- `receiver_routing` (Map of String)
+- `ruler` (Map of String)
 - `service_log` (Boolean)
 - `static_ips` (Boolean)
+- `store` (Map of String)
 
 <a id="nestedobjatt--thanos_user_config--compactor"></a>
 ### Nested Schema for `thanos_user_config.compactor`

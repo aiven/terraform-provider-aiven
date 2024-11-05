@@ -197,8 +197,8 @@ github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7l
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/aiven/aiven-go-client/v2 v2.31.0 h1:ThPtEQiKDxtq5GDfPW8bAmrT2d6oHRP492CQ7gXwuTI=
 github.com/aiven/aiven-go-client/v2 v2.31.0/go.mod h1:AXfB5OeioOln+hYh1XAJaYyi+f+TV6xInc7VZ9DwnY4=
-github.com/aiven/go-api-schemas v1.98.0 h1:DBoox74dixLYs0aGrMpNhYc5Uv9LfxqGDLxu3h3f8sU=
-github.com/aiven/go-api-schemas v1.98.0/go.mod h1:+E57naSaeLp5l8x7CPEBOMiuAbPNYyMiisPqx3NTqmM=
+github.com/aiven/go-api-schemas v1.98.1-0.20241105090317-c731c4603b2f h1:8NrSn+uLhjTbYvQKee7cYr+AzrVTn07nX0MUgowfr1c=
+github.com/aiven/go-api-schemas v1.98.1-0.20241105090317-c731c4603b2f/go.mod h1:0VMy+pz/3P4LOsTYfiS8pecLDWbtSZszvwG2y51zwtw=
 github.com/aiven/go-client-codegen v0.49.0 h1:KwpKVykr4xWcduQ4h7+ad7Y1rAYj9Z/Tq5iKhu7/guo=
 github.com/aiven/go-client-codegen v0.49.0/go.mod h1:FfbH32Xb+Hx5zeKTIug1Y8SfMeB+AKNRzxgrzkts2oA=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=

@@ -151,7 +151,7 @@ func kafkaUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"compact", "compact,delete", "delete"}, false),
 					},
 					"log_flush_interval_messages": {
-						Description: "The number of messages accumulated on a log partition before messages are flushed to disk (Default: 9223372036854775807 (Long.MAX_VALUE)). Example: `9223372036854775807`.",
+						Description: "The number of messages accumulated on a log partition before messages are flushed to disk (Default: 9223372036854775807 (Long.MAX_VALUE)).",
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},

@@ -124,8 +124,12 @@ Optional:
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--thanos_user_config--public_access))
 - `query` (Block List, Max: 1) ThanosQuery (see [below for nested schema](#nestedblock--thanos_user_config--query))
 - `query_frontend` (Block List, Max: 1) ThanosQueryFrontend (see [below for nested schema](#nestedblock--thanos_user_config--query_frontend))
+- `receiver_ingesting` (Map of String) CommonReceive.
+- `receiver_routing` (Map of String) ThanosReceiveRouting.
+- `ruler` (Map of String) ThanosRuler.
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `static_ips` (Boolean) Use static public IP addresses.
+- `store` (Map of String) ThanosStore.
 
 <a id="nestedblock--thanos_user_config--compactor"></a>
 ### Nested Schema for `thanos_user_config.compactor`
