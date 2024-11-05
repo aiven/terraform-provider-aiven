@@ -25,7 +25,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"alerting_enabled": {
-				Description: "Enable or disable Grafana legacy alerting functionality. This should not be enabled with unified_alerting_enabled.",
+				Description: "Setting has no effect with Grafana 11 and onward. Enable or disable Grafana legacy alerting functionality. This should not be enabled with unified_alerting_enabled.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
@@ -267,12 +267,12 @@ func grafanaUserConfig() *schema.Schema {
 						Type:     schema.TypeList,
 					},
 					"api_url": {
-						Description: "API URL. This only needs to be set when using self hosted GitLab. Example: `https://gitlab.com/api/v4`.",
+						Description: "This only needs to be set when using self hosted GitLab. Example: `https://gitlab.com/api/v4`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
 					"auth_url": {
-						Description: "Authorization URL. This only needs to be set when using self hosted GitLab. Example: `https://gitlab.com/oauth/authorize`.",
+						Description: "This only needs to be set when using self hosted GitLab. Example: `https://gitlab.com/oauth/authorize`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
@@ -288,7 +288,7 @@ func grafanaUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"token_url": {
-						Description: "Token URL. This only needs to be set when using self hosted GitLab. Example: `https://gitlab.com/oauth/token`.",
+						Description: "This only needs to be set when using self hosted GitLab. Example: `https://gitlab.com/oauth/token`.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
@@ -343,7 +343,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"dashboard_previews_enabled": {
-				Description: "This feature is new in Grafana 9 and is quite resource intensive. It may cause low-end plans to work more slowly while the dashboard previews are rendering.",
+				Description: "Enable browsing of dashboards in grid (pictures) mode. This feature is new in Grafana 9 and is quite resource intensive. It may cause low-end plans to work more slowly while the dashboard previews are rendering.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
@@ -439,7 +439,7 @@ func grafanaUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"provider": {
-						Description:  "Enum: `s3`. Provider type.",
+						Description:  "Enum: `s3`. External image store provider.",
 						Required:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringInSlice([]string{"s3"}, false),
@@ -500,7 +500,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:     schema.TypeSet,
 			},
 			"metrics_enabled": {
-				Description: "Enable Grafana /metrics endpoint.",
+				Description: "Enable Grafana's /metrics endpoint.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
@@ -620,7 +620,7 @@ func grafanaUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"unified_alerting_enabled": {
-				Description: "Enable or disable Grafana unified alerting functionality. By default this is enabled and any legacy alerts will be migrated on upgrade to Grafana 9+. To stay on legacy alerting, set unified_alerting_enabled to false and alerting_enabled to true. See https://grafana.com/docs/grafana/latest/alerting/set-up/migrating-alerts/ for more details.",
+				Description: "Enable or disable Grafana unified alerting functionality. By default this is enabled and any legacy alerts will be migrated on upgrade to Grafana 9+. To stay on legacy alerting, set unified_alerting_enabled to false and alerting_enabled to true. See https://grafana.com/docs/grafana/latest/alerting/ for more details.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},

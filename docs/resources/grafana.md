@@ -87,7 +87,7 @@ Optional:
 Optional:
 
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
-- `alerting_enabled` (Boolean) Enable or disable Grafana legacy alerting functionality. This should not be enabled with unified_alerting_enabled.
+- `alerting_enabled` (Boolean) Setting has no effect with Grafana 11 and onward. Enable or disable Grafana legacy alerting functionality. This should not be enabled with unified_alerting_enabled.
 - `alerting_error_or_timeout` (String) Enum: `alerting`, `keep_state`. Default error or timeout setting for new alerting rules.
 - `alerting_max_annotations_to_keep` (Number) Max number of alert annotations that Grafana stores. 0 (default) keeps all alert annotations. Example: `0`.
 - `alerting_nodata_or_nullvalues` (String) Enum: `alerting`, `keep_state`, `no_data`, `ok`. Default value for 'no data or null values' for new alerting rules.
@@ -100,7 +100,7 @@ Optional:
 - `auth_google` (Block List, Max: 1) Google Auth integration (see [below for nested schema](#nestedblock--grafana_user_config--auth_google))
 - `cookie_samesite` (String) Enum: `lax`, `none`, `strict`. Cookie SameSite attribute: `strict` prevents sending cookie for cross-site requests, effectively disabling direct linking from other sites to Grafana. `lax` is the default value.
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. Example: `grafana.example.org`.
-- `dashboard_previews_enabled` (Boolean) This feature is new in Grafana 9 and is quite resource intensive. It may cause low-end plans to work more slowly while the dashboard previews are rendering.
+- `dashboard_previews_enabled` (Boolean) Enable browsing of dashboards in grid (pictures) mode. This feature is new in Grafana 9 and is quite resource intensive. It may cause low-end plans to work more slowly while the dashboard previews are rendering.
 - `dashboards_min_refresh_interval` (String) Signed sequence of decimal numbers, followed by a unit suffix (ms, s, m, h, d), e.g. 30s, 1h. Example: `5s`.
 - `dashboards_versions_to_keep` (Number) Dashboard versions to keep per dashboard. Example: `20`.
 - `dataproxy_send_user_header` (Boolean) Send `X-Grafana-User` header to data source.
@@ -113,7 +113,7 @@ Optional:
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--grafana_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
-- `metrics_enabled` (Boolean) Enable Grafana /metrics endpoint.
+- `metrics_enabled` (Boolean) Enable Grafana's /metrics endpoint.
 - `oauth_allow_insecure_email_lookup` (Boolean) Enforce user lookup based on email instead of the unique ID provided by the IdP.
 - `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--grafana_user_config--private_access))
 - `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--grafana_user_config--privatelink_access))
@@ -124,7 +124,7 @@ Optional:
 - `service_to_fork_from` (String) Name of another service to fork from. This has effect only when a new service is being created. Example: `anotherservicename`.
 - `smtp_server` (Block List, Max: 1) SMTP server settings (see [below for nested schema](#nestedblock--grafana_user_config--smtp_server))
 - `static_ips` (Boolean) Use static public IP addresses.
-- `unified_alerting_enabled` (Boolean) Enable or disable Grafana unified alerting functionality. By default this is enabled and any legacy alerts will be migrated on upgrade to Grafana 9+. To stay on legacy alerting, set unified_alerting_enabled to false and alerting_enabled to true. See https://grafana.com/docs/grafana/latest/alerting/set-up/migrating-alerts/ for more details.
+- `unified_alerting_enabled` (Boolean) Enable or disable Grafana unified alerting functionality. By default this is enabled and any legacy alerts will be migrated on upgrade to Grafana 9+. To stay on legacy alerting, set unified_alerting_enabled to false and alerting_enabled to true. See https://grafana.com/docs/grafana/latest/alerting/ for more details.
 - `user_auto_assign_org` (Boolean) Auto-assign new users on signup to main organization. Defaults to false.
 - `user_auto_assign_org_role` (String) Enum: `Admin`, `Editor`, `Viewer`. Set role for new signups. Defaults to Viewer.
 - `viewers_can_edit` (Boolean) Users with view-only permission can edit but not save dashboards.
@@ -198,9 +198,9 @@ Required:
 Optional:
 
 - `allow_sign_up` (Boolean) Automatically sign-up users on successful sign-in.
-- `api_url` (String) API URL. This only needs to be set when using self hosted GitLab. Example: `https://gitlab.com/api/v4`.
-- `auth_url` (String) Authorization URL. This only needs to be set when using self hosted GitLab. Example: `https://gitlab.com/oauth/authorize`.
-- `token_url` (String) Token URL. This only needs to be set when using self hosted GitLab. Example: `https://gitlab.com/oauth/token`.
+- `api_url` (String) This only needs to be set when using self hosted GitLab. Example: `https://gitlab.com/api/v4`.
+- `auth_url` (String) This only needs to be set when using self hosted GitLab. Example: `https://gitlab.com/oauth/authorize`.
+- `token_url` (String) This only needs to be set when using self hosted GitLab. Example: `https://gitlab.com/oauth/token`.
 
 
 <a id="nestedblock--grafana_user_config--auth_google"></a>
@@ -239,7 +239,7 @@ Required:
 
 - `access_key` (String) S3 access key. Requires permissions to the S3 bucket for the s3:PutObject and s3:PutObjectAcl actions. Example: `AAAAAAAAAAAAAAAAAAA`.
 - `bucket_url` (String) Bucket URL for S3. Example: `https://grafana.s3-ap-southeast-2.amazonaws.com/`.
-- `provider` (String) Enum: `s3`. Provider type.
+- `provider` (String) Enum: `s3`. External image store provider.
 - `secret_key` (String, Sensitive) S3 secret key. Example: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`.
 
 
