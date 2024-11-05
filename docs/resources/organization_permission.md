@@ -3,37 +3,42 @@
 page_title: "aiven_organization_permission Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Grants permissions https://aiven.io/docs/platform/concepts/permissions to a principal for a resource.
+  Grants roles and permissions https://aiven.io/docs/platform/concepts/permissions to a principal for a resource.
 ---
 
 # aiven_organization_permission (Resource)
 
-Grants [permissions](https://aiven.io/docs/platform/concepts/permissions) to a principal for a resource.
+Grants [roles and permissions](https://aiven.io/docs/platform/concepts/permissions) to a principal for a resource.
 
 ## Example Usage
 
 ```terraform
-# Grant permission to a user
+# Grant the operator role and
+# the permission to read service logs to a user
 resource "aiven_organization_permission" "operator" {
   organization_id = data.aiven_organization.main.id
   resource_id     = data.aiven_project.example_project.id
   resource_type   = "project"
   permissions {
     permissions = [
-      "operator"
+      "operator",
+      "service:logs:read"
     ]
     principal_id   = "u123a456b7890c"
     principal_type = "user"
   }
 }
 
-# Grant permission to a group
+# Grant the write project integrations permission, read project
+# networking permission, and developer role to a group
 resource "aiven_organization_permission" "developers" {
   organization_id = data.aiven_organization.main.id
   resource_id     = data.aiven_project.example_project.id
   resource_type   = "project"
   permissions {
     permissions = [
+      "project:integrations:write",
+      "project:networking:read",
       "developer"
     ]
     principal_id   = data.aiven_organization_user_group.example_group.group_id
@@ -65,8 +70,8 @@ resource "aiven_organization_permission" "developers" {
 
 Required:
 
-- `permissions` (Set of String) List of permissions. The possible values are `admin`, `developer`, `operator`, `project:audit_logs:read`, `project:integrations:read`, `project:integrations:write`, `project:networking:read`, `project:networking:write`, `project:permissions:read`, `project:services:read`, `read_only`, `service:configuration:write`, `service:logs:read` and `services:maintenance`.
-- `principal_id` (String) ID of the user or group.
+- `permissions` (Set of String) List of [roles and permissions](https://aiven.io/docs/platform/concepts/permissions) to grant. The possible values are `admin`, `developer`, `operator`, `project:audit_logs:read`, `project:integrations:read`, `project:integrations:write`, `project:networking:read`, `project:networking:write`, `project:permissions:read`, `project:services:read`, `read_only`, `service:configuration:write`, `service:logs:read` and `services:maintenance`.
+- `principal_id` (String) ID of the user or group to grant permissions to. Only active users who have accepted an [invite](https://aiven.io/docs/platform/howto/manage-org-users) to join the organization can be granted permissions.
 - `principal_type` (String) The type of principal. The possible values are `user` and `user_group`.
 
 Read-Only:
