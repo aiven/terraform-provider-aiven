@@ -49,7 +49,7 @@ resource "aiven_valkey" "example_valkey" {
 - `termination_protection` (Boolean) Prevents the service from being deleted. It is recommended to set this to `true` for all production services to prevent unintentional service deletion. This does not shield against deleting databases or topics but for services with backups much of the content can at least be restored from backup in case accidental deletion is done.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `valkey` (Block List, Max: 1) Valkey server provided values (see [below for nested schema](#nestedblock--valkey))
-- `valkey_user_config` (Block List, Max: 1) Valkey user configurable settings (see [below for nested schema](#nestedblock--valkey_user_config))
+- `valkey_user_config` (Block List, Max: 1) Valkey user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--valkey_user_config))
 
 ### Read-Only
 

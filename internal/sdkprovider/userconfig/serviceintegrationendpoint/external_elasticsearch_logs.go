@@ -10,7 +10,7 @@ import (
 
 func externalElasticsearchLogsUserConfig() *schema.Schema {
 	return &schema.Schema{
-		Description:      "ExternalElasticsearchLogs user configurable settings",
+		Description:      "ExternalElasticsearchLogs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later",
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"ca": {

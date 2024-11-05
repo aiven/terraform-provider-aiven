@@ -11,7 +11,7 @@ import (
 
 func pgUserConfig() *schema.Schema {
 	return &schema.Schema{
-		Description:      "Pg user configurable settings",
+		Description:      "Pg user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later",
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"additional_backup_regions": {

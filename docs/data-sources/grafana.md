@@ -38,7 +38,7 @@ data "aiven_grafana" "example_grafana" {
 - `disk_space_step` (String) The default disk space step of the service, possible values depend on the service type, the cloud provider and the project. `disk_space` needs to increment from `disk_space_default` by increments of this size.
 - `disk_space_used` (String) Disk space that service is currently using
 - `grafana` (List of Object, Sensitive) Values provided by the Grafana server. (see [below for nested schema](#nestedatt--grafana))
-- `grafana_user_config` (List of Object) Grafana user configurable settings (see [below for nested schema](#nestedatt--grafana_user_config))
+- `grafana_user_config` (List of Object) Grafana user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--grafana_user_config))
 - `id` (String) The ID of this resource.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.

@@ -11,7 +11,7 @@ import (
 
 func autoscalerUserConfig() *schema.Schema {
 	return &schema.Schema{
-		Description:      "Autoscaler user configurable settings",
+		Description:      "Autoscaler user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later",
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{"autoscaling": {
 			Description: "Configure autoscaling thresholds for a service",

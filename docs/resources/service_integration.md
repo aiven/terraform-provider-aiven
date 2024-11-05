@@ -63,22 +63,22 @@ resource "aiven_service_integration" "autoscaler_integration" {
 
 ### Optional
 
-- `clickhouse_kafka_user_config` (Block List, Max: 1) ClickhouseKafka user configurable settings (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config))
-- `clickhouse_postgresql_user_config` (Block List, Max: 1) ClickhousePostgresql user configurable settings (see [below for nested schema](#nestedblock--clickhouse_postgresql_user_config))
-- `datadog_user_config` (Block List, Max: 1) Datadog user configurable settings (see [below for nested schema](#nestedblock--datadog_user_config))
+- `clickhouse_kafka_user_config` (Block List, Max: 1) ClickhouseKafka user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--clickhouse_kafka_user_config))
+- `clickhouse_postgresql_user_config` (Block List, Max: 1) ClickhousePostgresql user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--clickhouse_postgresql_user_config))
+- `datadog_user_config` (Block List, Max: 1) Datadog user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--datadog_user_config))
 - `destination_endpoint_id` (String) Destination endpoint for the integration.
 - `destination_service_name` (String) Destination service for the integration.
-- `external_aws_cloudwatch_logs_user_config` (Block List, Max: 1) ExternalAwsCloudwatchLogs user configurable settings (see [below for nested schema](#nestedblock--external_aws_cloudwatch_logs_user_config))
-- `external_aws_cloudwatch_metrics_user_config` (Block List, Max: 1) ExternalAwsCloudwatchMetrics user configurable settings (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config))
-- `external_elasticsearch_logs_user_config` (Block List, Max: 1) ExternalElasticsearchLogs user configurable settings (see [below for nested schema](#nestedblock--external_elasticsearch_logs_user_config))
-- `external_opensearch_logs_user_config` (Block List, Max: 1) ExternalOpensearchLogs user configurable settings (see [below for nested schema](#nestedblock--external_opensearch_logs_user_config))
-- `flink_external_postgresql_user_config` (Block List, Max: 1) FlinkExternalPostgresql user configurable settings (see [below for nested schema](#nestedblock--flink_external_postgresql_user_config))
-- `kafka_connect_user_config` (Block List, Max: 1) KafkaConnect user configurable settings (see [below for nested schema](#nestedblock--kafka_connect_user_config))
-- `kafka_logs_user_config` (Block List, Max: 1) KafkaLogs user configurable settings (see [below for nested schema](#nestedblock--kafka_logs_user_config))
-- `kafka_mirrormaker_user_config` (Block List, Max: 1) KafkaMirrormaker user configurable settings (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config))
-- `logs_user_config` (Block List, Max: 1) Logs user configurable settings (see [below for nested schema](#nestedblock--logs_user_config))
-- `metrics_user_config` (Block List, Max: 1) Metrics user configurable settings (see [below for nested schema](#nestedblock--metrics_user_config))
-- `prometheus_user_config` (Block List, Max: 1) Prometheus user configurable settings (see [below for nested schema](#nestedblock--prometheus_user_config))
+- `external_aws_cloudwatch_logs_user_config` (Block List, Max: 1) ExternalAwsCloudwatchLogs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_aws_cloudwatch_logs_user_config))
+- `external_aws_cloudwatch_metrics_user_config` (Block List, Max: 1) ExternalAwsCloudwatchMetrics user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config))
+- `external_elasticsearch_logs_user_config` (Block List, Max: 1) ExternalElasticsearchLogs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_elasticsearch_logs_user_config))
+- `external_opensearch_logs_user_config` (Block List, Max: 1) ExternalOpensearchLogs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_opensearch_logs_user_config))
+- `flink_external_postgresql_user_config` (Block List, Max: 1) FlinkExternalPostgresql user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--flink_external_postgresql_user_config))
+- `kafka_connect_user_config` (Block List, Max: 1) KafkaConnect user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--kafka_connect_user_config))
+- `kafka_logs_user_config` (Block List, Max: 1) KafkaLogs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--kafka_logs_user_config))
+- `kafka_mirrormaker_user_config` (Block List, Max: 1) KafkaMirrormaker user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--kafka_mirrormaker_user_config))
+- `logs_user_config` (Block List, Max: 1) Logs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--logs_user_config))
+- `metrics_user_config` (Block List, Max: 1) Metrics user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--metrics_user_config))
+- `prometheus_user_config` (Block List, Max: 1) Prometheus user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--prometheus_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration.
 - `source_service_name` (String) Source service for the integration (if any)
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
