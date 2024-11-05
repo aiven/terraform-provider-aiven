@@ -10,7 +10,7 @@ import (
 
 func clickhouseUserConfig() *schema.Schema {
 	return &schema.Schema{
-		Description:      "Clickhouse user configurable settings",
+		Description:      "Clickhouse user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later",
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"additional_backup_regions": {

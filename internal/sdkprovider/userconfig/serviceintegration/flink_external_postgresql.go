@@ -11,7 +11,7 @@ import (
 
 func flinkExternalPostgresqlUserConfig() *schema.Schema {
 	return &schema.Schema{
-		Description:      "FlinkExternalPostgresql user configurable settings",
+		Description:      "FlinkExternalPostgresql user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later",
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{"stringtype": {
 			Description:  "Enum: `unspecified`. If stringtype is set to unspecified, parameters will be sent to the server as untyped values.",

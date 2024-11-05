@@ -56,7 +56,7 @@ resource "aiven_kafka" "example_kafka" {
 - `default_acl` (Boolean) Create a default wildcard Kafka ACL.
 - `disk_space` (String, Deprecated) Service disk space. Possible values depend on the service type, the cloud provider and the project. Therefore, reducing will result in the service rebalancing.
 - `kafka` (Block List, Max: 1) Kafka server connection details. (see [below for nested schema](#nestedblock--kafka))
-- `kafka_user_config` (Block List, Max: 1) Kafka user configurable settings (see [below for nested schema](#nestedblock--kafka_user_config))
+- `kafka_user_config` (Block List, Max: 1) Kafka user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--kafka_user_config))
 - `karapace` (Boolean, Deprecated) Switch the service to use [Karapace](https://aiven.io/docs/products/kafka/karapace) for schema registry and REST proxy.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.

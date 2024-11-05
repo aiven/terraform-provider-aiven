@@ -10,7 +10,7 @@ import (
 
 func jolokiaUserConfig() *schema.Schema {
 	return &schema.Schema{
-		Description:      "Jolokia user configurable settings",
+		Description:      "Jolokia user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later",
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"basic_auth_password": {

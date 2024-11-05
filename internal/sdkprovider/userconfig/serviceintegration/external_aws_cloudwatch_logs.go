@@ -11,7 +11,7 @@ import (
 
 func externalAwsCloudwatchLogsUserConfig() *schema.Schema {
 	return &schema.Schema{
-		Description:      "ExternalAwsCloudwatchLogs user configurable settings",
+		Description:      "ExternalAwsCloudwatchLogs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later",
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{"selected_log_fields": {
 			Description: "The list of logging fields that will be sent to the integration logging service. The MESSAGE and timestamp fields are always sent.",

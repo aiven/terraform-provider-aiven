@@ -312,7 +312,7 @@ func unwrapArrayMultipleTypes(o *object) {
 				clone := deepcopy(p)
 				clone.jsonName = key
 				clone.ArrayItems = t
-				clone.Description = fmt.Sprintf("%s %s", addDot(p.Description), t.Description)
+				clone.Description = joinSentences(p.Description, t.Description)
 				fields[prefix+t.OrigType.(string)] = clone
 			}
 

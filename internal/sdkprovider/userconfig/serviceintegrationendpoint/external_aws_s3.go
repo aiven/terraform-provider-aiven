@@ -10,7 +10,7 @@ import (
 
 func externalAwsS3UserConfig() *schema.Schema {
 	return &schema.Schema{
-		Description:      "ExternalAwsS3 user configurable settings",
+		Description:      "ExternalAwsS3 user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later",
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"access_key_id": {

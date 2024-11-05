@@ -10,7 +10,7 @@ import (
 
 func kafkaConnectUserConfig() *schema.Schema {
 	return &schema.Schema{
-		Description:      "KafkaConnect user configurable settings",
+		Description:      "KafkaConnect user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later",
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{"kafka_connect": {
 			Description: "Kafka Connect service configuration values",

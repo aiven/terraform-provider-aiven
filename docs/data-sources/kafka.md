@@ -40,7 +40,7 @@ data "aiven_kafka" "example_kafka" {
 - `disk_space_used` (String) Disk space that service is currently using
 - `id` (String) The ID of this resource.
 - `kafka` (List of Object, Sensitive) Kafka server connection details. (see [below for nested schema](#nestedatt--kafka))
-- `kafka_user_config` (List of Object) Kafka user configurable settings (see [below for nested schema](#nestedatt--kafka_user_config))
+- `kafka_user_config` (List of Object) Kafka user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--kafka_user_config))
 - `karapace` (Boolean) Switch the service to use [Karapace](https://aiven.io/docs/products/kafka/karapace) for schema registry and REST proxy.
 - `maintenance_window_dow` (String) Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.
 - `maintenance_window_time` (String) Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.
