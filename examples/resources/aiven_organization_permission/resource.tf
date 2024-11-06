@@ -1,10 +1,9 @@
-# Grant the operator role and
-# the permission to read service logs to a user
-resource "aiven_organization_permission" "operator" {
+resource "aiven_organization_permission" "example_permissions" {
   organization_id = data.aiven_organization.main.id
   resource_id     = data.aiven_project.example_project.id
   resource_type   = "project"
   permissions {
+    # Grant the operator role and permission to read service logs to a user
     permissions = [
       "operator",
       "service:logs:read"
@@ -12,14 +11,7 @@ resource "aiven_organization_permission" "operator" {
     principal_id   = "u123a456b7890c"
     principal_type = "user"
   }
-}
-
-# Grant the write project integrations permission, read project
-# networking permission, and developer role to a group
-resource "aiven_organization_permission" "developers" {
-  organization_id = data.aiven_organization.main.id
-  resource_id     = data.aiven_project.example_project.id
-  resource_type   = "project"
+  # Grant write project integrations and read project networking permissions, and the developer role to a group
   permissions {
     permissions = [
       "project:integrations:write",
