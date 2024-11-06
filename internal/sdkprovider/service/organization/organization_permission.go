@@ -48,11 +48,11 @@ var permissionFields = map[string]*schema.Schema{
 	"principal_id": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "ID of the user or group.",
+		Description: "ID of the user or group to grant permissions to. Only active users who have accepted an [invite](https://aiven.io/docs/platform/howto/manage-org-users) to join the organization can be granted permissions.",
 	},
 	"permissions": {
 		Type:        schema.TypeSet,
-		Description: userconfig.Desc("List of permissions").PossibleValuesString(account.MemberTypeChoices()...).Build(),
+		Description: userconfig.Desc("List of [roles and permissions](https://aiven.io/docs/platform/concepts/permissions) to grant.").PossibleValuesString(account.MemberTypeChoices()...).Build(),
 		Required:    true,
 		Elem:        &schema.Schema{Type: schema.TypeString},
 	},
@@ -70,7 +70,7 @@ var permissionFields = map[string]*schema.Schema{
 
 func ResourceOrganizationalPermission() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Grants [permissions](https://aiven.io/docs/platform/concepts/permissions) to a principal for a resource.",
+		Description:   "Grants [roles and permissions](https://aiven.io/docs/platform/concepts/permissions) to a principal for a resource.",
 		CreateContext: common.WithGenClient(resourceOrganizationalPermissionUpsert),
 		ReadContext:   common.WithGenClient(resourceOrganizationalPermissionRead),
 		UpdateContext: common.WithGenClient(resourceOrganizationalPermissionUpsert),
