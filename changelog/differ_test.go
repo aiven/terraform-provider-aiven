@@ -3,6 +3,7 @@ package main
 import (
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 )
@@ -96,4 +97,25 @@ func TestCompare(t *testing.T) {
 			assert.Equal(t, opt.expect, got.String())
 		})
 	}
+}
+
+func TestSerializeDiff(t *testing.T) {
+	list := []*Diff{
+		{Action: AddDiffAction, RootType: ResourceRootType, Description: "foo", Item: &Item{Path: "aiven_opensearch.opensearch_user_config.azure_migration.include_aliases"}},
+		{Action: ChangeDiffAction, RootType: DataSourceRootType, Description: "remove deprecation", Item: &Item{Path: "aiven_cassandra.cassandra_user_config.additional_backup_regions"}},
+		{Action: ChangeDiffAction, RootType: ResourceRootType, Description: "remove deprecation", Item: &Item{Path: "aiven_cassandra.cassandra_user_config.additional_backup_regions"}},
+		{Action: AddDiffAction, RootType: ResourceRootType, Description: "foo", Item: &Item{Path: "aiven_opensearch.opensearch_user_config.s3_migration.include_aliases"}},
+		{Action: AddDiffAction, RootType: ResourceRootType, Description: "foo", Item: &Item{Path: "aiven_opensearch.opensearch_user_config.gcs_migration.include_aliases"}},
+	}
+
+	expect := []string{
+		"Add `aiven_opensearch` resource field `opensearch_user_config.azure_migration.include_aliases`: foo",
+		"Add `aiven_opensearch` resource field `opensearch_user_config.gcs_migration.include_aliases`: foo",
+		"Add `aiven_opensearch` resource field `opensearch_user_config.s3_migration.include_aliases`: foo",
+		"Change `aiven_cassandra` resource field `cassandra_user_config.additional_backup_regions`: remove deprecation",
+		"Change `aiven_cassandra` datasource field `cassandra_user_config.additional_backup_regions`: remove deprecation",
+	}
+
+	actual := serializeDiff(list)
+	assert.Empty(t, cmp.Diff(expect, actual))
 }
