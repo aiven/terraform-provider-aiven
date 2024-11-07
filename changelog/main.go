@@ -18,6 +18,7 @@ type flags struct {
 	diff          bool
 	schemaFile    string
 	changelogFile string
+	reformat      bool
 }
 
 func main() {
@@ -66,6 +67,7 @@ func parseFlags() (*flags, error) {
 	flag.BoolVar(&f.diff, "diff", false, "compare current schema with imported schema")
 	flag.StringVar(&f.schemaFile, "schema", "", "schema file path (for save/diff)")
 	flag.StringVar(&f.changelogFile, "changelog", "", "changelog output file path")
+	flag.BoolVar(&f.reformat, "reformat", false, "reformat the whole changelog file")
 	flag.Parse()
 
 	if f.save == f.diff {
@@ -115,10 +117,10 @@ func processDiff(flags *flags, newMap ItemMap) error {
 	}
 
 	if flags.changelogFile == "" {
-		return printEntries(entries)
+		return printChangelog(entries)
 	}
 
-	return writeChangelog(flags.changelogFile, entries)
+	return writeChangelog(flags.changelogFile, flags.reformat, entries)
 }
 
 func loadSchemaFile(path string) (ItemMap, error) {
@@ -136,20 +138,25 @@ func loadSchemaFile(path string) (ItemMap, error) {
 	return oldMap, nil
 }
 
-func printEntries(entries []string) error {
+func printChangelog(entries []string) error {
 	for _, l := range entries {
-		fmt.Printf("-  %s\n", l)
+		fmt.Printf("- %s\n", l)
 	}
 	return nil
 }
 
-func writeChangelog(_ string, entries []string) error {
-	// todo: write to file
-	for _, l := range entries {
-		fmt.Printf("-  %s\n", l)
+func writeChangelog(filePath string, reformat bool, entries []string) error {
+	b, err := os.ReadFile(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to read changelog file: %w", err)
 	}
 
-	return nil
+	s, err := updateChangelog(string(b), defaultLineMaxLength, reformat, entries...)
+	if err != nil {
+		return fmt.Errorf("failed to format changelog: %w", err)
+	}
+
+	return os.WriteFile(filePath, []byte(s), 0644)
 }
 
 func fromProvider(p *schema.Provider) (ItemMap, error) {

@@ -7,15 +7,23 @@ nav_order: 1
 # Changelog
 
 <!-- Always keep the following header in place: -->
+<!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
+
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Add support for `autoscaler` service integration
-- Add `aiven_opensearch` resource field `opensearch_user_config.azure_migration.include_aliases`: Whether to restore aliases alongside their associated indexes
-- Add `aiven_opensearch` resource field `opensearch_user_config.gcs_migration.include_aliases`: Whether to restore aliases alongside their associated indexes
-- Add `aiven_opensearch` resource field `opensearch_user_config.s3_migration.include_aliases`: Whether to restore aliases alongside their associated indexes
-- Add `aiven_opensearch` datasource field `opensearch_user_config.gcs_migration.include_aliases`: Whether to restore aliases alongside their associated indexes
-- Add `aiven_opensearch` datasource field `opensearch_user_config.azure_migration.include_aliases`: Whether to restore aliases alongside their associated indexes
-- Add `aiven_opensearch` datasource field `opensearch_user_config.s3_migration.include_aliases`: Whether to restore aliases alongside their associated indexes
+- Add `aiven_opensearch` resource field `opensearch_user_config.azure_migration.include_aliases`: Whether to restore
+  aliases alongside their associated indexes
+- Add `aiven_opensearch` resource field `opensearch_user_config.gcs_migration.include_aliases`: Whether to restore aliases
+  alongside their associated indexes
+- Add `aiven_opensearch` resource field `opensearch_user_config.s3_migration.include_aliases`: Whether to restore aliases
+  alongside their associated indexes
+- Add `aiven_opensearch` datasource field `opensearch_user_config.gcs_migration.include_aliases`: Whether to restore
+  aliases alongside their associated indexes
+- Add `aiven_opensearch` datasource field `opensearch_user_config.azure_migration.include_aliases`: Whether to restore
+  aliases alongside their associated indexes
+- Add `aiven_opensearch` datasource field `opensearch_user_config.s3_migration.include_aliases`: Whether to restore
+  aliases alongside their associated indexes
 - Change `aiven_cassandra` resource field `cassandra_user_config.additional_backup_regions`: remove deprecation
 - Change `aiven_cassandra` datasource field `cassandra_user_config.additional_backup_regions`: remove deprecation
 
@@ -71,14 +79,14 @@ nav_order: 1
 - Fix `aiven_transit_gateway_vpc_attachment`: remove `peer_region` deprecation, mark the field as create only.
 - Add `aiven_valkey` resource as a beta resource
 - Add `aiven_valkey_user` resource as a beta resource
-- Temporarily remove the `aiven_project_user` deprecation until we find a suitable alternative.  
+- Temporarily remove the `aiven_project_user` deprecation until we find a suitable alternative.
 
 ## [4.20.0] - 2024-06-26
 
 - Mark several sensitive user config fields as "sensitive"
 - Fix aiven-go-client dependency version
 - Fix `aiven_organization_user_group` resource - `name` field is required
-- Use `TypeSet` for `config_properties_exclude`  
+- Use `TypeSet` for `config_properties_exclude`
 
 ## [4.19.1] - 2024-05-05
 
@@ -89,7 +97,7 @@ nav_order: 1
 - Add `is_super_admin` flag to `aiven_organization_application_user` resource
 - Add `aiven_mirrormaker_replication_flow` replication factor
 - Remove `aiven_mirrormaker_replication_flow` global mutex, the backend has been fixed
-- Remove service version validation to allow running new service versions without the provider upgrade 
+- Remove service version validation to allow running new service versions without the provider upgrade
 - Fix `aiven_organization_application_user_token` crashes with empty optional fields
 - Fix `ip_filter` conversion issue
 
@@ -107,12 +115,12 @@ nav_order: 1
 ## [4.16.0] - 2024-04-30
 
 - Fix incorrect timeout values used in certain cases
-- Fix sending `aiven_kafka_topic` config default values 
+- Fix sending `aiven_kafka_topic` config default values
 - Fix sending `false` values in `aiven_kafka_topic` config
 - Fix `aiven_pg` user config fields with `__dot__` substring in name
 - Validate `aiven_kafka_topic` topic name conflict on `terraform plan`
 - Mark service connection info blocks as `sensitive`. See SDK [bug](https://github.com/hashicorp/terraform-plugin-sdk/issues/201).
-- Remove redundant service connection info fields 
+- Remove redundant service connection info fields
 - Add Thanos resource (`aiven_thanos`) to allow for the creation and management of Thanos services (currently available as beta)
 
 ## [4.15.0] - 2024-03-21
@@ -134,7 +142,7 @@ nav_order: 1
   - `emit_backward_heartbeats_enabled`
   - `offset_syncs_topic_location`
   - `replication_policy_class`
-- Remove the beta flag for `aiven_organization_user_group_member` and `aiven_organization_group_project` resources 
+- Remove the beta flag for `aiven_organization_user_group_member` and `aiven_organization_group_project` resources
 
 ## [4.14.0] - 2024-02-20
 
@@ -145,7 +153,7 @@ nav_order: 1
 - Fix `aiven_organization_user_group` resource - `description` field is required
 - Use golang 1.22
 - Output explicitly `termination_protection = true -> false` when service property is removed
-- Fix `aiven_flink_application_deployment` deletion 
+- Fix `aiven_flink_application_deployment` deletion
 
 ## [4.13.3] - 2024-01-29
 
@@ -165,7 +173,7 @@ nav_order: 1
 
 - Add organization application users support
 - Add organization application user tokens support
-- Configure "insufficient broker" error retries timeout 
+- Configure "insufficient broker" error retries timeout
 - Enable `local_retention_*` fields in `aiven_kafka_topic` resource
 - Validate that `local_retention_bytes` is not bigger than `retention_bytes`
 
@@ -200,12 +208,11 @@ nav_order: 1
 - Retry kafka topic creation error `Cluster only has N broker(s), cannot set replication factor to M`
 - Fix Kafka Topic migration issues from V3 to V4.
 - Fix V3 to V4 migration issue related to cloud_name diff.
-- Add support for the `aiven_organization_user_group_member` resource, allowing the association of groups with the users. Please note that this resource is in the beta stage, and to use it, you would need to set the environment variable PROVIDER_AIVEN_ENABLE_BETA to a non-zero value.  
-  
+- Add support for the `aiven_organization_user_group_member` resource, allowing the association of groups with the users. Please note that this resource is in the beta stage, and to use it, you would need to set the environment variable PROVIDER_AIVEN_ENABLE_BETA to a non-zero value.
 
 ## [4.9.4] - 2023-12-13
 
-- Fix race issues with `aiven_mirrormaker_replication_flow` on create/update/delete operations   
+- Fix race issues with `aiven_mirrormaker_replication_flow` on create/update/delete operations
 - Add `tech_emails` to services
 
 ## [4.9.3] - 2023-10-27
@@ -237,7 +244,7 @@ nav_order: 1
 
 - Add Organization User Groups support
 - Fixed incorrect `account_id` behavior in mixed constraint setup in `aiven_project` resource
-- Use updated aiven-go-client with enhanced retries 
+- Use updated aiven-go-client with enhanced retries
 - Change `plan` from optional to required
 - Improve `disk_space` deprecation message to become more explicit to migrating users
 - Fix account deletion flakiness
@@ -291,7 +298,7 @@ nav_order: 1
 
 - Added docs and validation for `aiven_service_integration_endpoint`
 - Dropped `signalfx` from supported integration types
-- Fix MySQL user creation authentication field 
+- Fix MySQL user creation authentication field
 - Fix Account SAML Field mapping set method
 - Adjust generated SQL for ClickHouse privilege grants
 - Fix `required` not generated for top level fields for user config options
@@ -369,7 +376,7 @@ nav_order: 1
   - Integration with Kafka source
   - Integration with PostgreSQL source
 - Fix VPC peering ID parser
-- Add `offset_syncs_topic_location` support for `aiven_mirrormaker_replication_flow` resource 
+- Add `offset_syncs_topic_location` support for `aiven_mirrormaker_replication_flow` resource
 - Add `ssl` and `kafka_authentication_method` output support in service components
 - Fix `admin_username` and `admin_password` fields diff
 
@@ -379,7 +386,7 @@ nav_order: 1
 - Add `ip_filter_object` and `namespaces_object` user config options which are meant to extend the existing `ip_filter` and `namespaces` ones
 - Revert `datasource_project_vpc` `cloud_name` and `project` deprecations
 - Add extra timeout for `kafka_connect` service integration create
-- Support `clickhouse_kafka` integration type in `aiven_service_integration` 
+- Support `clickhouse_kafka` integration type in `aiven_service_integration`
 - Fix `aiven_transit_gateway_vpc_attachment` fails to parse ID
 - Prevent generation of `Default` field in static schema generator
 - Add `self_link` field to `aiven_gcp_vpc_peering_connection` resource
@@ -399,7 +406,7 @@ nav_order: 1
 ## [3.8.0] - 2022-09-30
 
 - Fix `aiven_gcp_vpc_peering_connection` creation
-- Improve static IP error handling end messaging 
+- Improve static IP error handling end messaging
 - Fix `aiven_account_authentication` resource update, add tests
 - Change `aiven_project_vpc` datasource behaviour
 - Fix `aiven_service_component` optional parameters filters
@@ -458,7 +465,7 @@ nav_order: 1
 - Update Changelog Enforcer workflow
 - Add CodeQL workflow
 - Add `opensearch_index` support to `aiven_flink_table`
-- Add not found checks to the Kafka availability waiter 
+- Add not found checks to the Kafka availability waiter
 - Add PostgreSQL max connections and PgBouncer outputs
 - Perform general code clean-up and add `revive` linter
 - Add support for new user configuration options
@@ -543,15 +550,11 @@ nav_order: 1
 
 - `aiven_service` and `aiven_elasticsearch` resources were deleted
 - `aiven_project` resource previously deprecated schema field were deleted
-
 Deprecated resources and data-sources:
-
 - `aiven_database`
 - `aiven_service_user`
 - `aiven_vpc_peering_connection`
-
 New resources and data-sources:
-
 - `aiven_aws_vpc_peering_connection`
 - `aiven_azure_vpc_peering_connection`
 - `aiven_gcp_vpc_peering_connection`
@@ -1002,19 +1005,16 @@ Add backwards compatibility for old TF state files created before Kafka `topic` 
 ## [1.2.1] - 2020-03-02
 
 Terraform client-side termination protection for resources:
-
 - aiven_kafka_topic
 - aiven_database
 
 ## [1.2.0] - 2020-02-18
 
 - Following new types of resources have been added:
-
     - account
     - account_team
     - account_team_member
     - account_team_project
-
 - New configuration options
 - Fix for a read-only replica service types
 - Service specific acceptance tests
@@ -1151,5 +1151,4 @@ Support termination_protection property for services.
 Support all Aiven resource types. Also large changes to previously
 supported resource types, such as full support for all user config
 options.
-
 **NOTE**: This version is not backwards compatible with older versions.
