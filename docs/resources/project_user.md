@@ -33,7 +33,7 @@ resource "aiven_project_user" "mytestuser" {
 ### Required
 
 - `email` (String) Email address of the user in lowercase. Changing this property forces recreation of the resource.
-- `member_type` (String) Project membership type. The possible values are `admin`, `developer`, `operator`, `project:audit_logs:read`, `project:integrations:read`, `project:integrations:write`, `project:networking:read`, `project:networking:write`, `project:permissions:read`, `project:services:read`, `read_only`, `service:configuration:write`, `service:logs:read` and `services:maintenance`.
+- `member_type` (String) Project membership type. The possible values are `admin`, `developer`, `operator`, `organization:app_users:write`, `organization:audit_logs:read`, `organization:billing:read`, `organization:billing:write`, `organization:domains:write`, `organization:groups:write`, `organization:idps:write`, `organization:network:read`, `organization:network:write`, `organization:permissions:read`, `organization:permissions:write`, `organization:projects:read`, `organization:projects:write`, `organization:users:write`, `project:audit_logs:read`, `project:integrations:read`, `project:integrations:write`, `project:networking:read`, `project:networking:write`, `project:permissions:read`, `project:services:read`, `project:services:write`, `read_only`, `role:organization:admin`, `role:services:maintenance`, `role:services:recover`, `service:configuration:write`, `service:data:write`, `service:logs:read`, `service:secrets:read` and `service:users:write`.
 - `project` (String) The name of the project this resource belongs to. To set up proper dependencies please refer to this variable as a reference. Changing this property forces recreation of the resource.
 
 ### Optional

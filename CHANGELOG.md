@@ -26,6 +26,14 @@ nav_order: 1
   aliases alongside their associated indexes
 - Change `aiven_cassandra` resource field `cassandra_user_config.additional_backup_regions`: remove deprecation
 - Change `aiven_cassandra` datasource field `cassandra_user_config.additional_backup_regions`: remove deprecation
+- Add `aiven_thanos` resource field `thanos_user_config.receiver_ingesting`: CommonReceive.
+- Add `aiven_thanos` resource field `thanos_user_config.receiver_routing`: ThanosReceiveRouting.
+- Add `aiven_thanos` resource field `thanos_user_config.ruler`: ThanosRuler.
+- Add `aiven_thanos` resource field `thanos_user_config.store`: ThanosStore.
+- Add `aiven_thanos` datasource field `thanos_user_config.receiver_ingesting`: CommonReceive.
+- Add `aiven_thanos` datasource field `thanos_user_config.receiver_routing`: ThanosReceiveRouting.
+- Add `aiven_thanos` datasource field `thanos_user_config.ruler`: ThanosRuler.
+- Add `aiven_thanos` datasource field `thanos_user_config.store`: ThanosStore.
 
 ## [4.28.0] - 2024-10-21
 

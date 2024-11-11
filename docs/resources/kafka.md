@@ -170,7 +170,7 @@ Optional:
 - `log_cleaner_min_cleanable_ratio` (Number) Controls log compactor frequency. Larger value means more frequent compactions but also more space wasted for logs. Consider setting log.cleaner.max.compaction.lag.ms to enforce compactions sooner, instead of setting a very high value for this option. (Default: 0.5). Example: `0.5`.
 - `log_cleaner_min_compaction_lag_ms` (Number) The minimum time a message will remain uncompacted in the log. Only applicable for logs that are being compacted. (Default: 0 ms).
 - `log_cleanup_policy` (String) Enum: `compact`, `compact,delete`, `delete`. The default cleanup policy for segments beyond the retention window (Default: delete).
-- `log_flush_interval_messages` (Number) The number of messages accumulated on a log partition before messages are flushed to disk (Default: 9223372036854775807 (Long.MAX_VALUE)). Example: `9223372036854775807`.
+- `log_flush_interval_messages` (Number) The number of messages accumulated on a log partition before messages are flushed to disk (Default: 9223372036854775807 (Long.MAX_VALUE)).
 - `log_flush_interval_ms` (Number) The maximum time in ms that a message in any topic is kept in memory (page-cache) before flushed to disk. If not set, the value in log.flush.scheduler.interval.ms is used (Default: null).
 - `log_index_interval_bytes` (Number) The interval with which Kafka adds an entry to the offset index (Default: 4096 bytes (4 kibibytes)). Example: `4096`.
 - `log_index_size_max_bytes` (Number) The maximum size in bytes of the offset index (Default: 10485760 (10 mebibytes)). Example: `10485760`.

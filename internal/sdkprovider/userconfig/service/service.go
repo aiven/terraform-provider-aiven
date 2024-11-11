@@ -127,6 +127,8 @@ func GetFieldMapping(kind string) map[string]string {
 			"query/store_limits_request_series":                "query/store.limits.request-series",
 			"query_frontend":                                   "query-frontend",
 			"query_frontend/query_range_align_range_with_step": "query-frontend/query-range.align-range-with-step",
+			"receiver_ingesting":                               "receiver-ingesting",
+			"receiver_routing":                                 "receiver-routing",
 		},
 		"valkey": {
 			"ip_filter_object": "ip_filter",
