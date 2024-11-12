@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/kafkatopic"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -29,14 +30,16 @@ var (
 
 var aivenKafkaTopicConfigSchema = map[string]*schema.Schema{
 	"cleanup_policy": {
-		Type:        schema.TypeString,
-		Description: "cleanup.policy value",
-		Optional:    true,
+		Type:         schema.TypeString,
+		Optional:     true,
+		ValidateFunc: validation.StringInSlice(kafkatopic.CleanupPolicyTypeChoices(), false),
+		Description:  userconfig.Desc("cleanup.policy value").PossibleValuesString(kafkatopic.CleanupPolicyTypeChoices()...).Build(),
 	},
 	"compression_type": {
-		Type:        schema.TypeString,
-		Description: "compression.type value",
-		Optional:    true,
+		Type:         schema.TypeString,
+		Optional:     true,
+		ValidateFunc: validation.StringInSlice(kafkatopic.CompressionTypeChoices(), false),
+		Description:  userconfig.Desc("compression.type value").PossibleValuesString(kafkatopic.CompressionTypeChoices()...).Build(),
 	},
 	"delete_retention_ms": {
 		Type:        schema.TypeString,
@@ -79,9 +82,10 @@ var aivenKafkaTopicConfigSchema = map[string]*schema.Schema{
 		Optional:    true,
 	},
 	"message_format_version": {
-		Type:        schema.TypeString,
-		Description: "message.format.version value",
-		Optional:    true,
+		Type:         schema.TypeString,
+		Optional:     true,
+		ValidateFunc: validation.StringInSlice(kafkatopic.MessageFormatVersionTypeChoices(), false),
+		Description:  userconfig.Desc("message.format.version value").PossibleValuesString(kafkatopic.MessageFormatVersionTypeChoices()...).Build(),
 	},
 	"message_timestamp_difference_max_ms": {
 		Type:        schema.TypeString,
@@ -89,9 +93,10 @@ var aivenKafkaTopicConfigSchema = map[string]*schema.Schema{
 		Optional:    true,
 	},
 	"message_timestamp_type": {
-		Type:        schema.TypeString,
-		Description: "message.timestamp.type value",
-		Optional:    true,
+		Type:         schema.TypeString,
+		Optional:     true,
+		ValidateFunc: validation.StringInSlice(kafkatopic.MessageTimestampTypeChoices(), false),
+		Description:  userconfig.Desc("message.timestamp.type value").PossibleValuesString(kafkatopic.MessageTimestampTypeChoices()...).Build(),
 	},
 	"min_cleanable_dirty_ratio": {
 		Type:        schema.TypeFloat,
