@@ -7,6 +7,7 @@ import (
 	"github.com/aiven/go-client-codegen/handler/account"
 	"github.com/aiven/go-client-codegen/handler/organization"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -20,9 +21,10 @@ var aivenOrganizationalPermissionSchema = map[string]*schema.Schema{
 		Required:    true,
 	},
 	"resource_type": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: userconfig.Desc("Resource type.").PossibleValuesString("project").Build(),
+		Type:         schema.TypeString,
+		Required:     true,
+		ValidateFunc: validation.StringInSlice(organization.ResourceTypeChoices(), false),
+		Description:  userconfig.Desc("Resource type.").PossibleValuesString(organization.ResourceTypeChoices()...).Build(),
 	},
 	"resource_id": {
 		Type:        schema.TypeString,

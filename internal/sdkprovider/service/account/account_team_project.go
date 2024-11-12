@@ -33,7 +33,7 @@ var aivenAccountTeamProjectSchema = map[string]*schema.Schema{
 	"team_type": {
 		Type:         schema.TypeString,
 		Optional:     true,
-		ValidateFunc: validation.StringInSlice([]string{"admin", "developer", "operator", "read_only"}, false),
+		ValidateFunc: validation.StringInSlice(account.TeamTypeChoices(), false),
 		Description:  userconfig.Desc("The Account team project type").PossibleValuesString(account.TeamTypeChoices()...).Build(),
 	},
 }

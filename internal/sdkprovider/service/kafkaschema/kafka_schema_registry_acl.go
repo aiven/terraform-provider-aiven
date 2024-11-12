@@ -21,7 +21,7 @@ var aivenKafkaSchemaRegistryACLSchema = map[string]*schema.Schema{
 		Type:         schema.TypeString,
 		Required:     true,
 		ForceNew:     true,
-		ValidateFunc: validation.StringInSlice([]string{"schema_registry_read", "schema_registry_write"}, false),
+		ValidateFunc: validation.StringInSlice(kafkaschemaregistry.PermissionTypeChoices(), false),
 		Description:  userconfig.Desc("Kafka Schema Registry permission to grant.").ForceNew().PossibleValuesString(kafkaschemaregistry.PermissionTypeChoices()...).Build(),
 	},
 	"resource": {

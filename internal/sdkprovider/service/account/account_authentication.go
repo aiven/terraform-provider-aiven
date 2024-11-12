@@ -29,7 +29,7 @@ var aivenAccountAuthenticationSchema = map[string]*schema.Schema{
 	"type": {
 		Type:         schema.TypeString,
 		Required:     true,
-		ValidateFunc: validation.StringInSlice([]string{"internal", "saml"}, false),
+		ValidateFunc: validation.StringInSlice(accountauthentication.AuthenticationMethodTypeChoices(), false),
 		Description:  userconfig.Desc("The account authentication type.").PossibleValuesString(accountauthentication.AuthenticationMethodTypeChoices()...).Build(),
 	},
 	"enabled": {

@@ -27,9 +27,9 @@ var aivenConnectionPoolSchema = map[string]*schema.Schema{
 	"pool_mode": {
 		Type:         schema.TypeString,
 		Optional:     true,
-		Default:      "transaction",
-		ValidateFunc: validation.StringInSlice([]string{"session", "transaction", "statement"}, false),
-		Description:  userconfig.Desc("The [operational mode](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling#pooling-modes).").DefaultValue("transaction").PossibleValuesString(service.PoolModeTypeChoices()...).Build(),
+		Default:      service.PoolModeTypeTransaction,
+		ValidateFunc: validation.StringInSlice(service.PoolModeTypeChoices(), false),
+		Description:  userconfig.Desc("The [operational mode](https://aiven.io/docs/products/postgresql/concepts/pg-connection-pooling#pooling-modes).").DefaultValue(service.PoolModeTypeTransaction).PossibleValuesString(service.PoolModeTypeChoices()...).Build(),
 	},
 	"pool_name": {
 		Type:        schema.TypeString,
