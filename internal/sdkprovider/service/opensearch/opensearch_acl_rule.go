@@ -33,7 +33,7 @@ var aivenOpenSearchACLRuleSchema = map[string]*schema.Schema{
 	"permission": {
 		Type:         schema.TypeString,
 		Required:     true,
-		ValidateFunc: validation.StringInSlice([]string{"deny", "admin", "read", "readwrite", "write"}, false),
+		ValidateFunc: validation.StringInSlice(opensearch.PermissionTypeChoices(), false),
 		Description:  userconfig.Desc("The permissions for this ACL entry").PossibleValuesString(opensearch.PermissionTypeChoices()...).Build(),
 	},
 }

@@ -36,7 +36,7 @@ var aivenMySQLUserSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		ValidateFunc:     validation.StringInSlice([]string{"caching_sha2_password", "mysql_native_password"}, false),
+		ValidateFunc:     validation.StringInSlice(service.AuthenticationTypeChoices(), false),
 		Description:      userconfig.Desc("Authentication details.").PossibleValuesString(service.AuthenticationTypeChoices()...).Build(),
 	},
 

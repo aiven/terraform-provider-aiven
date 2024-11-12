@@ -21,7 +21,7 @@ var aivenKafkaACLSchema = map[string]*schema.Schema{
 		Type:         schema.TypeString,
 		Required:     true,
 		ForceNew:     true,
-		ValidateFunc: validation.StringInSlice([]string{"admin", "read", "readwrite", "write"}, false),
+		ValidateFunc: validation.StringInSlice(kafka.PermissionTypeChoices(), false),
 		Description:  userconfig.Desc("Permissions to grant.").ForceNew().PossibleValuesString(kafka.PermissionTypeChoices()...).Build(),
 	},
 	"topic": {
