@@ -27,14 +27,15 @@ jobs:
       - id: date
         run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
       - id: changes
-        run: echo "changes=$(git diff CHANGELOG.md | awk '/^\+[ -]/ {print substr($0, 2)}')" >> $GITHUB_OUTPUT
+        run: git diff CHANGELOG.md | awk '/^\+[ -]/ {print substr($0, 2)}' > changes.out
       - id: create_pr
         uses: peter-evans/create-pull-request@v7
         with:
           author: GitHub <noreply@github.com>
-          body: ${{ steps.changes.outputs.changes }}
+          body-path: changes.out
           branch: update/${{ steps.date.outputs.date }}-${{ github.run_id }}
           commit-message: "chore(update): update schemas (${{ steps.date.outputs.date }})"
+          title: "chore(update): update schemas (${{ steps.date.outputs.date }})"
           labels: |
             dependencies
       - name: Close previous update PRs
