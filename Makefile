@@ -174,21 +174,25 @@ sweep-check:
 
 generate: gen-go docs
 
-OLD_SCHEMA ?= .oldSchema.json
-CHANGELOG := PROVIDER_AIVEN_ENABLE_BETA=1 go run ./changelog/...
 gen-go:
-	$(CHANGELOG) -save -schema=$(OLD_SCHEMA)
 	go generate ./...;
 	$(MAKE) fmt-imports
-	$(CHANGELOG) -diff -schema=$(OLD_SCHEMA) -changelog=CHANGELOG.md
-	rm $(OLD_SCHEMA)
-
 
 docs: $(TFPLUGINDOCS)
 	rm -f docs/.DS_Store
 	PROVIDER_AIVEN_ENABLE_BETA=1 $(TFPLUGINDOCS) generate
 	rm -f docs/data-sources/influxdb*.md
 	rm -f docs/resources/influxdb*.md
+
+OLD_SCHEMA ?= .oldSchema.json
+CHANGELOG := PROVIDER_AIVEN_ENABLE_BETA=1 go run ./changelog/...
+schemas-update:
+	$(CHANGELOG) -save -schema=$(OLD_SCHEMA)
+	go get github.com/aiven/go-client-codegen@latest github.com/aiven/go-api-schemas@latest
+	go mod tidy
+	$(MAKE) gen-go
+	$(CHANGELOG) -diff -schema=$(OLD_SCHEMA) -changelog=CHANGELOG.md
+	rm $(OLD_SCHEMA)
 
 #################################################
 # CI
