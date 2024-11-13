@@ -118,22 +118,36 @@ func influxdbUserConfig() *schema.Schema {
 			},
 			"private_access": {
 				Description: "Allow access to selected service ports from private networks",
-				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"influxdb": {
-					Description: "Allow clients to connect to influxdb with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
-					Optional:    true,
-					Type:        schema.TypeBool,
-				}}},
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"influxdb": {
+						Description: "Allow clients to connect to influxdb with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"user_backup": {
+						Description: "Allow clients to connect to user_backup with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+				}},
 				MaxItems: 1,
 				Optional: true,
 				Type:     schema.TypeList,
 			},
 			"privatelink_access": {
 				Description: "Allow access to selected service components through Privatelink",
-				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"influxdb": {
-					Description: "Enable influxdb.",
-					Optional:    true,
-					Type:        schema.TypeBool,
-				}}},
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"influxdb": {
+						Description: "Enable influxdb.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"user_backup": {
+						Description: "Enable user_backup.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+				}},
 				MaxItems: 1,
 				Optional: true,
 				Type:     schema.TypeList,
@@ -146,11 +160,18 @@ func influxdbUserConfig() *schema.Schema {
 			},
 			"public_access": {
 				Description: "Allow access to selected service ports from the public Internet",
-				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"influxdb": {
-					Description: "Allow clients to connect to influxdb from the public internet for service nodes that are in a project VPC or another type of private network.",
-					Optional:    true,
-					Type:        schema.TypeBool,
-				}}},
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"influxdb": {
+						Description: "Allow clients to connect to influxdb from the public internet for service nodes that are in a project VPC or another type of private network.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"user_backup": {
+						Description: "Allow clients to connect to user_backup from the public internet for service nodes that are in a project VPC or another type of private network.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+				}},
 				MaxItems: 1,
 				Optional: true,
 				Type:     schema.TypeList,
