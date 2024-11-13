@@ -139,12 +139,14 @@ func softWrap(text string, size int) []string {
 
 	j := 0
 	result := make([]string, 1)
-	for i, w := range strings.Split(text, " ") {
+	words := strings.Split(text, " ")
+	for i, w := range words {
 		w = strings.ReplaceAll(w, "⍽", " ")
 		switch {
 		case i == 0:
 			result[j] += w
-		case len(result[j])+len(w) < size:
+		case len(result[j])+len(w) < size || i == len(words)-1:
+			// When the size is not reached, or it's the last word
 			result[j] += " " + w
 		default:
 			result = append(result, w) // nolint: makezero // By some reason linter doesn't understand it has length 1

@@ -22,15 +22,25 @@ func removeEnum(text string) string {
 	return reEnum.ReplaceAllString(text, "")
 }
 
-var reCode = regexp.MustCompile("`[^`]+`")
+var reCode = regexp.MustCompile("`([^`]+)`")
 
 func findEnums(description string) []string {
 	parts := strings.Split(description, userconfig.PossibleValuesPrefix)
 	if len(parts) != 2 {
 		return nil
 	}
+	values := reCode.FindAllString(parts[1], -1)
+	if len(values) == 0 {
+		return nil
+	}
 
-	return reCode.FindAllString(parts[1], -1)
+	// Removes ` from the beginning and end of the string
+	result := make([]string, len(values))
+	for i, v := range values {
+		result[i] = v[1 : len(v)-1]
+	}
+
+	return result
 }
 
 // strValue formats Go value into humanreadable string

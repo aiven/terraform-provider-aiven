@@ -45,3 +45,12 @@ updates:
         applies-to: security-updates
         patterns:
           - "*"
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    ignore:
+      # These libs are updated by a Makefile command
+      - dependency-name: github.com/aiven/go-client-codegen
+      - dependency-name: github.com/aiven/go-api-schemas
