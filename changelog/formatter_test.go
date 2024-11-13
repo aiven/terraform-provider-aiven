@@ -104,10 +104,9 @@ func TestLineWrapping(t *testing.T) {
 		"to map external service",
 		"user with internal aiven",
 		"user with",
-		"external_identity data",
-		"source",
+		"external_identity data source",
 	}
-	expectPoint := "- Add capability\n  to map external service\n  user with internal aiven\n  user with\n  external_identity data\n  source"
+	expectPoint := "- Add capability\n  to map external service\n  user with internal aiven\n  user with\n  external_identity data source"
 	assert.Equal(t, expectList, softWrap(input, 25))
 	assert.Equal(t, expectPoint, addBullet("- ", expectList))
 }
