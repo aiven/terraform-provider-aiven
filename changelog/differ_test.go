@@ -17,7 +17,7 @@ func TestCompare(t *testing.T) {
 	}{
 		{
 			name:   "change enums",
-			expect: "Change `foo` resource field `bar`: enum ~~`bar`, `baz`~~ -> `foo`, `baz`",
+			expect: "Change `foo` resource field `bar`: add `foo`, remove `bar`",
 			kind:   ResourceRootType,
 			old: &Item{
 				Type:        schema.TypeString,
@@ -77,7 +77,7 @@ func TestCompare(t *testing.T) {
 		},
 		{
 			name:   "change type",
-			expect: "Change `foo` resource field `bar`: type ~~`list`~~ -> `set`",
+			expect: "Change `foo` resource field `bar`: type ~~`list`~~ → `set`",
 			kind:   ResourceRootType,
 			old: &Item{
 				Type: schema.TypeList,
@@ -118,4 +118,38 @@ func TestSerializeDiff(t *testing.T) {
 
 	actual := serializeDiff(list)
 	assert.Empty(t, cmp.Diff(expect, actual))
+}
+
+func TestCmpList(t *testing.T) {
+	cases := []struct {
+		was, have []string
+		expect    string
+	}{
+		{
+			was:    []string{"a", "b", "c"},
+			have:   []string{"a", "b", "c"},
+			expect: "",
+		},
+		{
+			was:    []string{"a", "b", "c"},
+			have:   []string{"a", "b", "c", "d", "f"},
+			expect: "add `d`, `f`",
+		},
+		{
+			was:    []string{"a", "b", "c"},
+			have:   []string{"a", "c"},
+			expect: "remove `b`",
+		},
+		{
+			was:    []string{"a", "b", "c", "f"},
+			have:   []string{"a", "b", "c", "d"},
+			expect: "add `d`, remove `f`",
+		},
+	}
+
+	for _, opt := range cases {
+		t.Run(opt.expect, func(t *testing.T) {
+			assert.Equal(t, opt.expect, cmpList(opt.was, opt.have))
+		})
+	}
 }

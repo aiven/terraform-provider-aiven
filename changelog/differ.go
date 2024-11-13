@@ -64,9 +64,11 @@ func diffItems(resourceType RootType, was, have *Item) (*Diff, error) {
 			if !haveValue.(bool) {
 				entry = "no longer beta"
 			}
+		case "enum":
+			entry = cmpList(wasValue.([]string), haveValue.([]string))
 		default:
 			// The rest of the fields will have diff-like entry
-			entry = fmt.Sprintf("%s ~~`%s`~~ -> `%s`", k, strValue(wasValue), strValue(haveValue))
+			entry = fmt.Sprintf("%s ~~`%s`~~ → `%s`", k, strValue(wasValue), strValue(haveValue))
 
 			// Fixes formatting issues
 			entry = strings.ReplaceAll(entry, "``", "`")
@@ -182,4 +184,46 @@ func serializeDiff(list []*Diff) []string {
 		strs[i] = r.String()
 	}
 	return strs
+}
+
+func cmpList[T any](was, have []T) string {
+	const (
+		remove int = 1 << iota
+		add
+	)
+
+	seen := make(map[string]int)
+	for _, v := range was {
+		seen[fmt.Sprintf("`%v`", v)] = remove
+	}
+
+	for _, v := range have {
+		seen[fmt.Sprintf("`%v`", v)] |= add
+	}
+
+	var added, removed []string
+	for k, v := range seen {
+		switch v {
+		case add:
+			added = append(added, k)
+		case remove:
+			removed = append(removed, k)
+		}
+	}
+
+	result := make([]string, 0)
+	if s := joinSorted(added); s != "" {
+		result = append(result, "add "+s)
+	}
+
+	if s := joinSorted(removed); s != "" {
+		result = append(result, "remove "+s)
+	}
+
+	return joinSorted(result)
+}
+
+func joinSorted(args []string) string {
+	sort.Strings(args)
+	return strings.Join(args, ", ")
 }
