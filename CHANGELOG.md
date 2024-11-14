@@ -26,6 +26,66 @@ nav_order: 1
   aliases alongside their associated indexes
 - Change `aiven_cassandra` resource field `cassandra_user_config.additional_backup_regions`: remove deprecation
 - Change `aiven_cassandra` datasource field `cassandra_user_config.additional_backup_regions`: remove deprecation
+- Add `aiven_influxdb` resource field `influxdb_user_config.private_access.user_backup`: Allow clients to connect
+  to user_backup with a DNS name that always resolves to the service's private IP addresses
+- Add `aiven_influxdb` resource field `influxdb_user_config.privatelink_access.user_backup`: Enable user_backup.
+- Add `aiven_influxdb` resource field `influxdb_user_config.public_access.user_backup`: Allow clients to connect
+  to user_backup from the public internet for service nodes that are in a project VPC or another type of private network.
+- Add `aiven_thanos` resource field `thanos_user_config.receiver_ingesting`: CommonReceive.
+- Add `aiven_thanos` resource field `thanos_user_config.receiver_routing`: ThanosReceiveRouting.
+- Add `aiven_thanos` resource field `thanos_user_config.ruler`: ThanosRuler.
+- Add `aiven_thanos` resource field `thanos_user_config.store`: ThanosStore.
+- Add `aiven_influxdb` datasource field `influxdb_user_config.private_access.user_backup`: Allow clients to connect
+  to user_backup with a DNS name that always resolves to the service's private IP addresses
+- Add `aiven_influxdb` datasource field `influxdb_user_config.privatelink_access.user_backup`: Enable user_backup.
+- Add `aiven_influxdb` datasource field `influxdb_user_config.public_access.user_backup`: Allow clients to connect
+  to user_backup from the public internet for service nodes that are in a project VPC or another type of private network.
+- Add `aiven_thanos` datasource field `thanos_user_config.receiver_ingesting`: CommonReceive.
+- Add `aiven_thanos` datasource field `thanos_user_config.receiver_routing`: ThanosReceiveRouting.
+- Add `aiven_thanos` datasource field `thanos_user_config.ruler`: ThanosRuler.
+- Add `aiven_thanos` datasource field `thanos_user_config.store`: ThanosStore.
+- Change `aiven_account_team_project` resource field `team_type`: add `organization:app_users:write`,
+  `organization:audit_logs:read`, `organization:billing:read`, `organization:billing:write`, `organization:domains:write`,
+  `organization:groups:write`, `organization:idps:write`, `organization:network:read`, `organization:network:write`,
+  `organization:permissions:read`, `organization:permissions:write`, `organization:projects:read`,
+  `organization:projects:write`, `organization:users:write`, `project:services:write`, `role:organization:admin`,
+  `role:services:maintenance`, `role:services:recover`, `service:data:write`, `service:secrets:read`,
+  `service:users:write`, remove `services:maintenance`
+- Change `aiven_opensearch` resource field `opensearch_user_config.azure_migration.indices`: optional ~~`true`~~ → `false`
+- Change `aiven_opensearch` resource field `opensearch_user_config.gcs_migration.indices`: optional ~~`true`~~ → `false`
+- Change `aiven_opensearch` resource field `opensearch_user_config.s3_migration.indices`: optional ~~`true`~~ → `false`
+- Change `aiven_organization_permission` resource field `permissions.permissions`: add `organization:app_users:write`,
+  `organization:audit_logs:read`, `organization:billing:read`, `organization:billing:write`, `organization:domains:write`,
+  `organization:groups:write`, `organization:idps:write`, `organization:network:read`, `organization:network:write`,
+  `organization:permissions:read`, `organization:permissions:write`, `organization:projects:read`,
+  `organization:projects:write`, `organization:users:write`, `project:services:write`, `role:organization:admin`,
+  `role:services:maintenance`, `role:services:recover`, `service:data:write`, `service:secrets:read`,
+  `service:users:write`, remove `services:maintenance`
+- Change `aiven_organization_permission` resource field `resource_type`: add `organization_unit`, `organization`
+- Change `aiven_project_user` resource field `member_type`: add `organization:app_users:write`,
+  `organization:audit_logs:read`, `organization:billing:read`, `organization:billing:write`, `organization:domains:write`,
+  `organization:groups:write`, `organization:idps:write`, `organization:network:read`, `organization:network:write`,
+  `organization:permissions:read`, `organization:permissions:write`, `organization:projects:read`,
+  `organization:projects:write`, `organization:users:write`, `project:services:write`, `role:organization:admin`,
+  `role:services:maintenance`, `role:services:recover`, `service:data:write`, `service:secrets:read`,
+  `service:users:write`, remove `services:maintenance`
+- Change `aiven_account_team_project` datasource field `team_type`: add `organization:app_users:write`,
+  `organization:audit_logs:read`, `organization:billing:read`, `organization:billing:write`, `organization:domains:write`,
+  `organization:groups:write`, `organization:idps:write`, `organization:network:read`, `organization:network:write`,
+  `organization:permissions:read`, `organization:permissions:write`, `organization:projects:read`,
+  `organization:projects:write`, `organization:users:write`, `project:services:write`, `role:organization:admin`,
+  `role:services:maintenance`, `role:services:recover`, `service:data:write`, `service:secrets:read`,
+  `service:users:write`, remove `services:maintenance`
+- Change `aiven_opensearch` datasource field `opensearch_user_config.azure_migration.indices`: optional ~~`true`~~ → `false`
+- Change `aiven_opensearch` datasource field `opensearch_user_config.gcs_migration.indices`: optional ~~`true`~~ → `false`
+- Change `aiven_opensearch` datasource field `opensearch_user_config.s3_migration.indices`: optional ~~`true`~~ → `false`
+- Change `aiven_project_user` datasource field `member_type`: add `organization:app_users:write`,
+  `organization:audit_logs:read`, `organization:billing:read`, `organization:billing:write`, `organization:domains:write`,
+  `organization:groups:write`, `organization:idps:write`, `organization:network:read`, `organization:network:write`,
+  `organization:permissions:read`, `organization:permissions:write`, `organization:projects:read`,
+  `organization:projects:write`, `organization:users:write`, `project:services:write`, `role:organization:admin`,
+  `role:services:maintenance`, `role:services:recover`, `service:data:write`, `service:secrets:read`,
+  `service:users:write`, remove `services:maintenance`
 
 ## [4.28.0] - 2024-10-21
 

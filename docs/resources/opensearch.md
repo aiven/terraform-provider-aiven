@@ -102,7 +102,7 @@ Optional:
 - `additional_backup_regions` (List of String) Additional Cloud Regions for Backup Replication.
 - `azure_migration` (Block List, Max: 1) Azure migration settings (see [below for nested schema](#nestedblock--opensearch_user_config--azure_migration))
 - `custom_domain` (String) Serve the web frontend using a custom CNAME pointing to the Aiven DNS name. Example: `grafana.example.org`.
-- `disable_replication_factor_adjustment` (Boolean) Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can no longer be activated.
+- `disable_replication_factor_adjustment` (Boolean) Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can not be activated unless specifically allowed for the project.
 - `gcs_migration` (Block List, Max: 1) Google Cloud Storage migration settings (see [below for nested schema](#nestedblock--opensearch_user_config--gcs_migration))
 - `index_patterns` (Block List, Max: 512) Index patterns (see [below for nested schema](#nestedblock--opensearch_user_config--index_patterns))
 - `index_rollup` (Block List, Max: 1) Index rollup settings (see [below for nested schema](#nestedblock--opensearch_user_config--index_rollup))
@@ -135,6 +135,7 @@ Required:
 - `account` (String) Azure account name.
 - `base_path` (String) The path to the repository data within its container. The value of this setting should not start or end with a /.
 - `container` (String) Azure container name.
+- `indices` (String) A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. Example: `metrics*,logs*,data-20240823`.
 - `snapshot_name` (String) The snapshot name to restore from.
 
 Optional:
@@ -143,7 +144,6 @@ Optional:
 - `compress` (Boolean) When set to true metadata files are stored in compressed format.
 - `endpoint_suffix` (String) Defines the DNS suffix for Azure Storage endpoints.
 - `include_aliases` (Boolean) Whether to restore aliases alongside their associated indexes. Default is true.
-- `indices` (String) A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. By default, a restore operation includes all data streams and indices in the snapshot. If this argument is provided, the restore operation only includes the data streams and indices that you specify. Example: `metrics*,logs*,data-20240823`.
 - `key` (String, Sensitive) Azure account secret key. One of key or sas_token should be specified.
 - `restore_global_state` (Boolean) If true, restore the cluster state. Defaults to false.
 - `sas_token` (String, Sensitive) A shared access signatures (SAS) token. One of key or sas_token should be specified.
@@ -157,6 +157,7 @@ Required:
 - `base_path` (String) The path to the repository data within its container. The value of this setting should not start or end with a /.
 - `bucket` (String) The path to the repository data within its container.
 - `credentials` (String, Sensitive) Google Cloud Storage credentials file content.
+- `indices` (String) A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. Example: `metrics*,logs*,data-20240823`.
 - `snapshot_name` (String) The snapshot name to restore from.
 
 Optional:
@@ -164,7 +165,6 @@ Optional:
 - `chunk_size` (String) Big files can be broken down into chunks during snapshotting if needed. Should be the same as for the 3rd party repository.
 - `compress` (Boolean) When set to true metadata files are stored in compressed format.
 - `include_aliases` (Boolean) Whether to restore aliases alongside their associated indexes. Default is true.
-- `indices` (String) A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. By default, a restore operation includes all data streams and indices in the snapshot. If this argument is provided, the restore operation only includes the data streams and indices that you specify. Example: `metrics*,logs*,data-20240823`.
 - `restore_global_state` (Boolean) If true, restore the cluster state. Defaults to false.
 
 
@@ -491,6 +491,7 @@ Required:
 - `access_key` (String) AWS Access key.
 - `base_path` (String) The path to the repository data within its container. The value of this setting should not start or end with a /.
 - `bucket` (String) S3 bucket name.
+- `indices` (String) A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. Example: `metrics*,logs*,data-20240823`.
 - `region` (String) S3 region.
 - `secret_key` (String, Sensitive) AWS secret key.
 - `snapshot_name` (String) The snapshot name to restore from.
@@ -501,7 +502,6 @@ Optional:
 - `compress` (Boolean) When set to true metadata files are stored in compressed format.
 - `endpoint` (String) The S3 service endpoint to connect to. If you are using an S3-compatible service then you should set this to the service’s endpoint.
 - `include_aliases` (Boolean) Whether to restore aliases alongside their associated indexes. Default is true.
-- `indices` (String) A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. By default, a restore operation includes all data streams and indices in the snapshot. If this argument is provided, the restore operation only includes the data streams and indices that you specify. Example: `metrics*,logs*,data-20240823`.
 - `restore_global_state` (Boolean) If true, restore the cluster state. Defaults to false.
 - `server_side_encryption` (Boolean) When set to true files are encrypted on server side.
 

@@ -47,7 +47,7 @@ resource "aiven_organization_permission" "example_permissions" {
 - `organization_id` (String) Organization ID.
 - `permissions` (Block Set, Min: 1) Permissions to grant to principals. (see [below for nested schema](#nestedblock--permissions))
 - `resource_id` (String) Resource ID.
-- `resource_type` (String) Resource type. The possible values are `project`.
+- `resource_type` (String) Resource type. The possible values are `project`, `organization` and `organization_unit`.
 
 ### Optional
 
@@ -62,7 +62,7 @@ resource "aiven_organization_permission" "example_permissions" {
 
 Required:
 
-- `permissions` (Set of String) List of [roles and permissions](https://aiven.io/docs/platform/concepts/permissions) to grant. The possible values are `admin`, `developer`, `operator`, `project:audit_logs:read`, `project:integrations:read`, `project:integrations:write`, `project:networking:read`, `project:networking:write`, `project:permissions:read`, `project:services:read`, `read_only`, `service:configuration:write`, `service:logs:read` and `services:maintenance`.
+- `permissions` (Set of String) List of [roles and permissions](https://aiven.io/docs/platform/concepts/permissions) to grant. The possible values are `admin`, `developer`, `operator`, `organization:app_users:write`, `organization:audit_logs:read`, `organization:billing:read`, `organization:billing:write`, `organization:domains:write`, `organization:groups:write`, `organization:idps:write`, `organization:network:read`, `organization:network:write`, `organization:permissions:read`, `organization:permissions:write`, `organization:projects:read`, `organization:projects:write`, `organization:users:write`, `project:audit_logs:read`, `project:integrations:read`, `project:integrations:write`, `project:networking:read`, `project:networking:write`, `project:permissions:read`, `project:services:read`, `project:services:write`, `read_only`, `role:organization:admin`, `role:services:maintenance`, `role:services:recover`, `service:configuration:write`, `service:data:write`, `service:logs:read`, `service:secrets:read` and `service:users:write`.
 - `principal_id` (String) ID of the user or group to grant permissions to. Only active users who have accepted an [invite](https://aiven.io/docs/platform/howto/manage-org-users) to join the organization can be granted permissions.
 - `principal_type` (String) The type of principal. The possible values are `user` and `user_group`.
 
