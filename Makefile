@@ -190,7 +190,7 @@ schemas-update:
 	$(CHANGELOG) -save -schema=$(OLD_SCHEMA)
 	go get github.com/aiven/go-client-codegen@latest github.com/aiven/go-api-schemas@latest
 	go mod tidy
-	$(MAKE) gen-go
+	$(MAKE) generate
 	$(CHANGELOG) -diff -schema=$(OLD_SCHEMA) -changelog=CHANGELOG.md
 	rm $(OLD_SCHEMA)
 

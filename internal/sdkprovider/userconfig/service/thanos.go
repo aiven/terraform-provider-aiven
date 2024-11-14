@@ -166,6 +166,21 @@ func thanosUserConfig() *schema.Schema {
 				Optional: true,
 				Type:     schema.TypeList,
 			},
+			"receiver_ingesting": {
+				Description: "CommonReceive.",
+				Optional:    true,
+				Type:        schema.TypeMap,
+			},
+			"receiver_routing": {
+				Description: "ThanosReceiveRouting.",
+				Optional:    true,
+				Type:        schema.TypeMap,
+			},
+			"ruler": {
+				Description: "ThanosRuler.",
+				Optional:    true,
+				Type:        schema.TypeMap,
+			},
 			"service_log": {
 				Description: "Store logs for the service so that they are available in the HTTP API and console.",
 				Optional:    true,
@@ -175,6 +190,11 @@ func thanosUserConfig() *schema.Schema {
 				Description: "Use static public IP addresses.",
 				Optional:    true,
 				Type:        schema.TypeBool,
+			},
+			"store": {
+				Description: "ThanosStore.",
+				Optional:    true,
+				Type:        schema.TypeMap,
 			},
 		}},
 		MaxItems: 1,

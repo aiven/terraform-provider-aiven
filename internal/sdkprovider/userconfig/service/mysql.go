@@ -247,7 +247,7 @@ func mysqlUserConfig() *schema.Schema {
 						ValidateFunc: validation.StringInSlice([]string{"INSIGHTS", "INSIGHTS,TABLE", "NONE", "TABLE"}, false),
 					},
 					"long_query_time": {
-						Description: "The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Example: `10`.",
+						Description: "The slow_query_logs work as SQL statements that take more than long_query_time seconds to execute. Example: `10.0`.",
 						Optional:    true,
 						Type:        schema.TypeFloat,
 					},

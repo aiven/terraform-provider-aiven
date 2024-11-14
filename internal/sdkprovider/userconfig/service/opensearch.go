@@ -63,8 +63,8 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"indices": {
-						Description: "A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. By default, a restore operation includes all data streams and indices in the snapshot. If this argument is provided, the restore operation only includes the data streams and indices that you specify. Example: `metrics*,logs*,data-20240823`.",
-						Optional:    true,
+						Description: "A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. Example: `metrics*,logs*,data-20240823`.",
+						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"key": {
@@ -100,7 +100,7 @@ func opensearchUserConfig() *schema.Schema {
 				Type:        schema.TypeString,
 			},
 			"disable_replication_factor_adjustment": {
-				Description: "Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can no longer be activated.",
+				Description: "Disable automatic replication factor adjustment for multi-node services. By default, Aiven ensures all indexes are replicated at least to two nodes. Note: Due to potential data loss in case of losing a service node, this setting can not be activated unless specifically allowed for the project.",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
@@ -139,8 +139,8 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"indices": {
-						Description: "A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. By default, a restore operation includes all data streams and indices in the snapshot. If this argument is provided, the restore operation only includes the data streams and indices that you specify. Example: `metrics*,logs*,data-20240823`.",
-						Optional:    true,
+						Description: "A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. Example: `metrics*,logs*,data-20240823`.",
+						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"restore_global_state": {
@@ -1035,8 +1035,8 @@ func opensearchUserConfig() *schema.Schema {
 						Type:        schema.TypeBool,
 					},
 					"indices": {
-						Description: "A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. By default, a restore operation includes all data streams and indices in the snapshot. If this argument is provided, the restore operation only includes the data streams and indices that you specify. Example: `metrics*,logs*,data-20240823`.",
-						Optional:    true,
+						Description: "A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. Example: `metrics*,logs*,data-20240823`.",
+						Required:    true,
 						Type:        schema.TypeString,
 					},
 					"region": {
