@@ -9,7 +9,7 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+## [4.29.0] - 2024-11-14
 
 - Add support for `autoscaler` service integration
 - Add `aiven_opensearch` resource field `opensearch_user_config.azure_migration.include_aliases`: Whether to restore
