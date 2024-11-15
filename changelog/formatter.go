@@ -20,7 +20,7 @@ type changelogItem struct {
 var (
 	reVersion       = regexp.MustCompile(`\w+\.\w+\.\w+`)
 	reDate          = regexp.MustCompile(`\w{4}-\w{2}-\w{2}`)
-	reSplitEntries  = regexp.MustCompile(`(?m)^(\b[^a-z]| *- +)`) // A line that begins with "-" or a non-letter
+	reSplitEntries  = regexp.MustCompile(`(?m)^(\b[^a-z]| *- +)`) // A line that begins with "-" or a non-lowercase letter
 	reBulletLevel   = regexp.MustCompile(`^ *- +`)
 	reSpaces        = regexp.MustCompile(`\s+`)
 	reTrailingSpace = regexp.MustCompile(`\s+$`)
@@ -30,7 +30,7 @@ var (
 // Soft-wraps lines to the given lineLength
 // When reformat is true, reformats the whole given content
 func updateChangelog(content string, lineLength int, reformat bool, addLines ...string) (string, error) {
-	if addLines == nil && !reformat {
+	if len(addLines) == 0 && !reformat {
 		return content, nil
 	}
 
@@ -41,13 +41,13 @@ func updateChangelog(content string, lineLength int, reformat bool, addLines ...
 	if len(items) != 0 && items[0].Version == draftVersion {
 		// Appends to the current draft
 		items[0].Content = fmt.Sprintf("%s\n%s", items[0].Content, addText)
-	} else {
+	} else if addText != "" {
 		// The First item is not the draft, so we need to add a new item
-		items = append(items, &changelogItem{
+		items = append([]*changelogItem{{
 			Version: draftVersion,
 			Date:    draftDate,
-			Content: content,
-		})
+			Content: addText,
+		}}, items...)
 	}
 
 	result := lines[:start]
@@ -65,8 +65,7 @@ func updateChangelog(content string, lineLength int, reformat bool, addLines ...
 }
 
 func parseItems(lines []string) ([]*changelogItem, int, int) {
-	start := max(0, len(lines)-1)
-	end := start
+	var start, end int
 	var item *changelogItem
 	items := make([]*changelogItem, 0)
 	for i, line := range lines {
@@ -93,7 +92,6 @@ func parseItems(lines []string) ([]*changelogItem, int, int) {
 }
 
 func formatContent(content string, lineLength int) string {
-
 	// Golang doesn't support regexp "lookarounds", so we need to split the content,
 	// and then join it to keep what we otherwise would be just ignored by negative lookbehind
 	seps := reSplitEntries.FindAllStringSubmatchIndex(content, -1)
@@ -125,6 +123,10 @@ func formatContent(content string, lineLength int) string {
 			seen[point] = true
 			list = append(list, point)
 		}
+	}
+
+	if len(list) == 0 {
+		return content
 	}
 
 	return strings.Join(list, "\n")

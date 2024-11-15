@@ -186,13 +186,18 @@ docs: $(TFPLUGINDOCS)
 
 OLD_SCHEMA ?= .oldSchema.json
 CHANGELOG := PROVIDER_AIVEN_ENABLE_BETA=1 go run ./changelog/...
-schemas-update:
+dump-schemas:
 	$(CHANGELOG) -save -schema=$(OLD_SCHEMA)
-	go get github.com/aiven/go-client-codegen@latest github.com/aiven/go-api-schemas@latest
-	go mod tidy
-	$(MAKE) generate
+
+diff-schemas:
 	$(CHANGELOG) -diff -schema=$(OLD_SCHEMA) -changelog=CHANGELOG.md
 	rm $(OLD_SCHEMA)
+
+load-schemas:
+	go get github.com/aiven/go-client-codegen@latest github.com/aiven/go-api-schemas@latest
+	go mod tidy
+
+update-schemas: dump-schemas load-schemas generate diff-schemas
 
 #################################################
 # CI
