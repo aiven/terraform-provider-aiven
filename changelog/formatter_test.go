@@ -91,10 +91,72 @@ const testSampleExpected = `# Changelog
   for all user config options.
 `
 
-func TestFormatChangelog(t *testing.T) {
+func TestUpdateChangelog(t *testing.T) {
 	result, err := updateChangelog(testSample, 60, true, "foo", "bar", "Use TypeSet for ip_filter_object")
 	require.NoError(t, err)
 	assert.Empty(t, cmp.Diff(testSampleExpected, result))
+}
+
+func TestUpdateChangelog_nothing_to_change(t *testing.T) {
+	sample := `---
+title: Changelog
+parent: README
+nav_order: 1
+---
+
+# Changelog
+
+<!-- Always keep the following header in place: -->
+<!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
+
+## [4.29.0] - 2024-11-14
+
+- Add support for autoscaler service integration
+`
+	result, err := updateChangelog(sample, 60, false)
+	require.NoError(t, err)
+	assert.Empty(t, cmp.Diff(sample, result))
+}
+
+func TestUpdateChangelog_empty_changelog(t *testing.T) {
+	sample := `---
+title: Changelog
+parent: README
+nav_order: 1
+---
+
+# Changelog
+
+<!-- Always keep the following header in place: -->
+<!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
+
+## [4.29.0] - 2024-11-14
+
+- Add support for autoscaler service integration
+`
+	expect := `---
+title: Changelog
+parent: README
+nav_order: 1
+---
+
+# Changelog
+
+<!-- Always keep the following header in place: -->
+<!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
+
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Foo
+- Bar
+
+## [4.29.0] - 2024-11-14
+
+- Add support for autoscaler service integration
+`
+	result, err := updateChangelog(sample, 60, false, "Foo", "Bar")
+	require.NoError(t, err)
+	assert.Empty(t, cmp.Diff(expect, result))
 }
 
 func TestLineWrapping(t *testing.T) {
