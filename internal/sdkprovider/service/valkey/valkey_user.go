@@ -125,7 +125,7 @@ func resourceValkeyUserCreate(ctx context.Context, d *schema.ResourceData, clien
 
 	if _, ok := d.GetOk("password"); ok {
 		var req = service.ServiceUserCredentialsModifyIn{NewPassword: schemautil.OptionalStringPointer(d, "password"),
-			Operation: service.OperationTypeResetCredentials}
+			Operation: service.ServiceUserCredentialsModifyOperationTypeResetCredentials}
 		_, err := client.ServiceUserCredentialsModify(ctx, projectName, serviceName, username, &req)
 		if err != nil {
 			return err
