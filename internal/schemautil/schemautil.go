@@ -98,22 +98,22 @@ func CreateOnlyDiffSuppressFunc(_, _, _ string, d *schema.ResourceData) bool {
 
 // EmptyObjectDiffSuppressFunc suppresses a diff for service user configuration options when
 // fields are not set by the user but have default or previously defined values.
-func EmptyObjectDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+func EmptyObjectDiffSuppressFunc(k, oldValue, newValue string, d *schema.ResourceData) bool {
 	// When a map inside a list contains only default values without explicit values set by
 	// the user Terraform interprets the map as not being present and the array length being
 	// zero, resulting in bogus update that does nothing. Allow ignoring those.
-	if old == "1" && new == "0" && strings.HasSuffix(k, ".#") {
+	if oldValue == "1" && newValue == "0" && strings.HasSuffix(k, ".#") {
 		return true
 	}
 
 	// Ignore the field when it is not set to any value, but had a non-empty parameter before. This also accounts
 	// for the case when the field is not set to any value, but has a default value returned by the API.
-	if !d.HasChange(k) && (new == "" && old != "" || new == "0" && old != "0" || new == "false" && old == "true") {
+	if !d.HasChange(k) && (newValue == "" && oldValue != "" || newValue == "0" && oldValue != "0" || newValue == "false" && oldValue == "true") {
 		return true
 	}
 
 	// There is a bug in Terraform 0.11 which interprets "true" as "0" and "false" as "1"
-	if (new == "0" && old == "false") || (new == "1" && old == "true") {
+	if (newValue == "0" && oldValue == "false") || (newValue == "1" && oldValue == "true") {
 		return true
 	}
 
@@ -131,25 +131,25 @@ func EmptyObjectDiffSuppressFuncSkipArrays(s map[string]*schema.Schema) schema.S
 		}
 	}
 
-	return func(k, old, new string, d *schema.ResourceData) bool {
+	return func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 		for _, key := range skipKeys {
 			if strings.Contains(k, fmt.Sprintf(".%s.", key)) {
 				return false
 			}
 		}
 
-		return EmptyObjectDiffSuppressFunc(k, old, new, d)
+		return EmptyObjectDiffSuppressFunc(k, oldValue, newValue, d)
 	}
 }
 
 // EmptyObjectNoChangeDiffSuppressFunc it suppresses a diff if a field is empty but have not
 // been set before to any value
-func EmptyObjectNoChangeDiffSuppressFunc(k, _, new string, d *schema.ResourceData) bool {
+func EmptyObjectNoChangeDiffSuppressFunc(k, _, newValue string, d *schema.ResourceData) bool {
 	if d.HasChange(k) {
 		return false
 	}
 
-	if new == "" {
+	if newValue == "" {
 		return true
 	}
 
@@ -160,10 +160,10 @@ func EmptyObjectNoChangeDiffSuppressFunc(k, _, new string, d *schema.ResourceDat
 // the IP filter user config value has default. We don't want to force users to always
 // define explicit value just because of the Terraform restriction so suppress the
 // change from default to empty (which would be nonsensical operation anyway)
-func IPFilterArrayDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+func IPFilterArrayDiffSuppressFunc(k, oldValue, newValue string, d *schema.ResourceData) bool {
 	// TODO: Add support for ip_filter_object.
 
-	if old == "1" && new == "0" && strings.HasSuffix(k, ".ip_filter.#") {
+	if oldValue == "1" && newValue == "0" && strings.HasSuffix(k, ".ip_filter.#") {
 		if list, ok := d.Get(strings.TrimSuffix(k, ".#")).([]interface{}); ok {
 			if len(list) == 1 {
 				return list[0] == "0.0.0.0/0"
@@ -174,14 +174,14 @@ func IPFilterArrayDiffSuppressFunc(k, old, new string, d *schema.ResourceData) b
 	return false
 }
 
-func IPFilterValueDiffSuppressFunc(k, old, new string, _ *schema.ResourceData) bool {
+func IPFilterValueDiffSuppressFunc(k, oldValue, newValue string, _ *schema.ResourceData) bool {
 	// TODO: Add support for ip_filter_object.
 
-	return old == "0.0.0.0/0" && new == "" && strings.HasSuffix(k, ".ip_filter.0")
+	return oldValue == "0.0.0.0/0" && newValue == "" && strings.HasSuffix(k, ".ip_filter.0")
 }
 
-func TrimSpaceDiffSuppressFunc(_, old, new string, _ *schema.ResourceData) bool {
-	return strings.TrimSpace(old) == strings.TrimSpace(new)
+func TrimSpaceDiffSuppressFunc(_, oldValue, newValue string, _ *schema.ResourceData) bool {
+	return strings.TrimSpace(oldValue) == strings.TrimSpace(newValue)
 }
 
 // ValidateHumanByteSizeString is a ValidateFunc that ensures a string parses

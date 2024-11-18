@@ -69,23 +69,23 @@ var aivenKafkaSchemaSchema = map[string]*schema.Schema{
 		Type:         schema.TypeString,
 		Optional:     true,
 		ValidateFunc: validation.StringInSlice(kafkaschemaregistry.CompatibilityTypeChoices(), false),
-		DiffSuppressFunc: func(_, _, new string, _ *schema.ResourceData) bool {
+		DiffSuppressFunc: func(_, _, newValue string, _ *schema.ResourceData) bool {
 			// When a compatibility level is not set to any value and consequently is null (empty string).
 			// Allow ignoring those.
-			return new == ""
+			return newValue == ""
 		},
 		Description: userconfig.Desc("Kafka Schemas compatibility level.").PossibleValuesString(kafkaschemaregistry.CompatibilityTypeChoices()...).Build(),
 	},
 }
 
 // diffSuppressJSONObject checks logical equivalences in JSON Kafka Schema values
-func diffSuppressJSONObject(_, old, new string, _ *schema.ResourceData) bool {
+func diffSuppressJSONObject(_, oldValue, newValue string, _ *schema.ResourceData) bool {
 	var objOld, objNew interface{}
 
-	if err := json.Unmarshal([]byte(old), &objOld); err != nil {
+	if err := json.Unmarshal([]byte(oldValue), &objOld); err != nil {
 		return false
 	}
-	if err := json.Unmarshal([]byte(new), &objNew); err != nil {
+	if err := json.Unmarshal([]byte(newValue), &objNew); err != nil {
 		return false
 	}
 
@@ -93,9 +93,9 @@ func diffSuppressJSONObject(_, old, new string, _ *schema.ResourceData) bool {
 }
 
 // diffSuppressJSONObjectOrProtobufString checks logical equivalences in JSON or Protobuf Kafka Schema values.
-func diffSuppressJSONObjectOrProtobufString(k, old, new string, d *schema.ResourceData) bool {
-	if !diffSuppressJSONObject(k, old, new, d) {
-		return normalizeProtobufString(old) == normalizeProtobufString(new)
+func diffSuppressJSONObjectOrProtobufString(k, oldValue, newValue string, d *schema.ResourceData) bool {
+	if !diffSuppressJSONObject(k, oldValue, newValue, d) {
+		return normalizeProtobufString(oldValue) == normalizeProtobufString(newValue)
 	}
 
 	return true

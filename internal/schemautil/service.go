@@ -79,13 +79,13 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Defines where the cloud provider and region where the service is hosted in. This can be changed freely after service is created. Changing the value will trigger a potentially lengthy migration process for the service. Format is cloud provider name (`aws`, `azure`, `do` `google`, `upcloud`, etc.), dash, and the cloud provider specific region name. These are documented on each Cloud provider's own support articles, like [here for Google](https://cloud.google.com/compute/docs/regions-zones/) and [here for AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).",
-			DiffSuppressFunc: func(_, _, new string, _ *schema.ResourceData) bool {
+			DiffSuppressFunc: func(_, _, newValue string, _ *schema.ResourceData) bool {
 				// This is a workaround for a bug when migrating from V3 to V4 Aiven Provider.
 				// The bug is that the cloud_name is not set in the state file, but it is set
 				// on the API side. This causes a diff during plan, and it will not disappear
 				// even after consequent applies. This is because the state is not updated
 				// with the cloud_name value.
-				return new == ""
+				return newValue == ""
 			},
 		},
 		"plan": {
@@ -114,8 +114,8 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Day of week when maintenance operations should be performed. One monday, tuesday, wednesday, etc.",
-			DiffSuppressFunc: func(_, _, new string, _ *schema.ResourceData) bool {
-				return new == ""
+			DiffSuppressFunc: func(_, _, newValue string, _ *schema.ResourceData) bool {
+				return newValue == ""
 			},
 			// There is also `never` value, which can't be set, but can be received from the backend.
 			// Sending `never` is suppressed in GetMaintenanceWindow function,
@@ -126,8 +126,8 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Time of day when maintenance operations should be performed. UTC time in HH:mm:ss format.",
-			DiffSuppressFunc: func(_, _, new string, _ *schema.ResourceData) bool {
-				return new == ""
+			DiffSuppressFunc: func(_, _, newValue string, _ *schema.ResourceData) bool {
+				return newValue == ""
 			},
 		},
 		"termination_protection": {

@@ -14,11 +14,11 @@ import (
 const defaultLC = "en_US.UTF-8"
 
 // handleLcDefaults checks if the lc values have actually changed
-func handleLcDefaults(_, old, new string, _ *schema.ResourceData) bool {
+func handleLcDefaults(_, oldValue, newValue string, _ *schema.ResourceData) bool {
 	// NOTE! not all database resources return lc_* values even if
 	// they are set when the database is created; best we can do is
 	// to assume it was created using the default value.
-	return new == "" || (old == "" && new == defaultLC) || old == new
+	return newValue == "" || (oldValue == "" && newValue == defaultLC) || oldValue == newValue
 }
 
 var aivenPGDatabaseSchema = map[string]*schema.Schema{
