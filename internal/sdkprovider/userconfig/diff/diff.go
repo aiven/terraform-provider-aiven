@@ -15,10 +15,10 @@ var (
 
 // SuppressUnchanged suppresses diff for unchanged fields.
 // Applied for all nested values: both for objects and arrays.
-func SuppressUnchanged(k, old, new string, d *schema.ResourceData) bool {
+func SuppressUnchanged(k, oldValue, newValue string, d *schema.ResourceData) bool {
 	// schema.TypeMap
 	if strings.HasSuffix(k, ".%") {
-		return old == new
+		return oldValue == newValue
 	}
 
 	// Lists, sets and objects (object is list with one item).
@@ -44,7 +44,7 @@ func SuppressUnchanged(k, old, new string, d *schema.ResourceData) bool {
 	// SuppressUnchanged is applied to each nested field.
 	// Ip filter items handled with a special suppressor.
 	if reIsIPFilterStrings.MatchString(k) {
-		return suppressIPFilterSet(k, old, new, d)
+		return suppressIPFilterSet(k, oldValue, newValue, d)
 	}
 
 	// Doesn't suppress "set" items.
@@ -53,13 +53,13 @@ func SuppressUnchanged(k, old, new string, d *schema.ResourceData) bool {
 	}
 
 	// Object properties.
-	// "old" — is something read from API
-	// "new" — is what is read from tf file
-	// If value is "computed" (received as default) it has non-empty old (any value) and empty "new" (zero value).
+	// "oldValue" — is something read from API
+	// "newValue" — is what is read from tf file
+	// If value is "computed" (received as default) it has non-empty oldValue (any value) and empty "newValue" (zero value).
 	// For instance, when you create kafka it gets "kafka_version = 3.5",
 	// while it's not in your tf file, terraform shows a diff.
 	// This switch suppresses that, as well, as other "default" values.
-	switch new {
+	switch newValue {
 	case "", "0", "false":
 		// "" — kafka_version = "3.5" -> ""
 		// 0 — backup_hour = "4" -> 0
@@ -70,13 +70,13 @@ func SuppressUnchanged(k, old, new string, d *schema.ResourceData) bool {
 }
 
 // suppressIPFilterSet ip_filter list has specific logic, like default list value
-func suppressIPFilterSet(k, old, new string, d *schema.ResourceData) bool {
+func suppressIPFilterSet(k, oldValue, newValue string, d *schema.ResourceData) bool {
 	// Suppresses ip_filter = [0.0.0.0/0]
 	path := strings.Split(k, ".")
 	// Turns ~ip_filter.1234 to ~ip_filter.#
 	v, ok := d.GetOk(strings.Join(path[:len(path)-1], ".") + ".#")
 	// Literally, if the value is "0.0.0.0/0" and the parent's length is "1"
-	return old == "0.0.0.0/0" && new == "" && ok && v.(int) == 1
+	return oldValue == "0.0.0.0/0" && newValue == "" && ok && v.(int) == 1
 }
 
 // isObjectSet returns true if given k is for collection of objects

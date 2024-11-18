@@ -21,10 +21,10 @@ var aivenKafkaSchemaConfigurationSchema = map[string]*schema.Schema{
 		Type:         schema.TypeString,
 		Optional:     true,
 		ValidateFunc: validation.StringInSlice(kafkaschemaregistry.CompatibilityTypeChoices(), false),
-		DiffSuppressFunc: func(_, _, new string, _ *schema.ResourceData) bool {
+		DiffSuppressFunc: func(_, _, newValue string, _ *schema.ResourceData) bool {
 			// When a compatibility level is not set to any value and consequently is null (empty string).
 			// Allow ignoring those.
-			return new == ""
+			return newValue == ""
 		},
 		Description: userconfig.Desc("Kafka Schemas compatibility level.").PossibleValuesString(kafkaschemaregistry.CompatibilityTypeChoices()...).Build(),
 	},

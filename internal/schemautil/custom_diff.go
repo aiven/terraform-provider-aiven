@@ -48,8 +48,8 @@ func CustomizeDiffGenericService(serviceType string) schema.CustomizeDiffFunc {
 	)
 }
 
-func ShouldNotBeEmpty(_ context.Context, _, new, _ interface{}) bool {
-	switch t := new.(type) {
+func ShouldNotBeEmpty(_ context.Context, _, newValue, _ interface{}) bool {
+	switch t := newValue.(type) {
 	case string:
 		return t != ""
 	case []interface{}:
