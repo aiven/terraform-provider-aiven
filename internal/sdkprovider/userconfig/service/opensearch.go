@@ -28,7 +28,7 @@ func opensearchUserConfig() *schema.Schema {
 				Description: "Azure migration settings",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"account": {
-						Description: "Azure account name.",
+						Description: "Account name.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},
@@ -743,6 +743,82 @@ func opensearchUserConfig() *schema.Schema {
 										Description: "The heap usage threshold (as a percentage) required for the sum of heap usages of all search tasks before cancellation is applied. Default is 0.5.",
 										Optional:    true,
 										Type:        schema.TypeFloat,
+									},
+								}},
+								MaxItems: 1,
+								Optional: true,
+								Type:     schema.TypeList,
+							},
+						}},
+						MaxItems: 1,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"search_insights_top_queries": {
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+							"cpu": {
+								Description: "Top N queries monitoring by CPU",
+								Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+									"enabled": {
+										Description: "Enable or disable top N query monitoring by the metric. Default: `false`.",
+										Optional:    true,
+										Type:        schema.TypeBool,
+									},
+									"top_n_size": {
+										Description: "Specify the value of N for the top N queries by the metric.",
+										Optional:    true,
+										Type:        schema.TypeInt,
+									},
+									"window_size": {
+										Description: "The window size of the top N queries by the metric.",
+										Optional:    true,
+										Type:        schema.TypeString,
+									},
+								}},
+								MaxItems: 1,
+								Optional: true,
+								Type:     schema.TypeList,
+							},
+							"latency": {
+								Description: "Top N queries monitoring by latency",
+								Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+									"enabled": {
+										Description: "Enable or disable top N query monitoring by the metric. Default: `false`.",
+										Optional:    true,
+										Type:        schema.TypeBool,
+									},
+									"top_n_size": {
+										Description: "Specify the value of N for the top N queries by the metric.",
+										Optional:    true,
+										Type:        schema.TypeInt,
+									},
+									"window_size": {
+										Description: "The window size of the top N queries by the metric.",
+										Optional:    true,
+										Type:        schema.TypeString,
+									},
+								}},
+								MaxItems: 1,
+								Optional: true,
+								Type:     schema.TypeList,
+							},
+							"memory": {
+								Description: "Top N queries monitoring by memory",
+								Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+									"enabled": {
+										Description: "Enable or disable top N query monitoring by the metric. Default: `false`.",
+										Optional:    true,
+										Type:        schema.TypeBool,
+									},
+									"top_n_size": {
+										Description: "Specify the value of N for the top N queries by the metric.",
+										Optional:    true,
+										Type:        schema.TypeInt,
+									},
+									"window_size": {
+										Description: "The window size of the top N queries by the metric.",
+										Optional:    true,
+										Type:        schema.TypeString,
 									},
 								}},
 								MaxItems: 1,

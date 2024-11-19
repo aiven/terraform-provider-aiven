@@ -120,6 +120,8 @@ Read-Only:
 - `ip_filter_object` (Set of Object) (see [below for nested schema](#nestedobjatt--thanos_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String)
 - `object_storage_usage_alert_threshold_gb` (Number)
+- `private_access` (List of Object) (see [below for nested schema](#nestedobjatt--thanos_user_config--private_access))
+- `privatelink_access` (List of Object) (see [below for nested schema](#nestedobjatt--thanos_user_config--privatelink_access))
 - `public_access` (List of Object) (see [below for nested schema](#nestedobjatt--thanos_user_config--public_access))
 - `query` (List of Object) (see [below for nested schema](#nestedobjatt--thanos_user_config--query))
 - `query_frontend` (List of Object) (see [below for nested schema](#nestedobjatt--thanos_user_config--query_frontend))
@@ -145,6 +147,24 @@ Read-Only:
 
 - `description` (String)
 - `network` (String)
+
+
+<a id="nestedobjatt--thanos_user_config--private_access"></a>
+### Nested Schema for `thanos_user_config.private_access`
+
+Read-Only:
+
+- `query_frontend` (Boolean)
+- `receiver_routing` (Boolean)
+
+
+<a id="nestedobjatt--thanos_user_config--privatelink_access"></a>
+### Nested Schema for `thanos_user_config.privatelink_access`
+
+Read-Only:
+
+- `query_frontend` (Boolean)
+- `receiver_routing` (Boolean)
 
 
 <a id="nestedobjatt--thanos_user_config--public_access"></a>

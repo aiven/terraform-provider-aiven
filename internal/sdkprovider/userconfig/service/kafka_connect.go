@@ -219,7 +219,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 				Description: "Configure external secret providers in order to reference external secrets in connector configuration. Currently Hashicorp Vault (provider: vault, auth_method: token) and AWS Secrets Manager (provider: aws, auth_method: credentials) are supported. Secrets can be referenced in connector config with ${<provider_name>:<secret_path>:<key_name>}",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"aws": {
-						Description: "AWS config for Secret Provider",
+						Description: "AWS secret provider configuration",
 						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 							"access_key": {
 								Description: "Access key used to authenticate with aws.",
@@ -254,7 +254,7 @@ func kafkaConnectUserConfig() *schema.Schema {
 						Type:        schema.TypeString,
 					},
 					"vault": {
-						Description: "Vault Config for Secret Provider",
+						Description: "Vault secret provider configuration",
 						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 							"address": {
 								Description: "Address of the Vault server.",

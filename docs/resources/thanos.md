@@ -115,21 +115,23 @@ Read-Only:
 
 Optional:
 
-- `compactor` (Block List, Max: 1) ThanosCompactor (see [below for nested schema](#nestedblock--thanos_user_config--compactor))
+- `compactor` (Block List, Max: 1) Configuration options for Thanos Compactor (see [below for nested schema](#nestedblock--thanos_user_config--compactor))
 - `env` (Map of String, Deprecated) Environmental variables.
 - `ip_filter` (Set of String, Deprecated) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `ip_filter_object` (Block Set, Max: 1024) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16` (see [below for nested schema](#nestedblock--thanos_user_config--ip_filter_object))
 - `ip_filter_string` (Set of String) Allow incoming connections from CIDR address block, e.g. `10.20.0.0/16`.
 - `object_storage_usage_alert_threshold_gb` (Number) After exceeding the limit a service alert is going to be raised (0 means not set).
+- `private_access` (Block List, Max: 1) Allow access to selected service ports from private networks (see [below for nested schema](#nestedblock--thanos_user_config--private_access))
+- `privatelink_access` (Block List, Max: 1) Allow access to selected service components through Privatelink (see [below for nested schema](#nestedblock--thanos_user_config--privatelink_access))
 - `public_access` (Block List, Max: 1) Allow access to selected service ports from the public Internet (see [below for nested schema](#nestedblock--thanos_user_config--public_access))
-- `query` (Block List, Max: 1) ThanosQuery (see [below for nested schema](#nestedblock--thanos_user_config--query))
-- `query_frontend` (Block List, Max: 1) ThanosQueryFrontend (see [below for nested schema](#nestedblock--thanos_user_config--query_frontend))
-- `receiver_ingesting` (Map of String) CommonReceive.
-- `receiver_routing` (Map of String) ThanosReceiveRouting.
-- `ruler` (Map of String) ThanosRuler.
+- `query` (Block List, Max: 1) Configuration options for Thanos Query (see [below for nested schema](#nestedblock--thanos_user_config--query))
+- `query_frontend` (Block List, Max: 1) Configuration options for Thanos Query Frontend (see [below for nested schema](#nestedblock--thanos_user_config--query_frontend))
+- `receiver_ingesting` (Map of String) Common configuration options for Thanos Receive.
+- `receiver_routing` (Map of String) Configuration options for Thanos Receive Routing.
+- `ruler` (Map of String) Configuration options for Thanos Ruler.
 - `service_log` (Boolean) Store logs for the service so that they are available in the HTTP API and console.
 - `static_ips` (Boolean) Use static public IP addresses.
-- `store` (Map of String) ThanosStore.
+- `store` (Map of String) Configuration options for Thanos Store.
 
 <a id="nestedblock--thanos_user_config--compactor"></a>
 ### Nested Schema for `thanos_user_config.compactor`
@@ -149,6 +151,24 @@ Required:
 Optional:
 
 - `description` (String) Description for IP filter list entry. Example: `Production service IP range`.
+
+
+<a id="nestedblock--thanos_user_config--private_access"></a>
+### Nested Schema for `thanos_user_config.private_access`
+
+Optional:
+
+- `query_frontend` (Boolean) Allow clients to connect to query_frontend with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
+- `receiver_routing` (Boolean) Allow clients to connect to receiver_routing with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.
+
+
+<a id="nestedblock--thanos_user_config--privatelink_access"></a>
+### Nested Schema for `thanos_user_config.privatelink_access`
+
+Optional:
+
+- `query_frontend` (Boolean) Enable query_frontend.
+- `receiver_routing` (Boolean) Enable receiver_routing.
 
 
 <a id="nestedblock--thanos_user_config--public_access"></a>

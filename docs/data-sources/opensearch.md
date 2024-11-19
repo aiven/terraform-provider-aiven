@@ -250,6 +250,7 @@ Read-Only:
 - `reindex_remote_whitelist` (List of String)
 - `script_max_compilations_rate` (String)
 - `search_backpressure` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_backpressure))
+- `search_insights_top_queries` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_insights_top_queries))
 - `search_max_buckets` (Number)
 - `shard_indexing_pressure` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--shard_indexing_pressure))
 - `thread_pool_analyze_queue_size` (Number)
@@ -350,6 +351,46 @@ Read-Only:
 - `heap_percent_threshold` (Number)
 - `heap_variance` (Number)
 - `total_heap_percent_threshold` (Number)
+
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--search_insights_top_queries"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_insights_top_queries`
+
+Read-Only:
+
+- `cpu` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_insights_top_queries--cpu))
+- `latency` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_insights_top_queries--latency))
+- `memory` (List of Object) (see [below for nested schema](#nestedobjatt--opensearch_user_config--opensearch--search_insights_top_queries--memory))
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--search_insights_top_queries--cpu"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_insights_top_queries.cpu`
+
+Read-Only:
+
+- `enabled` (Boolean)
+- `top_n_size` (Number)
+- `window_size` (String)
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--search_insights_top_queries--latency"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_insights_top_queries.latency`
+
+Read-Only:
+
+- `enabled` (Boolean)
+- `top_n_size` (Number)
+- `window_size` (String)
+
+
+<a id="nestedobjatt--opensearch_user_config--opensearch--search_insights_top_queries--memory"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_insights_top_queries.memory`
+
+Read-Only:
+
+- `enabled` (Boolean)
+- `top_n_size` (Number)
+- `window_size` (String)
 
 
 

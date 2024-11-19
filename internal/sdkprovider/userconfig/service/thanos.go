@@ -14,7 +14,7 @@ func thanosUserConfig() *schema.Schema {
 		DiffSuppressFunc: diff.SuppressUnchanged,
 		Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 			"compactor": {
-				Description: "ThanosCompactor",
+				Description: "Configuration options for Thanos Compactor",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"retention_days": {
 					Description: "Retention time for data in days for each resolution (5m, 1h, raw).",
 					Optional:    true,
@@ -74,6 +74,42 @@ func thanosUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeInt,
 			},
+			"private_access": {
+				Description: "Allow access to selected service ports from private networks",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"query_frontend": {
+						Description: "Allow clients to connect to query_frontend with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"receiver_routing": {
+						Description: "Allow clients to connect to receiver_routing with a DNS name that always resolves to the service's private IP addresses. Only available in certain network locations.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+				}},
+				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
+			"privatelink_access": {
+				Description: "Allow access to selected service components through Privatelink",
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"query_frontend": {
+						Description: "Enable query_frontend.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+					"receiver_routing": {
+						Description: "Enable receiver_routing.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
+				}},
+				MaxItems: 1,
+				Optional: true,
+				Type:     schema.TypeList,
+			},
 			"public_access": {
 				Description: "Allow access to selected service ports from the public Internet",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
@@ -118,7 +154,7 @@ func thanosUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"query": {
-				Description: "ThanosQuery",
+				Description: "Configuration options for Thanos Query",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
 					"query_default_evaluation_interval": {
 						Description: "Set the default evaluation interval for subqueries. Default: `1m`.",
@@ -156,7 +192,7 @@ func thanosUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"query_frontend": {
-				Description: "ThanosQueryFrontend",
+				Description: "Configuration options for Thanos Query Frontend",
 				Elem: &schema.Resource{Schema: map[string]*schema.Schema{"query_range_align_range_with_step": {
 					Description: "Whether to align the query range boundaries with the step. If enabled, the query range boundaries will be aligned to the step, providing more accurate results for queries with high-resolution data. Default: `true`.",
 					Optional:    true,
@@ -167,17 +203,17 @@ func thanosUserConfig() *schema.Schema {
 				Type:     schema.TypeList,
 			},
 			"receiver_ingesting": {
-				Description: "CommonReceive.",
+				Description: "Common configuration options for Thanos Receive.",
 				Optional:    true,
 				Type:        schema.TypeMap,
 			},
 			"receiver_routing": {
-				Description: "ThanosReceiveRouting.",
+				Description: "Configuration options for Thanos Receive Routing.",
 				Optional:    true,
 				Type:        schema.TypeMap,
 			},
 			"ruler": {
-				Description: "ThanosRuler.",
+				Description: "Configuration options for Thanos Ruler.",
 				Optional:    true,
 				Type:        schema.TypeMap,
 			},
@@ -192,7 +228,7 @@ func thanosUserConfig() *schema.Schema {
 				Type:        schema.TypeBool,
 			},
 			"store": {
-				Description: "ThanosStore.",
+				Description: "Configuration options for Thanos Store.",
 				Optional:    true,
 				Type:        schema.TypeMap,
 			},
