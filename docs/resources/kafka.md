@@ -247,8 +247,8 @@ Required:
 
 Optional:
 
-- `aws` (Block List, Max: 1) AWS config for Secret Provider (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_secret_providers--aws))
-- `vault` (Block List, Max: 1) Vault Config for Secret Provider (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_secret_providers--vault))
+- `aws` (Block List, Max: 1) AWS secret provider configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_secret_providers--aws))
+- `vault` (Block List, Max: 1) Vault secret provider configuration (see [below for nested schema](#nestedblock--kafka_user_config--kafka_connect_secret_providers--vault))
 
 <a id="nestedblock--kafka_user_config--kafka_connect_secret_providers--aws"></a>
 ### Nested Schema for `kafka_user_config.kafka_connect_secret_providers.aws`

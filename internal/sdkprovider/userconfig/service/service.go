@@ -99,8 +99,9 @@ func GetFieldMapping(kind string) map[string]string {
 			"ip_filter_string": "ip_filter",
 		},
 		"opensearch": {
-			"ip_filter_object": "ip_filter",
-			"ip_filter_string": "ip_filter",
+			"ip_filter_object":                       "ip_filter",
+			"ip_filter_string":                       "ip_filter",
+			"opensearch/search_insights_top_queries": "opensearch/search.insights.top_queries",
 		},
 		"pg": {
 			"ip_filter_object":                                "ip_filter",

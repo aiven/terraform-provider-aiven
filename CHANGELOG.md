@@ -9,6 +9,19 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Add `aiven_opensearch` resource field `opensearch_user_config.opensearch.search_insights_top_queries`
+- Add `aiven_thanos` resource field `thanos_user_config.private_access`: Allow access to selected service ports from
+  private networks
+- Add `aiven_thanos` resource field `thanos_user_config.privatelink_access`: Allow access to selected service components
+  through Privatelink
+- Add `aiven_opensearch` datasource field `opensearch_user_config.opensearch.search_insights_top_queries`
+- Add `aiven_thanos` datasource field `thanos_user_config.private_access`: Allow access to selected service ports from
+  private networks
+- Add `aiven_thanos` datasource field `thanos_user_config.privatelink_access`: Allow access to selected service components
+  through Privatelink
+
 ## [4.29.0] - 2024-11-14
 
 - Add support for `autoscaler` service integration

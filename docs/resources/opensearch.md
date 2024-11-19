@@ -132,7 +132,7 @@ Optional:
 
 Required:
 
-- `account` (String) Azure account name.
+- `account` (String) Account name.
 - `base_path` (String) The path to the repository data within its container. The value of this setting should not start or end with a /.
 - `container` (String) Azure container name.
 - `indices` (String) A comma-delimited list of indices to restore from the snapshot. Multi-index syntax is supported. Example: `metrics*,logs*,data-20240823`.
@@ -275,6 +275,7 @@ Optional:
 - `reindex_remote_whitelist` (List of String) Whitelisted addresses for reindexing. Changing this value will cause all OpenSearch instances to restart.
 - `script_max_compilations_rate` (String) Script compilation circuit breaker limits the number of inline script compilations within a period of time. Default is use-context. Example: `75/5m`.
 - `search_backpressure` (Block List, Max: 1) Search Backpressure Settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_backpressure))
+- `search_insights_top_queries` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_insights_top_queries))
 - `search_max_buckets` (Number) Maximum number of aggregation buckets allowed in a single response. OpenSearch default value is used when this is not defined. Example: `10000`.
 - `shard_indexing_pressure` (Block List, Max: 1) Shard indexing back pressure settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--shard_indexing_pressure))
 - `thread_pool_analyze_queue_size` (Number) Size for the thread pool queue. See documentation for exact details.
@@ -375,6 +376,46 @@ Optional:
 - `heap_percent_threshold` (Number) The heap usage threshold (as a percentage) required for an individual parent task before it is considered for cancellation. Default is 0.2.
 - `heap_variance` (Number) The heap usage variance required for an individual parent task before it is considered for cancellation. A task is considered for cancellation when taskHeapUsage is greater than or equal to heapUsageMovingAverage * variance. Default is 2.0.
 - `total_heap_percent_threshold` (Number) The heap usage threshold (as a percentage) required for the sum of heap usages of all search tasks before cancellation is applied. Default is 0.5.
+
+
+
+<a id="nestedblock--opensearch_user_config--opensearch--search_insights_top_queries"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_insights_top_queries`
+
+Optional:
+
+- `cpu` (Block List, Max: 1) Top N queries monitoring by CPU (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_insights_top_queries--cpu))
+- `latency` (Block List, Max: 1) Top N queries monitoring by latency (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_insights_top_queries--latency))
+- `memory` (Block List, Max: 1) Top N queries monitoring by memory (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_insights_top_queries--memory))
+
+<a id="nestedblock--opensearch_user_config--opensearch--search_insights_top_queries--cpu"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_insights_top_queries.cpu`
+
+Optional:
+
+- `enabled` (Boolean) Enable or disable top N query monitoring by the metric. Default: `false`.
+- `top_n_size` (Number) Specify the value of N for the top N queries by the metric.
+- `window_size` (String) The window size of the top N queries by the metric.
+
+
+<a id="nestedblock--opensearch_user_config--opensearch--search_insights_top_queries--latency"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_insights_top_queries.latency`
+
+Optional:
+
+- `enabled` (Boolean) Enable or disable top N query monitoring by the metric. Default: `false`.
+- `top_n_size` (Number) Specify the value of N for the top N queries by the metric.
+- `window_size` (String) The window size of the top N queries by the metric.
+
+
+<a id="nestedblock--opensearch_user_config--opensearch--search_insights_top_queries--memory"></a>
+### Nested Schema for `opensearch_user_config.opensearch.search_insights_top_queries.memory`
+
+Optional:
+
+- `enabled` (Boolean) Enable or disable top N query monitoring by the metric. Default: `false`.
+- `top_n_size` (Number) Specify the value of N for the top N queries by the metric.
+- `window_size` (String) The window size of the top N queries by the metric.
 
 
 

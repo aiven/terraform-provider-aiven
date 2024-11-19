@@ -64,9 +64,10 @@ func (c *Diff) String() string {
 	}
 
 	// Adds description
-	const maxSize = 120
+	if c.Description != "" {
+		msg = fmt.Sprintf("%s: %s", msg, c.Description)
+	}
 
-	msg += ": "
-	msg += shorten(maxSize-len(msg), c.Description)
-	return msg
+	const maxSize = 120
+	return shorten(maxSize, msg)
 }
