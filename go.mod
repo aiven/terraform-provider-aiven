@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/aiven/aiven-go-client/v2 v2.31.0
-	github.com/aiven/go-client-codegen v0.52.0
+	github.com/aiven/go-client-codegen v0.54.0
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/dave/jennifer v1.7.1
 	github.com/docker/go-units v0.5.0
@@ -60,7 +60,7 @@ require (
 	cloud.google.com/go v0.112.0 // indirect
 	cloud.google.com/go/storage v1.36.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/aiven/go-api-schemas v1.100.0
+	github.com/aiven/go-api-schemas v1.102.0
 	github.com/aws/aws-sdk-go v1.44.122 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
