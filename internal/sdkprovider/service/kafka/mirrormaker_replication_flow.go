@@ -122,6 +122,14 @@ var aivenMirrorMakerReplicationFlowSchema = map[string]*schema.Schema{
 		ValidateFunc: validation.IntAtLeast(1),
 		Description:  "Replication factor, `>= 1`.",
 	},
+	"exactly_once_delivery_enabled": {
+		Type:     schema.TypeBool,
+		Optional: true,
+		Default:  false,
+		Description: userconfig.Desc(
+			"Whether to enable exactly-once message delivery. We recommend you set this to `enabled` for new replications.",
+		).DefaultValue(false).Build(),
+	},
 }
 
 func ResourceMirrorMakerReplicationFlow() *schema.Resource {

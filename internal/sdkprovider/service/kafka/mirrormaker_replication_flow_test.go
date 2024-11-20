@@ -43,10 +43,11 @@ func TestAccAivenMirrorMakerReplicationFlow_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "topics_blacklist.1", ".*\\.replica"),
 					resource.TestCheckResourceAttr(resourceName, "topics_blacklist.2", "__.*"),
 					resource.TestCheckResourceAttr(resourceName, "config_properties_exclude.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "exactly_once_delivery_enabled", "true"),
 				),
 			},
 			{
-				Config: testAccMirrorMakerReplicationFlowResource(rName, `	
+				Config: testAccMirrorMakerReplicationFlowResource(rName, `
 				config_properties_exclude = [
 					"follower\\.replication\\.throttled\\.replicas",
 					"leader\\.replication\\.throttled\\.replicas",
@@ -226,6 +227,7 @@ resource "aiven_mirrormaker_replication_flow" "foo" {
   emit_heartbeats_enabled             = true
   emit_backward_heartbeats_enabled    = true
   offset_syncs_topic_location         = "source"
+  exactly_once_delivery_enabled       = true
 
   topics = [
     ".*",
