@@ -21,7 +21,7 @@ var aivenValkeyUserSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: schemautil.GetServiceUserValidateFunc(),
-		Description:  userconfig.Desc("The actual name of the Valkey User.").ForceNew().Referenced().Build(),
+		Description:  userconfig.Desc("Name of the Valkey service user.").ForceNew().Referenced().Build(),
 	},
 	"password": {
 		Type:             schema.TypeString,
@@ -29,14 +29,14 @@ var aivenValkeyUserSchema = map[string]*schema.Schema{
 		Sensitive:        true,
 		Computed:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectDiffSuppressFunc,
-		Description:      "The password of the Valkey User.",
+		Description:      "The Valkey service user's password.",
 	},
 	"valkey_acl_categories": {
 		Type:         schema.TypeList,
 		Optional:     true,
 		ForceNew:     true,
 		RequiredWith: []string{"valkey_acl_commands", "valkey_acl_keys"},
-		Description:  userconfig.Desc("Defines command category rules.").RequiredWith("valkey_acl_commands", "valkey_acl_keys").ForceNew().Build(),
+		Description:  userconfig.Desc("Allow or disallow command categories. To allow a category use the prefix `+@` and to disallow use `-@`. See the [Valkey documentation](https://valkey.io/topics/acl/) for details on the ACL feature.").RequiredWith("valkey_acl_commands", "valkey_acl_keys").ForceNew().Build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
@@ -46,7 +46,7 @@ var aivenValkeyUserSchema = map[string]*schema.Schema{
 		Optional:     true,
 		ForceNew:     true,
 		RequiredWith: []string{"valkey_acl_categories", "valkey_acl_keys"},
-		Description:  userconfig.Desc("Defines rules for individual commands.").RequiredWith("valkey_acl_categories", "valkey_acl_keys").ForceNew().Build(),
+		Description:  userconfig.Desc("Defines rules for individual commands. To allow a command use the prefix `+` and to disallow use `-`.").RequiredWith("valkey_acl_categories", "valkey_acl_keys").ForceNew().Build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
@@ -56,7 +56,7 @@ var aivenValkeyUserSchema = map[string]*schema.Schema{
 		Optional:     true,
 		ForceNew:     true,
 		RequiredWith: []string{"valkey_acl_categories", "valkey_acl_commands"},
-		Description:  userconfig.Desc("Defines key access rules.").RequiredWith("valkey_acl_categories", "valkey_acl_keys").ForceNew().Build(),
+		Description:  userconfig.Desc("Key access rules. Entries are defined as standard glob patterns.").RequiredWith("valkey_acl_categories", "valkey_acl_keys").ForceNew().Build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
@@ -65,7 +65,7 @@ var aivenValkeyUserSchema = map[string]*schema.Schema{
 		Type:        schema.TypeList,
 		Optional:    true,
 		ForceNew:    true,
-		Description: userconfig.Desc("Defines the permitted pub/sub channel patterns.").ForceNew().Build(),
+		Description: userconfig.Desc("Allows and disallows access to pub/sub channels. Entries are defined as standard glob patterns.").ForceNew().Build(),
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
@@ -75,13 +75,13 @@ var aivenValkeyUserSchema = map[string]*schema.Schema{
 	"type": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "Type of the user account. Tells whether the user is the primary account or a regular account.",
+		Description: "User account type, such as primary or regular account.",
 	},
 }
 
 func ResourceValkeyUser() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Creates and manages an [Aiven for Valkey](https://aiven.io/docs/products/valkey) user.",
+		Description:   "Creates and manages an [Aiven for Valkey™](https://aiven.io/docs/products/valkey) service user.",
 		CreateContext: common.WithGenClient(resourceValkeyUserCreate),
 		UpdateContext: common.WithGenClient(resourceValkeyUserUpdate),
 		ReadContext:   common.WithGenClient(resourceValkeyUserRead),
