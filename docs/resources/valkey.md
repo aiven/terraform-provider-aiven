@@ -3,12 +3,12 @@
 page_title: "aiven_valkey Resource - terraform-provider-aiven"
 subcategory: ""
 description: |-
-  Creates and manages an Aiven for Valkey https://aiven.io/docs/products/valkey service.
+  Creates and manages an Aiven for Valkey™ https://aiven.io/docs/products/valkey service.
 ---
 
 # aiven_valkey (Resource)
 
-Creates and manages an [Aiven for Valkey](https://aiven.io/docs/products/valkey) service.
+Creates and manages an [Aiven for Valkey™](https://aiven.io/docs/products/valkey) service.
 
 ## Example Usage
 

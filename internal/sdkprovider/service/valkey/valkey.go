@@ -59,7 +59,7 @@ func valkeySchema() map[string]*schema.Schema {
 
 func ResourceValkey() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Creates and manages an [Aiven for Valkey](https://aiven.io/docs/products/valkey) service.",
+		Description:   "Creates and manages an [Aiven for Valkey™](https://aiven.io/docs/products/valkey) service.",
 		CreateContext: schemautil.ResourceServiceCreateWrapper(schemautil.ServiceTypeValkey),
 		ReadContext:   schemautil.ResourceServiceRead,
 		UpdateContext: schemautil.ResourceServiceUpdate,
