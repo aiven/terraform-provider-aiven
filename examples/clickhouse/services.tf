@@ -35,7 +35,7 @@ resource "aiven_clickhouse_role" "writer" {
 
 # Writer role's privileges
 resource "aiven_clickhouse_grant" "writer_role" {
-  project      = aiven_clickhouse.dev.project
+  project      = aiven_project.clickhouse_dev.project
   service_name = aiven_clickhouse.dev.service_name
   role         = aiven_clickhouse_role.writer.role
 
@@ -52,7 +52,7 @@ resource "aiven_clickhouse_grant" "writer_role" {
 
 # Grant the writer role to the ETL user
 resource "aiven_clickhouse_grant" "etl_user" {
-  project      = aiven_clickhouse.dev.project
+  project      = aiven_project.clickhouse_dev.project
   service_name = aiven_clickhouse.dev.service_name
   user         = aiven_clickhouse_user.etl.username
 
@@ -77,7 +77,7 @@ resource "aiven_clickhouse_role" "reader" {
 
 # Reader role's privileges
 resource "aiven_clickhouse_grant" "reader_role" {
-  project      = aiven_clickhouse.dev.project
+  project      = aiven_project.clickhouse_dev.project
   service_name = aiven_clickhouse.dev.service_name
   role         = aiven_clickhouse_role.reader.role
 
@@ -89,7 +89,7 @@ resource "aiven_clickhouse_grant" "reader_role" {
 
 # Grant the reader role to the Analyst user
 resource "aiven_clickhouse_grant" "analyst_user" {
-  project      = aiven_clickhouse.dev.project
+  project      = aiven_project.clickhouse_dev.project
   service_name = aiven_clickhouse.dev.service_name
   user         = aiven_clickhouse_user.analyst.username
 
