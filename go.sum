@@ -195,8 +195,8 @@ github.com/ProtonMail/go-crypto v1.1.0-alpha.2/go.mod h1:rA3QumHc/FZ8pAHreoekgiA
 github.com/agext/levenshtein v1.2.1/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
-github.com/aiven/aiven-go-client/v2 v2.31.0 h1:ThPtEQiKDxtq5GDfPW8bAmrT2d6oHRP492CQ7gXwuTI=
-github.com/aiven/aiven-go-client/v2 v2.31.0/go.mod h1:AXfB5OeioOln+hYh1XAJaYyi+f+TV6xInc7VZ9DwnY4=
+github.com/aiven/aiven-go-client/v2 v2.32.0 h1:P7MeU33bhn+DvvNygViAzXVLfAztEZF0xYrGGX8wZ14=
+github.com/aiven/aiven-go-client/v2 v2.32.0/go.mod h1:IUEFZGRoerp3hLTLBuGQhas/HI3IAzRLwDq5D+VSk0g=
 github.com/aiven/go-api-schemas v1.103.0 h1:jz1/Nu/l26gQF46PhL12tNAQLd79wrpagSrbqVJgVZU=
 github.com/aiven/go-api-schemas v1.103.0/go.mod h1:gtyL4LloZ2lRqcyEZTCSizi1eKm6tdzQdUdlIHlvdlY=
 github.com/aiven/go-client-codegen v0.56.0 h1:LSaVaZV+Uw7jWJXfQui4NTzrhKWHRJUNtd4aCQforeY=
@@ -569,8 +569,8 @@ github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.7.2/go.mod h1:R6va5+xMeoiuVRoj+gSkQ7d3FALtqAAGI1FQKckRals=
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
-github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
-github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
+github.com/stretchr/testify v1.10.0 h1:Xv5erBjTwe/5IxqUQTdXv5kgmIvbHo3QQyRwhJsOfJA=
+github.com/stretchr/testify v1.10.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/tmccombs/hcl2json v0.3.3 h1:+DLNYqpWE0CsOQiEZu+OZm5ZBImake3wtITYxQ8uLFQ=
 github.com/tmccombs/hcl2json v0.3.3/go.mod h1:Y2chtz2x9bAeRTvSibVRVgbLJhLJXKlUeIvjeVdnm4w=
 github.com/ulikunitz/xz v0.5.10 h1:t92gobL9l3HE202wg3rlk19F6X+JOxl9BBrCCMYEYd8=
