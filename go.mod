@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/aiven/aiven-go-client/v2 v2.31.0
-	github.com/aiven/go-client-codegen v0.56.0
+	github.com/aiven/go-client-codegen v0.58.0
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/dave/jennifer v1.7.1
 	github.com/docker/go-units v0.5.0
@@ -20,7 +20,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/samber/lo v1.47.0
 	github.com/stoewer/go-strcase v1.3.0
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c
 	golang.org/x/tools v0.26.0
 	gopkg.in/yaml.v3 v3.0.1
