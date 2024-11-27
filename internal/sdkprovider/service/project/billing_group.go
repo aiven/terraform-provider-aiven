@@ -100,7 +100,7 @@ var aivenBillingGroupSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Optional:         true,
 		DiffSuppressFunc: schemautil.EmptyObjectNoChangeDiffSuppressFunc,
-		Description:      "State or province.",
+		Description:      "Address state.",
 	},
 	"copy_from_billing_group": {
 		Type:             schema.TypeString,
