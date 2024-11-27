@@ -40,6 +40,6 @@ data "aiven_billing_group" "example_billing_group" {
 - `id` (String) The ID of this resource.
 - `name` (String) Name of the billing group.
 - `parent_id` (String) Link a billing group to an existing organization or account by using its ID. To set up proper dependencies please refer to this variable as a reference.
-- `state` (String) State or province.
+- `state` (String) Address state.
 - `vat_id` (String) The VAT identification number for your company.
 - `zip_code` (String) Zip or postal code.
