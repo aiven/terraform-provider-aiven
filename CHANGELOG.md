@@ -21,6 +21,10 @@ nav_order: 1
   private networks
 - Add `aiven_thanos` datasource field `thanos_user_config.privatelink_access`: Allow access to selected service components
   through Privatelink
+- Add `aiven_service_integration_endpoint` resource field `datadog_user_config.extra_tags_prefix`: Extra tags prefix.
+  Defaults to aiven.
+- Add `aiven_service_integration_endpoint` datasource field `datadog_user_config.extra_tags_prefix`: Extra tags prefix.
+  Defaults to aiven.
 
 ## [4.29.0] - 2024-11-14
 
