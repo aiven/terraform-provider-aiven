@@ -43,6 +43,11 @@ func datadogUserConfig() *schema.Schema {
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
+			"extra_tags_prefix": {
+				Description: "Extra tags prefix. Defaults to aiven.",
+				Optional:    true,
+				Type:        schema.TypeString,
+			},
 			"kafka_consumer_check_instances": {
 				Description: "Number of separate instances to fetch kafka consumer statistics with. Example: `8`.",
 				Optional:    true,
