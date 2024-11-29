@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/aiven/go-client-codegen/handler/staticip"
 	"github.com/docker/go-units"
@@ -955,16 +956,28 @@ func setProp[T comparable](m map[string]any, k string, v *T) {
 	}
 }
 
+func IsNotFound(err error) bool {
+	return aiven.IsNotFound(err) || avngen.IsNotFound(err)
+}
+
 // IsUnknownRole checks if the database returned an error because of an unknown role
 // to make deletions idempotent
 func IsUnknownRole(err error) bool {
-	var e aiven.Error
-	return errors.As(err, &e) && strings.Contains(e.Message, "Code: 511")
+	var oldError aiven.Error
+	var newError avngen.Error
+	var msg string
+	switch {
+	case errors.As(err, &oldError):
+		msg = oldError.Message
+	case errors.As(err, &newError):
+		msg = newError.Message
+	}
+	return strings.Contains(msg, "Code: 511")
 }
 
 // IsUnknownResource is a function to handle errors that we want to treat as "Not Found"
 func IsUnknownResource(err error) bool {
-	return aiven.IsNotFound(err) || IsUnknownRole(err)
+	return IsNotFound(err) || IsUnknownRole(err)
 }
 
 func ResourceReadHandleNotFound(err error, d *schema.ResourceData) error {
