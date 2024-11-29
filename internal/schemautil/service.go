@@ -38,6 +38,7 @@ func DefaultResourceTimeouts() *schema.ResourceTimeout {
 }
 
 const (
+	ServiceTypeAlloyDBOmni      = "alloydbomni"
 	ServiceTypePG               = "pg"
 	ServiceTypeCassandra        = "cassandra"
 	ServiceTypeOpenSearch       = "opensearch"
@@ -827,7 +828,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 		setProp(props, "connect_uri", connectionInfo.KafkaConnectUri)
 		setProp(props, "rest_uri", connectionInfo.KafkaRestUri)
 		setProp(props, "schema_registry_uri", connectionInfo.SchemaRegistryUri)
-	case ServiceTypePG:
+	case ServiceTypeAlloyDBOmni, ServiceTypePG:
 		// For compatibility with the old schema, we only set the first URI.
 		// TODO: Remove this block in the next major version. Keep `uris` key only, see below.
 		if len(connectionInfo.Pg) > 0 {

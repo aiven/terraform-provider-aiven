@@ -13,6 +13,7 @@ import (
 	"github.com/aiven/terraform-provider-aiven/internal/plugin/util"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/account"
+	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/alloydbomni"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/cassandra"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/clickhouse"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/service/connectionpool"
@@ -76,6 +77,9 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_pg":          pg.DatasourcePG(),
 			"aiven_pg_user":     pg.DatasourcePGUser(),
 			"aiven_pg_database": pg.DatasourcePGDatabase(),
+
+			// alloydbomni
+			"aiven_alloydbomni": alloydbomni.DatasourceAlloyDBOmni(),
 
 			// cassandra
 			"aiven_cassandra":      cassandra.DatasourceCassandra(),
@@ -186,6 +190,9 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_pg_user":     pg.ResourcePGUser(),
 			"aiven_pg_database": pg.ResourcePGDatabase(),
 
+			// alloydbomni
+			"aiven_alloydbomni": alloydbomni.ResourceAlloyDBOmni(),
+
 			// cassandra
 			"aiven_cassandra":      cassandra.ResourceCassandra(),
 			"aiven_cassandra_user": cassandra.ResourceCassandraUser(),
@@ -278,9 +285,12 @@ func Provider(version string) (*schema.Provider, error) {
 	}
 
 	// Adds "beta" warning to the description
-	betaResources := []string{}
+	betaResources := []string{
+		"aiven_alloydbomni",
+	}
 
 	betaDataSources := []string{
+		"aiven_alloydbomni",
 		"aiven_organization_user_list",
 	}
 

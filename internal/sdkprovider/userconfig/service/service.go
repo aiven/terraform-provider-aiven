@@ -6,6 +6,8 @@ import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 func GetUserConfig(kind string) *schema.Schema {
 	switch kind {
+	case "alloydbomni":
+		return alloydbomniUserConfig()
 	case "cassandra":
 		return cassandraUserConfig()
 	case "clickhouse":
@@ -48,6 +50,13 @@ func GetUserConfig(kind string) *schema.Schema {
 // GetFieldMapping returns TF fields to Json fields mapping (in unix-path way)
 func GetFieldMapping(kind string) map[string]string {
 	return map[string]map[string]string{
+		"alloydbomni": {
+			"ip_filter_object":                  "ip_filter",
+			"ip_filter_string":                  "ip_filter",
+			"pg/pg_partman_bgw__dot__interval":  "pg/pg_partman_bgw.interval",
+			"pg/pg_partman_bgw__dot__role":      "pg/pg_partman_bgw.role",
+			"pg/pg_stat_statements__dot__track": "pg/pg_stat_statements.track",
+		},
 		"cassandra": {
 			"ip_filter_object": "ip_filter",
 			"ip_filter_string": "ip_filter",
@@ -138,5 +147,5 @@ func GetFieldMapping(kind string) map[string]string {
 	}[kind]
 }
 func UserConfigTypes() []string {
-	return []string{"cassandra", "clickhouse", "dragonfly", "flink", "grafana", "influxdb", "kafka", "kafka_connect", "kafka_mirrormaker", "m3aggregator", "m3db", "mysql", "opensearch", "pg", "redis", "thanos", "valkey"}
+	return []string{"alloydbomni", "cassandra", "clickhouse", "dragonfly", "flink", "grafana", "influxdb", "kafka", "kafka_connect", "kafka_mirrormaker", "m3aggregator", "m3db", "mysql", "opensearch", "pg", "redis", "thanos", "valkey"}
 }
