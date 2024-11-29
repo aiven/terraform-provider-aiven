@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -957,8 +958,22 @@ func setProp[T comparable](m map[string]any, k string, v *T) {
 	}
 }
 
+// NewNotFound creates a new not found error
+// There are lots of endpoints that return a list of objects which might not contain the object we are looking for.
+// In this case, we should still return 404.
+func NewNotFound(msg string, args ...any) error {
+	return aiven.Error{Status: http.StatusNotFound, Message: fmt.Sprintf(msg, args...)}
+}
+
 func IsNotFound(err error) bool {
 	return aiven.IsNotFound(err) || avngen.IsNotFound(err)
+}
+
+func OmitNotFound(err error) error {
+	if IsNotFound(err) {
+		return nil
+	}
+	return err
 }
 
 // IsUnknownRole checks if the database returned an error because of an unknown role

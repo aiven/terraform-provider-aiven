@@ -12,6 +12,7 @@ import (
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/aiven/go-client-codegen/handler/staticip"
+	retryGo "github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -356,4 +357,16 @@ L:
 
 func staticIpsForServiceFromSchema(d *schema.ResourceData) []string {
 	return FlattenToString(d.Get("static_ips").(*schema.Set).List())
+}
+
+// WaitUntilNotFound retries the given retryableFunc until it returns 404
+// To stop the retrying, the function should return retryGo.Unrecoverable
+func WaitUntilNotFound(ctx context.Context, retryableFunc retryGo.RetryableFunc) error {
+	return retryGo.Do(
+		func() error {
+			return OmitNotFound(retryableFunc())
+		},
+		retryGo.Context(ctx),
+		retryGo.Delay(common.DefaultStateChangeDelay),
+	)
 }

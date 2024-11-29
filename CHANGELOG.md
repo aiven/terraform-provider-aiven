@@ -13,6 +13,7 @@ nav_order: 1
 
 - Add `alloydbomni` BETA resource and datasource
 - Add `aiven_alloydbomni_user` BETA resource and datasource
+- Add `aiven_alloydbomni_database` BETA resource and datasource
 
 ## [4.30.0] - 2024-12-05
 
