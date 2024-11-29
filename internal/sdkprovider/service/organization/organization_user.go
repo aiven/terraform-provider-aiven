@@ -63,9 +63,7 @@ func ResourceOrganizationUser() *schema.Resource {
 		
 After the user accepts the invite you can get their information using the ` + "`aiven_organization_user`" + `
 data source. You can manage user access to projects with the ` + "`aiven_organization_user_group`" + `, 
-` + "`aiven_organization_user_group_member`" + `, and ` + "`aiven_organization_group_project`" + ` resources.
-
-The organization user resource allows the creation and management of an Aiven organization user.
+` + "`aiven_organization_user_group_member`" + `, and ` + "`aiven_organization_permission`" + ` resources.
 `,
 		CreateContext: resourceOrganizationUserCreate,
 		ReadContext:   resourceOrganizationUserRead,
@@ -80,7 +78,7 @@ This resource is deprecated. Users cannot be invited to an organization using Te
 Use the Aiven Console to invite users to your organization. After the user accepts the invite
 you can get their information using the aiven_organization_user data source. You can manage
 user access to projects with the aiven_organization_user_group, aiven_organization_user_group_member,
-and aiven_organization_group_project resources.
+and aiven_organization_permission resources.
 		`,
 	}
 }

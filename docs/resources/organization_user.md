@@ -9,8 +9,7 @@ description: |-
   
   After the user accepts the invite you can get their information using the aiven_organization_user
   data source. You can manage user access to projects with the aiven_organization_user_group,
-  aiven_organization_user_group_member, and aiven_organization_group_project resources.
-  The organization user resource allows the creation and management of an Aiven organization user.
+  aiven_organization_user_group_member, and aiven_organization_permission resources.
 ---
 
 # aiven_organization_user (Resource)
@@ -21,9 +20,7 @@ description: |-
 		
 After the user accepts the invite you can get their information using the `aiven_organization_user`
 data source. You can manage user access to projects with the `aiven_organization_user_group`, 
-`aiven_organization_user_group_member`, and `aiven_organization_group_project` resources.
-
-The organization user resource allows the creation and management of an Aiven organization user.
+`aiven_organization_user_group_member`, and `aiven_organization_permission` resources.
 
 
 
