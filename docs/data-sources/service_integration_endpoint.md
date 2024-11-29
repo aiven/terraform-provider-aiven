@@ -76,6 +76,7 @@ Read-Only:
 - `datadog_api_key` (String)
 - `datadog_tags` (List of Object) (see [below for nested schema](#nestedobjatt--datadog_user_config--datadog_tags))
 - `disable_consumer_stats` (Boolean)
+- `extra_tags_prefix` (String)
 - `kafka_consumer_check_instances` (Number)
 - `kafka_consumer_stats_timeout` (Number)
 - `max_partition_contexts` (Number)
