@@ -12,6 +12,7 @@ nav_order: 1
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
 - Add `alloydbomni` BETA resource and datasource
+- Add `aiven_alloydbomni_user` BETA resource and datasource
 
 ## [4.30.0] - 2024-12-05
 

@@ -79,7 +79,8 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_pg_database": pg.DatasourcePGDatabase(),
 
 			// alloydbomni
-			"aiven_alloydbomni": alloydbomni.DatasourceAlloyDBOmni(),
+			"aiven_alloydbomni":      alloydbomni.DatasourceAlloyDBOmni(),
+			"aiven_alloydbomni_user": alloydbomni.DatasourceAlloyDBOmniUser(),
 
 			// cassandra
 			"aiven_cassandra":      cassandra.DatasourceCassandra(),
@@ -191,7 +192,8 @@ func Provider(version string) (*schema.Provider, error) {
 			"aiven_pg_database": pg.ResourcePGDatabase(),
 
 			// alloydbomni
-			"aiven_alloydbomni": alloydbomni.ResourceAlloyDBOmni(),
+			"aiven_alloydbomni":      alloydbomni.ResourceAlloyDBOmni(),
+			"aiven_alloydbomni_user": alloydbomni.ResourceAlloyDBOmniUser(),
 
 			// cassandra
 			"aiven_cassandra":      cassandra.ResourceCassandra(),
@@ -287,10 +289,12 @@ func Provider(version string) (*schema.Provider, error) {
 	// Adds "beta" warning to the description
 	betaResources := []string{
 		"aiven_alloydbomni",
+		"aiven_alloydbomni_user",
 	}
 
 	betaDataSources := []string{
 		"aiven_alloydbomni",
+		"aiven_alloydbomni_user",
 		"aiven_organization_user_list",
 	}
 
