@@ -25,6 +25,7 @@ nav_order: 1
   Defaults to aiven.
 - Add `aiven_service_integration_endpoint` datasource field `datadog_user_config.extra_tags_prefix`: Extra tags prefix.
   Defaults to aiven.
+- Add `exactly_once_delivery_enabled` field to `aiven_mirrormaker_replication_flow`: Whether to enable exactly-once message delivery for Mirrormaker replication flow
 
 ## [4.29.0] - 2024-11-14
 
