@@ -77,9 +77,16 @@ func ServiceCommonSchemaWithUserConfig(kind string) map[string]*schema.Schema {
 
 	// Assigns the integration types that are allowed to be set when creating a service
 	integrations := getBootstrapIntegrationTypes(kind)
-	if len(integrations) > 0 {
-		r := s["service_integrations"].Elem.(*schema.Resource)
-		r.Schema["integration_type"].Description = userconfig.Desc(r.Schema["integration_type"].Description).PossibleValuesString(FlattenToString(integrations)...).Build()
+	integrationType := s["service_integrations"].Elem.(*schema.Resource).Schema["integration_type"]
+	switch len(integrations) {
+	case 0:
+		// Disables the service integrations field if there are no integrations supported
+		integrationType.ValidateFunc = func(v any, _ string) ([]string, []error) {
+			return nil, []error{fmt.Errorf("service integration %s can't be specified here", v)}
+		}
+	default:
+		integrationType.Description = userconfig.Desc(integrationType.Description).PossibleValuesString(FlattenToString(integrations)...).Build()
+		integrationType.ValidateFunc = validation.StringInSlice(FlattenToString(integrations), false)
 	}
 
 	return s
@@ -643,6 +650,10 @@ func getTechnicalEmailsForTerraform(s *service.ServiceGetOut) *schema.Set {
 // flattenIntegrations converts the service integrations into a list of maps
 func flattenIntegrations(integrations []service.ServiceIntegrationOut, kinds ...service.IntegrationType) []map[string]interface{} {
 	result := make([]map[string]any, 0)
+	if len(integrations) == 0 || len(kinds) == 0 {
+		return result
+	}
+
 	for _, v := range integrations {
 		if slices.Contains(kinds, v.IntegrationType) {
 			result = append(result, map[string]any{
