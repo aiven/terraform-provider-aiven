@@ -142,8 +142,8 @@ Optional:
 
 Required:
 
-- `integration_type` (String) Type of the service integration. Supported integrations are `clickhouse_kafka` and `clickhouse_postgresql`.
-- `source_service_name` (String) Name of the source service.
+- `integration_type` (String) Type of the service integration
+- `source_service_name` (String) Name of the source service
 
 
 <a id="nestedblock--tag"></a>

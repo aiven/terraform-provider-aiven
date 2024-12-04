@@ -75,7 +75,7 @@ resource "aiven_thanos" "example_thanos" {
 
 Required:
 
-- `integration_type` (String) Type of the service integration. The only supported value at the moment is `read_replica`
+- `integration_type` (String) Type of the service integration
 - `source_service_name` (String) Name of the source service
 
 

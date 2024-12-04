@@ -142,7 +142,7 @@ const (
 	DefaultResourceNamePrefix = "test-acc"
 
 	// DefaultRandomSuffixLength is the default length of the random suffix used in acceptance tests.
-	DefaultRandomSuffixLength = 10
+	DefaultRandomSuffixLength = 6
 )
 
 func RandStr() string {
