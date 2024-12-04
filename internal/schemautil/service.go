@@ -209,7 +209,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Description: "Service state. One of `POWEROFF`, `REBALANCING`, `REBUILDING` or `RUNNING`",
 		},
 		"service_integrations": {
-			Type:        schema.TypeList,
+			Type:        schema.TypeSet,
 			Optional:    true,
 			Computed:    true,
 			Description: "Service integrations to specify when creating a service. Not applied after initial service creation",
