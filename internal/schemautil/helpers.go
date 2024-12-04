@@ -10,6 +10,7 @@ import (
 	"github.com/docker/go-units"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // ResourceStateOrResourceDiff either *schema.ResourceState or *schema.ResourceDiff
@@ -32,22 +33,19 @@ type PlanParameters struct {
 }
 
 func GetAPIServiceIntegrations(d ResourceStateOrResourceDiff) []service.ServiceIntegrationIn {
-	var apiServiceIntegrations []service.ServiceIntegrationIn
-	tfServiceIntegrations := d.Get("service_integrations")
-	if tfServiceIntegrations != nil {
-		tfServiceIntegrationList := tfServiceIntegrations.([]interface{})
-		for _, definition := range tfServiceIntegrationList {
-			definitionMap := definition.(map[string]interface{})
-			sourceService := definitionMap["source_service_name"].(string)
-			userConfig := make(map[string]any)
-			integrationType := definitionMap["integration_type"].(string)
-			apiIntegration := service.ServiceIntegrationIn{
-				IntegrationType: service.IntegrationType(integrationType),
-				SourceService:   &sourceService,
-				UserConfig:      &userConfig,
-			}
-			apiServiceIntegrations = append(apiServiceIntegrations, apiIntegration)
+	tfServiceIntegrations := d.Get("service_integrations").(*schema.Set).List()
+	apiServiceIntegrations := make([]service.ServiceIntegrationIn, 0, len(tfServiceIntegrations))
+	for _, definition := range tfServiceIntegrations {
+		definitionMap := definition.(map[string]interface{})
+		sourceService := definitionMap["source_service_name"].(string)
+		userConfig := make(map[string]any)
+		integrationType := definitionMap["integration_type"].(string)
+		apiIntegration := service.ServiceIntegrationIn{
+			IntegrationType: service.IntegrationType(integrationType),
+			SourceService:   &sourceService,
+			UserConfig:      &userConfig,
 		}
+		apiServiceIntegrations = append(apiServiceIntegrations, apiIntegration)
 	}
 	return apiServiceIntegrations
 }
