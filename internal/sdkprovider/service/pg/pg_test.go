@@ -1088,3 +1088,58 @@ func testAccCheckAivenServicePGAttributes(n string) resource.TestCheckFunc {
 		return nil
 	}
 }
+
+func TestAccAivenServicePG_disaster_recovery(t *testing.T) {
+	primaryName := "aiven_pg.primary"
+	secondaryName := "aiven_pg.secondary"
+	projectName := os.Getenv("AIVEN_PROJECT_NAME")
+	randStr := acc.RandStr()
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acc.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPGServiceResourceDisasterRecovery(projectName, randStr),
+				Check: resource.ComposeTestCheckFunc(
+					acc.TestAccCheckAivenServiceCommonAttributes(primaryName),
+					acc.TestAccCheckAivenServiceCommonAttributes(secondaryName),
+					// One service integration should be created
+					resource.TestCheckResourceAttr(secondaryName, "service_integrations.#", "1"),
+					// Which is of type disaster_recovery
+					resource.TestCheckTypeSetElemNestedAttrs(secondaryName, "service_integrations.*", map[string]string{
+						"integration_type":    "disaster_recovery",
+						"source_service_name": "test-acc-primary-" + randStr,
+					}),
+				),
+			},
+		},
+	})
+}
+
+func testAccPGServiceResourceDisasterRecovery(project, randStr string) string {
+	return fmt.Sprintf(`
+resource "aiven_pg" "primary" {
+  project                 = "%[1]s"
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-primary-%[2]s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_pg" "secondary" {
+  project                 = aiven_pg.primary.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-secondary-%[2]s"
+  maintenance_window_dow  = "monday"
+  maintenance_window_time = "10:00:00"
+
+  service_integrations {
+    integration_type    = "disaster_recovery"
+    source_service_name = "test-acc-primary-%[2]s"
+  }
+}
+`, project, randStr)
+}

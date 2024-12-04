@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -21,6 +22,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
+	"github.com/aiven/terraform-provider-aiven/internal/schemautil/userconfig"
 	"github.com/aiven/terraform-provider-aiven/internal/sdkprovider/userconfig/converters"
 )
 
@@ -72,7 +74,30 @@ var TechEmailsResourceSchema = &schema.Resource{
 func ServiceCommonSchemaWithUserConfig(kind string) map[string]*schema.Schema {
 	s := ServiceCommonSchema()
 	converters.SetUserConfig(converters.ServiceUserConfig, kind, s)
+
+	// Assigns the integration types that are allowed to be set when creating a service
+	integrations := getBootstrapIntegrationTypes(kind)
+	if len(integrations) > 0 {
+		r := s["service_integrations"].Elem.(*schema.Resource)
+		r.Schema["integration_type"].Description = userconfig.Desc(r.Schema["integration_type"].Description).PossibleValuesString(FlattenToString(integrations)...).Build()
+	}
+
 	return s
+}
+
+// getBootstrapIntegrationTypes returns the integration types that are allowed to be set when creating a service.
+func getBootstrapIntegrationTypes(kind string) []service.IntegrationType {
+	list := make([]service.IntegrationType, 0)
+	switch kind {
+	case ServiceTypeMySQL, ServiceTypePG, ServiceTypeAlloyDBOmni:
+		list = append(list, service.IntegrationTypeReadReplica)
+	}
+
+	if kind == ServiceTypePG {
+		list = append(list, service.IntegrationTypeDisasterRecovery)
+	}
+
+	return list
 }
 
 func ServiceCommonSchema() map[string]*schema.Schema {
@@ -223,7 +248,7 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 					"integration_type": {
 						Type:        schema.TypeString,
 						Required:    true,
-						Description: "Type of the service integration. The only supported value at the moment is `read_replica`",
+						Description: "Type of the service integration",
 					},
 				},
 			},
@@ -522,7 +547,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		return nil
 	}
 
-	if len(getIntegrationsForTerraform(s.ServiceIntegrations, service.IntegrationTypeAutoscaler)) == 0 {
+	if len(flattenIntegrations(s.ServiceIntegrations, service.IntegrationTypeAutoscaler)) == 0 {
 		diskSpace, err := getDiskSpaceFromStateOrDiff(ctx, d, client)
 		if err != nil {
 			return diag.Errorf("error getting default disc space: %s", err)
@@ -615,18 +640,18 @@ func getTechnicalEmailsForTerraform(s *service.ServiceGetOut) *schema.Set {
 	return schema.NewSet(schema.HashResource(TechEmailsResourceSchema), techEmails)
 }
 
-func getIntegrationsForTerraform(integrations []service.ServiceIntegrationOut, integrationType service.IntegrationType) []map[string]interface{} {
-	var filteredIntegrations []map[string]interface{}
-	for _, integration := range integrations {
-		if integration.IntegrationType == integrationType {
-			integrationMap := map[string]interface{}{
-				"integration_type":    integration.IntegrationType,
-				"source_service_name": integration.SourceService,
-			}
-			filteredIntegrations = append(filteredIntegrations, integrationMap)
+// flattenIntegrations converts the service integrations into a list of maps
+func flattenIntegrations(integrations []service.ServiceIntegrationOut, kinds ...service.IntegrationType) []map[string]interface{} {
+	result := make([]map[string]any, 0)
+	for _, v := range integrations {
+		if slices.Contains(kinds, v.IntegrationType) {
+			result = append(result, map[string]any{
+				"integration_type":    v.IntegrationType,
+				"source_service_name": v.SourceService,
+			})
 		}
 	}
-	return filteredIntegrations
+	return result
 }
 
 func ResourceServiceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -777,9 +802,9 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		return fmt.Errorf("cannot set `components` : %w", err)
 	}
 
-	// Handle read_replica service integrations
-	readReplicaIntegrations := getIntegrationsForTerraform(s.ServiceIntegrations, service.IntegrationTypeReadReplica)
-	if err := d.Set("service_integrations", readReplicaIntegrations); err != nil {
+	// Handle service integrations
+	integrations := flattenIntegrations(s.ServiceIntegrations, getBootstrapIntegrationTypes(serviceType)...)
+	if err := d.Set("service_integrations", integrations); err != nil {
 		return err
 	}
 

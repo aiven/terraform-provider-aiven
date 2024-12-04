@@ -11,6 +11,7 @@ nav_order: 1
 
 ## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
 
+- Add `disaster_recovery` service integration type support
 - Add `alloydbomni` BETA resource and datasource
 - Add `aiven_alloydbomni_user` BETA resource and datasource
 - Add `aiven_alloydbomni_database` BETA resource and datasource

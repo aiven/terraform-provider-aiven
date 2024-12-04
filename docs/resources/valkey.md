@@ -72,7 +72,7 @@ resource "aiven_valkey" "example_valkey" {
 
 Required:
 
-- `integration_type` (String) Type of the service integration. The only supported value at the moment is `read_replica`
+- `integration_type` (String) Type of the service integration
 - `source_service_name` (String) Name of the source service
 
 
