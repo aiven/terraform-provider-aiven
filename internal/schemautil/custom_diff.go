@@ -62,7 +62,7 @@ func ShouldNotBeEmpty(_ context.Context, _, newValue, _ interface{}) bool {
 }
 
 func CustomizeDiffServiceIntegrationAfterCreation(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
-	if len(d.Id()) > 0 && d.HasChange("service_integrations") && len(d.Get("service_integrations").([]interface{})) != 0 {
+	if len(d.Id()) > 0 && d.HasChange("service_integrations") && len(d.Get("service_integrations").(*schema.Set).List()) != 0 {
 		return fmt.Errorf("service_integrations field can only be set during creation of a service")
 	}
 	return nil
