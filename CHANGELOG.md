@@ -9,6 +9,10 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
+
+- Add `disaster_recovery` service integration type support
+
 ## [4.30.0] - 2024-12-05
 
 - Add `aiven_kafka_native_acl` resource
