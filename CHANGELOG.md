@@ -104,6 +104,7 @@ nav_order: 1
   `organization:projects:write`, `organization:users:write`, `project:services:write`, `role:organization:admin`,
   `role:services:maintenance`, `role:services:recover`, `service:data:write`, `service:secrets:read`,
   `service:users:write`, remove `services:maintenance`
+- Add `aiven_kafka_native_acl` resource
 
 ## [4.28.0] - 2024-10-21
 

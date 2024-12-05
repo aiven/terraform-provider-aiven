@@ -47,6 +47,7 @@ func knownMissingSweepers() []string {
 		"aiven_influxdb_database",
 		"aiven_mysql_user",
 		"aiven_kafka_acl",
+		"aiven_kafka_native_acl",
 		"aiven_pg_database",
 		"aiven_kafka_user",
 		"aiven_redis_user",
