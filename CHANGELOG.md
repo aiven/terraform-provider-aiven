@@ -9,8 +9,9 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
-## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+## [4.30.0] - 2024-12-05
 
+- Add `aiven_kafka_native_acl` resource
 - Add `aiven_opensearch` resource field `opensearch_user_config.opensearch.search_insights_top_queries`
 - Add `aiven_thanos` resource field `thanos_user_config.private_access`: Allow access to selected service ports from
   private networks
@@ -104,7 +105,6 @@ nav_order: 1
   `organization:projects:write`, `organization:users:write`, `project:services:write`, `role:organization:admin`,
   `role:services:maintenance`, `role:services:recover`, `service:data:write`, `service:secrets:read`,
   `service:users:write`, remove `services:maintenance`
-- Add `aiven_kafka_native_acl` resource
 
 ## [4.28.0] - 2024-10-21
 
