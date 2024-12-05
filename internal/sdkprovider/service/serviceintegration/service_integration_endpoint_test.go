@@ -2,17 +2,16 @@ package serviceintegration_test
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	acc "github.com/aiven/terraform-provider-aiven/internal/acctest"
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -248,11 +247,8 @@ func testAccCheckAivenServiceIntegraitonEndpointResourceDestroy(s *terraform.Sta
 		}
 
 		i, err := c.ServiceIntegrationEndpoints.Get(ctx, projectName, endpointID)
-		if err != nil {
-			var e aiven.Error
-			if errors.As(err, &e) && e.Status != 404 {
-				return err
-			}
+		if common.IsCritical(err) {
+			return err
 		}
 
 		if i != nil {
