@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/aiven/aiven-go-client/v2"
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
@@ -272,7 +271,7 @@ func resourceServiceIntegrationWaitUntilActive(ctx context.Context, d *schema.Re
 			ii, err := client.ServiceIntegrationGet(ctx, projectName, integrationID)
 			if err != nil {
 				// Sometimes Aiven API retrieves 404 error even when a successful service integration is created
-				if aiven.IsNotFound(err) {
+				if avngen.IsNotFound(err) {
 					log.Println("[DEBUG] Service Integration: not yet found")
 					return nil, notActive, nil
 				}

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/aiven/aiven-go-client/v2"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
@@ -48,19 +47,15 @@ func sweepServiceIntegrations(ctx context.Context) func(region string) error {
 			if err != nil {
 				return fmt.Errorf("error retrieving a list of service integration for service `%s`: %w", service.Name, err)
 			}
+
 			for _, serviceIntegration := range serviceIntegrations {
-				if err := client.ServiceIntegrations.Delete(
-					ctx,
-					projectName,
-					serviceIntegration.ServiceIntegrationID,
-				); err != nil {
-					if !aiven.IsNotFound(err) {
-						return fmt.Errorf(
-							"unable to delete service integration `%s`: %w",
-							serviceIntegration.ServiceIntegrationID,
-							err,
-						)
-					}
+				err = client.ServiceIntegrations.Delete(ctx, projectName, serviceIntegration.ServiceIntegrationID)
+				if common.IsCritical(err) {
+					return fmt.Errorf(
+						"unable to delete service integration `%s`: %w",
+						serviceIntegration.ServiceIntegrationID,
+						err,
+					)
 				}
 			}
 		}
