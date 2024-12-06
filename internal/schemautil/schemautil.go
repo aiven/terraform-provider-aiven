@@ -483,7 +483,17 @@ func serializeSet(s map[string]*schema.Schema, m map[string]any) map[string]any 
 	return m
 }
 
-// RenameAliases renames field names on object top level
+// RenameAlias renames field names terraform name -> dto name
+// Example: RenameAlias("hasFoo", "wantBar", "hasBaz", "wantEgg")
+func RenameAlias(keys ...string) KVModifier {
+	m := make(map[string]string, len(keys)/2)
+	for i := 0; i < len(keys); i += 2 {
+		m[keys[i]] = keys[i+1]
+	}
+	return RenameAliases(m)
+}
+
+// RenameAliases renames field names terraform name -> dto name
 func RenameAliases(aliases map[string]string) KVModifier {
 	return func(k string, v any) (string, any) {
 		alias, ok := aliases[k]

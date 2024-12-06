@@ -40,30 +40,31 @@ jobs:
       fail-fast: false
       matrix:
         pkg: [
-          kafka,
-          kafkatopic,
-          kafkaschema,
           account,
+          alloydbomni,
           cassandra,
           clickhouse,
           connectionpool,
+          dragonfly,
           flink,
-          pg,
           grafana,
           influxdb,
+          kafka,
+          kafkaschema,
+          kafkatopic,
           m3db,
           mysql,
           opensearch,
           organization,
+          pg,
           project,
           redis,
           servicecomponent,
-          staticip,
           serviceintegration,
-          vpc,
-          dragonfly,
+          staticip,
           thanos,
-          valkey
+          valkey,
+          vpc,
         ]
 
     steps:
