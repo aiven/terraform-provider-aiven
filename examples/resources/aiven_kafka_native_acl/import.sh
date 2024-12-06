@@ -1,0 +1,1 @@
+terraform import aiven_kafka_native_acl.example_acl PROJECT/SERVICE_NAME/ID
