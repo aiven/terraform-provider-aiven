@@ -2,9 +2,11 @@ package organization
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/aiven/aiven-go-client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/aiven/terraform-provider-aiven/internal/common"
+
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -12,7 +14,7 @@ import (
 
 func DatasourceOrganizationUserGroup() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: datasourceOrganizationUserGroupRead,
+		ReadContext: common.WithGenClient(datasourceOrganizationUserGroupRead),
 		Description: "Gets information about an existing user group in an organization.",
 		Schema: schemautil.ResourceSchemaAsDatasourceSchema(
 			aivenOrganizationUserGroupSchema, "organization_id", "name",
@@ -20,22 +22,24 @@ func DatasourceOrganizationUserGroup() *schema.Resource {
 	}
 }
 
-func datasourceOrganizationUserGroupRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	organizationID := d.Get("organization_id").(string)
-	name := d.Get("name").(string)
+func datasourceOrganizationUserGroupRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+	var (
+		organizationID = d.Get("organization_id").(string)
+		name           = d.Get("name").(string)
+	)
 
-	client := m.(*aiven.Client)
-	list, err := client.OrganizationUserGroups.List(ctx, organizationID)
+	list, err := client.UserGroupsList(ctx, organizationID)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	for _, ug := range list.UserGroups {
+	for _, ug := range list {
 		if ug.UserGroupName == name {
-			d.SetId(schemautil.BuildResourceID(organizationID, ug.UserGroupID))
-			return resourceOrganizationUserGroupRead(ctx, d, m)
+			d.SetId(schemautil.BuildResourceID(organizationID, ug.UserGroupId))
+
+			return resourceOrganizationUserGroupRead(ctx, d, client)
 		}
 	}
 
-	return diag.Errorf("organization user group %s not found", name)
+	return fmt.Errorf("organization user group %s not found", name)
 }
