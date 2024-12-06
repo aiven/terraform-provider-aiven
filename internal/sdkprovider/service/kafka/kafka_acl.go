@@ -49,9 +49,10 @@ var aivenKafkaACLSchema = map[string]*schema.Schema{
 func ResourceKafkaACL() *schema.Resource {
 	return &schema.Resource{
 		Description: `
-Creates and manages an [access control list](https://aiven.io/docs/products/kafka/concepts/acl) (ACL) entry for an Aiven for Apache Kafka® service.
+Creates and manages Aiven [access control lists](https://aiven.io/docs/products/kafka/concepts/acl) (ACLs) for an Aiven for Apache Kafka® service. ACLs control access to Kafka topics, consumer groups,
+clusters, and Schema Registry.
 
-ACL entries grant users rights to produce, consume, and manage Kafka topics.
+Aiven ACLs provide simplified topic-level control with basic permissions and wildcard support. For more advanced access control, you can use [Kafka-native ACLs](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/kafka_native_acl).
 `,
 		CreateContext: resourceKafkaACLCreate,
 		ReadContext:   resourceKafkaACLRead,
