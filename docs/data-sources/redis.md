@@ -45,7 +45,7 @@ data "aiven_redis" "redis1" {
 - `redis` (List of Object, Sensitive) Redis server provided values (see [below for nested schema](#nestedatt--redis))
 - `redis_user_config` (List of Object) Redis user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedatt--redis_user_config))
 - `service_host` (String) The hostname of the service.
-- `service_integrations` (List of Object) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedatt--service_integrations))
+- `service_integrations` (Set of Object) Service integrations to specify when creating a service. Not applied after initial service creation (see [below for nested schema](#nestedatt--service_integrations))
 - `service_password` (String, Sensitive) Password used for connecting to the service, if applicable
 - `service_port` (Number) The port of the service
 - `service_type` (String) Aiven internal service type code
