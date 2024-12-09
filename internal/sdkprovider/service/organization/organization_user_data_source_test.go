@@ -11,14 +11,15 @@ import (
 )
 
 func TestAccAivenOrganizationUserDataSource_using_email(t *testing.T) {
-	orgID := os.Getenv("AIVEN_ORG_ID")
-	email := os.Getenv("AIVEN_ORG_USER_EMAIL")
+	var (
+		orgID          = os.Getenv("AIVEN_ORG_ID")
+		email          = os.Getenv("AIVEN_ORG_USER_EMAIL")
+		datasourceName = "data.aiven_organization_user.member"
+	)
 
 	if orgID == "" || email == "" {
 		t.Skip("Skipping test due to missing AIVEN_ORG_ID or AIVEN_ORG_USER_EMAIL environment variable")
 	}
-
-	datasourceName := "data.aiven_organization_user.member"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -29,6 +30,8 @@ func TestAccAivenOrganizationUserDataSource_using_email(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(datasourceName, "user_email"),
 					resource.TestCheckResourceAttrSet(datasourceName, "create_time"),
+					resource.TestCheckResourceAttrSet(datasourceName, "user_id"),
+					resource.TestCheckResourceAttrSet(datasourceName, "organization_id"),
 				),
 			},
 		},
@@ -36,14 +39,15 @@ func TestAccAivenOrganizationUserDataSource_using_email(t *testing.T) {
 }
 
 func TestAccAivenOrganizationUserDataSource_using_userid(t *testing.T) {
-	orgID := os.Getenv("AIVEN_ORG_ID")
-	userID := os.Getenv("AIVEN_ORG_USER_ID")
+	var (
+		orgID          = os.Getenv("AIVEN_ORG_ID")
+		userID         = os.Getenv("AIVEN_ORG_USER_ID")
+		datasourceName = "data.aiven_organization_user.member"
+	)
 
 	if orgID == "" || userID == "" {
 		t.Skip("Skipping test due to missing AIVEN_ORG_ID or AIVEN_ORG_USER_ID environment variable")
 	}
-
-	datasourceName := "data.aiven_organization_user.member"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
@@ -54,6 +58,8 @@ func TestAccAivenOrganizationUserDataSource_using_userid(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(datasourceName, "user_id"),
 					resource.TestCheckResourceAttrSet(datasourceName, "create_time"),
+					resource.TestCheckResourceAttrSet(datasourceName, "user_id"),
+					resource.TestCheckResourceAttrSet(datasourceName, "organization_id"),
 				),
 			},
 		},
