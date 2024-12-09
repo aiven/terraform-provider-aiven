@@ -64,7 +64,7 @@ func datasourceOrganizationUserRead(ctx context.Context, d *schema.ResourceData,
 
 	rm, err := client.OrganizationUserList(ctx, organizationID)
 	if err != nil {
-		return fmt.Errorf("cannot get organization [%s] user list: %s", organizationID, err)
+		return fmt.Errorf("cannot get organization [%s] user list: %w", organizationID, err)
 	}
 
 	// Find the organization user by email or ID
