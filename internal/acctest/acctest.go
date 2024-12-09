@@ -176,6 +176,7 @@ func TestAccCheckAivenServiceResourceDestroy(s *terraform.State) error {
 
 		r := func() []string {
 			return []string{
+				"aiven_alloydbomni",
 				"aiven_influxdb",
 				"aiven_grafana",
 				"aiven_mysql",
@@ -190,6 +191,10 @@ func TestAccCheckAivenServiceResourceDestroy(s *terraform.State) error {
 				"aiven_kafka_connector",
 				"aiven_kafka_connect",
 				"aiven_clickhouse",
+				"aiven_dragonfly",
+				"aiven_m3aggregator",
+				"aiven_thanos",
+				"aiven_valkey",
 			}
 		}
 		if sort.SearchStrings(r(), rs.Type) > 0 {

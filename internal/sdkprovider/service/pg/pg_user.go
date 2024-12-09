@@ -77,9 +77,20 @@ func resourcePGUserCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	projectName := d.Get("project").(string)
 	serviceName := d.Get("service_name").(string)
+
+	// Validates that the service is an Pg service
+	pg, err := client.Services.Get(ctx, projectName, serviceName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if pg.Type != schemautil.ServiceTypePG {
+		return diag.Errorf("expected service type %q, got %q", schemautil.ServiceTypePG, pg.Type)
+	}
+
 	username := d.Get("username").(string)
 	allowReplication := d.Get("pg_allow_replication").(bool)
-	_, err := client.ServiceUsers.Create(
+	_, err = client.ServiceUsers.Create(
 		ctx,
 		projectName,
 		serviceName,

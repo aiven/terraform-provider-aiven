@@ -6,11 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/aiven/go-client-codegen/handler/staticip"
 	"github.com/docker/go-units"
@@ -37,6 +39,7 @@ func DefaultResourceTimeouts() *schema.ResourceTimeout {
 }
 
 const (
+	ServiceTypeAlloyDBOmni      = "alloydbomni"
 	ServiceTypePG               = "pg"
 	ServiceTypeCassandra        = "cassandra"
 	ServiceTypeOpenSearch       = "opensearch"
@@ -826,7 +829,7 @@ func copyConnectionInfoFromAPIResponseToTerraform(
 		setProp(props, "connect_uri", connectionInfo.KafkaConnectUri)
 		setProp(props, "rest_uri", connectionInfo.KafkaRestUri)
 		setProp(props, "schema_registry_uri", connectionInfo.SchemaRegistryUri)
-	case ServiceTypePG:
+	case ServiceTypeAlloyDBOmni, ServiceTypePG:
 		// For compatibility with the old schema, we only set the first URI.
 		// TODO: Remove this block in the next major version. Keep `uris` key only, see below.
 		if len(connectionInfo.Pg) > 0 {
@@ -955,16 +958,42 @@ func setProp[T comparable](m map[string]any, k string, v *T) {
 	}
 }
 
+// NewNotFound creates a new not found error
+// There are lots of endpoints that return a list of objects which might not contain the object we are looking for.
+// In this case, we should still return 404.
+func NewNotFound(msg string, args ...any) error {
+	return aiven.Error{Status: http.StatusNotFound, Message: fmt.Sprintf(msg, args...)}
+}
+
+func IsNotFound(err error) bool {
+	return aiven.IsNotFound(err) || avngen.IsNotFound(err)
+}
+
+func OmitNotFound(err error) error {
+	if IsNotFound(err) {
+		return nil
+	}
+	return err
+}
+
 // IsUnknownRole checks if the database returned an error because of an unknown role
 // to make deletions idempotent
 func IsUnknownRole(err error) bool {
-	var e aiven.Error
-	return errors.As(err, &e) && strings.Contains(e.Message, "Code: 511")
+	var oldError aiven.Error
+	var newError avngen.Error
+	var msg string
+	switch {
+	case errors.As(err, &oldError):
+		msg = oldError.Message
+	case errors.As(err, &newError):
+		msg = newError.Message
+	}
+	return strings.Contains(msg, "Code: 511")
 }
 
 // IsUnknownResource is a function to handle errors that we want to treat as "Not Found"
 func IsUnknownResource(err error) bool {
-	return aiven.IsNotFound(err) || IsUnknownRole(err)
+	return IsNotFound(err) || IsUnknownRole(err)
 }
 
 func ResourceReadHandleNotFound(err error, d *schema.ResourceData) error {

@@ -1,8 +1,10 @@
 package schemautil
 
 import (
+	"context"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -72,4 +74,18 @@ func PointerValueOrDefault[T comparable](v *T, d T) T {
 		return d
 	}
 	return *v
+}
+
+// ComposeContexts composes multiple context (create, update, read or delete) functions into one.
+// So instead of chaining them, they can be composed
+func ComposeContexts(funcs ...func(context.Context, *schema.ResourceData, any) diag.Diagnostics) func(context.Context, *schema.ResourceData, any) diag.Diagnostics {
+	return func(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
+		for _, f := range funcs {
+			err := f(ctx, d, m)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
 }
