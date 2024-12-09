@@ -9,7 +9,6 @@ import (
 	"github.com/aiven/go-client-codegen/handler/alloydbomni"
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
@@ -20,11 +19,11 @@ const serviceAccountCredentials = "service_account_credentials"
 func aivenAlloyDBOmniSchema() map[string]*schema.Schema {
 	s := schemautil.ServiceCommonSchemaWithUserConfig(schemautil.ServiceTypeAlloyDBOmni)
 	s[serviceAccountCredentials] = &schema.Schema{
-		Description:  "Your [Google service account key](https://cloud.google.com/iam/docs/service-account-creds#key-types) in JSON format.",
-		Optional:     true,
-		Sensitive:    true,
-		Type:         schema.TypeString,
-		ValidateFunc: validation.StringIsJSON,
+		Description:      "Your [Google service account key](https://cloud.google.com/iam/docs/service-account-creds#key-types) in JSON format.",
+		Optional:         true,
+		Sensitive:        true,
+		Type:             schema.TypeString,
+		ValidateDiagFunc: validateServiceAccountCredentials,
 	}
 	s[schemautil.ServiceTypeAlloyDBOmni] = &schema.Schema{
 		Type:        schema.TypeList,

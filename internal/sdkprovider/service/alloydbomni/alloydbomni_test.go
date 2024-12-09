@@ -1072,28 +1072,57 @@ func TestAccAivenServiceAlloyDBOmni_service_account_credentials(t *testing.T) {
 	project := os.Getenv("AIVEN_PROJECT_NAME")
 	resourceName := "aiven_alloydbomni.foo"
 	serviceName := fmt.Sprintf("test-acc-sr-%s", acc.RandStr())
+
+	// Service account credentials are managed by its own API
+	// When Terraform fails to create a service because of this field,
+	// the whole resource is tainted, and must be replaced
+	serviceAccountCredentialsInvalid := testAccAivenServiceAlloyDBOmniServiceAccountCredentials(
+		project, serviceName,
+		`{
+		  "private_key": "-----BEGIN PRIVATE KEY--.........----END PRIVATE KEY-----\n",
+		  "client_email": "example@aiven.io",
+		  "client_id": "example_user_id",
+		  "type": "service_account",
+		  "project_id": "example_project_id"
+		}`,
+	)
+	serviceAccountCredentialsEmpty := testAccAivenServiceAlloyDBOmniServiceAccountCredentials(
+		project, serviceName, "",
+	)
+	serviceAccountCredentialsValid := testAccAivenServiceAlloyDBOmniServiceAccountCredentials(
+		project, serviceName, getTestServiceAccountCredentials("foo"),
+	)
+	serviceAccountCredentialsValidModified := testAccAivenServiceAlloyDBOmniServiceAccountCredentials(
+		project, serviceName, getTestServiceAccountCredentials("bar"),
+	)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acc.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
 		CheckDestroy:             acc.TestAccCheckAivenServiceResourceDestroy,
 		Steps: []resource.TestStep{
 			{
+				// 0. Invalid credentials
+				Config:      serviceAccountCredentialsInvalid,
+				ExpectError: regexp.MustCompile(`private_key_id is required`),
+			},
+			{
 				// 1. No credential initially
-				Config: testAccAivenServiceAlloyDBOmniServiceAccountCredentials(project, serviceName, ""),
+				Config: serviceAccountCredentialsEmpty,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr(resourceName, "service_account_credentials"),
 				),
 			},
 			{
 				// 2. Credentials are set
-				Config: testAccAivenServiceAlloyDBOmniServiceAccountCredentials(project, serviceName, "foo"),
+				Config: serviceAccountCredentialsValid,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "service_account_credentials"),
 				),
 			},
 			{
 				// 3. Updates the credentials
-				Config: testAccAivenServiceAlloyDBOmniServiceAccountCredentials(project, serviceName, "bar"),
+				Config: serviceAccountCredentialsValidModified,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "service_account_credentials"),
 					// Validates they key has been updated
@@ -1111,7 +1140,7 @@ func TestAccAivenServiceAlloyDBOmni_service_account_credentials(t *testing.T) {
 			},
 			{
 				// 4. Removes the credentials
-				Config: testAccAivenServiceAlloyDBOmniServiceAccountCredentials(project, serviceName, ""),
+				Config: serviceAccountCredentialsEmpty,
 				Check: resource.ComposeTestCheckFunc(
 					// It looks like TF can't unset an attribute, when it was set.
 					// So I can't use TestCheckNoResourceAttr here.
@@ -1131,14 +1160,14 @@ func TestAccAivenServiceAlloyDBOmni_service_account_credentials(t *testing.T) {
 			},
 			{
 				// 5. Re-applies the credential, so we can check unexpected remote state changes in the next step
-				Config: testAccAivenServiceAlloyDBOmniServiceAccountCredentials(project, serviceName, "bar"),
+				Config: serviceAccountCredentialsValidModified,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "service_account_credentials"),
 				),
 			},
 			{
 				// 6. Same config. Modifies the remove state, expects non-empty plan
-				Config:             testAccAivenServiceAlloyDBOmniServiceAccountCredentials(project, serviceName, "bar"),
+				Config:             serviceAccountCredentialsValidModified,
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
 				PreConfig: func() {
@@ -1158,23 +1187,22 @@ func TestAccAivenServiceAlloyDBOmni_service_account_credentials(t *testing.T) {
 
 func getTestServiceAccountCredentials(privateKeyID string) string {
 	return fmt.Sprintf(`{
-  "private_key_id": %q,
-  "private_key": "-----BEGIN PRIVATE KEY--.........----END PRIVATE KEY-----\n",
-  "client_email": "example@aiven.io",
-  "client_id": "example_user_id",
-  "type": "service_account",
-  "project_id": "example_project_id"
-}`, privateKeyID)
+	  "private_key_id": %q,
+	  "private_key": "-----BEGIN PRIVATE KEY--.........----END PRIVATE KEY-----\n",
+	  "client_email": "example@aiven.io",
+	  "client_id": "example_user_id",
+	  "type": "service_account",
+	  "project_id": "example_project_id"
+	}`, privateKeyID)
 }
 
-// testAccAivenServiceAlloyDBOmniServiceAccountCredentials adds service_account_credentials when privateKeyID is not empty
-func testAccAivenServiceAlloyDBOmniServiceAccountCredentials(project, name, privateKeyID string) string {
+func testAccAivenServiceAlloyDBOmniServiceAccountCredentials(project, name, privateKey string) string {
 	var p string
-	if privateKeyID != "" {
+	if privateKey != "" {
 		p = fmt.Sprintf(`
   service_account_credentials = <<EOF
     %s
-    EOF`, getTestServiceAccountCredentials(privateKeyID))
+    EOF`, privateKey)
 	}
 
 	return fmt.Sprintf(`
