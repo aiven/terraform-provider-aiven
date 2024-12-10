@@ -21,14 +21,14 @@ var aivenKafkaNativeACLSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringLenBetween(1, 256),
-		Description:  userconfig.Desc("The kafka resource name").ForceNew().MaxLen(256).Build(),
+		Description:  userconfig.Desc("The name of the Kafka resource the permission applies to, such as the topic name or group ID.").ForceNew().MaxLen(256).Build(),
 	},
 	"resource_type": {
 		Type:         schema.TypeString,
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringInSlice(kafka.ResourceTypeChoices(), false),
-		Description:  userconfig.Desc("The kafka resource type").ForceNew().PossibleValuesString(kafka.ResourceTypeChoices()...).Build(),
+		Description:  userconfig.Desc("The type of Kafka resource.").ForceNew().PossibleValuesString(kafka.ResourceTypeChoices()...).Build(),
 	},
 	"pattern_type": {
 		Type:         schema.TypeString,
@@ -42,34 +42,37 @@ var aivenKafkaNativeACLSchema = map[string]*schema.Schema{
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringLenBetween(1, 256),
-		Description:  userconfig.Desc("Principal is in type:name' format").ForceNew().MaxLen(256).Build(),
+		Description:  userconfig.Desc("Identities in `user:name` format that the permissions apply to. The `name` supports wildcards.").ForceNew().MaxLen(256).Build(),
 	},
 	"host": {
 		Type:         schema.TypeString,
 		Optional:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringLenBetween(1, 256),
-		Description:  userconfig.Desc("The host or `*` for all hosts").ForceNew().MaxLen(256).Build(),
+		Description:  userconfig.Desc("The IP address from which a principal is allowed or denied access to the resource. Use `*` for all hosts.").ForceNew().MaxLen(256).Build(),
 	},
 	"operation": {
 		Type:         schema.TypeString,
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringInSlice(kafka.OperationTypeChoices(), false),
-		Description:  userconfig.Desc("The operation").ForceNew().PossibleValuesString(kafka.OperationTypeChoices()...).Build(),
+		Description:  userconfig.Desc("The action that a principal is allowed or denied on the Kafka resource.").ForceNew().PossibleValuesString(kafka.OperationTypeChoices()...).Build(),
 	},
 	"permission_type": {
 		Type:         schema.TypeString,
 		Required:     true,
 		ForceNew:     true,
 		ValidateFunc: validation.StringInSlice(kafka.KafkaAclPermissionTypeChoices(), false),
-		Description:  userconfig.Desc("The permission type").ForceNew().PossibleValuesString(kafka.KafkaAclPermissionTypeChoices()...).Build(),
+		Description:  userconfig.Desc("Specifies whether the action is explicitly allowed or denied for the principal on the specified resource.").ForceNew().PossibleValuesString(kafka.KafkaAclPermissionTypeChoices()...).Build(),
 	},
 }
 
 func ResourceKafkaNativeACL() *schema.Resource {
 	return &schema.Resource{
-		Description:   userconfig.Desc(`Manages native acls in [kafka service](https://aiven.io/docs/products/kafka/concepts/acl)`).Build(),
+		Description: userconfig.Desc(`Creates and manages Kafka-native [access control lists](https://aiven.io/docs/products/kafka/concepts/acl) (ACLs) for an Aiven for Apache Kafka® service. ACLs control access to Kafka topics, consumer groups,
+clusters, and Schema Registry.
+
+Kafka-native ACLs provide advanced resource-level access control with fine-grained permissions, including ` + "`ALLOW`" + ` and ` + "`DENY`" + ` rules. For simplified topic-level control you can use [Aiven ACLs](https://registry.terraform.io/providers/aiven/aiven/latest/docs/resources/kafka_acl).`).Build(),
 		CreateContext: common.WithGenClient(resourceKafkaNativeACLCreate),
 		ReadContext:   common.WithGenClient(resourceKafkaNativeACLRead),
 		DeleteContext: common.WithGenClient(resourceKafkaNativeACLDelete),
