@@ -74,24 +74,6 @@ func ToOptionalString(val interface{}) string {
 	}
 }
 
-func ParseOptionalStringToInt64(val interface{}) *int64 {
-	v, ok := val.(string)
-	if !ok {
-		return nil
-	}
-
-	if v == "" {
-		return nil
-	}
-
-	res, err := strconv.ParseInt(v, 10, 64)
-	if err != nil {
-		return nil
-	}
-
-	return &res
-}
-
 func CreateOnlyDiffSuppressFunc(_, _, _ string, d *schema.ResourceData) bool {
 	return len(d.Id()) > 0
 }
@@ -264,7 +246,7 @@ func SplitResourceID4(resourceID string) (string, string, string, string, error)
 	return parts[0], parts[1], parts[2], parts[3], nil
 }
 
-func FlattenToString(a []interface{}) []string {
+func FlattenToString[T any](a []T) []string {
 	r := make([]string, len(a))
 	for i, v := range a {
 		r[i] = fmt.Sprint(v)
