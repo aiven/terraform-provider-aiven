@@ -140,8 +140,11 @@ fmt-test: $(TERRAFMT)
 # macOS requires to install GNU sed first. Use `brew install gnu-sed` to install it.
 # It has to be added to PATH as `sed` command, to replace default BSD sed.
 # See `brew info gnu-sed` for more details on how to add it to PATH.
+# /^import ($$/: starts with "import ("
+# /^)/: ends with ")"
+# /^[[:space:]]*$$/: empty lines
 fmt-imports:
-	find . -type f -name '*.go' -exec sed -zi 's/"[\r\n\t]\+"/"\n"/g' {} +
+	find . -type f -name '*.go' -exec sed -i '/^import ($$/,/^)/ {/^[[:space:]]*$$/d}' {} +
 	goimports -local "github.com/aiven/terraform-provider-aiven" -w .
 
 #################################################

@@ -4,11 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aiven/terraform-provider-aiven/internal/common"
-
 	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
