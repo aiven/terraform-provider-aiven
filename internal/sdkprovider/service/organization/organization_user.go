@@ -2,8 +2,9 @@ package organization
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -66,8 +67,8 @@ data source. You can manage user access to projects with the ` + "`aiven_organiz
 ` + "`aiven_organization_user_group_member`" + `, and ` + "`aiven_organization_permission`" + ` resources.
 `,
 		CreateContext: resourceOrganizationUserCreate,
-		ReadContext:   resourceOrganizationUserRead,
-		DeleteContext: resourceOrganizationUserDelete,
+		ReadContext:   common.WithGenClient(resourceOrganizationUserRead),
+		DeleteContext: common.WithGenClient(resourceOrganizationUserDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -92,34 +93,30 @@ func resourceOrganizationUserCreate(_ context.Context, _ *schema.ResourceData, _
 }
 
 // resourceOrganizationUserRead reads the properties of an Aiven Organization User and provides them to Terraform
-func resourceOrganizationUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func resourceOrganizationUserRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	organizationID, userEmail, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	rm, err := client.OrganizationUser.List(ctx, organizationID)
+	resp, err := client.OrganizationUserList(ctx, organizationID)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	for _, user := range rm.Users {
-		userInfo := user.UserInfo
-
-		if userInfo.UserEmail == userEmail {
-			if err := d.Set("organization_id", organizationID); err != nil {
-				return diag.FromErr(err)
+	for _, user := range resp {
+		if user.UserInfo.UserEmail == userEmail {
+			if err = d.Set("organization_id", organizationID); err != nil {
+				return err
 			}
-			if err := d.Set("user_email", userInfo.UserEmail); err != nil {
-				return diag.FromErr(err)
+			if err = d.Set("user_email", userEmail); err != nil {
+				return err
 			}
-			if err := d.Set("create_time", user.JoinTime.String()); err != nil {
-				return diag.FromErr(err)
+			if err = d.Set("create_time", user.JoinTime.String()); err != nil {
+				return err
 			}
-			if err := d.Set("user_id", user.UserID); err != nil {
-				return diag.FromErr(err)
+			if err = d.Set("user_id", user.UserId); err != nil {
+				return err
 			}
 		}
 	}
@@ -127,52 +124,50 @@ func resourceOrganizationUserRead(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceOrganizationUserDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+func resourceOrganizationUserDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+	var invitationFound = true
 
 	organizationID, userEmail, err := schemautil.SplitResourceID2(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
-
-	found := true
 
 	// delete organization user invitation
-	err = client.OrganizationUserInvitations.Delete(ctx, organizationID, userEmail)
+	err = client.OrganizationUserInvitationDelete(ctx, organizationID, userEmail)
 	if err != nil {
-		if !aiven.IsNotFound(err) {
-			return diag.FromErr(err)
+		if !avngen.IsNotFound(err) {
+			return err
 		}
 
-		found = false
+		invitationFound = false
 	}
 
-	r, err := client.OrganizationUser.List(ctx, organizationID)
+	resp, err := client.OrganizationUserList(ctx, organizationID)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	if len(r.Users) == 0 {
+	if len(resp) == 0 {
 		return nil
 	}
 
 	// delete organization user
-	for _, u := range r.Users {
+	for _, u := range resp {
 		userInfo := u.UserInfo
 
 		if userInfo.UserEmail == userEmail {
-			err = client.OrganizationUser.Delete(ctx, organizationID, u.UserID)
-			if common.IsCritical(err) {
-				return diag.FromErr(err)
+			err = client.OrganizationUserDelete(ctx, organizationID, u.UserId)
+			if err != nil && !avngen.IsNotFound(err) {
+				return err
 			}
-			found = true
-			break
+
+			return nil
 		}
 	}
 
-	if !found {
-		return diag.Errorf("user with email %q is not a part of the organization %q", userEmail, organizationID)
+	if invitationFound {
+		return nil
 	}
 
-	return nil
+	return fmt.Errorf("user with email %q is not a part of the organization %q", userEmail, organizationID)
 }

@@ -2,12 +2,11 @@ package organization_test
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"regexp"
 	"testing"
 
-	"github.com/aiven/aiven-go-client/v2"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -54,9 +53,14 @@ data "aiven_organization_user" "member" {
 }
 
 func testAccCheckAivenOrganizationUserResourceDestroy(s *terraform.State) error {
-	c := acc.GetTestAivenClient()
+	var (
+		c, err = acc.GetTestGenAivenClient()
+		ctx    = context.Background()
+	)
 
-	ctx := context.Background()
+	if err != nil {
+		return fmt.Errorf("error getting generated Aiven client: %w", err)
+	}
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "aiven_organization_user" {
@@ -68,28 +72,26 @@ func testAccCheckAivenOrganizationUserResourceDestroy(s *terraform.State) error 
 			return err
 		}
 
-		r, err := c.Organization.Get(ctx, organizationID)
+		resp, err := c.OrganizationGet(ctx, organizationID)
 		if err != nil {
-			var e aiven.Error
-			if errors.As(err, &e) && e.Status != 404 {
-				return err
-			}
-
-			return nil
-		}
-
-		if r.ID == organizationID {
-			ri, err := c.OrganizationUserInvitations.List(ctx, organizationID)
-			if err != nil {
-				var e aiven.Error
-				if errors.As(err, &e) && e.Status != 404 {
-					return err
-				}
-
+			if avngen.IsNotFound(err) {
 				return nil
 			}
 
-			for _, i := range ri.Invitations {
+			return err
+		}
+
+		if resp.OrganizationId == organizationID {
+			respI, err := c.OrganizationUserInvitationsList(ctx, organizationID)
+			if err != nil {
+				if avngen.IsNotFound(err) {
+					return nil
+				}
+
+				return err
+			}
+
+			for _, i := range respI {
 				if i.UserEmail == userEmail {
 					return fmt.Errorf("organization user (%s) still exists", rs.Primary.ID)
 				}
