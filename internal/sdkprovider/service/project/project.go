@@ -432,7 +432,7 @@ func setProjectTerraformProperties(
 	project *aiven.Project,
 ) diag.Diagnostics {
 	if stateID := d.Get("parent_id"); stateID != "" {
-		idToSet, err := schemautil.DetermineMixedOrganizationConstraintIDToStore(
+		idToSet, err := determineMixedOrganizationConstraintIDToStore(
 			ctx,
 			client,
 			stateID.(string),

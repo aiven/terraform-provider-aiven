@@ -2,11 +2,13 @@ package organization
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/aiven/aiven-go-client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	avngen "github.com/aiven/go-client-codegen"
+	"github.com/aiven/go-client-codegen/handler/account"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
@@ -41,10 +43,10 @@ var aivenOrganizationalUnitSchema = map[string]*schema.Schema{
 func ResourceOrganizationalUnit() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Creates and manages an [organizational unit](https://aiven.io/docs/platform/concepts/orgs-units-projects) in an Aiven organization.",
-		CreateContext: resourceOrganizationalUnitCreate,
-		ReadContext:   resourceOrganizationalUnitRead,
-		UpdateContext: resourceOrganizationalUnitUpdate,
-		DeleteContext: resourceOrganizationalUnitDelete,
+		CreateContext: common.WithGenClient(resourceOrganizationalUnitCreate),
+		ReadContext:   common.WithGenClient(resourceOrganizationalUnitRead),
+		UpdateContext: common.WithGenClient(resourceOrganizationalUnitUpdate),
+		DeleteContext: common.WithGenClient(resourceOrganizationalUnitDelete),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -54,91 +56,114 @@ func ResourceOrganizationalUnit() *schema.Resource {
 	}
 }
 
-func resourceOrganizationalUnitCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-	name := d.Get("name").(string)
-
-	parentID, err := schemautil.NormalizeOrganizationID(ctx, client, d.Get("parent_id").(string))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	r, err := client.Accounts.Create(
-		ctx,
-		aiven.Account{
-			Name:            name,
-			ParentAccountId: parentID,
-		},
+func resourceOrganizationalUnitCreate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+	var (
+		name     = d.Get("name").(string)
+		parentID = d.Get("parent_id").(string)
 	)
+
+	accID, err := schemautil.ConvertOrganizationToAccountID(ctx, parentID, client)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	d.SetId(r.Account.Id)
+	resp, err := client.AccountCreate(ctx, &account.AccountCreateIn{
+		AccountName:           name,
+		ParentAccountId:       &accID,
+		PrimaryBillingGroupId: nil,
+	})
+	if err != nil {
+		return err
+	}
 
-	return resourceOrganizationalUnitRead(ctx, d, m)
+	d.SetId(resp.AccountId)
+
+	return resourceOrganizationalUnitRead(ctx, d, client)
 }
 
-func resourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
-	r, err := client.Accounts.Get(ctx, d.Id())
+func resourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+	resp, err := client.AccountGet(ctx, d.Id())
 	if err != nil {
-		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
+		return schemautil.ResourceReadHandleNotFound(err, d)
 	}
 
-	if stateID, _ := d.GetOk("parent_id"); true {
-		idToSet, err := schemautil.DetermineMixedOrganizationConstraintIDToStore(
+	// the ParentAccountId is required for the resource to be valid and this case should never happen,
+	// but we still need to check for it due to the definition in the avngen response schema
+	if resp.ParentAccountId == nil {
+		return fmt.Errorf("parent_id is not set for organizational unit: %q", d.Id())
+	}
+
+	if stateID, ok := d.GetOk("parent_id"); ok {
+		idToSet, err := determineMixedOrganizationConstraintIDToStore(
 			ctx,
 			client,
 			stateID.(string),
-			r.Account.ParentAccountId,
+			*resp.ParentAccountId,
 		)
 		if err != nil {
-			return diag.FromErr(err)
+			return err
 		}
 
-		if err := d.Set("parent_id", idToSet); err != nil {
-			return diag.FromErr(err)
+		if err = d.Set("parent_id", idToSet); err != nil {
+			return err
 		}
 	}
 
-	if err := d.Set("name", r.Account.Name); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("tenant_id", r.Account.TenantId); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("create_time", r.Account.CreateTime.String()); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("update_time", r.Account.UpdateTime.String()); err != nil {
-		return diag.FromErr(err)
+	if err = schemautil.ResourceDataSet(
+		aivenOrganizationalUnitSchema,
+		d,
+		resp,
+	); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func resourceOrganizationalUnitUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
-	r, err := client.Accounts.Update(ctx, d.Id(), aiven.Account{
-		Name: d.Get("name").(string),
-	})
-	if err != nil {
-		return diag.FromErr(err)
+func determineMixedOrganizationConstraintIDToStore(
+	ctx context.Context,
+	client avngen.Client,
+	stateID string,
+	accountID string,
+) (string, error) {
+	if len(accountID) == 0 {
+		return "", nil
 	}
 
-	d.SetId(r.Account.Id)
+	if !schemautil.IsOrganizationID(stateID) {
+		return accountID, nil
+	}
 
-	return resourceOrganizationalUnitRead(ctx, d, m)
+	r, err := client.AccountGet(ctx, accountID)
+	if err != nil {
+		return "", err
+	}
+
+	if len(r.OrganizationId) == 0 {
+		return accountID, nil
+	}
+
+	return r.OrganizationId, nil
 }
 
-func resourceOrganizationalUnitDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
+func resourceOrganizationalUnitUpdate(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+	var name = d.Get("name").(string)
 
-	if err := client.Accounts.Delete(ctx, d.Id()); err != nil && !aiven.IsNotFound(err) {
-		return diag.FromErr(err)
+	resp, err := client.AccountUpdate(ctx, d.Id(), &account.AccountUpdateIn{
+		AccountName: &name,
+	})
+	if err != nil {
+		return err
+	}
+
+	d.SetId(resp.AccountId)
+
+	return resourceOrganizationalUnitRead(ctx, d, client)
+}
+
+func resourceOrganizationalUnitDelete(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
+	if err := client.AccountDelete(ctx, d.Id()); common.IsCritical(err) {
+		return err
 	}
 
 	return nil

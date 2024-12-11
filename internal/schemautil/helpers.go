@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/aiven/aiven-go-client/v2"
+	"github.com/aiven/go-client-codegen/handler/organization"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/docker/go-units"
 	"github.com/hashicorp/go-cty/cty"
@@ -137,8 +138,8 @@ func HumanReadableByteSize(s int) string {
 	return units.CustomSize("%.12g%s", float64(s), 1024.0, suffixes)
 }
 
-// isStringAnOrganizationID is a helper function that returns true if the string is an organization ID.
-func isStringAnOrganizationID(s string) bool {
+// IsOrganizationID is a helper function that returns true if the string is an organization ID.
+func IsOrganizationID(s string) bool {
 	return strings.HasPrefix(s, "org")
 }
 
@@ -146,7 +147,7 @@ func isStringAnOrganizationID(s string) bool {
 // If the ID is an organization ID, it will be converted to an account ID via the API.
 // If the ID is an account ID, it will be returned as is, without performing any API calls.
 func NormalizeOrganizationID(ctx context.Context, client *aiven.Client, id string) (string, error) {
-	if isStringAnOrganizationID(id) {
+	if IsOrganizationID(id) {
 		r, err := client.Organization.Get(ctx, id)
 		if err != nil {
 			return "", err
@@ -158,37 +159,23 @@ func NormalizeOrganizationID(ctx context.Context, client *aiven.Client, id strin
 	return id, nil
 }
 
-// DetermineMixedOrganizationConstraintIDToStore is a helper function that returns the ID to store in the state.
-// We have several fields that can be either an organization ID or an account ID.
-// We want to store the one that was already in the state, if it was already there.
-// If it was not, we want to prioritize the organization ID, but if it is not available, we want to store the account
-// ID.
-// If the ID is an account ID, it will be returned as is, without performing any API calls.
-// If the ID is an organization ID, it will be refreshed via the provided account ID and returned.
-func DetermineMixedOrganizationConstraintIDToStore(
-	ctx context.Context,
-	client *aiven.Client,
-	stateID string,
-	accountID string,
-) (string, error) {
-	if len(accountID) == 0 {
-		return "", nil
+// organizationGetter helper type to shrinks the avngen.Client interface size.
+type organizationGetter interface {
+	OrganizationGet(ctx context.Context, id string) (*organization.OrganizationGetOut, error)
+}
+
+// ConvertOrganizationToAccountID transforms provided ID to an account ID via API call if it is an organization ID.
+func ConvertOrganizationToAccountID(ctx context.Context, id string, client organizationGetter) (string, error) {
+	if IsOrganizationID(id) {
+		resp, err := client.OrganizationGet(ctx, id)
+		if err != nil {
+			return "", err
+		}
+
+		return resp.AccountId, nil
 	}
 
-	if !isStringAnOrganizationID(stateID) {
-		return accountID, nil
-	}
-
-	r, err := client.Accounts.Get(ctx, accountID)
-	if err != nil {
-		return "", err
-	}
-
-	if len(r.Account.OrganizationId) == 0 {
-		return accountID, nil
-	}
-
-	return r.Account.OrganizationId, nil
+	return id, nil
 }
 
 // StringToDiagWarning is a function that converts a string to a diag warning.

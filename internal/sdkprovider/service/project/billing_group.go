@@ -180,14 +180,14 @@ func resourceBillingGroupRead(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(schemautil.ResourceReadHandleNotFound(err, d))
 	}
 
-	if stateID, _ := d.GetOk("parent_id"); true {
+	if stateID, ok := d.GetOk("parent_id"); ok {
 		var accountID string
 
 		if bg.AccountId != nil {
 			accountID = *bg.AccountId
 		}
 
-		idToSet, err := schemautil.DetermineMixedOrganizationConstraintIDToStore(
+		idToSet, err := determineMixedOrganizationConstraintIDToStore(
 			ctx,
 			client,
 			stateID.(string),

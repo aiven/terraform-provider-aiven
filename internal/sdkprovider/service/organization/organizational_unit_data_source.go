@@ -2,38 +2,38 @@ package organization
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/aiven/aiven-go-client/v2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	avngen "github.com/aiven/go-client-codegen"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aiven/terraform-provider-aiven/internal/common"
 	"github.com/aiven/terraform-provider-aiven/internal/schemautil"
 )
 
 func DatasourceOrganizationalUnit() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: datasourceOrganizationalUnitRead,
+		ReadContext: common.WithGenClient(datasourceOrganizationalUnitRead),
 		Description: "Gets information about an organizational unit.",
 		Schema:      schemautil.ResourceSchemaAsDatasourceSchema(aivenOrganizationalUnitSchema, "name"),
 	}
 }
 
-func datasourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*aiven.Client)
-
+func datasourceOrganizationalUnitRead(ctx context.Context, d *schema.ResourceData, client avngen.Client) error {
 	name := d.Get("name").(string)
 
-	r, err := client.Accounts.List(ctx)
+	resp, err := client.AccountList(ctx)
 	if err != nil {
-		return diag.FromErr(err)
+		return err
 	}
 
-	for _, ac := range r.Accounts {
-		if ac.Name == name {
-			d.SetId(ac.Id)
-			return resourceOrganizationalUnitRead(ctx, d, m)
+	for _, ac := range resp {
+		if ac.AccountName == name {
+			d.SetId(ac.AccountId)
+
+			return resourceOrganizationalUnitRead(ctx, d, client)
 		}
 	}
 
-	return diag.Errorf("organizational unit %s not found", name)
+	return fmt.Errorf("organizational unit %q not found", name)
 }
