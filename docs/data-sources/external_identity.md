@@ -22,7 +22,7 @@ the `PROVIDER_AIVEN_ENABLE_BETA` environment variable to use the resource.
 
 ### Required
 
-- `external_service_name` (String) The name of the external service. The possible values are `github`.
+- `external_service_name` (String) The name of the external service. The possible value is `github`.
 - `external_user_id` (String) The user's ID on the external service.
 - `internal_user_id` (String) The Aiven user ID.
 - `organization_id` (String) The ID of the Aiven organization that the user is part of.
