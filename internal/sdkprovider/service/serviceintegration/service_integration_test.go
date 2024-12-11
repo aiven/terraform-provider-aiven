@@ -761,3 +761,103 @@ func TestAccAivenServiceIntegration_autoscaler(t *testing.T) {
 		},
 	})
 }
+
+func TestAccAivenServiceIntegration_destination_service_name(t *testing.T) {
+	projectMetrics := os.Getenv("AIVEN_PROJECT_NAME")
+	projectServices := os.Getenv("AIVEN_PROJECT_NAME_SECONDARY")
+	if projectServices == "" {
+		t.Skip("AIVEN_PROJECT_NAME_SECONDARY is not set")
+	}
+
+	thanosToGrafanaName := "aiven_service_integration.thanos_to_grafana"
+	kafkaToThanosName := "aiven_service_integration.kafka_to_thanos"
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenServiceIntegrationResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAivenServiceIntegrationDestinationServiceName(projectMetrics, projectServices),
+				Check: resource.ComposeTestCheckFunc(
+					// Same source and destination project names
+					resource.TestCheckResourceAttr(thanosToGrafanaName, "integration_type", "dashboard"),
+					resource.TestCheckResourceAttr(thanosToGrafanaName, "source_service_project", projectMetrics),
+					resource.TestCheckResourceAttr(thanosToGrafanaName, "destination_service_project", projectMetrics),
+
+					// Different source and destination project names
+					resource.TestCheckResourceAttr(kafkaToThanosName, "integration_type", "metrics"),
+					resource.TestCheckResourceAttr(kafkaToThanosName, "source_service_project", projectServices),
+					resource.TestCheckResourceAttr(kafkaToThanosName, "destination_service_project", projectMetrics),
+				),
+			},
+		},
+	})
+}
+
+func testAccAivenServiceIntegrationDestinationServiceName(projectMetrics, projectService string) string {
+	return fmt.Sprintf(`
+data "aiven_project" "metrics" {
+  project = %[1]q
+}
+
+data "aiven_project" "services" {
+  project = %[2]q
+}
+
+resource "aiven_grafana" "grafana" {
+  project                 = data.aiven_project.metrics.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-1"
+  service_name            = "test-acc-grafana-%[3]s"
+  maintenance_window_dow  = "sunday"
+  maintenance_window_time = "10:00:00"
+
+  grafana_user_config {
+    alerting_enabled = true
+  }
+}
+
+resource "aiven_thanos" "thanos" {
+  project                 = data.aiven_project.metrics.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "startup-4"
+  service_name            = "test-acc-thanos-%[3]s"
+  maintenance_window_dow  = "sunday"
+  maintenance_window_time = "10:00:00"
+}
+
+resource "aiven_kafka" "kafka_service" {
+  project                 = data.aiven_project.services.project
+  cloud_name              = "google-europe-west1"
+  plan                    = "business-4"
+  service_name            = "test-acc-kafka-%[3]s"
+  maintenance_window_dow  = "sunday"
+  maintenance_window_time = "10:00:00"
+
+  kafka_user_config {
+    schema_registry = true
+    kafka_rest      = true
+
+    kafka {
+      group_max_session_timeout_ms = 70000
+      log_retention_bytes          = 1000000000
+    }
+  }
+}
+
+resource "aiven_service_integration" "thanos_to_grafana" {
+  project                     = data.aiven_project.metrics.project
+  integration_type            = "dashboard"
+  source_service_name         = aiven_grafana.grafana.service_name // project "metrics"
+  destination_service_name    = aiven_thanos.thanos.service_name   // project "metrics"
+  destination_service_project = aiven_thanos.thanos.project
+}
+
+resource "aiven_service_integration" "kafka_to_thanos" {
+  project                     = data.aiven_project.services.project
+  integration_type            = "metrics"
+  source_service_name         = aiven_kafka.kafka_service.service_name // project "services"
+  destination_service_name    = aiven_thanos.thanos.service_name       // project "metrics"
+  destination_service_project = aiven_thanos.thanos.project
+}
+	`, projectMetrics, projectService, acc.RandStr())
+}

@@ -68,6 +68,7 @@ resource "aiven_service_integration" "autoscaler_integration" {
 - `datadog_user_config` (Block List, Max: 1) Datadog user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--datadog_user_config))
 - `destination_endpoint_id` (String) Destination endpoint for the integration.
 - `destination_service_name` (String) Destination service for the integration.
+- `destination_service_project` (String) Destination service project name
 - `external_aws_cloudwatch_logs_user_config` (Block List, Max: 1) ExternalAwsCloudwatchLogs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_aws_cloudwatch_logs_user_config))
 - `external_aws_cloudwatch_metrics_user_config` (Block List, Max: 1) ExternalAwsCloudwatchMetrics user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_aws_cloudwatch_metrics_user_config))
 - `external_elasticsearch_logs_user_config` (Block List, Max: 1) ExternalElasticsearchLogs user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--external_elasticsearch_logs_user_config))
@@ -81,6 +82,7 @@ resource "aiven_service_integration" "autoscaler_integration" {
 - `prometheus_user_config` (Block List, Max: 1) Prometheus user configurable settings. **Warning:** There's no way to reset advanced configuration options to default. Options that you add cannot be removed later (see [below for nested schema](#nestedblock--prometheus_user_config))
 - `source_endpoint_id` (String) Source endpoint for the integration.
 - `source_service_name` (String) Source service for the integration (if any)
+- `source_service_project` (String) Source service project name
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

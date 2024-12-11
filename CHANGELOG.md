@@ -14,6 +14,10 @@ nav_order: 1
 - Add `alloydbomni` BETA resource and datasource
 - Add `aiven_alloydbomni_user` BETA resource and datasource
 - Add `aiven_alloydbomni_database` BETA resource and datasource
+- Add `aiven_service_integration` resource field `destination_service_project`: Destination service project name
+- Add `aiven_service_integration` resource field `source_service_project`: Source service project name
+- Add `aiven_service_integration` datasource field `destination_service_project`: Destination service project name
+- Add `aiven_service_integration` datasource field `source_service_project`: Source service project name
 
 ## [4.30.0] - 2024-12-05
 
