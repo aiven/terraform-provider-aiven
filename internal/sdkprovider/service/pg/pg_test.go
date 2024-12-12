@@ -1090,6 +1090,7 @@ func testAccCheckAivenServicePGAttributes(n string) resource.TestCheckFunc {
 }
 
 func TestAccAivenServicePG_disaster_recovery(t *testing.T) {
+	t.Skip("the feature is disabled")
 	primaryName := "aiven_pg.primary"
 	secondaryName := "aiven_pg.secondary"
 	projectName := os.Getenv("AIVEN_PROJECT_NAME")

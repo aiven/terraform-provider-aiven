@@ -260,9 +260,7 @@ func backupsReady(s *service.ServiceGetOut) bool {
 	// See https://github.com/aiven/terraform-provider-aiven/pull/172
 	for _, i := range s.ServiceIntegrations {
 		switch i.IntegrationType {
-		case service.IntegrationTypeReadReplica, service.IntegrationTypeDisasterRecovery:
-			// fixme: disaster recovery will have a backup eventually,
-			//  remove this when BE is ready
+		case service.IntegrationTypeReadReplica:
 			if lo.FromPtr(i.DestService) == s.ServiceName {
 				return true
 			}
