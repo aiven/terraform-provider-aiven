@@ -15,6 +15,7 @@ import (
 	retryGo "github.com/avast/retry-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/samber/lo"
 
 	"github.com/aiven/terraform-provider-aiven/internal/common"
 )
@@ -258,8 +259,13 @@ func backupsReady(s *service.ServiceGetOut) bool {
 	// No backups for read replicas type of service
 	// See https://github.com/aiven/terraform-provider-aiven/pull/172
 	for _, i := range s.ServiceIntegrations {
-		if i.IntegrationType == "read_replica" && *i.DestService == s.ServiceName {
-			return true
+		switch i.IntegrationType {
+		case service.IntegrationTypeReadReplica, service.IntegrationTypeDisasterRecovery:
+			// fixme: disaster recovery will have a backup eventually,
+			//  remove this when BE is ready
+			if lo.FromPtr(i.DestService) == s.ServiceName {
+				return true
+			}
 		}
 	}
 

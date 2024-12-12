@@ -13,7 +13,7 @@ const (
 	Resource EntityType = iota
 	// DataSource is a constant that represents the data source entity type.
 	DataSource
-	PossibleValuesPrefix = "The possible values are "
+	PossibleValuesPrefix = "The possible value"
 )
 
 // String is a function that returns the string representation of the entity type.
@@ -164,6 +164,11 @@ the ` + "`PROVIDER_AIVEN_ENABLE_BETA`" + ` environment variable to use the %[1]s
 	if db.withPossibleValues != nil {
 		builder.WriteRune(' ')
 		builder.WriteString(PossibleValuesPrefix)
+		if len(db.withPossibleValues) == 1 {
+			builder.WriteString(" is ")
+		} else {
+			builder.WriteString("s are ")
+		}
 		for i, value := range db.withPossibleValues {
 			if i > 0 {
 				if i == len(db.withPossibleValues)-1 {

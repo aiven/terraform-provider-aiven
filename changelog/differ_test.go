@@ -31,6 +31,21 @@ func TestCompare(t *testing.T) {
 			},
 		},
 		{
+			name:   "change enum",
+			expect: "Change `foo` resource field `bar`: add `foo`",
+			kind:   ResourceRootType,
+			old: &Item{
+				Type:        schema.TypeString,
+				Path:        "foo.bar",
+				Description: "Foo. The possible values is `bar`",
+			},
+			new: &Item{
+				Type:        schema.TypeString,
+				Path:        "foo.bar",
+				Description: "Foo. The possible values are `foo`, `bar`.",
+			},
+		},
+		{
 			name:   "add resource field",
 			expect: "Add `foo` resource field `bar`: Foo",
 			kind:   ResourceRootType,
