@@ -202,3 +202,79 @@ func testAccCheckAivenServiceOSAttributes(n string) resource.TestCheckFunc {
 		return nil
 	}
 }
+
+// TestAccAivenOpenSearchUser_user_config_zero_values
+// Tests that user config diff suppress doesn't suppress zero values for new resources, and they appear in the plan.
+func TestAccAivenOpenSearchUser_user_config_zero_values(t *testing.T) {
+	resourceName := "aiven_opensearch.foo"
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acc.TestProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckAivenOpenSearchUserResourceDestroy,
+		Steps: []resource.TestStep{
+			{
+				// 1. No user config at all
+				Config:             testAccAivenOpenSearchUserUserConfigZeroValues(),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "opensearch_user_config.0.opensearch.#", "0"),
+				),
+			},
+			{
+				// 2. All values are non-zero
+				Config: testAccAivenOpenSearchUserUserConfigZeroValues(
+					"action_destructive_requires_name", "true",
+					"override_main_response_version", "true",
+					"knn_memory_circuit_breaker_limit", "1",
+					"email_sender_username", "test@aiven.io",
+				),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "opensearch_user_config.0.opensearch.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "opensearch_user_config.0.opensearch.0.action_destructive_requires_name", "true"),
+					resource.TestCheckResourceAttr(resourceName, "opensearch_user_config.0.opensearch.0.override_main_response_version", "true"),
+					resource.TestCheckResourceAttr(resourceName, "opensearch_user_config.0.opensearch.0.knn_memory_circuit_breaker_limit", "1"),
+				),
+			},
+			{
+				// 2. All values are zero
+				Config: testAccAivenOpenSearchUserUserConfigZeroValues(
+					"action_destructive_requires_name", "false",
+					"override_main_response_version", "true",
+					"knn_memory_circuit_breaker_limit", "0",
+					"email_sender_username", "",
+				),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "opensearch_user_config.0.opensearch.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "opensearch_user_config.0.opensearch.0.action_destructive_requires_name", "false"),
+					resource.TestCheckResourceAttr(resourceName, "opensearch_user_config.0.opensearch.0.override_main_response_version", "true"),
+					resource.TestCheckResourceAttr(resourceName, "opensearch_user_config.0.opensearch.0.knn_memory_circuit_breaker_limit", "0"),
+					resource.TestCheckResourceAttr(resourceName, "opensearch_user_config.0.opensearch.0.email_sender_username", ""),
+				),
+			},
+		},
+	})
+}
+
+func testAccAivenOpenSearchUserUserConfigZeroValues(kv ...string) string {
+	options := make([]string, 0)
+	for i := 0; i < len(kv); i += 2 {
+		options = append(options, fmt.Sprintf(`%s = "%s"`, kv[i], kv[i+1]))
+	}
+	return fmt.Sprintf(`
+resource "aiven_opensearch" "os2" {
+  project      = "foo"
+  cloud_name   = "google-europe-west1"
+  plan         = "business-4"
+  service_name = "bar"
+
+  opensearch_user_config {
+    opensearch {
+		  %s
+    }
+  }
+}`, strings.Join(options, "\n"))
+}
