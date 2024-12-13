@@ -34,3 +34,36 @@ func accountIDPointer(ctx context.Context, client *aiven.Client, d *schema.Resou
 
 	return accountID, nil
 }
+
+// determineMixedOrganizationConstraintIDToStore is a helper function that returns the ID to store in the state.
+// We have several fields that can be either an organization ID or an account ID.
+// We want to store the one that was already in the state, if it was already there.
+// If it was not, we want to prioritize the organization ID, but if it is not available, we want to store the account
+// ID.
+// If the ID is an account ID, it will be returned as is, without performing any API calls.
+// If the ID is an organization ID, it will be refreshed via the provided account ID and returned.
+func determineMixedOrganizationConstraintIDToStore(
+	ctx context.Context,
+	client *aiven.Client,
+	stateID string,
+	accountID string,
+) (string, error) {
+	if accountID == "" {
+		return "", nil
+	}
+
+	if !schemautil.IsOrganizationID(stateID) {
+		return accountID, nil
+	}
+
+	r, err := client.Accounts.Get(ctx, accountID)
+	if err != nil {
+		return "", err
+	}
+
+	if r.Account.OrganizationId != "" {
+		return r.Account.OrganizationId, nil
+	}
+
+	return accountID, nil
+}
