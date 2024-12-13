@@ -44,6 +44,13 @@ func aivenServiceIntegrationSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
+		"destination_service_project": {
+			Description: "Destination service project name",
+			ForceNew:    true,
+			Optional:    true,
+			Computed:    true,
+			Type:        schema.TypeString,
+		},
 		"integration_type": {
 			Description:  userconfig.Desc("Type of the service integration").PossibleValuesString(service.IntegrationTypeChoices()...).Build(),
 			ForceNew:     true,
@@ -69,6 +76,14 @@ func aivenServiceIntegrationSchema() map[string]*schema.Schema {
 			Description: "Source service for the integration (if any)",
 			ForceNew:    true,
 			Optional:    true,
+			Computed:    true,
+			Type:        schema.TypeString,
+		},
+		"source_service_project": {
+			Description: "Source service project name",
+			ForceNew:    true,
+			Optional:    true,
+			Computed:    true,
 			Type:        schema.TypeString,
 		},
 	}
@@ -132,6 +147,8 @@ func resourceServiceIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 		IntegrationType:  service.IntegrationType(integrationType),
 		SourceEndpointId: plainEndpointID(schemautil.OptionalStringPointer(d, "source_endpoint_id")),
 		SourceService:    schemautil.OptionalStringPointer(d, "source_service_name"),
+		DestProject:      schemautil.OptionalStringPointer(d, "destination_service_project"),
+		SourceProject:    schemautil.OptionalStringPointer(d, "source_service_project"),
 	}
 
 	uc, err := converters.Expand(converters.ServiceIntegrationUserConfig, integrationType, d)
@@ -333,6 +350,13 @@ func resourceServiceIntegrationCopyAPIResponseToTerraform(
 	}
 	integrationType := res.IntegrationType
 	if err := d.Set("integration_type", integrationType); err != nil {
+		return err
+	}
+
+	if err := d.Set("destination_service_project", res.DestProject); err != nil {
+		return err
+	}
+	if err := d.Set("source_service_project", res.SourceProject); err != nil {
 		return err
 	}
 
