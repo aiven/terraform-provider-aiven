@@ -448,6 +448,7 @@ Read-Only:
 
 - `enabled` (Boolean)
 - `max_old_space_size` (Number)
+- `multiple_data_source_enabled` (Boolean)
 - `opensearch_request_timeout` (Number)
 
 

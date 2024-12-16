@@ -977,6 +977,11 @@ func opensearchUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"multiple_data_source_enabled": {
+						Description: "Enable or disable multiple data sources in OpenSearch Dashboards. Default: `true`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"opensearch_request_timeout": {
 						Description: "Timeout in milliseconds for requests made by OpenSearch Dashboards towards OpenSearch. Default: `30000`.",
 						Optional:    true,

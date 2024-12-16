@@ -491,6 +491,7 @@ Optional:
 
 - `enabled` (Boolean) Enable or disable OpenSearch Dashboards. Default: `true`.
 - `max_old_space_size` (Number) Limits the maximum amount of memory (in MiB) the OpenSearch Dashboards process can use. This sets the max_old_space_size option of the nodejs running the OpenSearch Dashboards. Note: the memory reserved by OpenSearch Dashboards is not available for OpenSearch. Default: `128`.
+- `multiple_data_source_enabled` (Boolean) Enable or disable multiple data sources in OpenSearch Dashboards. Default: `true`.
 - `opensearch_request_timeout` (Number) Timeout in milliseconds for requests made by OpenSearch Dashboards towards OpenSearch. Default: `30000`.
 
 
