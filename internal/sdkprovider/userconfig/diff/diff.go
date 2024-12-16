@@ -16,6 +16,11 @@ var (
 // SuppressUnchanged suppresses diff for unchanged fields.
 // Applied for all nested values: both for objects and arrays.
 func SuppressUnchanged(k, oldValue, newValue string, d *schema.ResourceData) bool {
+	if d.Id() == "" {
+		// Do not suppress diff for new resources, must show the whole diff.
+		return false
+	}
+
 	// schema.TypeMap
 	if strings.HasSuffix(k, ".%") {
 		return oldValue == newValue
