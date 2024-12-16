@@ -12,102 +12,116 @@ func TestCompare(t *testing.T) {
 	tests := []struct {
 		name     string
 		expect   string
-		kind     RootType
 		old, new *Item
 	}{
 		{
 			name:   "change enums",
-			expect: "Change `foo` resource field `bar`: add `foo`, remove `bar`",
-			kind:   ResourceRootType,
+			expect: "Change `foo` resource field `bar` (enum): add `foo`, remove `bar`",
 			old: &Item{
+				Kind:        ResourceRootKind,
 				Type:        schema.TypeString,
 				Path:        "foo.bar",
+				Root:        "foo",
 				Description: "Foo. The possible values are `bar`, `baz`.",
 			},
 			new: &Item{
+				Kind:        ResourceRootKind,
 				Type:        schema.TypeString,
 				Path:        "foo.bar",
+				Root:        "foo",
 				Description: "Foo. The possible values are `foo`, `baz`.",
 			},
 		},
 		{
 			name:   "change enum",
-			expect: "Change `foo` resource field `bar`: add `foo`",
-			kind:   ResourceRootType,
+			expect: "Change `foo` resource field `bar` (enum): add `foo`",
 			old: &Item{
+				Kind:        ResourceRootKind,
 				Type:        schema.TypeString,
 				Path:        "foo.bar",
+				Root:        "foo",
 				Description: "Foo. The possible values is `bar`",
 			},
 			new: &Item{
+				Kind:        ResourceRootKind,
 				Type:        schema.TypeString,
 				Path:        "foo.bar",
+				Root:        "foo",
 				Description: "Foo. The possible values are `foo`, `bar`.",
 			},
 		},
 		{
 			name:   "add resource field",
 			expect: "Add `foo` resource field `bar`: Foo",
-			kind:   ResourceRootType,
 			new: &Item{
+				Kind:        ResourceRootKind,
 				Type:        schema.TypeString,
 				Path:        "foo.bar",
+				Root:        "foo",
 				Description: "Foo",
 			},
 		},
 		{
 			name:   "remove resource field",
 			expect: "Remove `foo` resource field `bar`: Foo",
-			kind:   ResourceRootType,
 			old: &Item{
+				Kind:        ResourceRootKind,
 				Type:        schema.TypeString,
 				Path:        "foo.bar",
+				Root:        "foo",
 				Description: "Foo",
 			},
 		},
 		{
 			name:   "remove beta from the field",
 			expect: "Change `foo` resource field `bar`: no longer beta",
-			kind:   ResourceRootType,
 			old: &Item{
+				Kind:        ResourceRootKind,
 				Type:        schema.TypeString,
 				Path:        "foo.bar",
+				Root:        "foo",
 				Description: "PROVIDER_AIVEN_ENABLE_BETA",
 			},
 			new: &Item{
+				Kind:        ResourceRootKind,
 				Type:        schema.TypeString,
 				Path:        "foo.bar",
+				Root:        "foo",
 				Description: "Foo",
 			},
 		},
 		{
 			name:   "add beta resource",
 			expect: "Add `foo` resource _(beta)_: does stuff, PROVIDER_AIVEN_ENABLE_BETA",
-			kind:   ResourceRootType,
 			new: &Item{
+				Kind:        ResourceRootKind,
 				Type:        schema.TypeString,
 				Path:        "foo",
+				Root:        "foo",
 				Description: "does stuff, PROVIDER_AIVEN_ENABLE_BETA",
 			},
 		},
 		{
 			name:   "change type",
 			expect: "Change `foo` resource field `bar`: type ~~`list`~~ → `set`",
-			kind:   ResourceRootType,
 			old: &Item{
+				Kind: ResourceRootKind,
 				Type: schema.TypeList,
 				Path: "foo.bar",
+				Root: "foo",
 			},
 			new: &Item{
+				Kind: ResourceRootKind,
 				Type: schema.TypeSet,
 				Path: "foo.bar",
+				Root: "foo",
 			},
 		},
 	}
 
 	for _, opt := range tests {
 		t.Run(opt.name, func(t *testing.T) {
-			got, err := diffItems(opt.kind, opt.old, opt.new)
+			got, err := diffItems(opt.old, opt.new)
 			assert.NoError(t, err)
 			assert.Equal(t, opt.expect, got.String())
 		})
@@ -116,19 +130,19 @@ func TestCompare(t *testing.T) {
 
 func TestSerializeDiff(t *testing.T) {
 	list := []*Diff{
-		{Action: AddDiffAction, RootType: ResourceRootType, Description: "foo", Item: &Item{Path: "aiven_opensearch.opensearch_user_config.azure_migration.include_aliases"}},
-		{Action: ChangeDiffAction, RootType: DataSourceRootType, Description: "remove deprecation", Item: &Item{Path: "aiven_cassandra.cassandra_user_config.additional_backup_regions"}},
-		{Action: ChangeDiffAction, RootType: ResourceRootType, Description: "remove deprecation", Item: &Item{Path: "aiven_cassandra.cassandra_user_config.additional_backup_regions"}},
-		{Action: AddDiffAction, RootType: ResourceRootType, Description: "foo", Item: &Item{Path: "aiven_opensearch.opensearch_user_config.s3_migration.include_aliases"}},
-		{Action: AddDiffAction, RootType: ResourceRootType, Description: "foo", Item: &Item{Path: "aiven_opensearch.opensearch_user_config.gcs_migration.include_aliases"}},
+		{Action: AddDiffAction, Description: "foo", Item: &Item{Kind: ResourceRootKind, Root: "aiven_opensearch", Path: "aiven_opensearch.opensearch_user_config.azure_migration.include_aliases"}},
+		{Action: ChangeDiffAction, Description: "remove deprecation", Item: &Item{Kind: DataSourceRootKind, Root: "aiven_cassandra", Path: "aiven_cassandra.cassandra_user_config.additional_backup_regions"}},
+		{Action: ChangeDiffAction, Description: "remove deprecation", Item: &Item{Kind: ResourceRootKind, Root: "aiven_cassandra", Path: "aiven_cassandra.cassandra_user_config.additional_backup_regions"}},
+		{Action: AddDiffAction, Description: "foo", Item: &Item{Kind: ResourceRootKind, Root: "aiven_opensearch", Path: "aiven_opensearch.opensearch_user_config.s3_migration.include_aliases"}},
+		{Action: AddDiffAction, Description: "foo", Item: &Item{Kind: DataSourceRootKind, Root: "aiven_opensearch", Path: "aiven_opensearch.opensearch_user_config.s3_migration.include_aliases"}},
+		{Action: AddDiffAction, Description: "foo", Item: &Item{Kind: ResourceRootKind, Root: "aiven_opensearch", Path: "aiven_opensearch.opensearch_user_config.gcs_migration.include_aliases"}},
 	}
 
 	expect := []string{
+		"Change `aiven_cassandra` resource and datasource field `cassandra_user_config.additional_backup_regions`: remove deprecation",
 		"Add `aiven_opensearch` resource field `opensearch_user_config.azure_migration.include_aliases`: foo",
 		"Add `aiven_opensearch` resource field `opensearch_user_config.gcs_migration.include_aliases`: foo",
-		"Add `aiven_opensearch` resource field `opensearch_user_config.s3_migration.include_aliases`: foo",
-		"Change `aiven_cassandra` resource field `cassandra_user_config.additional_backup_regions`: remove deprecation",
-		"Change `aiven_cassandra` datasource field `cassandra_user_config.additional_backup_regions`: remove deprecation",
+		"Add `aiven_opensearch` resource and datasource field `opensearch_user_config.s3_migration.include_aliases`: foo",
 	}
 
 	actual := serializeDiff(list)

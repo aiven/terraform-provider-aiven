@@ -186,6 +186,7 @@ Optional:
 - `max_standby_streaming_delay` (Number) Max standby streaming delay in milliseconds.
 - `max_wal_senders` (Number) PostgreSQL maximum WAL senders.
 - `max_worker_processes` (Number) Sets the maximum number of background processes that the system can support.
+- `password_encryption` (String) Enum: `md5`, `scram-sha-256`. Chooses the algorithm for encrypting passwords. Default: `md5`.
 - `pg_partman_bgw__dot__interval` (Number) Sets the time interval to run pg_partman's scheduled tasks. Example: `3600`.
 - `pg_partman_bgw__dot__role` (String) Controls which role to use for pg_partman's scheduled background tasks. Example: `myrolename`.
 - `pg_stat_statements__dot__track` (String) Enum: `all`, `none`, `top`. Controls which statements are counted. Specify top to track top-level statements (those issued directly by clients), all to also track nested statements (such as statements invoked within functions), or none to disable statement statistics collection. The default value is top.

@@ -12,7 +12,7 @@ import (
 	"github.com/samber/lo"
 )
 
-func diffItems(resourceType RootType, was, have *Item) (*Diff, error) {
+func diffItems(was, have *Item) (*Diff, error) {
 	// Added or removed
 	if was == nil || have == nil {
 		action := AddDiffAction
@@ -23,8 +23,7 @@ func diffItems(resourceType RootType, was, have *Item) (*Diff, error) {
 
 		return &Diff{
 			Action:      action,
-			RootType:    resourceType,
-			Description: removeEnum(have.Description),
+			Description: removeEnum(have.Description), // Some fields have enums in the spec description
 			Item:        have,
 		}, nil
 	}
@@ -83,7 +82,6 @@ func diffItems(resourceType RootType, was, have *Item) (*Diff, error) {
 
 	return &Diff{
 		Action:      ChangeDiffAction,
-		RootType:    resourceType,
 		Description: strings.Join(entries, ", "),
 		Item:        have,
 	}, nil
@@ -91,7 +89,7 @@ func diffItems(resourceType RootType, was, have *Item) (*Diff, error) {
 
 func diffItemMaps(was, have ItemMap) ([]string, error) {
 	result := make([]*Diff, 0)
-	kinds := []RootType{ResourceRootType, DataSourceRootType}
+	kinds := []RootKind{ResourceRootKind, DataSourceRootKind}
 	for _, kind := range kinds {
 		wasItems := was[kind]
 		haveItems := have[kind]
@@ -122,7 +120,7 @@ func diffItemMaps(was, have ItemMap) ([]string, error) {
 				skipPrefix = k
 			}
 
-			change, err := diffItems(kind, wasVal, haveVal)
+			change, err := diffItems(wasVal, haveVal)
 			if err != nil {
 				return nil, fmt.Errorf("failed to compare %s %s: %w", kind, k, err)
 			}
@@ -167,17 +165,40 @@ func toMap(item *Item) (map[string]any, error) {
 func serializeDiff(list []*Diff) []string {
 	sort.Slice(list, func(i, j int) bool {
 		a, b := list[i], list[j]
+
+		if a.Item.Root != b.Item.Root {
+			return a.Item.Root < b.Item.Root
+		}
+
 		if a.Action != b.Action {
 			return a.Action < b.Action
 		}
 
-		// Resource comes first, then datasource
-		if a.RootType != b.RootType {
-			return a.RootType > b.RootType
+		if a.Item.Path != b.Item.Path {
+			return a.Item.Path < b.Item.Path
 		}
 
-		return a.Item.Path < b.Item.Path
+		if a.Item.Kind != b.Item.Kind {
+			return a.Item.Kind > b.Item.Kind
+		}
+
+		return false
 	})
+
+	// Removes duplicates
+	unique := make(map[string]*Diff)
+	for i := 0; i < len(list); i++ {
+		d := list[i]
+		k := fmt.Sprintf("%s:%s:%s", d.Action, d.Item.Path, d.Description)
+		other, ok := unique[k]
+		if !ok {
+			unique[k] = d
+			continue
+		}
+		other.AlsoAppliesTo = d.Item
+		list = append(list[:i], list[i+1:]...)
+		i--
+	}
 
 	strs := make([]string, len(list))
 	for i, r := range list {
