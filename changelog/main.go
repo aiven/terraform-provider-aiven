@@ -162,9 +162,9 @@ func writeChangelog(filePath string, reformat bool, entries []string) error {
 func fromProvider(p *schema.Provider) (ItemMap, error) {
 	// Item names might clash between resources and data sources
 	// Splits into separate maps
-	sourceMaps := map[RootType]map[string]*schema.Resource{
-		ResourceRootType:   p.ResourcesMap,
-		DataSourceRootType: p.DataSourcesMap,
+	sourceMaps := map[RootKind]map[string]*schema.Resource{
+		ResourceRootKind:   p.ResourcesMap,
+		DataSourceRootKind: p.DataSourcesMap,
 	}
 
 	items := make(ItemMap)
@@ -173,7 +173,9 @@ func fromProvider(p *schema.Provider) (ItemMap, error) {
 		for name, r := range m {
 			res := &Item{
 				Name:        name,
+				Root:        name,
 				Path:        name,
+				Kind:        kind,
 				Description: r.Description,
 				Type:        schema.TypeList,
 			}
@@ -192,7 +194,9 @@ func fromProvider(p *schema.Provider) (ItemMap, error) {
 func walkSchema(name string, this *schema.Schema, parent *Item) []*Item {
 	item := &Item{
 		Name:        name,
+		Root:        parent.Root,
 		Path:        fmt.Sprintf("%s.%s", parent.Path, name),
+		Kind:        parent.Kind,
 		ForceNew:    this.ForceNew,
 		Optional:    this.Optional,
 		Sensitive:   this.Sensitive,

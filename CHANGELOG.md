@@ -15,29 +15,23 @@ nav_order: 1
 - Add `aiven_alloydbomni_user` BETA resource and datasource
 - Add `aiven_alloydbomni_database` BETA resource and datasource
 - Fix `terraform plan`: new resources don't display zero values for user configuration options
-- Add `aiven_service_integration` resource field `destination_service_project`: Destination service project name
-- Add `aiven_service_integration` resource field `source_service_project`: Source service project name
-- Add `aiven_service_integration` datasource field `destination_service_project`: Destination service project name
-- Add `aiven_service_integration` datasource field `source_service_project`: Source service project name
-- Add `aiven_opensearch` resource field `opensearch_user_config.opensearch_dashboards.multiple_data_source_enabled`:
-  Enable or disable multiple data sources in OpenSearch Dashboards
-- Add `aiven_opensearch` datasource field `opensearch_user_config.opensearch_dashboards.multiple_data_source_enabled`:
-  Enable or disable multiple data sources in OpenSearch Dashboards
-- Change `aiven_account_team_project` resource field `team_type`: remove `organization:billing:read`,
-  `organization:billing:write`, `organization:network:read`, `organization:network:write`,
+- Add `aiven_service_integration` resource and datasource field `destination_service_project`: Destination service project name
+- Add `aiven_service_integration` resource and datasource field `source_service_project`: Source service project name
+- Change `aiven_account_team_project` resource and datasource field `team_type` (enum): remove
+  `organization:billing:read`, `organization:billing:write`, `organization:network:read`, `organization:network:write`,
   `organization:permissions:read`, `organization:permissions:write`, `organization:projects:read`, `organization:projects:write`
-- Change `aiven_organization_permission` resource field `permissions.permissions`: remove `organization:billing:read`,
-  `organization:billing:write`, `organization:network:read`, `organization:network:write`,
+- Add `aiven_alloydbomni` resource and datasource field `alloydbomni_user_config.pg.password_encryption` (enum)
+- Change `aiven_flink` resource and datasource field `flink_user_config.flink_version` (enum): add `1.20`
+- Add `aiven_opensearch` resource and datasource field
+  `opensearch_user_config.opensearch_dashboards.multiple_data_source_enabled`: Enable or disable multiple data sources
+  in OpenSearch Dashboards
+- Change `aiven_organization_permission` resource field `permissions.permissions` (enum): remove
+  `organization:billing:read`, `organization:billing:write`, `organization:network:read`, `organization:network:write`,
   `organization:permissions:read`, `organization:permissions:write`, `organization:projects:read`, `organization:projects:write`
-- Change `aiven_pg` resource field `pg_user_config.additional_backup_regions`: remove deprecation
-- Change `aiven_project_user` resource field `member_type`: remove `organization:billing:read`,
-  `organization:billing:write`, `organization:network:read`, `organization:network:write`,
-  `organization:permissions:read`, `organization:permissions:write`, `organization:projects:read`, `organization:projects:write`
-- Change `aiven_account_team_project` datasource field `team_type`: remove `organization:billing:read`,
-  `organization:billing:write`, `organization:network:read`, `organization:network:write`,
-  `organization:permissions:read`, `organization:permissions:write`, `organization:projects:read`, `organization:projects:write`
-- Change `aiven_pg` datasource field `pg_user_config.additional_backup_regions`: remove deprecation
-- Change `aiven_project_user` datasource field `member_type`: remove `organization:billing:read`,
+- Add `aiven_pg` resource and datasource field `pg_user_config.pg.password_encryption` (enum)
+- Change `aiven_pg` resource and datasource field `pg_user_config.additional_backup_regions`: remove deprecation
+- Change `aiven_pg` resource and datasource field `pg_user_config.pg_version` (enum): add `17`
+- Change `aiven_project_user` resource and datasource field `member_type` (enum): remove `organization:billing:read`,
   `organization:billing:write`, `organization:network:read`, `organization:network:write`,
   `organization:permissions:read`, `organization:permissions:write`, `organization:projects:read`, `organization:projects:write`
 

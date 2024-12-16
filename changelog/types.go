@@ -7,11 +7,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-type RootType string
+type RootKind string
 
 const (
-	ResourceRootType   RootType = "resource"
-	DataSourceRootType RootType = "datasource"
+	ResourceRootKind   RootKind = "resource"
+	DataSourceRootKind RootKind = "datasource"
 )
 
 type DiffAction string
@@ -22,11 +22,13 @@ const (
 	ChangeDiffAction DiffAction = "Change"
 )
 
-type ItemMap map[RootType]map[string]*Item
+type ItemMap map[RootKind]map[string]*Item
 
 type Item struct {
-	Path string `json:"path"` // e.g. aiven_project.project
-	Name string `json:"name"` // e.g. project
+	Name string   `json:"name"` // e.g. project
+	Root string   `json:"root"` // e.g. aiven_project
+	Path string   `json:"path"` // e.g. aiven_project.project
+	Kind RootKind `json:"kind"` // e.g. resource or datasource
 
 	// Terraform schema fields
 	Description string           `json:"description"`
@@ -40,22 +42,30 @@ type Item struct {
 }
 
 type Diff struct {
-	Action      DiffAction
-	RootType    RootType
-	Description string
-	Item        *Item
+	Action        DiffAction
+	Item          *Item
+	AlsoAppliesTo *Item // e.g., when the change is same for resource and datasource
+	Description   string
 }
 
 func (c *Diff) String() string {
-	// resource name + field name
-	path := strings.SplitN(c.Item.Path, ".", 2)
+	// Often the same diff applies both for resource and datasource
+	kinds := make([]string, 0, 2)
+	kinds = append(kinds, string(c.Item.Kind))
+	if c.AlsoAppliesTo != nil {
+		kinds = append(kinds, string(c.AlsoAppliesTo.Kind))
+	}
 
 	// e.g.: "Add `aiven_project` resource"
-	msg := fmt.Sprintf("%s `%s` %s", c.Action, path[0], c.RootType)
+	path := strings.SplitN(c.Item.Path, ".", 2)
+	msg := fmt.Sprintf("%s `%s` %s", c.Action, path[0], strings.Join(kinds, " and "))
 
 	// e.g.: "field `project`"
 	if len(path) > 1 {
 		msg = fmt.Sprintf("%s field `%s`", msg, path[1])
+		if len(findEnums(c.Item.Description)) > 0 {
+			msg += " (enum)"
+		}
 	}
 
 	// Adds beta if needed

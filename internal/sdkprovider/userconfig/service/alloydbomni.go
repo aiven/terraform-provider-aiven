@@ -292,6 +292,12 @@ func alloydbomniUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"password_encryption": {
+						Description:  "Enum: `md5`, `scram-sha-256`. Chooses the algorithm for encrypting passwords. Default: `md5`.",
+						Optional:     true,
+						Type:         schema.TypeString,
+						ValidateFunc: validation.StringInSlice([]string{"md5", "scram-sha-256"}, false),
+					},
 					"pg_partman_bgw__dot__interval": {
 						Description: "Sets the time interval to run pg_partman's scheduled tasks. Example: `3600`.",
 						Optional:    true,

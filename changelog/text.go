@@ -25,11 +25,21 @@ func removeEnum(text string) string {
 var reCode = regexp.MustCompile("`([^`]+)`")
 
 func findEnums(description string) []string {
-	parts := strings.Split(description, userconfig.PossibleValuesPrefix)
-	if len(parts) != 2 {
-		return nil
+	var values []string
+	switch {
+	case strings.Contains(description, userconfig.PossibleValuesPrefix):
+		// userconfig.PossibleValuesPrefix is used within "internal" package,
+		// see userconfig.DescriptionBuilder.PossibleValuesString()
+		parts := strings.Split(description, userconfig.PossibleValuesPrefix)
+		if len(parts) != 2 {
+			return nil
+		}
+		values = reCode.FindAllString(parts[1], -1)
+	case strings.Contains(strings.ToLower(description), "enum"):
+		// "enum" is used in the user config generator
+		values = reCode.FindAllString(description, -1)
 	}
-	values := reCode.FindAllString(parts[1], -1)
+
 	if len(values) == 0 {
 		return nil
 	}

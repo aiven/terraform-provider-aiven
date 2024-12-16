@@ -210,6 +210,7 @@ Read-Only:
 - `max_standby_streaming_delay` (Number)
 - `max_wal_senders` (Number)
 - `max_worker_processes` (Number)
+- `password_encryption` (String)
 - `pg_partman_bgw__dot__interval` (Number)
 - `pg_partman_bgw__dot__role` (String)
 - `pg_stat_monitor__dot__pgsm_enable_query_plan` (Boolean)
