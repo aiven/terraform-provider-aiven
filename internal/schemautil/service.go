@@ -17,6 +17,7 @@ import (
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/aiven/go-client-codegen/handler/staticip"
 	"github.com/docker/go-units"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -136,10 +137,24 @@ func ServiceCommonSchema() map[string]*schema.Schema {
 			Description: "Aiven internal service type code",
 		},
 		"project_vpc_id": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Computed:    true,
-			Description: "Specifies the VPC the service should run in. If the value is not set the service is not run inside a VPC. When set, the value should be given as a reference to set up dependencies correctly and the VPC must be in the same cloud and region as the service itself. Project can be freely moved to and from VPC after creation but doing so triggers migration to new servers so the operation can take significant amount of time to complete if the service has a lot of data.",
+			Type:     schema.TypeString,
+			Optional: true,
+			Computed: true,
+			ValidateDiagFunc: func(i interface{}, path cty.Path) diag.Diagnostics {
+				v := i.(string)
+				if v == "" {
+					// This is a workaround.
+					// The API assigns new services to a VPC if the project has a VPC in the same cloud.
+					// An empty string here means "no VPC".
+					return nil
+				}
+				return ValidateIDWithProject("project_vpc_id")(i, path)
+			},
+			Description: "The ID of the the `aiven_project_vpc` to deploy the service in." +
+				"If not set, the service is automatically deployed in a VPC when that project has a VPC in the same cloud. " +
+				"You can move the service to a different VPC after creation. " +
+				"This migration can take some time to complete if the service has a lot of data." +
+				"To deploy a service without VPC, set this to an empty string `\"\"`.",
 		},
 		"maintenance_window_dow": {
 			Type:        schema.TypeString,
@@ -427,7 +442,7 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.Errorf("error getting default disc space: %s", err)
 	}
 
-	vpcID, err := GetProjectVPCIdPointer(d)
+	vpcID, err := GetProjectVPCIDFromConfig(d)
 	if err != nil {
 		return diag.Errorf("error getting project VPC ID: %s", err)
 	}
@@ -522,8 +537,7 @@ func ResourceServiceUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		}
 	}
 
-	var vpcID *string
-	vpcID, err = GetProjectVPCIdPointer(d)
+	vpcID, err := GetProjectVPCIDFromConfig(d)
 	if err != nil {
 		return diag.Errorf("error getting project VPC ID: %s", err)
 	}
@@ -757,10 +771,13 @@ func copyServicePropertiesFromAPIResponseToTerraform(
 		return err
 	}
 
+	var vpcID string
 	if s.ProjectVpcId != "" {
-		if err := d.Set("project_vpc_id", BuildResourceID(project, s.ProjectVpcId)); err != nil {
-			return err
-		}
+		vpcID = BuildResourceID(project, s.ProjectVpcId)
+	}
+
+	if err := d.Set("project_vpc_id", vpcID); err != nil {
+		return err
 	}
 
 	err := FlattenService(serviceType, d, s.UserConfig)

@@ -12,6 +12,8 @@ import (
 	"github.com/aiven/aiven-go-client/v2"
 	"github.com/aiven/go-client-codegen/handler/service"
 	"github.com/docker/go-units"
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -193,6 +195,29 @@ func ValidateEmailAddress(v any, k string) (ws []string, errors []error) {
 	}
 
 	return
+}
+
+// ValidateIDN validates that the given string is a valid resource ID with n parts
+func ValidateIDN(n int, expected ...string) schema.SchemaValidateDiagFunc {
+	if n != len(expected) {
+		panic(fmt.Sprintf("expected %d parts, got %d", n, len(expected)))
+	}
+
+	return func(i any, _ cty.Path) diag.Diagnostics {
+		_, err := SplitResourceID(i.(string), n)
+		if err == nil {
+			return nil
+		}
+
+		return diag.Errorf(
+			"invalid resource id, should have the following format %q",
+			strings.Join(expected, "/"),
+		)
+	}
+}
+
+func ValidateIDWithProject(expected string) schema.SchemaValidateDiagFunc {
+	return ValidateIDN(2, "project_name", expected)
 }
 
 func BuildResourceID(parts ...string) string {

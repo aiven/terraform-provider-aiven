@@ -9,6 +9,12 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Display automatically assigned `project_vpc_id` on `terraform plan`
+- Do not suppress zero values for new resources on `terraform plan`
+- Allow to set `""` to `project_vpc_id` to deploy services without VPC
+ 
 ## [4.31.1] - 2024-12-23
 
 - Validate whether the `aiven_project.billing_group` field has changed before calling admin API
@@ -18,7 +24,6 @@ nav_order: 1
 - Add `alloydbomni` BETA resource and datasource
 - Add `aiven_alloydbomni_user` BETA resource and datasource
 - Add `aiven_alloydbomni_database` BETA resource and datasource
-- Fix `terraform plan`: new resources don't display zero values for user configuration options
 - Add `aiven_service_integration` resource and datasource field `destination_service_project`: Destination service project name
 - Add `aiven_service_integration` resource and datasource field `source_service_project`: Source service project name
 - Change `aiven_account_team_project` resource and datasource field `team_type` (enum): remove

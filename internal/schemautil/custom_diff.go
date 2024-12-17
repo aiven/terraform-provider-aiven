@@ -21,6 +21,7 @@ import (
 func CustomizeDiffGenericService(serviceType string) schema.CustomizeDiffFunc {
 	return customdiff.Sequence(
 		SetServiceTypeIfEmpty(serviceType),
+		CustomizeDiffProjectVPCID,
 		CustomizeDiffDisallowMultipleManyToOneKeys,
 		customdiff.IfValueChange("tag",
 			ShouldNotBeEmpty,
@@ -319,4 +320,71 @@ func CustomizeDiffAdditionalDiskSpace(ctx context.Context, diff *schema.Resource
 	// We must output a diff for the computed field,
 	// which otherwise will be suppressed by TF
 	return diff.SetNew(k, "0B")
+}
+
+// CustomizeDiffProjectVPCID
+// 1. Validates project_vpc_id when set
+// 2. Sets project_vpc_id when there is only one VPC in the cloud (that's how it works on the backend)
+func CustomizeDiffProjectVPCID(ctx context.Context, d *schema.ResourceDiff, _ any) error {
+	client, err := common.GenClient()
+	if err != nil {
+		return err
+	}
+
+	if d.Id() != "" || HasConfigValue(d, "project_vpc_id") {
+		v := d.Get("project_vpc_id").(string)
+		if v != "" {
+			return validateProjectVPCID(ctx, client, v)
+		}
+
+		// When a service has VPC ID, and project_vpc_id is set to "", this will force to show the plan.
+		// If we return nil here, the plan will omit the value.
+		return d.SetNew("project_vpc_id", "")
+	}
+
+	// This logic copies the behavior of the backend.
+	// A new service is created in the VPC of the project in the cloud.
+	// This code will show it in the plan.
+	project := d.Get("project").(string)
+	list, err := client.VpcList(ctx, project)
+	if err != nil {
+		return err
+	}
+
+	vpcIDs := make([]string, 0)
+	cloudName := d.Get("cloud_name").(string)
+	for _, v := range list {
+		if v.CloudName == cloudName {
+			vpcIDs = append(vpcIDs, v.ProjectVpcId)
+		}
+	}
+
+	switch len(vpcIDs) {
+	case 0:
+		// It would be nice to set the project_vpc_id to an empty string here,
+		// but it just won't work because TF takes "" and nil as nothing set.
+		// That would still result in project_vpc_id marked "known after apply" in the plan,
+		// even though we know it's going to be empty.
+		return nil
+	case 1:
+		return d.SetNew("project_vpc_id", BuildResourceID(project, vpcIDs[0]))
+	}
+
+	return fmt.Errorf(
+		"project %q has multiple active VPCs in cloud %q. Please specify the project_vpc_id: %s",
+		project, cloudName, strings.Join(vpcIDs, ", "),
+	)
+}
+
+func validateProjectVPCID(ctx context.Context, client avngen.Client, projectVPCID string) error {
+	project, vpcID, err := SplitResourceID2(projectVPCID)
+	if err != nil {
+		return err
+	}
+
+	_, err = client.VpcGet(ctx, project, vpcID)
+	if avngen.IsNotFound(err) {
+		return fmt.Errorf("VPC ID %q not found in project %q", vpcID, project)
+	}
+	return err
 }
