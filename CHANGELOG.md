@@ -9,6 +9,16 @@ nav_order: 1
 <!-- Always keep the following header in place: -->
 <!--## [MAJOR.MINOR.PATCH] - YYYY-MM-DD -->
 
+
+## [MAJOR.MINOR.PATCH] - YYYY-MM-DD
+
+- Add `aiven_kafka_quota` resource
+- Add `aiven_opensearch` resource and datasource field
+  `opensearch_user_config.opensearch.cluster_routing_allocation_balance_prefer_primary`: When set to true, OpenSearch
+  attempts to evenly distribute the primary shards between the cluster nodes
+- Add `aiven_opensearch` resource and datasource field `opensearch_user_config.opensearch.segrep`: Segment Replication
+  Backpressure Settings
+
 ## [4.31.1] - 2024-12-23
 
 - Validate whether the `aiven_project.billing_group` field has changed before calling admin API

@@ -465,6 +465,11 @@ func opensearchUserConfig() *schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeInt,
 					},
+					"cluster_routing_allocation_balance_prefer_primary": {
+						Description: "When set to true, OpenSearch attempts to evenly distribute the primary shards between the cluster nodes. Enabling this setting does not always guarantee an equal number of primary shards on each node, especially in the event of a failover. Changing this setting to false after it was set to true does not invoke redistribution of primary shards. Default is false. Default: `false`.",
+						Optional:    true,
+						Type:        schema.TypeBool,
+					},
 					"cluster_routing_allocation_node_concurrent_recoveries": {
 						Description: "How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to node cpu count * 2.",
 						Optional:    true,
@@ -834,6 +839,34 @@ func opensearchUserConfig() *schema.Schema {
 						Description: "Maximum number of aggregation buckets allowed in a single response. OpenSearch default value is used when this is not defined. Example: `10000`.",
 						Optional:    true,
 						Type:        schema.TypeInt,
+					},
+					"segrep": {
+						Description: "Segment Replication Backpressure Settings",
+						Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+							"pressure_checkpoint_limit": {
+								Description: "The maximum number of indexing checkpoints that a replica shard can fall behind when copying from primary. Once `segrep.pressure.checkpoint.limit` is breached along with `segrep.pressure.time.limit`, the segment replication backpressure mechanism is initiated. Default is 4 checkpoints. Default: `4`.",
+								Optional:    true,
+								Type:        schema.TypeInt,
+							},
+							"pressure_enabled": {
+								Description: "Enables the segment replication backpressure mechanism. Default is false. Default: `false`.",
+								Optional:    true,
+								Type:        schema.TypeBool,
+							},
+							"pressure_replica_stale_limit": {
+								Description: "The maximum number of stale replica shards that can exist in a replication group. Once `segrep.pressure.replica.stale.limit` is breached, the segment replication backpressure mechanism is initiated. Default is .5, which is 50% of a replication group. Default: `0.5`.",
+								Optional:    true,
+								Type:        schema.TypeFloat,
+							},
+							"pressure_time_limit": {
+								Description: "The maximum amount of time that a replica shard can take to copy from the primary shard. Once segrep.pressure.time.limit is breached along with segrep.pressure.checkpoint.limit, the segment replication backpressure mechanism is initiated. Default is 5 minutes. Default: `5m`.",
+								Optional:    true,
+								Type:        schema.TypeString,
+							},
+						}},
+						MaxItems: 1,
+						Optional: true,
+						Type:     schema.TypeList,
 					},
 					"shard_indexing_pressure": {
 						Description: "Shard indexing back pressure settings",

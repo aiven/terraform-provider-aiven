@@ -246,6 +246,7 @@ Optional:
 - `action_destructive_requires_name` (Boolean) Require explicit index names when deleting.
 - `auth_failure_listeners` (Block List, Max: 1) Opensearch Security Plugin Settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--auth_failure_listeners))
 - `cluster_max_shards_per_node` (Number) Controls the number of shards allowed in the cluster per data node. Example: `1000`.
+- `cluster_routing_allocation_balance_prefer_primary` (Boolean) When set to true, OpenSearch attempts to evenly distribute the primary shards between the cluster nodes. Enabling this setting does not always guarantee an equal number of primary shards on each node, especially in the event of a failover. Changing this setting to false after it was set to true does not invoke redistribution of primary shards. Default is false. Default: `false`.
 - `cluster_routing_allocation_node_concurrent_recoveries` (Number) How many concurrent incoming/outgoing shard recoveries (normally replicas) are allowed to happen on a node. Defaults to node cpu count * 2.
 - `email_sender_name` (String) Sender name placeholder to be used in Opensearch Dashboards and Opensearch keystore. Example: `alert-sender`.
 - `email_sender_password` (String, Sensitive) Sender password for Opensearch alerts to authenticate with SMTP server. Example: `very-secure-mail-password`.
@@ -277,6 +278,7 @@ Optional:
 - `search_backpressure` (Block List, Max: 1) Search Backpressure Settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_backpressure))
 - `search_insights_top_queries` (Block List, Max: 1) (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--search_insights_top_queries))
 - `search_max_buckets` (Number) Maximum number of aggregation buckets allowed in a single response. OpenSearch default value is used when this is not defined. Example: `10000`.
+- `segrep` (Block List, Max: 1) Segment Replication Backpressure Settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--segrep))
 - `shard_indexing_pressure` (Block List, Max: 1) Shard indexing back pressure settings (see [below for nested schema](#nestedblock--opensearch_user_config--opensearch--shard_indexing_pressure))
 - `thread_pool_analyze_queue_size` (Number) Size for the thread pool queue. See documentation for exact details.
 - `thread_pool_analyze_size` (Number) Size for the thread pool. See documentation for exact details. Do note this may have maximum value depending on CPU count - value is automatically lowered if set to higher than maximum value.
@@ -417,6 +419,17 @@ Optional:
 - `top_n_size` (Number) Specify the value of N for the top N queries by the metric.
 - `window_size` (String) The window size of the top N queries by the metric.
 
+
+
+<a id="nestedblock--opensearch_user_config--opensearch--segrep"></a>
+### Nested Schema for `opensearch_user_config.opensearch.segrep`
+
+Optional:
+
+- `pressure_checkpoint_limit` (Number) The maximum number of indexing checkpoints that a replica shard can fall behind when copying from primary. Once `segrep.pressure.checkpoint.limit` is breached along with `segrep.pressure.time.limit`, the segment replication backpressure mechanism is initiated. Default is 4 checkpoints. Default: `4`.
+- `pressure_enabled` (Boolean) Enables the segment replication backpressure mechanism. Default is false. Default: `false`.
+- `pressure_replica_stale_limit` (Number) The maximum number of stale replica shards that can exist in a replication group. Once `segrep.pressure.replica.stale.limit` is breached, the segment replication backpressure mechanism is initiated. Default is .5, which is 50% of a replication group. Default: `0.5`.
+- `pressure_time_limit` (String) The maximum amount of time that a replica shard can take to copy from the primary shard. Once segrep.pressure.time.limit is breached along with segrep.pressure.checkpoint.limit, the segment replication backpressure mechanism is initiated. Default is 5 minutes. Default: `5m`.
 
 
 <a id="nestedblock--opensearch_user_config--opensearch--shard_indexing_pressure"></a>
