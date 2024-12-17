@@ -14,7 +14,8 @@ nav_order: 1
 - Add `alloydbomni` BETA resource and datasource
 - Add `aiven_alloydbomni_user` BETA resource and datasource
 - Add `aiven_alloydbomni_database` BETA resource and datasource
-- Fix `terraform plan`: new resources don't display zero values for user configuration options
+- Fix `terraform plan` doesn't display automatically assigned `project_vpc_id`
+- Fix `terraform plan` doesn't display fields with zero values in service user config
 - Add `aiven_service_integration` resource and datasource field `destination_service_project`: Destination service project name
 - Add `aiven_service_integration` resource and datasource field `source_service_project`: Source service project name
 - Change `aiven_account_team_project` resource and datasource field `team_type` (enum): remove
